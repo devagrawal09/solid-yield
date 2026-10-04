@@ -5,6 +5,7 @@
  * not assignability: `Expect<Equal<A, B>>`. Type-checked by `test-types`.
  */
 import {
+  attempt,
   $component,
   $effect,
   $event,
@@ -15,12 +16,14 @@ import {
   raise,
   Show,
   view,
+  type Create,
   type EventHandler,
   type FailsOf,
   type Props,
   type Raise,
   type Source,
-  type View
+  type View,
+  type Yieldable
 } from "solid-blocks";
 
 type Equal<A, B> =
@@ -140,10 +143,10 @@ export const MemoTwo = $component(function* MemoTwo() {
 });
 export type MemoTwoView = Expect<Equal<ViewFailsOf<ReturnType<typeof MemoTwo>>, Boom | Other>>;
 
-// --- effect: the raise is accepted, and lands in no type (D-070) -----------------------------
-// `$effect` / `$settled` give `Yieldable<Create<…>, void>`: what the body raises is not in
-// the setup's yield union, so the component's view is `View<false, never>` though its
-// effect fails at run time (to the nearest Errored, or re-thrown; raise.spec.tsx).
+// --- effect: its raise joins the component's failures (D-073) -------------------------------
+// `$effect` / `$settled` give `Yieldable<Create<…, FailsOf<body>>, void>`: what the body
+// raises is in the setup's yield union, and so in the component's view, as it fails at run
+// time (to the nearest Errored above the component, or re-thrown; raise.spec.tsx).
 export const Effect = $component(function* Effect() {
   yield* $effect(function* () {
     yield* raise(new Boom());
@@ -155,7 +158,92 @@ export const Effect = $component(function* Effect() {
     return <i />;
   });
 });
-export type EffectView = Expect<Equal<ViewFailsOf<ReturnType<typeof Effect>>, never>>;
+export type EffectView = Expect<Equal<ViewFailsOf<ReturnType<typeof Effect>>, Boom | Other>>;
+export type EffectSettled = Expect<Equal<ViewPendingOf<ReturnType<typeof Effect>>, false>>;
+export type EffectCreate = Expect<
+  Equal<
+    ReturnType<typeof $effect<Raise<Boom>>> extends Yieldable<infer Y, void> ? Y : never,
+    Create<"effect", Boom>
+  >
+>;
+// an effect that handles its failure itself — an attempt whose `onError` absorbs it (returns
+// a value that is not an Error) — adds none
+export const EffectAbsorbs = $component(function* EffectAbsorbs() {
+  yield* $effect(function* () {
+    const v = yield* attempt(
+      () => JSON.parse("{") as unknown,
+      () => null
+    );
+    type _v = Expect<Equal<typeof v, unknown>>;
+  });
+  yield* $settled(function* () {
+    const n = yield* attempt(
+      () => 1,
+      () => 0
+    );
+    type _n = Expect<Equal<typeof n, number>>;
+  });
+  return view(function* () {
+    return <i />;
+  });
+});
+export type EffectAbsorbsView = Expect<Equal<ViewFailsOf<ReturnType<typeof EffectAbsorbs>>, never>>;
+// …while an attempt whose `onError` returns the failure joins it
+export const EffectAttempt = $component(function* EffectAttempt() {
+  yield* $effect(function* () {
+    yield* attempt(
+      () => JSON.parse("{") as unknown,
+      cause => new Boom(String(cause))
+    );
+  });
+  return view(function* () {
+    return <i />;
+  });
+});
+export type EffectAttemptView = Expect<Equal<ViewFailsOf<ReturnType<typeof EffectAttempt>>, Boom>>;
+// a handler may not do both: an Error is the failure, anything else absorbs it
+export const mixed = attempt(
+  () => 1,
+  // @ts-expect-error [ATTEMPT_ABSORBS]: one handler, one meaning
+  () => (Math.random() > 0.5 ? new Boom() : null)
+);
+// an effect delegating to a synchronous event that fails joins the event's failure
+export const EffectCalls = $component(function* EffectCalls() {
+  const fail = $event(function* () {
+    yield* raise(new Other());
+  });
+  yield* $effect(function* () {
+    yield* fail();
+  });
+  return view(function* () {
+    return <i />;
+  });
+});
+export type EffectCallsView = Expect<Equal<ViewFailsOf<ReturnType<typeof EffectCalls>>, Other>>;
+// a row's effect joins the flow control's output, and the holding view
+export const RowEffect = $component(function* RowEffect() {
+  const [items] = yield* $signal([1]);
+  return view(function* () {
+    return (
+      <ul>
+        {
+          yield* For({
+            each: items,
+            children: function* () {
+              yield* $effect(function* () {
+                yield* raise(new Boom());
+              });
+              return view(function* () {
+                return <li />;
+              });
+            }
+          })
+        }
+      </ul>
+    );
+  });
+});
+export type RowEffectView = Expect<Equal<ViewFailsOf<ReturnType<typeof RowEffect>>, Boom>>;
 
 // --- event: the handler's type carries it; a DOM dispatch drops it (D-070) -------------------
 export const Event = $component(function* Event() {

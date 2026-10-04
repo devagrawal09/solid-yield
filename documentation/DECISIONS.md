@@ -84,7 +84,7 @@ Reading order with the rest of the plan: `blocks-library.md` (the reference), th
 | D-070 | recorded (Phase 4) | Raise at every host: each reaches the nearest Errored or re-throws (D-033); an `$effect`'s and a DOM-dispatched `$event`'s failures are in no view type (ruled: D-072, D-073); a raising hole's type fixed |
 | D-071 | decided | Meta-rule: the types say exactly what the runtime does; a color the runtime routes and the type lacks is a bug, never a §7 limitation |
 | D-072 | decided | Binding an event in a view is a hole: `onClick={yield* save}` joins the handler's `P` and failures to the view; the transform's event refusal moves to the types; lint `no-unbound-event` |
-| D-073 | decided | An `$effect`'s or `$settled`'s raise joins the enclosing component's failure type, unless an attempt's `onError` absorbs it |
+| D-073 | implemented (Phase 5) | An `$effect`'s or `$settled`'s raise joins the enclosing component's failure type, unless an attempt's `onError` absorbs it |
 | D-074 | decided | The library route and the compiler route are not mixed: same markup, different hydration keys; server and client use one route |
 | D-075 | decided | An event exposes its in-flight state as a source: `save.pending: Source<boolean>`; no automatic `Loading` |
 
@@ -675,6 +675,12 @@ A root handler that wants the typed failure reads `error.cause ?? error`.
 
 ### D-073 — An effect's raise joins the component's failure type (D-070 F1)
 **Decided (Dev, 2026-10-05).** `$effect` and `$settled` bodies may raise. Their `FailsOf` joins the enclosing component's failure type, unless the effect handles the failure itself (an attempt whose `onError` absorbs it). This is Solid's runtime semantics today: an effect's failure reaches the nearest `Errored` (D-070's matrix). Tests: a type test, and a runtime test that an effect's raise reaches the nearest `Errored`.
+
+*Implemented (Phase 5, commit 2).*
+- `Create<K, E = never>` carries a failure. `$effect` and `$settled` give `Create<"effect" | "settled", FailsOf<body>>`; `$component` adds `FailsOf` of its setup's yields to its view's failures, and a row's setup's failures join the flow control's output (`RowOps<VY, R, Y>`; `RowFails<VY, R, Y>`). A memo's `Create` carries none: its failures are its source's.
+- **"An attempt whose `onError` absorbs it" did not exist:** every handler's result was thrown. It is now: a handler returning a value that is not an `Error` absorbs the failure, and the attempt gives that value (types: a second overload of `attempt`, no `Raise`; runtime: `handled()` in the attempt and in `mapStream`). A stream's absorbed failure ends the stream, so the absorbed value is not in the attempt's type there. A handler that may return either is `[ATTEMPT_ABSORBS]`.
+- Not visible to the types: a `try` / `catch` around a `yield*` in a block body (effect-blocks' `place`, room's `drop` and `submit` events) handles a failure at run time while the body's type keeps it. The type over-states there; it never under-states. Recorded, not changed.
+- Tests: raise.type-tests "effect: its raise joins the component's failures (D-073)" (an effect and a `$settled`, an absorbing attempt, a failing attempt, a sync event called from an effect, a row's effect, `[ATTEMPT_ABSORBS]`); raise.spec "D-073: an effect's failure is its component's" (the `Errored` above the component; an absorbing attempt in an effect, in an event after an await, and over a stream).
 
 ### D-074 — The library route and the compiler route are not mixed (D-069 F6)
 **Decided (Dev, 2026-10-05).** The two routes render identical markup with different hydration-key numbering, so a server and its client must be built with the same route. Documented in §7 and the README. No code change. The conformance harness pins the difference as a property of the routes, not a bug: `routes.spec.ts` asserts both key lists, and `hydrate-self-test.spec.ts` asserts that the library client misses every key of the compiler route's markup.

@@ -386,3 +386,102 @@ describe.each(hosts)("raise in a $host", ({ host, make, drive, atRoot }) => {
     }
   });
 });
+
+describe("D-073: an effect's failure is its component's", () => {
+  it("an $effect's raise reaches the Errored above the component that created it", () => {
+    const boom = new Boom("effect");
+    const Fails = $component(function* Fails() {
+      yield* $effect(function* () {
+        yield* raise(boom);
+      });
+      return view(function* () {
+        return <i>ok</i>;
+      });
+    });
+    const seen: unknown[] = [];
+    // the component's view type is View<false, Boom> (raise.type-tests.tsx): the Errored
+    // above it handles what its effect raises
+    dispose = render(
+      () =>
+        Errored({
+          fallback: (e: () => unknown) => (seen.push(e()), (<p>caught</p>)),
+          children: function* () {
+            return <>{yield* Fails()}</>;
+          }
+        }),
+      root
+    );
+    flush();
+    expect(seen).toEqual([boom]);
+    expect(root.innerHTML).toBe("<p>caught</p>");
+  });
+
+  it("an attempt whose onError absorbs the failure gives its value; the effect does not fail", () => {
+    const seen: unknown[] = [];
+    const App = $component(function* App() {
+      yield* $effect(function* () {
+        const v = yield* attempt(
+          () => JSON.parse("{") as unknown,
+          () => "fallback"
+        );
+        seen.push(v);
+      });
+      return view(function* () {
+        return <i>ok</i>;
+      });
+    });
+    dispose = render(App, root);
+    flush();
+    expect(seen).toEqual(["fallback"]);
+    expect(root.innerHTML).toBe("<i>ok</i>");
+  });
+
+  it("an absorbed async failure resumes the block with the handler's value", async () => {
+    const seen: unknown[] = [];
+    let go!: () => Promise<unknown>;
+    const App = $component(function* App() {
+      go = $event(function* () {
+        const v = yield* attempt(
+          () => Promise.reject(new Error("network")),
+          () => 0
+        );
+        seen.push(v);
+        return v;
+      });
+      return view(function* () {
+        return <i>ok</i>;
+      });
+    });
+    dispose = render(App, root);
+    flush();
+    await expect(go()).resolves.toBe(0);
+    expect(seen).toEqual([0]);
+  });
+
+  it("a stream's absorbed failure ends the stream", async () => {
+    async function* feed() {
+      yield 1;
+      throw new Error("dropped");
+    }
+    const got: unknown[] = [];
+    const App = $component(function* App() {
+      yield* $effect(function* () {
+        const stream = yield* attempt(
+          () => feed(),
+          () => "ended"
+        );
+        void (async () => {
+          for await (const v of stream) got.push(v);
+          got.push("done");
+        })();
+      });
+      return view(function* () {
+        return <i>ok</i>;
+      });
+    });
+    dispose = render(App, root);
+    flush();
+    await settle();
+    expect(got).toEqual([1, "done"]);
+  });
+});

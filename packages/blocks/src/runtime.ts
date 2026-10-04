@@ -587,13 +587,13 @@ class Attempt {
       v = this.run();
     } catch (e) {
       if (e instanceof NotReadyError) throw e;
-      throw known(this.onError(e));
+      return handled(this.onError(e));
     }
     if (isThenable(v)) {
       try {
         v = yield new Wait_(v);
       } catch (e) {
-        throw known(this.onError(e));
+        return handled(this.onError(e));
       }
     }
     // a stream (or a promise's stream) is not waited for: its failures go
@@ -601,7 +601,25 @@ class Attempt {
     return mapStream(v, this.onError);
   }
 }
-type AttemptOps<T, E> = (T extends PromiseLike<any> ? Wait : never) | Raise<E>;
+/**
+ * What an attempt's handler made of a failure: an `Error` is the failure
+ * the block fails with; anything else absorbs it and is the attempt's value
+ * (D-073).
+ */
+function handled(r: unknown): unknown {
+  if (r instanceof Error) throw known(r);
+  return r;
+}
+type AttemptWait<T> = T extends PromiseLike<any> ? Wait : never;
+/** What an absorbing handler adds to the attempt's value: a stream's absorbed failure ends the stream instead. */
+type Absorbed<T, V> = Awaited<T> extends AsyncIterable<any> ? never : V;
+type AttemptOps<T, E> = AttemptWait<T> | Raise<E>;
+/** An absorbing handler returns no `Error`: one that may is a failing handler (the first overload). */
+type Absorbs<V> = [Extract<V, Error>] extends [never]
+  ? unknown
+  : {
+      readonly "[ATTEMPT_ABSORBS] a handler returns the failure (an Error with a literal kind) or absorbs it (a value that is not an Error), not both": never;
+    };
 /** What an attempt gives: a promise's value; a stream as itself, handled. */
 type Attempted<T> = Awaited<T> extends AsyncIterable<any> ? Awaited<T> & Handled : Awaited<T>;
 /**
@@ -618,8 +636,19 @@ type Attempted<T> = Awaited<T> extends AsyncIterable<any> ? Awaited<T> & Handled
 export function attempt<T, E extends Error>(
   fn: () => T,
   onError: (error: unknown) => E & KindCheck<E>
-): Yieldable<AttemptOps<T, E>, Attempted<T>> {
-  return new Attempt(fn, onError) as any;
+): Yieldable<AttemptOps<T, E>, Attempted<T>>;
+/**
+ * `yield* attempt(fn, () => fallback)`: a handler that returns a value that
+ * is not an `Error` absorbs the failure — the attempt gives that value and
+ * the block does not fail (D-073: an effect that handles its own failure adds
+ * none to its component). A stream's failure absorbed ends the stream.
+ */
+export function attempt<T, V>(
+  fn: () => T,
+  onError: (error: unknown) => V & Absorbs<V>
+): Yieldable<AttemptWait<T>, Attempted<T> | Absorbed<T, V>>;
+export function attempt(fn: () => unknown, onError: (error: unknown) => unknown): unknown {
+  return new Attempt(fn, onError);
 }
 
 class RaiseOp {
@@ -918,9 +947,10 @@ function mapStream(value: unknown, onError: (error: unknown) => unknown): unknow
           const it = target[Symbol.asyncIterator]();
           return {
             next: (v?: unknown) =>
-              it.next(v).then(undefined, (e: unknown) => {
-                throw known(onError(e));
-              }),
+              it.next(v).then(undefined, (e: unknown) => ({
+                done: true,
+                value: handled(onError(e))
+              })),
             return: it.return && ((v?: unknown) => it.return(v)),
             throw: it.throw && ((v?: unknown) => it.throw(v)),
             [Symbol.asyncIterator]() {
@@ -1038,12 +1068,16 @@ function resume(
 /**
  * `yield* $effect(function* () {…})` in a setup: reads (tracked), writes,
  * `$cleanup`s. Uncompiled it runs as one tracked pass
- * (`createTrackedEffect`); its writes are queued until the flush.
+ * (`createTrackedEffect`); its writes are queued until the flush. What the
+ * body may fail with (a `raise`, an attempt's failure, a sync event's) reaches
+ * the nearest `Errored` above the component, so it joins the component's
+ * failures through the setup's `Create<"effect", E>` (D-073). An attempt
+ * whose `onError` absorbs the failure adds none.
  */
 export function $effect<Y extends EffectOp = never>(
   body: () => Generator<Y, void, any>,
   options?: { name?: string }
-): Yieldable<Create<"effect">, void> {
+): Yieldable<Create<"effect", FailsOf<Y>>, void> {
   return new CreateOp("effect", () => {
     const name = state.name;
     createTrackedEffect(() => runEffect(body, name), options as any);
@@ -1065,11 +1099,12 @@ function runCleanups(sink: (() => void)[]): void {
 /**
  * `yield* $settled(function* () {…})` in a setup: runs once, after the graph
  * settles (`onSettled`). Reads are current values; `$cleanup`s run when the
- * owner is disposed.
+ * owner is disposed. Its failures join the component's, as an `$effect`'s
+ * do (D-073).
  */
 export function $settled<Y extends EffectOp = never>(
   body: () => Generator<Y, void, any>
-): Yieldable<Create<"settled">, void> {
+): Yieldable<Create<"settled", FailsOf<Y>>, void> {
   return new CreateOp("settled", () => {
     const name = state.name;
     onSettled(() => untrack(() => runEffect(body, name)));
@@ -1404,6 +1439,8 @@ export function renderView(
  *
  * The setup runs once, untracked, under the component's owner: it creates
  * state and reads context. The returned generator is the view: it only reads.
+ * The component's failures are its view's and its setup's effects' (`FailsOf<Y>`,
+ * D-073): an `$effect` or a `$settled` fails to the nearest `Errored` above it.
  */
 export function $component<
   TP = unknown,
@@ -1416,7 +1453,7 @@ export function $component<
   ...props: PropsArgs<PropsOf<TP>>
 ) => ComponentView<
   ViewPending<ViewYield<V>, ViewReturn<V>>,
-  ViewFails<ViewYield<V>, ViewReturn<V>>
+  ViewFails<ViewYield<V>, ViewReturn<V>> | FailsOf<Y>
 > {
   const component: any = function (props?: object) {
     return untrack(() => {

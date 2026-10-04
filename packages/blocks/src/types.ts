@@ -79,10 +79,18 @@ export interface EventCallOp<
   readonly [ASYNC]: A;
   readonly [FAILS]: E;
 }
-/** Creating owned state (`$signal`, `$store`, `$memo`, `$effect`, `$settled`). */
-export interface Create<K extends string = string> {
+/**
+ * Creating owned state (`$signal`, `$store`, `$memo`, `$effect`, `$settled`).
+ * `E` is what the created computation may fail with where nothing reads it:
+ * an `$effect`'s or a `$settled`'s body (D-073). Its failure reaches the
+ * nearest `Errored` above the component, so it joins the component's
+ * failures. A memo's failures are its source's (they reach whoever reads it),
+ * so a memo's `Create` carries none.
+ */
+export interface Create<K extends string = string, E = never> {
   readonly [KIND]: "create";
   readonly kind: K;
+  readonly [FAILS]: E;
 }
 /** `$cleanup(fn)`. */
 export interface Cleanup {
@@ -105,13 +113,13 @@ export type AnyOp =
   | Raise<any>
   | Write
   | EventCallOp<boolean, boolean, any>
-  | Create<string>
+  | Create<string, any>
   | Cleanup
   | ContextRead
   | ChildView<boolean, any>;
 
 /** Operations a component's (or a row block's) setup may perform: it creates, never reads (D-042). */
-export type SetupOp = Create<string> | Cleanup | ContextRead;
+export type SetupOp = Create<string, any> | Cleanup | ContextRead;
 /**
  * What a JSX view's generator yields, as TypeScript sees it: the reads and
  * child views of its holes (each `yield*` in a JSX position, which the
@@ -475,7 +483,8 @@ type RowCheck<Y, VY, R> = [Y] extends [SetupOp]
  * and reach the nearest `Loading` / `Errored` above the list.
  */
 export type RowPending<VY, R> = ViewPending<VY, R>;
-export type RowFails<VY, R> = ViewFails<VY, R>;
+/** A row's failures: its view's, and its setup's effects' (`Y`, D-073). */
+export type RowFails<VY, R, Y = never> = ViewFails<VY, R> | FailsOf<Y>;
 
 export type ErrorClass<E = unknown> = abstract new (...args: any[]) => E;
 

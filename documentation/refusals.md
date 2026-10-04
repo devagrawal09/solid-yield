@@ -101,6 +101,7 @@ The neighbours of a view, for completeness:
 | --- | --- |
 | `[SETTLED_PROP]` | a pending or failing value, source or hole passed to a prop declared settled |
 | `[FAILURE_KIND]` | a failure type without a literal `kind`: at `attempt`, `until`, `raise`, `Errored catch`, a `Props` declaration |
+| `[ATTEMPT_ABSORBS]` | an `attempt` handler that may return an `Error` and a value that is not one: it either fails (returns the failure) or absorbs it (returns a value), D-073 |
 | `[HVIEW_READ]` | an `h` (no-JSX) view that yields |
 | `[ROW_SETUP_OP]` | a row's setup that reads |
 | `[ROW_VIEW_OP]` | a row's view that creates |

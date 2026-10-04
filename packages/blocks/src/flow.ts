@@ -69,8 +69,12 @@ type Ops<V> = V extends (...args: any[]) => infer R
   : OpsOfHole<V>;
 /** A flow control's view: the colors of its sources and its content (D-059, D-063, D-062). */
 type FlowView<O> = ComponentView<PendingOf<O>, FailsOf<O>>;
-/** A row's colors: its view's yields and output's. */
-type RowOps<VY, R> = VY | HOps<R>;
+/**
+ * A row's colors: its view's yields and output's, and its setup's (`Y`): an
+ * `$effect` / `$settled` the row creates fails to the boundary above the list
+ * (D-073).
+ */
+type RowOps<VY, R, Y> = VY | HOps<R> | Y;
 /**
  * Content a flow control renders: anything `h` takes (not a generator — a
  * generator is a lazy view or a row) or a JSX element.
@@ -161,7 +165,7 @@ function ForBlocks<W, Y, VY, R, F = never>(props: {
   fallback?: F;
   keyed?: boolean | ((item: EachOf<NonNullable<ValueOf<W>>>) => any);
   children: RowBlock<[item: ItemOf<W>, index: Source<number>], Y, VY, R>;
-}): FlowView<Ops<W> | Ops<F> | RowOps<VY, R>>;
+}): FlowView<Ops<W> | Ops<F> | RowOps<VY, R, Y>>;
 /** `h`: `For({ each: todos, children: todo => h(TodoItem, { todo }) })`. */
 function ForBlocks<W, C extends Content, F = never>(props: {
   each: W;
@@ -193,7 +197,7 @@ function RepeatBlocks<W, Y, VY, R, F = never>(props: {
   from?: number | undefined;
   fallback?: F;
   children: RowBlock<[index: Source<number>], Y, VY, R>;
-}): FlowView<Ops<W> | Ops<F> | RowOps<VY, R>>;
+}): FlowView<Ops<W> | Ops<F> | RowOps<VY, R, Y>>;
 function RepeatBlocks<W, C extends Children<[index: Source<number>]>, F = never>(props: {
   count: W;
   from?: number | undefined;
@@ -221,7 +225,7 @@ function ShowBlocks<W, Y, VY, R, F = never>(props: {
   keyed?: boolean;
   fallback?: F;
   children: RowBlock<[value: ValuePath<W>], Y, VY, R>;
-}): FlowView<Ops<W> | Ops<F> | RowOps<VY, R>>;
+}): FlowView<Ops<W> | Ops<F> | RowOps<VY, R, Y>>;
 function ShowBlocks<W, C extends Children<[value: ValuePath<W>]>, F = never>(props: {
   when: W;
   keyed?: boolean;
@@ -258,7 +262,7 @@ function MatchBlocks<W, Y, VY, R>(props: {
   when: W;
   keyed?: boolean;
   children: RowBlock<[value: ValuePath<W>], Y, VY, R>;
-}): FlowView<Ops<W> | RowOps<VY, R>>;
+}): FlowView<Ops<W> | RowOps<VY, R, Y>>;
 function MatchBlocks<W, C extends Children<[value: ValuePath<W>]>>(props: {
   when: W;
   keyed?: boolean;

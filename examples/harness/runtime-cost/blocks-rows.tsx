@@ -1,37 +1,41 @@
 // The same table with solid-blocks, uncompiled: rows are row blocks that
-// read their fields in holes.
-import { $component, $event, $store, For, render } from "solid-blocks";
+// read their fields in holes. The dialect as it stands: call form (D-062),
+// writes delegated (D-021), views wrapped.
+import { $component, $event, $store, For, render, view } from "solid-blocks";
 import { flush } from "solid-js";
 
 type Row = { id: number; label: string };
 
 export function mount(root: HTMLElement) {
-  let setRows!: (fn: (s: { items: Row[] }) => void) => void;
+  let setRows!: (fn: (s: { items: Row[] }) => void) => Promise<unknown>;
   const App = $component(function* App() {
     const [rows, set] = yield* $store<{ items: Row[] }>({ items: [] });
     setRows = $event(function* (fn: (s: { items: Row[] }) => void) {
-      set(s => void fn(s));
+      yield* set(s => void fn(s));
     });
-    return function* () {
+    return view(function* () {
       return (
         <table>
           <tbody>
-            <For each={yield* rows.items}>
-              {function* (row) {
-                return function* () {
-                  return (
-                    <tr>
-                      <td>{yield* row.id}</td>
-                      <td>{yield* row.label}</td>
-                    </tr>
-                  );
-                };
-              }}
-            </For>
+            {
+              yield* For({
+                each: rows.items,
+                children: function* (row) {
+                  return view(function* () {
+                    return (
+                      <tr>
+                        <td>{yield* row.id}</td>
+                        <td>{yield* row.label}</td>
+                      </tr>
+                    );
+                  });
+                }
+              })
+            }
           </tbody>
         </table>
       );
-    };
+    });
   });
   const dispose = render(App, root);
   flush();
@@ -53,6 +57,9 @@ export function mount(root: HTMLElement) {
       });
       flush();
     },
+    /** What the workload left in the DOM, compared across flavors. */
+    check: () =>
+      `${root.querySelectorAll("tr").length} tr, ${(root.textContent!.match(/!!!/g) || []).length} updated`,
     dispose
   };
 }

@@ -11,5 +11,5 @@ export default defineConfig({
     include: ["tests/**/*.test.ts"]
   },
   // tests run the development builds (dev warnings, dev checks); `vite build` keeps its defaults
-  resolve: process.env.VITEST ? { conditions: ["development", "browser"] } : undefined
+  resolve: process.env.VITEST ? { conditions: process.env.BLOCKS_COST_PROD ? ["browser"] : ["development", "browser"] } : undefined
 });

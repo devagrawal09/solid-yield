@@ -8,7 +8,7 @@ import blocks from "vite-plugin-solid-blocks";
 // (scripts/example-blocks/browser.mjs).
 export default defineConfig({
   plugins: [blocks(), solid()],
-  resolve: { conditions: ["development", "browser"] },
+  resolve: { conditions: process.env.BLOCKS_COST_PROD ? ["browser"] : ["development", "browser"] },
   test: {
     environment: "jsdom",
     globals: true,

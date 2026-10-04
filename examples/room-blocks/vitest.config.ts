@@ -42,7 +42,7 @@ export default defineConfig({
         replacement: fileURLToPath(new URL("./tests/fake-server-functions.ts", import.meta.url))
       }
     ],
-    conditions: ["development", "browser"]
+    conditions: process.env.BLOCKS_COST_PROD ? ["browser"] : ["development", "browser"]
   },
   test: {
     environment: "jsdom",

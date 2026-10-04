@@ -192,6 +192,14 @@ Reading order with the rest of the plan: `blocks-library.md` (the reference), th
 *Alternatives:* budgets per twin in the gate.
 *Reasoning:* budgets would be noisy across machines and the design is still moving; revisit when Phase 1 lands.
 
+*Re-run (Phase 4, item 3).* Still no budgets in the gate. Two changes to the harness, with the numbers in §8:
+
+- **The twins against their originals.** `examples/harness/runtime-cost/twins.mjs` adds the measurement this entry's alternative named. It runs each twin's parity script against one app per process, on production builds. The twins cost 1–16% of the scripts' wall time.
+- **The synthetic workloads.**
+  - *Finding: the old workloads measured nothing.* Their `solid-blocks` side was still written with setters not delegated to and component tags. Since D-021 an undelegated setter writes nothing in production, so any measurement after D-021 timed a list that never grew.
+  - *Fix.* The workloads are rewritten in the current dialect. Each run now prints what it left in the DOM, and the two flavors must agree.
+  - *Numbers.* Valgrind does not run on macOS arm64, so the instruction counts could not be re-taken; wall time is reported instead: 1.11–1.27x. The fork's instruction counts are kept in §8, labelled.
+
 ### D-018 — Open components
 **Dissolved** by D-023: with declared prop colors there is no "open" (undeclared-color) component for the linker to resolve, so the question it answered no longer exists. (Reconstructed: the original question text was not carried by the handoff.)
 

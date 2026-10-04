@@ -39,6 +39,9 @@ export function mount(root: HTMLElement) {
       toggle(id++);
       flush();
     },
+    /** What the workload left in the DOM, compared across flavors. */
+    check: () =>
+      `${root.querySelectorAll("li").length} li, ${root.querySelectorAll("li.done").length} done`,
     dispose
   };
 }

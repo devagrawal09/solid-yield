@@ -199,7 +199,7 @@ Only pending needs a position that admits it. A failure may reach a row, a call 
 - **No islands.** Hydration is Solid's: every hydrated component runs. Island boundaries need per-handler reads / writes and a compiler to split chunks. (The per-module analysis that would feed one, `summarizeBlocks` with its `solid-blocks-summary` schema, was removed with the type linker in Phase 1B. The schema and its mapping onto the experiment branch's summarizers, the old §6, are in git history before `f00b389a`.)
 - **No server components** (D-058). The blocks model has none: the idea is that a future compiler finds inert regions and turns them into server components itself. Server *data* (server functions, SSR) is supported; the twins whose point was server components (chat, hackernews, notes) were removed, and room's twin keeps only its live-server-function page.
 - **No runtime tiers.** The app ships the full runtime plus the interpreter; selecting a sync-only or smaller runtime needs a whole-graph capability proof and a compiler to lower blocks.
-- **Interpretation cost** (section 8): generator objects per setup / view / row, proxy paths for props and stores, one `perform` call per hole.
+- **Interpretation cost** (section 8): generator objects per setup / view / row, proxy paths for props and stores, one `perform` call per hole. That is 11–27% on synthetic workloads and 1–16% of the twins' parity scripts.
 - **An effect cannot trigger an async event** (D-035, `start()` removed): an `$effect` delegates only to a synchronous event; work that must wait is modelled as an event calling an event, or as a `$memo`.
 - **Failures with no boundary are re-thrown**: typed failures are complete for library-mediated failures; a plain throw is a bug surfaced in development (`UNTYPED_THROW`); either routes to the nearest `Errored` if there is one, otherwise it is re-thrown (D-033). The types require no boundary for a failure: it joins the holding view at a call, at a row (D-059) and at the root. Only pending needs a position that admits it (a `Loading`, which the root must have above any pending read). A failing view is still not a plain JSX child: it is `yield*`-ed into the holding view. Two library-mediated failures are not in any view type (open, D-070): an `$effect`'s or `$settled`'s raise, and the failure of an `$event` bound to a DOM event. Both reach the nearest `Errored` or are re-thrown. At the root a computation's failure is re-thrown as Solid's error with the failure as its `cause`.
 - **Detections at run time**, not compile time: a JSX view's top-level read is found when it happens (`READ_IN_VIEW` in development, and a lint rule), not by its type; a row block is recognized by its function kind.
@@ -207,21 +207,66 @@ Only pending needs a position that admits it. A failure may reach a row, a call 
 - **Paths are proxies**: a path answers only reads (`yield*`), keys (a longer path), `toString` / `toJSON` / `Symbol.toPrimitive` (its description) and `then` (`undefined`, so it is never taken for a promise). A data key with one of those names cannot be read through a path (read the parent and take the key from the value). Listing a path's keys, asking for a descriptor, defining or deleting a key is a dev error (`PATH_OBJECT`); production shows no keys and refuses the change.
 - **Types are per component**: a prop's colors are what it declares (§6), with no inference across modules. A forwarded color needs type parameters on every component it passes through, readers included (D-029). `h(GenericComp, props)` erases them, so a generic component is called directly in an `h` view. A type-level message cannot name the component it is about (`[SETTLED_PROP]` names the prop).
 
-## 8. Runtime cost: uncompiled blocks vs handwritten Solid on `next`
+## 8. Runtime cost: uncompiled blocks vs handwritten Solid
 
-`examples/harness/runtime-cost/measure.mjs`: each workload written twice (handwritten Solid; `solid-blocks` run by its interpreter with only the JSX transform's rule), bundled for production with the native compiler, mounted in jsdom, run under Valgrind cachegrind (no cache simulation) with `node --jitless`. Per operation: the instruction count of R operations minus the same process doing none, divided by R. `--wall` adds JIT-enabled wall time (median of five runs of 200 operations).
+Two harnesses, both manual and outside the gate (D-017: wall times move with the machine, so there are no budgets). Phase 4 measured both on 2026-10-05 against published Solid rc.13, on macOS arm64 with Node v24.18.0.
 
-Measured on this branch (10 operations per count; wall: JIT on, 200 operations, median of 5):
+### The twins against their originals
 
-| workload                          | handwritten Solid (instructions / op) | `solid-blocks`, uncompiled | ratio |               difference / op | wall, Solid / blocks (ms / op) |
-| --------------------------------- | ------------------------------------: | ----------------------------: | ----: | ----------------------------: | -----------------------------: |
-| todos: add a todo, then toggle it |                             4,097,720 |                     4,525,976 | 1.10x |                         +428k |                    1.09 / 0.95 |
-| 1,000 rows: create, then clear    |                         1,505,358,498 |                 1,574,854,638 | 1.05x |        +69.5M (≈ 69k per row) |                    87.2 / 93.1 |
-| 1,000 rows: update every 10th     |                            14,960,308 |                    18,323,066 | 1.22x | +3.4M (≈ 34k per updated row) |                    0.72 / 0.80 |
+`examples/harness/runtime-cost/twins.mjs` measures each twin against its original:
 
-Reading them: creation pays for a generator object per setup and view, per row, plus proxy paths; an update pays for the path read through the proxy and `perform` in each hole that re-runs. JIT wall times move with the same sign except the todos case, where the difference is within run-to-run noise on this shared machine (instruction counts are the figure to compare).
+- **What runs.** Each twin's `tests/runtime-cost.test.ts(x)` runs the twin's parity script against one app per process, the original or the twin. That is the same script the gate's parity test uses to compare the two apps.
+- **How.** In jsdom, under the twin's own vitest config, on **production** builds of Solid and `solid-blocks`.
+- **What is timed.**
+  - `script`: the script's steps.
+  - `mount`: the mount, where the script mounts a component.
+  - An app that renders as its module is evaluated (todos, effect, sierpinski) is not timed mounting, because that would also time Vite's transform.
+- **The figure.** JIT wall time, from a clock captured before the script fakes timers, so a fake-timer advance costs only the work it triggers. Each figure is the median of 5 runs per app, alternating which app goes first.
 
-What the numbers include: everything each operation does, jsdom's DOM work included (the same for both flavors, and the larger part of each count), so the ratio understates the interpreter's share of the framework's own work; the absolute difference is the interpreter's cost per operation.
+| twin | original: mount (ms) | twin: mount (ms) | ratio | original: script (ms) | twin: script (ms) | ratio |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| effect-blocks | — | — | — | 48.8 | 53.2 | 1.09x |
+| hackernews-spa-blocks | 12.0 | 12.6 | 1.05x | 245.6 | 243.7 | 0.99x |
+| rendering-blocks | 5.9 | 6.7 | 1.12x | 1,046.8 | 1,071.4 | 1.02x |
+| room-blocks | 19.6 | 21.7 | 1.11x | 15.1 | 17.4 | 1.16x |
+| sierpinski-blocks | — | — | — | 4,647.7 | 4,692.6 | 1.01x |
+| sierpinski-blocks-h | — | — | — | 4,640.3 | 4,728.2 | 1.02x |
+| todos-blocks | — | — | — | 25.4 | 26.2 | 1.03x |
+| todos-blocks-h | — | — | — | 24.3 | 28.0 | 1.15x |
+
+Reading them:
+
+- At app scale the interpreter costs **1–16%** of wall time. The scripts are dominated by jsdom and by the apps' own work: sierpinski's CPU-bound ticks, rendering's timers and streamed cards, hackernews' routing.
+- The largest ratios are in the smallest scripts, where the interpreter's per-component setup is a larger share: room's mount and script, the todos-h script (the `h` flavor adds `@solidjs/h`'s calls).
+- hackernews' 0.99x is within run-to-run noise. On this shared machine, figures within ±3% are not differences.
+
+### Synthetic workloads
+
+`examples/harness/runtime-cost/measure.mjs` runs each workload in both flavors: handwritten Solid, and `solid-blocks` run by its interpreter with only the JSX transform's rule. Both are bundled for production and mounted in jsdom.
+
+- **Instruction counts.** With Valgrind, the harness runs cachegrind (no cache simulation) under `node --jitless`. Per operation: the instruction count of R operations, minus the same process doing none, divided by R.
+- **Wall time.** `--wall` adds JIT wall time (median of 5 runs of 200 operations). Without Valgrind it reports wall time only. macOS on arm64 has no Valgrind, and that is the case here.
+- **A check per run.** Each run prints what the workload left in the DOM, and the two flavors must agree.
+
+Phase 4 rewrote the `solid-blocks` workloads in the dialect as it stands: call form (D-062), writes delegated to (D-021), views wrapped. Until then their setters were called without `yield*`, which since D-021 writes nothing in production. A `solid-blocks` measurement taken after D-021 timed a list that never grew. The DOM check makes that impossible to repeat.
+
+Wall time, JIT on, 200 operations, median of 5:
+
+| workload | handwritten Solid (ms / op) | `solid-blocks`, uncompiled (ms / op) | ratio | DOM after 200 operations (both) |
+| --- | ---: | ---: | ---: | --- |
+| todos: add a todo, then toggle it | 0.147 | 0.166 | 1.13x | 200 li, 200 done |
+| 1,000 rows: create, then clear | 18.07 | 20.04 | 1.11x | 0 tr |
+| 1,000 rows: update every 10th | 0.150 | 0.191 | 1.27x | 1,000 tr, 20,000 updated |
+
+Creation pays for a generator object per setup and view, per row, plus proxy paths. An update pays for the path read through the proxy and for `perform` in each hole that re-runs. Everything each operation does is included, jsdom's DOM work too. That work is the same for both flavors and is the larger part of each figure, so the ratio understates the interpreter's share of the framework's own work.
+
+The fork's instruction counts, from before Phase 4, are kept for reference. They used the earlier workloads and cannot be re-taken on this machine.
+
+| workload | handwritten Solid (instructions / op) | `solid-blocks`, uncompiled | ratio | wall, Solid / blocks (ms / op) |
+| --- | ---: | ---: | ---: | ---: |
+| todos: add a todo, then toggle it | 4,097,720 | 4,525,976 | 1.10x | 1.09 / 0.95 |
+| 1,000 rows: create, then clear | 1,505,358,498 | 1,574,854,638 | 1.05x | 87.2 / 93.1 |
+| 1,000 rows: update every 10th | 14,960,308 | 18,323,066 | 1.22x | 0.72 / 0.80 |
 
 ## 9. The twins
 

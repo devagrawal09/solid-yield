@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "target": "ESNext",
+    "newLine": "LF",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "jsx": "preserve",
+    "skipLibCheck": true,
+    "ignoreDeprecations": "6.0"
+  },
+  "exclude": ["node_modules"]
+}

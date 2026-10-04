@@ -1,0 +1,17 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "overrides": [
+    {
+      "files": [
+        "examples/*-blocks/**",
+        "examples/*-blocks-h/**",
+        "examples/harness/**",
+        "packages/blocks/**",
+        "packages/vite-plugin-blocks/test/fixtures/**"
+      ],
+      "rules": {
+        "require-yield": "off"
+      }
+    }
+  ]
+}

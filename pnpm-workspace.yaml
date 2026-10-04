@@ -1,0 +1,10 @@
+packages:
+  - "packages/*"
+  - "examples/*"
+  - "examples/originals/*"
+
+allowBuilds:
+  esbuild: true
+
+minimumReleaseAgeExclude:
+  - "@solidjs/vite-plugin"

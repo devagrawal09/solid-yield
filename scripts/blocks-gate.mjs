@@ -1,0 +1,405 @@
+#!/usr/bin/env node
+// Per-commit gate for the blocks library (packages/blocks, its tooling, and the
+// example twins). Runs every check, prints one line per step as it finishes,
+// then the captured output of each failure and a summary line. CI runs exactly
+// this (.github/workflows/gate.yml): CI = the gate.
+//
+// It never builds anything: build first (`pnpm build`, which builds
+// packages/blocks; the twins resolve it through its dist/).
+//
+// Every step runs with TZ=UTC in its environment, whatever the machine's
+// timezone, so results depend on the commit and not on the clock's locale
+// (e.g. examples/effect-blocks formats a fixed 12:00 UTC timestamp in local time).
+//
+// Usage: node scripts/blocks-gate.mjs [options]   (or `pnpm gate`)
+//   --only <substring>  run only steps whose name contains the substring
+//                       (repeatable; a step matching any of them runs)
+//   --fast              run only the quick subset: twin:*:typecheck, twin:*:lint,
+//                       pkg:blocks:test, pkg:vite-plugin-blocks:typecheck and
+//                       repo:prettier (skips twin tests, the other package
+//                       suites and oxlint)
+//   --json <path>       write machine-readable results to <path>
+//   --jobs <n>          steps run concurrently (default 3; vitest steps already
+//                       use 2 workers each, so keep this modest)
+//   --baseline <path>   compare against an earlier --json file. "Green" means no
+//                       step is FAIL that was PASS in the baseline, and no step
+//                       the baseline lacks is FAIL; the exit code follows that
+//                       instead of "any FAIL".
+//   --help              print this text
+//
+// Exit code: 0 when green, 1 otherwise (2 on bad arguments).
+
+import { spawn, execFileSync } from "node:child_process";
+import { existsSync, readFileSync, readdirSync, writeFileSync, mkdirSync } from "node:fs";
+import { dirname, isAbsolute, join, relative, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+const TAIL_LINES = 60;
+/** Overrides applied to every step's environment. TZ is pinned (see header). */
+const CHILD_ENV = { TZ: "UTC", FORCE_COLOR: "0", NO_COLOR: "1", CI: process.env.CI ?? "1" };
+
+// ---------------------------------------------------------------------------
+// Arguments
+
+function usage() {
+  const src = readFileSync(fileURLToPath(import.meta.url), "utf8").split("\n");
+  const start = src.findIndex(l => l.startsWith("// Usage:"));
+  const end = src.findIndex((l, i) => i > start && !l.startsWith("//"));
+  return src
+    .slice(start, end)
+    .map(l => l.replace(/^\/\/ ?/, ""))
+    .join("\n");
+}
+
+function parseArgs(argv) {
+  const opts = { only: [], fast: false, json: null, jobs: 3, baseline: null };
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    const [flag, inline] = arg.startsWith("--") && arg.includes("=") ? arg.split(/=(.*)/s) : [arg];
+    const value = () => {
+      if (inline !== undefined) return inline;
+      const v = argv[++i];
+      if (v === undefined) fail(`${flag} needs a value`);
+      return v;
+    };
+    switch (flag) {
+      case "--only":
+        opts.only.push(value());
+        break;
+      case "--fast":
+        opts.fast = true;
+        break;
+      case "--json":
+        opts.json = value();
+        break;
+      case "--jobs": {
+        const n = Number(value());
+        if (!Number.isInteger(n) || n < 1) fail("--jobs needs a positive integer");
+        opts.jobs = n;
+        break;
+      }
+      case "--baseline":
+        opts.baseline = value();
+        break;
+      case "--help":
+      case "-h":
+        console.log(usage());
+        process.exit(0);
+      default:
+        fail(`unknown argument: ${arg}`);
+    }
+  }
+  return opts;
+}
+
+function fail(message) {
+  console.error(`blocks-gate: ${message}\n\n${usage()}`);
+  process.exit(2);
+}
+
+// ---------------------------------------------------------------------------
+// Steps
+
+const TWIN_SCRIPTS = ["test", "typecheck", "lint"];
+const EXPECTED_TWINS = 8;
+
+function readJson(path) {
+  return JSON.parse(readFileSync(path, "utf8"));
+}
+
+function findTwins() {
+  const examples = join(root, "examples");
+  if (!existsSync(examples)) return [];
+  return readdirSync(examples, { withFileTypes: true })
+    .filter(d => d.isDirectory() && /-blocks(-h)?$/.test(d.name))
+    .map(d => d.name)
+    .filter(name => {
+      const pkg = join(examples, name, "package.json");
+      if (!existsSync(pkg)) return false;
+      const scripts = readJson(pkg).scripts ?? {};
+      // A twin has the full script set; a shared helper package does not.
+      return ["test", "typecheck", "lint"].every(s => typeof scripts[s] === "string");
+    })
+    .sort();
+}
+
+/** The repo-local oxlint, if installed. PATH is deliberately not consulted: a
+ * binary from some other project's node_modules would make results depend on
+ * the machine rather than the commit. */
+function resolveOxlint() {
+  const bin = join(
+    root,
+    "node_modules",
+    ".bin",
+    process.platform === "win32" ? "oxlint.cmd" : "oxlint"
+  );
+  return existsSync(bin) ? bin : null;
+}
+
+const LINT_DIRS = twins => [
+  "packages/blocks",
+  "packages/eslint-plugin-blocks",
+  "packages/vite-plugin-blocks",
+  ...twins.map(t => `examples/${t}`)
+];
+
+function buildSteps(twins) {
+  const steps = [];
+  const pnpmRun = (dir, script) => ({ cmd: "pnpm", args: ["-C", dir, "run", script] });
+
+  for (const twin of twins) {
+    const dir = `examples/${twin}`;
+    const scripts = readJson(join(root, dir, "package.json")).scripts;
+    for (const script of TWIN_SCRIPTS) {
+      const step = { name: `twin:${twin}:${script}`, cwd: root, ...pnpmRun(dir, script) };
+      step.fast = script === "typecheck" || script === "lint";
+      if (!scripts[script]) step.skip = `no "${script}" script in ${dir}/package.json`;
+      steps.push(step);
+    }
+  }
+
+  steps.push(
+    { name: "pkg:blocks:test", cwd: root, fast: true, ...pnpmRun("packages/blocks", "test") },
+    {
+      name: "pkg:eslint-plugin-blocks:test",
+      cwd: root,
+      ...pnpmRun("packages/eslint-plugin-blocks", "test")
+    },
+    // The JSX transform's rule as a standalone plugin (D-003, D-043): fixture parity with
+    // the checked-in outputs, the Vite plugin, the lazy module-URL pass.
+    {
+      name: "pkg:vite-plugin-blocks:test",
+      cwd: root,
+      ...pnpmRun("packages/vite-plugin-blocks", "test")
+    },
+    {
+      name: "pkg:vite-plugin-blocks:typecheck",
+      cwd: root,
+      fast: true,
+      ...pnpmRun("packages/vite-plugin-blocks", "typecheck")
+    }
+  );
+
+  // Solid's own JSX compilers (@solidjs/babel-plugin, @solidjs/compiler) are not in this
+  // repository: since D-043 they carry nothing of blocks, and the twins compile through the
+  // published packages, so a Solid release that breaks them reaches the twins' tests (D-016).
+
+  const dirs = LINT_DIRS(twins);
+  steps.push({
+    name: "repo:prettier",
+    cwd: root,
+    fast: true,
+    cmd: "pnpm",
+    // Same glob as the root `format` script; .gitignore is honoured by default (dist/,
+    // node_modules/).
+    args: [
+      "exec",
+      "prettier",
+      "--check",
+      ...dirs.map(d => `${d}/**/*.[tj]s?(x)`),
+      "scripts/blocks-gate.mjs"
+    ]
+  });
+
+  const oxlint = resolveOxlint();
+  steps.push({
+    name: "repo:oxlint",
+    cwd: root,
+    cmd: oxlint ?? "oxlint",
+    args: [...dirs, "--ignore-pattern", "**/dist/**", "--ignore-pattern", "**/node_modules/**"],
+    skip: oxlint ? null : "no repo-local oxlint binary (node_modules/.bin/oxlint)"
+  });
+
+  return steps;
+}
+
+// ---------------------------------------------------------------------------
+// Running
+
+function commandString(step) {
+  const quote = a => (/^[\w@%+=:,./-]+$/.test(a) ? a : `'${a.replace(/'/g, `'\\''`)}'`);
+  const cmd = isAbsolute(step.cmd) ? relative(root, step.cmd) : step.cmd;
+  return [cmd, ...step.args].map(quote).join(" ");
+}
+
+function runStep(step) {
+  return new Promise(resolve => {
+    const started = Date.now();
+    const chunks = [];
+    const child = spawn(step.cmd, step.args, {
+      cwd: step.cwd,
+      env: { ...process.env, ...CHILD_ENV },
+      stdio: ["ignore", "pipe", "pipe"]
+    });
+    child.stdout.on("data", c => chunks.push(c));
+    child.stderr.on("data", c => chunks.push(c));
+    const done = (status, extra = "") => {
+      resolve({
+        status,
+        durationMs: Date.now() - started,
+        output: Buffer.concat(chunks).toString("utf8") + extra
+      });
+    };
+    child.on("error", err => done("FAIL", `\n[blocks-gate] failed to spawn: ${err.message}\n`));
+    child.on("close", (code, signal) =>
+      code === 0
+        ? done("PASS")
+        : done("FAIL", signal ? `\n[blocks-gate] killed by ${signal}\n` : "")
+    );
+  });
+}
+
+async function runAll(steps, jobs, onDone) {
+  const queue = steps.slice();
+  const worker = async () => {
+    for (let step; (step = queue.shift()); ) {
+      const result = step.skip
+        ? { status: "SKIP", durationMs: 0, output: "", reason: step.skip }
+        : await runStep(step);
+      Object.assign(step, result);
+      onDone(step);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(jobs, steps.length) }, worker));
+}
+
+function fmtSecs(ms) {
+  return `${(ms / 1000).toFixed(1)}s`;
+}
+
+function tail(text, n) {
+  const lines = text.replace(/\s+$/, "").split("\n");
+  const cut = lines.length > n ? [`… (${lines.length - n} earlier lines omitted)`] : [];
+  return [...cut, ...lines.slice(-n)].join("\n");
+}
+
+function capture(cmd, args) {
+  try {
+    return execFileSync(cmd, args, { cwd: root, encoding: "utf8", stdio: "pipe" }).trim();
+  } catch {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Main
+
+const opts = parseArgs(process.argv.slice(2));
+const twins = findTwins();
+console.log(`blocks-gate: ${twins.length} twins: ${twins.join(", ")}`);
+if (twins.length !== EXPECTED_TWINS) {
+  console.error(`blocks-gate: expected ${EXPECTED_TWINS} twins, found ${twins.length}`);
+  process.exit(1);
+}
+
+let steps = buildSteps(twins);
+if (opts.fast) steps = steps.filter(s => s.fast);
+if (opts.only.length) steps = steps.filter(s => opts.only.some(o => s.name.includes(o)));
+if (!steps.length) fail("no steps selected");
+for (const s of steps) s.command = commandString(s);
+
+const startedAt = new Date();
+console.log(
+  `blocks-gate: ${steps.length} steps, --jobs ${opts.jobs}${opts.fast ? ", --fast" : ""}` +
+    (opts.only.length ? `, --only ${opts.only.join(" --only ")}` : "")
+);
+const width = Math.max(...steps.map(s => s.name.length));
+await runAll(steps, opts.jobs, s => {
+  const note = s.status === "SKIP" ? `  (${s.reason})` : "";
+  console.log(
+    `${s.status.padEnd(4)}  ${s.name.padEnd(width)}  ${fmtSecs(s.durationMs).padStart(7)}${note}`
+  );
+});
+const finishedAt = new Date();
+// Report in definition order, not completion order.
+const failed = steps.filter(s => s.status === "FAIL");
+for (const s of failed) {
+  console.log(`\n${"=".repeat(20)} FAIL ${s.name} ${"=".repeat(20)}\n$ ${s.command}\n`);
+  console.log(tail(s.output, TAIL_LINES));
+}
+
+const count = st => steps.filter(s => s.status === st).length;
+const wallMs = finishedAt - startedAt;
+const summary = {
+  pass: count("PASS"),
+  fail: count("FAIL"),
+  skip: count("SKIP"),
+  total: steps.length,
+  wallMs
+};
+const summaryLine = `${summary.pass} pass / ${summary.fail} fail / ${summary.skip} skip in ${Math.round(wallMs / 1000)}s`;
+console.log(`\n${summaryLine}`);
+
+let green = summary.fail === 0;
+let comparison = null;
+if (opts.baseline) {
+  const base = readJson(opts.baseline);
+  const before = new Map(base.steps.map(s => [s.name, s.status]));
+  const newReds = [];
+  const fixed = [];
+  const unchanged = [];
+  const added = [];
+  for (const s of steps) {
+    const was = before.get(s.name);
+    if (was === undefined) {
+      added.push(s.name);
+      // a step the baseline does not have yet must pass to be green
+      if (s.status === "FAIL") newReds.push(s.name);
+    } else if (s.status === "FAIL" && was === "PASS") newReds.push(s.name);
+    else if (s.status === "PASS" && was === "FAIL") fixed.push(s.name);
+    else unchanged.push(s.name);
+  }
+  comparison = {
+    baseline: opts.baseline,
+    baselineHead: base.head ?? null,
+    newReds,
+    fixed,
+    unchanged,
+    added
+  };
+  green = newReds.length === 0;
+  console.log(`\nvs baseline ${opts.baseline} (${(base.head ?? "unknown").slice(0, 12)}):`);
+  console.log(`  new reds:  ${newReds.length ? newReds.join(", ") : "none"}`);
+  console.log(`  fixed:     ${fixed.length ? fixed.join(", ") : "none"}`);
+  console.log(`  unchanged: ${unchanged.length}`);
+  if (added.length) console.log(`  not in baseline: ${added.join(", ")}`);
+  console.log(
+    green
+      ? "GREEN (no step regressed from PASS)"
+      : "RED (a step that passed in the baseline fails now)"
+  );
+}
+
+if (opts.json) {
+  const out = {
+    head: capture("git", ["rev-parse", "HEAD"]),
+    startedAt: startedAt.toISOString(),
+    finishedAt: finishedAt.toISOString(),
+    options: { only: opts.only, fast: opts.fast, jobs: opts.jobs, baseline: opts.baseline },
+    environment: {
+      node: process.version,
+      pnpm: capture("pnpm", ["-v"]),
+      platform: process.platform,
+      arch: process.arch,
+      hostTZ: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      childEnv: CHILD_ENV
+    },
+    twins,
+    summary: { ...summary, line: summaryLine, green },
+    comparison,
+    steps: steps.map(s => ({
+      name: s.name,
+      status: s.status,
+      durationMs: s.durationMs,
+      command: s.command,
+      ...(s.reason ? { reason: s.reason } : {})
+    }))
+  };
+  const path = resolve(opts.json);
+  mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(path, JSON.stringify(out, null, 2) + "\n");
+  console.log(`\nwrote ${relative(process.cwd(), path)}`);
+}
+
+process.exit(green ? 0 : 1);

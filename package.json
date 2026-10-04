@@ -1,0 +1,31 @@
+{
+  "name": "solid-blocks-monorepo",
+  "description": "solid-blocks, its Vite plugin and its ESLint plugin, with the example twins that pin it to Solid's behaviour",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm --filter \"./packages/*\" --if-present run build",
+    "test": "pnpm --filter \"./packages/*\" --if-present run test",
+    "gate": "node scripts/blocks-gate.mjs",
+    "format": "prettier --write --cache \"packages/**/*.[tj]s?(x)\" \"examples/**/*.[tj]s?(x)\" \"scripts/**/*.mjs\"",
+    "changeset": "changeset"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.25.2",
+    "@types/node": "^25.0.8",
+    "esbuild": "^0.27.7",
+    "jsdom": "^25.0.1",
+    "npm-run-all2": "^8.0.4",
+    "oxlint": "1.86.0",
+    "prettier": "3.8.1",
+    "rimraf": "^3.0.2",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.6"
+  },
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=11.0.0"
+  },
+  "packageManager": "pnpm@11.1.1"
+}

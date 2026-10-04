@@ -1,0 +1,39 @@
+# CI = the gate (D-015): the same scripts/blocks-gate.mjs a commit is gated by
+# locally, on Node 24 / pnpm 11, against published Solid (D-016: a Solid RC that
+# breaks a twin's parity test is a finding, not a reason to pin).
+name: gate
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Build
+        run: pnpm build
+      - name: Gate
+        run: |
+          baseline=documentation/blocks-gate-baseline.json
+          if [ -f "$baseline" ]; then
+            node scripts/blocks-gate.mjs --json gate.json --baseline "$baseline"
+          else
+            node scripts/blocks-gate.mjs --json gate.json
+          fi
+      - name: Gate result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate
+          path: gate.json
+          if-no-files-found: ignore

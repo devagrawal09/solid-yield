@@ -1,0 +1,14 @@
+node_modules/
+dist/
+lib/
+# ...but an example's source tree may legitimately have one (src/lib/api.ts).
+!examples/*/src/lib/
+!examples/originals/*/src/lib/
+coverage/
+.turbo/
+.pnpm-store/
+gate.json
+
+.DS_Store
+.vscode/
+.idea/

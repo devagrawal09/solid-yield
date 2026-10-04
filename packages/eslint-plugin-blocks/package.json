@@ -19,7 +19,8 @@
     "src"
   ],
   "scripts": {
-    "test": "vitest run --maxWorkers=2"
+    "test": "vitest run --maxWorkers=2",
+    "test:exports": "node --test test/exports-matrix.test.mjs"
   },
   "peerDependencies": {
     "eslint": ">=9"

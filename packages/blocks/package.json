@@ -69,7 +69,8 @@
     "types:src": "tsc -p tsconfig.build.json",
     "types:jsx": "node scripts/jsx-from-web.mjs && node scripts/jsx-web-shared.mjs",
     "test": "vitest run --maxWorkers=2 && vitest run --maxWorkers=2 --config vite.config.prod.mjs && vitest run --maxWorkers=2 --config vite.config.server.mjs && pnpm run test-types",
-    "test-types": "tsc -p tsconfig.json"
+    "test-types": "tsc -p tsconfig.json",
+    "test:exports": "node --test test/exports-matrix.test.mjs"
   },
   "peerDependencies": {
     "@solidjs/web": "^2.0.0-rc.11",

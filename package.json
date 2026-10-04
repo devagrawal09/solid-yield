@@ -8,7 +8,7 @@
     "build": "pnpm --filter \"./packages/*\" --if-present run build",
     "test": "pnpm --filter \"./packages/*\" --if-present run test",
     "gate": "node scripts/blocks-gate.mjs",
-    "format": "prettier --write --cache \"packages/**/*.[tj]s?(x)\" \"examples/**/*.[tj]s?(x)\" \"scripts/**/*.mjs\"",
+    "format": "prettier --write --cache \"packages/**/*.[tj]s?(x)\" \"packages/*/test/*.mjs\" \"examples/*-blocks*/**/*.[tj]s?(x)\" \"scripts/*.mjs\"",
     "changeset": "changeset"
   },
   "devDependencies": {

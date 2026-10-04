@@ -25,7 +25,8 @@
   ],
   "scripts": {
     "test": "vitest run --maxWorkers=2",
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "test:exports": "node --test test/exports-matrix.test.mjs"
   },
   "dependencies": {
     "@babel/core": "^7.29.0",

@@ -15,9 +15,9 @@
 //   --only <substring>  run only steps whose name contains the substring
 //                       (repeatable; a step matching any of them runs)
 //   --fast              run only the quick subset: twin:*:typecheck, twin:*:lint,
-//                       pkg:blocks:test, pkg:vite-plugin-blocks:typecheck and
-//                       repo:prettier (skips twin tests, the other package
-//                       suites and oxlint)
+//                       pkg:blocks:test, pkg:vite-plugin-blocks:typecheck,
+//                       pkg:*:exports and repo:prettier (skips twin tests, the
+//                       other package suites and oxlint)
 //   --json <path>       write machine-readable results to <path>
 //   --jobs <n>          steps run concurrently (default 3; vitest steps already
 //                       use 2 workers each, so keep this modest)
@@ -181,6 +181,17 @@ function buildSteps(twins) {
     }
   );
 
+  // The exports-conditions matrix of each published package (scripts/exports-matrix.mjs):
+  // every subpath under development / default / browser / node, resolved by esbuild, Node
+  // and TypeScript from a consumer's node_modules. Needs the build, like everything here.
+  for (const dir of ["blocks", "vite-plugin-blocks", "eslint-plugin-blocks"])
+    steps.push({
+      name: `pkg:${dir}:exports`,
+      cwd: root,
+      fast: true,
+      ...pnpmRun(`packages/${dir}`, "test:exports")
+    });
+
   // Solid's own JSX compilers (@solidjs/babel-plugin, @solidjs/compiler) are not in this
   // repository: since D-043 they carry nothing of blocks, and the twins compile through the
   // published packages, so a Solid release that breaks them reaches the twins' tests (D-016).
@@ -191,14 +202,14 @@ function buildSteps(twins) {
     cwd: root,
     fast: true,
     cmd: "pnpm",
-    // Same glob as the root `format` script; .gitignore is honoured by default (dist/,
-    // node_modules/).
+    // .gitignore is honoured by default (dist/, node_modules/).
     args: [
       "exec",
       "prettier",
       "--check",
       ...dirs.map(d => `${d}/**/*.[tj]s?(x)`),
-      "scripts/blocks-gate.mjs"
+      "packages/*/test/*.mjs",
+      "scripts/*.mjs"
     ]
   });
 

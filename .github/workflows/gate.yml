@@ -22,6 +22,11 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build
         run: pnpm build
+      # The build regenerates packages/blocks/jsx/ from the installed @solidjs/web
+      # (types:jsx); a Solid bump in the lockfile without the regenerated files
+      # committed shows up here.
+      - name: Vendored JSX types are current
+        run: git diff --exit-code
       - name: Gate
         run: |
           baseline=documentation/blocks-gate-baseline.json

@@ -5,9 +5,9 @@ reference run used as the baseline; the machine-readable copy is
 [`blocks-gate-baseline.json`](./blocks-gate-baseline.json). CI runs the same gate
 against this file (`.github/workflows/gate.yml`).
 
-**Reference summary: `30 pass / 0 fail / 0 skip in 26s`** (30 steps, `--jobs 3`,
-every step under `TZ=UTC`). Run on the staged tree of the extraction's commit 2
-("feat: move …"), so the JSON's `head` is that commit's parent, the scaffold.
+**Reference summary: `33 pass / 0 fail / 0 skip in 28s`** (33 steps, `--jobs 3`,
+every step under `TZ=UTC`). Run on the staged tree of the extraction's commit 4
+("test: exports-conditions matrix …"), so the JSON's `head` is that commit's parent.
 Environment: Node v24.18.0, pnpm 11.1.1, darwin/arm64.
 
 **Solid under test: the published packages** — `solid-js`, `@solidjs/web`, `@solidjs/h`
@@ -18,7 +18,13 @@ the same 30 steps ran against its local rc.11 workspace packages and its pristin
 upstream compiler build. All 30 pass on rc.13 too: nothing in the public API the
 library and the twins use moved between rc.11 and rc.13 (D-016's canary is quiet).
 
-**Same step list as the fork's last baseline** (`013d20ce`, 30 steps, 30 pass):
+**Commit 4 added three steps** (33 now): `pkg:blocks:exports`, `pkg:vite-plugin-blocks:exports`,
+`pkg:eslint-plugin-blocks:exports` — the exports-conditions matrix of each published package
+(`scripts/exports-matrix.mjs`: every subpath under development / default / browser / node and
+their combinations, resolved by esbuild, Node and TypeScript from a consumer's `node_modules`).
+`repo:prettier` now also checks `scripts/*.mjs` and `packages/*/test/*.mjs`.
+
+**The other 30 are the fork's last baseline's** (`013d20ce`, 30 steps, 30 pass):
 the twins' `test` / `typecheck` / `lint`, `pkg:blocks:test`,
 `pkg:eslint-plugin-blocks:test`, `pkg:vite-plugin-blocks:test` / `:typecheck`,
 `repo:prettier`, `repo:oxlint`. One test inside `pkg:vite-plugin-blocks:test` now
@@ -60,29 +66,32 @@ so results depend on the commit, not on the machine's clock locale (D-027).
 | `twin:effect-blocks:typecheck` | PASS | 1.3 s |
 | `twin:effect-blocks:lint` | PASS | 1.6 s |
 | `twin:hackernews-spa-blocks:test` | PASS | 1.8 s |
-| `twin:hackernews-spa-blocks:typecheck` | PASS | 1.4 s |
+| `twin:hackernews-spa-blocks:typecheck` | PASS | 1.8 s |
 | `twin:hackernews-spa-blocks:lint` | PASS | 1.6 s |
-| `twin:rendering-blocks:test` | PASS | 3.2 s |
+| `twin:rendering-blocks:test` | PASS | 3.1 s |
 | `twin:rendering-blocks:typecheck` | PASS | 1.3 s |
-| `twin:rendering-blocks:lint` | PASS | 1.6 s |
+| `twin:rendering-blocks:lint` | PASS | 1.5 s |
 | `twin:room-blocks:test` | PASS | 1.3 s |
 | `twin:room-blocks:typecheck` | PASS | 1.4 s |
 | `twin:room-blocks:lint` | PASS | 1.7 s |
-| `twin:sierpinski-blocks:test` | PASS | 10.9 s |
+| `twin:sierpinski-blocks:test` | PASS | 10.8 s |
 | `twin:sierpinski-blocks:typecheck` | PASS | 0.9 s |
 | `twin:sierpinski-blocks:lint` | PASS | 1.2 s |
-| `twin:sierpinski-blocks-h:test` | PASS | 10.9 s |
-| `twin:sierpinski-blocks-h:typecheck` | PASS | 1.7 s |
-| `twin:sierpinski-blocks-h:lint` | PASS | 2.0 s |
-| `twin:todos-blocks:test` | PASS | 1.3 s |
-| `twin:todos-blocks:typecheck` | PASS | 1.1 s |
+| `twin:sierpinski-blocks-h:test` | PASS | 10.8 s |
+| `twin:sierpinski-blocks-h:typecheck` | PASS | 1.6 s |
+| `twin:sierpinski-blocks-h:lint` | PASS | 1.8 s |
+| `twin:todos-blocks:test` | PASS | 1.2 s |
+| `twin:todos-blocks:typecheck` | PASS | 1.0 s |
 | `twin:todos-blocks:lint` | PASS | 1.3 s |
-| `twin:todos-blocks-h:test` | PASS | 1.2 s |
+| `twin:todos-blocks-h:test` | PASS | 1.1 s |
 | `twin:todos-blocks-h:typecheck` | PASS | 1.8 s |
-| `twin:todos-blocks-h:lint` | PASS | 2.1 s |
-| `pkg:blocks:test` | PASS | 7.4 s |
+| `twin:todos-blocks-h:lint` | PASS | 2.0 s |
+| `pkg:blocks:test` | PASS | 10.0 s |
 | `pkg:eslint-plugin-blocks:test` | PASS | 1.5 s |
-| `pkg:vite-plugin-blocks:test` | PASS | 1.4 s |
-| `pkg:vite-plugin-blocks:typecheck` | PASS | 1.3 s |
-| `repo:prettier` | PASS | 1.8 s |
+| `pkg:vite-plugin-blocks:test` | PASS | 1.6 s |
+| `pkg:vite-plugin-blocks:typecheck` | PASS | 1.8 s |
+| `pkg:blocks:exports` | PASS | 2.4 s |
+| `pkg:vite-plugin-blocks:exports` | PASS | 1.8 s |
+| `pkg:eslint-plugin-blocks:exports` | PASS | 1.6 s |
+| `repo:prettier` | PASS | 2.4 s |
 | `repo:oxlint` | PASS | 0.1 s |

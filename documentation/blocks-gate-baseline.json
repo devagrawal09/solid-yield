@@ -1,7 +1,7 @@
 {
-  "head": "858dd6830878173edb7b03dd31694ece2bed7444",
-  "startedAt": "2026-10-04T19:15:46.241Z",
-  "finishedAt": "2026-10-04T19:16:14.592Z",
+  "head": "84521e5bfd6d1fbb330cd1f9af28c718a695a528",
+  "startedAt": "2026-10-04T19:53:29.016Z",
+  "finishedAt": "2026-10-04T19:53:54.743Z",
   "options": {
     "only": [],
     "fast": false,
@@ -32,12 +32,12 @@
     "todos-blocks-h"
   ],
   "summary": {
-    "pass": 33,
+    "pass": 34,
     "fail": 0,
     "skip": 0,
-    "total": 33,
-    "wallMs": 28351,
-    "line": "33 pass / 0 fail / 0 skip in 28s",
+    "total": 34,
+    "wallMs": 25727,
+    "line": "34 pass / 0 fail / 0 skip in 26s",
     "green": true
   },
   "comparison": null,
@@ -45,199 +45,205 @@
     {
       "name": "twin:effect-blocks:test",
       "status": "PASS",
-      "durationMs": 1443,
+      "durationMs": 1492,
       "command": "pnpm -C examples/effect-blocks run test"
     },
     {
       "name": "twin:effect-blocks:typecheck",
       "status": "PASS",
-      "durationMs": 1347,
+      "durationMs": 1346,
       "command": "pnpm -C examples/effect-blocks run typecheck"
     },
     {
       "name": "twin:effect-blocks:lint",
       "status": "PASS",
-      "durationMs": 1637,
+      "durationMs": 1652,
       "command": "pnpm -C examples/effect-blocks run lint"
     },
     {
       "name": "twin:hackernews-spa-blocks:test",
       "status": "PASS",
-      "durationMs": 1807,
+      "durationMs": 1889,
       "command": "pnpm -C examples/hackernews-spa-blocks run test"
     },
     {
       "name": "twin:hackernews-spa-blocks:typecheck",
       "status": "PASS",
-      "durationMs": 1848,
+      "durationMs": 1417,
       "command": "pnpm -C examples/hackernews-spa-blocks run typecheck"
     },
     {
       "name": "twin:hackernews-spa-blocks:lint",
       "status": "PASS",
-      "durationMs": 1611,
+      "durationMs": 1695,
       "command": "pnpm -C examples/hackernews-spa-blocks run lint"
     },
     {
       "name": "twin:rendering-blocks:test",
       "status": "PASS",
-      "durationMs": 3139,
+      "durationMs": 3185,
       "command": "pnpm -C examples/rendering-blocks run test"
     },
     {
       "name": "twin:rendering-blocks:typecheck",
       "status": "PASS",
-      "durationMs": 1308,
+      "durationMs": 1351,
       "command": "pnpm -C examples/rendering-blocks run typecheck"
     },
     {
       "name": "twin:rendering-blocks:lint",
       "status": "PASS",
-      "durationMs": 1516,
+      "durationMs": 1576,
       "command": "pnpm -C examples/rendering-blocks run lint"
     },
     {
       "name": "twin:room-blocks:test",
       "status": "PASS",
-      "durationMs": 1303,
+      "durationMs": 1335,
       "command": "pnpm -C examples/room-blocks run test"
     },
     {
       "name": "twin:room-blocks:typecheck",
       "status": "PASS",
-      "durationMs": 1359,
+      "durationMs": 1374,
       "command": "pnpm -C examples/room-blocks run typecheck"
     },
     {
       "name": "twin:room-blocks:lint",
       "status": "PASS",
-      "durationMs": 1663,
+      "durationMs": 1696,
       "command": "pnpm -C examples/room-blocks run lint"
     },
     {
       "name": "twin:sierpinski-blocks:test",
       "status": "PASS",
-      "durationMs": 10849,
+      "durationMs": 10897,
       "command": "pnpm -C examples/sierpinski-blocks run test"
     },
     {
       "name": "twin:sierpinski-blocks:typecheck",
       "status": "PASS",
-      "durationMs": 946,
+      "durationMs": 964,
       "command": "pnpm -C examples/sierpinski-blocks run typecheck"
     },
     {
       "name": "twin:sierpinski-blocks:lint",
       "status": "PASS",
-      "durationMs": 1234,
+      "durationMs": 1249,
       "command": "pnpm -C examples/sierpinski-blocks run lint"
     },
     {
       "name": "twin:sierpinski-blocks-h:test",
       "status": "PASS",
-      "durationMs": 10833,
+      "durationMs": 10871,
       "command": "pnpm -C examples/sierpinski-blocks-h run test"
     },
     {
       "name": "twin:sierpinski-blocks-h:typecheck",
       "status": "PASS",
-      "durationMs": 1620,
+      "durationMs": 1659,
       "command": "pnpm -C examples/sierpinski-blocks-h run typecheck"
     },
     {
       "name": "twin:sierpinski-blocks-h:lint",
       "status": "PASS",
-      "durationMs": 1831,
+      "durationMs": 1850,
       "command": "pnpm -C examples/sierpinski-blocks-h run lint"
     },
     {
       "name": "twin:todos-blocks:test",
       "status": "PASS",
-      "durationMs": 1187,
+      "durationMs": 1179,
       "command": "pnpm -C examples/todos-blocks run test"
     },
     {
       "name": "twin:todos-blocks:typecheck",
       "status": "PASS",
-      "durationMs": 1004,
+      "durationMs": 995,
       "command": "pnpm -C examples/todos-blocks run typecheck"
     },
     {
       "name": "twin:todos-blocks:lint",
       "status": "PASS",
-      "durationMs": 1271,
+      "durationMs": 1258,
       "command": "pnpm -C examples/todos-blocks run lint"
     },
     {
       "name": "twin:todos-blocks-h:test",
       "status": "PASS",
-      "durationMs": 1136,
+      "durationMs": 1113,
       "command": "pnpm -C examples/todos-blocks-h run test"
     },
     {
       "name": "twin:todos-blocks-h:typecheck",
       "status": "PASS",
-      "durationMs": 1810,
+      "durationMs": 1756,
       "command": "pnpm -C examples/todos-blocks-h run typecheck"
     },
     {
       "name": "twin:todos-blocks-h:lint",
       "status": "PASS",
-      "durationMs": 2049,
+      "durationMs": 2046,
       "command": "pnpm -C examples/todos-blocks-h run lint"
     },
     {
       "name": "pkg:blocks:test",
       "status": "PASS",
-      "durationMs": 10016,
+      "durationMs": 7404,
       "command": "pnpm -C packages/blocks run test"
     },
     {
       "name": "pkg:eslint-plugin-blocks:test",
       "status": "PASS",
-      "durationMs": 1486,
+      "durationMs": 1406,
       "command": "pnpm -C packages/eslint-plugin-blocks run test"
     },
     {
       "name": "pkg:vite-plugin-blocks:test",
       "status": "PASS",
-      "durationMs": 1645,
+      "durationMs": 1354,
       "command": "pnpm -C packages/vite-plugin-blocks run test"
     },
     {
       "name": "pkg:vite-plugin-blocks:typecheck",
       "status": "PASS",
-      "durationMs": 1820,
+      "durationMs": 1106,
       "command": "pnpm -C packages/vite-plugin-blocks run typecheck"
+    },
+    {
+      "name": "pkg:blocks:conformance",
+      "status": "PASS",
+      "durationMs": 4068,
+      "command": "pnpm -C packages/blocks run test:conformance"
     },
     {
       "name": "pkg:blocks:exports",
       "status": "PASS",
-      "durationMs": 2362,
+      "durationMs": 1150,
       "command": "pnpm -C packages/blocks run test:exports"
     },
     {
       "name": "pkg:vite-plugin-blocks:exports",
       "status": "PASS",
-      "durationMs": 1759,
+      "durationMs": 898,
       "command": "pnpm -C packages/vite-plugin-blocks run test:exports"
     },
     {
       "name": "pkg:eslint-plugin-blocks:exports",
       "status": "PASS",
-      "durationMs": 1595,
+      "durationMs": 876,
       "command": "pnpm -C packages/eslint-plugin-blocks run test:exports"
     },
     {
       "name": "repo:prettier",
       "status": "PASS",
-      "durationMs": 2437,
+      "durationMs": 1553,
       "command": "pnpm exec prettier --check 'packages/blocks/**/*.[tj]s?(x)' 'packages/eslint-plugin-blocks/**/*.[tj]s?(x)' 'packages/vite-plugin-blocks/**/*.[tj]s?(x)' 'examples/effect-blocks/**/*.[tj]s?(x)' 'examples/hackernews-spa-blocks/**/*.[tj]s?(x)' 'examples/rendering-blocks/**/*.[tj]s?(x)' 'examples/room-blocks/**/*.[tj]s?(x)' 'examples/sierpinski-blocks/**/*.[tj]s?(x)' 'examples/sierpinski-blocks-h/**/*.[tj]s?(x)' 'examples/todos-blocks/**/*.[tj]s?(x)' 'examples/todos-blocks-h/**/*.[tj]s?(x)' 'packages/*/test/*.mjs' 'scripts/*.mjs'"
     },
     {
       "name": "repo:oxlint",
       "status": "PASS",
-      "durationMs": 79,
+      "durationMs": 49,
       "command": "node_modules/.bin/oxlint packages/blocks packages/eslint-plugin-blocks packages/vite-plugin-blocks examples/effect-blocks examples/hackernews-spa-blocks examples/rendering-blocks examples/room-blocks examples/sierpinski-blocks examples/sierpinski-blocks-h examples/todos-blocks examples/todos-blocks-h --ignore-pattern '**/dist/**' --ignore-pattern '**/node_modules/**'"
     }
   ]

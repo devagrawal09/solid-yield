@@ -1,0 +1,41 @@
+## mount
+read id = 1
+run user(1)
+owner before wait(1) = user memo
+task load#1 = 1
+## pending
+html = <p class="loading">loading</p>
+## resolve load#1
+settle load#1 = "ada"
+owner after wait(1) = none
+html = <p class="user">ada</p>
+## id 2 then 3 (load#2 superseded)
+write id = 2
+read id = 2
+run user(2)
+owner before wait(2) = user memo
+task load#2 = 2
+write id = 3
+read id = 3
+run user(3)
+owner before wait(3) = user memo
+task load#3 = 3
+html = <p class="user">ada</p>
+## resolve load#3
+settle load#3 = "grace"
+owner after wait(3) = none
+html = <p class="user">grace</p>
+## resolve stale load#2 (must not commit)
+settle load#2 = "stale"
+owner after wait(2) = none
+html = <p class="user">grace</p>
+## reject load#4
+write id = 4
+read id = 4
+run user(4)
+owner before wait(4) = user memo
+task load#4 = 4
+reject load#4 = NotFound(gone)
+caught boundary = NotFound(gone)
+html = <p class="err">NotFound</p>
+## teardown

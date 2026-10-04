@@ -1,0 +1,16 @@
+## mount
+read id = 1
+run user(1)
+task user1#1
+## resolve initial flight (fresh render only)
+settle user1#1 = "ada"
+## initial
+html = <section><p class="user">ada</p></section>
+## id 2
+write id = 2
+read id = 2
+run user(2)
+task user2#1
+settle user2#1 = "grace"
+html = <section><p class="user">grace</p></section>
+## teardown

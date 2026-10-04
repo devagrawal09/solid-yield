@@ -538,6 +538,9 @@ importers:
 
   packages/blocks:
     devDependencies:
+      '@solidjs/compiler':
+        specifier: ^2.0.0-rc.11
+        version: 2.0.0-rc.13
       '@solidjs/h':
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13(@solidjs/web@2.0.0-rc.13(solid-js@2.0.0-rc.13))

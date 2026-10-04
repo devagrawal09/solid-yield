@@ -1348,6 +1348,26 @@ export function throughHole(v: any): any {
   return isGeneratorFunction(v) && v.length === 0 ? runHole(v) : through(v);
 }
 
+/**
+ * @internal A flow control's creation (`For(…)`, `Show(…)`, a boundary): what
+ * it reads of its props is its own read, never the holding view's top-level
+ * one. On the client Solid's flow controls read inside their own computation
+ * (`checkRead` sees the observer); on the server they read synchronously,
+ * with no observer, while the view runs — in development that was a false
+ * `READ_IN_VIEW` in every named component holding a flow control (found by
+ * the conformance harness, D-039).
+ */
+export function flowControl<T>(create: () => T): T {
+  if (!__DEV__ || state.view === null) return create();
+  const prev = state;
+  state = { ...prev, view: null };
+  try {
+    return create();
+  } finally {
+    state = prev;
+  }
+}
+
 // --- components and views -------------------------------------------------------------------
 
 function runSetup(

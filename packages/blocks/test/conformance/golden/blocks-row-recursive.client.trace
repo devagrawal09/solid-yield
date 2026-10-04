@@ -1,0 +1,26 @@
+## mount
+read open a = true
+read open a1 = true
+read open a1 = true
+read open a = true
+## initial
+html = <ul class="tree"><li class="n1"><span>a</span><a class="t1">[-]</a><ul style="display: block;"><li class="n2"><span>a1</span><a class="t2">[-]</a><ul style="display: block;"><li class="n3"><span>a1x</span></li></ul></li></ul></li><li class="n4"><span>b</span></li></ul>
+## collapse a1 (a nested instance)
+read open a1 = true
+write open a1 = false
+read open a1 = false
+read open a1 = false
+html = <ul class="tree"><li class="n1"><span>a</span><a class="t1">[-]</a><ul style="display: block;"><li class="n2"><span>a1</span><a class="t2">[+]</a><ul style="display: none;"><li class="n3"><span>a1x</span></li></ul></li></ul></li><li class="n4"><span>b</span></li></ul>
+## collapse a (the outer instance)
+read open a = true
+write open a = false
+read open a = false
+read open a = false
+html = <ul class="tree"><li class="n1"><span>a</span><a class="t1">[+]</a><ul style="display: none;"><li class="n2"><span>a1</span><a class="t2">[+]</a><ul style="display: none;"><li class="n3"><span>a1x</span></li></ul></li></ul></li><li class="n4"><span>b</span></li></ul>
+## expand a1 again
+read open a1 = false
+write open a1 = true
+read open a1 = true
+read open a1 = true
+html = <ul class="tree"><li class="n1"><span>a</span><a class="t1">[+]</a><ul style="display: none;"><li class="n2"><span>a1</span><a class="t2">[-]</a><ul style="display: block;"><li class="n3"><span>a1x</span></li></ul></li></ul></li><li class="n4"><span>b</span></li></ul>
+## teardown

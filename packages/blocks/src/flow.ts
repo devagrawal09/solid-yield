@@ -33,7 +33,8 @@ import {
   isRowBlock,
   rowArg,
   runRow,
-  throughHole
+  throughHole,
+  flowControl
 } from "./runtime.js";
 import type { Element } from "./element.js";
 import type {
@@ -420,11 +421,13 @@ function ErroredBlocks(props: any): any {
  * Created untracked, as a JSX tag is (`createComponent`): called inside a
  * view's hole (`{yield* Loading({ … })}`), a flow control's creation must
  * not subscribe the hole — the hole would re-create it, and its content, on
- * every change the flow control reads.
+ * every change the flow control reads. Nor are its reads the holding view's
+ * top-level reads (`flowControl`: on the server Solid's flow controls read
+ * their props as they are created).
  */
 function untracked(fn: (props: any) => any): any {
   return (props: any) => {
-    const out = untrack(() => fn(props));
+    const out = untrack(() => flowControl(() => fn(props)));
     // its output is a view: `yield*` / `perform` passes it on unread
     if (typeof out === "function") out[VIEW_MARK] = true;
     return out;

@@ -1,0 +1,42 @@
+## mount
+read a = 1
+read flag = false
+read b = 0
+run effect
+write b = 10
+read b = 10
+## initial
+html = <p class="b">10</p>
+## write a = 2 (branch read of c starts)
+write a = 2
+read a = 2
+read flag = false
+read c = 100
+cleanup effect 1
+run effect
+write b = 20
+value c = 100
+read b = 20
+html = <p class="b">20</p>
+## write flag = true
+write flag = true
+read a = 2
+read flag = true
+read c = 100
+cleanup effect 2
+run effect
+write b = 20
+value a = 2
+value c = 100
+## write c = 200
+write c = 200
+read a = 2
+read flag = true
+read c = 200
+cleanup effect 2
+run effect
+write b = 20
+value a = 2
+value c = 200
+## dispose
+cleanup effect 2

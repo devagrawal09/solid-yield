@@ -1,0 +1,15 @@
+## mount
+read saved = "none"
+## initial
+html = <button class="save">none</button>
+## click
+run save
+task save#1 = "remote"
+html = <button class="save">none</button>
+## resolve
+settle save#1 = "done"
+run resumed
+write saved = "done"
+read saved = "done"
+html = <button class="save">done</button>
+## teardown

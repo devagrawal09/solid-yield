@@ -1,0 +1,14 @@
+## hydrate
+hydration server-nodes 4/4 kept, 0 client-inserted
+## initial
+html = <ul _hk="0"><li _hk="3" class="c1"><!--$-->a<!--/-->:<!--$-->open<!--/--></li><li _hk="5" class="c2"><!--$-->b<!--/-->:<!--$-->open<!--/--></li><li _hk="7" class="c3"><!--$-->c<!--/-->:<!--$-->open<!--/--></li></ul>
+## toggle row 2
+run toggle 2
+html = <ul _hk="0"><li _hk="3" class="c1"><!--$-->a<!--/-->:<!--$-->open<!--/--></li><li _hk="5" class="c2"><!--$-->b<!--/-->:<!--$-->closed<!--/--></li><li _hk="7" class="c3"><!--$-->c<!--/-->:<!--$-->open<!--/--></li></ul>
+## toggle row 1
+run toggle 1
+html = <ul _hk="0"><li _hk="3" class="c1"><!--$-->a<!--/-->:<!--$-->closed<!--/--></li><li _hk="5" class="c2"><!--$-->b<!--/-->:<!--$-->closed<!--/--></li><li _hk="7" class="c3"><!--$-->c<!--/-->:<!--$-->open<!--/--></li></ul>
+## toggle row 2 back
+run toggle 2
+html = <ul _hk="0"><li _hk="3" class="c1"><!--$-->a<!--/-->:<!--$-->closed<!--/--></li><li _hk="5" class="c2"><!--$-->b<!--/-->:<!--$-->open<!--/--></li><li _hk="7" class="c3"><!--$-->c<!--/-->:<!--$-->open<!--/--></li></ul>
+## teardown

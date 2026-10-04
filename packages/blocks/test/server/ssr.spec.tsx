@@ -114,6 +114,41 @@ describe("server rendering", () => {
     expect(() => renderToString(() => ReadsInBody())).toThrow(/READ_IN_VIEW.*<ReadsInBody>/);
   });
 
+  it("a flow control's own prop reads are not the named view's: no READ_IN_VIEW on the server (D-039)", () => {
+    // Solid's server For / Show read `each` / `when` as they are created, with
+    // no observer, while the holding view runs; an anonymous component was
+    // never checked, a named one was (a false READ_IN_VIEW)
+    const Named = $component(function* Named() {
+      const [items] = yield* $signal(["a", "b"]);
+      const [shown] = yield* $signal(true);
+      return view(function* () {
+        return (
+          <ul>
+            {
+              yield* For({
+                each: items,
+                children: function* (t) {
+                  return view(function* () {
+                    return <li>{yield* t}</li>;
+                  });
+                }
+              })
+            }
+            {
+              yield* Show({
+                when: shown,
+                children: function* () {
+                  return <b>{(yield* items).length}</b>;
+                }
+              })
+            }
+          </ul>
+        );
+      });
+    });
+    expect(strip(renderToString(() => Named({})))).toBe("<ul><li>a</li><li>b</li><b>2</b></ul>");
+  });
+
   it("an async memo resolves on the server", async () => {
     const User = $component(function* () {
       const user = yield* $memo(function* () {

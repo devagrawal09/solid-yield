@@ -1,0 +1,13 @@
+## mount
+## initial
+html = <ul><li class="c1">a:open<!----></li><li class="c2">b:open<!----></li><li class="c3">c:open<!----></li></ul>
+## toggle row 2
+run toggle 2
+html = <ul><li class="c1">a:open<!----></li><li class="c2">b:closed<!----></li><li class="c3">c:open<!----></li></ul>
+## toggle row 1
+run toggle 1
+html = <ul><li class="c1">a:closed<!----></li><li class="c2">b:closed<!----></li><li class="c3">c:open<!----></li></ul>
+## toggle row 2 back
+run toggle 2
+html = <ul><li class="c1">a:closed<!----></li><li class="c2">b:open<!----></li><li class="c3">c:open<!----></li></ul>
+## teardown

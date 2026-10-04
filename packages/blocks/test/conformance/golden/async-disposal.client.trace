@@ -1,0 +1,9 @@
+## mount
+read id = 1
+run user(1)
+owner before wait(1) = user memo
+task load#1 = 1
+## dispose while load#1 pending
+## settle after disposal
+settle load#1 = "late"
+owner after wait(1) = none

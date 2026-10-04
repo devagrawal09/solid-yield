@@ -1,0 +1,16 @@
+## hydrate
+read id = 1
+run user(1)
+task user1#1
+hydration server-nodes 2/2 kept, 0 client-inserted
+## initial
+html = <section _hk="1"><p _hk="2000" class="user">ada</p></section>
+## id 2
+write id = 2
+read id = 2
+run user(2)
+task user2#1
+settle user2#1 = "grace"
+html = <section _hk="1"><p _hk="2000" class="user">grace</p></section>
+## teardown
+unsettled = user1#1

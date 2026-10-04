@@ -1,0 +1,24 @@
+## mount
+run setup
+run doubled
+read count = 1
+read count = 1
+## initial
+html = <button class="inc">1:2<!----></button>
+## click
+run inc
+read count = 1
+write count = 2
+run doubled
+read count = 2
+read count = 2
+html = <button class="inc">2:4<!----></button>
+## click again
+run inc
+read count = 2
+write count = 3
+run doubled
+read count = 3
+read count = 3
+html = <button class="inc">3:6<!----></button>
+## teardown

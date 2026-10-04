@@ -1,0 +1,8 @@
+## render
+read id = 1
+run user(1)
+task user1#1
+settle user1#1 = "ada"
+markup = <section _hk=1><template id="pl-2"></template><p _hk=20 class="loading">loading</p><!--pl-2--></section><template id="2"><p _hk=2000 class="user">ada</p></template>
+hydration-keys = ["1","20","2000"]
+serialized = ["0","2_fr"]

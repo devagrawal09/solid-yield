@@ -181,6 +181,16 @@ function buildSteps(twins) {
     }
   );
 
+  // The conformance harness (D-039; packages/blocks/test/conformance): each scenario's
+  // handwritten Solid oracle against its library-dialect twin, client / server / hydrate,
+  // the library route against the compiler route's frozen server output, and the
+  // scenarios' library sources linted with the recommended rules.
+  steps.push({
+    name: "pkg:blocks:conformance",
+    cwd: root,
+    ...pnpmRun("packages/blocks", "test:conformance")
+  });
+
   // The exports-conditions matrix of each published package (scripts/exports-matrix.mjs):
   // every subpath under development / default / browser / node, resolved by esbuild, Node
   // and TypeScript from a consumer's node_modules. Needs the build, like everything here.

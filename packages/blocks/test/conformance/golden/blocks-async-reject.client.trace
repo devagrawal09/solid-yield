@@ -1,0 +1,9 @@
+## mount
+task load#1 = "1"
+## initial
+html = <main><p class="loading">loading</p></main>
+## reject
+reject load#1 = NotFound(user 1)
+caught errored = NotFound(user 1)
+html = <main><p class="err">error</p></main>
+## teardown

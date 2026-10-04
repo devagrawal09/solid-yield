@@ -1,0 +1,4 @@
+## render
+markup = <ul _hk=0><li _hk=3 class="c1"><!--$-->a<!--/-->:<!--$-->open<!--/--></li><li _hk=5 class="c2"><!--$-->b<!--/-->:<!--$-->open<!--/--></li><li _hk=7 class="c3"><!--$-->c<!--/-->:<!--$-->open<!--/--></li></ul>
+hydration-keys = ["0","3","5","7"]
+serialized = []

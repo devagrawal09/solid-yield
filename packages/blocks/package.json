@@ -70,7 +70,8 @@
     "types:jsx": "node scripts/jsx-from-web.mjs && node scripts/jsx-web-shared.mjs",
     "test": "vitest run --maxWorkers=2 && vitest run --maxWorkers=2 --config vite.config.prod.mjs && vitest run --maxWorkers=2 --config vite.config.server.mjs && pnpm run test-types",
     "test-types": "tsc -p tsconfig.json",
-    "test:exports": "node --test test/exports-matrix.test.mjs"
+    "test:exports": "node --test test/exports-matrix.test.mjs",
+    "test:conformance": "vitest run --config vite.config.conformance-server.mjs && vitest run --config vite.config.conformance-hydrate.mjs && vitest run --config vite.config.conformance.mjs && node test/conformance/lint.mjs"
   },
   "peerDependencies": {
     "@solidjs/web": "^2.0.0-rc.11",
@@ -82,6 +83,7 @@
     }
   },
   "devDependencies": {
+    "@solidjs/compiler": "^2.0.0-rc.11",
     "@solidjs/h": "^2.0.0-rc.11",
     "@solidjs/vite-plugin": "3.0.0-next.35",
     "@solidjs/web": "^2.0.0-rc.11",

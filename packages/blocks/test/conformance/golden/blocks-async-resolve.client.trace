@@ -1,0 +1,8 @@
+## mount
+task load#1 = "1"
+## initial
+html = <main><p class="loading">loading</p></main>
+## resolve
+settle load#1 = {"name":"Ada"}
+html = <main><h3 class="user">Ada</h3></main>
+## teardown

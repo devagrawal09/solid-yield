@@ -1,0 +1,16 @@
+## mount
+run app setup
+run child setup
+read label = "a"
+read other = 0
+## initial
+html = <div><span class="child">a</span><i>0</i></div>
+## write label (child re-renders)
+write label = "b"
+read label = "b"
+html = <div><span class="child">b</span><i>0</i></div>
+## write other (parent re-renders)
+write other = 1
+read other = 1
+html = <div><span class="child">b</span><i>1</i></div>
+## teardown

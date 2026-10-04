@@ -1,0 +1,8 @@
+## render
+read open a = true
+read open a = true
+read open a1 = true
+read open a1 = true
+markup = <ul _hk=0 class="tree"><li _hk=3 class="n1"><span>a</span><!--$--><a _hk=70 class="t1">[-]</a><ul _hk=71 style="display:block"><li _hk=74 class="n2"><span>a1</span><!--$--><a _hk=780 class="t2">[-]</a><ul _hk=781 style="display:block"><li _hk=784 class="n3"><span>a1x</span><!--$--><!--/--></li></ul><!--/--></li></ul><!--/--></li><li _hk=8 class="n4"><span>b</span><!--$--><!--/--></li></ul>
+hydration-keys = ["0","3","70","71","74","780","781","784","8"]
+serialized = []

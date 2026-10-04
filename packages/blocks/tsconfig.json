@@ -11,7 +11,8 @@
     "paths": {
       "solid-blocks": ["./src/index.ts"],
       "solid-blocks/h": ["./src/h.ts"],
-      "solid-blocks/jsx-runtime": ["./jsx/jsx-runtime.d.ts"]
+      "solid-blocks/jsx-runtime": ["./jsx/jsx-runtime.d.ts"],
+      "conformance": ["./test/conformance/harness/scenario-api.ts"]
     }
   },
   "include": ["./src", "./test"]

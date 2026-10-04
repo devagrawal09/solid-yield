@@ -21,7 +21,7 @@ export default defineConfig({
     pool: "threads",
     globals: true,
     include: ["test/**/*.spec.ts", "test/**/*.spec.tsx"],
-    exclude: ["**/node_modules/**", "test/server/**"]
+    exclude: ["**/node_modules/**", "test/server/**", "test/conformance/**"]
   },
   resolve: {
     conditions: ["development", "browser"],

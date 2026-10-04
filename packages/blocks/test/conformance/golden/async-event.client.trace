@@ -1,0 +1,22 @@
+## mount
+read status = "idle"
+## click (pending)
+run save
+write status = "saving"
+task save#1
+read status = "saving"
+html = <button class="save">saving</button>
+## resolve save#1
+settle save#1 = "saved"
+write status = "saved"
+read status = "saved"
+html = <button class="save">saved</button>
+## click, reject save#2
+run save
+write status = "saving"
+task save#2
+read status = "saving"
+reject save#2 = Forbidden(denied)
+caught boundary = Forbidden(denied)
+html = <p class="err">Forbidden</p>
+## teardown

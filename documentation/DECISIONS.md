@@ -50,7 +50,7 @@ Reading order with the rest of the plan: `blocks-library.md` (the reference), th
 | D-036 | decided | `context()` removed; `yield* Ctx` is the one way to read a context |
 | D-037 | decided | D-008 amended: no Chromium clause; `oxlint` is a real gate step |
 | D-038 | decided | Flow controls accept holes as well as sources |
-| D-039 | decided | Conformance harness ported in Phase 4 |
+| D-039 | implemented (Phase 4) | Conformance harness ported in Phase 4 |
 | D-040 | implemented (1B) | A declared prop color is permission only |
 | D-041 | decided | JSX only in view / hole / row returns; a setup never creates elements |
 | D-042 | decided | All props are reactive; no static prop kind; `$snapshot` removed; `$untrack` in reactive scopes only |
@@ -80,6 +80,7 @@ Reading order with the rest of the plan: `blocks-library.md` (the reference), th
 | D-066 | decided | A component call's `children` is always a generator (lazy view; rows for lists) |
 | D-067 | decided | Tags are DOM elements and foreign Solid components; block components are called (brand check) |
 | D-068 | implemented (1B) | D-056 amended: `Props<{…}>` wrapper; colors declared as `Source<T, E = never, P = false>`; no `Async` |
+| D-069 | recorded (Phase 4) | Conformance findings F1–F7: the library route against the oracle and the compiler route (F6: the routes' hydration keys are not interchangeable) |
 
 ## Entries
 
@@ -353,6 +354,14 @@ Consequences: (1) the whole-view read concept is deleted — `VY` is always `nev
 *Alternatives:* port now as 1A's last item (pin before more runtime surgery); never (twins suffice).
 *Reasoning:* the harness pins semantics independently of the twins, which is valuable, but it is most valuable once the runtime stops moving and the repo is standalone.
 
+*Implemented (Phase 4, item 1).*
+
+- **Where.** `packages/blocks/test/conformance/` (its README), as the gate step `pkg:blocks:conformance`: server, hydrate and client environments, plus a lint of the library sources. Those sources are type-checked by `test-types`.
+- **Two sources per scenario.** The oracle is the fork's handwritten Solid source, unchanged apart from formatting. The other is a library-dialect twin as the dialect stands: call form (D-062), `Props<{…}>` / `Source<T, E, P>` (D-068), views with no body (D-032), typed failures (D-034), writes through receipts in `$event`s (D-021, D-028), no `context()` (D-036).
+- **Real compiler output.** The library route runs `vite-plugin-solid-blocks`' `transform()`, then the published `@solidjs/compiler`. That is a new devDependency of `solid-blocks`, the version `@solidjs/vite-plugin` already uses.
+- **What changed from the fork.** blocks-context was dropped (D-036). blocks-effect was re-read against D-032 and D-053 and declared F1. The library side's artifacts were regenerated against the library runtime. Every difference is in D-069. The port also found one runtime bug, a false server `READ_IN_VIEW` (D-069 F7), now fixed.
+- **Golden traces and D-045.** D-045 rules out golden snapshots of the *originals* as a Solid-drift canary. The harness's goldens pin the *oracle's* traces, so that a change in Solid's semantics is reviewed as Solid's rather than showing up as a library divergence. The library side is never golden: it is judged against the oracle each run. So the goldens do not contradict D-045. When Solid moves, a golden moves with it, and the diff is reviewed as Solid's (rc.13 moved three, D-069).
+
 ### D-040 — `Async<T, E>` on a prop is permission only
 **Decided (Dev, 2026-10-04).** Declaring `todo: Async<Todo, FetchError>` says "I can be given unsettled data"; it creates no obligation to handle it. A pending read or a failure from that prop propagates to the nearest `<Loading>`/`<Errored>` wherever it is — possibly in the parent — exactly as a pending read propagates in Solid. A bare prop means "give me settled data; I am never the one that is pending". The declaration is a type permission, not a UI duty.
 *Alternatives:* duty — a component with an `Async` prop must contain the boundary for it (dev error when its pending escapes); permission plus a one-time dev hint when it escapes a component with no boundary.
@@ -572,6 +581,35 @@ Consequences: F1 (server-component props in event/`ref` positions) disappears �
 - **Tag check.** "A function returning a `View`" could not tell a foreign component that returns blocks' `Element` (which includes a settled `View`) from a block component. The mark is therefore a `[COMPONENT]` brand on the returned view (`ComponentView<P, E>`): `TagType` refuses a function returning one, and `no-component-tag` looks for it with type information. The no-JSX rest parameter of `$component` (`NoJsxViewRule`) does not interfere with generic inference.
 - **New exports.** `Props`, `PropsArgs`, `PropsInput`, `HoleProp`, `SettledProp`, `ComponentView`, `ViewPending`, `ViewFails`, `ViewYield`, `ViewReturn`, `NoJsxViewRule`. The view helpers had to be exported because a generic higher-order component's inferred type names them (rendering's `RouteHOC`).
 - **D-034 at the declaration.** `Props<D extends PropsCheck<D>>` refuses a declared `E` that is not a `Failure` with a literal `kind`, at the annotation.
+
+### D-069 — Conformance findings: the library route against the oracle and the compiler route
+**Recorded (Phase 4, item 1; for Dev's ruling).** The conformance port (D-039) runs each scenario's handwritten Solid program (the oracle) and its library-dialect twin through the same steps, on the client, on the server and in hydration. It compares their traces. Every difference is declared exactly in `packages/blocks/test/conformance/scenarios/declared.ts` and listed in that directory's `COVERAGE.md`. This entry records them. F1–F5 are the library against the oracle; F6 is the library route against the compiler route's frozen server output. None is normalized away. Each is pinned, so a change in either direction turns the gate red.
+
+- **F1 — `$effect` is one tracked pass (blocks-effect, client).** The reference uses Solid's split effect, `createEffect(compute, effect)`. `$effect` is one `createTrackedEffect` pass (D-053). The subscriptions, values, runs and cleanups are the same; the order is not:
+  - the first run comes after the view's first read;
+  - on a re-run the previous cleanup runs before the new reads;
+  - the branch read of `c` happens inside the body, after the write of `b`.
+  The split form has no block spelling. Re-read against D-032: the scenario's branch (`if (v > 1) … yield* c`) is inside the effect, which is where D-032 puts a branch; the view is `<p>{yield* b}</p>`, no body.
+- **F2 — a row's view renders once (blocks-row-list, all environments).** Each hole is its own computation, so a list update re-renders no row view. The reference's row callback returns a thunk that the list's insert calls again on every update, so each row re-reads its `open`; the fork's islands mode matched the library here. At mount a row's view is built right after its setup (setup a, view a, setup b, view b). The reference sets every row up first, then renders. Writes, runs, cleanups and markup are the oracle's. In hydration the reordered rows keep their server nodes; the oracle re-creates every row's element.
+- **F3 — a superseded `$memo` run is closed at its pending `attempt` (async-flights, client).** Its generator is returned. An async function continues after `await` and its result is discarded, so `owner after wait(2)` is not logged. A run disposed with its owner is not closed, so async-disposal is equivalent.
+- **F4 — an `$event` call is one transaction (async-event, client; D-020).** The write made before the event waits (`saving`) is held until the call settles, so the DOM keeps `idle`; the reference writes through at once. Showing a write while an event waits is `$optimistic`'s job. Everything else is the oracle's, including the rejection reaching the `Errored` above the event's owner.
+- **F5 — hydration keys (every SSR scenario, server and hydrate).** The markup is the oracle's; the `_hk` values are not. Each `{yield* …}` hole is an owner, and so is each flow control called in one, so the library's keys are deeper: `1000` / `1010` / `1020` where handwritten Solid has `3` / `5` / `7`; `100222000` for the oracle's `74` at depth 2 of the recursive rows; `200` for the `Loading`'s `20`. Each route hydrates its own markup with every node kept (3/3, 9/9, 4/4, 2/2).
+- **F6 — the library route and the compiler route number hydration keys differently (blocks-row-list, -recursive, -keyed-store, server).** `routes.spec.ts` compares `server/library` with the fork's `server/blocks-compiled` output, kept frozen under `__artifacts__/compiler-route/`.
+  - The markup is the same.
+  - The compiler route makes each `$component` view and row view a hydration-id scope (`blockScope`): `00`, `01000`, `01100`, adding 3 digits per level of rows.
+  - The library route has Solid's owner ids: `0`, `1000`, `1010`, adding 5 digits per level.
+  - So the routes are not interchangeable. The library client, given the compiler route's markup, misses every key, the root's included, and leaves the page inert (`hydrate-self-test.spec.ts`). The reverse needs the blocks compiler, which is not here.
+  - Consequence: a page rendered on the server by one route cannot be hydrated by the other. A future compiler route either adopts Solid's owner numbering or ships its own client.
+  - The compiler-route output also has `<!--!$-->` between rows. That is Solid drift, not the route's: rc.13's own reference no longer emits it, though the fork's Solid did.
+- **F7 — a false `READ_IN_VIEW` on the server (fixed).** Solid's server `For` / `Show` read `each` / `when` synchronously as they are created, with no observer, while the holding view runs. In development every named component holding a flow control hit `READ_IN_VIEW` on the server; anonymous ones were never checked. The runtime now runs a flow control's creation as its own (`flowControl` in `runtime.ts`). The test is ssr "a flow control's own prop reads are not the named view's" and the changeset is `blocks-server-flow-control-reads.md`.
+
+*Solid drift seen by the port (not findings; D-045).* Against the fork's goldens, every client golden trace is byte-identical on rc.13. The server and hydrate goldens and the `server-reference` artifacts of the three row scenarios moved with rc.13: `<!--!$-->` is gone between rows, the keys are renumbered (`4` → `5`, `60` → `70`), and one `_$HY.sh` script is gone from async-hydration's stream. They were regenerated on published Solid. The reference stays the oracle because it is plain Solid, whatever its version.
+
+*Not ported.* blocks-context is moot under D-036: `yield* Ctx` is the one way to read a context, so there is no second form to pin. blocks-async-event still reads one, through a helper generator. Also not ported:
+- the `$`-dialect-only scenarios (memo-effect-order, dynamic-subscriptions, owned-children, owner-routing, error-routing, event-reads-writes, store-paths, store-dynamic-index, prop-paths, jsx-block, error-markers): they have no generator-blocks source to translate;
+- the tiers and islands suites: those are compiler features the library does not have (§7);
+- every `$`, `blocks-compiled` and `blocks-uncompiled` mode.
+The ported set is 12 scenarios, 4 of them with SSR: blocks-counter, -effect, -props-child, -async-resolve, -async-reject, -async-event, -row-list, -row-recursive, -row-keyed-store; async-flights, -disposal, -event, -hydration.
 
 ## Phase 1A findings (agent report, items 4c–8; verbatim, 2026-10-04)
 

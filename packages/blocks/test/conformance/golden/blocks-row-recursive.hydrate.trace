@@ -1,0 +1,27 @@
+## hydrate
+read open a = true
+read open a1 = true
+read open a1 = true
+read open a = true
+hydration server-nodes 9/9 kept, 0 client-inserted
+## initial
+html = <ul _hk="0" class="tree"><li _hk="3" class="n1"><span>a</span><!--$--><a _hk="70" class="t1">[-]</a><ul _hk="71" style="display:block"><li _hk="74" class="n2"><span>a1</span><!--$--><a _hk="780" class="t2">[-]</a><ul _hk="781" style="display:block"><li _hk="784" class="n3"><span>a1x</span><!--$--><!--/--></li></ul><!--/--></li></ul><!--/--></li><li _hk="8" class="n4"><span>b</span><!--$--><!--/--></li></ul>
+## collapse a1 (a nested instance)
+read open a1 = true
+write open a1 = false
+read open a1 = false
+read open a1 = false
+html = <ul _hk="0" class="tree"><li _hk="3" class="n1"><span>a</span><!--$--><a _hk="70" class="t1">[-]</a><ul _hk="71" style="display:block"><li _hk="74" class="n2"><span>a1</span><!--$--><a _hk="780" class="t2">[+]</a><ul _hk="781" style="display: none;"><li _hk="784" class="n3"><span>a1x</span><!--$--><!--/--></li></ul><!--/--></li></ul><!--/--></li><li _hk="8" class="n4"><span>b</span><!--$--><!--/--></li></ul>
+## collapse a (the outer instance)
+read open a = true
+write open a = false
+read open a = false
+read open a = false
+html = <ul _hk="0" class="tree"><li _hk="3" class="n1"><span>a</span><!--$--><a _hk="70" class="t1">[+]</a><ul _hk="71" style="display: none;"><li _hk="74" class="n2"><span>a1</span><!--$--><a _hk="780" class="t2">[+]</a><ul _hk="781" style="display: none;"><li _hk="784" class="n3"><span>a1x</span><!--$--><!--/--></li></ul><!--/--></li></ul><!--/--></li><li _hk="8" class="n4"><span>b</span><!--$--><!--/--></li></ul>
+## expand a1 again
+read open a1 = false
+write open a1 = true
+read open a1 = true
+read open a1 = true
+html = <ul _hk="0" class="tree"><li _hk="3" class="n1"><span>a</span><!--$--><a _hk="70" class="t1">[+]</a><ul _hk="71" style="display: none;"><li _hk="74" class="n2"><span>a1</span><!--$--><a _hk="780" class="t2">[-]</a><ul _hk="781" style="display: block;"><li _hk="784" class="n3"><span>a1x</span><!--$--><!--/--></li></ul><!--/--></li></ul><!--/--></li><li _hk="8" class="n4"><span>b</span><!--$--><!--/--></li></ul>
+## teardown

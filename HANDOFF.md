@@ -1,4 +1,4 @@
-# HANDOFF — solid-blocks (checkpoint 2026-10-05; Phase 3 "extraction" complete)
+# HANDOFF — solid-blocks (checkpoint 2026-10-05; Phase 4 "extend" complete)
 
 This repository was extracted from the Solid fork `devagrawal09/solid`, branch `blocks-lib`, at commit **`6978eb83`** (D-015). Git history was not carried; the fork keeps it. The fork's own handoff at that commit (Phases 1A, 1B and 2, and its environment notes) is `git show 6978eb83:HANDOFF.md` in the fork.
 
@@ -61,15 +61,23 @@ node scripts/blocks-gate.mjs --baseline documentation/blocks-gate-baseline.json 
 - **Changesets would release `vite-plugin-solid-blocks` as a major.** It peer-depends on `solid-blocks` as `workspace:*`, which publishes as the exact version, so `solid-blocks`' first minor (0.0.0 → 0.1.0) leaves the range. Before the first release, decide the plugin's peer range for `solid-blocks` (e.g. `workspace:^` plus a 1.0, or an explicit range).
 - **`pnpm peers check` reports one unmet peer.** `@solidjs/vite-plugin@3.0.0-next.35` wants `vite ^8 || ^9`; the twins, their originals and the plugin's tests use `vite ^7`, as in the fork.
 - **Not carried.** The fork's `scripts/example-blocks/{browser,bytes}.mjs`, the manual Chromium check and the client-bytes measurement (not gated, D-037). They need Playwright and the originals' production builds. The twins' `tests/browser.steps.mjs` are here; port the runner if the browser check is wanted again.
-- **CI has not run yet** (see Publishing). The CI job was simulated locally from a fresh clone (frozen install → build → `git diff --exit-code` → gate vs baseline: GREEN, 33/33) on macOS arm64. The first real Linux run is the first check of the `linux-x64-gnu` compiler binary and of oxlint on Linux.
+- **CI.** The repository is on GitHub (`devagrawal09/solid-blocks`, private), and CI's first Linux run of the gate was green (2026-10-04T19:24Z, Node 24 / pnpm 11). That run was the first check of the `linux-x64-gnu` compiler binary and of oxlint on Linux. Phase 4's commits are local until the orchestrator pushes them.
 
-## Next: Phase 4
+## Phase 4 ("extend"), 2026-10-05
 
-1. **Conformance harness port (D-039).** The source is on Solid's `experiment/iterable-signals` branch: `packages/web/test/conformance` (`conformance.spec.ts`, golden client / hydrate / server traces, 8 pairs of server-reference vs blocks-compiled HTML scenarios, `COVERAGE.md`).
-   - Here, the "blocks" side of each pair is the library route: `solid-blocks` plus `vite-plugin-solid-blocks`, compiled by the published `@solidjs/vite-plugin`. The server-reference side renders with published `@solidjs/web` (SSR, hydratable).
-   - Port it as its own gate step (e.g. `packages/blocks/test/conformance/`, `pkg:blocks:conformance`).
-   - `blocks-context` is moot after D-036 (one way to read a context: `yield* Ctx`). `blocks-effect` must be re-read against D-032 (a view has no body).
-   - The scenarios were written for the `$`-block forms D-013 removed and for tags D-062 replaced with calls. Translate them to call form, and record each scenario whose semantics change as a finding.
-   - Golden traces are D-045's "no golden snapshots of the originals" question in another form. They pin the library's semantics, not Solid's, so they do not contradict D-045. Say so in the decision entry when the port lands.
-2. **Getting-started doc** (`documentation/getting-started.md`): install, the Vite/TS/ESLint setup from `packages/blocks/README.md`, a first component built up rule by rule (setup / view / hole / event / typed failure / declared prop color), and where each refusal is reported (types → dev error → lint). The README's counter example type-checks and lints clean in a twin; reuse it.
-3. **README line (D-002)** is in place in all three package READMEs and the repo README: "this is the strict dialect; the compiler route is the ergonomic one".
+Four commits on `main` after `84521e5`, each gated green. The gate has 34 steps; the baseline was re-recorded in commit 1. Nothing was pushed: the sandbox cannot reach GitHub.
+
+| Commit | What |
+| --- | --- |
+| 1 `test: port the conformance harness (D-039); findings D-069` | `packages/blocks/test/conformance` (its README), gate step `pkg:blocks:conformance`. 12 scenarios, handwritten Solid against the library dialect, on the client, on the server and in hydration. Self-tests plant regressions. The library route's server output is compared with the compiler route's, frozen from the fork. blocks-context dropped (D-036). Findings F1–F7 are in D-069. F7, a false server `READ_IN_VIEW`, is fixed in the runtime. |
+| 2 `test: raise at every host …; D-070` | `test/raise.spec.tsx` (table-driven over 9 hosts, development and production builds) and `test/raise.type-tests.tsx` (`FailsOf` at each position). Findings in D-070. A raising hole's type is fixed (`GeneratorOps`). |
+| 3 `perf: re-run the runtime-cost harness … (D-017)` | `examples/harness/runtime-cost/twins.mjs` measures each twin against its original over the parity script. `measure.mjs`'s workloads are rewritten: they had stopped writing after D-021. §8 has the numbers. |
+| 4 `docs: getting started, refusals …` | `documentation/getting-started.md`, whose program is type-checked, linted and run as `packages/blocks/test/docs/`; `documentation/refusals.md`; README links. The D-002 line was already in all four READMEs. |
+
+### Open for Dev
+
+- **D-069 F6.** The library route and the compiler route number hydration keys differently, so neither can hydrate the other's markup. A future compiler route either adopts Solid's owner numbering or ships its own client.
+- **D-069 F1–F5.** These are declared differences from handwritten Solid: `$effect`'s order, rows rendered once, superseded memo runs closed, events held as a transaction, deeper hydration keys. They are pinned, not judged. Rule on any you want changed.
+- **D-070 F1 / F2.** An `$effect`'s or `$settled`'s raise, and a DOM-dispatched `$event`'s failure, are in no view type, though they fail at run time. D-070 lists the options for each.
+- **Instruction counts.** Valgrind does not run on macOS arm64, so §8's synthetic numbers are wall time. On Linux, `node examples/harness/runtime-cost/measure.mjs --wall` restores the instruction counts.
+- **Conformance coverage.** The fork's `$`-dialect-only scenarios (memo-effect-order, owner-routing, store-paths, …) have no library source yet. Porting them is a candidate for later work (`COVERAGE.md`, "Not ported").

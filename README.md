@@ -39,7 +39,7 @@ node scripts/blocks-gate.mjs --baseline documentation/blocks-gate-baseline.json
 Each commit is gated (D-008). Green means no step that passes in [the baseline](documentation/blocks-gate-baseline.md) fails. The gate's steps:
 
 - `test`, `typecheck` and `lint` for each twin;
-- the three packages' tests;
+- the three packages' tests, and the conformance harness (`pkg:blocks:conformance`, D-039): 12 scenarios in handwritten Solid and in the library dialect, compared trace by trace;
 - the exports-conditions matrix of each package;
 - `prettier` and `oxlint`.
 
@@ -55,6 +55,8 @@ Changesets: `pnpm changeset`. The `.changeset/` entries are the packages' unrele
 
 ## Documentation
 
+- [`documentation/getting-started.md`](documentation/getting-started.md): install, and the strict dialect on one page (setup, view, holes, call form, colors, failures), with a first program built rule by rule.
+- [`documentation/refusals.md`](documentation/refusals.md): what you cannot write in a view, and every refusal code by layer (types, the transform, development errors, lint).
 - [`documentation/blocks-library.md`](documentation/blocks-library.md): the reference. Covers what the library is, every rule and where it is enforced, the runtime cost, the limitations and the twins.
 - [`documentation/DECISIONS.md`](documentation/DECISIONS.md): the decision log (D-001 onwards), with alternatives and reasoning.
 - [`documentation/blocks-gate-baseline.md`](documentation/blocks-gate-baseline.md): what "green" means.

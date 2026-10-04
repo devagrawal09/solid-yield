@@ -25,6 +25,8 @@ export default [
 
 `recommended` turns every rule on as an error, except `prefer-view-wrapper` (a warning). Rule ids are `solid-blocks/<rule>`. Several rules have autofixes, for example tag → call for `no-component-tag`. The twins' shared config is `examples/harness/eslint.config.mjs`.
 
+Every rule is listed with the type, development-error and transform codes for the same mistake in [`documentation/refusals.md`](../../documentation/refusals.md).
+
 The refusal messages the rules share with the JSX transform are checked against [`vite-plugin-solid-blocks`](../vite-plugin-blocks)'s `rule.json`.
 
 The package ships no type declarations: `test/exports-matrix.test.mjs` pins that TypeScript resolves none.

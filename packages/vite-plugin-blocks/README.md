@@ -2,7 +2,7 @@
 
 The JSX transform's one rule for [`solid-blocks`](../blocks) (D-003): inside a JSX expression or attribute value, `yield* e` becomes `perform(e)`, imported from `solid-blocks`. Each read is then its own hole, and the view generator runs once. Nothing else is lowered. Published as `vite-plugin-solid-blocks` (D-011; `@solidjs/vite-plugin-blocks` in the Solid fork).
 
-**This is the strict dialect; the compiler route is the ergonomic one** (D-002): this plugin is the strict dialect's transform, and Solid's `experiment/iterable-signals` branch bakes the model into its compiler and core.
+**This is the strict dialect; the compiler route is the ergonomic one** (D-002): this plugin is the strict dialect's transform, and Solid's `experiment/iterable-signals` branch bakes the model into its compiler and core. Its five refusal codes are listed with the matching lint rule and development errors in [`documentation/refusals.md`](../../documentation/refusals.md).
 
 ## Use
 

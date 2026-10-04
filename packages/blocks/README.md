@@ -27,7 +27,7 @@ export const Counter = $component(function* Counter(props: Props<{ step: number 
 - Failures are typed: `attempt`, `raise`, and `Errored` with `catch`.
 - A prop's pending/failure color is declared: `Props<{ todo: Source<Todo, FetchError, true> }>`.
 
-The full rules, where each is enforced, and what the library cannot do without a compiler are in [`documentation/blocks-library.md`](../../documentation/blocks-library.md).
+Start with [`documentation/getting-started.md`](../../documentation/getting-started.md): install, and the dialect on one page. Every refusal (type message, development error, lint rule, transform code) is in [`documentation/refusals.md`](../../documentation/refusals.md). The full rules, where each is enforced, and what the library cannot do without a compiler are in [`documentation/blocks-library.md`](../../documentation/blocks-library.md).
 
 ## Setup
 

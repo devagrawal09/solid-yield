@@ -20,7 +20,8 @@ const { default: blocksConfig } = await import(
 );
 
 process.chdir(pkg); // the config's projectService reads ./tsconfig.json
-const files = ["test/conformance/scenarios/sources/*.library.tsx"];
+// …and so does the program documentation/getting-started.md builds
+const files = ["test/conformance/scenarios/sources/*.library.tsx", "test/docs/getting-started.tsx"];
 const eslint = new ESLint({
   cwd: pkg,
   overrideConfigFile: true,
@@ -30,7 +31,7 @@ const results = await eslint.lintFiles(files);
 const formatter = await eslint.loadFormatter("stylish");
 const problems = results.reduce((n, r) => n + r.errorCount + r.warningCount, 0);
 if (results.length === 0) {
-  console.error("conformance lint: no library sources found");
+  console.error("conformance lint: no block sources found");
   process.exit(1);
 }
 if (problems) {
@@ -38,5 +39,5 @@ if (problems) {
   process.exit(1);
 }
 console.log(
-  `conformance lint: ${results.length} library sources clean (${results.map(r => relative(pkg, r.filePath).replace(/^.*\//, "")).join(", ")})`
+  `conformance lint: ${results.length} block sources clean (${results.map(r => relative(pkg, r.filePath).replace(/^.*\//, "")).join(", ")})`
 );

@@ -1,70 +1,75 @@
-> **Extracted (Phase 3, D-015).** This repository was created from the Solid fork
-> `devagrawal09/solid`, branch `blocks-lib`, commit **`6978eb83`** ("docs(blocks): HANDOFF.md —
-> Phase 2 complete …"). Git history was not carried; the fork keeps it. The text below is the
-> fork's handoff at that commit, verbatim; paths in it (`documentation/plans/…`,
-> `examples/blocks-harness`, `examples/<original>`) are the fork's. Here they are
-> `documentation/…`, `examples/harness` and `examples/originals/<original>`.
+# HANDOFF — solid-blocks (checkpoint 2026-10-05; Phase 3 "extraction" complete)
 
-# HANDOFF — blocks-lib build-out (checkpoint 2026-10-04, macOS session; Phases 1A, 1B and 2 complete)
-
-Supersedes the container-era handoff. Everything below is pushed to `fork` (git@github.com:devagrawal09/solid.git). Nothing is unpushed.
+This repository was extracted from the Solid fork `devagrawal09/solid`, branch `blocks-lib`, at commit **`6978eb83`** (D-015). Git history was not carried; the fork keeps it. The fork's own handoff at that commit (Phases 1A, 1B and 2, and its environment notes) is `git show 6978eb83:HANDOFF.md` in the fork.
 
 ## Where things are
 
-| Branch | Head | Contents |
-| --- | --- | --- |
-| `blocks-lib` = `fork/blocks-lib` | `7c7f8057` | baseline `dfe692cf` + reconstruction + **Phases 1A, 1B and 2 complete** (40 code commits) + decisions D-001…D-068 |
-| `bl/bootstrap` | = `blocks-lib` | docs-only branch where DECISIONS.md is edited; ff'd into `blocks-lib` per commit |
-| `bl/tighten` | = `blocks-lib` | Phase 1A, done; agent session continuable if a 1A regression appears |
-| `bl/colors` | = `blocks-lib` | Phase 1B, done |
-| `bl/plugin` | = `blocks-lib` | Phase 2, done |
+| Commit | What |
+| --- | --- |
+| 1 `chore: scaffold the monorepo` | pnpm 11 workspace, root tooling, `scripts/blocks-gate.mjs` (the fork's gate minus its compiler steps), `.github/workflows/gate.yml` (CI = the gate), a fresh changesets config. The gate is red here by construction: there is nothing to gate. |
+| 2 `feat: move …` | the 3 packages, the 8 twins, `examples/harness`, the 6 originals under `examples/originals/`, the docs, the 29 changesets. Verbatim apart from the edits the move needs; the commit message lists them. Vendored JSX types. First baseline: **30 / 30** on published rc.13. |
+| 3 `refactor: rename …` | D-011: `solid-blocks`, `vite-plugin-solid-blocks`, `eslint-plugin-solid-blocks`, all in one commit. |
+| 4 `test: exports-conditions matrix …` | `pkg:*:exports` gate steps. CI checks that the build leaves no diff in the vendored types. Baseline re-recorded: **33 / 33**. |
+| 5 `docs: …` | READMEs (repo, `solid-blocks`, `eslint-plugin-solid-blocks`; the plugin's existed), this file, D-011/D-015 marked implemented. |
 
-Key documents, in reading order: `documentation/plans/blocks-library.md` (the reference), `documentation/plans/DECISIONS.md` (D-001…D-057, every decision with alternatives/reasoning; a "Phase 1A findings" section with the agent's verbatim stop-reports; reconstructed after the container loss — provenance note at the top), `documentation/plans/blocks-gate-baseline.md` (reference run **`30 pass / 0 fail / 0 skip`**, 30 steps, 8 twins; `pkg:vite-plugin-blocks:test`/`:typecheck` added, `pkg:babel-plugin:test`/`pkg:compiler:test` dropped — both packages are pristine upstream after D-043; a FAIL on a step absent from the baseline now counts as red — a gate bug fixed in Phase 2).
+**Publishing.** Dev's ruling was a private GitHub repository `devagrawal09/solid-blocks`, created after commit 1 and pushed after every commit. The extraction session could not do this from its sandbox:
 
-## What changed since the container handoff (one screen)
+- `gh` failed TLS verification (`x509: OSStatus -26276`);
+- SSH to github.com failed (broken pipe);
+- the target directory `/Users/devagr/solid-blocks` was not writable, so the repository was built in `/private/tmp/solid-blocks`.
 
-- The lost commits were rebuilt (D-007 note): changeset `blocks-typed-failures-v2.md`, `scripts/blocks-gate.mjs` (55 steps, `TZ=UTC`, real `oxlint`), DECISIONS.md.
-- Design review with Dev produced D-027…D-057. The ones that reshape the library: **D-032** a view has no body (reads only in JSX positions; structure via flow controls), **D-042** all props are reactive and a setup never reads (`$snapshot` → `$untrack` in reactive scopes), **D-023/D-024/D-029/D-040/D-056** declared prop colors as plain object types with `Async<T,E>` opt-in and explicit generics for pass-through, **D-034** error types carry a literal `kind`, **D-035/D-036/D-046/D-047** `start()`, `context()`, the `html` flavor and `adopt()` removed (blocks exports its own colored `lazy`), **D-038/D-050** holes in flow-control props; JSX hole is `yield*` only, **D-043** the fork's compiler goes pristine after Phase 2's plugin passes parity, **D-048** `$event(body, { latest: true })`, **D-052** `createContext(plainDefault)`, **D-054** `view()` typing wrapper, **D-055** rows receive `item: Source<T>`, `index: Source<number>`, **D-057** Phase 2 strictly after 1B, **D-015** extraction to a new monorepo `solid-blocks`.
-- Phase 1A landed: duplicate-runtime guard; rows/holes as bare `function*` (`$`/`$scope` gone); no-body views (`[READ_IN_VIEW]`, lint `no-read-in-view-body`, 0 twin sites); `runAs` host state; `$optimistic` forms (`[OPTIMISTIC_FORM]`); path-proxy traps (`[PATH_OBJECT]`, lint `no-path-object-use`); blocks `lazy`, `adopt` removed; `html` dropped; flow-control holes; `[UNTYPED_THROW]` + `Failure` kind constraint; `[UNYIELDED_WRITE]` + `[SETTER_OUTSIDE_RUN]`; `start()`/`context()` removed. Package tests drive writes through an `$event` (`test/write.ts`).
+From outside the sandbox:
 
-## Decisions taken after the first checkpoint (all recorded; none open)
+```sh
+mv /private/tmp/solid-blocks /Users/devagr/solid-blocks && cd /Users/devagr/solid-blocks
+pnpm install --frozen-lockfile --offline     # refresh node_modules/.bin shims after the move
+gh repo create devagrawal09/solid-blocks --private --source . --remote origin
+# one push per commit, so CI runs on each (commit 1's run is red by construction)
+for c in $(git rev-list --reverse main); do git push origin "$c:refs/heads/main"; done
+```
 
-D-058 no server components (notes/hackernews/chat twins removed, room reduced to its /live page, `$dynamic` removed); D-059/D-063 rows need not be settled (failures and pending propagate to the holding view through call form); D-060 `constant(value)`; D-061 migrating-element twin removed (an element is not a value); **D-062 block components are called, never tagged** — with its three rules D-065 (call-form props are sources/holes/settled values; no inline read in an argument), D-066 (children always a generator; `fallback` too), D-067 (JSX tags are DOM elements and foreign Solid components — 12 foreign tags remain: Router ×2, Reveal ×3, Portal, HydrationScript ×2, four context providers); D-064 `latest` removed. 104 block-component tags migrated to calls; lint rules `no-component-tag`, `no-read-in-prop`, `component-children-generator` in `recommended`; JSX types reject branded block components as tags.
+## Solid under test (D-016)
 
-## Phase 1B result (D-023's own validation)
+`solid-js`, `@solidjs/web` and `@solidjs/h` are declared `^2.0.0-rc.11`, the fork's declaration. On the registry this resolves to **`2.0.0-rc.13`** (`next`), two RCs ahead of the fork's local rc.11. Through `@solidjs/vite-plugin@3.0.0-next.35` (pinned exact, as in the fork) the twins compile with `@solidjs/compiler` / `@solidjs/babel-plugin` rc.13. `@solidjs/router` is `2.0.0-next.29`. There are no workspace links to Solid.
 
-`Props<{…}>` replaces `TypedProps`; colors are `Source<T, E = never, P = false>` (D-068; no `Async`); `TypedProps` keys, `solid-props.gen.d.ts`, `link:check`, `@solidjs/blocks-linker`, `typed-props-key`, `.prettierignore` and Rust `summarizeBlocks` are gone. Per-twin table (props / colored after / generic pass-through props (components) / boundaries added for typing): effect 4/2/0/0 · hackernews-spa 15/0/0/0 · rendering 19/8/2(2)/0 · room 37/11/6(5)/0 · sierpinski 10/2/0/0 · sierpinski-h 10/2/0/0 · todos 4/0/0/0 · todos-h 3/0/0/0 · **all 102 / 25 / 8 (7) / 0**. A quarter of props need a color, nearly all in the two async-data twins; no cast, `any` or boundary for typing: D-023 holds; `Inherit<T>` (D-029) not warranted at 7 generic components. Findings recorded under D-068: the call-site message cannot name the component (TS); the block-component mark sits on the returned view; `h(GenericComp, props)` erases type parameters; `render`/`hydrate` refuse only a pending root (a failure with no `Errored` re-throws, D-033).
+**Canary result: quiet.** All 30 of the fork's gate steps pass on rc.13. All 8 parity tests pass, along with every package test and every twin's typecheck and lint, and the plugin's compiled fixtures, regenerated through rc.13's compiler, are byte-identical. The only visible RC drift is in the vendored JSX types: rc.13 adds an optional `$key?: string | number` attribute to every element.
 
-## Phase 2 result
+## Vendored files to regenerate per Solid RC
 
-`packages/vite-plugin-blocks` (publishes as `vite-plugin-solid-blocks`): `babelPluginBlocks`, `transform()` as text edits (TSX and formatting preserved, exact source maps — a `[UNTYPED_THROW]` in a hole maps to the authored line), Vite plugin `blocks()` with `enforce: "pre"`, the lazy module-URL pass for the library's `lazy` (D-047). Fixture parity with the Rust rule was byte-identical with nothing normalised (rule cases, one file per twin, every JSX file of the 6 twins, dom/ssr/hydratable); after D-043 the `perform` import sits before the module's first statement on that statement's line (no line shift; a line-1 placement made oxc drop a first-line comment). D-043 done: `packages/compiler` and `packages/babel-plugin` are byte-identical to upstream `644eaf3b` — the non-blocks hunks were `rustfmt`-only formatting from the linker commit plus two `pub(crate)` for `blocks_summary.rs`. `packages/blocks`' own tests and the runtime-cost harness compile through `blocks()` (imported by path to avoid a turbo cycle).
+- `packages/blocks/jsx/jsx.d.ts` and `jsx/jsx-properties.d.ts` are built from the installed `@solidjs/web`'s `types/` by `scripts/jsx-from-web.mjs`, then the unchanged `scripts/jsx-web-shared.mjs` (D-067's `TagType`, web's `SerializableAttributeValue`).
+- The build regenerates them (`types:jsx`), and CI fails if a commit's lockfile and those files disagree.
+- When Solid moves: `pnpm update solid-js @solidjs/web @solidjs/h`, then `pnpm build`, then commit `jsx/` with the lockfile and run the gate.
+- If web's generated banner, its `solid-js` `Element` import or its `type Element = … // END - difference …` block changes shape, the script stops with a named error rather than guessing.
+- `packages/vite-plugin-blocks/test/fixtures/compiled/*.out` are the plugin's oracle (D-043). They pass through the published compiler, so a compiler RC that changes its output turns `pkg:vite-plugin-blocks:test` red. Regenerate them only deliberately (`node test/fixtures/generate.mjs`) and review the diff: it is Solid's change, not ours.
 
-## Open rulings for Dev — none at this checkpoint. Historical (resolved by D-058/D-059):
+## Working here
 
-- **F1 — D-042 vs server-component props in event/`ref` positions** (notes `AppView`, chat `Markdown`): hydration claims are keyed on the prop stub's identity; a setup may not read it, the transform refuses `yield*` in event/ref positions, wrapping it in an `$event` breaks the claim. Options: (A) event/ref positions accept a `Source` attached by value; (B) keep `$snapshot` for exactly this; (C) §7 limitation.
-- **F2 — D-044 colored `$dynamic` forces boundaries the originals lack** (chat `Reply` in a row; hackernews `Nav`, notes `NoteList` under the router's children callback). Options: (A) revert D-044; (B) add three `<Errored>`s; (C) types match D-033 — a failing element is accepted at any position and re-throws if uncaught; only pending needs an admitting position. 1B hits the same wall with `Async` props; decide before dispatching 1B.
+```sh
+pnpm install --frozen-lockfile
+pnpm build                       # packages/blocks: dist/ + vendored JSX types
+node scripts/blocks-gate.mjs --baseline documentation/blocks-gate-baseline.json   # ≈30 s; --fast ≈15 s
+```
 
-## Work queue
+- The gate never builds; a stale `dist/` gives spurious reds, so rebuild after pulling.
+- When the step list changes, re-record the baseline in the same commit (`--json documentation/blocks-gate-baseline.json`) and update `blocks-gate-baseline.md`.
+- There is no pre-commit hook. `repo:prettier` in the gate covers formatting; prettier is pinned to the fork's 3.8.1.
+- Patch docs with function-form replacements (`s.replace(a, () => b)`). A string replacement expands `` $` `` and once pasted DECISIONS.md into itself (fork incident).
 
-1. ~~**1A follow-up**~~ Done (D-041, D-042 `$untrack` — needed at 0 twin sites, D-005 candidate — D-048→D-064, D-052→D-060, D-054 `view()` only, D-055, D-058, D-059, D-061, D-062/065–067, D-063). Historical text: D-048 `latest` option; D-052 `createContext` constant default and revert the `undefined`+`$memo` workaround in room/rendering; D-054 `view()` wrapper (no `setup()`), lint `prefer-view-wrapper`; D-055 row-signature type test + in-place item change test; D-041 lint `jsx-only-in-view` + `[JSX_IN_SETUP]` (two twins build `<Router>` JSX in setup — report the sites); 4c per F1 (`$snapshot` → `$untrack`; 33 sites / 16 files surveyed in DECISIONS); 4d remainder per F2. Then full gate, ff, push.
-2. ~~**Phase 1B**~~ Done (five commits `e1aba8f6`…`30090c23`). Historical text: D-056: `TypedProps` removed outright; removal list enumerated: 12 `solid-props.gen.d.ts`, 12 `link:check`, 13 linker dependents, `typed-props-key`; `summarizeBlocks` removal needs `RUSTUP_TOOLCHAIN=stable`). Report Async / generic-pass-through counts per twin (validates D-023/D-029).
-3. ~~**Phase 2**~~ Done (`a6575ff8`, `188a99fb`, `5770f1a5`, `013d20ce`, `7c7f8057`). Historical text: plugin lifted from `packages/babel-plugin/src/shared/blocks-rule.ts`; 5 fixtures / 5 refusal codes as oracle; `enforce: "pre"` so the compiler rule idles (no disable option, D-031 note); then D-043 removal (classify the non-blocks compiler hunks first); also give the library's `lazy` the module-URL pass the published Vite plugin only does for `solid-js`'s `lazy` (D-047 finding).
-4. **Phase 3** extraction per D-015 — brief drafted (notebook `extractBrief2`; depends on PUBLISHED Solid `^2.0.0-rc.11` → registry `rc.13`, D-016's canary; `gh` and SSH are available for creating/pushing the new repo — Dev decides "GitHub + push" vs "local only"); **Phase 4** conformance harness port (D-039), getting-started doc, `README`: "this is the strict dialect; the compiler route is the ergonomic one".
+## Known, recorded, not fixed
 
-## Environment notes (this machine: macOS, /Users/devagr/solid)
-- Main checkout on `blocks-lib`; worktrees under `/Users/devagr/solid-wt/<branch>` (`bl-bootstrap`, `bl-tighten`). Each needs `pnpm install --frozen-lockfile --prefer-offline`, a copy of `packages/compiler/compiler.node` from the main checkout, and `pnpm exec turbo run build --filter=@solidjs/blocks --force` before gating. Disk is not a constraint (83 GB free); Rust/cargo/gcc are installed.
-- Gate: `node scripts/blocks-gate.mjs --baseline documentation/plans/blocks-gate-baseline.json` (≈60-90 s, 55 steps, every step under `TZ=UTC` per D-027); `--fast` ≈16 s while iterating. Reference run is in `blocks-gate-baseline.md`; the two reds (`pkg:blocks-linker:test`, `pkg:compiler:test`) are pre-existing and moot under D-023. `oxlint` is a real step since D-037.
-- The pre-commit hook is a silent no-op here: `scripts/pre-commit.sh` pipes through `rg`, which is not installed, so its file list is empty and prettier never runs from the hook. The gate's `repo:prettier` step covers it; run `pnpm exec prettier --check` by hand before committing non-gated files.
-- Subagents (Claude Code, native harness) run sandboxed: they cannot write the pnpm store (`ERR_PNPM_UNEXPECTED_STORE`), so any `pnpm add`/install is done from the orchestrating session, then the agent continues. Agents may commit when told to; worktree git identity is set to `Claude <noreply@anthropic.com>` with `git config` per worktree.
-- Push target: `fork` (git@github.com:devagrawal09/solid.git) over SSH; `git push fork blocks-lib bl/<topic>` works from the main checkout.
-- D-009 flow in practice: topic worktree → gated commits → `git merge --ff-only bl/<topic>` in the main checkout → push. Keep DECISIONS.md edits on `bl/bootstrap` (docs-only) so topic branches rebase cleanly; a topic branch that appends to DECISIONS.md (e.g. D-032's migration count) rebases onto `blocks-lib` before its ff.
-- **Incident:** three DECISIONS.md commits (`6ee17db2`, `8ba517ba`, `b47fde80`) pasted the file into itself — `String.replace(a, b)` with a string `b` expands `$`` to the text before the match, and the entry text contained a backtick-dollar-backtick. Repaired in `83b514ac` by rebuilding from the last clean revision. Rule: patch docs with function-form replacements (`s.replace(a, () => b)`); the scripts under `/tmp/*.cjs` in this session do.
-- Subagent commits made after a rebase onto a corrupted revision were replayed with `git checkout --ours` on DECISIONS.md and the agent's findings re-appended (`1a53ece8`).
-- `cargo test` on `packages/compiler` builds and passes here with `RUSTUP_TOOLCHAIN=stable` (1.99); the default toolchain (1.88) is below the crate's `rust-version = 1.95` and was left as is.
+- **The plugin's "differential no-op" test skips.** It ran the plugin over Solid's own compiler fixtures, which stayed in Solid (D-043). `pkg:vite-plugin-blocks:test` is otherwise whole: 81 passed, 1 skipped.
+- **Changesets would release `vite-plugin-solid-blocks` as a major.** It peer-depends on `solid-blocks` as `workspace:*`, which publishes as the exact version, so `solid-blocks`' first minor (0.0.0 → 0.1.0) leaves the range. Before the first release, decide the plugin's peer range for `solid-blocks` (e.g. `workspace:^` plus a 1.0, or an explicit range).
+- **`pnpm peers check` reports one unmet peer.** `@solidjs/vite-plugin@3.0.0-next.35` wants `vite ^8 || ^9`; the twins, their originals and the plugin's tests use `vite ^7`, as in the fork.
+- **Not carried.** The fork's `scripts/example-blocks/{browser,bytes}.mjs`, the manual Chromium check and the client-bytes measurement (not gated, D-037). They need Playwright and the originals' production builds. The twins' `tests/browser.steps.mjs` are here; port the runner if the browser check is wanted again.
+- **CI has not run yet** (see Publishing). The CI job was simulated locally from a fresh clone (frozen install → build → `git diff --exit-code` → gate vs baseline: GREEN, 33/33) on macOS arm64. The first real Linux run is the first check of the `linux-x64-gnu` compiler binary and of oxlint on Linux.
 
-- **After fast-forwarding a worktree over code commits, reinstall and rebuild before gating** (`pnpm install --frozen-lockfile --prefer-offline && pnpm exec turbo run build --filter=@solidjs/blocks --force`): a stale `dist/` produced a spurious RED on `bl/bootstrap` at `9b358663` (the same code was green on `bl/tighten`).
-- **Never chain a push after a gate with `;`**: the orchestrator's chain once pushed on a RED fast gate (the commit was docs-only and later verified green, but the chain was wrong). Use `node scripts/blocks-gate.mjs … | tail -1 | grep -q GREEN && git merge --ff-only … && git push …`.
-- **Sandbox limits found in 1B:** `pnpm install` that must change the lockfile stalls and empties `node_modules` inside an agent's sandbox — the orchestrator runs it (`pnpm install --prefer-offline`, not frozen) and resumes the agent; the napi CLI fails with `spawn EPERM` there — agents copy cargo's output by hand, the orchestrator re-runs `pnpm --filter @solidjs/compiler run build` outside the sandbox and copies `compiler.node` to every checkout; cargo's target dir must be under `$TMPDIR`, not `/tmp`.
-- **Upstream Rust lint state (not ours):** on a toolchain with clippy (1.97.1), `cargo clippy -- -D warnings` fails on `src/shared/validate.rs:101` and `src/tsrx/project.rs:168`; rustfmt flags `tests/tsrx_typecheck_projection.rs`. Left alone per D-043.
-- **Server restart (22:xx):** one execution was lost mid-run; nothing committed was lost. Notebook values and agent sessions survived; an interrupted agent is resumed with an instruction to inspect its uncommitted edits first.
-- **Subagent sandbox, explained:** Claude Code 2.1.288's default headless sandbox (nothing in `~/.claude/settings.json` or the OC++ config sets it): writes limited to the worktree and `$TMPDIR`, child spawns limited. Knobs exist (`sandbox.filesystem.allowWrite`, `sandbox.excludedCommands`, `sandbox.enabled`). Proposed per-worktree `.claude/settings.json` (excluded from git) allowing `~/Library/pnpm/store`, `~/.cargo`, `/tmp` and the napi CLI — pending Dev's choice of scope.
+## Next: Phase 4
+
+1. **Conformance harness port (D-039).** The source is on Solid's `experiment/iterable-signals` branch: `packages/web/test/conformance` (`conformance.spec.ts`, golden client / hydrate / server traces, 8 pairs of server-reference vs blocks-compiled HTML scenarios, `COVERAGE.md`).
+   - Here, the "blocks" side of each pair is the library route: `solid-blocks` plus `vite-plugin-solid-blocks`, compiled by the published `@solidjs/vite-plugin`. The server-reference side renders with published `@solidjs/web` (SSR, hydratable).
+   - Port it as its own gate step (e.g. `packages/blocks/test/conformance/`, `pkg:blocks:conformance`).
+   - `blocks-context` is moot after D-036 (one way to read a context: `yield* Ctx`). `blocks-effect` must be re-read against D-032 (a view has no body).
+   - The scenarios were written for the `$`-block forms D-013 removed and for tags D-062 replaced with calls. Translate them to call form, and record each scenario whose semantics change as a finding.
+   - Golden traces are D-045's "no golden snapshots of the originals" question in another form. They pin the library's semantics, not Solid's, so they do not contradict D-045. Say so in the decision entry when the port lands.
+2. **Getting-started doc** (`documentation/getting-started.md`): install, the Vite/TS/ESLint setup from `packages/blocks/README.md`, a first component built up rule by rule (setup / view / hole / event / typed failure / declared prop color), and where each refusal is reported (types → dev error → lint). The README's counter example type-checks and lints clean in a twin; reuse it.
+3. **README line (D-002)** is in place in all three package READMEs and the repo README: "this is the strict dialect; the compiler route is the ergonomic one".

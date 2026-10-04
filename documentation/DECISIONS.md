@@ -22,11 +22,11 @@ Reading order with the rest of the plan: `blocks-library.md` (the reference), th
 | D-008 | decided | Gate per commit |
 | D-009 | decided | Topic branches `bl/<topic>`, conventional commits + changesets, ff into `blocks-lib` |
 | D-010 | decided | Order: tighten → standalone plugin → extract → extend |
-| D-011 | decided | npm names unscoped |
+| D-011 | implemented (Phase 3) | npm names unscoped: `solid-blocks`, `vite-plugin-solid-blocks`, `eslint-plugin-solid-blocks` |
 | D-012 | decided | No-JSX `h`/`html` flavor is first-class |
 | D-013 | decided | Rows and holes are bare `function*`; `$` and `$scope` removed |
 | D-014 | decided | `$optimistic` / `$optimisticStore` mirror `$signal` / `$store` |
-| D-015 | decided | Extraction: new pnpm monorepo `solid-blocks` with twins and vendored originals (Q22 closed) |
+| D-015 | implemented (Phase 3) | Extraction: new pnpm monorepo `solid-blocks` with twins and vendored originals (Q22 closed) |
 | D-016 | decided | Peer range `^2.0.0-rc`; twins' parity tests are the canary |
 | D-017 | decided | Perf not in the gate |
 | D-018 | dissolved | (open components) — dissolved by D-023 |
@@ -144,6 +144,8 @@ Reading order with the rest of the plan: `blocks-library.md` (the reference), th
 *Alternatives:* `@solidjs/*` (implies org ownership we don't have); a personal scope.
 *Reasoning:* D-001; unscoped names don't claim the Solid org's endorsement and need no scope access.
 
+*Implemented (Phase 3, commit 3 of the extraction, "refactor: rename to the unscoped package names").* One commit renamed the three packages, every import and `jsxImportSource`, the lint plugin's namespace (`solid-blocks/<rule>` in every eslint config, rule id and disable comment), the vendored JSX types and their generators, the plugin's default `blocksModule` and its checked-in compiled fixtures (regenerated through the published compiler, byte-identical to the renamed files), the docs and the changesets. The package directories keep their names (`packages/blocks`, `packages/vite-plugin-blocks`, `packages/eslint-plugin-blocks`), and so do the gate's step names. This log keeps the names its entries were written with (see the names note at the top).
+
 ### D-012 — No-JSX flavor is first-class
 **Decided.** The `h`/`html` flavor (`@solidjs/blocks/h`, `/html`) is first-class: same hole forms as JSX, same strictness, its own twins (`*-blocks-h`), and it must be a no-op for the JSX plugin.
 *Alternatives:* JSX only; no-JSX as a best-effort subset.
@@ -161,6 +163,22 @@ Reading order with the rest of the plan: `blocks-library.md` (the reference), th
 
 ### D-015 — Repo layout for extraction
 **Decided (Dev, 2026-10-04; Q22 closed).** Original text was lost; re-decided as the handoff's recommendation: a new pnpm monorepo `solid-blocks` with `packages/{blocks, vite-plugin-blocks, eslint-plugin-blocks}`, `examples/` twins plus vendored originals so the parity tests keep their oracle, the `@solidjs/web` JSX `.d.ts` vendored (today `types:jsx` builds it from `../web`), an exports-conditions matrix test, CI = the gate.
+
+*Implemented (Phase 3, 2026-10-05).* This repository was extracted from the fork's `blocks-lib` at `6978eb83` in five commits. Git history was not carried.
+
+1. Scaffold: a pnpm 11 workspace, the gate without its compiler steps, CI and changesets.
+2. The move, verbatim apart from the edits it needs. The 8 twins keep their names. `examples/blocks-harness` became `examples/harness`. The 6 originals are vendored runnable under `examples/originals/`.
+3. The D-011 rename.
+4. The exports-conditions matrix (gate steps `pkg:*:exports`).
+5. Docs.
+
+- **Solid is the published one.** `solid-js`, `@solidjs/web` and `@solidjs/h` are declared `^2.0.0-rc.11`, which resolves to `2.0.0-rc.13`. There are no workspace links to Solid. The fork's `packages/compiler` and `packages/babel-plugin` were not carried: after D-043 they are upstream's, and the twins compile through the published `@solidjs/vite-plugin@3.0.0-next.35`, which uses compiler rc.13.
+- **D-016's canary at extraction.** The gate is 30 / 30 on rc.13, against the fork's 30 / 30 on its local rc.11. All 8 parity tests pass. No public API the library or the twins use moved across two RCs.
+- **The JSX types are vendored.** `types:jsx` is now `scripts/jsx-from-web.mjs`, then the unchanged `jsx-web-shared.mjs` (D-067's `TagType`). It re-stamps the installed `@solidjs/web`'s `types/jsx.d.ts` for blocks, the same two edits the fork's `jsx-sync --element/--import` made from `jsx-h.d.ts`, which is not published. The outputs are checked in and regenerated on every build. CI fails if the build leaves a diff. From rc.13 the output equals the fork's rc.11 output apart from the banner and rc.13's new `$key` attribute.
+- **Exports matrix.** For each package, every subpath under default, development, browser, node and their combinations resolves to the table's file through esbuild, through Node (`--conditions`), and for types through TypeScript (`customConditions`). The checks run from a consumer's `node_modules`.
+- **CI = the gate.** `.github/workflows/gate.yml` runs on Node 24 / pnpm 11: frozen install, build, the vendored-types check, then the gate against `documentation/blocks-gate-baseline.json` (33 steps, all passing).
+- **Dropped with the compilers.** The plugin test "differential no-op", which ran over Solid's compiler fixtures, now skips.
+- **Not carried.** The fork's manual `scripts/example-blocks/{browser,bytes}.mjs`, the Chromium check and the client-bytes measurement, are not gated (D-037). The twins' `tests/browser.steps.mjs` are carried.
 
 ### D-016 — Peer range and canary
 **Decided.** Peer dependency on Solid is `^2.0.0-rc`; the twins' parity tests are the canary for RC drift — a Solid change that breaks a twin is a finding, not a reason to pin.

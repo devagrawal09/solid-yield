@@ -1,6 +1,6 @@
 # Generator blocks as a library: `solid-blocks`
 
-Status: implemented on `blocks-lib` (cut from `upstream/next` at 644eaf3b). Eight example twins run on it. This document is the reference for what the library is, what it enforces and where, what it costs, and what it cannot do without a blocks compiler.
+Status: implemented. Built on the Solid fork's `blocks-lib` branch (cut from `upstream/next` at 644eaf3b) and extracted to this repository at `6978eb83` (Phase 3, D-015); it runs on published Solid (`^2.0.0-rc.11`, resolving to rc.13). Eight example twins run on it. This document is the reference for what the library is, what it enforces and where, what it costs, and what it cannot do without a blocks compiler.
 
 ## 1. What it is
 
@@ -207,7 +207,7 @@ Only pending needs a position that admits it. A failure may reach a row, a call 
 
 ## 8. Runtime cost: uncompiled blocks vs handwritten Solid on `next`
 
-`examples/blocks-harness/runtime-cost/measure.mjs`: each workload written twice (handwritten Solid; `solid-blocks` run by its interpreter with only the JSX transform's rule), bundled for production with the native compiler, mounted in jsdom, run under Valgrind cachegrind (no cache simulation) with `node --jitless`. Per operation: the instruction count of R operations minus the same process doing none, divided by R. `--wall` adds JIT-enabled wall time (median of five runs of 200 operations).
+`examples/harness/runtime-cost/measure.mjs`: each workload written twice (handwritten Solid; `solid-blocks` run by its interpreter with only the JSX transform's rule), bundled for production with the native compiler, mounted in jsdom, run under Valgrind cachegrind (no cache simulation) with `node --jitless`. Per operation: the instruction count of R operations minus the same process doing none, divided by R. `--wall` adds JIT-enabled wall time (median of five runs of 200 operations).
 
 Measured on this branch (10 operations per count; wall: JIT on, 200 operations, median of 5):
 
@@ -223,7 +223,7 @@ What the numbers include: everything each operation does, jsdom's DOM work inclu
 
 ## 9. The twins
 
-Eight `examples/*-blocks` (JSX) and `*-blocks-h` (no-JSX) apps (chat, hackernews and notes, whose point was server components, were removed with D-058; migrating-element, whose point is an element held as a value, with D-061), each against its original: same markup, same behavior, the wire (server functions, frames, data layers) verbatim. Per twin: jsdom behavior tests; a differential parity test (one script against both apps, DOM compared after every step, only hydration markers normalized, plus app-specific clock / random normalization where stated); `typecheck`, lint with no `any`; `vite build` for every variant; for SSR apps a Chromium check against the original's production build (no console errors, no page errors, no hydration warnings, the same DOM after load and after every step; `scripts/example-blocks/browser.mjs`); client bytes (`scripts/example-blocks/bytes.mjs`).
+Eight `examples/*-blocks` (JSX) and `*-blocks-h` (no-JSX) apps (chat, hackernews and notes, whose point was server components, were removed with D-058; migrating-element, whose point is an element held as a value, with D-061), each against its original: same markup, same behavior, the wire (server functions, frames, data layers) verbatim. Per twin: jsdom behavior tests; a differential parity test (one script against both apps, DOM compared after every step, only hydration markers normalized, plus app-specific clock / random normalization where stated); `typecheck`, lint with no `any`; `vite build` for every variant; for SSR apps a Chromium check against the original's production build (no console errors, no page errors, no hydration warnings, the same DOM after load and after every step; `scripts/example-blocks/browser.mjs`); client bytes (`scripts/example-blocks/bytes.mjs`). Both scripts are manual, not gated (D-037), and stayed in the Solid fork at extraction; the twins' `tests/browser.steps.mjs` came along. The originals are vendored under `examples/originals/`.
 
 Tests are behavior + parity (steps). Browser: Chromium steps against the original's production build (all pass; re-run after the last runtime change). Bytes: client JS, minified / gzip -9, original → twin, measured after Phase 1B (`f00b389a`).
 

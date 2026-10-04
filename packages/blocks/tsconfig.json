@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "emitDeclarationOnly": false,
+    "declaration": false,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "preserve",
+    "jsxImportSource": "@solidjs/blocks",
+    "types": ["vitest/globals"],
+    "paths": {
+      "@solidjs/blocks": ["./src/index.ts"],
+      "@solidjs/blocks/h": ["./src/h.ts"],
+      "@solidjs/blocks/jsx-runtime": ["./jsx/jsx-runtime.d.ts"]
+    }
+  },
+  "include": ["./src", "./test"]
+}

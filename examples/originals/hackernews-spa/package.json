@@ -1,0 +1,24 @@
+{
+  "name": "hackernews-spa-example",
+  "description": "The SSR-SPA comparison baseline for the hackernews server-components example: the SAME app — same routes, same components, same data — but server functions return JSON and client components render everything, with the standard hydration data blob",
+  "version": "0.0.0",
+  "private": true,
+  "author": "Ryan Carniato",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "start": "node server.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@solidjs/router": "2.0.0-next.29",
+    "@solidjs/web": "^2.0.0-rc.11",
+    "solid-js": "^2.0.0-rc.11"
+  },
+  "devDependencies": {
+    "@solidjs/vite-plugin": "3.0.0-next.35",
+    "vite": "^8.0.0"
+  }
+}

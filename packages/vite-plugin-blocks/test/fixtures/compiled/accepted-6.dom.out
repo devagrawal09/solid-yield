@@ -1,0 +1,9 @@
+import { template as _$template } from "@solidjs/web";
+import { insert as _$insert } from "@solidjs/web";
+var _tmpl$ = /* @__PURE__ */ _$template(`<p>`);
+function* v() {
+	const x = yield* a;
+	var _el$ = _tmpl$();
+	_$insert(_el$, x);
+	return _el$;
+}

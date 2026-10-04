@@ -1,0 +1,62 @@
+{
+  "$comment": "The JSX transform's block rule. Generated once by generate.mjs from the fork's Rust compiler (packages/compiler/src/blocks_rule.rs and tests/blocks-rule-fixtures.json, both removed by D-043): `refusals` is exactly the list of codes the rule refuses, `refused[].error` the compiler's message, compiled/accepted-<n>.<mode>.out its output for accepted[n]. The plugin and the ESLint rule `@solidjs/blocks/yield-in-jsx-hole` are tested against this file.",
+  "version": 1,
+  "refusals": [
+    "BLOCKS_YIELD_IN_EVENT",
+    "BLOCKS_YIELD_IN_REF",
+    "BLOCKS_YIELD_IN_SPREAD",
+    "BLOCKS_YIELD_IN_SPREAD_CHILD",
+    "BLOCKS_PLAIN_YIELD_IN_JSX"
+  ],
+  "refused": [
+    {
+      "code": "BLOCKS_YIELD_IN_EVENT",
+      "source": "function* v() { return <b onClick={yield* h} />; }",
+      "error": "[BLOCKS_YIELD_IN_EVENT] a `yield*` in an event handler prop would read once, at render: read inside the `$event` instead (1:36)"
+    },
+    {
+      "code": "BLOCKS_YIELD_IN_EVENT",
+      "source": "function* v() { return <b on:click={yield* h} />; }",
+      "error": "[BLOCKS_YIELD_IN_EVENT] a `yield*` in an event handler prop would read once, at render: read inside the `$event` instead (1:37)"
+    },
+    {
+      "code": "BLOCKS_YIELD_IN_EVENT",
+      "source": "function* v() { return <Comp onSelect={yield* h} />; }",
+      "error": "[BLOCKS_YIELD_IN_EVENT] a `yield*` in an event handler prop would read once, at render: read inside the `$event` instead (1:40)"
+    },
+    {
+      "code": "BLOCKS_YIELD_IN_REF",
+      "source": "function* v() { return <b ref={yield* r} />; }",
+      "error": "[BLOCKS_YIELD_IN_REF] a `yield*` in a `ref` has no hole to read in: a ref is set once (1:32)"
+    },
+    {
+      "code": "BLOCKS_YIELD_IN_SPREAD",
+      "source": "function* v() { return <b {...(yield* p)} />; }",
+      "error": "[BLOCKS_YIELD_IN_SPREAD] a `yield*` in a spread cannot become a hole: spread an object of values, or pass each prop (1:32)"
+    },
+    {
+      "code": "BLOCKS_YIELD_IN_SPREAD",
+      "source": "function* v() { return <Comp {...(yield* p)} />; }",
+      "error": "[BLOCKS_YIELD_IN_SPREAD] a `yield*` in a spread cannot become a hole: spread an object of values, or pass each prop (1:35)"
+    },
+    {
+      "code": "BLOCKS_YIELD_IN_SPREAD_CHILD",
+      "source": "function* v() { return <b>{...(yield* p)}</b>; }",
+      "error": "[BLOCKS_YIELD_IN_SPREAD_CHILD] a `yield*` in a spread child cannot become a hole (1:32)"
+    },
+    {
+      "code": "BLOCKS_PLAIN_YIELD_IN_JSX",
+      "source": "function* v() { return <b>{yield x}</b>; }",
+      "error": "[BLOCKS_PLAIN_YIELD_IN_JSX] a plain `yield` inside JSX is not a read: use `yield*` (1:28)"
+    }
+  ],
+  "accepted": [
+    "function* v() { return <p class={{ big: (yield* n) > 3 }}>Hello {(yield* user).name}</p>; }",
+    "function* v() { return <Comp a={yield* n} b={x} />; }",
+    "function* v() { return <Show when={yield* open}><i>{yield* n}</i></Show>; }",
+    "function* v() { return <p title={String(yield* t)} data-x={yield* $(function* () { return 1; })} />; }",
+    "function* v() { return <b onClick={h}>{cond ? <i>{yield* a}</i> : <s>{yield* b}</s>}</b>; }",
+    "function* v() { return <For each={yield* xs}>{function* (x) { const s = yield* $signal(1); return function* () { return <i>{yield* s}</i>; }; }}</For>; }",
+    "function* v() { const x = yield* a; return <p>{x}</p>; }"
+  ]
+}

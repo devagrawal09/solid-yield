@@ -1,0 +1,90 @@
+{
+  "name": "@solidjs/blocks",
+  "description": "Generator blocks for Solid as a library: strict, typed generator syntax and a runtime interpreter on Solid's public API (no blocks compiler).",
+  "version": "0.0.0",
+  "author": "Ryan Carniato",
+  "license": "MIT",
+  "homepage": "https://solidjs.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/solidjs/solid.git",
+    "directory": "packages/blocks"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/server.js",
+  "module": "./dist/server.js",
+  "types": "./dist/types/index.d.ts",
+  "files": [
+    "dist",
+    "jsx",
+    "package.json"
+  ],
+  "exports": {
+    ".": {
+      "worker": {
+        "types": "./dist/types/index.d.ts",
+        "development": "./dist/server.dev.js",
+        "default": "./dist/server.js"
+      },
+      "browser": {
+        "types": "./dist/types/index.d.ts",
+        "development": "./dist/blocks.dev.js",
+        "default": "./dist/blocks.js"
+      },
+      "deno": {
+        "types": "./dist/types/index.d.ts",
+        "development": "./dist/server.dev.js",
+        "default": "./dist/server.js"
+      },
+      "node": {
+        "types": "./dist/types/index.d.ts",
+        "development": "./dist/server.dev.js",
+        "default": "./dist/server.js"
+      },
+      "types": "./dist/types/index.d.ts",
+      "development": "./dist/blocks.dev.js",
+      "default": "./dist/blocks.js"
+    },
+    "./h": {
+      "types": "./dist/types/h.d.ts",
+      "development": "./dist/h.dev.js",
+      "default": "./dist/h.js"
+    },
+    "./jsx-runtime": {
+      "types": "./jsx/jsx-runtime.d.ts",
+      "default": "./dist/jsx-runtime.js"
+    },
+    "./jsx-dev-runtime": {
+      "types": "./jsx/jsx-runtime.d.ts",
+      "default": "./dist/jsx-runtime.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "npm-run-all -nl build:clean build:js types",
+    "build:clean": "rimraf dist/",
+    "build:js": "node scripts/build.mjs",
+    "types": "npm-run-all -nl types:jsx types:src",
+    "types:src": "tsc -p tsconfig.build.json",
+    "types:jsx": "node scripts/jsx-from-web.mjs && node scripts/jsx-web-shared.mjs",
+    "test": "vitest run --maxWorkers=2 && vitest run --maxWorkers=2 --config vite.config.prod.mjs && vitest run --maxWorkers=2 --config vite.config.server.mjs && pnpm run test-types",
+    "test-types": "tsc -p tsconfig.json"
+  },
+  "peerDependencies": {
+    "@solidjs/web": "^2.0.0-rc.11",
+    "solid-js": "^2.0.0-rc.11"
+  },
+  "peerDependenciesMeta": {
+    "@solidjs/h": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@solidjs/h": "^2.0.0-rc.11",
+    "@solidjs/vite-plugin": "3.0.0-next.35",
+    "@solidjs/web": "^2.0.0-rc.11",
+    "csstype": "^3.1.0",
+    "solid-js": "^2.0.0-rc.11"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "name": "rendering-example",
+  "description": "Example of the different Solid render modes (string SSR, streaming SSR, client-only)",
+  "version": "0.0.0",
+  "private": true,
+  "author": "Ryan Carniato",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "string:dev": "node string/server.js",
+    "string:build": "vite build --config string/vite.config.mjs --outDir dist/client && vite build --config string/vite.config.mjs --ssr entry-server.tsx --outDir dist/server",
+    "string:start": "NODE_ENV=production node string/server.js",
+    "stream:dev": "node stream/server.js",
+    "stream:build": "vite build --config stream/vite.config.mjs --outDir dist/client && vite build --config stream/vite.config.mjs --ssr entry-server.tsx --outDir dist/server",
+    "stream:start": "NODE_ENV=production node stream/server.js",
+    "csr:dev": "vite --config csr/vite.config.mjs",
+    "csr:build": "vite build --config csr/vite.config.mjs",
+    "csr:start": "vite preview --config csr/vite.config.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "clean": "rimraf */dist/"
+  },
+  "devDependencies": {
+    "@solidjs/vite-plugin": "3.0.0-next.35",
+    "@solidjs/web": "^2.0.0-rc.11",
+    "@types/node": "^25.6.0",
+    "rimraf": "^3.0.2",
+    "solid-js": "^2.0.0-rc.11",
+    "typescript": "^6.0.2",
+    "vite": "^7.0.0"
+  }
+}

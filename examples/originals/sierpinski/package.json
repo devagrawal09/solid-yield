@@ -1,0 +1,23 @@
+{
+  "name": "sierpinski-example",
+  "description": "Sierpinski triangle stress test (CSR) — used to investigate transition/hover regressions",
+  "version": "0.0.0",
+  "private": true,
+  "author": "Ryan Carniato",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "start": "vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@solidjs/vite-plugin": "3.0.0-next.35",
+    "@solidjs/web": "^2.0.0-rc.11",
+    "@types/node": "^25.6.0",
+    "solid-js": "^2.0.0-rc.11",
+    "typescript": "^6.0.2",
+    "vite": "^7.0.0"
+  }
+}

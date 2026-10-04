@@ -1,0 +1,23 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "lib": ["ESNext", "DOM"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "preserve",
+    "jsxImportSource": "@solidjs/web",
+    "esModuleInterop": true,
+    "types": ["node", "vite/client"]
+  },
+  "include": [
+    "shared/src/**/*",
+    "stream/**/*.ts",
+    "stream/**/*.tsx",
+    "string/**/*.ts",
+    "string/**/*.tsx",
+    "csr/**/*.ts",
+    "csr/**/*.tsx",
+    "types.d.ts"
+  ]
+}

@@ -1,0 +1,20 @@
+import { template as _$template } from "@solidjs/web";
+import { insert as _$insert } from "@solidjs/web";
+import { createComponent as _$createComponent } from "@solidjs/web";
+import { Show as _$Show } from "@solidjs/web";
+var _tmpl$ = /* @__PURE__ */ _$template(`<i>`);
+import { perform as _$perform } from "@solidjs/blocks";
+function* v() {
+	return _$createComponent(_$Show, {
+		get when() {
+			return _$perform(open);
+		},
+		get children() {
+			var _el$ = _tmpl$();
+			_$insert(_el$, () => {
+				return _$perform(n);
+			});
+			return _el$;
+		}
+	});
+}

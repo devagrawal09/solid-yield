@@ -1,0 +1,153 @@
+body {
+  background-color: #eee;
+}
+#app {
+  border-radius: 3px;
+  border: 1px solid #e5e5e5;
+  margin: 15px;
+  background-color: white;
+}
+.tab {
+  width: 100%;
+  padding: 25px;
+  font-family: sans-serif;
+  color: #444;
+}
+.tab.pending {
+  transition: opacity 0.2s;
+  transition-delay: 0.1s;
+  transition-timing-function: ease-in;
+  opacity: 0.6;
+}
+ul.inline {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 0;
+  -webkit-margin-before: 0;
+  -webkit-margin-after: 0;
+  -webkit-margin-start: 0px;
+  -webkit-margin-end: 0px;
+  -webkit-padding-start: 0px;
+}
+ul.inline li {
+  display: inline-block;
+  margin-left: 0;
+  border-bottom: 2px solid #eee;
+  transition: all 0.5s;
+  font-family: sans-serif;
+  font-weight: 300;
+  cursor: pointer;
+  color: #aaa;
+}
+ul.inline li.selected {
+  border-bottom: 2px solid #337ab7;
+  color: #444;
+}
+ul.inline a {
+  display: block;
+  padding: 10px;
+}
+a.link {
+  text-decoration: none;
+  color: black;
+}
+.loader {
+  color: #aaa;
+  font-size: 16px;
+  font-weight: 600;
+}
+.reveal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.reveal-card {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 1rem;
+  transition: opacity 0.3s ease;
+}
+.reveal-card strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #337ab7;
+}
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1000;
+}
+.modal-card {
+  width: min(420px, calc(100vw - 2rem));
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #d0d7de;
+  background: white;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.25);
+  color: #444;
+  font-family: sans-serif;
+}
+.modal-card h2 {
+  margin-top: 0;
+  color: #337ab7;
+}
+.feed {
+  transition: opacity 0.2s ease-in;
+  transition-delay: 0.1s;
+}
+.feed.pending {
+  opacity: 0.6;
+}
+.feed-card {
+  max-width: 420px;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+}
+.feed-card h2 {
+  margin-top: 0;
+  color: #337ab7;
+}
+/* Dummy data renders through the real template — the only loading cues are
+   dimmed text and the inline dot, both driven by the data's own
+   `provisional` flag. */
+.feed-card ul {
+  padding-left: 1.25rem;
+  min-width: 240px;
+}
+.feed-card li {
+  margin: 8px 0;
+}
+.feed-card.provisional h2,
+.feed-card.provisional li {
+  color: #99a1a9;
+}
+.feed-card .loading-dot {
+  display: none;
+}
+.feed-card.provisional .loading-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-left: 8px;
+  border-radius: 50%;
+  background: #337ab7;
+  vertical-align: middle;
+  animation: loading-dot-pulse 1s ease-in-out infinite;
+}
+@keyframes loading-dot-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}

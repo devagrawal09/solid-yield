@@ -1,0 +1,16 @@
+var _d$ = {
+	get() {
+		return _$perform(n);
+	},
+	enumerable: true,
+	configurable: true
+};
+function _P$(_p) {
+	Object.defineProperty(this, "a", _d$);
+	this.b = _p;
+}
+_P$.prototype = Object.prototype;
+import { perform as _$perform } from "@solidjs/blocks";
+function* v() {
+	return Comp(new _P$(x));
+}

@@ -1,0 +1,375 @@
+import { template as _$template } from "@solidjs/web";
+import { insert as _$insert } from "@solidjs/web";
+import { memo as _$memo } from "@solidjs/web";
+import { className as _$className } from "@solidjs/web";
+import { effect as _$effect } from "@solidjs/web";
+import { setAttribute as _$setAttribute } from "@solidjs/web";
+import { addEvent as _$addEvent } from "@solidjs/web";
+import { delegateEvents as _$delegateEvents } from "@solidjs/web";
+var _tmpl$ = /* @__PURE__ */ _$template(`<p class=empty>No orders yet.`);
+var _tmpl$2 = /* @__PURE__ */ _$template(`<ul class=orders>`);
+var _tmpl$3 = /* @__PURE__ */ _$template(`<li><span class=pkg-name></span><span class=pkg-desc> line<!> · placed <!></span><span class=cart-price>$`);
+var _tmpl$4 = /* @__PURE__ */ _$template(`<section class=panel><header><h2>Checkout saga</h2><p>Three Effect steps inside one Solid action transaction. Cancel mid-charge (it takes ~2.6s) or toggle the decline: the fiber is interrupted, compensations run server-side, and the optimistic UI reverts — automatically on both sides.</p></header><div class=cart><div class="cart-row total"><span class=cart-name>Total</span><span class=cart-price>$</span></div></div><div class=checkout-controls><label class=decline-toggle><input type=checkbox>Simulate card decline (typed <code>CardDeclinedError</code>)</label></div><ol class=steps></ol><h3>Your orders</h3><!>`);
+var _tmpl$5 = /* @__PURE__ */ _$template(`<div class=cart-row><span class=cart-name></span><span class=qty><button>−</button><button>+</button></span><span class=cart-price>$`);
+var _tmpl$6 = /* @__PURE__ */ _$template(`<button class=primary>Place order — $`);
+var _tmpl$7 = /* @__PURE__ */ _$template(`<button class=danger>Cancel checkout`);
+var _tmpl$8 = /* @__PURE__ */ _$template(`<li>`);
+var _tmpl$9 = /* @__PURE__ */ _$template(`<p>`);
+var _tmpl$10 = /* @__PURE__ */ _$template(`<p class=error>Could not load orders: `);
+var _tmpl$11 = /* @__PURE__ */ _$template(`<p class=loading>Loading orders…`);
+// Action path: a cancellable checkout saga — examples/effect's checkout with
+// @solidjs/blocks.
+//
+// `placeOrder` is unchanged: a Solid action whose steps are Effect programs
+// (its `yield*` delegates Effects to the saga driver; it is not a block).
+// The optimistic phase and the optimistic orders store are Solid primitives
+// created in the setup and read through `read` / `paths`; the cart, the
+// notice and the decline toggle are block state.
+import { perform as _$perform } from "@solidjs/blocks";
+import { $component, $event, $memo, $signal, $store, $optimistic, $optimisticStore, attempt, For, Errored, Loading, readStore, refresh, Show, type Source, type Props, view } from "@solidjs/blocks";
+import { CardDeclinedError, chargeCard, createOrder, fetchOrders, refundCharge, releaseReservation, reserveInventory, type CartItem, type Charge, type Order, type Reservation } from "./api";
+import { ActionInterruptedError, effectAction } from "./solid-effect";
+type Phase = "idle" | "reserving" | "charging" | "finalizing";
+interface Notice {
+	kind: "success" | "error" | "info";
+	text: string;
+}
+const STEPS: {
+	phase: Phase;
+	label: string;
+}[] = [
+	{
+		phase: "reserving",
+		label: "Reserve inventory"
+	},
+	{
+		phase: "charging",
+		label: "Charge card"
+	},
+	{
+		phase: "finalizing",
+		label: "Create order"
+	}
+];
+const INITIAL_CART: CartItem[] = [
+	{
+		id: "sku_signal",
+		name: "Signal (fine-grained)",
+		price: 19.99,
+		quantity: 1
+	},
+	{
+		id: "sku_fiber",
+		name: "Fiber (interruptible)",
+		price: 24.5,
+		quantity: 2
+	},
+	{
+		id: "sku_boundary",
+		name: "Boundary (loading)",
+		price: 9.75,
+		quantity: 1
+	}
+];
+/**
+* The orders list. In the original it sits inside the checkout's
+* `<Loading>`; a view that reads a pending source is pending itself, so the
+* list is its own component and the boundary receives it.
+*/
+const Orders = $component(function* Orders(props: Props<{
+	orders: Source<Order[], OrdersError, true>;
+}>) {
+	return view(function* () {
+		return _$memo(() => {
+			return _$perform(Show({
+				when: function* () {
+					return (yield* props.orders.length) > 0;
+				},
+				fallback: _tmpl$(),
+				children: function* () {
+					var _el$2 = _tmpl$2();
+					_$insert(_el$2, () => {
+						return _$perform(For({
+							each: props.orders,
+							children: function* (order) {
+								return view(function* () {
+									var _el$3 = _tmpl$3();
+									var _el$4 = _el$3.firstChild;
+									var _el$5 = _el$4.nextSibling;
+									var _el$6 = _el$5.firstChild;
+									var _el$7 = _el$6.nextSibling;
+									var _el$8 = _el$7.nextSibling;
+									var _el$9 = _el$8.nextSibling;
+									var _el$10 = _el$5.nextSibling;
+									var _el$11 = _el$10.firstChild;
+									_$insert(_el$4, () => {
+										return _$perform(order.id);
+									});
+									_$insert(_el$5, () => {
+										return _$perform(order.items.length);
+									}, _el$6);
+									_$insert(_el$5, () => {
+										return _$perform(order.items.length) === 1 ? "" : "s";
+									}, _el$7);
+									_$insert(_el$5, () => {
+										return _$perform(order.placedAt);
+									}, _el$9);
+									_$insert(_el$10, () => {
+										return _$perform(order.total).toFixed(2);
+									}, null);
+									return _el$3;
+								});
+							}
+						}));
+					});
+					return _el$2;
+				}
+			}));
+		});
+	});
+});
+/** Fetching the orders failed: the color of the orders list's failure. */
+export class OrdersError extends Error {
+	readonly kind = "orders" as const;
+	constructor(cause: unknown) {
+		super(cause instanceof Error ? cause.message : String(cause));
+	}
+}
+export const Checkout = $component(function* Checkout() {
+	const [cart, setCart] = yield* $store<CartItem[]>(INITIAL_CART.map((i) => ({ ...i })));
+	// The optimistic orders store fetches asynchronously: pending until the
+	// first fetch lands, and failing as an OrdersError.
+	const [orders] = yield* $optimisticStore(function* () {
+		return yield* attempt(() => fetchOrders(), (cause) => new OrdersError(cause));
+	}, [] as Order[]);
+	// Transition-scoped: writes inside the action revert automatically when it
+	// settles — success, failure, or cancellation.
+	const [phase, setPhase] = yield* $optimistic<Phase>("idle");
+	// Plain signal: survives the optimistic revert, carries the outcome.
+	const [notice, setNotice] = yield* $signal<Notice | null>(null);
+	const [declineCard, setDeclineCard] = yield* $signal(false);
+	const total = yield* $memo(function* () {
+		return yield* readStore(cart, (c) => c.reduce((sum, item) => sum + item.price * item.quantity, 0));
+	});
+	const placeOrder = effectAction(function* (items: CartItem[], decline: boolean) {
+		let reservation: Reservation | undefined;
+		let charge: Charge | undefined;
+		yield* setNotice(null);
+		try {
+			yield* setPhase("reserving");
+			reservation = yield* reserveInventory(items);
+			yield* setPhase("charging");
+			charge = yield* chargeCard(items.reduce((sum, item) => sum + item.price * item.quantity, 0), decline);
+			yield* setPhase("finalizing");
+			const order = yield* createOrder(items, reservation, charge);
+			yield* setNotice({
+				kind: "success",
+				text: `Order ${order.id} confirmed — $${order.total.toFixed(2)}`
+			});
+			yield* refresh(orders);
+			return order;
+		} catch (e) {
+			// Saga compensation, in reverse order of what committed. Mid-step
+			// cleanup (voiding a half-done authorization) already ran via the
+			// interrupted step's own finalizers.
+			if (charge) yield* refundCharge(charge);
+			if (reservation) yield* releaseReservation(reservation);
+			if (e instanceof CardDeclinedError) {
+				yield* setNotice({
+					kind: "error",
+					text: `Card declined for $${e.amount.toFixed(2)} — refunds/releases applied, cart untouched`
+				});
+			} else if (e instanceof ActionInterruptedError) {
+				yield* setNotice({
+					kind: "info",
+					text: "Checkout cancelled — compensations ran, cart untouched"
+				});
+			}
+			throw e;
+		}
+	});
+	const inFlight = yield* $memo(function* () {
+		return (yield* phase) !== "idle";
+	});
+	const place = $event(function* () {
+		const items = yield* readStore(cart, (c) => c.map((item) => ({ ...item })));
+		try {
+			yield* placeOrder(items, yield* declineCard);
+		} catch {}
+	});
+	const cancel = $event(function* () {
+		placeOrder.interrupt();
+	});
+	const toggleDecline = $event(function* (e: InputEvent & {
+		currentTarget: HTMLInputElement;
+	}) {
+		yield* setDeclineCard(e.currentTarget.checked);
+	});
+	return view(function* () {
+		var _el$12 = _tmpl$4();
+		var _el$13 = _el$12.firstChild;
+		var _el$14 = _el$13.nextSibling;
+		var _el$15 = _el$14.firstChild;
+		var _el$16 = _el$15.firstChild;
+		var _el$17 = _el$16.nextSibling;
+		var _el$18 = _el$17.firstChild;
+		var _el$19 = _el$14.nextSibling;
+		var _el$20 = _el$19.firstChild;
+		var _el$21 = _el$20.firstChild;
+		var _el$22 = _el$19.nextSibling;
+		var _el$23 = _el$22.nextSibling;
+		var _el$24 = _el$23.nextSibling;
+		_$insert(_el$14, () => {
+			return _$perform(For({
+				each: cart,
+				children: function* (item, i) {
+					const decrement = $event(function* () {
+						const index = yield* i;
+						yield* setCart((c) => {
+							c[index].quantity--;
+						});
+					});
+					const increment = $event(function* () {
+						const index = yield* i;
+						yield* setCart((c) => {
+							c[index].quantity++;
+						});
+					});
+					return view(function* () {
+						var _el$25 = _tmpl$5();
+						var _el$26 = _el$25.firstChild;
+						var _el$27 = _el$26.nextSibling;
+						var _el$28 = _el$27.firstChild;
+						var _el$29 = _el$28.nextSibling;
+						var _el$30 = _el$27.nextSibling;
+						var _el$31 = _el$30.firstChild;
+						_$insert(_el$26, () => {
+							return _$perform(item.name);
+						});
+						_$addEvent(_el$28, "click", decrement, true);
+						_$insert(_el$27, () => {
+							return _$perform(item.quantity);
+						}, _el$29);
+						_$addEvent(_el$29, "click", increment, true);
+						_$insert(_el$30, () => {
+							return (_$perform(item.price) * _$perform(item.quantity)).toFixed(2);
+						}, null);
+						_$effect(() => {
+							return {
+								e: _$perform(inFlight) || _$perform(item.quantity) <= 1,
+								t: _$perform(inFlight)
+							};
+						}, ({ e, t }, _p$) => {
+							e !== _p$?.e && _$setAttribute(_el$28, "disabled", e);
+							t !== _p$?.t && _$setAttribute(_el$29, "disabled", t);
+						});
+						return _el$25;
+					});
+				}
+			}));
+		}, _el$15);
+		_$insert(_el$17, () => {
+			return _$perform(total).toFixed(2);
+		}, null);
+		_$addEvent(_el$21, "input", toggleDecline, true);
+		_$insert(_el$19, () => {
+			return _$perform(Show({
+				when: inFlight,
+				fallback: function* () {
+					var _el$32 = _tmpl$6();
+					var _el$33 = _el$32.firstChild;
+					_$addEvent(_el$32, "click", place, true);
+					_$insert(_el$32, () => {
+						return _$perform(total).toFixed(2);
+					}, null);
+					return _el$32;
+				},
+				children: function* () {
+					var _el$34 = _tmpl$7();
+					_$addEvent(_el$34, "click", cancel, true);
+					return _el$34;
+				}
+			}));
+		}, null);
+		_$insert(_el$22, () => {
+			return _$perform(For({
+				each: STEPS,
+				children: function* (step) {
+					const state = yield* $memo(function* () {
+						const order: Phase[] = [
+							"reserving",
+							"charging",
+							"finalizing"
+						];
+						const current = order.indexOf(yield* phase);
+						const target = order.indexOf(yield* step.phase);
+						if (current === -1) return "";
+						return target < current ? "done" : target === current ? "active" : "";
+					});
+					return view(function* () {
+						var _el$35 = _tmpl$8();
+						_$insert(_el$35, () => {
+							return _$perform(step.label);
+						});
+						_$effect(() => {
+							return {
+								e: !!(_$perform(state) === "done"),
+								t: !!(_$perform(state) === "active")
+							};
+						}, ({ e, t }, _p$) => {
+							e !== _p$?.e && _el$35.classList.toggle("done", e);
+							t !== _p$?.t && _el$35.classList.toggle("active", t);
+						});
+						return _el$35;
+					});
+				}
+			}));
+		});
+		_$insert(_el$12, () => {
+			return _$perform(Show({
+				when: notice,
+				children: function* (n) {
+					return view(function* () {
+						var _el$36 = _tmpl$9();
+						_$insert(_el$36, () => {
+							return _$perform(n.text);
+						});
+						_$effect(() => `notice ${_$perform(n.kind)}`, (_v$, _$p) => {
+							_$className(_el$36, _v$, _$p);
+						});
+						return _el$36;
+					});
+				}
+			}));
+		}, _el$23);
+		_$insert(_el$12, () => {
+			return _$perform(Errored({
+				fallback: (err) => (() => {
+					var _el$37 = _tmpl$10();
+					var _el$38 = _el$37.firstChild;
+					_$insert(_el$37, () => {
+						return err().message;
+					}, null);
+					return _el$37;
+				})(),
+				children: function* () {
+					return _$memo(() => {
+						return _$perform(Loading({
+							fallback: _tmpl$11(),
+							children: function* () {
+								return _$memo(() => {
+									return _$perform(Orders({ orders }));
+								});
+							}
+						}));
+					});
+				}
+			}));
+		}, _el$24);
+		_$effect(() => _$perform(declineCard), (_v$) => {
+			_el$21.checked = _v$;
+		});
+		return _el$12;
+	});
+});
+_$delegateEvents(["input", "click"]);

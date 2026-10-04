@@ -1,0 +1,34 @@
+{
+  "name": "hackernews-spa-blocks-example",
+  "description": "examples/hackernews-spa (the SSR-SPA baseline: JSON server functions, client-rendered templates) with @solidjs/blocks (JSX flavor): same routes, markup and data",
+  "version": "0.0.0",
+  "private": true,
+  "author": "Ryan Carniato",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "start": "node server.js",
+    "test": "vitest run --config vitest.config.ts --maxWorkers=2",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "@solidjs/blocks": "workspace:*",
+    "@solidjs/router": "2.0.0-next.29",
+    "@solidjs/web": "^2.0.0-rc.11",
+    "solid-js": "^2.0.0-rc.11"
+  },
+  "devDependencies": {
+    "@solidjs/vite-plugin": "3.0.0-next.35",
+    "@solidjs/vite-plugin-blocks": "workspace:*",
+    "@types/node": "^25.6.0",
+    "blocks-example-harness": "workspace:*",
+    "eslint": "^9.0.0",
+    "jsdom": "^25.0.1",
+    "typescript": "^6.0.2",
+    "vite": "^8.0.0",
+    "vitest": "^4.1.6"
+  }
+}

@@ -1,0 +1,6 @@
+---
+"@solidjs/blocks": minor
+"@solidjs/eslint-plugin-blocks": patch
+---
+
+`$snapshot` is removed and `$untrack` added (D-042): every prop is a source, and a setup never reads, tracked or not. `$snapshot` took a value in a setup and silently froze what the parent believed was live. "Take the value once and ignore its updates" is now written where Solid writes it, in a reactive scope under `untrack`. `yield* $untrack(source)` is a read op allowed in a hole, a `$memo`, an `$effect` or an `$event`. In an event it waits for a pending source, as any event read does. After a memo's async `attempt` it is not `READ_AFTER_ATTEMPT`, since it does not track. It is not a `SetupOp`, so a setup that uses it is a type error, and at run time it is the dev error `[UNTRACK_IN_SETUP]`. The `Snapshot` op type is gone, and a component's coloring is its view's. The twins' 16 sites migrated without `$untrack`: seeds became a `$signal` plus a `$memo` falling back to the prop, config moved into holes, sierpinski's setup-time leaf-or-branch choice became a flow control over a hole (with `{ lazy: true }` memos), and a callback prop is read inside the event that calls it. `@solidjs/eslint-plugin-blocks`: `no-foreign-reactive` points Solid's `untrack` to `$untrack`, and `read-before-attempt` accepts a `$untrack` read after an attempt.

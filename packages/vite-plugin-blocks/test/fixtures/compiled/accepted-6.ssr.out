@@ -1,0 +1,13 @@
+import { escape as _$escape } from "@solidjs/web";
+import { ssr as _$ssr } from "@solidjs/web";
+import { ssrHydrationKey as _$ssrHydrationKey } from "@solidjs/web";
+var _tmpl$ = [
+	"<p",
+	">",
+	"</p>"
+];
+function* v() {
+	const x = yield* a;
+	var _v$ = _$ssrHydrationKey(), _v$2 = _$escape(x);
+	return _$ssr(_tmpl$, _v$, _v$2);
+}

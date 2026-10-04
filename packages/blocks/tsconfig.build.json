@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist/types",
+    "rootDir": "./src",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "paths": { "@solidjs/blocks": ["./src/index.ts"], "@solidjs/blocks/jsx-runtime": ["./jsx/jsx-runtime.d.ts"] }
+  },
+  "include": ["./src"]
+}

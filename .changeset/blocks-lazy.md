@@ -1,0 +1,5 @@
+---
+"@solidjs/blocks": minor
+---
+
+`@solidjs/blocks` exports its own `lazy`, and `adopt` is removed (D-047). `lazy` takes the same arguments as `solid-js`'s `lazy`: `fn`, `options` (with `export` for a named export) and `moduleUrl`, and keeps `preload` and `moduleUrl` on the result. The result is a block component that is pending while its chunk loads, unioned with the loaded component's own colors, so a settled page is still `View<true, never>` until it lands and a failing page fails as it does. It is created untracked and usable in call form in a hole (`{yield* Page()}`), as `adopt(lazy(…))` was. `adopt()`, which made any plain component usable in call form, had no use outside `adopt(lazy(…))` and dropped the chunk-loading pending from the type, so it is gone; a foreign non-lazy component has no bridge. The rendering twin's 7 pages change their import only. One gap remains: `@solidjs/vite-plugin`'s module-URL pass annotates only `lazy` imported from `"solid-js"`, so these calls carry no `moduleUrl`, and Solid's server `lazy` falls back to the module's bundler-injected `$$moduleUrl`.

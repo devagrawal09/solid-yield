@@ -48,7 +48,7 @@ test("the comparator catches a hydration-ID mismatch", async () => {
   expect(verdict.comparison!.divergence!.actual).toMatch(/^console\.warn = Hydration key miss/);
 });
 
-test("the library route cannot hydrate the compiler route's markup (D-069 F6)", async () => {
+test("the library route cannot hydrate the compiler route's markup (D-069 F6, pinned by D-074)", async () => {
   // The routes number hydration keys differently (routes.spec.ts): the
   // library client, given the compiler route's frozen server output, misses
   // every key, the root's included, and leaves the page inert.

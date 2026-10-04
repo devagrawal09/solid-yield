@@ -9,6 +9,9 @@
  * Nothing is normalized away: once the declared keys are replaced by their
  * ordinals and the declared compiler-only markup is removed, the two outputs
  * must be byte-identical.
+ *
+ * The key difference is a pinned property of the two routes, not a bug
+ * (D-074): an app's server and client are built with the same route.
  */
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { describe, expect, test } from "vitest";

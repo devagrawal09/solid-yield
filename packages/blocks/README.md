@@ -2,7 +2,9 @@
 
 Generator blocks for Solid 2 as a library. A runtime interpreter on Solid's public API, with strict types.
 
-**This is the strict dialect; the compiler route is the ergonomic one.** Solid's `experiment/iterable-signals` branch builds the same model into its compiler and core. This package does it in userland, and makes every rule checkable: types first, then development errors, then [lint rules](../eslint-plugin-blocks). It is a design lab (D-002), not a polished end-user API.
+**This is the strict dialect; the compiler route is the ergonomic one.** Solid's `experiment/iterable-signals` branch builds the same model into its compiler and core. This package does it in userland, and makes every rule checkable: types first, then development errors, then [lint rules](../eslint-plugin-blocks). It is a design lab (D-002), not a polished end-user API. Its types say exactly what the runtime does (D-071).
+
+Do not mix it with the compiler route in one app (D-074): the markup is the same, but the hydration keys are numbered differently, so the server and the client must be built with the same route.
 
 ```tsx
 import { $component, $event, $signal, view, type Props } from "solid-blocks";

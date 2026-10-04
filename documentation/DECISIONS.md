@@ -81,7 +81,12 @@ Reading order with the rest of the plan: `blocks-library.md` (the reference), th
 | D-067 | decided | Tags are DOM elements and foreign Solid components; block components are called (brand check) |
 | D-068 | implemented (1B) | D-056 amended: `Props<{…}>` wrapper; colors declared as `Source<T, E = never, P = false>`; no `Async` |
 | D-069 | recorded (Phase 4) | Conformance findings F1–F7: the library route against the oracle and the compiler route (F6: the routes' hydration keys are not interchangeable) |
-| D-070 | recorded (Phase 4) | Raise at every host: each reaches the nearest Errored or re-throws (D-033); an `$effect`'s and a DOM-dispatched `$event`'s failures are in no view type (open); a raising hole's type fixed |
+| D-070 | recorded (Phase 4) | Raise at every host: each reaches the nearest Errored or re-throws (D-033); an `$effect`'s and a DOM-dispatched `$event`'s failures are in no view type (ruled: D-072, D-073); a raising hole's type fixed |
+| D-071 | decided | Meta-rule: the types say exactly what the runtime does; a color the runtime routes and the type lacks is a bug, never a §7 limitation |
+| D-072 | decided | Binding an event in a view is a hole: `onClick={yield* save}` joins the handler's `P` and failures to the view; the transform's event refusal moves to the types; lint `no-unbound-event` |
+| D-073 | decided | An `$effect`'s or `$settled`'s raise joins the enclosing component's failure type, unless an attempt's `onError` absorbs it |
+| D-074 | decided | The library route and the compiler route are not mixed: same markup, different hydration keys; server and client use one route |
+| D-075 | decided | An event exposes its in-flight state as a source: `save.pending: Source<boolean>`; no automatic `Loading` |
 
 ## Entries
 
@@ -657,6 +662,25 @@ A root handler that wants the typed failure reads `error.cause ?? error`.
   - require a handler bound to the DOM to have `E = never`, so failures are handled inside it (`attempt`, or an `$optimistic` rollback);
   - accept it and say so in §7.
 - **F3 (fixed): a hole that always raises lost its failure.** `GeneratorOps<Y, R>` in `holes.ts` distributed over the hole's return type. A hole that always raises returns `never`, so the whole result was `never` and its own `Raise` was dropped. `Show({ when: function* () { return yield* raise(e); } })` typed as settled and never failing. `never` is now its own case. The type test is "a flow control's source hole" and the changeset is `blocks-raising-hole-type.md`.
+
+### D-071 — Meta-rule: the types say exactly what the runtime does
+**Decided (Dev, 2026-10-05).** Wherever the runtime routes a color — pending, a failure — the type carries it to the same place. A channel the runtime has and the type lacks is a bug, never a §7 limitation. D-034, D-044, D-047, D-059, D-063, D-072, D-073 and D-074 are instances. A future finding of the form "the runtime does X but the type says Y" is resolved by making the type say X. A finding where the type cannot say X is reported to Dev; it is not documented away.
+*Consequence.* §7's "two library-mediated failures are in no view type (open, D-070)" is not a limitation: D-070 F2 is ruled by D-072 and F1 by D-073.
+
+### D-072 — Binding an event in a view is a hole (D-070 F2)
+**Decided (Dev, 2026-10-05).** `<button onClick={yield* save}>` yields a **Bind** op. It contributes the handler's failures (`FailsOf`) and its `P` (`ReadsPendingOf`: it may wait on a pending read) to the enclosing view's type, and evaluates to the handler unchanged. The runtime binds it as before: a failure nobody handles goes to the nearest `Errored` above the handler's creation site (D-019, D-033). `yield* save` (bind) is distinct from `yield* save(x)` (call): bind is the un-called `EventCall` handler.
+- The transform's refusal in event positions, `BLOCKS_YIELD_IN_EVENT`, moves to the types. `perform(save)` in an `on*` attribute is allowed when the expression is a block event handler (a type-level check); a source or any non-handler there is a type error. `ref` stays refused.
+- A plain `onClick={save}` (no `yield*`) is the lint error `no-unbound-event`; its autofix adds the `yield*`.
+- Migrated under this decision: the 8 twins, the package tests, the conformance scenarios, getting-started and refusals.md (site counts below, with the implementation).
+
+### D-073 — An effect's raise joins the component's failure type (D-070 F1)
+**Decided (Dev, 2026-10-05).** `$effect` and `$settled` bodies may raise. Their `FailsOf` joins the enclosing component's failure type, unless the effect handles the failure itself (an attempt whose `onError` absorbs it). This is Solid's runtime semantics today: an effect's failure reaches the nearest `Errored` (D-070's matrix). Tests: a type test, and a runtime test that an effect's raise reaches the nearest `Errored`.
+
+### D-074 — The library route and the compiler route are not mixed (D-069 F6)
+**Decided (Dev, 2026-10-05).** The two routes render identical markup with different hydration-key numbering, so a server and its client must be built with the same route. Documented in §7 and the README. No code change. The conformance harness pins the difference as a property of the routes, not a bug: `routes.spec.ts` asserts both key lists, and `hydrate-self-test.spec.ts` asserts that the library client misses every key of the compiler route's markup.
+
+### D-075 — An event's in-flight state is a source
+**Decided (Dev, 2026-10-05).** An event exposes its in-flight state as a typed source, `save.pending: Source<boolean, never, false>`. It is `true` while any call of `save` is paused on a pending read or awaiting an async attempt, and `false` otherwise. It is read in holes like any source: `<button disabled={yield* save.pending}>`. There is no automatic `<Loading>` triggering: the runtime cannot know an event's dependencies before it runs (a compiler could; out of scope). Tests: a type test; a runtime test that `pending` flips to `true` on a pause or an await and back to `false` on settling, and that with several concurrent calls it stays `true` until the last settles. Docs: §1's events bullet, a getting-started example.
 
 ## Phase 1A findings (agent report, items 4c–8; verbatim, 2026-10-04)
 

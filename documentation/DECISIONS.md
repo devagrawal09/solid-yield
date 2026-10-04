@@ -81,6 +81,7 @@ Reading order with the rest of the plan: `blocks-library.md` (the reference), th
 | D-067 | decided | Tags are DOM elements and foreign Solid components; block components are called (brand check) |
 | D-068 | implemented (1B) | D-056 amended: `Props<{…}>` wrapper; colors declared as `Source<T, E = never, P = false>`; no `Async` |
 | D-069 | recorded (Phase 4) | Conformance findings F1–F7: the library route against the oracle and the compiler route (F6: the routes' hydration keys are not interchangeable) |
+| D-070 | recorded (Phase 4) | Raise at every host: each reaches the nearest Errored or re-throws (D-033); an `$effect`'s and a DOM-dispatched `$event`'s failures are in no view type (open); a raising hole's type fixed |
 
 ## Entries
 
@@ -610,6 +611,44 @@ Consequences: F1 (server-component props in event/`ref` positions) disappears �
 - the tiers and islands suites: those are compiler features the library does not have (§7);
 - every `$`, `blocks-compiled` and `blocks-uncompiled` mode.
 The ported set is 12 scenarios, 4 of them with SSR: blocks-counter, -effect, -props-child, -async-resolve, -async-reject, -async-event, -row-list, -row-recursive, -row-keyed-store; async-flights, -disposal, -event, -hydration.
+
+### D-070 — Raise at every host: where a failure is typed, where it lands
+**Recorded (Phase 4, item 2; for Dev's ruling).** `packages/blocks/test/raise.spec.tsx` raises a kinded failure in every host and checks where it goes. The hosts: a setup; a hole (a prop's, and a flow control's source); a `$memo` (before and after an async `attempt`); an `$effect`; a `$settled`; an `$event`; a row. `raise.type-tests.tsx` pins `FailsOf` at each position. The suite runs on development and production builds.
+
+At run time every host behaves as D-033 says:
+- The failure reaches the nearest `Errored` as the original instance.
+- An `Errored` whose `catch` does not list it passes it to the one above.
+- With no `Errored` it is re-thrown at the root.
+
+**How it is re-thrown depends on the host** (pinned, Solid's behaviour):
+- a setup throws the failure itself out of `render`;
+- a computation (a hole, a memo, an effect, `$settled`, a row) re-throws Solid's own error, with the failure as its `cause`;
+- a memo failing after an async step becomes an unhandled rejection of that error;
+- an event's call rejects with the failure, so a DOM dispatch with no boundary leaves an unhandled rejection.
+
+A root handler that wants the typed failure reads `error.cause ?? error`.
+
+**Where the failure lands in the types:**
+
+| Host | `FailsOf` | Lands in the component's view type? |
+| --- | --- | --- |
+| setup | refused: `Raise` is not a `SetupOp` (a setup never reads, so it has nothing to fail on) | — |
+| hole (a prop's) | the child's view, through the prop's declared `Source<T, E>`; a raising hole is refused for a settled prop | yes |
+| hole (a flow control's source) | the flow control's output | yes |
+| `$memo` | `Source<T, E>` | yes, through the holes that read it |
+| row | the flow control's output (D-059) | yes |
+| `$event` | `EventHandler<Args, E, …>`; `yield* go()` in another event joins it | **no**: `onClick={go}` takes the handler as a value |
+| `$effect` / `$settled` | **dropped**: both give `Yieldable<Create<…>, void>` | **no** |
+
+- **F1 (open): an effect's failure is in no type.** A component whose `$effect` or `$settled` raises has the view type `View<false, never>`, yet it fails at run time, to the nearest `Errored` or re-thrown. §1 says "typed failures are complete for library-mediated failures", and this is one that is not. Options:
+  - carry the body's `FailsOf` into the setup's yield union (`Create<"effect", E>`) and into the view's colors, the way a memo's failures reach the holes that read it;
+  - refuse `Raise` in an effect (`EffectOp` without `Raise`), so an effect's fallible work goes through an event or a memo;
+  - accept it and say so in §7.
+- **F2 (open): a DOM-dispatched event's failure is in no view type.** A DOM dispatch ignores the returned promise, so the failure goes to the nearest `Errored` (documented on `$event`). The handler's type carries `E`; the view that binds it with `onClick` does not. Options:
+  - join an event's `E` into the view when it is bound in a JSX event position, which needs the JSX namespace to read the handler's type;
+  - require a handler bound to the DOM to have `E = never`, so failures are handled inside it (`attempt`, or an `$optimistic` rollback);
+  - accept it and say so in §7.
+- **F3 (fixed): a hole that always raises lost its failure.** `GeneratorOps<Y, R>` in `holes.ts` distributed over the hole's return type. A hole that always raises returns `never`, so the whole result was `never` and its own `Raise` was dropped. `Show({ when: function* () { return yield* raise(e); } })` typed as settled and never failing. `never` is now its own case. The type test is "a flow control's source hole" and the changeset is `blocks-raising-hole-type.md`.
 
 ## Phase 1A findings (agent report, items 4c–8; verbatim, 2026-10-04)
 

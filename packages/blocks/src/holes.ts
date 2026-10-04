@@ -57,9 +57,18 @@ export type OpsOfHole<V> =
               : V extends readonly (infer U)[]
                 ? OpsOfHole<U>
                 : never;
-type GeneratorOps<Y, R> = R extends () => Generator<infer VY, infer VR, any>
-  ? VY | OpsOfHole<VR>
-  : Y | OpsOfHole<R>;
+/**
+ * A generator's colors: a row's (it returns its view generator) or a hole's
+ * (its yields, and what it returns). A hole that always raises returns
+ * `never`; a conditional distributing over that `never` would be `never`
+ * too and drop the hole's own yields — its `Raise` — so `never` is its own
+ * case (found by the raise tests, Phase 4 item 2).
+ */
+type GeneratorOps<Y, R> = [R] extends [never]
+  ? Y
+  : R extends () => Generator<infer VY, infer VR, any>
+    ? VY | OpsOfHole<VR>
+    : Y | OpsOfHole<R>;
 
 /** The no-JSX output of holes `V`: its pending / failures are theirs. */
 export type HViewOf<V> = HView<PendingOf<OpsOfHole<V>>, FailsOf<OpsOfHole<V>>>;

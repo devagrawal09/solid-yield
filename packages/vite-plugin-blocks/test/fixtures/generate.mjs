@@ -19,6 +19,11 @@
 //    refusal messages in rule.json and the twins/ snapshots are kept as the
 //    Rust rule left them; they are the oracle now (D-043).
 //
+// 3. D-072 (Phase 5) stopped refusing a `yield*` in an event prop: the three
+//    BLOCKS_YIELD_IN_EVENT cases moved to `accepted` (#7–#9) with a bound-data
+//    array (#10). A run of this script added their outputs; the other 26 were
+//    byte-identical.
+//
 //   node test/fixtures/generate.mjs   (from packages/vite-plugin-blocks)
 //
 // Rewrites compiled/accepted-<n>.<mode>.out and compiled/<twin>.<mode>.out,

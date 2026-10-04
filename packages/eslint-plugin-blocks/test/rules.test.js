@@ -695,3 +695,79 @@ typedTester.run("no-component-tag (with types)", rules["no-component-tag"], {
     }
   ]
 });
+
+// --- no-unbound-event (D-072) ---------------------------------------------------------
+const evt = "const save = $event(function* () {});";
+tester.run("no-unbound-event", rules["no-unbound-event"], {
+  valid: [
+    component(`${evt} return function* () { return <b onClick={yield* save} />; };`),
+    component(`${evt} return function* () { return <b on:click={yield* save} />; };`),
+    component(`${evt} return function* () { return <b onClick={[yield* save, 1]} />; };`),
+    // not an event prop
+    component(`${evt} return function* () { return <b data-save={save} />; };`),
+    // not an $event handler (a plain function is the types' business)
+    component("const f = () => {}; return function* () { return <b onClick={f} />; };"),
+    component("return function* () { return <b onClick={() => go()} />; };")
+  ],
+  invalid: [
+    {
+      code: component(`${evt} return function* () { return <b onClick={save} />; };`),
+      output: component(`${evt} return function* () { return <b onClick={yield* save} />; };`),
+      errors: [{ messageId: "unbound", data: { name: "save", attr: "onClick" } }]
+    },
+    {
+      code: component(`${evt} return function* () { return <b on:click={save} />; };`),
+      output: component(`${evt} return function* () { return <b on:click={yield* save} />; };`),
+      errors: [{ messageId: "unbound" }]
+    },
+    {
+      // the bound-data form: the handler is the array's first element
+      code: component(`${evt} return function* () { return <b onClick={[save, 1]} />; };`),
+      output: component(`${evt} return function* () { return <b onClick={[yield* save, 1]} />; };`),
+      errors: [{ messageId: "unbound" }]
+    },
+    {
+      // a foreign component's event prop too
+      code: component(`${evt} return function* () { return <Router onNavigate={save} />; };`),
+      output: component(
+        `${evt} return function* () { return <Router onNavigate={yield* save} />; };`
+      ),
+      errors: [{ messageId: "unbound" }]
+    },
+    {
+      // outside a generator there is no yield*: reported, not fixed
+      code: `${evt} const el = () => <b onClick={save} />;`,
+      output: null,
+      errors: [{ messageId: "unbound" }]
+    }
+  ]
+});
+
+// with types: anything typed as an $event handler (the [EVENT] brand)
+const eventDecls = `
+declare const EVENT: unique symbol;
+interface EventHandler<A extends unknown[]> { (...a: A): Promise<void>; readonly [EVENT]: true }
+declare function pick(v: string): EventHandler<[]>;
+declare const actions: { save: EventHandler<[]> };
+declare const plain: () => void;
+`;
+typedTester.run("no-unbound-event (with types)", rules["no-unbound-event"], {
+  valid: [
+    { filename, code: eventDecls + "function* v() { return <b onClick={plain} />; }" },
+    { filename, code: eventDecls + 'function* v() { return <b onInput={yield* pick("a")} />; }' }
+  ],
+  invalid: [
+    {
+      filename,
+      code: eventDecls + 'function* v() { return <b onInput={pick("a")} />; }',
+      output: eventDecls + 'function* v() { return <b onInput={yield* pick("a")} />; }',
+      errors: [{ messageId: "unbound" }]
+    },
+    {
+      filename,
+      code: eventDecls + "function* v() { return <b onClick={actions.save} />; }",
+      output: eventDecls + "function* v() { return <b onClick={yield* actions.save} />; }",
+      errors: [{ messageId: "unbound" }]
+    }
+  ]
+});

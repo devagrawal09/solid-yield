@@ -93,6 +93,8 @@ export const READ: unique symbol = Symbol.for("solid.blocks.read") as any;
 export const VIEW_MARK: unique symbol = Symbol.for("solid.blocks.view") as any;
 /** Marks `$component` functions. */
 export const COMPONENT_MARK: unique symbol = Symbol.for("solid.blocks.component") as any;
+/** Marks `$event` handlers (`perform` binds one: returns it unread and uncalled, D-072). */
+export const EVENT_MARK: unique symbol = Symbol.for("solid.blocks.event") as any;
 const OP: unique symbol = Symbol.for("solid.blocks.op") as any;
 const PATH_TARGET: unique symbol = Symbol.for("solid.blocks.path") as any;
 const PATH_READ = 1;
@@ -377,7 +379,9 @@ export function accessor<T>(source: Source<T, any, boolean>): Accessor<T> {
 /**
  * The call form of `yield*` in a view hole: the JSX transform turns
  * `{(yield* user).name}` into `{perform(user).name}`, so the read happens in
- * the hole's own computation. Also reads a foreign accessor.
+ * the hole's own computation. Also reads a foreign accessor. An `$event`
+ * handler in an event attribute (`onClick={yield* save}`) is bound: returned
+ * as it is, for the DOM to call (D-072).
  */
 export function perform<T>(target: Yieldable<any, T> | (() => T) | T): T {
   const x = target as any;
@@ -395,6 +399,7 @@ export function perform<T>(target: Yieldable<any, T> | (() => T) | T): T {
       return runAs(host, () => readOf(x) as T, sink, view, true, resumed, name, receipts);
     }
     if (x[VIEW_MARK] === true) return x;
+    if (x[EVENT_MARK] === true) return x;
     if (typeof x === "function") return x();
     if (typeof x === "object" && !Array.isArray(x) && typeof x[Symbol.iterator] === "function")
       return runAs(
@@ -1301,7 +1306,7 @@ export function $event<Args extends unknown[] = [], Y extends EventOp = never, R
       throw error;
     }
   });
-  return ((...args: Args) => {
+  const handler: any = (...args: Args) => {
     // A failure goes to whoever handles the returned promise; one nobody
     // handles (a DOM dispatch ignores the result) goes to the boundary.
     const rec: CallRecord = {};
@@ -1332,7 +1337,14 @@ export function $event<Args extends unknown[] = [], Y extends EventOp = never, R
       return yield new Wait_(result);
     };
     return result;
-  }) as any;
+  };
+  handler[EVENT_MARK] = true;
+  // `yield* save`: bind it (D-072) — the handler itself, for an event
+  // attribute; the JSX transform's `perform(save)` returns it the same way
+  handler[Symbol.iterator] = function* (): Generator<never, unknown, unknown> {
+    return handler;
+  };
+  return handler;
 }
 
 /** Whether (and how) an event call's body finished. */

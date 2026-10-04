@@ -42,7 +42,7 @@ Option `lazy: false` turns the pass off.
 | `{yield* e}` as a child, `a={yield* e}` as an attribute, of a DOM element or a foreign Solid component (D-067) | `perform(e)`                                                         |
 | a block-component call in a hole, `{yield* Card({ todo })}` (D-062)                                            | one hole: `perform(Card({ todo }))`; the argument is left as written |
 | a `yield*` inside a nested function in JSX                                                                     | that function's own; not a hole of this JSX                          |
-| an event prop (`onClick`, `on:click`, `oncapture:…`)                                                           | refused: `BLOCKS_YIELD_IN_EVENT`                                     |
+| an event prop (`onClick`, `on:click`, `oncapture:…`): `onClick={yield* save}` binds an `$event` handler (D-072) | `perform(save)`, which returns the handler; the types check it is one |
 | `ref`                                                                                                          | refused: `BLOCKS_YIELD_IN_REF`                                       |
 | a spread attribute                                                                                             | refused: `BLOCKS_YIELD_IN_SPREAD`                                    |
 | a spread child                                                                                                 | refused: `BLOCKS_YIELD_IN_SPREAD_CHILD`                              |

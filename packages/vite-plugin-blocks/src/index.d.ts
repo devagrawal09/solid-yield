@@ -4,7 +4,6 @@ import type { SourceMap } from "magic-string";
 
 /** The positions the rule refuses, by code. */
 export declare const REFUSALS: {
-  readonly BLOCKS_YIELD_IN_EVENT: string;
   readonly BLOCKS_YIELD_IN_REF: string;
   readonly BLOCKS_YIELD_IN_SPREAD: string;
   readonly BLOCKS_YIELD_IN_SPREAD_CHILD: string;

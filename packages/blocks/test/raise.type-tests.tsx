@@ -16,8 +16,11 @@ import {
   raise,
   Show,
   view,
+  type Bind,
+  type BoundEvent,
   type Create,
   type EventHandler,
+  type HView,
   type FailsOf,
   type Props,
   type Raise,
@@ -25,6 +28,7 @@ import {
   type View,
   type Yieldable
 } from "solid-blocks";
+import { h } from "solid-blocks/h";
 
 type Equal<A, B> =
   (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
@@ -245,7 +249,7 @@ export const RowEffect = $component(function* RowEffect() {
 });
 export type RowEffectView = Expect<Equal<ViewFailsOf<ReturnType<typeof RowEffect>>, Boom>>;
 
-// --- event: the handler's type carries it; a DOM dispatch drops it (D-070) -------------------
+// --- event: the handler's type carries it; binding it gives it to the view (D-072) -----------
 export const Event = $component(function* Event() {
   const go = $event(function* () {
     yield* raise(new Boom());
@@ -258,14 +262,82 @@ export const Event = $component(function* Event() {
   type _outer = Expect<Equal<typeof outer, EventHandler<[], Boom, void, false, false>>>;
   return view(function* () {
     return (
-      <button onClick={go} onDblClick={outer}>
+      <button onClick={yield* go} onDblClick={yield* outer}>
         go
       </button>
     );
   });
 });
-// …but an `onClick` takes it as a value: the view does not carry Boom
-export type EventView = Expect<Equal<ViewFailsOf<ReturnType<typeof Event>>, never>>;
+// binding it (`onClick={yield* go}`, a Bind op) gives the view its failure: a DOM dispatch's
+// failure reaches the nearest Errored above the handler's creation site
+export type EventView = Expect<Equal<ViewFailsOf<ReturnType<typeof Event>>, Boom>>;
+export type EventViewSettled = Expect<Equal<ViewPendingOf<ReturnType<typeof Event>>, false>>;
+// the bind is the handler, un-called and branded; the call is an EventCallOp (D-072)
+export type BindOp = Expect<
+  Equal<
+    ReturnType<EventHandler<[], Boom, void, true, false>[typeof Symbol.iterator]>,
+    Generator<Bind<true, Boom>, BoundEvent<[]>, any>
+  >
+>;
+// an event that waits on a pending read (`P`) makes the view binding it pending (D-072)
+export const EventPending = $component(function* EventPending(
+  props: Props<{ n: Source<number, never, true> }>
+) {
+  const go = $event(function* () {
+    yield* props.n;
+  });
+  type _go = Expect<Equal<typeof go, EventHandler<[], never, void, true, false>>>;
+  return view(function* () {
+    return <button onClick={yield* go}>go</button>;
+  });
+});
+export type EventPendingView = Expect<Equal<ViewPendingOf<ReturnType<typeof EventPending>>, true>>;
+// async work of its own (`A`) is not pending: the view does not wait for a call
+export const EventAsync = $component(function* EventAsync() {
+  const go = $event(function* () {
+    yield* attempt(
+      () => Promise.resolve(1),
+      cause => new Boom(String(cause))
+    );
+  });
+  return view(function* () {
+    return <button onClick={yield* go}>go</button>;
+  });
+});
+export type EventAsyncView = Expect<Equal<ViewPendingOf<ReturnType<typeof EventAsync>>, false>>;
+export type EventAsyncFails = Expect<Equal<ViewFailsOf<ReturnType<typeof EventAsync>>, Boom>>;
+// the bound-data form, `[yield* pick, data]`: pick(data, event)
+export const EventData = $component(function* EventData() {
+  const pick = $event(function* (value: string) {
+    if (value === "") yield* raise(new Other());
+  });
+  return view(function* () {
+    return <button onClick={[yield* pick, "a"]}>go</button>;
+  });
+});
+export type EventDataView = Expect<Equal<ViewFailsOf<ReturnType<typeof EventData>>, Other>>;
+// in `h`, an `$event` handler given as an attribute is the bind: it carries the same colors
+export const hBound = h("button", {
+  onClick: null as unknown as EventHandler<[], Boom, void, true, false>
+});
+export type HBound = Expect<Equal<typeof hBound, HView<true, Boom>>>;
+// bind belongs to a view: an event, a memo or a hole prop does not bind
+export const NoBindInEvent = $component(function* NoBindInEvent() {
+  const go = $event(function* () {});
+  // @ts-expect-error Bind is not an EventOp: an event calls another (`yield* go()`)
+  const outer = $event(function* () {
+    yield* go;
+  });
+  // @ts-expect-error Bind is not a MemoOp
+  const m = yield* $memo(function* () {
+    return yield* go;
+  });
+  void outer;
+  void m;
+  return view(function* () {
+    return <i />;
+  });
+});
 
 // --- row: a row's raise joins the flow control's output, and the holding view (D-059) -------
 export const Row = $component(function* Row() {

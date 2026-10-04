@@ -12,7 +12,9 @@
  * block-component call written as a hole (`{yield* Card({ todo })}`, D-062) is
  * itself a hole and becomes `perform(Card({ todo }))`; its argument is left as
  * written. The refused positions are exactly `REFUSALS`, pinned by
- * `test/fixtures/rule.json`.
+ * `test/fixtures/rule.json`. An event prop is not one of them since D-072:
+ * `onClick={yield* save}` becomes `onClick={perform(save)}`, which binds the
+ * handler (the runtime returns it unchanged).
  *
  * Whether a hole runs while a setup is the host (`[JSX_IN_SETUP]`, D-041) is
  * the runtime's business: `perform` asserts it. The rule does not know hosts.
@@ -24,8 +26,6 @@
 /** @typedef {import("@babel/core").types.JSXAttribute["name"]} JSXAttributeName */
 
 export const REFUSALS = {
-  BLOCKS_YIELD_IN_EVENT:
-    "a `yield*` in an event handler prop would read once, at render: read inside the `$event` instead",
   BLOCKS_YIELD_IN_REF: "a `yield*` in a `ref` has no hole to read in: a ref is set once",
   BLOCKS_YIELD_IN_SPREAD:
     "a `yield*` in a spread cannot become a hole: spread an object of values, or pass each prop",
@@ -43,15 +43,11 @@ export const DEFAULT_BLOCKS_MODULE = "solid-blocks";
  * @returns {Hole}
  */
 function attributeHole(name) {
-  if (name.type === "JSXNamespacedName") {
-    const ns = name.namespace.name;
-    return ns === "on" || ns === "oncapture" ? "BLOCKS_YIELD_IN_EVENT" : "allowed";
-  }
-  const n = name.name;
-  if (n === "ref") return "BLOCKS_YIELD_IN_REF";
-  if (n.length > 2 && n.startsWith("on") && n[2] >= "A" && n[2] <= "Z")
-    return "BLOCKS_YIELD_IN_EVENT";
-  return "allowed";
+  // an event prop binds a handler, `onClick={yield* save}` (D-072): a hole
+  // like any other here; that the value is a block event handler is the
+  // types' check (the blocks JSX namespace's event attributes)
+  if (name.type === "JSXNamespacedName") return "allowed";
+  return name.name === "ref" ? "BLOCKS_YIELD_IN_REF" : "allowed";
 }
 
 /**

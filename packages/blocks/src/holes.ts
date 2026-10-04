@@ -11,6 +11,7 @@
 import { holeOf, perform, READ, isGeneratorFunction, runRow } from "solid-blocks";
 import type { Element } from "./element.js";
 import type {
+  Bind,
   ChildView,
   EventHandler,
   FailsOf,
@@ -41,8 +42,10 @@ export type Hole =
   | ((...args: any[]) => Generator<any, any, any>);
 
 export type OpsOfHole<V> =
-  V extends EventHandler<any, any>
-    ? never
+  // an `$event` handler given to `h` as an attribute is bound there (D-072):
+  // its pending read and failures join the output, as `yield* save` in JSX
+  V extends EventHandler<any, infer E, any, infer P>
+    ? Bind<P, E>
     : // a JSX element is settled by construction (and recursive: not walked)
       V extends Element
       ? never

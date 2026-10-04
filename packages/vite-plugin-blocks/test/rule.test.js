@@ -157,7 +157,7 @@ describe("transform()", () => {
   it("reports every refusal, with Vite's id and loc", () => {
     let thrown;
     try {
-      transform("function* v() {\n  return <b ref={yield* r} onClick={yield* h} />;\n}", {
+      transform("function* v() {\n  return <b ref={yield* r} {...(yield* h)} />;\n}", {
         filename: "/abs/a.tsx"
       });
     } catch (e) {
@@ -165,7 +165,7 @@ describe("transform()", () => {
     }
     expect(thrown.refusals.map(r => r.code)).toEqual([
       "BLOCKS_YIELD_IN_REF",
-      "BLOCKS_YIELD_IN_EVENT"
+      "BLOCKS_YIELD_IN_SPREAD"
     ]);
     expect(thrown.message.split("\n")).toHaveLength(2);
     expect(thrown.id).toBe("/abs/a.tsx");

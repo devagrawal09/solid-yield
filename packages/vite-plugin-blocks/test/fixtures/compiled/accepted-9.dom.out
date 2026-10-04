@@ -1,0 +1,7 @@
+import { createComponent as _$createComponent } from "@solidjs/web";
+import { perform as _$perform } from "solid-blocks";
+function* v() {
+	return _$createComponent(Comp, { get onSelect() {
+		return _$perform(h);
+	} });
+}

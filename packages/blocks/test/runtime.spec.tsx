@@ -2635,3 +2635,73 @@ describe("attempt / isPending interplay", () => {
     void isPending;
   });
 });
+
+describe("binding an event is a hole (D-072)", () => {
+  it("onClick={yield* save} binds the handler itself: the click calls it, the bind does not", async () => {
+    const calls: unknown[] = [];
+    let save!: ReturnType<typeof $event<[MouseEvent], never, void>>;
+    const App = $component(function* () {
+      const [n, setN] = yield* $signal(0);
+      save = $event(function* (e: MouseEvent) {
+        calls.push(e.type);
+        yield* setN(v => v + 1);
+      });
+      return view(function* () {
+        return <button onClick={yield* save}>{yield* n}</button>;
+      });
+    });
+    mount(App);
+    // binding is not calling
+    expect(calls).toEqual([]);
+    // the value bound is the handler: `perform` returns it as it is, uncalled
+    expect(perform(save as any)).toBe(save);
+    expect([...(save as any)]).toEqual([]);
+    root.querySelector("button")!.click();
+    await settle();
+    expect(calls).toEqual(["click"]);
+    expect(root.textContent).toBe("1");
+  });
+
+  it("the bound-data form: [yield* pick, data] calls pick(data, event)", async () => {
+    const picked: unknown[] = [];
+    const App = $component(function* () {
+      const pick = $event(function* (value: string, e: MouseEvent) {
+        picked.push([value, e.type]);
+      });
+      return view(function* () {
+        return <button onClick={[yield* pick, "a"]}>go</button>;
+      });
+    });
+    mount(App);
+    root.querySelector("button")!.click();
+    await settle();
+    expect(picked).toEqual([["a", "click"]]);
+  });
+
+  it("a bound event's failure reaches the Errored above where the handler was created", async () => {
+    const seen: unknown[] = [];
+    const App = $component(function* () {
+      const fail = $event(function* () {
+        yield* raise(new Failed("bound"));
+      });
+      return view(function* () {
+        return <button onClick={yield* fail}>go</button>;
+      });
+    });
+    dispose = render(
+      () =>
+        Errored({
+          fallback: (e: () => unknown) => (seen.push((e() as Error).message), (<p>caught</p>)),
+          children: function* () {
+            return <>{yield* App()}</>;
+          }
+        }),
+      root
+    );
+    flush();
+    root.querySelector("button")!.click();
+    await settle();
+    expect(seen).toEqual(["bound"]);
+    expect(root.innerHTML).toBe("<p>caught</p>");
+  });
+});

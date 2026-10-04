@@ -11,6 +11,7 @@
  *   no-component-tag       a block component is called, never a JSX tag (autofix)
  *   no-read-in-prop        a component call's prop is a source, a hole or a value — never a read (autofix)
  *   component-children-generator  a component call's children is a generator (autofix)
+ *   no-unbound-event       an `$event` handler in an event prop is bound: `onClick={yield* save}` (autofix)
  *   jsx-only-in-view       JSX only in a view, a hole or a row's view: a setup never creates elements
  *   prefer-view-wrapper    (warning) wrap a view in `view(…)` so its errors land where it is written
  *   no-path-object-use     a path is a read: no spread, no `===`, no `JSON.stringify` of one
@@ -40,8 +41,6 @@ import {
  * packages/vite-plugin-blocks/test/fixtures/rule.json).
  */
 export const REFUSALS = {
-  BLOCKS_YIELD_IN_EVENT:
-    "a `yield*` in an event handler prop would read once, at render: read inside the `$event` instead",
   BLOCKS_YIELD_IN_REF: "a `yield*` in a `ref` has no hole to read in: a ref is set once",
   BLOCKS_YIELD_IN_SPREAD:
     "a `yield*` in a spread cannot become a hole: spread an object of values, or pass each prop",
@@ -56,8 +55,8 @@ export function refusalFor(node, position) {
   if (position.hole === "spread-child") return "BLOCKS_YIELD_IN_SPREAD_CHILD";
   if (position.hole === "attribute") {
     const name = position.name;
+    // an event prop binds a handler, `onClick={yield* save}` (D-072): accepted
     if (name === "ref") return "BLOCKS_YIELD_IN_REF";
-    if (/^on[A-Z]/.test(name) || /^(on|oncapture):/.test(name)) return "BLOCKS_YIELD_IN_EVENT";
   }
   return null;
 }
@@ -1069,6 +1068,93 @@ const componentChildrenGenerator = {
   }
 };
 
+/** Whether a JSX attribute name is an event prop: `onClick`, `on:click`, `oncapture:click`. */
+function isEventAttribute(name) {
+  if (name.type === "JSXNamespacedName")
+    return name.namespace.name === "on" || name.namespace.name === "oncapture";
+  const n = name.name;
+  return n.length > 2 && n.startsWith("on") && n[2] >= "A" && n[2] <= "Z";
+}
+
+/** Whether a TypeScript type is an `$event` handler: it carries the library's `[EVENT]` brand. */
+function isEventHandlerType(type, seen = new Set()) {
+  if (!type || seen.has(type)) return false;
+  seen.add(type);
+  if (type.isUnionOrIntersection && type.isUnionOrIntersection())
+    return type.types.some(t => isEventHandlerType(t, seen));
+  const props = type.getProperties ? type.getProperties() : [];
+  return props.some(p => /^__@EVENT@\d+$/.test(String(p.escapedName)));
+}
+
+/**
+ * D-072: an `$event` handler in an event prop is bound — `onClick={yield*
+ * save}`, a `Bind` op whose pending read and failures join the view's type.
+ * Given as a plain value (`onClick={save}`) it is bound all the same at run
+ * time, but its colors reach no type. With type information any expression
+ * typed as an `$event` handler is reported (`onInput={pick("a")}`); without,
+ * a binding of `$event(…)` and a direct `$event(…)` call. Autofix (in a
+ * generator): the `yield*`.
+ */
+const noUnboundEvent = {
+  meta: {
+    type: "problem",
+    fixable: "code",
+    docs: {
+      description:
+        "An `$event` handler in an event prop is bound with `yield*` (`onClick={yield* save}`), so its pending read and failures join the view's type (D-072)."
+    },
+    messages: {
+      unbound:
+        "`{{name}}` is an `$event` handler given unbound: bind it, `{{attr}}={yield* {{name}}}`, so its pending read and failures join this view's type (D-072)."
+    },
+    schema: []
+  },
+  create(context) {
+    const source = context.sourceCode;
+    const services = source.parserServices;
+    const checker =
+      services && services.program && services.esTreeNodeToTSNodeMap
+        ? services.program.getTypeChecker()
+        : null;
+    const isHandler = node => {
+      if (checker) {
+        const tsNode = services.esTreeNodeToTSNodeMap.get(node);
+        if (tsNode) return isEventHandlerType(checker.getTypeAtLocation(tsNode));
+      }
+      if (node.type === "CallExpression") return isCallTo(node, ["$event"]);
+      if (node.type !== "Identifier") return false;
+      const variable = resolve(context, node);
+      const def = variable && variable.defs[0];
+      const init = def && def.type === "Variable" ? def.node.init : null;
+      return !!init && isCallTo(init, ["$event"]);
+    };
+    const short = text => (text.length > 40 ? text.slice(0, 37) + "..." : text);
+    return {
+      JSXAttribute(node) {
+        if (!isEventAttribute(node.name)) return;
+        const v = node.value;
+        if (!v || v.type !== "JSXExpressionContainer") return;
+        // `onClick={[save, data]}`: the handler is the array's first element
+        let target = v.expression;
+        if (target.type === "ArrayExpression") target = target.elements[0];
+        if (!target || target.type === "YieldExpression" || target.type === "JSXEmptyExpression")
+          return;
+        if (!isHandler(target)) return;
+        const text = source.getText(target);
+        const attr = source.getText(node.name);
+        const simple = /^(Identifier|MemberExpression|CallExpression)$/.test(target.type);
+        context.report({
+          node: target,
+          messageId: "unbound",
+          data: { name: short(text), attr },
+          fix:
+            inGenerator(node) && simple ? fixer => fixer.insertTextBefore(target, "yield* ") : null
+        });
+      }
+    };
+  }
+};
+
 export const rules = {
   "no-throw": noThrow,
   "no-read-in-view-body": noReadInViewBody,
@@ -1082,7 +1168,8 @@ export const rules = {
   "jsx-only-in-view": jsxOnlyInView,
   "no-component-tag": noComponentTag,
   "no-read-in-prop": noReadInProp,
-  "component-children-generator": componentChildrenGenerator
+  "component-children-generator": componentChildrenGenerator,
+  "no-unbound-event": noUnboundEvent
 };
 
 const plugin = {
@@ -1093,11 +1180,18 @@ const plugin = {
 
 /** Rules `recommended` sets to warn (a suggestion, not a rule of the model). */
 const WARNINGS = new Set(["prefer-view-wrapper"]);
+/**
+ * D-072, staged: not in `recommended` until the twins, the tests and the docs
+ * bind their events (the next commit adds it, as an error).
+ */
+const STAGED = new Set(["no-unbound-event"]);
 /** `recommended`: every rule an error, but the suggestions (`WARNINGS`), which warn (flat config). */
 plugin.configs.recommended = {
   plugins: { "solid-blocks": plugin },
   rules: Object.fromEntries(
-    Object.keys(rules).map(name => [`solid-blocks/${name}`, WARNINGS.has(name) ? "warn" : "error"])
+    Object.keys(rules)
+      .filter(name => !STAGED.has(name))
+      .map(name => [`solid-blocks/${name}`, WARNINGS.has(name) ? "warn" : "error"])
   )
 };
 

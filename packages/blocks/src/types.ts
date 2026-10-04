@@ -34,6 +34,8 @@ export declare const HVIEW: unique symbol;
 export declare const EVENT: unique symbol;
 /** Phantom brand of a call of an `$event` handler. */
 export declare const EVENT_CALL: unique symbol;
+/** Phantom brand of an `$event` handler bound in a view (`onClick={yield* save}`, D-072). */
+export declare const BOUND: unique symbol;
 /** Phantom key of an event call's async color. */
 export declare const ASYNC: unique symbol;
 /** Phantom brand of a stream an `attempt` handled. */
@@ -80,6 +82,18 @@ export interface EventCallOp<
   readonly [FAILS]: E;
 }
 /**
+ * Binding an `$event` handler in a view: `onClick={yield* save}` (D-072). The
+ * handler is not called; the DOM calls it. What a call may do the view
+ * carries: its pending read (`P`, it may wait on pending data) and its
+ * failures, which go to the nearest `Errored` above the handler's creation
+ * site when nobody handles the call (a DOM dispatch does not).
+ */
+export interface Bind<P extends boolean = boolean, E = unknown> {
+  readonly [KIND]: "bind";
+  readonly [PENDING]: P;
+  readonly [FAILS]: E;
+}
+/**
  * Creating owned state (`$signal`, `$store`, `$memo`, `$effect`, `$settled`).
  * `E` is what the created computation may fail with where nothing reads it:
  * an `$effect`'s or a `$settled`'s body (D-073). Its failure reaches the
@@ -116,19 +130,21 @@ export type AnyOp =
   | Create<string, any>
   | Cleanup
   | ContextRead
-  | ChildView<boolean, any>;
+  | ChildView<boolean, any>
+  | Bind<boolean, any>;
 
 /** Operations a component's (or a row block's) setup may perform: it creates, never reads (D-042). */
 export type SetupOp = Create<string, any> | Cleanup | ContextRead;
 /**
  * What a JSX view's generator yields, as TypeScript sees it: the reads and
  * child views of its holes (each `yield*` in a JSX position, which the
- * transform turns into a hole). The view's own body reads nothing (D-032) —
+ * transform turns into a hole), and the events it binds (`onClick={yield*
+ * save}`, D-072). The view's own body reads nothing (D-032) —
  * a rule TypeScript cannot see, since it types a `yield*` in JSX and one in
  * a statement alike; the runtime (`READ_IN_VIEW`) and the lint
  * (`no-read-in-view-body`) hold it.
  */
-export type ViewOp = Read<boolean, any> | ChildView<boolean, any>;
+export type ViewOp = Read<boolean, any> | ChildView<boolean, any> | Bind<boolean, any>;
 /** What a no-JSX view yields: nothing (D-032). Its reads are holes, its pending and failures its output's. */
 export type HViewOp = never;
 /** Operations a memo may perform. */
@@ -435,6 +451,12 @@ export interface EventCall<
  * An `$event` handler, a Solid action: call it with the arguments its body
  * takes (an event, or anything else). Its colors: `P`, it reads pending data
  * (and waits for it); `A`, it does async work of its own.
+ *
+ * Two operations take it. `yield* save(x)` calls it (an `EventCallOp`: the
+ * caller waits, and gets the call's colors). `yield* save` binds it (D-072):
+ * in a view's event attribute, `onClick={yield* save}` is a `Bind` op that
+ * gives the view the handler's `P` and failures and evaluates to the handler
+ * itself, branded `BoundEvent` — the one value an event attribute takes.
  */
 export interface EventHandler<
   Args extends unknown[] = any[],
@@ -446,7 +468,20 @@ export interface EventHandler<
   (...args: Args): EventCall<R, E, P, A>;
   readonly [EVENT]: true;
   readonly [FAILS]?: E;
+  [Symbol.iterator](): Generator<Bind<P, E>, BoundEvent<Args>, any>;
 }
+
+/**
+ * An `$event` handler bound in a view (`yield* save`, D-072): what an event
+ * attribute of the blocks JSX namespace takes. At run time it is the handler
+ * itself; the brand says a `Bind` op put its colors in the view's type.
+ */
+export interface BoundEvent<Args extends unknown[] = any[]> {
+  (...args: Args): unknown;
+  readonly [BOUND]: true;
+}
+/** A DOM handler type `H` as an event attribute takes it: bound in a view (D-072). */
+export type Bound<H> = H & { readonly [BOUND]: true };
 
 /** Setter of a `$signal`: writes when called; `yield*` on the receipt is the new value. */
 export type BlockSetter<T> = <U extends T>(value: U | ((prev: T) => U)) => Receipt<U>;

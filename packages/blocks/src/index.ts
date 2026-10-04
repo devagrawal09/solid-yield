@@ -53,8 +53,11 @@ export type { Element, ArrayElement, RenderedObject, TagType } from "./element.j
 export type { ViewYield, ViewReturn, NoJsxViewRule } from "./runtime.js";
 export type {
   AnyOp,
+  Bind,
   BlockSetter,
   BlockStoreSetter,
+  Bound,
+  BoundEvent,
   ChildView,
   Cleanup,
   Component,

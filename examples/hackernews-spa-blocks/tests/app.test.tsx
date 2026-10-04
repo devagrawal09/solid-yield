@@ -22,7 +22,7 @@ const $ = (sel: string) => app.root.querySelector<HTMLElement>(sel);
 const $$ = (sel: string) => [...app.root.querySelectorAll<HTMLElement>(sel)];
 const titles = () => $$(".news-item .title > a").map(a => a.textContent);
 
-describe("hackernews-spa with @solidjs/blocks", () => {
+describe("hackernews-spa with solid-blocks", () => {
   it("renders the top feed with 30 rows and paging controls", async () => {
     await open("/");
     expect($$(".news-item")).toHaveLength(30);

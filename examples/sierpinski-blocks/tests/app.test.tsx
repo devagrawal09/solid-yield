@@ -1,7 +1,7 @@
 // The Sierpinski twin driven through jsdom (native compiler, the block rule):
 // the loading fallback, the async per-branch memos, the seconds ticker, the
 // frame-driven scale, hover, and disposal.
-import { render } from "@solidjs/blocks";
+import { render } from "solid-blocks";
 import { TriangleDemo } from "../src/app";
 import { advance, dots, installClocks, uninstallClocks } from "./script";
 
@@ -20,7 +20,7 @@ afterEach(() => {
 const container = () => document.body.querySelector<HTMLElement>(".container");
 const labels = () => new Set(dots().map(d => d.textContent));
 
-describe("sierpinski with @solidjs/blocks", () => {
+describe("sierpinski with solid-blocks", () => {
   it("shows the fallback until every branch's idle callback resolves", async () => {
     expect(document.body.textContent).toBe("Loading...");
     expect(container()).toBeNull();

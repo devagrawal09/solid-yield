@@ -1,5 +1,5 @@
 ---
-"@solidjs/blocks": minor
+"solid-blocks": minor
 ---
 
 Untyped throws and the `Failure` constraint (D-019, D-033, D-034). A plain `throw` in a block (not `raise`, and not a failure an `attempt` handler typed) is a bug. In development it is re-thrown as `[UNTYPED_THROW] <host> in <Component>: <message>`, naming the setup, view, hole, memo, effect or event and the component or row, with the original as `cause`. Every place the runtime drives block code goes through one `runAs`, which wraps such a throw exactly once, however many nested runs it crosses. Typed failures (tagged when `raise` throws them or an `attempt` handler returns them, and recognized through Solid's own error wrapper by following `cause`), the library's dev errors and `NotReadyError` (pending, not a failure) pass unchanged. Like any failure the error goes to the nearest `Errored`, or, with none, it is re-thrown: the library installs no root boundary (D-033, new runtime test "a failing view with no Errored re-throws"). Production re-throws the original.

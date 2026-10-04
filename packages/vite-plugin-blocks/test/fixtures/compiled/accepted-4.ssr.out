@@ -17,7 +17,7 @@ var _tmpl$3 = [
 	">",
 	"</s>"
 ];
-import { perform as _$perform } from "@solidjs/blocks";
+import { perform as _$perform } from "solid-blocks";
 function* v() {
 	var _v$3, _v$4, _v$5, _v$6;
 	var _v$ = _$ssrHydrationKey(), _v$2 = cond ? (_v$3 = _$ssrHydrationKey(), _v$4 = _$scope(() => {

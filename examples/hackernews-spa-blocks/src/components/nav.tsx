@@ -1,4 +1,4 @@
-import { $component, view } from "@solidjs/blocks";
+import { $component, view } from "solid-blocks";
 
 const Nav = $component(function* Nav() {
   return view(function* () {

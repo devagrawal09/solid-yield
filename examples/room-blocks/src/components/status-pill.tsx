@@ -6,7 +6,7 @@
 //
 // The hook is set only in the browser: the server half's call is a promise
 // of the branded iterable (in process there is no wire).
-import { $component, $event, $signal, type Source, type Props, view } from "@solidjs/blocks";
+import { $component, $event, $signal, type Source, type Props, view } from "solid-blocks";
 import { isServer } from "@solidjs/web";
 import type { LiveSource, LiveSourceStatus } from "@solidjs/web/server-functions";
 

@@ -1,6 +1,6 @@
 import { createUniqueId } from "solid-js";
 import { Portal } from "@solidjs/web";
-import { $component, $event, $signal, view } from "@solidjs/blocks";
+import { $component, $event, $signal, view } from "solid-blocks";
 
 type Input = InputEvent & { currentTarget: HTMLInputElement };
 

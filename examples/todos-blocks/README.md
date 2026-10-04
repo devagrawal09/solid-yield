@@ -1,6 +1,6 @@
-# TodoMVC — `@solidjs/blocks` twin
+# TodoMVC — `solid-blocks` twin
 
-[`examples/todos`](../todos) written with `@solidjs/blocks` (JSX flavor). `src/todos.ts` (optimistic store over a projection, actions, the error side-channel), `src/api.ts` and `src/filter.ts` are the original's, verbatim; only `src/app.tsx` and `src/main.tsx` changed.
+[`examples/todos`](../todos) written with `solid-blocks` (JSX flavor). `src/todos.ts` (optimistic store over a projection, actions, the error side-channel), `src/api.ts` and `src/filter.ts` are the original's, verbatim; only `src/app.tsx` and `src/main.tsx` changed.
 
 What the library's rules change in the source:
 

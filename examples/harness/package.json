@@ -9,8 +9,8 @@
     "./eslint": "./eslint.config.mjs"
   },
   "dependencies": {
-    "@solidjs/blocks": "workspace:*",
-    "@solidjs/eslint-plugin-blocks": "workspace:*",
+    "solid-blocks": "workspace:*",
+    "eslint-plugin-solid-blocks": "workspace:*",
     "@solidjs/web": "^2.0.0-rc.11",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",

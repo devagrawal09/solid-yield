@@ -7,7 +7,7 @@ import {
   type Source,
   type Props,
   view
-} from "@solidjs/blocks";
+} from "solid-blocks";
 import type { ProfileError } from "./errors";
 
 export interface User {

@@ -6,7 +6,7 @@
  * itself the twin of `packages/compiler/src/blocks_rule.rs`; D-003, D-043).
  *
  * Inside a JSX expression or attribute value, `yield* e` becomes `perform(e)`
- * (imported from `blocksModule`, default `@solidjs/blocks`), so the expression
+ * (imported from `blocksModule`, default `solid-blocks`), so the expression
  * is a call, the JSX compiler treats it as dynamic, and the view generator
  * runs once. Nothing else is lowered and the rule is purely syntactic: a
  * block-component call written as a hole (`{yield* Card({ todo })}`, D-062) is
@@ -36,7 +36,7 @@ export const REFUSALS = {
 /** @typedef {keyof typeof REFUSALS} RefusalCode */
 /** @typedef {"none" | "allowed" | RefusalCode} Hole */
 
-export const DEFAULT_BLOCKS_MODULE = "@solidjs/blocks";
+export const DEFAULT_BLOCKS_MODULE = "solid-blocks";
 
 /**
  * @param {JSXAttributeName} name

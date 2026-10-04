@@ -76,7 +76,7 @@ function _P$(_p, _p2) {
 	Object.defineProperty(this, "children", _d$);
 }
 _P$.prototype = Object.prototype;
-// TodoMVC from examples/todos with @solidjs/blocks (JSX flavor). The data
+// TodoMVC from examples/todos with solid-blocks (JSX flavor). The data
 // layer (`todos.ts`: an optimistic store over a projection, actions, the
 // error side-channel) and `filter.ts` are generator helpers the App's setup
 // delegates to; `api.ts` is the original's.
@@ -89,8 +89,8 @@ _P$.prototype = Object.prototype;
 //   until the first fetch lands); structural reads go through `readStore`;
 // - a view that reads a pending store is pending, so the loading boundary
 //   receives the two sections in its lazy view: `{yield* MainSection(…)}{yield* Footer(…)}`.
-import { perform as _$perform } from "@solidjs/blocks";
-import { $component, $event, $signal, $memo, createContext, Errored, For, Loading, readStore, Show, type Props, view } from "@solidjs/blocks";
+import { perform as _$perform } from "solid-blocks";
+import { $component, $event, $signal, $memo, createContext, Errored, For, Loading, readStore, Show, type Props, view } from "solid-blocks";
 import { createTodos, type Todo } from "./todos";
 import { hashFilter, type Filter } from "./filter";
 /** What a generator helper returns once delegated to. */

@@ -120,12 +120,12 @@ tester.run("no-dollar-block", rules["no-dollar-block"], {
     {
       // a derivation in a setup becomes the setup's $memo; the import follows
       code:
-        'import { $, $component } from "@solidjs/blocks";\n' +
+        'import { $, $component } from "solid-blocks";\n' +
         component(
           "const d = $(function* () { return 1; }); return function* () { return <p>{yield* d}</p>; };"
         ),
       output:
-        'import { $component, $memo } from "@solidjs/blocks";\n' +
+        'import { $component, $memo } from "solid-blocks";\n' +
         component(
           "const d = yield* $memo(function* () { return 1; }); return function* () { return <p>{yield* d}</p>; };"
         ),
@@ -152,9 +152,9 @@ tester.run("no-dollar-block", rules["no-dollar-block"], {
     },
     {
       // rows: `$(function* (item) …)` and `$scope(fn)` are the bare function*
-      code: 'import { $, $scope, For } from "@solidjs/blocks";\nconst a = <For each={xs}>{$(function* (x) { return function* () { return <i />; }; })}</For>;\nconst b = <For each={xs}>{$scope(row)}</For>;',
+      code: 'import { $, $scope, For } from "solid-blocks";\nconst a = <For each={xs}>{$(function* (x) { return function* () { return <i />; }; })}</For>;\nconst b = <For each={xs}>{$scope(row)}</For>;',
       output:
-        'import { For } from "@solidjs/blocks";\nconst a = <For each={xs}>{function* (x) { return function* () { return <i />; }; }}</For>;\nconst b = <For each={xs}>{row}</For>;',
+        'import { For } from "solid-blocks";\nconst a = <For each={xs}>{function* (x) { return function* () { return <i />; }; }}</For>;\nconst b = <For each={xs}>{row}</For>;',
       errors: [
         { messageId: "import" },
         { messageId: "import" },
@@ -164,7 +164,7 @@ tester.run("no-dollar-block", rules["no-dollar-block"], {
     },
     {
       // no fix where no form is equivalent: a module-level source, a JSX child
-      code: 'import { $ } from "@solidjs/blocks";\nconst NOBODY = $(function* () { return null; });',
+      code: 'import { $ } from "solid-blocks";\nconst NOBODY = $(function* () { return null; });',
       output: null,
       errors: [{ messageId: "import" }, { messageId: "other" }]
     },
@@ -219,10 +219,10 @@ tester.run("prefer-view-wrapper", rules["prefer-view-wrapper"], {
   invalid: [
     {
       code:
-        'import { $component } from "@solidjs/blocks";\n' +
+        'import { $component } from "solid-blocks";\n' +
         component("return function* () { return <p />; };"),
       output:
-        'import { $component, view } from "@solidjs/blocks";\n' +
+        'import { $component, view } from "solid-blocks";\n' +
         component("return view(function* () { return <p />; });"),
       errors: [{ messageId: "wrap" }]
     },
@@ -285,7 +285,7 @@ tester.run("jsx-only-in-view", rules["jsx-only-in-view"], {
   ]
 });
 
-const imports = 'import { $component, Show, For, Loading, view } from "@solidjs/blocks";\n';
+const imports = 'import { $component, Show, For, Loading, view } from "solid-blocks";\n';
 const Card =
   "const Card = $component(function* (props) { return view(function* () { return <p />; }); });\n";
 
@@ -491,7 +491,7 @@ tester.run("no-unyielded-write", rules["no-unyielded-write"], {
 
 tester.run("no-foreign-reactive", rules["no-foreign-reactive"], {
   valid: [
-    'import { $signal, $optimisticStore, until, refresh } from "@solidjs/blocks";',
+    'import { $signal, $optimisticStore, until, refresh } from "solid-blocks";',
     'import { lazy, createUniqueId, onCleanup } from "solid-js";',
     'import { query, useNavigate } from "@solidjs/router";',
     'import type { Accessor } from "solid-js";',
@@ -540,7 +540,7 @@ tester.run("no-foreign-reactive", rules["no-foreign-reactive"], {
 });
 
 // --- the lint's refusals ARE the transform's refusals --------------------------------------------------
-// The rule's cases, pinned by @solidjs/vite-plugin-blocks (generated from the fork's Rust rule
+// The rule's cases, pinned by vite-plugin-solid-blocks (generated from the fork's Rust rule
 // before D-043 removed it from the compiler).
 const fixtures = JSON.parse(
   readFileSync(
@@ -566,7 +566,7 @@ describe("transform refusals and lint refusals are the same list", () => {
   const cases = [...fixtures.accepted.map(source => ({ source, code: null })), ...fixtures.refused];
   for (const { source, code } of cases) {
     it(`${code ?? "accepted"}: ${source}`, async () => {
-      const { transform } = await import("@solidjs/vite-plugin-blocks");
+      const { transform } = await import("vite-plugin-solid-blocks");
       let compiled = null;
       try {
         transform(source, { filename: "case.tsx" });

@@ -8,7 +8,7 @@ var _tmpl$ = [
 	"\">Hello <!--$-->",
 	"<!--/--></p>"
 ];
-import { perform as _$perform } from "@solidjs/blocks";
+import { perform as _$perform } from "solid-blocks";
 function* v() {
 	var _v$ = _$ssrHydrationKey(), _v$2 = () => {
 		return _$perform(n) > 3 ? "big" : "";

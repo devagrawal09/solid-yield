@@ -2,7 +2,7 @@ import { dirname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig, type Plugin } from "vitest/config";
 import solid from "@solidjs/vite-plugin";
-import blocks from "@solidjs/vite-plugin-blocks";
+import blocks from "vite-plugin-solid-blocks";
 
 const examples = fileURLToPath(new URL("..", import.meta.url));
 

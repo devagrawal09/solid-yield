@@ -1,5 +1,5 @@
 // Action path: a cancellable checkout saga — examples/effect's checkout with
-// @solidjs/blocks.
+// solid-blocks.
 //
 // `placeOrder` is unchanged: a Solid action whose steps are Effect programs
 // (its `yield*` delegates Effects to the saga driver; it is not a block).
@@ -24,7 +24,7 @@ import {
   type Source,
   type Props,
   view
-} from "@solidjs/blocks";
+} from "solid-blocks";
 import {
   CardDeclinedError,
   chargeCard,

@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const external = ["solid-js", "@solidjs/web", "@solidjs/h", "@solidjs/blocks"];
+const external = ["solid-js", "@solidjs/web", "@solidjs/h", "solid-blocks"];
 
 const variants = [
   { entry: "src/index.ts", out: "dist/blocks.js", dev: false, server: false },

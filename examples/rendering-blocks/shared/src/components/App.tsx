@@ -6,11 +6,11 @@
 // response, string SSR's entry wraps the app in a Loading). So the pages are
 // rendered in call form (`{yield* Profile()}`), which hands their pending /
 // failures on, and the app's type carries them.
-import { $component, isPendingOf, lazy, Match, Switch, view } from "@solidjs/blocks";
+import { $component, isPendingOf, lazy, Match, Switch, view } from "solid-blocks";
 import { Link, RouteHOC, useRouter } from "../router";
 import Profile from "./Profile";
 
-// @solidjs/vite-plugin-blocks gives these calls the module URL that
+// vite-plugin-solid-blocks gives these calls the module URL that
 // @solidjs/vite-plugin's own pass writes only for `lazy` from "solid-js" (D-047).
 const Home = lazy(() => import("./Home"));
 const Settings = lazy(() => import("./Settings"));

@@ -1,5 +1,5 @@
 // Read path: an Effect program consumed directly by a memo — examples/effect's
-// typeahead with @solidjs/blocks.
+// typeahead with solid-blocks.
 //
 // The memo block returns the AsyncIterable `runEffect` builds, exactly as the
 // original's memo does, so Solid still closes a superseded flight's iterator
@@ -24,7 +24,7 @@ import {
   type Source,
   type Props,
   view
-} from "@solidjs/blocks";
+} from "solid-blocks";
 import { searchPackages, TransientNetworkError, type Package } from "./api";
 import { runEffect } from "./solid-effect";
 import { SearchError, TransientError } from "./errors";

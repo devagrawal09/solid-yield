@@ -3,7 +3,7 @@
  * `babelPluginBlocks`: the rule (and the `lazy()` module-URL pass) as a Babel
  * plugin, for a Babel pipeline (`@solidjs/vite-plugin`'s `babel` option, a
  * Babel-only build). Run it before the JSX transform. Options:
- * `blocksModule` (default `@solidjs/blocks`), `lazy` (default `true`).
+ * `blocksModule` (default `solid-blocks`), `lazy` (default `true`).
  *
  * `file.metadata.blocks` records what changed: `{ holes, lazy }` (booleans).
  */

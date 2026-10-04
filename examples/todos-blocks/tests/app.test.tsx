@@ -1,7 +1,7 @@
-// TodoMVC with @solidjs/blocks, driven through jsdom (native compiler, the
+// TodoMVC with solid-blocks, driven through jsdom (native compiler, the
 // block rule): loading, adding, toggling, filtering by hash, toggle all,
 // clear completed, removing, per-item failures with retry, and disposal.
-import { render } from "@solidjs/blocks";
+import { render } from "solid-blocks";
 import { App } from "../src/app";
 import {
   $,

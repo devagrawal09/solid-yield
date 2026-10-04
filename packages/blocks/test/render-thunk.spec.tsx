@@ -4,7 +4,7 @@
  * once and keeps its state, including across a Loading / async round trip.
  */
 import { flush } from "solid-js";
-import { jsx } from "@solidjs/blocks/jsx-runtime";
+import { jsx } from "solid-blocks/jsx-runtime";
 import { jsx as coreJsx } from "@solidjs/h/jsx-runtime";
 import {
   $component,
@@ -15,7 +15,7 @@ import {
   Errored,
   Loading,
   render
-} from "@solidjs/blocks";
+} from "solid-blocks";
 import { toFailed } from "./failed.js";
 
 const tick = () => new Promise<void>(r => setTimeout(r, 0));

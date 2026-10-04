@@ -1,6 +1,6 @@
 {
   "name": "room-blocks-example",
-  "description": "examples/room's /live page (live server functions) with @solidjs/blocks (JSX flavor): same sources, markup and behavior; the original's live server component is not part of the twin (D-058)",
+  "description": "examples/room's /live page (live server functions) with solid-blocks (JSX flavor): same sources, markup and behavior; the original's live server component is not part of the twin (D-058)",
   "version": "0.0.0",
   "private": true,
   "author": "Ryan Carniato",
@@ -15,14 +15,14 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@solidjs/blocks": "workspace:*",
+    "solid-blocks": "workspace:*",
     "@solidjs/router": "2.0.0-next.29",
     "@solidjs/web": "^2.0.0-rc.11",
     "solid-js": "^2.0.0-rc.11"
   },
   "devDependencies": {
     "@solidjs/vite-plugin": "3.0.0-next.35",
-    "@solidjs/vite-plugin-blocks": "workspace:*",
+    "vite-plugin-solid-blocks": "workspace:*",
     "@types/node": "^25.6.0",
     "@vitejs/plugin-basic-ssl": "^2.3.0",
     "blocks-example-harness": "workspace:*",

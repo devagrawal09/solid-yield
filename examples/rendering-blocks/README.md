@@ -1,6 +1,6 @@
-# Rendering modes — `@solidjs/blocks` twin (JSX flavor)
+# Rendering modes — `solid-blocks` twin (JSX flavor)
 
-[`examples/rendering`](../rendering) — one shared app under three render modes: client-only (`csr/`), streaming SSR (`stream/`), string SSR (`string/`) — with the shared app written in `@solidjs/blocks`. The variants' configs, entries and servers are the original's (the entries carry a `@jsxImportSource @solidjs/web` pragma, see below).
+[`examples/rendering`](../rendering) — one shared app under three render modes: client-only (`csr/`), streaming SSR (`stream/`), string SSR (`string/`) — with the shared app written in `solid-blocks`. The variants' configs, entries and servers are the original's (the entries carry a `@jsxImportSource @solidjs/web` pragma, see below).
 
 ```bash
 pnpm test         # behavior (8) + parity against examples/rendering (1): DOM after 29 steps (CSR)

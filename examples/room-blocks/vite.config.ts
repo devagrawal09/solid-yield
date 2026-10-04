@@ -2,7 +2,7 @@ import { fileURLToPath } from "node:url";
 import type { ServerResponse } from "node:http";
 import { defineConfig, type Plugin } from "vite";
 import solid from "@solidjs/vite-plugin";
-import blocks from "@solidjs/vite-plugin-blocks";
+import blocks from "vite-plugin-solid-blocks";
 import basicSsl from "@vitejs/plugin-basic-ssl";
 
 // HTTP/2 in dev. Live sources hold a connection each and a browser allows

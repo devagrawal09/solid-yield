@@ -38,7 +38,7 @@ import {
   readStore,
   refresh,
   type EventCall
-} from "@solidjs/blocks";
+} from "solid-blocks";
 import { api, type Todo as ServerTodo } from "./api";
 
 /** The todo API failed: the color of every todo request's failure. */

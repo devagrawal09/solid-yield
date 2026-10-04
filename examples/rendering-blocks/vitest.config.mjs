@@ -1,6 +1,6 @@
 import { defineConfig } from "vitest/config";
 import solid from "@solidjs/vite-plugin";
-import blocks from "@solidjs/vite-plugin-blocks";
+import blocks from "vite-plugin-solid-blocks";
 
 // The tests render the shared app client-side in jsdom (the CSR variant's
 // `render`), for this twin and for examples/rendering side by side; the SSR

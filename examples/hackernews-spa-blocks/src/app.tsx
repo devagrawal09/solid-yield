@@ -5,7 +5,7 @@
 // tree is built by App's view (JSX only in a view, D-041); a view runs once
 // (D-032), so the router is not re-created.
 import { createRouter, defineRoute } from "@solidjs/router";
-import { $component, Loading, type Component, view } from "@solidjs/blocks";
+import { $component, Loading, type Component, view } from "solid-blocks";
 import Nav from "~/components/nav";
 import Stories, { preload as preloadStories } from "~/routes/stories";
 import Story, { preload as preloadStory } from "~/routes/story";

@@ -6,7 +6,7 @@
 // response, string SSR's entry wraps the app in a Loading). So the pages are
 // rendered in call form (`{yield* Profile()}`), which hands their pending /
 // failures on, and the app's type carries them.
-import { $component, isPendingOf, lazy, Match, Switch, view } from "@solidjs/blocks";
+import { $component, isPendingOf, lazy, Match, Switch, view } from "solid-blocks";
 import { Link, RouteHOC, useRouter } from "../router";
 import Profile from "./Profile";
 

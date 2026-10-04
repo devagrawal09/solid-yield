@@ -1,6 +1,6 @@
-# Room — `@solidjs/blocks` twin (JSX flavor)
+# Room — `solid-blocks` twin (JSX flavor)
 
-[`examples/room`](../room)'s `/live` page — live server functions, SSR with the router — written with `@solidjs/blocks`. The original's `/` page, one live server component, is not part of the twin: the blocks model has no server components (D-058), so the twin serves `/live` at both `/` and `/live`. The wire is the original's, verbatim: `src/lib/sources.ts`, `src/lib/rooms.ts`, `src/server-config.ts`, `server.js`, the chaos plugin in `vite.config.ts`. Every component is a block, the document shell `start` renders into (`src/Document.tsx`) included.
+[`examples/room`](../room)'s `/live` page — live server functions, SSR with the router — written with `solid-blocks`. The original's `/` page, one live server component, is not part of the twin: the blocks model has no server components (D-058), so the twin serves `/live` at both `/` and `/live`. The wire is the original's, verbatim: `src/lib/sources.ts`, `src/lib/rooms.ts`, `src/server-config.ts`, `server.js`, the chaos plugin in `vite.config.ts`. Every component is a block, the document shell `start` renders into (`src/Document.tsx`) included.
 
 ```bash
 pnpm test         # behavior (4) + parity against examples/room (1): DOM + draft after 13 steps on /live

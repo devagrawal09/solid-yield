@@ -60,7 +60,7 @@ if (!source.includes(solidImport))
   throw new Error("jsx-from-web: solid-js Element import not found");
 source = source.replace(
   solidImport,
-  () => 'import type { Element as BlocksElement } from "@solidjs/blocks";'
+  () => 'import type { Element as BlocksElement } from "solid-blocks";'
 );
 
 const element =

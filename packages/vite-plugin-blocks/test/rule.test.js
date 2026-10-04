@@ -94,7 +94,7 @@ describe("transform()", () => {
       const source = readFileSync(join(fixtures, "twins", twin, basename(file)), "utf8");
       const out = transform(source, { filename: twinFilename(twin, file), lazy: false }).code;
       // the import sits on the first statement's line: no line moves
-      const IMPORT = 'import { perform as _$perform } from "@solidjs/blocks"; ';
+      const IMPORT = 'import { perform as _$perform } from "solid-blocks"; ';
       expect(out.split("\n").length).toBe(source.split("\n").length);
       // (each sample's first statement is an import, after its leading comments)
       expect(out.indexOf(IMPORT)).toBe(source.search(/^import /m));
@@ -114,7 +114,7 @@ describe("transform()", () => {
     const source =
       "function* v() { return <ul>{yield* Card({ todo, children: function* () { return <b>{yield* todo.title}</b>; } })}</ul>; }";
     expect(transform(source, { filename: "a.tsx" }).code).toBe(
-      'import { perform as _$perform } from "@solidjs/blocks"; ' +
+      'import { perform as _$perform } from "solid-blocks"; ' +
         "function* v() { return <ul>{_$perform(Card({ todo, children: function* () { return <b>{_$perform(todo.title)}</b>; } }))}</ul>; }"
     );
   });

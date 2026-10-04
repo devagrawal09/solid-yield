@@ -14,7 +14,7 @@ import {
   type Source,
   type Props,
   view
-} from "@solidjs/blocks";
+} from "solid-blocks";
 import { isServer } from "@solidjs/web";
 
 interface RouterValue {

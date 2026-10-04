@@ -19,7 +19,7 @@ const $ = <T extends HTMLElement = HTMLElement>(sel: string) => document.querySe
 const $$ = (sel: string) => [...document.querySelectorAll<HTMLElement>(sel)];
 const tabs = () => $$("ul.inline li").map(li => li.className);
 
-describe("rendering with @solidjs/blocks", () => {
+describe("rendering with solid-blocks", () => {
   it("starts on Home with its ticker running", async () => {
     expect(tabs()[0]).toBe("selected");
     expect($("h1")?.textContent).toBe("Welcome to this Simple Routing Example");

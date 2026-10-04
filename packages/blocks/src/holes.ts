@@ -8,7 +8,7 @@
  * plain thunk is not a hole (it would be a hidden read) and is rejected by
  * the types.
  */
-import { holeOf, perform, READ, isGeneratorFunction, runRow } from "@solidjs/blocks";
+import { holeOf, perform, READ, isGeneratorFunction, runRow } from "solid-blocks";
 import type { Element } from "./element.js";
 import type {
   ChildView,

@@ -1,5 +1,5 @@
 ---
-"@solidjs/blocks": minor
+"solid-blocks": minor
 ---
 
 Development builds now check setter receipts at run time (D-021, D-028). A setter call returns a receipt that writes only when it is delegated to (`yield* setX(v)`). Every block run (a setup, a view, a hole, a memo run, an effect run) now records the receipts minted during it, and when the run ends normally any receipt not delegated to is `[UNYIELDED_WRITE] a $signal's setter in <Component>`. An `$event` call checks once when its body ends, not after each step, so a receipt minted before an async `attempt` and delegated to after it is fine. The `no-unyielded-write` lint stays for editor-time feedback; the runtime check also sees a setter handed to a helper or called in a callback. A setter called with no block running (handed to plain code such as `onClick={setX}` or a timer) throws `[SETTER_OUTSIDE_RUN] … called outside a block run` at the call, because there is no run to report at; production keeps the silent no-op. Receipts name their creator (`$signal`, `$store`, `$optimistic`, `$optimisticStore`). The package's tests now drive their writes through an `$event`, as a DOM event would, instead of iterating a receipt from plain code.

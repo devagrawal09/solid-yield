@@ -1,6 +1,6 @@
-# HackerNews (SSR-SPA baseline) — `@solidjs/blocks` twin (JSX flavor)
+# HackerNews (SSR-SPA baseline) — `solid-blocks` twin (JSX flavor)
 
-[`examples/hackernews-spa`](../hackernews-spa) — the same app as the server-components HackerNews, but server functions return JSON and client components render everything — written with `@solidjs/blocks`. The data layer (`src/lib/hn.ts`, `src/lib/api.ts`: server functions wrapped in the router's `query`), the route tree and preloads, `server.js` and the styles are the original's (the 600KB thread capture is imported from the original, not duplicated).
+[`examples/hackernews-spa`](../hackernews-spa) — the same app as the server-components HackerNews, but server functions return JSON and client components render everything — written with `solid-blocks`. The data layer (`src/lib/hn.ts`, `src/lib/api.ts`: server functions wrapped in the router's `query`), the route tree and preloads, `server.js` and the styles are the original's (the 600KB thread capture is imported from the original, not duplicated).
 
 ```bash
 pnpm test         # behavior (7) + parity against examples/hackernews-spa (1): URL + DOM after 15 steps

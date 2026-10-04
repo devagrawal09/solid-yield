@@ -1,6 +1,6 @@
-# TodoMVC — `@solidjs/blocks` twin, no-JSX flavor (`h`)
+# TodoMVC — `solid-blocks` twin, no-JSX flavor (`h`)
 
-[`examples/todos`](../todos) written with `@solidjs/blocks` and `@solidjs/blocks/h`: no JSX in the app (`src/app.ts`), no JSX transform needed for the views. The data layer (`todos.ts`, `api.ts`, `filter.ts`) is the original's, verbatim. The JSX-flavor twin is [`todos-blocks`](../todos-blocks).
+[`examples/todos`](../todos) written with `solid-blocks` and `solid-blocks/h`: no JSX in the app (`src/app.ts`), no JSX transform needed for the views. The data layer (`todos.ts`, `api.ts`, `filter.ts`) is the original's, verbatim. The JSX-flavor twin is [`todos-blocks`](../todos-blocks).
 
 How the no-JSX flavor reads:
 

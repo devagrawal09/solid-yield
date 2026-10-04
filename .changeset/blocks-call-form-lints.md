@@ -1,5 +1,5 @@
 ---
-"@solidjs/eslint-plugin-blocks": minor
+"eslint-plugin-solid-blocks": minor
 ---
 
 Three new rules for the call form (D-062, D-065, D-066, D-067), each with an autofix. All three are errors in `recommended`, which they join together with the types that refuse block component tags.

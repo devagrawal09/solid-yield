@@ -1,6 +1,6 @@
 // A fixture app for the source-map test (test/vite.test.js): holes rewritten
 // above the deliberate throw, and a hole on the same line as a call.
-import { $component, type Props, view } from "@solidjs/blocks";
+import { $component, type Props, view } from "solid-blocks";
 import { renderToString } from "@solidjs/web";
 
 export const Card = $component(function* Card(props: Props<{ title: string; n: number }>) {

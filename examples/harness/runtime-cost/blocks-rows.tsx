@@ -1,6 +1,6 @@
-// The same table with @solidjs/blocks, uncompiled: rows are row blocks that
+// The same table with solid-blocks, uncompiled: rows are row blocks that
 // read their fields in holes.
-import { $component, $event, $store, For, render } from "@solidjs/blocks";
+import { $component, $event, $store, For, render } from "solid-blocks";
 import { flush } from "solid-js";
 
 type Row = { id: number; label: string };

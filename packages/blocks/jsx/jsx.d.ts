@@ -5,7 +5,7 @@
 
 import * as csstype from "csstype";
 import type { PropKey, WidenPropValue } from "./jsx-properties.js";
-import type { Element as BlocksElement, TagType as BlocksTagType } from "@solidjs/blocks";
+import type { Element as BlocksElement, TagType as BlocksTagType } from "solid-blocks";
 
 /**
  * Originally based on JSX types for Surplus and Inferno and adapted for Solid.

@@ -6,6 +6,8 @@ Decision log for the blocks-library build-out on `blocks-lib`. One entry per dec
 
 Reading order with the rest of the plan: `blocks-library.md` (the reference), this file, `blocks-gate-baseline.md` (what "green" means).
 
+> **Names (Phase 3).** Entries written in the Solid fork use the in-repo names `@solidjs/blocks`, `@solidjs/vite-plugin-blocks` and `@solidjs/eslint-plugin-blocks`, and the lint prefix `@solidjs/blocks/<rule>`. They are left as written (a log is not edited). Since the extraction's rename commit (D-011) the packages are `solid-blocks`, `vite-plugin-solid-blocks` and `eslint-plugin-solid-blocks`, and the lint prefix is `solid-blocks/<rule>`. Fork paths in entries (`documentation/plans/…`, `examples/blocks-harness`, `examples/<original>`) are `documentation/…`, `examples/harness` and `examples/originals/<original>` here.
+
 ## Index
 
 | ID | Status | Decision |

@@ -6,12 +6,12 @@
     "declaration": false,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "jsx": "preserve",
-    "jsxImportSource": "@solidjs/blocks",
+    "jsxImportSource": "solid-blocks",
     "types": ["vitest/globals"],
     "paths": {
-      "@solidjs/blocks": ["./src/index.ts"],
-      "@solidjs/blocks/h": ["./src/h.ts"],
-      "@solidjs/blocks/jsx-runtime": ["./jsx/jsx-runtime.d.ts"]
+      "solid-blocks": ["./src/index.ts"],
+      "solid-blocks/h": ["./src/h.ts"],
+      "solid-blocks/jsx-runtime": ["./jsx/jsx-runtime.d.ts"]
     }
   },
   "include": ["./src", "./test"]

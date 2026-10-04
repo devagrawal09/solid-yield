@@ -1,8 +1,8 @@
-// The lint every `-blocks` twin runs: @solidjs/eslint-plugin-blocks
+// The lint every `-blocks` twin runs: eslint-plugin-solid-blocks
 // (recommended: every rule an error) plus no explicit `any`.
 import tsParser from "@typescript-eslint/parser";
 import tsPlugin from "@typescript-eslint/eslint-plugin";
-import blocks from "@solidjs/eslint-plugin-blocks";
+import blocks from "eslint-plugin-solid-blocks";
 
 // `files`: the block code (default `src/`).
 export default function blocksConfig(extra = [], files = ["src/**/*.{ts,tsx}"]) {
@@ -22,7 +22,7 @@ export default function blocksConfig(extra = [], files = ["src/**/*.{ts,tsx}"]) 
         ecmaVersion: 2024,
         sourceType: "module"
       },
-      plugins: { "@solidjs/blocks": blocks, "@typescript-eslint": tsPlugin },
+      plugins: { "solid-blocks": blocks, "@typescript-eslint": tsPlugin },
       rules: {
         ...blocks.configs.recommended.rules,
         "@typescript-eslint/no-explicit-any": "error"

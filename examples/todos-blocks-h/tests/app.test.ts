@@ -1,7 +1,7 @@
-// TodoMVC with @solidjs/blocks in the no-JSX flavor (views built with h),
+// TodoMVC with solid-blocks in the no-JSX flavor (views built with h),
 // driven through jsdom: loading, adding, toggling, filtering by hash, toggle
 // all, clear completed, removing, per-item failures with retry, disposal.
-import { render } from "@solidjs/blocks";
+import { render } from "solid-blocks";
 import { App } from "../src/app";
 import {
   $,

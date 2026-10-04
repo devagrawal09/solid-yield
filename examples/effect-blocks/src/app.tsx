@@ -8,7 +8,7 @@ import {
   Show,
   type Props,
   view
-} from "@solidjs/blocks";
+} from "solid-blocks";
 import { Typeahead } from "./typeahead";
 import { Checkout } from "./checkout";
 import { createLog, type Log } from "./log";

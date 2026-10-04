@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// The runtime cost of @solidjs/blocks run uncompiled (the library's
+// The runtime cost of solid-blocks run uncompiled (the library's
 // interpreter; the JSX transform's one rule) against handwritten Solid on
 // the same runtime.
 //
@@ -136,7 +136,7 @@ for (const [workload, kind] of [
 }
 
 console.log(`\nInstructions per operation (valgrind cachegrind, node --jitless, ${reps} reps, minus a 0-rep baseline):\n`);
-console.log("| workload | handwritten Solid | @solidjs/blocks (uncompiled) | ratio |" + (wall ? " wall Solid / blocks (JIT, ms) |" : ""));
+console.log("| workload | handwritten Solid | solid-blocks (uncompiled) | ratio |" + (wall ? " wall Solid / blocks (JIT, ms) |" : ""));
 console.log("| --- | ---: | ---: | ---: |" + (wall ? " ---: |" : ""));
 const label = { todos: "todos: add + toggle", create: "1,000 rows: create + clear", update: "1,000 rows: update every 10th" };
 for (const r of rows)

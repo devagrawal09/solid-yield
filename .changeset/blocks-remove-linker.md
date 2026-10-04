@@ -1,5 +1,5 @@
 ---
-"@solidjs/eslint-plugin-blocks": minor
+"eslint-plugin-solid-blocks": minor
 ---
 
 The type linker is removed (D-023): prop colors are declared on the props type (`Props<{ todo: Source<Todo, FetchError, true> }>`, D-068) and TypeScript checks every call site locally. Removed with it:

@@ -1,4 +1,4 @@
-import { $cleanup, $component, $event, $settled, $signal, view } from "@solidjs/blocks";
+import { $cleanup, $component, $event, $settled, $signal, view } from "solid-blocks";
 
 const Home = $component(function* Home() {
   const [s, set] = yield* $signal(0);

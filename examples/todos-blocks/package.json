@@ -1,6 +1,6 @@
 {
   "name": "todos-blocks-example",
-  "description": "examples/todos (TodoMVC) with @solidjs/blocks (JSX flavor): same data layer, markup and behavior",
+  "description": "examples/todos (TodoMVC) with solid-blocks (JSX flavor): same data layer, markup and behavior",
   "version": "0.0.0",
   "private": true,
   "author": "Ryan Carniato",
@@ -15,9 +15,9 @@
     "lint": "eslint src"
   },
   "devDependencies": {
-    "@solidjs/blocks": "workspace:*",
+    "solid-blocks": "workspace:*",
     "@solidjs/vite-plugin": "3.0.0-next.35",
-    "@solidjs/vite-plugin-blocks": "workspace:*",
+    "vite-plugin-solid-blocks": "workspace:*",
     "@solidjs/web": "^2.0.0-rc.11",
     "@types/node": "^25.6.0",
     "blocks-example-harness": "workspace:*",

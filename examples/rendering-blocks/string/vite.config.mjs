@@ -3,7 +3,7 @@ import { defineConfig } from "vite";
 // default, native lazy/refresh passes, solid-js/refresh HMR runtime, and
 // the built-in lazy() manifest handling (`virtual:solid-manifest`).
 import solid from "@solidjs/vite-plugin";
-import blocks from "@solidjs/vite-plugin-blocks";
+import blocks from "vite-plugin-solid-blocks";
 
 export default defineConfig({
   root: import.meta.dirname,

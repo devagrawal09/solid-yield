@@ -1,6 +1,6 @@
 import { defineConfig } from "vite";
 import solid from "@solidjs/vite-plugin";
-import blocks from "@solidjs/vite-plugin-blocks";
+import blocks from "vite-plugin-solid-blocks";
 
 export default defineConfig({
   plugins: [blocks(), solid()],

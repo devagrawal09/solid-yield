@@ -2,7 +2,7 @@ import { template as _$template } from "@solidjs/web";
 import { insert as _$insert } from "@solidjs/web";
 import { effect as _$effect } from "@solidjs/web";
 var _tmpl$ = /* @__PURE__ */ _$template(`<p>Hello `);
-import { perform as _$perform } from "@solidjs/blocks";
+import { perform as _$perform } from "solid-blocks";
 function* v() {
 	var _el$ = _tmpl$();
 	var _el$2 = _el$.firstChild;

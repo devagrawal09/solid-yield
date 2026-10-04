@@ -1,4 +1,4 @@
-import { $component, $event, $signal, type Element, type Props, view } from "@solidjs/blocks";
+import { $component, $event, $signal, type Element, type Props, view } from "solid-blocks";
 
 // A comment's collapse toggle: its own state (a `$signal`), its handler an
 // `$event`.

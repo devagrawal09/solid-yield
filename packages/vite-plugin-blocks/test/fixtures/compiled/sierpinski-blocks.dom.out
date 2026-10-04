@@ -7,7 +7,7 @@ import { addEvent as _$addEvent } from "@solidjs/web";
 var _tmpl$ = /* @__PURE__ */ _$template(`<div class=container>`);
 var _tmpl$2 = /* @__PURE__ */ _$template(`<div class=dot>`);
 // The Sierpinski triangle stress test from examples/sierpinski, written with
-// @solidjs/blocks (JSX flavor). Same markup, same timing, same behavior.
+// solid-blocks (JSX flavor). Same markup, same timing, same behavior.
 //
 // What the library's rules change in the source (see the README):
 // - A setup does not read (D-042) and a view does not branch (D-032): the
@@ -18,8 +18,8 @@ var _tmpl$2 = /* @__PURE__ */ _$template(`<div class=dot>`);
 //   that reads a pending child is pending itself, so the container moves
 //   into its own component and the boundary receives it as a pending view.
 // - Timer and frame callbacks are `$event`s.
-import { perform as _$perform } from "@solidjs/blocks";
-import { $cleanup, $component, $event, $memo, $signal, attempt, Errored, Loading, Match, Switch, type Component, type Props, type Source, view } from "@solidjs/blocks";
+import { perform as _$perform } from "solid-blocks";
+import { $cleanup, $component, $event, $memo, $signal, attempt, Errored, Loading, Match, Switch, type Component, type Props, type Source, view } from "solid-blocks";
 import { onCleanup } from "solid-js";
 // `children` is the seconds a dot shows: Container passes them settled, a
 // triangle passes its own idle-time memo down — pending, failing with an

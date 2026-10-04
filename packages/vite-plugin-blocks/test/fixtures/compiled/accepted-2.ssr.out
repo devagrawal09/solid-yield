@@ -29,7 +29,7 @@ function _P$() {
 	Object.defineProperty(this, "children", _d$2);
 }
 _P$.prototype = Object.prototype;
-import { perform as _$perform } from "@solidjs/blocks";
+import { perform as _$perform } from "solid-blocks";
 function* v() {
 	return _$Show(new _P$());
 }

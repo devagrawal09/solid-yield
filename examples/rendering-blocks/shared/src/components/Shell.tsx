@@ -1,4 +1,4 @@
-import { $component, type Element, type Props, view } from "@solidjs/blocks";
+import { $component, type Element, type Props, view } from "solid-blocks";
 import { HydrationScript } from "@solidjs/web";
 
 /**

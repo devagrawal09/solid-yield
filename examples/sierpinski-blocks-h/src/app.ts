@@ -1,5 +1,5 @@
 // The Sierpinski triangle stress test from examples/sierpinski, written with
-// @solidjs/blocks, no-JSX flavor: views are built with `h`. Same markup,
+// solid-blocks, no-JSX flavor: views are built with `h`. Same markup,
 // same timing, same behavior as the original and the JSX twin
 // (examples/sierpinski-blocks).
 //
@@ -24,8 +24,8 @@ import {
   type Props,
   type Source,
   view
-} from "@solidjs/blocks";
-import { h } from "@solidjs/blocks/h";
+} from "solid-blocks";
+import { h } from "solid-blocks/h";
 import { onCleanup } from "solid-js";
 
 // `children` is the seconds a dot shows: Container passes them settled, a

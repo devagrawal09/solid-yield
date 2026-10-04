@@ -1,4 +1,4 @@
-import { $component, $memo, attempt, lazy, view } from "@solidjs/blocks";
+import { $component, $memo, attempt, lazy, view } from "solid-blocks";
 import type { User } from "./Profile";
 import { ProfileError } from "./errors";
 

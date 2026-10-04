@@ -12,9 +12,9 @@
  * returning it is pending when any hole is.
  */
 import solidH from "@solidjs/h";
-import type { JSX } from "@solidjs/blocks/jsx-runtime";
+import type { JSX } from "solid-blocks/jsx-runtime";
 import { toHole, toHoleProps, type Hole, type HViewOf, type OpsOfHole } from "./holes.js";
-import { blockName, READ } from "@solidjs/blocks";
+import { blockName, READ } from "solid-blocks";
 import type {
   ChildView,
   Component,

@@ -20,7 +20,7 @@ function _P$(_p) {
 	this.children = _p;
 }
 _P$.prototype = Object.prototype;
-import { perform as _$perform } from "@solidjs/blocks";
+import { perform as _$perform } from "solid-blocks";
 function* v() {
 	return _$For(new _P$(function* (x) {
 		const s = yield* $signal(1);

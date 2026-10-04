@@ -1,4 +1,4 @@
-// TodoMVC from examples/todos with @solidjs/blocks, no-JSX flavor: views are
+// TodoMVC from examples/todos with solid-blocks, no-JSX flavor: views are
 // built with `h` (no JSX transform, no build step needed for the views).
 // Same data layer, markup and behavior as the original and the JSX twin.
 //
@@ -19,8 +19,8 @@ import {
   Show,
   type Props,
   view
-} from "@solidjs/blocks";
-import { h } from "@solidjs/blocks/h";
+} from "solid-blocks";
+import { h } from "solid-blocks/h";
 import { createTodos, type Todo } from "./todos";
 import { hashFilter, type Filter } from "./filter";
 

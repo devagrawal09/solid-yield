@@ -2,7 +2,7 @@
 // under the tab's identity. The tree is built by the view (JSX only in a
 // view, D-041); a view runs once (D-032), so the router is not re-created.
 import { createRouter } from "@solidjs/router";
-import { $component, Loading, view } from "@solidjs/blocks";
+import { $component, Loading, view } from "solid-blocks";
 import { IdentityProvider } from "~/lib/identity";
 import { routes } from "~/routes";
 import "./app.css";

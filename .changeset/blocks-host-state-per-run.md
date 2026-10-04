@@ -1,5 +1,5 @@
 ---
-"@solidjs/blocks": patch
+"solid-blocks": patch
 ---
 
 The runtime's host state is now one value per run. The state is which block kind is running, the running effect's cleanups, whether a memo has resumed after its first async `attempt`, the view whose top level is running, and whether a read comes from a JSX position. One `runAs(host, run)` replaces it whole for every place block code is driven (a setup, a view, a hole, a memo's first run and each resumption, an effect run, each step of an event, a `$snapshot`, a generator delegated to in a JSX position) and restores the outer state after. Before, each site saved and restored only the variables it knew about. A run started inside another could therefore inherit the outer run's flags. A view built while an async `$memo` resumed (a component created by the memo's body after its `attempt`) had its holes fail with `[READ_AFTER_ATTEMPT]`, because the resumed flag was still set while those holes made their first reads. A generator delegated to in a JSX position (`{yield* matches("a")}`) now runs as a hole. The dev errors for an operation an event or a resumed memo cannot perform also name that host instead of the caller's.

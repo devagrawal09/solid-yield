@@ -1,9 +1,14 @@
 {
-  "name": "@solidjs/eslint-plugin-blocks",
-  "description": "ESLint rules for @solidjs/blocks: the strict rules TypeScript cannot express (no throw in blocks, no reads outside holes, yield* only in JSX holes, reads before the first attempt, no writes in reactive blocks, typed-props keys).",
+  "name": "eslint-plugin-solid-blocks",
+  "description": "ESLint rules for solid-blocks: the strict rules TypeScript cannot express (no throw in blocks, no reads outside holes, yield* only in JSX holes, reads before the first attempt, no writes in reactive blocks, typed-props keys).",
   "version": "0.0.0",
   "author": "Ryan Carniato",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/devagrawal09/solid-blocks.git",
+    "directory": "packages/eslint-plugin-blocks"
+  },
   "type": "module",
   "main": "./src/index.js",
   "exports": {
@@ -20,7 +25,7 @@
     "eslint": ">=9"
   },
   "devDependencies": {
-    "@solidjs/vite-plugin-blocks": "workspace:*",
+    "vite-plugin-solid-blocks": "workspace:*",
     "@typescript-eslint/parser": "^8.0.0",
     "eslint": "^9.0.0"
   }

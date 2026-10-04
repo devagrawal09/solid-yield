@@ -1,4 +1,4 @@
-import { $component, For, Show, type Component, type Props, view } from "@solidjs/blocks";
+import { $component, For, Show, type Component, type Props, view } from "solid-blocks";
 import type { CommentDefinition } from "~/types";
 import Toggle from "./toggle";
 

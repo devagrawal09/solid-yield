@@ -1,5 +1,5 @@
 {
-  "$comment": "The JSX transform's block rule. Generated once by generate.mjs from the fork's Rust compiler (packages/compiler/src/blocks_rule.rs and tests/blocks-rule-fixtures.json, both removed by D-043): `refusals` is exactly the list of codes the rule refuses, `refused[].error` the compiler's message, compiled/accepted-<n>.<mode>.out its output for accepted[n]. The plugin and the ESLint rule `@solidjs/blocks/yield-in-jsx-hole` are tested against this file.",
+  "$comment": "The JSX transform's block rule. Generated once by generate.mjs from the fork's Rust compiler (packages/compiler/src/blocks_rule.rs and tests/blocks-rule-fixtures.json, both removed by D-043): `refusals` is exactly the list of codes the rule refuses, `refused[].error` the compiler's message, compiled/accepted-<n>.<mode>.out its output for accepted[n]. The plugin and the ESLint rule `solid-blocks/yield-in-jsx-hole` are tested against this file.",
   "version": 1,
   "refusals": [
     "BLOCKS_YIELD_IN_EVENT",

@@ -146,7 +146,7 @@ export function registerInstance(url: string | undefined): void {
   if (prev && (prev.url === undefined || url === undefined || prev.url !== url))
     throw devError(
       "DUPLICATE_RUNTIME",
-      `two copies of @solidjs/blocks are loaded: ${prev.url ?? "(unknown URL)"} and ${url ?? "(unknown URL)"}. ` +
+      `two copies of solid-blocks are loaded: ${prev.url ?? "(unknown URL)"} and ${url ?? "(unknown URL)"}. ` +
         "An app holds one runtime: dedupe the dependency (one version, one install), and keep the package external in bundles."
     );
   g[INSTANCE] = { url };

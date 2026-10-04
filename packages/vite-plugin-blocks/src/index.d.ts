@@ -12,7 +12,7 @@ export declare const REFUSALS: {
 };
 export type RefusalCode = keyof typeof REFUSALS;
 
-/** `"@solidjs/blocks"`: where `perform` is imported from unless configured. */
+/** `"solid-blocks"`: where `perform` is imported from unless configured. */
 export declare const DEFAULT_BLOCKS_MODULE: string;
 
 export interface Refusal {
@@ -59,7 +59,7 @@ export declare function babelPluginBlocks(
 export interface TransformOptions {
   /** The module's file name: picks the parser dialect and names the map's source. */
   filename: string;
-  /** Where `perform` and `lazy` come from (default `"@solidjs/blocks"`). */
+  /** Where `perform` and `lazy` come from (default `"solid-blocks"`). */
   blocksModule?: string;
   /** The `lazy()` module-URL pass (default `true`). */
   lazy?: boolean;
@@ -79,7 +79,7 @@ export declare function transform(code: string, options: TransformOptions): Tran
 export declare function parserPlugins(filename: string): string[];
 
 export interface BlocksPluginOptions {
-  /** Where `perform` and `lazy` come from (default `"@solidjs/blocks"`). */
+  /** Where `perform` and `lazy` come from (default `"solid-blocks"`). */
   blocksModule?: string;
   /** Annotate `lazy(() => import("…"))` from the blocks module with its module URL (default `true`, D-047). */
   lazy?: boolean;

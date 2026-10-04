@@ -1,5 +1,5 @@
 // The Sierpinski triangle stress test from examples/sierpinski, written with
-// @solidjs/blocks (JSX flavor). Same markup, same timing, same behavior.
+// solid-blocks (JSX flavor). Same markup, same timing, same behavior.
 //
 // What the library's rules change in the source (see the README):
 // - A setup does not read (D-042) and a view does not branch (D-032): the
@@ -25,7 +25,7 @@ import {
   type Props,
   type Source,
   view
-} from "@solidjs/blocks";
+} from "solid-blocks";
 import { onCleanup } from "solid-js";
 
 // `children` is the seconds a dot shows: Container passes them settled, a

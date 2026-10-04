@@ -1,4 +1,4 @@
-import { $component, Show, type Props, view } from "@solidjs/blocks";
+import { $component, Show, type Props, view } from "solid-blocks";
 import type { StoryDefinition } from "../types";
 
 const Story = $component(function* Story(props: Props<{ story: StoryDefinition }>) {

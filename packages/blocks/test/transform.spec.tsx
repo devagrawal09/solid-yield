@@ -18,7 +18,7 @@ import {
   Show,
   type Props,
   view
-} from "@solidjs/blocks";
+} from "solid-blocks";
 import { toFailed } from "./failed.js";
 import { write } from "./write.js";
 

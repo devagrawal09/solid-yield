@@ -1,4 +1,4 @@
-// TodoMVC from examples/todos with @solidjs/blocks (JSX flavor). The data
+// TodoMVC from examples/todos with solid-blocks (JSX flavor). The data
 // layer (`todos.ts`: an optimistic store over a projection, actions, the
 // error side-channel) and `filter.ts` are generator helpers the App's setup
 // delegates to; `api.ts` is the original's.
@@ -24,7 +24,7 @@ import {
   Show,
   type Props,
   view
-} from "@solidjs/blocks";
+} from "solid-blocks";
 import { createTodos, type Todo } from "./todos";
 import { hashFilter, type Filter } from "./filter";
 

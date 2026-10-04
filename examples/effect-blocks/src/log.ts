@@ -5,7 +5,7 @@
 //
 // The log is block state: `createLog()` (in the app's setup) creates the
 // store and its writers, and registers the writer `log()` hands entries to.
-import { $cleanup, $event, $store } from "@solidjs/blocks";
+import { $cleanup, $event, $store } from "solid-blocks";
 
 export type LogKind = "start" | "success" | "retry" | "interrupt" | "compensate" | "error";
 

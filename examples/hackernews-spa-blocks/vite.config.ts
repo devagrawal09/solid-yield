@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 import solid from "@solidjs/vite-plugin";
-import blocks from "@solidjs/vite-plugin-blocks";
+import blocks from "vite-plugin-solid-blocks";
 
 // examples/hackernews-spa's turnkey SSR: `start: {}` (with `ssr: true`)
 // generates the entries and the serving layer around src/app.tsx;

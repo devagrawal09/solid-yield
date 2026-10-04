@@ -31,7 +31,7 @@ import {
   Show,
   type Props,
   view
-} from "@solidjs/blocks";
+} from "solid-blocks";
 import { Failed } from "../failed.js";
 
 const strip = (html: string) =>

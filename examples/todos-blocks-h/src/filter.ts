@@ -1,4 +1,4 @@
-import { $cleanup, $event, $settled, $signal } from "@solidjs/blocks";
+import { $cleanup, $event, $settled, $signal } from "solid-blocks";
 
 export type Filter = "all" | "active" | "completed";
 

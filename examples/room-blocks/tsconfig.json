@@ -7,7 +7,7 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "jsx": "preserve",
-    "jsxImportSource": "@solidjs/blocks",
+    "jsxImportSource": "solid-blocks",
     "allowJs": true,
     "strict": true,
     "noEmit": true,

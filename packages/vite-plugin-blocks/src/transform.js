@@ -35,7 +35,7 @@ export function parserPlugins(filename) {
 /**
  * @typedef {object} TransformOptions
  * @property {string} filename the module's file name (picks the parser dialect; names the map's source)
- * @property {string} [blocksModule] the module `perform` and `lazy` come from (default `@solidjs/blocks`)
+ * @property {string} [blocksModule] the module `perform` and `lazy` come from (default `solid-blocks`)
  * @property {boolean} [lazy] the `lazy()` module-URL pass (default `true`)
  * @property {boolean} [sourceMap] produce a source map (default `true`)
  */

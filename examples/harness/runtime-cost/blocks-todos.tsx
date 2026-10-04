@@ -1,6 +1,6 @@
-// The same todo list with @solidjs/blocks, uncompiled (the runtime
+// The same todo list with solid-blocks, uncompiled (the runtime
 // interpreter; only the JSX transform's yield*-in-JSX rule).
-import { $component, $event, $store, For, render } from "@solidjs/blocks";
+import { $component, $event, $store, For, render } from "solid-blocks";
 import { flush } from "solid-js";
 
 type Todo = { id: number; title: string; done: boolean };

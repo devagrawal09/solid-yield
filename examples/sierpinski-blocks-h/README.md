@@ -1,6 +1,6 @@
-# Sierpinski — `@solidjs/blocks` twin, no-JSX flavor (`h`)
+# Sierpinski — `solid-blocks` twin, no-JSX flavor (`h`)
 
-[`examples/sierpinski`](../sierpinski) written with `@solidjs/blocks` and `@solidjs/blocks/h`: no JSX in the app (`src/app.ts`), no JSX transform involved in the views. The JSX-flavor twin is [`sierpinski-blocks`](../sierpinski-blocks); the setups follow the same rules (a setup does not read: positions are lazy memos over the props and the leaf-or-branch choice a `Show` over a hole; timer / frame callbacks are `$event`s).
+[`examples/sierpinski`](../sierpinski) written with `solid-blocks` and `solid-blocks/h`: no JSX in the app (`src/app.ts`), no JSX transform involved in the views. The JSX-flavor twin is [`sierpinski-blocks`](../sierpinski-blocks); the setups follow the same rules (a setup does not read: positions are lazy memos over the props and the leaf-or-branch choice a `Show` over a hole; timer / frame callbacks are `$event`s).
 
 What changes in the no-JSX flavor:
 

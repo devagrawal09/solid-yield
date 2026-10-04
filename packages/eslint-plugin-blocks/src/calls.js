@@ -45,7 +45,7 @@ function hasBrand(type, seen = new Set()) {
 /**
  * Whether `node` (an Identifier, a JSXIdentifier, a member expression) names a
  * block component. With type information: it returns a marked view. Without:
- * imported from `@solidjs/blocks` (the flow controls and boundaries), or bound
+ * imported from `solid-blocks` (the flow controls and boundaries), or bound
  * to `$component(…)` / `lazy(…)`. Unknown (a component imported from another
  * module, without types) is not reported.
  */
@@ -64,7 +64,7 @@ export function isBlockComponent(context, node) {
   const def = v && v.defs[0];
   if (!def) return FLOW.has(name);
   if (def.type === "ImportBinding")
-    return def.parent.source.value === "@solidjs/blocks" && def.parent.importKind !== "type";
+    return def.parent.source.value === "solid-blocks" && def.parent.importKind !== "type";
   const init = def.node && def.node.init;
   return (
     !!init &&
@@ -194,14 +194,12 @@ export function inGenerator(node) {
   return !!fn && !!fn.generator;
 }
 
-/** A fix that imports `view` from @solidjs/blocks when a fix used it and it is missing. */
+/** A fix that imports `view` from solid-blocks when a fix used it and it is missing. */
 export function importView(context, fixer) {
   const source = context.sourceCode;
   const blocks = source.ast.body.find(
     s =>
-      s.type === "ImportDeclaration" &&
-      s.source.value === "@solidjs/blocks" &&
-      s.importKind !== "type"
+      s.type === "ImportDeclaration" && s.source.value === "solid-blocks" && s.importKind !== "type"
   );
   if (!blocks) return null;
   if (blocks.specifiers.some(s => s.type === "ImportSpecifier" && s.local.name === "view"))

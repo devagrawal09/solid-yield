@@ -12,7 +12,7 @@ const app = fileURLToPath(new URL("./fixtures/app/", import.meta.url));
 const renderingTwin = fileURLToPath(
   new URL("../../../examples/rendering-blocks/", import.meta.url)
 );
-const IMPORT = 'import { lazy } from "@solidjs/blocks";\n';
+const IMPORT = 'import { lazy } from "solid-blocks";\n';
 const run = (code, options) =>
   transform(code, { filename: "/src/a.tsx", ...options })?.code ?? null;
 const placeholder = spec => JSON.stringify(LAZY_PLACEHOLDER_PREFIX + spec);
@@ -44,7 +44,7 @@ describe("which calls are annotated (the compiler's lazy pass, for the blocks mo
       // solid-js's lazy: @solidjs/vite-plugin's own pass
       'import { lazy } from "solid-js";\nlazy(() => import("./A"));',
       // an aliased import, as in the compiler's pass
-      'import { lazy as l } from "@solidjs/blocks";\nl(() => import("./A"));',
+      'import { lazy as l } from "solid-blocks";\nl(() => import("./A"));',
       // a shadowed `lazy`
       IMPORT + 'function f(lazy) { return lazy(() => import("./A")); }',
       // not a literal specifier, not a bare import, a spread options slot

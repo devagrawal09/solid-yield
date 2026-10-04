@@ -1,6 +1,6 @@
-# Sierpinski — `@solidjs/blocks` twin
+# Sierpinski — `solid-blocks` twin
 
-[`examples/sierpinski`](../sierpinski) written with `@solidjs/blocks` (JSX flavor) on stock Solid 2: same markup, timing and behavior. The original stays as the baseline.
+[`examples/sierpinski`](../sierpinski) written with `solid-blocks` (JSX flavor) on stock Solid 2: same markup, timing and behavior. The original stays as the baseline.
 
 What the library's rules change in the source:
 
@@ -14,7 +14,7 @@ The seconds passed down the recursion are pending and may fail, so `TriangleProp
 ```bash
 pnpm test         # behavior (6) + differential parity against examples/sierpinski (1)
 pnpm typecheck    # stock tsc
-pnpm lint         # @solidjs/eslint-plugin-blocks + no explicit any
+pnpm lint         # eslint-plugin-solid-blocks + no explicit any
 pnpm build
 node ../../scripts/example-blocks/browser.mjs sierpinski   # Chromium, original vs twin
 ```

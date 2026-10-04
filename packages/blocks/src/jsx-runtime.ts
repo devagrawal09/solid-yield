@@ -5,7 +5,7 @@
  * builds once where it is written and `render(() => jsx(App, {}), root)`
  * behaves like `render(App, root)`.
  */
-import { h } from "@solidjs/blocks/h";
+import { h } from "solid-blocks/h";
 
 export function jsx(type: any, props: any): any {
   if (props == null) return (h as any)(type);

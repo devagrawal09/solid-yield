@@ -1,4 +1,4 @@
-import { $component, view } from "@solidjs/blocks";
+import { $component, view } from "solid-blocks";
 
 export default $component(function* Page() {
   return view(function* () {

@@ -4,7 +4,7 @@
 // so this twin is the original's `/live` — the room from live DATA sources
 // (server functions), rendered in the browser — served at `/` and `/live`.
 import { defineRoute, defineRoutes } from "@solidjs/router";
-import type { Component } from "@solidjs/blocks";
+import type { Component } from "solid-blocks";
 import Live from "~/routes/live";
 
 /**

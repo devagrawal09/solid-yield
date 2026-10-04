@@ -11,7 +11,7 @@ import {
   type Source,
   type Props,
   view
-} from "@solidjs/blocks";
+} from "solid-blocks";
 
 function delayedValue<T>(ms: number, value: T): Promise<T> {
   return new Promise(resolve => setTimeout(() => resolve(value), ms));

@@ -36,7 +36,7 @@ import {
   type Source,
   type Props,
   view
-} from "@solidjs/blocks";
+} from "solid-blocks";
 import type { RouteSectionProps } from "@solidjs/router";
 import { useIdentity } from "~/lib/identity";
 import { ArchiveError, ChaosError, DeliveryError, SendError } from "~/lib/errors";

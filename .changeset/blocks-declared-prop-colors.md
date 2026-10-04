@@ -1,6 +1,6 @@
 ---
-"@solidjs/blocks": minor
-"@solidjs/eslint-plugin-blocks": patch
+"solid-blocks": minor
+"eslint-plugin-solid-blocks": patch
 ---
 
 Prop colors are declared, not inferred by the type linker (D-023, D-024, D-029, D-056 as amended by D-068).

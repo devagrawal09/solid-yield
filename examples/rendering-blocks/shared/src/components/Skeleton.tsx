@@ -10,7 +10,7 @@ import {
   type Props,
   type Source,
   view
-} from "@solidjs/blocks";
+} from "solid-blocks";
 
 /** Fetching the feed failed: the color of its failure. */
 export class FeedError extends Error {

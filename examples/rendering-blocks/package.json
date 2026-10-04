@@ -1,6 +1,6 @@
 {
   "name": "rendering-blocks-example",
-  "description": "examples/rendering (one shared app under string SSR, streaming SSR and client-only rendering) with the shared app in @solidjs/blocks (JSX flavor)",
+  "description": "examples/rendering (one shared app under string SSR, streaming SSR and client-only rendering) with the shared app in solid-blocks (JSX flavor)",
   "version": "0.0.0",
   "private": true,
   "author": "Ryan Carniato",
@@ -23,11 +23,11 @@
     "clean": "rimraf */dist/"
   },
   "dependencies": {
-    "@solidjs/blocks": "workspace:*"
+    "solid-blocks": "workspace:*"
   },
   "devDependencies": {
     "@solidjs/vite-plugin": "3.0.0-next.35",
-    "@solidjs/vite-plugin-blocks": "workspace:*",
+    "vite-plugin-solid-blocks": "workspace:*",
     "@solidjs/web": "^2.0.0-rc.11",
     "@types/node": "^25.6.0",
     "blocks-example-harness": "workspace:*",

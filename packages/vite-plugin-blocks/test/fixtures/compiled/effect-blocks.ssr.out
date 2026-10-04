@@ -65,15 +65,15 @@ var _tmpl$10 = [
 ];
 var _tmpl$11 = ["<p", " class=\"loading\">Loading orders…</p>"];
 // Action path: a cancellable checkout saga — examples/effect's checkout with
-// @solidjs/blocks.
+// solid-blocks.
 //
 // `placeOrder` is unchanged: a Solid action whose steps are Effect programs
 // (its `yield*` delegates Effects to the saga driver; it is not a block).
 // The optimistic phase and the optimistic orders store are Solid primitives
 // created in the setup and read through `read` / `paths`; the cart, the
 // notice and the decline toggle are block state.
-import { perform as _$perform } from "@solidjs/blocks";
-import { $component, $event, $memo, $signal, $store, $optimistic, $optimisticStore, attempt, For, Errored, Loading, readStore, refresh, Show, type Source, type Props, view } from "@solidjs/blocks";
+import { perform as _$perform } from "solid-blocks";
+import { $component, $event, $memo, $signal, $store, $optimistic, $optimisticStore, attempt, For, Errored, Loading, readStore, refresh, Show, type Source, type Props, view } from "solid-blocks";
 import { CardDeclinedError, chargeCard, createOrder, fetchOrders, refundCharge, releaseReservation, reserveInventory, type CartItem, type Charge, type Order, type Reservation } from "./api";
 import { ActionInterruptedError, effectAction } from "./solid-effect";
 type Phase = "idle" | "reserving" | "charging" | "finalizing";

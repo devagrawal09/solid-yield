@@ -41,10 +41,10 @@ import {
   type Element as BlocksElement,
   type Props,
   view
-} from "@solidjs/blocks";
+} from "solid-blocks";
 import { createSignal as plainSignal } from "solid-js";
 import { INSTANCE, registerInstance } from "../src/runtime.js";
-import { h } from "@solidjs/blocks/h";
+import { h } from "solid-blocks/h";
 import { Failed, toFailed } from "./failed.js";
 import { write } from "./write.js";
 

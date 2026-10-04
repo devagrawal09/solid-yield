@@ -10,7 +10,7 @@ function _P$(_p) {
 	this.b = _p;
 }
 _P$.prototype = Object.prototype;
-import { perform as _$perform } from "@solidjs/blocks";
+import { perform as _$perform } from "solid-blocks";
 function* v() {
 	return Comp(new _P$(x));
 }

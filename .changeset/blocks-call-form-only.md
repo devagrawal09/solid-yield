@@ -1,5 +1,5 @@
 ---
-"@solidjs/blocks": minor
+"solid-blocks": minor
 ---
 
 A block component is called, never used as a tag (D-062, D-065, D-066, D-067). JSX is for DOM elements and foreign (plain-Solid) components only. A `$component`, a `lazy` component, or one of the library's flow controls and boundaries (`For`, `Show`, `Switch`, `Match`, `Repeat`, `Loading`, `Errored`) is written `{yield* Card({ todo })}`, so its pending and failures reach the view through `yield*`. A tag's type is always `JSX.Element`, so a tag dropped them.

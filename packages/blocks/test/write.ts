@@ -5,7 +5,7 @@
  * (`SETTER_OUTSIDE_RUN`, D-028), so the setter is called inside the event.
  */
 import { createRoot } from "solid-js";
-import { $event } from "@solidjs/blocks";
+import { $event } from "solid-blocks";
 
 export function write(make: () => Iterable<unknown>): void {
   const event = createRoot(() =>

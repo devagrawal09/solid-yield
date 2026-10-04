@@ -1,4 +1,4 @@
-# Generator blocks as a library: `@solidjs/blocks`
+# Generator blocks as a library: `solid-blocks`
 
 Status: implemented on `blocks-lib` (cut from `upstream/next` at 644eaf3b). Eight example twins run on it. This document is the reference for what the library is, what it enforces and where, what it costs, and what it cannot do without a blocks compiler.
 
@@ -8,9 +8,9 @@ Generator blocks — `$component(function* (props) { setup; return function* () 
 
 | Package                                      | What                                                                                                                                                         | Kind                       |
 | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- |
-| `@solidjs/blocks`                            | runtime interpreter, strict types, flow controls, render / hydrate, a settled-only JSX namespace, the no-JSX `h` wrapper, an automatic JSX runtime | userland (public API only) |
-| `@solidjs/vite-plugin-blocks`                | **one syntactic rule**, run before Solid's JSX compiler (`yield*` inside JSX → `perform(…)`), as a Vite plugin, a Babel plugin and a `transform()`; also the library `lazy`'s module URL (D-003, D-043, D-047) | transform |
-| `@solidjs/eslint-plugin-blocks`              | thirteen rules for what TypeScript cannot express | lint |
+| `solid-blocks`                            | runtime interpreter, strict types, flow controls, render / hydrate, a settled-only JSX namespace, the no-JSX `h` wrapper, an automatic JSX runtime | userland (public API only) |
+| `vite-plugin-solid-blocks`                | **one syntactic rule**, run before Solid's JSX compiler (`yield*` inside JSX → `perform(…)`), as a Vite plugin, a Babel plugin and a `transform()`; also the library `lazy`'s module URL (D-003, D-043, D-047) | transform |
+| `eslint-plugin-solid-blocks`              | thirteen rules for what TypeScript cannot express | lint |
 
 ### Surface
 
@@ -26,8 +26,8 @@ Generator blocks — `$component(function* (props) { setup; return function* () 
 - **Effects of failure and waiting**: `attempt(fn, onError)`: `onError` (required) turns what `fn` threw, or its promise rejected with, into the error object the block fails with, so every failure has a type, each error class its own color; when `fn` returns a promise a `$memo` / `$event` suspends on it. `raise(error)` fails with a typed error. `until(source, onError, options)` waits for a source to read truthy. `attempt` is the one place a failure gets its type: a `$memo`, `$optimisticStore` or `$projection` body that returns a promise or a stream returns it through `attempt` (`return yield* attempt(() => watch(feed), cause => new FeedError(cause))`; returning one raw is a type error). A promise is waited for; a stream (or a promise of one) is given back as itself, its failures going through the handler as they come, by a Proxy that changes only how it fails (a server function's brand, a live source's `onstatus` stay its own). `$dynamic`'s component is a plain one: its failures are not in its type.
 - **Events**: `$event(function* (e) {…})` is a Solid `action`: every call is one transaction (writes are held until it settles; an async `attempt` re-enters it; a rejection is thrown at the `yield*`). It takes any arguments and returns a promise of its result, so block code does not need `action`; `yield* refresh(store)` and `yield* until(source)` are its forms of Solid's `refresh` / `until`. A failure goes to whoever handles the returned promise; one nobody handles (a DOM dispatch) goes to the nearest `Errored`. Calls are independent runs, full stop (D-064: no `latest` option); a search box that wants latest-wins reads its input through a `$memo`, which closes superseded runs. An event has two colors in its type, apart from its failures: `P`, it reads a pending source (and waits for its data), and `A`, it does async work of its own (an async `attempt`, `until`). Calling an event is an operation: `yield* save(x)` waits for the call and joins both its colors and its failures to the caller's type (so they travel through any depth of calls). An `$effect` cannot wait, so it may delegate only to an event with neither color. With type information, `no-unyielded-write` reports an event call a block uses any other way. Setters return receipts (`yield* setX(v)` is a `Write`).
 - **Flow and boundaries**: `For`, `Repeat`, `Show`, `Switch`, `Match`, `Loading`, `Errored` — Solid's, typed for blocks, render callbacks may be row blocks; boundaries in call form only (D-062). Failures are a union of error types, each its own color: `Errored` handles them all, or with `catch={[NotFound, …]}` only those types (its fallback receives them; any other is rethrown to the boundary above, and stays in the type). A view with an unhandled pending read or failure is not an element: it reaches the holding view through `yield*`. At the root, `render` / `hydrate` refuse a pending view. A failing one is accepted and re-thrown when it fails, since the library installs no boundary (D-033, D-059). Every failure type is a `Failure` — an `Error` with a literal `kind` (`readonly kind = "not-found" as const`), checked at `attempt`, `until`, `raise` and `Errored`'s `catch` (D-034): TypeScript removes a handled class structurally while the runtime matches with `instanceof`, so two classes of one shape would be one type; a missing or plain-string `kind` is the type error `[FAILURE_KIND]`.
-- **Mounting**: `render`, `hydrate` (a root that is not pending; it may fail, and a failure with no `Errored` is re-thrown); `@solidjs/blocks/jsx-runtime`.
-- **No-JSX**: `@solidjs/blocks/h` — the `h` flavor (D-012 as amended by D-046: `html`` ` tagged templates are dropped).
+- **Mounting**: `render`, `hydrate` (a root that is not pending; it may fail, and a failure with no `Errored` is re-thrown); `solid-blocks/jsx-runtime`.
+- **No-JSX**: `solid-blocks/h` — the `h` flavor (D-012 as amended by D-046: `html`` ` tagged templates are dropped).
 - **Types**: `Source<T, E, P>` (the failures second, the pending flag last, D-068), `Path<T, E, P>`, `View<P, E>`, `ComponentView<P, E>`, `Component<D, Pd, E>`, `Props<{ … }>` (the props annotation, §6), `PropsInput`, `HoleProp`, `RowBlock`, `EventHandler`, and the op types (`Read`, `Wait`, `Raise`, `Write`, `Create`, …).
 
 ### The userland route
@@ -48,7 +48,7 @@ The flavors share everything above the DOM. A block component is called in both,
 |                         | JSX flavor                                                                           | No-JSX flavor                                                                                                                                                   |
 | ----------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | DOM elements            | `return <p>{yield* user.name}</p>`; each `yield*` in JSX becomes `perform(…)`, one computation per hole (the transform, its one rule) | `return h("p", null, user.name)`: a source, a path or a bare zero-arity `function*` is a hole; plain thunks are type errors (no build step) |
-| Types                   | `jsxImportSource: "@solidjs/blocks"`: only settled views are elements, only DOM elements and foreign components are tags | `h` is typed per tag and attribute; the output (`HView<P, E>`) carries its holes' colors; a no-JSX view may yield only child views (`[HVIEW_READ]`) |
+| Types                   | `jsxImportSource: "solid-blocks"`: only settled views are elements, only DOM elements and foreign components are tags | `h` is typed per tag and attribute; the output (`HView<P, E>`) carries its holes' colors; a no-JSX view may yield only child views (`[HVIEW_READ]`) |
 | Twins                   | 6                                                                                    | 2 (`todos-blocks-h`, `sierpinski-blocks-h`)                                                                                                                     |
 
 ## 3. The rules, where each is enforced, and its test
@@ -86,7 +86,7 @@ The flavors share everything above the DOM. A block component is called in both,
 | Web-branded attribute values (the router's `action()`, typed paths) are accepted                                | the JSX namespace aliases web's `SerializableAttributeValue`                   | —                                                  | —                                                | type-tests "web's serializable attribute values"                                                                                                                                                                                     |
 | One runtime per app (per build: client, server): a second copy of the package is refused                       | —                                                                              | `DUPLICATE_RUNTIME` (names both module URLs)       | —                                                | runtime "a second copy of the runtime is an error naming both module URLs"                                                                                                                                                           |
 
-## 4. Lint rules (`@solidjs/eslint-plugin-blocks`, flat config, `recommended` = all errors)
+## 4. Lint rules (`eslint-plugin-solid-blocks`, flat config, `recommended` = all errors)
 
 | Rule                   | What TypeScript cannot say                                                                                                |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------- |
@@ -108,9 +108,9 @@ Every twin lints `src` (the rendering twin `shared/src`) with the recommended se
 
 ## 5. The JSX transform's rule
 
-One syntactic rule, in `@solidjs/vite-plugin-blocks` (D-003; `vite-plugin-solid-blocks` at extraction, D-011). It runs before Solid's JSX compiler, whose packages carry nothing of blocks since D-043.
+One syntactic rule, in `vite-plugin-solid-blocks` (D-003; `vite-plugin-solid-blocks` at extraction, D-011). It runs before Solid's JSX compiler, whose packages carry nothing of blocks since D-043.
 
-**The rule.** Inside a JSX expression container or attribute value, `yield* e` becomes `perform(e)`, imported from `blocksModule` (default `@solidjs/blocks`). Each read becomes its own hole: the JSX compiler sees a call and treats it as dynamic, and the view generator, with no `yield` left, runs once.
+**The rule.** Inside a JSX expression container or attribute value, `yield* e` becomes `perform(e)`, imported from `blocksModule` (default `solid-blocks`). Each read becomes its own hole: the JSX compiler sees a call and treats it as dynamic, and the view generator, with no `yield` left, runs once.
 
 - The rule is purely syntactic. It applies to the JSX of DOM elements and of foreign Solid components (D-067).
 - A block-component call written as a hole, `{yield* Card({ todo })}` (D-062), is one hole: `perform(Card({ todo }))`, with its argument left as written. A read inside that argument is a lint error, `no-read-in-prop` (D-065).
@@ -207,11 +207,11 @@ Only pending needs a position that admits it. A failure may reach a row, a call 
 
 ## 8. Runtime cost: uncompiled blocks vs handwritten Solid on `next`
 
-`examples/blocks-harness/runtime-cost/measure.mjs`: each workload written twice (handwritten Solid; `@solidjs/blocks` run by its interpreter with only the JSX transform's rule), bundled for production with the native compiler, mounted in jsdom, run under Valgrind cachegrind (no cache simulation) with `node --jitless`. Per operation: the instruction count of R operations minus the same process doing none, divided by R. `--wall` adds JIT-enabled wall time (median of five runs of 200 operations).
+`examples/blocks-harness/runtime-cost/measure.mjs`: each workload written twice (handwritten Solid; `solid-blocks` run by its interpreter with only the JSX transform's rule), bundled for production with the native compiler, mounted in jsdom, run under Valgrind cachegrind (no cache simulation) with `node --jitless`. Per operation: the instruction count of R operations minus the same process doing none, divided by R. `--wall` adds JIT-enabled wall time (median of five runs of 200 operations).
 
 Measured on this branch (10 operations per count; wall: JIT on, 200 operations, median of 5):
 
-| workload                          | handwritten Solid (instructions / op) | `@solidjs/blocks`, uncompiled | ratio |               difference / op | wall, Solid / blocks (ms / op) |
+| workload                          | handwritten Solid (instructions / op) | `solid-blocks`, uncompiled | ratio |               difference / op | wall, Solid / blocks (ms / op) |
 | --------------------------------- | ------------------------------------: | ----------------------------: | ----: | ----------------------------: | -----------------------------: |
 | todos: add a todo, then toggle it |                             4,097,720 |                     4,525,976 | 1.10x |                         +428k |                    1.09 / 0.95 |
 | 1,000 rows: create, then clear    |                         1,505,358,498 |                 1,574,854,638 | 1.05x |        +69.5M (≈ 69k per row) |                    87.2 / 93.1 |
@@ -263,8 +263,8 @@ The pitfalls the experiment branch's ports hit (a `$component` view under `<For>
 
 ## 10. Changesets
 
-`.changeset/blocks-library.md` (`@solidjs/blocks`, `@solidjs/eslint-plugin-blocks`: new packages; `@solidjs/blocks-linker` was dropped from it when the linker was removed before release) and `.changeset/vite-plugin-blocks.md` (`@solidjs/vite-plugin-blocks`: new package, the JSX transform's block rule and the `lazy` module-URL pass). `.changeset/compiler-blocks-rule.md`, which announced the rule in `@solidjs/compiler` and `@solidjs/babel-plugin`, was deleted with the rule (D-043): neither package changes from upstream, and nothing of it was released.
+`.changeset/blocks-library.md` (`solid-blocks`, `eslint-plugin-solid-blocks`: new packages; `@solidjs/blocks-linker` was dropped from it when the linker was removed before release) and `.changeset/vite-plugin-blocks.md` (`vite-plugin-solid-blocks`: new package, the JSX transform's block rule and the `lazy` module-URL pass). `.changeset/compiler-blocks-rule.md`, which announced the rule in `@solidjs/compiler` and `@solidjs/babel-plugin`, was deleted with the rule (D-043): neither package changes from upstream, and nothing of it was released.
 
-`.changeset/blocks-typed-failures-v2.md` (`@solidjs/blocks`, `@solidjs/eslint-plugin-blocks`: minor) documents commits 57d05dda and dfe692cf: `attempt(fn, onError)`, `Errored catch`, `$event` as an action returning an `EventCall`, the new `$optimistic` / `$optimisticStore` / `$projection` / `$dynamic` / `refresh` / `start` / `until`, the removal of `read` / `paths` / `accessor` / `$flush`, and the `no-unyielded-write` and `no-foreign-reactive` lint rules. (Its `@solidjs/compiler` patch, which was for `summarizeBlocks` only, was removed in Phase 1B.)
+`.changeset/blocks-typed-failures-v2.md` (`solid-blocks`, `eslint-plugin-solid-blocks`: minor) documents commits 57d05dda and dfe692cf: `attempt(fn, onError)`, `Errored catch`, `$event` as an action returning an `EventCall`, the new `$optimistic` / `$optimisticStore` / `$projection` / `$dynamic` / `refresh` / `start` / `until`, the removal of `read` / `paths` / `accessor` / `$flush`, and the `no-unyielded-write` and `no-foreign-reactive` lint rules. (Its `@solidjs/compiler` patch, which was for `summarizeBlocks` only, was removed in Phase 1B.)
 
 Phase 1B: `.changeset/blocks-declared-prop-colors.md` (`Props<{ … }>`, `Source<T, E, P>`, call-site checking, generic components, a root that may fail, `Errored`'s lazy fallback), `.changeset/blocks-twins-pass-through-generics.md` and `.changeset/blocks-remove-linker.md` (the linker, `typed-props-key`, the gate's linker steps).

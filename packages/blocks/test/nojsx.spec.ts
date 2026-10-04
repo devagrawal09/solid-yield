@@ -20,8 +20,8 @@ import {
   render,
   Show,
   type Props
-} from "@solidjs/blocks";
-import { h } from "@solidjs/blocks/h";
+} from "solid-blocks";
+import { h } from "solid-blocks/h";
 import { toFailed } from "./failed.js";
 import { write } from "./write.js";
 

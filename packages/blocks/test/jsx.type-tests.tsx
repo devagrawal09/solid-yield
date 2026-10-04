@@ -36,7 +36,7 @@ import {
   latestOf,
   isPendingOf,
   view
-} from "@solidjs/blocks";
+} from "solid-blocks";
 
 declare const root: HTMLElement;
 declare function fetchUser(id: string): Promise<{ name: string }>;

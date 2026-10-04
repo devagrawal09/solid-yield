@@ -1,13 +1,13 @@
 {
-  "name": "@solidjs/blocks",
+  "name": "solid-blocks",
   "description": "Generator blocks for Solid as a library: strict, typed generator syntax and a runtime interpreter on Solid's public API (no blocks compiler).",
   "version": "0.0.0",
   "author": "Ryan Carniato",
   "license": "MIT",
-  "homepage": "https://solidjs.com",
+  "homepage": "https://github.com/devagrawal09/solid-blocks#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/solidjs/solid.git",
+    "url": "git+https://github.com/devagrawal09/solid-blocks.git",
     "directory": "packages/blocks"
   },
   "type": "module",

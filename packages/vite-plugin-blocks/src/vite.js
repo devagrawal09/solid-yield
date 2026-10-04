@@ -21,7 +21,7 @@ const SCRIPT = /\.[mc]?[jt]sx?$/i;
 
 /**
  * @typedef {object} BlocksPluginOptions
- * @property {string} [blocksModule] the module `perform` and `lazy` come from (default `@solidjs/blocks`)
+ * @property {string} [blocksModule] the module `perform` and `lazy` come from (default `solid-blocks`)
  * @property {boolean} [lazy] annotate `lazy(() => import("…"))` from the blocks module with its module URL (default `true`)
  * @property {(file: string) => boolean} [filter] which files to look at (default: `.js`/`.jsx`/`.ts`/`.tsx` and their `m`/`c` forms, outside `node_modules`)
  */

@@ -32,7 +32,7 @@
 import { Cause, Effect, Exit, Fiber, Layer, ManagedRuntime } from "effect";
 import { YieldWrap, yieldWrapGet } from "effect/Utils";
 import { createContext, onCleanup, useContext } from "solid-js";
-import { $event, attempt, type EventCall, type Write } from "@solidjs/blocks";
+import { $event, attempt, type EventCall, type Write } from "solid-blocks";
 
 /** Solid context carrying the Effect runtime. Provide with
  * `<RuntimeContext value={createRuntime(layer)}>`. The explicit `null`

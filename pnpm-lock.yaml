@@ -45,15 +45,9 @@ importers:
         specifier: ^3.22.0
         version: 3.22.2
     devDependencies:
-      '@solidjs/blocks':
-        specifier: workspace:*
-        version: link:../../packages/blocks
       '@solidjs/vite-plugin':
         specifier: 3.0.0-next.35
         version: 3.0.0-next.35(@solidjs/web@2.0.0-rc.13(solid-js@2.0.0-rc.13))(solid-js@2.0.0-rc.13)(vite@7.3.6(@types/node@25.9.9)(lightningcss@1.33.0))
-      '@solidjs/vite-plugin-blocks':
-        specifier: workspace:*
-        version: link:../../packages/vite-plugin-blocks
       '@solidjs/web':
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13(solid-js@2.0.0-rc.13)
@@ -69,6 +63,9 @@ importers:
       jsdom:
         specifier: ^25.0.1
         version: 25.0.1
+      solid-blocks:
+        specifier: workspace:*
+        version: link:../../packages/blocks
       solid-js:
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13
@@ -78,21 +75,24 @@ importers:
       vite:
         specifier: ^7.0.0
         version: 7.3.6(@types/node@25.9.9)(lightningcss@1.33.0)
+      vite-plugin-solid-blocks:
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin-blocks
       vitest:
         specifier: ^4.1.6
         version: 4.1.11(@types/node@25.9.9)(jsdom@25.0.1)(vite@7.3.6(@types/node@25.9.9)(lightningcss@1.33.0))
 
   examples/hackernews-spa-blocks:
     dependencies:
-      '@solidjs/blocks':
-        specifier: workspace:*
-        version: link:../../packages/blocks
       '@solidjs/router':
         specifier: 2.0.0-next.29
         version: 2.0.0-next.29(@solidjs/web@2.0.0-rc.13(solid-js@2.0.0-rc.13))(solid-js@2.0.0-rc.13)
       '@solidjs/web':
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13(solid-js@2.0.0-rc.13)
+      solid-blocks:
+        specifier: workspace:*
+        version: link:../../packages/blocks
       solid-js:
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13
@@ -100,9 +100,6 @@ importers:
       '@solidjs/vite-plugin':
         specifier: 3.0.0-next.35
         version: 3.0.0-next.35(@solidjs/web@2.0.0-rc.13(solid-js@2.0.0-rc.13))(solid-js@2.0.0-rc.13)(vite@8.3.2(@types/node@25.9.9)(esbuild@0.27.7))
-      '@solidjs/vite-plugin-blocks':
-        specifier: workspace:*
-        version: link:../../packages/vite-plugin-blocks
       '@types/node':
         specifier: ^25.6.0
         version: 25.9.9
@@ -121,18 +118,15 @@ importers:
       vite:
         specifier: ^8.0.0
         version: 8.3.2(@types/node@25.9.9)(esbuild@0.27.7)
+      vite-plugin-solid-blocks:
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin-blocks
       vitest:
         specifier: ^4.1.6
         version: 4.1.11(@types/node@25.9.9)(jsdom@25.0.1)(vite@8.3.2(@types/node@25.9.9)(esbuild@0.27.7))
 
   examples/harness:
     dependencies:
-      '@solidjs/blocks':
-        specifier: workspace:*
-        version: link:../../packages/blocks
-      '@solidjs/eslint-plugin-blocks':
-        specifier: workspace:*
-        version: link:../../packages/eslint-plugin-blocks
       '@solidjs/web':
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13(solid-js@2.0.0-rc.13)
@@ -145,6 +139,12 @@ importers:
       eslint:
         specifier: ^9.0.0
         version: 9.39.5
+      eslint-plugin-solid-blocks:
+        specifier: workspace:*
+        version: link:../../packages/eslint-plugin-blocks
+      solid-blocks:
+        specifier: workspace:*
+        version: link:../../packages/blocks
       solid-js:
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13
@@ -293,16 +293,13 @@ importers:
 
   examples/rendering-blocks:
     dependencies:
-      '@solidjs/blocks':
+      solid-blocks:
         specifier: workspace:*
         version: link:../../packages/blocks
     devDependencies:
       '@solidjs/vite-plugin':
         specifier: 3.0.0-next.35
         version: 3.0.0-next.35(@solidjs/web@2.0.0-rc.13(solid-js@2.0.0-rc.13))(solid-js@2.0.0-rc.13)(vite@7.3.6(@types/node@25.9.9)(lightningcss@1.33.0))
-      '@solidjs/vite-plugin-blocks':
-        specifier: workspace:*
-        version: link:../../packages/vite-plugin-blocks
       '@solidjs/web':
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13(solid-js@2.0.0-rc.13)
@@ -330,21 +327,24 @@ importers:
       vite:
         specifier: ^7.0.0
         version: 7.3.6(@types/node@25.9.9)(lightningcss@1.33.0)
+      vite-plugin-solid-blocks:
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin-blocks
       vitest:
         specifier: ^4.1.6
         version: 4.1.11(@types/node@25.9.9)(jsdom@25.0.1)(vite@7.3.6(@types/node@25.9.9)(lightningcss@1.33.0))
 
   examples/room-blocks:
     dependencies:
-      '@solidjs/blocks':
-        specifier: workspace:*
-        version: link:../../packages/blocks
       '@solidjs/router':
         specifier: 2.0.0-next.29
         version: 2.0.0-next.29(@solidjs/web@2.0.0-rc.13(solid-js@2.0.0-rc.13))(solid-js@2.0.0-rc.13)
       '@solidjs/web':
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13(solid-js@2.0.0-rc.13)
+      solid-blocks:
+        specifier: workspace:*
+        version: link:../../packages/blocks
       solid-js:
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13
@@ -352,9 +352,6 @@ importers:
       '@solidjs/vite-plugin':
         specifier: 3.0.0-next.35
         version: 3.0.0-next.35(@solidjs/web@2.0.0-rc.13(solid-js@2.0.0-rc.13))(solid-js@2.0.0-rc.13)(vite@8.3.2(@types/node@25.9.9)(esbuild@0.27.7))
-      '@solidjs/vite-plugin-blocks':
-        specifier: workspace:*
-        version: link:../../packages/vite-plugin-blocks
       '@types/node':
         specifier: ^25.6.0
         version: 25.9.9
@@ -376,21 +373,18 @@ importers:
       vite:
         specifier: ^8.0.0
         version: 8.3.2(@types/node@25.9.9)(esbuild@0.27.7)
+      vite-plugin-solid-blocks:
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin-blocks
       vitest:
         specifier: ^4.1.6
         version: 4.1.11(@types/node@25.9.9)(jsdom@25.0.1)(vite@8.3.2(@types/node@25.9.9)(esbuild@0.27.7))
 
   examples/sierpinski-blocks:
     devDependencies:
-      '@solidjs/blocks':
-        specifier: workspace:*
-        version: link:../../packages/blocks
       '@solidjs/vite-plugin':
         specifier: 3.0.0-next.35
         version: 3.0.0-next.35(@solidjs/web@2.0.0-rc.13(solid-js@2.0.0-rc.13))(solid-js@2.0.0-rc.13)(vite@7.3.6(@types/node@25.9.9)(lightningcss@1.33.0))
-      '@solidjs/vite-plugin-blocks':
-        specifier: workspace:*
-        version: link:../../packages/vite-plugin-blocks
       '@solidjs/web':
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13(solid-js@2.0.0-rc.13)
@@ -406,6 +400,9 @@ importers:
       jsdom:
         specifier: ^25.0.1
         version: 25.0.1
+      solid-blocks:
+        specifier: workspace:*
+        version: link:../../packages/blocks
       solid-js:
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13
@@ -415,15 +412,15 @@ importers:
       vite:
         specifier: ^7.0.0
         version: 7.3.6(@types/node@25.9.9)(lightningcss@1.33.0)
+      vite-plugin-solid-blocks:
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin-blocks
       vitest:
         specifier: ^4.1.6
         version: 4.1.11(@types/node@25.9.9)(jsdom@25.0.1)(vite@7.3.6(@types/node@25.9.9)(lightningcss@1.33.0))
 
   examples/sierpinski-blocks-h:
     devDependencies:
-      '@solidjs/blocks':
-        specifier: workspace:*
-        version: link:../../packages/blocks
       '@solidjs/h':
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13(@solidjs/web@2.0.0-rc.13(solid-js@2.0.0-rc.13))
@@ -445,6 +442,9 @@ importers:
       jsdom:
         specifier: ^25.0.1
         version: 25.0.1
+      solid-blocks:
+        specifier: workspace:*
+        version: link:../../packages/blocks
       solid-js:
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13
@@ -460,15 +460,9 @@ importers:
 
   examples/todos-blocks:
     devDependencies:
-      '@solidjs/blocks':
-        specifier: workspace:*
-        version: link:../../packages/blocks
       '@solidjs/vite-plugin':
         specifier: 3.0.0-next.35
         version: 3.0.0-next.35(@solidjs/web@2.0.0-rc.13(solid-js@2.0.0-rc.13))(solid-js@2.0.0-rc.13)(vite@7.3.6(@types/node@25.9.9)(lightningcss@1.33.0))
-      '@solidjs/vite-plugin-blocks':
-        specifier: workspace:*
-        version: link:../../packages/vite-plugin-blocks
       '@solidjs/web':
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13(solid-js@2.0.0-rc.13)
@@ -484,6 +478,9 @@ importers:
       jsdom:
         specifier: ^25.0.1
         version: 25.0.1
+      solid-blocks:
+        specifier: workspace:*
+        version: link:../../packages/blocks
       solid-js:
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13
@@ -493,15 +490,15 @@ importers:
       vite:
         specifier: ^7.0.0
         version: 7.3.6(@types/node@25.9.9)(lightningcss@1.33.0)
+      vite-plugin-solid-blocks:
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin-blocks
       vitest:
         specifier: ^4.1.6
         version: 4.1.11(@types/node@25.9.9)(jsdom@25.0.1)(vite@7.3.6(@types/node@25.9.9)(lightningcss@1.33.0))
 
   examples/todos-blocks-h:
     devDependencies:
-      '@solidjs/blocks':
-        specifier: workspace:*
-        version: link:../../packages/blocks
       '@solidjs/h':
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13(@solidjs/web@2.0.0-rc.13(solid-js@2.0.0-rc.13))
@@ -523,6 +520,9 @@ importers:
       jsdom:
         specifier: ^25.0.1
         version: 25.0.1
+      solid-blocks:
+        specifier: workspace:*
+        version: link:../../packages/blocks
       solid-js:
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13
@@ -556,15 +556,15 @@ importers:
 
   packages/eslint-plugin-blocks:
     devDependencies:
-      '@solidjs/vite-plugin-blocks':
-        specifier: workspace:*
-        version: link:../vite-plugin-blocks
       '@typescript-eslint/parser':
         specifier: ^8.0.0
         version: 8.71.0(eslint@9.39.5)(typescript@6.0.3)
       eslint:
         specifier: ^9.0.0
         version: 9.39.5
+      vite-plugin-solid-blocks:
+        specifier: workspace:*
+        version: link:../vite-plugin-blocks
 
   packages/vite-plugin-blocks:
     dependencies:
@@ -578,9 +578,6 @@ importers:
       '@jridgewell/trace-mapping':
         specifier: ^0.3.31
         version: 0.3.31
-      '@solidjs/blocks':
-        specifier: workspace:*
-        version: link:../blocks
       '@solidjs/compiler':
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13
@@ -596,6 +593,9 @@ importers:
       '@types/node':
         specifier: ^25.6.0
         version: 25.9.9
+      solid-blocks:
+        specifier: workspace:*
+        version: link:../blocks
       solid-js:
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13

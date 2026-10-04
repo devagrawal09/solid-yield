@@ -17,8 +17,8 @@ import {
   type View,
   type Source,
   view
-} from "@solidjs/blocks";
-import { h } from "@solidjs/blocks/h";
+} from "solid-blocks";
+import { h } from "solid-blocks/h";
 
 declare const root: HTMLElement;
 declare function fetchUser(): Promise<{ name: string }>;

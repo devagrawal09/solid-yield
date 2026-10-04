@@ -1,7 +1,7 @@
 // @ts-check
 /**
- * `@solidjs/vite-plugin-blocks` (published as `vite-plugin-solid-blocks`,
- * D-011): the JSX transform's one block rule for `@solidjs/blocks`, as a Vite
+ * `vite-plugin-solid-blocks` (published as `vite-plugin-solid-blocks`,
+ * D-011): the JSX transform's one block rule for `solid-blocks`, as a Vite
  * plugin (the default export), a Babel plugin and a plain `transform()`. See
  * `documentation/plans/blocks-library.md` §5.
  */

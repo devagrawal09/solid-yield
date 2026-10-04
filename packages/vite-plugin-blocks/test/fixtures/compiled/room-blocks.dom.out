@@ -61,8 +61,8 @@ var _tmpl$35 = /* @__PURE__ */ _$template(`<p> message<!> ever in #<!>`);
 //   until the first transcript lands) and posting is an `$event` (a Solid
 //   action) that writes the row optimistically and waits with `until`.
 // - Handlers are `$event`s.
-import { perform as _$perform } from "@solidjs/blocks";
-import { $component, $event, $memo, $optimistic, $optimisticStore, $signal, attempt, Errored, For, latestOf, Loading, readStore, Show, until, type EventHandler, type Path, type Source, type Props, view } from "@solidjs/blocks";
+import { perform as _$perform } from "solid-blocks";
+import { $component, $event, $memo, $optimistic, $optimisticStore, $signal, attempt, Errored, For, latestOf, Loading, readStore, Show, until, type EventHandler, type Path, type Source, type Props, view } from "solid-blocks";
 import type { RouteSectionProps } from "@solidjs/router";
 import { useIdentity } from "~/lib/identity";
 import { ArchiveError, ChaosError, DeliveryError, SendError } from "~/lib/errors";

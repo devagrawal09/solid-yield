@@ -14,7 +14,7 @@ import {
   type Element,
   type Props,
   view
-} from "@solidjs/blocks";
+} from "solid-blocks";
 import { isServer } from "@solidjs/web";
 import type { Identity } from "./sources";
 

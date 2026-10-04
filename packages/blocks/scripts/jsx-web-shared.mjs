@@ -19,7 +19,7 @@ if (!copy.test(source))
 // a block component (branded) is called, never tagged (D-062).
 const namespace = "export namespace JSX {\n";
 if (!source.includes(namespace)) throw new Error("jsx-web-shared: JSX namespace not found");
-const importLine = 'import type { Element as BlocksElement } from "@solidjs/blocks";';
+const importLine = 'import type { Element as BlocksElement } from "solid-blocks";';
 if (!source.includes(importLine)) throw new Error("jsx-web-shared: blocks import not found");
 fs.writeFileSync(
   file,
@@ -30,7 +30,7 @@ fs.writeFileSync(
     )
     .replace(
       importLine,
-      'import type { Element as BlocksElement, TagType as BlocksTagType } from "@solidjs/blocks";'
+      'import type { Element as BlocksElement, TagType as BlocksTagType } from "solid-blocks";'
     )
     .replace(
       namespace,

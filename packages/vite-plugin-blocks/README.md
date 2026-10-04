@@ -1,6 +1,6 @@
-# @solidjs/vite-plugin-blocks
+# vite-plugin-solid-blocks
 
-The JSX transform's one rule for [`@solidjs/blocks`](../blocks) (D-003): inside a JSX expression or attribute value, `yield* e` becomes `perform(e)`, imported from `@solidjs/blocks`. Each read is then its own hole, and the view generator runs once. Nothing else is lowered. Published as `vite-plugin-solid-blocks` at extraction (D-011).
+The JSX transform's one rule for [`solid-blocks`](../blocks) (D-003): inside a JSX expression or attribute value, `yield* e` becomes `perform(e)`, imported from `solid-blocks`. Each read is then its own hole, and the view generator runs once. Nothing else is lowered. Published as `vite-plugin-solid-blocks` at extraction (D-011).
 
 This is the strict dialect's transform; the compiler route (`experiment/iterable-signals`) is the ergonomic one.
 
@@ -8,7 +8,7 @@ This is the strict dialect's transform; the compiler route (`experiment/iterable
 
 ```js
 // vite.config.mjs
-import blocks from "@solidjs/vite-plugin-blocks";
+import blocks from "vite-plugin-solid-blocks";
 import solid from "@solidjs/vite-plugin";
 
 export default { plugins: [blocks(), solid()] };
@@ -18,7 +18,7 @@ export default { plugins: [blocks(), solid()] };
 
 ## `lazy()` module URLs (D-047)
 
-`@solidjs/blocks` exports its own `lazy`, with Solid's signature `lazy(fn, options?, moduleUrl?)`. `@solidjs/vite-plugin` annotates `lazy(() => import("…"))` only when `lazy` comes from `solid-js`. So this plugin writes the same annotation for a `lazy` imported from the blocks module: `lazy(() => import("./Page"), void 0, "__SOLID_LAZY_MODULE__:./Page")`. `solid()` then resolves the placeholder to the project-relative module path, and the lazy component carries its `moduleUrl` for asset preloading and the hydration manifest. Eligibility mirrors the compiler's pass:
+`solid-blocks` exports its own `lazy`, with Solid's signature `lazy(fn, options?, moduleUrl?)`. `@solidjs/vite-plugin` annotates `lazy(() => import("…"))` only when `lazy` comes from `solid-js`. So this plugin writes the same annotation for a `lazy` imported from the blocks module: `lazy(() => import("./Page"), void 0, "__SOLID_LAZY_MODULE__:./Page")`. `solid()` then resolves the placeholder to the project-relative module path, and the lazy component carries its `moduleUrl` for asset preloading and the hydration manifest. Eligibility mirrors the compiler's pass:
 
 - the callee is spelled `lazy` and is a named import of `lazy` from the blocks module;
 - the first argument returns `import("literal")`;
@@ -54,7 +54,7 @@ A refusal throws a `BlocksRuleError` whose message lists each refusal as `[CODE]
 
 ## The `perform` import's line
 
-`import { perform as _$perform } from "@solidjs/blocks";` goes just before the module's first statement, on that statement's line. It comes after any hashbang, directive prologue and leading comments, which stay where they are. No line moves, so a compiler error in a file with holes names the authored line, and the source map covers the columns.
+`import { perform as _$perform } from "solid-blocks";` goes just before the module's first statement, on that statement's line. It comes after any hashbang, directive prologue and leading comments, which stay where they are. No line moves, so a compiler error in a file with holes names the authored line, and the source map covers the columns.
 
 While the fork's Rust rule was the parity oracle, the import took a line of its own, as the rule inserted it. That kept the compiled output byte-identical to the rule's, at the cost of compiler error messages one line late. D-043 removed the rule and the placement changed (D-031 note).
 
@@ -70,7 +70,7 @@ They were generated once from the fork's Rust compiler while it carried the rule
 
 ## Status
 
-In-repo package, `0.0.0`, unreleased. Its runtime dependencies are `@babel/core` and `magic-string`. Its peers are `@solidjs/blocks` (the module the rewritten code imports `perform` from) and, optionally, `vite`.
+In-repo package, `0.0.0`, unreleased. Its runtime dependencies are `@babel/core` and `magic-string`. Its peers are `solid-blocks` (the module the rewritten code imports `perform` from) and, optionally, `vite`.
 
 The tests also use, as devDependencies:
 

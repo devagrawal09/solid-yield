@@ -16,7 +16,7 @@ var _tmpl$6 = /* @__PURE__ */ _$template(`<button class=clear-completed>Clear co
 var _tmpl$7 = /* @__PURE__ */ _$template(`<section class=todoapp><!><!>`);
 var _tmpl$8 = /* @__PURE__ */ _$template(`<p class=loading>Loading…`);
 var _tmpl$9 = /* @__PURE__ */ _$template(`<div class=app-error><p>Something went wrong: </p><button>Reset`);
-// TodoMVC from examples/todos with @solidjs/blocks (JSX flavor). The data
+// TodoMVC from examples/todos with solid-blocks (JSX flavor). The data
 // layer (`todos.ts`: an optimistic store over a projection, actions, the
 // error side-channel) and `filter.ts` are generator helpers the App's setup
 // delegates to; `api.ts` is the original's.
@@ -29,8 +29,8 @@ var _tmpl$9 = /* @__PURE__ */ _$template(`<div class=app-error><p>Something went
 //   until the first fetch lands); structural reads go through `readStore`;
 // - a view that reads a pending store is pending, so the loading boundary
 //   receives the two sections in its lazy view: `{yield* MainSection(…)}{yield* Footer(…)}`.
-import { perform as _$perform } from "@solidjs/blocks";
-import { $component, $event, $signal, $memo, createContext, Errored, For, Loading, readStore, Show, type Props, view } from "@solidjs/blocks";
+import { perform as _$perform } from "solid-blocks";
+import { $component, $event, $signal, $memo, createContext, Errored, For, Loading, readStore, Show, type Props, view } from "solid-blocks";
 import { createTodos, type Todo } from "./todos";
 import { hashFilter, type Filter } from "./filter";
 /** What a generator helper returns once delegated to. */

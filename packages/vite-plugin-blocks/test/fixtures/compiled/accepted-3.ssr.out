@@ -9,7 +9,7 @@ var _tmpl$ = [
 	"",
 	"></p>"
 ];
-import { perform as _$perform } from "@solidjs/blocks";
+import { perform as _$perform } from "solid-blocks";
 function* v() {
 	var _v$ = _$ssrHydrationKey(), _g$ = _$ssrGroup(() => {
 		return [_$ssrAttribute("title", _$escape(String(_$perform(t)), true)), _$ssrAttribute("data-x", _$escape(_$perform($(function* () {

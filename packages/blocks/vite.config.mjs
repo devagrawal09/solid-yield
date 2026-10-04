@@ -1,7 +1,7 @@
 import { defineConfig } from "vitest/config";
 import solidPlugin from "@solidjs/vite-plugin";
 // The JSX transform's block rule (`yield*` in a JSX hole → `perform(…)`) is
-// @solidjs/vite-plugin-blocks, run before the JSX compiler (D-003, D-043). It
+// vite-plugin-solid-blocks, run before the JSX compiler (D-003, D-043). It
 // is imported by path, not as a dependency: the plugin package devDepends on
 // this one (its tests render through it), and the reverse edge would make a
 // cycle in the workspace graph.
@@ -26,9 +26,9 @@ export default defineConfig({
   resolve: {
     conditions: ["development", "browser"],
     alias: [
-      { find: /^@solidjs\/blocks$/, replacement: resolve(src, "index.ts") },
-      { find: /^@solidjs\/blocks\/h$/, replacement: resolve(src, "h.ts") },
-      { find: /^@solidjs\/blocks\/jsx-runtime$/, replacement: resolve(src, "jsx-runtime.ts") }
+      { find: /^solid-blocks$/, replacement: resolve(src, "index.ts") },
+      { find: /^solid-blocks\/h$/, replacement: resolve(src, "h.ts") },
+      { find: /^solid-blocks\/jsx-runtime$/, replacement: resolve(src, "jsx-runtime.ts") }
     ]
   }
 });

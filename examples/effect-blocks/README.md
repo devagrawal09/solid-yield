@@ -1,6 +1,6 @@
-# Solid 2.0 × Effect — `@solidjs/blocks` twin
+# Solid 2.0 × Effect — `solid-blocks` twin
 
-[`examples/effect`](../effect) written with `@solidjs/blocks` (JSX flavor): the typeahead (read path) and the checkout saga (action path), same markup and behavior. `src/solid-effect.ts`, `src/api.ts` and `src/log.ts` are the original's, verbatim: they are the Effect integration and data layer, not components.
+[`examples/effect`](../effect) written with `solid-blocks` (JSX flavor): the typeahead (read path) and the checkout saga (action path), same markup and behavior. `src/solid-effect.ts`, `src/api.ts` and `src/log.ts` are the original's, verbatim: they are the Effect integration and data layer, not components.
 
 What the library's rules change in the source:
 

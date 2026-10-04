@@ -4,7 +4,7 @@
 // up into <Errored>, reset), the fiber log, and the checkout saga (cart
 // edits, the optimistic phase, success, a typed decline, cancellation with
 // compensation, the orders list).
-import { render } from "@solidjs/blocks";
+import { render } from "solid-blocks";
 import { App } from "../src/app";
 import {
   $,
@@ -39,7 +39,7 @@ const names = () => $$(".pkg-name").map(e => e.textContent);
 const cartQuantities = () => $$(".cart-row .qty").map(q => q.textContent!.replace(/[−+]/g, ""));
 const stepClasses = () => $$(".steps li").map(li => li.className);
 
-describe("effect typeahead with @solidjs/blocks", () => {
+describe("effect typeahead with solid-blocks", () => {
   it("starts on the typeahead tab with an empty log", () => {
     expect(button("Typeahead")!.className).toBe("selected");
     expect(button("Checkout")!.className).toBe("");
@@ -124,7 +124,7 @@ describe("effect typeahead with @solidjs/blocks", () => {
   });
 });
 
-describe("effect checkout with @solidjs/blocks", () => {
+describe("effect checkout with solid-blocks", () => {
   beforeEach(async () => {
     await click(button("Checkout"));
   });

@@ -1,5 +1,5 @@
 import { type RoutePreloadFuncArgs, type RouteSectionProps } from "@solidjs/router";
-import { $component, $memo, attempt, For, Show, type Props, view } from "@solidjs/blocks";
+import { $component, $memo, attempt, For, Show, type Props, view } from "solid-blocks";
 import Story from "~/components/story";
 import { getStories } from "~/lib/api";
 import type { StoryTypes } from "~/types";

@@ -1,5 +1,5 @@
 /**
- * @solidjs/eslint-plugin-blocks — the strict rules of @solidjs/blocks that
+ * eslint-plugin-solid-blocks — the strict rules of solid-blocks that
  * TypeScript cannot express. Everything else is a type error.
  *
  *   no-throw               a block raises typed failures: `yield* raise(e)`
@@ -36,7 +36,7 @@ import {
 
 /**
  * The positions the JSX transform's block rule refuses — the same list as
- * `REFUSALS` in @solidjs/vite-plugin-blocks (pinned by
+ * `REFUSALS` in vite-plugin-solid-blocks (pinned by
  * packages/vite-plugin-blocks/test/fixtures/rule.json).
  */
 export const REFUSALS = {
@@ -323,8 +323,8 @@ const SOLID_FOREIGN = {
   createReaction: "`$effect`",
   onSettled: "`$settled`",
   action: "`$event`",
-  until: "`until` from @solidjs/blocks",
-  refresh: "`refresh` from @solidjs/blocks",
+  until: "`until` from solid-blocks",
+  refresh: "`refresh` from solid-blocks",
   isPending: "`isPendingOf`",
   latest: "`latestOf`",
   untrack: "`$untrack` (in a hole, a $memo, an $effect or an $event)",
@@ -404,7 +404,7 @@ function isLibraryBinding(context, identifier) {
         !!def &&
         def.type === "ImportBinding" &&
         def.parent.type === "ImportDeclaration" &&
-        def.parent.source.value === "@solidjs/blocks"
+        def.parent.source.value === "solid-blocks"
       );
     }
     s = s.upper;
@@ -471,7 +471,7 @@ const noDollarBlock = {
         "`$` is removed: a derivation is `yield* $memo(function* () { … })` in the setup (or the row's setup).",
       other:
         "`$` is removed: read inside JSX (`{yield* …}`), pass a bare `function*` hole to `h` / `html`, or derive with `yield* $memo(…)` in a setup.",
-      import: "`{{name}}` is removed from @solidjs/blocks."
+      import: "`{{name}}` is removed from solid-blocks."
     },
     schema: []
   },
@@ -482,7 +482,7 @@ const noDollarBlock = {
     const imports = [];
     return {
       ImportDeclaration(node) {
-        if (node.source.value === "@solidjs/blocks") imports.push(node);
+        if (node.source.value === "solid-blocks") imports.push(node);
       },
       CallExpression(node) {
         const callee = node.callee;
@@ -722,7 +722,7 @@ const preferViewWrapper = {
         const blocks = source.ast.body.find(
           s =>
             s.type === "ImportDeclaration" &&
-            s.source.value === "@solidjs/blocks" &&
+            s.source.value === "solid-blocks" &&
             s.importKind !== "type"
         );
         context.report({
@@ -1086,7 +1086,7 @@ export const rules = {
 };
 
 const plugin = {
-  meta: { name: "@solidjs/eslint-plugin-blocks", version: "0.0.0" },
+  meta: { name: "eslint-plugin-solid-blocks", version: "0.0.0" },
   rules,
   configs: {}
 };
@@ -1095,12 +1095,9 @@ const plugin = {
 const WARNINGS = new Set(["prefer-view-wrapper"]);
 /** `recommended`: every rule an error, but the suggestions (`WARNINGS`), which warn (flat config). */
 plugin.configs.recommended = {
-  plugins: { "@solidjs/blocks": plugin },
+  plugins: { "solid-blocks": plugin },
   rules: Object.fromEntries(
-    Object.keys(rules).map(name => [
-      `@solidjs/blocks/${name}`,
-      WARNINGS.has(name) ? "warn" : "error"
-    ])
+    Object.keys(rules).map(name => [`solid-blocks/${name}`, WARNINGS.has(name) ? "warn" : "error"])
   )
 };
 

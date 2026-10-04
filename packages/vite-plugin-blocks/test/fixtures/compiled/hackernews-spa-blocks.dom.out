@@ -9,8 +9,8 @@ var _tmpl$2 = /* @__PURE__ */ _$template(`<a>`);
 var _tmpl$3 = /* @__PURE__ */ _$template(`<a target=_blank rel=noreferrer>`);
 var _tmpl$4 = /* @__PURE__ */ _$template(`<span class=host> (<!>)`);
 var _tmpl$5 = /* @__PURE__ */ _$template(`<span class=label>`);
-import { perform as _$perform } from "@solidjs/blocks";
-import { $component, Show, type Props, view } from "@solidjs/blocks";
+import { perform as _$perform } from "solid-blocks";
+import { $component, Show, type Props, view } from "solid-blocks";
 import type { StoryDefinition } from "../types";
 const Story = $component(function* Story(props: Props<{
 	story: StoryDefinition;

@@ -10,7 +10,7 @@ import {
   type Source,
   type Props,
   view
-} from "@solidjs/blocks";
+} from "solid-blocks";
 import { ItemError } from "./errors";
 
 interface Item {

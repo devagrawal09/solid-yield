@@ -39,6 +39,7 @@ import {
   until,
   type ChildView,
   type Element as BlocksElement,
+  type EventHandler,
   type Props,
   view
 } from "solid-blocks";
@@ -2703,5 +2704,150 @@ describe("binding an event is a hole (D-072)", () => {
     await settle();
     expect(seen).toEqual(["bound"]);
     expect(root.innerHTML).toBe("<p>caught</p>");
+  });
+});
+
+describe("an event's in-flight state is a source (D-075)", () => {
+  function deferred() {
+    let resolve!: () => void;
+    let reject!: (e: unknown) => void;
+    const promise = new Promise<void>((res, rej) => ((resolve = res), (reject = rej)));
+    return { promise, resolve, reject };
+  }
+
+  it("pending flips true while a call awaits an async attempt, false when it settles", async () => {
+    const d = deferred();
+    let save!: EventHandler<[], any, void>;
+    const App = $component(function* () {
+      save = $event(function* () {
+        yield* attempt(() => d.promise, toError);
+      });
+      return view(function* () {
+        return (
+          <button disabled={yield* save.pending} onClick={yield* save}>
+            save
+          </button>
+        );
+      });
+    });
+    mount(App);
+    const button = root.querySelector("button")!;
+    expect(button.disabled).toBe(false);
+    button.click();
+    await settle();
+    expect(button.disabled).toBe(true);
+    expect(perform(save.pending)).toBe(true);
+    d.resolve();
+    await settle();
+    expect(button.disabled).toBe(false);
+  });
+
+  it("pending is true while a call is paused on a pending read", async () => {
+    const d = deferred();
+    let save!: EventHandler<[], any, void>;
+    const seen: unknown[] = [];
+    const App = $component(function* () {
+      const data = yield* $memo(function* () {
+        return yield* attempt(() => d.promise.then(() => 42), toError);
+      });
+      save = $event(function* () {
+        seen.push(yield* data);
+      });
+      return view(function* () {
+        return <i>{(yield* save.pending) ? "busy" : "idle"}</i>;
+      });
+    });
+    mount(App);
+    expect(root.textContent).toBe("idle");
+    void save();
+    await settle();
+    expect(root.textContent).toBe("busy");
+    d.resolve();
+    await settle();
+    expect(seen).toEqual([42]);
+    expect(root.textContent).toBe("idle");
+  });
+
+  it("with several calls in flight it stays true until the last settles", async () => {
+    const waits = [deferred(), deferred()];
+    let n = 0;
+    let save!: EventHandler<[], any, void>;
+    const App = $component(function* () {
+      save = $event(function* () {
+        const d = waits[n++];
+        yield* attempt(() => d.promise, toError);
+      });
+      return view(function* () {
+        return <i>{String(yield* save.pending)}</i>;
+      });
+    });
+    mount(App);
+    void save();
+    void save();
+    await settle();
+    expect(root.textContent).toBe("true");
+    waits[0].resolve();
+    await settle();
+    expect(root.textContent).toBe("true");
+    waits[1].resolve();
+    await settle();
+    expect(root.textContent).toBe("false");
+  });
+
+  it("a synchronous call is never pending; a failing call ends pending too", async () => {
+    const d = deferred();
+    const flips: boolean[] = [];
+    let sync!: EventHandler<[], any, void>;
+    let fails!: EventHandler<[], any, void>;
+    const App = $component(function* () {
+      const [n, setN] = yield* $signal(0);
+      sync = $event(function* () {
+        yield* setN((yield* n) + 1);
+      });
+      fails = $event(function* () {
+        yield* attempt(() => d.promise, toError);
+      });
+      yield* $effect(function* () {
+        flips.push(yield* sync.pending);
+      });
+      return view(function* () {
+        return <i>{String(yield* fails.pending)}</i>;
+      });
+    });
+    mount(App);
+    await sync();
+    await settle();
+    expect(flips).toEqual([false]);
+    const call = fails();
+    await settle();
+    expect(root.textContent).toBe("true");
+    d.reject(new Error("down"));
+    await expect(call).rejects.toBeInstanceOf(Failed);
+    await settle();
+    expect(root.textContent).toBe("false");
+  });
+
+  it("a call made by another event counts too", async () => {
+    const d = deferred();
+    let inner!: EventHandler<[], any, void>;
+    let outer!: EventHandler<[], any, void>;
+    const App = $component(function* () {
+      inner = $event(function* () {
+        yield* attempt(() => d.promise, toError);
+      });
+      outer = $event(function* () {
+        yield* inner();
+      });
+      return view(function* () {
+        return <i>{`${yield* inner.pending}/${yield* outer.pending}`}</i>;
+      });
+    });
+    mount(App);
+    void outer();
+    await settle();
+    expect(root.textContent).toBe("true/true");
+    d.resolve();
+    await settle();
+    expect(root.textContent).toBe("false/false");
   });
 });

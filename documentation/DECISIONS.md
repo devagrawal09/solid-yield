@@ -86,7 +86,7 @@ Reading order with the rest of the plan: `blocks-library.md` (the reference), th
 | D-072 | implemented (Phase 5) | Binding an event in a view is a hole: `onClick={yield* save}` joins the handler's `P` and failures to the view; the transform's event refusal moves to the types; lint `no-unbound-event` |
 | D-073 | implemented (Phase 5) | An `$effect`'s or `$settled`'s raise joins the enclosing component's failure type, unless an attempt's `onError` absorbs it |
 | D-074 | decided | The library route and the compiler route are not mixed: same markup, different hydration keys; server and client use one route |
-| D-075 | decided | An event exposes its in-flight state as a source: `save.pending: Source<boolean>`; no automatic `Loading` |
+| D-075 | implemented (Phase 5) | An event exposes its in-flight state as a source: `save.pending: Source<boolean>`; no automatic `Loading` |
 
 ## Entries
 
@@ -714,6 +714,8 @@ The transform's fixtures keep `onClick={h}` (accepted #4) and its twin snapshots
 
 ### D-075 — An event's in-flight state is a source
 **Decided (Dev, 2026-10-05).** An event exposes its in-flight state as a typed source, `save.pending: Source<boolean, never, false>`. It is `true` while any call of `save` is paused on a pending read or awaiting an async attempt, and `false` otherwise. It is read in holes like any source: `<button disabled={yield* save.pending}>`. There is no automatic `<Loading>` triggering: the runtime cannot know an event's dependencies before it runs (a compiler could; out of scope). Tests: a type test; a runtime test that `pending` flips to `true` on a pause or an await and back to `false` on settling, and that with several concurrent calls it stays `true` until the last settles. Docs: §1's events bullet, a getting-started example.
+
+*Implemented (Phase 5, commit 5).* `EventHandler.pending: Source<boolean, never, false>`. Each handler keeps a count of its calls in flight and makes a signal of `count > 0` the first time `pending` is read (created with no owner). A call is in flight when its body did not finish synchronously, that is, when it paused on a pending read or an async attempt. The count is written outside the call's transaction: an `$event` call is an action, and the writes in its window (its synchronous slice, and whatever runs before the scheduled flush, including a write right after the call returns) are held until it settles (D-069 F4). Measured before writing it: a write in a microtask after the call, or in a reaction to it, shows at once. So the count goes up one microtask after a call is found paused, and down in a reaction on the action's own promise when it settles. That promise's rejection is already handled by the call's result, so whether the result's rejection is handled stays the caller's. Tests: runtime "an event's in-flight state is a source (D-075)" (an await; a pending read; two calls, true until the last settles; a sync call never; a failing call; a call made by another event); type test "an event's in-flight state is a settled source"; getting-started §6 (`Saver`, run by its spec).
 
 ## Phase 1A findings (agent report, items 4c–8; verbatim, 2026-10-04)
 

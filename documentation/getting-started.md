@@ -178,6 +178,31 @@ At the call, `UserCard({ user })` type-checks because the declaration admits the
 - **`Errored`** with `catch: [NotFound]` handles that failure type and removes it from the type. Any other failure passes to the boundary above.
 - **The root.** With both handled, `App` is a settled view, which `render` accepts. A root that may fail is accepted too (D-033: re-thrown), but a pending root is not.
 
+### 6. An event's in-flight state
+
+```tsx
+export const Saver = $component(function* Saver() {
+  const [saved, setSaved] = yield* $signal(0);
+  const save = $event(function* () {
+    yield* attempt(saveDraft, cause => new SaveError(String(cause)));
+    yield* setSaved((yield* saved) + 1);
+  });
+  return view(function* () {
+    return (
+      <button class="save" disabled={yield* save.pending} onClick={yield* save}>
+        saved {yield* saved}
+      </button>
+    );
+  });
+});
+```
+
+`SaveError` is a `Failure` like `NotFound`, and `saveDraft()` a stand-in for a slow save; both are in the program.
+
+- **`save.pending`** is a source (`Source<boolean>`, settled, never failing): `true` while any call of `save` is paused on a pending read or awaiting an async attempt, `false` otherwise (D-075). It is read in a hole like any other source. Here it disables the button while the save is in flight.
+- **No `Loading` for a call.** A call's wait never shows a `Loading`: the runtime cannot know what a call will read before it runs. Show it with `pending`.
+- **The binding carries the failure.** `onClick={yield* save}` gives `Saver`'s view the event's `SaveError`. The app calls it inside an `Errored`: `{yield* Errored({ fallback: <p class="error">not saved</p>, children: function* () { return <>{yield* Saver()}</>; } })}`.
+
 The whole program is [`getting-started.tsx`](../packages/blocks/test/docs/getting-started.tsx).
 
 ## Where a refusal is reported

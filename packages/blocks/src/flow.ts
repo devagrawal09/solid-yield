@@ -38,6 +38,7 @@ import {
 } from "./runtime.js";
 import type { Element } from "./element.js";
 import type {
+  BoundEvent,
   ComponentView,
   ErrorClass,
   Failure,
@@ -358,11 +359,25 @@ function LoadingBlocks(props: any): any {
 }
 
 /**
+ * `Errored`'s `reset`: it re-renders the boundary's children, and cannot pend
+ * or fail. A view binds it as it is, `onClick={reset}`: there are no colors
+ * for a `Bind` to carry, so it is typed as already bound (D-072).
+ */
+export type Reset = BoundEvent<[]>;
+/** An `Errored` fallback that carries no colors: content, or a render function returning content. */
+type PlainFallback<E> = Content | ((error: Accessor<E>, reset: Reset) => Content);
+
+/**
  * Handles failures below it. The fallback is content, a lazy view
- * (`fallback: function* () { return <…/>; }`, built when it shows, D-066), or
- * a function receiving the error (typed with the failures of the children)
- * and a `reset`. `$event` failures under it are
- * routed here.
+ * (`fallback: function* () { return <…/>; }`, built when it shows, D-066), a
+ * function receiving the error (typed with the failures of the children) and
+ * a `reset`, or a row `function* (error, reset) { …; return view(…); }` whose
+ * `error` is a path (a view that binds an event needs one, D-072). `$event`
+ * failures under it are routed here.
+ *
+ * The fallback's own colors are not this boundary's to handle: what it reads
+ * pending, and how it fails, reach the boundaries above (D-071), so they are
+ * in the output.
  *
  * With `catch` it handles only those error types: `<Errored catch={[NotFound]}
  * fallback={err => …}>` removes `NotFound` from its children's failures (the
@@ -371,21 +386,31 @@ function LoadingBlocks(props: any): any {
  * its own color: give each class a member of its own (`readonly kind =
  * "not-found"`), or TypeScript cannot tell two of them apart.
  */
-function ErroredBlocks<C, K extends readonly ErrorClass<Failure>[]>(props: {
+function ErroredBlocks<C, K extends readonly ErrorClass<Failure>[], Y, VY, R>(props: {
   catch: K & KindCheck<InstanceType<K[number]>>;
-  fallback:
-    | Content
-    | (() => Generator<any, Content, any>)
-    | ((error: Accessor<InstanceType<K[number]>>, reset: () => void) => Content);
+  fallback: RowBlock<[error: Path<InstanceType<K[number]>>, reset: Reset], Y, VY, R>;
   children: C;
-}): ComponentView<PendingOf<Ops<C>>, Exclude<FailsOf<Ops<C>>, InstanceType<K[number]>>>;
-function ErroredBlocks<C>(props: {
-  fallback:
-    | Content
-    | (() => Generator<any, Content, any>)
-    | ((error: Accessor<FailsOf<Ops<C>>>, reset: () => void) => Content);
+}): ComponentView<
+  PendingOf<Ops<C> | RowOps<VY, R, Y>>,
+  Exclude<FailsOf<Ops<C>>, InstanceType<K[number]>> | FailsOf<RowOps<VY, R, Y>>
+>;
+/** A lazy-view fallback carries its colors (`FY`); content and a render function carry none. */
+function ErroredBlocks<C, K extends readonly ErrorClass<Failure>[], FY = never>(props: {
+  catch: K & KindCheck<InstanceType<K[number]>>;
+  fallback: (() => Generator<FY, Content, any>) | PlainFallback<InstanceType<K[number]>>;
   children: C;
-}): ComponentView<PendingOf<Ops<C>>, never>;
+}): ComponentView<
+  PendingOf<Ops<C> | FY>,
+  Exclude<FailsOf<Ops<C>>, InstanceType<K[number]>> | FailsOf<FY>
+>;
+function ErroredBlocks<C, Y, VY, R>(props: {
+  fallback: RowBlock<[error: Path<FailsOf<Ops<C>>>, reset: Reset], Y, VY, R>;
+  children: C;
+}): ComponentView<PendingOf<Ops<C> | RowOps<VY, R, Y>>, FailsOf<RowOps<VY, R, Y>>>;
+function ErroredBlocks<C, FY = never>(props: {
+  fallback: (() => Generator<FY, Content, any>) | PlainFallback<FailsOf<Ops<C>>>;
+  children: C;
+}): ComponentView<PendingOf<Ops<C> | FY>, FailsOf<FY>>;
 function ErroredBlocks(props: any): any {
   const children = content(props, "Errored");
   const fallback = props.fallback as any;

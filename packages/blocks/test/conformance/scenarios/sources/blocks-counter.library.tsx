@@ -14,7 +14,7 @@ export const App = $component(function* App() {
   });
   return view(function* () {
     return (
-      <button class="inc" onClick={inc}>
+      <button class="inc" onClick={yield* inc}>
         {yield* count}:{yield* doubled}
       </button>
     );

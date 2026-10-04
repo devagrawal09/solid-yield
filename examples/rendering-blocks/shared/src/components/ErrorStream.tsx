@@ -7,6 +7,8 @@ import {
   Errored,
   Loading,
   type BlockSetter,
+  type Path,
+  type Reset,
   type Source,
   type Props,
   view
@@ -54,18 +56,25 @@ const Title = $component(function* Title(props: Props<{ item: Source<Item, ItemE
   });
 });
 
+/**
+ * The boundaries' fallback: a row (D-030), its error a path, so its view can
+ * bind the retry event (D-072). Its parameters are annotated: TypeScript does
+ * not infer a generator fallback's.
+ */
 function fallback(setId: BlockSetter<string | undefined>) {
-  return (error: () => ItemError, reset: () => void) => {
+  return function* (error: Path<ItemError>, reset: Reset) {
     const retry = $event(function* () {
       yield* setId("1");
       reset();
     });
-    return (
-      <div>
-        <div>ItemError: {String(error())}</div>
-        <button onClick={retry}>Reset to valid item</button>
-      </div>
-    );
+    return view(function* () {
+      return (
+        <div>
+          <div>ItemError: {String(yield* error)}</div>
+          <button onClick={yield* retry}>Reset to valid item</button>
+        </div>
+      );
+    });
   };
 }
 

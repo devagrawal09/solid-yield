@@ -44,7 +44,7 @@ export interface CompiledModule {
 export interface LoweringStats {
   /** `function*` bodies left in the output (the library interprets every one). */
   generators: number;
-  /** `_$perform(` holes the block rule wrote. */
+  /** `_$perform(` holes the block rule wrote (an event bound in a view, `onClick={yield* save}`, is one too: D-072). */
   performs: number;
 }
 

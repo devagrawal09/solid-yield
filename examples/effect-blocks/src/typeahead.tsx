@@ -123,7 +123,7 @@ export const Typeahead = $component(function* Typeahead() {
           type="search"
           placeholder="Search packages… (try typing “solid” quickly)"
           value={yield* query}
-          onInput={onInput}
+          onInput={yield* onInput}
           autofocus
         />
         {

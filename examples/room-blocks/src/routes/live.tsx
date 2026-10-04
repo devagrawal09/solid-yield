@@ -33,6 +33,7 @@ import {
   until,
   type EventHandler,
   type Path,
+  type Reset,
   type Source,
   type Props,
   view
@@ -237,7 +238,7 @@ const Chaos = $component(function* Chaos() {
   return view(function* () {
     return (
       <span class="chaos">
-        <button type="button" onClick={drop}>
+        <button type="button" onClick={yield* drop}>
           Kill every connection
         </button>
         {
@@ -401,10 +402,10 @@ const Composer = $component(function* Composer(
   });
   return view(function* () {
     return (
-      <form class="composer" onSubmit={submit}>
+      <form class="composer" onSubmit={yield* submit}>
         <input
           value={yield* shown}
-          onInput={input}
+          onInput={yield* input}
           placeholder={`Message #${yield* props.room}`}
           disabled={(yield* me) === null}
           autocomplete="off"
@@ -670,14 +671,21 @@ const Summary = $component(function* Summary(props: Props<{ room: string }>) {
         </div>
         {
           yield* Errored({
-            fallback: (err, reset) => (
-              <div class="error">
-                <p>The stream died: {describe(err())}</p>
-                <button type="button" onClick={() => regenerate(reset)}>
-                  Regenerate
-                </button>
-              </div>
-            ),
+            // a row (its error a path), so its view can bind `regenerate` with the
+            // boundary's `reset` as its data (D-072); TypeScript does not infer a
+            // generator fallback's parameters
+            fallback: function* (err: Path<Error>, reset: Reset) {
+              return view(function* () {
+                return (
+                  <div class="error">
+                    <p>The stream died: {describe(yield* err)}</p>
+                    <button type="button" onClick={[yield* regenerate, reset]}>
+                      Regenerate
+                    </button>
+                  </div>
+                );
+              });
+            },
             children: function* () {
               return (
                 <>

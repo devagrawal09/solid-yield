@@ -1180,18 +1180,11 @@ const plugin = {
 
 /** Rules `recommended` sets to warn (a suggestion, not a rule of the model). */
 const WARNINGS = new Set(["prefer-view-wrapper"]);
-/**
- * D-072, staged: not in `recommended` until the twins, the tests and the docs
- * bind their events (the next commit adds it, as an error).
- */
-const STAGED = new Set(["no-unbound-event"]);
 /** `recommended`: every rule an error, but the suggestions (`WARNINGS`), which warn (flat config). */
 plugin.configs.recommended = {
   plugins: { "solid-blocks": plugin },
   rules: Object.fromEntries(
-    Object.keys(rules)
-      .filter(name => !STAGED.has(name))
-      .map(name => [`solid-blocks/${name}`, WARNINGS.has(name) ? "warn" : "error"])
+    Object.keys(rules).map(name => [`solid-blocks/${name}`, WARNINGS.has(name) ? "warn" : "error"])
   )
 };
 

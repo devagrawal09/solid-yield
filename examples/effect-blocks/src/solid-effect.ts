@@ -122,8 +122,13 @@ export class SagaDriverError extends Error {
 }
 
 export interface EffectAction<Args extends unknown[], R> {
-  /** An event call doing async work (its steps are fibers); a failure is whatever the saga rethrows. */
-  (...args: Args): EventCall<R, unknown, boolean, true>;
+  /**
+   * An event call doing async work (its steps are fibers); a failure is
+   * whatever the saga rethrows. It reads no pending source (`P` is `false`:
+   * the driver only awaits fibers), so binding an event that calls it does
+   * not make a view pending (D-071, D-072).
+   */
+  (...args: Args): EventCall<R, unknown, false, true>;
   /** Interrupt the in-flight step's fiber. The interruption surfaces inside
    * the generator as a thrown `ActionInterruptedError` at the `yield*`. */
   interrupt(): void;
@@ -165,7 +170,7 @@ export function effectAction<Args extends unknown[], R>(
 
   const invoke = (...args: Args) => {
     invoke.interrupt(); // superseding call cancels the previous flight
-    return base(...args) as EventCall<R, unknown, boolean, true>;
+    return base(...args) as EventCall<R, unknown, false, true>;
   };
   invoke.interrupt = () => {
     const fiber = inFlight;

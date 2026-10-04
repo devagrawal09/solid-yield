@@ -61,7 +61,12 @@ const Header = $component(function* Header() {
     return (
       <header class="header">
         <h1>todos</h1>
-        <input class="new-todo" placeholder="What needs to be done?" autofocus onKeyDown={submit} />
+        <input
+          class="new-todo"
+          placeholder="What needs to be done?"
+          autofocus
+          onKeyDown={yield* submit}
+        />
       </header>
     );
   });
@@ -95,7 +100,7 @@ const TodoItem = $component(function* TodoItem(props: Props<{ todo: Todo }>) {
             class="toggle"
             type="checkbox"
             checked={yield* props.todo.completed}
-            onInput={toggle}
+            onInput={yield* toggle}
           />
           <label>{yield* props.todo.title}</label>
           {
@@ -104,13 +109,17 @@ const TodoItem = $component(function* TodoItem(props: Props<{ todo: Todo }>) {
               children: function* (error) {
                 return view(function* () {
                   return (
-                    <button class="retry" title={`Retry ${yield* error.type}`} onClick={retry} />
+                    <button
+                      class="retry"
+                      title={`Retry ${yield* error.type}`}
+                      onClick={yield* retry}
+                    />
                   );
                 });
               }
             })
           }
-          <button class="destroy" onClick={remove} />
+          <button class="destroy" onClick={yield* remove} />
         </div>
       </li>
     );
@@ -151,7 +160,7 @@ const MainSection = $component(function* MainSection(props: Props<{ filter: Filt
                     class="toggle-all"
                     type="checkbox"
                     checked={yield* allCompleted}
-                    onChange={toggle}
+                    onChange={yield* toggle}
                   />
                   <label for="toggle-all">Mark all as complete</label>
                   <ul class="todo-list">
@@ -229,7 +238,7 @@ const Footer = $component(function* Footer(props: Props<{ filter: Filter }>) {
                       },
                       children: function* () {
                         return (
-                          <button class="clear-completed" onClick={clear}>
+                          <button class="clear-completed" onClick={yield* clear}>
                             Clear completed
                           </button>
                         );

@@ -25,7 +25,7 @@ const Saver = $component(function* Saver() {
   });
   return view(function* () {
     return (
-      <button class="save" onClick={save}>
+      <button class="save" onClick={yield* save}>
         {yield* saved}
       </button>
     );

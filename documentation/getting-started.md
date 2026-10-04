@@ -62,6 +62,7 @@ render(App, document.getElementById("root")!);
 | **View** | A view has no body (D-032). It is `return <…/>`, every read is a hole, and structure comes from flow controls. No `if`, no early `return`, no local computation, no `yield*` outside JSX. | `return view(function* () { return <p>{yield* count}</p>; })` |
 | **Holes** | A `yield*` in a JSX position is a hole: its own computation, re-run when what it reads changes. Derive in a hole or in a `$memo`. | `{(yield* count) * 2}` |
 | **Writes** | A setter returns a receipt, and the write happens when it is delegated to. Only an `$event` or an `$effect` writes. | `yield* setCount((yield* count) + 1)` |
+| **Events** | An `$event` is *bound* in a view, `onClick={yield* save}`: a hole that attaches the handler, un-called, and gives the view its pending read and failures (D-072). Another event *calls* it, `yield* save(x)`. | `<button onClick={yield* save}>` |
 | **Call form** | A block component, a flow control and a boundary are *called* in a hole, never tagged (D-062). Props are a source, a zero-arity `function*` hole, or a settled value (D-065). `children` is always a generator (D-066). | `{yield* Card({ todo, children: function* () { return <i />; } })}` |
 | **Colors** | Reading may be *pending* (async) or *fail* with a typed error: `Source<T, E, P>`. A prop declares the colors it accepts (D-068). A call passes only what the declaration admits. Colors flow up through `yield*` to a `Loading` / `Errored`. | `props: Props<{ user: Source<User, NotFound, true> }>` |
 | **Failures** | A failure is an `Error` with a literal `kind` (D-034). `attempt(fn, onError)` gives a failure its type, and `raise(e)` fails with one. An `Errored` handles failures, or with `catch` only the listed ones. With no `Errored` the failure is re-thrown (D-033). A plain `throw` is a bug (`UNTYPED_THROW`). | `yield* attempt(() => fetch(u), cause => new NotFound(cause))` |
@@ -82,7 +83,7 @@ export const Counter = $component(function* Counter(props: Props<{ step: number 
   // view: no body; every read is a hole
   return view(function* () {
     return (
-      <button class="counter" onClick={add}>
+      <button class="counter" onClick={yield* add}>
         {yield* count}
       </button>
     );
@@ -93,6 +94,7 @@ export const Counter = $component(function* Counter(props: Props<{ step: number 
 - **Setup.** The setup runs once. `yield* $signal(0)` *creates*, which a setup may do. Writing `yield* count` here would *read*, which a setup may not: that is a type error (`Read` is not a `SetupOp`), and the dev error `READ_IN_SETUP`.
 - **Props.** `props.step` is a source like any other. The setup does not read it; the event does.
 - **Event.** `$event` is a transaction. `setCount(…)` alone writes nothing: the write happens at `yield* setCount(…)`. A bare call is the lint error `no-unyielded-write`, and in development `UNYIELDED_WRITE`.
+- **Binding.** `onClick={yield* add}` binds the event: the handler is attached, not called, and what a click may do joins the view's type. Here that is nothing. An event that may fail gives the view its failure, which goes to the nearest `Errored`; one that waits on a pending read makes the view pending (D-072). `onClick={add}` would drop both: it is a type error (an event attribute takes only a bound handler) and the lint error `no-unbound-event`, whose autofix adds the `yield*`.
 - **View.** `{yield* count}` is a hole. The transform rewrites it to `perform(count)`, and only that text node updates. `view(…)` makes TypeScript report a mistake in the view at the view, not at `$component(`. A top-level `const n = yield* count` above the `return` would be `READ_IN_VIEW` and the lint error `no-read-in-view-body`.
 
 ### 2. Call a component, pass it a source
@@ -182,9 +184,9 @@ The whole program is [`getting-started.tsx`](../packages/blocks/test/docs/gettin
 
 Each rule is checked as early as the tools allow:
 
-1. **Types.** For example: a component tag, a read in a setup, a create or write in a view, a source called like a function, an unhandled pending at the root, `[SETTLED_PROP]`, `[FAILURE_KIND]`, `[HVIEW_READ]`.
-2. **The transform** (at build time). A `yield*` in a JSX position it cannot make a hole: `BLOCKS_YIELD_IN_EVENT`, `…_REF`, `…_SPREAD`, `…_SPREAD_CHILD`, `BLOCKS_PLAIN_YIELD_IN_JSX`.
+1. **Types.** For example: a component tag, a read in a setup, a create or write in a view, a source called like a function, an unbound event handler, an unhandled pending at the root, `[SETTLED_PROP]`, `[FAILURE_KIND]`, `[HVIEW_READ]`.
+2. **The transform** (at build time). A `yield*` in a JSX position it cannot make a hole: `BLOCKS_YIELD_IN_REF`, `…_SPREAD`, `…_SPREAD_CHILD`, `BLOCKS_PLAIN_YIELD_IN_JSX`.
 3. **Development errors**, thrown where they happen and stripped from production builds. For example: `READ_IN_VIEW`, `READ_IN_SETUP`, `UNYIELDED_WRITE`, `UNTYPED_THROW`, `JSX_IN_SETUP`, `PATH_OBJECT`.
-4. **Lint** (`eslint-plugin-solid-blocks`), for what TypeScript cannot see. For example: `no-read-in-view-body`, `no-read-in-prop`, `component-children-generator`, `no-throw`.
+4. **Lint** (`eslint-plugin-solid-blocks`), for what TypeScript cannot see. For example: `no-read-in-view-body`, `no-read-in-prop`, `component-children-generator`, `no-unbound-event`, `no-throw`.
 
 [`refusals.md`](./refusals.md) puts every one of them in one place, starting with what you cannot write in a view.

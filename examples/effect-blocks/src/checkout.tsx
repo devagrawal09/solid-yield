@@ -236,12 +236,12 @@ export const Checkout = $component(function* Checkout() {
                       <span class="qty">
                         <button
                           disabled={(yield* inFlight) || (yield* item.quantity) <= 1}
-                          onClick={decrement}
+                          onClick={yield* decrement}
                         >
                           −
                         </button>
                         {yield* item.quantity}
-                        <button disabled={yield* inFlight} onClick={increment}>
+                        <button disabled={yield* inFlight} onClick={yield* increment}>
                           +
                         </button>
                       </span>
@@ -262,7 +262,7 @@ export const Checkout = $component(function* Checkout() {
 
         <div class="checkout-controls">
           <label class="decline-toggle">
-            <input type="checkbox" checked={yield* declineCard} onInput={toggleDecline} />
+            <input type="checkbox" checked={yield* declineCard} onInput={yield* toggleDecline} />
             Simulate card decline (typed <code>CardDeclinedError</code>)
           </label>
           {
@@ -270,14 +270,14 @@ export const Checkout = $component(function* Checkout() {
               when: inFlight,
               fallback: function* () {
                 return (
-                  <button class="primary" onClick={place}>
+                  <button class="primary" onClick={yield* place}>
                     Place order — ${(yield* total).toFixed(2)}
                   </button>
                 );
               },
               children: function* () {
                 return (
-                  <button class="danger" onClick={cancel}>
+                  <button class="danger" onClick={yield* cancel}>
                     Cancel checkout
                   </button>
                 );

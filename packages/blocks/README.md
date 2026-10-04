@@ -17,12 +17,12 @@ export const Counter = $component(function* Counter(props: Props<{ step: number 
   });
   // view: no body; every read is a hole
   return view(function* () {
-    return <button onClick={add}>{yield* count}</button>;
+    return <button onClick={yield* add}>{yield* count}</button>;
   });
 });
 ```
 
-- Every read and write is a `yield*`.
+- Every read and write is a `yield*`; so is binding an event in a view (`onClick={yield* add}`), which gives the view the event's pending read and failures.
 - A setup creates and never reads.
 - A view has no body: every read is a hole in JSX, and structure comes from flow controls.
 - A block component is called (`{yield* Counter({ step })}`), not tagged.

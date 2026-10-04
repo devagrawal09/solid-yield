@@ -126,7 +126,7 @@ const RevealPage = $component(function* RevealPage() {
                 name="order"
                 value="sequential"
                 checked={(yield* order) === "sequential"}
-                onInput={pick("sequential")}
+                onInput={yield* pick("sequential")}
               />{" "}
               sequential
             </label>
@@ -136,7 +136,7 @@ const RevealPage = $component(function* RevealPage() {
                 name="order"
                 value="together"
                 checked={(yield* order) === "together"}
-                onInput={pick("together")}
+                onInput={yield* pick("together")}
               />{" "}
               together
             </label>
@@ -146,7 +146,7 @@ const RevealPage = $component(function* RevealPage() {
                 name="order"
                 value="natural"
                 checked={(yield* order) === "natural"}
-                onInput={pick("natural")}
+                onInput={yield* pick("natural")}
               />{" "}
               natural
             </label>
@@ -156,11 +156,11 @@ const RevealPage = $component(function* RevealPage() {
               type="checkbox"
               checked={yield* collapsed}
               disabled={(yield* order) !== "sequential"}
-              onInput={collapse}
+              onInput={yield* collapse}
             />{" "}
             collapsed <em>(sequential only)</em>
           </label>
-          <button onClick={restart}>Restart run</button>
+          <button onClick={yield* restart}>Restart run</button>
         </div>
 
         {

@@ -11,7 +11,7 @@ const Toggle = $component(function* Toggle(props: Props<{ children: Element }>) 
     return (
       <>
         <div class={["toggle", { open: yield* open }]}>
-          <a onClick={toggle}>{(yield* open) ? "[-]" : "[+] comments collapsed"}</a>
+          <a onClick={yield* toggle}>{(yield* open) ? "[-]" : "[+] comments collapsed"}</a>
         </div>
         <ul class="comment-children" style={{ display: (yield* open) ? "block" : "none" }}>
           {yield* props.children}

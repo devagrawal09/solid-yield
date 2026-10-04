@@ -48,7 +48,7 @@ export const App = $component(function* App() {
               children: function* () {
                 return (
                   <>
-                    <a class={"t" + (yield* n.id)} onClick={toggle}>
+                    <a class={"t" + (yield* n.id)} onClick={yield* toggle}>
                       {(yield* open) ? "[-]" : "[+]"}
                     </a>
                     <ul style={{ display: (yield* open) ? "block" : "none" }}>

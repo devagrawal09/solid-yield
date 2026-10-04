@@ -68,7 +68,7 @@ export function coverageMatrix(scenarios: Scenario[]): string {
   out.push("## What the library route ran (compiled output facts)");
   out.push("");
   out.push(
-    "`function*` bodies left (every one interpreted by the runtime) / `_$perform(` holes the block rule wrote, in the client build of the library source."
+    "`function*` bodies left (every one interpreted by the runtime) / `_$perform(` holes the block rule wrote (an event bound in a view, `onClick={yield* save}`, is one too: D-072), in the client build of the library source."
   );
   out.push("");
   out.push("| scenario | c/library |");

@@ -42,7 +42,7 @@ export const Counter = $component(function* Counter(props: Props<{ step: number 
   // view: no body; every read is a hole
   return view(function* () {
     return (
-      <button class="counter" onClick={add}>
+      <button class="counter" onClick={yield* add}>
         {yield* count}
       </button>
     );
@@ -76,7 +76,7 @@ export const App = $component(function* App() {
     return (
       <main>
         {yield* Counter({ step: 2 })}
-        <button class="next" onClick={next}>
+        <button class="next" onClick={yield* next}>
           next user
         </button>
         {

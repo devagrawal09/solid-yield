@@ -83,7 +83,7 @@ const Link = $component(function* Link(props: Props<{ path: string; children: El
   });
   return view(function* () {
     return (
-      <a class="link" href={`/${yield* props.path}`} onClick={navigate}>
+      <a class="link" href={`/${yield* props.path}`} onClick={yield* navigate}>
         {yield* props.children}
       </a>
     );

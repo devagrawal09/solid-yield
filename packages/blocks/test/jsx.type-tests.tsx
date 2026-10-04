@@ -59,7 +59,7 @@ export const Settled = $component(function* (props: Props<{ label: string }>) {
   });
   return function* () {
     return (
-      <p onClick={inc} title={yield* props.label}>
+      <p onClick={yield* inc} title={yield* props.label}>
         {yield* props.label}: {yield* doubled} {yield* store.todos[0].title}{" "}
         {yield* readStore(store, s => s.todos.length)}
       </p>
@@ -104,7 +104,7 @@ export const Untracks = $component(function* (props: Props<{ start: number }>) {
   });
   return function* () {
     return (
-      <p onClick={log}>
+      <p onClick={yield* log}>
         {yield* doubled} {yield* $untrack(props.start)}
       </p>
     );
@@ -422,7 +422,7 @@ export const Rows = $component(function* () {
               });
               return function* () {
                 return (
-                  <li onClick={toggle}>
+                  <li onClick={yield* toggle}>
                     {yield* i}: {yield* c.text} {(yield* open) ? "-" : "+"}
                   </li>
                 );
@@ -1081,8 +1081,8 @@ const onlyA = Errored({
 });
 const stillB: View<false, KindB> = onlyA;
 void stillB;
-// @ts-expect-error a catch list needs classes with a literal kind
 export const plainCatch = Errored({
+  // @ts-expect-error a catch list needs classes with a literal kind
   catch: [PlainA],
   fallback: "!",
   children: function* () {

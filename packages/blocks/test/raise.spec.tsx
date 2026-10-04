@@ -222,7 +222,7 @@ const hosts: HostCase[] = [
         });
         event = go;
         return view(function* () {
-          return <button onClick={go}>go</button>;
+          return <button onClick={yield* go}>go</button>;
         });
       });
       return {

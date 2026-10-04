@@ -4,6 +4,7 @@
  */
 import {
   $component,
+  $event,
   $memo,
   $signal,
   attempt,
@@ -30,17 +31,11 @@ export const Settled = $component(function* () {
   const doubled = yield* $memo(function* () {
     return (yield* n) * 2;
   });
+  const go = $event(function* () {});
   return function* () {
-    return h(
-      "p",
-      { class: doubled, title: "static", onClick: () => {} },
-      "count ",
-      n,
-      " ",
-      function* () {
-        return (yield* n) + 1;
-      }
-    );
+    return h("p", { class: doubled, title: "static", onClick: go }, "count ", n, " ", function* () {
+      return (yield* n) + 1;
+    });
   };
 });
 const settledOut: HView<false, never> = h("p", "x");
@@ -226,3 +221,11 @@ declare const pendingCount: Source<number, FetchError, true>;
 export const hChildrenOk = h(Shows, { children: 1 });
 // @ts-expect-error [SETTLED_PROP] Shows' children are settled
 export const hChildrenBad = h(Shows, { children: pendingCount });
+
+// --- an event attribute takes an $event handler, bound by h (D-072) -----------------------------
+export const PlainHandler = $component(function* () {
+  return function* () {
+    // @ts-expect-error a plain function: the DOM would call it with its colors in no type (D-071)
+    return h("button", { onClick: () => {} }, "go");
+  };
+});

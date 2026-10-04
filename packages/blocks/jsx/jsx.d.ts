@@ -5,7 +5,11 @@
 
 import * as csstype from "csstype";
 import type { PropKey, WidenPropValue } from "./jsx-properties.js";
-import type { Element as BlocksElement, TagType as BlocksTagType } from "solid-blocks";
+import type {
+  Bound as BlocksBound,
+  Element as BlocksElement,
+  TagType as BlocksTagType
+} from "solid-blocks";
 
 /**
  * Originally based on JSX types for Surplus and Inferno and adapted for Solid.
@@ -163,19 +167,25 @@ export namespace JSX {
     ): void;
   }
 
+  /** D-072: the bound-data form, `onClick={[yield* pick, data]}`: Solid calls `pick(data, event)`. */
   interface BoundEventHandler<
     T,
     E extends Event,
     EHandler extends EventHandler<T, any> = EventHandler<T, E>
   > {
-    0: (data: any, ...e: Parameters<EHandler>) => void;
+    0: BlocksBound<(data: any, ...e: Parameters<EHandler>) => void>;
     1: any;
   }
+  /**
+   * D-072: an event attribute takes a bound block event handler, `onClick={yield* save}`:
+   * its pending read and failures are the view's. Not an unbound handler, a plain function or
+   * a source's value: the DOM would call it with its colors in no type (D-071).
+   */
   type EventHandlerUnion<
     T,
     E extends Event,
     EHandler extends EventHandler<T, any> = EventHandler<T, E>
-  > = EHandler | BoundEventHandler<T, E, EHandler>;
+  > = BlocksBound<EHandler> | BoundEventHandler<T, E, EHandler>;
 
   interface InputEventHandler<T, E extends InputEvent> {
     (

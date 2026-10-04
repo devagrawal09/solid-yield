@@ -146,7 +146,7 @@ const Skeleton = $component(function* Skeleton() {
             {yield* FeedCard({ feed: store })}
           </div>
         </div>
-        <button type="button" onClick={refetch}>
+        <button type="button" onClick={yield* refetch}>
           Refetch
         </button>
       </section>

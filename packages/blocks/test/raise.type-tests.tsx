@@ -12,6 +12,7 @@ import {
   $memo,
   $settled,
   $signal,
+  Errored,
   For,
   raise,
   Show,
@@ -21,6 +22,8 @@ import {
   type Create,
   type EventHandler,
   type HView,
+  type Path,
+  type Reset,
   type FailsOf,
   type Props,
   type Raise,
@@ -365,3 +368,126 @@ export const Row = $component(function* Row() {
   });
 });
 export type RowView = Expect<Equal<ViewFailsOf<ReturnType<typeof Row>>, Boom>>;
+
+// --- an event attribute takes a bound block event handler, nothing else (D-072) ---------------
+export const Refusals = $component(function* Refusals(
+  props: Props<{ onSave: EventHandler<[], Boom, void, false, false>; fn: () => void }>
+) {
+  const go = $event(function* () {});
+  const [fn] = yield* $signal<() => void>(() => {});
+  return view(function* () {
+    return (
+      <>
+        {/* @ts-expect-error unbound: its colors would reach no type (lint: no-unbound-event) */}
+        <button onClick={go}>a</button>
+        {/* @ts-expect-error a source's value is not a bound handler */}
+        <button onClick={yield* fn}>b</button>
+        {/* @ts-expect-error a plain function: the DOM would call it with its colors in no type */}
+        <button onClick={() => {}}>c</button>
+        {/* @ts-expect-error a handler read from a prop is a source's value: wrap it in an $event */}
+        <button onClick={yield* props.onSave}>d</button>
+        {/* @ts-expect-error a plain-function prop either */}
+        <button onClick={yield* props.fn}>e</button>
+      </>
+    );
+  });
+});
+// a handler given as a prop is called by an $event of the child's, which joins its colors
+export const ForwardsHandler = $component(function* ForwardsHandler(
+  props: Props<{ onSave: EventHandler<[], Boom, void, false, false> }>
+) {
+  const save = $event(function* () {
+    yield* (yield* props.onSave)();
+  });
+  return view(function* () {
+    return <button onClick={yield* save}>save</button>;
+  });
+});
+export type ForwardsHandlerView = Expect<
+  Equal<ViewFailsOf<ReturnType<typeof ForwardsHandler>>, Boom>
+>;
+
+// --- Errored: reset is already bound; a row fallback binds; the fallback's colors pass on -----
+export const ResetBound = $component(function* ResetBound() {
+  return view(function* () {
+    return (
+      <>
+        {
+          yield* Errored({
+            fallback: (_err, reset) => <button onClick={reset}>reset</button>,
+            children: function* () {
+              return <>{yield* Fails()}</>;
+            }
+          })
+        }
+      </>
+    );
+  });
+});
+export type ResetBoundView = Expect<Equal<ViewFailsOf<ReturnType<typeof ResetBound>>, never>>;
+const Fails = $component(function* Fails() {
+  const m = yield* $memo(function* () {
+    return yield* raise(new Boom());
+  });
+  return view(function* () {
+    return <i>{yield* m}</i>;
+  });
+});
+// a row fallback: its error is a path, its handlers are bound, its failures pass on (D-071)
+export const RowFallback = $component(function* RowFallback() {
+  return view(function* () {
+    return (
+      <>
+        {
+          yield* Errored({
+            // its parameters are annotated: TypeScript does not infer a generator fallback's
+            fallback: function* (err: Path<Boom>, reset: Reset) {
+              const again = $event(function* (r: Reset) {
+                yield* raise(new Other());
+                r();
+              });
+              return view(function* () {
+                return (
+                  <p>
+                    {(yield* err).message}
+                    <button onClick={[yield* again, reset]}>again</button>
+                  </p>
+                );
+              });
+            },
+            children: function* () {
+              return <>{yield* Fails()}</>;
+            }
+          })
+        }
+      </>
+    );
+  });
+});
+export type RowFallbackView = Expect<Equal<ViewFailsOf<ReturnType<typeof RowFallback>>, Other>>;
+// a lazy-view fallback's colors pass on too (before D-071 they were dropped)
+const Pends = $component(function* Pends(props: Props<{ n: Source<number, never, true> }>) {
+  return view(function* () {
+    return <i>{yield* props.n}</i>;
+  });
+});
+declare const pendingN: Source<number, never, true>;
+export const LazyFallback = $component(function* LazyFallback() {
+  return view(function* () {
+    return (
+      <>
+        {
+          yield* Errored({
+            fallback: function* () {
+              return <>{yield* Pends({ n: pendingN })}</>;
+            },
+            children: function* () {
+              return <>{yield* Fails()}</>;
+            }
+          })
+        }
+      </>
+    );
+  });
+});
+export type LazyFallbackView = Expect<Equal<ViewPendingOf<ReturnType<typeof LazyFallback>>, true>>;

@@ -169,7 +169,7 @@ it("props, stores, row blocks and hole blocks read with yield* in JSX", () => {
             yield* Show({
               when: open,
               children: function* () {
-                return <button onClick={close}>close</button>;
+                return <button onClick={yield* close}>close</button>;
               }
             })
           }

@@ -55,7 +55,7 @@ describe("server rendering", () => {
       const click = $event(function* () {});
       return function* () {
         return (
-          <section onClick={click}>
+          <section onClick={yield* click}>
             <h1>{perform(store.title)}</h1>
             <ul>
               {

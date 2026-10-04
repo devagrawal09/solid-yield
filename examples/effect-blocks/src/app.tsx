@@ -34,7 +34,7 @@ const LogPanel = $component(function* LogPanel(props: Props<{ log: Log }>) {
       <aside class="log-panel">
         <header>
           <h2>Fiber events</h2>
-          <button onClick={clear}>Clear</button>
+          <button onClick={yield* clear}>Clear</button>
         </header>
         {
           yield* Show({
@@ -109,13 +109,13 @@ export const App = $component(function* App() {
                       <nav class="tabs">
                         <button
                           class={{ selected: (yield* tab) === "typeahead" }}
-                          onClick={showTypeahead}
+                          onClick={yield* showTypeahead}
                         >
                           Typeahead <small>read path</small>
                         </button>
                         <button
                           class={{ selected: (yield* tab) === "checkout" }}
-                          onClick={showCheckout}
+                          onClick={yield* showCheckout}
                         >
                           Checkout <small>action path</small>
                         </button>

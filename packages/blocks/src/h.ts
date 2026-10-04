@@ -25,7 +25,7 @@ import type {
   Source,
   View
 } from "./types.js";
-import type { Errored, Loading } from "./flow.js";
+import type { Errored, Loading, Reset } from "./flow.js";
 import type { Accessor } from "solid-js";
 
 type Intrinsic = JSX.IntrinsicElements;
@@ -79,16 +79,21 @@ export interface BlocksH {
     props: { fallback?: Hole; on?: unknown },
     ...children: C
   ): HView<false, FailsOf<OpsOfHole<C[number]>>>;
-  /** `Errored` handles the failures of its children; their pending passes on. */
-  <const C extends readonly Hole[]>(
+  /**
+   * `Errored` handles the failures of its children; their pending passes on,
+   * and so do the fallback's own colors (D-071). `reset` is already bound
+   * (`Reset`, D-072): `h("button", { onClick: reset })`.
+   */
+  <const C extends readonly Hole[], R extends Hole>(
     component: typeof Errored,
-    props: {
-      fallback:
-        | Exclude<Hole, (...args: any[]) => any>
-        | ((error: Accessor<unknown>, reset: () => void) => Hole);
-    },
+    props: { fallback: (error: Accessor<unknown>, reset: Reset) => R },
     ...children: C
-  ): HView<PendingOf<OpsOfHole<C[number]>>, never>;
+  ): HView<PendingOf<OpsOfHole<C[number]> | OpsOfHole<R>>, FailsOf<OpsOfHole<R>>>;
+  <const C extends readonly Hole[], F extends Exclude<Hole, (...args: any[]) => any>>(
+    component: typeof Errored,
+    props: { fallback: F },
+    ...children: C
+  ): HView<PendingOf<OpsOfHole<C[number]> | OpsOfHole<F>>, FailsOf<OpsOfHole<F>>>;
   /**
    * A component: its props, then its children. The result carries the
    * component's pending / failures and its children's (a component renders

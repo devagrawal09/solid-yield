@@ -25,7 +25,9 @@ A view is `return view(function* () { return <…/>; })`: it has no body (D-032)
 | a pending or failing child not `yield*`-ed: `{Card({ todo })}` | `{yield* Card({ todo })}`, under a `Loading` / `Errored` as its colors need | `JSX.Element` is settled only | — | — | — |
 | a thunk as a child or attribute: `{() => x}`, `class={() => c}` | a hole: `{yield* x}` | JSX and `h` reject plain thunks | — | — | — |
 | a source called: `count()` | `yield* count` | `Source` has no call signature | — | — | — |
-| `yield*` in an event prop: `onClick={yield* handler}` | an `$event`, `onClick={save}`; read the handler inside it | — | `BLOCKS_YIELD_IN_EVENT` | — | `yield-in-jsx-hole` |
+| an `$event` handler given unbound: `onClick={save}` | bind it: `onClick={yield* save}` (D-072) | the JSX namespace's event attributes take only a bound handler (`[BOUND]` is missing) | — | — | `no-unbound-event` (autofix) |
+| a plain function, or a value read from a source, in an event prop: `onClick={() => go()}`, `onClick={yield* props.onSave}` | an `$event` that does the work, bound: `const save = $event(function* () { yield* (yield* props.onSave)(); })`, `onClick={yield* save}` | event attributes take only a bound handler; in `h`, only an `$event` handler | — | — | — |
+| `yield* save` (a bind) in an event, a memo or a hole prop | call it: `yield* save(x)` | `Bind` is a `ViewOp` only | — | — | — |
 | `yield*` in `ref` | pass the ref function itself | — | `BLOCKS_YIELD_IN_REF` | — | `yield-in-jsx-hole` |
 | `yield*` in a spread attribute: `{...(yield* attrs)}` | one hole per attribute | — | `BLOCKS_YIELD_IN_SPREAD` | — | `yield-in-jsx-hole` |
 | `yield*` in a spread child | a flow control (`For`) | — | `BLOCKS_YIELD_IN_SPREAD_CHILD` | — | `yield-in-jsx-hole` |
@@ -44,6 +46,7 @@ The neighbours of a view, for completeness:
 | JSX in a setup (or in a memo, an effect, an event) | in the view it returns | — | `JSX_IN_SETUP` (when a hole is performed while a setup runs) | `jsx-only-in-view` |
 | a setup that returns markup, or nothing | `return view(function* () { return <…/>; })` | setup return type | `COMPONENT_VIEW` | — |
 | a row that returns markup | the row's setup returns its view | `RowBlock` | `ROW_VIEW` | — |
+| a generator `Errored` fallback with unannotated parameters | annotate them: `function* (error: Path<NotFound>, reset: Reset)` (TypeScript does not infer a generator fallback's) | no overload of `Errored` matches | — | — |
 | a row's setup reads, a row's view creates | as a component's | `[ROW_SETUP_OP]`, `[ROW_VIEW_OP]` | `READ_IN_SETUP`, `CREATE_OUTSIDE_SETUP` | — |
 | a setter call not delegated to: `setX(v)` | `yield* setX(v)` | — | `UNYIELDED_WRITE` (end of the run) | `no-unyielded-write` |
 | a setter called with no block running (`onClick={setX}`, a timer) | wrap it in an `$event` | — | `SETTER_OUTSIDE_RUN` | `no-unyielded-write` |
@@ -63,7 +66,6 @@ The neighbours of a view, for completeness:
 
 | Code | Position |
 | --- | --- |
-| `BLOCKS_YIELD_IN_EVENT` | an event prop |
 | `BLOCKS_YIELD_IN_REF` | `ref` |
 | `BLOCKS_YIELD_IN_SPREAD` | a spread attribute |
 | `BLOCKS_YIELD_IN_SPREAD_CHILD` | a spread child |
@@ -113,7 +115,8 @@ Every other type refusal is a plain assignability error. The common ones: an op 
 | Rule | Reports |
 | --- | --- |
 | `no-read-in-view-body` | a `yield*` in a view outside a JSX expression or attribute |
-| `yield-in-jsx-hole` | a `yield*` in JSX where the transform makes no hole (its five codes) |
+| `yield-in-jsx-hole` | a `yield*` in JSX where the transform makes no hole (its four codes) |
+| `no-unbound-event` | an `$event` handler in an event prop without `yield*` (autofix) |
 | `no-component-tag` | a block component, flow control or boundary written as a tag (autofix: the call) |
 | `no-read-in-prop` | a `yield*` in a component call's argument (autofix) |
 | `component-children-generator` | a call's `children` that is not a generator (autofix) |

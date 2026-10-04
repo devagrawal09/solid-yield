@@ -740,7 +740,7 @@ describe("props", () => {
       });
       return function* () {
         return (
-          <button onClick={add}>
+          <button onClick={yield* add}>
             {String(perform(saving))} {perform(readStore(list, s => s.items.join(",")))}
           </button>
         );
@@ -845,7 +845,7 @@ describe("props", () => {
         done = true;
       });
       return function* () {
-        return <button onClick={go}>go</button>;
+        return <button onClick={yield* go}>go</button>;
       };
     });
     mount(App);
@@ -923,7 +923,7 @@ describe("events", () => {
       });
       return function* () {
         return (
-          <button onClick={click}>
+          <button onClick={yield* click}>
             {perform(n)} {perform(status)}
           </button>
         );
@@ -1123,7 +1123,7 @@ describe("events", () => {
         yield* raise(new SaveError("nope"));
       });
       return function* () {
-        return <button onClick={click}>go</button>;
+        return <button onClick={yield* click}>go</button>;
       };
     });
     mount(() =>
@@ -1552,7 +1552,7 @@ describe("row blocks", () => {
                   return function* () {
                     views++;
                     return (
-                      <li onClick={toggle}>
+                      <li onClick={yield* toggle}>
                         {perform(item.text)} {perform(open) ? "[-]" : "[+]"}
                       </li>
                     );

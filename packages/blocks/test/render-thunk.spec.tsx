@@ -65,7 +65,7 @@ for (const form of forms) {
           yield* setN(v => v + 1);
         });
         return function* () {
-          return <button onClick={inc}>{yield* n}</button>;
+          return <button onClick={yield* inc}>{yield* n}</button>;
         };
       });
       mount(form, App);
@@ -92,7 +92,7 @@ for (const form of forms) {
         });
         return function* () {
           return (
-            <button onClick={inc}>
+            <button onClick={yield* inc}>
               {yield* data}:{yield* n}
             </button>
           );

@@ -269,8 +269,8 @@ const Dot = $component(function* Dot(props: Props<TriangleProps>) {
           "line-height": (yield* props.s) + "px",
           background: (yield* hover) ? "#ff0" : "#61dafb"
         }}
-        onMouseEnter={onEnter}
-        onMouseLeave={onExit}
+        onMouseEnter={yield* onEnter}
+        onMouseLeave={yield* onExit}
       >
         {(yield* hover) ? "**" + (yield* props.children) + "**" : yield* props.children}
       </div>

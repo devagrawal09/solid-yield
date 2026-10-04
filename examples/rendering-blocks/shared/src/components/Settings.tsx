@@ -26,13 +26,13 @@ const Settings = $component(function* Settings() {
 
   return view(function* () {
     return (
-      <section onClick={count}>
+      <section onClick={yield* count}>
         <h1>Settings</h1>
         <p>All that configuration you never really ever want to look at.</p>
         <label for={id}>Write:</label>
-        <input type="text" id={id} value={yield* text} onInput={input} />
+        <input type="text" id={id} value={yield* text} onInput={yield* input} />
         <p>{yield* text}</p>
-        <button type="button" onClick={open}>
+        <button type="button" onClick={yield* open}>
           Open body portal
         </button>
         <p>Portal logical clicks: {yield* modalClicks}</p>
@@ -42,7 +42,7 @@ const Settings = $component(function* Settings() {
               <div class="modal-card" role="dialog" aria-modal="true" aria-label="Settings portal">
                 <h2>Body Portal</h2>
                 <p>This modal is portaled to document.body.</p>
-                <button type="button" onClick={close}>
+                <button type="button" onClick={yield* close}>
                   Close portal
                 </button>
               </div>

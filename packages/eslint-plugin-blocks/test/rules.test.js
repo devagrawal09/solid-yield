@@ -453,10 +453,10 @@ tester.run("read-before-attempt", rules["read-before-attempt"], {
 tester.run("no-unyielded-write", rules["no-unyielded-write"], {
   valid: [
     component(
-      "const [n, setN] = yield* $signal(1); const inc = $event(function* () { yield* setN(2); }); yield* $effect(function* () { const v = yield* setN(3); }); return function* () { return <p onClick={inc}>{yield* n}</p>; };"
+      "const [n, setN] = yield* $signal(1); const inc = $event(function* () { yield* setN(2); }); yield* $effect(function* () { const v = yield* setN(3); }); return function* () { return <p onClick={yield* inc}>{yield* n}</p>; };"
     ),
     component(
-      "const [s, setS] = yield* $optimisticStore({ a: 1 }); const go = $event(function* () { yield* setS(d => { d.a = 2; }); }); return function* () { return <p onClick={go} />; };"
+      "const [s, setS] = yield* $optimisticStore({ a: 1 }); const go = $event(function* () { yield* setS(d => { d.a = 2; }); }); return function* () { return <p onClick={yield* go} />; };"
     ),
     // not a block setter: plain code is no-foreign-reactive's concern
     "const [a, setA] = createSignal(1); setA(2);"
@@ -464,7 +464,7 @@ tester.run("no-unyielded-write", rules["no-unyielded-write"], {
   invalid: [
     {
       code: component(
-        "const [n, setN] = yield* $signal(1); const inc = $event(function* () { setN(2); }); return function* () { return <p onClick={inc} />; };"
+        "const [n, setN] = yield* $signal(1); const inc = $event(function* () { setN(2); }); return function* () { return <p onClick={yield* inc} />; };"
       ),
       errors: [{ messageId: "unyielded", data: { name: "setN" } }]
     },
@@ -482,7 +482,7 @@ tester.run("no-unyielded-write", rules["no-unyielded-write"], {
     },
     {
       code: component(
-        "const [n, setN] = yield* $signal(1); const go = $event(function* () { yield setN(1); }); return function* () { return <p onClick={go} />; };"
+        "const [n, setN] = yield* $signal(1); const go = $event(function* () { yield setN(1); }); return function* () { return <p onClick={yield* go} />; };"
       ),
       errors: [{ messageId: "unyielded", data: { name: "setN" } }]
     }

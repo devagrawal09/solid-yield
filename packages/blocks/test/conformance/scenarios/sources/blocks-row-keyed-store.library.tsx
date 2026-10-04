@@ -29,7 +29,7 @@ export const App = $component(function* App() {
               });
               return view(function* () {
                 return (
-                  <li class={"c" + (yield* c.id)} onClick={toggle}>
+                  <li class={"c" + (yield* c.id)} onClick={yield* toggle}>
                     {yield* c.text}:{(yield* closed[yield* c.id]) ? "closed" : "open"}
                   </li>
                 );

@@ -74,12 +74,20 @@ export interface BlocksH {
     tag: Tag,
     ...children: C
   ): HViewOf<C[number]>;
-  /** `Loading` handles the pending of its children; their failures pass on. */
-  <const C extends readonly Hole[]>(
+  /**
+   * `Loading` handles the pending of its children; their failures pass on,
+   * and so do the fallback's colors and `on`'s failures (D-071), as in the
+   * call form: `on`'s pending is the boundary's own.
+   */
+  <const C extends readonly Hole[], F extends Hole = never, O extends Hole = never>(
     component: typeof Loading,
-    props: { fallback?: Hole; on?: unknown },
+    props: { fallback?: F; on?: O },
     ...children: C
-  ): HView<false, FailsOf<OpsOfHole<C[number]>>, MayWaitOf<OpsOfHole<C[number]>>>;
+  ): HView<
+    PendingOf<OpsOfHole<F>>,
+    FailsOf<OpsOfHole<C[number]> | OpsOfHole<F> | OpsOfHole<O>>,
+    MayWaitOf<OpsOfHole<C[number]> | OpsOfHole<F> | OpsOfHole<O>>
+  >;
   /**
    * `Errored` handles the failures of its children; their pending passes on,
    * and so do the fallback's own colors (D-071). `reset` is already bound

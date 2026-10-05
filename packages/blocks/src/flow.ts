@@ -355,14 +355,23 @@ function content(props: any, name: string): () => unknown {
  * Handles pending below it. Tag form takes settled or pending children
  * (`<Loading fallback={…}>{UserCard({ user })}</Loading>`); it returns a
  * view without pending, so failures still have to be handled above.
- * `on` may be a source (`Loading({ on: props.room, … })`): it is read where
- * Solid's `Loading` reads it, so the call form keys the boundary too.
+ * `on` may be a source or a hole (`Loading({ on: props.room, … })`): it is
+ * read where Solid's `Loading` reads it, so the call form keys the boundary
+ * too. Its colors are typed as the runtime routes them (D-071): Solid reads
+ * `on` beside the boundary and drops its pending (the boundary's own: no
+ * fallback shows for it, above or here), while its failure is not a
+ * `Loading`'s to handle and reaches the boundary above (runtime.spec,
+ * "Loading's on"). The fallback's colors pass on too.
  */
-function LoadingBlocks<C, F = never>(props: {
+function LoadingBlocks<C, F = never, O = never>(props: {
   fallback?: F;
-  on?: unknown;
+  on?: O;
   children: C;
-}): ComponentView<PendingOf<Ops<F>>, FailsOf<Ops<C> | Ops<F>>, MayWaitOf<Ops<C> | Ops<F>>>;
+}): ComponentView<
+  PendingOf<Ops<F>>,
+  FailsOf<Ops<C> | Ops<F> | Ops<O>>,
+  MayWaitOf<Ops<C> | Ops<F> | Ops<O>>
+>;
 function LoadingBlocks(props: any): any {
   const children = content(props, "Loading");
   // `on` may be a source: every other prop is read through where it is read

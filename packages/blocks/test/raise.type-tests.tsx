@@ -17,6 +17,7 @@ import {
   For,
   foreign,
   lazy,
+  Loading,
   raise,
   until,
   Show,
@@ -781,6 +782,46 @@ export const LazyFallback = $component(function* LazyFallback() {
   });
 });
 export type LazyFallbackView = Expect<Equal<ViewPendingOf<ReturnType<typeof LazyFallback>>, true>>;
+
+// --- Loading: `on`'s failures and the fallback's colors pass on (D-071) ---------------------
+// `on`'s pending is the boundary's own (runtime.spec, "Loading's on"); its failure is not a
+// Loading's to handle. The h flavor says the same as the call form.
+declare const failingKey: Source<string, Boom, true>;
+const loadingOn = Loading({
+  on: failingKey,
+  fallback: "…",
+  children: function* () {
+    return <>{yield* Pends({ n: pendingN })}</>;
+  }
+});
+export type LoadingOnFails = Expect<Equal<ViewFailsOf<typeof loadingOn>, Boom>>;
+export type LoadingOnPending = Expect<Equal<ViewPendingOf<typeof loadingOn>, false>>;
+const loadingFallback = Loading({
+  fallback: function* () {
+    return (
+      <>
+        {yield* Fails()}
+        {yield* Pends({ n: pendingN })}
+      </>
+    );
+  },
+  children: "x"
+});
+export type LoadingFallbackFails = Expect<Equal<ViewFailsOf<typeof loadingFallback>, Boom>>;
+export type LoadingFallbackPending = Expect<Equal<ViewPendingOf<typeof loadingFallback>, true>>;
+type HFails<V> = V extends HView<boolean, infer E> ? E : never;
+type HPending<V> = V extends HView<infer P, unknown> ? P : never;
+const hLoadingOn = h(Loading, { on: failingKey, fallback: "…" }, h(Pends, { n: pendingN }));
+export type HLoadingOnFails = Expect<Equal<HFails<typeof hLoadingOn>, Boom>>;
+export type HLoadingOnPending = Expect<Equal<HPending<typeof hLoadingOn>, false>>;
+const hLoadingFallback = h(Loading, { fallback: h(Fails, {}) }, "x");
+export type HLoadingFallbackFails = Expect<Equal<HFails<typeof hLoadingFallback>, Boom>>;
+const hLoadingPendingFallback = h(Loading, { fallback: h(Pends, { n: pendingN }) }, "x");
+export type HLoadingFallbackPending = Expect<Equal<HPending<typeof hLoadingPendingFallback>, true>>;
+const hLoadingPlain = h(Loading, { fallback: "…" }, h(Pends, { n: pendingN }));
+export type HLoadingPlain = Expect<
+  Equal<HPending<typeof hLoadingPlain> | HFails<typeof hLoadingPlain>, false>
+>;
 
 // --- D-077: attempt over an event call ------------------------------------------------
 // `yield* attempt(() => go(), onError)` is `yield* go()` with the call's failure handled: the

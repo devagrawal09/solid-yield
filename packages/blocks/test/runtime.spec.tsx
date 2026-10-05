@@ -427,6 +427,68 @@ describe("setup operations", () => {
     expect(seen).toEqual(["ada"]);
   });
 
+  it("Loading's on: its pending is the Loading's own, its failure passes above (D-071)", async () => {
+    let resolve!: (v: string) => void;
+    let reject!: (e: unknown) => void;
+    let refetch!: () => void;
+    const Page = $component(function* Page() {
+      const [which, setWhich] = yield* $signal(0);
+      refetch = () => write(() => setWhich(1));
+      const key = yield* $memo(function* () {
+        yield* which;
+        return yield* attempt(
+          () =>
+            new Promise<string>((r, j) => {
+              resolve = r;
+              reject = j;
+            }),
+          toError
+        );
+      });
+      return view(function* () {
+        return (
+          <>
+            {
+              yield* Loading({
+                on: key,
+                fallback: <p>inner</p>,
+                children: function* () {
+                  return <i>content</i>;
+                }
+              })
+            }
+          </>
+        );
+      });
+    });
+    mount(() =>
+      Errored({
+        fallback: (e: () => unknown) => <p>failed {(e() as Error).message}</p>,
+        children: () =>
+          Loading({
+            fallback: <p>outer</p>,
+            children: () => Page()
+          })
+      })
+    );
+    // `on` pending is the Loading's own: Solid reads it outside the boundary's
+    // tree and drops its pending, so neither fallback shows; nothing under
+    // this Loading is pending, so it shows its content
+    expect(root.textContent).toBe("content");
+    await settle();
+    expect(root.textContent).toBe("content");
+    resolve("a");
+    await settle();
+    expect(root.textContent).toBe("content");
+    refetch();
+    await settle();
+    expect(root.textContent).toBe("content");
+    // `on` failing is not a Loading's to handle: it reaches the Errored above
+    reject(new Error("no key"));
+    await settle();
+    expect(root.textContent).toBe("failed no key");
+  });
+
   devIt("a setup does not read: READ_IN_SETUP", () => {
     // @ts-expect-error a setup does not read (Read is not a SetupOp)
     const Bad = $component(function* (props: Props<{ start: number }>) {

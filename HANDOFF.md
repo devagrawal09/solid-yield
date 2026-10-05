@@ -154,11 +154,12 @@ The Solid rc.13 SSR loop found under rendering's `/profile` (D-082) is drafted a
 | D-087 | R4 (Claude G-3) | Typed failures branded at run time in every build; an attempt over a call handles only branded failures, re-throws the rest | Not yet implemented |
 | D-088 | R5 (Claude I-1 / G-4) | A block component handed to foreign code is `View<boolean, never>`: `foreign(Comp)`, lint `no-unchecked-foreign-handoff`; room's `route()` → `foreign()`, its row `Errored`s removed; D-067 reworded, D-023 corrected | Not yet implemented |
 | D-089 | R6 | `view(function* …)` is required; `require-view-wrapper` (error, autofix); D-054 amended | Not yet implemented |
+| D-091 | R3 (Codex §3, Claude G-7) | An `$event` does not attempt a stream (`StreamAttempt` is not an `EventOp`; `STREAM_IN_EVENT`); a stream attempt's handler is a plain function (`[STREAM_HANDLER]`) | Implemented |
 | D-090 | R7 (Claude G-5) | An `$effect` compute waiting on a pending read holds no `Loading`; `Create<"effect">` carries no pending; a runtime test pins it | Not yet implemented |
 
 ### Open for Dev (review)
 
-- **R3, stream error handlers** (Codex: a stream's handler may type-check a wait the runtime refuses). Option A: a stream's handler is a sync-only generator. Option C: a stream's handler is a plain function only. Awaiting Dev.
+- ~~**R3, stream error handlers**~~ Ruled by D-091 (implemented): an `$event` does not attempt a stream; a stream's handler is a plain function.
 - **The upstream issue** (`documentation/upstream/solid-ssr-memo-loop-rc13.md`) awaits "file it".
 
 ### Fixes with no ruling needed (from the reviews; not yet done)

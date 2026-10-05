@@ -1338,6 +1338,56 @@ describe("events", () => {
     expect(root.textContent).toBe("stream: cut");
   });
 
+  devIt("an $event does not attempt a stream: STREAM_IN_EVENT (D-091)", async () => {
+    async function* feed() {
+      yield 1;
+    }
+    // the types refuse it (a stream attempt is not an EventOp): cast past them
+    const save = $event(function* () {
+      return yield* attempt(
+        () => feed(),
+        () => {}
+      );
+    } as any);
+    await expect(save()).rejects.toThrow(/STREAM_IN_EVENT/);
+  });
+
+  it("a stream attempt's handler is a plain function: a generator handler fails the stream with STREAM_HANDLER (D-091)", async () => {
+    async function* feed() {
+      yield 1;
+      throw new Error("dropped");
+    }
+    const got: unknown[] = [];
+    let ran = false;
+    const App = $component(function* () {
+      yield* $effect(
+        function* () {},
+        function* () {
+          // the types refuse a generator handler on a stream: cast past them
+          const stream = yield* attempt(() => feed(), function* () {
+            ran = true;
+          } as any);
+          void (async () => {
+            try {
+              for await (const v of stream as AsyncIterable<number>) got.push(v);
+            } catch (e) {
+              got.push(e);
+            }
+          })();
+        }
+      );
+      return view(function* () {
+        return <i>ok</i>;
+      });
+    });
+    mount(App);
+    await settle();
+    expect(got[0]).toBe(1);
+    expect(String(got[1])).toMatch(/STREAM_HANDLER/);
+    // the generator was closed, not run
+    expect(ran).toBe(false);
+  });
+
   it("a memo's raise reaches Errored", () => {
     class Missing extends Error {
       readonly kind = "missing" as const;

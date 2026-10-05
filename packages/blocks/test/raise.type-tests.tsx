@@ -33,11 +33,13 @@ import {
   type Read,
   type Source,
   type SettledView,
+  type StreamAttempt,
   type View,
   type Wait,
   type Yieldable
 } from "solid-blocks";
 import { h } from "solid-blocks/h";
+import type { Handled } from "../src/types.js";
 
 type Equal<A, B> =
   (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
@@ -869,3 +871,100 @@ export const mixedCall = attempt(
   // @ts-expect-error [ATTEMPT_ABSORBS]
   e => (e instanceof Boom ? e : undefined)
 );
+
+// --- D-091: an $event does not attempt a stream; a stream's handler is a plain function ---
+declare function feed(): AsyncIterable<number>;
+declare function feedLater(): Promise<AsyncIterable<number>>;
+type StreamOp = StreamAttempt & {
+  readonly "[STREAM_IN_EVENT] a stream is consumed in a reactive block: $memo or $projection": true;
+};
+// a stream attempt yields the stream op (with the refusal's message), and its handler's failure
+export const streamTransform = attempt(
+  () => feed(),
+  cause => new Boom(String(cause))
+);
+export type StreamTransform = Expect<
+  Equal<typeof streamTransform, Yieldable<StreamOp | Raise<Boom>, AsyncIterable<number> & Handled>>
+>;
+// absorbed: nothing ends the stream (or there was no stream: undefined)
+export const streamAbsorb = attempt(
+  () => feed(),
+  () => {}
+);
+export type StreamAbsorb = Expect<
+  Equal<typeof streamAbsorb, Yieldable<StreamOp, (AsyncIterable<number> & Handled) | undefined>>
+>;
+// a promise of a stream waits, then gives the stream back
+export const streamLater = attempt(
+  () => feedLater(),
+  cause => new Boom(String(cause))
+);
+export type StreamLater = Expect<
+  Equal<
+    typeof streamLater,
+    Yieldable<Wait | StreamOp | Raise<Boom>, AsyncIterable<number> & Handled>
+  >
+>;
+export const StreamHosts = $component(function* StreamHosts() {
+  // a reactive block consumes a stream: a $memo returns it
+  const live = yield* $memo(function* () {
+    return yield* attempt(
+      () => feed(),
+      cause => new Boom(String(cause))
+    );
+  });
+  type _live = Expect<Equal<typeof live, Source<number, Boom, true>>>;
+  // an $event does not attempt one: a stream attempt is not an EventOp
+  // @ts-expect-error [STREAM_IN_EVENT] a stream is consumed in a reactive block
+  const watchIt = $event(function* () {
+    return yield* attempt(
+      () => feed(),
+      () => {}
+    );
+  });
+  // … nor a promise of one
+  // @ts-expect-error [STREAM_IN_EVENT]
+  const watchLater = $event(function* () {
+    return yield* attempt(
+      () => feedLater(),
+      () => {}
+    );
+  });
+  // a promise attempt in an $event keeps its generator handler (D-078)
+  const save = $event(function* () {
+    return yield* attempt(flaky, function* () {
+      return yield* attempt(flaky, () => {});
+    });
+  });
+  type _save = Expect<Equal<typeof save, EventHandler<[], never, string | undefined, false, true>>>;
+  void watchIt;
+  void watchLater;
+  return view(function* () {
+    return <i>{yield* live}</i>;
+  });
+});
+// a stream's failures arrive after the host's run: no generator handler …
+export const streamGen = attempt(
+  () => feed(),
+  // @ts-expect-error [STREAM_HANDLER] a stream's handler is a plain function
+  function* (cause) {
+    return new Boom(String(cause));
+  }
+);
+// … and no value: an Error fails the stream, nothing ends it
+export const streamValue = attempt(
+  () => feed(),
+  // @ts-expect-error [STREAM_HANDLER]
+  () => "ended"
+);
+// a sync attempt keeps its generator handler (D-078)
+export const syncGen = attempt(
+  () => 1,
+  function* () {
+    return yield* attempt(
+      () => 2,
+      () => {}
+    );
+  }
+);
+export type SyncGen = Expect<Equal<typeof syncGen, Yieldable<never, number | undefined>>>;

@@ -46,6 +46,7 @@ import {
 } from "solid-js";
 import type {
   Handled,
+  StreamAttempt,
   WaitsOf,
   ReadsPendingOf,
   Write,
@@ -650,15 +651,30 @@ class Attempt {
       // resumption — the attempt's own host runs the handler (D-078)
       if (failed) return yield* handle(this.onError, error);
     }
-    // a stream (or a promise's stream) is not waited for: its failures go
-    // through the handler as they come, each run as the attempt's host ran
+    // a stream (or a promise's stream) is not waited for. An event does not
+    // attempt one (D-091): it does one thing and finishes; a $memo holds what
+    // keeps arriving. Its failures go through the handler as they come, after
+    // the host's run, so the handler is a plain function — an `Error` fails the
+    // stream, nothing ends it — run as the attempt's host ran
     const { host, name } = state;
+    if (__DEV__ && host === EVENT && isStream(v))
+      throw devError(
+        "STREAM_IN_EVENT",
+        "an $event does not attempt a stream: a stream is consumed in a reactive block — $memo or $projection (`return yield* attempt(() => watch(feed), onError)`)."
+      );
     return mapStream(v, e =>
       runAs(
         host,
         () => {
           const r = this.onError(e);
-          return isGeneratorObject(r) ? drive(r, SYNC_RUN) : r;
+          if (isGeneratorObject(r)) {
+            r.return(undefined);
+            throw devError(
+              "STREAM_HANDLER",
+              "a stream's failures arrive after the host's run, so its attempt's handler is a plain function: return an Error (the stream fails) or nothing (the stream ends), not a generator."
+            );
+          }
+          return r;
         },
         null,
         null,
@@ -668,6 +684,14 @@ class Attempt {
       )
     );
   }
+}
+/** An async iterable: what an attempt gives back as a stream. */
+function isStream(v: any): boolean {
+  return (
+    v != null &&
+    (typeof v === "object" || typeof v === "function") &&
+    typeof v[Symbol.asyncIterator] === "function"
+  );
 }
 /** A generator object (what a `function*` handler returns), not any iterable. */
 function isGeneratorObject(r: any): r is Generator<unknown, unknown, unknown> {
@@ -712,6 +736,20 @@ type AttemptWait<T> =
     : T extends PromiseLike<any>
       ? Wait
       : never;
+/** Whether `fn`'s result is a stream (or a promise of one): an attempt gives it back (D-091). */
+type IsStream<T> =
+  T extends EventCall<any, any, any, any>
+    ? false
+    : Awaited<T> extends AsyncIterable<any>
+      ? true
+      : false;
+/** A stream given back is a `StreamAttempt`: reactive blocks take it, an `$event` does not (D-091). */
+type AttemptStream<T> =
+  true extends IsStream<T>
+    ? StreamAttempt & {
+        readonly "[STREAM_IN_EVENT] a stream is consumed in a reactive block: $memo or $projection": true;
+      }
+    : never;
 /** What the handler receives: an event call's known failure (D-077), else anything caught. */
 type Caught<T> = T extends EventCall<any, infer E, any, any> ? E : unknown;
 /** What a handler's run yields: a generator handler's ops, which are the host's (D-078). */
@@ -726,6 +764,7 @@ type Fails<R> = [R] extends [Error] ? true : false;
  */
 type AttemptOps<T, H> =
   | AttemptWait<T>
+  | AttemptStream<T>
   | HandlerYields<H>
   | (Fails<HandlerReturn<H>> extends true ? Raise<HandlerReturn<H>> : never);
 /** Absorbed: nothing gives `undefined`, a value `V` itself. */
@@ -745,6 +784,23 @@ type HandlerCheck<H> = [HandlerReturn<H>] extends [Error]
     : {
         readonly "[ATTEMPT_ABSORBS] a handler returns the failure (an Error with a literal kind) or absorbs it (returns nothing or a value), not sometimes one and sometimes the other": never;
       };
+/**
+ * A stream's failures arrive after the host's run (D-091), so a stream
+ * attempt's handler is a plain function that transforms (returns an `Error`:
+ * the stream fails) or absorbs (returns nothing: the stream ends). A
+ * generator handler, or one returning a value, is refused.
+ */
+type StreamHandlerCheck<T, H> =
+  true extends IsStream<T>
+    ? [H] extends [Generator<any, any, any>]
+      ? StreamHandlerRefused
+      : [H] extends [Error | void]
+        ? unknown
+        : StreamHandlerRefused
+    : unknown;
+interface StreamHandlerRefused {
+  readonly "[STREAM_HANDLER] a stream's failures arrive after the host's run: its handler is a plain function that returns an Error (the stream fails) or nothing (the stream ends)": never;
+}
 /** What an attempt gives: an event call's result; a promise's value; a stream as itself, handled. */
 type Attempted<T> =
   T extends EventCall<infer R, any, any, any>
@@ -771,10 +827,10 @@ type Attempted<T> =
  * When `fn` returns a promise the block suspends until it settles ($memo
  * and $event only) and resumes with its value. When it returns a stream (or
  * a promise of one) the attempt gives the stream back, its failures going
- * through `onError` as they come — an `Error` fails the stream, anything else
- * ends it (a generator handler runs synchronously there): `return
+ * through `onError` as they come, after the host's run — so the handler is a
+ * plain function: an `Error` fails the stream, nothing ends it (D-091). `return
  * yield* attempt(() => watch(feed), cause => new FeedError(cause))` is how a
- * memo's body returns a stream.
+ * memo's body returns a stream; an `$event` does not attempt one.
  *
  * When it returns an event call (D-077), `yield* attempt(() => post(msg), e =>
  * { … })` is `yield* post(msg)` with the call's failure handled: the handler
@@ -785,7 +841,7 @@ type Attempted<T> =
  */
 export function attempt<T, H>(
   fn: () => T,
-  onError: (error: Caught<T>) => H & HandlerCheck<H>
+  onError: (error: Caught<T>) => H & HandlerCheck<H> & StreamHandlerCheck<T, H>
 ): Yieldable<AttemptOps<T, H>, AttemptResult<T, H>>;
 export function attempt(fn: () => unknown, onError: (error: unknown) => unknown): unknown {
   return new Attempt(fn, onError);

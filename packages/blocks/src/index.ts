@@ -100,6 +100,7 @@ export type {
   SetupOp,
   Source,
   SettledProp,
+  StreamAttempt,
   TypedStore,
   View,
   ViewFails,

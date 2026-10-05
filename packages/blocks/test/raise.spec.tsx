@@ -763,34 +763,46 @@ describe("D-078: an attempt's handler may be a generator, run as the host's bloc
     expect(root.textContent).toBe("failed");
   });
 
-  it("a stream's failure: an Error fails the stream, anything else ends it", async () => {
+  it("a stream's failure, after the host's run: a plain handler's Error fails the stream, nothing ends it (D-091)", async () => {
     async function* feed() {
       yield 1;
       throw new Error("dropped");
     }
     const ended: unknown[] = [];
     const failed: unknown[] = [];
-    const save = $event(function* () {
-      const a = yield* attempt(
-        () => feed(),
-        () => "ended"
-      );
-      const b = yield* attempt(
-        () => feed(),
-        function* (cause) {
-          return new Boom((cause as Error).message);
+    const App = $component(function* App() {
+      yield* $effect(
+        function* () {},
+        function* () {
+          const a = yield* attempt(
+            () => feed(),
+            () => {}
+          );
+          const b = yield* attempt(
+            () => feed(),
+            cause => new Boom((cause as Error).message)
+          );
+          void (async () => {
+            for await (const v of a ?? []) ended.push(v);
+            ended.push("done");
+          })();
+          void (async () => {
+            try {
+              for await (const v of b) failed.push(v);
+            } catch (e) {
+              failed.push(e);
+            }
+          })();
         }
       );
-      return [a, b] as const;
+      return view(function* () {
+        return <i>ok</i>;
+      });
     });
-    const [a, b] = (await save())!;
-    for await (const v of a!) ended.push(v);
-    ended.push("done");
-    try {
-      for await (const v of b!) failed.push(v);
-    } catch (e) {
-      failed.push(e);
-    }
+    // what the stream fails with is its reader's: nothing reaches the component
+    dispose = render(App, root);
+    flush();
+    await settle();
     expect(ended).toEqual([1, "done"]);
     expect(failed[0]).toBe(1);
     expect(failed[1]).toBeInstanceOf(Boom);

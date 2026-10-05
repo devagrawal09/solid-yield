@@ -106,6 +106,17 @@ export interface Bind<W extends boolean = boolean, E = unknown> {
   readonly [FAILS]: E;
 }
 /**
+ * An `attempt` that gives back a stream (D-091). A stream keeps arriving, so
+ * a reactive block holds it — a `$memo` or a `$projection` returns it — and
+ * its failures arrive after the host's run, through a plain handler. An
+ * `$event` does one thing and finishes: this op is not an `EventOp`. An
+ * attempt yields it with the refusal's message attached (`AttemptOps`), so
+ * that is what TypeScript prints where an event attempts a stream.
+ */
+export interface StreamAttempt {
+  readonly [KIND]: "stream";
+}
+/**
  * Creating owned state (`$signal`, `$store`, `$memo`, `$effect`, `$settled`).
  * `E` is what the created computation may fail with where nothing reads it:
  * an `$effect`'s or a `$settled`'s body (D-073). Its failure reaches the
@@ -144,7 +155,8 @@ export type AnyOp =
   | Cleanup
   | ContextRead
   | ChildView<boolean, any>
-  | Bind<boolean, any>;
+  | Bind<boolean, any>
+  | StreamAttempt;
 
 /** Operations a component's (or a row block's) setup may perform: it creates, never reads (D-042). */
 export type SetupOp = Create<string, any> | Cleanup | ContextRead;
@@ -160,8 +172,8 @@ export type SetupOp = Create<string, any> | Cleanup | ContextRead;
 export type ViewOp = Read<boolean, any> | ChildView<boolean, any> | Bind<boolean, any>;
 /** What a no-JSX view yields: nothing (D-032). Its reads are holes, its pending and failures its output's. */
 export type HViewOp = never;
-/** Operations a memo may perform. */
-export type MemoOp = Read<boolean, any> | Wait | Raise<any>;
+/** Operations a memo (or a projection) may perform; it may return a stream an `attempt` gave (D-091). */
+export type MemoOp = Read<boolean, any> | Wait | Raise<any> | StreamAttempt;
 /**
  * Operations a `$settled` may perform (a sync `attempt` only): it runs once
  * after the graph settles, untracked (D-053).
@@ -171,13 +183,14 @@ export type EffectOp =
   | Write
   | Cleanup
   | Raise<any>
-  | EventCallOp<false, false, any>;
+  | EventCallOp<false, false, any>
+  | StreamAttempt;
 /**
  * Operations an `$effect`'s compute may perform (D-079): tracked reads and
  * failures (`raise`, a sync `attempt`'s). It is pure: a write, a `$cleanup`
  * or an event call is refused. Its value is handed to the effect phase.
  */
-export type ComputeOp = Read<boolean, any> | Raise<any>;
+export type ComputeOp = Read<boolean, any> | Raise<any> | StreamAttempt;
 /**
  * Operations an `$effect`'s effect phase may perform (D-079, D-083): it runs
  * after the compute, untracked, as Solid's `createEffect` effect does —
@@ -191,8 +204,12 @@ export type EffectPhaseOp =
   | Write
   | Cleanup
   | Raise<any>
-  | EventCallOp<false, false, any>;
-/** Operations an event handler may perform. */
+  | EventCallOp<false, false, any>
+  | StreamAttempt;
+/**
+ * Operations an event handler may perform. Not a stream (D-091): an event
+ * does one thing and finishes; a `$memo` holds what keeps arriving.
+ */
 export type EventOp =
   | Read<boolean, any>
   | Write
@@ -200,7 +217,7 @@ export type EventOp =
   | EventCallOp<boolean, boolean, any>
   | Raise<any>;
 /** Operations a no-JSX hole (a bare `function*` given to `h`) may perform: reads. */
-export type HoleOp = Read<boolean, any> | Raise<any>;
+export type HoleOp = Read<boolean, any> | Raise<any> | StreamAttempt;
 
 // --- folding a yield union ---------------------------------------------------------
 

@@ -17,7 +17,6 @@ export {
   $projection,
   $settled,
   $signal,
-  $untrack,
   $store,
   attempt,
   constant,

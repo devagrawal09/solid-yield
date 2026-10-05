@@ -63,17 +63,6 @@ export interface Read<P extends boolean = boolean, E = unknown> {
   readonly [PENDING]: P;
   readonly [FAILS]: E;
 }
-/**
- * An untracked read, `yield* $untrack(source)` (D-042): it may be pending and
- * may fail as a read does, but subscribes nothing. Its own op so that an
- * `$effect`'s effect phase, which runs untracked, admits it and refuses a
- * plain (tracked) read (D-079).
- */
-export interface UntrackedRead<P extends boolean = boolean, E = unknown> {
-  readonly [KIND]: "untracked";
-  readonly [PENDING]: P;
-  readonly [FAILS]: E;
-}
 /** An async `attempt`: the block suspends until the promise settles. */
 export interface Wait {
   readonly [KIND]: "wait";
@@ -147,7 +136,6 @@ export interface ChildView<P extends boolean = boolean, E = unknown, W extends b
 
 export type AnyOp =
   | Read<boolean, any>
-  | UntrackedRead<boolean, any>
   | Wait
   | Raise<any>
   | Write
@@ -169,22 +157,17 @@ export type SetupOp = Create<string, any> | Cleanup | ContextRead;
  * a statement alike; the runtime (`READ_IN_VIEW`) and the lint
  * (`no-read-in-view-body`) hold it.
  */
-export type ViewOp =
-  | Read<boolean, any>
-  | UntrackedRead<boolean, any>
-  | ChildView<boolean, any>
-  | Bind<boolean, any>;
+export type ViewOp = Read<boolean, any> | ChildView<boolean, any> | Bind<boolean, any>;
 /** What a no-JSX view yields: nothing (D-032). Its reads are holes, its pending and failures its output's. */
 export type HViewOp = never;
 /** Operations a memo may perform. */
-export type MemoOp = Read<boolean, any> | UntrackedRead<boolean, any> | Wait | Raise<any>;
+export type MemoOp = Read<boolean, any> | Wait | Raise<any>;
 /**
  * Operations a `$settled` may perform (a sync `attempt` only): it runs once
  * after the graph settles, untracked (D-053).
  */
 export type EffectOp =
   | Read<boolean, any>
-  | UntrackedRead<boolean, any>
   | Write
   | Cleanup
   | Raise<any>
@@ -194,16 +177,17 @@ export type EffectOp =
  * failures (`raise`, a sync `attempt`'s). It is pure: a write, a `$cleanup`
  * or an event call is refused. Its value is handed to the effect phase.
  */
-export type ComputeOp = Read<boolean, any> | UntrackedRead<boolean, any> | Raise<any>;
+export type ComputeOp = Read<boolean, any> | Raise<any>;
 /**
- * Operations an `$effect`'s effect phase may perform (D-079): it runs after
- * the compute, untracked, as Solid's `createEffect` effect does — writes,
- * `$cleanup`, a sync `attempt`, a synchronous event call, and
- * `$untrack`. A plain read is refused: read it in the compute and pass the
- * value, or `$untrack` it.
+ * Operations an `$effect`'s effect phase may perform (D-079, D-083): it runs
+ * after the compute, untracked, as Solid's `createEffect` effect does —
+ * writes, `$cleanup`, a sync `attempt`, a synchronous event call, and
+ * settled reads. A read there is untracked because the host is (as an
+ * event's); it does not wait, so a source that may be pending is refused:
+ * read it in the compute and pass the value.
  */
 export type EffectPhaseOp =
-  | UntrackedRead<false, any>
+  | Read<false, any>
   | Write
   | Cleanup
   | Raise<any>
@@ -211,13 +195,12 @@ export type EffectPhaseOp =
 /** Operations an event handler may perform. */
 export type EventOp =
   | Read<boolean, any>
-  | UntrackedRead<boolean, any>
   | Write
   | Wait
   | EventCallOp<boolean, boolean, any>
   | Raise<any>;
 /** Operations a no-JSX hole (a bare `function*` given to `h`) may perform: reads. */
-export type HoleOp = Read<boolean, any> | UntrackedRead<boolean, any> | Raise<any>;
+export type HoleOp = Read<boolean, any> | Raise<any>;
 
 // --- folding a yield union ---------------------------------------------------------
 
@@ -413,7 +396,7 @@ type Widen<P extends boolean> = [P] extends [true] ? boolean : P;
  * return <…/>; }`, built where the child reads it.
  */
 export type HoleProp<T, E = never, P extends boolean = false> = () => Generator<
-  Read<P, E> | UntrackedRead<P, E> | ChildView<P, E> | Raise<E>,
+  Read<P, E> | ChildView<P, E> | Raise<E>,
   T,
   any
 >;

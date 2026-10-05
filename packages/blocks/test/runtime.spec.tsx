@@ -17,7 +17,6 @@ import {
   lazy,
   $settled,
   $signal,
-  $untrack,
   $store,
   attempt,
   constant,
@@ -336,50 +335,57 @@ describe("setup operations", () => {
     expect(root.textContent).toBe("a true 0");
   });
 
-  it("$untrack reads once, untracked, in a memo, an effect and an event (D-042)", async () => {
+  it("reads track where the host tracks: a memo and a compute subscribe; an event and the effect phase do not (D-083)", async () => {
     let setA!: (v: number) => void;
     let setB!: (v: number) => void;
     let fire!: () => Promise<unknown>;
-    const seen: number[] = [];
-    let memoRuns = 0;
-    const App = $component(function* (props: Props<{ start: number }>) {
+    const seen: string[] = [];
+    const runs = { memo: 0, compute: 0, effect: 0 };
+    const App = $component(function* () {
       const [a, sa] = yield* $signal(1);
       const [b, sb] = yield* $signal(10);
       setA = v => write(() => sa(v));
       setB = v => write(() => sb(v));
-      // seeded from a prop, taken once: the memo does not re-run when it changes
-      const seeded = yield* $memo(function* () {
-        memoRuns++;
-        return (yield* $untrack(props.start)) * 2 + (yield* $untrack(a)) + (yield* b);
+      const doubled = yield* $memo(function* () {
+        runs.memo++;
+        return (yield* b) * 2;
       });
       yield* $effect(
-        function* () {},
         function* () {
-          seen.push(yield* $untrack(a));
+          runs.compute++;
+          return yield* b;
+        },
+        function* (v) {
+          runs.effect++;
+          // a plain read: untracked, because the effect phase is
+          seen.push(`effect ${v} ${yield* a}`);
         }
       );
       fire = $event(function* () {
-        seen.push(yield* $untrack(b));
+        seen.push(`event ${yield* a}`);
       });
       return function* () {
-        return <i>{perform(seeded)}</i>;
+        return <i>{perform(doubled)}</i>;
       };
     });
-    mount(() => App({ start: 21 }));
-    expect(root.textContent).toBe("53");
+    mount(() => App());
+    flush();
+    expect(root.textContent).toBe("20");
+    expect(seen).toEqual(["effect 10 1"]);
+    // a is read only in the effect phase and the event: nothing re-runs
     setA(5);
     flush();
-    // a is read untracked everywhere: nothing re-runs
-    expect(root.textContent).toBe("53");
-    expect(memoRuns).toBe(1);
+    expect(runs).toEqual({ memo: 1, compute: 1, effect: 1 });
+    // b is read in the memo and the compute: both re-run, and the effect phase reads a's value now
     setB(20);
     flush();
-    expect(root.textContent).toBe("67");
+    expect(root.textContent).toBe("40");
+    expect(runs).toEqual({ memo: 2, compute: 2, effect: 2 });
     await fire();
-    expect(seen).toEqual([1, 20]);
+    expect(seen).toEqual(["effect 10 1", "effect 20 5", "event 5"]);
   });
 
-  devIt("a setup does not read, tracked or not: READ_IN_SETUP, UNTRACK_IN_SETUP", () => {
+  devIt("a setup does not read: READ_IN_SETUP", () => {
     // @ts-expect-error a setup does not read (Read is not a SetupOp)
     const Bad = $component(function* (props: Props<{ start: number }>) {
       const v = yield* props.start;
@@ -388,40 +394,7 @@ describe("setup operations", () => {
       };
     });
     expect(() => createRoot(() => Bad({ start: 1 }))).toThrow(/READ_IN_SETUP/);
-    // @ts-expect-error $untrack is a read too: not a SetupOp
-    const Untracks = $component(function* Untracks(props: Props<{ start: number }>) {
-      const v = yield* $untrack(props.start);
-      return function* () {
-        return <i>{v}</i>;
-      };
-    });
-    expect(() => createRoot(() => Untracks({ start: 1 }))).toThrow(/UNTRACK_IN_SETUP\] <Untracks>/);
   });
-
-  devIt(
-    "$untrack after a memo's async attempt is not READ_AFTER_ATTEMPT (it does not track)",
-    async () => {
-      const App = $component(function* (props: Props<{ label: string }>) {
-        const m = yield* $memo(function* () {
-          const n = yield* attempt(() => Promise.resolve(2), toError);
-          return `${yield* $untrack(props.label)}${n}`;
-        });
-        return function* () {
-          return <i>{perform(m)}</i>;
-        };
-      });
-      mount(() =>
-        Loading({
-          fallback: "…",
-          children: function* () {
-            return <>{yield* App({ label: "n=" })}</>;
-          }
-        })
-      );
-      await settle();
-      expect(root.textContent).toBe("n=2");
-    }
-  );
 
   devIt("creating outside a setup and writing in a memo are dev errors", () => {
     // @ts-expect-error a view only reads (Create is not a ViewOp)
@@ -682,64 +655,54 @@ describe("props", () => {
     expect(root.textContent).toBe("2");
   });
 
-  devIt("an $effect's compute does not write; its effect phase does not read (D-079)", () => {
-    const errorOf = (App: () => any) => {
-      dispose?.();
-      root.textContent = "";
-      mount(() =>
-        Errored({
-          fallback: (e: any) => <b>{e().message}</b>,
-          children: function* () {
-            return <>{yield* App()}</>;
+  devIt(
+    "an $effect's compute does not write; its effect phase reads, untracked (D-079, D-083)",
+    () => {
+      const errorOf = (App: () => any) => {
+        dispose?.();
+        root.textContent = "";
+        mount(() =>
+          Errored({
+            fallback: (e: any) => <b>{e().message}</b>,
+            children: function* () {
+              return <>{yield* App()}</>;
+            }
+          })
+        );
+        flush();
+        return root.textContent;
+      };
+      const Writes = $component(function* Writes() {
+        const [, setN] = yield* $signal(0);
+        yield* $effect(
+          // @ts-expect-error a Write is not a ComputeOp
+          function* () {
+            yield* setN(1);
+          },
+          function* () {}
+        );
+        return function* () {
+          return <i />;
+        };
+      });
+      expect(errorOf(Writes)).toMatch(/WRITE_IN_REACTIVE\] an effect's compute does not write/);
+      // the effect phase reads, untracked because its host is (D-083)
+      const Reads = $component(function* Reads() {
+        const [n] = yield* $signal(7);
+        const [out, setOut] = yield* $signal(0);
+        yield* $effect(
+          function* () {},
+          function* () {
+            yield* setOut(yield* n);
           }
-        })
-      );
-      flush();
-      return root.textContent;
-    };
-    const Writes = $component(function* Writes() {
-      const [, setN] = yield* $signal(0);
-      yield* $effect(
-        // @ts-expect-error a Write is not a ComputeOp
-        function* () {
-          yield* setN(1);
-        },
-        function* () {}
-      );
-      return function* () {
-        return <i />;
-      };
-    });
-    expect(errorOf(Writes)).toMatch(/WRITE_IN_REACTIVE\] an effect's compute does not write/);
-    const Reads = $component(function* Reads() {
-      const [n] = yield* $signal(0);
-      yield* $effect(
-        function* () {},
-        // @ts-expect-error a Read is not an EffectPhaseOp
-        function* () {
-          void (yield* n);
-        }
-      );
-      return function* () {
-        return <i />;
-      };
-    });
-    expect(errorOf(Reads)).toMatch(/READ_IN_EFFECT\] an \$effect's effect phase runs untracked/);
-    const Untracks = $component(function* Untracks() {
-      const [n] = yield* $signal(7);
-      const [out, setOut] = yield* $signal(0);
-      yield* $effect(
-        function* () {},
-        function* () {
-          yield* setOut(yield* $untrack(n));
-        }
-      );
-      return function* () {
-        return <i>{perform(out)}</i>;
-      };
-    });
-    expect(errorOf(Untracks)).toBe("7");
-  });
+        );
+        return function* () {
+          return <i>{perform(out)}</i>;
+        };
+      });
+      expect(errorOf(Reads)).toBe("7");
+    }
+  );
 
   devIt("an effect's undelegated receipt is UNYIELDED_WRITE", () => {
     const App = $component(function* Effecting() {
@@ -1472,7 +1435,7 @@ describe("row blocks", () => {
                   yield* $effect(
                     function* () {},
                     function* () {
-                      created.push(yield* $untrack(item.id));
+                      created.push(yield* item.id);
                     }
                   );
                   const label = yield* $memo(function* () {

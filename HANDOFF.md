@@ -111,7 +111,7 @@ Five commits on `main` after `c6da576`, then ten more for Dev's amending rulings
 
 **Landed through A10.** D-071–D-082 are decided and, where they change code, implemented. Of D-069: F1, F2, F3 gone; F4 the model; F5 documented; F6 not mixed (D-074); F7 fixed; F8 open.
 
-**Next: D-083** (Dev) — remove `$untrack`: a plain read in an effect phase is untracked because its host is. Not yet recorded in DECISIONS.md, not started.
+**D-083** (Dev) — `$untrack` removed: a plain read in an effect phase is admitted and untracked because its host is (amends D-079; closes D-042's `$untrack` and D-029). Implemented in `feat: tracking is the host's; $untrack removed (D-083)`.
 
 ### Open for Dev (Phase 5)
 

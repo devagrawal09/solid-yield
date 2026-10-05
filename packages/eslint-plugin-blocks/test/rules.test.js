@@ -438,9 +438,7 @@ tester.run("read-before-attempt", rules["read-before-attempt"], {
   valid: [
     "const m = $memo(function* () { const id = yield* props.id; return yield* attempt(() => f(id)); });",
     "const m = $memo(function* () { const u = yield* attempt(() => f()); if (!u) yield* raise(new E()); return u; });",
-    "const e = $event(function* () { yield* attempt(() => f()); const v = yield* n; });",
-    // an untracked read after an attempt tracks nothing: fine
-    "const m = $memo(function* () { const u = yield* attempt(() => f()); return u + (yield* $untrack(n)); });"
+    "const e = $event(function* () { yield* attempt(() => f()); const v = yield* n; });"
   ],
   invalid: [
     {
@@ -528,6 +526,20 @@ tester.run("no-foreign-reactive", rules["no-foreign-reactive"], {
             name: "dynamic",
             source: "@solidjs/web",
             hint: " Use `<Switch>` / `<Show>` over the components."
+          }
+        }
+      ]
+    },
+    {
+      // no $untrack (D-083): a read is untracked where its host is
+      code: 'import { untrack } from "solid-js";',
+      errors: [
+        {
+          messageId: "foreign",
+          data: {
+            name: "untrack",
+            source: "solid-js",
+            hint: " Use a plain `yield*` where the host does not track: an `$event`, or an `$effect`'s effect phase."
           }
         }
       ]

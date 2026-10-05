@@ -43,7 +43,6 @@ The neighbours of a view, for completeness:
 | You wrote | Instead | Types | Dev error | Lint |
 | --- | --- | --- | --- | --- |
 | a read in a setup (`yield* count`, `yield* props.x`) | read in a hole, a `$memo`, an `$effect` or an `$event` | `Read` is not a `SetupOp` | `READ_IN_SETUP` | — |
-| `yield* $untrack(source)` in a setup | in a hole, a `$memo`, an `$effect` or an `$event` | `$untrack` is a read | `UNTRACK_IN_SETUP` | — |
 | JSX in a setup (or in a memo, an effect, an event) | in the view it returns | — | `JSX_IN_SETUP` (when a hole is performed while a setup runs) | `jsx-only-in-view` |
 | a setup that returns markup, or nothing | `return view(function* () { return <…/>; })` | setup return type | `COMPONENT_VIEW` | — |
 | a row that returns markup | the row's setup returns its view | `RowBlock` | `ROW_VIEW` | — |
@@ -54,7 +53,7 @@ The neighbours of a view, for completeness:
 | a write in a `$memo` | in an `$event` or an `$effect`'s effect phase | `Write` is not a `MemoOp` | `WRITE_IN_REACTIVE` | `no-unyielded-write` |
 | `$effect(function* () { … })`, one function | `$effect(compute, effect)`: read in the compute and return the value, write in `function* (value, prev) { … }` (D-079) | two arguments are required | — | — |
 | a write, a `$cleanup` or an event call in an `$effect`'s compute | in its effect phase | not a `ComputeOp` | `WRITE_IN_REACTIVE`, `CLEANUP_OUTSIDE_OWNER` | — |
-| a plain read in an `$effect`'s effect phase: `yield* count` | read it in the compute and pass the value, or `yield* $untrack(count)` (D-079) | `Read` is not an `EffectPhaseOp` (nor a pending `$untrack`: the effect phase does not wait) | `READ_IN_EFFECT` | — |
+| a read of a source that may be pending in an `$effect`'s effect phase | read it in the compute and pass the value (D-079; a settled source the effect phase reads, untracked, D-083) | `Read<true>` is not an `EffectPhaseOp`: the effect phase does not wait | — (Solid's `NotReadyError` if it is pending) | — |
 | a memo read after its first async `attempt` | read before it | — | `READ_AFTER_ATTEMPT` | `read-before-attempt` |
 | `$optimistic(body)` / `$optimisticStore(scalar)` | `$optimistic(value)`; `$optimisticStore(object \| body)` (D-014) | overloads | `OPTIMISTIC_FORM` | — |
 | a boundary's content built before the boundary | pass it as a function | overloads | `BOUNDARY_CONTENT_BUILT` | — |
@@ -83,7 +82,6 @@ The neighbours of a view, for completeness:
 | --- | --- |
 | `READ_IN_VIEW` | a view reads at its top level, outside a JSX position (named component or row; on the server too) |
 | `READ_IN_SETUP` | a setup reads (tracked or not) |
-| `UNTRACK_IN_SETUP` | a setup uses `$untrack` |
 | `READ_AFTER_ATTEMPT` | a memo reads after its first async `attempt` |
 | `CREATE_OUTSIDE_SETUP` | `$signal` / `$memo` / … outside a setup |
 | `CONTEXT_OUTSIDE_SETUP` | `yield* Ctx` outside a setup |

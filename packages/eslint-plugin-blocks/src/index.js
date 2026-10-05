@@ -237,8 +237,8 @@ const readBeforeAttempt = {
           if (!attempts.has(fn)) attempts.set(fn, node.range[0]);
           return;
         }
-        // a raise, or an untracked read (D-042), is fine after an attempt
-        if (isCallTo(node.argument, ["raise", "$untrack"])) return;
+        // a raise is fine after an attempt
+        if (isCallTo(node.argument, ["raise"])) return;
         const first = attempts.get(fn);
         if (first !== undefined && node.range[0] > first)
           context.report({ node, messageId: "after" });
@@ -375,7 +375,8 @@ const SOLID_FOREIGN = {
   refresh: "`refresh` from solid-blocks",
   isPending: "`isPendingOf`",
   latest: "`latestOf`",
-  untrack: "`$untrack` (in a hole, a $memo, an $effect or an $event)",
+  untrack:
+    "a plain `yield*` where the host does not track: an `$event`, or an `$effect`'s effect phase",
   flush: null
 };
 /**

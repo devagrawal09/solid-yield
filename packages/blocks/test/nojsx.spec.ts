@@ -10,7 +10,6 @@ import {
   $event,
   $memo,
   $signal,
-  $untrack,
   $store,
   attempt,
   For,
@@ -254,7 +253,7 @@ describe("h argument shapes", () => {
       yield* $effect(
         function* () {},
         function* () {
-          seen = yield* $untrack(props.list);
+          seen = yield* props.list;
         }
       );
       return function* () {

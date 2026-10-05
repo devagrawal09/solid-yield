@@ -13,7 +13,6 @@ import {
   $memo,
   $settled,
   $signal,
-  $untrack,
   Errored,
   For,
   raise,
@@ -375,8 +374,8 @@ export const Split = $component(function* Split() {
     function* (value, prev) {
       type _value = Expect<Equal<typeof value, { n: number; at: "now" }>>;
       type _prev = Expect<Equal<typeof prev, { n: number; at: "now" } | undefined>>;
-      // the effect phase writes, cleans up, reads untracked
-      yield* setLabel(`${value.n}${yield* $untrack(label)}`);
+      // the effect phase writes, cleans up, and reads: untracked, because its host is (D-083)
+      yield* setLabel(`${value.n}${yield* label}`);
       yield* $cleanup(() => {});
     }
   );
@@ -405,13 +404,13 @@ export const Split = $component(function* Split() {
     },
     function* () {}
   );
-  // the effect phase runs untracked: a plain read is refused (read it in the compute and pass
-  // the value, or $untrack it)
+  // the effect phase does not wait: a read of a source that may be pending is refused (read
+  // it in the compute and pass the value)
   yield* $effect(
     function* () {},
-    // @ts-expect-error a Read is not an EffectPhaseOp
+    // @ts-expect-error a pending Read is not an EffectPhaseOp
     function* () {
-      void (yield* count);
+      void (yield* n);
     }
   );
   return view(function* () {

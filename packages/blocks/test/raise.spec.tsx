@@ -16,6 +16,7 @@ import {
   $settled,
   $signal,
   attempt,
+  constant,
   Errored,
   For,
   Loading,
@@ -464,14 +465,14 @@ describe("D-073: an effect's failure is its component's", () => {
     expect(seen).toEqual([undefined]);
   });
 
-  it("a handler cast past its type that returns a value still absorbs: the attempt gives undefined (D-076)", () => {
+  it("a handler that returns a value absorbs the failure: the attempt gives the value (D-078)", () => {
     const seen: unknown[] = [];
     const App = $component(function* App() {
       yield* $effect(function* () {
         seen.push(
           yield* attempt(
             () => JSON.parse("{") as unknown,
-            (() => "a value") as unknown as () => void
+            () => "a value"
           )
         );
       });
@@ -481,7 +482,7 @@ describe("D-073: an effect's failure is its component's", () => {
     });
     dispose = render(App, root);
     flush();
-    expect(seen).toEqual([undefined]);
+    expect(seen).toEqual(["a value"]);
   });
 
   it("a stream's absorbed failure ends the stream", async () => {
@@ -627,5 +628,127 @@ describe("D-077: an attempt over an event call", () => {
       );
     });
     await expect(outer()).rejects.toBeInstanceOf(Other);
+  });
+});
+
+describe("D-078: an attempt's handler may be a generator, run as the host's block code", () => {
+  const rejecting = (message: string) => () =>
+    Promise.reject(new Error(message)) as Promise<string>;
+
+  it("transforms: the returned Error fails the attempt (the caller's call rejects with it)", async () => {
+    const n = constant(2);
+    const save = $event(function* () {
+      return yield* attempt(rejecting("net"), function* (cause) {
+        const k = yield* n;
+        return new Boom(`${k}: ${(cause as Error).message}`);
+      });
+    });
+    await expect(save()).rejects.toThrow("2: net");
+  });
+
+  it("absorbs with nothing (undefined) or with a value (the attempt gives it)", async () => {
+    const seen: unknown[] = [];
+    const save = $event(function* () {
+      seen.push(yield* attempt(rejecting("a"), function* () {}));
+      seen.push(
+        yield* attempt(rejecting("b"), function* () {
+          return "value";
+        })
+      );
+    });
+    await save();
+    expect(seen).toEqual([undefined, "value"]);
+  });
+
+  it("a nested attempt retries, then falls back", async () => {
+    let calls = 0;
+    const flaky = () => (++calls < 2 ? Promise.reject(new Error("once")) : Promise.resolve("ok"));
+    const retry = $event(function* () {
+      return yield* attempt(flaky, function* () {
+        return yield* attempt(flaky, () => "fallback");
+      });
+    });
+    expect(await retry()).toBe("ok");
+    expect(calls).toBe(2);
+    const fallback = $event(function* () {
+      return yield* attempt(rejecting("1"), function* () {
+        return yield* attempt(rejecting("2"), () => "fallback");
+      });
+    });
+    expect(await fallback()).toBe("fallback");
+  });
+
+  it("yield* raise(e) inside the handler fails the attempt with e", async () => {
+    const other = new Other("raised");
+    const save = $event(function* () {
+      yield* attempt(rejecting("x"), function* () {
+        yield* raise(other);
+      });
+    });
+    await expect(save()).rejects.toBe(other);
+  });
+
+  it("a write in an event's handler is inside the event's transaction: held until it settles", async () => {
+    let resolve!: () => void;
+    let save!: () => Promise<unknown>;
+    const App = $component(function* App() {
+      const [status, setStatus] = yield* $signal("idle");
+      save = $event(function* () {
+        yield* attempt(rejecting("x"), function* () {
+          yield* setStatus("failed");
+          yield* attempt(
+            () => new Promise<void>(r => (resolve = r)),
+            () => {}
+          );
+        });
+      });
+      return view(function* () {
+        return <i>{yield* status}</i>;
+      });
+    });
+    dispose = render(App, root);
+    flush();
+    const done = save();
+    await settle();
+    // the handler wrote, then waited: the write is held by the transaction
+    expect(root.textContent).toBe("idle");
+    resolve();
+    await done;
+    await settle();
+    expect(root.textContent).toBe("failed");
+  });
+
+  it("a stream's failure: an Error fails the stream, anything else ends it", async () => {
+    async function* feed() {
+      yield 1;
+      throw new Error("dropped");
+    }
+    const ended: unknown[] = [];
+    const failed: unknown[] = [];
+    const save = $event(function* () {
+      const a = yield* attempt(
+        () => feed(),
+        () => "ended"
+      );
+      const b = yield* attempt(
+        () => feed(),
+        function* (cause) {
+          return new Boom((cause as Error).message);
+        }
+      );
+      return [a, b] as const;
+    });
+    const [a, b] = (await save())!;
+    for await (const v of a!) ended.push(v);
+    ended.push("done");
+    try {
+      for await (const v of b!) failed.push(v);
+    } catch (e) {
+      failed.push(e);
+    }
+    expect(ended).toEqual([1, "done"]);
+    expect(failed[0]).toBe(1);
+    expect(failed[1]).toBeInstanceOf(Boom);
+    expect((failed[1] as Error).message).toBe("dropped");
   });
 });

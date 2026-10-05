@@ -61,12 +61,17 @@ export const UserCard = $component(function* UserCard(
 // --- 3. the app: async data, a typed failure, boundaries, a flow control -------------------
 export const App = $component(function* App() {
   const [id, setId] = yield* $signal(1);
-  // a memo reads, then waits; its failure has a type
+  // a memo reads, then waits; it retries once, and its failure has a type
   const user = yield* $memo(function* () {
     const current = yield* id;
     return yield* attempt(
       () => fetchUser(current),
-      cause => new NotFound(String(cause))
+      function* () {
+        return yield* attempt(
+          () => fetchUser(current),
+          cause => new NotFound(String(cause))
+        );
+      }
     );
   });
   const next = $event(function* () {

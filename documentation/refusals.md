@@ -57,7 +57,7 @@ The neighbours of a view, for completeness:
 | a boundary's content built before the boundary | pass it as a function | overloads | `BOUNDARY_CONTENT_BUILT` | — |
 | a non-operation delegated to: `yield* 42` | `yield*` a source, a path, a prop, `attempt`, `raise` or a receipt | `Yieldable` ops | `NOT_AN_OPERATION` | — |
 | `try { yield* save(); } catch (e) { … }` in a block | `yield* attempt(() => save(), e => { … })` (absorb: return nothing; transform: return an `Error` with a literal `kind`), or an `Errored` above (D-077) | — (the types cannot see a catch: the failure stays in the type) | — | `no-try-catch` |
-| an `attempt` handler returning a value: `() => 0` | return nothing and use `??`: `(yield* attempt(f, () => {})) ?? 0` (D-076) | `Error \| void` constraint (printed with `[ATTEMPT_ABSORBS]`) | — | — |
+| an op in a generator handler its host does not take: a write in a `$memo`'s, a wait in an `$effect`'s | the handler is the host's block code (D-078): write in an `$event`'s handler; wait in a `$memo` or an `$event` | the host's op union (`MemoOp`, `EffectOp`) | `WRITE_IN_REACTIVE`, `ASYNC_NOT_ALLOWED` | — |
 | a failure class without a literal `kind` | `readonly kind = "not-found" as const` | `[FAILURE_KIND]` at `attempt`, `until`, `raise`, `Errored catch`, `Props` | — | — |
 | a pending or failing source passed to a prop declared settled | declare `Source<T, E, true>`, or pass a settled one | `[SETTLED_PROP]` | — | — |
 | a pending view at the root | a `Loading` above every pending read | `render` / `hydrate` take `View<false, any>` | — | — |
@@ -106,7 +106,7 @@ The neighbours of a view, for completeness:
 | --- | --- |
 | `[SETTLED_PROP]` | a pending or failing value, source or hole passed to a prop declared settled |
 | `[FAILURE_KIND]` | a failure type without a literal `kind`: at `attempt`, `until`, `raise`, `Errored catch`, a `Props` declaration |
-| `[ATTEMPT_ABSORBS]` | an `attempt` handler that returns the failure on one path and nothing on another: it returns the failure (an `Error` with a literal `kind`) or nothing (absorbs it), not sometimes one and sometimes the other (D-076). A handler returning any other value (`() => 0`, `() => null`) is refused too: absorb with `() => {}` and use `??` for a fallback |
+| `[ATTEMPT_ABSORBS]` | an `attempt` handler (or a generator handler's return) that is an `Error` on one path and not on another: it returns the failure (an `Error` with a literal `kind`) or absorbs it (returns nothing or a value), not sometimes one and sometimes the other (D-076, D-078) |
 | `[HVIEW_READ]` | an `h` (no-JSX) view that yields |
 | `[ROW_SETUP_OP]` | a row's setup that reads |
 | `[ROW_VIEW_OP]` | a row's view that creates |

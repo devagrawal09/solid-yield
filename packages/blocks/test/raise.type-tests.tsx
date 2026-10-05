@@ -15,6 +15,7 @@ import {
   Errored,
   For,
   raise,
+  until,
   Show,
   view,
   type Bind,
@@ -28,6 +29,7 @@ import {
   type FailsOf,
   type Props,
   type Raise,
+  type Read,
   type Source,
   type SettledView,
   type View,
@@ -220,7 +222,7 @@ export const EffectAttempt = $component(function* EffectAttempt() {
   });
 });
 export type EffectAttemptView = Expect<Equal<ViewFailsOf<ReturnType<typeof EffectAttempt>>, Boom>>;
-// D-076: a handler returns the failure (an Error with a literal kind) or nothing, never both
+// D-076 / D-078: a handler returns the failure (an Error with a literal kind) or absorbs it, never both
 export const mixed = attempt(
   () => 1,
   // @ts-expect-error [ATTEMPT_ABSORBS]: one handler, one meaning
@@ -233,17 +235,22 @@ export const mixedStatements = attempt(
     if (cause instanceof Boom) return cause;
   }
 );
-// …and returns nothing else: a value is not a failure, nor nothing
+// D-078 (amends D-076): a value absorbs too, and the attempt gives it: T | V
 export const valueHandler = attempt(
   () => 1,
-  // @ts-expect-error a handler returns an Error or nothing (use `?? 0` for a fallback)
-  () => 0
+  () => "none" as const
 );
+export type ValueHandler = Expect<Equal<typeof valueHandler, Yieldable<never, number | "none">>>;
 export const nullHandler = attempt(
-  () => 1,
-  // @ts-expect-error null is a value, not nothing
+  () => Promise.resolve(1),
   () => null
 );
+export type NullHandler = Expect<Equal<typeof nullHandler, Yieldable<Wait, number | null>>>;
+export const maybeValue = attempt(
+  () => 1,
+  () => (Math.random() > 0.5 ? 0 : undefined)
+);
+export type MaybeValue = Expect<Equal<typeof maybeValue, Yieldable<never, number | undefined>>>;
 // a failure without a literal kind is still [FAILURE_KIND]
 export const plainError = attempt(
   () => 1,
@@ -257,6 +264,91 @@ export type ReturnsFailure = Expect<
 export type ReturnsNothing = Expect<
   Equal<ReturnType<typeof attempt<Promise<number>, void>>, Yieldable<Wait, number | undefined>>
 >;
+// --- D-078: a generator handler is block code of the host -----------------------------
+declare const n: Source<number, never, true>;
+declare const flaky: () => Promise<string>;
+// its ops are the host's and join the attempt's; its return decides: an Error fails …
+export const genTransform = attempt(flaky, function* (cause) {
+  const k = yield* n;
+  return new Boom(`${k}: ${String(cause)}`);
+});
+export type GenTransform = Expect<
+  Equal<typeof genTransform, Yieldable<Wait | Read<true, never> | Raise<Boom>, string>>
+>;
+// … nothing absorbs (T | undefined) …
+export const genVoid = attempt(flaky, function* () {
+  yield* n;
+});
+export type GenVoid = Expect<
+  Equal<typeof genVoid, Yieldable<Wait | Read<true, never>, string | undefined>>
+>;
+// … a value absorbs, the attempt gives it: a nested attempt is a retry or a fallback
+export const genRetry = attempt(flaky, function* () {
+  return yield* attempt(flaky, () => "fallback" as const);
+});
+export type GenRetry = Expect<Equal<typeof genRetry, Yieldable<Wait, string>>>;
+// `yield* raise(e)` in it fails the attempt with e
+export const genRaise = attempt(flaky, function* () {
+  yield* raise(new Other());
+});
+export type GenRaise = Expect<
+  Equal<typeof genRaise, Yieldable<Wait | Raise<Other>, string | undefined>>
+>;
+// a generator returning an Error on one path and nothing on another is [ATTEMPT_ABSORBS]
+export const genMixed = attempt(
+  flaky,
+  // @ts-expect-error [ATTEMPT_ABSORBS]
+  function* (cause) {
+    if ((yield* n) > 0) return new Boom(String(cause));
+  }
+);
+// host-op admission: a write in an event's handler is the event's …
+export const HandlerHosts = $component(function* HandlerHosts() {
+  const [count, setCount] = yield* $signal(0);
+  const save = $event(function* () {
+    yield* attempt(flaky, function* () {
+      yield* setCount(c => c + 1);
+      return yield* attempt(flaky, () => {});
+    });
+  });
+  type _save = Expect<Equal<typeof save, EventHandler<[], never, void, false, true>>>;
+  // … but not a memo's: a Write is not a MemoOp
+  // @ts-expect-error a write in a memo's handler
+  const m = yield* $memo(function* () {
+    return yield* attempt(flaky, function* () {
+      yield* setCount(0);
+      return "x";
+    });
+  });
+  // a memo's handler reads and raises: its colors are the memo's
+  const failing = yield* $memo(function* () {
+    return yield* attempt(flaky, function* () {
+      if ((yield* count) > 1) yield* raise(new Boom());
+      return "x";
+    });
+  });
+  type _failing = Expect<Equal<typeof failing, Source<string, Boom, true>>>;
+  // an effect's handler is synchronous: a wait in it is not an EffectOp
+  // @ts-expect-error an async nested attempt in an effect's handler
+  yield* $effect(function* () {
+    yield* attempt(
+      () => JSON.parse("{") as unknown,
+      function* () {
+        return yield* attempt(flaky, () => {});
+      }
+    );
+  });
+  void m;
+  return view(function* () {
+    return <button onClick={yield* save}>{yield* count}</button>;
+  });
+});
+// until's handler follows the same rule
+export const untilGen = until(n, function* () {
+  return 0;
+});
+export type UntilGen = Expect<Equal<typeof untilGen, Yieldable<Wait, number>>>;
+
 // an effect delegating to a synchronous event that fails joins the event's failure
 export const EffectCalls = $component(function* EffectCalls() {
   const fail = $event(function* () {

@@ -65,7 +65,7 @@ render(App, document.getElementById("root")!);
 | **Events** | An `$event` is *bound* in a view, `onClick={yield* save}`: a hole that attaches the handler, un-called, and gives the view its failures (D-072); a call that may wait on a pending read marks the view *may wait*, never pending (D-075). Another event *calls* it, `yield* save(x)`. | `<button onClick={yield* save}>` |
 | **Call form** | A block component, a flow control and a boundary are *called* in a hole, never tagged (D-062). Props are a source, a zero-arity `function*` hole, or a settled value (D-065). `children` is always a generator (D-066). | `{yield* Card({ todo, children: function* () { return <i />; } })}` |
 | **Colors** | Reading may be *pending* (async) or *fail* with a typed error: `Source<T, E, P>`. A prop declares the colors it accepts (D-068). A call passes only what the declaration admits. Colors flow up through `yield*` to a `Loading` / `Errored`. | `props: Props<{ user: Source<User, NotFound, true> }>` |
-| **Failures** | A failure is an `Error` with a literal `kind` (D-034). `attempt(fn, onError)` gives a failure its type, and `raise(e)` fails with one. An `Errored` handles failures, or with `catch` only the listed ones. With no `Errored` the failure is re-thrown (D-033). A plain `throw` is a bug (`UNTYPED_THROW`), and `try` / `catch` is not a block form (`no-try-catch`): `attempt`'s handler returns the failure, or nothing to absorb it (D-076, D-077). | `yield* attempt(() => fetch(u), cause => new NotFound(cause))` |
+| **Failures** | A failure is an `Error` with a literal `kind` (D-034). `attempt(fn, onError)` gives a failure its type, and `raise(e)` fails with one. An `Errored` handles failures, or with `catch` only the listed ones. With no `Errored` the failure is re-thrown (D-033). A plain `throw` is a bug (`UNTYPED_THROW`), and `try` / `catch` is not a block form (`no-try-catch`): `attempt`'s handler returns the failure, or absorbs it with nothing or a value; it may be a generator, e.g. a retry (D-076–D-078). | `yield* attempt(() => fetch(u), cause => new NotFound(cause))` |
 
 ## Build it, rule by rule
 
@@ -119,13 +119,20 @@ const user = yield* $memo(function* () {
   const current = yield* id; // a memo reads before its first async attempt
   return yield* attempt(
     () => fetchUser(current),
-    cause => new NotFound(String(cause))
+    // on failure, retry once: the retry's failure is the memo's
+    function* () {
+      return yield* attempt(
+        () => fetchUser(current),
+        cause => new NotFound(String(cause))
+      );
+    }
   );
 });
 ```
 
 - **The memo's type.** `user` is a `Source<User, NotFound, true>`: it may be pending, and may fail with a `NotFound`.
-- **`attempt`.** It is the one place a failure gets its type. The handler is required, and it must return a `Failure`: an `Error` with a literal `kind`. Without the `kind` it is the type error `[FAILURE_KIND]`.
+- **`attempt`.** It is the one place a failure gets its type. The handler is required, and its return decides (D-076, D-078). A `Failure` — an `Error` with a literal `kind` — fails the attempt with it; without the `kind` it is the type error `[FAILURE_KIND]`. Nothing, or a value, absorbs the failure: the attempt gives `undefined` or that value.
+- **The retry.** A handler may be a generator, run as the memo's own block code: its reads, its nested `attempt` and its `yield* raise(e)` are the memo's, as its colors are. Here it returns the nested attempt's value (absorbing the first failure) or fails with the retry's `NotFound`. In an `$event` the same handler could write, inside the event's transaction.
 - **Reads after the attempt.** A memo's reads after an async `attempt` would not be tracked: dev error `READ_AFTER_ATTEMPT`, lint error `read-before-attempt`.
 
 ### 4. A child declares the colors it accepts

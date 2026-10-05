@@ -4,7 +4,8 @@ import { render } from "solid-blocks";
 import { App } from "./getting-started.js";
 
 const settle = async () => {
-  await new Promise(r => setTimeout(r, 20));
+  // two fetches of 10 ms when the first fails and the retry runs
+  await new Promise(r => setTimeout(r, 40));
   flush();
   await new Promise(r => setTimeout(r, 0));
   flush();

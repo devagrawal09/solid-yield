@@ -597,40 +597,87 @@ class Attempt {
       v = this.run();
     } catch (e) {
       if (e instanceof NotReadyError) throw e;
-      return handled(this.onError(e));
+      return yield* handle(this.onError, e);
     }
     // an event call (D-077): delegated to as `yield* call` is — at once when
     // its body already finished (so an `$effect` may attempt a synchronous
     // one), else waiting for it — and its failure goes through the handler
     if (v != null && (v as any)[EVENT_CALL_MARK] === true) {
+      let failed = false;
+      let error: unknown;
       try {
         return yield* (v as any)[Symbol.iterator]();
       } catch (e) {
         if (e instanceof NotReadyError) throw e;
-        return handled(this.onError(e));
+        failed = true;
+        error = e;
       }
+      if (failed) return yield* handle(this.onError, error);
     }
     if (isThenable(v)) {
+      let failed = false;
+      let error: unknown;
       try {
         v = yield new Wait_(v);
       } catch (e) {
-        return handled(this.onError(e));
+        failed = true;
+        error = e;
       }
+      // on rejection: inside the event's transaction, or as the memo's
+      // resumption — the attempt's own host runs the handler (D-078)
+      if (failed) return yield* handle(this.onError, error);
     }
     // a stream (or a promise's stream) is not waited for: its failures go
-    // through the handler as they come
-    return mapStream(v, this.onError);
+    // through the handler as they come, each run as the attempt's host ran
+    const { host, name } = state;
+    return mapStream(v, e =>
+      runAs(
+        host,
+        () => {
+          const r = this.onError(e);
+          return isGeneratorObject(r) ? drive(r, SYNC_RUN) : r;
+        },
+        null,
+        null,
+        false,
+        true,
+        name
+      )
+    );
   }
 }
+/** A generator object (what a `function*` handler returns), not any iterable. */
+function isGeneratorObject(r: any): r is Generator<unknown, unknown, unknown> {
+  return (
+    r != null &&
+    typeof r === "object" &&
+    typeof r.next === "function" &&
+    typeof r.throw === "function" &&
+    typeof r[Symbol.iterator] === "function"
+  );
+}
 /**
- * What an attempt's handler made of a failure (D-076): an `Error` is the
- * failure the block fails with; nothing absorbs it, and the attempt gives
- * `undefined`. (A handler cast past its type that returns another value
- * absorbs too: the attempt still gives `undefined`, as its type says.)
+ * Run an attempt's handler on a failure (D-078). One handler, decided by its
+ * result: a generator is block code, delegated to as part of the attempt —
+ * its ops are the host's (a write inside an event's transaction, a nested
+ * attempt), and `yield* raise(e)` in it fails the attempt with `e`. Then the
+ * return decides: an `Error` is the failure the attempt fails with (the
+ * only way a failure leaves the handler); anything else — nothing, or a
+ * value — absorbs it, and the attempt gives that value.
  */
-function handled(r: unknown): undefined {
+function* handle(
+  onError: (error: unknown) => unknown,
+  error: unknown
+): Generator<unknown, unknown, unknown> {
+  const r = onError(error);
+  const out = isGeneratorObject(r) ? yield* r : r;
+  if (out instanceof Error) throw known(out);
+  return out;
+}
+/** For a stream's failure, outside the attempt's run: an `Error` fails the stream, anything else ends it. */
+function handled(r: unknown): unknown {
   if (r instanceof Error) throw known(r);
-  return undefined;
+  return r;
 }
 /**
  * What waiting on `fn`'s result is: an event call's colors (its failures go
@@ -644,22 +691,36 @@ type AttemptWait<T> =
       : never;
 /** What the handler receives: an event call's known failure (D-077), else anything caught. */
 type Caught<T> = T extends EventCall<any, infer E, any, any> ? E : unknown;
-/** A handler that returns the failure, an `Error`: the attempt raises it. */
-type Fails<H> = [H] extends [Error] ? true : false;
-type AttemptOps<T, H> = AttemptWait<T> | (Fails<H> extends true ? Raise<H> : never);
-/** What an attempt gives: absorbed (`H` is `void`), `undefined` too. */
-type AttemptResult<T, H> = Fails<H> extends true ? Attempted<T> : Attempted<T> | undefined;
+/** What a handler's run yields: a generator handler's ops, which are the host's (D-078). */
+type HandlerYields<H> = H extends Generator<infer Y, any, any> ? Y : never;
+/** What a handler's run returns: a generator handler's return, else the handler's own. */
+type HandlerReturn<H> = H extends Generator<any, infer R, any> ? R : H;
+/** A handler whose return is an `Error`: the attempt fails with it (a transform). */
+type Fails<R> = [R] extends [Error] ? true : false;
 /**
- * A handler returns the failure (an `Error` with a literal `kind`) or
- * nothing (it absorbs the failure), never sometimes one and sometimes the
- * other (D-076). Any other value is refused by the constraint `Error | void`.
+ * What the attempt yields: what waiting on `fn`'s result is, the generator
+ * handler's ops (its colors join the host's), and the returned failure.
  */
-type HandlerCheck<H> = [H] extends [Error]
-  ? KindCheck<H>
-  : [H] extends [void]
+type AttemptOps<T, H> =
+  | AttemptWait<T>
+  | HandlerYields<H>
+  | (Fails<HandlerReturn<H>> extends true ? Raise<HandlerReturn<H>> : never);
+/** Absorbed: nothing gives `undefined`, a value `V` itself. */
+type Absorbed<R> = R extends void ? undefined : R;
+/** What an attempt gives: absorbed, the handler's value too (`T | undefined`, `T | V`). */
+type AttemptResult<T, H> =
+  Fails<HandlerReturn<H>> extends true ? Attempted<T> : Attempted<T> | Absorbed<HandlerReturn<H>>;
+/**
+ * A handler returns the failure (an `Error` with a literal `kind`) or does
+ * not (it absorbs the failure, with nothing or a value), never sometimes one
+ * and sometimes the other (D-076, D-078).
+ */
+type HandlerCheck<H> = [HandlerReturn<H>] extends [Error]
+  ? KindCheck<HandlerReturn<H>>
+  : [Extract<HandlerReturn<H>, Error>] extends [never]
     ? unknown
     : {
-        readonly "[ATTEMPT_ABSORBS] a handler returns the failure (an Error with a literal kind) or nothing (absorbs it), not sometimes one and sometimes the other": never;
+        readonly "[ATTEMPT_ABSORBS] a handler returns the failure (an Error with a literal kind) or absorbs it (returns nothing or a value), not sometimes one and sometimes the other": never;
       };
 /** What an attempt gives: an event call's result; a promise's value; a stream as itself, handled. */
 type Attempted<T> =
@@ -670,20 +731,25 @@ type Attempted<T> =
       : Awaited<T>;
 /**
  * `yield* attempt(fn, onError)`: call `fn`; when it throws, or the promise it
- * returns rejects, `onError` handles what it caught (D-076). It returns the
- * failure — an `Error` with a literal `kind`, what was caught or a
- * transformation of it — and the block fails with it: the failure's type is
- * its color. Or it returns nothing and absorbs the failure: the attempt gives
- * `undefined` (its value is `T | undefined`; `?? fallback` for a default) and
- * the block does not fail (D-073: an effect that handles its own failure adds
- * none to its component). Any other return value is a type error, and so is a
- * handler that may do either (`[ATTEMPT_ABSORBS]`). An attempt always
- * handles its error: one without a handler would be just a call.
+ * returns rejects, `onError` handles what it caught (D-076, D-078). It may
+ * be a generator — `function* (e) { … }` — run as block code of the host
+ * (an event's writes inside its transaction, a nested `attempt` for a retry
+ * or a fallback, `yield* raise(e)` failing the attempt); its ops and colors
+ * are the host's. Its return decides: the failure — an `Error` with a
+ * literal `kind`, what was caught or a transformation of it — and the block
+ * fails with it, the failure's type its color; or nothing, and the failure is
+ * absorbed (the attempt gives `undefined`, its value `T | undefined`); or a
+ * value `V`, absorbed too (the attempt gives it, `T | V`). D-073: an effect
+ * that handles its own failure adds none to its component. A handler that
+ * may return an `Error` on one path and not on another is
+ * `[ATTEMPT_ABSORBS]`. An attempt always handles its error: one without a
+ * handler would be just a call.
  *
  * When `fn` returns a promise the block suspends until it settles ($memo
  * and $event only) and resumes with its value. When it returns a stream (or
  * a promise of one) the attempt gives the stream back, its failures going
- * through `onError` as they come — an absorbed one ends the stream: `return
+ * through `onError` as they come — an `Error` fails the stream, anything else
+ * ends it (a generator handler runs synchronously there): `return
  * yield* attempt(() => watch(feed), cause => new FeedError(cause))` is how a
  * memo's body returns a stream.
  *
@@ -694,7 +760,7 @@ type Attempted<T> =
  * block's as with `yield*`. This is how a block handles a failure — `try` /
  * `catch` is not a block form (`no-try-catch`).
  */
-export function attempt<T, H extends Error | void>(
+export function attempt<T, H>(
   fn: () => T,
   onError: (error: Caught<T>) => H & HandlerCheck<H>
 ): Yieldable<AttemptOps<T, H>, AttemptResult<T, H>>;
@@ -937,17 +1003,15 @@ export function refresh(
  * `yield* until(readStore(store, s => s.ready), onError, { timeout })`: wait
  * until a source reads truthy (Solid's `until`). It is an async `attempt`:
  * only a `$memo` or an `$event` waits, and `onError` is an attempt's
- * handler (D-076): it turns a failure (a timeout) into the block's error, or
- * returns nothing to absorb it (`until` then gives `undefined`).
+ * handler (D-076, D-078): it turns a failure (a timeout) into the block's
+ * error, or absorbs it (`until` then gives `undefined` or the handler's
+ * value); it may be a generator run as the host's block code.
  */
-export function until<T, H extends Error | void>(
+export function until<T, H>(
   source: Source<T, unknown, boolean>,
   onError: (error: unknown) => H & HandlerCheck<H>,
   options?: Parameters<typeof solidUntil>[1]
-): Yieldable<
-  Wait | (Fails<H> extends true ? Raise<H> : never),
-  Fails<H> extends true ? T : T | undefined
-> {
+): Yieldable<AttemptOps<Promise<T>, H>, AttemptResult<Promise<T>, H>> {
   return attempt(() => solidUntil(accessor(source), options), onError as any) as any;
 }
 

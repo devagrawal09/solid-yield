@@ -2,63 +2,16 @@
  * Declared differences of the library route from the oracle, per scenario
  * and mode, each with its reason; and the findings from comparing the
  * library route's server output with the compiler route's. Every entry is a
- * finding recorded in documentation/DECISIONS.md (D-069; F2, F4, F5 here, F6 in `routeFindings`; F1 resolved by D-079, F3 by D-080).
+ * finding recorded in documentation/DECISIONS.md (D-069; F4, F5, F8 here, F6 in `routeFindings`; F1 resolved by D-079, F3 by D-080, F2 by fixing the oracle).
  */
 import type { ModeExpectation } from "../harness/types.js";
 
 export const declared: Record<string, Record<string, ModeExpectation>> = {
   "blocks-row-list": {
-    "client/library": {
-      status: "differs",
-      reason:
-        "F2: a row's view is rendered once per row, and each hole is its own computation, so a list update re-renders no row view: the reference's row callback returns a thunk that the list's insert calls again on every update (each row re-reads its `open`; the islands mode of the fork matched the library here). At mount a row's view is built right after its setup (setup a, view a, setup b, view b), where the reference sets every row up before rendering. Every write, run, cleanup and markup is the oracle's.",
-      trace: [
-        "## mount",
-        'read items = [{"id":1,"label":"a"},{"id":2,"label":"b"}]',
-        "run setup a",
-        "read open a = true",
-        "run setup b",
-        "read open b = true",
-        "## initial",
-        'html = <ul><li class="row r1">a=open<!----></li><li class="row r2">b=open<!----></li></ul>',
-        "## toggle row b (its own state)",
-        "run toggle b",
-        "read open b = true",
-        "write open b = false",
-        "read open b = false",
-        'html = <ul><li class="row r1">a=open<!----></li><li class="row r2">b=closed<!----></li></ul>',
-        "## reorder b, c, a (c is new: one setup; b keeps its state)",
-        'write items = [{"id":2,"label":"b"},{"id":3,"label":"c"},{"id":1,"label":"a"}]',
-        'read items = [{"id":2,"label":"b"},{"id":3,"label":"c"},{"id":1,"label":"a"}]',
-        "run setup c",
-        "read open c = true",
-        'html = <ul><li class="row r2">b=closed<!----></li><li class="row r3">c=open<!----></li><li class="row r1">a=open<!----></li></ul>',
-        "## toggle row c",
-        "run toggle c",
-        "read open c = true",
-        "write open c = false",
-        "read open c = false",
-        'html = <ul><li class="row r2">b=closed<!----></li><li class="row r3">c=closed<!----></li><li class="row r1">a=open<!----></li></ul>',
-        "## remove a (its cleanup runs)",
-        'write items = [{"id":2,"label":"b"},{"id":3,"label":"c"}]',
-        'read items = [{"id":2,"label":"b"},{"id":3,"label":"c"}]',
-        "run cleanup a",
-        'html = <ul><li class="row r2">b=closed<!----></li><li class="row r3">c=closed<!----></li></ul>',
-        "## toggle row b again",
-        "run toggle b",
-        "read open b = false",
-        "write open b = true",
-        "read open b = true",
-        'html = <ul><li class="row r2">b=open<!----></li><li class="row r3">c=closed<!----></li></ul>',
-        "## dispose (every row's cleanup)",
-        "run cleanup c",
-        "run cleanup b"
-      ]
-    },
     "server/library": {
       status: "differs",
       reason:
-        "F5: hydration keys only, plus F2's row order: the markup is the oracle's with other `_hk` values. Each `{yield* …}` hole is a computation, and a flow control called in one adds its own owner, so the library numbers a row's nodes two levels below the list (`1000`, `1010`) where the handwritten oracle numbers them in its component's sequence (`3`, `5`). Each row's view is rendered right after its setup.",
+        "F5: hydration keys only: the markup is the oracle's with other `_hk` values. Each `{yield* …}` hole is a computation, and a flow control called in one adds its own owner, so the library numbers a row's nodes one level deeper (`1000`, `1010`) than the handwritten oracle (`100`, `110`). Every read and run is the oracle's.",
       trace: [
         "## render",
         'read items = [{"id":1,"label":"a"},{"id":2,"label":"b"}]',
@@ -76,7 +29,7 @@ export const declared: Record<string, Record<string, ModeExpectation>> = {
     "hydrate/library": {
       status: "differs",
       reason:
-        "F5 + F2: hydrating `server/library`'s markup claims every server node (3/3 kept, none inserted), with the library's `_hk` values in the `html` lines; a list update re-renders no row (the reordered rows keep their server nodes and keys, where the oracle re-creates every row's element).",
+        "F5: hydrating `server/library`'s markup claims every server node (3/3 kept, none inserted), with the library's `_hk` values in the `html` lines. Every read, write, run and later render is the oracle's: a list update re-renders no row in either, and the reordered rows keep their server nodes.",
       trace: [
         "## hydrate",
         'read items = [{"id":1,"label":"a"},{"id":2,"label":"b"}]',
@@ -126,7 +79,7 @@ export const declared: Record<string, Record<string, ModeExpectation>> = {
     "server/library": {
       status: "differs",
       reason:
-        "F5: hydration keys only: the markup is the oracle's; every level of nesting adds the hole's and the flow control's owners (`100222000` where the oracle has `74`).",
+        "F5 + F8: the markup is the oracle's with other `_hk` values: every level of nesting adds the hole's and the flow control's owners (`100222000` where the oracle has `104200`). F8: the order of a nested row's reads on the server: the oracle reads `open a` for the toggle, renders the nested rows (`open a1` twice), then reads `open a` again for the `<ul>`'s `style`; the library reads both of `a`'s holes before the nested rows. Same reads, same values, same markup.",
       trace: [
         "## render",
         "read open a = true",
@@ -177,7 +130,7 @@ export const declared: Record<string, Record<string, ModeExpectation>> = {
     "server/library": {
       status: "differs",
       reason:
-        "F5: hydration keys only: the markup is the oracle's with the library's `_hk` values (`1000`, `1010`, `1020` for `3`, `5`, `7`).",
+        "F5: hydration keys only: the markup is the oracle's with the library's `_hk` values (`1000`, `1010`, `1020` for `100`, `110`, `120`)",
       trace: [
         "## render",
         'markup = <ul _hk=0><li _hk=1000 class="c1"><!--$-->a<!--/-->:<!--$-->open<!--/--></li><li _hk=1010 class="c2"><!--$-->b<!--/-->:<!--$-->open<!--/--></li><li _hk=1020 class="c3"><!--$-->c<!--/-->:<!--$-->open<!--/--></li></ul>',

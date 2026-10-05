@@ -19,7 +19,7 @@ export function App() {
             setOpen(!open());
           };
           // The view: rendered where the row is inserted, like a component's.
-          return () => (
+          return (
             <li class={"row r" + c.id} onClick={toggle}>
               {c.label}={open() ? "open" : "closed"}
             </li>

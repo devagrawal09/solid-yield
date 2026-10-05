@@ -1,45 +1,41 @@
 ## hydrate
 read items = [{"id":1,"label":"a"},{"id":2,"label":"b"}]
 run setup a
-run setup b
 read open a = true
+run setup b
 read open b = true
 hydration server-nodes 3/3 kept, 0 client-inserted
 ## initial
-html = <ul _hk="0"><li _hk="3" class="row r1"><!--$-->a<!--/-->=<!--$-->open<!--/--></li><li _hk="5" class="row r2"><!--$-->b<!--/-->=<!--$-->open<!--/--></li></ul>
+html = <ul _hk="0"><li _hk="100" class="row r1"><!--$-->a<!--/-->=<!--$-->open<!--/--></li><li _hk="110" class="row r2"><!--$-->b<!--/-->=<!--$-->open<!--/--></li></ul>
 ## toggle row b (its own state)
 run toggle b
 read open b = true
 write open b = false
 read open b = false
-html = <ul _hk="0"><li _hk="3" class="row r1"><!--$-->a<!--/-->=<!--$-->open<!--/--></li><li _hk="5" class="row r2"><!--$-->b<!--/-->=<!--$-->closed<!--/--></li></ul>
+html = <ul _hk="0"><li _hk="100" class="row r1"><!--$-->a<!--/-->=<!--$-->open<!--/--></li><li _hk="110" class="row r2"><!--$-->b<!--/-->=<!--$-->closed<!--/--></li></ul>
 ## reorder b, c, a (c is new: one setup; b keeps its state)
 write items = [{"id":2,"label":"b"},{"id":3,"label":"c"},{"id":1,"label":"a"}]
 read items = [{"id":2,"label":"b"},{"id":3,"label":"c"},{"id":1,"label":"a"}]
 run setup c
-read open b = false
 read open c = true
-read open a = true
-html = <ul _hk="0"><li class="row r2"><!--$-->b<!--/-->=<!--$-->closed<!--/--></li><li class="row r3"><!--$-->c<!--/-->=<!--$-->open<!--/--></li><li class="row r1"><!--$-->a<!--/-->=<!--$-->open<!--/--></li></ul>
+html = <ul _hk="0"><li _hk="110" class="row r2"><!--$-->b<!--/-->=<!--$-->closed<!--/--></li><li class="row r3"><!--$-->c<!--/-->=<!--$-->open<!--/--></li><li _hk="100" class="row r1"><!--$-->a<!--/-->=<!--$-->open<!--/--></li></ul>
 ## toggle row c
 run toggle c
 read open c = true
 write open c = false
 read open c = false
-html = <ul _hk="0"><li class="row r2"><!--$-->b<!--/-->=<!--$-->closed<!--/--></li><li class="row r3"><!--$-->c<!--/-->=<!--$-->closed<!--/--></li><li class="row r1"><!--$-->a<!--/-->=<!--$-->open<!--/--></li></ul>
+html = <ul _hk="0"><li _hk="110" class="row r2"><!--$-->b<!--/-->=<!--$-->closed<!--/--></li><li class="row r3"><!--$-->c<!--/-->=<!--$-->closed<!--/--></li><li _hk="100" class="row r1"><!--$-->a<!--/-->=<!--$-->open<!--/--></li></ul>
 ## remove a (its cleanup runs)
 write items = [{"id":2,"label":"b"},{"id":3,"label":"c"}]
 read items = [{"id":2,"label":"b"},{"id":3,"label":"c"}]
 run cleanup a
-read open b = false
-read open c = false
-html = <ul _hk="0"><li class="row r2"><!--$-->b<!--/-->=<!--$-->closed<!--/--></li><li class="row r3"><!--$-->c<!--/-->=<!--$-->closed<!--/--></li></ul>
+html = <ul _hk="0"><li _hk="110" class="row r2"><!--$-->b<!--/-->=<!--$-->closed<!--/--></li><li class="row r3"><!--$-->c<!--/-->=<!--$-->closed<!--/--></li></ul>
 ## toggle row b again
 run toggle b
 read open b = false
 write open b = true
 read open b = true
-html = <ul _hk="0"><li class="row r2"><!--$-->b<!--/-->=<!--$-->open<!--/--></li><li class="row r3"><!--$-->c<!--/-->=<!--$-->closed<!--/--></li></ul>
+html = <ul _hk="0"><li _hk="110" class="row r2"><!--$-->b<!--/-->=<!--$-->open<!--/--></li><li class="row r3"><!--$-->c<!--/-->=<!--$-->closed<!--/--></li></ul>
 ## dispose (every row's cleanup)
 run cleanup c
 run cleanup b

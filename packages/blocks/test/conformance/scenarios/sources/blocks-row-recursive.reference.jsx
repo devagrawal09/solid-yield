@@ -8,7 +8,7 @@ export function App() {
   const node = n => {
     const [open, setOpen] = h.signal("open " + n.label, true);
     const toggle = () => setOpen(!open());
-    return () => (
+    return (
       <li class={"n" + n.id}>
         <span>{n.label}</span>
         <Show when={n.kids.length}>

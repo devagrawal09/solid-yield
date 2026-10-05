@@ -17,7 +17,7 @@ export function App() {
               s[c.id] = !s[c.id];
             });
           };
-          return () => (
+          return (
             <li class={"c" + c.id} onClick={toggle}>
               {c.text}:{closed[c.id] ? "closed" : "open"}
             </li>

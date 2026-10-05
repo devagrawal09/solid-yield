@@ -1,8 +1,8 @@
 ## mount
 read items = [{"id":1,"label":"a"},{"id":2,"label":"b"}]
 run setup a
-run setup b
 read open a = true
+run setup b
 read open b = true
 ## initial
 html = <ul><li class="row r1">a=open<!----></li><li class="row r2">b=open<!----></li></ul>
@@ -16,9 +16,7 @@ html = <ul><li class="row r1">a=open<!----></li><li class="row r2">b=closed<!---
 write items = [{"id":2,"label":"b"},{"id":3,"label":"c"},{"id":1,"label":"a"}]
 read items = [{"id":2,"label":"b"},{"id":3,"label":"c"},{"id":1,"label":"a"}]
 run setup c
-read open b = false
 read open c = true
-read open a = true
 html = <ul><li class="row r2">b=closed<!----></li><li class="row r3">c=open<!----></li><li class="row r1">a=open<!----></li></ul>
 ## toggle row c
 run toggle c
@@ -30,8 +28,6 @@ html = <ul><li class="row r2">b=closed<!----></li><li class="row r3">c=closed<!-
 write items = [{"id":2,"label":"b"},{"id":3,"label":"c"}]
 read items = [{"id":2,"label":"b"},{"id":3,"label":"c"}]
 run cleanup a
-read open b = false
-read open c = false
 html = <ul><li class="row r2">b=closed<!----></li><li class="row r3">c=closed<!----></li></ul>
 ## toggle row b again
 run toggle b

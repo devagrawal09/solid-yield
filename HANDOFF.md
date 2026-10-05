@@ -1,4 +1,4 @@
-# HANDOFF — solid-blocks (checkpoint 2026-10-05; Phase 5 through D-083)
+# HANDOFF — solid-blocks (checkpoint 2026-10-05; Phase 5 through D-083; review rulings D-084–D-090)
 
 This repository was extracted from the Solid fork `devagrawal09/solid`, branch `blocks-lib`, at commit **`6978eb83`** (D-015). Git history was not carried; the fork keeps it. The fork's own handoff at that commit (Phases 1A, 1B and 2, and its environment notes) is `git show 6978eb83:HANDOFF.md` in the fork.
 
@@ -129,8 +129,47 @@ Five commits on `main` after `c6da576`, then ten more for Dev's amending rulings
 - **`no-unshown-wait` fires 7 times in the twins** (todos `retry` / `toggle` / `clear`, the same in todos-h, room's `submit`). They stay warnings: the originals show no in-flight state there, and the twins keep parity. With the pending source reverted, "show its in-flight state" means state the app writes itself; there is no library form for it.
 - **A view annotated without `W` counts as may-wait.** `W` defaults to `boolean` so that every existing annotation accepts a may-wait view, and `MayWaitOf` reads `boolean` as "may" (as `PendingOf` does). `yield* v` of a `v: View<false, never>` therefore marks the enclosing view. The marker only drives a warning, and the lint reads the handler, not the view.
 - **A handler returning a non-`Error` value is refused with the `[ATTEMPT_ABSORBS]` text.** TypeScript falls back to the constraint `Error | void` and prints the brand with it. The message names both allowed returns, but not the value's mistake specifically.
-- **An attempt over a call types its handler's parameter as the call's `FailsOf`.** That is the model's claim for `yield* call` too. An untyped `throw` inside the called event (`no-throw`; `UNTYPED_THROW` in development) would reach the handler outside that type.
+- ~~**An attempt over a call types its handler's parameter as the call's `FailsOf`.**~~ Ruled by D-087 (not yet implemented): typed failures are branded at run time; anything else is re-thrown past the handler. Was: That is the model's claim for `yield* call` too. An untyped `throw` inside the called event (`no-throw`; `UNTYPED_THROW` in development) would reach the handler outside that type.
 - **Plain functions in event attributes are refused.** "Any non-handler there is a type error" was read to cover `onClick={() => …}` too: a plain function can call an event whose colors would then reach no type. One twin site changed (room's `() => regenerate(reset)`). `Errored`'s `reset` is the one plain function kept, typed as already bound because it has no colors.
 - **A row `Errored` fallback has its parameters annotated.** TypeScript does not infer them, even with `For`'s own row signature in a `declare function`. §7 records it.
-- **D-069 F8: a nested row's server read order** (blocks-row-recursive, server). The oracle reads `open a` for the toggle, renders the nested rows, then reads `open a` again for the `<ul>`'s `style`; the library reads both of `a`'s holes first. Same reads, values and markup; server only. Declared with F5; not judged. Rule on it.
-- ~~**rendering-blocks' streamed SSR, found while measuring D-082.**~~ Fixed (A12, A13); the gate now renders every twin page on the server (A14). Left: the Solid rc.13 slot loop under `/profile` (D-082) is Solid's, worth reporting upstream; the twins' hydration of their server output is still checked by nothing here. Was: Through `vite dev`'s SSR loader (development builds), `renderToStream` of `/profile` never ends (the process blocks; the original's ends) and of `/stream` fails with a server `READ_IN_VIEW` in `MemoList` (a `For` over a streamed memo under a `Loading` in a hole). No gate step renders the twins' pages on the server, so nothing caught it. Details in D-082.
+- ~~**D-069 F8: a nested row's server read order**~~ Ruled by D-084: the model (a view's holes are read before its children on the server). Was: (blocks-row-recursive, server). The oracle reads `open a` for the toggle, renders the nested rows, then reads `open a` again for the `<ul>`'s `style`; the library reads both of `a`'s holes first. Same reads, values and markup; server only. Declared with F5; not judged. Rule on it.
+- ~~**rendering-blocks' streamed SSR, found while measuring D-082.**~~ Fixed (A12, A13); the gate now renders every twin page on the server (A14). Left: the Solid rc.13 slot loop under `/profile` (D-082) is Solid's; its issue is drafted in `documentation/upstream/solid-ssr-memo-loop-rc13.md` (not yet filed); the twins' hydration of their server output is still checked by nothing here. Was: Through `vite dev`'s SSR loader (development builds), `renderToStream` of `/profile` never ends (the process blocks; the original's ends) and of `/stream` fails with a server `READ_IN_VIEW` in `MemoList` (a `For` over a streamed memo under a `Loading` in a hole). No gate step renders the twins' pages on the server, so nothing caught it. Details in D-082.
+
+## Review 2026-10-05
+
+Two independent, read-only design reviews of `main` at `f608fa7`, kept verbatim:
+
+- `documentation/reviews/2026-10-05-claude.md` (Claude; its file:line citations are at `df06d89`);
+- `documentation/reviews/2026-10-05-codex.md` (Codex).
+
+The Solid rc.13 SSR loop found under rendering's `/profile` (D-082) is drafted as an upstream issue in `documentation/upstream/solid-ssr-memo-loop-rc13.md` (status: draft, not yet filed).
+
+### Rulings (Dev, 2026-10-05)
+
+| Decision | Review | Ruling | Status |
+| --- | --- | --- | --- |
+| D-084 | D-069 F8 | On the server a view's holes are read before its children; the markup is unaffected. The model. | Documented (§3); D-069 fully resolved |
+| D-085 | R1 (Claude G-2) | A bound event's failure routes to the bind site; the creation-time `BOUNDARY` lookup and context are removed | Not yet implemented |
+| D-086 | R2 (both) | An unyielded block call is refused: `Fragment` children typed `Element`; lint `component-call-yielded` (autofix); fix todos-blocks `app.tsx:269` | Not yet implemented |
+| D-087 | R4 (Claude G-3) | Typed failures branded at run time in every build; an attempt over a call handles only branded failures, re-throws the rest | Not yet implemented |
+| D-088 | R5 (Claude I-1 / G-4) | A block component handed to foreign code is `View<boolean, never>`: `foreign(Comp)`, lint `no-unchecked-foreign-handoff`; room's `route()` → `foreign()`, its row `Errored`s removed; D-067 reworded, D-023 corrected | Not yet implemented |
+| D-089 | R6 | `view(function* …)` is required; `require-view-wrapper` (error, autofix); D-054 amended | Not yet implemented |
+| D-090 | R7 (Claude G-5) | An `$effect` compute waiting on a pending read holds no `Loading`; `Create<"effect">` carries no pending; a runtime test pins it | Not yet implemented |
+
+### Open for Dev (review)
+
+- **R3, stream error handlers** (Codex: a stream's handler may type-check a wait the runtime refuses). Option A: a stream's handler is a sync-only generator. Option C: a stream's handler is a plain function only. Awaiting Dev.
+- **The upstream issue** (`documentation/upstream/solid-ssr-memo-loop-rc13.md`) awaits "file it".
+
+### Fixes with no ruling needed (from the reviews; not yet done)
+
+- The plugin's `function*` prefilter misses generator methods.
+- `Loading.on` and `h(Loading)` colors.
+- Docs drift: ESLint `html` remnants; §1's `createTrackedEffect` / `untrack`; §7's D-072 wording; room's "a row is settled"; D-082's stale text (§8's "Not measured" line, fixed since by `df06d89` / `046387b`).
+- Root exports trimmed to the user model.
+- `isElementThunk` sniffs the `"hyper-element"` symbol description (against D-004); it needs a public check.
+- A gate step that hydrates a twin's server output.
+- Attribution: LICENSE and package `author` → Dev, with Solid's MIT notice for the vendored originals and the generated JSX types.
+- `@solidjs/h` as a peer dependency; the plugin's peer range.
+- The ESLint plugin's description, and `@typescript-eslint/parser` as a peer.
+- Collapse the changesets into one initial release note (43 at `f608fa7`; the Claude review counts 44, its README included).

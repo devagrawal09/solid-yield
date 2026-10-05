@@ -68,4 +68,4 @@ Extracted from the Solid fork `devagrawal09/solid` (branch `blocks-lib`, commit 
 
 ## License
 
-MIT
+MIT, copyright (c) 2026 Dev Agrawal ([`LICENSE`](./LICENSE)). The vendored originals (`examples/originals/`), the files the twins copy from them unchanged, the JSX types generated from `@solidjs/web` and the compiler outputs kept as the plugin's oracle are Solid's, under its MIT notice: [`NOTICE`](./NOTICE) lists them.

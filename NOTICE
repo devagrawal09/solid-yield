@@ -1,0 +1,75 @@
+solid-blocks
+Copyright (c) 2026 Dev Agrawal. Licensed under the MIT license (LICENSE).
+
+This repository includes material from Solid (https://github.com/solidjs/solid),
+copyright (c) 2016-2025 Ryan Carniato, used under the MIT license reproduced
+at the end of this file. It came here through the Solid fork
+devagrawal09/solid, branch blocks-lib, at commit 6978eb83 (D-015). That notice
+applies to:
+
+1. examples/originals/ — the six example apps the twins are measured against
+   (effect, hackernews-spa, rendering, room, sierpinski, todos), vendored from
+   the fork's examples.
+
+2. The twins, examples/*-blocks and examples/*-blocks-h, are ports of those
+   originals: their markup, behavior and wire are the originals', and these
+   files are copied from them unchanged:
+
+   - examples/effect-blocks/index.html
+   - examples/effect-blocks/src/api.ts
+   - examples/effect-blocks/src/app.css
+   - examples/hackernews-spa-blocks/src/lib/api.ts
+   - examples/hackernews-spa-blocks/src/types.ts
+   - examples/hackernews-spa-blocks/src/vite-env.d.ts
+   - examples/rendering-blocks/csr/index.html
+   - examples/rendering-blocks/shared/static/favicon.ico
+   - examples/rendering-blocks/shared/static/styles.css
+   - examples/rendering-blocks/stream/server.js
+   - examples/rendering-blocks/string/server.js
+   - examples/rendering-blocks/types.d.ts
+   - examples/room-blocks/public/favicon.ico
+   - examples/room-blocks/src/app.css
+   - examples/room-blocks/src/lib/rooms.ts
+   - examples/room-blocks/src/lib/sources.ts
+   - examples/room-blocks/src/server-config.ts
+   - examples/room-blocks/src/vite-env.d.ts
+   - examples/sierpinski-blocks/index.html
+   - examples/sierpinski-blocks/src/app.css
+   - examples/sierpinski-blocks-h/src/app.css
+   - examples/todos-blocks/index.html
+   - examples/todos-blocks/src/api.ts
+   - examples/todos-blocks-h/src/api.ts
+
+3. packages/blocks/jsx/jsx.d.ts and packages/blocks/jsx/jsx-properties.d.ts —
+   generated from @solidjs/web's published types (types/jsx.d.ts,
+   types/jsx-properties.d.ts) by packages/blocks/scripts/jsx-from-web.mjs and
+   jsx-web-shared.mjs; jsx-properties.d.ts is copied as it is. They ship in
+   the solid-blocks package (its jsx/ directory), with this notice.
+
+4. packages/vite-plugin-blocks/test/fixtures/compiled/ — the output of Solid's
+   JSX compiler (@solidjs/compiler) over the plugin's fixtures, kept as the
+   transform's oracle (D-043).
+
+---
+
+MIT License
+
+Copyright (c) 2016-2025 Ryan Carniato
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

@@ -2,7 +2,7 @@
   "name": "vite-plugin-solid-blocks",
   "description": "The JSX transform's one block rule for solid-blocks (`yield*` in a JSX hole becomes `perform(…)`), as a Vite plugin, a Babel plugin and a plain transform; also annotates the library's `lazy()` with its module URL.",
   "version": "0.0.0",
-  "author": "Ryan Carniato",
+  "author": "Dev Agrawal <dev@codemod.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -33,7 +33,7 @@
     "magic-string": "^0.30.21"
   },
   "peerDependencies": {
-    "solid-blocks": "workspace:*",
+    "solid-blocks": "workspace:^",
     "vite": ">=6.0.0"
   },
   "peerDependenciesMeta": {

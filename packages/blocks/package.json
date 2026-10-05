@@ -2,7 +2,7 @@
   "name": "solid-blocks",
   "description": "Generator blocks for Solid as a library: strict, typed generator syntax and a runtime interpreter on Solid's public API (no blocks compiler).",
   "version": "0.0.0",
-  "author": "Ryan Carniato",
+  "author": "Dev Agrawal <dev@codemod.com>",
   "license": "MIT",
   "homepage": "https://github.com/devagrawal09/solid-blocks#readme",
   "repository": {
@@ -18,6 +18,7 @@
   "files": [
     "dist",
     "jsx",
+    "NOTICE",
     "package.json"
   ],
   "exports": {
@@ -99,6 +100,7 @@
     "test:conformance": "vitest run --config vite.config.conformance-server.mjs && vitest run --config vite.config.conformance-hydrate.mjs && vitest run --config vite.config.conformance.mjs && node test/conformance/lint.mjs"
   },
   "peerDependencies": {
+    "@solidjs/h": "^2.0.0-rc.11",
     "@solidjs/web": "^2.0.0-rc.11",
     "solid-js": "^2.0.0-rc.11"
   },

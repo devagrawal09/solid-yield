@@ -1,6 +1,16 @@
+solid-blocks
+Copyright (c) 2026 Dev Agrawal. Licensed under the MIT license (LICENSE).
+
+jsx/jsx.d.ts and jsx/jsx-properties.d.ts are generated from @solidjs/web's
+published types (types/jsx.d.ts, types/jsx-properties.d.ts); jsx-properties.d.ts
+is copied as it is. They are part of Solid (https://github.com/solidjs/solid),
+copyright (c) 2016-2025 Ryan Carniato, used under this license:
+
+---
+
 MIT License
 
-Copyright (c) 2026 Dev Agrawal
+Copyright (c) 2016-2025 Ryan Carniato
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

@@ -1,8 +1,8 @@
 {
   "name": "eslint-plugin-solid-blocks",
-  "description": "ESLint rules for solid-blocks: the strict rules TypeScript cannot express (no throw in blocks, no reads outside holes, yield* only in JSX holes, reads before the first attempt, no writes in reactive blocks, typed-props keys).",
+  "description": "ESLint rules for solid-blocks: the rules of its strict dialect that TypeScript cannot express (18 rules; `recommended`: 17 errors, 1 warning). The type-aware rules need @typescript-eslint/parser.",
   "version": "0.0.0",
-  "author": "Ryan Carniato",
+  "author": "Dev Agrawal <dev@codemod.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -23,6 +23,7 @@
     "test:exports": "node --test test/exports-matrix.test.mjs"
   },
   "peerDependencies": {
+    "@typescript-eslint/parser": "^8.0.0",
     "eslint": ">=9"
   },
   "devDependencies": {

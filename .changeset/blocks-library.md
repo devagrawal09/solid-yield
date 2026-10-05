@@ -1,6 +1,0 @@
----
-"solid-blocks": minor
-"eslint-plugin-solid-blocks": minor
----
-
-New packages: generator blocks as a library on stock Solid 2. `solid-blocks` is a runtime interpreter with strict types — `$component(function* (props) { setup; return function* () { view } })`, `$signal` / `$store` / `$memo` / `$optimistic` / `$optimisticStore` / `$projection` / `$dynamic` / `$effect` / `$settled` / `$event` (a Solid action), every read and write a `yield*`, typed pending and failures (`attempt`, `raise`, `Loading` / `Errored`), row blocks in `For` / `Show` / `Match` / `Repeat`, `adopt()` for plain components, `render` / `hydrate`, a settled-only JSX namespace (`jsxImportSource: "solid-blocks"`) and a no-JSX flavor (`solid-blocks/h`, `solid-blocks/html`). `@solidjs/blocks-linker` joins what every render site passes into each component's props and writes declaration-merged prop colors that `TypedProps<P, "Key">` reads (Vite plugin and `solid-link` CLI; reads the project's tsconfig path aliases). (Removed before release, with `TypedProps` and `typed-props-key`: prop colors are declared, D-023 / D-068.) `eslint-plugin-solid-blocks` covers what TypeScript cannot express: `no-throw`, `no-read-outside-hole`, `yield-in-jsx-hole`, `read-before-attempt`, `no-unyielded-write`, `no-foreign-reactive`, `typed-props-key`. See documentation/plans/blocks-library.md.

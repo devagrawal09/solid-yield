@@ -388,8 +388,9 @@ type PlainFallback<E> = Content | ((error: Accessor<E>, reset: Reset) => Content
  * (`fallback: function* () { return <…/>; }`, built when it shows, D-066), a
  * function receiving the error (typed with the failures of the children) and
  * a `reset`, or a row `function* (error, reset) { …; return view(…); }` whose
- * `error` is a path (a view that binds an event needs one, D-072). `$event`
- * failures under it are routed here.
+ * `error` is a path (a view that binds an event needs one, D-072). The
+ * failure of an `$event` bound under it that nobody handles is routed here
+ * (D-085).
  *
  * The fallback's own colors are not this boundary's to handle: what it reads
  * pending, and how it fails, reach the boundaries above (D-071), so they are

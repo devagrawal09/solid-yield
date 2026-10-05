@@ -512,7 +512,7 @@ export const Event = $component(function* Event() {
   });
 });
 // binding it (`onClick={yield* go}`, a Bind op) gives the view its failure: a DOM dispatch's
-// failure reaches the nearest Errored above the handler's creation site
+// failure reaches the nearest Errored above the bind site (D-085)
 export type EventView = Expect<Equal<ViewFailsOf<ReturnType<typeof Event>>, Boom>>;
 export type EventViewSettled = Expect<Equal<ViewPendingOf<ReturnType<typeof Event>>, false>>;
 export type EventViewNoWait = Expect<Equal<ViewMayWaitOf<ReturnType<typeof Event>>, false>>;

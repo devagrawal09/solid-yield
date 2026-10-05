@@ -94,9 +94,8 @@ export interface EventCallOp<
 /**
  * Binding an `$event` handler in a view: `onClick={yield* save}` (D-072). The
  * handler is not called; the DOM calls it. What a call may do the view
- * carries: its failures, which go to the nearest `Errored` above the
- * handler's creation site when nobody handles the call (a DOM dispatch does
- * not), and — as a marker, not as pending — that it may wait on pending data
+ * carries: its failures, which go to the nearest `Errored` above the bind
+ * site when nobody handles the call (a DOM dispatch does not; D-085), and — as a marker, not as pending — that it may wait on pending data
  * (`W`, the handler's `P`; D-075 amended): the runtime never suspends a view
  * for a call, so a bind does not make the view pending.
  */

@@ -402,8 +402,9 @@ export function accessor<T>(source: Source<T, any, boolean>): Accessor<T> {
  * The call form of `yield*` in a view hole: the JSX transform turns
  * `{(yield* user).name}` into `{perform(user).name}`, so the read happens in
  * the hole's own computation. Also reads a foreign accessor. An `$event`
- * handler in an event attribute (`onClick={yield* save}`) is bound: returned
- * as it is, for the DOM to call (D-072).
+ * handler in an event attribute (`onClick={yield* save}`) is bound (D-072):
+ * a wrapper for the DOM to call, which routes a failure nobody handles to the
+ * bind site's `Errored` (D-085).
  */
 export function perform<T>(target: Yieldable<any, T> | (() => T) | T): T {
   const x = target as any;
@@ -428,7 +429,7 @@ export function perform<T>(target: Yieldable<any, T> | (() => T) | T): T {
     // (rendering-blocks' streamed `/profile`). As an array element the view
     // is resolved, and retried, as itself. The client inserts it as it is.
     if (x[VIEW_MARK] === true) return (__SERVER__ ? [x] : x) as T;
-    if (x[EVENT_MARK] === true) return x;
+    if (x[EVENT_MARK] === true) return bindEvent(x);
     if (typeof x === "function") return x();
     if (typeof x === "object" && !Array.isArray(x) && typeof x[Symbol.iterator] === "function")
       return runAs(
@@ -1362,8 +1363,44 @@ export function createContext<T>(defaultValue?: T, options?: { name?: string }):
 
 // --- events ---------------------------------------------------------------------------------
 
-/** Provided by `Errored` so an `$event` knows a boundary will take its failure. */
+/**
+ * Provided by `Errored` so a bind site knows a boundary will take a failure
+ * nobody handles (D-085). Solid has no public way to ask whether an owner has
+ * an error boundary above it, and with none `reportError` would halt the
+ * reactive system rather than let the call reject.
+ */
 export const BOUNDARY = solidCreateContext<boolean>(false);
+
+/** An `$event` handler's call, with where a failure nobody handles goes (D-085). */
+const CALL: unique symbol = Symbol("solid.blocks.call") as any;
+type Route = ((error: unknown) => void) | null;
+
+/**
+ * Bind an `$event` handler where it meets the DOM (D-085): `perform` in an
+ * event attribute, `h`'s attribute bind. One wrapper per bind, which records
+ * the bind site's owner and whether an `Errored` is above it: a call nobody
+ * handles (a DOM dispatch) reports its failure to that boundary, and with
+ * none the call's promise rejects. A call that is handled — `yield*`,
+ * `await` — fails at its caller, wherever it was bound.
+ */
+export function bindEvent<H>(handler: H): H {
+  const call = (handler as any)[CALL] as (route: Route, args: unknown[]) => unknown;
+  const owner = getOwner();
+  let boundary = false;
+  if (owner) {
+    try {
+      boundary = useContext(BOUNDARY);
+    } catch {}
+  }
+  const route: Route = boundary ? error => reportError(owner, error) : null;
+  const bound: any = (...args: unknown[]) => call(route, args);
+  bound[EVENT_MARK] = true;
+  bound[CALL] = call;
+  bound[Symbol.iterator] = function* (): Generator<never, unknown, unknown> {
+    return bound;
+  };
+  return bound;
+}
 
 function reportError(owner: ReturnType<typeof getOwner>, error: unknown): void {
   let delivered = false;
@@ -1441,23 +1478,17 @@ function* eventSteps(
  * body's result, so it replaces `action` in block code.
  *
  * A failure goes to whoever handles the returned promise (`await`, `.then`,
- * `.catch`). One nobody handles — a DOM dispatch ignores the result — goes to
- * the nearest `Errored` above where the handler was created (the promise then
- * resolves `undefined`); with no boundary either, the promise rejects.
+ * `.catch`, `yield*`). One nobody handles — a DOM dispatch ignores the result
+ * — goes to the nearest `Errored` above where the handler was bound (D-085;
+ * the promise then resolves `undefined`); with no boundary there, or for a
+ * call of the unbound handler, the promise rejects.
  * Like any action it is called from an event or other imperative code, not
  * synchronously inside a computation (ACTION_CALLED_IN_OWNED_SCOPE).
  */
 export function $event<Args extends unknown[] = [], Y extends EventOp = never, R = void>(
   body: (...args: Args) => Generator<Y, R, any>
 ): EventHandler<Args, FailsOf<Y>, R, ReadsPendingOf<Y>, WaitsOf<Y>> {
-  const owner = getOwner();
   const name = state.name;
-  let boundary = false;
-  if (owner) {
-    try {
-      boundary = useContext(BOUNDARY);
-    } catch {}
-  }
   const run = action(function* (rec: CallRecord, ...args: Args) {
     try {
       // one list for the whole call: a receipt minted before an async
@@ -1476,14 +1507,15 @@ export function $event<Args extends unknown[] = [], Y extends EventOp = never, R
       throw error;
     }
   });
-  const handler: any = (...args: Args) => {
+  const call = (route: Route, args: Args) => {
     // A failure goes to whoever handles the returned promise; one nobody
-    // handles (a DOM dispatch ignores the result) goes to the boundary.
+    // handles (a DOM dispatch ignores the result) goes to the bind site's
+    // boundary (D-085).
     const rec: CallRecord = {};
     let handled = false;
     const result = run(rec, ...args).then(undefined, (error: unknown) => {
-      if (!handled && boundary && owner) {
-        reportError(owner, error);
+      if (!handled && route) {
+        route(error);
         return undefined;
       }
       throw error;
@@ -1509,11 +1541,13 @@ export function $event<Args extends unknown[] = [], Y extends EventOp = never, R
     };
     return result;
   };
+  const handler: any = (...args: Args) => call(null, args);
   handler[EVENT_MARK] = true;
-  // `yield* save`: bind it (D-072) — the handler itself, for an event
-  // attribute; the JSX transform's `perform(save)` returns it the same way
+  handler[CALL] = call;
+  // `yield* save`: bind it (D-072, D-085) — a wrapper for the DOM, routing
+  // to the bind site; the JSX transform's `perform(save)` binds the same way
   handler[Symbol.iterator] = function* (): Generator<never, unknown, unknown> {
-    return handler;
+    return bindEvent(handler);
   };
   return handler;
 }

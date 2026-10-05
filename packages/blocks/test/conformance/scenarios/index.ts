@@ -414,6 +414,64 @@ export const asyncHydration = scenario({
   ]
 });
 
+export const errorRouting = scenario({
+  name: "error-routing",
+  covers: [
+    "synchronous throw",
+    "typed failure (raise)",
+    "untyped failure (attempt)",
+    "local recovery (an absorbing attempt)",
+    "error-boundary routing and reset",
+    "a bound event's failure routes to the bind site (D-085)"
+  ],
+  entry: { component: "App" },
+  sources: sources("error-routing"),
+  steps: [
+    { name: "initial", run: ({ html }) => html() },
+    {
+      name: "recover locally",
+      run: ({ app, flush, html }) => {
+        app.setMode("recover");
+        flush();
+        html();
+      }
+    },
+    {
+      name: "typed failure routes to boundary",
+      run: ({ app, flush, html }) => {
+        app.setMode("typed");
+        flush();
+        html();
+      }
+    },
+    {
+      name: "fix source and reset boundary",
+      run: ({ app, flush, html }) => {
+        app.setMode("ok");
+        app.reset();
+        flush();
+        html();
+      }
+    },
+    {
+      name: "synchronous throw routes to boundary",
+      run: ({ app, flush, html }) => {
+        app.setMode("sync");
+        flush();
+        html();
+      }
+    },
+    {
+      name: "a bound event's failure routes to the bind site's Errored, not the creation site's",
+      run: async ({ click, settle, html }) => {
+        click(".save");
+        await settle();
+        html();
+      }
+    }
+  ]
+});
+
 export const scenarios: Scenario[] = [
   blocksCounter,
   blocksEffect,
@@ -427,7 +485,8 @@ export const scenarios: Scenario[] = [
   asyncFlights,
   asyncDisposal,
   asyncEvent,
-  asyncHydration
+  asyncHydration,
+  errorRouting
 ];
 
 /** The fork's scenarios this port does not carry, and why. */
@@ -437,7 +496,7 @@ export const dropped: { name: string; why: string }[] = [
     why: "moot under D-036: `yield* Ctx` on a library context is the one way to read one, so there is no second form to pin; blocks-async-event still reads a context, through a helper generator"
   },
   {
-    name: "memo-effect-order, dynamic-subscriptions, owned-children, owner-routing, error-routing, event-reads-writes, store-paths, store-dynamic-index, prop-paths, jsx-block, error-markers",
+    name: "memo-effect-order, dynamic-subscriptions, owned-children, owner-routing, event-reads-writes, store-paths, store-dynamic-index, prop-paths, jsx-block, error-markers",
     why: "written for the `$`-block proposal (a reference and a `$` source, no blocks source); a library source for each is a candidate for a later port"
   },
   {

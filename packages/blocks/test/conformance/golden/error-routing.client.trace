@@ -1,0 +1,35 @@
+## mount
+read mode = "ok"
+run value(ok)
+## initial
+html = <p>ok</p><div class="panel"><button class="save">save</button></div>
+## recover locally
+write mode = "recover"
+read mode = "recover"
+run value(recover)
+html = <p>recovered NotFound</p><div class="panel"><button class="save">save</button></div>
+## typed failure routes to boundary
+write mode = "typed"
+read mode = "typed"
+run value(typed)
+caught boundary = NotFound(typed)
+html = <p class="err">NotFound</p><div class="panel"><button class="save">save</button></div>
+## fix source and reset boundary
+write mode = "ok"
+read mode = "typed"
+run value(typed)
+read mode = "ok"
+run value(ok)
+caught boundary = NotFound(typed)
+html = <p>ok</p><div class="panel"><button class="save">save</button></div>
+## synchronous throw routes to boundary
+write mode = "sync"
+read mode = "sync"
+run value(sync)
+caught boundary = SyntaxError(cannot parse {)
+html = <p class="err">SyntaxError</p><div class="panel"><button class="save">save</button></div>
+## a bound event's failure routes to the bind site's Errored, not the creation site's
+run save
+caught bind site = Forbidden(save)
+html = <p class="err">SyntaxError</p><div class="panel"><p class="bind-err">Forbidden</p></div>
+## teardown

@@ -37,6 +37,8 @@ export {
   READ,
   VIEW_MARK,
   COMPONENT_MARK,
+  EVENT_MARK,
+  bindEvent,
   blockName,
   holeOf,
   isGeneratorFunction,

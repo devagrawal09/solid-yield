@@ -4,11 +4,20 @@
  *
  * A hole is a source (`$signal` / `$memo` accessor, store or prop path, a
  * `readStore` selection), a bare zero-arity `function*` (a hole of its own),
- * an `$event` handler, a child view, or a static value. A
+ * an `$event` handler (an event attribute's, bound where the output is
+ * materialized, D-085), a child view, or a static value. A
  * plain thunk is not a hole (it would be a hidden read) and is rejected by
  * the types.
  */
-import { holeOf, perform, READ, isGeneratorFunction, runRow } from "solid-blocks";
+import {
+  bindEvent,
+  EVENT_MARK,
+  holeOf,
+  perform,
+  READ,
+  isGeneratorFunction,
+  runRow
+} from "solid-blocks";
 import type { Element } from "./element.js";
 import type {
   Bind,
@@ -111,6 +120,20 @@ function toPropHole(value: any, name?: string | null): any {
 }
 
 /**
+ * An event attribute's `$event` handler is bound here, where the output is
+ * materialized (D-072, D-085): a failure nobody handles goes to the `Errored`
+ * above this bind site. The bound-data form `[save, data]` binds its handler.
+ */
+function toAttribute(key: string, value: any, name?: string | null): any {
+  if (key.startsWith("on")) {
+    if (typeof value === "function" && value[EVENT_MARK] === true) return bindEvent(value);
+    if (Array.isArray(value) && typeof value[0] === "function" && value[0][EVENT_MARK] === true)
+      return [bindEvent(value[0]), ...value.slice(1)];
+  }
+  return toPropHole(value, name);
+}
+
+/**
  * Convert the values of a props object (a copy; getters stay lazy). Only
  * the values themselves: a prop holding an array or an object (a context
  * value, a store) is passed as it is.
@@ -125,10 +148,10 @@ export function toHoleProps(props: any, name?: string | null): any {
     const d = descriptors[key];
     if (d.get)
       Object.defineProperty(out, key, {
-        get: () => toPropHole(props[key], name),
+        get: () => toAttribute(key, props[key], name),
         enumerable: true
       });
-    else out[key] = toPropHole(d.value, name);
+    else out[key] = toAttribute(key, d.value, name);
   }
   return out;
 }

@@ -8,7 +8,7 @@ const caught = (error: unknown) => (h.caught("boundary", error), (error as Error
 const Saver = $component(function* Saver() {
   const [status, ss] = yield* h.$signal("status", "idle");
   // a DOM dispatch ignores the call's promise, so its failure goes to the
-  // Errored above where the event was created
+  // Errored above where the event is bound (D-085)
   const save = $event(function* () {
     h.run("save");
     yield* ss("saving");

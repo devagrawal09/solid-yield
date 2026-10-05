@@ -38,6 +38,7 @@ import {
   until,
   type ChildView,
   type Element as BlocksElement,
+  type EventHandler,
   type Props,
   view
 } from "solid-blocks";
@@ -2794,8 +2795,17 @@ describe("attempt / isPending interplay", () => {
   });
 });
 
+class SaveError extends Error {
+  readonly kind = "save" as const;
+}
+// At module scope: a provider whose context is created inside a test (or a
+// describe) callback, at a view's root under an outer Errored, keeps an inner
+// Errored's fallback out of the DOM — with Solid's own createContext too, and
+// before D-085 (recorded in D-085, not fixed here).
+const SaveContext = createContext<EventHandler<[], SaveError, void, false, false>>();
+
 describe("binding an event is a hole (D-072)", () => {
-  it("onClick={yield* save} binds the handler itself: the click calls it, the bind does not", async () => {
+  it("onClick={yield* save} binds the handler: the click calls it, the bind does not", async () => {
     const calls: unknown[] = [];
     let save!: ReturnType<typeof $event<[MouseEvent], never, void>>;
     const App = $component(function* () {
@@ -2811,8 +2821,13 @@ describe("binding an event is a hole (D-072)", () => {
     mount(App);
     // binding is not calling
     expect(calls).toEqual([]);
-    // the value bound is the handler: `perform` returns it as it is, uncalled
-    expect(perform(save as any)).toBe(save);
+    // the value bound is a wrapper of the handler, one per bind (D-085):
+    // `perform` returns it uncalled
+    const bound = perform(save as any) as unknown;
+    expect(typeof bound).toBe("function");
+    expect(bound).not.toBe(save);
+    expect(perform(save as any)).not.toBe(bound);
+    expect(calls).toEqual([]);
     expect([...(save as any)]).toEqual([]);
     root.querySelector("button")!.click();
     await settle();
@@ -2836,7 +2851,7 @@ describe("binding an event is a hole (D-072)", () => {
     expect(picked).toEqual([["a", "click"]]);
   });
 
-  it("a bound event's failure reaches the Errored above where the handler was created", async () => {
+  it("a bound event's failure reaches the Errored above where it is bound (D-085)", async () => {
     const seen: unknown[] = [];
     const App = $component(function* () {
       const fail = $event(function* () {
@@ -2861,5 +2876,157 @@ describe("binding an event is a hole (D-072)", () => {
     await settle();
     expect(seen).toEqual(["bound"]);
     expect(root.innerHTML).toBe("<p>caught</p>");
+  });
+
+  describe("D-085: a bound event's failure routes to the bind site", () => {
+    /** Binds the handler it finds in context: the bind site. */
+    const Child = $component(function* Child() {
+      const save = (yield* SaveContext)!;
+      return view(function* () {
+        return <button onClick={yield* save}>save</button>;
+      });
+    });
+    /** Creates the handler, and renders `Child` under an `Errored` of `Child`'s own. */
+    const Parent = $component(function* Parent(props: Props<{ seen: string[] }>) {
+      const save = $event(function* () {
+        yield* raise(new SaveError("save failed"));
+      });
+      return view(function* () {
+        return (
+          <SaveContext value={save}>
+            {
+              yield* Errored({
+                fallback: (e: () => SaveError) => <p>child's: {e().message}</p>,
+                children: function* () {
+                  return <>{yield* Child()}</>;
+                }
+              })
+            }
+          </SaveContext>
+        );
+      });
+    });
+
+    it("created in Parent, bound in Child under Child's Errored: that Errored shows it", async () => {
+      mount(() => Parent({ seen: [] }));
+      root.querySelector("button")!.click();
+      await settle();
+      expect(root.textContent).toBe("child's: save failed");
+    });
+
+    it("with an Errored above both sites too: the bind site's shows it, not the one above the creation", async () => {
+      const outer: unknown[] = [];
+      mount(() =>
+        Errored({
+          fallback: (e: () => unknown) => (outer.push(e()), (<p>outer</p>)),
+          children: function* () {
+            return <>{yield* Parent({ seen: [] })}</>;
+          }
+        })
+      );
+      root.querySelector("button")!.click();
+      await settle();
+      expect(outer).toEqual([]);
+      expect(root.textContent).toBe("child's: save failed");
+    });
+
+    it("with no Errored above the bind site the DOM call rejects, though one is above the creation site", async () => {
+      let save!: EventHandler<[], SaveError, void, false, false>;
+      const Creator = $component(function* Creator() {
+        save = $event(function* () {
+          yield* raise(new SaveError("unrouted"));
+        });
+        return view(function* () {
+          return <i>creator</i>;
+        });
+      });
+      const Binder = $component(function* Binder() {
+        return view(function* () {
+          return <button onClick={yield* save}>save</button>;
+        });
+      });
+      const seen: unknown[] = [];
+      mount(() =>
+        Errored({
+          fallback: (e: () => unknown) => (seen.push(e()), (<p>creation's</p>)),
+          children: function* () {
+            return <>{yield* Creator()}</>;
+          }
+        })
+      );
+      // a second root, with no Errored: the bind site
+      const other = document.createElement("div");
+      document.body.appendChild(other);
+      const disposeOther = render(Binder, other);
+      flush();
+      try {
+        // what the DOM calls (Solid's delegated handler), called as the DOM
+        // does: nobody handles its promise. Observed through the prototype's
+        // `then`, which does not mark the call handled: it rejects
+        const button = other.querySelector("button") as any;
+        const key = Object.keys(button).find(k => k.endsWith("$$click"))!;
+        const result = button[key](new MouseEvent("click")) as Promise<unknown>;
+        const outcome = await Promise.prototype.then.call(
+          result,
+          v => ["resolved", v],
+          e => ["rejected", (e as Error).message]
+        );
+        expect(outcome).toEqual(["rejected", "unrouted"]);
+        await settle();
+        expect(seen).toEqual([]);
+        expect(root.textContent).toBe("creator");
+      } finally {
+        disposeOther();
+        other.remove();
+      }
+    });
+
+    it("a call from another block fails at its caller, wherever the handler is bound", async () => {
+      const caught: unknown[] = [];
+      let call!: () => Promise<unknown>;
+      const Caller = $component(function* Caller() {
+        const save = (yield* SaveContext)!;
+        call = $event(function* () {
+          yield* attempt(
+            () => save(),
+            e => {
+              caught.push(e);
+            }
+          );
+        });
+        return view(function* () {
+          return <i>caller</i>;
+        });
+      });
+      const Host = $component(function* Host() {
+        const save = $event(function* () {
+          yield* raise(new SaveError("to the caller"));
+        });
+        return view(function* () {
+          return (
+            <SaveContext value={save}>
+              {
+                yield* Errored({
+                  fallback: () => <p>bind site's</p>,
+                  children: function* () {
+                    return (
+                      <>
+                        {yield* Child()}
+                        {yield* Caller()}
+                      </>
+                    );
+                  }
+                })
+              }
+            </SaveContext>
+          );
+        });
+      });
+      mount(Host);
+      await call();
+      await settle();
+      expect(caught.map(e => (e as Error).message)).toEqual(["to the caller"]);
+      expect(root.textContent).toBe("savecaller");
+    });
   });
 });

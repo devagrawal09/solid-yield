@@ -17,7 +17,9 @@ import {
   Loading,
   readStore,
   render,
+  raise,
   Show,
+  type EventHandler,
   type Props
 } from "solid-blocks";
 import { h } from "solid-blocks/h";
@@ -264,5 +266,48 @@ describe("h argument shapes", () => {
     dispose = render(() => h(Child, { list }) as any, root);
     flush();
     expect(seen).toBe(list);
+  });
+});
+
+describe("h binds an event attribute where its output is materialized (D-085)", () => {
+  class SaveError extends Error {
+    readonly kind = "save" as const;
+  }
+  it("created in Parent, bound in Child under Child's Errored: that Errored shows it, not the one above both", async () => {
+    let save!: EventHandler<[], SaveError, void, false, false>;
+    const Child = $component(function* Child() {
+      const bound = save;
+      return function* () {
+        return h("button", { onClick: bound }, "save");
+      };
+    });
+    const Parent = $component(function* Parent() {
+      save = $event(function* () {
+        yield* raise(new SaveError("save failed"));
+      });
+      return function* () {
+        return h(
+          "section",
+          Errored({
+            fallback: (e: () => SaveError) => h("p", "child's: ", e().message),
+            children: () => Child()
+          })
+        );
+      };
+    });
+    const outer: unknown[] = [];
+    dispose = render(
+      () =>
+        Errored({
+          fallback: (e: () => unknown) => (outer.push(e()), h("p", "outer")),
+          children: () => Parent()
+        }),
+      root
+    );
+    flush();
+    root.querySelector("button")!.click();
+    await settle();
+    expect(outer).toEqual([]);
+    expect(root.textContent).toBe("child's: save failed");
   });
 });

@@ -149,7 +149,7 @@ The Solid rc.13 SSR loop found under rendering's `/profile` (D-082) is drafted a
 | Decision | Review | Ruling | Status |
 | --- | --- | --- | --- |
 | D-084 | D-069 F8 | On the server a view's holes are read before its children; the markup is unaffected. The model. | Documented (§3); D-069 fully resolved |
-| D-085 | R1 (Claude G-2) | A bound event's failure routes to the bind site; the creation-time `BOUNDARY` lookup and context are removed | Not yet implemented |
+| D-085 | R1 (Claude G-2) | A bound event's failure routes to the bind site; the creation-time `BOUNDARY` lookup and context are removed | Implemented (the `BOUNDARY` context stays: the bind reads it); conformance `error-routing` |
 | D-086 | R2 (both) | An unyielded block call is refused: `Fragment` children typed `Element`; lint `component-call-yielded` (autofix); fix todos-blocks `app.tsx:269` | Not yet implemented |
 | D-087 | R4 (Claude G-3) | Typed failures branded at run time in every build; an attempt over a call handles only branded failures, re-throws the rest | Not yet implemented |
 | D-088 | R5 (Claude I-1 / G-4) | A block component handed to foreign code is `View<boolean, never>`: `foreign(Comp)`, lint `no-unchecked-foreign-handoff`; room's `route()` → `foreign()`, its row `Errored`s removed; D-067 reworded, D-023 corrected | Not yet implemented |
@@ -160,6 +160,7 @@ The Solid rc.13 SSR loop found under rendering's `/profile` (D-082) is drafted a
 ### Open for Dev (review)
 
 - ~~**R3, stream error handlers**~~ Ruled by D-091 (implemented): an `$event` does not attempt a stream; a stream's handler is a plain function.
+- **A provider-rooted `Errored` keeps its fallback out of the DOM** (found implementing D-085, not fixed). A call-form `Errored` held by a context provider tag at a view's root, rendered under another `Errored`, takes a failure but never shows its fallback; handwritten Solid does. Pre-existing (a memo's failure too). D-085's "Found, not fixed" has the shape.
 - **The upstream issue** (`documentation/upstream/solid-ssr-memo-loop-rc13.md`) awaits "file it".
 
 ### Fixes with no ruling needed (from the reviews; not yet done)

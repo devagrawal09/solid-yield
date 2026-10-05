@@ -80,7 +80,7 @@ Reading order with the rest of the plan: `blocks-library.md` (the reference), th
 | D-066 | decided | A component call's `children` is always a generator (lazy view; rows for lists) |
 | D-067 | decided | Tags are DOM elements and foreign Solid components; block components are called (brand check) |
 | D-068 | implemented (1B) | D-056 amended: `Props<{…}>` wrapper; colors declared as `Source<T, E = never, P = false>`; no `Async` |
-| D-069 | recorded (Phase 4) | Conformance findings F1–F7: the library route against the oracle and the compiler route (F6: the routes' hydration keys are not interchangeable) |
+| D-069 | recorded (Phase 4); ruled (Phase 5) | Conformance findings F1–F8: the library route against the oracle and the compiler route. F1 gone (D-079), F2 an oracle artifact (fixed), F3 gone (D-080), F4 the model (D-081), F5 a documented cost (D-082), F6 not mixed (D-074), F7 fixed; F8 open for Dev |
 | D-070 | recorded (Phase 4) | Raise at every host: each reaches the nearest Errored or re-throws (D-033); an `$effect`'s and a DOM-dispatched `$event`'s failures are in no view type (ruled: D-072, D-073); a raising hole's type fixed |
 | D-071 | decided | Meta-rule: the types say exactly what the runtime does; a color the runtime routes and the type lacks is a bug, never a §7 limitation |
 | D-072 | implemented (Phase 5) | Binding an event in a view is a hole: `onClick={yield* save}` joins the handler's failures to the view (its `P`: the may-wait marker, D-075); the transform's event refusal moves to the types; lint `no-unbound-event` |
@@ -92,6 +92,8 @@ Reading order with the rest of the plan: `blocks-library.md` (the reference), th
 | D-078 | implemented (Phase 5) | An attempt's handler may be a generator, run as the host's block code; its return decides: an `Error` fails, nothing or a value absorbs (amends D-076) |
 | D-079 | implemented (Phase 5) | `$effect(compute, effect)`: Solid's split effect, both halves generators; the compute tracks and is pure, the effect phase writes untracked (supersedes D-053's one-pass form) |
 | D-080 | implemented (Phase 5) | A superseded `$memo` run is not closed: it runs to completion and its result is discarded, as Solid's async memo (D-069 F3) |
+| D-081 | decided, documented (Phase 5) | D-069 F4 is the model: an `$event` call is one transaction; a write made before it waits is held until it settles; `$optimistic` shows something during the wait |
+| D-082 | decided, documented (Phase 5) | D-069 F5 is a documented cost (§8): the library route's hydration keys are 2 characters longer per nesting level; measured on rendering's SSR; hydration improves with the compiler |
 
 ## Entries
 
@@ -605,6 +607,19 @@ Consequences: F1 (server-component props in event/`ref` positions) disappears �
 ### D-069 — Conformance findings: the library route against the oracle and the compiler route
 **Recorded (Phase 4, item 1; for Dev's ruling).** The conformance port (D-039) runs each scenario's handwritten Solid program (the oracle) and its library-dialect twin through the same steps, on the client, on the server and in hydration. It compares their traces. Every difference is declared exactly in `packages/blocks/test/conformance/scenarios/declared.ts` and listed in that directory's `COVERAGE.md`. This entry records them. F1–F5 are the library against the oracle; F6 is the library route against the compiler route's frozen server output. None is normalized away. Each is pinned, so a change in either direction turns the gate red.
 
+*Status (Phase 5, 2026-10-05).*
+
+| Finding | Status | Where |
+| --- | --- | --- |
+| F1 `$effect` one pass | **gone**: `$effect(compute, effect)`, blocks-effect equals the oracle | D-079, `360371d` |
+| F2 a row's view renders once | **an oracle artifact, fixed**: the reference rows returned a thunk; blocks-row-list equals the oracle | "F2 resolved" below, `168ca21` |
+| F3 a superseded memo run closed | **gone**: the run continues, its result discarded; async-flights equals the oracle | D-080, `caf6117` |
+| F4 an `$event` call is one transaction | **the model**: kept and documented (§3), `$optimistic` for what shows during the wait | D-081 |
+| F5 deeper hydration keys | **a documented cost** (§8): +2 characters per level, measured on rendering's SSR; hydration improves with the compiler | D-082 |
+| F6 the routes' hydration keys differ | **not mixed**: one route per app | D-074 |
+| F7 a false server `READ_IN_VIEW` | **fixed** (Phase 4) | F7 below |
+| F8 a nested row's server read order | **open, for Dev**: declared with F5 in `declared.ts` | F8 below, `168ca21` |
+
 - ~~**F1**~~ *(resolved by D-079: with `$effect(compute, effect)` blocks-effect's library trace equals the oracle's; the declaration is removed.)* **F1 — `$effect` is one tracked pass (blocks-effect, client).** The reference uses Solid's split effect, `createEffect(compute, effect)`. `$effect` is one `createTrackedEffect` pass (D-053). The subscriptions, values, runs and cleanups are the same; the order is not:
   - the first run comes after the view's first read;
   - on a re-run the previous cleanup runs before the new reads;
@@ -612,8 +627,8 @@ Consequences: F1 (server-component props in event/`ref` positions) disappears �
   The split form has no block spelling. Re-read against D-032: the scenario's branch (`if (v > 1) … yield* c`) is inside the effect, which is where D-032 puts a branch; the view is `<p>{yield* b}</p>`, no body.
 - ~~**F2**~~ *(resolved: an artifact of a non-idiomatic oracle, see "F2 resolved" below.)* **F2 — a row's view renders once (blocks-row-list, all environments).** Each hole is its own computation, so a list update re-renders no row view. The reference's row callback returns a thunk that the list's insert calls again on every update, so each row re-reads its `open`; the fork's islands mode matched the library here. At mount a row's view is built right after its setup (setup a, view a, setup b, view b). The reference sets every row up first, then renders. Writes, runs, cleanups and markup are the oracle's. In hydration the reordered rows keep their server nodes; the oracle re-creates every row's element.
 - ~~**F3**~~ *(resolved by D-080: a superseded run is not closed; async-flights' library trace equals the oracle's, the declaration is removed.)* **F3 — a superseded `$memo` run is closed at its pending `attempt` (async-flights, client).** Its generator is returned. An async function continues after `await` and its result is discarded, so `owner after wait(2)` is not logged. A run disposed with its owner is not closed, so async-disposal is equivalent.
-- **F4 — an `$event` call is one transaction (async-event, client; D-020).** The write made before the event waits (`saving`) is held until the call settles, so the DOM keeps `idle`; the reference writes through at once. Showing a write while an event waits is `$optimistic`'s job. Everything else is the oracle's, including the rejection reaching the `Errored` above the event's owner.
-- **F5 — hydration keys (every SSR scenario, server and hydrate).** The markup is the oracle's; the `_hk` values are not. Each `{yield* …}` hole is an owner, and so is each flow control called in one, so the library's keys are deeper: `1000` / `1010` / `1020` where handwritten Solid has `3` / `5` / `7`; `100222000` for the oracle's `74` at depth 2 of the recursive rows; `200` for the `Loading`'s `20`. Each route hydrates its own markup with every node kept (3/3, 9/9, 4/4, 2/2).
+- *(F4: the model, D-081.)* **F4 — an `$event` call is one transaction (async-event, client; D-020).** The write made before the event waits (`saving`) is held until the call settles, so the DOM keeps `idle`; the reference writes through at once. Showing a write while an event waits is `$optimistic`'s job. Everything else is the oracle's, including the rejection reaching the `Errored` above the event's owner.
+- *(F5: a documented cost, D-082.)* **F5 — hydration keys (every SSR scenario, server and hydrate).** The markup is the oracle's; the `_hk` values are not. Each `{yield* …}` hole is an owner, and so is each flow control called in one, so the library's keys are deeper: `1000` / `1010` / `1020` where handwritten Solid has `100` / `110` / `120` (`3` / `5` / `7` before the oracle fix, "F2 resolved"); `100222000` for the oracle's `104200` at depth 2 of the recursive rows; `200` for the `Loading`'s `20`. Each route hydrates its own markup with every node kept (3/3, 9/9, 4/4, 2/2).
 - **F6 — the library route and the compiler route number hydration keys differently (blocks-row-list, -recursive, -keyed-store, server).** `routes.spec.ts` compares `server/library` with the fork's `server/blocks-compiled` output, kept frozen under `__artifacts__/compiler-route/`.
   - The markup is the same.
   - The compiler route makes each `$component` view and row view a hydration-id scope (`blockScope`): `00`, `01000`, `01100`, adding 3 digits per level of rows.
@@ -789,6 +804,21 @@ Tests: type tests for each return shape and for host-op admission (a write in a 
 - **Tests.** runtime "a memo that waits is pending; a superseded run runs to completion and its result is discarded (D-080)" (the current run lands, then the superseded one continues — `after` counts 2 — without landing; a later write re-runs only from the current run's reads) and "a superseded run that fails after its attempt is discarded too" (a stale `raise` reaches no `Errored`).
 - **Conformance.** async-flights' client/library trace equals the oracle's: **F3 is gone**, its declaration removed, COVERAGE.md regenerated. No new finding.
 - **Docs.** §3's paragraph; §1's latest-wins line; effect-blocks' typeahead comment (why it returns a stream, not an `attempt`).
+
+### D-081 — An `$event` call is one transaction (D-069 F4 is the model)
+**Decided (Dev, 2026-10-05).** D-069 F4 is not a divergence to remove: it is the model, D-020's. An `$event` call is one transaction. A write it makes before it waits (an async `attempt`, `until`, a pending read) is held until the call settles, so nothing it wrote shows during the wait; handwritten Solid that writes a plain signal outside an action shows it at once. To show something during the wait, write an `$optimistic` (or `$optimisticStore`): it shows at once and reverts when the call settles. No code change.
+
+*Documented (Phase 5).*
+- **§3**, with the example: `yield* setSaving(true)` on a `$signal` before an attempt is held (the view keeps `false` until the call settles, and then shows the last write); on an `$optimistic` it shows at once and reverts when the call settles.
+- **Tests already pinning it.** runtime "$event is an action: its writes are one transaction across an async attempt" (held) and "$optimistic / $optimisticStore: an $event's writes show at once and revert when it settles"; conformance async-event, declared F4 (the DOM keeps `idle` while the call waits).
+
+### D-082 — Deeper hydration keys are a documented cost (D-069 F5)
+**Decided (Dev, 2026-10-05).** D-069 F5 stays as it is and is documented as a cost of the library route in §8: the key length per level, and the bytes it adds to one twin's SSR output, measured. Hydration improvements come with the compiler later. No code change.
+
+*Documented (Phase 5).*
+- **Per level** (conformance, F5): a level of nested rows adds 5 characters to the library's keys and 3 to handwritten Solid's, so 2 more per level: blocks-row-recursive's rows at depths 0 / 1 / 2 are `1000` / `100222000` / `10022200222000` (4 / 9 / 14) against `100` / `104200` / `104204200` (3 / 6 / 9). A flat list's rows and a `Loading` called in a hole have one more character.
+- **Measured** with `examples/harness/ssr-keys/measure.mjs` (new; manual, outside the gate, D-017): rendering-blocks against its original through Vite's SSR loader, development builds, rc.13, each render in its own process. `renderToString`: 801 bytes for both on each of the 4 URLs (every route is the `Loading` fallback; 2 equal keys). `renderToStream`: `/` 1,735 → 1,742 bytes (+7, 0.4%; 13 keys, mean length 4.23 → 5.23, longest 6 → 8); `/settings` 1,887 → 1,894 (+7, 0.4%; 11 keys, 3.91 → 4.73, 6 → 8). Almost every key gains one digit, the route's hole; the page's nested content two.
+- **Found while measuring, not fixed (for Dev; outside this ruling).** The twin's streamed `/profile` never ends: the render blocks the process (it logs `LOAD USER` twice and `LOAD INFO`, then no timer fires; killed after 30 s), where the original's ends. The twin's streamed `/stream` fails with a server `READ_IN_VIEW` in `MemoList` (its `For` over a streamed memo, under a `Loading` called in a hole). Both are development builds under `vite dev`'s SSR loader; the gate renders neither page through `renderToStream`. Not measured.
 
 ## Phase 1A findings (agent report, items 4c–8; verbatim, 2026-10-04)
 

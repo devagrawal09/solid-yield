@@ -1,4 +1,4 @@
-# HANDOFF — solid-blocks (checkpoint 2026-10-05; Phase 5 and its amendments complete)
+# HANDOFF — solid-blocks (checkpoint 2026-10-05; Phase 5 through D-082; next D-083)
 
 This repository was extracted from the Solid fork `devagrawal09/solid`, branch `blocks-lib`, at commit **`6978eb83`** (D-015). Git history was not carried; the fork keeps it. The fork's own handoff at that commit (Phases 1A, 1B and 2, and its environment notes) is `git show 6978eb83:HANDOFF.md` in the fork.
 
@@ -77,14 +77,14 @@ Four commits on `main` after `84521e5`, each gated green. The gate has 34 steps;
 ### Open for Dev
 
 - ~~**D-069 F6.**~~ Ruled D-074: the routes are not mixed (Phase 5).
-- **D-069 F1–F5.** These are declared differences from handwritten Solid: `$effect`'s order, rows rendered once, superseded memo runs closed, events held as a transaction, deeper hydration keys. They are pinned, not judged. Rule on any you want changed.
+- ~~**D-069 F1–F5.**~~ Ruled in Phase 5: F1 gone (D-079), F2 an oracle artifact (fixed), F3 gone (D-080), F4 the model (D-081), F5 a documented cost (D-082). D-069 has the status table; F8, found later, is open (Phase 5 below).
 - ~~**D-070 F1 / F2.**~~ Ruled D-073 / D-072 and implemented (Phase 5).
 - **Instruction counts.** Valgrind does not run on macOS arm64, so §8's synthetic numbers are wall time. On Linux, `node examples/harness/runtime-cost/measure.mjs --wall` restores the instruction counts.
 - **Conformance coverage.** The fork's `$`-dialect-only scenarios (memo-effect-order, owner-routing, store-paths, …) have no library source yet. Porting them is a candidate for later work (`COVERAGE.md`, "Not ported").
 
-## Phase 5 (Dev's rulings D-071–D-077), 2026-10-05
+## Phase 5 (Dev's rulings D-071–D-082), 2026-10-05
 
-Five commits on `main` after `c6da576`, then five more for Dev's amending rulings, each gated green (34 steps, the baseline unchanged). Nothing was pushed.
+Five commits on `main` after `c6da576`, then ten more for Dev's amending rulings and the D-069 findings, each gated green (34 steps, the baseline unchanged). Nothing was pushed.
 
 | Commit | What |
 | --- | --- |
@@ -102,7 +102,16 @@ Five commits on `main` after `c6da576`, then five more for Dev's amending ruling
 | A2 `feat: a bound handler that may wait is a may-wait marker, not pending (D-075)` (`6bf94c0`) | A bound handler's `P` no longer makes the view pending: `[MAY_WAIT]`, `MayWaitOf`, `View<P, E, W>` (`W` defaults to `boolean`); flow controls, boundaries, `h` and `lazy` pass it on. Lint warning `no-unshown-wait` (with types). |
 | A3 `feat: an attempt's handler returns the failure, or nothing (D-076)` (`59b885b`) | One `attempt` signature, `H extends Error \| void`: absorbed gives `T \| undefined`; any other value refused; `[ATTEMPT_ABSORBS]` reworded. |
 | A4 `feat: try/catch is not a block form; attempt takes an event call (D-077)` (`2bd68c7`) | `attempt(() => call(), onError)`, the handler typed with the call's failures; `until` follows D-076; lint error `no-try-catch`; 16 sites migrated. |
-| A5 `docs: HANDOFF …` | This section. |
+| A5 `docs: HANDOFF …` (`6a66da5`) | This section, first version. |
+| A6 `feat: an attempt's handler may be a generator, run as the host's code (D-078)` (`e5c876b`) | The handler runs as the host's block code; its return decides: an `Error` fails, nothing or a value absorbs (amends D-076). `until` follows it. |
+| A7 `feat: $effect is split, $effect(compute, effect) (D-079)` (`360371d`) | Solid's `createEffect(compute, effect)`: a pure tracked compute, an untracked effect phase (`READ_IN_EFFECT`); `$untrack` its own op; 31 sites migrated. D-069 F1 gone. |
+| A8 `feat: a superseded $memo run runs to completion, its result discarded (D-080)` (`caf6117`) | No `gen.return()` on supersession. D-069 F3 gone. |
+| A9 `test: the row oracles return their element, not a thunk; D-069 F2 resolved, F8` (`168ca21`) | The three row references returned a thunk; fixed, re-recorded. F2 was the oracle's. New finding F8 (open). |
+| A10 `docs: D-081, D-082; D-069 status` | D-081: F4 is the model (§3, with the `$optimistic` example). D-082: F5 a documented cost (§8), measured by the new `examples/harness/ssr-keys/measure.mjs` (+7 bytes, 0.4%, on rendering's streamed `/` and `/settings`; 2 characters per level of rows). D-069's status table. This section. |
+
+**Landed through A10.** D-071–D-082 are decided and, where they change code, implemented. Of D-069: F1, F2, F3 gone; F4 the model; F5 documented; F6 not mixed (D-074); F7 fixed; F8 open.
+
+**Next: D-083** (Dev) — remove `$untrack`: a plain read in an effect phase is untracked because its host is. Not yet recorded in DECISIONS.md, not started.
 
 ### Open for Dev (Phase 5)
 
@@ -116,3 +125,5 @@ Five commits on `main` after `c6da576`, then five more for Dev's amending ruling
 - **An attempt over a call types its handler's parameter as the call's `FailsOf`.** That is the model's claim for `yield* call` too. An untyped `throw` inside the called event (`no-throw`; `UNTYPED_THROW` in development) would reach the handler outside that type.
 - **Plain functions in event attributes are refused.** "Any non-handler there is a type error" was read to cover `onClick={() => …}` too: a plain function can call an event whose colors would then reach no type. One twin site changed (room's `() => regenerate(reset)`). `Errored`'s `reset` is the one plain function kept, typed as already bound because it has no colors.
 - **A row `Errored` fallback has its parameters annotated.** TypeScript does not infer them, even with `For`'s own row signature in a `declare function`. §7 records it.
+- **D-069 F8: a nested row's server read order** (blocks-row-recursive, server). The oracle reads `open a` for the toggle, renders the nested rows, then reads `open a` again for the `<ul>`'s `style`; the library reads both of `a`'s holes first. Same reads, values and markup; server only. Declared with F5; not judged. Rule on it.
+- **rendering-blocks' streamed SSR, found while measuring D-082, not fixed.** Through `vite dev`'s SSR loader (development builds), `renderToStream` of `/profile` never ends (the process blocks; the original's ends) and of `/stream` fails with a server `READ_IN_VIEW` in `MemoList` (a `For` over a streamed memo under a `Loading` in a hole). No gate step renders the twins' pages on the server, so nothing caught it. Details in D-082.

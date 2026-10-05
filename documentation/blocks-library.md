@@ -60,6 +60,25 @@ Separately from the rules, `packages/blocks/test/conformance` (D-039) pins the l
 
 **A superseded `$memo` run runs to completion; its result is discarded; put no side effects after an await** (D-080). When a memo's read changes while a run waits on an async `attempt`, a new run starts. The old one is not closed: it continues after its attempt, exactly like Solid's async memo (and the compiler route), and Solid keeps only the latest run's result, so the old run's value or failure never lands and it subscribes nothing (its reads after the attempt are untracked anyway, `READ_AFTER_ATTEMPT`). Anything it does after the await still happens: keep a memo's body free of side effects there. Tests: runtime "a memo that waits is pending; a superseded run runs to completion and its result is discarded (D-080)" and "a superseded run that fails after its attempt is discarded too"; conformance async-flights (equal to the oracle).
 
+**An `$event` call is one transaction: what it writes before it waits is held until the call settles; to show something during the wait, write an `$optimistic`** (D-081, D-020). This is the model, not a divergence (D-069 F4). A write before an async `attempt`, an `until` or a pending read does not show while the call waits; when the call settles, the last write shows. Handwritten Solid that writes a plain signal outside an action shows it at once. An `$optimistic` (or `$optimisticStore`) write shows at once and reverts when the call settles:
+
+```tsx
+const [saving, setSaving] = yield* $signal(false);
+const save = $event(function* () {
+  yield* setSaving(true); // held: the view keeps `false` while the call waits
+  yield* attempt(() => api.save(), cause => new SaveError(cause));
+  yield* setSaving(false);
+});
+
+const [saving, setSaving] = yield* $optimistic(false);
+const save = $event(function* () {
+  yield* setSaving(true); // shows at once; back to `false` when the call settles
+  yield* attempt(() => api.save(), cause => new SaveError(cause));
+});
+```
+
+Tests: runtime "$event is an action: its writes are one transaction across an async attempt" (held) and "$optimistic / $optimisticStore: an $event's writes show at once and revert when it settles"; conformance async-event (declared F4: the DOM keeps `idle` while the call waits).
+
 | Rule                                                                                                            | Types                                                                          | Runtime (dev error)                                | Lint                                             | Test                                                                                                                                                                                                                                 |
 | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | A setup creates; it never reads, tracked or not (D-042: read in the view's holes, a `$memo`, an `$effect` or an `$event`; once, untracked, with `yield* $untrack(source)` there) | `Read` is not a `SetupOp` (nor is `$untrack`, a read) | `READ_IN_SETUP`, `UNTRACK_IN_SETUP` | — | type-tests "a setup does not read", "$untrack is not a SetupOp"; runtime "a setup does not read, tracked or not", "$untrack reads once, untracked, in a memo, an effect and an event (D-042)", "the setup's own read is still an error"                                                                               |
@@ -220,7 +239,7 @@ Only pending needs a position that admits it. A failure may reach a row, a call 
 
 ## 8. Runtime cost: uncompiled blocks vs handwritten Solid
 
-Two harnesses, both manual and outside the gate (D-017: wall times move with the machine, so there are no budgets). Phase 4 measured both on 2026-10-05 against published Solid rc.13, on macOS arm64 with Node v24.18.0.
+Two runtime harnesses and one for hydration keys, all manual and outside the gate (D-017: wall times move with the machine, so there are no budgets). Phase 4 measured the runtime harnesses on 2026-10-05 against published Solid rc.13, on macOS arm64 with Node v24.18.0.
 
 ### The twins against their originals
 
@@ -278,6 +297,23 @@ The fork's instruction counts, from before Phase 4, are kept for reference. They
 | todos: add a todo, then toggle it | 4,097,720 | 4,525,976 | 1.10x | 1.09 / 0.95 |
 | 1,000 rows: create, then clear | 1,505,358,498 | 1,574,854,638 | 1.05x | 87.2 / 93.1 |
 | 1,000 rows: update every 10th | 14,960,308 | 18,323,066 | 1.22x | 0.72 / 0.80 |
+
+### Hydration keys (D-082, D-069 F5)
+
+The library route's server output is the handwritten markup with longer `_hk` hydration keys. Each `{yield* …}` hole is an owner, and so is a flow control called in one, so the library numbers a node at least one owner level deeper than handwritten Solid.
+
+- **Key length per level** (the conformance scenarios, D-069 F5). A level of nested rows adds 5 characters to the library's keys and 3 to the handwritten Solid's, so 2 more per level. blocks-row-recursive at row depths 0 / 1 / 2: `1000` / `100222000` / `10022200222000` (4 / 9 / 14 characters) where handwritten Solid has `100` / `104200` / `104204200` (3 / 6 / 9). A flat list's rows have one more character (`1000` / `1010` for `100` / `110`); a `Loading` called in a hole too (`200` for `20`, its placeholder `pl-20`, its record `20_fr`).
+- **Bytes on one twin.** `examples/harness/ssr-keys/measure.mjs` renders rendering-blocks and its original for each URL through Vite's SSR loader (development builds), each render in its own process. It counts the output's bytes and `_hk` keys. Measured 2026-10-05, rc.13:
+
+| entry | URL | original (bytes) | twin (bytes) | added | `_hk` keys | mean key length | longest key |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `renderToString` | each of the 4 | 801 | 801 | 0 | 2 | 2 → 2 | 3 → 3 |
+| `renderToStream` | `/` | 1,735 | 1,742 | +7 (0.4%) | 13 | 4.23 → 5.23 | 6 → 8 |
+| `renderToStream` | `/settings` | 1,887 | 1,894 | +7 (0.4%) | 11 | 3.91 → 4.73 | 6 → 8 |
+
+- **Reading them.** The string entry renders every route as its `Loading` fallback above the app, so its two keys are the shell's and equal. In the streamed pages almost every key gains one digit, the route's hole (`1003` → `11020`), and the page's nested content two (`100j01` → `11093001`). The cost grows with nesting depth, not with the number of nodes alone: +0.4% on these shallow pages, more on deep trees.
+- **Not measured.** The twin's streamed `/profile` does not finish (it blocks the process; killed after 30 s) and its `/stream` fails with a server `READ_IN_VIEW` in `MemoList` (D-082, found while measuring, not fixed).
+- **Later.** The keys are Solid's owner ids. Shorter keys, and hydration improvements generally, come with the blocks compiler, which can make a view a hydration scope instead of an owner per hole: the fork's compiler route adds 3 digits per level of rows where the library route adds 5 (D-069 F6). Until then this is the price of the library route.
 
 ## 9. The twins
 

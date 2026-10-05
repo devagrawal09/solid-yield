@@ -16,4 +16,5 @@ export function jsx(type: any, props: any): any {
     : (h as any)(type, rest, ...(Array.isArray(children) ? children : [children]));
 }
 export { jsx as jsxs, jsx as jsxDEV };
+/** D-086: a fragment's children are elements (the types are jsx/jsx-runtime.d.ts'). */
 export const Fragment = (props: { children?: unknown }): unknown => props.children;

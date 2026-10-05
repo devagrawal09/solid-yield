@@ -266,7 +266,10 @@ const TodoApp = $component(function* TodoApp(props: Props<{ filter: Filter }>) {
             fallback: <p class="loading">Loading…</p>,
             children: function* () {
               return (
-                <>{[MainSection({ filter: props.filter }), Footer({ filter: props.filter })]}</>
+                <>
+                  {yield* MainSection({ filter: props.filter })}
+                  {yield* Footer({ filter: props.filter })}
+                </>
               );
             }
           })
@@ -282,17 +285,19 @@ export const App = $component(function* App() {
   return view(function* () {
     return (
       <TodosContext value={todos}>
-        {Errored({
-          fallback: (err, reset) => (
-            <div class="app-error">
-              <p>Something went wrong: {String(err())}</p>
-              <button onClick={reset}>Reset</button>
-            </div>
-          ),
-          children: function* () {
-            return <>{yield* TodoApp({ filter })}</>;
-          }
-        })}
+        {
+          yield* Errored({
+            fallback: (err, reset) => (
+              <div class="app-error">
+                <p>Something went wrong: {String(err())}</p>
+                <button onClick={reset}>Reset</button>
+              </div>
+            ),
+            children: function* () {
+              return <>{yield* TodoApp({ filter })}</>;
+            }
+          })
+        }
       </TodosContext>
     );
   });

@@ -459,11 +459,13 @@ export const Rows = $component(function* () {
               return function* () {
                 return (
                   <li>
-                    {Loading({
-                      children: function* () {
-                        return <>{yield* Pending({ id: c.text })}</>;
-                      }
-                    })}
+                    {
+                      yield* Loading({
+                        children: function* () {
+                          return <>{yield* Pending({ id: c.text })}</>;
+                        }
+                      })
+                    }
                   </li>
                 );
               };
@@ -1424,3 +1426,57 @@ const OnlyOptional = $component(function* (props: Props<{ note?: string }>) {
   });
 });
 export const onlyOptional = OnlyOptional();
+
+// --- D-086: an unyielded block call in a fragment is refused ------------------------------------
+// A fragment's children are elements, as an element's are (with `jsxFactory` / `jsxFragmentFactory`
+// in the tsconfig: TypeScript checks a fragment only then). Not delegated to, a pending, failing
+// view's colors would reach no type.
+declare const unsettled: Source<string, NotFound, true>;
+const Unsettled = $component(function* Unsettled(
+  props: Props<{ u: Source<string, NotFound, true> }>
+) {
+  return view(function* () {
+    return <p>{yield* props.u}</p>;
+  });
+});
+export const UnyieldedInFragment = $component(function* () {
+  return view(function* () {
+    return (
+      // @ts-expect-error an unyielded call in a fragment is refused: the view is pending and fails
+      <>{Unsettled({ u: unsettled })}</>
+    );
+  });
+});
+export const UnyieldedArrayInFragment = $component(function* () {
+  return view(function* () {
+    return (
+      // @ts-expect-error … in an array in a fragment too (the todos twin's shape, review R2)
+      <>{[Unsettled({ u: unsettled }), Unsettled({ u: unsettled })]}</>
+    );
+  });
+});
+// delegated to, the call's colors are the view's
+export const YieldedInFragment = $component(function* () {
+  return view(function* () {
+    return <>{yield* Unsettled({ u: unsettled })}</>;
+  });
+});
+export type YieldedInFragmentView =
+  ReturnType<typeof YieldedInFragment> extends View<true, NotFound> ? true : never;
+export const yieldedInFragmentView: YieldedInFragmentView = true;
+// a settled call in a fragment is an element (a JSX element child, text and an array of them too)
+const SettledCall = $component(function* SettledCall() {
+  return view(function* () {
+    return <i />;
+  });
+});
+export const SettledInFragment = $component(function* () {
+  return view(function* () {
+    return (
+      <>
+        {SettledCall()}
+        text {[<b />, "s"]}
+      </>
+    );
+  });
+});

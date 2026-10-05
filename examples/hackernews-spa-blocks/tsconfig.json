@@ -8,6 +8,8 @@
     "esModuleInterop": true,
     "jsx": "preserve",
     "jsxImportSource": "solid-blocks",
+    "jsxFactory": "jsx",
+    "jsxFragmentFactory": "Fragment",
     "allowJs": true,
     "strict": true,
     "noEmit": true,

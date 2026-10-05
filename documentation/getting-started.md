@@ -23,8 +23,19 @@ export default { plugins: [blocks(), solid()] };
 
 ```jsonc
 // tsconfig.json: only settled views are elements; only DOM elements and foreign components are tags
-{ "compilerOptions": { "jsx": "preserve", "jsxImportSource": "solid-blocks", "strict": true } }
+{
+  "compilerOptions": {
+    "jsx": "preserve",
+    "jsxImportSource": "solid-blocks",
+    // a fragment's children are checked too (D-086)
+    "jsxFactory": "jsx",
+    "jsxFragmentFactory": "Fragment",
+    "strict": true
+  }
+}
 ```
+
+`jsxFactory` / `jsxFragmentFactory`: TypeScript checks a fragment's children (against `Fragment`, typed `Element`) only with them set; without them an unyielded block call in `<>…</>` passes the types (D-086), and only the lint `component-call-yielded` reports it.
 
 ```js
 // eslint.config.mjs (flat config): the rules TypeScript cannot express
@@ -194,6 +205,6 @@ Each rule is checked as early as the tools allow:
 1. **Types.** For example: a component tag, a read in a setup, a create or write in a view, a source called like a function, an unbound event handler, an unhandled pending at the root, `[SETTLED_PROP]`, `[FAILURE_KIND]`, `[HVIEW_READ]`.
 2. **The transform** (at build time). A `yield*` in a JSX position it cannot make a hole: `BLOCKS_YIELD_IN_REF`, `…_SPREAD`, `…_SPREAD_CHILD`, `BLOCKS_PLAIN_YIELD_IN_JSX`.
 3. **Development errors**, thrown where they happen and stripped from production builds. For example: `READ_IN_VIEW`, `READ_IN_SETUP`, `UNYIELDED_WRITE`, `UNTYPED_THROW`, `JSX_IN_SETUP`, `PATH_OBJECT`.
-4. **Lint** (`eslint-plugin-solid-blocks`), for what TypeScript cannot see. For example: `no-read-in-view-body`, `no-read-in-prop`, `component-children-generator`, `no-unbound-event`, `no-throw`.
+4. **Lint** (`eslint-plugin-solid-blocks`), for what TypeScript cannot see. For example: `no-read-in-view-body`, `no-read-in-prop`, `component-children-generator`, `component-call-yielded`, `no-unbound-event`, `no-throw`.
 
 [`refusals.md`](./refusals.md) puts every one of them in one place, starting with what you cannot write in a view.

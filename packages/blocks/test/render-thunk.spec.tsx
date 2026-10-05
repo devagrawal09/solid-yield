@@ -108,12 +108,14 @@ for (const form of forms) {
                   children: function* () {
                     return (
                       <>
-                        {Loading({
-                          fallback: <i>…</i>,
-                          children: function* () {
-                            return <>{yield* Inner()}</>;
-                          }
-                        })}
+                        {
+                          yield* Loading({
+                            fallback: <i>…</i>,
+                            children: function* () {
+                              return <>{yield* Inner()}</>;
+                            }
+                          })
+                        }
                       </>
                     );
                   }

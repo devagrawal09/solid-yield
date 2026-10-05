@@ -7,6 +7,8 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "jsx": "preserve",
     "jsxImportSource": "solid-blocks",
+    "jsxFactory": "jsx",
+    "jsxFragmentFactory": "Fragment",
     "types": ["vitest/globals"],
     "paths": {
       "solid-blocks": ["./src/index.ts"],

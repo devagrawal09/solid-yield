@@ -7,6 +7,8 @@
     "moduleResolution": "Bundler",
     "jsx": "preserve",
     "jsxImportSource": "solid-blocks",
+    "jsxFactory": "jsx",
+    "jsxFragmentFactory": "Fragment",
     "esModuleInterop": true,
     "types": ["vite/client", "vitest/globals"]
   },

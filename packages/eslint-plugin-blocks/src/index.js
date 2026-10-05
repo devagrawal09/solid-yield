@@ -12,6 +12,7 @@
  *   no-component-tag       a block component is called, never a JSX tag (autofix)
  *   no-read-in-prop        a component call's prop is a source, a hole or a value — never a read (autofix)
  *   component-children-generator  a component call's children is a generator (autofix)
+ *   component-call-yielded  a block component call in a block is delegated to: `{yield* Card(…)}` (autofix)
  *   no-unbound-event       an `$event` handler in an event prop is bound: `onClick={yield* save}` (autofix)
  *   no-unshown-wait        (warning, with types) a bound handler that may wait on pending data: show its in-flight state
  *   jsx-only-in-view       JSX only in a view, a hole or a row's view: a setup never creates elements
@@ -1118,6 +1119,74 @@ const componentChildrenGenerator = {
   }
 };
 
+/**
+ * D-086: a block component call (a `$component`, `lazy`, a flow control or a
+ * boundary) in JSX is delegated to with `yield*` — `{yield* Card({ todo })}`
+ * — so its pending and failures join the holding view's type. Not delegated
+ * (`<>{Card({ todo })}</>`, `{[Main(), Footer()]}`, `{ok ? A() : B()}`) the
+ * call still renders, and its colors reach no type. Reported in a JSX
+ * expression (through an array, a conditional or a logical operand) and as a
+ * discarded statement, in a generator, where `yield*` can be written. Not
+ * reported: an argument or a prop (`h("div", Show(…))`, `fallback: Card()`:
+ * typed by what takes it), a view's returned call, a call kept in a variable,
+ * a call in a plain function (a root or foreign handoff, `render(() =>
+ * App(), root)`, an `h` thunk). Autofix: the `yield*`.
+ */
+const WRAPPERS = new Set([
+  "ArrayExpression",
+  "ConditionalExpression",
+  "LogicalExpression",
+  "TSAsExpression",
+  "TSNonNullExpression",
+  "TSSatisfiesExpression"
+]);
+const componentCallYielded = {
+  meta: {
+    type: "problem",
+    fixable: "code",
+    docs: {
+      description:
+        "A block component call in JSX is delegated to with `yield*` (`{yield* Card(…)}`), so its pending and failures join the view's type (D-086)."
+    },
+    messages: {
+      unyielded:
+        "`{{name}}(…)` is a block component call not delegated to: write `yield* {{name}}(…)`, so its pending and failures join this view's type (D-086)."
+    },
+    schema: []
+  },
+  create(context) {
+    const source = context.sourceCode;
+    return {
+      CallExpression(node) {
+        let child = node;
+        let p = node.parent;
+        while (p && WRAPPERS.has(p.type)) {
+          if (p.type === "ConditionalExpression" && p.test === child) return;
+          child = p;
+          p = p.parent;
+        }
+        if (!p || (p.type !== "JSXExpressionContainer" && p.type !== "ExpressionStatement")) return;
+        if (!inGenerator(node)) return;
+        if (!isBlockComponent(context, node.callee)) return;
+        const name = source.getText(node.callee);
+        const parent = node.parent;
+        const bare =
+          parent.type === "JSXExpressionContainer" ||
+          parent.type === "ExpressionStatement" ||
+          parent.type === "ArrayExpression";
+        context.report({
+          node,
+          messageId: "unyielded",
+          data: { name: name.length > 40 ? name.slice(0, 37) + "..." : name },
+          fix: bare
+            ? fixer => fixer.insertTextBefore(node, "yield* ")
+            : fixer => [fixer.insertTextBefore(node, "(yield* "), fixer.insertTextAfter(node, ")")]
+        });
+      }
+    };
+  }
+};
+
 /** Whether a JSX attribute name is an event prop: `onClick`, `on:click`, `oncapture:click`. */
 function isEventAttribute(name) {
   if (name.type === "JSXNamespacedName")
@@ -1307,6 +1376,7 @@ export const rules = {
   "no-component-tag": noComponentTag,
   "no-read-in-prop": noReadInProp,
   "component-children-generator": componentChildrenGenerator,
+  "component-call-yielded": componentCallYielded,
   "no-unbound-event": noUnboundEvent,
   "no-unshown-wait": noUnshownWait
 };

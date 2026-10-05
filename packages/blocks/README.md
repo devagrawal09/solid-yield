@@ -46,8 +46,15 @@ export default { plugins: [blocks(), solid()] };
 ```
 
 ```jsonc
-// tsconfig.json
-{ "compilerOptions": { "jsx": "preserve", "jsxImportSource": "solid-blocks" } }
+// tsconfig.json (`jsxFactory` / `jsxFragmentFactory`: so TypeScript checks a fragment's children, D-086)
+{
+  "compilerOptions": {
+    "jsx": "preserve",
+    "jsxImportSource": "solid-blocks",
+    "jsxFactory": "jsx",
+    "jsxFragmentFactory": "Fragment"
+  }
+}
 ```
 
 ## Entry points

@@ -22,7 +22,7 @@ A view is `return view(function* () { return <…/>; })`: it has no body (D-032)
 | a flow control or boundary as a tag: `<Show when={…}>` | `{yield* Show({ when, children: function* () { … } })}` | `ElementType` | — | — | `no-component-tag` (autofix) |
 | a read in a call's argument: `Card({ n: yield* count })` | pass the source (`n: count`) or a hole (`n: function* () { return (yield* count) * 2; }`) | — | — | — | `no-read-in-prop` (autofix) |
 | plain JSX as a call's `children`: `Show({ when, children: <p /> })` | a lazy view `children: function* () { return <p />; }`, or a row `function* (item) { … }` | — (content is accepted) | — | — | `component-children-generator` (autofix) |
-| a pending or failing child not `yield*`-ed: `{Card({ todo })}` | `{yield* Card({ todo })}`, under a `Loading` / `Errored` as its colors need | `JSX.Element` is settled only | — | — | — |
+| a block call not `yield*`-ed: `{Card({ todo })}`, `<>{Card({ todo })}</>`, `{[Main(), Footer()]}` | `{yield* Card({ todo })}`, under a `Loading` / `Errored` as its colors need (D-086) | `JSX.Element` is settled only: a pending or failing view is not one, in an element and in a fragment (`Fragment`'s children are `Element`; checked when the tsconfig sets `jsxFactory` / `jsxFragmentFactory`) | — | — | `component-call-yielded` (autofix: the `yield*`) |
 | a thunk as a child or attribute: `{() => x}`, `class={() => c}` | a hole: `{yield* x}` | JSX and `h` reject plain thunks | — | — | — |
 | a source called: `count()` | `yield* count` | `Source` has no call signature | — | — | — |
 | an `$event` handler given unbound: `onClick={save}` | bind it: `onClick={yield* save}` (D-072) | the JSX namespace's event attributes take only a bound handler (`[BOUND]` is missing) | — | — | `no-unbound-event` (autofix) |
@@ -130,6 +130,7 @@ Every other type refusal is a plain assignability error. The common ones: an op 
 | `no-component-tag` | a block component, flow control or boundary written as a tag (autofix: the call) |
 | `no-read-in-prop` | a `yield*` in a component call's argument (autofix) |
 | `component-children-generator` | a call's `children` that is not a generator (autofix) |
+| `component-call-yielded` | a block component call in JSX (an array, a conditional) or a discarded statement, not delegated to with `yield*` (autofix) |
 | `jsx-only-in-view` | JSX outside a view, a hole or a row's view |
 | `no-unyielded-write` | a setter call, an event call or another block operation not delegated to |
 | `read-before-attempt` | a memo read after its first `attempt` |

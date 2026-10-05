@@ -919,8 +919,8 @@ describe("constant (D-060)", () => {
       return function* () {
         return (
           <div>
-            <Identity value={me}>{Who()}</Identity>
-            {Who()}
+            <Identity value={me}>{yield* Who()}</Identity>
+            {yield* Who()}
           </div>
         );
       };
@@ -1205,13 +1205,15 @@ describe("events", () => {
         children: function* () {
           return (
             <>
-              {Errored({
-                catch: [NotFound],
-                fallback: (e: any) => <p>inner: {e().message}</p>,
-                children: function* () {
-                  return <>{yield* Fails()}</>;
-                }
-              })}
+              {
+                yield* Errored({
+                  catch: [NotFound],
+                  fallback: (e: any) => <p>inner: {e().message}</p>,
+                  children: function* () {
+                    return <>{yield* Fails()}</>;
+                  }
+                })
+              }
             </>
           );
         }
@@ -1242,13 +1244,15 @@ describe("events", () => {
         children: function* () {
           return (
             <>
-              {Errored({
-                catch: [NotFound],
-                fallback: (e: any) => <p>inner: {e().message}</p>,
-                children: function* () {
-                  return <>{yield* Fails()}</>;
-                }
-              })}
+              {
+                yield* Errored({
+                  catch: [NotFound],
+                  fallback: (e: any) => <p>inner: {e().message}</p>,
+                  children: function* () {
+                    return <>{yield* Fails()}</>;
+                  }
+                })
+              }
             </>
           );
         }
@@ -1282,11 +1286,13 @@ describe("events", () => {
         children: function* () {
           return (
             <>
-              {Loading({
-                children: function* () {
-                  return <>{yield* Loads()}</>;
-                }
-              })}
+              {
+                yield* Loading({
+                  children: function* () {
+                    return <>{yield* Loads()}</>;
+                  }
+                })
+              }
             </>
           );
         }
@@ -1325,11 +1331,13 @@ describe("events", () => {
         children: function* () {
           return (
             <>
-              {Loading({
-                children: function* () {
-                  return <>{yield* Streams()}</>;
-                }
-              })}
+              {
+                yield* Loading({
+                  children: function* () {
+                    return <>{yield* Streams()}</>;
+                  }
+                })
+              }
             </>
           );
         }
@@ -1915,10 +1923,10 @@ describe("reads from JSX positions are never a view's or a setup's own", () => {
       return function* () {
         return (
           <div>
-            <Probe value={perform(label)}>{Card()}</Probe>
+            <Probe value={perform(label)}>{yield* Card()}</Probe>
             <Reveal order={perform(order)}>
-              {Card()}
-              {Card()}
+              {yield* Card()}
+              {yield* Card()}
             </Reveal>
           </div>
         );

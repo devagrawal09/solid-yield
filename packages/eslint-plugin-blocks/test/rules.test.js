@@ -434,6 +434,90 @@ tester.run("component-children-generator", rules["component-children-generator"]
   ]
 });
 
+tester.run("component-call-yielded", rules["component-call-yielded"], {
+  valid: [
+    imports +
+      Card +
+      component(
+        "return view(function* () { return <>{yield* Card({})}{yield* Show({ when: x, children: function* () { return <b />; } })}</>; });"
+      ),
+    // a view's returned call is typed through its return
+    imports +
+      Card +
+      component("return function* () { return Show({ when: x, children: h('b') }); };"),
+    // an argument or a prop: typed by what takes it
+    imports +
+      Card +
+      component("return function* () { return h('div', Show({ when: x, children: h('b') })); };"),
+    imports +
+      Card +
+      component(
+        "return view(function* () { return <>{yield* Loading({ fallback: Card({}), children: function* () { return <b />; } })}</>; });"
+      ),
+    // a call in a plain function: a root or foreign handoff
+    imports +
+      Card +
+      "render(() => Errored({ fallback: 'x', children: function* () { return <>{yield* Card({})}</>; } }), root);",
+    // a plain function or a lowercase call is not a block component
+    imports + Card + component("return view(function* () { return <>{format(x)}{Other()}</>; });"),
+    // a conditional's test is not rendered
+    imports + Card + component("return view(function* () { return <>{Card({}) ? 1 : 2}</>; });")
+  ],
+  invalid: [
+    {
+      code: imports + Card + component("return view(function* () { return <>{Card({})}</>; });"),
+      output:
+        imports + Card + component("return view(function* () { return <>{yield* Card({})}</>; });"),
+      errors: [{ messageId: "unyielded" }]
+    },
+    {
+      // the todos twin's shape (review R2): an array in a fragment
+      code:
+        imports +
+        Card +
+        component(
+          "return view(function* () { return <>{[Card({ a: 1 }), Show({ when: x, children: function* () { return <b />; } })]}</>; });"
+        ),
+      output:
+        imports +
+        Card +
+        component(
+          "return view(function* () { return <>{[yield* Card({ a: 1 }), yield* Show({ when: x, children: function* () { return <b />; } })]}</>; });"
+        ),
+      errors: [{ messageId: "unyielded" }, { messageId: "unyielded" }]
+    },
+    {
+      code:
+        imports +
+        Card +
+        component("return view(function* () { return <div>{ok ? Card({}) : null}</div>; });"),
+      output:
+        imports +
+        Card +
+        component(
+          "return view(function* () { return <div>{ok ? (yield* Card({})) : null}</div>; });"
+        ),
+      errors: [{ messageId: "unyielded" }]
+    },
+    {
+      // a flow control imported from solid-blocks
+      code:
+        imports +
+        Card +
+        component(
+          "return view(function* () { return <ul>{Show({ when: x, children: function* () { return <b />; } })}</ul>; });"
+        ),
+      output:
+        imports +
+        Card +
+        component(
+          "return view(function* () { return <ul>{yield* Show({ when: x, children: function* () { return <b />; } })}</ul>; });"
+        ),
+      errors: [{ messageId: "unyielded" }]
+    }
+  ]
+});
+
 tester.run("read-before-attempt", rules["read-before-attempt"], {
   valid: [
     "const m = $memo(function* () { const id = yield* props.id; return yield* attempt(() => f(id)); });",
@@ -703,6 +787,31 @@ typedTester.run("no-component-tag (with types)", rules["no-component-tag"], {
       filename,
       code: componentDecls + "function* v() { return <p><Through todo={1} /></p>; }",
       output: componentDecls + "function* v() { return <p>{yield* Through({ todo: 1 })}</p>; }",
+      errors: 1
+    }
+  ]
+});
+typedTester.run("component-call-yielded (with types)", rules["component-call-yielded"], {
+  valid: [
+    {
+      filename,
+      code: componentDecls + 'function* v() { return <>{yield* Card({ title: "t" })}</>; }'
+    },
+    // a foreign component returns no view: calling it is plain code
+    { filename, code: componentDecls + 'function* v() { return <>{Foreign({ title: "t" })}</>; }' }
+  ],
+  invalid: [
+    {
+      // an unyielded call in a fragment (review R2): its colors reach no type
+      filename,
+      code: componentDecls + 'function* v() { return <>{Card({ title: "t" })}</>; }',
+      output: componentDecls + 'function* v() { return <>{yield* Card({ title: "t" })}</>; }',
+      errors: 1
+    },
+    {
+      filename,
+      code: componentDecls + "function* v() { return <>{[Through({ todo: 1 })]}</>; }",
+      output: componentDecls + "function* v() { return <>{[yield* Through({ todo: 1 })]}</>; }",
       errors: 1
     }
   ]

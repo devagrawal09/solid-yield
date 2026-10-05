@@ -419,7 +419,14 @@ export function perform<T>(target: Yieldable<any, T> | (() => T) | T): T {
       const { host, sink, view, resumed, name, receipts } = state;
       return runAs(host, () => readOf(x) as T, sink, view, true, resumed, name, receipts);
     }
-    if (x[VIEW_MARK] === true) return x;
+    // A view that is a function (a flow control's, a lazy component's) is
+    // content. On the server it goes back in a one-element array: Solid's
+    // server hole calls a function it returns inside the hole, so a pending
+    // read in the view made the hole the retry unit, and the retry re-ran the
+    // call that created it — a page set up twice, its memos run again
+    // (rendering-blocks' streamed `/profile`). As an array element the view
+    // is resolved, and retried, as itself. The client inserts it as it is.
+    if (x[VIEW_MARK] === true) return (__SERVER__ ? [x] : x) as T;
     if (x[EVENT_MARK] === true) return x;
     if (typeof x === "function") return x();
     if (typeof x === "object" && !Array.isArray(x) && typeof x[Symbol.iterator] === "function")

@@ -4,10 +4,10 @@
  */
 import { renderToString, renderToStream } from "@solidjs/web";
 
-function stream(code: () => any): Promise<string> {
+function stream(code: () => any, options?: object): Promise<string> {
   return new Promise(resolve => {
     const chunks: string[] = [];
-    renderToStream(code).pipe({
+    renderToStream(code, options as any).pipe({
       write(chunk: string) {
         chunks.push(chunk);
       },
@@ -25,7 +25,9 @@ import {
   $store,
   attempt,
   createContext,
+  Errored,
   For,
+  lazy,
   Loading,
   perform,
   Show,
@@ -198,6 +200,99 @@ describe("server rendering", () => {
       });
     });
     const html = await stream(() => Page());
+    expect(strip(html)).toContain("<ul><li>a</li><li>b</li></ul>");
+  });
+
+  it("a pending view returned into a hole is retried as itself, not by re-running the hole that called it (rendering /profile)", async () => {
+    // A page called in a hole (`{yield* Page()}`) renders a lazy component
+    // whose output — a memo function — is pending until its chunk loads.
+    // Solid's server hole calls a function it returns inside the hole, so the
+    // pending read made the hole the retry unit: the page was set up again
+    // (its memos re-run), and the second `info` memo spun on a slot its
+    // predecessor had settled, in microtasks, starving every timer.
+    let setups = 0;
+    let infoRuns = 0;
+    const wait = <T,>(v: T) => new Promise<T>(r => setTimeout(() => r(v), 5));
+    const Facts = $component(function* Facts(
+      props: Props<{ info: Source<string[], Failed, true> }>
+    ) {
+      return view(function* () {
+        return (
+          <ul>
+            {
+              yield* For({
+                each: props.info,
+                children: function* (fact) {
+                  return view(function* () {
+                    return <li>{yield* fact}</li>;
+                  });
+                }
+              })
+            }
+          </ul>
+        );
+      });
+    });
+    const Profile = $component(function* Profile(
+      props: Props<{
+        user: Source<{ name: string }, Failed, true>;
+        info: Source<string[], Failed, true>;
+      }>
+    ) {
+      return view(function* () {
+        return (
+          <>
+            <h1>{yield* props.user.name}</h1>
+            {
+              yield* Errored({
+                fallback: (e: any) => <b>{e().message}</b>,
+                children: function* () {
+                  return (
+                    <>
+                      {
+                        yield* Loading({
+                          fallback: <i>…</i>,
+                          children: function* () {
+                            return <>{yield* Facts({ info: props.info })}</>;
+                          }
+                        })
+                      }
+                    </>
+                  );
+                }
+              })
+            }
+          </>
+        );
+      });
+    });
+    const LazyProfile = lazy(async () => ({ default: Profile }));
+    const Page = $component(function* Page() {
+      setups++;
+      const user = yield* $memo(function* () {
+        return yield* attempt(
+          () => wait({ name: "Jon" }),
+          e => new Failed(e)
+        );
+      });
+      const info = yield* $memo(function* () {
+        // a regression spins here: fail instead of hanging the run
+        if (++infoRuns > 50) throw new Error("info re-ran 50 times");
+        yield* user;
+        return yield* attempt(
+          () => wait(["a", "b"]),
+          e => new Failed(e)
+        );
+      });
+      return view(function* () {
+        return <>{yield* LazyProfile({ user, info })}</>;
+      });
+    });
+    const html = await stream(() => <div>{perform(Page())}</div>, { manifest: {} });
+    expect(setups).toBe(1);
+    expect(infoRuns).toBeLessThan(5);
+    // the facts stream in after the shell, through the inner Loading
+    expect(strip(html)).toContain("<div><h1>Jon</h1>");
     expect(strip(html)).toContain("<ul><li>a</li><li>b</li></ul>");
   });
 

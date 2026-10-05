@@ -21,9 +21,35 @@ describe("blocks()", () => {
     expect(plugin.name).toBe("vite-plugin-solid-blocks");
   });
 
-  it("skips a module with no function* without parsing it", () => {
+  it("skips a module with no yield without parsing it", () => {
     // not even valid syntax: a parse would throw
-    expect(run("const a = <p>{yield* x</p>", "/src/a.tsx")).toBeNull();
+    expect(run("const a = <p>{x</p>", "/src/a.tsx")).toBeNull();
+  });
+
+  // The fast skip looked for the text `function*` and passed over every
+  // other spelling of a generator (review 2026-10-05): any `yield` is a
+  // candidate now, and the parse decides.
+  it.each([
+    ["a spaced generator", "function *View() { return <p>{yield* x}</p>; }"],
+    ["an object generator method", "const o = { *view() { return <p>{yield* x}</p>; } };"],
+    ["an async generator method", "const o = { async *view() { return <p>{yield* x}</p>; } };"],
+    ["a class generator method", "class C { *view() { return <p>{yield* x}</p>; } }"],
+    ["a static class generator method", "class C { static *view() { return <p>{yield* x}</p>; } }"]
+  ])("rewrites a JSX hole in %s", (_name, code) => {
+    const out = run(code, "/src/a.tsx");
+    expect(out?.code).toContain("_$perform(x)");
+    expect(out.code).not.toContain("yield*");
+  });
+
+  it("leaves a module whose yield is only in a string or a comment alone", () => {
+    const code = [
+      "// yield* x in a comment",
+      "/* <p>{yield* x}</p> */",
+      'const s = "yield* x";',
+      "const t = `<p>{yield* x}</p>`;",
+      "export const P = () => <p>{s}{t}</p>;"
+    ].join("\n");
+    expect(run(code, "/src/a.tsx")).toBeNull();
   });
 
   it("skips virtual modules, non-scripts and node_modules", () => {

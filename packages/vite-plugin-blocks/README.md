@@ -14,7 +14,7 @@ import solid from "@solidjs/vite-plugin";
 export default { plugins: [blocks(), solid()] };
 ```
 
-`blocks()` runs `enforce: "pre"`, before the JSX compiler. It skips a module whose source has no `function*` (and no `lazy` from the blocks module) without parsing it, and returns `null` (no change) for a module with no hole. Its source map is chained by Vite with the compiler's, so a runtime error maps back to the authored line and column. Options: `blocksModule`, `lazy`, and `filter(file)` (by default `.js`/`.jsx`/`.ts`/`.tsx` and their `m`/`c` forms, outside `node_modules`).
+`blocks()` runs `enforce: "pre"`, before the JSX compiler. It skips a module whose source has no `yield` (and no `lazy` from the blocks module) without parsing it (every spelling of a generator, `function *f`, `*method()`, `async *gen`, is a candidate; the parse decides), and returns `null` (no change) for a module with no hole. Its source map is chained by Vite with the compiler's, so a runtime error maps back to the authored line and column. Options: `blocksModule`, `lazy`, and `filter(file)` (by default `.js`/`.jsx`/`.ts`/`.tsx` and their `m`/`c` forms, outside `node_modules`).
 
 ## `lazy()` module URLs (D-047)
 
@@ -37,16 +37,16 @@ Option `lazy: false` turns the pass off.
 
 ## The rule
 
-| Position                                                                                                       | Result                                                               |
-| -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `{yield* e}` as a child, `a={yield* e}` as an attribute, of a DOM element or a foreign Solid component (D-067) | `perform(e)`                                                         |
-| a block-component call in a hole, `{yield* Card({ todo })}` (D-062)                                            | one hole: `perform(Card({ todo }))`; the argument is left as written |
-| a `yield*` inside a nested function in JSX                                                                     | that function's own; not a hole of this JSX                          |
+| Position                                                                                                        | Result                                                                |
+| --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `{yield* e}` as a child, `a={yield* e}` as an attribute, of a DOM element or a foreign Solid component (D-067)  | `perform(e)`                                                          |
+| a block-component call in a hole, `{yield* Card({ todo })}` (D-062)                                             | one hole: `perform(Card({ todo }))`; the argument is left as written  |
+| a `yield*` inside a nested function in JSX                                                                      | that function's own; not a hole of this JSX                           |
 | an event prop (`onClick`, `on:click`, `oncapture:…`): `onClick={yield* save}` binds an `$event` handler (D-072) | `perform(save)`, which returns the handler; the types check it is one |
-| `ref`                                                                                                          | refused: `BLOCKS_YIELD_IN_REF`                                       |
-| a spread attribute                                                                                             | refused: `BLOCKS_YIELD_IN_SPREAD`                                    |
-| a spread child                                                                                                 | refused: `BLOCKS_YIELD_IN_SPREAD_CHILD`                              |
-| a plain `yield` in JSX                                                                                         | refused: `BLOCKS_PLAIN_YIELD_IN_JSX`                                 |
+| `ref`                                                                                                           | refused: `BLOCKS_YIELD_IN_REF`                                        |
+| a spread attribute                                                                                              | refused: `BLOCKS_YIELD_IN_SPREAD`                                     |
+| a spread child                                                                                                  | refused: `BLOCKS_YIELD_IN_SPREAD_CHILD`                               |
+| a plain `yield` in JSX                                                                                          | refused: `BLOCKS_PLAIN_YIELD_IN_JSX`                                  |
 
 A refusal throws a `BlocksRuleError` whose message lists each refusal as `[CODE] message (line:column)`, the compiler's format. The rule does not know hosts. A hole performed while a setup runs is the runtime's `[JSX_IN_SETUP]` (D-041).
 

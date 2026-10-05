@@ -7,15 +7,17 @@
  * It runs `enforce: "pre"`, so by the time the JSX compiler sees a module
  * every `yield*` in JSX is already `perform(…)`, and every `lazy(() =>
  * import("…"))` from the blocks module carries the module-URL placeholder that
- * `solid()` resolves (D-047). A module whose source has no `function*` (a
- * `yield` exists only in a generator) and no `lazy` from the blocks module is
- * skipped without being parsed; anything else goes through `transform()`,
+ * `solid()` resolves (D-047). A module whose source has no `yield` at all
+ * and no `lazy` from the blocks module is skipped without being parsed (the
+ * same cheap check as `transform()`'s own: the generator's spelling —
+ * `function*`, `function *`, a `*method()` — does not matter, and a `yield`
+ * in a string or a comment only costs a parse); anything else goes through `transform()`,
  * which returns `null` (no change) unless the module has a hole or an
  * eligible `lazy` call. The source map is returned to Vite, which chains it
  * with the JSX compiler's.
  */
 import { DEFAULT_BLOCKS_MODULE } from "./rule.js";
-import { transform } from "./transform.js";
+import { mayTransform, transform } from "./transform.js";
 
 const SCRIPT = /\.[mc]?[jt]sx?$/i;
 
@@ -46,8 +48,7 @@ export default function blocks(options = {}) {
       if (id.startsWith("\0")) return null;
       const file = id.replace(/[?#].*$/, "");
       if (!filter(file)) return null;
-      const lazyCandidate = lazy && code.includes("lazy") && code.includes(blocksModule);
-      if (!code.includes("function*") && !lazyCandidate) return null;
+      if (!mayTransform(code, blocksModule, lazy)) return null;
       return transform(code, { filename: file, blocksModule, lazy });
     }
   };

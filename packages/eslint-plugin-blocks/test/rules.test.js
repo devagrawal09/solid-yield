@@ -146,9 +146,10 @@ tester.run("no-dollar-block", rules["no-dollar-block"], {
       errors: [{ messageId: "hole" }, { messageId: "hole" }, { messageId: "hole" }]
     },
     {
+      // `html` is removed (D-046): a value in a tagged template is no hole of `h`
       code: "const v = html`<p>${$(function* () { return 1; })}</p>`;",
-      output: "const v = html`<p>${function* () { return 1; }}</p>`;",
-      errors: [{ messageId: "hole" }]
+      output: null,
+      errors: [{ messageId: "other" }]
     },
     {
       // rows: `$(function* (item) …)` and `$scope(fn)` are the bare function*

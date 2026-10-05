@@ -165,10 +165,10 @@ const noReadInViewBody = {
     type: "problem",
     docs: {
       description:
-        "A view does not read: every read is a hole (a `yield*` in JSX, a bare `function*` hole in `h` / `html`); structure comes from flow controls."
+        "A view does not read: every read is a hole (a `yield*` in JSX, a bare `function*` hole in `h`); structure comes from flow controls."
     },
     messages: {
-      read: "a view does not read: read in a hole (`{yield* …}` in JSX, a bare `function*` in `h` / `html`), branch with <Show> / <Match>, derive with a $memo in the setup.",
+      read: "a view does not read: read in a hole (`{yield* …}` in JSX, a bare `function*` in `h`), branch with <Show> / <Match>, derive with a $memo in the setup.",
       child:
         "a view does not read: a child view is rendered by a hole (`{yield* Child(props)}` in JSX, `h(Child, props)` without JSX)."
     },
@@ -465,9 +465,9 @@ function isLibraryBinding(context, identifier) {
 
 /**
  * Whether a node is a hole of the no-JSX flavor: an argument of `h(…)` (a
- * child, or an attribute value in its props object), a value in an `html`
- * template, or a source prop (`when`, `each`, …) of a flow control called
- * directly. A bare `function*` is a hole there.
+ * child, or an attribute value in its props object), or a source prop
+ * (`when`, `each`, …) of a flow control called directly. A bare `function*`
+ * is a hole there.
  */
 function isHHole(node) {
   let child = node;
@@ -486,12 +486,6 @@ function isHHole(node) {
       p = child.parent;
       continue;
     }
-    if (p.type === "TemplateLiteral")
-      return (
-        p.parent.type === "TaggedTemplateExpression" &&
-        p.parent.tag.type === "Identifier" &&
-        p.parent.tag.name === "html"
-      );
     if (p.type === "CallExpression" && p.arguments.includes(child)) {
       const callee = p.callee.type === "Identifier" ? p.callee.name : null;
       if (callee === "h") {
@@ -521,7 +515,7 @@ const noDollarBlock = {
       derived:
         "`$` is removed: a derivation is `yield* $memo(function* () { … })` in the setup (or the row's setup).",
       other:
-        "`$` is removed: read inside JSX (`{yield* …}`), pass a bare `function*` hole to `h` / `html`, or derive with `yield* $memo(…)` in a setup.",
+        "`$` is removed: read inside JSX (`{yield* …}`), pass a bare `function*` hole to `h`, or derive with `yield* $memo(…)` in a setup.",
       import: "`{{name}}` is removed from solid-blocks."
     },
     schema: []

@@ -1,7 +1,7 @@
 // @ts-check
 /**
  * The one block rule of the JSX transform (generator blocks as a library,
- * `documentation/plans/blocks-library.md` §5), lifted from the Babel twin of
+ * `documentation/blocks-library.md` §5), lifted from the Babel twin of
  * the fork's compiler rule (`packages/babel-plugin/src/shared/blocks-rule.ts`,
  * itself the twin of `packages/compiler/src/blocks_rule.rs`; D-003, D-043).
  *

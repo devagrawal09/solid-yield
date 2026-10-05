@@ -4,7 +4,7 @@
  * compiler; the JSX transform's one block rule (`yield*` inside JSX becomes
  * `perform(…)`) makes JSX views fine-grained.
  *
- * See documentation/plans/blocks-library.md.
+ * See documentation/blocks-library.md.
  */
 export {
   $cleanup,

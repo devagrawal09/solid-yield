@@ -613,7 +613,9 @@ const MemberCount = $component(function* MemberCount<E, P extends boolean>(
 const ActivityLine = $component(function* ActivityLine<E, P extends boolean>(
   props: Props<{ activity: Source<Activity, E, P> }>
 ) {
-  // A row is settled: the (pending) activity is read once, into one flag per tick.
+  // The (pending) activity is read once, into one flag per tick, and each row
+  // reads its flag. A row may be pending (D-059 / D-063); one memo keeps the
+  // activity's reads to one per change, as the original's one derivation does.
   const ticks = yield* $memo(function* () {
     const { of, tick } = yield* props.activity;
     return Array.from({ length: of }, (_, i) => i < tick);

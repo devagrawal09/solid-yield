@@ -3,7 +3,7 @@
  * `vite-plugin-solid-blocks` (published as `vite-plugin-solid-blocks`,
  * D-011): the JSX transform's one block rule for `solid-blocks`, as a Vite
  * plugin (the default export), a Babel plugin and a plain `transform()`. See
- * `documentation/plans/blocks-library.md` §5.
+ * `documentation/blocks-library.md` §5.
  */
 export { default, default as blocks } from "./vite.js";
 export { default as babelPluginBlocks } from "./babel.js";

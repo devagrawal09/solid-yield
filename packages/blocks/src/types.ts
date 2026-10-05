@@ -590,7 +590,8 @@ export interface ViewWrapped {
 /**
  * A render callback written as a block: its setup takes the flow control's
  * render arguments and creates, and returns its view, which only reads.
- * A flow control renders settled rows only.
+ * A row need not be settled (D-059, D-063): its pending and failures join
+ * the flow control's output (`RowOps` in flow.ts).
  */
 export type RowBlock<A extends readonly unknown[], Y, VY, R = unknown> = ((
   ...args: A

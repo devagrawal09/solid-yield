@@ -70,6 +70,8 @@ The neighbours of a view, for completeness:
 
 ## Every code, by layer
 
+Counted against the code (2026-10-06): 4 transform codes (`REFUSALS` in `vite-plugin-solid-blocks`), 22 development errors, 10 type-level messages, 18 lint rules (17 errors and 1 warning in `recommended`).
+
 **The transform** (`vite-plugin-solid-blocks`). A compile error lists each refusal as `[CODE] message (line:column)`. The lint rule `yield-in-jsx-hole` reports the same list.
 
 | Code | Position |

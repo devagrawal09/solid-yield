@@ -48,15 +48,15 @@ describe("server rendering", () => {
     const Theme = createContext("light");
     const Item = $component(function* (props: Props<{ text: string }>) {
       const theme = yield* Theme;
-      return function* () {
+      return view(function* () {
         return <li class={theme}>{perform(props.text)}</li>;
-      };
+      });
     });
     const App = $component(function* () {
       const [items] = yield* $signal(["a", "b"]);
       const [store] = yield* $store({ title: "list" });
       const click = $event(function* () {});
-      return function* () {
+      return view(function* () {
         return (
           <section onClick={yield* click}>
             <h1>{perform(store.title)}</h1>
@@ -77,14 +77,14 @@ describe("server rendering", () => {
                 each: items,
                 children: function* (t) {
                   const [n] = yield* $signal(1);
-                  return function* () {
+                  return view(function* () {
                     return (
                       <b>
                         {perform(t)}
                         {perform(n)}
                       </b>
                     );
-                  };
+                  });
                 }
               })
             }
@@ -98,7 +98,7 @@ describe("server rendering", () => {
             }
           </section>
         );
-      };
+      });
     });
     const html = renderToString(() => <Theme value="dark">{App()}</Theme>);
     expect(strip(html)).toBe(
@@ -109,10 +109,10 @@ describe("server rendering", () => {
   it("a view does not read on the server either: READ_IN_VIEW", () => {
     const ReadsInBody = $component(function* ReadsInBody() {
       const [n] = yield* $signal(1);
-      return function* () {
+      return view(function* () {
         const v = yield* n;
         return <b>{v}</b>;
-      };
+      });
     });
     expect(() => renderToString(() => ReadsInBody())).toThrow(/READ_IN_VIEW.*<ReadsInBody>/);
   });
@@ -304,9 +304,9 @@ describe("server rendering", () => {
           e => new Failed(e)
         );
       });
-      return function* () {
+      return view(function* () {
         return <h3>{perform(user).name}</h3>;
-      };
+      });
     });
     const html = await stream(() =>
       Loading({

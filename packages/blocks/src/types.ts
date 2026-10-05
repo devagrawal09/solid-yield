@@ -575,13 +575,26 @@ export interface Receipt<T> extends Yieldable<Write, T> {}
 // --- row blocks ----------------------------------------------------------------------
 
 /**
+ * What `view(function* () { … })` returns (D-089): the view function, with a
+ * phantom brand whose name is the refusal. A setup — a component's or a
+ * row's — returns its view through `view(…)`, so a bare `function*` returned
+ * there lacks the brand, and TypeScript reports the missing property by its
+ * name: "wrap the view: return view(function* () { … })". Nothing exists at
+ * run time (`view` is the identity).
+ */
+export type ViewFn<Y, R> = (() => Generator<Y, R, any>) & ViewWrapped;
+export interface ViewWrapped {
+  readonly "[VIEW_WRAPPER] wrap the view: return view(function* () { ... })": true;
+}
+
+/**
  * A render callback written as a block: its setup takes the flow control's
  * render arguments and creates, and returns its view, which only reads.
  * A flow control renders settled rows only.
  */
 export type RowBlock<A extends readonly unknown[], Y, VY, R = unknown> = ((
   ...args: A
-) => Generator<Y, () => Generator<VY, R, any>, any>) &
+) => Generator<Y, ViewFn<VY, R>, any>) &
   RowCheck<Y, VY, R>;
 
 type RowCheck<Y, VY, R> = [Y] extends [SetupOp]

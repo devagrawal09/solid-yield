@@ -32,11 +32,11 @@ export const Settled = $component(function* () {
     return (yield* n) * 2;
   });
   const go = $event(function* () {});
-  return function* () {
+  return view(function* () {
     return h("p", { class: doubled, title: "static", onClick: go }, "count ", n, " ", function* () {
       return (yield* n) + 1;
     });
-  };
+  });
 });
 const settledOut: HView<false, never> = h("p", "x");
 void settledOut;
@@ -56,30 +56,30 @@ export const thunkChild = h("p", () => 1);
 export const thunkAttr = h("p", { title: () => "x" });
 
 // a view does not read (D-032): a no-JSX view yields nothing
-// @ts-expect-error [HVIEW_READ]
 export const ReadsInView = $component(function* () {
   const [n] = yield* $signal(1);
-  return function* () {
+  // @ts-expect-error [HVIEW_READ]
+  return view(function* () {
     const v = yield* n;
     return h("p", String(v));
-  };
+  });
 });
 // a child view is h(Child, props), not a yield* in the view
-// @ts-expect-error [HVIEW_READ]
 export const YieldsChild = $component(function* () {
-  return function* () {
+  // @ts-expect-error [HVIEW_READ]
+  return view(function* () {
     return h("div", yield* ReadsInView());
-  };
+  });
 });
 
 // pending holes make the output (and so the view) pending
 export const Pending = $component(function* () {
   const user = pendingUser;
-  return function* () {
+  return view(function* () {
     return h("p", function* () {
       return (yield* user).name;
     });
-  };
+  });
 });
 const pendingOut: HView<true, never> = h("p", Pending());
 void pendingOut;
@@ -99,20 +99,20 @@ void fragmentSettled;
 // row blocks in h
 export const Rows = $component(function* () {
   const [items] = yield* $signal(["a"]);
-  return function* () {
+  return view(function* () {
     return h(
       "ul",
       For({
         each: items,
         children: function* (item) {
           const [open] = yield* $signal(false);
-          return function* () {
+          return view(function* () {
             return h("li", item, open);
-          };
+          });
         }
       })
     );
-  };
+  });
 });
 
 // a flow control's source may be a bare function* hole: the output carries its coloring
@@ -153,7 +153,7 @@ export const WrappedReads = $component(function* () {
 type Is<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
 export const HRowSignature = $component(function* () {
   const [list] = yield* $signal([{ id: 1 }]);
-  return function* () {
+  return view(function* () {
     return For({
       each: list,
       children: function* (item, index) {
@@ -162,12 +162,12 @@ export const HRowSignature = $component(function* () {
           true
         ];
         void sig;
-        return function* () {
+        return view(function* () {
           return h("li", item.id, index);
-        };
+        });
       }
     });
-  };
+  });
 });
 
 // --- declared prop colors at h(Comp, props) (D-024, D-029, D-068) ------------------------------
@@ -224,8 +224,8 @@ export const hChildrenBad = h(Shows, { children: pendingCount });
 
 // --- an event attribute takes an $event handler, bound by h (D-072) -----------------------------
 export const PlainHandler = $component(function* () {
-  return function* () {
+  return view(function* () {
     // @ts-expect-error a plain function: the DOM would call it with its colors in no type (D-071)
     return h("button", { onClick: () => {} }, "go");
-  };
+  });
 });

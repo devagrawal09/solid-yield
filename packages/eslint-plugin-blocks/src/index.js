@@ -17,7 +17,7 @@
  *   no-unshown-wait        (warning, with types) a bound handler that may wait on pending data: show its in-flight state
  *   no-unchecked-foreign-handoff  a block component handed to plain Solid (the router, `@solidjs/web`'s render) goes through `foreign(…)`
  *   jsx-only-in-view       JSX only in a view, a hole or a row's view: a setup never creates elements
- *   prefer-view-wrapper    (warning) wrap a view in `view(…)` so its errors land where it is written
+ *   require-view-wrapper   a setup's (or a row's) view is `view(function* () { … })`: one spelling (D-089; autofix)
  *   no-path-object-use     a path is a read: no spread, no `===`, no `JSON.stringify` of one
  *   no-dollar-block        `$` / `$scope` are removed: bare `function*` holes and rows, `$memo` derivations (autofix)
  */
@@ -748,16 +748,16 @@ const noPathObjectUse = {
   }
 };
 
-const preferViewWrapper = {
+const requireViewWrapper = {
   meta: {
-    type: "suggestion",
+    type: "problem",
     fixable: "code",
     docs: {
       description:
-        "Wrap a view in `view(function* () { … })`: its mistakes are reported where it is written, naming the op, instead of at the `$component(` call (D-054)."
+        "A setup's (or a row's) view is written `view(function* () { … })` (D-089: one spelling of a view; its type errors are reported where it is written, D-054)."
     },
     messages: {
-      wrap: "wrap this view in `view(…)` so its type errors are reported here, not at the `$component(` call."
+      wrap: "wrap the view: `return view(function* () { … })` — a bare `function*` returned from a setup is not a view (D-089); with `view(…)` its type errors are reported here, not at the `$component(` call."
     },
     schema: []
   },
@@ -1567,7 +1567,7 @@ export const rules = {
   "no-foreign-reactive": noForeignReactive,
   "no-dollar-block": noDollarBlock,
   "no-path-object-use": noPathObjectUse,
-  "prefer-view-wrapper": preferViewWrapper,
+  "require-view-wrapper": requireViewWrapper,
   "jsx-only-in-view": jsxOnlyInView,
   "no-component-tag": noComponentTag,
   "no-read-in-prop": noReadInProp,
@@ -1585,7 +1585,7 @@ const plugin = {
 };
 
 /** Rules `recommended` sets to warn (a suggestion, not a rule of the model). */
-const WARNINGS = new Set(["prefer-view-wrapper", "no-unshown-wait"]);
+const WARNINGS = new Set(["no-unshown-wait"]);
 /** `recommended`: every rule an error, but the suggestions (`WARNINGS`), which warn (flat config). */
 plugin.configs.recommended = {
   plugins: { "solid-blocks": plugin },

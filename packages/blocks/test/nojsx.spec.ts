@@ -20,7 +20,8 @@ import {
   raise,
   Show,
   type EventHandler,
-  type Props
+  type Props,
+  view
 } from "solid-blocks";
 import { h } from "solid-blocks/h";
 import { toFailed } from "./failed.js";
@@ -63,7 +64,7 @@ describe("h", () => {
       const cls = function* () {
         return (yield* n) > 3 ? "big" : "";
       };
-      return function* () {
+      return view(function* () {
         viewRuns++;
         return h(
           "div",
@@ -79,7 +80,7 @@ describe("h", () => {
           ),
           h("input")
         );
-      };
+      });
     });
     dispose = render(
       () =>
@@ -131,18 +132,18 @@ describe("h", () => {
         const bump = $event(function* () {
           yield* setN(v => v + 1);
         });
-        return function* () {
+        return view(function* () {
           return h("li", { onClick: bump }, item, ":", n);
-        };
+        });
       };
-      return function* () {
+      return view(function* () {
         return h(
           "div",
           h("button", { id: "add", onClick: add }, "add"),
           h("ul", For({ each: store.items, children: row })),
           Show({ when: show, children: h("button", { id: "hide", onClick: hide }, "hide") })
         );
-      };
+      });
     });
     dispose = render(App as any, root);
     flush();
@@ -168,7 +169,7 @@ describe("h argument shapes", () => {
     const App = $component(function* () {
       const [n, setN] = yield* $signal(1);
       set = v => write(() => setN(v));
-      return function* () {
+      return view(function* () {
         return h(
           "p",
           {
@@ -187,7 +188,7 @@ describe("h argument shapes", () => {
             children: h("b", "big")
           })
         );
-      };
+      });
     });
     dispose = render(App, root);
     flush();
@@ -210,7 +211,7 @@ describe("h argument shapes", () => {
           s.user.name = "Grace";
         });
       });
-      return function* () {
+      return view(function* () {
         return h(
           "p",
           h("b", store.user.name),
@@ -220,7 +221,7 @@ describe("h argument shapes", () => {
           ),
           h("button", { onClick: rename }, "rename")
         );
-      };
+      });
     });
     dispose = render(App as any, root);
     flush();
@@ -237,9 +238,9 @@ describe("h argument shapes", () => {
       const inc = $event(function* () {
         yield* setCount(c => c + 1);
       });
-      return function* () {
+      return view(function* () {
         return h([h("b", count), h("button", { onClick: inc }, "+")]);
-      };
+      });
     });
     dispose = render(App, root);
     flush();
@@ -258,9 +259,9 @@ describe("h argument shapes", () => {
           seen = yield* props.list;
         }
       );
-      return function* () {
+      return view(function* () {
         return h("span", "ok");
-      };
+      });
     });
     const list = ["x", "y"];
     dispose = render(() => h(Child, { list }) as any, root);
@@ -277,15 +278,15 @@ describe("h binds an event attribute where its output is materialized (D-085)", 
     let save!: EventHandler<[], SaveError, void, false, false>;
     const Child = $component(function* Child() {
       const bound = save;
-      return function* () {
+      return view(function* () {
         return h("button", { onClick: bound }, "save");
-      };
+      });
     });
     const Parent = $component(function* Parent() {
       save = $event(function* () {
         yield* raise(new SaveError("save failed"));
       });
-      return function* () {
+      return view(function* () {
         return h(
           "section",
           Errored({
@@ -293,7 +294,7 @@ describe("h binds an event attribute where its output is materialized (D-085)", 
             children: () => Child()
           })
         );
-      };
+      });
     });
     const outer: unknown[] = [];
     dispose = render(

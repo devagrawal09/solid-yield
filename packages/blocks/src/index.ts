@@ -53,7 +53,7 @@ export { render, hydrate } from "./render.js";
 export { lazy } from "./lazy.js";
 export { foreign, type ForeignCheck } from "./foreign.js";
 export type { Element, ArrayElement, RenderedObject, TagType } from "./element.js";
-export type { ViewYield, ViewReturn, NoJsxViewRule } from "./runtime.js";
+export type { ViewYield, ViewReturn, NoJsxViewRule, ViewWrapperCheck } from "./runtime.js";
 export type {
   AnyOp,
   Bind,
@@ -107,6 +107,8 @@ export type {
   TypedStore,
   View,
   ViewFails,
+  ViewFn,
+  ViewWrapped,
   ViewMayWait,
   ViewOp,
   ViewPending,

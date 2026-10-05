@@ -54,7 +54,7 @@ it("measured case: runs once, suspends to Loading, updates text and class indepe
     const user = yield* $memo(function* () {
       return yield* attempt(() => new Promise<{ name: string }>(r => (resolve = r)), fail);
     });
-    return function* () {
+    return view(function* () {
       viewRuns++;
       return (
         <div>
@@ -62,7 +62,7 @@ it("measured case: runs once, suspends to Loading, updates text and class indepe
           <input />
         </div>
       );
-    };
+    });
   });
   dispose = render(
     () =>
@@ -108,10 +108,10 @@ it("measured case: runs once, suspends to Loading, updates text and class indepe
 it("props, stores, row blocks and hole blocks read with yield* in JSX", () => {
   let views = 0;
   const Item = $component(function* (props: Props<{ todo: { title: string; done: boolean } }>) {
-    return function* () {
+    return view(function* () {
       views++;
       return <li class={{ done: yield* props.todo.done }}>{yield* props.todo.title}</li>;
-    };
+    });
   });
   let toggle!: () => void;
   const App = $component(function* () {
@@ -134,7 +134,7 @@ it("props, stores, row blocks and hole blocks read with yield* in JSX", () => {
     const close = $event(function* () {
       yield* setOpen(false);
     });
-    return function* () {
+    return view(function* () {
       return (
         <section>
           <ul>
@@ -154,7 +154,7 @@ it("props, stores, row blocks and hole blocks read with yield* in JSX", () => {
               each: todos.list,
               children: function* (todo, i) {
                 const [seen] = yield* $signal("*");
-                return function* () {
+                return view(function* () {
                   return (
                     <b>
                       {yield* i}
@@ -162,7 +162,7 @@ it("props, stores, row blocks and hole blocks read with yield* in JSX", () => {
                       {yield* seen}
                     </b>
                   );
-                };
+                });
               }
             })
           }
@@ -177,7 +177,7 @@ it("props, stores, row blocks and hole blocks read with yield* in JSX", () => {
           }
         </section>
       );
-    };
+    });
   });
   dispose = render(App, root);
   flush();

@@ -31,6 +31,8 @@ import {
   type Element,
   type EventHandler,
   type Read,
+  type ViewFn,
+  type ViewWrapperCheck,
   lazy,
   latestOf,
   isPendingOf,
@@ -38,6 +40,9 @@ import {
 } from "solid-blocks";
 
 declare const root: HTMLElement;
+type Equal<A, B> =
+  (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
+type Expect<T extends true> = T;
 declare function fetchUser(id: string): Promise<{ name: string }>;
 /** Pending until its first value, and never failing (as a server border states it). */
 declare const pendingUser: Source<{ name: string }, never, true>;
@@ -56,14 +61,14 @@ export const Settled = $component(function* (props: Props<{ label: string }>) {
     const v = yield* setCount(c => c + 1);
     void v;
   });
-  return function* () {
+  return view(function* () {
     return (
       <p onClick={yield* inc} title={yield* props.label}>
         {yield* props.label}: {yield* doubled} {yield* store.todos[0].title}{" "}
         {yield* readStore(store, s => s.todos.length)}
       </p>
     );
-  };
+  });
 });
 export const ok1 = Settled({ label: "a" });
 
@@ -79,9 +84,9 @@ export const savedMissingArg = save("a");
 export const ReadsInSetup = $component(function* () {
   const [count] = yield* $signal(0);
   const v = yield* count;
-  return function* () {
+  return view(function* () {
     return <p>{v}</p>;
-  };
+  });
 });
 // the effect phase reads, untracked because its host is (D-083)
 export const ReadsInEffectPhase = $component(function* (props: Props<{ start: number }>) {
@@ -91,23 +96,23 @@ export const ReadsInEffectPhase = $component(function* (props: Props<{ start: nu
       void (yield* props.start);
     }
   );
-  return function* () {
+  return view(function* () {
     return <p />;
-  };
+  });
 });
-// @ts-expect-error a view does not create
 export const CreatesInView = $component(function* () {
-  return function* () {
+  // @ts-expect-error a view does not create
+  return view(function* () {
     const [count] = yield* $signal(0);
     return <p>{yield* count}</p>;
-  };
+  });
 });
 export const HiddenRead = $component(function* () {
   const [count] = yield* $signal(0);
-  return function* () {
+  return view(function* () {
     // @ts-expect-error a source is not callable: reads are `yield*`
     return <p>{count()}</p>;
-  };
+  });
 });
 export const WritesInMemo = $component(function* () {
   const [count, setCount] = yield* $signal(0);
@@ -116,17 +121,17 @@ export const WritesInMemo = $component(function* () {
     yield* setCount(1);
     return yield* count;
   });
-  return function* () {
+  return view(function* () {
     return <p>{yield* m}</p>;
-  };
+  });
 });
-// @ts-expect-error a view does not write
 export const WritesInView = $component(function* () {
   const [, setCount] = yield* $signal(0);
-  return function* () {
+  // @ts-expect-error a view does not write
+  return view(function* () {
     const n = yield* setCount(1);
     return <p>{n}</p>;
-  };
+  });
 });
 
 // --- $optimistic / $optimisticStore mirror $signal / $store (D-014) ------------------------------
@@ -145,13 +150,13 @@ export const Optimistic = $component(function* () {
   });
   // @ts-expect-error $optimisticStore is the object-or-body form: a scalar is $optimistic
   yield* $optimisticStore(1);
-  return function* () {
+  return view(function* () {
     return (
       <p>
         {String(yield* sending)} {yield* list.items[0]} {yield* derived.items[0]}
       </p>
     );
-  };
+  });
 });
 
 // --- no async function* blocks ---------------------------------------------------------------
@@ -177,9 +182,9 @@ export const Pending = $component(function* (props: Props<{ id: string }>) {
     yield* props.id;
     return yield* pendingUser;
   });
-  return function* () {
+  return view(function* () {
     return <h3>{(yield* user).name}</h3>;
-  };
+  });
 });
 export const Fallible = $component(function* (props: Props<{ id: string }>) {
   const user = yield* $memo(function* () {
@@ -191,9 +196,9 @@ export const Fallible = $component(function* (props: Props<{ id: string }>) {
     if (!u.name) yield* raise(new NotFound());
     return u;
   });
-  return function* () {
+  return view(function* () {
     return <h3>{(yield* user).name}</h3>;
-  };
+  });
 });
 // A memo with a loadingValue is never pending on read (commit #0 is the value)
 export const Seeded = $component(function* (props: Props<{ id: string }>) {
@@ -210,9 +215,9 @@ export const Seeded = $component(function* (props: Props<{ id: string }>) {
   // never pending (commit #0 is the value); it fails as its attempt does
   const seeded: Source<{ name: string }, NotFound> = user;
   void seeded;
-  return function* () {
+  return view(function* () {
     return <h3>{(yield* user).name}</h3>;
-  };
+  });
 });
 // never pending: an Errored alone renders it
 export const seededOk = Errored({
@@ -264,9 +269,9 @@ export const ok4 = Errored({
 
 // yield* Child(props) propagates to the parent
 export const Parent = $component(function* () {
-  return function* () {
+  return view(function* () {
     return <section>{yield* Fallible({ id: "1" })}</section>;
-  };
+  });
 });
 // @ts-expect-error Parent inherits Fallible's pending and failures
 export const bad4: View<false, never> = Parent();
@@ -289,9 +294,9 @@ export const ok5 = Errored({
 
 // the root must not be pending (it may fail: re-thrown, D-033)
 const ok5Root = $component(function* () {
-  return function* () {
+  return view(function* () {
     return <>{yield* Settled({ label: "x" })}</>;
-  };
+  });
 });
 render(() => Settled({ label: "x" }), root);
 render(ok5Root, root);
@@ -304,7 +309,7 @@ render(() => Parent(), root);
 export const Thunks = $component(function* () {
   const [n] = yield* $signal(1);
   const [user] = yield* $signal({ name: "x" });
-  return function* () {
+  return view(function* () {
     // @ts-expect-error a plain thunk is not a child: read with yield*
     const a = <div>{() => 1}</div>;
     // @ts-expect-error a source is not a child: read it with yield*
@@ -313,7 +318,7 @@ export const Thunks = $component(function* () {
     const c = <p title={() => "x"} />;
     const ok = <p title={(yield* user).name}>{yield* n}</p>;
     return [a, b, c, ok];
-  };
+  });
 });
 
 // --- derivations are $memos; in JSX the hole is the yield* ----------------------------------
@@ -329,7 +334,7 @@ export const Blocks = $component(function* () {
   const big = yield* $memo(function* () {
     return (yield* n) > 1 ? "big" : "";
   });
-  return function* () {
+  return view(function* () {
     const settledChild = <div>{yield* doubled}</div>;
     // @ts-expect-error a memo is a source, not an element: read it with yield*
     const memoChild = <div>{name}</div>;
@@ -343,7 +348,7 @@ export const Blocks = $component(function* () {
     );
     const asAttribute = <p title={String(yield* doubled)} class={yield* big} />;
     return [settledChild, memoChild, generatorChild, asAttribute];
-  };
+  });
 });
 // a memo read in an attribute counts in the view: this view may be pending
 export const PendingAttribute = $component(function* () {
@@ -351,9 +356,9 @@ export const PendingAttribute = $component(function* () {
   const name = yield* $memo(function* () {
     return (yield* user).name;
   });
-  return function* () {
+  return view(function* () {
     return <p title={yield* name} />;
-  };
+  });
 });
 // @ts-expect-error PendingAttribute may be pending
 export const bad5: View<false, never> = PendingAttribute();
@@ -366,7 +371,7 @@ export const Rows = $component(function* () {
   // type its own initializer references), as a recursive component's are
   function* comment(c: Source<Comment> & { kids: Source<Comment[]>; text: Source<string> }) {
     const [open] = yield* $signal(true);
-    return function* (): Generator<Read<false, never> | ChildView<false, never>, Element> {
+    return view(function* (): Generator<Read<false, never> | ChildView<false, never>, Element> {
       return (
         <li>
           {yield* c.text}
@@ -389,9 +394,9 @@ export const Rows = $component(function* () {
           }
         </li>
       );
-    };
+    });
   }
-  return function* () {
+  return view(function* () {
     return (
       <ul>
         {
@@ -408,13 +413,13 @@ export const Rows = $component(function* () {
               const toggle = $event(function* () {
                 yield* setOpen(o => !o);
               });
-              return function* () {
+              return view(function* () {
                 return (
                   <li onClick={yield* toggle}>
                     {yield* i}: {yield* c.text} {(yield* open) ? "-" : "+"}
                   </li>
                 );
-              };
+              });
             }
           })
         }
@@ -436,9 +441,9 @@ export const Rows = $component(function* () {
               const shout = yield* $memo(function* () {
                 return (yield* c.text).toUpperCase();
               });
-              return function* () {
+              return view(function* () {
                 return <li title={yield* shout}>{yield* shout}</li>;
-              };
+              });
             }
           })
         }
@@ -446,9 +451,9 @@ export const Rows = $component(function* () {
           yield* Repeat({
             count: 2,
             children: function* (i) {
-              return function* () {
+              return view(function* () {
                 return <b>{yield* i}</b>;
-              };
+              });
             }
           })
         }
@@ -456,7 +461,7 @@ export const Rows = $component(function* () {
           yield* For({
             each: comments,
             children: function* (c) {
-              return function* () {
+              return view(function* () {
                 return (
                   <li>
                     {
@@ -468,20 +473,20 @@ export const Rows = $component(function* () {
                     }
                   </li>
                 );
-              };
+              });
             }
           })
         }
       </ul>
     );
-  };
+  });
 });
 
 // --- flow controls take a hole as well as a source (D-038) --------------------------------------
 export const FlowHoles = $component(function* () {
   const [n] = yield* $signal(1);
   const [list] = yield* $signal(["a", "b"]);
-  return function* () {
+  return view(function* () {
     return (
       <div>
         {
@@ -501,9 +506,9 @@ export const FlowHoles = $component(function* () {
               return (yield* list)[0];
             },
             children: function* (first) {
-              return function* () {
+              return view(function* () {
                 return <b>{yield* first}</b>;
-              };
+              });
             }
           })
         }
@@ -513,9 +518,9 @@ export const FlowHoles = $component(function* () {
               return (yield* list).filter(x => x !== "b");
             },
             children: function* (item) {
-              return function* () {
+              return view(function* () {
                 return <li>{yield* item}</li>;
-              };
+              });
             }
           })
         }
@@ -525,15 +530,15 @@ export const FlowHoles = $component(function* () {
               return yield* n;
             },
             children: function* (i) {
-              return function* () {
+              return view(function* () {
                 return <u>{yield* i}</u>;
-              };
+              });
             }
           })
         }
       </div>
     );
-  };
+  });
 });
 const pendingHole = function* () {
   return (yield* pendingUser).name;
@@ -548,7 +553,7 @@ export const pendingHoleView: View<true, never> = Show({
 
 // --- a pending row colors the holding view too (D-063) ------------------------------------------
 const pendingRow = function* (c: Path<Comment>) {
-  return function* () {
+  return view(function* () {
     return (
       <li>
         {
@@ -560,12 +565,12 @@ const pendingRow = function* (c: Path<Comment>) {
         }
       </li>
     );
-  };
+  });
 };
 export const PendingRows = $component(function* () {
-  return function* () {
+  return view(function* () {
     return <ul>{yield* For({ each: comments, children: pendingRow })}</ul>;
-  };
+  });
 });
 const pendingRowsView: View<true, never> = PendingRows();
 void pendingRowsView;
@@ -583,14 +588,14 @@ const failingRow = function* (c: Path<Comment>) {
     if (!text) yield* raise(new NotFound());
     return text;
   });
-  return function* () {
+  return view(function* () {
     return <li>{yield* shown}</li>;
-  };
+  });
 };
 export const FailingRows = $component(function* () {
-  return function* () {
+  return view(function* () {
     return <ul>{yield* For({ each: comments, children: failingRow })}</ul>;
-  };
+  });
 });
 // a failing row colors the holding view
 const failingRowsView: View<false, NotFound> = FailingRows();
@@ -618,19 +623,35 @@ export const WrappedCreates = $component(function* () {
     );
   });
 });
-// unwrapped, the same mistake is reported at the $component( call
-// @ts-expect-error reported here, forty lines up in a long setup
-export const UnwrappedCreates = $component(function* () {
-  const [n] = yield* $signal(1);
+// --- D-089: one spelling of a view: a bare function* returned from a setup is refused -------------
+// (before D-089 it was accepted, and a view's mistake was reported at the $component( call)
+// @ts-expect-error [VIEW_WRAPPER] wrap the view: return view(function* () { ... })
+export const Unwrapped = $component(function* () {
   return function* () {
-    const [m] = yield* $signal(0);
-    return (
-      <p>
-        {yield* n}
-        {yield* m}
-      </p>
-    );
+    return <p />;
   };
+});
+// the refusal is the setup's own check, so TypeScript prints its message first
+export type UnwrappedRefused = Expect<
+  Equal<
+    ViewWrapperCheck<() => Generator<never, Element, any>>,
+    { readonly "[VIEW_WRAPPER] wrap the view: return view(function* () { ... })": never }
+  >
+>;
+export type WrappedAccepted = Expect<Equal<ViewWrapperCheck<ViewFn<never, Element>>, unknown>>;
+// a row's setup returns its view through view(…) too. Refused as no overload of For matching
+// (the first ends "… is not assignable to type 'ViewWrapped'"), and TypeScript also reports TS2589
+// ("excessively deep") at the call: not by the message. The lint `require-view-wrapper` reports
+// an inline row with its message (and the autofix)
+// @ts-expect-error TS2589 at the call
+export const UnwrappedRow = For({
+  each: comments,
+  // @ts-expect-error a row's bare view lacks view's brand
+  children: function* (c) {
+    return function* () {
+      return <li>{yield* c.text}</li>;
+    };
+  }
 });
 // a wrapped view keeps its colors
 export const WrappedPending = $component(function* () {
@@ -645,7 +666,7 @@ void wrappedPendingView;
 type Is<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
 export const RowSignature = $component(function* () {
   const [list] = yield* $signal([{ id: 1, text: "a" }]);
-  return function* () {
+  return view(function* () {
     return (
       <ul>
         {
@@ -661,13 +682,13 @@ export const RowSignature = $component(function* () {
               // @ts-expect-error an item is not its value
               const text: string = item.text;
               void text;
-              return function* () {
+              return view(function* () {
                 return (
                   <li>
                     {yield* index}: {yield* item.text}
                   </li>
                 );
-              };
+              });
             }
           })
         }
@@ -677,42 +698,42 @@ export const RowSignature = $component(function* () {
             children: function* (i) {
               const sig: Is<typeof i, Source<number>> = true;
               void sig;
-              return function* () {
+              return view(function* () {
                 return <b>{yield* i}</b>;
-              };
+              });
             }
           })
         }
       </ul>
     );
-  };
+  });
 });
 
 // a row's setup does not read: derive with $memo, read in the view
 const readsInRowSetup = function* (c: Path<Comment>) {
   const text = yield* c.text;
-  return function* () {
+  return view(function* () {
     return <li>{text}</li>;
-  };
+  });
 };
 // @ts-expect-error [ROW_SETUP_OP]
 export const badRowSetup = For({ each: comments, children: readsInRowSetup });
 
 // --- paths through nullable values and nested sources --------------------------------------------
 export const Nullable = $component(function* (props: Props<{ me: { name: string } | null }>) {
-  return function* () {
+  return view(function* () {
     // through a nullable object a key may read `undefined`
     const name: Source<string | undefined> = props.me.name;
     return <b>{yield* name}</b>;
-  };
+  });
 });
 declare const wire: { status: Source<"on" | "off", NotFound, true> };
 // a key holding a source reads through it, with its coloring
 export const Through = $component(function* (props: Props<{ wire: typeof wire }>) {
-  return function* () {
+  return view(function* () {
     const status: Source<"on" | "off", NotFound, boolean> = props.wire.status;
     return <b>{yield* status}</b>;
-  };
+  });
 });
 // @ts-expect-error the status may be pending and fail: so may Through's view
 export const bad6: View<false, never> = Through({ wire: wire });
@@ -721,9 +742,9 @@ export const bad6: View<false, never> = Through({ wire: wire });
 export const Declared = $component(function* (
   props: Props<{ user: Source<{ name: string }, NotFound, true> }>
 ) {
-  return function* () {
+  return view(function* () {
     return <b>{(yield* props.user).name}</b>;
-  };
+  });
 });
 declare const settledUser: Source<{ name: string }>;
 // callers pass any source within it (a settled one too) or the value
@@ -773,9 +794,9 @@ export const Streamed = $component(function* () {
   });
   // pending (a stream), failing as its attempt's handler says
   const typed: Source<number, NotFound, true> = n;
-  return function* () {
+  return view(function* () {
     return <b>{yield* typed}</b>;
-  };
+  });
 });
 export const StreamedWithoutAttempt = $component(function* () {
   // @ts-expect-error a body returns a promise or a stream through attempt
@@ -783,9 +804,9 @@ export const StreamedWithoutAttempt = $component(function* () {
     return stream();
   });
   void n;
-  return function* () {
+  return view(function* () {
     return <b />;
-  };
+  });
 });
 
 // --- lazy: pending while its chunk loads, and colored as the loaded component (D-047) -----------
@@ -799,9 +820,9 @@ export const lazyOk = Loading({
   }
 });
 export const LazyHost = $component(function* () {
-  return function* () {
+  return view(function* () {
     return <div>{yield* LazyPending({ id: "1" })}</div>;
-  };
+  });
 });
 const lazyHostView: View<true, never> = LazyHost();
 void lazyHostView;
@@ -810,9 +831,9 @@ const LazySettled = lazy(() => Promise.resolve({ default: Settled }));
 // @ts-expect-error pending while its chunk loads
 export const lazySettledBad: View<false, never> = LazySettled({ label: "x" });
 export const LazySettledHost = $component(function* () {
-  return function* () {
+  return view(function* () {
     return <div>{yield* LazySettled({ label: "x" })}</div>;
-  };
+  });
 });
 const lazySettledView: View<true, never> = LazySettledHost();
 void lazySettledView;
@@ -890,9 +911,9 @@ export const EventColors = $component(function* () {
       yield* readsData();
     }
   );
-  return function* () {
+  return view(function* () {
     return <p />;
-  };
+  });
 });
 
 // each error type is its own color; an Errored with `catch` handles only the types it lists
@@ -911,9 +932,9 @@ const Fetches = $component(function* () {
       error => (error === "forbidden" ? new ForbiddenE() : new NotFoundE())
     );
   });
-  return function* () {
+  return view(function* () {
     return <p>{(yield* user).name}</p>;
-  };
+  });
 });
 // one boundary per type: both handled, renderable
 export const bothHandled = Errored({
@@ -1057,9 +1078,9 @@ const KindFails = $component(function* () {
       e => (e === "a" ? new KindA() : new KindB())
     );
   });
-  return function* () {
+  return view(function* () {
     return <b>{yield* m}</b>;
-  };
+  });
 });
 const onlyA = Errored({
   catch: [KindA],
@@ -1096,9 +1117,9 @@ void nobodyIs;
 export const ConstantContext = createContext(constant<{ name: string } | null>(null));
 export const ReadsConstant = $component(function* () {
   const who = yield* ConstantContext;
-  return function* () {
+  return view(function* () {
     return <b>{(yield* who)?.name ?? "nobody"}</b>;
-  };
+  });
 });
 // settled: an element as it is
 export const readsConstantOk = <div>{ReadsConstant()}</div>;

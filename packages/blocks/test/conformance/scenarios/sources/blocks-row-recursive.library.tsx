@@ -8,7 +8,8 @@ import {
   type Create,
   type Element,
   type Path,
-  type Read
+  type Read,
+  type ViewFn
 } from "solid-blocks";
 import { h } from "conformance";
 
@@ -30,7 +31,7 @@ export const App = $component(function* App() {
     n: Path<TreeNode>
   ): Generator<
     Create<"signal">,
-    () => Generator<Read<false, never> | ChildView<false, never>, Element, unknown>,
+    ViewFn<Read<false, never> | ChildView<false, never>, Element>,
     unknown
   > {
     const label = h.peek<string>(n.label);

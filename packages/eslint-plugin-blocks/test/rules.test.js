@@ -21,10 +21,10 @@ const component = body => `const C = $component(function* () { ${body} });`;
 
 tester.run("no-throw", rules["no-throw"], {
   valid: [
-    component("return function* () { return <p />; };"),
+    component("return view(function* () { return <p />; });"),
     "function* notABlock() { throw new Error('x'); }",
     component(
-      "const f = () => { throw new Error('plain callback'); }; return function* () { return <p />; };"
+      "const f = () => { throw new Error('plain callback'); }; return view(function* () { return <p />; });"
     ),
     "const m = $memo(function* () { try { return 1; } catch (e) { return 2; } });"
   ],
@@ -38,7 +38,7 @@ tester.run("no-throw", rules["no-throw"], {
       errors: [{ messageId: "throw" }]
     },
     {
-      code: component("return function* () { throw new Error('view'); };"),
+      code: component("return view(function* () { throw new Error('view'); });"),
       errors: [{ messageId: "throw" }]
     },
     {
@@ -51,31 +51,31 @@ tester.run("no-throw", rules["no-throw"], {
 tester.run("no-read-in-view-body", rules["no-read-in-view-body"], {
   valid: [
     component(
-      "const [n] = yield* $signal(1); return function* () { return <p class={{ a: (yield* n) > 1 }}>{yield* n}</p>; };"
+      "const [n] = yield* $signal(1); return view(function* () { return <p class={{ a: (yield* n) > 1 }}>{yield* n}</p>; });"
     ),
-    component("return function* () { return <section>{yield* Child({})}</section>; };"),
+    component("return view(function* () { return <section>{yield* Child({})}</section>; });"),
     "const m = $memo(function* () { const v = yield* n; return v; });",
     // a row's setup is not its view (its reads are READ_IN_SETUP's, a type error)
-    "const r = <For each={xs}>{function* (x) { const d = yield* $memo(function* () { return yield* x.a; }); return function* () { return <i>{yield* d}</i>; }; }}</For>;",
+    "const r = <For each={xs}>{function* (x) { const d = yield* $memo(function* () { return yield* x.a; }); return view(function* () { return <i>{yield* d}</i>; }); }}</For>;",
     // h: an h view (no JSX) is held by its type, [HVIEW_READ], not the lint (D-049)
     component(
-      "const [n] = yield* $signal(1); return function* () { return h('p', String(yield* n)); };"
+      "const [n] = yield* $signal(1); return view(function* () { return h('p', String(yield* n)); });"
     ),
     component(
-      "return function* () { return For({ each: xs, children: function* (x) { return function* () { return h('li', yield* x.a); }; } }); };"
+      "return view(function* () { return For({ each: xs, children: function* (x) { return function* () { return h('li', yield* x.a); }; } }); });"
     ),
     // h: the reads are in bare function* holes
     component(
-      "const [n] = yield* $signal(1); return function* () { return h('p', { class: function* () { return (yield* n) > 1 ? 'big' : ''; } }, n, function* () { return (yield* n) * 2; }); };"
+      "const [n] = yield* $signal(1); return view(function* () { return h('p', { class: function* () { return (yield* n) > 1 ? 'big' : ''; } }, n, function* () { return (yield* n) * 2; }); });"
     ),
     component(
-      "return function* () { return For({ each: xs, children: function* (x) { return function* () { return h('li', function* () { return yield* x.a; }); }; } }); };"
+      "return view(function* () { return For({ each: xs, children: function* (x) { return function* () { return h('li', function* () { return yield* x.a; }); }; } }); });"
     )
   ],
   invalid: [
     {
       code: component(
-        "const [n] = yield* $signal(1); return function* () { const v = yield* n; return <p>{v}</p>; };"
+        "const [n] = yield* $signal(1); return view(function* () { const v = yield* n; return <p>{v}</p>; });"
       ),
       errors: [{ messageId: "read" }]
     },
@@ -88,19 +88,19 @@ tester.run("no-read-in-view-body", rules["no-read-in-view-body"], {
     },
     {
       // a branch on a read: structure comes from flow controls
-      code: "const r = <For each={xs}>{function* (x) { return function* () { if (yield* x.done) return <i />; return <b />; }; }}</For>;",
+      code: "const r = <For each={xs}>{function* (x) { return view(function* () { if (yield* x.done) return <i />; return <b />; }); }}</For>;",
       errors: [{ messageId: "read" }]
     },
     {
       code: component(
-        "return function* () { const c = yield* Child({}); return <div>{c}</div>; };"
+        "return view(function* () { const c = yield* Child({}); return <div>{c}</div>; });"
       ),
       errors: [{ messageId: "child" }]
     },
     {
       // a setup returning one of two views, and a row bound to a const in the setup
       code: component(
-        "const row = function* (x) { return function* () { const t = yield* x; return <li>{t}</li>; }; }; return mode ? function* () { return <p>{String(yield* n)}</p>; } : function* () { const v = yield* n; return <i>{v}</i>; };"
+        "const row = function* (x) { return view(function* () { const t = yield* x; return <li>{t}</li>; }); }; return mode ? function* () { return <p>{String(yield* n)}</p>; } : function* () { const v = yield* n; return <i>{v}</i>; };"
       ),
       errors: [{ messageId: "read" }, { messageId: "read" }]
     }
@@ -110,7 +110,7 @@ tester.run("no-read-in-view-body", rules["no-read-in-view-body"], {
 tester.run("no-dollar-block", rules["no-dollar-block"], {
   valid: [
     component(
-      "const d = yield* $memo(function* () { return 1; }); return function* () { return <p>{yield* d}</p>; };"
+      "const d = yield* $memo(function* () { return 1; }); return view(function* () { return <p>{yield* d}</p>; });"
     ),
     // a `$` that is not the library's (a test helper, jQuery)
     "const $ = s => document.querySelector(s); $('p');",
@@ -122,20 +122,20 @@ tester.run("no-dollar-block", rules["no-dollar-block"], {
       code:
         'import { $, $component } from "solid-blocks";\n' +
         component(
-          "const d = $(function* () { return 1; }); return function* () { return <p>{yield* d}</p>; };"
+          "const d = $(function* () { return 1; }); return view(function* () { return <p>{yield* d}</p>; });"
         ),
       output:
         'import { $component, $memo } from "solid-blocks";\n' +
         component(
-          "const d = yield* $memo(function* () { return 1; }); return function* () { return <p>{yield* d}</p>; };"
+          "const d = yield* $memo(function* () { return 1; }); return view(function* () { return <p>{yield* d}</p>; });"
         ),
       errors: [{ messageId: "import" }, { messageId: "derived" }]
     },
     {
       // in a row's setup too (D-030)
-      code: "const r = <For each={xs}>{function* (x) { const s = $(function* () { return yield* x.a; }); return function* () { return <i>{yield* s}</i>; }; }}</For>;",
+      code: "const r = <For each={xs}>{function* (x) { const s = $(function* () { return yield* x.a; }); return view(function* () { return <i>{yield* s}</i>; }); }}</For>;",
       output:
-        "const r = <For each={xs}>{function* (x) { const s = yield* $memo(function* () { return yield* x.a; }); return function* () { return <i>{yield* s}</i>; }; }}</For>;",
+        "const r = <For each={xs}>{function* (x) { const s = yield* $memo(function* () { return yield* x.a; }); return view(function* () { return <i>{yield* s}</i>; }); }}</For>;",
       errors: [{ messageId: "derived" }]
     },
     {
@@ -152,9 +152,9 @@ tester.run("no-dollar-block", rules["no-dollar-block"], {
     },
     {
       // rows: `$(function* (item) …)` and `$scope(fn)` are the bare function*
-      code: 'import { $, $scope, For } from "solid-blocks";\nconst a = <For each={xs}>{$(function* (x) { return function* () { return <i />; }; })}</For>;\nconst b = <For each={xs}>{$scope(row)}</For>;',
+      code: 'import { $, $scope, For } from "solid-blocks";\nconst a = <For each={xs}>{$(function* (x) { return view(function* () { return <i />; }); })}</For>;\nconst b = <For each={xs}>{$scope(row)}</For>;',
       output:
-        'import { For } from "solid-blocks";\nconst a = <For each={xs}>{function* (x) { return function* () { return <i />; }; }}</For>;\nconst b = <For each={xs}>{row}</For>;',
+        'import { For } from "solid-blocks";\nconst a = <For each={xs}>{function* (x) { return view(function* () { return <i />; }); }}</For>;\nconst b = <For each={xs}>{row}</For>;',
       errors: [
         { messageId: "import" },
         { messageId: "import" },
@@ -169,7 +169,9 @@ tester.run("no-dollar-block", rules["no-dollar-block"], {
       errors: [{ messageId: "import" }, { messageId: "other" }]
     },
     {
-      code: component("return function* () { return <p>{$(function* () { return 1; })}</p>; };"),
+      code: component(
+        "return view(function* () { return <p>{$(function* () { return 1; })}</p>; });"
+      ),
       output: null,
       errors: [{ messageId: "other" }]
     }
@@ -180,38 +182,38 @@ tester.run("no-path-object-use", rules["no-path-object-use"], {
   valid: [
     // reads compare and spread values
     component(
-      "const [s] = yield* $store({ a: { b: 1 } }); const m = yield* $memo(function* () { return { ...(yield* s.a) }; }); return function* () { return <p title={JSON.stringify(yield* s.a)}>{(yield* s.a.b) === 1 ? 'one' : ''}</p>; };"
+      "const [s] = yield* $store({ a: { b: 1 } }); const m = yield* $memo(function* () { return { ...(yield* s.a) }; }); return view(function* () { return <p title={JSON.stringify(yield* s.a)}>{(yield* s.a.b) === 1 ? 'one' : ''}</p>; });"
     ),
     // passing a path on is fine; so is spreading the props object (not a path)
-    "const C = $component(function* (props) { return function* () { return <Child {...props} user={props.user} />; }; });",
+    "const C = $component(function* (props) { return view(function* () { return <Child {...props} user={props.user} />; }); });",
     // a plain object with the same shape is not a path
     "const s = { a: 1 }; const t = { ...s }; s.a === 1;"
   ],
   invalid: [
     {
-      code: "const C = $component(function* (props) { const m = yield* $memo(function* () { return { ...props.user }; }); return function* () { return <p />; }; });",
+      code: "const C = $component(function* (props) { const m = yield* $memo(function* () { return { ...props.user }; }); return view(function* () { return <p />; }); });",
       errors: [{ messageId: "spread" }]
     },
     {
       code: component(
-        "const [s] = yield* $store({ a: 1 }); const m = yield* $memo(function* () { return s.a === 1; }); return function* () { return <p {...s} />; };"
+        "const [s] = yield* $store({ a: 1 }); const m = yield* $memo(function* () { return s.a === 1; }); return view(function* () { return <p {...s} />; });"
       ),
       errors: [{ messageId: "compare" }, { messageId: "spread" }]
     },
     {
-      code: "const r = <For each={xs}>{function* (x) { return function* () { return <i>{JSON.stringify(x)}</i>; }; }}</For>;",
+      code: "const r = <For each={xs}>{function* (x) { return view(function* () { return <i>{JSON.stringify(x)}</i>; }); }}</For>;",
       errors: [{ messageId: "stringify" }]
     },
     {
       code: component(
-        "const p = yield* $projection(function* (d) {}, { a: [1] }); const m = yield* $memo(function* () { return p.a[0] !== undefined; }); return function* () { return <p />; };"
+        "const p = yield* $projection(function* (d) {}, { a: [1] }); const m = yield* $memo(function* () { return p.a[0] !== undefined; }); return view(function* () { return <p />; });"
       ),
       errors: [{ messageId: "compare" }]
     }
   ]
 });
 
-tester.run("prefer-view-wrapper", rules["prefer-view-wrapper"], {
+tester.run("require-view-wrapper", rules["require-view-wrapper"], {
   valid: [
     component("return view(function* () { return <p />; });"),
     "const r = <For each={xs}>{function* (x) { return view(function* () { return <i />; }); }}</For>;"
@@ -255,27 +257,27 @@ tester.run("jsx-only-in-view", rules["jsx-only-in-view"], {
     ),
     // a render callback inside a view's JSX builds elements: fine
     component(
-      "return function* () { return <Router>{props => <Loading>{props.children}</Loading>}</Router>; };"
+      "return view(function* () { return <Router>{props => <Loading>{props.children}</Loading>}</Router>; });"
     ),
     // a row's view
-    "const r = <For each={xs}>{function* (x) { return function* () { return <li />; }; }}</For>;",
+    "const r = <For each={xs}>{function* (x) { return view(function* () { return <li />; }); }}</For>;",
     // plain code outside blocks
     "const el = () => <p />;"
   ],
   invalid: [
     {
       code: component(
-        "const header = <h1>{yield* title}</h1>; return function* () { return header; };"
+        "const header = <h1>{yield* title}</h1>; return view(function* () { return header; });"
       ),
       errors: [{ messageId: "jsx", data: { where: "a setup" } }]
     },
     {
       // a plain function declared in the setup is the setup's code
-      code: component("const make = () => <h1 />; return function* () { return <p />; };"),
+      code: component("const make = () => <h1 />; return view(function* () { return <p />; });"),
       errors: [{ messageId: "jsx", data: { where: "a setup" } }]
     },
     {
-      code: "const r = <For each={xs}>{function* (x) { const el = <i />; return function* () { return el; }; }}</For>;",
+      code: "const r = <For each={xs}>{function* (x) { const el = <i />; return view(function* () { return el; }); }}</For>;",
       errors: [{ messageId: "jsx", data: { where: "a row's setup" } }]
     },
     {
@@ -444,11 +446,13 @@ tester.run("component-call-yielded", rules["component-call-yielded"], {
     // a view's returned call is typed through its return
     imports +
       Card +
-      component("return function* () { return Show({ when: x, children: h('b') }); };"),
+      component("return view(function* () { return Show({ when: x, children: h('b') }); });"),
     // an argument or a prop: typed by what takes it
     imports +
       Card +
-      component("return function* () { return h('div', Show({ when: x, children: h('b') })); };"),
+      component(
+        "return view(function* () { return h('div', Show({ when: x, children: h('b') })); });"
+      ),
     imports +
       Card +
       component(
@@ -535,10 +539,10 @@ tester.run("read-before-attempt", rules["read-before-attempt"], {
 tester.run("no-unyielded-write", rules["no-unyielded-write"], {
   valid: [
     component(
-      "const [n, setN] = yield* $signal(1); const inc = $event(function* () { yield* setN(2); }); yield* $effect(function* () {}, function* () { const v = yield* setN(3); }); return function* () { return <p onClick={yield* inc}>{yield* n}</p>; };"
+      "const [n, setN] = yield* $signal(1); const inc = $event(function* () { yield* setN(2); }); yield* $effect(function* () {}, function* () { const v = yield* setN(3); }); return view(function* () { return <p onClick={yield* inc}>{yield* n}</p>; });"
     ),
     component(
-      "const [s, setS] = yield* $optimisticStore({ a: 1 }); const go = $event(function* () { yield* setS(d => { d.a = 2; }); }); return function* () { return <p onClick={yield* go} />; };"
+      "const [s, setS] = yield* $optimisticStore({ a: 1 }); const go = $event(function* () { yield* setS(d => { d.a = 2; }); }); return view(function* () { return <p onClick={yield* go} />; });"
     ),
     // not a block setter: plain code is no-foreign-reactive's concern
     "const [a, setA] = createSignal(1); setA(2);"
@@ -546,25 +550,25 @@ tester.run("no-unyielded-write", rules["no-unyielded-write"], {
   invalid: [
     {
       code: component(
-        "const [n, setN] = yield* $signal(1); const inc = $event(function* () { setN(2); }); return function* () { return <p onClick={yield* inc} />; };"
+        "const [n, setN] = yield* $signal(1); const inc = $event(function* () { setN(2); }); return view(function* () { return <p onClick={yield* inc} />; });"
       ),
       errors: [{ messageId: "unyielded", data: { name: "setN" } }]
     },
     {
       code: component(
-        "const [s, setS] = yield* $store({ a: 1 }); setS(d => { d.a = 2; }); return function* () { return <p />; };"
+        "const [s, setS] = yield* $store({ a: 1 }); setS(d => { d.a = 2; }); return view(function* () { return <p />; });"
       ),
       errors: [{ messageId: "unyielded", data: { name: "setS" } }]
     },
     {
       code: component(
-        "const [n, setN] = yield* $optimistic(1); const bump = () => setN(1); return function* () { return <p />; };"
+        "const [n, setN] = yield* $optimistic(1); const bump = () => setN(1); return view(function* () { return <p />; });"
       ),
       errors: [{ messageId: "unyielded", data: { name: "setN" } }]
     },
     {
       code: component(
-        "const [n, setN] = yield* $signal(1); const go = $event(function* () { yield setN(1); }); return function* () { return <p onClick={yield* go} />; };"
+        "const [n, setN] = yield* $signal(1); const go = $event(function* () { yield setN(1); }); return view(function* () { return <p onClick={yield* go} />; });"
       ),
       errors: [{ messageId: "unyielded", data: { name: "setN" } }]
     }
@@ -821,37 +825,43 @@ typedTester.run("component-call-yielded (with types)", rules["component-call-yie
 const evt = "const save = $event(function* () {});";
 tester.run("no-unbound-event", rules["no-unbound-event"], {
   valid: [
-    component(`${evt} return function* () { return <b onClick={yield* save} />; };`),
-    component(`${evt} return function* () { return <b on:click={yield* save} />; };`),
-    component(`${evt} return function* () { return <b onClick={[yield* save, 1]} />; };`),
+    component(`${evt} return view(function* () { return <b onClick={yield* save} />; });`),
+    component(`${evt} return view(function* () { return <b on:click={yield* save} />; });`),
+    component(`${evt} return view(function* () { return <b onClick={[yield* save, 1]} />; });`),
     // not an event prop
-    component(`${evt} return function* () { return <b data-save={save} />; };`),
+    component(`${evt} return view(function* () { return <b data-save={save} />; });`),
     // not an $event handler (a plain function is the types' business)
-    component("const f = () => {}; return function* () { return <b onClick={f} />; };"),
-    component("return function* () { return <b onClick={() => go()} />; };")
+    component("const f = () => {}; return view(function* () { return <b onClick={f} />; });"),
+    component("return view(function* () { return <b onClick={() => go()} />; });")
   ],
   invalid: [
     {
-      code: component(`${evt} return function* () { return <b onClick={save} />; };`),
-      output: component(`${evt} return function* () { return <b onClick={yield* save} />; };`),
+      code: component(`${evt} return view(function* () { return <b onClick={save} />; });`),
+      output: component(
+        `${evt} return view(function* () { return <b onClick={yield* save} />; });`
+      ),
       errors: [{ messageId: "unbound", data: { name: "save", attr: "onClick" } }]
     },
     {
-      code: component(`${evt} return function* () { return <b on:click={save} />; };`),
-      output: component(`${evt} return function* () { return <b on:click={yield* save} />; };`),
+      code: component(`${evt} return view(function* () { return <b on:click={save} />; });`),
+      output: component(
+        `${evt} return view(function* () { return <b on:click={yield* save} />; });`
+      ),
       errors: [{ messageId: "unbound" }]
     },
     {
       // the bound-data form: the handler is the array's first element
-      code: component(`${evt} return function* () { return <b onClick={[save, 1]} />; };`),
-      output: component(`${evt} return function* () { return <b onClick={[yield* save, 1]} />; };`),
+      code: component(`${evt} return view(function* () { return <b onClick={[save, 1]} />; });`),
+      output: component(
+        `${evt} return view(function* () { return <b onClick={[yield* save, 1]} />; });`
+      ),
       errors: [{ messageId: "unbound" }]
     },
     {
       // a foreign component's event prop too
-      code: component(`${evt} return function* () { return <Router onNavigate={save} />; };`),
+      code: component(`${evt} return view(function* () { return <Router onNavigate={save} />; });`),
       output: component(
-        `${evt} return function* () { return <Router onNavigate={yield* save} />; };`
+        `${evt} return view(function* () { return <Router onNavigate={yield* save} />; });`
       ),
       errors: [{ messageId: "unbound" }]
     },
@@ -945,7 +955,7 @@ typedTester.run("no-unshown-wait (with types)", rules["no-unshown-wait"], {
 
 // without type information it cannot know: silent
 tester.run("no-unshown-wait (without types)", rules["no-unshown-wait"], {
-  valid: [component(`${evt} return function* () { return <b onClick={yield* save} />; };`)],
+  valid: [component(`${evt} return view(function* () { return <b onClick={yield* save} />; });`)],
   invalid: []
 });
 
@@ -954,14 +964,14 @@ tester.run("no-try-catch", rules["no-try-catch"], {
   valid: [
     // attempt is the block form
     component(
-      "const e = $event(function* () { yield* attempt(() => save(), e => {}); }); return function* () { return <i />; };"
+      "const e = $event(function* () { yield* attempt(() => save(), e => {}); }); return view(function* () { return <i />; });"
     ),
     // plain code inside a block's plain function is not the block's body
     component(
-      "const e = $event(function* () { yield* attempt(() => { try { return f(); } catch { return 0; } }, e => {}); }); return function* () { return <i />; };"
+      "const e = $event(function* () { yield* attempt(() => { try { return f(); } catch { return 0; } }, e => {}); }); return view(function* () { return <i />; });"
     ),
     // a try with only finally catches nothing
-    component("try { x(); } finally { y(); } return function* () { return <i />; };"),
+    component("try { x(); } finally { y(); } return view(function* () { return <i />; });"),
     // outside blocks
     "function plain() { try { x(); } catch (e) {} }",
     "function* helper() { try { yield 1; } catch {} }"
@@ -969,12 +979,12 @@ tester.run("no-try-catch", rules["no-try-catch"], {
   invalid: [
     {
       code: component(
-        "const e = $event(function* () { try { yield* save(); } catch (e) { log(e); } }); return function* () { return <i />; };"
+        "const e = $event(function* () { try { yield* save(); } catch (e) { log(e); } }); return view(function* () { return <i />; });"
       ),
       errors: [{ messageId: "tryCatch", data: { where: "an $event" } }]
     },
     {
-      code: component("try { x(); } catch {} return function* () { return <i />; };"),
+      code: component("try { x(); } catch {} return view(function* () { return <i />; });"),
       errors: [{ messageId: "tryCatch", data: { where: "a setup" } }]
     },
     {
@@ -991,12 +1001,14 @@ tester.run("no-try-catch", rules["no-try-catch"], {
       errors: [{ messageId: "tryCatch", data: { where: "an $effect" } }]
     },
     {
-      code: component("return function* () { try { return <i />; } catch { return <b />; } };"),
+      code: component(
+        "return view(function* () { try { return <i />; } catch { return <b />; } });"
+      ),
       errors: [{ messageId: "tryCatch", data: { where: "a view" } }]
     },
     {
       code: component(
-        "return function* () { return <ul>{yield* For({ each: xs, children: function* (x) { try { f(); } catch {} return view(function* () { return <li />; }); } })}</ul>; };"
+        "return view(function* () { return <ul>{yield* For({ each: xs, children: function* (x) { try { f(); } catch {} return view(function* () { return <li />; }); } })}</ul>; });"
       ),
       errors: [{ messageId: "tryCatch", data: { where: "a row" } }]
     },

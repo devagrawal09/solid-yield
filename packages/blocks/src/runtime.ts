@@ -84,6 +84,8 @@ import type {
   ViewOp,
   ViewPending,
   ViewMayWait,
+  ViewFn,
+  ViewWrapped,
   Wait,
   Yieldable
 } from "./types.js";
@@ -1699,9 +1701,9 @@ export function renderView(
 export function $component<
   TP = unknown,
   Y extends SetupOp = never,
-  V extends () => Generator<ViewOp, unknown, any> = () => Generator<never, unknown, any>
+  V extends () => Generator<ViewOp, unknown, any> = ViewFn<never, unknown>
 >(
-  body: (props: TP) => Generator<Y, V, any>,
+  body: ((props: TP) => Generator<Y, V, any>) & ViewWrapperCheck<V>,
   ..._rule: NoJsxViewRule<ViewYield<V>, ViewReturn<V>>
 ): (
   ...props: PropsArgs<PropsOf<TP>>
@@ -1716,7 +1718,7 @@ export function $component<
       if (typeof view !== "function")
         throw devError(
           "COMPONENT_VIEW",
-          "a $component's setup returns its view: `return function* () { return <…/> }`."
+          "a $component's setup returns its view: `return view(function* () { return <…/>; })`."
         );
       return renderView(view as any, body.name || "anonymous");
     });
@@ -1739,11 +1741,20 @@ export function $component<
 export function view<Y extends ViewOp = never, R = unknown>(
   fn: () => Generator<Y, R, any>,
   ..._rule: NoJsxViewRule<Y, R>
-): () => Generator<[R] extends [HView<any, any>] ? never : Y, R, any> {
+): ViewFn<[R] extends [HView<any, any>] ? never : Y, R> {
   // an `h` view's colors are its output's: its yields (refused above) are not
   // passed on, so `$component` does not report the same mistake again
   return fn as any;
 }
+
+/**
+ * D-089: a setup returns its view through `view(…)`. A bare `function*`
+ * returned instead lacks `view`'s brand, and the setup is refused with the
+ * message (checked on the setup itself, so that TypeScript prints it first).
+ */
+export type ViewWrapperCheck<V> = [V] extends [ViewWrapped]
+  ? unknown
+  : { readonly "[VIEW_WRAPPER] wrap the view: return view(function* () { ... })": never };
 
 /** What a view function yields (a setup may return one of several views). */
 export type ViewYield<V> = V extends () => Generator<infer Y, any, any> ? Y : never;

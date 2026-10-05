@@ -1,6 +1,6 @@
 # solid-blocks
 
-Generator blocks for Solid 2 as a library: `$component(function* (props) { setup; return function* () { view } })`, interpreted at run time on Solid's public API, with strict types for every read, write, wait and failure.
+Generator blocks for Solid 2 as a library: `$component(function* (props) { setup; return view(function* () { view }) })`, interpreted at run time on Solid's public API, with strict types for every read, write, wait and failure.
 
 **This is the strict dialect; the compiler route is the ergonomic one.** The same model is baked into Solid's compiler and core on the `experiment/iterable-signals` branch. This repository is the userland counterpart. It is a design lab (D-002): every read and write is a `yield*`, failures are typed, a view has no body, components are called and not tagged. Each of these rules is enforced by types, a development error or a lint rule. Where the model is awkward, the awkwardness is a finding and goes into [`documentation/DECISIONS.md`](documentation/DECISIONS.md), not behind an escape hatch. The types say exactly what the runtime does (D-071): a pending read or a failure the runtime routes somewhere is in the type at the same place.
 

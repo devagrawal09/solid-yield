@@ -40,6 +40,7 @@ import {
   type Element as BlocksElement,
   type EventHandler,
   type Props,
+  type ViewFn,
   view
 } from "solid-blocks";
 import { createSignal as plainSignal } from "solid-js";
@@ -87,7 +88,7 @@ describe("views are fine-grained", () => {
     const Counter = $component(function* () {
       const [n, setN] = yield* $signal(0);
       bump = () => write(() => setN(v => v + 1));
-      return function* () {
+      return view(function* () {
         viewRuns++;
         return (
           <div>
@@ -95,7 +96,7 @@ describe("views are fine-grained", () => {
             <input />
           </div>
         );
-      };
+      });
     });
     mount(Counter);
     const input = root.querySelector("input")!;
@@ -118,10 +119,10 @@ describe("views are fine-grained", () => {
       const user = yield* $memo(function* () {
         return yield* attempt(() => new Promise<{ name: string }>(r => (resolve = r)), toError);
       });
-      return function* () {
+      return view(function* () {
         viewRuns++;
         return <h3>Hello {perform(user).name}</h3>;
-      };
+      });
     });
     mount(() =>
       Loading({
@@ -148,9 +149,9 @@ describe("views are fine-grained", () => {
         { loadingValue: { name: "…" } }
       );
       const pending = isPendingOf(user);
-      return function* () {
+      return view(function* () {
         return <h3 class={{ pending: perform(pending) }}>Hello {perform(user).name}</h3>;
-      };
+      });
     });
     mount(User);
     expect(root.querySelector("h3")!.textContent).toBe("Hello …");
@@ -165,40 +166,40 @@ describe("views are fine-grained", () => {
     // statement alike; the lint `no-read-in-view-body` reports it)
     const ReadsInBody = $component(function* ReadsInBody() {
       const [n] = yield* $signal(1);
-      return function* () {
+      return view(function* () {
         const v = yield* n;
         return <b>{v}</b>;
-      };
+      });
     });
     expect(() => createRoot(() => ReadsInBody())).toThrow(/READ_IN_VIEW.*<ReadsInBody>/);
     // a branch on a read is one too: structure comes from flow controls
     const Branches = $component(function* Branches() {
       const [open] = yield* $signal(true);
-      return function* () {
+      return view(function* () {
         if (yield* open) return <b>open</b>;
         return <i>closed</i>;
-      };
+      });
     });
     expect(() => createRoot(() => Branches())).toThrow(/READ_IN_VIEW.*<Branches>/);
     // in a row's view, named by the row
     const Rows = $component(function* Rows() {
-      return function* () {
+      return view(function* () {
         return (
           <ul>
             {
               yield* For({
                 each: ["a"],
                 children: function* item(x) {
-                  return function* () {
+                  return view(function* () {
                     const t = yield* x;
                     return <li>{t}</li>;
-                  };
+                  });
                 }
               })
             }
           </ul>
         );
-      };
+      });
     });
     expect(() => createRoot(() => Rows())).toThrow(/READ_IN_VIEW.*<row item>/);
     // the same reads in holes, and a flow control reading its source, are the holes'
@@ -206,7 +207,7 @@ describe("views are fine-grained", () => {
     const Holes = $component(function* Holes() {
       const [open, setOpen] = yield* $signal(true);
       set = v => write(() => setOpen(v));
-      return function* () {
+      return view(function* () {
         return (
           <p>
             {perform(open) ? "open" : "closed"}
@@ -220,7 +221,7 @@ describe("views are fine-grained", () => {
             }
           </p>
         );
-      };
+      });
     });
     mount(Holes);
     expect(root.textContent).toBe("open!");
@@ -233,14 +234,14 @@ describe("views are fine-grained", () => {
 describe("components", () => {
   it("a named setup names the component (dev owner labels)", () => {
     const Greeting = $component(function* Greeting() {
-      return function* () {
+      return view(function* () {
         return <b>hi</b>;
-      };
+      });
     });
     const Anonymous = $component(function* () {
-      return function* () {
+      return view(function* () {
         return <b>hi</b>;
-      };
+      });
     });
     expect(Greeting.name).toBe("Greeting");
     expect(Anonymous.name).toBe("component");
@@ -269,9 +270,9 @@ describe("setup operations", () => {
       yield* $settled(function* () {
         log.push(`settled ${yield* doubled}`);
       });
-      return function* () {
+      return view(function* () {
         return <span>{perform(doubled)}</span>;
-      };
+      });
     });
     mount(App);
     expect(root.textContent).toBe("2");
@@ -296,9 +297,9 @@ describe("setup operations", () => {
           expect(written).toBe(v * 10);
         }
       );
-      return function* () {
+      return view(function* () {
         return <span>{perform(copy)}</span>;
-      };
+      });
     });
     mount(App);
     flush();
@@ -320,14 +321,14 @@ describe("setup operations", () => {
           })
         );
       const remaining = readStore(todos, t => t.list.filter(x => !x.done).length);
-      return function* () {
+      return view(function* () {
         return (
           <p>
             {perform(todos.list[0].title)} {String(perform(todos.list[0].done))}{" "}
             {perform(remaining)}
           </p>
         );
-      };
+      });
     });
     mount(App);
     expect(root.textContent).toBe("a false 1");
@@ -365,9 +366,9 @@ describe("setup operations", () => {
       fire = $event(function* () {
         seen.push(`event ${yield* a}`);
       });
-      return function* () {
+      return view(function* () {
         return <i>{perform(doubled)}</i>;
-      };
+      });
     });
     mount(() => App());
     flush();
@@ -430,20 +431,20 @@ describe("setup operations", () => {
     // @ts-expect-error a setup does not read (Read is not a SetupOp)
     const Bad = $component(function* (props: Props<{ start: number }>) {
       const v = yield* props.start;
-      return function* () {
+      return view(function* () {
         return <i>{v}</i>;
-      };
+      });
     });
     expect(() => createRoot(() => Bad({ start: 1 }))).toThrow(/READ_IN_SETUP/);
   });
 
   devIt("creating outside a setup and writing in a memo are dev errors", () => {
-    // @ts-expect-error a view only reads (Create is not a ViewOp)
     const CreatesInView = $component(function* () {
-      return function* () {
+      // @ts-expect-error a view only reads (Create is not a ViewOp)
+      return view(function* () {
         const [x] = yield* $signal(1);
         return <i>{perform(x)}</i>;
-      };
+      });
     });
     expect(() => createRoot(() => CreatesInView())).toThrow(/CREATE_OUTSIDE_SETUP/);
     let error: unknown;
@@ -460,9 +461,9 @@ describe("setup operations", () => {
         );
         return yield* n;
       });
-      return function* () {
+      return view(function* () {
         return <i>{perform(m)}</i>;
-      };
+      });
     });
     mount(WritesInMemo);
     expect(String(error)).toMatch(/WRITE_IN_REACTIVE/);
@@ -514,9 +515,9 @@ describe("the runtime's other dev errors", () => {
     const Builds = $component(function* Builds() {
       const [title] = yield* $signal("t");
       const header = <h1>{perform(title)}</h1>;
-      return function* () {
+      return view(function* () {
         return header;
-      };
+      });
     });
     expect(() => createRoot(() => Builds())).toThrow(/JSX_IN_SETUP\] <Builds>: JSX in a setup/);
   });
@@ -524,7 +525,7 @@ describe("the runtime's other dev errors", () => {
   devIt("a setup returns its view; a path is not writable", () => {
     const NoView = $component(function* () {
       return 1;
-    } as unknown as () => Generator<never, () => Generator<never, null>>);
+    } as unknown as () => Generator<never, ViewFn<never, null>>);
     expect(() => createRoot(() => NoView())).toThrow(/COMPONENT_VIEW/);
     const p = rowArg({ a: 1 }, false) as unknown as { a: number };
     expect(() => {
@@ -586,9 +587,9 @@ describe("the runtime's other dev errors", () => {
         yield* attempt(() => Promise.resolve(0), toError);
         return yield* n;
       });
-      return function* () {
+      return view(function* () {
         return <i>{perform(m)}</i>;
-      };
+      });
     });
     mount(() =>
       Loading({
@@ -622,15 +623,15 @@ describe("setups inside a parent's first view run", () => {
       const n = yield* $memo(function* () {
         return yield* props.n;
       });
-      return function* () {
+      return view(function* () {
         return <i>{perform(n)}</i>;
-      };
+      });
     });
     const Parent = $component(function* () {
-      return function* () {
+      return view(function* () {
         parentRuns++;
         return <p>{perform(Leaf({ n: 1 }))}</p>;
-      };
+      });
     });
     mount(Parent);
     expect(root.textContent).toBe("1");
@@ -645,21 +646,21 @@ describe("props", () => {
     let setName!: (v: string) => void;
     let childRuns = 0;
     const Card = $component(function* (props: Props<{ user: { name: string }; tag: string }>) {
-      return function* () {
+      return view(function* () {
         childRuns++;
         return (
           <p>
             {perform(props.tag)}:{perform(props.user.name)}
           </p>
         );
-      };
+      });
     });
     const Parent = $component(function* () {
       const [user, setUser] = yield* $signal({ name: "a" });
       setName = name => write(() => setUser({ name }));
-      return function* () {
+      return view(function* () {
         return <>{yield* Card({ user: user, tag: "t" })}</>;
-      };
+      });
     });
     mount(Parent);
     expect(root.textContent).toBe("t:a");
@@ -678,9 +679,9 @@ describe("props", () => {
         void setN(1);
       });
       bump = () => write(() => setN(2));
-      return function* () {
+      return view(function* () {
         return <i>{perform(n)}</i>;
-      };
+      });
     });
     mount(App);
     const failure = await poke().then(
@@ -722,9 +723,9 @@ describe("props", () => {
           },
           function* () {}
         );
-        return function* () {
+        return view(function* () {
           return <i />;
-        };
+        });
       });
       expect(errorOf(Writes)).toMatch(/WRITE_IN_REACTIVE\] an effect's compute does not write/);
       // the effect phase reads, untracked because its host is (D-083)
@@ -737,9 +738,9 @@ describe("props", () => {
             yield* setOut(yield* n);
           }
         );
-        return function* () {
+        return view(function* () {
           return <i>{perform(out)}</i>;
-        };
+        });
       });
       expect(errorOf(Reads)).toBe("7");
     }
@@ -756,9 +757,9 @@ describe("props", () => {
           if (v === 0) void setN(1);
         }
       );
-      return function* () {
+      return view(function* () {
         return <i>{perform(n)}</i>;
-      };
+      });
     });
     mount(() =>
       Errored({
@@ -781,9 +782,9 @@ describe("props", () => {
         yield* attempt(() => Promise.resolve(), toError);
         yield* receipt;
       });
-      return function* () {
+      return view(function* () {
         return <i>{perform(n)}</i>;
-      };
+      });
     });
     mount(App);
     await go();
@@ -796,9 +797,9 @@ describe("props", () => {
     const App = $component(function* App() {
       const [n, setN] = yield* $signal(0);
       setter = setN;
-      return function* () {
+      return view(function* () {
         return <i>{perform(n)}</i>;
-      };
+      });
     });
     mount(App);
     // handed to plain code (a DOM handler, a timer): it fails at the call
@@ -819,13 +820,13 @@ describe("props", () => {
         });
         yield* attempt(() => new Promise<void>(r => (resolve = r)), toError);
       });
-      return function* () {
+      return view(function* () {
         return (
           <button onClick={yield* add}>
             {String(perform(saving))} {perform(readStore(list, s => s.items.join(",")))}
           </button>
         );
-      };
+      });
     });
     mount(App);
     root.querySelector("button")!.click();
@@ -844,18 +845,18 @@ describe("props", () => {
         const [v] = yield* $optimistic(function* () {
           return 1;
         } as unknown as number);
-        return function* () {
+        return view(function* () {
           return <i>{perform(v)}</i>;
-        };
+        });
       });
       expect(() => createRoot(() => Body())).toThrow(
         /OPTIMISTIC_FORM.*\$optimisticStore\(function\*/
       );
       const Scalar = $component(function* () {
         const [s] = yield* $optimisticStore(1 as unknown as { n: number });
-        return function* () {
+        return view(function* () {
           return <i>{perform(s.n)}</i>;
-        };
+        });
       });
       expect(() => createRoot(() => Scalar())).toThrow(/OPTIMISTIC_FORM.*\$optimistic\(value\)/);
     }
@@ -873,9 +874,9 @@ describe("props", () => {
         yield* refresh(todos);
       });
       reload = () => void again();
-      return function* () {
+      return view(function* () {
         return <i>{perform(readStore(todos, t => t.join(",")))}</i>;
-      };
+      });
     });
     mount(() =>
       Loading({
@@ -898,15 +899,15 @@ describe("props", () => {
     const App = $component(function* () {
       const [n, set] = yield* $signal(1);
       setN = v => write(() => set(v));
-      const view = yield* $projection(
+      const projected = yield* $projection(
         function* (draft: { doubled: number }) {
           draft.doubled = (yield* n) * 2;
         },
         { doubled: 0 }
       );
-      return function* () {
-        return <i>{perform(view.doubled)}</i>;
-      };
+      return view(function* () {
+        return <i>{perform(projected.doubled)}</i>;
+      });
     });
     mount(App);
     expect(root.textContent).toBe("2");
@@ -925,9 +926,9 @@ describe("props", () => {
         yield* until(ok, toError);
         done = true;
       });
-      return function* () {
+      return view(function* () {
         return <button onClick={yield* go}>go</button>;
-      };
+      });
     });
     mount(App);
     root.querySelector("button")!.click();
@@ -949,21 +950,21 @@ describe("constant (D-060)", () => {
     let setMe!: (v: string) => void;
     const Who = $component(function* Who() {
       const who = yield* Identity;
-      return function* () {
+      return view(function* () {
         return <b>{perform(who) ?? "nobody"}</b>;
-      };
+      });
     });
     const Provider = $component(function* () {
       const [me, set] = yield* $signal<string | null>("ada");
       setMe = v => write(() => set(v));
-      return function* () {
+      return view(function* () {
         return (
           <div>
             <Identity value={me}>{yield* Who()}</Identity>
             {yield* Who()}
           </div>
         );
-      };
+      });
     });
     mount(Provider);
     // with a provider, its source; with none, the constant
@@ -980,9 +981,9 @@ describe("context", () => {
     const Theme = createContext<string>("light");
     const Child = $component(function* () {
       const theme = yield* Theme;
-      return function* () {
+      return view(function* () {
         return <i>{theme}</i>;
-      };
+      });
     });
     mount(() => <Theme value="dark">{Child()}</Theme>);
     expect(root.textContent).toBe("dark");
@@ -1002,13 +1003,13 @@ describe("events", () => {
         yield* attempt(() => new Promise<void>(r => (resolve = r)), toError);
         yield* setStatus("saved");
       });
-      return function* () {
+      return view(function* () {
         return (
           <button onClick={yield* click}>
             {perform(n)} {perform(status)}
           </button>
         );
-      };
+      });
     });
     mount(App);
     root.querySelector("button")!.click();
@@ -1047,9 +1048,9 @@ describe("events", () => {
         yield* raise(new Failed("declined"));
       });
       save = () => failing().catch(e => (caught = e));
-      return function* () {
+      return view(function* () {
         return <p>ok</p>;
-      };
+      });
     });
     mount(() =>
       Errored({
@@ -1077,9 +1078,9 @@ describe("events", () => {
         seen = yield* data;
       });
       go = () => take();
-      return function* () {
+      return view(function* () {
         return <p>ok</p>;
-      };
+      });
     });
     mount(App);
     go();
@@ -1135,9 +1136,9 @@ describe("events", () => {
           yield* record(v);
         }
       );
-      return function* () {
+      return view(function* () {
         return <p />;
-      };
+      });
     });
     mount(App);
     flush();
@@ -1162,9 +1163,9 @@ describe("events", () => {
         const found = yield* attempt(() => new Promise<string>(r => (pending[q] = r)), toError);
         yield* setResults(found);
       });
-      return function* () {
+      return view(function* () {
         return <p>{perform(results)}</p>;
-      };
+      });
     });
     mount(Box);
     const calls = [search("s"), search("so"), search("sol")];
@@ -1184,9 +1185,9 @@ describe("events", () => {
         yield* raise(new Failed("no boundary"));
         return 1;
       });
-      return function* () {
+      return view(function* () {
         return <i>{perform(m)}</i>;
-      };
+      });
     });
     const error = vi.spyOn(console, "error").mockImplementation(() => {});
     let thrown: unknown;
@@ -1209,9 +1210,9 @@ describe("events", () => {
       const click = $event(function* () {
         yield* raise(new SaveError("nope"));
       });
-      return function* () {
+      return view(function* () {
         return <button onClick={yield* click}>go</button>;
-      };
+      });
     });
     mount(() =>
       Errored({
@@ -1235,9 +1236,9 @@ describe("events", () => {
         yield* raise(new NotFound("nf"));
         return 1;
       });
-      return function* () {
+      return view(function* () {
         return <i>{perform(m)}</i>;
-      };
+      });
     });
     mount(() =>
       Errored({
@@ -1274,9 +1275,9 @@ describe("events", () => {
         yield* raise(new Forbidden("no"));
         return 1;
       });
-      return function* () {
+      return view(function* () {
         return <i>{perform(m)}</i>;
-      };
+      });
     });
     mount(() =>
       Errored({
@@ -1312,9 +1313,9 @@ describe("events", () => {
           e => new LoadError((e as Error).message)
         );
       });
-      return function* () {
+      return view(function* () {
         return <i>{perform(m)}</i>;
-      };
+      });
     });
     mount(() =>
       Errored({
@@ -1357,9 +1358,9 @@ describe("events", () => {
           e => new StreamError((e as Error).message)
         );
       });
-      return function* () {
+      return view(function* () {
         return <i>{perform(m)}</i>;
-      };
+      });
     });
     mount(() =>
       Errored({
@@ -1446,9 +1447,9 @@ describe("events", () => {
         yield* raise(new Missing("missing"));
         return 1;
       });
-      return function* () {
+      return view(function* () {
         return <i>{perform(m)}</i>;
-      };
+      });
     });
     mount(() =>
       Errored({
@@ -1475,7 +1476,7 @@ describe("row blocks", () => {
             s.items[0].text = text;
           })
         );
-      return function* () {
+      return view(function* () {
         return (
           <ul>
             {
@@ -1483,20 +1484,20 @@ describe("row blocks", () => {
                 each: store.items,
                 children: function* (item, index) {
                   setups++;
-                  return function* () {
+                  return view(function* () {
                     views++;
                     return (
                       <li>
                         {perform(index)}:{perform(item.text)}
                       </li>
                     );
-                  };
+                  });
                 }
               })
             }
           </ul>
         );
-      };
+      });
     });
     mount(List);
     const first = root.querySelector("li")!;
@@ -1522,7 +1523,7 @@ describe("row blocks", () => {
       const [suffix, setSuffix] = yield* $signal("!");
       setItems = v => write(() => set(v));
       setText = v => write(() => setSuffix(v));
-      return function* () {
+      return view(function* () {
         return (
           <ul>
             {
@@ -1542,15 +1543,15 @@ describe("row blocks", () => {
                     computed.push(text);
                     return text;
                   });
-                  return function* () {
+                  return view(function* () {
                     return <li title={perform(label)}>{perform(label)}</li>;
-                  };
+                  });
                 }
               })
             }
           </ul>
         );
-      };
+      });
     });
     mount(List);
     const lis = () => [...root.querySelectorAll("li")];
@@ -1581,16 +1582,16 @@ describe("row blocks", () => {
         if (v === "bad") yield* raise(new Failed(`row ${v}`));
         return v;
       });
-      return function* () {
+      return view(function* () {
         return <li>{perform(shown)}</li>;
-      };
+      });
     };
     const List = $component(function* List() {
       const [items, set] = yield* $signal(["a", "b"]);
       setItems = v => write(() => set(v));
-      return function* () {
+      return view(function* () {
         return <ul>{perform(For({ each: items, children: row }))}</ul>;
-      };
+      });
     });
     mount(() =>
       Errored({
@@ -1608,9 +1609,9 @@ describe("row blocks", () => {
     root.textContent = "";
     // with no boundary the failure is re-thrown at the root (D-033)
     const Bare = $component(function* Bare() {
-      return function* () {
+      return view(function* () {
         return <ul>{perform(For({ each: ["bad"], children: row }))}</ul>;
-      };
+      });
     });
     const error = vi.spyOn(console, "error").mockImplementation(() => {});
     let thrown: unknown;
@@ -1631,14 +1632,14 @@ describe("row blocks", () => {
         if (v !== "slow") return v;
         return yield* attempt(() => new Promise<string>(r => (resolve = r)), toError);
       });
-      return function* () {
+      return view(function* () {
         return <li>{perform(shown)}</li>;
-      };
+      });
     };
     const List = $component(function* List() {
-      return function* () {
+      return view(function* () {
         return <ul>{perform(For({ each: ["a", "slow"], children: row }))}</ul>;
-      };
+      });
     });
     mount(() =>
       Loading({
@@ -1656,7 +1657,7 @@ describe("row blocks", () => {
 
   devIt("a row's body returns its view, as a setup does", () => {
     const Rows = $component(function* () {
-      return function* () {
+      return view(function* () {
         return (
           <ul>
             {
@@ -1665,12 +1666,12 @@ describe("row blocks", () => {
                 // a row that returns its markup directly (no view): a dev error
                 children: function* (_item: unknown) {
                   return <li />;
-                } as unknown as (item: unknown) => Generator<never, () => Generator<never, null>>
+                } as unknown as (item: unknown) => Generator<never, ViewFn<never, null>>
               })
             }
           </ul>
         );
-      };
+      });
     });
     expect(() => createRoot(() => Rows())).toThrow(/ROW_VIEW/);
   });
@@ -1685,7 +1686,7 @@ describe("row blocks", () => {
         { id: 2, text: "b" }
       ]);
       setItems = v => write(() => set(v));
-      return function* () {
+      return view(function* () {
         return (
           <ul>
             {
@@ -1697,20 +1698,20 @@ describe("row blocks", () => {
                   const toggle = $event(function* () {
                     yield* setOpen(o => !o);
                   });
-                  return function* () {
+                  return view(function* () {
                     views++;
                     return (
                       <li onClick={yield* toggle}>
                         {perform(item.text)} {perform(open) ? "[-]" : "[+]"}
                       </li>
                     );
-                  };
+                  });
                 }
               })
             }
           </ul>
         );
-      };
+      });
     });
     mount(List);
     const first = root.querySelector("li")!;
@@ -1734,7 +1735,7 @@ describe("row blocks", () => {
     let views = 0;
     const Row = $component(function* (props: Props<{ row: { t: string } }>) {
       const [n] = yield* $signal(0);
-      return function* () {
+      return view(function* () {
         views++;
         return (
           <li>
@@ -1742,12 +1743,12 @@ describe("row blocks", () => {
             {perform(n)}
           </li>
         );
-      };
+      });
     });
     const App = $component(function* () {
       const [items, setItems] = yield* $signal(rows);
       set = v => write(() => setItems(v));
-      return function* () {
+      return view(function* () {
         return (
           <ul>
             {
@@ -1762,7 +1763,7 @@ describe("row blocks", () => {
             }
           </ul>
         );
-      };
+      });
     });
     mount(App);
     const lis = [...root.querySelectorAll("li")];
@@ -1783,7 +1784,7 @@ describe("row blocks", () => {
       // recursive: its view's yields are spelled out
       function* comment(c: any) {
         const [open] = yield* $signal(true);
-        return function* (): Generator<ChildView<boolean, any>, BlocksElement> {
+        return view(function* (): Generator<ChildView<boolean, any>, BlocksElement> {
           return (
             <li>
               {perform(c.id)}
@@ -1806,9 +1807,9 @@ describe("row blocks", () => {
               }
             </li>
           );
-        };
+        });
       }
-      return function* () {
+      return view(function* () {
         return (
           <>
             {
@@ -1819,7 +1820,7 @@ describe("row blocks", () => {
             }
           </>
         );
-      };
+      });
     });
     mount(Thread);
     expect(root.querySelectorAll("li").length).toBe(2);
@@ -1828,7 +1829,7 @@ describe("row blocks", () => {
 
     const [when, setWhen] = plainSignal<{ name: string } | undefined>({ name: "x" });
     const App = $component(function* () {
-      return function* () {
+      return view(function* () {
         return (
           <div>
             {
@@ -1839,14 +1840,14 @@ describe("row blocks", () => {
                 keyed: true,
                 children: function* (v: any) {
                   const [k] = yield* $signal("!");
-                  return function* () {
+                  return view(function* () {
                     return (
                       <b>
                         {perform(v.name)}
                         {perform(k)}
                       </b>
                     );
-                  };
+                  });
                 }
               })
             }
@@ -1861,9 +1862,9 @@ describe("row blocks", () => {
                             return when();
                           },
                           children: function* (v: any) {
-                            return function* () {
+                            return view(function* () {
                               return <s>{perform(v.name)}</s>;
-                            };
+                            });
                           }
                         })
                       }
@@ -1877,15 +1878,15 @@ describe("row blocks", () => {
                 count: 2,
                 children: function* (i) {
                   const [x] = yield* $signal(10);
-                  return function* () {
+                  return view(function* () {
                     return <u>{perform(i) + perform(x)}</u>;
-                  };
+                  });
                 }
               })
             }
           </div>
         );
-      };
+      });
     });
     mount(App);
     expect(root.querySelector("b")!.textContent).toBe("x!");
@@ -1901,10 +1902,10 @@ describe("row blocks", () => {
     let views = 0;
     const [flag, setFlag] = plainSignal(1);
     const Child = $component(function* () {
-      return function* () {
+      return view(function* () {
         views++;
         return <i>child</i>;
-      };
+      });
     });
     mount(() =>
       Show({
@@ -1935,7 +1936,7 @@ describe("reads from JSX positions are never a view's or a setup's own", () => {
       const v = yield* $memo(function* () {
         return yield* attempt(() => new Promise<string>(r => (resolve = r)), toError);
       });
-      return function* () {
+      return view(function* () {
         cardViews++;
         return (
           <>
@@ -1949,7 +1950,7 @@ describe("reads from JSX positions are never a view's or a setup's own", () => {
             }
           </>
         );
-      };
+      });
     });
     // a plain component that reads its prop untracked when it is created
     let seen: unknown;
@@ -1960,7 +1961,7 @@ describe("reads from JSX positions are never a view's or a setup's own", () => {
     const Page = $component(function* () {
       const [order] = yield* $signal<"sequential" | "together">("sequential");
       const [label] = yield* $signal("x");
-      return function* () {
+      return view(function* () {
         return (
           <div>
             <Probe value={perform(label)}>{yield* Card()}</Probe>
@@ -1970,7 +1971,7 @@ describe("reads from JSX positions are never a view's or a setup's own", () => {
             </Reveal>
           </div>
         );
-      };
+      });
     });
     mount(Page);
     expect(seen).toBe("x");
@@ -1987,9 +1988,9 @@ describe("a view that is a function is a branch's content", () => {
   it("Show / Match render it (a lazy page's output) instead of calling it as a render callback", async () => {
     const [n, setN] = plainSignal(1);
     const Whole = $component(function* (props: Props<{ n: number }>) {
-      return function* () {
+      return view(function* () {
         return <b>{perform(props.n)}</b>;
-      };
+      });
     });
     // a lazy component's output is a function (its memo), marked as a view
     const Page = lazy(() => Promise.resolve({ default: Whole }));
@@ -2049,14 +2050,14 @@ describe("lazy", () => {
       setups++;
       const [n, setN] = yield* $signal(1);
       bump = () => write(() => setN(v => v + 1));
-      return function* () {
+      return view(function* () {
         return (
           <b>
             {perform(props.label)}
             {perform(n)}
           </b>
         );
-      };
+      });
     });
     let land!: (m: { default: typeof Inner }) => void;
     const Page = lazy(() => new Promise<{ default: typeof Inner }>(r => (land = r)));
@@ -2064,9 +2065,9 @@ describe("lazy", () => {
     const App = $component(function* () {
       const [label, set] = yield* $signal("n=");
       setLabel = v => write(() => set(v));
-      return function* () {
+      return view(function* () {
         return <div>{perform(Page({ label }))}</div>;
-      };
+      });
     });
     mount(() =>
       Loading({
@@ -2222,7 +2223,7 @@ describe("flow controls keep children lazy", () => {
         built++;
         return <i>{label}</i>;
       };
-      return function* () {
+      return view(function* () {
         return (
           <div>
             {
@@ -2251,7 +2252,7 @@ describe("flow controls keep children lazy", () => {
             }
           </div>
         );
-      };
+      });
     });
     mount(App);
     // the shared node sits in the branch that shows (built lazily, not by
@@ -2274,9 +2275,9 @@ describe("computations created in a setup", () => {
       const m = yield* $memo(function* () {
         return (yield* props.n) * 2;
       });
-      return function* () {
+      return view(function* () {
         return <b>{yield* m}</b>;
-      };
+      });
     });
     const [n, setN] = plainSignal(2);
     // a plain Solid signal given as a hole: read inside the child (D-065)
@@ -2296,9 +2297,9 @@ describe("computations created in a setup", () => {
   devIt("the setup's own read is still an error", () => {
     const Child = $component(function* (props: Props<{ n: number }>) {
       yield* props.n as unknown as Iterable<never>;
-      return function* () {
+      return view(function* () {
         return <b />;
-      };
+      });
     });
     expect(() => createRoot(() => Child({ n: 1 }))).toThrow("[READ_IN_SETUP]");
   });
@@ -2316,11 +2317,11 @@ describe("Loading on a source", () => {
         return yield* attempt(() => new Promise<string>(r => (resolvers[at] = r)), toError);
       });
       const Content = $component(function* () {
-        return function* () {
+        return view(function* () {
           return <b>{perform(v)}</b>;
-        };
+        });
       });
-      return function* () {
+      return view(function* () {
         return (
           <div>
             {perform(
@@ -2334,7 +2335,7 @@ describe("Loading on a source", () => {
             )}
           </div>
         );
-      };
+      });
     });
     mount(Page);
     expect(root.textContent).toBe("wait");
@@ -2362,9 +2363,9 @@ describe("boundaries in call form", () => {
       const v = yield* $memo(function* () {
         return yield* attempt(() => new Promise<string>(r => (resolve = r)), toError);
       });
-      return function* () {
+      return view(function* () {
         return <b>{perform(v)}</b>;
-      };
+      });
     });
     return { Pending, resolve: (v: string) => resolve(v) };
   }
@@ -2372,7 +2373,7 @@ describe("boundaries in call form", () => {
   it("Loading({ children: () => View }) builds the content inside the boundary", async () => {
     const { Pending, resolve } = pendingView();
     const Page = $component(function* () {
-      return function* () {
+      return view(function* () {
         return (
           <div>
             <p>shell</p>
@@ -2386,7 +2387,7 @@ describe("boundaries in call form", () => {
             )}
           </div>
         );
-      };
+      });
     });
     mount(() =>
       Loading({
@@ -2407,12 +2408,12 @@ describe("boundaries in call form", () => {
       const v = yield* $memo(function* () {
         return yield* raise(new Failed("nope"));
       });
-      return function* () {
+      return view(function* () {
         return <b>{perform(v)}</b>;
-      };
+      });
     });
     const Page = $component(function* () {
-      return function* () {
+      return view(function* () {
         return (
           <div>
             {perform(
@@ -2425,7 +2426,7 @@ describe("boundaries in call form", () => {
             )}
           </div>
         );
-      };
+      });
     });
     mount(() =>
       Errored({
@@ -2458,7 +2459,7 @@ describe("flow controls take holes (D-038)", () => {
     const App = $component(function* () {
       const [n, setN] = yield* $signal(1);
       set = v => write(() => setN(v));
-      return function* () {
+      return view(function* () {
         return (
           <div>
             {
@@ -2519,7 +2520,7 @@ describe("flow controls take holes (D-038)", () => {
             }
           </div>
         );
-      };
+      });
     });
     mount(App);
     expect(root.textContent).toBe("smallodda0");
@@ -2546,13 +2547,13 @@ describe("derivations", () => {
       const plusOne = yield* $memo(function* () {
         return (yield* doubled) + 1;
       });
-      return function* () {
+      return view(function* () {
         return (
           <p>
             {perform(doubled)} {perform(plusOne)} {perform(doubled)}
           </p>
         );
-      };
+      });
     });
     mount(App);
     expect(root.textContent).toBe("4 5 4");
@@ -2573,24 +2574,24 @@ describe("untyped throws (D-019)", () => {
   it("a plain throw in a block goes to the nearest Errored; in development it is UNTYPED_THROW naming the host and the component", async () => {
     const InSetup = $component(function* InSetup() {
       throwIn("setup");
-      return function* () {
+      return view(function* () {
         return <i />;
-      };
+      });
     });
     const InView = $component(function* InView() {
-      return function* () {
+      return view(function* () {
         throwIn("view");
         return <i />;
-      };
+      });
     });
     const InMemo = $component(function* InMemo() {
       const m = yield* $memo(function* () {
         throwIn("memo");
         return 1;
       });
-      return function* () {
+      return view(function* () {
         return <i>{perform(m)}</i>;
-      };
+      });
     });
     const InEffect = $component(function* InEffect() {
       yield* $effect(
@@ -2599,17 +2600,17 @@ describe("untyped throws (D-019)", () => {
           throwIn("effect");
         }
       );
-      return function* () {
+      return view(function* () {
         return <i />;
-      };
+      });
     });
     const InHole = $component(function* InHole() {
-      return function* () {
+      return view(function* () {
         return h("i", function* () {
           throwIn("hole");
           return 1;
         });
-      };
+      });
     });
     const cases: [string, () => any, string][] = [
       ["setup", InSetup, "a setup in <InSetup>"],
@@ -2646,9 +2647,9 @@ describe("untyped throws (D-019)", () => {
       fire = $event(function* () {
         throwIn("event");
       });
-      return function* () {
+      return view(function* () {
         return <i />;
-      };
+      });
     });
     mount(App);
     const error = await fire().then(
@@ -2666,9 +2667,9 @@ describe("untyped throws (D-019)", () => {
         yield* raise(new Failed("typed"));
         return 1;
       });
-      return function* () {
+      return view(function* () {
         return <p>{perform(m)}</p>;
-      };
+      });
     });
     mount(() =>
       Errored({
@@ -2688,9 +2689,9 @@ describe("untyped throws (D-019)", () => {
           throw new Error("handled");
         }, toError);
       });
-      return function* () {
+      return view(function* () {
         return <p>{perform(a)}</p>;
-      };
+      });
     });
     mount(() =>
       Errored({
@@ -2708,10 +2709,10 @@ describe("host state is per run (re-entrancy)", () => {
   it("an async $memo resuming while another view renders: the view's reads are its holes'", async () => {
     let cardViews = 0;
     const Card = $component(function* Card(props: Props<{ name: string }>) {
-      return function* () {
+      return view(function* () {
         cardViews++;
         return <b>{perform(props.name)}</b>;
-      };
+      });
     });
     const App = $component(function* App() {
       const card = yield* $memo(function* () {
@@ -2720,9 +2721,9 @@ describe("host state is per run (re-entrancy)", () => {
         // and holes run inside the resumed run, each as its own host
         return createRoot(() => Card({ name }));
       });
-      return function* () {
+      return view(function* () {
         return <div>{perform(card)}</div>;
-      };
+      });
     });
     mount(() =>
       Loading({
@@ -2764,9 +2765,9 @@ describe("attempt / isPending interplay", () => {
         after++;
         return v + i;
       });
-      return function* () {
+      return view(function* () {
         return <i>{perform(m)}</i>;
-      };
+      });
     });
     mount(() =>
       Loading({
@@ -2809,9 +2810,9 @@ describe("attempt / isPending interplay", () => {
         if (v < 0) yield* raise(new Failed("stale"));
         return v + i;
       });
-      return function* () {
+      return view(function* () {
         return <i>{perform(m)}</i>;
-      };
+      });
     });
     mount(() =>
       Errored({

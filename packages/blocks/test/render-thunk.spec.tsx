@@ -14,7 +14,8 @@ import {
   attempt,
   Errored,
   Loading,
-  render
+  render,
+  view
 } from "solid-blocks";
 import { toFailed } from "./failed.js";
 
@@ -64,9 +65,9 @@ for (const form of forms) {
         const inc = $event(function* () {
           yield* setN(v => v + 1);
         });
-        return function* () {
+        return view(function* () {
           return <button onClick={yield* inc}>{yield* n}</button>;
-        };
+        });
       });
       mount(form, App);
       root.querySelector("button")!.click();
@@ -90,16 +91,16 @@ for (const form of forms) {
         const inc = $event(function* () {
           yield* setN(v => v + 1);
         });
-        return function* () {
+        return view(function* () {
           return (
             <button onClick={yield* inc}>
               {yield* data}:{yield* n}
             </button>
           );
-        };
+        });
       });
       const App = $component(function* () {
-        return function* () {
+        return view(function* () {
           return (
             <>
               {
@@ -123,7 +124,7 @@ for (const form of forms) {
               }
             </>
           );
-        };
+        });
       });
       mount(form, App);
       expect(root.textContent).toBe("…");

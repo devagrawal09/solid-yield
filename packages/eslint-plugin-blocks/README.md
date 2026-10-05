@@ -23,7 +23,7 @@ export default [
 ];
 ```
 
-`recommended` turns every rule on as an error, except `prefer-view-wrapper` and `no-unshown-wait` (warnings; the latter needs type information). Rule ids are `solid-blocks/<rule>`. Several rules have autofixes, for example tag → call for `no-component-tag`. `no-unchecked-foreign-handoff` (D-088) reports a block component handed to plain Solid (the router, `@solidjs/web`'s `render`) without `foreign(…)`; with type information its message names what the component may fail with. The twins' shared config is `examples/harness/eslint.config.mjs`.
+`recommended` turns every rule on as an error, except `no-unshown-wait` (a warning; it needs type information). `require-view-wrapper` (D-089, formerly the warning `prefer-view-wrapper`) is an error with an autofix. Rule ids are `solid-blocks/<rule>`. Several rules have autofixes, for example tag → call for `no-component-tag`. `no-unchecked-foreign-handoff` (D-088) reports a block component handed to plain Solid (the router, `@solidjs/web`'s `render`) without `foreign(…)`; with type information its message names what the component may fail with. The twins' shared config is `examples/harness/eslint.config.mjs`.
 
 Every rule is listed with the type, development-error and transform codes for the same mistake in [`documentation/refusals.md`](../../documentation/refusals.md).
 

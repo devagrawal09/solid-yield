@@ -58,30 +58,7 @@ export const UserCard = $component(function* UserCard(
   });
 });
 
-// --- 3. an event's in-flight state, read like any source (D-075) ---------------------------
-export class SaveError extends Error {
-  readonly kind = "save" as const;
-}
-/** A stand-in for a slow save. */
-export function saveDraft(): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, 10));
-}
-export const Saver = $component(function* Saver() {
-  const [saved, setSaved] = yield* $signal(0);
-  const save = $event(function* () {
-    yield* attempt(saveDraft, cause => new SaveError(String(cause)));
-    yield* setSaved((yield* saved) + 1);
-  });
-  return view(function* () {
-    return (
-      <button class="save" disabled={yield* save.pending} onClick={yield* save}>
-        saved {yield* saved}
-      </button>
-    );
-  });
-});
-
-// --- 4. the app: async data, a typed failure, boundaries, a flow control -------------------
+// --- 3. the app: async data, a typed failure, boundaries, a flow control -------------------
 export const App = $component(function* App() {
   const [id, setId] = yield* $signal(1);
   // a memo reads, then waits; its failure has a type
@@ -129,14 +106,6 @@ export const App = $component(function* App() {
                   }
                 </>
               );
-            }
-          })
-        }
-        {
-          yield* Errored({
-            fallback: <p class="error">not saved</p>,
-            children: function* () {
-              return <>{yield* Saver()}</>;
             }
           })
         }

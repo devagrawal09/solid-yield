@@ -18,7 +18,6 @@ import {
   Show,
   view,
   type Bind,
-  type ComponentView,
   type BoundEvent,
   type Create,
   type EventHandler,
@@ -492,23 +491,3 @@ export const LazyFallback = $component(function* LazyFallback() {
   });
 });
 export type LazyFallbackView = Expect<Equal<ViewPendingOf<ReturnType<typeof LazyFallback>>, true>>;
-
-// --- an event's in-flight state is a settled source (D-075) -----------------------------------
-export const InFlight = $component(function* InFlight() {
-  const save = $event(function* () {
-    yield* attempt(
-      () => Promise.resolve(),
-      () => undefined
-    );
-  });
-  type _pending = Expect<Equal<typeof save.pending, Source<boolean, never, false>>>;
-  return view(function* () {
-    return (
-      <button disabled={yield* save.pending} onClick={yield* save}>
-        save
-      </button>
-    );
-  });
-});
-// reading it adds no color: an async event's `A` is not the view's, and it absorbs its failure
-export type InFlightView = Expect<Equal<ReturnType<typeof InFlight>, ComponentView<false, never>>>;

@@ -469,14 +469,6 @@ export interface EventHandler<
   readonly [EVENT]: true;
   readonly [FAILS]?: E;
   [Symbol.iterator](): Generator<Bind<P, E>, BoundEvent<Args>, any>;
-  /**
-   * Its in-flight state (D-075): `true` while any call is paused on a pending
-   * read or awaiting an async attempt, `false` otherwise — read like any
-   * source, `<button disabled={yield* save.pending}>`. It is settled and never
-   * fails; nothing shows a `Loading` for a call (the runtime cannot know what
-   * a call will read before it runs).
-   */
-  readonly pending: Source<boolean, never, false>;
 }
 
 /**

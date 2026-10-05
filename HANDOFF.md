@@ -36,7 +36,7 @@ for c in $(git rev-list --reverse main); do git push origin "$c:refs/heads/main"
 
 ## Vendored files to regenerate per Solid RC
 
-- `packages/blocks/jsx/jsx.d.ts` and `jsx/jsx-properties.d.ts` are built from the installed `@solidjs/web`'s `types/` by `scripts/jsx-from-web.mjs`, then `scripts/jsx-web-shared.mjs` (D-067's `TagType`, web's `SerializableAttributeValue`, D-072's bound-only `EventHandlerUnion`).
+- `packages/blocks/jsx/jsx.d.ts` and `jsx/jsx-properties.d.ts` are built from the installed `@solidjs/web`'s `types/` by `scripts/jsx-from-web.mjs`, then the unchanged `scripts/jsx-web-shared.mjs` (D-067's `TagType`, web's `SerializableAttributeValue`).
 - The build regenerates them (`types:jsx`), and CI fails if a commit's lockfile and those files disagree.
 - When Solid moves: `pnpm update solid-js @solidjs/web @solidjs/h`, then `pnpm build`, then commit `jsx/` with the lockfile and run the gate.
 - If web's generated banner, its `solid-js` `Element` import or its `type Element = … // END - difference …` block changes shape, the script stops with a named error rather than guessing.
@@ -76,27 +76,8 @@ Four commits on `main` after `84521e5`, each gated green. The gate has 34 steps;
 
 ### Open for Dev
 
-- ~~**D-069 F6.**~~ Ruled D-074: the routes are not mixed (Phase 5).
+- **D-069 F6.** The library route and the compiler route number hydration keys differently, so neither can hydrate the other's markup. A future compiler route either adopts Solid's owner numbering or ships its own client.
 - **D-069 F1–F5.** These are declared differences from handwritten Solid: `$effect`'s order, rows rendered once, superseded memo runs closed, events held as a transaction, deeper hydration keys. They are pinned, not judged. Rule on any you want changed.
-- ~~**D-070 F1 / F2.**~~ Ruled D-073 / D-072 and implemented (Phase 5).
+- **D-070 F1 / F2.** An `$effect`'s or `$settled`'s raise, and a DOM-dispatched `$event`'s failure, are in no view type, though they fail at run time. D-070 lists the options for each.
 - **Instruction counts.** Valgrind does not run on macOS arm64, so §8's synthetic numbers are wall time. On Linux, `node examples/harness/runtime-cost/measure.mjs --wall` restores the instruction counts.
 - **Conformance coverage.** The fork's `$`-dialect-only scenarios (memo-effect-order, owner-routing, store-paths, …) have no library source yet. Porting them is a candidate for later work (`COVERAGE.md`, "Not ported").
-
-## Phase 5 (Dev's rulings D-071–D-075), 2026-10-05
-
-Five commits on `main` after `c6da576`, each gated green (34 steps, the baseline unchanged). Nothing was pushed.
-
-| Commit | What |
-| --- | --- |
-| 1 `docs: record D-071–D-075 …` | The five decisions; §1 / §3 / §7 and the READMEs for D-071 (the types say exactly what the runtime does) and D-074 (one route per app). |
-| 2 `feat: an effect's raise joins its component's failures (D-073)` | `Create<K, E>`; `$effect` / `$settled` failures in the component's and a row's type; an absorbing `attempt` (a handler returning a non-`Error`). |
-| 3 `feat: binding an event in a view is a hole (D-072)` | `Bind<P, E>`, iterable `EventHandler`, `BoundEvent`; `perform` binds; `BLOCKS_YIELD_IN_EVENT` removed from the transform and the lint; `no-unbound-event` (staged out of `recommended`). |
-| 4 `refactor: bind every event in a view …` | Event attributes take only a bound handler; `Errored`'s `Reset` and fallback colors; every site migrated (counts in D-072). |
-| 5 `feat: an event's in-flight state is a source (D-075)` | `save.pending`; tests; §1 / §3; getting-started §6. |
-
-### Open for Dev (Phase 5)
-
-- **D-072's `P` in a view says more than the runtime does.** Binding an event that may wait on a pending read makes the view pending, so it needs a `Loading` above it. But the runtime never suspends a view for a call (D-075: a call shows no `Loading`). That is D-071's pattern the other way round: the type over-states, it does not under-state. Implemented as ruled. No twin needed a new boundary once effect-blocks' widened `P` was corrected. todos' and room's `P` events already sit under a `Loading`.
-- **`try` / `catch` is invisible to the types.** A block that catches a failure (effect's `place`, room's `drop` / `submit`) keeps it in its type, so binding the event gives the view a failure the runtime never delivers. The one typed handler is D-073's absorbing `attempt`, which does not cover an event call (`yield* save()`) or a `raise`.
-- **Plain functions in event attributes are refused.** "Any non-handler there is a type error" was read to cover `onClick={() => …}` too: a plain function can call an event whose colors would then reach no type. One twin site changed (room's `() => regenerate(reset)`). `Errored`'s `reset` is the one plain function kept, typed as already bound because it has no colors.
-- **A row `Errored` fallback has its parameters annotated.** TypeScript does not infer them, even with `For`'s own row signature in a `declare function`. §7 records it.

@@ -1311,8 +1311,7 @@ export function $event<Args extends unknown[] = [], Y extends EventOp = never, R
     // handles (a DOM dispatch ignores the result) goes to the boundary.
     const rec: CallRecord = {};
     let handled = false;
-    const call = run(rec, ...args);
-    const result = call.then(undefined, (error: unknown) => {
+    const result = run(rec, ...args).then(undefined, (error: unknown) => {
       if (!handled && boundary && owner) {
         reportError(owner, error);
         return undefined;
@@ -1320,9 +1319,6 @@ export function $event<Args extends unknown[] = [], Y extends EventOp = never, R
       throw error;
     });
     const then = result.then.bind(result);
-    // D-075: a call whose body did not finish synchronously is paused (on a
-    // pending read) or awaiting (an async attempt) until it settles
-    if (!rec.done) inFlight.call(call);
     result.then = ((onFulfilled?: any, onRejected?: any) => {
       handled = true;
       return then(onFulfilled, onRejected);
@@ -1342,9 +1338,6 @@ export function $event<Args extends unknown[] = [], Y extends EventOp = never, R
     };
     return result;
   };
-  const inFlight = new InFlight();
-  // `save.pending` (D-075): a source, created when first read
-  Object.defineProperty(handler, "pending", { get: () => inFlight.source() });
   handler[EVENT_MARK] = true;
   // `yield* save`: bind it (D-072) — the handler itself, for an event
   // attribute; the JSX transform's `perform(save)` returns it the same way
@@ -1352,55 +1345,6 @@ export function $event<Args extends unknown[] = [], Y extends EventOp = never, R
     return handler;
   };
   return handler;
-}
-
-/**
- * An event's in-flight state (D-075): how many of its calls are paused on a
- * pending read or awaiting an async attempt, as a source of `count > 0`.
- *
- * The flag is written outside the call's transaction. An `$event` call is an
- * action, and the writes made in its window — the call's synchronous slice and
- * whatever runs before the scheduled flush — are held until it settles (D-069
- * F4), so a flag written there would show only once the call is over. The
- * count goes up in a microtask after the call is found paused, and down in
- * the reaction to its settling; both are plain writes, shown at once.
- */
-class InFlight {
-  count = 0;
-  set: ((v: boolean) => void) | null = null;
-  get: Source<boolean> | null = null;
-  source(): Source<boolean> {
-    if (!this.get) {
-      const [get, set] = runWithOwner(null, () => createSignal(this.count > 0));
-      this.get = asSource(get) as any;
-      this.set = set as (v: boolean) => void;
-    }
-    return this.get!;
-  }
-  /**
-   * One call, paused: counted from the next microtask until it settles. The
-   * reaction is on the action's own promise, which the call's result already
-   * handles: whether the result's rejection is handled stays the caller's.
-   */
-  call(action: Promise<unknown>): void {
-    let settled = false;
-    let counted = false;
-    queueMicrotask(() => {
-      if (settled) return;
-      counted = true;
-      this.add(1);
-    });
-    const done = () => {
-      settled = true;
-      if (counted) this.add(-1);
-    };
-    action.then(done, done);
-  }
-  add(delta: number): void {
-    const was = this.count > 0;
-    this.count += delta;
-    if (this.set && was !== this.count > 0) this.set(this.count > 0);
-  }
 }
 
 /** Whether (and how) an event call's body finished. */

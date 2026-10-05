@@ -172,6 +172,21 @@ function buildSteps(twins) {
     args: ["examples/harness/ssr-smoke/smoke.mjs"]
   });
 
+  // Twin-hydration smoke (examples/harness/hydrate-smoke/hydrate.mjs): each of those 16
+  // server renders is hydrated in jsdom by the twin's own client entry, compiled for the
+  // DOM by the same Vite server, each case in its own process with a 30 s timeout. A
+  // hydration mismatch (Solid's dev diagnostics), a development error, an unhandled
+  // rejection, a replaced server root or a failed interaction (rendering's /settings
+  // portal) fails it. The network is held (no listening server). Five twin cases are
+  // recorded known failures (KNOWN_FAILURES; the originals hydrate clean): each must
+  // still fail with its recorded key miss.
+  steps.push({
+    name: "twins:hydrate-smoke",
+    cwd: root,
+    cmd: process.execPath,
+    args: ["examples/harness/hydrate-smoke/hydrate.mjs"]
+  });
+
   steps.push(
     { name: "pkg:blocks:test", cwd: root, fast: true, ...pnpmRun("packages/blocks", "test") },
     {
@@ -233,6 +248,7 @@ function buildSteps(twins) {
       ...dirs.map(d => `${d}/**/*.[tj]s?(x)`),
       "packages/*/test/*.mjs",
       "examples/harness/ssr-smoke/*.mjs",
+      "examples/harness/hydrate-smoke/*.mjs",
       "scripts/*.mjs"
     ]
   });

@@ -5,9 +5,9 @@ reference run used as the baseline; the machine-readable copy is
 [`blocks-gate-baseline.json`](./blocks-gate-baseline.json). CI runs the same gate
 against this file (`.github/workflows/gate.yml`).
 
-**Reference summary: `35 pass / 0 fail / 0 skip in 28s`** (35 steps, `--jobs 3`,
-every step under `TZ=UTC`). Run on the staged tree of Phase 5's gate-step commit (the
-server-render smoke), so the JSON's `head` is that commit's parent (`046387b`).
+**Reference summary: `36 pass / 0 fail / 0 skip in 34s`** (36 steps, `--jobs 3`,
+every step under `TZ=UTC`). Run on the staged tree of the review fixes' gate-step commit (the
+twin-hydration smoke), so the JSON's `head` is that commit's parent (`d612c89`).
 Environment: Node v24.18.0, pnpm 11.1.1, darwin/arm64.
 
 **Solid under test: the published packages** — `solid-js`, `@solidjs/web`, `@solidjs/h`
@@ -18,7 +18,33 @@ the same 30 steps ran against its local rc.11 workspace packages and its pristin
 upstream compiler build. All 30 pass on rc.13 too: nothing in the public API the
 library and the twins use moved between rc.11 and rc.13 (D-016's canary is quiet).
 
-**Phase 5 added one step** (35 now): `twins:ssr-smoke`
+**The review fixes added one step** (36 now): `twins:hydrate-smoke`
+(`examples/harness/hydrate-smoke/hydrate.mjs`). Each of the server-render smoke's 16 renders
+is hydrated in jsdom by the twin's own client entry. One Vite server per case, with the
+twin's config plus a runnable `hydrate` environment (consumer `client`): the SSR environment
+renders as the smoke does, `hydrate` compiles the client entry for the DOM (hydratable) and
+runs it in the same process. jsdom's window is put on Node's global as Vitest's jsdom
+environment does (`populateGlobal`), so the server's inline scripts (`_$HY`, the streamed
+chunks) and Solid's client share it. rendering's `client.tsx` is the entry; room's and
+hackernews' generated entries are the document's module script. A case fails on a
+development error or a hydration complaint (Solid's "Hydration key miss" …), an unhandled
+rejection that nothing handles later, a server root element the client replaced, or a failed
+interaction (rendering's `/settings`: the portal's close button). Vite's HMR client is
+stubbed in `hydrate`; a hydrating page's lazy-module preload (`import(http://localhost/…)`)
+is served by the dev server. **The network is held:** `fetch` never settles, because server
+functions are served by Vite's middleware, which needs a listening server (local port
+binding is refused in the sandbox this was built in), so room's live sources and posts are
+not exercised past hydration. **Five twin cases are known failures**, recorded in the
+script's `KNOWN_FAILURES` with their exact messages: rendering `stream` `/profile`,
+`/stream`, `/error-stream`, room `/live`, hackernews' story. Each is a "Hydration key miss"
+on a call-form `Loading`'s fallback, which the client builds where the server streamed the
+content. `--originals` runs the same cases against the originals, which hydrate clean (16 /
+16), so these are the library's. A known case must keep failing with its message, and one
+that starts to pass fails the step until it is removed from the list. Planting a client-only
+`<p>` in rendering's stream client fails `/settings` with a key miss. `repo:prettier` now
+also checks `examples/harness/hydrate-smoke/*.mjs`.
+
+**Phase 5 added one step** (35 then): `twins:ssr-smoke`
 (`examples/harness/ssr-smoke/smoke.mjs`). Every twin with a server entry renders each of its
 routes on the server through Vite's SSR loader (development builds, as `vite dev` serves
 them), each render in its own process, killed after 30 s. That is rendering-blocks' `string`
@@ -85,38 +111,39 @@ so results depend on the commit, not on the machine's clock locale (D-027).
 
 | Step | Result | Duration |
 | --- | --- | --- |
-| `twin:effect-blocks:test` | PASS | 1.6 s |
-| `twin:effect-blocks:typecheck` | PASS | 1.2 s |
-| `twin:effect-blocks:lint` | PASS | 1.5 s |
-| `twin:hackernews-spa-blocks:test` | PASS | 2.0 s |
-| `twin:hackernews-spa-blocks:typecheck` | PASS | 1.3 s |
-| `twin:hackernews-spa-blocks:lint` | PASS | 1.5 s |
-| `twin:rendering-blocks:test` | PASS | 3.1 s |
-| `twin:rendering-blocks:typecheck` | PASS | 1.2 s |
-| `twin:rendering-blocks:lint` | PASS | 1.5 s |
-| `twin:room-blocks:test` | PASS | 1.5 s |
-| `twin:room-blocks:typecheck` | PASS | 1.3 s |
-| `twin:room-blocks:lint` | PASS | 1.6 s |
-| `twin:sierpinski-blocks:test` | PASS | 10.7 s |
-| `twin:sierpinski-blocks:typecheck` | PASS | 0.9 s |
-| `twin:sierpinski-blocks:lint` | PASS | 1.2 s |
-| `twin:sierpinski-blocks-h:test` | PASS | 10.7 s |
-| `twin:sierpinski-blocks-h:typecheck` | PASS | 1.6 s |
-| `twin:sierpinski-blocks-h:lint` | PASS | 1.8 s |
-| `twin:todos-blocks:test` | PASS | 1.4 s |
+| `twin:effect-blocks:test` | PASS | 1.7 s |
+| `twin:effect-blocks:typecheck` | PASS | 1.4 s |
+| `twin:effect-blocks:lint` | PASS | 1.7 s |
+| `twin:hackernews-spa-blocks:test` | PASS | 2.2 s |
+| `twin:hackernews-spa-blocks:typecheck` | PASS | 1.5 s |
+| `twin:hackernews-spa-blocks:lint` | PASS | 1.7 s |
+| `twin:rendering-blocks:test` | PASS | 3.2 s |
+| `twin:rendering-blocks:typecheck` | PASS | 1.4 s |
+| `twin:rendering-blocks:lint` | PASS | 1.6 s |
+| `twin:room-blocks:test` | PASS | 1.6 s |
+| `twin:room-blocks:typecheck` | PASS | 1.4 s |
+| `twin:room-blocks:lint` | PASS | 1.7 s |
+| `twin:sierpinski-blocks:test` | PASS | 11.0 s |
+| `twin:sierpinski-blocks:typecheck` | PASS | 1.0 s |
+| `twin:sierpinski-blocks:lint` | PASS | 1.3 s |
+| `twin:sierpinski-blocks-h:test` | PASS | 11.1 s |
+| `twin:sierpinski-blocks-h:typecheck` | PASS | 1.7 s |
+| `twin:sierpinski-blocks-h:lint` | PASS | 1.9 s |
+| `twin:todos-blocks:test` | PASS | 1.5 s |
 | `twin:todos-blocks:typecheck` | PASS | 1.0 s |
 | `twin:todos-blocks:lint` | PASS | 1.3 s |
 | `twin:todos-blocks-h:test` | PASS | 1.3 s |
-| `twin:todos-blocks-h:typecheck` | PASS | 1.8 s |
-| `twin:todos-blocks-h:lint` | PASS | 2.1 s |
-| `twins:ssr-smoke` | PASS | 7.2 s |
-| `pkg:blocks:test` | PASS | 8.7 s |
-| `pkg:eslint-plugin-blocks:test` | PASS | 1.5 s |
-| `pkg:vite-plugin-blocks:test` | PASS | 1.3 s |
-| `pkg:vite-plugin-blocks:typecheck` | PASS | 1.0 s |
-| `pkg:blocks:conformance` | PASS | 3.9 s |
-| `pkg:blocks:exports` | PASS | 1.1 s |
-| `pkg:vite-plugin-blocks:exports` | PASS | 0.8 s |
-| `pkg:eslint-plugin-blocks:exports` | PASS | 0.8 s |
-| `repo:prettier` | PASS | 1.5 s |
+| `twin:todos-blocks-h:typecheck` | PASS | 1.9 s |
+| `twin:todos-blocks-h:lint` | PASS | 2.3 s |
+| `twins:ssr-smoke` | PASS | 7.6 s |
+| `twins:hydrate-smoke` | PASS | 10.6 s |
+| `pkg:blocks:test` | PASS | 9.4 s |
+| `pkg:eslint-plugin-blocks:test` | PASS | 1.6 s |
+| `pkg:vite-plugin-blocks:test` | PASS | 1.4 s |
+| `pkg:vite-plugin-blocks:typecheck` | PASS | 1.1 s |
+| `pkg:blocks:conformance` | PASS | 4.2 s |
+| `pkg:blocks:exports` | PASS | 1.2 s |
+| `pkg:vite-plugin-blocks:exports` | PASS | 0.9 s |
+| `pkg:eslint-plugin-blocks:exports` | PASS | 0.9 s |
+| `repo:prettier` | PASS | 1.7 s |
 | `repo:oxlint` | PASS | 0.1 s |

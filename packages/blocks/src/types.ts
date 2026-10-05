@@ -11,11 +11,21 @@
  * Two facts travel with values: whether reading them may be *pending*
  * (async, not yet resolved) and which errors reading them may *fail* with.
  * Operations carry them as phantom fields; `PendingOf` / `FailsOf` fold a
- * yield union into them. Nothing here exists at runtime.
+ * yield union into them. A third fact is a marker only: a view that binds an
+ * event which may wait on a pending read *may wait* (`MayWaitOf`, D-075). It
+ * never makes the view pending — the runtime does not suspend a view for a
+ * call. Nothing here exists at runtime.
  */
 
 /** Phantom: may this value / operation be pending? */
 export declare const PENDING: unique symbol;
+/**
+ * Phantom marker (D-075): a bound handler may wait on a pending read, so the
+ * view binding it may wait. Not a color: no boundary handles it, and it never
+ * joins `PendingOf` (the runtime shows no `Loading` for a call). The lint
+ * `no-unshown-wait` warns where it is bound.
+ */
+export declare const MAY_WAIT: unique symbol;
 /** Phantom: the failures reading this value / performing this operation may raise. */
 export declare const FAILS: unique symbol;
 /** Phantom: the operation kind. */
@@ -84,13 +94,15 @@ export interface EventCallOp<
 /**
  * Binding an `$event` handler in a view: `onClick={yield* save}` (D-072). The
  * handler is not called; the DOM calls it. What a call may do the view
- * carries: its pending read (`P`, it may wait on pending data) and its
- * failures, which go to the nearest `Errored` above the handler's creation
- * site when nobody handles the call (a DOM dispatch does not).
+ * carries: its failures, which go to the nearest `Errored` above the
+ * handler's creation site when nobody handles the call (a DOM dispatch does
+ * not), and — as a marker, not as pending — that it may wait on pending data
+ * (`W`, the handler's `P`; D-075 amended): the runtime never suspends a view
+ * for a call, so a bind does not make the view pending.
  */
-export interface Bind<P extends boolean = boolean, E = unknown> {
+export interface Bind<W extends boolean = boolean, E = unknown> {
   readonly [KIND]: "bind";
-  readonly [PENDING]: P;
+  readonly [MAY_WAIT]: W;
   readonly [FAILS]: E;
 }
 /**
@@ -114,11 +126,12 @@ export interface Cleanup {
 export interface ContextRead {
   readonly [KIND]: "context";
 }
-/** `yield* Child(props)`: the child's pending and failures, propagated. */
-export interface ChildView<P extends boolean = boolean, E = unknown> {
+/** `yield* Child(props)`: the child's pending and failures, propagated, and its may-wait marker (D-075). */
+export interface ChildView<P extends boolean = boolean, E = unknown, W extends boolean = boolean> {
   readonly [KIND]: "child";
   readonly [PENDING]: P;
   readonly [FAILS]: E;
+  readonly [MAY_WAIT]: W;
 }
 
 export type AnyOp =
@@ -179,6 +192,18 @@ type PendingBits<Y> = Y extends Wait
 export type PendingOf<Y> = [PendingBits<Y>] extends [never] ? false : true;
 /** The union of the failures of the operations in `Y`. */
 export type FailsOf<Y> = Y extends { readonly [FAILS]: infer E } ? E : never;
+
+type MayWaitBits<Y> = Y extends { readonly [MAY_WAIT]: infer W }
+  ? true extends W
+    ? true
+    : never
+  : never;
+/**
+ * Whether any operation in `Y` binds a handler that may wait on pending data
+ * (a `Bind`, or a child view that does): the may-wait marker (D-075). Folded
+ * like `PendingOf`, and never part of it.
+ */
+export type MayWaitOf<Y> = [MayWaitBits<Y>] extends [never] ? false : true;
 
 type ReadPendingBits<Y> = Y extends { readonly [PENDING]: infer P }
   ? true extends P
@@ -377,12 +402,17 @@ export type PropsArgs<D> = {} extends D ? [props?: PropsInput<D>] : [props: Prop
  * What a component renders. `P` / `E` are the pending and failures it has
  * not handled; only a settled view (`View<false, never>`) is an element.
  * `yield* view` (inside another view) moves them into the enclosing view.
+ * `W` is the may-wait marker (D-075): the view binds a handler that may
+ * wait on pending data. It is not a color — a may-wait view is settled when
+ * `P` is `false` — so it defaults to `boolean` and every annotation without
+ * it accepts either.
  */
-export interface View<P extends boolean = boolean, E = unknown> {
+export interface View<P extends boolean = boolean, E = unknown, W extends boolean = boolean> {
   readonly [VIEW]: true;
   readonly [PENDING]: P;
   readonly [FAILS]: E;
-  [Symbol.iterator](): Generator<ChildView<P, E>, SettledView, any>;
+  readonly [MAY_WAIT]: W;
+  [Symbol.iterator](): Generator<ChildView<P, E, W>, SettledView, any>;
 }
 export type SettledView = View<false, never>;
 
@@ -391,7 +421,11 @@ export type SettledView = View<false, never>;
  * — a JSX tag refuses a function returning one (D-067), and the mark sits on
  * the view, not the function, so a component stays a plain function type.
  */
-export type ComponentView<P extends boolean = boolean, E = unknown> = View<P, E> & {
+export type ComponentView<
+  P extends boolean = boolean,
+  E = unknown,
+  W extends boolean = boolean
+> = View<P, E, W> & {
   readonly [COMPONENT]: true;
 };
 
@@ -400,32 +434,38 @@ export type ComponentView<P extends boolean = boolean, E = unknown> = View<P, E>
  * view. A plain function type, so a component whose props are generic in
  * their colors (D-029) keeps its type parameters (D-068).
  */
-export type Component<D = {}, Pd extends boolean = boolean, E = unknown> = (
-  ...props: PropsArgs<D>
-) => ComponentView<Pd, E>;
+export type Component<
+  D = {},
+  Pd extends boolean = boolean,
+  E = unknown,
+  W extends boolean = boolean
+> = (...props: PropsArgs<D>) => ComponentView<Pd, E, W>;
 
 /** A view generator's pending: its reads' and, for a no-JSX view, its output's. */
 export type ViewPending<VY, R> = PendingOf<VY | HOps<R>>;
 export type ViewFails<VY, R> = FailsOf<VY | HOps<R>>;
+/** A view generator's may-wait marker (D-075): its binds' and its children's. */
+export type ViewMayWait<VY, R> = MayWaitOf<VY | HOps<R>>;
 /**
  * The colors of what a view returns: `h` output's, or a flow control's view
  * (an `h` view may return `Show({ … })` itself). A JSX element is settled.
  */
 export type HOps<R> =
-  R extends HView<infer P, infer E>
-    ? ChildView<P, E>
-    : R extends View<infer P, infer E>
-      ? ChildView<P, E>
+  R extends HView<infer P, infer E, infer W>
+    ? ChildView<P, E, W>
+    : R extends View<infer P, infer E, infer W>
+      ? ChildView<P, E, W>
       : never;
 
 /**
  * Output of the no-JSX renderer (`h`): its pending / failures are
- * the union of its holes'.
+ * the union of its holes', and so is its may-wait marker (`W`, D-075).
  */
-export interface HView<P extends boolean = boolean, E = unknown> {
+export interface HView<P extends boolean = boolean, E = unknown, W extends boolean = boolean> {
   readonly [HVIEW]: true;
   readonly [PENDING]: P;
   readonly [FAILS]: E;
+  readonly [MAY_WAIT]: W;
 }
 
 // --- events ----------------------------------------------------------------------------
@@ -455,8 +495,9 @@ export interface EventCall<
  * Two operations take it. `yield* save(x)` calls it (an `EventCallOp`: the
  * caller waits, and gets the call's colors). `yield* save` binds it (D-072):
  * in a view's event attribute, `onClick={yield* save}` is a `Bind` op that
- * gives the view the handler's `P` and failures and evaluates to the handler
- * itself, branded `BoundEvent` — the one value an event attribute takes.
+ * gives the view the handler's failures and, from its `P`, the may-wait
+ * marker (not pending, D-075), and evaluates to the handler itself, branded
+ * `BoundEvent` — the one value an event attribute takes.
  */
 export interface EventHandler<
   Args extends unknown[] = any[],
@@ -468,6 +509,8 @@ export interface EventHandler<
   (...args: Args): EventCall<R, E, P, A>;
   readonly [EVENT]: true;
   readonly [FAILS]?: E;
+  /** Phantom: a call may wait on pending data (its `P`; the lint's `no-unshown-wait` reads it). */
+  readonly [MAY_WAIT]?: P;
   [Symbol.iterator](): Generator<Bind<P, E>, BoundEvent<Args>, any>;
 }
 

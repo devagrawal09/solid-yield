@@ -22,7 +22,7 @@ export const Counter = $component(function* Counter(props: Props<{ step: number 
 });
 ```
 
-- Every read and write is a `yield*`; so is binding an event in a view (`onClick={yield* add}`), which gives the view the event's pending read and failures.
+- Every read and write is a `yield*`; so is binding an event in a view (`onClick={yield* add}`), which gives the view the event's failures (and, when a call may wait on a pending read, a may-wait marker: never pending, D-075).
 - A setup creates and never reads.
 - A view has no body: every read is a hole in JSX, and structure comes from flow controls.
 - A block component is called (`{yield* Counter({ step })}`), not tagged.

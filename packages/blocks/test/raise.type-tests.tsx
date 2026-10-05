@@ -28,6 +28,7 @@ import {
   type Props,
   type Raise,
   type Source,
+  type SettledView,
   type View,
   type Yieldable
 } from "solid-blocks";
@@ -40,6 +41,8 @@ type Expect<T extends true> = T;
 type ViewFailsOf<V> = V extends View<boolean, infer E> ? E : never;
 /** A view's pending flag (its first color). */
 type ViewPendingOf<V> = V extends View<infer P, unknown> ? P : never;
+/** A view's may-wait marker (D-075): not a color. */
+type ViewMayWaitOf<V> = V extends View<boolean, unknown, infer W> ? W : never;
 
 class Boom extends Error {
   readonly kind = "boom" as const;
@@ -275,6 +278,7 @@ export const Event = $component(function* Event() {
 // failure reaches the nearest Errored above the handler's creation site
 export type EventView = Expect<Equal<ViewFailsOf<ReturnType<typeof Event>>, Boom>>;
 export type EventViewSettled = Expect<Equal<ViewPendingOf<ReturnType<typeof Event>>, false>>;
+export type EventViewNoWait = Expect<Equal<ViewMayWaitOf<ReturnType<typeof Event>>, false>>;
 // the bind is the handler, un-called and branded; the call is an EventCallOp (D-072)
 export type BindOp = Expect<
   Equal<
@@ -282,7 +286,9 @@ export type BindOp = Expect<
     Generator<Bind<true, Boom>, BoundEvent<[]>, any>
   >
 >;
-// an event that waits on a pending read (`P`) makes the view binding it pending (D-072)
+// an event that may wait on a pending read (`P`) does not make the view binding it pending:
+// the runtime never suspends a view for a call. The view carries the may-wait marker
+// instead (D-075 amended), which no boundary handles and the lint's no-unshown-wait reports
 export const EventPending = $component(function* EventPending(
   props: Props<{ n: Source<number, never, true> }>
 ) {
@@ -294,7 +300,51 @@ export const EventPending = $component(function* EventPending(
     return <button onClick={yield* go}>go</button>;
   });
 });
-export type EventPendingView = Expect<Equal<ViewPendingOf<ReturnType<typeof EventPending>>, true>>;
+export type EventPendingView = Expect<Equal<ViewPendingOf<ReturnType<typeof EventPending>>, false>>;
+export type EventPendingMayWait = Expect<
+  Equal<ViewMayWaitOf<ReturnType<typeof EventPending>>, true>
+>;
+// so it is an element: a settled view, needing no Loading
+export const eventPendingElement: SettledView = EventPending({ n: pendingN });
+// the marker folds like pending: through a flow control's content and a child view
+export const EventPendingNested = $component(function* EventPendingNested(
+  props: Props<{ n: Source<number, never, true> }>
+) {
+  const go = $event(function* () {
+    yield* props.n;
+  });
+  return view(function* () {
+    return (
+      <div>
+        {
+          yield* Show({
+            when: true,
+            children: function* () {
+              return <button onClick={yield* go}>go</button>;
+            }
+          })
+        }
+      </div>
+    );
+  });
+});
+export type EventPendingNestedView = Expect<
+  Equal<ViewPendingOf<ReturnType<typeof EventPendingNested>>, false>
+>;
+export type EventPendingNestedMayWait = Expect<
+  Equal<ViewMayWaitOf<ReturnType<typeof EventPendingNested>>, true>
+>;
+export const EventPendingParent = $component(function* EventPendingParent() {
+  return view(function* () {
+    return <div>{yield* EventPending({ n: pendingN })}</div>;
+  });
+});
+export type EventPendingParentView = Expect<
+  Equal<ViewPendingOf<ReturnType<typeof EventPendingParent>>, false>
+>;
+export type EventPendingParentMayWait = Expect<
+  Equal<ViewMayWaitOf<ReturnType<typeof EventPendingParent>>, true>
+>;
 // async work of its own (`A`) is not pending: the view does not wait for a call
 export const EventAsync = $component(function* EventAsync() {
   const go = $event(function* () {
@@ -323,7 +373,7 @@ export type EventDataView = Expect<Equal<ViewFailsOf<ReturnType<typeof EventData
 export const hBound = h("button", {
   onClick: null as unknown as EventHandler<[], Boom, void, true, false>
 });
-export type HBound = Expect<Equal<typeof hBound, HView<true, Boom>>>;
+export type HBound = Expect<Equal<typeof hBound, HView<false, Boom, true>>>;
 // bind belongs to a view: an event, a memo or a hole prop does not bind
 export const NoBindInEvent = $component(function* NoBindInEvent() {
   const go = $event(function* () {});

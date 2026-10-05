@@ -8,7 +8,7 @@
  * web renderer as it is, and the renderer does not drive generators; in
  * JSX the hole is the `yield*`.
  */
-import type { COMPONENT, HView, PENDING, SettledView, VIEW, HVIEW } from "./types.js";
+import type { COMPONENT, HView, MAY_WAIT, PENDING, SettledView, VIEW, HVIEW } from "./types.js";
 
 type NotCallable = {
   readonly call?: never;
@@ -27,12 +27,21 @@ export type RenderedObject = object &
 
 export interface ArrayElement extends Array<Element> {}
 
+/**
+ * A settled view as an element, whatever its may-wait marker (D-075): the
+ * marker is not a color. Without the marker's key, so a view returning an
+ * element (`HOps`) does not read the element type itself as a child view
+ * that may wait.
+ */
+type SettledElementView = Omit<SettledView, typeof MAY_WAIT>;
+type SettledElementHView = Omit<HView<false, never>, typeof MAY_WAIT>;
+
 export type Element =
   | Node
   | RenderedObject
   | ArrayElement
-  | SettledView
-  | HView<false, never>
+  | SettledElementView
+  | SettledElementHView
   | (string & {})
   | number
   | boolean

@@ -45,6 +45,7 @@ import type {
   KindCheck,
   FailsOf,
   HOps,
+  MayWaitOf,
   Path,
   PendingOf,
   RowBlock,
@@ -68,8 +69,11 @@ type Ops<V> = V extends (...args: any[]) => infer R
     ? OpsOfHole<V>
     : OpsOfHole<R>
   : OpsOfHole<V>;
-/** A flow control's view: the colors of its sources and its content (D-059, D-063, D-062). */
-type FlowView<O> = ComponentView<PendingOf<O>, FailsOf<O>>;
+/**
+ * A flow control's view: the colors of its sources and its content (D-059,
+ * D-063, D-062), and their may-wait marker (D-075).
+ */
+type FlowView<O> = ComponentView<PendingOf<O>, FailsOf<O>, MayWaitOf<O>>;
 /**
  * A row's colors: its view's yields and output's, and its setup's (`Y`): an
  * `$effect` / `$settled` the row creates fails to the boundary above the list
@@ -346,7 +350,7 @@ function LoadingBlocks<C, F = never>(props: {
   fallback?: F;
   on?: unknown;
   children: C;
-}): ComponentView<PendingOf<Ops<F>>, FailsOf<Ops<C> | Ops<F>>>;
+}): ComponentView<PendingOf<Ops<F>>, FailsOf<Ops<C> | Ops<F>>, MayWaitOf<Ops<C> | Ops<F>>>;
 function LoadingBlocks(props: any): any {
   const children = content(props, "Loading");
   // `on` may be a source: every other prop is read through where it is read
@@ -392,7 +396,8 @@ function ErroredBlocks<C, K extends readonly ErrorClass<Failure>[], Y, VY, R>(pr
   children: C;
 }): ComponentView<
   PendingOf<Ops<C> | RowOps<VY, R, Y>>,
-  Exclude<FailsOf<Ops<C>>, InstanceType<K[number]>> | FailsOf<RowOps<VY, R, Y>>
+  Exclude<FailsOf<Ops<C>>, InstanceType<K[number]>> | FailsOf<RowOps<VY, R, Y>>,
+  MayWaitOf<Ops<C> | RowOps<VY, R, Y>>
 >;
 /** A lazy-view fallback carries its colors (`FY`); content and a render function carry none. */
 function ErroredBlocks<C, K extends readonly ErrorClass<Failure>[], FY = never>(props: {
@@ -401,16 +406,21 @@ function ErroredBlocks<C, K extends readonly ErrorClass<Failure>[], FY = never>(
   children: C;
 }): ComponentView<
   PendingOf<Ops<C> | FY>,
-  Exclude<FailsOf<Ops<C>>, InstanceType<K[number]>> | FailsOf<FY>
+  Exclude<FailsOf<Ops<C>>, InstanceType<K[number]>> | FailsOf<FY>,
+  MayWaitOf<Ops<C> | FY>
 >;
 function ErroredBlocks<C, Y, VY, R>(props: {
   fallback: RowBlock<[error: Path<FailsOf<Ops<C>>>, reset: Reset], Y, VY, R>;
   children: C;
-}): ComponentView<PendingOf<Ops<C> | RowOps<VY, R, Y>>, FailsOf<RowOps<VY, R, Y>>>;
+}): ComponentView<
+  PendingOf<Ops<C> | RowOps<VY, R, Y>>,
+  FailsOf<RowOps<VY, R, Y>>,
+  MayWaitOf<Ops<C> | RowOps<VY, R, Y>>
+>;
 function ErroredBlocks<C, FY = never>(props: {
   fallback: (() => Generator<FY, Content, any>) | PlainFallback<FailsOf<Ops<C>>>;
   children: C;
-}): ComponentView<PendingOf<Ops<C> | FY>, FailsOf<FY>>;
+}): ComponentView<PendingOf<Ops<C> | FY>, FailsOf<FY>, MayWaitOf<Ops<C> | FY>>;
 function ErroredBlocks(props: any): any {
   const children = content(props, "Errored");
   const fallback = props.fallback as any;

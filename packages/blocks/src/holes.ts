@@ -16,6 +16,7 @@ import type {
   EventHandler,
   FailsOf,
   HView,
+  MayWaitOf,
   PendingOf,
   Read,
   Source,
@@ -43,7 +44,7 @@ export type Hole =
 
 export type OpsOfHole<V> =
   // an `$event` handler given to `h` as an attribute is bound there (D-072):
-  // its pending read and failures join the output, as `yield* save` in JSX
+  // its failures and its may-wait marker join the output, as `yield* save` in JSX
   V extends EventHandler<any, infer E, any, infer P>
     ? Bind<P, E>
     : // a JSX element is settled by construction (and recursive: not walked)
@@ -51,10 +52,10 @@ export type OpsOfHole<V> =
       ? never
       : V extends Source<any, infer E, infer P>
         ? Read<P, E>
-        : V extends HView<infer P, infer E>
-          ? ChildView<P, E>
-          : V extends View<infer P, infer E>
-            ? ChildView<P, E>
+        : V extends HView<infer P, infer E, infer W>
+          ? ChildView<P, E, W>
+          : V extends View<infer P, infer E, infer W>
+            ? ChildView<P, E, W>
             : V extends (...args: any[]) => Generator<infer Y, infer R, any>
               ? GeneratorOps<Y, R>
               : V extends readonly (infer U)[]
@@ -73,8 +74,12 @@ type GeneratorOps<Y, R> = [R] extends [never]
     ? VY | OpsOfHole<VR>
     : Y | OpsOfHole<R>;
 
-/** The no-JSX output of holes `V`: its pending / failures are theirs. */
-export type HViewOf<V> = HView<PendingOf<OpsOfHole<V>>, FailsOf<OpsOfHole<V>>>;
+/** The no-JSX output of holes `V`: its pending / failures (and may-wait marker) are theirs. */
+export type HViewOf<V> = HView<
+  PendingOf<OpsOfHole<V>>,
+  FailsOf<OpsOfHole<V>>,
+  MayWaitOf<OpsOfHole<V>>
+>;
 
 /**
  * Convert a hole value for Solid's renderer: a zero-arity generator is a

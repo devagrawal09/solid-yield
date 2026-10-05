@@ -178,8 +178,8 @@ export namespace JSX {
   }
   /**
    * D-072: an event attribute takes a bound block event handler, `onClick={yield* save}`:
-   * its pending read and failures are the view's. Not an unbound handler, a plain function or
-   * a source's value: the DOM would call it with its colors in no type (D-071).
+   * its failures (and may-wait marker, D-075) are the view's. Not an unbound handler, a plain
+   * function or a source's value: the DOM would call it with its colors in no type (D-071).
    */
   type EventHandlerUnion<
     T,

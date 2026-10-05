@@ -78,6 +78,7 @@ import type {
   ViewFails,
   ViewOp,
   ViewPending,
+  ViewMayWait,
   Wait,
   Yieldable
 } from "./types.js";
@@ -1465,7 +1466,8 @@ export function $component<
   ...props: PropsArgs<PropsOf<TP>>
 ) => ComponentView<
   ViewPending<ViewYield<V>, ViewReturn<V>>,
-  ViewFails<ViewYield<V>, ViewReturn<V>> | FailsOf<Y>
+  ViewFails<ViewYield<V>, ViewReturn<V>> | FailsOf<Y>,
+  ViewMayWait<ViewYield<V>, ViewReturn<V>>
 > {
   const component: any = function (props?: object) {
     return untrack(() => {

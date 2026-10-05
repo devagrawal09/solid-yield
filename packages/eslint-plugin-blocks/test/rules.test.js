@@ -771,3 +771,59 @@ typedTester.run("no-unbound-event (with types)", rules["no-unbound-event"], {
     }
   ]
 });
+
+// --- no-unshown-wait (D-075, amended: types only) ------------------------------------
+// a handler that may wait on pending data carries the [MAY_WAIT] phantom (its `P`)
+const waitDecls = `
+declare const EVENT: unique symbol;
+declare const MAY_WAIT: unique symbol;
+interface EventHandler<A extends unknown[], P extends boolean> {
+  (...a: A): Promise<void>;
+  readonly [EVENT]: true;
+  readonly [MAY_WAIT]?: P;
+  [Symbol.iterator](): Generator<unknown, (...a: A) => unknown, any>;
+}
+declare const waits: EventHandler<[], true>;
+declare const maybe: EventHandler<[], boolean>;
+declare const quick: EventHandler<[], false>;
+declare const pick: EventHandler<[string], true>;
+declare function h(tag: string, props: object): unknown;
+`;
+typedTester.run("no-unshown-wait (with types)", rules["no-unshown-wait"], {
+  valid: [
+    { filename, code: waitDecls + "function* v() { return <b onClick={yield* quick} />; }" },
+    { filename, code: waitDecls + "function* v() { return <b onClick={[yield* quick, 1]} />; }" },
+    { filename, code: waitDecls + 'const o = h("b", { onClick: quick });' },
+    // not an event prop
+    { filename, code: waitDecls + "function* v() { return <b title={yield* waits} />; }" }
+  ],
+  invalid: [
+    {
+      filename,
+      code: waitDecls + "function* v() { return <b onClick={yield* waits} />; }",
+      errors: [{ messageId: "wait", data: { name: "waits" } }]
+    },
+    {
+      // `boolean`: it may
+      filename,
+      code: waitDecls + "function* v() { return <b on:click={yield* maybe} />; }",
+      errors: [{ messageId: "wait" }]
+    },
+    {
+      filename,
+      code: waitDecls + 'function* v() { return <b onClick={[yield* pick, "a"]} />; }',
+      errors: [{ messageId: "wait", data: { name: "pick" } }]
+    },
+    {
+      filename,
+      code: waitDecls + 'const o = h("b", { onClick: waits });',
+      errors: [{ messageId: "wait" }]
+    }
+  ]
+});
+
+// without type information it cannot know: silent
+tester.run("no-unshown-wait (without types)", rules["no-unshown-wait"], {
+  valid: [component(`${evt} return function* () { return <b onClick={yield* save} />; };`)],
+  invalid: []
+});

@@ -35,6 +35,7 @@ A view is `return view(function* () { return <…/>; })`: it has no body (D-032)
 | a path used as an object: `{...props.user}`, `props.user === x`, `JSON.stringify(props.user)` | read it: `yield* props.user` | — (a path types as a source with keys) | — | `PATH_OBJECT` (listing keys, a descriptor, defining or deleting a key); `PATH_WRITE` | `no-path-object-use` |
 | reactive state the library did not create: Solid's `createSignal`, the router's hooks, `dynamic` | the block forms: `$signal`, `$memo`, … | — | — | — | `no-foreign-reactive` |
 | `$(…)` / `$scope(…)` | a bare `function*` (a hole, a row), or a `$memo` | not exported | — | — | `no-dollar-block` (autofix) |
+| a bound handler that may wait on pending data: `onClick={yield* save}` where `save` reads a pending source | show its in-flight state (the view is not pending: nothing suspends it for a call, D-075) | the view's may-wait marker (`View<P, E, W>`), not an error | — | — | `no-unshown-wait` (warning, with types) |
 | a view not wrapped in `view(…)` | `return view(function* () { … })` | (errors reported at `$component(` instead) | — | — | `prefer-view-wrapper` (warning, autofix) |
 
 The neighbours of a view, for completeness:
@@ -110,7 +111,7 @@ The neighbours of a view, for completeness:
 
 Every other type refusal is a plain assignability error. The common ones: an op that is not a `SetupOp` / `ViewOp` / `MemoOp` / `EffectOp` / `HoleOp` (reported at `view(` or `$component(`); a component tag (`ElementType`); a pending view as a child or at the root; a source called as a function; a plain thunk as a child.
 
-**Lint rules** (`eslint-plugin-solid-blocks`, `recommended`: every rule an error, `prefer-view-wrapper` a warning):
+**Lint rules** (`eslint-plugin-solid-blocks`, `recommended`: every rule an error, `prefer-view-wrapper` and `no-unshown-wait` warnings):
 
 | Rule | Reports |
 | --- | --- |
@@ -128,3 +129,4 @@ Every other type refusal is a plain assignability error. The common ones: an op 
 | `no-foreign-reactive` | reactive state from plain Solid, the router or `dynamic` in block code |
 | `no-dollar-block` | `$` / `$scope` (removed, D-013; autofix) |
 | `prefer-view-wrapper` | a view not wrapped in `view(…)` (warning, autofix) |
+| `no-unshown-wait` | a bound handler that may wait on pending data (warning, with types; D-075) |

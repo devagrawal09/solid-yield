@@ -22,7 +22,7 @@ if (!source.includes(namespace)) throw new Error("jsx-web-shared: JSX namespace 
 const importLine = 'import type { Element as BlocksElement } from "solid-blocks";';
 if (!source.includes(importLine)) throw new Error("jsx-web-shared: blocks import not found");
 // D-072: an event attribute takes a bound block event handler — `onClick={yield*
-// save}`, whose pending read and failures the view's type carries — and nothing
+// save}`, whose failures (and may-wait marker, D-075) the view's type carries — and nothing
 // else: an unbound handler, a plain function or a source's value would be called
 // by the DOM with its colors in no type (D-071).
 const eventUnion =
@@ -48,8 +48,8 @@ fs.writeFileSync(
         "  interface BoundEventHandler<\n    T,\n    E extends Event,\n    EHandler extends EventHandler<T, any> = EventHandler<T, E>\n  > {\n" +
         "    0: BlocksBound<(data: any, ...e: Parameters<EHandler>) => void>;\n    1: any;\n  }\n" +
         "  /**\n   * D-072: an event attribute takes a bound block event handler, `onClick={yield* save}`:\n" +
-        "   * its pending read and failures are the view's. Not an unbound handler, a plain function or\n" +
-        "   * a source's value: the DOM would call it with its colors in no type (D-071).\n   */\n" +
+        "   * its failures (and may-wait marker, D-075) are the view's. Not an unbound handler, a plain\n" +
+        "   * function or a source's value: the DOM would call it with its colors in no type (D-071).\n   */\n" +
         "  type EventHandlerUnion<\n    T,\n    E extends Event,\n    EHandler extends EventHandler<T, any> = EventHandler<T, E>\n  > = BlocksBound<EHandler> | BoundEventHandler<T, E, EHandler>;\n"
     )
     .replace(

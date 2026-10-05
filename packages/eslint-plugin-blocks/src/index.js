@@ -12,6 +12,7 @@
  *   no-read-in-prop        a component call's prop is a source, a hole or a value — never a read (autofix)
  *   component-children-generator  a component call's children is a generator (autofix)
  *   no-unbound-event       an `$event` handler in an event prop is bound: `onClick={yield* save}` (autofix)
+ *   no-unshown-wait        (warning, with types) a bound handler that may wait on pending data: show its in-flight state
  *   jsx-only-in-view       JSX only in a view, a hole or a row's view: a setup never creates elements
  *   prefer-view-wrapper    (warning) wrap a view in `view(…)` so its errors land where it is written
  *   no-path-object-use     a path is a read: no spread, no `===`, no `JSON.stringify` of one
@@ -1088,7 +1089,7 @@ function isEventHandlerType(type, seen = new Set()) {
 
 /**
  * D-072: an `$event` handler in an event prop is bound — `onClick={yield*
- * save}`, a `Bind` op whose pending read and failures join the view's type.
+ * save}`, a `Bind` op whose failures (and may-wait marker, D-075) join the view's type.
  * Given as a plain value (`onClick={save}`) it is bound all the same at run
  * time, but its colors reach no type. With type information any expression
  * typed as an `$event` handler is reported (`onInput={pick("a")}`); without,
@@ -1101,11 +1102,11 @@ const noUnboundEvent = {
     fixable: "code",
     docs: {
       description:
-        "An `$event` handler in an event prop is bound with `yield*` (`onClick={yield* save}`), so its pending read and failures join the view's type (D-072)."
+        "An `$event` handler in an event prop is bound with `yield*` (`onClick={yield* save}`), so its failures and may-wait marker join the view's type (D-072, D-075)."
     },
     messages: {
       unbound:
-        "`{{name}}` is an `$event` handler given unbound: bind it, `{{attr}}={yield* {{name}}}`, so its pending read and failures join this view's type (D-072)."
+        "`{{name}}` is an `$event` handler given unbound: bind it, `{{attr}}={yield* {{name}}}`, so its failures and may-wait marker join this view's type (D-072, D-075)."
     },
     schema: []
   },
@@ -1155,6 +1156,93 @@ const noUnboundEvent = {
   }
 };
 
+/** The type of a TypeScript property whose name is a library phantom (`[MAY_WAIT]`), or null. */
+function phantomType(checker, type, name, at) {
+  const pattern = new RegExp(`^__@${name}@\\d+$`);
+  const types = type.isUnion && type.isUnion() ? type.types : [type];
+  for (const t of types) {
+    const props = t.getProperties ? t.getProperties() : [];
+    const prop = props.find(p => pattern.test(String(p.escapedName)));
+    if (prop) return checker.getTypeOfSymbolAtLocation(prop, at);
+  }
+  return null;
+}
+/** Whether a type is, or is a union holding, the literal `true`. */
+function includesTrue(checker, type) {
+  const types = type.isUnion && type.isUnion() ? type.types : [type];
+  return types.some(t => checker.typeToString(t) === "true");
+}
+
+/**
+ * D-075 (amended): a bound handler whose call may wait on a pending read
+ * (its `P`) does not make the view pending — the runtime never suspends a
+ * view for a call — so nothing shows that a click is waiting. The type
+ * carries it as the view's may-wait marker; this rule surfaces it where the
+ * handler is bound (`onClick={yield* save}`, `[yield* save, data]`, or an
+ * `h` attribute). With type information only: the handler's `[MAY_WAIT]`
+ * phantom says whether it may wait.
+ */
+const noUnshownWait = {
+  meta: {
+    type: "suggestion",
+    docs: {
+      description:
+        "A view binds a handler that may wait on pending data (its call waits, and nothing suspends the view for it): show its in-flight state (D-075)."
+    },
+    messages: {
+      wait: "this view binds a handler that may wait on pending data; show its in-flight state (`{{name}}`, D-075)."
+    },
+    schema: []
+  },
+  create(context) {
+    const source = context.sourceCode;
+    const services = source.parserServices;
+    const checker =
+      services && services.program && services.esTreeNodeToTSNodeMap
+        ? services.program.getTypeChecker()
+        : null;
+    if (!checker) return {};
+    const short = text => (text.length > 40 ? text.slice(0, 37) + "..." : text);
+    const check = node => {
+      const tsNode = services.esTreeNodeToTSNodeMap.get(node);
+      if (!tsNode) return;
+      const wait = phantomType(checker, checker.getTypeAtLocation(tsNode), "MAY_WAIT", tsNode);
+      if (wait && includesTrue(checker, wait))
+        context.report({ node, messageId: "wait", data: { name: short(source.getText(node)) } });
+    };
+    return {
+      JSXAttribute(node) {
+        if (!isEventAttribute(node.name)) return;
+        const v = node.value;
+        if (!v || v.type !== "JSXExpressionContainer") return;
+        let target = v.expression;
+        if (target.type === "ArrayExpression") target = target.elements[0];
+        if (target && target.type === "YieldExpression" && target.delegate && target.argument)
+          check(target.argument);
+      },
+      // `h("button", { onClick: save })`: an `$event` handler attribute is the bind
+      Property(node) {
+        if (node.computed || node.kind !== "init") return;
+        const key = node.key.type === "Identifier" ? node.key.name : node.key.value;
+        if (typeof key !== "string" || !/^on(?:[A-Z]|:|capture:)/.test(key)) return;
+        const obj = node.parent;
+        const call = obj && obj.parent;
+        if (
+          !call ||
+          call.type !== "CallExpression" ||
+          call.arguments[1] !== obj ||
+          call.callee.type !== "Identifier" ||
+          call.callee.name !== "h"
+        )
+          return;
+        let target = node.value;
+        if (target.type === "ArrayExpression") target = target.elements[0];
+        if (target) check(target);
+      }
+    };
+  }
+};
+
 export const rules = {
   "no-throw": noThrow,
   "no-read-in-view-body": noReadInViewBody,
@@ -1169,7 +1257,8 @@ export const rules = {
   "no-component-tag": noComponentTag,
   "no-read-in-prop": noReadInProp,
   "component-children-generator": componentChildrenGenerator,
-  "no-unbound-event": noUnboundEvent
+  "no-unbound-event": noUnboundEvent,
+  "no-unshown-wait": noUnshownWait
 };
 
 const plugin = {
@@ -1179,7 +1268,7 @@ const plugin = {
 };
 
 /** Rules `recommended` sets to warn (a suggestion, not a rule of the model). */
-const WARNINGS = new Set(["prefer-view-wrapper"]);
+const WARNINGS = new Set(["prefer-view-wrapper", "no-unshown-wait"]);
 /** `recommended`: every rule an error, but the suggestions (`WARNINGS`), which warn (flat config). */
 plugin.configs.recommended = {
   plugins: { "solid-blocks": plugin },

@@ -20,6 +20,7 @@ import type {
   Component,
   EventHandler,
   FailsOf,
+  MayWaitOf,
   HView,
   PendingOf,
   Source,
@@ -53,8 +54,8 @@ type PropsOfComponent<C> = C extends (props: infer P) => any
   : never;
 type ChildrenOf<P> = "children" extends keyof P ? P["children"] : unknown;
 /** What a component's output (a view or `h` output) contributes. */
-type OpsOfOutput<R> = R extends View<infer P, infer E> | HView<infer P, infer E>
-  ? ChildView<P, E>
+type OpsOfOutput<R> = R extends View<infer P, infer E, infer W> | HView<infer P, infer E, infer W>
+  ? ChildView<P, E, W>
   : never;
 
 export interface BlocksH {
@@ -78,7 +79,7 @@ export interface BlocksH {
     component: typeof Loading,
     props: { fallback?: Hole; on?: unknown },
     ...children: C
-  ): HView<false, FailsOf<OpsOfHole<C[number]>>>;
+  ): HView<false, FailsOf<OpsOfHole<C[number]>>, MayWaitOf<OpsOfHole<C[number]>>>;
   /**
    * `Errored` handles the failures of its children; their pending passes on,
    * and so do the fallback's own colors (D-071). `reset` is already bound
@@ -88,12 +89,20 @@ export interface BlocksH {
     component: typeof Errored,
     props: { fallback: (error: Accessor<unknown>, reset: Reset) => R },
     ...children: C
-  ): HView<PendingOf<OpsOfHole<C[number]> | OpsOfHole<R>>, FailsOf<OpsOfHole<R>>>;
+  ): HView<
+    PendingOf<OpsOfHole<C[number]> | OpsOfHole<R>>,
+    FailsOf<OpsOfHole<R>>,
+    MayWaitOf<OpsOfHole<C[number]> | OpsOfHole<R>>
+  >;
   <const C extends readonly Hole[], F extends Exclude<Hole, (...args: any[]) => any>>(
     component: typeof Errored,
     props: { fallback: F },
     ...children: C
-  ): HView<PendingOf<OpsOfHole<C[number]> | OpsOfHole<F>>, FailsOf<OpsOfHole<F>>>;
+  ): HView<
+    PendingOf<OpsOfHole<C[number]> | OpsOfHole<F>>,
+    FailsOf<OpsOfHole<F>>,
+    MayWaitOf<OpsOfHole<C[number]> | OpsOfHole<F>>
+  >;
   /**
    * A component: its props, then its children. The result carries the
    * component's pending / failures and its children's (a component renders
@@ -106,9 +115,10 @@ export interface BlocksH {
     ...children: C
   ): HView<
     PendingOf<OpsOfOutput<ReturnType<Comp>> | OpsOfHole<C[number]>>,
-    FailsOf<OpsOfOutput<ReturnType<Comp>> | OpsOfHole<C[number]>>
+    FailsOf<OpsOfOutput<ReturnType<Comp>> | OpsOfHole<C[number]>>,
+    MayWaitOf<OpsOfOutput<ReturnType<Comp>> | OpsOfHole<C[number]>>
   >;
-  Fragment: (props: { children: Hole }) => HView<false, never>;
+  Fragment: (props: { children: Hole }) => HView<false, never, false>;
 }
 
 /**

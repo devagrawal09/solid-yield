@@ -83,10 +83,12 @@ Reading order with the rest of the plan: `blocks-library.md` (the reference), th
 | D-069 | recorded (Phase 4) | Conformance findings F1–F7: the library route against the oracle and the compiler route (F6: the routes' hydration keys are not interchangeable) |
 | D-070 | recorded (Phase 4) | Raise at every host: each reaches the nearest Errored or re-throws (D-033); an `$effect`'s and a DOM-dispatched `$event`'s failures are in no view type (ruled: D-072, D-073); a raising hole's type fixed |
 | D-071 | decided | Meta-rule: the types say exactly what the runtime does; a color the runtime routes and the type lacks is a bug, never a §7 limitation |
-| D-072 | implemented (Phase 5) | Binding an event in a view is a hole: `onClick={yield* save}` joins the handler's `P` and failures to the view; the transform's event refusal moves to the types; lint `no-unbound-event` |
-| D-073 | implemented (Phase 5) | An `$effect`'s or `$settled`'s raise joins the enclosing component's failure type, unless an attempt's `onError` absorbs it |
+| D-072 | implemented (Phase 5) | Binding an event in a view is a hole: `onClick={yield* save}` joins the handler's failures to the view (its `P`: the may-wait marker, D-075); the transform's event refusal moves to the types; lint `no-unbound-event` |
+| D-073 | implemented (Phase 5) | An `$effect`'s or `$settled`'s raise joins the enclosing component's failure type, unless an attempt's `onError` absorbs it (the absorbing form: D-076) |
 | D-074 | decided | The library route and the compiler route are not mixed: same markup, different hydration keys; server and client use one route |
-| D-075 | decided | An event exposes its in-flight state as a source: `save.pending: Source<boolean>`; no automatic `Loading` |
+| D-075 | implemented (Phase 5, amended) | Types only: a bound handler that may wait on a pending read marks the view *may wait* (`View<P, E, W>`), never pending; lint warning `no-unshown-wait`. The first ruling's `save.pending` source was built and reverted |
+| D-076 | implemented (Phase 5) | An attempt's handler returns the failure (an `Error` with a literal `kind`) or nothing (absorbed: `T \| undefined`); any other value is a type error; `[ATTEMPT_ABSORBS]` for both |
+| D-077 | implemented (Phase 5) | `try` / `catch` is not a block form (lint `no-try-catch`); `attempt` takes an event call, its typed failure through `onError`; 16 sites migrated |
 
 ## Entries
 

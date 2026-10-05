@@ -1113,17 +1113,17 @@ function mapStream(value: unknown, onError: (error: unknown) => unknown): unknow
 
 /**
  * A computation's function for a memo-like body: each run drives the body as
- * the MEMO host (reads, an async `attempt` that suspends, `raise`), and a
- * superseded run is closed instead of resumed. The argument (a projection's
+ * the MEMO host (reads, an async `attempt` that suspends, `raise`). A
+ * superseded run is not closed (D-080): it runs to completion after its
+ * pending attempt, as Solid's async memo does, and its result is discarded —
+ * Solid keeps only the latest run's promise. The argument (a projection's
  * draft) is handed to the body.
  */
 export function memoCompute(
   body: (arg?: any) => Generator<unknown, unknown, unknown>
 ): (arg?: unknown) => unknown {
-  let run = 0;
   const name = state.name;
   return (arg?: unknown) => {
-    const my = ++run;
     let gen!: Generator<unknown, unknown, unknown>;
     const r = runAs(
       MEMO,
@@ -1138,7 +1138,7 @@ export function memoCompute(
       name
     );
     if (r.done) return r.value;
-    return resume(gen, r.value, MEMO, () => my === run, name);
+    return resume(gen, r.value, MEMO, name);
   };
 }
 
@@ -1149,23 +1149,16 @@ function memoOf(body: () => Generator<unknown, unknown, unknown>, options?: any)
 /**
  * Continue a generator that yielded an async `attempt`: wait for its
  * promise, resume, and settle with the generator's result. A superseded run
- * is closed instead of resumed.
+ * continues too (D-080); whoever holds its promise discards its result.
  */
 function resume(
   gen: Generator<unknown, unknown, unknown>,
   op: unknown,
   as: Host,
-  current: () => boolean,
   name: string | null
 ): Promise<unknown> {
   return new Promise((resolve, reject) => {
     const step = (value: unknown, failed: boolean) => {
-      if (!current()) {
-        try {
-          gen.return(undefined);
-        } catch {}
-        return;
-      }
       let r: IteratorResult<unknown, unknown>;
       try {
         r = runAs(

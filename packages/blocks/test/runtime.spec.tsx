@@ -2689,7 +2689,7 @@ describe("host state is per run (re-entrancy)", () => {
 });
 
 describe("attempt / isPending interplay", () => {
-  it("a memo that waits is pending, and a superseded run is closed", async () => {
+  it("a memo that waits is pending; a superseded run runs to completion and its result is discarded (D-080)", async () => {
     const resolvers: ((v: number) => void)[] = [];
     let after = 0;
     let set!: (v: number) => void;
@@ -2716,12 +2716,68 @@ describe("attempt / isPending interplay", () => {
     );
     set(2);
     flush();
-    resolvers[0](100);
+    // the current run lands first …
     resolvers[1](200);
     await settle();
     expect(root.textContent).toBe("202");
     expect(after).toBe(1);
+    // … the superseded one still continues after its attempt, and its result does not land
+    resolvers[0](100);
+    await settle();
+    expect(after).toBe(2);
+    expect(root.textContent).toBe("202");
+    // nor does it subscribe the memo: a later write re-runs only the current run's reads
+    set(3);
+    flush();
+    resolvers[2](300);
+    await settle();
+    expect(root.textContent).toBe("303");
     void isPending;
+  });
+
+  it("a superseded run that fails after its attempt is discarded too (D-080)", async () => {
+    const resolvers: ((v: number) => void)[] = [];
+    let set!: (v: number) => void;
+    const App = $component(function* () {
+      const [id, setId] = yield* $signal(1);
+      set = v => write(() => setId(v));
+      const m = yield* $memo(function* () {
+        const i = yield* id;
+        const v = yield* attempt(() => new Promise<number>(r => resolvers.push(r)), toError);
+        if (v < 0) yield* raise(new Failed("stale"));
+        return v + i;
+      });
+      return function* () {
+        return <i>{perform(m)}</i>;
+      };
+    });
+    mount(() =>
+      Errored({
+        fallback: (e: any) => <b>{e().message}</b>,
+        children: function* () {
+          return (
+            <>
+              {
+                yield* Loading({
+                  fallback: "…",
+                  children: function* () {
+                    return <>{yield* App()}</>;
+                  }
+                })
+              }
+            </>
+          );
+        }
+      })
+    );
+    set(2);
+    flush();
+    resolvers[1](200);
+    await settle();
+    expect(root.textContent).toBe("202");
+    resolvers[0](-1);
+    await settle();
+    expect(root.textContent).toBe("202");
   });
 });
 

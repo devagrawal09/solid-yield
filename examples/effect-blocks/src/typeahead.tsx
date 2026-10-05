@@ -4,8 +4,9 @@
 // The memo block returns the AsyncIterable `runEffect` builds, exactly as the
 // original's memo does, so Solid still closes a superseded flight's iterator
 // and `runEffect` interrupts the fiber. (`yield* attempt(…)` would not do: it
-// awaits a promise, and a superseded run is closed without telling the
-// producer, so the fiber and its retries would run on.) The memo's source
+// awaits a promise, and a superseded run runs to completion with its result
+// discarded (D-080) without telling the producer, so the fiber and its
+// retries would run on.) The memo's source
 // may be pending and fails as the stream's handler says; `Results` declares
 // that coloring on its prop: `Source<Package[], SearchError | TransientError,
 // true>`.

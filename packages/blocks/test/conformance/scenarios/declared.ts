@@ -2,7 +2,7 @@
  * Declared differences of the library route from the oracle, per scenario
  * and mode, each with its reason; and the findings from comparing the
  * library route's server output with the compiler route's. Every entry is a
- * finding recorded in documentation/DECISIONS.md (D-069; F2–F5 here, F6 in `routeFindings`; F1 resolved by D-079).
+ * finding recorded in documentation/DECISIONS.md (D-069; F2, F4, F5 here, F6 in `routeFindings`; F1 resolved by D-079, F3 by D-080).
  */
 import type { ModeExpectation } from "../harness/types.js";
 
@@ -203,55 +203,6 @@ export const declared: Record<string, Record<string, ModeExpectation>> = {
         "## toggle row 2 back",
         "run toggle 2",
         'html = <ul _hk="0"><li _hk="1000" class="c1"><!--$-->a<!--/-->:<!--$-->closed<!--/--></li><li _hk="1010" class="c2"><!--$-->b<!--/-->:<!--$-->open<!--/--></li><li _hk="1020" class="c3"><!--$-->c<!--/-->:<!--$-->open<!--/--></li></ul>',
-        "## teardown"
-      ]
-    }
-  },
-  "async-flights": {
-    "client/library": {
-      status: "differs",
-      reason:
-        "F3: a superseded `$memo` run is closed at its pending `attempt` (its generator is returned), where an async function continues after `await` and its result is discarded: `owner after wait(2)` is not logged (as the fork's `$` modes). A run disposed with its owner is not closed: async-disposal is equivalent.",
-      trace: [
-        "## mount",
-        "read id = 1",
-        "run user(1)",
-        "owner before wait(1) = user memo",
-        "task load#1 = 1",
-        "## pending",
-        'html = <p class="loading">loading</p>',
-        "## resolve load#1",
-        'settle load#1 = "ada"',
-        "owner after wait(1) = none",
-        'html = <p class="user">ada</p>',
-        "## id 2 then 3 (load#2 superseded)",
-        "write id = 2",
-        "read id = 2",
-        "run user(2)",
-        "owner before wait(2) = user memo",
-        "task load#2 = 2",
-        "write id = 3",
-        "read id = 3",
-        "run user(3)",
-        "owner before wait(3) = user memo",
-        "task load#3 = 3",
-        'html = <p class="user">ada</p>',
-        "## resolve load#3",
-        'settle load#3 = "grace"',
-        "owner after wait(3) = none",
-        'html = <p class="user">grace</p>',
-        "## resolve stale load#2 (must not commit)",
-        'settle load#2 = "stale"',
-        'html = <p class="user">grace</p>',
-        "## reject load#4",
-        "write id = 4",
-        "read id = 4",
-        "run user(4)",
-        "owner before wait(4) = user memo",
-        "task load#4 = 4",
-        "reject load#4 = NotFound(gone)",
-        "caught boundary = NotFound(gone)",
-        'html = <p class="err">NotFound</p>',
         "## teardown"
       ]
     }

@@ -30,6 +30,7 @@ import {
   type Source,
   type SettledView,
   type View,
+  type Wait,
   type Yieldable
 } from "solid-blocks";
 import { h } from "solid-blocks/h";
@@ -177,21 +178,28 @@ export type EffectCreate = Expect<
   >
 >;
 // an effect that handles its failure itself — an attempt whose `onError` absorbs it (returns
-// a value that is not an Error) — adds none
+// nothing, D-076) — adds none; the attempt gives `T | undefined`
 export const EffectAbsorbs = $component(function* EffectAbsorbs() {
   yield* $effect(function* () {
     const v = yield* attempt(
       () => JSON.parse("{") as unknown,
-      () => null
+      () => {}
     );
     type _v = Expect<Equal<typeof v, unknown>>;
   });
   yield* $settled(function* () {
     const n = yield* attempt(
       () => 1,
-      () => 0
+      () => undefined
     );
-    type _n = Expect<Equal<typeof n, number>>;
+    type _n = Expect<Equal<typeof n, number | undefined>>;
+    // a fallback is `??`
+    const m =
+      (yield* attempt(
+        () => 1,
+        () => {}
+      )) ?? 0;
+    type _m = Expect<Equal<typeof m, number>>;
   });
   return view(function* () {
     return <i />;
@@ -211,12 +219,43 @@ export const EffectAttempt = $component(function* EffectAttempt() {
   });
 });
 export type EffectAttemptView = Expect<Equal<ViewFailsOf<ReturnType<typeof EffectAttempt>>, Boom>>;
-// a handler may not do both: an Error is the failure, anything else absorbs it
+// D-076: a handler returns the failure (an Error with a literal kind) or nothing, never both
 export const mixed = attempt(
   () => 1,
   // @ts-expect-error [ATTEMPT_ABSORBS]: one handler, one meaning
-  () => (Math.random() > 0.5 ? new Boom() : null)
+  () => (Math.random() > 0.5 ? new Boom() : undefined)
 );
+export const mixedStatements = attempt(
+  () => 1,
+  // @ts-expect-error [ATTEMPT_ABSORBS]: returns a Boom on one path, nothing on the other
+  (cause: unknown) => {
+    if (cause instanceof Boom) return cause;
+  }
+);
+// …and returns nothing else: a value is not a failure, nor nothing
+export const valueHandler = attempt(
+  () => 1,
+  // @ts-expect-error a handler returns an Error or nothing (use `?? 0` for a fallback)
+  () => 0
+);
+export const nullHandler = attempt(
+  () => 1,
+  // @ts-expect-error null is a value, not nothing
+  () => null
+);
+// a failure without a literal kind is still [FAILURE_KIND]
+export const plainError = attempt(
+  () => 1,
+  // @ts-expect-error [FAILURE_KIND]
+  () => new Error("x")
+);
+// returning the failure: a Raise of it, the value as is; returning nothing: no Raise, T | undefined
+export type ReturnsFailure = Expect<
+  Equal<ReturnType<typeof attempt<Promise<number>, Boom>>, Yieldable<Wait | Raise<Boom>, number>>
+>;
+export type ReturnsNothing = Expect<
+  Equal<ReturnType<typeof attempt<Promise<number>, void>>, Yieldable<Wait, number | undefined>>
+>;
 // an effect delegating to a synchronous event that fails joins the event's failure
 export const EffectCalls = $component(function* EffectCalls() {
   const fail = $event(function* () {

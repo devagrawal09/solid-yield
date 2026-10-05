@@ -416,14 +416,18 @@ describe("D-073: an effect's failure is its component's", () => {
     expect(root.innerHTML).toBe("<p>caught</p>");
   });
 
-  it("an attempt whose onError absorbs the failure gives its value; the effect does not fail", () => {
+  it("an attempt whose onError returns nothing absorbs the failure: it gives undefined; the effect does not fail (D-076)", () => {
     const seen: unknown[] = [];
+    const caught: unknown[] = [];
     const App = $component(function* App() {
       yield* $effect(function* () {
-        const v = yield* attempt(
-          () => JSON.parse("{") as unknown,
-          () => "fallback"
-        );
+        const v =
+          (yield* attempt(
+            () => JSON.parse("{") as unknown,
+            e => {
+              caught.push(e);
+            }
+          )) ?? "fallback";
         seen.push(v);
       });
       return view(function* () {
@@ -433,20 +437,22 @@ describe("D-073: an effect's failure is its component's", () => {
     dispose = render(App, root);
     flush();
     expect(seen).toEqual(["fallback"]);
+    expect(caught).toHaveLength(1);
+    expect(caught[0]).toBeInstanceOf(SyntaxError);
     expect(root.innerHTML).toBe("<i>ok</i>");
   });
 
-  it("an absorbed async failure resumes the block with the handler's value", async () => {
+  it("an absorbed async failure resumes the block with undefined (D-076)", async () => {
     const seen: unknown[] = [];
     let go!: () => Promise<unknown>;
     const App = $component(function* App() {
       go = $event(function* () {
         const v = yield* attempt(
-          () => Promise.reject(new Error("network")),
-          () => 0
+          () => Promise.reject(new Error("network")) as Promise<number>,
+          () => {}
         );
         seen.push(v);
-        return v;
+        return v ?? 0;
       });
       return view(function* () {
         return <i>ok</i>;
@@ -455,7 +461,27 @@ describe("D-073: an effect's failure is its component's", () => {
     dispose = render(App, root);
     flush();
     await expect(go()).resolves.toBe(0);
-    expect(seen).toEqual([0]);
+    expect(seen).toEqual([undefined]);
+  });
+
+  it("a handler cast past its type that returns a value still absorbs: the attempt gives undefined (D-076)", () => {
+    const seen: unknown[] = [];
+    const App = $component(function* App() {
+      yield* $effect(function* () {
+        seen.push(
+          yield* attempt(
+            () => JSON.parse("{") as unknown,
+            (() => "a value") as unknown as () => void
+          )
+        );
+      });
+      return view(function* () {
+        return <i>ok</i>;
+      });
+    });
+    dispose = render(App, root);
+    flush();
+    expect(seen).toEqual([undefined]);
   });
 
   it("a stream's absorbed failure ends the stream", async () => {
@@ -468,10 +494,10 @@ describe("D-073: an effect's failure is its component's", () => {
       yield* $effect(function* () {
         const stream = yield* attempt(
           () => feed(),
-          () => "ended"
+          () => {}
         );
         void (async () => {
-          for await (const v of stream) got.push(v);
+          for await (const v of stream ?? []) got.push(v);
           got.push("done");
         })();
       });

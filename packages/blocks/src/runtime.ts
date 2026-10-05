@@ -608,51 +608,58 @@ class Attempt {
   }
 }
 /**
- * What an attempt's handler made of a failure: an `Error` is the failure
- * the block fails with; anything else absorbs it and is the attempt's value
- * (D-073).
+ * What an attempt's handler made of a failure (D-076): an `Error` is the
+ * failure the block fails with; nothing absorbs it, and the attempt gives
+ * `undefined`. (A handler cast past its type that returns another value
+ * absorbs too: the attempt still gives `undefined`, as its type says.)
  */
-function handled(r: unknown): unknown {
+function handled(r: unknown): undefined {
   if (r instanceof Error) throw known(r);
-  return r;
+  return undefined;
 }
 type AttemptWait<T> = T extends PromiseLike<any> ? Wait : never;
-/** What an absorbing handler adds to the attempt's value: a stream's absorbed failure ends the stream instead. */
-type Absorbed<T, V> = Awaited<T> extends AsyncIterable<any> ? never : V;
-type AttemptOps<T, E> = AttemptWait<T> | Raise<E>;
-/** An absorbing handler returns no `Error`: one that may is a failing handler (the first overload). */
-type Absorbs<V> = [Extract<V, Error>] extends [never]
-  ? unknown
-  : {
-      readonly "[ATTEMPT_ABSORBS] a handler returns the failure (an Error with a literal kind) or absorbs it (a value that is not an Error), not both": never;
-    };
+/** A handler that returns the failure, an `Error`: the attempt raises it. */
+type Fails<H> = [H] extends [Error] ? true : false;
+type AttemptOps<T, H> = AttemptWait<T> | (Fails<H> extends true ? Raise<H> : never);
+/** What an attempt gives: absorbed (`H` is `void`), `undefined` too. */
+type AttemptResult<T, H> = Fails<H> extends true ? Attempted<T> : Attempted<T> | undefined;
+/**
+ * A handler returns the failure (an `Error` with a literal `kind`) or
+ * nothing (it absorbs the failure), never sometimes one and sometimes the
+ * other (D-076). Any other value is refused by the constraint `Error | void`.
+ */
+type HandlerCheck<H> = [H] extends [Error]
+  ? KindCheck<H>
+  : [H] extends [void]
+    ? unknown
+    : {
+        readonly "[ATTEMPT_ABSORBS] a handler returns the failure (an Error with a literal kind) or nothing (absorbs it), not sometimes one and sometimes the other": never;
+      };
 /** What an attempt gives: a promise's value; a stream as itself, handled. */
 type Attempted<T> = Awaited<T> extends AsyncIterable<any> ? Awaited<T> & Handled : Awaited<T>;
 /**
  * `yield* attempt(fn, onError)`: call `fn`; when it throws, or the promise it
- * returns rejects, `onError` turns what it caught into the error object the
- * block fails with — the failure's type is its color. An attempt always
- * handles its error: one without a handler would be just a call. When `fn`
- * returns a promise the block suspends until it settles ($memo and $event
- * only) and resumes with its value. When it returns a stream (or a promise of
- * one) the attempt gives the stream back, its failures going through
- * `onError` as they come: `return yield* attempt(() => watch(feed), cause =>
- * new FeedError(cause))` is how a memo's body returns a stream.
- */
-export function attempt<T, E extends Error>(
-  fn: () => T,
-  onError: (error: unknown) => E & KindCheck<E>
-): Yieldable<AttemptOps<T, E>, Attempted<T>>;
-/**
- * `yield* attempt(fn, () => fallback)`: a handler that returns a value that
- * is not an `Error` absorbs the failure — the attempt gives that value and
+ * returns rejects, `onError` handles what it caught (D-076). It returns the
+ * failure — an `Error` with a literal `kind`, what was caught or a
+ * transformation of it — and the block fails with it: the failure's type is
+ * its color. Or it returns nothing and absorbs the failure: the attempt gives
+ * `undefined` (its value is `T | undefined`; `?? fallback` for a default) and
  * the block does not fail (D-073: an effect that handles its own failure adds
- * none to its component). A stream's failure absorbed ends the stream.
+ * none to its component). Any other return value is a type error, and so is a
+ * handler that may do either (`[ATTEMPT_ABSORBS]`). An attempt always
+ * handles its error: one without a handler would be just a call.
+ *
+ * When `fn` returns a promise the block suspends until it settles ($memo
+ * and $event only) and resumes with its value. When it returns a stream (or
+ * a promise of one) the attempt gives the stream back, its failures going
+ * through `onError` as they come — an absorbed one ends the stream: `return
+ * yield* attempt(() => watch(feed), cause => new FeedError(cause))` is how a
+ * memo's body returns a stream.
  */
-export function attempt<T, V>(
+export function attempt<T, H extends Error | void>(
   fn: () => T,
-  onError: (error: unknown) => V & Absorbs<V>
-): Yieldable<AttemptWait<T>, Attempted<T> | Absorbed<T, V>>;
+  onError: (error: unknown) => H & HandlerCheck<H>
+): Yieldable<AttemptOps<T, H>, AttemptResult<T, H>>;
 export function attempt(fn: () => unknown, onError: (error: unknown) => unknown): unknown {
   return new Attempt(fn, onError);
 }
@@ -899,7 +906,7 @@ export function until<T, E extends Error>(
   onError: (error: unknown) => E & KindCheck<E>,
   options?: Parameters<typeof solidUntil>[1]
 ): Yieldable<Wait | Raise<E>, T> {
-  return attempt(() => solidUntil(accessor(source), options), onError) as any;
+  return attempt(() => solidUntil(accessor(source), options), onError as any) as any;
 }
 
 /** A memo's value: a promise's, an async iterable's latest — or a promise of an iterable's (Solid flattens one level). */

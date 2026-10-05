@@ -105,9 +105,10 @@ const Panel = $component(function* Panel() {
     yield* raise(new Forbidden("save"));
   });
   return view(function* () {
-    // the wrapper element: a provider tag at a view's root holding a call-form
-    // Errored, under another Errored, keeps that Errored's fallback out of the
-    // DOM — a library bug found while porting this scenario (D-085, not fixed)
+    // the wrapper element (in both sources): it once hid a library bug found
+    // while porting this scenario — a provider tag at a view's root holding a
+    // call-form Errored, under another Errored, kept that Errored's fallback
+    // out of the DOM (D-085's note; fixed, test/provider-errored.spec.tsx)
     return (
       <div class="panel">
         <Save value={save}>{yield* Child()}</Save>

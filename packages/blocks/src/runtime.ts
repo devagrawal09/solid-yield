@@ -1720,7 +1720,18 @@ export function $component<
           "COMPONENT_VIEW",
           "a $component's setup returns its view: `return view(function* () { return <…/>; })`."
         );
-      return renderView(view as any, body.name || "anonymous");
+      const out = renderView(view as any, body.name || "anonymous");
+      // A view that returns a function — a foreign component's output at its
+      // root (a context provider's tag: Solid's provider returns its
+      // `children` memo), an `h` thunk — returns content, as a lazy
+      // component's does (`blockComponent`): `perform` passes it on to be
+      // inserted. Unmarked, the holding hole called it, so the hole read
+      // what it shows and re-ran when that changed — an `Errored` under the
+      // provider switching to its fallback re-created the component, its
+      // setup and state, and the fallback never showed (D-085's note).
+      if (typeof out === "function" && (out as any)[READ] === undefined)
+        (out as any)[VIEW_MARK] = true;
+      return out;
     });
   };
   component[COMPONENT_MARK] = true;

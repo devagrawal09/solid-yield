@@ -1,4 +1,4 @@
-# HANDOFF — solid-blocks (checkpoint 2026-10-05; Phase 5 through D-082; next D-083)
+# HANDOFF — solid-blocks (checkpoint 2026-10-05; Phase 5 through D-083)
 
 This repository was extracted from the Solid fork `devagrawal09/solid`, branch `blocks-lib`, at commit **`6978eb83`** (D-015). Git history was not carried; the fork keeps it. The fork's own handoff at that commit (Phases 1A, 1B and 2, and its environment notes) is `git show 6978eb83:HANDOFF.md` in the fork.
 
@@ -111,7 +111,14 @@ Five commits on `main` after `c6da576`, then ten more for Dev's amending rulings
 
 **Landed through A10.** D-071–D-082 are decided and, where they change code, implemented. Of D-069: F1, F2, F3 gone; F4 the model; F5 documented; F6 not mixed (D-074); F7 fixed; F8 open.
 
-**D-083** (Dev) — `$untrack` removed: a plain read in an effect phase is admitted and untracked because its host is (amends D-079; closes D-042's `$untrack` and D-029). Implemented in `feat: tracking is the host's; $untrack removed (D-083)`.
+**After A10** (each gated green; the gate has 35 steps since A14):
+
+| Commit | What |
+| --- | --- |
+| A11 `feat: tracking is the host's; $untrack removed (D-083)` (`bda1b10`) | A plain read in an effect phase is admitted, untracked because its host is; `$untrack`, `UntrackedRead`, `READ_IN_EFFECT`, `UNTRACK_IN_SETUP` removed (16 uses, all package tests; 0 twin uses). Amends D-079; closes D-042's `$untrack` and D-029 (`Inherit<T>` not added). |
+| A12 `fix: a flow control's later prop reads are its own on the server (rendering /stream)` (`df06d89`) | A detector false positive (F7's sibling): Solid's server `For` re-reads a pending `each` when the view's template resolves its hole, inside the named view's run. Every flow-control prop getter now runs as the flow control's read. |
+| A13 `fix: a pending view returned into a server hole is retried as itself (rendering /profile)` (`046387b`) | A library bug: a call-form component in a hole was re-created by Solid's server retry of that hole (the page set up twice); under it a Solid rc.13 slot bug spun in microtasks. `perform` hands a function view back to the server renderer as a one-element array. D-082 has both diagnoses. |
+| A14 `test: server-render smoke in the gate` | Gate step `twins:ssr-smoke` (16 renders: rendering string + stream × 7 routes, room `/live`, hackernews' cached story); baseline re-recorded (35). |
 
 ### Open for Dev (Phase 5)
 
@@ -126,4 +133,4 @@ Five commits on `main` after `c6da576`, then ten more for Dev's amending rulings
 - **Plain functions in event attributes are refused.** "Any non-handler there is a type error" was read to cover `onClick={() => …}` too: a plain function can call an event whose colors would then reach no type. One twin site changed (room's `() => regenerate(reset)`). `Errored`'s `reset` is the one plain function kept, typed as already bound because it has no colors.
 - **A row `Errored` fallback has its parameters annotated.** TypeScript does not infer them, even with `For`'s own row signature in a `declare function`. §7 records it.
 - **D-069 F8: a nested row's server read order** (blocks-row-recursive, server). The oracle reads `open a` for the toggle, renders the nested rows, then reads `open a` again for the `<ul>`'s `style`; the library reads both of `a`'s holes first. Same reads, values and markup; server only. Declared with F5; not judged. Rule on it.
-- **rendering-blocks' streamed SSR, found while measuring D-082, not fixed.** Through `vite dev`'s SSR loader (development builds), `renderToStream` of `/profile` never ends (the process blocks; the original's ends) and of `/stream` fails with a server `READ_IN_VIEW` in `MemoList` (a `For` over a streamed memo under a `Loading` in a hole). No gate step renders the twins' pages on the server, so nothing caught it. Details in D-082.
+- ~~**rendering-blocks' streamed SSR, found while measuring D-082.**~~ Fixed (A12, A13); the gate now renders every twin page on the server (A14). Left: the Solid rc.13 slot loop under `/profile` (D-082) is Solid's, worth reporting upstream; the twins' hydration of their server output is still checked by nothing here. Was: Through `vite dev`'s SSR loader (development builds), `renderToStream` of `/profile` never ends (the process blocks; the original's ends) and of `/stream` fails with a server `READ_IN_VIEW` in `MemoList` (a `For` over a streamed memo under a `Loading` in a hole). No gate step renders the twins' pages on the server, so nothing caught it. Details in D-082.

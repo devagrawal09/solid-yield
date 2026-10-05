@@ -17,7 +17,7 @@
 //   --fast              run only the quick subset: twin:*:typecheck, twin:*:lint,
 //                       pkg:blocks:test, pkg:vite-plugin-blocks:typecheck,
 //                       pkg:*:exports and repo:prettier (skips twin tests, the
-//                       other package suites and oxlint)
+//                       server-render smoke, the other package suites and oxlint)
 //   --json <path>       write machine-readable results to <path>
 //   --jobs <n>          steps run concurrently (default 3; vitest steps already
 //                       use 2 workers each, so keep this modest)
@@ -159,6 +159,19 @@ function buildSteps(twins) {
     }
   }
 
+  // Server-render smoke (examples/harness/ssr-smoke/smoke.mjs): every twin with a server
+  // entry renders each of its routes through Vite's SSR loader, each render in its own
+  // process with a 30 s timeout — rendering-blocks' string and stream entries for all 7
+  // routes, room-blocks' /live, hackernews-spa-blocks' cached story. Nothing is compared:
+  // a throw, a development error or a render that never ends fails it. The twins' own
+  // tests render on the client only, so this is the only server render of their pages.
+  steps.push({
+    name: "twins:ssr-smoke",
+    cwd: root,
+    cmd: process.execPath,
+    args: ["examples/harness/ssr-smoke/smoke.mjs"]
+  });
+
   steps.push(
     { name: "pkg:blocks:test", cwd: root, fast: true, ...pnpmRun("packages/blocks", "test") },
     {
@@ -219,6 +232,7 @@ function buildSteps(twins) {
       "--check",
       ...dirs.map(d => `${d}/**/*.[tj]s?(x)`),
       "packages/*/test/*.mjs",
+      "examples/harness/ssr-smoke/*.mjs",
       "scripts/*.mjs"
     ]
   });

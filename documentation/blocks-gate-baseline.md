@@ -5,9 +5,9 @@ reference run used as the baseline; the machine-readable copy is
 [`blocks-gate-baseline.json`](./blocks-gate-baseline.json). CI runs the same gate
 against this file (`.github/workflows/gate.yml`).
 
-**Reference summary: `34 pass / 0 fail / 0 skip in 26s`** (34 steps, `--jobs 3`,
-every step under `TZ=UTC`). Run on the staged tree of Phase 4's commit 1 (the conformance
-harness), so the JSON's `head` is that commit's parent (`84521e5`).
+**Reference summary: `35 pass / 0 fail / 0 skip in 28s`** (35 steps, `--jobs 3`,
+every step under `TZ=UTC`). Run on the staged tree of Phase 5's gate-step commit (the
+server-render smoke), so the JSON's `head` is that commit's parent (`046387b`).
 Environment: Node v24.18.0, pnpm 11.1.1, darwin/arm64.
 
 **Solid under test: the published packages** — `solid-js`, `@solidjs/web`, `@solidjs/h`
@@ -18,7 +18,25 @@ the same 30 steps ran against its local rc.11 workspace packages and its pristin
 upstream compiler build. All 30 pass on rc.13 too: nothing in the public API the
 library and the twins use moved between rc.11 and rc.13 (D-016's canary is quiet).
 
-**Phase 4 added one step** (34 now): `pkg:blocks:conformance` (D-039), the conformance
+**Phase 5 added one step** (35 now): `twins:ssr-smoke`
+(`examples/harness/ssr-smoke/smoke.mjs`). Every twin with a server entry renders each of its
+routes on the server through Vite's SSR loader (development builds, as `vite dev` serves
+them), each render in its own process, killed after 30 s. That is rendering-blocks' `string`
+(`renderToString`) and `stream` (`renderToStream`, awaited to its end) entries for all 7
+routes (`/`, `/profile`, `/settings`, `/stream`, `/error-stream`, `/reveal`,
+`/skeleton`), room-blocks' `/live` and hackernews-spa-blocks' `/stories/30186326`, the
+last two through @solidjs/vite-plugin's generated `virtual:solid-ssr-handler`: 16 renders.
+hackernews' feed and user routes read the live HN API, so only the story it serves from its
+checked-in capture is rendered (the gate has no network). Nothing is compared: a render fails
+on a throw, a non-200 response, an empty document, a development error (a `[CODE]` message
+logged with `console.error` / `console.warn`, raised as an unhandled rejection or written
+into the document), or no end within 30 s. It was added after D-082's measurement found two
+streamed pages that no step rendered: `/stream` (a false server `READ_IN_VIEW`) and
+`/profile` (never ended). Run against the runtime before those fixes, it fails both, as
+`development error: [READ_IN_VIEW] <MemoList2>: …` and `no end after 30 s`.
+`repo:prettier` now also checks `examples/harness/ssr-smoke/*.mjs`.
+
+**Phase 4 added one step** (34 then): `pkg:blocks:conformance` (D-039), the conformance
 harness (`packages/blocks/test/conformance`): 12 scenarios, handwritten Solid against the
 library dialect, on the client, the server and in hydration; the library route against the
 compiler route's frozen server output; and a lint of the scenarios' library sources.
@@ -67,37 +85,38 @@ so results depend on the commit, not on the machine's clock locale (D-027).
 
 | Step | Result | Duration |
 | --- | --- | --- |
-| `twin:effect-blocks:test` | PASS | 1.5 s |
-| `twin:effect-blocks:typecheck` | PASS | 1.3 s |
-| `twin:effect-blocks:lint` | PASS | 1.7 s |
-| `twin:hackernews-spa-blocks:test` | PASS | 1.9 s |
-| `twin:hackernews-spa-blocks:typecheck` | PASS | 1.4 s |
-| `twin:hackernews-spa-blocks:lint` | PASS | 1.7 s |
-| `twin:rendering-blocks:test` | PASS | 3.2 s |
-| `twin:rendering-blocks:typecheck` | PASS | 1.4 s |
-| `twin:rendering-blocks:lint` | PASS | 1.6 s |
-| `twin:room-blocks:test` | PASS | 1.3 s |
-| `twin:room-blocks:typecheck` | PASS | 1.4 s |
-| `twin:room-blocks:lint` | PASS | 1.7 s |
-| `twin:sierpinski-blocks:test` | PASS | 10.9 s |
-| `twin:sierpinski-blocks:typecheck` | PASS | 1.0 s |
+| `twin:effect-blocks:test` | PASS | 1.6 s |
+| `twin:effect-blocks:typecheck` | PASS | 1.2 s |
+| `twin:effect-blocks:lint` | PASS | 1.5 s |
+| `twin:hackernews-spa-blocks:test` | PASS | 2.0 s |
+| `twin:hackernews-spa-blocks:typecheck` | PASS | 1.3 s |
+| `twin:hackernews-spa-blocks:lint` | PASS | 1.5 s |
+| `twin:rendering-blocks:test` | PASS | 3.1 s |
+| `twin:rendering-blocks:typecheck` | PASS | 1.2 s |
+| `twin:rendering-blocks:lint` | PASS | 1.5 s |
+| `twin:room-blocks:test` | PASS | 1.5 s |
+| `twin:room-blocks:typecheck` | PASS | 1.3 s |
+| `twin:room-blocks:lint` | PASS | 1.6 s |
+| `twin:sierpinski-blocks:test` | PASS | 10.7 s |
+| `twin:sierpinski-blocks:typecheck` | PASS | 0.9 s |
 | `twin:sierpinski-blocks:lint` | PASS | 1.2 s |
-| `twin:sierpinski-blocks-h:test` | PASS | 10.9 s |
-| `twin:sierpinski-blocks-h:typecheck` | PASS | 1.7 s |
-| `twin:sierpinski-blocks-h:lint` | PASS | 1.9 s |
-| `twin:todos-blocks:test` | PASS | 1.2 s |
+| `twin:sierpinski-blocks-h:test` | PASS | 10.7 s |
+| `twin:sierpinski-blocks-h:typecheck` | PASS | 1.6 s |
+| `twin:sierpinski-blocks-h:lint` | PASS | 1.8 s |
+| `twin:todos-blocks:test` | PASS | 1.4 s |
 | `twin:todos-blocks:typecheck` | PASS | 1.0 s |
 | `twin:todos-blocks:lint` | PASS | 1.3 s |
-| `twin:todos-blocks-h:test` | PASS | 1.1 s |
+| `twin:todos-blocks-h:test` | PASS | 1.3 s |
 | `twin:todos-blocks-h:typecheck` | PASS | 1.8 s |
-| `twin:todos-blocks-h:lint` | PASS | 2.0 s |
-| `pkg:blocks:test` | PASS | 7.4 s |
-| `pkg:eslint-plugin-blocks:test` | PASS | 1.4 s |
-| `pkg:vite-plugin-blocks:test` | PASS | 1.4 s |
-| `pkg:vite-plugin-blocks:typecheck` | PASS | 1.1 s |
-| `pkg:blocks:conformance` | PASS | 4.1 s |
+| `twin:todos-blocks-h:lint` | PASS | 2.1 s |
+| `twins:ssr-smoke` | PASS | 7.2 s |
+| `pkg:blocks:test` | PASS | 8.7 s |
+| `pkg:eslint-plugin-blocks:test` | PASS | 1.5 s |
+| `pkg:vite-plugin-blocks:test` | PASS | 1.3 s |
+| `pkg:vite-plugin-blocks:typecheck` | PASS | 1.0 s |
+| `pkg:blocks:conformance` | PASS | 3.9 s |
 | `pkg:blocks:exports` | PASS | 1.1 s |
-| `pkg:vite-plugin-blocks:exports` | PASS | 0.9 s |
-| `pkg:eslint-plugin-blocks:exports` | PASS | 0.9 s |
-| `repo:prettier` | PASS | 1.6 s |
-| `repo:oxlint` | PASS | 0.0 s |
+| `pkg:vite-plugin-blocks:exports` | PASS | 0.8 s |
+| `pkg:eslint-plugin-blocks:exports` | PASS | 0.8 s |
+| `repo:prettier` | PASS | 1.5 s |
+| `repo:oxlint` | PASS | 0.1 s |

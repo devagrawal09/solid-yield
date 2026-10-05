@@ -121,14 +121,28 @@ export class SagaDriverError extends Error {
   }
 }
 
+/**
+ * What the saga rethrows (a step's failure it did not handle, an
+ * `ActionInterruptedError`), given a type as it leaves the saga: the saga is
+ * plain code, so its `throw` is not a typed failure until the driver's
+ * `attempt` gives it one (D-087). The original is the `cause`.
+ */
+export class SagaError extends Error {
+  readonly kind = "saga" as const;
+  constructor(cause: unknown) {
+    super(cause instanceof Error ? cause.message : String(cause), { cause });
+  }
+}
+
 export interface EffectAction<Args extends unknown[], R> {
   /**
-   * An event call doing async work (its steps are fibers); a failure is
-   * whatever the saga rethrows. It reads no pending source (`P` is `false`:
+   * An event call doing async work (its steps are fibers); its failure is
+   * what the saga rethrows (`SagaError`, the original as its `cause`) or the
+   * driver's own (`SagaDriverError`). It reads no pending source (`P` is `false`:
    * the driver only awaits fibers), so binding an event that calls it does
    * not make a view pending (D-071, D-072).
    */
-  (...args: Args): EventCall<R, unknown, false, true>;
+  (...args: Args): EventCall<R, SagaError | SagaDriverError, false, true>;
   /** Interrupt the in-flight step's fiber. The interruption surfaces inside
    * the generator as a thrown `ActionInterruptedError` at the `yield*`. */
   interrupt(): void;
@@ -149,7 +163,11 @@ export function effectAction<Args extends unknown[], R>(
 
   const base = $event(function* (...args: Args) {
     const it = genFn(...args);
-    let step = it.next();
+    // each advance runs the saga's plain code up to its next Effect: what it
+    // rethrows gets its type here (D-087)
+    const advance = (next: () => IteratorResult<SagaStep | Write, R>) =>
+      attempt(next, cause => new SagaError(cause));
+    let step = yield* advance(() => it.next());
     while (!step.done) {
       // A block write in the saga (`yield* setX(v)`) completes without yielding:
       // every step that reaches here is an Effect.
@@ -161,16 +179,17 @@ export function effectAction<Args extends unknown[], R>(
         cause => new SagaDriverError(cause)
       );
       if (inFlight === fiber) inFlight = null;
-      if (Exit.isSuccess(exit)) step = it.next(exit.value as never);
-      else if (Exit.isInterrupted(exit)) step = it.throw(new ActionInterruptedError());
-      else step = it.throw(Cause.squash(exit.cause));
+      if (Exit.isSuccess(exit)) step = yield* advance(() => it.next(exit.value as never));
+      else if (Exit.isInterrupted(exit))
+        step = yield* advance(() => it.throw(new ActionInterruptedError()));
+      else step = yield* advance(() => it.throw(Cause.squash(exit.cause)));
     }
     return step.value;
   });
 
   const invoke = (...args: Args) => {
     invoke.interrupt(); // superseding call cancels the previous flight
-    return base(...args) as EventCall<R, unknown, false, true>;
+    return base(...args) as EventCall<R, SagaError | SagaDriverError, false, true>;
   };
   invoke.interrupt = () => {
     const fiber = inFlight;

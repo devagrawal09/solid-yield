@@ -108,12 +108,37 @@ const PATH_TARGET: unique symbol = Symbol.for("solid.blocks.path") as any;
 const PATH_READ = 1;
 
 /**
- * Dev only: what a block may throw without it being a bug — the failures it
- * types (`raise`'s error, an `attempt` handler's result), the library's own
- * dev errors, and a plain throw already reported (so nested runs never wrap
- * it twice). `NotReadyError` is pending, not a failure, and is never wrapped.
- * Solid hands a failure on wrapped (its internal status error, the original
- * as `cause`): the `cause` chain is followed.
+ * Every build (D-087): the brand of a typed failure — `raise`'s error, and the
+ * `Error` an `attempt`'s handler returns. One non-enumerable symbol on the
+ * object already being thrown. An `attempt` over an event call hands its
+ * handler only a branded failure; anything else the call rejects with is a
+ * crash (D-019) and goes past the handler.
+ */
+const FAILURE: unique symbol = Symbol.for("solid.blocks.failure") as any;
+function brand<T>(e: T): T {
+  if (
+    e !== null &&
+    (typeof e === "object" || typeof e === "function") &&
+    (e as any)[FAILURE] !== true &&
+    Object.isExtensible(e)
+  )
+    Object.defineProperty(e, FAILURE, { value: true, enumerable: false, configurable: true });
+  return known(e);
+}
+/** A typed failure (D-087): branded by `raise` or an attempt's handler, in every build. */
+function isFailure(e: unknown): boolean {
+  return (
+    e != null && (typeof e === "object" || typeof e === "function") && (e as any)[FAILURE] === true
+  );
+}
+
+/**
+ * Dev only: what a block may throw without it being a bug, so is not
+ * decorated as `UNTYPED_THROW` — a typed failure (branded, above), the
+ * library's own dev errors, and a plain throw already reported (so nested
+ * runs never wrap it twice). `NotReadyError` is pending, not a failure, and
+ * is never wrapped. Solid hands a failure on wrapped (its internal status
+ * error, the original as `cause`): the `cause` chain is followed.
  */
 const KNOWN = new WeakSet<object>();
 function known<T>(e: T): T {
@@ -125,7 +150,7 @@ function known<T>(e: T): T {
 function isKnown(e: unknown): boolean {
   let x: any = e;
   for (let i = 0; i < 8 && x !== null && (typeof x === "object" || typeof x === "function"); i++) {
-    if (KNOWN.has(x)) return true;
+    if (KNOWN.has(x) || x[FAILURE] === true) return true;
     x = x.cause;
   }
   return false;
@@ -626,14 +651,17 @@ class Attempt {
     }
     // an event call (D-077): delegated to as `yield* call` is — at once when
     // its body already finished (so an `$effect` may attempt a synchronous
-    // one), else waiting for it — and its failure goes through the handler
+    // one), else waiting for it — and its typed failure goes through the
+    // handler. Anything else it rejects with is a crash, not a failure
+    // (D-019, D-087): it goes past the handler, `UNTYPED_THROW` in
+    // development, as itself in production.
     if (v != null && (v as any)[EVENT_CALL_MARK] === true) {
       let failed = false;
       let error: unknown;
       try {
         return yield* (v as any)[Symbol.iterator]();
       } catch (e) {
-        if (e instanceof NotReadyError) throw e;
+        if (e instanceof NotReadyError || !isFailure(e)) throw e;
         failed = true;
         error = e;
       }
@@ -719,12 +747,12 @@ function* handle(
 ): Generator<unknown, unknown, unknown> {
   const r = onError(error);
   const out = isGeneratorObject(r) ? yield* r : r;
-  if (out instanceof Error) throw known(out);
+  if (out instanceof Error) throw brand(out);
   return out;
 }
 /** For a stream's failure, outside the attempt's run: an `Error` fails the stream, anything else ends it. */
 function handled(r: unknown): unknown {
-  if (r instanceof Error) throw known(r);
+  if (r instanceof Error) throw brand(r);
   return r;
 }
 /**
@@ -751,7 +779,11 @@ type AttemptStream<T> =
         readonly "[STREAM_IN_EVENT] a stream is consumed in a reactive block: $memo or $projection": true;
       }
     : never;
-/** What the handler receives: an event call's known failure (D-077), else anything caught. */
+/**
+ * What the handler receives: an event call's typed failures, exactly (D-077,
+ * D-087: the runtime passes only branded failures; a crash goes past the
+ * handler), else anything caught.
+ */
 type Caught<T> = T extends EventCall<any, infer E, any, any> ? E : unknown;
 /** What a handler's run yields: a generator handler's ops, which are the host's (D-078). */
 type HandlerYields<H> = H extends Generator<infer Y, any, any> ? Y : never;
@@ -835,9 +867,12 @@ type Attempted<T> =
  *
  * When it returns an event call (D-077), `yield* attempt(() => post(msg), e =>
  * { … })` is `yield* post(msg)` with the call's failure handled: the handler
- * receives the call's known failure (its `FailsOf`) and returns it, a
+ * receives the call's typed failure (its `FailsOf`) and returns it, a
  * transformation, or nothing; the call's other colors (`P`, `A`) are the
- * block's as with `yield*`. This is how a block handles a failure — `try` /
+ * block's as with `yield*`. Only a typed failure (one `raise`d, or returned
+ * by a handler) reaches it, in every build: a crash inside the call — a
+ * plain `throw`, a `TypeError` — is a bug, and goes past the handler
+ * (D-087). This is how a block handles a failure — `try` /
  * `catch` is not a block form (`no-try-catch`).
  */
 export function attempt<T, H>(
@@ -851,7 +886,7 @@ export function attempt(fn: () => unknown, onError: (error: unknown) => unknown)
 class RaiseOp {
   constructor(readonly error: unknown) {}
   *[Symbol.iterator](): Generator<never, never, unknown> {
-    throw known(this.error);
+    throw brand(this.error);
   }
 }
 /** `yield* raise(error)`: the typed replacement for `throw` in a block. */

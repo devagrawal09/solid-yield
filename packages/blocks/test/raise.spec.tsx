@@ -29,6 +29,8 @@ import {
   type View
 } from "solid-blocks";
 
+declare const __DEV__: boolean;
+
 class Boom extends Error {
   readonly kind = "boom" as const;
 }
@@ -660,6 +662,107 @@ describe("D-077: an attempt over an event call", () => {
     resolve();
     expect(await failed).toBe(undefined);
     expect(log).toEqual([7, "late", undefined]);
+  });
+
+  it("a typed failure is branded in every build: raise's, and a handler's returned Error (D-087)", async () => {
+    const BRAND = Symbol.for("solid.blocks.failure");
+    const got: unknown[] = [];
+    const load = $event(function* () {
+      yield* raise(new Boom("inner"));
+    });
+    const outer = $event(function* () {
+      yield* attempt(
+        () => load(),
+        e => (got.push(e), new Other(e.message))
+      );
+    });
+    const top = $event(function* () {
+      yield* attempt(
+        () => outer(),
+        e => {
+          got.push(e);
+        }
+      );
+    });
+    await top();
+    expect(got.map(e => (e as Error).constructor)).toEqual([Boom, Other]);
+    for (const e of got) {
+      const d = Object.getOwnPropertyDescriptor(e, BRAND);
+      expect(d?.value).toBe(true);
+      expect(d?.enumerable).toBe(false);
+    }
+  });
+
+  it("a crash inside the called event goes past the handler: a bug, not a failure (D-087)", async () => {
+    const handled: unknown[] = [];
+    const crash = $event(function* (fail: boolean) {
+      if (fail) return (null as any).x.y as number; // a TypeError
+      yield* raise(new Boom("typed"));
+    });
+    const outer = $event(function* (fail: boolean) {
+      yield* attempt(
+        () => crash(fail),
+        e => {
+          handled.push(e.kind);
+        }
+      );
+      return "absorbed";
+    });
+    // the typed failure reaches the handler
+    expect(await outer(false)).toBe("absorbed");
+    expect(handled).toEqual(["boom"]);
+    const error = await outer(true).then(
+      () => null,
+      e => e
+    );
+    expect(handled).toEqual(["boom"]);
+    if (__DEV__) {
+      expect(String(error)).toContain("[UNTYPED_THROW] an event");
+      // the crash itself is the cause, reported once
+      let x: any = error;
+      while (x && !(x instanceof TypeError)) x = x.cause;
+      expect(x).toBeInstanceOf(TypeError);
+    } else expect(error).toBeInstanceOf(TypeError);
+  });
+
+  it("a crash in a synchronous call attempted by an $effect reaches the Errored, past the handler (D-087)", () => {
+    const handled: unknown[] = [];
+    const seen: unknown[] = [];
+    const App = $component(function* App() {
+      const crash = $event(function* () {
+        throw new TypeError("crash");
+      });
+      yield* $effect(
+        function* () {},
+        function* () {
+          yield* attempt(
+            () => crash(),
+            e => {
+              handled.push(e);
+            }
+          );
+        }
+      );
+      return view(function* () {
+        return <i>ok</i>;
+      });
+    });
+    dispose = render(
+      () =>
+        Errored({
+          fallback: (e: () => unknown) => (seen.push(e()), (<p>caught</p>)),
+          children: function* () {
+            return <>{yield* App()}</>;
+          }
+        }),
+      root
+    );
+    flush();
+    expect(handled).toEqual([]);
+    expect(seen).toHaveLength(1);
+    expect(String(seen[0])).toContain("crash");
+    if (__DEV__) expect(String(seen[0])).toContain("[UNTYPED_THROW]");
+    else expect(seen[0]).toBeInstanceOf(TypeError);
   });
 
   it("a transformed async call's failure fails the caller with the new one", async () => {

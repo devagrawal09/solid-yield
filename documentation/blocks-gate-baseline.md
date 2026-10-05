@@ -34,13 +34,16 @@ stubbed in `hydrate`; a hydrating page's lazy-module preload (`import(http://loc
 is served by the dev server. **The network is held:** `fetch` never settles, because server
 functions are served by Vite's middleware, which needs a listening server (local port
 binding is refused in the sandbox this was built in), so room's live sources and posts are
-not exercised past hydration. **Five twin cases are known failures**, recorded in the
-script's `KNOWN_FAILURES` with their exact messages: rendering `stream` `/profile`,
-`/stream`, `/error-stream`, room `/live`, hackernews' story. Each is a "Hydration key miss"
-on a call-form `Loading`'s fallback, which the client builds where the server streamed the
-content. `--originals` runs the same cases against the originals, which hydrate clean (16 /
-16), so these are the library's. A known case must keep failing with its message, and one
-that starts to pass fails the step until it is removed from the list. Planting a client-only
+not exercised past hydration. `--originals` runs the same cases against the originals (a
+diagnosis aid, not gated). The script's `KNOWN_FAILURES` lists a case expected to fail, with
+its message: a known case must keep failing with it, and one that starts to pass fails the
+step until it is removed from the list. The step was added with five (rendering `stream`
+`/profile`, `/stream`, `/error-stream`, room `/live`, hackernews' story, each a "Hydration
+key miss" on a `Loading` fallback, where the originals hydrate 16 / 16). All five were one
+cause, a call-form fallback written as JSX: it is built with the holding view, and while
+hydrating it claims a server node that the server never rendered (D-092: the lint
+`component-children-generator` makes it a lazy view, and the twins are migrated). The list is
+empty since; all 16 cases pass. Planting a client-only
 `<p>` in rendering's stream client fails `/settings` with a key miss. `repo:prettier` now
 also checks `examples/harness/hydrate-smoke/*.mjs`.
 

@@ -191,6 +191,37 @@ export const declared: Record<string, Record<string, ModeExpectation>> = {
       ]
     }
   },
+  "loading-fallback-hydration": {
+    "server/library": {
+      status: "differs",
+      reason:
+        "F5: hydration keys only: the `Loading` is called in a hole, one owner deeper than the oracle's tag, so the content's key has one more digit (`1000` → `10000`). The read and the markup are the oracle's; the fallback is never built (D-092).",
+      trace: [
+        "## render",
+        'read name = "ada"',
+        'markup = <section _hk=0><p _hk=10000 class="user">ada</p></section>',
+        'hydration-keys = ["0","10000"]',
+        "serialized = []"
+      ]
+    },
+    "hydrate/library": {
+      status: "differs",
+      reason:
+        "F5: hydrating `server/library`'s markup claims every server node (2/2 kept) with no key miss: the lazy-view fallback is not built (D-092; built as JSX it claims a key the server never rendered, hydrate-self-test.spec.ts). The `html` lines show the library's `_hk` value (`10000`).",
+      trace: [
+        "## hydrate",
+        'read name = "ada"',
+        "hydration server-nodes 2/2 kept, 0 client-inserted",
+        "## initial",
+        'html = <section _hk="0"><p _hk="10000" class="user">ada</p></section>',
+        "## name grace",
+        'write name = "grace"',
+        'read name = "grace"',
+        'html = <section _hk="0"><p _hk="10000" class="user">grace</p></section>',
+        "## teardown"
+      ]
+    }
+  },
   "async-hydration": {
     "server/library": {
       status: "differs",

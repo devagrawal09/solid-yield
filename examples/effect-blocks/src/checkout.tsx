@@ -75,7 +75,9 @@ const Orders = $component(function* Orders(
             when: function* () {
               return (yield* props.orders.length) > 0;
             },
-            fallback: <p class="empty">No orders yet.</p>,
+            fallback: function* () {
+              return <p class="empty">No orders yet.</p>;
+            },
             children: function* () {
               return (
                 <ul class="orders">
@@ -336,7 +338,9 @@ export const Checkout = $component(function* Checkout() {
                 <>
                   {
                     yield* Loading({
-                      fallback: <p class="loading">Loading orders…</p>,
+                      fallback: function* () {
+                        return <p class="loading">Loading orders…</p>;
+                      },
                       children: function* () {
                         return <>{yield* Orders({ orders })}</>;
                       }

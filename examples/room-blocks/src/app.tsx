@@ -20,7 +20,9 @@ const App = $component(function* App() {
                 <Router>
                   {props =>
                     Loading({
-                      fallback: <div class="room muted">Loading…</div>,
+                      fallback: function* () {
+                        return <div class="room muted">Loading…</div>;
+                      },
                       children: function* () {
                         return <>{props.children}</>;
                       }

@@ -1,0 +1,9 @@
+## mount
+read name = "ada"
+## initial
+html = <section><p class="user">ada</p></section>
+## name grace
+write name = "grace"
+read name = "grace"
+html = <section><p class="user">grace</p></section>
+## teardown

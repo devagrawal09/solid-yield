@@ -22,6 +22,7 @@ A view is `return view(function* () { return <…/>; })`: it has no body (D-032)
 | a flow control or boundary as a tag: `<Show when={…}>` | `{yield* Show({ when, children: function* () { … } })}` | `ElementType` | — | — | `no-component-tag` (autofix) |
 | a read in a call's argument: `Card({ n: yield* count })` | pass the source (`n: count`) or a hole (`n: function* () { return (yield* count) * 2; }`) | — | — | — | `no-read-in-prop` (autofix) |
 | plain JSX as a call's `children`: `Show({ when, children: <p /> })` | a lazy view `children: function* () { return <p />; }`, or a row `function* (item) { … }` | — (content is accepted) | — | — | `component-children-generator` (autofix) |
+| JSX as a flow control's `fallback`: `Loading({ fallback: <p>…</p>, … })` (built with the holding view, shown or not; while hydrating it claims a server node that is there only if the server showed the fallback: Solid's "Hydration key miss", D-092) | a lazy view `fallback: function* () { return <p>…</p>; }`, built when it shows | — (an element is accepted) | — | — | `component-children-generator` (autofix) |
 | a block call not `yield*`-ed: `{Card({ todo })}`, `<>{Card({ todo })}</>`, `{[Main(), Footer()]}` | `{yield* Card({ todo })}`, under a `Loading` / `Errored` as its colors need (D-086) | `JSX.Element` is settled only: a pending or failing view is not one, in an element and in a fragment (`Fragment`'s children are `Element`; checked when the tsconfig sets `jsxFactory` / `jsxFragmentFactory`) | — | — | `component-call-yielded` (autofix: the `yield*`) |
 | a thunk as a child or attribute: `{() => x}`, `class={() => c}` | a hole: `{yield* x}` | JSX and `h` reject plain thunks | — | — | — |
 | a source called: `count()` | `yield* count` | `Source` has no call signature | — | — | — |
@@ -134,7 +135,7 @@ Every other type refusal is a plain assignability error. The common ones: an op 
 | `no-unbound-event` | an `$event` handler in an event prop without `yield*` (autofix) |
 | `no-component-tag` | a block component, flow control or boundary written as a tag (autofix: the call) |
 | `no-read-in-prop` | a `yield*` in a component call's argument (autofix) |
-| `component-children-generator` | a call's `children` that is not a generator (autofix) |
+| `component-children-generator` | a call's `children` that is not a generator; a flow control's JSX `fallback` (D-092) (autofix) |
 | `component-call-yielded` | a block component call in JSX (an array, a conditional) or a discarded statement, not delegated to with `yield*` (autofix) |
 | `no-unchecked-foreign-handoff` | a block component handed to plain Solid (a `component` property or attribute, `@solidjs/web`'s `render` / `hydrate` / `renderTo…`, Solid's `lazy` over one) without `foreign(…)` (D-088; suggestion: the wrap) |
 | `jsx-only-in-view` | JSX outside a view, a hole or a row's view |

@@ -414,6 +414,27 @@ export const asyncHydration = scenario({
   ]
 });
 
+export const loadingFallbackHydration = scenario({
+  name: "loading-fallback-hydration",
+  covers: [
+    "a call-form Loading whose content the server renders in place hydrates without building its fallback (D-092)"
+  ],
+  entry: { component: "App" },
+  ssr: {},
+  sources: sources("loading-fallback-hydration"),
+  steps: [
+    { name: "initial", run: ({ html }) => html() },
+    {
+      name: "name grace",
+      run: ({ app, flush, html }) => {
+        app.setName("grace");
+        flush();
+        html();
+      }
+    }
+  ]
+});
+
 export const errorRouting = scenario({
   name: "error-routing",
   covers: [
@@ -486,6 +507,7 @@ export const scenarios: Scenario[] = [
   asyncDisposal,
   asyncEvent,
   asyncHydration,
+  loadingFallbackHydration,
   errorRouting
 ];
 

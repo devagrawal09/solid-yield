@@ -38,7 +38,9 @@ const App = $component(function* App() {
           <>
             {Nav()}
             {Loading({
-              fallback: <div class="news-list-nav">Loading...</div>,
+              fallback: function* () {
+                return <div class="news-list-nav">Loading...</div>;
+              },
               children: function* () {
                 return <>{props.children}</>;
               }

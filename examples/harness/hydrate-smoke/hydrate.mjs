@@ -21,10 +21,13 @@
 // `_$HY` bootstrap, the streamed chunks) and Solid's client read the same
 // global. Each case runs in its own process, killed after TIMEOUT_MS.
 //
-// Usage: node examples/harness/hydrate-smoke/hydrate.mjs [--only <substring>] [--jobs <n>]
+// Usage: node examples/harness/hydrate-smoke/hydrate.mjs [--only <substring>] [--jobs <n>] [--originals]
+// (HYDRATE_SMOKE_VERBOSE=1 passes the cases' console through; HYDRATE_SMOKE_DUMP=<file>
+// writes a case's server document, with --only one case)
 // Exit code 0 when every case passes.
 import { createRequire } from "node:module";
 import { spawn } from "node:child_process";
+import { writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -74,21 +77,16 @@ const TARGETS = [
 ];
 
 /**
- * Known failures: a twin's case that fails, each with the key-miss Solid
- * reports, where its original (`--originals`) hydrates clean. Found when this
- * step was added (2026-10-06): on the client a call-form `Loading` renders its
- * fallback where the server streamed its content, so the client's tree and
- * the server's diverge there (HANDOFF, "Review fixes"). Each must still fail
- * with its message: a case that starts to pass fails the step until it is
- * removed here, so a fix is recorded.
+ * Known failures: a twin's case that fails, by name, with the message it must
+ * keep failing with, where its original (`--originals`) hydrates clean. A
+ * case that starts to pass fails the step until it is removed here, so a fix
+ * is recorded. Empty since D-092: the five found when this step was added
+ * (rendering's streamed `/profile`, `/stream`, `/error-stream`, room's
+ * `/live`, hackernews' story) were all a call-form fallback written as JSX,
+ * built with the holding view and claiming, while hydrating, a server node
+ * the server never rendered.
  */
-const KNOWN_FAILURES = {
-  "rendering-blocks stream /profile": 'Hydration key miss for "11090000030203000000"',
-  "rendering-blocks stream /stream": 'Hydration key miss for "11090000030050"',
-  "rendering-blocks stream /error-stream": 'Hydration key miss for "110900000300410"',
-  "room-blocks handler /live": 'Hydration key miss for "1010701"',
-  "hackernews-spa-blocks handler /stories/30186326": 'Hydration key miss for "17020"'
-};
+const KNOWN_FAILURES = {};
 
 /** A development error: `[READ_IN_VIEW] …`, `[HYDRATION_MISMATCH] …`. */
 const DEV_ERROR = /\[([A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+)\]/;
@@ -207,6 +205,8 @@ async function hydrateOne(twin, entry, kind, url, interaction) {
     return report({ failed: `render threw: ${String(e?.message ?? e).split("\n")[0]}` });
   }
   await new Promise(r => setTimeout(r, 50));
+  // a diagnosis aid: HYDRATE_SMOKE_DUMP=<file> writes the server's document
+  if (process.env.HYDRATE_SMOKE_DUMP) writeFileSync(process.env.HYDRATE_SMOKE_DUMP, html);
   const renderError = logged.find(m => DEV_ERROR.test(m));
   if (renderError) return report({ failed: `development error: ${renderError.split("\n")[0]}` });
   if (!html.trim()) return report({ failed: "empty document" });

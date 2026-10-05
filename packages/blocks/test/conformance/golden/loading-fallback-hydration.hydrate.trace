@@ -1,0 +1,10 @@
+## hydrate
+read name = "ada"
+hydration server-nodes 2/2 kept, 0 client-inserted
+## initial
+html = <section _hk="0"><p _hk="1000" class="user">ada</p></section>
+## name grace
+write name = "grace"
+read name = "grace"
+html = <section _hk="0"><p _hk="1000" class="user">grace</p></section>
+## teardown

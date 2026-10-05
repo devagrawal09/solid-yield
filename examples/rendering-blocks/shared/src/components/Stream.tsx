@@ -136,7 +136,9 @@ const Stream = $component(function* Stream() {
             <p>Accumulates an immutable array each yield.</p>
             {
               yield* Loading({
-                fallback: <span class="loader">Loading memo...</span>,
+                fallback: function* () {
+                  return <span class="loader">Loading memo...</span>;
+                },
                 children: function* () {
                   return <>{yield* MemoList({ items: memoItems })}</>;
                 }
@@ -148,7 +150,9 @@ const Stream = $component(function* Stream() {
             <p>Pushes into a reactive store each yield.</p>
             {
               yield* Loading({
-                fallback: <span class="loader">Loading projection...</span>,
+                fallback: function* () {
+                  return <span class="loader">Loading projection...</span>;
+                },
                 children: function* () {
                   return <>{yield* ProjList({ count, rows })}</>;
                 }

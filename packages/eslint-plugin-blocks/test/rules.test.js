@@ -403,9 +403,49 @@ tester.run("component-children-generator", rules["component-children-generator"]
         "return view(function* () { return <ul>{yield* For({ each: xs, children: function* (x) { return view(function* () { return <li />; }); } })}</ul>; });"
       ),
     // h output in a no-JSX file is built where it is inserted
-    { code: imports + "const v = Show({ when: x, children: h('b') });", filename: "app.ts" }
+    { code: imports + "const v = Show({ when: x, children: h('b') });", filename: "app.ts" },
+    // D-092: a lazy-view fallback, text, a render function
+    imports +
+      component(
+        "return view(function* () { return <>{yield* Loading({ fallback: function* () { return <i>…</i>; }, children: function* () { return <b />; } })}{yield* Show({ when: x, fallback: 'none', children: function* () { return <b />; } })}{yield* Errored({ fallback: (e) => <p>{String(e())}</p>, children: function* () { return <b />; } })}</>; });"
+      ),
+    // a block component's own `fallback` prop is a value like any other
+    imports +
+      "const Card = $component(function* (props) { return view(function* () { return <b />; }); });" +
+      component("return view(function* () { return <>{yield* Card({ fallback: <i /> })}</>; });")
   ],
   invalid: [
+    {
+      filename: "app.tsx",
+      code:
+        imports +
+        component(
+          'return view(function* () { return <ul>{yield* Loading({ fallback: <span class="loader">…</span>, children: function* () { return <b />; } })}</ul>; });'
+        ),
+      output:
+        imports +
+        component(
+          'return view(function* () { return <ul>{yield* Loading({ fallback: function* () {\nreturn <span class="loader">…</span>;\n}, children: function* () { return <b />; } })}</ul>; });'
+        ),
+      errors: [{ messageId: "fallback", data: { name: "Loading" } }]
+    },
+    {
+      filename: "app.tsx",
+      code:
+        imports +
+        component(
+          "return view(function* () { return <>{yield* Errored({ fallback: <><p>failed</p></>, children: function* () { return <b />; } })}{yield* For({ each: xs, fallback: <p>none</p>, children: function* (x) { return view(function* () { return <li />; }); } })}</>; });"
+        ),
+      output:
+        imports +
+        component(
+          "return view(function* () { return <>{yield* Errored({ fallback: function* () {\nreturn <><p>failed</p></>;\n}, children: function* () { return <b />; } })}{yield* For({ each: xs, fallback: function* () {\nreturn <p>none</p>;\n}, children: function* (x) { return view(function* () { return <li />; }); } })}</>; });"
+        ),
+      errors: [
+        { messageId: "fallback", data: { name: "Errored" } },
+        { messageId: "fallback", data: { name: "For" } }
+      ]
+    },
     {
       filename: "app.tsx",
       code:

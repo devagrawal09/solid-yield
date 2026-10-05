@@ -147,7 +147,9 @@ const Header = $component(function* Header(props: Props<{ room: string }>) {
         <div class="presence">
           {
             yield* Loading({
-              fallback: <span class="muted">joining…</span>,
+              fallback: function* () {
+                return <span class="muted">joining…</span>;
+              },
               children: function* () {
                 return <>{yield* Members({ who, me })}</>;
               }
@@ -327,7 +329,9 @@ const Transcript = $component(function* Transcript<E, P extends boolean>(
         </div>
         {
           yield* Loading({
-            fallback: <p class="muted">loading…</p>,
+            fallback: function* () {
+              return <p class="muted">loading…</p>;
+            },
             children: function* () {
               return <>{yield* Messages({ messages: props.messages })}</>;
             }
@@ -545,7 +549,9 @@ const Card = $component(function* Card(props: Props<{ room: string }>) {
         {
           yield* Loading({
             on: props.room,
-            fallback: <p class="muted">loading card…</p>,
+            fallback: function* () {
+              return <p class="muted">loading card…</p>;
+            },
             children: function* () {
               return <>{yield* CardBody({ card, members, activity })}</>;
             }
@@ -575,7 +581,9 @@ const CardBody = $component(function* CardBody<E, P extends boolean>(
         <p>
           {
             yield* Loading({
-              fallback: <span class="muted">counting members…</span>,
+              fallback: function* () {
+                return <span class="muted">counting members…</span>;
+              },
               children: function* () {
                 return <>{yield* MemberCount({ members: props.members })}</>;
               }
@@ -585,7 +593,9 @@ const CardBody = $component(function* CardBody<E, P extends boolean>(
         <p>
           {
             yield* Loading({
-              fallback: <span class="muted">sampling activity…</span>,
+              fallback: function* () {
+                return <span class="muted">sampling activity…</span>;
+              },
               children: function* () {
                 return <>{yield* ActivityLine({ activity: props.activity })}</>;
               }
@@ -685,7 +695,9 @@ const Summary = $component(function* Summary(props: Props<{ room: string }>) {
                 <>
                   {
                     yield* Loading({
-                      fallback: <p class="muted">summarizing…</p>,
+                      fallback: function* () {
+                        return <p class="muted">summarizing…</p>;
+                      },
                       children: function* () {
                         return <>{yield* SummaryText({ room: props.room, attempt: attemptNo })}</>;
                       }
@@ -742,7 +754,9 @@ const Archive = $component(function* Archive(props: Props<{ room: string }>) {
         {
           yield* Loading({
             on: props.room,
-            fallback: <p class="muted">counting the archive (4s)…</p>,
+            fallback: function* () {
+              return <p class="muted">counting the archive (4s)…</p>;
+            },
             children: function* () {
               return <>{yield* ArchiveCount({ stats })}</>;
             }

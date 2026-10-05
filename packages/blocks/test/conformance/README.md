@@ -63,7 +63,7 @@ By default a candidate is `equivalent`: its trace must equal the oracle's exactl
 | `known-defect` | A defect the scenario isolates. The mode must keep diverging; when it stops, the test fails and asks for the entry to be flipped. |
 | `not-applicable` | The scenario cannot be expressed in the mode. |
 
-Two files check that the comparator catches real regressions. `self-test.spec.ts` plants a missing cleanup, a duplicate event write, a stale async commit and an owner mismatch in real scenario sources. `hydrate-self-test.spec.ts` plants a hydration-key mismatch, and also checks that the library client cannot hydrate the compiler route's markup. `harness/mutate.ts` requires every edit to match exactly once, so a self-test cannot pass vacuously.
+Two files check that the comparator catches real regressions. `self-test.spec.ts` plants a missing cleanup, a duplicate event write, a stale async commit and an owner mismatch in real scenario sources. `hydrate-self-test.spec.ts` plants a hydration-key mismatch, checks that the library client cannot hydrate the compiler route's markup, and plants a call-form fallback written as JSX in loading-fallback-hydration: built with the holding view, it claims a key the server never rendered (D-092; `server.spec.ts` pins that mutant's own server output). `harness/mutate.ts` requires every edit to match exactly once, so a self-test cannot pass vacuously.
 
 `CONFORMANCE_DUMP=1` prints both traces side by side on a divergence. `CONFORMANCE_DUMP=json` prints the candidate's trace as JSON, for declaring a `differs`.
 

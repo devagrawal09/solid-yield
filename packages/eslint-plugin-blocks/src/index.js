@@ -11,7 +11,7 @@
  *   no-foreign-reactive    no reactive state from plain Solid, the router or another library
  *   no-component-tag       a block component is called, never a JSX tag (autofix)
  *   no-read-in-prop        a component call's prop is a source, a hole or a value — never a read (autofix)
- *   component-children-generator  a component call's children is a generator (autofix)
+ *   component-children-generator  a component call's children is a generator, a flow control's JSX fallback a lazy view (autofix)
  *   component-call-yielded  a block component call in a block is delegated to: `{yield* Card(…)}` (autofix)
  *   no-unbound-event       an `$event` handler in an event prop is bound: `onClick={yield* save}` (autofix)
  *   no-unshown-wait        (warning, with types) a bound handler that may wait on pending data: show its in-flight state
@@ -1047,6 +1047,10 @@ const noReadInProp = {
  * D-066: a component call's `children` is always a generator — a lazy view
  * `function* () { return <…/>; }` or a row `function* (item, index) { … }` —
  * never plain JSX (built eagerly, in the caller), a getter or a render arrow.
+ * D-092: so is a flow control's or a boundary's JSX `fallback`: written as
+ * JSX in the call it is built with the holding view, shown or not, and while
+ * hydrating that build claims a server node that is not there whenever the
+ * server rendered the content (Solid's "Hydration key miss").
  */
 const componentChildrenGenerator = {
   meta: {
@@ -1054,11 +1058,13 @@ const componentChildrenGenerator = {
     fixable: "code",
     docs: {
       description:
-        "A component call's `children` is a generator: a lazy view `function* () { return <…/>; }` or a row (D-066)."
+        "A component call's `children` is a generator: a lazy view `function* () { return <…/>; }` or a row (D-066); a flow control's JSX `fallback` is a lazy view (D-092)."
     },
     messages: {
       children:
-        "`children` of a component call is a generator: `function* () { return <…/>; }` (built inside the component), or a row `function* (item) { … }` (D-066)."
+        "`children` of a component call is a generator: `function* () { return <…/>; }` (built inside the component), or a row `function* (item) { … }` (D-066).",
+      fallback:
+        "`fallback` of `{{name}}` is built here, shown or not (and while hydrating it claims a server node that is there only if the server showed it): write it as a lazy view, `function* () { return <…/>; }`, built when it shows (D-092)."
     },
     schema: []
   },
@@ -1068,12 +1074,31 @@ const componentChildrenGenerator = {
     return {
       Property(node) {
         const key = node.key.type === "Identifier" ? node.key.name : node.key.value;
-        if (key !== "children" || node.computed) return;
+        if ((key !== "children" && key !== "fallback") || node.computed) return;
         const obj = node.parent;
         const call = obj.parent;
         if (!call || call.type !== "CallExpression" || call.arguments[0] !== obj) return;
         if (!isComponentCallee(context, call.callee)) return;
         const v = node.value;
+        if (key === "fallback") {
+          // a flow control's or a boundary's (the library's): a block
+          // component's own `fallback` prop is a value like any other
+          if (
+            call.callee.type !== "Identifier" ||
+            !FLOW_CONTROLS.has(call.callee.name) ||
+            !isBlockComponent(context, call.callee)
+          )
+            return;
+          if (node.kind !== "init" || (v.type !== "JSXElement" && v.type !== "JSXFragment")) return;
+          context.report({
+            node,
+            messageId: "fallback",
+            data: { name: call.callee.name },
+            fix: fixer =>
+              fixer.replaceText(node, `fallback: function* () {\nreturn ${source.getText(v)};\n}`)
+          });
+          return;
+        }
         let text;
         if (node.kind === "get") text = childrenFromFunction(source, { ...v, params: [] });
         else if (v.type === "JSXElement" || v.type === "JSXFragment")

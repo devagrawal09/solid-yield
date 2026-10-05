@@ -263,7 +263,9 @@ const TodoApp = $component(function* TodoApp(props: Props<{ filter: Filter }>) {
         {yield* Header()}
         {
           yield* Loading({
-            fallback: <p class="loading">Loading…</p>,
+            fallback: function* () {
+              return <p class="loading">Loading…</p>;
+            },
             children: function* () {
               return (
                 <>

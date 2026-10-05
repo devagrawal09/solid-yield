@@ -41,7 +41,9 @@ const LogPanel = $component(function* LogPanel(props: Props<{ log: Log }>) {
             when: function* () {
               return (yield* entries.length) > 0;
             },
-            fallback: <p class="empty">Interact to see fiber lifecycle events.</p>,
+            fallback: function* () {
+              return <p class="empty">Interact to see fiber lifecycle events.</p>;
+            },
             children: function* () {
               return (
                 <ul>

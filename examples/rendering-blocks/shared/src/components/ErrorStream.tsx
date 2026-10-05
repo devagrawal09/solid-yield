@@ -87,7 +87,9 @@ const InnerBoundaryItem = $component(function* InnerBoundaryItem(props: Props<{ 
       <>
         {
           yield* Loading({
-            fallback: <div>Item Loading...</div>,
+            fallback: function* () {
+              return <div>Item Loading...</div>;
+            },
             children: function* () {
               return (
                 <>
@@ -122,7 +124,9 @@ const OuterBoundaryItem = $component(function* OuterBoundaryItem(props: Props<{ 
                 <>
                   {
                     yield* Loading({
-                      fallback: <div>Item Loading...</div>,
+                      fallback: function* () {
+                        return <div>Item Loading...</div>;
+                      },
                       children: function* () {
                         return <>{yield* Title({ item: loaded })}</>;
                       }

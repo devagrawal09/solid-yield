@@ -58,7 +58,9 @@ const Profile = $component(function* Profile<E extends Failure, P extends boolea
                 <>
                   {
                     yield* Loading({
-                      fallback: <span class="loader">Loading Info...</span>,
+                      fallback: function* () {
+                        return <span class="loader">Loading Info...</span>;
+                      },
                       children: function* () {
                         return <>{yield* Facts({ info: props.info })}</>;
                       }

@@ -152,7 +152,9 @@ export const Typeahead = $component(function* Typeahead() {
                             <>
                               {
                                 yield* Loading({
-                                  fallback: <p class="loading">Searching…</p>,
+                                  fallback: function* () {
+                                    return <p class="loading">Searching…</p>;
+                                  },
                                   children: function* () {
                                     return <>{yield* Results({ results, query: q })}</>;
                                   }

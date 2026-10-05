@@ -50,11 +50,13 @@ const Stories = $component(function* Stories(props: Props<RouteSectionProps>) {
                         when: function* () {
                           return (yield* page) > 1;
                         },
-                        fallback: (
-                          <span class="page-link disabled" aria-disabled="true">
-                            {"<"} prev
-                          </span>
-                        ),
+                        fallback: function* () {
+                          return (
+                            <span class="page-link disabled" aria-disabled="true">
+                              {"<"} prev
+                            </span>
+                          );
+                        },
                         children: function* () {
                           return (
                             <a
@@ -74,11 +76,13 @@ const Stories = $component(function* Stories(props: Props<RouteSectionProps>) {
                         when: function* () {
                           return (yield* stories) && (yield* stories).length >= 29;
                         },
-                        fallback: (
-                          <span class="page-link disabled" aria-disabled="true">
-                            more {">"}
-                          </span>
-                        ),
+                        fallback: function* () {
+                          return (
+                            <span class="page-link disabled" aria-disabled="true">
+                              more {">"}
+                            </span>
+                          );
+                        },
                         children: function* () {
                           return (
                             <a

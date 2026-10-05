@@ -65,6 +65,7 @@ The neighbours of a view, for completeness:
 | a failure class without a literal `kind` | `readonly kind = "not-found" as const` | `[FAILURE_KIND]` at `attempt`, `until`, `raise`, `Errored catch`, `Props` | — | — |
 | a pending or failing source passed to a prop declared settled | declare `Source<T, E, true>`, or pass a settled one | `[SETTLED_PROP]` | — | — |
 | a pending view at the root | a `Loading` above every pending read | `render` / `hydrate` take `View<false, any>` | — | — |
+| a block component handed to plain Solid unchecked: `defineRoute({ component: Live })`, `render(App, root)` from `@solidjs/web` | `foreign(Live)`, with its failures handled inside it (an `Errored` in its view); it may pend (D-088) | `[FOREIGN_HANDOFF]` at `foreign(…)` when it may fail (the property's type lists the failures' `kind`s) | — | `no-unchecked-foreign-handoff` (suggestion: `foreign(…)`) |
 | two copies of the runtime | dedupe the dependency | — | `DUPLICATE_RUNTIME` | — |
 
 ## Every code, by layer
@@ -114,6 +115,7 @@ The neighbours of a view, for completeness:
 | `[ATTEMPT_ABSORBS]` | an `attempt` handler (or a generator handler's return) that is an `Error` on one path and not on another: it returns the failure (an `Error` with a literal `kind`) or absorbs it (returns nothing or a value), not sometimes one and sometimes the other (D-076, D-078) |
 | `[STREAM_IN_EVENT]` | an `$event` that attempts a stream (or a promise of one): a stream is consumed in a `$memo` or a `$projection` (D-091) |
 | `[STREAM_HANDLER]` | a generator handler, or one returning a value, on a stream attempt (D-091) |
+| `[FOREIGN_HANDOFF]` | `foreign(Comp)` of a block component that may fail: "a block component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first", the property's type the kinds (`"archive" \| "live"`) (D-088). A type cannot name the component; the lint's message does |
 | `[HVIEW_READ]` | an `h` (no-JSX) view that yields |
 | `[ROW_SETUP_OP]` | a row's setup that reads |
 | `[ROW_VIEW_OP]` | a row's view that creates |
@@ -131,6 +133,7 @@ Every other type refusal is a plain assignability error. The common ones: an op 
 | `no-read-in-prop` | a `yield*` in a component call's argument (autofix) |
 | `component-children-generator` | a call's `children` that is not a generator (autofix) |
 | `component-call-yielded` | a block component call in JSX (an array, a conditional) or a discarded statement, not delegated to with `yield*` (autofix) |
+| `no-unchecked-foreign-handoff` | a block component handed to plain Solid (a `component` property or attribute, `@solidjs/web`'s `render` / `hydrate` / `renderTo…`, Solid's `lazy` over one) without `foreign(…)` (D-088; suggestion: the wrap) |
 | `jsx-only-in-view` | JSX outside a view, a hole or a row's view |
 | `no-unyielded-write` | a setter call, an event call or another block operation not delegated to |
 | `read-before-attempt` | a memo read after its first `attempt` |

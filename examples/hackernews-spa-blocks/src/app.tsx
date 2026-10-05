@@ -5,32 +5,26 @@
 // tree is built by App's view (JSX only in a view, D-041); a view runs once
 // (D-032), so the router is not re-created.
 import { createRouter, defineRoute } from "@solidjs/router";
-import { $component, Loading, type Component, view } from "solid-blocks";
+import { $component, foreign, Loading, view } from "solid-blocks";
 import Nav from "~/components/nav";
 import Stories, { preload as preloadStories } from "~/routes/stories";
 import Story, { preload as preloadStory } from "~/routes/story";
 import User, { preload as preloadUser } from "~/routes/user";
 import "./app.css";
 
-/**
- * The router is plain Solid: its types do not see a block component's
- * pending / failures. A route renders under the app's <Loading>, so it may
- * be pending; its failures reach the app root, as the original's do (a
- * route's query may reject).
- */
-function route<P>(component: Component<P, boolean, unknown>): Component<P, boolean, unknown> {
-  return component;
-}
-
+// The router is plain Solid: it renders a route with no `yield*`, so a
+// route's colors stop here (D-088). `foreign` checks each handoff: a route
+// may be pending (the app's <Loading> is around the route), and it handles
+// its own failure (each route's view has an `Errored` at its root).
 const Router = createRouter({
   routes: [
     defineRoute({
       path: ["/", "/top", "/new", "/show", "/ask", "/job"],
-      component: route(Stories),
+      component: foreign(Stories),
       preload: preloadStories
     }),
-    defineRoute({ path: "/stories/:id", component: route(Story), preload: preloadStory }),
-    defineRoute({ path: "/users/:id", component: route(User), preload: preloadUser })
+    defineRoute({ path: "/stories/:id", component: foreign(Story), preload: preloadStory }),
+    defineRoute({ path: "/users/:id", component: foreign(User), preload: preloadUser })
   ]
 });
 

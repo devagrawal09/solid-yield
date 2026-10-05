@@ -1,5 +1,5 @@
 import { type RouteParams, type RoutePreloadFuncArgs, type RouteProps } from "@solidjs/router";
-import { $component, $memo, attempt, For, Show, type Props, view } from "solid-blocks";
+import { $component, $memo, attempt, Errored, For, Show, type Props, view } from "solid-blocks";
 import Comment from "~/components/comment";
 import { getStory } from "~/lib/api";
 import { ApiError } from "~/lib/errors";
@@ -22,49 +22,62 @@ const Story = $component(function* Story(props: Props<RouteProps<Path>>) {
   });
   return view(function* () {
     return (
-      <div class="item-view">
-        <div class="item-view-header">
-          <a href={(yield* story).url} target="_blank">
-            <h1>{(yield* story).title}</h1>
-          </a>
-          {
-            yield* Show({
-              when: function* () {
-                return (yield* story).domain;
-              },
-              children: function* () {
-                return <span class="host">({(yield* story).domain})</span>;
-              }
-            })
-          }
-          <p class="meta">
-            {(yield* story).points} points | by{" "}
-            <a href={`/users/${(yield* story).user}`}>{(yield* story).user}</a>{" "}
-            {(yield* story).time_ago} ago
-          </p>
-        </div>
-        <div class="item-view-comments">
-          <p class="item-view-comments-header">
-            {(yield* story).comments_count
-              ? (yield* story).comments_count + " comments"
-              : "No comments yet."}
-          </p>
-          <ul class="comment-children">
-            {
-              yield* For({
-                each: function* () {
-                  return (yield* story).comments;
-                },
-                children: function* (comment) {
-                  return view(function* () {
-                    return <>{yield* Comment({ comment: comment })}</>;
-                  });
-                }
-              })
+      <>
+        {
+          yield* Errored({
+            // a route is handed to the router, plain Solid: it handles its own
+            // failure (D-088; the original lets it reach the app root)
+            fallback: err => <p class="route-error">Failed to load: {err().message}</p>,
+            children: function* () {
+              return (
+                <div class="item-view">
+                  <div class="item-view-header">
+                    <a href={(yield* story).url} target="_blank">
+                      <h1>{(yield* story).title}</h1>
+                    </a>
+                    {
+                      yield* Show({
+                        when: function* () {
+                          return (yield* story).domain;
+                        },
+                        children: function* () {
+                          return <span class="host">({(yield* story).domain})</span>;
+                        }
+                      })
+                    }
+                    <p class="meta">
+                      {(yield* story).points} points | by{" "}
+                      <a href={`/users/${(yield* story).user}`}>{(yield* story).user}</a>{" "}
+                      {(yield* story).time_ago} ago
+                    </p>
+                  </div>
+                  <div class="item-view-comments">
+                    <p class="item-view-comments-header">
+                      {(yield* story).comments_count
+                        ? (yield* story).comments_count + " comments"
+                        : "No comments yet."}
+                    </p>
+                    <ul class="comment-children">
+                      {
+                        yield* For({
+                          each: function* () {
+                            return (yield* story).comments;
+                          },
+                          children: function* (comment) {
+                            return view(function* () {
+                              return <>{yield* Comment({ comment: comment })}</>;
+                            });
+                          }
+                        })
+                      }
+                    </ul>
+                  </div>
+                </div>
+              );
             }
-          </ul>
-        </div>
-      </div>
+          })
+        }
+      </>
     );
   });
 });

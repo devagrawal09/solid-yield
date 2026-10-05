@@ -3,8 +3,14 @@
 // the original does, pending pages included (see shared/src/components/App.tsx).
 import { renderToStream } from "@solidjs/web";
 import manifest from "virtual:solid-manifest";
-import Shell from "../shared/src/components/Shell";
-import App from "../shared/src/components/App";
+import { foreign } from "solid-blocks";
+import BlocksApp from "../shared/src/components/App";
+import BlocksShell from "../shared/src/components/Shell";
+
+// the block components handed to plain Solid: they may pend, and handle
+// their own failures (D-088)
+const App = foreign(BlocksApp);
+const Shell = foreign(BlocksShell);
 
 export function render(url: string) {
   return renderToStream(

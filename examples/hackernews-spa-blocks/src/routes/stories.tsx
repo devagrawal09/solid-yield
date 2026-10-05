@@ -1,5 +1,5 @@
 import { type RoutePreloadFuncArgs, type RouteSectionProps } from "@solidjs/router";
-import { $component, $memo, attempt, For, Show, type Props, view } from "solid-blocks";
+import { $component, $memo, attempt, Errored, For, Show, type Props, view } from "solid-blocks";
 import Story from "~/components/story";
 import { getStories } from "~/lib/api";
 import type { StoryTypes } from "~/types";
@@ -35,69 +35,82 @@ const Stories = $component(function* Stories(props: Props<RouteSectionProps>) {
 
   return view(function* () {
     return (
-      <div class="news-view">
-        <div class="news-list-nav">
-          {
-            yield* Show({
-              when: function* () {
-                return (yield* page) > 1;
-              },
-              fallback: (
-                <span class="page-link disabled" aria-disabled="true">
-                  {"<"} prev
-                </span>
-              ),
-              children: function* () {
-                return (
-                  <a
-                    class="page-link"
-                    href={`/${yield* type}?page=${(yield* page) - 1}`}
-                    aria-label="Previous Page"
-                  >
-                    {"<"} prev
-                  </a>
-                );
-              }
-            })
-          }
-          <span>page {yield* page}</span>
-          {
-            yield* Show({
-              when: function* () {
-                return (yield* stories) && (yield* stories).length >= 29;
-              },
-              fallback: (
-                <span class="page-link disabled" aria-disabled="true">
-                  more {">"}
-                </span>
-              ),
-              children: function* () {
-                return (
-                  <a
-                    class="page-link"
-                    href={`/${yield* type}?page=${(yield* page) + 1}`}
-                    aria-label="Next Page"
-                  >
-                    more {">"}
-                  </a>
-                );
-              }
-            })
-          }
-        </div>
-        <main class="news-list">
-          {
-            yield* For({
-              each: stories,
-              children: function* (story) {
-                return view(function* () {
-                  return <>{yield* Story({ story: story })}</>;
-                });
-              }
-            })
-          }
-        </main>
-      </div>
+      <>
+        {
+          yield* Errored({
+            // a route is handed to the router, plain Solid: it handles its own
+            // failure (D-088; the original lets it reach the app root)
+            fallback: err => <p class="route-error">Failed to load: {err().message}</p>,
+            children: function* () {
+              return (
+                <div class="news-view">
+                  <div class="news-list-nav">
+                    {
+                      yield* Show({
+                        when: function* () {
+                          return (yield* page) > 1;
+                        },
+                        fallback: (
+                          <span class="page-link disabled" aria-disabled="true">
+                            {"<"} prev
+                          </span>
+                        ),
+                        children: function* () {
+                          return (
+                            <a
+                              class="page-link"
+                              href={`/${yield* type}?page=${(yield* page) - 1}`}
+                              aria-label="Previous Page"
+                            >
+                              {"<"} prev
+                            </a>
+                          );
+                        }
+                      })
+                    }
+                    <span>page {yield* page}</span>
+                    {
+                      yield* Show({
+                        when: function* () {
+                          return (yield* stories) && (yield* stories).length >= 29;
+                        },
+                        fallback: (
+                          <span class="page-link disabled" aria-disabled="true">
+                            more {">"}
+                          </span>
+                        ),
+                        children: function* () {
+                          return (
+                            <a
+                              class="page-link"
+                              href={`/${yield* type}?page=${(yield* page) + 1}`}
+                              aria-label="Next Page"
+                            >
+                              more {">"}
+                            </a>
+                          );
+                        }
+                      })
+                    }
+                  </div>
+                  <main class="news-list">
+                    {
+                      yield* For({
+                        each: stories,
+                        children: function* (story) {
+                          return view(function* () {
+                            return <>{yield* Story({ story: story })}</>;
+                          });
+                        }
+                      })
+                    }
+                  </main>
+                </div>
+              );
+            }
+          })
+        }
+      </>
     );
   });
 });

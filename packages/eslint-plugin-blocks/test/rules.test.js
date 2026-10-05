@@ -1007,3 +1007,130 @@ tester.run("no-try-catch", rules["no-try-catch"], {
     }
   ]
 });
+
+// --- no-unchecked-foreign-handoff (D-088) -------------------------------------------------
+const live =
+  'import { $component, view } from "solid-blocks";\nconst Live = $component(function* () { return view(function* () { return <i />; }); });\n';
+tester.run("no-unchecked-foreign-handoff", rules["no-unchecked-foreign-handoff"], {
+  valid: [
+    // checked at the handoff
+    live + "defineRoute({ path: '/', component: foreign(Live) });",
+    live + "const r = <Route path='/' component={foreign(Live)} />;",
+    live + 'import { render } from "@solidjs/web";\nrender(foreign(Live), root);',
+    live + 'import { render } from "@solidjs/web";\nrender(() => foreign(Live)(), root);',
+    // the library's own render is typed (a pending root is refused; D-033)
+    live + 'import { render } from "solid-blocks";\nrender(Live, root);',
+    // a plain Solid component: nothing to check
+    "const Page = () => <i />;\ndefineRoute({ path: '/', component: Page });",
+    // a block component called in a block is not a handoff
+    live + "function* v() { return <>{yield* Live()}</>; }"
+  ],
+  invalid: [
+    {
+      code: live + "defineRoute({ path: '/', component: Live });",
+      errors: [
+        {
+          messageId: "unchecked",
+          data: { name: "Live", where: "a `component` given to foreign code" },
+          suggestions: [
+            {
+              messageId: "wrap",
+              output:
+                'import { $component, view, foreign } from "solid-blocks";\nconst Live = $component(function* () { return view(function* () { return <i />; }); });\n' +
+                "defineRoute({ path: '/', component: foreign(Live) });"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      code: live + "const routes = [{ path: '/', component: Live }];",
+      errors: [{ messageId: "unchecked", suggestions: 1 }]
+    },
+    {
+      code: live + "const r = <Route path='/' component={Live} />;",
+      errors: [
+        {
+          messageId: "unchecked",
+          data: { name: "Live", where: "a foreign tag's `component`" },
+          suggestions: 1
+        }
+      ]
+    },
+    {
+      code: live + 'import { render } from "@solidjs/web";\nrender(Live, root);',
+      errors: [
+        {
+          messageId: "unchecked",
+          data: { name: "Live", where: "`render` from @solidjs/web" },
+          suggestions: 1
+        }
+      ]
+    },
+    {
+      code: live + 'import { hydrate } from "@solidjs/web";\nhydrate(() => Live(), root);',
+      errors: [{ messageId: "unchecked", suggestions: 1 }]
+    }
+  ]
+});
+
+const handoffDecls = `
+declare const COMPONENT: unique symbol;
+declare const FAILS: unique symbol;
+interface View<P extends boolean, E> { readonly __pending: P; readonly [FAILS]: E }
+type ComponentView<P extends boolean, E> = View<P, E> & { readonly [COMPONENT]: true };
+declare class ApiError extends Error { readonly kind: "api" }
+declare const Page: (props: { id: string }) => ComponentView<true, never>;
+declare const Failing: (props: { id: string }) => ComponentView<true, ApiError>;
+declare function route<C>(c: C): C;
+declare function foreign<C>(c: C): C;
+declare function defineRoute(r: { path: string; component: unknown }): void;
+declare const Plain: (props: { id: string }) => Node;
+`;
+typedTester.run(
+  "no-unchecked-foreign-handoff (with types)",
+  rules["no-unchecked-foreign-handoff"],
+  {
+    valid: [
+      { filename, code: handoffDecls + "defineRoute({ path: '/', component: foreign(Page) });" },
+      { filename, code: handoffDecls + "defineRoute({ path: '/', component: Plain });" }
+    ],
+    invalid: [
+      {
+        filename,
+        code: handoffDecls + "defineRoute({ path: '/', component: Page });",
+        errors: [{ messageId: "unchecked", suggestions: 1 }]
+      },
+      {
+        // the message names what it may fail with
+        filename,
+        code: handoffDecls + "defineRoute({ path: '/', component: Failing });",
+        errors: [
+          {
+            messageId: "uncheckedFails",
+            data: {
+              name: "Failing",
+              fails: "ApiError",
+              where: "a `component` given to foreign code"
+            },
+            suggestions: 1
+          }
+        ]
+      },
+      {
+        // a local bridge is not a check: its result is still a block component
+        filename,
+        code: handoffDecls + "defineRoute({ path: '/', component: route(Failing) });",
+        errors: [{ messageId: "uncheckedFails", suggestions: 1 }]
+      },
+      {
+        // Solid's lazy over a module whose default export is a block component
+        filename,
+        code:
+          handoffDecls +
+          'import { lazy } from "solid-js";\nconst L = lazy(() => Promise.resolve({ default: Page }));',
+        errors: [{ messageId: "solidLazy" }]
+      }
+    ]
+  }
+);

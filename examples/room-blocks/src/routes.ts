@@ -4,16 +4,13 @@
 // so this twin is the original's `/live` — the room from live DATA sources
 // (server functions), rendered in the browser — served at `/` and `/live`.
 import { defineRoute, defineRoutes } from "@solidjs/router";
-import type { Component } from "solid-blocks";
+import { foreign } from "solid-blocks";
 import Live from "~/routes/live";
 
-/**
- * The router is plain Solid: its types do not see a block component's
- * pending / failures. A route renders under the app's <Loading> (app.tsx),
- * so it may be pending; it must handle its own failures.
- */
-function route<P>(component: Component<P, boolean, never>): Component<P, boolean, never> {
-  return component;
-}
-
-export const routes = defineRoutes([defineRoute({ path: ["/", "/live"], component: route(Live) })]);
+// The router is plain Solid: it renders a route with no `yield*`, so a
+// route's colors stop here (D-088). `foreign` checks the handoff: a route
+// may be pending (the app's <Loading> is above the router), and it handles
+// its own failures (`Live` has an `Errored` at its root).
+export const routes = defineRoutes([
+  defineRoute({ path: ["/", "/live"], component: foreign(Live) })
+]);

@@ -15,6 +15,7 @@
  *   component-call-yielded  a block component call in a block is delegated to: `{yield* Card(…)}` (autofix)
  *   no-unbound-event       an `$event` handler in an event prop is bound: `onClick={yield* save}` (autofix)
  *   no-unshown-wait        (warning, with types) a bound handler that may wait on pending data: show its in-flight state
+ *   no-unchecked-foreign-handoff  a block component handed to plain Solid (the router, `@solidjs/web`'s render) goes through `foreign(…)`
  *   jsx-only-in-view       JSX only in a view, a hole or a row's view: a setup never creates elements
  *   prefer-view-wrapper    (warning) wrap a view in `view(…)` so its errors land where it is written
  *   no-path-object-use     a path is a read: no spread, no `===`, no `JSON.stringify` of one
@@ -1361,6 +1362,201 @@ const noUnshownWait = {
   }
 };
 
+/** The modules whose `render` / `hydrate` / `renderTo…` mount a component as plain Solid. */
+const FOREIGN_RENDER_MODULES = new Set(["@solidjs/web", "solid-js/web"]);
+const FOREIGN_RENDERERS = new Set([
+  "render",
+  "hydrate",
+  "renderToString",
+  "renderToStringAsync",
+  "renderToStream"
+]);
+
+/** The module an identifier is imported from, or null. */
+function importedFrom(context, node) {
+  const v = resolve(context, node);
+  const def = v && v.defs[0];
+  if (!def || def.type !== "ImportBinding") return null;
+  const spec = def.node;
+  const imported =
+    spec.type === "ImportSpecifier"
+      ? spec.imported.type === "Identifier"
+        ? spec.imported.name
+        : spec.imported.value
+      : "default";
+  return { module: def.parent.source.value, imported };
+}
+
+/** A fix that imports `name` from solid-blocks when it is missing (null when there is no import to extend). */
+function importFromBlocks(context, fixer, name) {
+  const blocks = context.sourceCode.ast.body.find(
+    s =>
+      s.type === "ImportDeclaration" && s.source.value === "solid-blocks" && s.importKind !== "type"
+  );
+  if (!blocks) return null;
+  if (blocks.specifiers.some(s => s.type === "ImportSpecifier" && s.local.name === name))
+    return null;
+  const specs = blocks.specifiers.filter(s => s.type === "ImportSpecifier");
+  return specs.length ? fixer.insertTextAfter(specs[specs.length - 1], `, ${name}`) : null;
+}
+
+/**
+ * D-088: a block component handed to foreign code as a value — the router's
+ * `component` (`defineRoute({ component })`, a route object, `<Route
+ * component={…}>`, `<Dynamic component={…}>`), `@solidjs/web`'s `render` /
+ * `hydrate` / `renderTo…` (not the library's own, which are typed), Solid's
+ * `lazy` over a module whose export is a block component — loses its colors
+ * there: plain Solid renders it with no `yield*`. It may pend (the app's
+ * `Loading`); it must handle its own failures. `foreign(Comp)` checks that
+ * at the handoff; this rule reports a handoff written without it. With type
+ * information any expression typed as a block component is reported (a local
+ * `route(Live)` bridge too) and the message names what it may fail with;
+ * without, a `$component` / `lazy` binding. Suggestion: wrap in `foreign(…)`.
+ */
+const noUncheckedForeignHandoff = {
+  meta: {
+    type: "problem",
+    hasSuggestions: true,
+    docs: {
+      description:
+        "A block component handed to plain Solid as a value (the router, `@solidjs/web`'s `render`, Solid's `lazy`) goes through `foreign(…)`, which checks that it handles its own failures (D-088)."
+    },
+    messages: {
+      unchecked:
+        "`{{name}}` is a block component handed to plain Solid ({{where}}) unchecked: write `foreign({{name}})`, which checks that it handles its own failures — plain Solid renders it with no `yield*`, so they would reach no type (D-088).",
+      uncheckedFails:
+        "`{{name}}` may fail with {{fails}}; handle it inside, or wrap it in an Errored, before handing it to plain Solid ({{where}}) — and write `foreign({{name}})`, which checks it (D-088).",
+      solidLazy:
+        "Solid's `lazy` hands `{{name}}`, a block component, to plain Solid: its pending and failures reach no type. Use solid-blocks' `lazy` (a block component, called with `yield*`) (D-088).",
+      wrap: "Wrap it in `foreign(…)`."
+    },
+    schema: []
+  },
+  create(context) {
+    const source = context.sourceCode;
+    const services = source.parserServices;
+    const checker =
+      services && services.program && services.esTreeNodeToTSNodeMap
+        ? services.program.getTypeChecker()
+        : null;
+    const short = text => (text.length > 40 ? text.slice(0, 37) + "..." : text);
+    /** What a block component may fail with (with types), or null. */
+    const failsOf = node => {
+      if (!checker) return null;
+      const tsNode = services.esTreeNodeToTSNodeMap.get(node);
+      if (!tsNode) return null;
+      const type = checker.getTypeAtLocation(tsNode);
+      const types = type.isUnion && type.isUnion() ? type.types : [type];
+      for (const t of types)
+        for (const sig of t.getCallSignatures ? t.getCallSignatures() : []) {
+          const fails = phantomType(checker, sig.getReturnType(), "FAILS", tsNode);
+          if (fails) {
+            const text = checker.typeToString(fails);
+            return text === "never" ? null : text;
+          }
+        }
+      return null;
+    };
+    const isForeignCall = node =>
+      node.type === "CallExpression" &&
+      node.callee.type === "Identifier" &&
+      node.callee.name === "foreign";
+    /** Report `value` (a component handed over) when it is a block component not checked. */
+    const check = (value, where) => {
+      if (!value || isForeignCall(value)) return;
+      if (/Function/.test(value.type)) {
+        // `render(() => App(), root)`: the function's result is the handoff
+        const body = value.body;
+        if (body && body.type === "CallExpression" && !isForeignCall(body))
+          check(body.callee, where);
+        return;
+      }
+      if (
+        !checker &&
+        value.type !== "Identifier" &&
+        value.type !== "MemberExpression" &&
+        value.type !== "JSXIdentifier"
+      )
+        return;
+      if (!isBlockComponent(context, value)) return;
+      const name = short(source.getText(value));
+      const fails = failsOf(value);
+      context.report({
+        node: value,
+        messageId: fails ? "uncheckedFails" : "unchecked",
+        data: { name, where, fails: fails ?? "" },
+        suggest: [
+          {
+            messageId: "wrap",
+            fix: fixer => {
+              const fixes = [
+                fixer.insertTextBefore(value, "foreign("),
+                fixer.insertTextAfter(value, ")")
+              ];
+              const imp = importFromBlocks(context, fixer, "foreign");
+              return imp ? [...fixes, imp] : fixes;
+            }
+          }
+        ]
+      });
+    };
+    return {
+      // a route object, `defineRoute({ component })`, any config's `component`
+      Property(node) {
+        if (node.computed || node.kind !== "init") return;
+        const key = node.key.type === "Identifier" ? node.key.name : node.key.value;
+        if (key !== "component") return;
+        if (node.parent.type !== "ObjectExpression") return;
+        check(node.value, "a `component` given to foreign code");
+      },
+      // `<Route component={Page} />`, `<Dynamic component={Page} />`
+      JSXAttribute(node) {
+        if (node.name.type !== "JSXIdentifier" || node.name.name !== "component") return;
+        const v = node.value;
+        if (!v || v.type !== "JSXExpressionContainer") return;
+        check(v.expression, "a foreign tag's `component`");
+      },
+      CallExpression(node) {
+        if (node.callee.type !== "Identifier") return;
+        const from = importedFrom(context, node.callee);
+        if (!from) return;
+        if (FOREIGN_RENDER_MODULES.has(from.module) && FOREIGN_RENDERERS.has(from.imported)) {
+          check(node.arguments[0], `\`${from.imported}\` from ${from.module}`);
+          return;
+        }
+        // Solid's `lazy(() => import("./Page"))`: with types, the module's export
+        if (from.module === "solid-js" && from.imported === "lazy" && checker) {
+          const loader = node.arguments[0];
+          if (!loader) return;
+          const tsNode = services.esTreeNodeToTSNodeMap.get(loader);
+          if (!tsNode) return;
+          const loaderType = checker.getTypeAtLocation(tsNode);
+          for (const sig of loaderType.getCallSignatures()) {
+            const promised = checker.getAwaitedType(sig.getReturnType());
+            const def = promised && promised.getProperty("default");
+            if (!def) continue;
+            const defType = checker.getTypeOfSymbolAtLocation(def, tsNode);
+            const isBlock = defType.getCallSignatures().some(s =>
+              s
+                .getReturnType()
+                .getProperties()
+                .some(p => String(p.escapedName).startsWith("__@COMPONENT@"))
+            );
+            if (isBlock) {
+              context.report({
+                node,
+                messageId: "solidLazy",
+                data: { name: "its default export" }
+              });
+              return;
+            }
+          }
+        }
+      }
+    };
+  }
+};
+
 export const rules = {
   "no-throw": noThrow,
   "no-try-catch": noTryCatch,
@@ -1378,7 +1574,8 @@ export const rules = {
   "component-children-generator": componentChildrenGenerator,
   "component-call-yielded": componentCallYielded,
   "no-unbound-event": noUnboundEvent,
-  "no-unshown-wait": noUnshownWait
+  "no-unshown-wait": noUnshownWait,
+  "no-unchecked-foreign-handoff": noUncheckedForeignHandoff
 };
 
 const plugin = {

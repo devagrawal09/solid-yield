@@ -4,8 +4,14 @@
 import { Loading } from "solid-js";
 import { renderToString } from "@solidjs/web";
 import manifest from "virtual:solid-manifest";
-import Shell from "../shared/src/components/Shell";
-import App from "../shared/src/components/App";
+import { foreign } from "solid-blocks";
+import BlocksApp from "../shared/src/components/App";
+import BlocksShell from "../shared/src/components/Shell";
+
+// the block components handed to plain Solid: they may pend, and handle
+// their own failures (D-088)
+const App = foreign(BlocksApp);
+const Shell = foreign(BlocksShell);
 
 // `renderToString` is fully synchronous, so an uncaught async read throws.
 // Wrap `<App />` in a `<Loading>` here (and in `./client.tsx`) so sync SSR

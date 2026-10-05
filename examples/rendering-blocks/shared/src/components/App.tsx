@@ -1,12 +1,15 @@
 // The routes (examples/rendering's App, as a block). The pages are `lazy()`
 // chunks, as in the original (the library's `lazy`: pending while its chunk
 // loads, and colored as the page's `$component`): a page may be pending (Profile)
-// or fail (Stream's stream), and nothing here handles it — as in the
-// original, the root does (CSR's render defers, streaming SSR holds the
-// response, string SSR's entry wraps the app in a Loading). So the pages are
-// rendered in call form (`{yield* Profile()}`), which hands their pending /
-// failures on, and the app's type carries them.
-import { $component, isPendingOf, lazy, Match, Switch, view } from "solid-blocks";
+// or fail (Stream's stream). The pages are rendered in call form
+// (`{yield* Profile()}`), which hands their pending / failures on. Pending is
+// the root's, as in the original (CSR's render defers, streaming SSR holds the
+// response, string SSR's entry wraps the app in a Loading). A failure is
+// handled here, by the `Errored` around the pages: the app is handed to
+// @solidjs/web, plain Solid, as `foreign(App)`, and a block component handed
+// to foreign code handles its own failures (D-088). The original lets a
+// page's failure reach the root; with no failure the markup is the same.
+import { $component, Errored, isPendingOf, lazy, Match, Switch, view } from "solid-blocks";
 import { Link, RouteHOC, useRouter } from "../router";
 import Profile from "./Profile";
 
@@ -101,77 +104,90 @@ const App = RouteHOC(
           </ul>
           <div class={["tab", { pending: yield* pending }]}>
             {
-              yield* Switch({
+              yield* Errored({
+                // the app is handed to @solidjs/web (plain Solid): it handles its pages'
+                // failures (D-088; the original lets them reach the root)
+                fallback: err => <p class="page-error">{String(err())}</p>,
                 children: function* () {
                   return (
                     <>
                       {
-                        yield* Match({
-                          when: function* () {
-                            return yield* matches("index");
-                          },
+                        yield* Switch({
                           children: function* () {
-                            return <>{yield* Home()}</>;
-                          }
-                        })
-                      }
-                      {
-                        yield* Match({
-                          when: function* () {
-                            return yield* matches("profile");
-                          },
-                          children: function* () {
-                            return <>{yield* Profile()}</>;
-                          }
-                        })
-                      }
-                      {
-                        yield* Match({
-                          when: function* () {
-                            return yield* matches("settings");
-                          },
-                          children: function* () {
-                            return <>{yield* Settings()}</>;
-                          }
-                        })
-                      }
-                      {
-                        yield* Match({
-                          when: function* () {
-                            return yield* matches("stream");
-                          },
-                          children: function* () {
-                            return <>{yield* Stream()}</>;
-                          }
-                        })
-                      }
-                      {
-                        yield* Match({
-                          when: function* () {
-                            return yield* matches("error-stream");
-                          },
-                          children: function* () {
-                            return <>{yield* ErrorStream()}</>;
-                          }
-                        })
-                      }
-                      {
-                        yield* Match({
-                          when: function* () {
-                            return yield* matches("reveal");
-                          },
-                          children: function* () {
-                            return <>{yield* RevealPage()}</>;
-                          }
-                        })
-                      }
-                      {
-                        yield* Match({
-                          when: function* () {
-                            return yield* matches("skeleton");
-                          },
-                          children: function* () {
-                            return <>{yield* Skeleton()}</>;
+                            return (
+                              <>
+                                {
+                                  yield* Match({
+                                    when: function* () {
+                                      return yield* matches("index");
+                                    },
+                                    children: function* () {
+                                      return <>{yield* Home()}</>;
+                                    }
+                                  })
+                                }
+                                {
+                                  yield* Match({
+                                    when: function* () {
+                                      return yield* matches("profile");
+                                    },
+                                    children: function* () {
+                                      return <>{yield* Profile()}</>;
+                                    }
+                                  })
+                                }
+                                {
+                                  yield* Match({
+                                    when: function* () {
+                                      return yield* matches("settings");
+                                    },
+                                    children: function* () {
+                                      return <>{yield* Settings()}</>;
+                                    }
+                                  })
+                                }
+                                {
+                                  yield* Match({
+                                    when: function* () {
+                                      return yield* matches("stream");
+                                    },
+                                    children: function* () {
+                                      return <>{yield* Stream()}</>;
+                                    }
+                                  })
+                                }
+                                {
+                                  yield* Match({
+                                    when: function* () {
+                                      return yield* matches("error-stream");
+                                    },
+                                    children: function* () {
+                                      return <>{yield* ErrorStream()}</>;
+                                    }
+                                  })
+                                }
+                                {
+                                  yield* Match({
+                                    when: function* () {
+                                      return yield* matches("reveal");
+                                    },
+                                    children: function* () {
+                                      return <>{yield* RevealPage()}</>;
+                                    }
+                                  })
+                                }
+                                {
+                                  yield* Match({
+                                    when: function* () {
+                                      return yield* matches("skeleton");
+                                    },
+                                    children: function* () {
+                                      return <>{yield* Skeleton()}</>;
+                                    }
+                                  })
+                                }
+                              </>
+                            );
                           }
                         })
                       }

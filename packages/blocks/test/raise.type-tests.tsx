@@ -15,6 +15,8 @@ import {
   $signal,
   Errored,
   For,
+  foreign,
+  lazy,
   raise,
   until,
   Show,
@@ -28,6 +30,7 @@ import {
   type Path,
   type Reset,
   type FailsOf,
+  type ForeignCheck,
   type Props,
   type Raise,
   type Read,
@@ -996,3 +999,64 @@ export type EffectWaitsSettled = Expect<
   Equal<ViewPendingOf<ReturnType<typeof EffectWaits>>, false>
 >;
 export const effectWaitsElement: SettledView = EffectWaits();
+
+// --- D-088: a block component handed to foreign code handles its own failures ------------------
+// `foreign(Comp)` is the handoff's check: a component that may pend is accepted (the app's
+// `Loading` shows it), one that may fail is `[FOREIGN_HANDOFF]`, the property's type naming its
+// failures. Identity: it returns the component's own type.
+const FSettles = $component(function* FSettles() {
+  return view(function* () {
+    return <i />;
+  });
+});
+const FPends = $component(function* FPends() {
+  return view(function* () {
+    return <i>{yield* n}</i>;
+  });
+});
+const FFails = $component(function* FFails() {
+  const m = yield* $memo(function* () {
+    yield* raise(new Boom("x"));
+    return 1;
+  });
+  return view(function* () {
+    return <i>{yield* m}</i>;
+  });
+});
+const FHandles = $component(function* FHandles() {
+  return view(function* () {
+    return (
+      <>
+        {
+          yield* Errored({
+            fallback: "!",
+            children: function* () {
+              return <>{yield* FFails()}</>;
+            }
+          })
+        }
+      </>
+    );
+  });
+});
+export const foreignSettles = foreign(FSettles);
+export const foreignPends = foreign(FPends);
+export const foreignHandles = foreign(FHandles);
+export type ForeignIdentity = Expect<Equal<typeof foreignPends, typeof FPends>>;
+// @ts-expect-error [FOREIGN_HANDOFF] FFails may fail with Boom
+export const foreignFails = foreign(FFails);
+// the refusal names the failures: the property's type is the `kind`s of the component's `E`
+export type ForeignNames = Expect<
+  Equal<
+    ForeignCheck<typeof FFails>,
+    {
+      readonly "[FOREIGN_HANDOFF] a block component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first": "boom";
+    }
+  >
+>;
+// a lazy component pends while its chunk loads; it fails as the loaded one does
+export const foreignLazy = foreign(lazy(() => Promise.resolve({ default: FPends })));
+// @ts-expect-error [FOREIGN_HANDOFF] the loaded component may fail
+export const foreignLazyFails = foreign(lazy(() => Promise.resolve({ default: FFails })));
+// a plain function returning an element is not a block component: nothing to check
+export const foreignPlain = foreign(() => <i />);

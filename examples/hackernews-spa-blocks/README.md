@@ -13,7 +13,7 @@ node ../../scripts/example-blocks/browser.mjs hackernews-spa --variant thread  #
 
 - **Every component is a `$component`**; `Toggle`'s state is a `$signal` and its handler an `$event`; props are read in holes (`{yield* props.story.title}`).
 - **The routes' data are `$memo`s over the router's `query`** (`$memo(function* () { return getStory(yield* props.params.id) })`): a memo returning a promise is pending and may fail with anything. The feed's page and type are hole blocks (`$(function* () { … })`) over the location, as the original's plain functions.
-- **The router is created at module scope and the app's tree in `App`'s setup**; routes pass through `route()`, which states what the router cannot see: a route may be pending (the app's `<Loading>` is above it) and its failures reach the app root, as the original's do.
+- **The router is created at module scope and the app's tree in `App`'s setup**; each route is handed to the router as `foreign(Route)` (D-088): the router is plain Solid and renders a route with no `yield*`, so a route may be pending (the app's `<Loading>` is around it) and handles its own failures — each route's view has an `Errored` at its root, which the original lacks (its query failures reach the app root). With no failure the markup is the original's.
 - **`Comment` is recursive**: its type is stated (`Component<{ comment }, false, never>`) and its setup unnamed.
 - **Row blocks**: the feeds' and threads' rows hold no state (a `Story` / `Comment` per row, rendered with the row's item path); the per-thread state is `Toggle`'s own.
 

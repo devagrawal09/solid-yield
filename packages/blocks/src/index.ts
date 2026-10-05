@@ -51,6 +51,7 @@ export { For, Show, Switch, Match, Repeat, Loading, Errored } from "./flow.js";
 export type { Reset } from "./flow.js";
 export { render, hydrate } from "./render.js";
 export { lazy } from "./lazy.js";
+export { foreign, type ForeignCheck } from "./foreign.js";
 export type { Element, ArrayElement, RenderedObject, TagType } from "./element.js";
 export type { ViewYield, ViewReturn, NoJsxViewRule } from "./runtime.js";
 export type {

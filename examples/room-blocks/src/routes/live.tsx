@@ -9,9 +9,10 @@
 //   (`Loading({ children: function* () { return <>{yield* Members({ who, me })}</>; } })`).
 // - A memo over a stream or a promise may fail with anything, and the types
 //   make that visible: the page's failures are handled at its root
-//   (`Errored` around the page), each directory row handles its own (a row
-//   is settled), and the summary keeps its <Errored>. The original lets such
-//   a failure reach the app root; with no failure the markup is the same.
+//   (`Errored` around the page, which `foreign(Live)` in routes.ts requires:
+//   a route handed to the router handles its own failures, D-088), and the
+//   summary keeps its <Errored>. The original lets such a failure reach the
+//   app root; with no failure the markup is the same.
 // - The transcript is an `$optimisticStore` over the room's stream (pending
 //   until the first transcript lands) and posting is an `$event` (a Solid
 //   action) that writes the row optimistically and waits with `until`.
@@ -440,7 +441,9 @@ const Composer = $component(function* Composer(
 
 // ---------------------------------------------------------------------------
 // directory — one more live source per room, watching only (no identity).
-// A row is settled, so each entry handles its count's pending and failure.
+// Each entry shows its count's pending, as the original's does; a failure
+// passes up the list to the page's Errored (a row need not be settled,
+// D-059 / D-063).
 const Directory = $component(function* Directory(props: Props<{ current: string }>) {
   return view(function* () {
     return (
@@ -482,21 +485,10 @@ const DirectoryEntry = $component(function* DirectoryEntry(
         <a href={`/live?room=${yield* props.name}`}>#{yield* props.name}</a>
         <span class="count-small">
           {
-            yield* Errored({
-              fallback: "!",
+            yield* Loading({
+              fallback: "…",
               children: function* () {
-                return (
-                  <>
-                    {
-                      yield* Loading({
-                        fallback: "…",
-                        children: function* () {
-                          return <>{yield* Count({ who })}</>;
-                        }
-                      })
-                    }
-                  </>
-                );
+                return <>{yield* Count({ who })}</>;
               }
             })
           }

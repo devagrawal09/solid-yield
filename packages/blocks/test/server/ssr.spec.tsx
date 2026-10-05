@@ -30,6 +30,7 @@ import {
   perform,
   Show,
   type Props,
+  type Source,
   view
 } from "solid-blocks";
 import { Failed } from "../failed.js";
@@ -147,6 +148,57 @@ describe("server rendering", () => {
       });
     });
     expect(strip(renderToString(() => Named({})))).toBe("<ul><li>a</li><li>b</li><b>2</b></ul>");
+  });
+
+  it("a flow control re-reading a pending prop when its hole resolves is not the named view: no READ_IN_VIEW (rendering /stream)", async () => {
+    // Solid's server For reads `each` in a memo as it is created; while the
+    // source is pending that read throws and the memo reads again when the
+    // view's template resolves the hole — inside the named view's run, with
+    // no observer (rendering-blocks' MemoList under a Loading)
+    const List = $component(function* List(
+      props: Props<{ items: Source<string[], Failed, true> }>
+    ) {
+      return view(function* () {
+        return (
+          <ul>
+            {
+              yield* For({
+                each: props.items,
+                children: function* (t) {
+                  return view(function* () {
+                    return <li>{yield* t}</li>;
+                  });
+                }
+              })
+            }
+          </ul>
+        );
+      });
+    });
+    const Page = $component(function* Page() {
+      const items = yield* $memo(function* () {
+        return yield* attempt(
+          () => new Promise<string[]>(r => setTimeout(() => r(["a", "b"]), 5)),
+          e => new Failed(e)
+        );
+      });
+      return view(function* () {
+        return (
+          <div>
+            {
+              yield* Loading({
+                fallback: <i>…</i>,
+                children: function* () {
+                  return <>{yield* List({ items })}</>;
+                }
+              })
+            }
+          </div>
+        );
+      });
+    });
+    const html = await stream(() => Page());
+    expect(strip(html)).toContain("<ul><li>a</li><li>b</li></ul>");
   });
 
   it("an async memo resolves on the server", async () => {

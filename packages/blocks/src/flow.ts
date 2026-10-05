@@ -114,7 +114,7 @@ function forward(props: any, adaptChildren: (children: unknown) => unknown): any
     // A source passed straight to a flow control (`each={todos}` in `h`, or
     // a call `For({ each: todos, … })`) is read where the prop is read; so is
     // a bare `function*` hole (`Show({ when: function* () { … } })`).
-    Object.defineProperty(out, key, { get: () => throughHole(props[key]), enumerable: true });
+    Object.defineProperty(out, key, { get: () => propRead(props[key]), enumerable: true });
   }
   // Children stay as lazy as they were written: JSX element children are a
   // getter the flow control reads when (and each time) it renders the branch
@@ -152,6 +152,18 @@ function adapt(cb: unknown, args: (...raw: any[]) => unknown[], arity: number): 
     : (...raw: any[]) => (cb as any)(...args(...raw));
   if (arity === 2) return (a: any, b: any) => run(a, b);
   return (a: any) => run(a);
+}
+
+/**
+ * A flow control's prop, read where the flow control reads it: always the
+ * flow control's own read, never the holding view's top-level one. On the
+ * server Solid's flow controls read in memos that have no observer, and a
+ * memo whose first read was pending reads again when the view's template
+ * resolves its hole — while the named view still runs. `flowControl` covers
+ * the creation; this covers every later read (rendering-blocks' `/stream`).
+ */
+function propRead(v: unknown): unknown {
+  return flowControl(() => throughHole(v));
 }
 
 // --- For ------------------------------------------------------------------------------------------
@@ -257,7 +269,7 @@ function SwitchBlocks(props: any): any {
   const out: any = {};
   for (const key of Object.keys(props))
     if (key !== "children")
-      Object.defineProperty(out, key, { get: () => throughHole(props[key]), enumerable: true });
+      Object.defineProperty(out, key, { get: () => propRead(props[key]), enumerable: true });
   Object.defineProperty(out, "children", { get: children, enumerable: true });
   return SolidSwitch(out);
 }
@@ -357,7 +369,7 @@ function LoadingBlocks(props: any): any {
   const out: any = {};
   for (const key of Object.keys(props))
     if (key !== "children")
-      Object.defineProperty(out, key, { get: () => throughHole(props[key]), enumerable: true });
+      Object.defineProperty(out, key, { get: () => propRead(props[key]), enumerable: true });
   Object.defineProperty(out, "children", { get: children, enumerable: true });
   return SolidLoading(out);
 }

@@ -827,3 +827,57 @@ tester.run("no-unshown-wait (without types)", rules["no-unshown-wait"], {
   valid: [component(`${evt} return function* () { return <b onClick={yield* save} />; };`)],
   invalid: []
 });
+
+// --- no-try-catch (D-077) ----------------------------------------------------------------
+tester.run("no-try-catch", rules["no-try-catch"], {
+  valid: [
+    // attempt is the block form
+    component(
+      "const e = $event(function* () { yield* attempt(() => save(), e => {}); }); return function* () { return <i />; };"
+    ),
+    // plain code inside a block's plain function is not the block's body
+    component(
+      "const e = $event(function* () { yield* attempt(() => { try { return f(); } catch { return 0; } }, e => {}); }); return function* () { return <i />; };"
+    ),
+    // a try with only finally catches nothing
+    component("try { x(); } finally { y(); } return function* () { return <i />; };"),
+    // outside blocks
+    "function plain() { try { x(); } catch (e) {} }",
+    "function* helper() { try { yield 1; } catch {} }"
+  ],
+  invalid: [
+    {
+      code: component(
+        "const e = $event(function* () { try { yield* save(); } catch (e) { log(e); } }); return function* () { return <i />; };"
+      ),
+      errors: [{ messageId: "tryCatch", data: { where: "an $event" } }]
+    },
+    {
+      code: component("try { x(); } catch {} return function* () { return <i />; };"),
+      errors: [{ messageId: "tryCatch", data: { where: "a setup" } }]
+    },
+    {
+      code: "const m = $memo(function* () { try { return yield* n; } catch { return 0; } });",
+      errors: [{ messageId: "tryCatch", data: { where: "a $memo" } }]
+    },
+    {
+      code: "const f = $effect(function* () { try { yield* n; } catch {} });",
+      errors: [{ messageId: "tryCatch", data: { where: "an $effect" } }]
+    },
+    {
+      code: component("return function* () { try { return <i />; } catch { return <b />; } };"),
+      errors: [{ messageId: "tryCatch", data: { where: "a view" } }]
+    },
+    {
+      code: component(
+        "return function* () { return <ul>{yield* For({ each: xs, children: function* (x) { try { f(); } catch {} return view(function* () { return <li />; }); } })}</ul>; };"
+      ),
+      errors: [{ messageId: "tryCatch", data: { where: "a row" } }]
+    },
+    {
+      // a bare function* hole given to h
+      code: 'const v = h("p", null, function* () { try { return yield* n; } catch { return 0; } });',
+      errors: [{ messageId: "tryCatch", data: { where: "a hole" } }]
+    }
+  ]
+});

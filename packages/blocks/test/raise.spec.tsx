@@ -511,3 +511,121 @@ describe("D-073: an effect's failure is its component's", () => {
     expect(got).toEqual([1, "done"]);
   });
 });
+
+describe("D-077: an attempt over an event call", () => {
+  it("absorbs a synchronous call's failure in an $effect: nothing reaches the Errored", () => {
+    const seen: unknown[] = [];
+    const caught: unknown[] = [];
+    const App = $component(function* App() {
+      const fail = $event(function* () {
+        yield* raise(new Boom("call"));
+      });
+      yield* $effect(function* () {
+        seen.push(
+          yield* attempt(
+            () => fail(),
+            e => {
+              caught.push(e);
+            }
+          )
+        );
+      });
+      return view(function* () {
+        return <i>ok</i>;
+      });
+    });
+    dispose = render(
+      () =>
+        Errored({
+          fallback: <p>caught</p>,
+          children: function* () {
+            return <>{yield* App()}</>;
+          }
+        }),
+      root
+    );
+    flush();
+    expect(seen).toEqual([undefined]);
+    expect(caught).toHaveLength(1);
+    expect(caught[0]).toBeInstanceOf(Boom);
+    expect(root.innerHTML).toBe("<i>ok</i>");
+  });
+
+  it("transforms a synchronous call's failure in an $effect: the Errored gets the new one", () => {
+    const seen: unknown[] = [];
+    const App = $component(function* App() {
+      const fail = $event(function* () {
+        yield* raise(new Boom("call"));
+      });
+      yield* $effect(function* () {
+        yield* attempt(
+          () => fail(),
+          e => new Other(`from ${e.kind}`)
+        );
+      });
+      return view(function* () {
+        return <i>ok</i>;
+      });
+    });
+    dispose = render(
+      () =>
+        Errored({
+          fallback: (e: () => unknown) => (seen.push(e()), (<p>caught</p>)),
+          children: function* () {
+            return <>{yield* App()}</>;
+          }
+        }),
+      root
+    );
+    flush();
+    expect(seen).toHaveLength(1);
+    expect(seen[0]).toBeInstanceOf(Other);
+    expect((seen[0] as Error).message).toBe("from boom");
+  });
+
+  it("waits for an async call in an $event: its result, or undefined when absorbed", async () => {
+    const log: unknown[] = [];
+    let resolve!: () => void;
+    const load = $event(function* (fail: boolean) {
+      yield* attempt(
+        () => new Promise<void>(r => (resolve = r)),
+        () => new Boom("never")
+      );
+      if (fail) yield* raise(new Boom("late"));
+      return 7;
+    });
+    const outer = $event(function* (fail: boolean) {
+      const v = yield* attempt(
+        () => load(fail),
+        e => {
+          log.push(e.message);
+        }
+      );
+      log.push(v);
+      return v;
+    });
+    const ok = outer(false);
+    await settle();
+    expect(log).toEqual([]);
+    resolve();
+    expect(await ok).toBe(7);
+    const failed = outer(true);
+    await settle();
+    resolve();
+    expect(await failed).toBe(undefined);
+    expect(log).toEqual([7, "late", undefined]);
+  });
+
+  it("a transformed async call's failure fails the caller with the new one", async () => {
+    const load = $event(function* () {
+      yield* raise(new Boom("inner"));
+    });
+    const outer = $event(function* () {
+      yield* attempt(
+        () => load(),
+        e => new Other(e.message)
+      );
+    });
+    await expect(outer()).rejects.toBeInstanceOf(Other);
+  });
+});

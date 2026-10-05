@@ -20,6 +20,7 @@ import {
   type Bind,
   type BoundEvent,
   type Create,
+  type EventCallOp,
   type EventHandler,
   type HView,
   type Path,
@@ -580,3 +581,90 @@ export const LazyFallback = $component(function* LazyFallback() {
   });
 });
 export type LazyFallbackView = Expect<Equal<ViewPendingOf<ReturnType<typeof LazyFallback>>, true>>;
+
+// --- D-077: attempt over an event call ------------------------------------------------
+// `yield* attempt(() => go(), onError)` is `yield* go()` with the call's failure handled: the
+// handler receives the call's known failure (its FailsOf), and the call's other colors stay
+declare const failing: EventHandler<[], Boom | Other, number, true, true>;
+declare const failingSync: EventHandler<[], Boom, number, false, false>;
+// absorbed: the call's failure is gone from the type, its value may be undefined
+export const absorbCall = attempt(
+  () => failing(),
+  e => {
+    type _e = Expect<Equal<typeof e, Boom | Other>>;
+  }
+);
+export type AbsorbCall = Expect<
+  Equal<typeof absorbCall, Yieldable<EventCallOp<true, true, never>, number | undefined>>
+>;
+export type AbsorbCallFails = Expect<
+  Equal<FailsOf<typeof absorbCall extends Yieldable<infer Y, any> ? Y : never>, never>
+>;
+// transformed: the handler's failure replaces the call's
+export const transformCall = attempt(
+  () => failing(),
+  e => new Other(e.kind)
+);
+export type TransformCall = Expect<
+  Equal<typeof transformCall, Yieldable<EventCallOp<true, true, never> | Raise<Other>, number>>
+>;
+// returned as it is: the call's own failure (narrowed, here)
+export const keepBoom = attempt(
+  () => failing(),
+  e => (e instanceof Boom ? e : new Boom(e.message))
+);
+export type KeepBoom = Expect<
+  Equal<FailsOf<typeof keepBoom extends Yieldable<infer Y, any> ? Y : never>, Boom>
+>;
+// in an event the caller's type follows: absorbed, none of the call's failures
+export const AttemptCallEvent = $component(function* AttemptCallEvent() {
+  const outer = $event(function* () {
+    return yield* attempt(
+      () => failing(),
+      () => {}
+    );
+  });
+  type _outer = Expect<
+    Equal<typeof outer, EventHandler<[], never, number | undefined, true, true>>
+  >;
+  return view(function* () {
+    return <button onClick={yield* outer}>go</button>;
+  });
+});
+export type AttemptCallEventView = Expect<
+  Equal<ViewFailsOf<ReturnType<typeof AttemptCallEvent>>, never>
+>;
+// an effect may attempt a synchronous call (as it may delegate to one), absorbing its failure
+export const AttemptCallEffect = $component(function* AttemptCallEffect() {
+  yield* $effect(function* () {
+    yield* attempt(
+      () => failingSync(),
+      () => {}
+    );
+  });
+  return view(function* () {
+    return <i />;
+  });
+});
+export type AttemptCallEffectView = Expect<
+  Equal<ViewFailsOf<ReturnType<typeof AttemptCallEffect>>, never>
+>;
+// …but not one that waits
+export const AttemptAsyncCallEffect = $component(function* AttemptAsyncCallEffect() {
+  // @ts-expect-error an $effect does not wait: EventCallOp<true, true> is not an EffectOp
+  yield* $effect(function* () {
+    yield* attempt(
+      () => failing(),
+      () => {}
+    );
+  });
+  return view(function* () {
+    return <i />;
+  });
+});
+// a handler that returns the call's failure on one path and nothing on another is refused
+export const mixedCall = attempt(
+  () => failing(),
+  // @ts-expect-error [ATTEMPT_ABSORBS]
+  e => (e instanceof Boom ? e : undefined)
+);

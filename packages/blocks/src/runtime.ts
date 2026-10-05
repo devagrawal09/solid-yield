@@ -59,6 +59,8 @@ import type {
   Create,
   EffectOp,
   ErrorClass,
+  EventCall,
+  EventCallOp,
   EventHandler,
   KindCheck,
   EventOp,
@@ -96,6 +98,8 @@ export const VIEW_MARK: unique symbol = Symbol.for("solid.blocks.view") as any;
 export const COMPONENT_MARK: unique symbol = Symbol.for("solid.blocks.component") as any;
 /** Marks `$event` handlers (`perform` binds one: returns it unread and uncalled, D-072). */
 export const EVENT_MARK: unique symbol = Symbol.for("solid.blocks.event") as any;
+/** Marks a call of an `$event` handler (an `attempt` over one delegates to it, D-077). */
+const EVENT_CALL_MARK: unique symbol = Symbol.for("solid.blocks.event-call") as any;
 const OP: unique symbol = Symbol.for("solid.blocks.op") as any;
 const PATH_TARGET: unique symbol = Symbol.for("solid.blocks.path") as any;
 const PATH_READ = 1;
@@ -595,6 +599,17 @@ class Attempt {
       if (e instanceof NotReadyError) throw e;
       return handled(this.onError(e));
     }
+    // an event call (D-077): delegated to as `yield* call` is — at once when
+    // its body already finished (so an `$effect` may attempt a synchronous
+    // one), else waiting for it — and its failure goes through the handler
+    if (v != null && (v as any)[EVENT_CALL_MARK] === true) {
+      try {
+        return yield* (v as any)[Symbol.iterator]();
+      } catch (e) {
+        if (e instanceof NotReadyError) throw e;
+        return handled(this.onError(e));
+      }
+    }
     if (isThenable(v)) {
       try {
         v = yield new Wait_(v);
@@ -617,7 +632,18 @@ function handled(r: unknown): undefined {
   if (r instanceof Error) throw known(r);
   return undefined;
 }
-type AttemptWait<T> = T extends PromiseLike<any> ? Wait : never;
+/**
+ * What waiting on `fn`'s result is: an event call's colors (its failures go
+ * through the handler, D-077), a promise's wait, or nothing.
+ */
+type AttemptWait<T> =
+  T extends EventCall<any, any, infer P, infer A>
+    ? EventCallOp<P, A, never>
+    : T extends PromiseLike<any>
+      ? Wait
+      : never;
+/** What the handler receives: an event call's known failure (D-077), else anything caught. */
+type Caught<T> = T extends EventCall<any, infer E, any, any> ? E : unknown;
 /** A handler that returns the failure, an `Error`: the attempt raises it. */
 type Fails<H> = [H] extends [Error] ? true : false;
 type AttemptOps<T, H> = AttemptWait<T> | (Fails<H> extends true ? Raise<H> : never);
@@ -635,8 +661,13 @@ type HandlerCheck<H> = [H] extends [Error]
     : {
         readonly "[ATTEMPT_ABSORBS] a handler returns the failure (an Error with a literal kind) or nothing (absorbs it), not sometimes one and sometimes the other": never;
       };
-/** What an attempt gives: a promise's value; a stream as itself, handled. */
-type Attempted<T> = Awaited<T> extends AsyncIterable<any> ? Awaited<T> & Handled : Awaited<T>;
+/** What an attempt gives: an event call's result; a promise's value; a stream as itself, handled. */
+type Attempted<T> =
+  T extends EventCall<infer R, any, any, any>
+    ? R
+    : Awaited<T> extends AsyncIterable<any>
+      ? Awaited<T> & Handled
+      : Awaited<T>;
 /**
  * `yield* attempt(fn, onError)`: call `fn`; when it throws, or the promise it
  * returns rejects, `onError` handles what it caught (D-076). It returns the
@@ -655,10 +686,17 @@ type Attempted<T> = Awaited<T> extends AsyncIterable<any> ? Awaited<T> & Handled
  * through `onError` as they come — an absorbed one ends the stream: `return
  * yield* attempt(() => watch(feed), cause => new FeedError(cause))` is how a
  * memo's body returns a stream.
+ *
+ * When it returns an event call (D-077), `yield* attempt(() => post(msg), e =>
+ * { … })` is `yield* post(msg)` with the call's failure handled: the handler
+ * receives the call's known failure (its `FailsOf`) and returns it, a
+ * transformation, or nothing; the call's other colors (`P`, `A`) are the
+ * block's as with `yield*`. This is how a block handles a failure — `try` /
+ * `catch` is not a block form (`no-try-catch`).
  */
 export function attempt<T, H extends Error | void>(
   fn: () => T,
-  onError: (error: unknown) => H & HandlerCheck<H>
+  onError: (error: Caught<T>) => H & HandlerCheck<H>
 ): Yieldable<AttemptOps<T, H>, AttemptResult<T, H>>;
 export function attempt(fn: () => unknown, onError: (error: unknown) => unknown): unknown {
   return new Attempt(fn, onError);
@@ -898,14 +936,18 @@ export function refresh(
 /**
  * `yield* until(readStore(store, s => s.ready), onError, { timeout })`: wait
  * until a source reads truthy (Solid's `until`). It is an async `attempt`:
- * only a `$memo` or an `$event` waits, and `onError` turns a failure (a
- * timeout) into the block's error.
+ * only a `$memo` or an `$event` waits, and `onError` is an attempt's
+ * handler (D-076): it turns a failure (a timeout) into the block's error, or
+ * returns nothing to absorb it (`until` then gives `undefined`).
  */
-export function until<T, E extends Error>(
+export function until<T, H extends Error | void>(
   source: Source<T, unknown, boolean>,
-  onError: (error: unknown) => E & KindCheck<E>,
+  onError: (error: unknown) => H & HandlerCheck<H>,
   options?: Parameters<typeof solidUntil>[1]
-): Yieldable<Wait | Raise<E>, T> {
+): Yieldable<
+  Wait | (Fails<H> extends true ? Raise<H> : never),
+  Fails<H> extends true ? T : T | undefined
+> {
   return attempt(() => solidUntil(accessor(source), options), onError as any) as any;
 }
 
@@ -1326,6 +1368,7 @@ export function $event<Args extends unknown[] = [], Y extends EventOp = never, R
       }
       throw error;
     });
+    (result as any)[EVENT_CALL_MARK] = true;
     const then = result.then.bind(result);
     result.then = ((onFulfilled?: any, onRejected?: any) => {
       handled = true;

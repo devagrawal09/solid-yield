@@ -49,6 +49,13 @@ export class ApiError extends Error {
   }
 }
 const apiError = (cause: unknown) => new ApiError(cause);
+/**
+ * An action's request, its failure absorbed (D-076, D-077): `true` once it
+ * succeeded, `undefined` when it failed — which the action records in
+ * `Errors` instead of failing, so its type carries no `ApiError`.
+ */
+const settled = (request: Promise<unknown>) => request.then(() => true as const);
+const absorb = () => {};
 
 export type TodoError = {
   type: "addTodo" | "removeTodo" | "toggleTodo";
@@ -109,22 +116,14 @@ export function* createTodos() {
         if (old) old.pending = true;
         else t.push({ ...todo, pending: true });
       });
-      try {
-        yield* attempt(() => api.addTodo(todo), apiError);
-        delete Errors[todo.id];
-      } catch {
-        Errors[todo.id] ||= { type: "addTodo", args: [todo] };
-      }
+      if (yield* attempt(() => settled(api.addTodo(todo)), absorb)) delete Errors[todo.id];
+      else Errors[todo.id] ||= { type: "addTodo", args: [todo] };
       yield* refresh(todos);
     }),
     removeTodo: $event(function* (id: string) {
       yield* setTodos(t => t.filter(todo => todo.id !== id));
-      try {
-        yield* attempt(() => api.removeTodo(id), apiError);
-        delete Errors[id];
-      } catch {
-        Errors[id] ||= { type: "removeTodo", args: [id] };
-      }
+      if (yield* attempt(() => settled(api.removeTodo(id)), absorb)) delete Errors[id];
+      else Errors[id] ||= { type: "removeTodo", args: [id] };
       yield* refresh(todos);
     }),
     toggleTodo: $event(function* (id: string, completed: boolean) {
@@ -135,12 +134,8 @@ export function* createTodos() {
           todo.pending = true;
         }
       });
-      try {
-        yield* attempt(() => api.toggleTodo(id, completed), apiError);
-        delete Errors[id];
-      } catch {
-        Errors[id] ||= { type: "toggleTodo", args: [id, completed] };
-      }
+      if (yield* attempt(() => settled(api.toggleTodo(id, completed)), absorb)) delete Errors[id];
+      else Errors[id] ||= { type: "toggleTodo", args: [id, completed] };
       yield* refresh(todos);
     }),
     toggleAll: $event(function* (completed: boolean) {
@@ -156,29 +151,25 @@ export function* createTodos() {
           }
         });
       });
-      try {
-        yield* attempt(() => api.toggleAll(ids, completed), apiError);
+      if (yield* attempt(() => settled(api.toggleAll(ids, completed)), absorb))
         ids.forEach(id => delete Errors[id]);
-      } catch {
+      else
         // Bulk failed — fan the error out to per-item entries so each
         // failed todo gets its own retry affordance via `retryTodo`.
         ids.forEach(id => {
           Errors[id] ||= { type: "toggleTodo", args: [id, completed] };
         });
-      }
       yield* refresh(todos);
     }),
     clearCompleted: $event(function* () {
       const ids = yield* readStore(todos, t => t.filter(x => x.completed).map(x => x.id));
       yield* setTodos(t => t.filter(todo => !todo.completed));
-      try {
-        yield* attempt(() => api.clearCompleted(ids), apiError);
+      if (yield* attempt(() => settled(api.clearCompleted(ids)), absorb))
         ids.forEach(id => delete Errors[id]);
-      } catch {
+      else
         ids.forEach(id => {
           Errors[id] ||= { type: "removeTodo", args: [id] };
         });
-      }
       yield* refresh(todos);
     })
   };
@@ -189,7 +180,7 @@ export function* createTodos() {
     if (!todo.error) return;
     const retry = actions[todo.error.type] as (
       ...args: unknown[]
-    ) => EventCall<void, ApiError, boolean, true>;
+    ) => EventCall<void, never, boolean, true>;
     yield* retry(...todo.error.args);
   });
 

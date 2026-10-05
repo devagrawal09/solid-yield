@@ -56,6 +56,8 @@ The neighbours of a view, for completeness:
 | `$optimistic(body)` / `$optimisticStore(scalar)` | `$optimistic(value)`; `$optimisticStore(object \| body)` (D-014) | overloads | `OPTIMISTIC_FORM` | — |
 | a boundary's content built before the boundary | pass it as a function | overloads | `BOUNDARY_CONTENT_BUILT` | — |
 | a non-operation delegated to: `yield* 42` | `yield*` a source, a path, a prop, `attempt`, `raise` or a receipt | `Yieldable` ops | `NOT_AN_OPERATION` | — |
+| `try { yield* save(); } catch (e) { … }` in a block | `yield* attempt(() => save(), e => { … })` (absorb: return nothing; transform: return an `Error` with a literal `kind`), or an `Errored` above (D-077) | — (the types cannot see a catch: the failure stays in the type) | — | `no-try-catch` |
+| an `attempt` handler returning a value: `() => 0` | return nothing and use `??`: `(yield* attempt(f, () => {})) ?? 0` (D-076) | `Error \| void` constraint (printed with `[ATTEMPT_ABSORBS]`) | — | — |
 | a failure class without a literal `kind` | `readonly kind = "not-found" as const` | `[FAILURE_KIND]` at `attempt`, `until`, `raise`, `Errored catch`, `Props` | — | — |
 | a pending or failing source passed to a prop declared settled | declare `Source<T, E, true>`, or pass a settled one | `[SETTLED_PROP]` | — | — |
 | a pending view at the root | a `Loading` above every pending read | `render` / `hydrate` take `View<false, any>` | — | — |
@@ -125,6 +127,7 @@ Every other type refusal is a plain assignability error. The common ones: an op 
 | `no-unyielded-write` | a setter call, an event call or another block operation not delegated to |
 | `read-before-attempt` | a memo read after its first `attempt` |
 | `no-throw` | `throw` in a block |
+| `no-try-catch` | `try` / `catch` in a block body (D-077) |
 | `no-path-object-use` | a path spread, compared or stringified |
 | `no-foreign-reactive` | reactive state from plain Solid, the router or `dynamic` in block code |
 | `no-dollar-block` | `$` / `$scope` (removed, D-013; autofix) |

@@ -218,22 +218,18 @@ const Members = $component(function* Members(
 const Chaos = $component(function* Chaos() {
   const [last, setLast] = yield* $signal("");
   const drop = $event(function* () {
-    try {
-      const res = yield* attempt(
-        () => fetch("/__chaos/drop", { method: "POST" }),
-        cause => new ChaosError(cause)
-      );
-      yield* setLast(
-        res.ok
-          ? yield* attempt(
-              () => res.text(),
-              cause => new ChaosError(cause)
-            )
-          : `no chaos route (${res.status}) — dev only`
-      );
-    } catch (e) {
-      yield* setLast(String(e));
-    }
+    // a failure is shown, not raised: each attempt absorbs it (D-076, D-077)
+    let failure: ChaosError | undefined;
+    const absorb = (cause: unknown) => {
+      failure = new ChaosError(cause);
+    };
+    const res = yield* attempt(() => fetch("/__chaos/drop", { method: "POST" }), absorb);
+    const text = !res
+      ? undefined
+      : res.ok
+        ? yield* attempt(() => res.text(), absorb)
+        : `no chaos route (${res.status}) — dev only`;
+    yield* setLast(text ?? String(failure));
   });
   return view(function* () {
     return (
@@ -286,19 +282,23 @@ const Chat = $component(function* Chat(props: Props<{ room: string }>) {
     yield* setOptimistic(t => {
       t.messages.push({ id, from: current.name, text, at: Date.now(), pending: true });
     });
-    try {
-      yield* attempt(
-        () => send(room, id, current.name, text),
-        cause => new SendError(cause)
-      );
+    // a failure is shown, not raised: the attempt and the wait absorb it (D-076, D-077)
+    let failure: SendError | DeliveryError | undefined;
+    const sent = yield* attempt(
+      () => send(room, id, current.name, text).then(() => true as const),
+      cause => {
+        failure = new SendError(cause);
+      }
+    );
+    if (sent)
       yield* until(
         readStore(store, s => s.messages.some(m => m.id === id)),
-        cause => new DeliveryError(cause),
+        cause => {
+          failure = new DeliveryError(cause);
+        },
         { timeout: 10_000 }
       );
-    } catch (err) {
-      yield* setError(err instanceof Error ? err.message : String(err));
-    }
+    if (failure) yield* setError(failure.message);
   });
   // The first transcript arrives asynchronously: the store's reads are pending.
   const transcriptRows = store.messages;
@@ -380,7 +380,7 @@ const Composer = $component(function* Composer(
   props: Props<{
     room: string;
     // an event that does async work (it sends, then waits for the transcript)
-    post: EventHandler<[text: string], SendError | DeliveryError, void, boolean, true>;
+    post: EventHandler<[text: string], never, void, boolean, true>;
     sending: boolean;
     error: string | undefined;
   }>

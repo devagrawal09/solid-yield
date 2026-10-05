@@ -3,6 +3,7 @@
  * TypeScript cannot express. Everything else is a type error.
  *
  *   no-throw               a block raises typed failures: `yield* raise(e)`
+ *   no-try-catch           a block handles a failure with `attempt` or an `Errored`, never `try` / `catch`
  *   no-read-in-view-body   a view has no body: every read is a hole (D-032)
  *   yield-in-jsx-hole      every `yield*` in JSX is in a position the transform turns into a hole
  *   read-before-attempt    a $memo reads before its first `attempt`
@@ -78,6 +79,52 @@ const noThrow = {
     return {
       ThrowStatement(node) {
         if (kindAt(node)) context.report({ node, messageId: "throw" });
+      }
+    };
+  }
+};
+
+const TRY_WHERE = {
+  setup: "a setup",
+  view: "a view",
+  hole: "a hole",
+  row: "a row",
+  memo: "a $memo",
+  effect: "an $effect",
+  event: "an $event",
+  settled: "a $settled"
+};
+/**
+ * D-077: `try` / `catch` is not a block form. A failure it catches at run
+ * time stays in the block's type (the types cannot see a `catch`), so the
+ * type would over-state the runtime (D-071). A block handles a failure with
+ * `attempt(fn, onError)` — over a promise, a stream or an event call, the
+ * handler returning the failure, a transformation of it, or nothing to absorb
+ * it (D-076) — or lets it reach an `Errored`. Reported in every block body
+ * (and a bare `function*` hole given to `h`); a `try` with only `finally`
+ * catches nothing and is not reported.
+ */
+const noTryCatch = {
+  meta: {
+    type: "problem",
+    docs: {
+      description:
+        "A block handles a failure with `attempt` (absorb or transform it) or an `Errored`, never `try` / `catch`: the types cannot see a catch (D-077)."
+    },
+    messages: {
+      tryCatch:
+        "`try` / `catch` in {{where}} is not a block form: the types cannot see the catch, so the failure stays in this block's type. Handle it with `yield* attempt(() => …, e => …)` — return the failure or a transformation of it, or nothing to absorb it — or let it reach an `Errored` (D-077)."
+    },
+    schema: []
+  },
+  create(context) {
+    return {
+      TryStatement(node) {
+        if (!node.handler) return;
+        const fn = enclosingFunction(node);
+        let kind = blockKind(fn);
+        if (!kind && fn && fn.generator && fn.params.length === 0 && isHHole(fn)) kind = "hole";
+        if (kind) context.report({ node, messageId: "tryCatch", data: { where: TRY_WHERE[kind] } });
       }
     };
   }
@@ -1245,6 +1292,7 @@ const noUnshownWait = {
 
 export const rules = {
   "no-throw": noThrow,
+  "no-try-catch": noTryCatch,
   "no-read-in-view-body": noReadInViewBody,
   "yield-in-jsx-hole": yieldInJsxHole,
   "read-before-attempt": readBeforeAttempt,

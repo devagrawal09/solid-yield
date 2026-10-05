@@ -187,11 +187,12 @@ export const Checkout = $component(function* Checkout() {
   });
   const place = $event(function* () {
     const items = yield* readStore(cart, c => c.map(item => ({ ...item })));
-    try {
-      yield* placeOrder(items, yield* declineCard);
-    } catch {
-      // the saga set the notice; its failure ends here
-    }
+    const decline = yield* declineCard;
+    // the saga set the notice; its failure ends here: absorbed (D-076, D-077)
+    yield* attempt(
+      () => placeOrder(items, decline),
+      () => {}
+    );
   });
   const cancel = $event(function* () {
     placeOrder.interrupt();

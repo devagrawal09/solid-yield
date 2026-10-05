@@ -425,12 +425,14 @@ describe("setup operations", () => {
     const WritesInMemo = $component(function* () {
       const [n, setN] = yield* $signal(1);
       const m = yield* $memo(function* () {
-        try {
-          // a memo's own write: the receipt delegated to right here
-          void [...setN(2)];
-        } catch (e) {
-          error = e;
-        }
+        // a memo's own write: the receipt delegated to right here (its dev
+        // error caught by an absorbing attempt, D-077)
+        yield* attempt(
+          () => void [...setN(2)],
+          e => {
+            error = e;
+          }
+        );
         return yield* n;
       });
       return function* () {
@@ -943,20 +945,19 @@ describe("events", () => {
     class SaveError extends Error {
       readonly kind = "save" as const;
     }
-    const caught: string[] = [];
-    const save = $event(function* (id: string, times: number) {
-      try {
-        yield* attempt(
-          () => Promise.reject(new SaveError(id)),
-          e => e as SaveError
-        );
-      } catch (e) {
-        caught.push((e as Error).message);
-      }
+    const after: string[] = [];
+    const save = $event(function* (id: string, times: number, fail: boolean) {
+      yield* attempt(
+        () => (fail ? Promise.reject(new SaveError(id)) : Promise.resolve()),
+        e => e as SaveError
+      );
+      after.push(id);
       return id.repeat(times);
     });
-    expect(await save("a", 3)).toBe("aaa");
-    expect(caught).toEqual(["a"]);
+    expect(await save("a", 3, false)).toBe("aaa");
+    // thrown at the yield*: the body stops there, and the call fails with it
+    await expect(save("b", 1, true)).rejects.toThrow(SaveError);
+    expect(after).toEqual(["a"]);
   });
 
   it("a failure the caller handles goes to the caller, not to the Errored", async () => {
@@ -1022,11 +1023,13 @@ describe("events", () => {
     const outer = $event(function* () {
       const n = yield* fetchN();
       log.push(`got ${n}`);
-      try {
-        yield* fail();
-      } catch (e) {
-        log.push((e as Error).message);
-      }
+      // its failure, thrown at the delegation, handled by an attempt over the call (D-077)
+      yield* attempt(
+        () => fail(),
+        e => {
+          log.push(e.message);
+        }
+      );
     });
     const done = outer();
     await settle();

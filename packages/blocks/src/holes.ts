@@ -17,7 +17,7 @@ import {
   READ,
   isGeneratorFunction,
   runRow
-} from "solid-blocks";
+} from "solid-blocks/internal";
 import type { Element } from "./element.js";
 import type {
   Bind,

@@ -23,7 +23,6 @@ import {
   createContext,
   Errored,
   For,
-  holeOf,
   Loading,
   Match,
   perform,
@@ -32,7 +31,6 @@ import {
   refresh,
   render,
   Repeat,
-  rowArg,
   Show,
   Switch,
   until,
@@ -44,6 +42,7 @@ import {
   view
 } from "solid-blocks";
 import { createSignal as plainSignal } from "solid-js";
+import { holeOf, rowArg } from "solid-blocks/internal";
 import { INSTANCE, registerInstance } from "../src/runtime.js";
 import { h } from "solid-blocks/h";
 import { Failed, toFailed } from "./failed.js";

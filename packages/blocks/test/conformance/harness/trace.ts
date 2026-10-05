@@ -26,6 +26,7 @@
  *   <kind> ...                anything else a scenario logs via `h.log`
  */
 import type * as SolidModule from "solid-js";
+import { READ } from "solid-blocks/internal";
 
 type Solid = typeof SolidModule;
 /** The library module the scenario's environment resolved (client, server). */
@@ -191,7 +192,7 @@ export function probe(recorder: Recorder, solid: Solid, blocks?: Blocks) {
         return value;
       };
       // a library source: the read the runtime performs, and its iterator
-      read[b.READ] = read;
+      read[READ] = read;
       read[Symbol.iterator] = source[Symbol.iterator];
       const write = (next: T | ((prev: T) => T)) =>
         set((prev: T) => {

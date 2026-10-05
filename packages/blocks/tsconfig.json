@@ -13,6 +13,7 @@
     "paths": {
       "solid-blocks": ["./src/index.ts"],
       "solid-blocks/h": ["./src/h.ts"],
+      "solid-blocks/internal": ["./src/internal.ts"],
       "solid-blocks/jsx-runtime": ["./jsx/jsx-runtime.d.ts"],
       "conformance": ["./test/conformance/harness/scenario-api.ts"]
     }

@@ -5,6 +5,10 @@
  * `perform(…)`) makes JSX views fine-grained.
  *
  * See documentation/blocks-library.md.
+ *
+ * The runtime's marks and helpers that the `h` entry shares (one runtime per
+ * app) are not exported here: they are `solid-blocks/internal`, which is not
+ * a documented entry and makes no compatibility promise.
  */
 export {
   $cleanup,
@@ -31,21 +35,6 @@ export {
   until,
   view,
   type BlockContext
-} from "./runtime.js";
-/** @internal shared with the `h` entry (one runtime per app). */
-export {
-  READ,
-  VIEW_MARK,
-  COMPONENT_MARK,
-  EVENT_MARK,
-  bindEvent,
-  blockName,
-  holeOf,
-  isGeneratorFunction,
-  isRowBlock,
-  renderView,
-  rowArg,
-  runRow
 } from "./runtime.js";
 export { For, Show, Switch, Match, Repeat, Loading, Errored } from "./flow.js";
 export type { Reset } from "./flow.js";

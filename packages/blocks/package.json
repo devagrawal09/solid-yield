@@ -46,6 +46,31 @@
       "development": "./dist/blocks.dev.js",
       "default": "./dist/blocks.js"
     },
+    "./internal": {
+      "worker": {
+        "types": "./dist/types/internal.d.ts",
+        "development": "./dist/internal.server.dev.js",
+        "default": "./dist/internal.server.js"
+      },
+      "browser": {
+        "types": "./dist/types/internal.d.ts",
+        "development": "./dist/internal.dev.js",
+        "default": "./dist/internal.js"
+      },
+      "deno": {
+        "types": "./dist/types/internal.d.ts",
+        "development": "./dist/internal.server.dev.js",
+        "default": "./dist/internal.server.js"
+      },
+      "node": {
+        "types": "./dist/types/internal.d.ts",
+        "development": "./dist/internal.server.dev.js",
+        "default": "./dist/internal.server.js"
+      },
+      "types": "./dist/types/internal.d.ts",
+      "development": "./dist/internal.dev.js",
+      "default": "./dist/internal.js"
+    },
     "./h": {
       "types": "./dist/types/h.d.ts",
       "development": "./dist/h.dev.js",

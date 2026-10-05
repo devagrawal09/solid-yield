@@ -4,7 +4,11 @@
     "outDir": "./dist/types",
     "rootDir": "./src",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "paths": { "solid-blocks": ["./src/index.ts"], "solid-blocks/jsx-runtime": ["./jsx/jsx-runtime.d.ts"] }
+    "paths": {
+      "solid-blocks": ["./src/index.ts"],
+      "solid-blocks/internal": ["./src/internal.ts"],
+      "solid-blocks/jsx-runtime": ["./jsx/jsx-runtime.d.ts"]
+    }
   },
   "include": ["./src"]
 }

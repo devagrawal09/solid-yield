@@ -23,6 +23,9 @@ export default defineConfig({
   },
   resolve: {
     conditions: ["development", "browser"],
-    alias: [{ find: /^solid-blocks$/, replacement: resolve(src, "index.ts") }]
+    alias: [
+      { find: /^solid-blocks\/internal$/, replacement: resolve(src, "internal.ts") },
+      { find: /^solid-blocks$/, replacement: resolve(src, "index.ts") }
+    ]
   }
 });

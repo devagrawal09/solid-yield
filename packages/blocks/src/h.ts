@@ -14,7 +14,7 @@
 import solidH from "@solidjs/h";
 import type { JSX } from "solid-blocks/jsx-runtime";
 import { toHole, toHoleProps, type Hole, type HViewOf, type OpsOfHole } from "./holes.js";
-import { blockName, READ } from "solid-blocks";
+import { blockName, READ } from "solid-blocks/internal";
 import type {
   ChildView,
   Component,

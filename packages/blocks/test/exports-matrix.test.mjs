@@ -18,6 +18,19 @@ exportsMatrix(new URL("..", import.meta.url), {
     },
     types: "./dist/types/index.d.ts"
   },
+  // undocumented: the runtime the root and `h` share (one copy per app)
+  "./internal": {
+    runtime: {
+      default: "./dist/internal.js",
+      development: "./dist/internal.dev.js",
+      browser: "./dist/internal.js",
+      "browser+development": "./dist/internal.dev.js",
+      node: "./dist/internal.server.js",
+      "node+development": "./dist/internal.server.dev.js",
+      "browser+node+development": "./dist/internal.dev.js"
+    },
+    types: "./dist/types/internal.d.ts"
+  },
   "./h": {
     runtime: {
       default: "./dist/h.js",

@@ -96,9 +96,12 @@ export const Untracks = $component(function* (props: Props<{ start: number }>) {
   const doubled = yield* $memo(function* () {
     return (yield* $untrack(props.start)) * 2;
   });
-  yield* $effect(function* () {
-    void (yield* $untrack(props.start));
-  });
+  yield* $effect(
+    function* () {},
+    function* () {
+      void (yield* $untrack(props.start));
+    }
+  );
   const log = $event(function* () {
     return yield* $untrack(props.start);
   });
@@ -174,13 +177,16 @@ export const Optimistic = $component(function* () {
 export const asyncMemo = $memo(async function* () {
   return 1;
 });
-// @ts-expect-error an effect's attempt is synchronous (Wait is not an EffectOp)
-export const asyncInEffect = $effect(function* () {
-  yield* attempt(
-    () => fetchUser("1"),
-    () => new NotFound()
-  );
-});
+export const asyncInEffect = $effect(
+  function* () {},
+  // @ts-expect-error an effect's attempt is synchronous (Wait is not an EffectOp)
+  function* () {
+    yield* attempt(
+      () => fetchUser("1"),
+      () => new NotFound()
+    );
+  }
+);
 
 // --- only settled values render -------------------------------------------------------------
 // pending, and nothing it reads can fail
@@ -880,17 +886,26 @@ export const EventColors = $component(function* () {
   void colors;
   // an $effect does not wait: it delegates to a sync event only (an async one
   // is reached through an event calling an event, or a $memo; D-035)
-  yield* $effect(function* () {
-    yield* sync();
-  });
-  // @ts-expect-error an $effect does not wait on an event doing async work
-  yield* $effect(function* () {
-    yield* requests();
-  });
-  // @ts-expect-error nor on an event that waits for pending data
-  yield* $effect(function* () {
-    yield* readsData();
-  });
+  yield* $effect(
+    function* () {},
+    function* () {
+      yield* sync();
+    }
+  );
+  yield* $effect(
+    function* () {},
+    // @ts-expect-error an $effect does not wait on an event doing async work
+    function* () {
+      yield* requests();
+    }
+  );
+  yield* $effect(
+    function* () {},
+    // @ts-expect-error nor on an event that waits for pending data
+    function* () {
+      yield* readsData();
+    }
+  );
   return function* () {
     return <p />;
   };

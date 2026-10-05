@@ -6,12 +6,14 @@
  */
 import {
   attempt,
+  $cleanup,
   $component,
   $effect,
   $event,
   $memo,
   $settled,
   $signal,
+  $untrack,
   Errored,
   For,
   raise,
@@ -162,9 +164,12 @@ export type MemoTwoView = Expect<Equal<ViewFailsOf<ReturnType<typeof MemoTwo>>, 
 // raises is in the setup's yield union, and so in the component's view, as it fails at run
 // time (to the nearest Errored above the component, or re-thrown; raise.spec.tsx).
 export const Effect = $component(function* Effect() {
-  yield* $effect(function* () {
-    yield* raise(new Boom());
-  });
+  yield* $effect(
+    function* () {},
+    function* () {
+      yield* raise(new Boom());
+    }
+  );
   yield* $settled(function* () {
     yield* raise(new Other());
   });
@@ -183,13 +188,16 @@ export type EffectCreate = Expect<
 // an effect that handles its failure itself — an attempt whose `onError` absorbs it (returns
 // nothing, D-076) — adds none; the attempt gives `T | undefined`
 export const EffectAbsorbs = $component(function* EffectAbsorbs() {
-  yield* $effect(function* () {
-    const v = yield* attempt(
-      () => JSON.parse("{") as unknown,
-      () => {}
-    );
-    type _v = Expect<Equal<typeof v, unknown>>;
-  });
+  yield* $effect(
+    function* () {},
+    function* () {
+      const v = yield* attempt(
+        () => JSON.parse("{") as unknown,
+        () => {}
+      );
+      type _v = Expect<Equal<typeof v, unknown>>;
+    }
+  );
   yield* $settled(function* () {
     const n = yield* attempt(
       () => 1,
@@ -211,12 +219,15 @@ export const EffectAbsorbs = $component(function* EffectAbsorbs() {
 export type EffectAbsorbsView = Expect<Equal<ViewFailsOf<ReturnType<typeof EffectAbsorbs>>, never>>;
 // …while an attempt whose `onError` returns the failure joins it
 export const EffectAttempt = $component(function* EffectAttempt() {
-  yield* $effect(function* () {
-    yield* attempt(
-      () => JSON.parse("{") as unknown,
-      cause => new Boom(String(cause))
-    );
-  });
+  yield* $effect(
+    function* () {},
+    function* () {
+      yield* attempt(
+        () => JSON.parse("{") as unknown,
+        cause => new Boom(String(cause))
+      );
+    }
+  );
   return view(function* () {
     return <i />;
   });
@@ -329,15 +340,18 @@ export const HandlerHosts = $component(function* HandlerHosts() {
   });
   type _failing = Expect<Equal<typeof failing, Source<string, Boom, true>>>;
   // an effect's handler is synchronous: a wait in it is not an EffectOp
-  // @ts-expect-error an async nested attempt in an effect's handler
-  yield* $effect(function* () {
-    yield* attempt(
-      () => JSON.parse("{") as unknown,
-      function* () {
-        return yield* attempt(flaky, () => {});
-      }
-    );
-  });
+  yield* $effect(
+    function* () {},
+    // @ts-expect-error an async nested attempt in an effect's handler
+    function* () {
+      yield* attempt(
+        () => JSON.parse("{") as unknown,
+        function* () {
+          return yield* attempt(flaky, () => {});
+        }
+      );
+    }
+  );
   void m;
   return view(function* () {
     return <button onClick={yield* save}>{yield* count}</button>;
@@ -349,14 +363,101 @@ export const untilGen = until(n, function* () {
 });
 export type UntilGen = Expect<Equal<typeof untilGen, Yieldable<Wait, number>>>;
 
+// --- D-079: $effect(compute, effect) ----------------------------------------------------
+// the compute's value is the effect phase's (and the previous one, undefined at first)
+export const Split = $component(function* Split() {
+  const [count, setCount] = yield* $signal(0);
+  const [label, setLabel] = yield* $signal("");
+  yield* $effect(
+    function* () {
+      return { n: yield* count, at: "now" as const };
+    },
+    function* (value, prev) {
+      type _value = Expect<Equal<typeof value, { n: number; at: "now" }>>;
+      type _prev = Expect<Equal<typeof prev, { n: number; at: "now" } | undefined>>;
+      // the effect phase writes, cleans up, reads untracked
+      yield* setLabel(`${value.n}${yield* $untrack(label)}`);
+      yield* $cleanup(() => {});
+    }
+  );
+  // the compute is pure: no write …
+  yield* $effect(
+    // @ts-expect-error a Write is not a ComputeOp
+    function* () {
+      yield* setCount(1);
+    },
+    function* () {}
+  );
+  // … no $cleanup …
+  yield* $effect(
+    // @ts-expect-error a Cleanup is not a ComputeOp
+    function* () {
+      yield* $cleanup(() => {});
+    },
+    function* () {}
+  );
+  // … no event call
+  const sync = $event(function* () {});
+  yield* $effect(
+    // @ts-expect-error an EventCallOp is not a ComputeOp
+    function* () {
+      yield* sync();
+    },
+    function* () {}
+  );
+  // the effect phase runs untracked: a plain read is refused (read it in the compute and pass
+  // the value, or $untrack it)
+  yield* $effect(
+    function* () {},
+    // @ts-expect-error a Read is not an EffectPhaseOp
+    function* () {
+      void (yield* count);
+    }
+  );
+  return view(function* () {
+    return <i>{yield* label}</i>;
+  });
+});
+// both halves' failures are the component's (D-073 for the compute; the effect phase's take
+// the same runtime path)
+export const SplitFails = $component(function* SplitFails() {
+  const [n] = yield* $signal(0);
+  yield* $effect(
+    function* () {
+      if ((yield* n) > 1) yield* raise(new Boom());
+      return yield* n;
+    },
+    function* (v) {
+      if (v > 2) yield* raise(new Other());
+    }
+  );
+  return view(function* () {
+    return <i />;
+  });
+});
+export type SplitFailsView = Expect<
+  Equal<ViewFailsOf<ReturnType<typeof SplitFails>>, Boom | Other>
+>;
+export type SplitCreate = Expect<
+  Equal<
+    ReturnType<typeof $effect<Raise<Boom>, number, Raise<Other>>> extends Yieldable<infer Y, void>
+      ? Y
+      : never,
+    Create<"effect", Boom | Other>
+  >
+>;
+
 // an effect delegating to a synchronous event that fails joins the event's failure
 export const EffectCalls = $component(function* EffectCalls() {
   const fail = $event(function* () {
     yield* raise(new Other());
   });
-  yield* $effect(function* () {
-    yield* fail();
-  });
+  yield* $effect(
+    function* () {},
+    function* () {
+      yield* fail();
+    }
+  );
   return view(function* () {
     return <i />;
   });
@@ -372,9 +473,12 @@ export const RowEffect = $component(function* RowEffect() {
           yield* For({
             each: items,
             children: function* () {
-              yield* $effect(function* () {
-                yield* raise(new Boom());
-              });
+              yield* $effect(
+                function* () {},
+                function* () {
+                  yield* raise(new Boom());
+                }
+              );
               return view(function* () {
                 return <li />;
               });
@@ -728,12 +832,15 @@ export type AttemptCallEventView = Expect<
 >;
 // an effect may attempt a synchronous call (as it may delegate to one), absorbing its failure
 export const AttemptCallEffect = $component(function* AttemptCallEffect() {
-  yield* $effect(function* () {
-    yield* attempt(
-      () => failingSync(),
-      () => {}
-    );
-  });
+  yield* $effect(
+    function* () {},
+    function* () {
+      yield* attempt(
+        () => failingSync(),
+        () => {}
+      );
+    }
+  );
   return view(function* () {
     return <i />;
   });
@@ -743,13 +850,16 @@ export type AttemptCallEffectView = Expect<
 >;
 // …but not one that waits
 export const AttemptAsyncCallEffect = $component(function* AttemptAsyncCallEffect() {
-  // @ts-expect-error an $effect does not wait: EventCallOp<true, true> is not an EffectOp
-  yield* $effect(function* () {
-    yield* attempt(
-      () => failing(),
-      () => {}
-    );
-  });
+  yield* $effect(
+    function* () {},
+    // @ts-expect-error an $effect does not wait: EventCallOp<true, true> is not an EffectOp
+    function* () {
+      yield* attempt(
+        () => failing(),
+        () => {}
+      );
+    }
+  );
   return view(function* () {
     return <i />;
   });

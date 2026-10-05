@@ -3,7 +3,8 @@
  *
  * A block is a generator function that is
  * - the argument of a block constructor (`$component` → setup, `$memo`,
- *   `$effect`, `$event`, `$settled`, `$` → hole, or row when it has
+ *   `$effect` (both its compute and its effect phase, D-079), `$event`,
+ *   `$settled`, `$` → hole, or row when it has
  *   parameters, `$scope` → row);
  * - returned by a setup or a row block's setup (→ view), also as a branch of
  *   a conditional or logical return (a setup may return one of several views);
@@ -68,6 +69,13 @@ function computeKind(fn) {
     if (name === "$") return fn.params.length > 0 ? "row" : "hole";
     if (name && CONSTRUCTORS[name]) return CONSTRUCTORS[name];
   }
+  // `$effect(compute, effect)` (D-079): the effect phase is a block too
+  if (
+    parent.type === "CallExpression" &&
+    parent.arguments[1] === fn &&
+    calleeName(parent) === "$effect"
+  )
+    return "effect";
   // returned by a setup (or a row block's setup): the view — also wrapped,
   // `return view(function* () { … })` (D-054)
   let ret = isViewCall(parent) && parent.arguments[0] === fn ? parent : fn;

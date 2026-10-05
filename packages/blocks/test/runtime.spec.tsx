@@ -257,11 +257,15 @@ describe("setup operations", () => {
       const doubled = yield* $memo(function* () {
         return (yield* n) * 2;
       });
-      yield* $effect(function* () {
-        const d = yield* doubled;
-        log.push(`effect ${d}`);
-        yield* $cleanup(() => log.push(`cleanup ${d}`));
-      });
+      yield* $effect(
+        function* () {
+          return yield* doubled;
+        },
+        function* (d) {
+          log.push(`effect ${d}`);
+          yield* $cleanup(() => log.push(`cleanup ${d}`));
+        }
+      );
       yield* $settled(function* () {
         log.push(`settled ${yield* doubled}`);
       });
@@ -283,11 +287,15 @@ describe("setup operations", () => {
       const [n, setN] = yield* $signal(1);
       const [copy, setCopy] = yield* $signal(0);
       set = v => write(() => setN(v));
-      yield* $effect(function* () {
-        const v = yield* n;
-        const written = yield* setCopy(v * 10);
-        expect(written).toBe(v * 10);
-      });
+      yield* $effect(
+        function* () {
+          return yield* n;
+        },
+        function* (v) {
+          const written = yield* setCopy(v * 10);
+          expect(written).toBe(v * 10);
+        }
+      );
       return function* () {
         return <span>{perform(copy)}</span>;
       };
@@ -344,9 +352,12 @@ describe("setup operations", () => {
         memoRuns++;
         return (yield* $untrack(props.start)) * 2 + (yield* $untrack(a)) + (yield* b);
       });
-      yield* $effect(function* () {
-        seen.push(yield* $untrack(a));
-      });
+      yield* $effect(
+        function* () {},
+        function* () {
+          seen.push(yield* $untrack(a));
+        }
+      );
       fire = $event(function* () {
         seen.push(yield* $untrack(b));
       });
@@ -671,12 +682,76 @@ describe("props", () => {
     expect(root.textContent).toBe("2");
   });
 
+  devIt("an $effect's compute does not write; its effect phase does not read (D-079)", () => {
+    const errorOf = (App: () => any) => {
+      dispose?.();
+      root.textContent = "";
+      mount(() =>
+        Errored({
+          fallback: (e: any) => <b>{e().message}</b>,
+          children: function* () {
+            return <>{yield* App()}</>;
+          }
+        })
+      );
+      flush();
+      return root.textContent;
+    };
+    const Writes = $component(function* Writes() {
+      const [, setN] = yield* $signal(0);
+      yield* $effect(
+        // @ts-expect-error a Write is not a ComputeOp
+        function* () {
+          yield* setN(1);
+        },
+        function* () {}
+      );
+      return function* () {
+        return <i />;
+      };
+    });
+    expect(errorOf(Writes)).toMatch(/WRITE_IN_REACTIVE\] an effect's compute does not write/);
+    const Reads = $component(function* Reads() {
+      const [n] = yield* $signal(0);
+      yield* $effect(
+        function* () {},
+        // @ts-expect-error a Read is not an EffectPhaseOp
+        function* () {
+          void (yield* n);
+        }
+      );
+      return function* () {
+        return <i />;
+      };
+    });
+    expect(errorOf(Reads)).toMatch(/READ_IN_EFFECT\] an \$effect's effect phase runs untracked/);
+    const Untracks = $component(function* Untracks() {
+      const [n] = yield* $signal(7);
+      const [out, setOut] = yield* $signal(0);
+      yield* $effect(
+        function* () {},
+        function* () {
+          yield* setOut(yield* $untrack(n));
+        }
+      );
+      return function* () {
+        return <i>{perform(out)}</i>;
+      };
+    });
+    expect(errorOf(Untracks)).toBe("7");
+  });
+
   devIt("an effect's undelegated receipt is UNYIELDED_WRITE", () => {
     const App = $component(function* Effecting() {
       const [n, setN] = yield* $signal(0);
-      yield* $effect(function* () {
-        if ((yield* n) === 0) void setN(1);
-      });
+      yield* $effect(
+        function* () {
+          return yield* n;
+        },
+        function* (v) {
+          if (v === 0) void setN(1);
+        }
+      );
       return function* () {
         return <i>{perform(n)}</i>;
       };
@@ -1048,9 +1123,14 @@ describe("events", () => {
     const App = $component(function* () {
       const [n, set] = yield* $signal(1);
       setN = v => write(() => set(v));
-      yield* $effect(function* () {
-        yield* record(yield* n);
-      });
+      yield* $effect(
+        function* () {
+          return yield* n;
+        },
+        function* (v) {
+          yield* record(v);
+        }
+      );
       return function* () {
         return <p />;
       };
@@ -1389,9 +1469,12 @@ describe("row blocks", () => {
                 children: function* (item) {
                   // the row's body is a setup: it runs once per item, and the
                   // memo it creates is the row's (read by two holes, computed once)
-                  yield* $effect(function* () {
-                    created.push(yield* $untrack(item.id));
-                  });
+                  yield* $effect(
+                    function* () {},
+                    function* () {
+                      created.push(yield* $untrack(item.id));
+                    }
+                  );
                   const label = yield* $memo(function* () {
                     const text = `${yield* item.text}${yield* suffix}`;
                     computed.push(text);
@@ -2448,9 +2531,12 @@ describe("untyped throws (D-019)", () => {
       };
     });
     const InEffect = $component(function* InEffect() {
-      yield* $effect(function* () {
-        throwIn("effect");
-      });
+      yield* $effect(
+        function* () {},
+        function* () {
+          throwIn("effect");
+        }
+      );
       return function* () {
         return <i />;
       };

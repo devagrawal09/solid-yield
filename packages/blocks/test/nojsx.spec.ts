@@ -251,9 +251,12 @@ describe("h argument shapes", () => {
   it("a prop holding an array or a store is passed as it is", () => {
     let seen: unknown;
     const Child = $component(function* (props: Props<{ list: string[] }>) {
-      yield* $effect(function* () {
-        seen = yield* $untrack(props.list);
-      });
+      yield* $effect(
+        function* () {},
+        function* () {
+          seen = yield* $untrack(props.list);
+        }
+      );
       return function* () {
         return h("span", "ok");
       };

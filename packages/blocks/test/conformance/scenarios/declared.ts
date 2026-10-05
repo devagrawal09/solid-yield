@@ -2,62 +2,11 @@
  * Declared differences of the library route from the oracle, per scenario
  * and mode, each with its reason; and the findings from comparing the
  * library route's server output with the compiler route's. Every entry is a
- * finding recorded in documentation/DECISIONS.md (D-069; F1–F5 here, F6 in `routeFindings`).
+ * finding recorded in documentation/DECISIONS.md (D-069; F2–F5 here, F6 in `routeFindings`; F1 resolved by D-079).
  */
 import type { ModeExpectation } from "../harness/types.js";
 
 export const declared: Record<string, Record<string, ModeExpectation>> = {
-  "blocks-effect": {
-    "client/library": {
-      status: "differs",
-      reason:
-        "F1 (D-053): `$effect` is one tracked pass (`createTrackedEffect`), not Solid's split effect: the first run happens after the view's first read; on a re-run the previous cleanup runs before the new reads, and the branch read of `c` happens inside the body after the write of `b`. Same subscriptions, values, runs and cleanups; different order (as the fork's `blocks-uncompiled` mode). The reference's split form has no block spelling.",
-      trace: [
-        "## mount",
-        "read b = 0",
-        "read a = 1",
-        "read flag = false",
-        "run effect",
-        "write b = 10",
-        "read b = 10",
-        "## initial",
-        'html = <p class="b">10</p>',
-        "## write a = 2 (branch read of c starts)",
-        "write a = 2",
-        "cleanup effect 1",
-        "read a = 2",
-        "read flag = false",
-        "run effect",
-        "write b = 20",
-        "read c = 100",
-        "value c = 100",
-        "read b = 20",
-        'html = <p class="b">20</p>',
-        "## write flag = true",
-        "write flag = true",
-        "cleanup effect 2",
-        "read a = 2",
-        "read flag = true",
-        "run effect",
-        "write b = 20",
-        "value a = 2",
-        "read c = 100",
-        "value c = 100",
-        "## write c = 200",
-        "write c = 200",
-        "cleanup effect 2",
-        "read a = 2",
-        "read flag = true",
-        "run effect",
-        "write b = 20",
-        "value a = 2",
-        "read c = 200",
-        "value c = 200",
-        "## dispose",
-        "cleanup effect 2"
-      ]
-    }
-  },
   "blocks-row-list": {
     "client/library": {
       status: "differs",

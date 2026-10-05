@@ -315,7 +315,7 @@ const noUnyieldedWrite = {
     },
     messages: {
       unyielded:
-        "`{{name}}(…)` writes nothing until it is delegated to: `yield* {{name}}(…)`, in an $event or an $effect.",
+        "`{{name}}(…)` writes nothing until it is delegated to: `yield* {{name}}(…)`, in an $event or an $effect's effect phase.",
       discarded: "`{{name}}(…)` does nothing until it is delegated to: `yield* {{name}}(…)`.",
       eventCall:
         "`{{name}}(…)` is an event call this block does not delegate to: `yield* {{name}}(…)` waits for it (its colors join this block's type)."
@@ -364,9 +364,10 @@ const SOLID_FOREIGN = {
   createProjection: "`$projection`",
   createOptimistic: "`$optimistic`",
   createOptimisticStore: "`$optimisticStore`",
-  createEffect: "`$effect`",
+  createEffect: "`$effect(compute, effect)`",
   createRenderEffect: "`$effect`",
-  createTrackedEffect: "`$effect`",
+  createTrackedEffect:
+    "`$effect(compute, effect)` (a tracked effect is the compute; its writes go in the effect phase)",
   createReaction: "`$effect`",
   onSettled: "`$settled`",
   action: "`$event`",

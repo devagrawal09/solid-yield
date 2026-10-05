@@ -53,7 +53,9 @@ const Child = $component(function* Child(props: Props<{ n: Source<number, Boom> 
 /**
  * How a failure with no `Errored` reaches the root:
  * - `thrown`: the failure itself is thrown out of `render` (a setup runs
- *   inside the component call, outside any computation);
+ *   inside the component call, outside any computation; an `$effect`'s
+ *   either phase is escalated as itself by Solid's `createEffect`, D-079,
+ *   which halts the reactive system when no boundary takes it);
  * - `cause`: Solid re-throws the failure of a computation as its own error,
  *   the failure its `cause`;
  * - `unhandled`: a computation failing after an async step (a memo resumed
@@ -186,18 +188,38 @@ const hosts: HostCase[] = [
     atRoot: "unhandled"
   },
   {
-    host: "effect",
+    host: "effect's compute",
     make: boom => ({
       App: $component(function* App() {
-        yield* $effect(function* () {
-          yield* raise(boom);
-        });
+        yield* $effect(
+          function* () {
+            yield* raise(boom);
+          },
+          function* () {}
+        );
         return view(function* () {
           return <i>ok</i>;
         });
       })
     }),
-    atRoot: "cause"
+    atRoot: "thrown"
+  },
+  {
+    host: "effect's effect phase",
+    make: boom => ({
+      App: $component(function* App() {
+        yield* $effect(
+          function* () {},
+          function* () {
+            yield* raise(boom);
+          }
+        );
+        return view(function* () {
+          return <i>ok</i>;
+        });
+      })
+    }),
+    atRoot: "thrown"
   },
   {
     host: "$settled",
@@ -389,48 +411,59 @@ describe.each(hosts)("raise in a $host", ({ host, make, drive, atRoot }) => {
 });
 
 describe("D-073: an effect's failure is its component's", () => {
-  it("an $effect's raise reaches the Errored above the component that created it", () => {
-    const boom = new Boom("effect");
-    const Fails = $component(function* Fails() {
-      yield* $effect(function* () {
-        yield* raise(boom);
-      });
-      return view(function* () {
-        return <i>ok</i>;
-      });
-    });
-    const seen: unknown[] = [];
-    // the component's view type is View<false, Boom> (raise.type-tests.tsx): the Errored
-    // above it handles what its effect raises
-    dispose = render(
-      () =>
-        Errored({
-          fallback: (e: () => unknown) => (seen.push(e()), (<p>caught</p>)),
-          children: function* () {
-            return <>{yield* Fails()}</>;
+  it.each(["compute", "effect"] as const)(
+    "an $effect's raise in its %s phase reaches the Errored above the component that created it (D-079)",
+    phase => {
+      const boom = new Boom("effect");
+      const Fails = $component(function* Fails() {
+        yield* $effect(
+          function* () {
+            if (phase === "compute") yield* raise(boom);
+          },
+          function* () {
+            if (phase === "effect") yield* raise(boom);
           }
-        }),
-      root
-    );
-    flush();
-    expect(seen).toEqual([boom]);
-    expect(root.innerHTML).toBe("<p>caught</p>");
-  });
+        );
+        return view(function* () {
+          return <i>ok</i>;
+        });
+      });
+      const seen: unknown[] = [];
+      // the component's view type is View<false, Boom> (raise.type-tests.tsx): the Errored
+      // above it handles what its effect raises
+      dispose = render(
+        () =>
+          Errored({
+            fallback: (e: () => unknown) => (seen.push(e()), (<p>caught</p>)),
+            children: function* () {
+              return <>{yield* Fails()}</>;
+            }
+          }),
+        root
+      );
+      flush();
+      expect(seen).toEqual([boom]);
+      expect(root.innerHTML).toBe("<p>caught</p>");
+    }
+  );
 
   it("an attempt whose onError returns nothing absorbs the failure: it gives undefined; the effect does not fail (D-076)", () => {
     const seen: unknown[] = [];
     const caught: unknown[] = [];
     const App = $component(function* App() {
-      yield* $effect(function* () {
-        const v =
-          (yield* attempt(
-            () => JSON.parse("{") as unknown,
-            e => {
-              caught.push(e);
-            }
-          )) ?? "fallback";
-        seen.push(v);
-      });
+      yield* $effect(
+        function* () {},
+        function* () {
+          const v =
+            (yield* attempt(
+              () => JSON.parse("{") as unknown,
+              e => {
+                caught.push(e);
+              }
+            )) ?? "fallback";
+          seen.push(v);
+        }
+      );
       return view(function* () {
         return <i>ok</i>;
       });
@@ -468,14 +501,17 @@ describe("D-073: an effect's failure is its component's", () => {
   it("a handler that returns a value absorbs the failure: the attempt gives the value (D-078)", () => {
     const seen: unknown[] = [];
     const App = $component(function* App() {
-      yield* $effect(function* () {
-        seen.push(
-          yield* attempt(
-            () => JSON.parse("{") as unknown,
-            () => "a value"
-          )
-        );
-      });
+      yield* $effect(
+        function* () {},
+        function* () {
+          seen.push(
+            yield* attempt(
+              () => JSON.parse("{") as unknown,
+              () => "a value"
+            )
+          );
+        }
+      );
       return view(function* () {
         return <i>ok</i>;
       });
@@ -492,16 +528,19 @@ describe("D-073: an effect's failure is its component's", () => {
     }
     const got: unknown[] = [];
     const App = $component(function* App() {
-      yield* $effect(function* () {
-        const stream = yield* attempt(
-          () => feed(),
-          () => {}
-        );
-        void (async () => {
-          for await (const v of stream ?? []) got.push(v);
-          got.push("done");
-        })();
-      });
+      yield* $effect(
+        function* () {},
+        function* () {
+          const stream = yield* attempt(
+            () => feed(),
+            () => {}
+          );
+          void (async () => {
+            for await (const v of stream ?? []) got.push(v);
+            got.push("done");
+          })();
+        }
+      );
       return view(function* () {
         return <i>ok</i>;
       });
@@ -521,16 +560,19 @@ describe("D-077: an attempt over an event call", () => {
       const fail = $event(function* () {
         yield* raise(new Boom("call"));
       });
-      yield* $effect(function* () {
-        seen.push(
-          yield* attempt(
-            () => fail(),
-            e => {
-              caught.push(e);
-            }
-          )
-        );
-      });
+      yield* $effect(
+        function* () {},
+        function* () {
+          seen.push(
+            yield* attempt(
+              () => fail(),
+              e => {
+                caught.push(e);
+              }
+            )
+          );
+        }
+      );
       return view(function* () {
         return <i>ok</i>;
       });
@@ -558,12 +600,15 @@ describe("D-077: an attempt over an event call", () => {
       const fail = $event(function* () {
         yield* raise(new Boom("call"));
       });
-      yield* $effect(function* () {
-        yield* attempt(
-          () => fail(),
-          e => new Other(`from ${e.kind}`)
-        );
-      });
+      yield* $effect(
+        function* () {},
+        function* () {
+          yield* attempt(
+            () => fail(),
+            e => new Other(`from ${e.kind}`)
+          );
+        }
+      );
       return view(function* () {
         return <i>ok</i>;
       });

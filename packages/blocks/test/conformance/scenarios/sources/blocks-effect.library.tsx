@@ -21,17 +21,22 @@ export const App = $component(function* App() {
   setC = $event(function* (v: number) {
     yield* sc(v);
   });
-  // `$effect` reacts (D-053): one tracked pass, re-run when a read changes;
-  // the branch read of `c` is the effect's, not the view's (D-032)
-  yield* $effect(function* () {
-    const v = yield* a;
-    const f = yield* flag;
-    h.run("effect");
-    yield* sb(v * 10);
-    if (f) h.value("a", v);
-    if (v > 1) h.value("c", yield* c);
-    yield* $cleanup(() => h.log("cleanup", "effect " + v));
-  });
+  // `$effect(compute, effect)` (D-079): Solid's split effect. The compute
+  // tracks (the branch read of `c` is the effect's, not the view's, D-032);
+  // the effect phase runs after it, untracked, and writes
+  yield* $effect(
+    function* () {
+      const v = yield* a;
+      return [v, yield* flag, v > 1 ? yield* c : undefined] as const;
+    },
+    function* ([v, f, cv]) {
+      h.run("effect");
+      yield* sb(v * 10);
+      if (f) h.value("a", v);
+      if (v > 1) h.value("c", cv);
+      yield* $cleanup(() => h.log("cleanup", "effect " + v));
+    }
+  );
   return view(function* () {
     return <p class="b">{yield* b}</p>;
   });

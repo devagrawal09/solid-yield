@@ -453,7 +453,7 @@ tester.run("read-before-attempt", rules["read-before-attempt"], {
 tester.run("no-unyielded-write", rules["no-unyielded-write"], {
   valid: [
     component(
-      "const [n, setN] = yield* $signal(1); const inc = $event(function* () { yield* setN(2); }); yield* $effect(function* () { const v = yield* setN(3); }); return function* () { return <p onClick={yield* inc}>{yield* n}</p>; };"
+      "const [n, setN] = yield* $signal(1); const inc = $event(function* () { yield* setN(2); }); yield* $effect(function* () {}, function* () { const v = yield* setN(3); }); return function* () { return <p onClick={yield* inc}>{yield* n}</p>; };"
     ),
     component(
       "const [s, setS] = yield* $optimisticStore({ a: 1 }); const go = $event(function* () { yield* setS(d => { d.a = 2; }); }); return function* () { return <p onClick={yield* go} />; };"
@@ -861,7 +861,12 @@ tester.run("no-try-catch", rules["no-try-catch"], {
       errors: [{ messageId: "tryCatch", data: { where: "a $memo" } }]
     },
     {
-      code: "const f = $effect(function* () { try { yield* n; } catch {} });",
+      code: "const f = $effect(function* () { try { return yield* n; } catch {} }, function* () {});",
+      errors: [{ messageId: "tryCatch", data: { where: "an $effect" } }]
+    },
+    {
+      // the effect phase is a block too (D-079)
+      code: "const f = $effect(function* () {}, function* (v) { try { yield* save(v); } catch {} });",
       errors: [{ messageId: "tryCatch", data: { where: "an $effect" } }]
     },
     {

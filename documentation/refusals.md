@@ -12,7 +12,7 @@ A view is `return view(function* () { return <…/>; })`: it has no body (D-032)
 | a branch: `if (yield* flag) return <A />;` | `Show({ when: flag, … })`, `Switch` / `Match` | — (`[HVIEW_READ]` in `h`) | — | `READ_IN_VIEW` | `no-read-in-view-body` |
 | a local computation from reads: `const total = (yield* a) + (yield* b);` | a hole `{(yield* a) + (yield* b)}`, or a `$memo` in the setup | — (`[HVIEW_READ]` in `h`) | — | `READ_IN_VIEW` | `no-read-in-view-body` |
 | a creation: `yield* $signal(0)`, `$memo`, `$store`, `$effect` | create in the setup (or a row's setup) | `Create` is not a `ViewOp` (reported at `view(`) | — | `CREATE_OUTSIDE_SETUP` | — |
-| a write: `yield* setX(v)` | write in an `$event` (or an `$effect`) | `Write` is not a `ViewOp` | — | `WRITE_IN_REACTIVE` | `no-unyielded-write` (if not delegated) |
+| a write: `yield* setX(v)` | write in an `$event` (or an `$effect`'s effect phase) | `Write` is not a `ViewOp` | — | `WRITE_IN_REACTIVE` | `no-unyielded-write` (if not delegated) |
 | `yield* $cleanup(fn)` | in the setup or an effect | `Cleanup` is not a `ViewOp` | — | `CLEANUP_OUTSIDE_OWNER` | — |
 | a context read: `yield* Ctx` | in the setup | `ContextRead` is not a `ViewOp` | — | `CONTEXT_OUTSIDE_SETUP` | — |
 | `yield* raise(e)` in a hole | raise in a `$memo` (its source carries the failure), or in a hole given as a prop | `Raise` is not a `ViewOp` | — | — | — |
@@ -51,7 +51,10 @@ The neighbours of a view, for completeness:
 | a row's setup reads, a row's view creates | as a component's | `[ROW_SETUP_OP]`, `[ROW_VIEW_OP]` | `READ_IN_SETUP`, `CREATE_OUTSIDE_SETUP` | — |
 | a setter call not delegated to: `setX(v)` | `yield* setX(v)` | — | `UNYIELDED_WRITE` (end of the run) | `no-unyielded-write` |
 | a setter called with no block running (`onClick={setX}`, a timer) | wrap it in an `$event` | — | `SETTER_OUTSIDE_RUN` | `no-unyielded-write` |
-| a write in a `$memo` | in an `$event` or an `$effect` | `Write` is not a `MemoOp` | `WRITE_IN_REACTIVE` | `no-unyielded-write` |
+| a write in a `$memo` | in an `$event` or an `$effect`'s effect phase | `Write` is not a `MemoOp` | `WRITE_IN_REACTIVE` | `no-unyielded-write` |
+| `$effect(function* () { … })`, one function | `$effect(compute, effect)`: read in the compute and return the value, write in `function* (value, prev) { … }` (D-079) | two arguments are required | — | — |
+| a write, a `$cleanup` or an event call in an `$effect`'s compute | in its effect phase | not a `ComputeOp` | `WRITE_IN_REACTIVE`, `CLEANUP_OUTSIDE_OWNER` | — |
+| a plain read in an `$effect`'s effect phase: `yield* count` | read it in the compute and pass the value, or `yield* $untrack(count)` (D-079) | `Read` is not an `EffectPhaseOp` (nor a pending `$untrack`: the effect phase does not wait) | `READ_IN_EFFECT` | — |
 | a memo read after its first async `attempt` | read before it | — | `READ_AFTER_ATTEMPT` | `read-before-attempt` |
 | `$optimistic(body)` / `$optimisticStore(scalar)` | `$optimistic(value)`; `$optimisticStore(object \| body)` (D-014) | overloads | `OPTIMISTIC_FORM` | — |
 | a boundary's content built before the boundary | pass it as a function | overloads | `BOUNDARY_CONTENT_BUILT` | — |

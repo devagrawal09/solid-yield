@@ -25,7 +25,7 @@ import {
   createRenderEffect,
   createSignal,
   createStore,
-  createTrackedEffect,
+  createEffect,
   getObserver,
   getOwner,
   isPending as solidIsPending,
@@ -57,7 +57,10 @@ import type {
   ComponentView,
   ContextRead,
   Create,
+  ComputeOp,
   EffectOp,
+  EffectPhaseOp,
+  UntrackedRead,
   ErrorClass,
   EventCall,
   EventCallOp,
@@ -169,8 +172,24 @@ const MEMO = 3;
 const EFFECT = 4;
 const EVENT = 5;
 const HOLE = 6;
-type Host = 0 | 1 | 2 | 3 | 4 | 5 | 6;
-const HOST_NAMES = ["plain code", "a setup", "a view", "a memo", "an effect", "an event", "a hole"];
+/** An `$effect`'s compute (D-079): tracked reads, no writes. (`EFFECT` is its effect phase.) */
+const COMPUTE = 7;
+/** A `$settled` body: runs once after settle, reads current values, writes (D-053). */
+const SETTLED = 8;
+type Host = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+const HOST_NAMES = [
+  "plain code",
+  "a setup",
+  "a view",
+  "a memo",
+  "an effect",
+  "an event",
+  "a hole",
+  "an effect's compute",
+  "a $settled"
+];
+/** Dev only: a read made by `$untrack` (the effect phase admits it, D-079). */
+let untracking = false;
 
 /**
  * What the running block is. One value, replaced whole by `runAs` for each
@@ -283,6 +302,13 @@ function checkRead(inJsx: boolean): void {
     throw devError(
       "READ_IN_VIEW",
       `<${view}>: read outside a JSX position. A view has no body: read in a hole ({yield* …} in JSX, a bare function* in h), branch with <Show> / <Match>, derive with a $memo in the setup.`
+    );
+  // An `$effect`'s effect phase runs untracked, as Solid's: a read there
+  // would subscribe nothing (D-079)
+  if (host === EFFECT && !untracking)
+    throw devError(
+      "READ_IN_EFFECT",
+      "an $effect's effect phase runs untracked: read in its compute and pass the value, or yield* $untrack(source)."
     );
   if (state.resumed)
     throw devError(
@@ -818,10 +844,10 @@ function checkReceipts(list: Receipt<unknown>[], host: Host, name: string | null
 }
 function checkWrite(): void {
   const host = state.host;
-  if (host === SETUP || host === VIEW || host === MEMO || host === HOLE)
+  if (host === SETUP || host === VIEW || host === MEMO || host === HOLE || host === COMPUTE)
     throw devError(
       "WRITE_IN_REACTIVE",
-      `${HOST_NAMES[host]} does not write: write in an $event or an $effect.`
+      `${HOST_NAMES[host]} does not write: write in an $event or an $effect's effect phase.`
     );
 }
 function receiptSetter(setter: string, set: (v: any) => any, value?: () => any): any {
@@ -1185,30 +1211,50 @@ function resume(
 }
 
 /**
- * `yield* $effect(function* () {…})` in a setup: reads (tracked), writes,
- * `$cleanup`s. Uncompiled it runs as one tracked pass
- * (`createTrackedEffect`); its writes are queued until the flush. What the
- * body may fail with (a `raise`, an attempt's failure, a sync event's) reaches
- * the nearest `Errored` above the component, so it joins the component's
- * failures through the setup's `Create<"effect", E>` (D-073). An attempt
- * whose `onError` absorbs the failure adds none.
+ * `yield* $effect(compute, effect)` in a setup (D-079): Solid's
+ * `createEffect`, both halves generators. `compute` runs tracked and pure —
+ * reads, `raise`, a sync `attempt` — and returns a value; `effect(value,
+ * prev)` runs after it, untracked: writes, `$cleanup`s (run before the next
+ * effect run, or on disposal), a sync `attempt` or event call, `$untrack`.
+ * A plain read in the effect phase is refused (`READ_IN_EFFECT`; a type
+ * error): read it in the compute and pass the value.
+ *
+ * What either half may fail with reaches the nearest `Errored` above the
+ * component, so it joins the component's failures through the setup's
+ * `Create<"effect", E>` (D-073): a compute failure is rethrown by the
+ * effect's error arm (Solid would otherwise log and skip it), an effect-phase
+ * failure is Solid's uncaught effect error. An attempt whose `onError`
+ * absorbs the failure adds none.
  */
-export function $effect<Y extends EffectOp = never>(
-  body: () => Generator<Y, void, any>,
+export function $effect<YC extends ComputeOp = never, V = void, YE extends EffectPhaseOp = never>(
+  compute: () => Generator<YC, V, any>,
+  effect: (value: V, prev: V | undefined) => Generator<YE, void, any>,
   options?: { name?: string }
-): Yieldable<Create<"effect", FailsOf<Y>>, void> {
+): Yieldable<Create<"effect", FailsOf<YC> | FailsOf<YE>>, void> {
   return new CreateOp("effect", () => {
     const name = state.name;
-    createTrackedEffect(() => runEffect(body, name), options as any);
+    createEffect<V>(
+      () => runAs(COMPUTE, () => drive(compute(), SYNC_RUN) as V, null, null, false, false, name),
+      {
+        effect: (value: V, prev?: V) => runEffect(() => effect(value, prev), name, EFFECT),
+        // a compute failure reaches the nearest Errored, as an effect-phase one
+        // does (D-073): rethrown, it escalates to the boundary
+        error: (err: unknown) => {
+          throw err;
+        }
+      },
+      options as any
+    );
   }) as any;
 }
 
 function runEffect(
   body: () => Generator<unknown, unknown, unknown>,
-  name: string | null
+  name: string | null,
+  host: Host
 ): (() => void) | undefined {
   const sink: (() => void)[] = [];
-  runAs(EFFECT, () => drive(body(), SYNC_RUN), sink, null, false, false, name);
+  runAs(host, () => drive(body(), SYNC_RUN), sink, null, false, false, name);
   return sink.length ? () => runCleanups(sink) : undefined;
 }
 function runCleanups(sink: (() => void)[]): void {
@@ -1226,7 +1272,7 @@ export function $settled<Y extends EffectOp = never>(
 ): Yieldable<Create<"settled", FailsOf<Y>>, void> {
   return new CreateOp("settled", () => {
     const name = state.name;
-    onSettled(() => untrack(() => runEffect(body, name)));
+    onSettled(() => untrack(() => runEffect(body, name, SETTLED)));
   }) as any;
 }
 
@@ -1262,7 +1308,16 @@ class UntrackOp {
     // untracked, so a read after a memo's async attempt is fine
     return runAs(
       host,
-      () => untrack(() => readOf(this.target)),
+      () =>
+        untrack(() => {
+          const was = untracking;
+          untracking = true;
+          try {
+            return readOf(this.target);
+          } finally {
+            untracking = was;
+          }
+        }),
       sink,
       view,
       jsx,
@@ -1275,12 +1330,12 @@ class UntrackOp {
 /**
  * `yield* $untrack(props.initial)`: read a source once, untracked — "take the
  * value and ignore its updates" (D-042), as Solid's `untrack`. A read op: in
- * a hole, a `$memo`, an `$effect` or an `$event`; never in a setup, which
+ * a hole, a `$memo`, an `$effect` (either half) or an `$event`; never in a setup, which
  * does not read (its pending / failures are the read's).
  */
 export function $untrack<T, E, P extends boolean>(
   source: Source<T, E, P>
-): Yieldable<Read<P, E>, T> {
+): Yieldable<UntrackedRead<P, E>, T> {
   return new UntrackOp(source) as any;
 }
 

@@ -968,3 +968,31 @@ export const syncGen = attempt(
   }
 );
 export type SyncGen = Expect<Equal<typeof syncGen, Yieldable<never, number | undefined>>>;
+
+// --- D-090: an $effect waiting on a pending read holds no boundary --------------------------
+// Its compute reads `n` (pending): the `Create<"effect">` carries no pending, so the component's
+// view stays settled — only render effects (holes) notify a Loading (runtime.spec "D-090").
+const effectOverPending = $effect(
+  function* () {
+    return yield* n;
+  },
+  function* () {}
+);
+export type EffectOverPending = Expect<
+  Equal<typeof effectOverPending, Yieldable<Create<"effect", never>, void>>
+>;
+export const EffectWaits = $component(function* EffectWaits() {
+  yield* $effect(
+    function* () {
+      return yield* n;
+    },
+    function* () {}
+  );
+  return view(function* () {
+    return <i />;
+  });
+});
+export type EffectWaitsSettled = Expect<
+  Equal<ViewPendingOf<ReturnType<typeof EffectWaits>>, false>
+>;
+export const effectWaitsElement: SettledView = EffectWaits();

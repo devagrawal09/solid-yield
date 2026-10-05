@@ -386,6 +386,46 @@ describe("setup operations", () => {
     expect(seen).toEqual(["effect 10 1", "effect 20 5", "event 5"]);
   });
 
+  it("an $effect whose compute reads a pending source waits; no Loading shows (D-090)", async () => {
+    let resolve!: (v: string) => void;
+    const seen: string[] = [];
+    const Watcher = $component(function* Watcher() {
+      const user = yield* $memo(function* () {
+        return yield* attempt(() => new Promise<string>(r => (resolve = r)), toError);
+      });
+      yield* $effect(
+        function* () {
+          return yield* user;
+        },
+        function* (name) {
+          seen.push(name);
+        }
+      );
+      // the view reads nothing pending: only the effect waits on `user`
+      return view(function* () {
+        return <i>shown</i>;
+      });
+    });
+    mount(() =>
+      Loading({
+        fallback: <p>loading</p>,
+        children: function* () {
+          return <>{yield* Watcher()}</>;
+        }
+      })
+    );
+    expect(root.textContent).toBe("shown");
+    await settle();
+    // the compute waits silently: the Loading above shows its content, and
+    // the effect phase has not run (only render effects, holes, notify Loading)
+    expect(root.textContent).toBe("shown");
+    expect(seen).toEqual([]);
+    resolve("ada");
+    await settle();
+    expect(root.textContent).toBe("shown");
+    expect(seen).toEqual(["ada"]);
+  });
+
   devIt("a setup does not read: READ_IN_SETUP", () => {
     // @ts-expect-error a setup does not read (Read is not a SetupOp)
     const Bad = $component(function* (props: Props<{ start: number }>) {

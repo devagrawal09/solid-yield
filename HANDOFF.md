@@ -155,7 +155,7 @@ The Solid rc.13 SSR loop found under rendering's `/profile` (D-082) is drafted a
 | D-088 | R5 (Claude I-1 / G-4) | A block component handed to foreign code is `View<boolean, never>`: `foreign(Comp)`, lint `no-unchecked-foreign-handoff`; room's `route()` → `foreign()`, its row `Errored`s removed; D-067 reworded, D-023 corrected | Not yet implemented |
 | D-089 | R6 | `view(function* …)` is required; `require-view-wrapper` (error, autofix); D-054 amended | Not yet implemented |
 | D-091 | R3 (Codex §3, Claude G-7) | An `$event` does not attempt a stream (`StreamAttempt` is not an `EventOp`; `STREAM_IN_EVENT`); a stream attempt's handler is a plain function (`[STREAM_HANDLER]`) | Implemented |
-| D-090 | R7 (Claude G-5) | An `$effect` compute waiting on a pending read holds no `Loading`; `Create<"effect">` carries no pending; a runtime test pins it | Not yet implemented |
+| D-090 | R7 (Claude G-5) | An `$effect` compute waiting on a pending read holds no `Loading`; `Create<"effect">` carries no pending; a runtime test pins it | Implemented (the test confirms Solid holds no `Loading`) |
 
 ### Open for Dev (review)
 

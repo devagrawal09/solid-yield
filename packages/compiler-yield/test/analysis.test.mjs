@@ -645,3 +645,24 @@ test("option A: two error accessor holes share a paragraph span", () => {
   assert.equal(r.roots[0].size, 2);
   assert(r.merges.some(x => x.rule === "SPAN_OVERLAP"));
 });
+
+test("option A: computed template keys carry reads, literal keys retain callable identity", () => {
+  const r = instances(
+    'const actions=[()=>"ready"];const pictures={a:"image"};' +
+      app(
+        'const [index,set]=yield* $signal("a");const next=$event(function*(){yield* set("b")});return view(function*(){return <section><img src={pictures[`${yield* index}`]}/><b>{actions[0]()}</b><button onClick={yield* next}/></section>});'
+      )
+  );
+  assert.equal(r.leaks.length, 0);
+  assert.equal(r.holes.inert, 1);
+  assert.equal(r.roots[0].parts.filter(x => x.kind === "hole").length, 1);
+});
+
+test("option A: a promise executor reading browser globals is not proved independent", () => {
+  const r = instances(
+    "const delay=()=>new Promise(resolve=>setTimeout(resolve,window.delay));" +
+      "const Widget=component(function*(){const m=yield* $memo(function*(){return yield* attempt(()=>delay(),()=>0)});return view(function*(){return <b>{yield* m}</b>});});" +
+      app("return view(function*(){return <main>{yield* Widget()}{yield* Widget()}</main>});")
+  );
+  assert.equal(r.roots.length, 1);
+});

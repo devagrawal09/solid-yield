@@ -398,19 +398,16 @@ export class Analysis {
       return v;
     }
     if (p.isMemberExpression() || p.isOptionalMemberExpression()) {
+      const literalKey = p.get("property").isLiteral() && !p.get("property").isTemplateLiteral();
       const value = this.prop(
         this.expr(p.get("object"), env, ctx),
-        p.node.computed
-          ? p.get("property").isLiteral()
-            ? p.node.property.value
-            : "*"
-          : key(p.node.property),
+        p.node.computed ? (literalKey ? String(p.node.property.value) : "*") : key(p.node.property),
         p,
         env
       );
       // Choosing a field is itself a read. Do not mutate the stored field's
       // equation: another use of that field may have a different key.
-      return p.node.computed
+      return p.node.computed && !literalKey
         ? this.join(p, env, [value, this.expr(p.get("property"), env, ctx)], "computed-field")
         : value;
     }
@@ -1052,6 +1049,8 @@ export class Analysis {
           },
           ReferencedIdentifier: q => {
             const binding = q.scope.getBinding(q.node.name);
+            if (!binding && ![...timers, ...pure].some(name => name.split(".")[0] === q.node.name))
+              closed = false;
             if (
               binding &&
               binding.scope !== executor.path.scope &&

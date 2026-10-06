@@ -10,9 +10,14 @@ const common = nodes => {
 
 export function analyzeInstances(
   modules,
-  { resolve = (id, from) => new URL(id, `file://${from}`).pathname, entry } = {}
+  {
+    resolve = (id, from) => new URL(id, `file://${from}`).pathname,
+    entry,
+    AnalysisClass = Analysis,
+    inspect
+  } = {}
 ) {
-  const a = new Analysis(modules, resolve);
+  const a = new AnalysisClass(modules, resolve);
   const templates = [],
     rootCalls = [];
   for (const r of a.modules.values())
@@ -324,6 +329,7 @@ export function analyzeInstances(
   const elements = a.dom.filter(n => n.kind === "element");
   const used = new Set();
   for (const p of a.parts) for (const v of reach(p)) used.add(v);
+  inspect?.(a, groups());
   return {
     definitions: {
       provenance: "S < U < C; join=max",

@@ -1,5 +1,26 @@
 # HANDOFF — solid-yield (checkpoint 2026-10-06: v0.1, through D-101)
 
+## Compiler branch checkpoint (2026-10-07)
+
+Local work on `proto/compiler`, based on `1da4d82`; nothing pushed and main
+untouched. This is a **partial prototype**, not v0.2 completion.
+`aeb67df` adds the guarded `foreignSource` bridge; `5245bbb` adds the C1 analysis
+checkpoint; `0c6e2b0` pins the public hydration finding; `0bba9c9` adds the V8
+executed-byte gate and measurements. Subsequent analysis fixes preserve mutable
+bindings as U, follow setter aliases, and keep named props' provenance separate.
+
+Read [compiler-findings.md](documentation/compiler-findings.md) first: C2 is
+stopped at F-C5 under C0 §3.1. Immediate independent roots retain their server
+nodes, but after one timer turn the second root silently replaces its server
+node on Solid rc.13. No private reset or eager-only workaround was added.
+C1 remains diagnostic and has explicit gaps; it is not safe codegen input.
+The [C1 report](documentation/compiler-c1-report.md) and
+[byte report](documentation/compiler-benchmarks.md) cover all eight twins.
+The gate is 42 steps, including reproduction of F-C5 (not a passing delayed
+claim), library parity/smokes/conformance and original/library byte thresholds.
+Continue only on this branch; run `pnpm build` and the full baseline gate before
+each local commit. The original v0.1 handoff follows.
+
 This repository was extracted from the Solid fork `devagrawal09/solid`, branch `blocks-lib`, at commit **`6978eb83`** (D-015). Git history was not carried; the fork keeps it. The fork's own handoff at that commit (Phases 1A, 1B and 2, and its environment notes) is `git show 6978eb83:HANDOFF.md` in the fork.
 
 > **Names (D-096, 2026-10-06).** The product is `solid-yield` (was `solid-blocks`), with `vite-plugin-solid-yield` and `eslint-plugin-solid-yield`; the unit is a **routine** (was "block"), the model is **yield components**. Package directories are `packages/yield`, `packages/vite-plugin-yield`, `packages/eslint-plugin-yield`; twins are `examples/*-yield(-h)`; the gate is `scripts/yield-gate.mjs`. Text below written before D-096 was updated to the new names, except quoted fork paths and the extraction's own history.

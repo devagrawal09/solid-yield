@@ -61,6 +61,107 @@ test("1.2: props flow from call arguments (joined cap is explicit)", () => {
   assert.equal(b.components.find(x => x.name === "Child").inert, false);
   assert.equal(b.definitions.contextSensitivityCap, 1);
 });
+test("1.2: one prop's provenance does not contaminate a different prop", () => {
+  const a = run(
+    "const Child=component(function*(props){const m=yield* $memo(function*(){return yield* props.label});return view(function*(){return <b>{yield* m}</b>});});" +
+      app(
+        "const [n,set]=yield* $optimistic(1);return view(function*(){return <>{yield* Child({label:'fixed',unused:n})}</>});"
+      )
+  );
+  assert.equal(a.sources.find(x => x.kind === "memo").provenance, "S");
+});
+test("1.2: a reassigned binding never inherits S from its initializer", () => {
+  const a = run(
+    "let current=0;current=window.value;" +
+      app(
+        "const m=yield* $memo(function*(){return current});return view(function*(){return <b>{yield* m}</b>});"
+      )
+  );
+  assert.equal(a.sources[0].provenance, "U");
+  assert(a.leaks.some(x => x.reason === "mutable binding"));
+});
+test("1.2: a const object with a member write is unknown", () => {
+  const a = run(
+    "const state={value:0};state.value=window.value;" +
+      app(
+        "const m=yield* $memo(function*(){return state.value});return view(function*(){return <b>{yield* m}</b>});"
+      )
+  );
+  assert.equal(a.sources[0].provenance, "U");
+});
+test("1.1: writes through a setter alias still make its cell client", () => {
+  const a = run(
+    app(
+      "const [n,set]=yield* $signal(0);const write=set;const click=$event(function*(){yield* write(1)});return view(function*(){return <button onClick={yield* click}>{yield* n}</button>});"
+    )
+  );
+  assert.equal(a.sources[0].provenance, "C");
+  assert.equal(a.sources[0].written, true);
+});
+test("1.2: an effect compute read does not make an unwritten cell C", () => {
+  const a = run(
+    app(
+      "const [n,set]=yield* $signal(0);yield* $effect(function*(){return yield* n},function*(){});return view(function*(){return <b>{yield* n}</b>});"
+    )
+  );
+  assert.equal(a.sources[0].provenance, "S");
+  assert.equal(a.roots[0].mode, "eager");
+});
+test("1.2: a server memo with a client key remains C", () => {
+  const a = run(
+    'async function fetchValue(x){"use server";return x;}' +
+      app(
+        "const [key,set]=yield* $optimistic(1);const m=yield* $memo(function*(){const x=yield* key;return yield* attempt(()=>fetchValue(x),e=>new Error(e))});return view(function*(){return <b>{yield* m}</b>});"
+      )
+  );
+  assert.equal(a.sources.find(x => x.kind === "memo").provenance, "C");
+});
+test("1.2: context includes every provider and its default", () => {
+  const a = run(
+    'import {unknown} from "foreign";const Ctx=createContext(unknown);' +
+      app(
+        "return view(function*(){return <>{yield* Ctx.provide({value:1,children:function*(){return <p/>}})}</>});"
+      )
+  );
+  assert(a.leaks.some(x => x.reason.includes("import")));
+  assert.equal(a.components[0].inert, false);
+});
+test("D-098: a required context from an unseen provider is U, never S", () => {
+  const a = run(
+    "const Ctx=createContext();" +
+      app("const n=yield* Ctx;return view(function*(){return <b>{yield* n}</b>});")
+  );
+  assert.equal(a.components[0].provenance, "U");
+  assert(a.leaks.some(x => x.name === "Ctx" && x.reason.includes("required context")));
+});
+test("D-098: a provider for a different context does not discharge the unknown", () => {
+  const a = run(
+    "const Ctx=createContext();const Other=createContext();" +
+      app(
+        "const n=yield* Ctx;return view(function*(){return <>{yield* Other.provide({value:1,children:function*(){return <b>{yield* n}</b>}})}</>});"
+      )
+  );
+  assert.equal(a.components[0].provenance, "U");
+  assert(a.leaks.some(x => x.name === "Ctx"));
+  assert(!a.leaks.some(x => x.name === "Other"));
+});
+test("1.2: server module exports resolve through named re-exports", () => {
+  const a = analyze(
+    new Map([
+      ["/server.ts", '"use server";export async function get(){return 1}'],
+      ["/barrel.ts", 'export {get as load} from "./server.ts";'],
+      [
+        "/app.tsx",
+        prefix +
+          'import {load} from "./barrel.ts";' +
+          app(
+            "const m=yield* $memo(function*(){return yield* attempt(()=>load(),e=>new Error(e))});return view(function*(){return <b>{yield* m}</b>});"
+          )
+      ]
+    ])
+  );
+  assert.equal(a.sources[0].provenance, "S");
+});
 test("1.2: context joins providers through its resolved binding", () => {
   const a = run(
     "const Ctx=createContext(0);const Child=component(function*(){const n=yield* Ctx;return view(function*(){return <b>{yield* n}</b>});});" +
@@ -114,6 +215,7 @@ test("1.5/M6: the same unknown binding merges its readers", () => {
   );
   assert.equal(a.roots.length, 1);
   assert(a.merges.some(x => x.rule === "M6"));
+  assert.equal(a.roots[0].mode, "visible");
 });
 test("1.6: captures name the setup-local variable", () => {
   const a = run(

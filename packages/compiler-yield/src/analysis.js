@@ -214,6 +214,7 @@ export function analyze(
     });
   const setterCells = new Map();
   const inbound = new Map();
+  const inboundArgs = new Map();
   const callsites = new Map();
   for (const part of parts) {
     if (part.kind !== "cell") continue;
@@ -235,6 +236,21 @@ export function analyze(
     const b = p.scope.getBinding(p.node.name);
     if (!b) return p.node.name === "undefined" ? make(p, "constant") : leak(p, "unresolved global");
     if (setterCells.has(b.identifier)) return setterCells.get(b.identifier);
+    // Resolve mutable bindings before following their initializer. A literal
+    // initializer does not prove that a later read still sees that literal.
+    const memberWrite = b.referencePaths.some(ref => {
+      let target = ref;
+      while (target.parentPath?.isMemberExpression() && target.parentKey === "object")
+        target = target.parentPath;
+      const parent = target.parentPath;
+      return (
+        (parent?.isAssignmentExpression() && target.key === "left") ||
+        parent?.isUpdateExpression() ||
+        parent?.isUnaryExpression({ operator: "delete" })
+      );
+    });
+    if (!b.constant || memberWrite || (b.scope.path.isProgram() && ["let", "var"].includes(b.kind)))
+      return leak(b.path, "mutable binding");
     const d = definition(p);
     if (d.node !== p.node) return value(d);
     if (b.kind === "param") {
@@ -269,6 +285,45 @@ export function analyze(
     }
     return leak(b.path, "unread import or mutable binding");
   }
+  function propValues(p) {
+    const object = p.get("object");
+    if (!object.isIdentifier()) return null;
+    const binding = object.scope.getBinding(object.node.name);
+    if (binding?.kind !== "param") return null;
+    const fn = binding.path.findParent(q => q.isFunction());
+    const comp = fn?.parentPath && componentByNode.get(fn.parentPath.node);
+    if (!comp) return null;
+    const key = p.node.computed
+      ? p.get("property").isStringLiteral() && p.node.property.value
+      : keyName(p.node.property);
+    if (key === false) return null;
+    const args = inboundArgs.get(comp.id) ?? [];
+    const values = [];
+    let unknown = !args.length;
+    for (const arg of args) {
+      const obj = arg && definition(arg);
+      if (!obj?.isObjectExpression()) {
+        unknown = true;
+        if (arg) values.push(arg);
+        continue;
+      }
+      // Last explicit property wins, unless a later spread can replace it.
+      let selected = null;
+      for (const prop of obj.get("properties")) {
+        if (prop.isSpreadElement()) {
+          selected = null;
+          unknown = true;
+          values.push(prop.get("argument"));
+        } else if (prop.node.computed || prop.isObjectMethod()) {
+          unknown = true;
+        } else if (prop.isObjectProperty() && keyName(prop.node.key) === key) {
+          selected = prop.get("value");
+        }
+      }
+      if (selected) values.push(selected);
+    }
+    return { values, unknown };
+  }
   const evaluating = new Set();
   function value(input) {
     const p = unwrap(input);
@@ -289,8 +344,14 @@ export function analyze(
       /* serializable scalar syntax */
     } else if (p.isYieldExpression()) dep(p.get("argument"));
     else if (p.isMemberExpression() || p.isOptionalMemberExpression()) {
-      dep(p.get("object"));
-      if (p.node.computed) dep(p.get("property"));
+      const prop = propValues(p);
+      if (prop) {
+        if (prop.unknown) f.base = Math.max(f.base, 1);
+        for (const arg of prop.values) dep(arg);
+      } else {
+        dep(p.get("object"));
+        if (p.node.computed) dep(p.get("property"));
+      }
     } else if (p.isFunction()) {
       if (!p.get("body").isBlockStatement()) dep(p.get("body"));
       p.traverse({
@@ -460,6 +521,9 @@ export function analyze(
           const arg = p.get("arguments")[lib(p.get("callee")) === "h" ? 1 : 0];
           if (arg?.node) list.add(getId(unwrap(arg)));
           inbound.set(comp.id, list);
+          const args = inboundArgs.get(comp.id) ?? [];
+          args.push(arg?.node ? arg : null);
+          inboundArgs.set(comp.id, args);
         }
       }
     });
@@ -483,9 +547,10 @@ export function analyze(
           const arg = p.get("argument");
           if (arg.isCallExpression()) {
             const callee = arg.get("callee");
+            const setter = definition(callee);
             const cell =
-              callee.isIdentifier() &&
-              setterCells.get(callee.scope.getBinding(callee.node.name)?.identifier);
+              setter?.isIdentifier() &&
+              setterCells.get(setter.scope.getBinding(setter.node.name)?.identifier);
             const target = lib(callee) === "refresh" ? value(arg.get("arguments")[0]) : cell;
             if (target) {
               target.base = 2;
@@ -571,6 +636,16 @@ export function analyze(
         addPart(p, "provide").deps.add(ctx.id);
       }
     });
+  for (const ctx of contexts.values())
+    if (!ctx.deps.size && ctx.path.node.arguments.length === 0) {
+      ctx.base = 1;
+      leaks.set(ctx.id, {
+        id: ctx.id,
+        at: ctx.at,
+        name: ctx.path.parentPath.node.id?.name ?? "context",
+        reason: "required context has no analysed provider or default"
+      });
+    }
   for (const p of parts) {
     p.component = componentOf(p.path)?.id ?? null;
     const c = facts.get(p.component);
@@ -749,7 +824,7 @@ export function analyze(
     const mode =
       effects.length || unsafe
         ? "eager"
-        : ps.some(p => p.kind === "foreign-source" || p.pending)
+        : ps.some(p => p.kind === "foreign-source" || p.pending || p.p === 1)
           ? "visible"
           : "lazy";
     return {

@@ -68,7 +68,7 @@ export function markdown(reports) {
     "",
     "Status: diagnostic prototype; not a completed C1 or a codegen input. Counts are static sites, not dynamic islands. The implementation limits below prevent a C0 premise verdict.",
     "",
-    "Definitions actually used: S < U < C, join=max; written cells C; unproved calls/imports U; props joined across call sites (cap 1); contexts joined over all resolved providers. Every effect forces eager. Unproved setup work forces an eager fallback. Merge counts count distinct reported pairs, not successful union operations. SPAN_OVERLAP and CAPTURE_FALLBACK are listed separately from M1-M6. Capture failures describe candidate edges, not emitted edges. JSX fractions exclude h element sites; markup bytes are not measured.",
+    "Definitions actually used: S < U < C, join=max; written cells C (including setter aliases); unproved calls/imports and observed mutable bindings U; each named prop joined across call sites (cap 1); contexts joined over all resolved providers and their default, or U when neither is known. Every effect forces eager. Unproved setup work forces an eager fallback. Remaining roots with unknown or possibly pending parts are visible; others are lazy. Merge counts count distinct reported pairs, not successful union operations. SPAN_OVERLAP and CAPTURE_FALLBACK are listed separately from M1-M6. Capture failures describe candidate edges, not emitted edges. JSX fractions exclude h element sites; markup bytes are not measured.",
     "",
     "| Twin | Inert holes | Inert JSX elements | Candidate roots (parts; mode) | M1/M2/M3/M4/M5/M6 | Capture candidates | U sources | Effects |",
     "| --- | ---: | ---: | --- | --- | ---: | ---: | ---: |"

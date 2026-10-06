@@ -1,0 +1,1076 @@
+[
+  {
+    "twin": "docs-yield",
+    "holes": {
+      "S": 133,
+      "R": 56,
+      "client": 54,
+      "total": 243
+    },
+    "jsx": {
+      "S": 151,
+      "R": 61,
+      "client": 37,
+      "total": 249
+    },
+    "h": {
+      "S": 0,
+      "R": 0,
+      "client": 0,
+      "total": 0
+    },
+    "regions": [
+      {
+        "component": "SiteNav",
+        "at": "examples/docs-yield/src/app.tsx:49:26",
+        "provenance": "S",
+        "arguments": [],
+        "slots": [],
+        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1453"
+      },
+      {
+        "component": "ArticleContent",
+        "at": "examples/docs-yield/src/app.tsx:17:17",
+        "provenance": "S",
+        "arguments": [],
+        "slots": [],
+        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1028>1028:view>component:531"
+      },
+      {
+        "component": "ArticleContent",
+        "at": "examples/docs-yield/src/app.tsx:27:17",
+        "provenance": "R",
+        "arguments": [
+          {
+            "expression": "props.params.slug",
+            "at": "examples/docs-yield/src/app.tsx:27:34",
+            "call": "getArticle",
+            "capture": "typed scalar; runtime codec check required"
+          }
+        ],
+        "slots": [],
+        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1096>1096:view>component:800"
+      },
+      {
+        "component": "ReadingGuide",
+        "at": "examples/docs-yield/src/app.tsx:57:17",
+        "provenance": "S",
+        "arguments": [],
+        "slots": [],
+        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1680"
+      },
+      {
+        "component": "SiteFooter",
+        "at": "examples/docs-yield/src/app.tsx:58:17",
+        "provenance": "S",
+        "arguments": [],
+        "slots": [],
+        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1712"
+      }
+    ],
+    "captures": [],
+    "serverCalls": [
+      {
+        "at": "examples/docs-yield/src/content.tsx:17:13",
+        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1453",
+        "target": "getSite",
+        "provenance": "S",
+        "captureEligible": true
+      },
+      {
+        "at": "examples/docs-yield/src/content.tsx:133:13",
+        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1028>1028:view>component:531",
+        "target": "getArticle",
+        "provenance": "S",
+        "captureEligible": true
+      },
+      {
+        "at": "examples/docs-yield/src/content.tsx:133:13",
+        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1096>1096:view>component:800",
+        "target": "getArticle",
+        "provenance": "R",
+        "captureEligible": true
+      },
+      {
+        "at": "examples/docs-yield/src/content.tsx:133:13",
+        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1680>1680:view>component:8959",
+        "target": "getArticle",
+        "provenance": "S",
+        "captureEligible": true
+      },
+      {
+        "at": "examples/docs-yield/src/content.tsx:81:13",
+        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1712",
+        "target": "getSite",
+        "provenance": "S",
+        "captureEligible": true
+      }
+    ],
+    "sources": [
+      {
+        "at": "examples/docs-yield/src/widgets.tsx:44:26",
+        "component": "SearchBox",
+        "provenance": "C"
+      },
+      {
+        "at": "examples/docs-yield/src/content.tsx:15:23",
+        "component": "SiteNav",
+        "provenance": "S"
+      },
+      {
+        "at": "examples/docs-yield/src/content.tsx:130:26",
+        "component": "ArticleContent",
+        "provenance": "S"
+      },
+      {
+        "at": "examples/docs-yield/src/content.tsx:130:26",
+        "component": "ArticleContent",
+        "provenance": "R"
+      },
+      {
+        "at": "examples/docs-yield/src/widgets.tsx:184:23",
+        "component": "CommentList",
+        "provenance": "U"
+      },
+      {
+        "at": "examples/docs-yield/src/widgets.tsx:204:48",
+        "component": "CommentList",
+        "provenance": "U"
+      },
+      {
+        "at": "examples/docs-yield/src/content.tsx:130:26",
+        "component": "ArticleContent",
+        "provenance": "S"
+      },
+      {
+        "at": "examples/docs-yield/src/content.tsx:79:23",
+        "component": "SiteFooter",
+        "provenance": "S"
+      }
+    ],
+    "before": {
+      "holes": {
+        "inert": 124,
+        "total": 243
+      },
+      "jsx": {
+        "inert": 148,
+        "total": 249
+      },
+      "h": {
+        "inert": 0,
+        "total": 0
+      }
+    },
+    "clientGroups": [
+      {
+        "id": 1,
+        "components": [
+          "ThemeToggle"
+        ],
+        "mode": "eager",
+        "size": 6
+      },
+      {
+        "id": 2,
+        "components": [
+          "SearchBox"
+        ],
+        "mode": "visible",
+        "size": 13
+      },
+      {
+        "id": 3,
+        "components": [
+          "App"
+        ],
+        "mode": "visible",
+        "size": 1
+      },
+      {
+        "id": 4,
+        "components": [
+          "App"
+        ],
+        "mode": "visible",
+        "size": 1
+      },
+      {
+        "id": 5,
+        "components": [
+          "ArticleContent"
+        ],
+        "mode": "lazy",
+        "size": 2
+      },
+      {
+        "id": 6,
+        "components": [
+          "LikeButton"
+        ],
+        "mode": "lazy",
+        "size": 12
+      },
+      {
+        "id": 7,
+        "components": [
+          "App",
+          "ArticleContent",
+          "ArticleBody",
+          "LikeButton",
+          "DocPage"
+        ],
+        "mode": "visible",
+        "size": 69
+      },
+      {
+        "id": 8,
+        "components": [
+          "NewsletterForm"
+        ],
+        "mode": "lazy",
+        "size": 15
+      },
+      {
+        "id": 9,
+        "components": [
+          "CommentList"
+        ],
+        "mode": "visible",
+        "size": 9
+      },
+      {
+        "id": 10,
+        "components": [
+          "ImageCarousel"
+        ],
+        "mode": "lazy",
+        "size": 6
+      },
+      {
+        "id": 11,
+        "components": [
+          "ArticleContent"
+        ],
+        "mode": "lazy",
+        "size": 2
+      }
+    ]
+  },
+  {
+    "twin": "effect-yield",
+    "holes": {
+      "S": 2,
+      "R": 0,
+      "client": 75,
+      "total": 77
+    },
+    "jsx": {
+      "S": 22,
+      "R": 0,
+      "client": 54,
+      "total": 76
+    },
+    "h": {
+      "S": 0,
+      "R": 0,
+      "client": 0,
+      "total": 0
+    },
+    "regions": [],
+    "captures": [],
+    "serverCalls": [],
+    "sources": [
+      {
+        "at": "examples/effect-yield/src/typeahead.tsx:99:26",
+        "component": "Typeahead",
+        "provenance": "C"
+      },
+      {
+        "at": "examples/effect-yield/src/checkout.tsx:140:24",
+        "component": "Checkout",
+        "provenance": "C"
+      },
+      {
+        "at": "examples/effect-yield/src/checkout.tsx:187:27",
+        "component": "Checkout",
+        "provenance": "C"
+      },
+      {
+        "at": "examples/effect-yield/src/checkout.tsx:297:38",
+        "component": "Checkout",
+        "provenance": "C"
+      },
+      {
+        "at": "examples/effect-yield/src/app.tsx:26:30",
+        "component": "LogPanel",
+        "provenance": "C"
+      }
+    ],
+    "before": {
+      "holes": {
+        "inert": 2,
+        "total": 77
+      },
+      "jsx": {
+        "inert": 22,
+        "total": 76
+      },
+      "h": {
+        "inert": 0,
+        "total": 0
+      }
+    },
+    "clientGroups": [
+      {
+        "id": 1,
+        "components": [
+          "App",
+          "Typeahead",
+          "Results",
+          "Checkout",
+          "Orders",
+          "LogPanel"
+        ],
+        "mode": "eager",
+        "size": 96
+      }
+    ]
+  },
+  {
+    "twin": "hackernews-spa-yield",
+    "holes": {
+      "S": 1,
+      "R": 0,
+      "client": 74,
+      "total": 75
+    },
+    "jsx": {
+      "S": 19,
+      "R": 0,
+      "client": 46,
+      "total": 65
+    },
+    "h": {
+      "S": 0,
+      "R": 0,
+      "client": 0,
+      "total": 0
+    },
+    "regions": [],
+    "captures": [],
+    "serverCalls": [],
+    "sources": [
+      {
+        "at": "examples/hackernews-spa-yield/src/routes/stories.tsx:21:23",
+        "component": "Stories",
+        "provenance": "U"
+      },
+      {
+        "at": "examples/hackernews-spa-yield/src/routes/stories.tsx:24:23",
+        "component": "Stories",
+        "provenance": "U"
+      },
+      {
+        "at": "examples/hackernews-spa-yield/src/routes/stories.tsx:27:26",
+        "component": "Stories",
+        "provenance": "U"
+      },
+      {
+        "at": "examples/hackernews-spa-yield/src/routes/story.tsx:16:24",
+        "component": "Story",
+        "provenance": "U"
+      },
+      {
+        "at": "examples/hackernews-spa-yield/src/routes/user.tsx:13:23",
+        "component": "User",
+        "provenance": "U"
+      }
+    ],
+    "before": {
+      "holes": {
+        "inert": 1,
+        "total": 75
+      },
+      "jsx": {
+        "inert": 19,
+        "total": 65
+      },
+      "h": {
+        "inert": 0,
+        "total": 0
+      }
+    },
+    "clientGroups": [
+      {
+        "id": 1,
+        "components": [
+          "App"
+        ],
+        "mode": "visible",
+        "size": 1
+      },
+      {
+        "id": 2,
+        "components": [
+          "App",
+          "Stories",
+          "Story"
+        ],
+        "mode": "visible",
+        "size": 35
+      },
+      {
+        "id": 3,
+        "components": [
+          "App",
+          "Story",
+          "Comment",
+          "Toggle"
+        ],
+        "mode": "visible",
+        "size": 30
+      },
+      {
+        "id": 4,
+        "components": [
+          "App",
+          "User"
+        ],
+        "mode": "visible",
+        "size": 12
+      }
+    ]
+  },
+  {
+    "twin": "rendering-yield",
+    "holes": {
+      "S": 47,
+      "R": 0,
+      "client": 156,
+      "total": 203
+    },
+    "jsx": {
+      "S": 66,
+      "R": 0,
+      "client": 87,
+      "total": 153
+    },
+    "h": {
+      "S": 0,
+      "R": 0,
+      "client": 0,
+      "total": 0
+    },
+    "regions": [],
+    "captures": [],
+    "serverCalls": [],
+    "sources": [
+      {
+        "at": "examples/rendering-yield/shared/src/router.tsx:42:29",
+        "component": "Router",
+        "provenance": "C"
+      },
+      {
+        "at": "examples/rendering-yield/shared/src/components/Profile/index.tsx:9:23",
+        "component": "ProfilePage",
+        "provenance": "U"
+      },
+      {
+        "at": "examples/rendering-yield/shared/src/components/Profile/index.tsx:21:23",
+        "component": "ProfilePage",
+        "provenance": "U"
+      },
+      {
+        "at": "examples/rendering-yield/shared/src/components/Stream.tsx:101:28",
+        "component": "Stream",
+        "provenance": "U"
+      },
+      {
+        "at": "examples/rendering-yield/shared/src/components/ErrorStream.tsx:43:23",
+        "component": "InnerBoundaryItem",
+        "provenance": "U"
+      },
+      {
+        "at": "examples/rendering-yield/shared/src/components/ErrorStream.tsx:43:23",
+        "component": "InnerBoundaryItem",
+        "provenance": "U"
+      },
+      {
+        "at": "examples/rendering-yield/shared/src/components/ErrorStream.tsx:43:23",
+        "component": "OuterBoundaryItem",
+        "provenance": "U"
+      },
+      {
+        "at": "examples/rendering-yield/shared/src/components/ErrorStream.tsx:43:23",
+        "component": "OuterBoundaryItem",
+        "provenance": "U"
+      },
+      {
+        "at": "examples/rendering-yield/shared/src/components/Reveal.tsx:42:24",
+        "component": "AsyncCard",
+        "provenance": "U"
+      },
+      {
+        "at": "examples/rendering-yield/shared/src/components/Reveal.tsx:42:24",
+        "component": "AsyncCard",
+        "provenance": "U"
+      },
+      {
+        "at": "examples/rendering-yield/shared/src/components/Reveal.tsx:42:24",
+        "component": "AsyncCard",
+        "provenance": "U"
+      },
+      {
+        "at": "examples/rendering-yield/shared/src/components/Reveal.tsx:42:24",
+        "component": "AsyncCard",
+        "provenance": "U"
+      },
+      {
+        "at": "examples/rendering-yield/shared/src/components/Reveal.tsx:42:24",
+        "component": "AsyncCard",
+        "provenance": "U"
+      },
+      {
+        "at": "examples/rendering-yield/shared/src/components/Reveal.tsx:42:24",
+        "component": "AsyncCard",
+        "provenance": "U"
+      },
+      {
+        "at": "examples/rendering-yield/shared/src/components/Reveal.tsx:42:24",
+        "component": "AsyncCard",
+        "provenance": "U"
+      },
+      {
+        "at": "examples/rendering-yield/shared/src/components/Skeleton.tsx:92:23",
+        "component": "Skeleton",
+        "provenance": "C"
+      }
+    ],
+    "before": {
+      "holes": {
+        "inert": 47,
+        "total": 203
+      },
+      "jsx": {
+        "inert": 66,
+        "total": 153
+      },
+      "h": {
+        "inert": 0,
+        "total": 0
+      }
+    },
+    "clientGroups": [
+      {
+        "id": 1,
+        "components": [
+          "Router",
+          "Routes",
+          "Link",
+          "Home",
+          "ProfilePage",
+          "Profile",
+          "Facts",
+          "Settings",
+          "Stream",
+          "MemoList",
+          "InnerBoundaryItem",
+          "Title",
+          "OuterBoundaryItem",
+          "RevealPage",
+          "AsyncCard",
+          "CardBody",
+          "Skeleton",
+          "FeedCard"
+        ],
+        "mode": "eager",
+        "size": 175
+      }
+    ]
+  },
+  {
+    "twin": "room-yield",
+    "holes": {
+      "S": 5,
+      "R": 0,
+      "client": 104,
+      "total": 109
+    },
+    "jsx": {
+      "S": 23,
+      "R": 0,
+      "client": 55,
+      "total": 78
+    },
+    "h": {
+      "S": 0,
+      "R": 0,
+      "client": 0,
+      "total": 0
+    },
+    "regions": [],
+    "captures": [
+      {
+        "at": "examples/room-yield/src/routes/live.tsx:724:15",
+        "reason": "Server argument has no proved serializable shape",
+        "expression": "summary(room4, attempt2)"
+      },
+      {
+        "at": "examples/room-yield/src/routes/live.tsx:743:13",
+        "reason": "Server argument has no proved serializable shape",
+        "expression": "archive(room)"
+      }
+    ],
+    "serverCalls": [
+      {
+        "at": "examples/room-yield/src/routes/live.tsx:724:15",
+        "instance": "examples/room-yield/src/app.tsx>component:497>497:view>component:603>603:view>2581:call>2620:hole-prop>component:1089>1089:view>2630:call>component:2676>2676:view>component:3236>3236:view>22172:call>22456:call>component:22512",
+        "target": "summary",
+        "provenance": "C",
+        "captureEligible": false
+      },
+      {
+        "at": "examples/room-yield/src/routes/live.tsx:743:13",
+        "instance": "examples/room-yield/src/app.tsx>component:497>497:view>component:603>603:view>2581:call>2620:hole-prop>component:1089>1089:view>2630:call>component:2676>2676:view>component:3287",
+        "target": "archive",
+        "provenance": "U",
+        "captureEligible": false
+      }
+    ],
+    "sources": [
+      {
+        "at": "examples/room-yield/src/routes/live.tsx:65:23",
+        "component": "Live",
+        "provenance": "U"
+      },
+      {
+        "at": "examples/room-yield/src/routes/live.tsx:117:22",
+        "component": "Header",
+        "provenance": "C"
+      },
+      {
+        "at": "examples/room-yield/src/routes/live.tsx:126:25",
+        "component": "Header",
+        "provenance": "C"
+      },
+      {
+        "at": "examples/room-yield/src/routes/live.tsx:479:22",
+        "component": "DirectoryEntry",
+        "provenance": "U"
+      },
+      {
+        "at": "examples/room-yield/src/routes/live.tsx:521:61",
+        "component": "Card",
+        "provenance": "U"
+      },
+      {
+        "at": "examples/room-yield/src/routes/live.tsx:528:26",
+        "component": "Card",
+        "provenance": "U"
+      },
+      {
+        "at": "examples/room-yield/src/routes/live.tsx:535:27",
+        "component": "Card",
+        "provenance": "U"
+      },
+      {
+        "at": "examples/room-yield/src/routes/live.tsx:629:24",
+        "component": "ActivityLine",
+        "provenance": "U"
+      },
+      {
+        "at": "examples/room-yield/src/routes/live.tsx:719:23",
+        "component": "SummaryText",
+        "provenance": "C"
+      },
+      {
+        "at": "examples/room-yield/src/routes/live.tsx:740:24",
+        "component": "Archive",
+        "provenance": "U"
+      }
+    ],
+    "before": {
+      "holes": {
+        "inert": 5,
+        "total": 109
+      },
+      "jsx": {
+        "inert": 23,
+        "total": 78
+      },
+      "h": {
+        "inert": 0,
+        "total": 0
+      }
+    },
+    "clientGroups": [
+      {
+        "id": 1,
+        "components": [
+          "IdentityProvider",
+          "Live",
+          "Header",
+          "Joined",
+          "Members",
+          "StatusPill",
+          "Chaos",
+          "Chat",
+          "Messages",
+          "Composer",
+          "DirectoryEntry",
+          "Count",
+          "Card",
+          "CardBody",
+          "MemberCount",
+          "ActivityLine",
+          "Summary",
+          "SummaryText",
+          "Archive",
+          "ArchiveCount",
+          "Transcript"
+        ],
+        "mode": "eager",
+        "size": 122
+      },
+      {
+        "id": 2,
+        "components": [
+          "IdentityProvider"
+        ],
+        "mode": "visible",
+        "size": 1
+      }
+    ]
+  },
+  {
+    "twin": "sierpinski-yield",
+    "holes": {
+      "S": 2,
+      "R": 0,
+      "client": 16,
+      "total": 18
+    },
+    "jsx": {
+      "S": 0,
+      "R": 0,
+      "client": 2,
+      "total": 2
+    },
+    "h": {
+      "S": 0,
+      "R": 0,
+      "client": 0,
+      "total": 0
+    },
+    "regions": [],
+    "captures": [],
+    "serverCalls": [],
+    "sources": [
+      {
+        "at": "examples/sierpinski-yield/src/app.tsx:54:24",
+        "component": "TriangleDemo",
+        "provenance": "C"
+      },
+      {
+        "at": "examples/sierpinski-yield/src/app.tsx:128:31",
+        "component": "Triangle",
+        "provenance": "C"
+      }
+    ],
+    "before": {
+      "holes": {
+        "inert": 2,
+        "total": 18
+      },
+      "jsx": {
+        "inert": 0,
+        "total": 2
+      },
+      "h": {
+        "inert": 0,
+        "total": 0
+      }
+    },
+    "clientGroups": [
+      {
+        "id": 1,
+        "components": [
+          "TriangleDemo",
+          "Container",
+          "Triangle",
+          "Dot"
+        ],
+        "mode": "eager",
+        "size": 19
+      }
+    ]
+  },
+  {
+    "twin": "sierpinski-yield-h",
+    "holes": {
+      "S": 1,
+      "R": 0,
+      "client": 6,
+      "total": 7
+    },
+    "jsx": {
+      "S": 0,
+      "R": 0,
+      "client": 0,
+      "total": 0
+    },
+    "h": {
+      "S": 0,
+      "R": 0,
+      "client": 2,
+      "total": 2
+    },
+    "regions": [],
+    "captures": [],
+    "serverCalls": [],
+    "sources": [
+      {
+        "at": "examples/sierpinski-yield-h/src/app.ts:54:24",
+        "component": "TriangleDemo",
+        "provenance": "C"
+      },
+      {
+        "at": "examples/sierpinski-yield-h/src/app.ts:116:23",
+        "component": "Triangle",
+        "provenance": "S"
+      },
+      {
+        "at": "examples/sierpinski-yield-h/src/app.ts:122:23",
+        "component": "Triangle",
+        "provenance": "S"
+      },
+      {
+        "at": "examples/sierpinski-yield-h/src/app.ts:128:23",
+        "component": "Triangle",
+        "provenance": "S"
+      },
+      {
+        "at": "examples/sierpinski-yield-h/src/app.ts:134:22",
+        "component": "Triangle",
+        "provenance": "S"
+      },
+      {
+        "at": "examples/sierpinski-yield-h/src/app.ts:140:25",
+        "component": "Triangle",
+        "provenance": "S"
+      },
+      {
+        "at": "examples/sierpinski-yield-h/src/app.ts:146:23",
+        "component": "Triangle",
+        "provenance": "S"
+      },
+      {
+        "at": "examples/sierpinski-yield-h/src/app.ts:152:24",
+        "component": "Triangle",
+        "provenance": "S"
+      },
+      {
+        "at": "examples/sierpinski-yield-h/src/app.ts:159:31",
+        "component": "Triangle",
+        "provenance": "C"
+      }
+    ],
+    "before": {
+      "holes": {
+        "inert": 1,
+        "total": 7
+      },
+      "jsx": {
+        "inert": 0,
+        "total": 0
+      },
+      "h": {
+        "inert": 0,
+        "total": 2
+      }
+    },
+    "clientGroups": [
+      {
+        "id": 1,
+        "components": [
+          "TriangleDemo",
+          "Container",
+          "Triangle",
+          "Dot"
+        ],
+        "mode": "eager",
+        "size": 19
+      }
+    ]
+  },
+  {
+    "twin": "todos-yield",
+    "holes": {
+      "S": 0,
+      "R": 0,
+      "client": 36,
+      "total": 36
+    },
+    "jsx": {
+      "S": 3,
+      "R": 0,
+      "client": 26,
+      "total": 29
+    },
+    "h": {
+      "S": 0,
+      "R": 0,
+      "client": 0,
+      "total": 0
+    },
+    "regions": [],
+    "captures": [],
+    "serverCalls": [],
+    "sources": [
+      {
+        "at": "examples/todos-yield/src/app.tsx:55:21",
+        "component": "Header",
+        "provenance": "S"
+      },
+      {
+        "at": "examples/todos-yield/src/app.tsx:140:27",
+        "component": "MainSection",
+        "provenance": "C"
+      },
+      {
+        "at": "examples/todos-yield/src/app.tsx:150:31",
+        "component": "MainSection",
+        "provenance": "C"
+      },
+      {
+        "at": "examples/todos-yield/src/app.tsx:199:28",
+        "component": "Footer",
+        "provenance": "C"
+      },
+      {
+        "at": "examples/todos-yield/src/app.tsx:202:28",
+        "component": "Footer",
+        "provenance": "C"
+      }
+    ],
+    "before": {
+      "holes": {
+        "inert": 0,
+        "total": 36
+      },
+      "jsx": {
+        "inert": 3,
+        "total": 29
+      },
+      "h": {
+        "inert": 0,
+        "total": 0
+      }
+    },
+    "clientGroups": [
+      {
+        "id": 1,
+        "components": [
+          "App",
+          "Header",
+          "MainSection",
+          "TodoItem",
+          "Footer",
+          "TodoApp"
+        ],
+        "mode": "eager",
+        "size": 55
+      }
+    ]
+  },
+  {
+    "twin": "todos-yield-h",
+    "holes": {
+      "S": 8,
+      "R": 0,
+      "client": 29,
+      "total": 37
+    },
+    "jsx": {
+      "S": 0,
+      "R": 0,
+      "client": 0,
+      "total": 0
+    },
+    "h": {
+      "S": 7,
+      "R": 0,
+      "client": 17,
+      "total": 24
+    },
+    "regions": [],
+    "captures": [],
+    "serverCalls": [],
+    "sources": [
+      {
+        "at": "examples/todos-yield-h/src/app.ts:132:27",
+        "component": "MainSection",
+        "provenance": "C"
+      },
+      {
+        "at": "examples/todos-yield-h/src/app.ts:142:31",
+        "component": "MainSection",
+        "provenance": "C"
+      },
+      {
+        "at": "examples/todos-yield-h/src/app.ts:145:27",
+        "component": "MainSection",
+        "provenance": "C"
+      },
+      {
+        "at": "examples/todos-yield-h/src/app.ts:86:26",
+        "component": "TodoItem",
+        "provenance": "C"
+      },
+      {
+        "at": "examples/todos-yield-h/src/app.ts:177:28",
+        "component": "Footer",
+        "provenance": "C"
+      },
+      {
+        "at": "examples/todos-yield-h/src/app.ts:180:28",
+        "component": "Footer",
+        "provenance": "C"
+      },
+      {
+        "at": "examples/todos-yield-h/src/app.ts:183:27",
+        "component": "Footer",
+        "provenance": "C"
+      }
+    ],
+    "before": {
+      "holes": {
+        "inert": 8,
+        "total": 37
+      },
+      "jsx": {
+        "inert": 0,
+        "total": 0
+      },
+      "h": {
+        "inert": 7,
+        "total": 24
+      }
+    },
+    "clientGroups": [
+      {
+        "id": 1,
+        "components": [
+          "App",
+          "Header",
+          "MainSection",
+          "TodoItem",
+          "Footer"
+        ],
+        "mode": "eager",
+        "size": 53
+      }
+    ]
+  }
+]

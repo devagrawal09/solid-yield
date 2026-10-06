@@ -56,11 +56,12 @@ A cell is **written** when some setter receipt of it, or a `refresh` of it, is d
 
 ### 1.2 Provenance
 
-Every value a routine reads has a **provenance** π ∈ {**S**, **U**, **C**}, ordered S < U < C, with join = max:
+Every value a routine reads has a **provenance** π ∈ {**S**, **R**, **U**, **C**}. Pure expression joins use S < R < U < C. A server call is a cut in this ordering, as defined below:
 
 - **S, server-derived.** The server can compute it from the request and server functions alone, and it does not change on the client until the region is next rendered by the server.
+- **R, server-recomputable (Dev, 2026-10-07).** A server-function memo with serializable U arguments, and every pure downstream derivation of it. S is the special case of R with no U inputs. Reports use disjoint S and R columns: R means at least one U input.
 - **C, client.** It can change in the browser: something written by an event or an effect phase, an event's arguments, or anything computed from those.
-- **U, unknown.** The analysis cannot tell. U is placed exactly as C (it is never on the server), but it is reported apart. U is the **leak** metric (R1).
+- **U, unknown.** The analysis cannot tell. A direct U read is client. Its settled value may enter a generated server function only through the checked argument edge below; its producer stays client. It is reported apart from C. U is the **leak** metric (R1).
 
 The base cases:
 
@@ -69,7 +70,7 @@ The base cases:
 | a literal, a module-level `const` of a serializable value, `constant(v)` | π(v); S for a literal |
 | a cell | C if it is written (§1.1); otherwise π of its initial value |
 | `$optimistic` / `$optimisticStore` | C (they exist to be written by events, D-014, D-081) |
-| `$memo(body)` | the join of the reads before its attempt (the run's key, D-080) and its attempt's target: a **server function** (a `"use server"` module export or a function with the directive) called with arguments of π = S gives S; any other promise or stream gives U |
+| `$memo(body)` | an attempt targeting a **server function** (a `"use server"` module export or a function with the directive) gives S for S arguments, R for S/U arguments that pass §1.6, and C if any argument reads C. Pre-attempt U reads must be accounted for by the argument vector; an unrelated U read keeps the memo client. Non-server promises/streams remain U |
 | an event's parameters, a DOM event | C |
 | a value read in an event or an effect phase | not a provenance source: those hosts run on the client by definition. Their *writes* make cells C |
 | a foreign value: a foreign component's output, a router's route props, `query(…)`, a module the analysis does not parse | U (§2.2, Q5) |
@@ -77,7 +78,8 @@ The base cases:
 How provenance flows through each construct:
 
 - **Through `Source`.** A path over a source has the source's π: `yield* story.title` has π(story).
-- **Through `$memo` bodies.** A memo's π is the join described above. A memo is atomic: C2 does not split a memo whose branches mix S and C (R3). The whole memo is C.
+- **Through pure derivations.** Memos, holes, settled values, paths and flow sources derived only from S/R are S/R. Any C read, event/effect write, browser operation or unproved impure operation keeps the affected computation client. A U value is not made R just because another operand is R.
+- **Through `$memo` bodies.** A memo's π is the transfer described above. A memo is atomic: C2 does not split a memo whose branches mix S and C (R3). The whole memo is C.
 - **Through props (call form, D-065).** At a call site `C({ x: v })`, the prop `x` has π(v): a source's π, a hole prop's join over its reads, or a settled value's π. Inside C, `yield* props.x` has the π of the call site's argument. A component therefore has a **summary** parameterised by its props' provenance, which each call site instantiates (§2.3).
 - **Through context (D-098).** `yield* Ctx` has the join of the π of every `value` given by a `Ctx.provide` that can be above the reader, plus the default if the context has one. Statically, "can be above" is over-approximated as every `provide` of Ctx in the module graph. Across a `foreign(C, { provided: [Ctx] })` edge (D-102) the analysis cannot see the tree, so it uses all of Ctx's providers.
 - **Through events.** An event is always client. A bind is always a client part. What the event writes becomes C; what it reads does not matter to provenance. An event that calls a server function is still client code: the call is an RPC.
@@ -104,6 +106,60 @@ A view subtree at a site is **inert** (for a given instantiation) when all of th
 So an inert region renders with props whose provenance is S (the "inert-prop sources" of the brief).
 
 **Inert does not mean static.** An inert region may be pending (a server function's memo, under a `Loading` that is itself inert) and may fail (under an inert `Errored`). What it cannot do is change after the server has sent it. A `Loading` or `Errored` whose children and fallback are all inert is inert.
+
+**C3 generalization: recomputable regions.** An R region is a view subtree whose
+server-owned reads are all S/R, including attribute holes, flow sources, row
+setups and pure derivations. It owns the server-function loaders that produce
+those reads. An all-S region is its zero-U-input case. A direct U read, C read,
+effect, event or bind cannot execute in its server template. A client yield
+component or client hole can instead be a **slot**, provided it has a separate
+client group and every edge passes §1.6. Shared C state, a context provider, or a
+pending/failure route across that cut must remain together or be carried by a
+proved public transport. Moving the U producer itself is never authorized.
+Foreign ownership keeps the router shell client; it does not disqualify a
+server region invoked beneath it.
+
+A region's argument vector is the ordered set of distinct external settled
+inputs needed by its server loaders and template. Order is first lexical use;
+identity is binding plus selected property path, not display name. Constants
+may be baked into its generated server function. A dynamic path includes its
+selector. Route `props.params.slug` crosses as its string/undefined value,
+never as the router props object, Source, accessor or closure. Collecting a
+closure or a nonserializable value is a capture failure with a source location,
+not permission to run it on the server. A value derived from an event-written C
+cell remains C even if its current value happens to be serializable.
+
+A slot key is `(region call-site, slot site, enclosing keyed row identities)`;
+repeated rows require stable serializable entity keys, not response positions.
+The region call-site distinguishes two uses of ArticleContent. The key preserves
+state only while the original library owner would survive; route disposal also
+disposes its slots. Slot inputs are serialized settled values, checked at the
+edge; the fill code and its events stay in their own client group. Missing,
+duplicate or unproved keys refuse extraction. Public frame slots reconnect the
+fills during markup replacement; a second page-level hydrate is not a refetch
+mechanism. Initial client groups hydrate eagerly within the single root.
+
+When a U argument changes, its tracked client stub calls the generated server
+function with the new vector. The server reruns the loader and derivation and
+returns the region template as markup plus keyed slot input records. The public
+frame API applies that response and reconnects the client fills. The library's
+own memo, Loading, Errored and owner disposal semantics govern pending reads,
+stale responses, failures and cancellation; no independent loading state or
+last-response-wins scheduler is introduced. Pending/failing reads must still
+reach the same nearest boundary (calculus §3.4). A boundary internal to the
+region may handle the failure there only if its observable fallback timing is
+preserved. Otherwise the transport must rethrow the typed failure at the stub's
+read, using the authored class and brand. D-115 marks public typed failure data
+safe; this does **not** by itself restore a custom class after a codec round trip.
+A class-losing transport or changed boundary route is a stop finding, not a
+successful extraction. Streamed SSR may leave a pending region flushed and
+carry its failure to hydration; it need not print the fallback in that stream.
+
+Cost model: one RPC for each changed argument vector actually observed by the
+memo (writes batched by the library are one observation). It returns **markup,
+not the article data**; slot inputs and transport framing are extra bytes.
+No debounce, cache, prefetch, or byte saving is assumed. Measure navigation
+request/response bytes and pending/failing checkpoints alongside client code.
 
 ### 1.4 Client root
 
@@ -170,11 +226,13 @@ An **edge** is where a root's client code reads something defined outside the ro
 | --- | --- |
 | a **serializable constant** | serialized by `@solidjs/web`'s serializer (its public `serialization` entry), not by a list of the project's own |
 | an **S value** read by the root (an S memo, an S prop, an S context value) | its value is serialized at the edge, and on the client it is a `constant(v)`. If it is still pending at flush it is streamed as Solid streams an async memo, and the root's `Loading` waits for it (M4 put that `Loading` in the root). If it failed on the server, the failure is serialized and re-thrown at the client read, **as its own class and branded** (D-087), so that `catch: [K]`'s `instanceof` and `attempt`'s brand check still hold (R12) |
+| a **U argument** to an R region | only the settled serializable value at its selected path, encoded by the public serializer and checked at the edge. The U producer, reactive source and closures remain client. A rejected value refuses extraction; no JSON-only substitute |
+| an **R value** passed to a client slot | its settled serialized value, with the same pending and typed-failure obligations as S; never its loader or derivation code |
 | a **prop** from a parent outside the root | an S value as above, or a hole prop whose reads are S (a constant). A hole prop whose body calls components crosses as a slot |
 | an **element handle (a slot)** | server-rendered DOM that the root places and does not render (§1.4) |
 | a **module import** | code, not a capture. Module-level mutable state is U |
 
-Event handlers do not cross: a handler is created in a setup, so its creator is in the root (M2). **Anything else** — a closure over a setup-local non-source, an instance the serializer refuses, a function, a U value — cannot cross. The region that defines it is then client, and the analysis gives **a diagnostic at the variable** that names it and the reason (ML-L3, and ML-L8's "escalation is never silent"). In the C1 report that diagnostic is a *capture failure*.
+Event handlers do not cross: a handler is created in a setup, so its creator is in the root (M2). **Anything else** — a closure over a setup-local non-source, an instance the serializer refuses, a function, or a U value outside the checked R-argument edge — cannot cross. The region that defines it is then client, and the analysis gives **a diagnostic at the variable** that names it and the reason (ML-L3, and ML-L8's "escalation is never silent"). In the C1 report that diagnostic is a *capture failure*.
 
 ### 1.7 Eager and lazy roots
 
@@ -340,9 +398,9 @@ An inert native element still participates in public element-claim registration
 
 ### 3.2 C3: server components
 
-A maximal inert region that is not inside a root's span (a slot is outside, by §1.4) becomes a **server component** on Solid's **public** server-component API. In rc.13 that is `@solidjs/web/frames` (`createServerComponentHandler`, `Slot`, `AttributeSlot`, …) and `@solidjs/vite-plugin`'s `serverFunctions: { components: true }`, documented in `@solidjs/web`'s `skills/server-components/SKILL.md`.
+A maximal S/R region, with any client children represented as slots (§1.3), becomes a **server component** on Solid's **public** server-component API. In rc.13 that is `@solidjs/web/frames` (`createServerComponentHandler`, `Slot`, `AttributeSlot`, …) and `@solidjs/vite-plugin`'s `serverFunctions: { components: true }`, documented in `@solidjs/web`'s `skills/server-components/SKILL.md`.
 
-- **Emitted.** A `"use server"` function returning the region's template. Its S memos run inside it, and their values never ship: only the markup does. For hackernews' story page, that is the end of "each story and comment twice".
+- **Emitted.** A `"use server"` function returning the region's template. Its S/R memos, loaders and pure downstream derivations run inside it, and their values never ship: only the markup does. For hackernews' story page, that is the end of "each story and comment twice".
 - **Client parts inside it become slots, as Solid defines them:**
   - a root placed in server markup is a **markup slot** (`Slot`);
   - a client hole at an attribute, `class`, `style`, event or `ref` position of a *server* element is an **attribute slot** (`AttributeSlot`), whose fill the compiler generates from the root's code;
@@ -377,6 +435,7 @@ C4 comes only after C3 and only as sugar that desugars to the dialect before the
 1. **Hydration keys** (D-074).
 2. **A lazy root's setups run at its first event, not at load.** This is unobservable in the DOM by D-042 and D-101 (§1.7). It is observable only in a trace that logs setup runs.
 3. **On the server, an inert region's server-component render order**, which D-084 already rules unobservable.
+4. **R refetch completion may arrive after an RPC.** A parity checkpoint may be labelled `server-refetched` only after the same DOM arrives. This is not permission to normalize DOM differences or change Loading/Errored behavior. Record both the original checkpoint and the eventual observation.
 
 **The theorem holds for compiled output.** calculus §4 (a)–(d) holds at the positions of §4.2 for P compiled. The obligation the compiler adds is a lemma, **edge preservation**:
 

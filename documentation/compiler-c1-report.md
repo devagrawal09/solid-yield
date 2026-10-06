@@ -394,3 +394,56 @@ Merge pairs M1/M2/M3/M4/M5/M6: 306/70/10/76/24/45. Additional pairs: SPAN_OVERLA
 ## Premise verdict
 
 Dev's option A accepts the content-heavy premise. The corrected docs twin retains a majority of locally inert JSX and separate SearchBox, CommentList, ThemeToggle, NewsletterForm and ImageCarousel groups. It has eleven dependency groups in total, including route owners and error fallbacks. The other twins remain mostly interactive. Physical claims, capture serialization and byte savings require C2 evidence; these static counts alone establish none of them.
+
+## C3: server-recomputable provenance (2026-10-07)
+
+All nine entry graphs rerun. Before is the unchanged option-A S-only analysis; after uses the R cut. S and R columns are disjoint. Counts include structural holes and call-site instances, not runtime nodes or bytes. A server-owned parent with client slots is still counted client by the subtree metric; its server children are counted separately. These are placement candidates, not proof of frame transport or serialization.
+
+| Twin | Before S holes | After S holes | R holes | Client holes | Before S JSX | After S JSX | R JSX | Client JSX |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| docs-yield | 124/243 (51.0%) | 133/243 (54.7%) | 56/243 (23.0%) | 54/243 (22.2%) | 148/249 (59.4%) | 151/249 (60.6%) | 61/249 (24.5%) | 37/249 (14.9%) |
+| effect-yield | 2/77 (2.6%) | 2/77 (2.6%) | 0/77 (0.0%) | 75/77 (97.4%) | 22/76 (28.9%) | 22/76 (28.9%) | 0/76 (0.0%) | 54/76 (71.1%) |
+| hackernews-spa-yield | 1/75 (1.3%) | 1/75 (1.3%) | 0/75 (0.0%) | 74/75 (98.7%) | 19/65 (29.2%) | 19/65 (29.2%) | 0/65 (0.0%) | 46/65 (70.8%) |
+| rendering-yield | 47/203 (23.2%) | 47/203 (23.2%) | 0/203 (0.0%) | 156/203 (76.8%) | 66/153 (43.1%) | 66/153 (43.1%) | 0/153 (0.0%) | 87/153 (56.9%) |
+| room-yield | 5/109 (4.6%) | 5/109 (4.6%) | 0/109 (0.0%) | 104/109 (95.4%) | 23/78 (29.5%) | 23/78 (29.5%) | 0/78 (0.0%) | 55/78 (70.5%) |
+| sierpinski-yield | 2/18 (11.1%) | 2/18 (11.1%) | 0/18 (0.0%) | 16/18 (88.9%) | 0/2 (0.0%) | 0/2 (0.0%) | 0/2 (0.0%) | 2/2 (100.0%) |
+| sierpinski-yield-h | 1/7 (14.3%) | 1/7 (14.3%) | 0/7 (0.0%) | 6/7 (85.7%) | 0/0 (0.0%) | 0/0 (0.0%) | 0/0 (0.0%) | 0/0 (0.0%) |
+| todos-yield | 0/36 (0.0%) | 0/36 (0.0%) | 0/36 (0.0%) | 36/36 (100.0%) | 3/29 (10.3%) | 3/29 (10.3%) | 0/29 (0.0%) | 26/29 (89.7%) |
+| todos-yield-h | 8/37 (21.6%) | 8/37 (21.6%) | 0/37 (0.0%) | 29/37 (78.4%) | 0/0 (0.0%) | 0/0 (0.0%) | 0/0 (0.0%) | 0/0 (0.0%) |
+
+The h twins have no JSX sites. Their S/R/client h-element counts are sierpinski-yield-h: 0/0/2 of 2; todos-yield-h: 7/0/17 of 24.
+
+### Regions, inputs and slots
+
+**docs-yield.**
+
+- SiteNav at examples/docs-yield/src/app.tsx:49:26: **S**, arguments [], slots [].
+- ArticleContent at examples/docs-yield/src/app.tsx:17:17: **S**, arguments [], slots [].
+- ArticleContent at examples/docs-yield/src/app.tsx:27:17: **R**, arguments [props.params.slug], slots [].
+- ReadingGuide at examples/docs-yield/src/app.tsx:57:17: **S**, arguments [], slots [].
+- SiteFooter at examples/docs-yield/src/app.tsx:58:17: **S**, arguments [], slots [].
+
+**effect-yield.** No S/R loader region. No directly targeted declared server-function memo was found; async adapters/query/live wrappers stay U and event-written cells stay C.
+
+**hackernews-spa-yield.** No S/R loader region. No directly targeted declared server-function memo was found; async adapters/query/live wrappers stay U and event-written cells stay C.
+
+**rendering-yield.** No S/R loader region. No directly targeted declared server-function memo was found; async adapters/query/live wrappers stay U and event-written cells stay C.
+
+**room-yield.** No S/R loader region. The server-call results remain beneath client or unproved dependencies.
+
+- Capture refused at examples/room-yield/src/routes/live.tsx:724:15: Server argument has no proved serializable shape.
+- Capture refused at examples/room-yield/src/routes/live.tsx:743:13: Server argument has no proved serializable shape.
+
+**sierpinski-yield.** No S/R loader region. No directly targeted declared server-function memo was found; async adapters/query/live wrappers stay U and event-written cells stay C.
+
+**sierpinski-yield-h.** No S/R loader region. No directly targeted declared server-function memo was found; async adapters/query/live wrappers stay U and event-written cells stay C.
+
+**todos-yield.** No S/R loader region. No directly targeted declared server-function memo was found; async adapters/query/live wrappers stay U and event-written cells stay C.
+
+**todos-yield-h.** No S/R loader region. No directly targeted declared server-function memo was found; async adapters/query/live wrappers stay U and event-written cells stay C.
+
+Home's ArticleContent("overview") and ReadingGuide's ArticleContent("widgets") become entirely S, including their internal error fallback holes. DocPage's ArticleContent becomes R with the external argument vector [props.params.slug]; its default-to-overview expression stays on the server. Loaders, ArticleBody, chapter fields, table of contents and related links follow that placement. There is no article-list component in this version of Home. SiteNav and SiteFooter were already S.
+
+The maximal Home/DocPage server-wrapper proposal would place their sibling LikeButton in a slot keyed by route component call-site plus LikeButton call-site, with serialized {slug}. No LikeButton is nested inside ArticleContent in this source. This report lists the narrower slot-free ArticleContent regions: wrapper/slot transport is not established by the analysis. ThemeToggle, SearchBox, NewsletterForm, CommentList (including avatars), ImageCarousel, both LikeButton instances and the router shell remain client. C1's eleven dependency groups are preserved as the before grouping, not relabelled as eleven independently emitted R groups.
+
+The old leak rows saying a client input remains U are still correct about the router/props producer. Their former implication that every downstream server-function result also stays client is superseded by C0 §1.2.

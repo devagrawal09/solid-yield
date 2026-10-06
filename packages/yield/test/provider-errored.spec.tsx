@@ -2,7 +2,7 @@
  * A view whose root is a foreign component's tag — a context provider —
  * holding a call-form `Errored`, rendered under another `Errored` (D-085's
  * note). Solid's provider returns its `children` memo, so the view's output
- * is a function. `$component` did not mark it as a view, so `perform` in the
+ * is a function. `component` did not mark it as a view, so `perform` in the
  * holding hole called it: the hole read what the provider shows, and when
  * the inner `Errored` switched to its fallback the hole re-ran and re-created
  * the component — its setup and its state — and the fallback never reached
@@ -17,7 +17,7 @@ import {
 } from "solid-js";
 import { render as solidRender } from "@solidjs/web";
 import {
-  $component,
+  component,
   $event,
   $memo,
   $signal,
@@ -38,7 +38,7 @@ const TopLevel = createContext<number>(0);
 function app(Ctx: any, wrap: boolean) {
   let fail!: () => unknown;
   const log: string[] = [];
-  const Child = $component(function* Child() {
+  const Child = component(function* Child() {
     log.push("setup");
     const [bad, setBad] = yield* $signal(false);
     fail = $event(function* () {
@@ -66,7 +66,7 @@ function app(Ctx: any, wrap: boolean) {
       );
     });
   });
-  const Panel = $component(function* Panel() {
+  const Panel = component(function* Panel() {
     return view(function* () {
       return wrap ? (
         <div class="panel">
@@ -77,7 +77,7 @@ function app(Ctx: any, wrap: boolean) {
       );
     });
   });
-  const App = $component(function* App() {
+  const App = component(function* App() {
     return view(function* () {
       return (
         <main>

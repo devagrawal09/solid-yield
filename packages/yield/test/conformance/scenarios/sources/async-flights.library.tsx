@@ -1,4 +1,4 @@
-import { $component, $event, $memo, attempt, Errored, Loading, view } from "solid-yield";
+import { component, $event, $memo, attempt, Errored, Loading, view } from "solid-yield";
 import { h, NotFound } from "conformance";
 
 export let setId: (v: number) => unknown;
@@ -8,7 +8,7 @@ const notFound = (cause: unknown) =>
 /** The fallback's one hole: records what the boundary caught, shows its name. */
 const caught = (error: NotFound) => (h.caught("boundary", error), error.name);
 
-export const App = $component(function* App() {
+export const App = component(function* App() {
   const [id, si] = yield* h.$signal("id", 1);
   setId = $event(function* (v: number) {
     yield* si(v);

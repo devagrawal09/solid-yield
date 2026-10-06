@@ -1,4 +1,4 @@
-import { $cleanup, $component, $event, For, view } from "solid-yield";
+import { $cleanup, component, $event, For, view } from "solid-yield";
 import { h } from "conformance";
 
 interface Item {
@@ -8,7 +8,7 @@ interface Item {
 
 export let setItems: (update: (list: Item[]) => Item[]) => unknown;
 
-export const App = $component(function* App() {
+export const App = component(function* App() {
   const [items, si] = yield* h.$signal<Item[]>("items", [
     { id: 1, label: "a" },
     { id: 2, label: "b" }

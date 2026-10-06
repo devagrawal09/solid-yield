@@ -3,7 +3,7 @@
  *
  * A routine is a `function*`. Everything it does is an operation it delegates
  * to with `yield*`, and TypeScript collects the delegated operations' yield
- * types into the generator's yield union. The constructors (`$component`,
+ * types into the generator's yield union. The constructors (`component`,
  * `$memo`, `$effect`, `$event`, row routines) constrain that union: each kind
  * of routine admits a fixed set of operations, so a disallowed operation is a
  * type error at the constructor call.
@@ -469,7 +469,7 @@ export type ComponentView<
 };
 
 /**
- * A component built by `$component`: calling it renders it and returns its
+ * A component built by `component`: calling it renders it and returns its
  * view. A plain function type, so a component whose props are generic in
  * their colors (D-029) keeps its type parameters (D-068).
  */

@@ -6,7 +6,7 @@
 import { flush, createRoot, isPending, Reveal, untrack } from "solid-js";
 import {
   $cleanup,
-  $component,
+  component,
   $effect,
   $event,
   $memo,
@@ -84,7 +84,7 @@ describe("views are fine-grained", () => {
   it("runs the view once; holes update independently; the input keeps its text", () => {
     let viewRuns = 0;
     let bump!: () => void;
-    const Counter = $component(function* () {
+    const Counter = component(function* () {
       const [n, setN] = yield* $signal(0);
       bump = () => write(() => setN(v => v + 1));
       return view(function* () {
@@ -114,7 +114,7 @@ describe("views are fine-grained", () => {
   it("an async memo suspends to Loading and resolves; the view still runs once", async () => {
     let viewRuns = 0;
     let resolve!: (v: { name: string }) => void;
-    const User = $component(function* () {
+    const User = component(function* () {
       const user = yield* $memo(function* () {
         return yield* attempt(() => new Promise<{ name: string }>(r => (resolve = r)), toError);
       });
@@ -142,7 +142,7 @@ describe("views are fine-grained", () => {
 
   it("a memo with a loadingValue renders it without a boundary, then its answer", async () => {
     let resolve!: (v: { name: string }) => void;
-    const User = $component(function* () {
+    const User = component(function* () {
       const user = yield* $memo(
         function* () {
           return yield* attempt(() => new Promise<{ name: string }>(r => (resolve = r)), toError);
@@ -165,7 +165,7 @@ describe("views are fine-grained", () => {
   devIt("a view does not read: a read outside a JSX position is READ_IN_VIEW", () => {
     // (no type error: TypeScript types a yield* in JSX — a hole — and one in a
     // statement alike; the lint `no-read-in-view-body` reports it)
-    const ReadsInBody = $component(function* ReadsInBody() {
+    const ReadsInBody = component(function* ReadsInBody() {
       const [n] = yield* $signal(1);
       return view(function* () {
         const v = yield* n;
@@ -174,7 +174,7 @@ describe("views are fine-grained", () => {
     });
     expect(() => createRoot(() => ReadsInBody())).toThrow(/READ_IN_VIEW.*<ReadsInBody>/);
     // a branch on a read is one too: structure comes from flow controls
-    const Branches = $component(function* Branches() {
+    const Branches = component(function* Branches() {
       const [open] = yield* $signal(true);
       return view(function* () {
         if (yield* open) return <b>open</b>;
@@ -183,7 +183,7 @@ describe("views are fine-grained", () => {
     });
     expect(() => createRoot(() => Branches())).toThrow(/READ_IN_VIEW.*<Branches>/);
     // in a row's view, named by the row
-    const Rows = $component(function* Rows() {
+    const Rows = component(function* Rows() {
       return view(function* () {
         return (
           <ul>
@@ -205,7 +205,7 @@ describe("views are fine-grained", () => {
     expect(() => createRoot(() => Rows())).toThrow(/READ_IN_VIEW.*<row item>/);
     // the same reads in holes, and a flow control reading its source, are the holes'
     let set!: (v: boolean) => void;
-    const Holes = $component(function* Holes() {
+    const Holes = component(function* Holes() {
       const [open, setOpen] = yield* $signal(true);
       set = v => write(() => setOpen(v));
       return view(function* () {
@@ -234,12 +234,12 @@ describe("views are fine-grained", () => {
 
 describe("components", () => {
   it("a named setup names the component (dev owner labels)", () => {
-    const Greeting = $component(function* Greeting() {
+    const Greeting = component(function* Greeting() {
       return view(function* () {
         return <b>hi</b>;
       });
     });
-    const Anonymous = $component(function* () {
+    const Anonymous = component(function* () {
       return view(function* () {
         return <b>hi</b>;
       });
@@ -253,7 +253,7 @@ describe("setup operations", () => {
   it("$memo derives; $effect runs after changes and cleans up; $settled runs once", () => {
     const log: string[] = [];
     let set!: (v: number) => void;
-    const App = $component(function* () {
+    const App = component(function* () {
       const [n, setN] = yield* $signal(1);
       set = v => write(() => setN(v));
       const doubled = yield* $memo(function* () {
@@ -285,7 +285,7 @@ describe("setup operations", () => {
 
   it("an $effect's writes apply", () => {
     let set!: (v: number) => void;
-    const App = $component(function* () {
+    const App = component(function* () {
       const [n, setN] = yield* $signal(1);
       const [copy, setCopy] = yield* $signal(0);
       set = v => write(() => setN(v));
@@ -313,7 +313,7 @@ describe("setup operations", () => {
 
   it("$store paths and readStore selections are tracked reads", () => {
     let toggle!: () => void;
-    const App = $component(function* () {
+    const App = component(function* () {
       const [todos, setTodos] = yield* $store({ list: [{ title: "a", done: false }] });
       toggle = () =>
         write(() =>
@@ -344,7 +344,7 @@ describe("setup operations", () => {
     let fire!: () => Promise<unknown>;
     const seen: string[] = [];
     const runs = { memo: 0, compute: 0, effect: 0 };
-    const App = $component(function* () {
+    const App = component(function* () {
       const [a, sa] = yield* $signal(1);
       const [b, sb] = yield* $signal(10);
       setA = v => write(() => sa(v));
@@ -391,7 +391,7 @@ describe("setup operations", () => {
   it("an $effect whose compute reads a pending source waits; no Loading shows (D-090)", async () => {
     let resolve!: (v: string) => void;
     const seen: string[] = [];
-    const Watcher = $component(function* Watcher() {
+    const Watcher = component(function* Watcher() {
       const user = yield* $memo(function* () {
         return yield* attempt(() => new Promise<string>(r => (resolve = r)), toError);
       });
@@ -434,7 +434,7 @@ describe("setup operations", () => {
     let resolve!: (v: string) => void;
     let reject!: (e: unknown) => void;
     let refetch!: () => void;
-    const Page = $component(function* Page() {
+    const Page = component(function* Page() {
       const [which, setWhich] = yield* $signal(0);
       refetch = () => write(() => setWhich(1));
       const key = yield* $memo(function* () {
@@ -498,7 +498,7 @@ describe("setup operations", () => {
 
   devIt("a setup does not read: READ_IN_SETUP", () => {
     // @ts-expect-error a setup does not read (Read is not a SetupOp)
-    const Bad = $component(function* (props: Props<{ start: number }>) {
+    const Bad = component(function* (props: Props<{ start: number }>) {
       const v = yield* props.start;
       return view(function* () {
         return <i>{v}</i>;
@@ -508,7 +508,7 @@ describe("setup operations", () => {
   });
 
   devIt("creating outside a setup and writing in a memo are dev errors", () => {
-    const CreatesInView = $component(function* () {
+    const CreatesInView = component(function* () {
       // @ts-expect-error a view only reads (Create is not a ViewOp)
       return view(function* () {
         const [x] = yield* $signal(1);
@@ -517,7 +517,7 @@ describe("setup operations", () => {
     });
     expect(() => createRoot(() => CreatesInView())).toThrow(/CREATE_OUTSIDE_SETUP/);
     let error: unknown;
-    const WritesInMemo = $component(function* () {
+    const WritesInMemo = component(function* () {
       const [n, setN] = yield* $signal(1);
       const m = yield* $memo(function* () {
         // a memo's own write: the receipt delegated to right here (its dev
@@ -581,7 +581,7 @@ describe("the runtime's other dev errors", () => {
   });
 
   devIt("JSX in a setup is JSX_IN_SETUP (D-041)", () => {
-    const Builds = $component(function* Builds() {
+    const Builds = component(function* Builds() {
       const [title] = yield* $signal("t");
       const header = <h1>{perform(title)}</h1>;
       return view(function* () {
@@ -592,7 +592,7 @@ describe("the runtime's other dev errors", () => {
   });
 
   devIt("a setup returns its view; a path is not writable", () => {
-    const NoView = $component(function* () {
+    const NoView = component(function* () {
       return 1;
     } as unknown as () => Generator<never, ViewFn<never, null>>);
     expect(() => createRoot(() => NoView())).toThrow(/COMPONENT_VIEW/);
@@ -650,7 +650,7 @@ describe("the runtime's other dev errors", () => {
   });
 
   devIt("a memo's reads after its first async attempt are errors", async () => {
-    const Late = $component(function* () {
+    const Late = component(function* () {
       const [n] = yield* $signal(1);
       const m = yield* $memo(function* () {
         yield* attempt(() => Promise.resolve(0), toError);
@@ -688,7 +688,7 @@ describe("setups inside a parent's first view run", () => {
   it("a child's setup (and its memo's first pass) is not a read at the parent view's top level", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     let parentRuns = 0;
-    const Leaf = $component(function* (props: Props<{ n: number }>) {
+    const Leaf = component(function* (props: Props<{ n: number }>) {
       const n = yield* $memo(function* () {
         return yield* props.n;
       });
@@ -696,7 +696,7 @@ describe("setups inside a parent's first view run", () => {
         return <i>{perform(n)}</i>;
       });
     });
-    const Parent = $component(function* () {
+    const Parent = component(function* () {
       return view(function* () {
         parentRuns++;
         return <p>{perform(Leaf({ n: 1 }))}</p>;
@@ -714,7 +714,7 @@ describe("props", () => {
   it("props are reads; forwarding a source forwards the read; paths walk deep", () => {
     let setName!: (v: string) => void;
     let childRuns = 0;
-    const Card = $component(function* (props: Props<{ user: { name: string }; tag: string }>) {
+    const Card = component(function* (props: Props<{ user: { name: string }; tag: string }>) {
       return view(function* () {
         childRuns++;
         return (
@@ -724,7 +724,7 @@ describe("props", () => {
         );
       });
     });
-    const Parent = $component(function* () {
+    const Parent = component(function* () {
       const [user, setUser] = yield* $signal({ name: "a" });
       setName = name => write(() => setUser({ name }));
       return view(function* () {
@@ -742,7 +742,7 @@ describe("props", () => {
   it("a setter call does nothing until it is delegated to; in development an undelegated receipt is UNYIELDED_WRITE", async () => {
     let poke!: () => Promise<unknown>;
     let bump!: () => void;
-    const App = $component(function* App() {
+    const App = component(function* App() {
       const [n, setN] = yield* $signal(0);
       poke = $event(function* () {
         void setN(1);
@@ -783,7 +783,7 @@ describe("props", () => {
         flush();
         return root.textContent;
       };
-      const Writes = $component(function* Writes() {
+      const Writes = component(function* Writes() {
         const [, setN] = yield* $signal(0);
         yield* $effect(
           // @ts-expect-error a Write is not a ComputeOp
@@ -798,7 +798,7 @@ describe("props", () => {
       });
       expect(errorOf(Writes)).toMatch(/WRITE_IN_REACTIVE\] an effect's compute does not write/);
       // the effect phase reads, untracked because its host is (D-083)
-      const Reads = $component(function* Reads() {
+      const Reads = component(function* Reads() {
         const [n] = yield* $signal(7);
         const [out, setOut] = yield* $signal(0);
         yield* $effect(
@@ -816,7 +816,7 @@ describe("props", () => {
   );
 
   devIt("an effect's undelegated receipt is UNYIELDED_WRITE", () => {
-    const App = $component(function* Effecting() {
+    const App = component(function* Effecting() {
       const [n, setN] = yield* $signal(0);
       yield* $effect(
         function* () {
@@ -844,7 +844,7 @@ describe("props", () => {
 
   it("a receipt minted before an event's async attempt and delegated to after it is not unyielded", async () => {
     let go!: () => Promise<unknown>;
-    const App = $component(function* App() {
+    const App = component(function* App() {
       const [n, setN] = yield* $signal(0);
       go = $event(function* () {
         const receipt = setN(7);
@@ -863,7 +863,7 @@ describe("props", () => {
 
   devIt("a setter called outside a routine is SETTER_OUTSIDE_RUN (D-028)", () => {
     let setter!: (v: number) => unknown;
-    const App = $component(function* App() {
+    const App = component(function* App() {
       const [n, setN] = yield* $signal(0);
       setter = setN;
       return view(function* () {
@@ -879,7 +879,7 @@ describe("props", () => {
 
   it("$optimistic / $optimisticStore: an $event's writes show at once and revert when it settles", async () => {
     let resolve!: () => void;
-    const App = $component(function* () {
+    const App = component(function* () {
       const [saving, setSaving] = yield* $optimistic(false);
       const [list, setList] = yield* $optimisticStore({ items: ["a"] });
       const add = $event(function* () {
@@ -910,7 +910,7 @@ describe("props", () => {
     "$optimistic is the scalar form and $optimisticStore the object-or-body form (D-014)",
     () => {
       // each through a cast: both are type errors (type-tests "D-014")
-      const Body = $component(function* () {
+      const Body = component(function* () {
         const [v] = yield* $optimistic(function* () {
           return 1;
         } as unknown as number);
@@ -921,7 +921,7 @@ describe("props", () => {
       expect(() => createRoot(() => Body())).toThrow(
         /OPTIMISTIC_FORM.*\$optimisticStore\(function\*/
       );
-      const Scalar = $component(function* () {
+      const Scalar = component(function* () {
         const [s] = yield* $optimisticStore(1 as unknown as { n: number });
         return view(function* () {
           return <i>{perform(s.n)}</i>;
@@ -934,7 +934,7 @@ describe("props", () => {
   it("a derived $optimisticStore waits on its body; refresh recomputes it", async () => {
     let calls = 0;
     let reload!: () => void;
-    const App = $component(function* () {
+    const App = component(function* () {
       const [todos] = yield* $optimisticStore(function* () {
         const n = ++calls;
         return yield* attempt(() => Promise.resolve([`t${n}`]), toError);
@@ -967,7 +967,7 @@ describe("props", () => {
 
   it("$projection derives a store from routine reads", () => {
     let setN!: (v: number) => void;
-    const App = $component(function* () {
+    const App = component(function* () {
       const [n, set] = yield* $signal(1);
       setN = v => write(() => set(v));
       const projected = yield* $projection(
@@ -990,7 +990,7 @@ describe("props", () => {
   it("until waits in an $event until a source reads truthy", async () => {
     let ready!: () => void;
     let done = false;
-    const App = $component(function* () {
+    const App = component(function* () {
       const [ok, setOk] = yield* $signal(false);
       ready = () => write(() => setOk(true));
       const go = $event(function* () {
@@ -1019,13 +1019,13 @@ describe("constant (D-060)", () => {
     expect(perform(one)).toBe(1);
     const Identity = createContext(constant<string | null>(null));
     let setMe!: (v: string) => void;
-    const Who = $component(function* Who() {
+    const Who = component(function* Who() {
       const who = yield* Identity;
       return view(function* () {
         return <b>{perform(who) ?? "nobody"}</b>;
       });
     });
-    const Provider = $component(function* () {
+    const Provider = component(function* () {
       const [me, set] = yield* $signal<string | null>("ada");
       setMe = v => write(() => set(v));
       return view(function* () {
@@ -1050,7 +1050,7 @@ describe("constant (D-060)", () => {
 describe("context", () => {
   it("yield* Ctx reads a context in a setup", () => {
     const Theme = createContext<string>("light");
-    const Child = $component(function* () {
+    const Child = component(function* () {
       const theme = yield* Theme;
       return view(function* () {
         return <i>{theme}</i>;
@@ -1064,7 +1064,7 @@ describe("context", () => {
 describe("events", () => {
   it("$event is an action: its writes are one transaction across an async attempt", async () => {
     let resolve!: () => void;
-    const App = $component(function* () {
+    const App = component(function* () {
       const [n, setN] = yield* $signal(0);
       const [status, setStatus] = yield* $signal("idle");
       const click = $event(function* () {
@@ -1114,7 +1114,7 @@ describe("events", () => {
   it("a failure the caller handles goes to the caller, not to the Errored", async () => {
     let caught: unknown;
     let save!: () => Promise<unknown>;
-    const App = $component(function* () {
+    const App = component(function* () {
       const failing = $event(function* () {
         yield* raise(new Failed("declined"));
       });
@@ -1141,7 +1141,7 @@ describe("events", () => {
     let resolve!: (v: number) => void;
     let seen: number | undefined;
     let go!: () => unknown;
-    const App = $component(function* () {
+    const App = component(function* () {
       const data = yield* $memo(function* () {
         return yield* attempt(() => new Promise<number>(r => (resolve = r)), toError);
       });
@@ -1196,7 +1196,7 @@ describe("events", () => {
     const record = $event(function* (v: number) {
       seen.push(v);
     });
-    const App = $component(function* () {
+    const App = component(function* () {
       const [n, set] = yield* $signal(1);
       setN = v => write(() => set(v));
       yield* $effect(
@@ -1228,7 +1228,7 @@ describe("events", () => {
   it("calls of an event are independent runs: typing fast, the last answer to arrive wins (D-064)", async () => {
     const pending: Record<string, (v: string) => void> = {};
     let search!: (q: string) => Promise<unknown>;
-    const Box = $component(function* Box() {
+    const Box = component(function* Box() {
       const [results, setResults] = yield* $signal("");
       search = $event(function* (q: string) {
         const found = yield* attempt(() => new Promise<string>(r => (pending[q] = r)), toError);
@@ -1251,7 +1251,7 @@ describe("events", () => {
   });
 
   it("a failing view with no Errored re-throws (D-033)", () => {
-    const Fails = $component(function* Fails() {
+    const Fails = component(function* Fails() {
       const m = yield* $memo(function* () {
         yield* raise(new Failed("no boundary"));
         return 1;
@@ -1277,7 +1277,7 @@ describe("events", () => {
     class SaveError extends Error {
       readonly kind = "save" as const;
     }
-    const App = $component(function* () {
+    const App = component(function* () {
       const click = $event(function* () {
         yield* raise(new SaveError("nope"));
       });
@@ -1302,7 +1302,7 @@ describe("events", () => {
     class NotFound extends Error {
       readonly kind = "not-found";
     }
-    const Fails = $component(function* () {
+    const Fails = component(function* () {
       const m = yield* $memo(function* () {
         yield* raise(new NotFound("nf"));
         return 1;
@@ -1341,7 +1341,7 @@ describe("events", () => {
     class Forbidden extends Error {
       readonly kind = "forbidden";
     }
-    const Fails = $component(function* () {
+    const Fails = component(function* () {
       const m = yield* $memo(function* () {
         yield* raise(new Forbidden("no"));
         return 1;
@@ -1377,7 +1377,7 @@ describe("events", () => {
     class LoadError extends Error {
       readonly kind = "load";
     }
-    const Loads = $component(function* () {
+    const Loads = component(function* () {
       const m = yield* $memo(function* () {
         return yield* attempt(
           () => Promise.reject(new Error("boom")),
@@ -1418,7 +1418,7 @@ describe("events", () => {
     class StreamError extends Error {
       readonly kind = "stream";
     }
-    const Streams = $component(function* () {
+    const Streams = component(function* () {
       const m = yield* $memo(function* () {
         return yield* attempt(
           () =>
@@ -1480,7 +1480,7 @@ describe("events", () => {
     }
     const got: unknown[] = [];
     let ran = false;
-    const App = $component(function* () {
+    const App = component(function* () {
       yield* $effect(
         function* () {},
         function* () {
@@ -1513,7 +1513,7 @@ describe("events", () => {
     class Missing extends Error {
       readonly kind = "missing" as const;
     }
-    const App = $component(function* () {
+    const App = component(function* () {
       const m = yield* $memo(function* () {
         yield* raise(new Missing("missing"));
         return 1;
@@ -1539,7 +1539,7 @@ describe("row routines", () => {
     let edit!: (text: string) => void;
     let setups = 0;
     let views = 0;
-    const List = $component(function* List() {
+    const List = component(function* List() {
       const [store, setStore] = yield* $store({ items: [{ text: "a" }, { text: "b" }] });
       edit = text =>
         write(() =>
@@ -1589,7 +1589,7 @@ describe("row routines", () => {
     const computed: string[] = [];
     const a = { id: 1, text: "a" };
     const b = { id: 2, text: "b" };
-    const List = $component(function* () {
+    const List = component(function* () {
       const [items, set] = yield* $signal([a, b]);
       const [suffix, setSuffix] = yield* $signal("!");
       setItems = v => write(() => set(v));
@@ -1657,7 +1657,7 @@ describe("row routines", () => {
         return <li>{perform(shown)}</li>;
       });
     };
-    const List = $component(function* List() {
+    const List = component(function* List() {
       const [items, set] = yield* $signal(["a", "b"]);
       setItems = v => write(() => set(v));
       return view(function* () {
@@ -1679,7 +1679,7 @@ describe("row routines", () => {
     dispose?.();
     root.textContent = "";
     // with no boundary the failure is re-thrown at the root (D-033)
-    const Bare = $component(function* Bare() {
+    const Bare = component(function* Bare() {
       return view(function* () {
         return <ul>{perform(For({ each: ["bad"], children: row }))}</ul>;
       });
@@ -1707,7 +1707,7 @@ describe("row routines", () => {
         return <li>{perform(shown)}</li>;
       });
     };
-    const List = $component(function* List() {
+    const List = component(function* List() {
       return view(function* () {
         return <ul>{perform(For({ each: ["a", "slow"], children: row }))}</ul>;
       });
@@ -1729,7 +1729,7 @@ describe("row routines", () => {
   });
 
   devIt("a row's body returns its view, as a setup does", () => {
-    const Rows = $component(function* () {
+    const Rows = component(function* () {
       return view(function* () {
         return (
           <ul>
@@ -1753,7 +1753,7 @@ describe("row routines", () => {
     let setItems!: (v: { id: number; text: string }[]) => void;
     let setups = 0;
     let views = 0;
-    const List = $component(function* () {
+    const List = component(function* () {
       const [items, set] = yield* $signal([
         { id: 1, text: "a" },
         { id: 2, text: "b" }
@@ -1806,7 +1806,7 @@ describe("row routines", () => {
     const rows = [{ t: "a" }, { t: "b" }];
     let set!: (v: typeof rows) => void;
     let views = 0;
-    const Row = $component(function* (props: Props<{ row: { t: string } }>) {
+    const Row = component(function* (props: Props<{ row: { t: string } }>) {
       const [n] = yield* $signal(0);
       return view(function* () {
         views++;
@@ -1818,7 +1818,7 @@ describe("row routines", () => {
         );
       });
     });
-    const App = $component(function* () {
+    const App = component(function* () {
       const [items, setItems] = yield* $signal(rows);
       set = v => write(() => setItems(v));
       return view(function* () {
@@ -1853,7 +1853,7 @@ describe("row routines", () => {
   it("named recursive row routines, bare function* rows, Show / Match / Repeat branches", () => {
     type C = { id: number; kids: C[] };
     const tree: C[] = [{ id: 1, kids: [{ id: 2, kids: [] }] }];
-    const Thread = $component(function* () {
+    const Thread = component(function* () {
       // recursive: its view's yields are spelled out
       function* comment(c: any) {
         const [open] = yield* $signal(true);
@@ -1901,7 +1901,7 @@ describe("row routines", () => {
     root.textContent = "";
 
     const [when, setWhen] = plainSignal<{ name: string } | undefined>({ name: "x" });
-    const App = $component(function* () {
+    const App = component(function* () {
       return view(function* () {
         return (
           <div>
@@ -1974,7 +1974,7 @@ describe("row routines", () => {
   it("a Show's direct child view is not rebuilt when the Show re-reads", () => {
     let views = 0;
     const [flag, setFlag] = plainSignal(1);
-    const Child = $component(function* () {
+    const Child = component(function* () {
       return view(function* () {
         views++;
         return <i>child</i>;
@@ -2005,7 +2005,7 @@ describe("reads from JSX positions are never a view's or a setup's own", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     let resolve!: (v: string) => void;
     let cardViews = 0;
-    const Card = $component(function* () {
+    const Card = component(function* () {
       const v = yield* $memo(function* () {
         return yield* attempt(() => new Promise<string>(r => (resolve = r)), toError);
       });
@@ -2033,7 +2033,7 @@ describe("reads from JSX positions are never a view's or a setup's own", () => {
       seen = untrack(() => props.value);
       return props.children as never;
     };
-    const Page = $component(function* () {
+    const Page = component(function* () {
       const [order] = yield* $signal<"sequential" | "together">("sequential");
       const [label] = yield* $signal("x");
       return view(function* () {
@@ -2062,7 +2062,7 @@ describe("reads from JSX positions are never a view's or a setup's own", () => {
 describe("a view that is a function is a branch's content", () => {
   it("Show / Match render it (a lazy page's output) instead of calling it as a render callback", async () => {
     const [n, setN] = plainSignal(1);
-    const Whole = $component(function* (props: Props<{ n: number }>) {
+    const Whole = component(function* (props: Props<{ n: number }>) {
       return view(function* () {
         return <b>{perform(props.n)}</b>;
       });
@@ -2121,7 +2121,7 @@ describe("lazy", () => {
   it("a lazy yield component in call form is built once; its chunk and its state land in place", async () => {
     let setups = 0;
     let bump!: () => void;
-    const Inner = $component(function* (props: Props<{ label: string }>) {
+    const Inner = component(function* (props: Props<{ label: string }>) {
       setups++;
       const [n, setN] = yield* $signal(1);
       bump = () => write(() => setN(v => v + 1));
@@ -2137,7 +2137,7 @@ describe("lazy", () => {
     let land!: (m: { default: typeof Inner }) => void;
     const Page = lazy(() => new Promise<{ default: typeof Inner }>(r => (land = r)));
     let setLabel!: (v: string) => void;
-    const App = $component(function* () {
+    const App = component(function* () {
       const [label, set] = yield* $signal("n=");
       setLabel = v => write(() => set(v));
       return view(function* () {
@@ -2172,14 +2172,14 @@ describe("lazy", () => {
 describe("flow controls keep children lazy", () => {
   it("a hole prop is read in the child, as a source is: a change updates the hole, the child is not re-created (D-065)", () => {
     let setups = 0;
-    const Total = $component(function* (props: Props<{ n: number }>) {
+    const Total = component(function* (props: Props<{ n: number }>) {
       setups++;
       return view(function* () {
         return <b>{yield* props.n}</b>;
       });
     });
     let set!: (v: number) => void;
-    const App = $component(function* () {
+    const App = component(function* () {
       const [n, setN] = yield* $signal(1);
       set = v => write(() => setN(v));
       return view(function* () {
@@ -2208,14 +2208,14 @@ describe("flow controls keep children lazy", () => {
   });
   it("a fallback written as a function* is a lazy view: its components set up when it shows (D-066)", () => {
     let setups = 0;
-    const Late = $component(function* () {
+    const Late = component(function* () {
       setups++;
       return view(function* () {
         return <i>late</i>;
       });
     });
     let set!: (v: boolean) => void;
-    const App = $component(function* () {
+    const App = component(function* () {
       const [on, setOn] = yield* $signal(true);
       set = v => write(() => setOn(v));
       return view(function* () {
@@ -2249,14 +2249,14 @@ describe("flow controls keep children lazy", () => {
   });
   it("Errored's fallback written as a function* is a lazy view, as other flow controls' (D-066)", () => {
     let setups = 0;
-    const Oops = $component(function* () {
+    const Oops = component(function* () {
       setups++;
       return view(function* () {
         return <i>oops</i>;
       });
     });
     let set!: (v: boolean) => void;
-    const App = $component(function* () {
+    const App = component(function* () {
       const [bad, setBad] = yield* $signal(false);
       set = v => write(() => setBad(v));
       const value = yield* $memo(function* () {
@@ -2295,7 +2295,7 @@ describe("flow controls keep children lazy", () => {
     let built = 0;
     const node = document.createElement("b");
     const [which, setWhich] = plainSignal("a");
-    const App = $component(function* () {
+    const App = component(function* () {
       const make = (label: string) => {
         built++;
         return <i>{label}</i>;
@@ -2348,7 +2348,7 @@ describe("flow controls keep children lazy", () => {
 
 describe("computations created in a setup", () => {
   it("read sources in their own pass (their reads are theirs, not the setup's)", () => {
-    const Child = $component(function* (props: Props<{ n: number }>) {
+    const Child = component(function* (props: Props<{ n: number }>) {
       const m = yield* $memo(function* () {
         return (yield* props.n) * 2;
       });
@@ -2372,7 +2372,7 @@ describe("computations created in a setup", () => {
   });
 
   devIt("the setup's own read is still an error", () => {
-    const Child = $component(function* (props: Props<{ n: number }>) {
+    const Child = component(function* (props: Props<{ n: number }>) {
       yield* props.n as unknown as Iterable<never>;
       return view(function* () {
         return <b />;
@@ -2389,7 +2389,7 @@ describe("D-097: a component runs in its caller's computation (no untrack)", () 
     let effects = 0;
     const [n, setN] = plainSignal(1);
     const Foreign = (props: { value: number }) => <u>{props.value}</u>;
-    const Child = $component(function* Child(props: Props<{ n: number; label: string }>) {
+    const Child = component(function* Child(props: Props<{ n: number; label: string }>) {
       setups++;
       const doubled = yield* $memo(function* () {
         return (yield* props.n) * 2;
@@ -2435,7 +2435,7 @@ describe("D-097: a component runs in its caller's computation (no untrack)", () 
     const nHole = function* () {
       return n();
     };
-    const Parent = $component(function* Parent() {
+    const Parent = component(function* Parent() {
       return view(function* () {
         return (
           <div>
@@ -2459,13 +2459,13 @@ describe("D-097: a component runs in its caller's computation (no untrack)", () 
   devIt(
     "a read in a setup called inside a hole is still READ_IN_SETUP (the hole's observer is the setup's)",
     () => {
-      const Bad = $component(function* Bad(props: Props<{ n: number }>) {
+      const Bad = component(function* Bad(props: Props<{ n: number }>) {
         yield* props.n as unknown as Iterable<never>;
         return view(function* () {
           return <b />;
         });
       });
-      const Parent = $component(function* Parent() {
+      const Parent = component(function* Parent() {
         return view(function* () {
           return <div>{perform(Bad({ n: 1 }))}</div>;
         });
@@ -2476,7 +2476,7 @@ describe("D-097: a component runs in its caller's computation (no untrack)", () 
 
   devIt("a read at a view's top level inside a hole is still READ_IN_VIEW", () => {
     const [n] = plainSignal(1);
-    const Bad = $component(function* Bad() {
+    const Bad = component(function* Bad() {
       const s = yield* $memo(function* () {
         return n();
       });
@@ -2485,7 +2485,7 @@ describe("D-097: a component runs in its caller's computation (no untrack)", () 
         return <b>{v}</b>;
       });
     });
-    const Parent = $component(function* Parent() {
+    const Parent = component(function* Parent() {
       return view(function* () {
         return <div>{perform(Bad())}</div>;
       });
@@ -2498,14 +2498,14 @@ describe("Loading on a source", () => {
   it("the call form's `on` may be a source: a new key shows the fallback", async () => {
     let setKey!: (v: string) => void;
     const resolvers: Record<string, (v: string) => void> = {};
-    const Page = $component(function* () {
+    const Page = component(function* () {
       const [k, set] = yield* $signal("a");
       setKey = v => write(() => set(v));
       const v = yield* $memo(function* () {
         const at = yield* k;
         return yield* attempt(() => new Promise<string>(r => (resolvers[at] = r)), toError);
       });
-      const Content = $component(function* () {
+      const Content = component(function* () {
         return view(function* () {
           return <b>{perform(v)}</b>;
         });
@@ -2550,7 +2550,7 @@ describe("boundaries in call form", () => {
   // boundary above — so the call form takes its content as a function.
   function pendingView() {
     let resolve!: (v: string) => void;
-    const Pending = $component(function* () {
+    const Pending = component(function* () {
       const v = yield* $memo(function* () {
         return yield* attempt(() => new Promise<string>(r => (resolve = r)), toError);
       });
@@ -2563,7 +2563,7 @@ describe("boundaries in call form", () => {
 
   it("Loading({ children: () => View }) builds the content inside the boundary", async () => {
     const { Pending, resolve } = pendingView();
-    const Page = $component(function* () {
+    const Page = component(function* () {
       return view(function* () {
         return (
           <div>
@@ -2599,7 +2599,7 @@ describe("boundaries in call form", () => {
   });
 
   it("Errored({ children: () => View }) too", async () => {
-    const Failing = $component(function* () {
+    const Failing = component(function* () {
       const v = yield* $memo(function* () {
         return yield* raise(new Failed("nope"));
       });
@@ -2607,7 +2607,7 @@ describe("boundaries in call form", () => {
         return <b>{perform(v)}</b>;
       });
     });
-    const Page = $component(function* () {
+    const Page = component(function* () {
       return view(function* () {
         return (
           <div>
@@ -2654,7 +2654,7 @@ describe("boundaries in call form", () => {
 describe("flow controls take holes (D-038)", () => {
   it("Show / Match when, For each and Repeat count may be a bare function* hole", () => {
     let set!: (v: number) => void;
-    const App = $component(function* () {
+    const App = component(function* () {
       const [n, setN] = yield* $signal(1);
       set = v => write(() => setN(v));
       return view(function* () {
@@ -2739,7 +2739,7 @@ describe("derivations", () => {
   it("a derivation several holes read is a $memo: it runs once per change", () => {
     let set!: (v: number) => void;
     let runs = 0;
-    const App = $component(function* () {
+    const App = component(function* () {
       const [n, setN] = yield* $signal(2);
       set = v => write(() => setN(v));
       const doubled = yield* $memo(function* () {
@@ -2774,19 +2774,19 @@ describe("untyped throws (D-019)", () => {
   };
 
   it("a plain throw in a routine goes to the nearest Errored; in development it is UNTYPED_THROW naming the host and the component", async () => {
-    const InSetup = $component(function* InSetup() {
+    const InSetup = component(function* InSetup() {
       throwIn("setup");
       return view(function* () {
         return <i />;
       });
     });
-    const InView = $component(function* InView() {
+    const InView = component(function* InView() {
       return view(function* () {
         throwIn("view");
         return <i />;
       });
     });
-    const InMemo = $component(function* InMemo() {
+    const InMemo = component(function* InMemo() {
       const m = yield* $memo(function* () {
         throwIn("memo");
         return 1;
@@ -2795,7 +2795,7 @@ describe("untyped throws (D-019)", () => {
         return <i>{perform(m)}</i>;
       });
     });
-    const InEffect = $component(function* InEffect() {
+    const InEffect = component(function* InEffect() {
       yield* $effect(
         function* () {},
         function* () {
@@ -2806,7 +2806,7 @@ describe("untyped throws (D-019)", () => {
         return <i />;
       });
     });
-    const InHole = $component(function* InHole() {
+    const InHole = component(function* InHole() {
       return view(function* () {
         return h("i", function* () {
           throwIn("hole");
@@ -2845,7 +2845,7 @@ describe("untyped throws (D-019)", () => {
 
   it("an event's plain throw rejects its call; in development as UNTYPED_THROW", async () => {
     let fire!: () => Promise<unknown>;
-    const App = $component(function* App() {
+    const App = component(function* App() {
       fire = $event(function* () {
         throwIn("event");
       });
@@ -2864,7 +2864,7 @@ describe("untyped throws (D-019)", () => {
 
   it("typed failures are not wrapped", () => {
     const show = (e: any) => <b>{`${e() instanceof Failed}:${e().message}`}</b>;
-    const Raises = $component(function* Raises() {
+    const Raises = component(function* Raises() {
       const m = yield* $memo(function* () {
         yield* raise(new Failed("typed"));
         return 1;
@@ -2885,7 +2885,7 @@ describe("untyped throws (D-019)", () => {
     dispose?.();
     root.textContent = "";
     // a plain throw an attempt catches is typed by its handler
-    const Attempts = $component(function* Attempts() {
+    const Attempts = component(function* Attempts() {
       const a = yield* $memo(function* () {
         return yield* attempt(() => {
           throw new Error("handled");
@@ -2910,13 +2910,13 @@ describe("untyped throws (D-019)", () => {
 describe("host state is per run (re-entrancy)", () => {
   it("an async $memo resuming while another view renders: the view's reads are its holes'", async () => {
     let cardViews = 0;
-    const Card = $component(function* Card(props: Props<{ name: string }>) {
+    const Card = component(function* Card(props: Props<{ name: string }>) {
       return view(function* () {
         cardViews++;
         return <b>{perform(props.name)}</b>;
       });
     });
-    const App = $component(function* App() {
+    const App = component(function* App() {
       const card = yield* $memo(function* () {
         const name = yield* attempt(() => Promise.resolve("Ada"), toError);
         // built while the memo resumes after its attempt: Card's setup, view
@@ -2958,7 +2958,7 @@ describe("attempt / isPending interplay", () => {
     const resolvers: ((v: number) => void)[] = [];
     let after = 0;
     let set!: (v: number) => void;
-    const App = $component(function* () {
+    const App = component(function* () {
       const [id, setId] = yield* $signal(1);
       set = v => write(() => setId(v));
       const m = yield* $memo(function* () {
@@ -3003,7 +3003,7 @@ describe("attempt / isPending interplay", () => {
   it("a superseded run that fails after its attempt is discarded too (D-080)", async () => {
     const resolvers: ((v: number) => void)[] = [];
     let set!: (v: number) => void;
-    const App = $component(function* () {
+    const App = component(function* () {
       const [id, setId] = yield* $signal(1);
       set = v => write(() => setId(v));
       const m = yield* $memo(function* () {
@@ -3059,7 +3059,7 @@ describe("binding an event is a hole (D-072)", () => {
   it("onClick={yield* save} binds the handler: the click calls it, the bind does not", async () => {
     const calls: unknown[] = [];
     let save!: ReturnType<typeof $event<[MouseEvent], never, void>>;
-    const App = $component(function* () {
+    const App = component(function* () {
       const [n, setN] = yield* $signal(0);
       save = $event(function* (e: MouseEvent) {
         calls.push(e.type);
@@ -3088,7 +3088,7 @@ describe("binding an event is a hole (D-072)", () => {
 
   it("the bound-data form: [yield* pick, data] calls pick(data, event)", async () => {
     const picked: unknown[] = [];
-    const App = $component(function* () {
+    const App = component(function* () {
       const pick = $event(function* (value: string, e: MouseEvent) {
         picked.push([value, e.type]);
       });
@@ -3104,7 +3104,7 @@ describe("binding an event is a hole (D-072)", () => {
 
   it("a bound event's failure reaches the Errored above where it is bound (D-085)", async () => {
     const seen: unknown[] = [];
-    const App = $component(function* () {
+    const App = component(function* () {
       const fail = $event(function* () {
         yield* raise(new Failed("bound"));
       });
@@ -3131,14 +3131,14 @@ describe("binding an event is a hole (D-072)", () => {
 
   describe("D-085: a bound event's failure routes to the bind site", () => {
     /** Binds the handler it finds in context: the bind site. */
-    const Child = $component(function* Child() {
+    const Child = component(function* Child() {
       const save = (yield* SaveContext)!;
       return view(function* () {
         return <button onClick={yield* save}>save</button>;
       });
     });
     /** Creates the handler, and renders `Child` under an `Errored` of `Child`'s own. */
-    const Parent = $component(function* Parent(props: Props<{ seen: string[] }>) {
+    const Parent = component(function* Parent(props: Props<{ seen: string[] }>) {
       const save = $event(function* () {
         yield* raise(new SaveError("save failed"));
       });
@@ -3183,7 +3183,7 @@ describe("binding an event is a hole (D-072)", () => {
 
     it("with no Errored above the bind site the DOM call rejects, though one is above the creation site", async () => {
       let save!: EventHandler<[], SaveError, void, false, false>;
-      const Creator = $component(function* Creator() {
+      const Creator = component(function* Creator() {
         save = $event(function* () {
           yield* raise(new SaveError("unrouted"));
         });
@@ -3191,7 +3191,7 @@ describe("binding an event is a hole (D-072)", () => {
           return <i>creator</i>;
         });
       });
-      const Binder = $component(function* Binder() {
+      const Binder = component(function* Binder() {
         return view(function* () {
           return <button onClick={yield* save}>save</button>;
         });
@@ -3235,7 +3235,7 @@ describe("binding an event is a hole (D-072)", () => {
     it("a call from another routine fails at its caller, wherever the handler is bound", async () => {
       const caught: unknown[] = [];
       let call!: () => Promise<unknown>;
-      const Caller = $component(function* Caller() {
+      const Caller = component(function* Caller() {
         const save = (yield* SaveContext)!;
         call = $event(function* () {
           yield* attempt(
@@ -3249,7 +3249,7 @@ describe("binding an event is a hole (D-072)", () => {
           return <i>caller</i>;
         });
       });
-      const Host = $component(function* Host() {
+      const Host = component(function* Host() {
         const save = $event(function* () {
           yield* raise(new SaveError("to the caller"));
         });

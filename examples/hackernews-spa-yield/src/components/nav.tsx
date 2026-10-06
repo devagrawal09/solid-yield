@@ -1,6 +1,6 @@
-import { $component, view } from "solid-yield";
+import { component, view } from "solid-yield";
 
-const Nav = $component(function* Nav() {
+const Nav = component(function* Nav() {
   return view(function* () {
     return (
       <header class="header">

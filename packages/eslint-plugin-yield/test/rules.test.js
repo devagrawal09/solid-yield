@@ -18,7 +18,7 @@ const tester = new RuleTester({
   }
 });
 
-const component = body => `const C = $component(function* () { ${body} });`;
+const component = body => `const C = component(function* () { ${body} });`;
 
 tester.run("no-throw", rules["no-throw"], {
   valid: [
@@ -121,12 +121,12 @@ tester.run("no-dollar-block", rules["no-dollar-block"], {
     {
       // a derivation in a setup becomes the setup's $memo; the import follows
       code:
-        'import { $, $component } from "solid-yield";\n' +
+        'import { $, component } from "solid-yield";\n' +
         component(
           "const d = $(function* () { return 1; }); return view(function* () { return <p>{yield* d}</p>; });"
         ),
       output:
-        'import { $component, $memo } from "solid-yield";\n' +
+        'import { $memo, component } from "solid-yield";\n' +
         component(
           "const d = yield* $memo(function* () { return 1; }); return view(function* () { return <p>{yield* d}</p>; });"
         ),
@@ -187,13 +187,13 @@ tester.run("no-path-object-use", rules["no-path-object-use"], {
       "const [s] = yield* $store({ a: { b: 1 } }); const m = yield* $memo(function* () { return { ...(yield* s.a) }; }); return view(function* () { return <p title={JSON.stringify(yield* s.a)}>{(yield* s.a.b) === 1 ? 'one' : ''}</p>; });"
     ),
     // passing a path on is fine; so is spreading the props object (not a path)
-    "const C = $component(function* (props) { return view(function* () { return <Child {...props} user={props.user} />; }); });",
+    "const C = component(function* (props) { return view(function* () { return <Child {...props} user={props.user} />; }); });",
     // a plain object with the same shape is not a path
     "const s = { a: 1 }; const t = { ...s }; s.a === 1;"
   ],
   invalid: [
     {
-      code: "const C = $component(function* (props) { const m = yield* $memo(function* () { return { ...props.user }; }); return view(function* () { return <p />; }); });",
+      code: "const C = component(function* (props) { const m = yield* $memo(function* () { return { ...props.user }; }); return view(function* () { return <p />; }); });",
       errors: [{ messageId: "spread" }]
     },
     {
@@ -223,10 +223,10 @@ tester.run("require-view-wrapper", rules["require-view-wrapper"], {
   invalid: [
     {
       code:
-        'import { $component } from "solid-yield";\n' +
+        'import { component } from "solid-yield";\n' +
         component("return function* () { return <p />; };"),
       output:
-        'import { $component, view } from "solid-yield";\n' +
+        'import { component, view } from "solid-yield";\n' +
         component("return view(function* () { return <p />; });"),
       errors: [{ messageId: "wrap" }]
     },
@@ -289,9 +289,9 @@ tester.run("jsx-only-in-view", rules["jsx-only-in-view"], {
   ]
 });
 
-const imports = 'import { $component, Show, For, Loading, view } from "solid-yield";\n';
+const imports = 'import { component, Show, For, Loading, view } from "solid-yield";\n';
 const Card =
-  "const Card = $component(function* (props) { return view(function* () { return <p />; }); });\n";
+  "const Card = component(function* (props) { return view(function* () { return <p />; }); });\n";
 
 tester.run("no-component-tag", rules["no-component-tag"], {
   valid: [
@@ -412,7 +412,7 @@ tester.run("component-children-generator", rules["component-children-generator"]
       ),
     // a yield component's own `fallback` prop is a value like any other
     imports +
-      "const Card = $component(function* (props) { return view(function* () { return <b />; }); });" +
+      "const Card = component(function* (props) { return view(function* () { return <b />; }); });" +
       component("return view(function* () { return <>{yield* Card({ fallback: <i /> })}</>; });")
   ],
   invalid: [
@@ -1066,7 +1066,7 @@ tester.run("no-try-catch", rules["no-try-catch"], {
 
 // --- no-unchecked-foreign-handoff (D-088) -------------------------------------------------
 const live =
-  'import { $component, view } from "solid-yield";\nconst Live = $component(function* () { return view(function* () { return <i />; }); });\n';
+  'import { component, view } from "solid-yield";\nconst Live = component(function* () { return view(function* () { return <i />; }); });\n';
 tester.run("no-unchecked-foreign-handoff", rules["no-unchecked-foreign-handoff"], {
   valid: [
     // checked at the handoff
@@ -1094,7 +1094,7 @@ tester.run("no-unchecked-foreign-handoff", rules["no-unchecked-foreign-handoff"]
             {
               messageId: "wrap",
               output:
-                'import { $component, view, foreign } from "solid-yield";\nconst Live = $component(function* () { return view(function* () { return <i />; }); });\n' +
+                'import { component, view, foreign } from "solid-yield";\nconst Live = component(function* () { return view(function* () { return <i />; }); });\n' +
                 "defineRoute({ path: '/', component: foreign(Live) });"
             }
           ]

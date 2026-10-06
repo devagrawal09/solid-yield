@@ -6,7 +6,7 @@
  *   never raw values that would be read without `yield*`;
  * - a callback may be a row routine (a bare `function*`, or a named generator
  *   declared in a setup): its body is a setup that runs once per row and
- *   returns the row's view, as a `$component`'s does.
+ *   returns the row's view, as a `component`'s does.
  *
  * Only the children are adapted; every other prop is forwarded as a getter,
  * so the flow control reads it where it always did.

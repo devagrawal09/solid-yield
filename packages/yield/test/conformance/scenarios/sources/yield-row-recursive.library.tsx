@@ -1,5 +1,5 @@
 import {
-  $component,
+  component,
   $event,
   For,
   Show,
@@ -24,7 +24,7 @@ const tree: TreeNode[] = [
   { id: 4, label: "b", kids: [] }
 ];
 
-export const App = $component(function* App() {
+export const App = component(function* App() {
   // a named row declared in the setup, rendering itself for its children; a
   // recursive function needs its return type written, here a settled row
   function* node(

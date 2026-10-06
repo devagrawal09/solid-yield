@@ -4,7 +4,7 @@
 
 What the library's rules change in the source:
 
-- Components are `$component`s; every handler is an `$event`; per-row state and reads live in row routines (`<For>{function* (item, i) { … }}</For>`).
+- Components are `component`s; every handler is an `$event`; per-row state and reads live in row routines (`<For>{function* (item, i) { … }}</For>`).
 - The typeahead's memo still returns `runEffect(…)` (an async iterable): Solid closes a superseded flight's iterator and the fiber is interrupted. Its type is `Source<Package[], boolean, unknown>` (a memo returning an async iterable may be pending and may fail with anything), and `Results` declares that prop type. `latest` / `isPending` are `latestOf` / `isPendingOf`.
 - Boundaries: a view that reads a pending source is pending, so the orders list moved into `Orders` under `<Loading>`, and the search results are `Loading({ fallback, get children() { return Results(…) } })` inside the `<Errored>` (a boundary tag hands on nothing it does not handle; the getter creates the results inside the boundary).
 - The optimistic phase and the optimistic orders store are Solid primitives created in the setup and read with `read(…)` / `paths<Order[], true>(…)` (stated pending: the fetch is asynchronous).

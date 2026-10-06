@@ -1,5 +1,5 @@
 import { type RouteParams, type RoutePreloadFuncArgs, type RouteProps } from "@solidjs/router";
-import { $component, $memo, attempt, Errored, For, Show, type Props, view } from "solid-yield";
+import { component, $memo, attempt, Errored, For, Show, type Props, view } from "solid-yield";
 import Comment from "~/components/comment";
 import { getStory } from "~/lib/api";
 import { ApiError } from "~/lib/errors";
@@ -12,7 +12,7 @@ export const preload = ({ params }: RoutePreloadFuncArgs<RouteParams<Path>>) => 
   void getStory(params.id);
 };
 
-const Story = $component(function* Story(props: Props<RouteProps<Path>>) {
+const Story = component(function* Story(props: Props<RouteProps<Path>>) {
   const story = yield* $memo(function* () {
     const id2 = yield* props.params.id;
     return yield* attempt(

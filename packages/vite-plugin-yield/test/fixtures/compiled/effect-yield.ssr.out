@@ -73,7 +73,7 @@ var _tmpl$11 = ["<p", " class=\"loading\">Loading orders…</p>"];
 // created in the setup and read through `read` / `paths`; the cart, the
 // notice and the decline toggle are routine state.
 import { perform as _$perform } from "solid-yield";
-import { $component, $event, $memo, $signal, $store, $optimistic, $optimisticStore, attempt, For, Errored, Loading, readStore, refresh, Show, type Source, type Props, view } from "solid-yield";
+import { component, $event, $memo, $signal, $store, $optimistic, $optimisticStore, attempt, For, Errored, Loading, readStore, refresh, Show, type Source, type Props, view } from "solid-yield";
 import { CardDeclinedError, chargeCard, createOrder, fetchOrders, refundCharge, releaseReservation, reserveInventory, type CartItem, type Charge, type Order, type Reservation } from "./api";
 import { ActionInterruptedError, effectAction } from "./solid-effect";
 type Phase = "idle" | "reserving" | "charging" | "finalizing";
@@ -123,7 +123,7 @@ const INITIAL_CART: CartItem[] = [
 * `<Loading>`; a view that reads a pending source is pending itself, so the
 * list is its own component and the boundary receives it.
 */
-const Orders = $component(function* Orders(props: Props<{
+const Orders = component(function* Orders(props: Props<{
 	orders: Source<Order[], OrdersError, true>;
 }>) {
 	return view(function* () {
@@ -169,7 +169,7 @@ export class OrdersError extends Error {
 		super(cause instanceof Error ? cause.message : String(cause));
 	}
 }
-export const Checkout = $component(function* Checkout() {
+export const Checkout = component(function* Checkout() {
 	const [cart, setCart] = yield* $store<CartItem[]>(INITIAL_CART.map((i) => ({ ...i })));
 	// The optimistic orders store fetches asynchronously: pending until the
 	// first fetch lands, and failing as an OrdersError.

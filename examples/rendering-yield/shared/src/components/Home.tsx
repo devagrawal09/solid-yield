@@ -1,6 +1,6 @@
-import { $cleanup, $component, $event, $settled, $signal, view } from "solid-yield";
+import { $cleanup, component, $event, $settled, $signal, view } from "solid-yield";
 
-const Home = $component(function* Home() {
+const Home = component(function* Home() {
   const [s, set] = yield* $signal(0);
 
   // `onSettled(() => { …; return teardown })`: a run-once routine whose

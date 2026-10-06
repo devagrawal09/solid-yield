@@ -4,7 +4,7 @@
 
 What the library's rules change in the source:
 
-- Components are `$component`s: setups read the context (`yield* TodosContext`, a library context) and create `$event` handlers; views read in JSX holes.
+- Components are `component`s: setups read the context (`yield* TodosContext`, a library context) and create `$event` handlers; views read in JSX holes.
 - The todos store is Solid's (optimistic, fetched): routines read it through `paths<Todo[], true>` — stated pending, the first fetch is asynchronous — and structural reads (`filter`, `every`, `length` of a filtered list) through `readStore`.
 - A view that reads a pending store is pending, so the boundary receives the two sections as views: `<Loading>{MainSection({ filter })}{Footer({ filter })}</Loading>`.
 - The URL-hash filter is the original's primitive, created in the setup and read with `read(…)`.

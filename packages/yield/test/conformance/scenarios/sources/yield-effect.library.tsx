@@ -1,4 +1,4 @@
-import { $cleanup, $component, $effect, $event, view } from "solid-yield";
+import { $cleanup, component, $effect, $event, view } from "solid-yield";
 import { h } from "conformance";
 
 // The driver writes through events: a setter writes only when its receipt is
@@ -7,7 +7,7 @@ export let setA: (v: number) => unknown;
 export let setFlag: (v: boolean) => unknown;
 export let setC: (v: number) => unknown;
 
-export const App = $component(function* App() {
+export const App = component(function* App() {
   const [a, sa] = yield* h.$signal("a", 1);
   const [flag, sf] = yield* h.$signal("flag", false);
   const [b, sb] = yield* h.$signal("b", 0);

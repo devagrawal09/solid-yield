@@ -11,7 +11,7 @@
 // that coloring on its prop: `Source<Package[], SearchError | TransientError,
 // true>`.
 import {
-  $component,
+  component,
   $event,
   $memo,
   $signal,
@@ -36,7 +36,7 @@ function formatDownloads(n: number) {
   return String(n);
 }
 
-const Results = $component(function* Results(
+const Results = component(function* Results(
   props: Props<{ results: Source<Package[], SearchError | TransientError, true>; query: string }>
 ) {
   // Solid's `latest` / `isPending`, as sources: stale while revalidating.
@@ -90,7 +90,7 @@ const Results = $component(function* Results(
   });
 });
 
-export const Typeahead = $component(function* Typeahead() {
+export const Typeahead = component(function* Typeahead() {
   const [query, setQuery] = yield* $signal("");
 
   // The whole data layer. searchPackages carries retry w/ backoff, timeout,

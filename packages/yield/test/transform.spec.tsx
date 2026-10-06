@@ -5,7 +5,7 @@
  */
 import { flush } from "solid-js";
 import {
-  $component,
+  component,
   $event,
   $memo,
   $signal,
@@ -48,7 +48,7 @@ it("measured case: runs once, suspends to Loading, updates text and class indepe
   let viewRuns = 0;
   let resolve!: (u: { name: string }) => void;
   let inc!: () => void;
-  const Greeting = $component(function* () {
+  const Greeting = component(function* () {
     const [n, setN] = yield* $signal(1);
     inc = () => write(() => setN(v => v + 1));
     const user = yield* $memo(function* () {
@@ -109,14 +109,14 @@ it("measured case: runs once, suspends to Loading, updates text and class indepe
 
 it("props, stores, row routines and hole routines read with yield* in JSX", () => {
   let views = 0;
-  const Item = $component(function* (props: Props<{ todo: { title: string; done: boolean } }>) {
+  const Item = component(function* (props: Props<{ todo: { title: string; done: boolean } }>) {
     return view(function* () {
       views++;
       return <li class={{ done: yield* props.todo.done }}>{yield* props.todo.title}</li>;
     });
   });
   let toggle!: () => void;
-  const App = $component(function* () {
+  const App = component(function* () {
     const [todos, setTodos] = yield* $store({
       list: [
         { title: "a", done: false },

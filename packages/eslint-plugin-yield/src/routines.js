@@ -2,7 +2,7 @@
  * What the rules share: recognizing routines from syntax.
  *
  * A routine is a generator function that is
- * - the argument of a routine constructor (`$component` → setup, `$memo`,
+ * - the argument of a routine constructor (`component` → setup, `$memo`,
  *   `$effect` (both its compute and its effect phase, D-079), `$event`,
  *   `$settled`, `$` → hole, or row when it has
  *   parameters, `$scope` → row);
@@ -17,7 +17,7 @@
  */
 
 export const CONSTRUCTORS = {
-  $component: "setup",
+  component: "setup",
   $memo: "memo",
   $effect: "effect",
   $event: "event",

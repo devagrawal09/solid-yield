@@ -1,5 +1,5 @@
 import {
-  $component,
+  component,
   $event,
   $memo,
   attempt,
@@ -28,7 +28,7 @@ const fail = (error: Error): never => {
   throw error;
 };
 
-const Value = $component(function* Value() {
+const Value = component(function* Value() {
   const [mode, sm] = yield* h.$signal("mode", "ok");
   setMode = $event(function* (m: string) {
     yield* sm(m);
@@ -73,7 +73,7 @@ const Value = $component(function* Value() {
 const Save = createContext<EventHandler<[], Forbidden, void, false, false>>();
 
 /** Binds the handler it is given, under an Errored of its own: the bind site (D-085). */
-const Child = $component(function* Child() {
+const Child = component(function* Child() {
   const save = (yield* Save)!;
   return view(function* () {
     return (
@@ -99,7 +99,7 @@ const Child = $component(function* Child() {
 });
 
 /** Creates the handler, under the App's Errored: the creation site. */
-const Panel = $component(function* Panel() {
+const Panel = component(function* Panel() {
   const save = $event(function* () {
     h.run("save");
     yield* raise(new Forbidden("save"));
@@ -117,7 +117,7 @@ const Panel = $component(function* Panel() {
   });
 });
 
-export const App = $component(function* App() {
+export const App = component(function* App() {
   return view(function* () {
     return (
       <>

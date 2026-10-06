@@ -1,7 +1,7 @@
 // The same todo list with solid-yield, uncompiled (the runtime
 // interpreter; only the JSX transform's yield*-in-JSX rule), in the dialect
 // as it stands: call form (D-062), writes delegated (D-021), views wrapped.
-import { $component, $event, $store, For, render, view } from "solid-yield";
+import { component, $event, $store, For, render, view } from "solid-yield";
 import { flush } from "solid-js";
 
 type Todo = { id: number; title: string; done: boolean };
@@ -9,7 +9,7 @@ type Todo = { id: number; title: string; done: boolean };
 export function mount(root: HTMLElement) {
   let add!: (title: string) => Promise<unknown>;
   let toggle!: (id: number) => Promise<unknown>;
-  const App = $component(function* App() {
+  const App = component(function* App() {
     const [todos, setTodos] = yield* $store<Todo[]>([]);
     let next = 0;
     add = $event(function* (title: string) {

@@ -11,7 +11,7 @@ The Chromium check (`tests/browser.steps.mjs`) ran from the Solid fork's `script
 
 ## What the library's rules change
 
-- **Components are `$component`s** with named setups (`$component(function* Card(props) {…})`, so dev owner labels read `<Live> › <Card>`). Handlers are `$event`s; the transport's `onstatus` hook reports through one (`createWire`).
+- **Components are `component`s** with named setups (`component(function* Card(props) {…})`, so dev owner labels read `<Live> › <Card>`). Handlers are `$event`s; the transport's `onstatus` hook reports through one (`createWire`).
 - **The router is created at module level** (`createRouter({ routes })` in `app.tsx`) and `App`'s view renders it. `routes.ts` hands each route to the router as `foreign(Live)` (D-088): the router is plain Solid and renders a route with no `yield*`, so a route may be pending (the app's `<Loading>` is above it) and handles its own failures.
 - **What a `Loading` covers is its own component**, in the call form with a lazy view: `yield* Loading({ fallback, children: function* () { return <>{yield* Members({ who, me })}</>; } })` — the content is built inside the boundary (D-062, D-066).
 - **Failures are typed.** A memo over a stream or a promise may fail with anything, so every panel that reads a live source may fail. The original lets that reach the app root; here `/live`'s page is wrapped in an `Errored` at its root, which `foreign(Live)` requires (a route handed to the router handles its own failures, D-088), and the summary keeps its own `Errored`. A directory row's count failure passes up the list to the page's `Errored` (a row need not be settled, D-059 / D-063); the per-row `Errored`s the twin had before are gone. With no failure, the markup is the original's.
@@ -34,9 +34,9 @@ No `any`. One type assertion: the transcript's seed, `{ messages: [] } as { mess
 
 ## Client bundle
 
-| | min | gz |
-| --- | ---: | ---: |
-| original | 322,023 B | 111,464 B |
-| twin | 332,570 B | 114,598 B (+2.8%) |
+|          |       min |                gz |
+| -------- | --------: | ----------------: |
+| original | 322,023 B |         111,464 B |
+| twin     | 332,570 B | 114,598 B (+2.8%) |
 
 Measured in the Solid fork with `scripts/example-blocks/bytes.mjs` (not carried here, so not reproducible from this repository); `documentation/yield-library.md` §9 has a later figure (+0.2%).

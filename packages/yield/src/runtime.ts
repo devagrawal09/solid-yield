@@ -99,7 +99,7 @@ declare const __SERVER__: boolean;
 export const READ: unique symbol = Symbol.for("solid.yield.read") as any;
 /** Marks a component's view value (so `perform` returns it unread). */
 export const VIEW_MARK: unique symbol = Symbol.for("solid.yield.view") as any;
-/** Marks `$component` functions. */
+/** Marks `component` functions. */
 export const COMPONENT_MARK: unique symbol = Symbol.for("solid.yield.component") as any;
 /**
  * Marks `solid-yield/h` output (and so the automatic `jsx()` runtime's,
@@ -990,7 +990,7 @@ function checkCreate(kind: string): void {
   if (state.host !== SETUP)
     throw devError(
       "CREATE_OUTSIDE_SETUP",
-      `$${kind} creates state: call it in a $component's (or a row routine's) setup, not in ${HOST_NAMES[state.host]}.`
+      `$${kind} creates state: call it in a component's (or a row routine's) setup, not in ${HOST_NAMES[state.host]}.`
     );
 }
 
@@ -1717,7 +1717,7 @@ export function renderView(
 }
 
 /**
- * `$component(function* (props) { setup; return function* () { view } })`.
+ * `component(function* (props) { setup; return function* () { view } })`.
  *
  * The setup runs once, under the component's owner: it creates state and
  * reads context. The returned generator is the view: it only reads. Neither
@@ -1728,7 +1728,7 @@ export function renderView(
  * The component's failures are its view's and its setup's effects' (`FailsOf<Y>`,
  * D-073): an `$effect` or a `$settled` fails to the nearest `Errored` above it.
  */
-export function $component<
+export function component<
   TP = unknown,
   Y extends SetupOp = never,
   V extends () => Generator<ViewOp, unknown, any> = ViewFn<never, unknown>
@@ -1742,12 +1742,12 @@ export function $component<
   ViewFails<ViewYield<V>, ViewReturn<V>> | FailsOf<Y>,
   ViewMayWait<ViewYield<V>, ViewReturn<V>>
 > {
-  const component: any = function (props?: object) {
+  const comp: any = function (props?: object) {
     const view = runSetup(body as any, [typedProps(props || {})], body.name || "anonymous");
     if (typeof view !== "function")
       throw devError(
         "COMPONENT_VIEW",
-        "a $component's setup returns its view: `return view(function* () { return <…/>; })`."
+        "a component's setup returns its view: `return view(function* () { return <…/>; })`."
       );
     const out = renderView(view as any, body.name || "anonymous");
     // A view that returns a function — a foreign component's output at its
@@ -1762,18 +1762,19 @@ export function $component<
       (out as any)[VIEW_MARK] = true;
     return out;
   };
-  component[COMPONENT_MARK] = true;
+  comp[COMPONENT_MARK] = true;
   // Dev owner labels (`in <App> › <Card> › …`) use the component's name: a
-  // named setup (`$component(function* Card(props) {…})`) names it.
-  if (body.name) Object.defineProperty(component, "name", { value: body.name });
-  return component;
+  // named setup (`component(function* Card(props) {…})`) names it; an
+  // anonymous one is "component".
+  Object.defineProperty(comp, "name", { value: body.name || "component" });
+  return comp;
 }
 
 /**
  * `return view(function* () { return <…/>; })`: a view, type-checked where
  * it is written (D-054). Identity at run time. Without it a view's mistakes
  * (an op a view may not perform — a creation, a write; a no-JSX view's read)
- * are reported at the `$component(` call, with the whole setup's yield union;
+ * are reported at the `component(` call, with the whole setup's yield union;
  * with it they are reported at the `view(` call, naming the op. Its colors
  * are kept: the component is pending / failing as the view is.
  */
@@ -1782,7 +1783,7 @@ export function view<Y extends ViewOp = never, R = unknown>(
   ..._rule: NoJsxViewRule<Y, R>
 ): ViewFn<[R] extends [HView<any, any>] ? never : Y, R> {
   // an `h` view's colors are its output's: its yields (refused above) are not
-  // passed on, so `$component` does not report the same mistake again
+  // passed on, so `component` does not report the same mistake again
   return fn as any;
 }
 
@@ -1821,7 +1822,7 @@ export type NoJsxViewRule<VY, R> = [R] extends [HView<any, any>]
 /**
  * @internal A Solid component (Solid's `lazy()` or `dynamic()` output) made a
  * yield component: usable in call form in a hole — `{yield* Page()}` — as a
- * `$component` is: created untracked (as a tag is, `createComponent`), so the
+ * `component` is: created untracked (as a tag is, `createComponent`), so the
  * hole does not re-create it when what it builds changes (a chunk landing),
  * and its output passed on as a view. Its own keys (`preload`, `moduleUrl`)
  * are kept.
@@ -1848,7 +1849,7 @@ export function isRowRoutine(fn: unknown): boolean {
 }
 
 /**
- * Run a row routine. A row's body is a setup, as a `$component`'s is: it runs
+ * Run a row routine. A row's body is a setup, as a `component`'s is: it runs
  * once per row (per item of a `For`, per shown branch), untracked, with the
  * render arguments as reads; it creates (a `yield* $memo` there is the row's,
  * disposed with it) and returns the row's view, which is rendered as a

@@ -1,4 +1,4 @@
-import { $component, $event, Loading, view } from "solid-yield";
+import { component, $event, Loading, view } from "solid-yield";
 import { h } from "conformance";
 
 export let setName: (v: string) => unknown;
@@ -8,7 +8,7 @@ export let setName: (v: string) => unknown;
 // only when it shows (D-092); written as JSX it would be built with the
 // holding view's hole and, while hydrating, claim a server node that is not
 // there (hydrate-self-test.spec.ts plants that).
-export const App = $component(function* App() {
+export const App = component(function* App() {
   const [name, sn] = yield* h.$signal("name", "ada");
   setName = $event(function* (v: string) {
     yield* sn(v);

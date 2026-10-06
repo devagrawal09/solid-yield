@@ -29,7 +29,7 @@ var _tmpl$2 = [
 //   into its own component and the boundary receives it as a pending view.
 // - Timer and frame callbacks are `$event`s.
 import { perform as _$perform } from "solid-yield";
-import { $cleanup, $component, $event, $memo, $signal, attempt, Errored, Loading, Match, Switch, type Component, type Props, type Source, view } from "solid-yield";
+import { $cleanup, component, $event, $memo, $signal, attempt, Errored, Loading, Match, Switch, type Component, type Props, type Source, view } from "solid-yield";
 import { onCleanup } from "solid-js";
 // `children` is the seconds a dot shows: Container passes them settled, a
 // triangle passes its own idle-time memo down — pending, failing with an
@@ -48,7 +48,7 @@ export class IdleError extends Error {
 	}
 }
 const TARGET = 25;
-export const TriangleDemo = $component(function* TriangleDemo() {
+export const TriangleDemo = component(function* TriangleDemo() {
 	const [elapsed, setElapsed] = yield* $signal(0);
 	const [seconds, setSeconds] = yield* $signal(0);
 	const scale = yield* $memo(function* () {
@@ -94,7 +94,7 @@ export const TriangleDemo = $component(function* TriangleDemo() {
 		});
 	});
 });
-const Container = $component(function* Container(props: Props<{
+const Container = component(function* Container(props: Props<{
 	scale: number;
 	seconds: number;
 }>) {
@@ -116,7 +116,7 @@ const Container = $component(function* Container(props: Props<{
 // a const its own initializer references): a triangle may be pending — its
 // branches read an async memo. Its setup is left unnamed: a named setup
 // (`function* Triangle`) would shadow the component inside its own body.
-const Triangle: Component<TriangleProps, true, IdleError> = $component(function* (props: Props<TriangleProps>) {
+const Triangle: Component<TriangleProps, true, IdleError> = component(function* (props: Props<TriangleProps>) {
 	// Created here, computed only when a branch reads it (`lazy`): a leaf
 	// never starts the idle-time work.
 	const slowChildren = yield* $memo(function* () {
@@ -213,7 +213,7 @@ const Triangle: Component<TriangleProps, true, IdleError> = $component(function*
 		});
 	});
 });
-const Dot = $component(function* Dot(props: Props<TriangleProps>) {
+const Dot = component(function* Dot(props: Props<TriangleProps>) {
 	const [hover, setHover] = yield* $signal(false);
 	const onEnter = $event(function* () {
 		yield* setHover(true);

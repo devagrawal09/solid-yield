@@ -1,4 +1,4 @@
-import { $component, $event, attempt, createContext, view } from "solid-yield";
+import { component, $event, attempt, createContext, view } from "solid-yield";
 import { h } from "conformance";
 
 class SaveError extends Error {
@@ -11,7 +11,7 @@ function* useApi() {
   return yield* Api;
 }
 
-const Saver = $component(function* Saver() {
+const Saver = component(function* Saver() {
   const api = yield* useApi();
   const [saved, setSaved] = yield* h.$signal("saved", "none");
   const save = $event(function* () {
@@ -32,7 +32,7 @@ const Saver = $component(function* Saver() {
   });
 });
 
-export const App = $component(function* App() {
+export const App = component(function* App() {
   return view(function* () {
     return <Api value="remote">{yield* Saver({})}</Api>;
   });

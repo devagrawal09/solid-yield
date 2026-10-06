@@ -1,4 +1,4 @@
-import { $component, $event, $store, For, view } from "solid-yield";
+import { component, $event, $store, For, view } from "solid-yield";
 import { h } from "conformance";
 
 const comments = [
@@ -7,7 +7,7 @@ const comments = [
   { id: 3, text: "c" }
 ];
 
-export const App = $component(function* App() {
+export const App = component(function* App() {
   const [closed, setClosed] = yield* $store<Record<number, boolean>>({
     1: false,
     2: false,

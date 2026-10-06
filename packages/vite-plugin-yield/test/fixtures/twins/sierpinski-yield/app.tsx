@@ -12,7 +12,7 @@
 // - Timer and frame callbacks are `$event`s.
 import {
   $cleanup,
-  $component,
+  component,
   $event,
   $memo,
   $signal,
@@ -48,7 +48,7 @@ export class IdleError extends Error {
 
 const TARGET = 25;
 
-export const TriangleDemo = $component(function* TriangleDemo() {
+export const TriangleDemo = component(function* TriangleDemo() {
   const [elapsed, setElapsed] = yield* $signal(0);
   const [seconds, setSeconds] = yield* $signal(0);
   const scale = yield* $memo(function* () {
@@ -101,7 +101,7 @@ export const TriangleDemo = $component(function* TriangleDemo() {
   });
 });
 
-const Container = $component(function* Container(props: Props<{ scale: number; seconds: number }>) {
+const Container = component(function* Container(props: Props<{ scale: number; seconds: number }>) {
   return view(function* () {
     return (
       <div
@@ -120,7 +120,7 @@ const Container = $component(function* Container(props: Props<{ scale: number; s
 // a const its own initializer references): a triangle may be pending — its
 // branches read an async memo. Its setup is left unnamed: a named setup
 // (`function* Triangle`) would shadow the component inside its own body.
-const Triangle: Component<TriangleProps, true, IdleError> = $component(function* (
+const Triangle: Component<TriangleProps, true, IdleError> = component(function* (
   props: Props<TriangleProps>
 ) {
   // Created here, computed only when a branch reads it (`lazy`): a leaf
@@ -247,7 +247,7 @@ const Triangle: Component<TriangleProps, true, IdleError> = $component(function*
   });
 });
 
-const Dot = $component(function* Dot(props: Props<TriangleProps>) {
+const Dot = component(function* Dot(props: Props<TriangleProps>) {
   const [hover, setHover] = yield* $signal(false);
   const onEnter = $event(function* () {
     yield* setHover(true);

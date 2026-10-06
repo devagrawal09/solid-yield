@@ -9,7 +9,7 @@
  */
 import { flush } from "solid-js";
 import {
-  $component,
+  component,
   $effect,
   $event,
   $memo,
@@ -46,7 +46,7 @@ async function settle(times = 3) {
 }
 
 /** A child read through a hole prop: its view's hole runs the parent's `function*`. */
-const Child = $component(function* Child(props: Props<{ n: Source<number, Boom> }>) {
+const Child = component(function* Child(props: Props<{ n: Source<number, Boom> }>) {
   return view(function* () {
     return <i>{yield* props.n}</i>;
   });
@@ -81,7 +81,7 @@ const hosts: HostCase[] = [
   {
     host: "setup",
     make: boom => ({
-      App: $component(function* App() {
+      App: component(function* App() {
         // Raise is not a SetupOp (raise.type-tests.tsx): reached through a cast
         yield* raise(boom) as any;
         return view(function* () {
@@ -94,7 +94,7 @@ const hosts: HostCase[] = [
   {
     host: "hole (a prop's)",
     make: boom => ({
-      App: $component(function* App() {
+      App: component(function* App() {
         return view(function* () {
           return (
             <b>
@@ -115,7 +115,7 @@ const hosts: HostCase[] = [
   {
     host: "hole (a flow control's source)",
     make: boom => ({
-      App: $component(function* App() {
+      App: component(function* App() {
         return view(function* () {
           return (
             <p>
@@ -139,7 +139,7 @@ const hosts: HostCase[] = [
   {
     host: "memo",
     make: boom => ({
-      App: $component(function* App() {
+      App: component(function* App() {
         const m = yield* $memo(function* () {
           return yield* raise(boom);
         });
@@ -153,7 +153,7 @@ const hosts: HostCase[] = [
   {
     host: "memo (after an async attempt)",
     make: boom => {
-      const Async = $component(function* Async() {
+      const Async = component(function* Async() {
         const m = yield* $memo(function* () {
           const n = yield* attempt(
             () => Promise.resolve(1),
@@ -168,7 +168,7 @@ const hosts: HostCase[] = [
       });
       // pending first: under a Loading, which handles pending only
       return {
-        App: $component(function* App() {
+        App: component(function* App() {
           return view(function* () {
             return (
               <>
@@ -192,7 +192,7 @@ const hosts: HostCase[] = [
   {
     host: "effect's compute",
     make: boom => ({
-      App: $component(function* App() {
+      App: component(function* App() {
         yield* $effect(
           function* () {
             yield* raise(boom);
@@ -209,7 +209,7 @@ const hosts: HostCase[] = [
   {
     host: "effect's effect phase",
     make: boom => ({
-      App: $component(function* App() {
+      App: component(function* App() {
         yield* $effect(
           function* () {},
           function* () {
@@ -226,7 +226,7 @@ const hosts: HostCase[] = [
   {
     host: "$settled",
     make: boom => ({
-      App: $component(function* App() {
+      App: component(function* App() {
         yield* $settled(function* () {
           yield* raise(boom);
         });
@@ -241,7 +241,7 @@ const hosts: HostCase[] = [
     host: "event",
     make: boom => {
       let event!: () => Promise<unknown>;
-      const App = $component(function* App() {
+      const App = component(function* App() {
         const go = $event(function* () {
           yield* raise(boom);
         });
@@ -266,7 +266,7 @@ const hosts: HostCase[] = [
   {
     host: "row",
     make: boom => ({
-      App: $component(function* App() {
+      App: component(function* App() {
         const [items] = yield* $signal([1, 2]);
         return view(function* () {
           return (
@@ -417,7 +417,7 @@ describe("D-073: an effect's failure is its component's", () => {
     "an $effect's raise in its %s phase reaches the Errored above the component that created it (D-079)",
     phase => {
       const boom = new Boom("effect");
-      const Fails = $component(function* Fails() {
+      const Fails = component(function* Fails() {
         yield* $effect(
           function* () {
             if (phase === "compute") yield* raise(boom);
@@ -452,7 +452,7 @@ describe("D-073: an effect's failure is its component's", () => {
   it("an attempt whose onError returns nothing absorbs the failure: it gives undefined; the effect does not fail (D-076)", () => {
     const seen: unknown[] = [];
     const caught: unknown[] = [];
-    const App = $component(function* App() {
+    const App = component(function* App() {
       yield* $effect(
         function* () {},
         function* () {
@@ -481,7 +481,7 @@ describe("D-073: an effect's failure is its component's", () => {
   it("an absorbed async failure resumes the routine with undefined (D-076)", async () => {
     const seen: unknown[] = [];
     let go!: () => Promise<unknown>;
-    const App = $component(function* App() {
+    const App = component(function* App() {
       go = $event(function* () {
         const v = yield* attempt(
           () => Promise.reject(new Error("network")) as Promise<number>,
@@ -502,7 +502,7 @@ describe("D-073: an effect's failure is its component's", () => {
 
   it("a handler that returns a value absorbs the failure: the attempt gives the value (D-078)", () => {
     const seen: unknown[] = [];
-    const App = $component(function* App() {
+    const App = component(function* App() {
       yield* $effect(
         function* () {},
         function* () {
@@ -529,7 +529,7 @@ describe("D-073: an effect's failure is its component's", () => {
       throw new Error("dropped");
     }
     const got: unknown[] = [];
-    const App = $component(function* App() {
+    const App = component(function* App() {
       yield* $effect(
         function* () {},
         function* () {
@@ -558,7 +558,7 @@ describe("D-077: an attempt over an event call", () => {
   it("absorbs a synchronous call's failure in an $effect: nothing reaches the Errored", () => {
     const seen: unknown[] = [];
     const caught: unknown[] = [];
-    const App = $component(function* App() {
+    const App = component(function* App() {
       const fail = $event(function* () {
         yield* raise(new Boom("call"));
       });
@@ -600,7 +600,7 @@ describe("D-077: an attempt over an event call", () => {
 
   it("transforms a synchronous call's failure in an $effect: the Errored gets the new one", () => {
     const seen: unknown[] = [];
-    const App = $component(function* App() {
+    const App = component(function* App() {
       const fail = $event(function* () {
         yield* raise(new Boom("call"));
       });
@@ -730,7 +730,7 @@ describe("D-077: an attempt over an event call", () => {
   it("a crash in a synchronous call attempted by an $effect reaches the Errored, past the handler (D-087)", () => {
     const handled: unknown[] = [];
     const seen: unknown[] = [];
-    const App = $component(function* App() {
+    const App = component(function* App() {
       const crash = $event(function* () {
         throw new TypeError("crash");
       });
@@ -841,7 +841,7 @@ describe("D-078: an attempt's handler may be a generator, run as the host's rout
   it("a write in an event's handler is inside the event's transaction: held until it settles", async () => {
     let resolve!: () => void;
     let save!: () => Promise<unknown>;
-    const App = $component(function* App() {
+    const App = component(function* App() {
       const [status, setStatus] = yield* $signal("idle");
       save = $event(function* () {
         yield* attempt(rejecting("x"), function* () {
@@ -875,7 +875,7 @@ describe("D-078: an attempt's handler may be a generator, run as the host's rout
     }
     const ended: unknown[] = [];
     const failed: unknown[] = [];
-    const App = $component(function* App() {
+    const App = component(function* App() {
       yield* $effect(
         function* () {},
         function* () {

@@ -1,10 +1,10 @@
 import { createUniqueId } from "solid-js";
 import { Portal } from "@solidjs/web";
-import { $component, $event, $signal, view } from "solid-yield";
+import { component, $event, $signal, view } from "solid-yield";
 
 type Input = InputEvent & { currentTarget: HTMLInputElement };
 
-const Settings = $component(function* Settings() {
+const Settings = component(function* Settings() {
   const [text, setText] = yield* $signal("Hi");
   const [modalOpen, setModalOpen] = yield* $signal(true);
   const [modalClicks, setModalClicks] = yield* $signal(0);

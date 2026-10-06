@@ -1,5 +1,5 @@
 import {
-  $component,
+  component,
   $memo,
   $projection,
   attempt,
@@ -43,7 +43,7 @@ async function* accumulate(): AsyncIterable<StreamItem[]> {
 
 // What each `<Loading>` covers is its own component (a view that reads a
 // pending source is pending).
-const MemoList = $component(function* MemoList(
+const MemoList = component(function* MemoList(
   props: Props<{ items: Source<StreamItem[], StreamError, true> }>
 ) {
   return view(function* () {
@@ -68,7 +68,7 @@ const MemoList = $component(function* MemoList(
   });
 });
 
-const ProjList = $component(function* ProjList(
+const ProjList = component(function* ProjList(
   props: Props<{ count: Source<number, StreamError, true>; rows: Path<StreamItem[]> }>
 ) {
   return view(function* () {
@@ -96,7 +96,7 @@ const ProjList = $component(function* ProjList(
   });
 });
 
-const Stream = $component(function* Stream() {
+const Stream = component(function* Stream() {
   // A memo over an async iterable: its latest value, pending until the first.
   const memoItems = yield* $memo(function* () {
     return yield* attempt(

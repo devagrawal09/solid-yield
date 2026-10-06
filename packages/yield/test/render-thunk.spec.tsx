@@ -11,7 +11,7 @@ import { flush } from "solid-js";
 import { jsx } from "solid-yield/jsx-runtime";
 import { h } from "solid-yield/h";
 import {
-  $component,
+  component,
   $event,
   $memo,
   $signal,
@@ -63,7 +63,7 @@ for (const form of forms) {
   describe(form, () => {
     it("keeps state when the view reads in holes", () => {
       let setups = 0;
-      const App = $component(function* () {
+      const App = component(function* () {
         setups++;
         const [n, setN] = yield* $signal(0);
         const inc = $event(function* () {
@@ -86,7 +86,7 @@ for (const form of forms) {
       const error = vi.spyOn(console, "error").mockImplementation(() => {});
       let setups = 0;
       let resolve!: (v: string) => void;
-      const Inner = $component(function* () {
+      const Inner = component(function* () {
         setups++;
         const [n, setN] = yield* $signal(0);
         const data = yield* $memo(function* () {
@@ -103,7 +103,7 @@ for (const form of forms) {
           );
         });
       });
-      const App = $component(function* () {
+      const App = component(function* () {
         return view(function* () {
           return (
             <>

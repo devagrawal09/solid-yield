@@ -23,14 +23,14 @@ var _tmpl$9 = /* @__PURE__ */ _$template(`<div class=app-error><p>Something went
 //
 // What the library's rules change here:
 // - every read and write is a `yield*`: no plain Solid state in routine code;
-// - components are `$component`s: setups read the context (`yield* TodosContext`)
+// - components are `component`s: setups read the context (`yield* TodosContext`)
 //   and create handlers (`$event`); views read in JSX holes;
 // - the todos store is an `$optimisticStore` whose body fetches (pending
 //   until the first fetch lands); structural reads go through `readStore`;
 // - a view that reads a pending store is pending, so the loading boundary
 //   receives the two sections in its lazy view: `{yield* MainSection(…)}{yield* Footer(…)}`.
 import { perform as _$perform } from "solid-yield";
-import { $component, $event, $signal, $memo, createContext, Errored, For, Loading, readStore, Show, type Props, view } from "solid-yield";
+import { component, $event, $signal, $memo, createContext, Errored, For, Loading, readStore, Show, type Props, view } from "solid-yield";
 import { createTodos, type Todo } from "./todos";
 import { hashFilter, type Filter } from "./filter";
 /** What a generator helper returns once delegated to. */
@@ -46,7 +46,7 @@ type Input = InputEvent & {
 type Key = KeyboardEvent & {
 	currentTarget: HTMLInputElement;
 };
-const Header = $component(function* Header() {
+const Header = component(function* Header() {
 	const [s, set] = yield* $signal(0);
 	const ss = yield* $memo(function* () {
 		return yield* s;
@@ -74,7 +74,7 @@ const Header = $component(function* Header() {
 		return _el$;
 	});
 });
-const TodoItem = $component(function* TodoItem(props: Props<{
+const TodoItem = component(function* TodoItem(props: Props<{
 	todo: Todo;
 }>) {
 	const [, { toggleTodo, removeTodo, retryTodo }] = yield* useTodos();
@@ -129,7 +129,7 @@ const TodoItem = $component(function* TodoItem(props: Props<{
 		return _el$4;
 	});
 });
-const MainSection = $component(function* MainSection(props: Props<{
+const MainSection = component(function* MainSection(props: Props<{
 	filter: Filter;
 }>) {
 	const [todos, { toggleAll }] = yield* useTodos();
@@ -176,7 +176,7 @@ const MainSection = $component(function* MainSection(props: Props<{
 		});
 	});
 });
-const Footer = $component(function* Footer(props: Props<{
+const Footer = component(function* Footer(props: Props<{
 	filter: Filter;
 }>) {
 	const [todos, { clearCompleted }] = yield* useTodos();
@@ -248,7 +248,7 @@ const Footer = $component(function* Footer(props: Props<{
 	});
 });
 /** The app's section: its list and footer read the store, so it waits for it and fails with it. */
-const TodoApp = $component(function* TodoApp(props: Props<{
+const TodoApp = component(function* TodoApp(props: Props<{
 	filter: Filter;
 }>) {
 	return view(function* () {
@@ -271,7 +271,7 @@ const TodoApp = $component(function* TodoApp(props: Props<{
 		return _el$28;
 	});
 });
-export const App = $component(function* App() {
+export const App = component(function* App() {
 	const filter = yield* hashFilter();
 	const todos = yield* createTodos();
 	return view(function* () {

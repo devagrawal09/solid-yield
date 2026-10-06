@@ -12,7 +12,7 @@
  */
 export {
   $cleanup,
-  $component,
+  component,
   $effect,
   $event,
   $memo,

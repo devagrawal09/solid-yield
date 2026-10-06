@@ -5,7 +5,7 @@
  */
 import { flush } from "solid-js";
 import {
-  $component,
+  component,
   $effect,
   $event,
   $memo,
@@ -54,7 +54,7 @@ describe("h", () => {
     let viewRuns = 0;
     let resolve!: (u: { name: string }) => void;
     let inc!: () => void;
-    const Greeting = $component(function* () {
+    const Greeting = component(function* () {
       const [n, setN] = yield* $signal(1);
       inc = () => write(() => setN(v => v + 1));
       const user = yield* $memo(function* () {
@@ -115,7 +115,7 @@ describe("h", () => {
 
   it("row routines, store paths, events", () => {
     let rowSetups = 0;
-    const App = $component(function* () {
+    const App = component(function* () {
       const [store, setStore] = yield* $store({ items: ["a", "b"] });
       const [show, setShow] = yield* $signal(true);
       const add = $event(function* () {
@@ -166,7 +166,7 @@ describe("h argument shapes", () => {
   it("a bare function* is a hole: a child, an attribute value, a flow control's source", () => {
     let set!: (v: number) => void;
     let holeRuns = 0;
-    const App = $component(function* () {
+    const App = component(function* () {
       const [n, setN] = yield* $signal(1);
       set = v => write(() => setN(v));
       return view(function* () {
@@ -204,7 +204,7 @@ describe("h argument shapes", () => {
   });
 
   it("a path or a selection as the second argument is a child, not the props", () => {
-    const App = $component(function* () {
+    const App = component(function* () {
       const [store, setStore] = yield* $store({ user: { name: "Ada" }, tags: ["a", "b"] });
       const rename = $event(function* () {
         yield* setStore(s => {
@@ -233,7 +233,7 @@ describe("h argument shapes", () => {
   });
 
   it("h([a, b]) is a fragment", () => {
-    const App = $component(function* () {
+    const App = component(function* () {
       const [count, setCount] = yield* $signal(1);
       const inc = $event(function* () {
         yield* setCount(c => c + 1);
@@ -252,7 +252,7 @@ describe("h argument shapes", () => {
 
   it("a prop holding an array or a store is passed as it is", () => {
     let seen: unknown;
-    const Child = $component(function* (props: Props<{ list: string[] }>) {
+    const Child = component(function* (props: Props<{ list: string[] }>) {
       yield* $effect(
         function* () {},
         function* () {
@@ -276,13 +276,13 @@ describe("h binds an event attribute where its output is materialized (D-085)", 
   }
   it("created in Parent, bound in Child under Child's Errored: that Errored shows it, not the one above both", async () => {
     let save!: EventHandler<[], SaveError, void, false, false>;
-    const Child = $component(function* Child() {
+    const Child = component(function* Child() {
       const bound = save;
       return view(function* () {
         return h("button", { onClick: bound }, "save");
       });
     });
-    const Parent = $component(function* Parent() {
+    const Parent = component(function* Parent() {
       save = $event(function* () {
         yield* raise(new SaveError("save failed"));
       });

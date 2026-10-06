@@ -1,6 +1,6 @@
 // The routes (examples/rendering's App, as a yield component). The pages are `lazy()`
 // chunks, as in the original (the library's `lazy`: pending while its chunk
-// loads, and colored as the page's `$component`): a page may be pending (Profile)
+// loads, and colored as the page's `component`): a page may be pending (Profile)
 // or fail (Stream's stream). The pages are rendered in call form
 // (`{yield* Profile()}`), which hands their pending / failures on. Pending is
 // the root's, as in the original (CSR's render defers, streaming SSR holds the
@@ -9,7 +9,7 @@
 // @solidjs/web, plain Solid, as `foreign(App)`, and a yield component handed
 // to foreign code handles its own failures (D-088). The original lets a
 // page's failure reach the root; with no failure the markup is the same.
-import { $component, Errored, isPendingOf, lazy, Match, Switch, view } from "solid-yield";
+import { component, Errored, isPendingOf, lazy, Match, Switch, view } from "solid-yield";
 import { Link, RouteHOC, useRouter } from "../router";
 import Profile from "./Profile";
 
@@ -23,7 +23,7 @@ const RevealPage = lazy(() => import("./Reveal"));
 const Skeleton = lazy(() => import("./Skeleton"));
 
 const App = RouteHOC(
-  $component(function* Routes() {
+  component(function* Routes() {
     const { location, matches } = yield* useRouter();
     const pending = isPendingOf(location);
 

@@ -1,14 +1,14 @@
 // The same table with solid-yield, uncompiled: rows are row routines that
 // read their fields in holes. The dialect as it stands: call form (D-062),
 // writes delegated (D-021), views wrapped.
-import { $component, $event, $store, For, render, view } from "solid-yield";
+import { component, $event, $store, For, render, view } from "solid-yield";
 import { flush } from "solid-js";
 
 type Row = { id: number; label: string };
 
 export function mount(root: HTMLElement) {
   let setRows!: (fn: (s: { items: Row[] }) => void) => Promise<unknown>;
-  const App = $component(function* App() {
+  const App = component(function* App() {
     const [rows, set] = yield* $store<{ items: Row[] }>({ items: [] });
     setRows = $event(function* (fn: (s: { items: Row[] }) => void) {
       yield* set(s => void fn(s));

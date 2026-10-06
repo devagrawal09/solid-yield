@@ -7,9 +7,9 @@ Yield components for Solid 2 as a library. A runtime interpreter on Solid's publ
 Do not mix it with the compiler route in one app (D-074): the markup is the same, but the hydration keys are numbered differently, so the server and the client must be built with the same route.
 
 ```tsx
-import { $component, $event, $signal, view, type Props } from "solid-yield";
+import { component, $event, $signal, view, type Props } from "solid-yield";
 
-export const Counter = $component(function* Counter(props: Props<{ step: number }>) {
+export const Counter = component(function* Counter(props: Props<{ step: number }>) {
   // setup: creates, never reads
   const [count, setCount] = yield* $signal(0);
   const add = $event(function* () {
@@ -59,11 +59,11 @@ export default { plugins: [solidYield(), solid()] };
 
 ## Entry points
 
-| Import | What |
-| --- | --- |
-| `solid-yield` | the runtime and its types (client and server builds, development and production) |
-| `solid-yield/h` | the no-JSX flavor (`h`), which also needs `@solidjs/h` |
-| `solid-yield/jsx-runtime`, `solid-yield/jsx-dev-runtime` | the JSX namespace for `jsxImportSource` |
+| Import                                                   | What                                                                             |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `solid-yield`                                            | the runtime and its types (client and server builds, development and production) |
+| `solid-yield/h`                                          | the no-JSX flavor (`h`), which also needs `@solidjs/h`                           |
+| `solid-yield/jsx-runtime`, `solid-yield/jsx-dev-runtime` | the JSX namespace for `jsxImportSource`                                          |
 
 `test/exports-matrix.test.mjs` pins which file each entry point resolves to under each condition: development, default, browser, node, and types.
 

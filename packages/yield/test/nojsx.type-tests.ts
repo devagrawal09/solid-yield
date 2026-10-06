@@ -3,7 +3,7 @@
  * executed.
  */
 import {
-  $component,
+  component,
   $event,
   $memo,
   $signal,
@@ -27,7 +27,7 @@ declare function fetchUser(): Promise<{ name: string }>;
 /** Pending until its first value, and never failing (as a server border states it). */
 declare const pendingUser: Source<{ name: string }, never, true>;
 
-export const Settled = $component(function* () {
+export const Settled = component(function* () {
   const [n] = yield* $signal(1);
   const doubled = yield* $memo(function* () {
     return (yield* n) * 2;
@@ -57,7 +57,7 @@ export const thunkChild = h("p", () => 1);
 export const thunkAttr = h("p", { title: () => "x" });
 
 // a view does not read (D-032): a no-JSX view yields nothing
-export const ReadsInView = $component(function* () {
+export const ReadsInView = component(function* () {
   const [n] = yield* $signal(1);
   // @ts-expect-error [HVIEW_READ]
   return view(function* () {
@@ -66,7 +66,7 @@ export const ReadsInView = $component(function* () {
   });
 });
 // a child view is h(Child, props), not a yield* in the view
-export const YieldsChild = $component(function* () {
+export const YieldsChild = component(function* () {
   // @ts-expect-error [HVIEW_READ]
   return view(function* () {
     return h("div", yield* ReadsInView());
@@ -74,7 +74,7 @@ export const YieldsChild = $component(function* () {
 });
 
 // pending holes make the output (and so the view) pending
-export const Pending = $component(function* () {
+export const Pending = component(function* () {
   const user = pendingUser;
   return view(function* () {
     return h("p", function* () {
@@ -106,7 +106,7 @@ const fragmentSettled: HView<false, never> = h([h("i", "x"), h(Pending, {})]);
 void fragmentSettled;
 
 // row routines in h
-export const Rows = $component(function* () {
+export const Rows = component(function* () {
   const [items] = yield* $signal(["a"]);
   return view(function* () {
     return h(
@@ -150,7 +150,7 @@ const listedSettled: View<false, never> = For({
 void listedSettled;
 
 // view() holds an h view to the no-body rule where it is written (D-054)
-export const WrappedReads = $component(function* () {
+export const WrappedReads = component(function* () {
   const [n] = yield* $signal(1);
   // @ts-expect-error [HVIEW_READ] at the view
   return view(function* () {
@@ -160,7 +160,7 @@ export const WrappedReads = $component(function* () {
 
 // the h form's row signature is the JSX form's (D-055)
 type Is<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
-export const HRowSignature = $component(function* () {
+export const HRowSignature = component(function* () {
   const [list] = yield* $signal([{ id: 1 }]);
   return view(function* () {
     return For({
@@ -186,17 +186,17 @@ class FetchError extends Error {
 type Todo = { title: string };
 declare const settledTodo: Source<Todo>;
 declare const asyncTodo: Source<Todo, FetchError, true>;
-const Item = $component(function* (props: Props<{ todo: Todo }>) {
+const Item = component(function* (props: Props<{ todo: Todo }>) {
   return view(function* () {
     return h("li", props.todo.title);
   });
 });
-const AsyncItem = $component(function* (props: Props<{ todo: Source<Todo, FetchError, true> }>) {
+const AsyncItem = component(function* (props: Props<{ todo: Source<Todo, FetchError, true> }>) {
   return view(function* () {
     return h("li", props.todo.title);
   });
 });
-const Through = $component(function* <E, P extends boolean>(
+const Through = component(function* <E, P extends boolean>(
   props: Props<{ todo: Source<Todo, E, P> }>
 ) {
   return view(function* () {
@@ -205,7 +205,7 @@ const Through = $component(function* <E, P extends boolean>(
     return h("ul", AsyncItemOf({ todo: props.todo }));
   });
 });
-const AsyncItemOf = $component(function* <E, P extends boolean>(
+const AsyncItemOf = component(function* <E, P extends boolean>(
   props: Props<{ todo: Source<Todo, E, P> }>
 ) {
   return view(function* () {
@@ -221,7 +221,7 @@ export const hAsyncSettled = h("ul", h(AsyncItem, { todo: settledTodo }));
 export const hThrough: View<true, FetchError> = Through({ todo: asyncTodo });
 export const hThroughSettled: View<false, never> = Through({ todo: settledTodo });
 // children given in the props object are checked like any prop
-const Shows = $component(function* (props: Props<{ children: number }>) {
+const Shows = component(function* (props: Props<{ children: number }>) {
   return view(function* () {
     return h("b", props.children);
   });
@@ -232,7 +232,7 @@ export const hChildrenOk = h(Shows, { children: 1 });
 export const hChildrenBad = h(Shows, { children: pendingCount });
 
 // --- an event attribute takes an $event handler, bound by h (D-072) -----------------------------
-export const PlainHandler = $component(function* () {
+export const PlainHandler = component(function* () {
   return view(function* () {
     // @ts-expect-error a plain function: the DOM would call it with its colors in no type (D-071)
     return h("button", { onClick: () => {} }, "go");

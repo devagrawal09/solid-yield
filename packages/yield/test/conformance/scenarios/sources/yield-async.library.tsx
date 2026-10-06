@@ -1,4 +1,4 @@
-import { $component, $memo, attempt, Errored, Loading, view, type Props } from "solid-yield";
+import { component, $memo, attempt, Errored, Loading, view, type Props } from "solid-yield";
 import { h, NotFound } from "conformance";
 
 const notFound = (cause: unknown) =>
@@ -6,7 +6,7 @@ const notFound = (cause: unknown) =>
 /** The fallback's one hole: records what the boundary caught. */
 const caught = (error: NotFound) => (h.caught("errored", error), "error");
 
-const User = $component(function* User(props: Props<{ id: string }>) {
+const User = component(function* User(props: Props<{ id: string }>) {
   const user = yield* $memo(function* () {
     const id = yield* props.id;
     return yield* attempt(() => h.task<{ name: string }>("load", id), notFound);
@@ -16,7 +16,7 @@ const User = $component(function* User(props: Props<{ id: string }>) {
   });
 });
 
-export const App = $component(function* App() {
+export const App = component(function* App() {
   return view(function* () {
     return (
       <main>

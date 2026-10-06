@@ -5,14 +5,14 @@
 //
 // What the library's rules change here:
 // - every read and write is a `yield*`: no plain Solid state in routine code;
-// - components are `$component`s: setups read the context (`yield* TodosContext`)
+// - components are `component`s: setups read the context (`yield* TodosContext`)
 //   and create handlers (`$event`); views read in JSX holes;
 // - the todos store is an `$optimisticStore` whose body fetches (pending
 //   until the first fetch lands); structural reads go through `readStore`;
 // - a view that reads a pending store is pending, so the loading boundary
 //   receives the two sections in its lazy view: `{yield* MainSection(…)}{yield* Footer(…)}`.
 import {
-  $component,
+  component,
   $event,
   $signal,
   $memo,
@@ -41,7 +41,7 @@ function* useTodos() {
 type Input = InputEvent & { currentTarget: HTMLInputElement };
 type Key = KeyboardEvent & { currentTarget: HTMLInputElement };
 
-const Header = $component(function* Header() {
+const Header = component(function* Header() {
   const [s, set] = yield* $signal(0);
   const ss = yield* $memo(function* () {
     return yield* s;
@@ -67,7 +67,7 @@ const Header = $component(function* Header() {
   });
 });
 
-const TodoItem = $component(function* TodoItem(props: Props<{ todo: Todo }>) {
+const TodoItem = component(function* TodoItem(props: Props<{ todo: Todo }>) {
   const [, { toggleTodo, removeTodo, retryTodo }] = yield* useTodos();
   const toggle = $event(function* (e: Input) {
     yield* toggleTodo(yield* props.todo.id, e.currentTarget.checked);
@@ -117,7 +117,7 @@ const TodoItem = $component(function* TodoItem(props: Props<{ todo: Todo }>) {
   });
 });
 
-const MainSection = $component(function* MainSection(props: Props<{ filter: Filter }>) {
+const MainSection = component(function* MainSection(props: Props<{ filter: Filter }>) {
   const [todos, { toggleAll }] = yield* useTodos();
   const filtered = yield* $memo(function* () {
     const f = yield* props.filter;
@@ -176,7 +176,7 @@ const MainSection = $component(function* MainSection(props: Props<{ filter: Filt
   });
 });
 
-const Footer = $component(function* Footer(props: Props<{ filter: Filter }>) {
+const Footer = component(function* Footer(props: Props<{ filter: Filter }>) {
   const [todos, { clearCompleted }] = yield* useTodos();
   const remaining = yield* $memo(function* () {
     return yield* readStore(todos, t => t.filter(x => !x.completed).length);
@@ -247,7 +247,7 @@ const Footer = $component(function* Footer(props: Props<{ filter: Filter }>) {
 });
 
 /** The app's section: its list and footer read the store, so it waits for it and fails with it. */
-const TodoApp = $component(function* TodoApp(props: Props<{ filter: Filter }>) {
+const TodoApp = component(function* TodoApp(props: Props<{ filter: Filter }>) {
   return view(function* () {
     return (
       <section class="todoapp">
@@ -267,7 +267,7 @@ const TodoApp = $component(function* TodoApp(props: Props<{ filter: Filter }>) {
   });
 });
 
-export const App = $component(function* App() {
+export const App = component(function* App() {
   const filter = yield* hashFilter();
   const todos = yield* createTodos();
   return view(function* () {

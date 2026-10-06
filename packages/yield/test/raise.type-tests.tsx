@@ -7,7 +7,7 @@
 import {
   attempt,
   $cleanup,
-  $component,
+  component,
   $effect,
   $event,
   $memo,
@@ -72,7 +72,7 @@ export type RaiseUnion = Expect<Equal<FailsOf<Raise<Boom> | Raise<Other>>, Boom 
 // SetupOp. (At run time a raise reached through a cast still reaches the nearest Errored;
 // raise.spec.tsx.)
 // @ts-expect-error Raise is not a SetupOp
-export const SetupRaises = $component(function* SetupRaises() {
+export const SetupRaises = component(function* SetupRaises() {
   yield* raise(new Boom());
   return view(function* () {
     return <i />;
@@ -80,12 +80,12 @@ export const SetupRaises = $component(function* SetupRaises() {
 });
 
 // --- a hole: a zero-arity function* given as a prop (D-065), read in the child's hole -----
-const Child = $component(function* Child(props: Props<{ n: Source<number, Boom> }>) {
+const Child = component(function* Child(props: Props<{ n: Source<number, Boom> }>) {
   return view(function* () {
     return <i>{yield* props.n}</i>;
   });
 });
-export const Hole = $component(function* Hole() {
+export const Hole = component(function* Hole() {
   return view(function* () {
     return (
       <b>
@@ -104,7 +104,7 @@ export type HoleChild = Expect<Equal<ViewFailsOf<ReturnType<typeof Child>>, Boom
 export type HoleCaller = Expect<Equal<ViewFailsOf<ReturnType<typeof Hole>>, Boom>>;
 // a flow control's source hole (D-038): its raise colors the flow control's output. The
 // hole always raises (it returns `never`): until D-070 F3 that dropped its Raise entirely.
-export const When = $component(function* When() {
+export const When = component(function* When() {
   return view(function* () {
     return (
       <p>
@@ -124,7 +124,7 @@ export const When = $component(function* When() {
 });
 export type WhenCaller = Expect<Equal<ViewFailsOf<ReturnType<typeof When>>, Boom>>;
 // a hole that raises is refused for a prop declared settled (D-024)
-const Settled = $component(function* Settled(props: Props<{ n: number }>) {
+const Settled = component(function* Settled(props: Props<{ n: number }>) {
   return view(function* () {
     return <i>{yield* props.n}</i>;
   });
@@ -137,7 +137,7 @@ export const settledRefuses = Settled({
 });
 
 // --- memo: its source fails with what it raises; a hole reading it colors the view ------
-export const Memo = $component(function* Memo() {
+export const Memo = component(function* Memo() {
   const m = yield* $memo(function* () {
     const [flag] = [true];
     if (flag) yield* raise(new Boom());
@@ -151,7 +151,7 @@ export const Memo = $component(function* Memo() {
 export type MemoView = Expect<Equal<ViewFailsOf<ReturnType<typeof Memo>>, Boom>>;
 export type MemoSettled = Expect<Equal<ViewPendingOf<ReturnType<typeof Memo>>, false>>;
 // two raises: the union
-export const MemoTwo = $component(function* MemoTwo() {
+export const MemoTwo = component(function* MemoTwo() {
   const m = yield* $memo(function* () {
     const [a, b] = [true, false];
     if (a) yield* raise(new Boom());
@@ -168,7 +168,7 @@ export type MemoTwoView = Expect<Equal<ViewFailsOf<ReturnType<typeof MemoTwo>>, 
 // `$effect` / `$settled` give `Yieldable<Create<…, FailsOf<body>>, void>`: what the body
 // raises is in the setup's yield union, and so in the component's view, as it fails at run
 // time (to the nearest Errored above the component, or re-thrown; raise.spec.tsx).
-export const Effect = $component(function* Effect() {
+export const Effect = component(function* Effect() {
   yield* $effect(
     function* () {},
     function* () {
@@ -192,7 +192,7 @@ export type EffectCreate = Expect<
 >;
 // an effect that handles its failure itself — an attempt whose `onError` absorbs it (returns
 // nothing, D-076) — adds none; the attempt gives `T | undefined`
-export const EffectAbsorbs = $component(function* EffectAbsorbs() {
+export const EffectAbsorbs = component(function* EffectAbsorbs() {
   yield* $effect(
     function* () {},
     function* () {
@@ -223,7 +223,7 @@ export const EffectAbsorbs = $component(function* EffectAbsorbs() {
 });
 export type EffectAbsorbsView = Expect<Equal<ViewFailsOf<ReturnType<typeof EffectAbsorbs>>, never>>;
 // …while an attempt whose `onError` returns the failure joins it
-export const EffectAttempt = $component(function* EffectAttempt() {
+export const EffectAttempt = component(function* EffectAttempt() {
   yield* $effect(
     function* () {},
     function* () {
@@ -319,7 +319,7 @@ export const genMixed = attempt(
   }
 );
 // host-op admission: a write in an event's handler is the event's …
-export const HandlerHosts = $component(function* HandlerHosts() {
+export const HandlerHosts = component(function* HandlerHosts() {
   const [count, setCount] = yield* $signal(0);
   const save = $event(function* () {
     yield* attempt(flaky, function* () {
@@ -370,7 +370,7 @@ export type UntilGen = Expect<Equal<typeof untilGen, Yieldable<Wait, number>>>;
 
 // --- D-079: $effect(compute, effect) ----------------------------------------------------
 // the compute's value is the effect phase's (and the previous one, undefined at first)
-export const Split = $component(function* Split() {
+export const Split = component(function* Split() {
   const [count, setCount] = yield* $signal(0);
   const [label, setLabel] = yield* $signal("");
   yield* $effect(
@@ -425,7 +425,7 @@ export const Split = $component(function* Split() {
 });
 // both halves' failures are the component's (D-073 for the compute; the effect phase's take
 // the same runtime path)
-export const SplitFails = $component(function* SplitFails() {
+export const SplitFails = component(function* SplitFails() {
   const [n] = yield* $signal(0);
   yield* $effect(
     function* () {
@@ -453,7 +453,7 @@ export type SplitCreate = Expect<
 >;
 
 // an effect delegating to a synchronous event that fails joins the event's failure
-export const EffectCalls = $component(function* EffectCalls() {
+export const EffectCalls = component(function* EffectCalls() {
   const fail = $event(function* () {
     yield* raise(new Other());
   });
@@ -469,7 +469,7 @@ export const EffectCalls = $component(function* EffectCalls() {
 });
 export type EffectCallsView = Expect<Equal<ViewFailsOf<ReturnType<typeof EffectCalls>>, Other>>;
 // a row's effect joins the flow control's output, and the holding view
-export const RowEffect = $component(function* RowEffect() {
+export const RowEffect = component(function* RowEffect() {
   const [items] = yield* $signal([1]);
   return view(function* () {
     return (
@@ -497,7 +497,7 @@ export const RowEffect = $component(function* RowEffect() {
 export type RowEffectView = Expect<Equal<ViewFailsOf<ReturnType<typeof RowEffect>>, Boom>>;
 
 // --- event: the handler's type carries it; binding it gives it to the view (D-072) -----------
-export const Event = $component(function* Event() {
+export const Event = component(function* Event() {
   const go = $event(function* () {
     yield* raise(new Boom());
   });
@@ -530,7 +530,7 @@ export type BindOp = Expect<
 // an event that may wait on a pending read (`P`) does not make the view binding it pending:
 // the runtime never suspends a view for a call. The view carries the may-wait marker
 // instead (D-075 amended), which no boundary handles and the lint's no-unshown-wait reports
-export const EventPending = $component(function* EventPending(
+export const EventPending = component(function* EventPending(
   props: Props<{ n: Source<number, never, true> }>
 ) {
   const go = $event(function* () {
@@ -548,7 +548,7 @@ export type EventPendingMayWait = Expect<
 // so it is an element: a settled view, needing no Loading
 export const eventPendingElement: SettledView = EventPending({ n: pendingN });
 // the marker folds like pending: through a flow control's content and a child view
-export const EventPendingNested = $component(function* EventPendingNested(
+export const EventPendingNested = component(function* EventPendingNested(
   props: Props<{ n: Source<number, never, true> }>
 ) {
   const go = $event(function* () {
@@ -575,7 +575,7 @@ export type EventPendingNestedView = Expect<
 export type EventPendingNestedMayWait = Expect<
   Equal<ViewMayWaitOf<ReturnType<typeof EventPendingNested>>, true>
 >;
-export const EventPendingParent = $component(function* EventPendingParent() {
+export const EventPendingParent = component(function* EventPendingParent() {
   return view(function* () {
     return <div>{yield* EventPending({ n: pendingN })}</div>;
   });
@@ -587,7 +587,7 @@ export type EventPendingParentMayWait = Expect<
   Equal<ViewMayWaitOf<ReturnType<typeof EventPendingParent>>, true>
 >;
 // async work of its own (`A`) is not pending: the view does not wait for a call
-export const EventAsync = $component(function* EventAsync() {
+export const EventAsync = component(function* EventAsync() {
   const go = $event(function* () {
     yield* attempt(
       () => Promise.resolve(1),
@@ -601,7 +601,7 @@ export const EventAsync = $component(function* EventAsync() {
 export type EventAsyncView = Expect<Equal<ViewPendingOf<ReturnType<typeof EventAsync>>, false>>;
 export type EventAsyncFails = Expect<Equal<ViewFailsOf<ReturnType<typeof EventAsync>>, Boom>>;
 // the bound-data form, `[yield* pick, data]`: pick(data, event)
-export const EventData = $component(function* EventData() {
+export const EventData = component(function* EventData() {
   const pick = $event(function* (value: string) {
     if (value === "") yield* raise(new Other());
   });
@@ -616,7 +616,7 @@ export const hBound = h("button", {
 });
 export type HBound = Expect<Equal<typeof hBound, HView<false, Boom, true>>>;
 // bind belongs to a view: an event, a memo or a hole prop does not bind
-export const NoBindInEvent = $component(function* NoBindInEvent() {
+export const NoBindInEvent = component(function* NoBindInEvent() {
   const go = $event(function* () {});
   // @ts-expect-error Bind is not an EventOp: an event calls another (`yield* go()`)
   const outer = $event(function* () {
@@ -634,7 +634,7 @@ export const NoBindInEvent = $component(function* NoBindInEvent() {
 });
 
 // --- row: a row's raise joins the flow control's output, and the holding view (D-059) -------
-export const Row = $component(function* Row() {
+export const Row = component(function* Row() {
   const [items] = yield* $signal([1]);
   return view(function* () {
     return (
@@ -661,7 +661,7 @@ export const Row = $component(function* Row() {
 export type RowView = Expect<Equal<ViewFailsOf<ReturnType<typeof Row>>, Boom>>;
 
 // --- an event attribute takes a bound `$event` handler, nothing else (D-072) ---------------
-export const Refusals = $component(function* Refusals(
+export const Refusals = component(function* Refusals(
   props: Props<{ onSave: EventHandler<[], Boom, void, false, false>; fn: () => void }>
 ) {
   const go = $event(function* () {});
@@ -684,7 +684,7 @@ export const Refusals = $component(function* Refusals(
   });
 });
 // a handler given as a prop is called by an $event of the child's, which joins its colors
-export const ForwardsHandler = $component(function* ForwardsHandler(
+export const ForwardsHandler = component(function* ForwardsHandler(
   props: Props<{ onSave: EventHandler<[], Boom, void, false, false> }>
 ) {
   const save = $event(function* () {
@@ -699,7 +699,7 @@ export type ForwardsHandlerView = Expect<
 >;
 
 // --- Errored: reset is already bound; a row fallback binds; the fallback's colors pass on -----
-export const ResetBound = $component(function* ResetBound() {
+export const ResetBound = component(function* ResetBound() {
   return view(function* () {
     return (
       <>
@@ -716,7 +716,7 @@ export const ResetBound = $component(function* ResetBound() {
   });
 });
 export type ResetBoundView = Expect<Equal<ViewFailsOf<ReturnType<typeof ResetBound>>, never>>;
-const Fails = $component(function* Fails() {
+const Fails = component(function* Fails() {
   const m = yield* $memo(function* () {
     return yield* raise(new Boom());
   });
@@ -725,7 +725,7 @@ const Fails = $component(function* Fails() {
   });
 });
 // a row fallback: its error is a path, its handlers are bound, its failures pass on (D-071)
-export const RowFallback = $component(function* RowFallback() {
+export const RowFallback = component(function* RowFallback() {
   return view(function* () {
     return (
       <>
@@ -757,13 +757,13 @@ export const RowFallback = $component(function* RowFallback() {
 });
 export type RowFallbackView = Expect<Equal<ViewFailsOf<ReturnType<typeof RowFallback>>, Other>>;
 // a lazy-view fallback's colors pass on too (before D-071 they were dropped)
-const Pends = $component(function* Pends(props: Props<{ n: Source<number, never, true> }>) {
+const Pends = component(function* Pends(props: Props<{ n: Source<number, never, true> }>) {
   return view(function* () {
     return <i>{yield* props.n}</i>;
   });
 });
 declare const pendingN: Source<number, never, true>;
-export const LazyFallback = $component(function* LazyFallback() {
+export const LazyFallback = component(function* LazyFallback() {
   return view(function* () {
     return (
       <>
@@ -858,7 +858,7 @@ export type KeepBoom = Expect<
   Equal<FailsOf<typeof keepBoom extends Yieldable<infer Y, any> ? Y : never>, Boom>
 >;
 // in an event the caller's type follows: absorbed, none of the call's failures
-export const AttemptCallEvent = $component(function* AttemptCallEvent() {
+export const AttemptCallEvent = component(function* AttemptCallEvent() {
   const outer = $event(function* () {
     return yield* attempt(
       () => failing(),
@@ -876,7 +876,7 @@ export type AttemptCallEventView = Expect<
   Equal<ViewFailsOf<ReturnType<typeof AttemptCallEvent>>, never>
 >;
 // an effect may attempt a synchronous call (as it may delegate to one), absorbing its failure
-export const AttemptCallEffect = $component(function* AttemptCallEffect() {
+export const AttemptCallEffect = component(function* AttemptCallEffect() {
   yield* $effect(
     function* () {},
     function* () {
@@ -894,7 +894,7 @@ export type AttemptCallEffectView = Expect<
   Equal<ViewFailsOf<ReturnType<typeof AttemptCallEffect>>, never>
 >;
 // …but not one that waits
-export const AttemptAsyncCallEffect = $component(function* AttemptAsyncCallEffect() {
+export const AttemptAsyncCallEffect = component(function* AttemptAsyncCallEffect() {
   yield* $effect(
     function* () {},
     // @ts-expect-error an $effect does not wait: EventCallOp<true, true> is not an EffectOp
@@ -949,7 +949,7 @@ export type StreamLater = Expect<
     Yieldable<Wait | StreamOp | Raise<Boom>, AsyncIterable<number> & Handled>
   >
 >;
-export const StreamHosts = $component(function* StreamHosts() {
+export const StreamHosts = component(function* StreamHosts() {
   // a reactive routine consumes a stream: a $memo returns it
   const live = yield* $memo(function* () {
     return yield* attempt(
@@ -1025,7 +1025,7 @@ const effectOverPending = $effect(
 export type EffectOverPending = Expect<
   Equal<typeof effectOverPending, Yieldable<Create<"effect", never>, void>>
 >;
-export const EffectWaits = $component(function* EffectWaits() {
+export const EffectWaits = component(function* EffectWaits() {
   yield* $effect(
     function* () {
       return yield* n;
@@ -1045,17 +1045,17 @@ export const effectWaitsElement: SettledView = EffectWaits();
 // `foreign(Comp)` is the handoff's check: a component that may pend is accepted (the app's
 // `Loading` shows it), one that may fail is `[FOREIGN_HANDOFF]`, the property's type naming its
 // failures. Identity: it returns the component's own type.
-const FSettles = $component(function* FSettles() {
+const FSettles = component(function* FSettles() {
   return view(function* () {
     return <i />;
   });
 });
-const FPends = $component(function* FPends() {
+const FPends = component(function* FPends() {
   return view(function* () {
     return <i>{yield* n}</i>;
   });
 });
-const FFails = $component(function* FFails() {
+const FFails = component(function* FFails() {
   const m = yield* $memo(function* () {
     yield* raise(new Boom("x"));
     return 1;
@@ -1064,7 +1064,7 @@ const FFails = $component(function* FFails() {
     return <i>{yield* m}</i>;
   });
 });
-const FHandles = $component(function* FHandles() {
+const FHandles = component(function* FHandles() {
   return view(function* () {
     return (
       <>

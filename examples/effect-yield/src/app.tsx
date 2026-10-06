@@ -1,5 +1,5 @@
 import {
-  $component,
+  component,
   $event,
   $memo,
   $signal,
@@ -21,7 +21,7 @@ type Tab = "typeahead" | "checkout";
 // write it through `log()`); the panel reads its entries and clears it. The
 // prop is read where it is used (D-042): its entries in a memo and holes,
 // its `clear` event inside the event that calls it.
-const LogPanel = $component(function* LogPanel(props: Props<{ log: Log }>) {
+const LogPanel = component(function* LogPanel(props: Props<{ log: Log }>) {
   const entries = props.log.entries;
   const newestFirst = yield* $memo(function* () {
     return [...(yield* entries)].reverse();
@@ -73,7 +73,7 @@ const LogPanel = $component(function* LogPanel(props: Props<{ log: Log }>) {
   });
 });
 
-export const App = $component(function* App() {
+export const App = component(function* App() {
   // Created before any child: the first Effects log as soon as they fork.
   const log = yield* createLog();
   const runtime = createRuntime(SearchConfigLive);

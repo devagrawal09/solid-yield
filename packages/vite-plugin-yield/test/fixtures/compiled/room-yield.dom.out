@@ -62,7 +62,7 @@ var _tmpl$35 = /* @__PURE__ */ _$template(`<p> message<!> ever in #<!>`);
 //   action) that writes the row optimistically and waits with `until`.
 // - Handlers are `$event`s.
 import { perform as _$perform } from "solid-yield";
-import { $component, $event, $memo, $optimistic, $optimisticStore, $signal, attempt, Errored, For, latestOf, Loading, readStore, Show, until, type EventHandler, type Path, type Source, type Props, view } from "solid-yield";
+import { component, $event, $memo, $optimistic, $optimisticStore, $signal, attempt, Errored, For, latestOf, Loading, readStore, Show, until, type EventHandler, type Path, type Source, type Props, view } from "solid-yield";
 import type { RouteSectionProps } from "@solidjs/router";
 import { useIdentity } from "~/lib/identity";
 import { ArchiveError, ChaosError, DeliveryError, SendError } from "~/lib/errors";
@@ -75,7 +75,7 @@ const ROOMS = [
 	"infra",
 	"random"
 ];
-const Live = $component(function* Live(props: Props<RouteSectionProps>) {
+const Live = component(function* Live(props: Props<RouteSectionProps>) {
 	const room = yield* $memo(function* () {
 		const q = String((yield* props.location.query.room) || "lobby");
 		return ROOMS.includes(q) ? q : "lobby";
@@ -102,7 +102,7 @@ const Live = $component(function* Live(props: Props<RouteSectionProps>) {
 	});
 });
 export default Live;
-const LivePage = $component(function* LivePage(props: Props<{
+const LivePage = component(function* LivePage(props: Props<{
 	room: string;
 }>) {
 	return view(function* () {
@@ -140,7 +140,7 @@ const LivePage = $component(function* LivePage(props: Props<{
 // connection. The document render watches only (`me` is null on the server
 // and until the tab's identity is minted); then the memo re-invokes and that
 // connection joins.
-const Header = $component(function* Header(props: Props<{
+const Header = component(function* Header(props: Props<{
 	room: string;
 }>) {
 	const me = yield* useIdentity();
@@ -207,7 +207,7 @@ const Header = $component(function* Header(props: Props<{
 		return _el$12;
 	});
 });
-const Joined = $component(function* Joined(props: Props<{
+const Joined = component(function* Joined(props: Props<{
 	joined: Source<boolean, LiveError, true>;
 	me: Identity | null;
 }>) {
@@ -233,7 +233,7 @@ const Joined = $component(function* Joined(props: Props<{
 		});
 	});
 });
-const Members = $component(function* Members(props: Props<{
+const Members = component(function* Members(props: Props<{
 	who: Source<Presence, LiveError, true>;
 	me: Identity | null;
 }>) {
@@ -280,7 +280,7 @@ const Members = $component(function* Members(props: Props<{
 });
 // The chaos switch: asks the dev server to destroy the socket of every open
 // server-function response (see vite.config.ts).
-const Chaos = $component(function* Chaos() {
+const Chaos = component(function* Chaos() {
 	const [last, setLast] = yield* $signal("");
 	const drop = $event(function* () {
 		try {
@@ -318,7 +318,7 @@ const Chaos = $component(function* Chaos() {
 type Row = Message & {
 	pending?: boolean;
 };
-const Chat = $component(function* Chat(props: Props<{
+const Chat = component(function* Chat(props: Props<{
 	room: string;
 }>) {
 	const me = yield* useIdentity();
@@ -374,7 +374,7 @@ const Chat = $component(function* Chat(props: Props<{
 });
 // Transcript only forwards the messages: it takes their color from its caller
 // (D-029), and Messages, which reads them, is generic for the same reason.
-const Transcript = $component(function* Transcript<
+const Transcript = component(function* Transcript<
 	E,
 	P extends boolean
 >(props: Props<{
@@ -401,7 +401,7 @@ const Transcript = $component(function* Transcript<
 		return _el$33;
 	});
 });
-const Messages = $component(function* Messages<
+const Messages = component(function* Messages<
 	E,
 	P extends boolean
 >(props: Props<{
@@ -455,7 +455,7 @@ type Input = InputEvent & {
 };
 // The composer is disabled until this tab has an identity. It is NOT
 // disabled while a post is in flight: actions run concurrently.
-const Composer = $component(function* Composer(props: Props<{
+const Composer = component(function* Composer(props: Props<{
 	room: string;
 	// an event that does async work (it sends, then waits for the transcript)
 	post: EventHandler<[text: string], SendError | DeliveryError, void, boolean, true>;
@@ -524,7 +524,7 @@ const Composer = $component(function* Composer(props: Props<{
 // ---------------------------------------------------------------------------
 // directory — one more live source per room, watching only (no identity).
 // A row is settled, so each entry handles its count's pending and failure.
-const Directory = $component(function* Directory(props: Props<{
+const Directory = component(function* Directory(props: Props<{
 	current: string;
 }>) {
 	return view(function* () {
@@ -549,7 +549,7 @@ const Directory = $component(function* Directory(props: Props<{
 		return _el$49;
 	});
 });
-const DirectoryEntry = $component(function* DirectoryEntry(props: Props<{
+const DirectoryEntry = component(function* DirectoryEntry(props: Props<{
 	name: string;
 	current: string;
 }>) {
@@ -601,7 +601,7 @@ const DirectoryEntry = $component(function* DirectoryEntry(props: Props<{
 		return _el$52;
 	});
 });
-const Count = $component(function* Count(props: Props<{
+const Count = component(function* Count(props: Props<{
 	who: Source<Presence, LiveError, true>;
 }>) {
 	return view(function* () {
@@ -613,7 +613,7 @@ const Count = $component(function* Count(props: Props<{
 // ---------------------------------------------------------------------------
 // roomCard — a NESTED-async answer: one object, a promise and a bounded
 // stream inside it. The child memos read INTO the answer.
-const Card = $component(function* Card(props: Props<{
+const Card = component(function* Card(props: Props<{
 	room: string;
 }>) {
 	const wire = yield* createWire();
@@ -660,7 +660,7 @@ const Card = $component(function* Card(props: Props<{
 });
 // CardBody reads the card and only forwards members and activity: those take
 // their color from the caller (D-029), as the two components reading them do.
-const CardBody = $component(function* CardBody<
+const CardBody = component(function* CardBody<
 	E,
 	P extends boolean
 >(props: Props<{
@@ -717,7 +717,7 @@ const CardBody = $component(function* CardBody<
 		];
 	});
 });
-const MemberCount = $component(function* MemberCount<
+const MemberCount = component(function* MemberCount<
 	E,
 	P extends boolean
 >(props: Props<{
@@ -737,7 +737,7 @@ const MemberCount = $component(function* MemberCount<
 		];
 	});
 });
-const ActivityLine = $component(function* ActivityLine<
+const ActivityLine = component(function* ActivityLine<
 	E,
 	P extends boolean
 >(props: Props<{
@@ -788,7 +788,7 @@ const ActivityLine = $component(function* ActivityLine<
 // connections while it is running and it errors: <Errored> shows the
 // failure and Regenerate is an explicit new call. Client-only
 // (`ssrSource: "client"`).
-const Summary = $component(function* Summary(props: Props<{
+const Summary = component(function* Summary(props: Props<{
 	room: string;
 }>) {
 	const [attemptNo, setAttempt] = yield* $signal(1);
@@ -832,7 +832,7 @@ const Summary = $component(function* Summary(props: Props<{
 		return _el$77;
 	});
 });
-const SummaryText = $component(function* SummaryText(props: Props<{
+const SummaryText = component(function* SummaryText(props: Props<{
 	room: string;
 	attempt: number;
 }>) {
@@ -853,7 +853,7 @@ const SummaryText = $component(function* SummaryText(props: Props<{
 // archive — a slow plain read in its own boundary. `on: room` makes a room
 // switch show the fallback for the new room at once. A failure is an
 // ArchiveError, handled with the page's other failures (`Errored` at its root).
-const Archive = $component(function* Archive(props: Props<{
+const Archive = component(function* Archive(props: Props<{
 	room: string;
 }>) {
 	const stats = yield* $memo(function* () {
@@ -877,7 +877,7 @@ const Archive = $component(function* Archive(props: Props<{
 		return _el$85;
 	});
 });
-const ArchiveCount = $component(function* ArchiveCount(props: Props<{
+const ArchiveCount = component(function* ArchiveCount(props: Props<{
 	stats: Source<{
 		room: string;
 		total: number;

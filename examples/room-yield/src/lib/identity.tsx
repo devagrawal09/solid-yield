@@ -6,7 +6,7 @@
 // settled on the client, so the null→identity change flows through the
 // graph: the composer enables, presence re-invokes and this tab joins.
 import {
-  $component,
+  component,
   $settled,
   $signal,
   constant,
@@ -41,7 +41,7 @@ function mint(): Identity {
 const IdentityContext = createContext(constant<Identity | null>(null));
 
 /** Holds this tab's identity for the tree below; mints it on the client once settled. */
-export const IdentityProvider = $component(function* IdentityProvider(
+export const IdentityProvider = component(function* IdentityProvider(
   props: Props<{ children: Element }>
 ) {
   const [me, setMe] = yield* $signal<Identity | null>(null);

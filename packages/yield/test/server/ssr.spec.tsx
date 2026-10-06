@@ -18,7 +18,7 @@ function stream(code: () => any, options?: object): Promise<string> {
   });
 }
 import {
-  $component,
+  component,
   $event,
   $memo,
   $signal,
@@ -46,13 +46,13 @@ const strip = (html: string) =>
 describe("server rendering", () => {
   it("renders setup state, props, row routines and context", () => {
     const Theme = createContext("light");
-    const Item = $component(function* (props: Props<{ text: string }>) {
+    const Item = component(function* (props: Props<{ text: string }>) {
       const theme = yield* Theme;
       return view(function* () {
         return <li class={theme}>{perform(props.text)}</li>;
       });
     });
-    const App = $component(function* () {
+    const App = component(function* () {
       const [items] = yield* $signal(["a", "b"]);
       const [store] = yield* $store({ title: "list" });
       const click = $event(function* () {});
@@ -107,7 +107,7 @@ describe("server rendering", () => {
   });
 
   it("a view does not read on the server either: READ_IN_VIEW", () => {
-    const ReadsInBody = $component(function* ReadsInBody() {
+    const ReadsInBody = component(function* ReadsInBody() {
       const [n] = yield* $signal(1);
       return view(function* () {
         const v = yield* n;
@@ -121,7 +121,7 @@ describe("server rendering", () => {
     // Solid's server For / Show read `each` / `when` as they are created, with
     // no observer, while the holding view runs; an anonymous component was
     // never checked, a named one was (a false READ_IN_VIEW)
-    const Named = $component(function* Named() {
+    const Named = component(function* Named() {
       const [items] = yield* $signal(["a", "b"]);
       const [shown] = yield* $signal(true);
       return view(function* () {
@@ -157,9 +157,7 @@ describe("server rendering", () => {
     // source is pending that read throws and the memo reads again when the
     // view's template resolves the hole — inside the named view's run, with
     // no observer (rendering-yield's MemoList under a Loading)
-    const List = $component(function* List(
-      props: Props<{ items: Source<string[], Failed, true> }>
-    ) {
+    const List = component(function* List(props: Props<{ items: Source<string[], Failed, true> }>) {
       return view(function* () {
         return (
           <ul>
@@ -177,7 +175,7 @@ describe("server rendering", () => {
         );
       });
     });
-    const Page = $component(function* Page() {
+    const Page = component(function* Page() {
       const items = yield* $memo(function* () {
         return yield* attempt(
           () => new Promise<string[]>(r => setTimeout(() => r(["a", "b"]), 5)),
@@ -215,7 +213,7 @@ describe("server rendering", () => {
     let setups = 0;
     let infoRuns = 0;
     const wait = <T,>(v: T) => new Promise<T>(r => setTimeout(() => r(v), 5));
-    const Facts = $component(function* Facts(
+    const Facts = component(function* Facts(
       props: Props<{ info: Source<string[], Failed, true> }>
     ) {
       return view(function* () {
@@ -235,7 +233,7 @@ describe("server rendering", () => {
         );
       });
     });
-    const Profile = $component(function* Profile(
+    const Profile = component(function* Profile(
       props: Props<{
         user: Source<{ name: string }, Failed, true>;
         info: Source<string[], Failed, true>;
@@ -271,7 +269,7 @@ describe("server rendering", () => {
       });
     });
     const LazyProfile = lazy(async () => ({ default: Profile }));
-    const Page = $component(function* Page() {
+    const Page = component(function* Page() {
       setups++;
       const user = yield* $memo(function* () {
         return yield* attempt(
@@ -301,7 +299,7 @@ describe("server rendering", () => {
   });
 
   it("an async memo resolves on the server", async () => {
-    const User = $component(function* () {
+    const User = component(function* () {
       const user = yield* $memo(function* () {
         return yield* attempt(
           () => Promise.resolve({ name: "Ada" }),

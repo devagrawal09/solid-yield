@@ -1,6 +1,6 @@
 import { Reveal, type RevealOrder } from "solid-js";
 import {
-  $component,
+  component,
   $event,
   $memo,
   $signal,
@@ -17,7 +17,7 @@ function delayedValue<T>(ms: number, value: T): Promise<T> {
   return new Promise(resolve => setTimeout(() => resolve(value), ms));
 }
 
-const CardBody = $component(function* CardBody(
+const CardBody = component(function* CardBody(
   props: Props<{ title: string; value: Source<string, RevealError, true> }>
 ) {
   return view(function* () {
@@ -38,7 +38,7 @@ export class RevealError extends Error {
   }
 }
 
-const AsyncCard = $component(function* AsyncCard(props: Props<{ delay: number; title: string }>) {
+const AsyncCard = component(function* AsyncCard(props: Props<{ delay: number; title: string }>) {
   const value = yield* $memo(function* () {
     const delay = yield* props.delay;
     const title = yield* props.title;
@@ -81,7 +81,7 @@ const AsyncCard = $component(function* AsyncCard(props: Props<{ delay: number; t
 
 type Input = InputEvent & { currentTarget: HTMLInputElement };
 
-const RevealPage = $component(function* RevealPage() {
+const RevealPage = component(function* RevealPage() {
   const [order, setOrder] = yield* $signal<RevealOrder>("sequential");
   const [collapsed, setCollapsed] = yield* $signal(true);
   const [seed, setSeed] = yield* $signal(1);

@@ -284,7 +284,7 @@ export interface RouteFinding {
 const SEPARATOR =
   "`<!--!$-->` between rows is in the compiler route's output only; rc.13's own reference does not emit it either (the fork's Solid did), so it is Solid's drift, not the route's.";
 const KEYS =
-  "The markup is the same; the hydration keys are not. The compiler route makes each `$component` view and row view a hydration id scope (`blockScope`: one slot reserved where the routine is created, its content numbered inside: `00`, `01000`, `01100`); the library route has Solid's owner ids, where each hole and each flow control called in one is an owner (`0`, `1000`, `1010`). Each route hydrates its own markup with every node kept, and the two are not interchangeable: the library client given the compiler route's markup misses every key, the root's included, and the page stays inert (hydrate-self-test.spec.ts; the reverse needs the yield compiler, which is not here).";
+  "The markup is the same; the hydration keys are not. The compiler route makes each `component` view and row view a hydration id scope (`blockScope`: one slot reserved where the routine is created, its content numbered inside: `00`, `01000`, `01100`); the library route has Solid's owner ids, where each hole and each flow control called in one is an owner (`0`, `1000`, `1010`). Each route hydrates its own markup with every node kept, and the two are not interchangeable: the library client given the compiler route's markup misses every key, the root's included, and the page stays inert (hydrate-self-test.spec.ts; the reverse needs the yield compiler, which is not here).";
 
 export const routeFindings: RouteFinding[] = [
   {

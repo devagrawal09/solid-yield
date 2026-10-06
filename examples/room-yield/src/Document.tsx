@@ -1,8 +1,8 @@
 import { HydrationScript } from "@solidjs/web";
-import { $component, type Element, type Props, view } from "solid-yield";
+import { component, type Element, type Props, view } from "solid-yield";
 
 // The document shell `start` renders the app into (a routine like the rest).
-const Document = $component(function* Document(props: Props<{ children?: Element }>) {
+const Document = component(function* Document(props: Props<{ children?: Element }>) {
   return view(function* () {
     return (
       <html lang="en">

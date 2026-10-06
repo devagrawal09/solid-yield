@@ -7,7 +7,7 @@
 // created in the setup and read through `read` / `paths`; the cart, the
 // notice and the decline toggle are routine state.
 import {
-  $component,
+  component,
   $event,
   $memo,
   $signal,
@@ -64,7 +64,7 @@ const INITIAL_CART: CartItem[] = [
  * `<Loading>`; a view that reads a pending source is pending itself, so the
  * list is its own component and the boundary receives it.
  */
-const Orders = $component(function* Orders(
+const Orders = component(function* Orders(
   props: Props<{ orders: Source<Order[], OrdersError, true> }>
 ) {
   return view(function* () {
@@ -117,7 +117,7 @@ export class OrdersError extends Error {
   }
 }
 
-export const Checkout = $component(function* Checkout() {
+export const Checkout = component(function* Checkout() {
   const [cart, setCart] = yield* $store<CartItem[]>(INITIAL_CART.map(i => ({ ...i })));
   // The optimistic orders store fetches asynchronously: pending until the
   // first fetch lands, and failing as an OrdersError.

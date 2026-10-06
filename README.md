@@ -1,6 +1,6 @@
 # solid-yield
 
-Yield components for Solid 2 as a library: `$component(function* (props) { setup; return view(function* () { view }) })`, interpreted at run time on Solid's public API, with strict types for every read, write, wait and failure.
+Yield components for Solid 2 as a library: `component(function* (props) { setup; return view(function* () { view }) })`, interpreted at run time on Solid's public API, with strict types for every read, write, wait and failure.
 
 **This is the strict dialect; the compiler route is the ergonomic one.** The same model is baked into Solid's compiler and core on the `experiment/iterable-signals` branch. This repository is the userland counterpart. It is a design lab (D-002): every read and write is a `yield*`, failures are typed, a view has no body, components are called and not tagged. Each of these rules is enforced by types, a development error or a lint rule. Where the model is awkward, the awkwardness is a finding and goes into [`documentation/DECISIONS.md`](documentation/DECISIONS.md), not behind an escape hatch. The types say exactly what the runtime does (D-071): a pending read or a failure the runtime routes somewhere is in the type at the same place.
 
@@ -8,11 +8,11 @@ Yield components for Solid 2 as a library: `$component(function* (props) { setup
 
 ## Packages
 
-| Package | Directory | What |
-| --- | --- | --- |
-| [`solid-yield`](packages/yield) | `packages/yield` | the runtime interpreter, its types, flow controls, `render` / `hydrate`, the no-JSX `h` flavor, a JSX namespace for yield components |
-| [`vite-plugin-solid-yield`](packages/vite-plugin-yield) | `packages/vite-plugin-yield` | the one JSX rule (`yield*` inside JSX becomes `perform(…)`), run before Solid's JSX compiler, plus the library `lazy`'s module URL |
-| [`eslint-plugin-solid-yield`](packages/eslint-plugin-yield) | `packages/eslint-plugin-yield` | the rules TypeScript cannot express |
+| Package                                                     | Directory                      | What                                                                                                                                 |
+| ----------------------------------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| [`solid-yield`](packages/yield)                             | `packages/yield`               | the runtime interpreter, its types, flow controls, `render` / `hydrate`, the no-JSX `h` flavor, a JSX namespace for yield components |
+| [`vite-plugin-solid-yield`](packages/vite-plugin-yield)     | `packages/vite-plugin-yield`   | the one JSX rule (`yield*` inside JSX becomes `perform(…)`), run before Solid's JSX compiler, plus the library `lazy`'s module URL   |
+| [`eslint-plugin-solid-yield`](packages/eslint-plugin-yield) | `packages/eslint-plugin-yield` | the rules TypeScript cannot express                                                                                                  |
 
 They depend on **published** Solid: `solid-js`, `@solidjs/web` and, for `h`, `@solidjs/h`, all at `^2.0.0-rc.11`. This resolves to `2.0.0-rc.13` today. There is no workspace link to Solid and no pinned RC (D-016).
 

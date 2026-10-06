@@ -1,7 +1,7 @@
 // The example's tiny router (examples/rendering's, as yield components): the location
 // is a `$signal` provided through context; `Link` navigates with an `$event`.
 import {
-  $component,
+  component,
   $event,
   $memo,
   $signal,
@@ -40,7 +40,7 @@ const RouterContext = createContext<RouterValue>({
 });
 
 function RouteHOC<P extends boolean, E>(Comp: Component<{}, P, E>) {
-  return $component(function* Router(props: Props<{ url?: string }>) {
+  return component(function* Router(props: Props<{ url?: string }>) {
     // The location the router navigated to, or none yet: then the URL a
     // server render starts from (a prop: read where the location is derived,
     // D-042), else the document's.
@@ -73,7 +73,7 @@ function* useRouter() {
   return yield* RouterContext;
 }
 
-const Link = $component(function* Link(props: Props<{ path: string; children: Element }>) {
+const Link = component(function* Link(props: Props<{ path: string; children: Element }>) {
   const { setLocation } = yield* useRouter();
   const navigate = $event(function* (event: MouseEvent) {
     event.preventDefault();

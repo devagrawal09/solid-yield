@@ -1,11 +1,11 @@
-import { $component, $event, attempt, Errored, view } from "solid-yield";
+import { component, $event, attempt, Errored, view } from "solid-yield";
 import { h, Forbidden } from "conformance";
 
 const forbidden = (cause: unknown) =>
   cause instanceof Forbidden ? cause : new Forbidden(String(cause));
 const caught = (error: unknown) => (h.caught("boundary", error), (error as Error).name);
 
-const Saver = $component(function* Saver() {
+const Saver = component(function* Saver() {
   const [status, ss] = yield* h.$signal("status", "idle");
   // a DOM dispatch ignores the call's promise, so its failure goes to the
   // Errored above where the event is bound (D-085)
@@ -24,7 +24,7 @@ const Saver = $component(function* Saver() {
   });
 });
 
-export const App = $component(function* App() {
+export const App = component(function* App() {
   return view(function* () {
     return (
       <>

@@ -2,7 +2,7 @@
 // type-checked (test-types), linted with the twins' lint (test:conformance's
 // lint step) and run (getting-started.spec.tsx): edit the two together.
 import {
-  $component,
+  component,
   $event,
   $memo,
   $signal,
@@ -33,7 +33,7 @@ export function fetchUser(id: number): Promise<User> {
 }
 
 // --- 1. a counter: setup, view, hole, event ------------------------------------------------
-export const Counter = $component(function* Counter(props: Props<{ step: number }>) {
+export const Counter = component(function* Counter(props: Props<{ step: number }>) {
   // setup: creates, never reads
   const [count, setCount] = yield* $signal(0);
   const add = $event(function* () {
@@ -50,7 +50,7 @@ export const Counter = $component(function* Counter(props: Props<{ step: number 
 });
 
 // --- 2. a child that declares the colors it accepts ----------------------------------------
-export const UserCard = $component(function* UserCard(
+export const UserCard = component(function* UserCard(
   props: Props<{ user: Source<User, NotFound, true> }>
 ) {
   return view(function* () {
@@ -59,7 +59,7 @@ export const UserCard = $component(function* UserCard(
 });
 
 // --- 3. the app: async data, a typed failure, boundaries, a flow control -------------------
-export const App = $component(function* App() {
+export const App = component(function* App() {
   const [id, setId] = yield* $signal(1);
   // a memo reads, then waits; it retries once, and its failure has a type
   const user = yield* $memo(function* () {

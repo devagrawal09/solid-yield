@@ -1,7 +1,7 @@
-import { $component, $event, $memo, view } from "solid-yield";
+import { component, $event, $memo, view } from "solid-yield";
 import { h } from "conformance";
 
-export const App = $component(function* App() {
+export const App = component(function* App() {
   h.run("setup");
   const [count, setCount] = yield* h.$signal("count", 1);
   const doubled = yield* $memo(function* () {

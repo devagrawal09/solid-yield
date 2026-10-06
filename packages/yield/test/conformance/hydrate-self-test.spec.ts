@@ -43,7 +43,7 @@ test("the comparator catches a hydration-ID mismatch", async () => {
       "  return view(function* () {\n    return (\n      <ul>",
       "  yield* $memo(function* () {\n    return 0;\n  });\n  return view(function* () {\n    return (\n      <ul>"
     ],
-    ["import { $component, $event, $store,", "import { $component, $event, $memo, $store,"]
+    ["import { component, $event, $store,", "import { component, $event, $memo, $store,"]
   ]);
   const observed = await observeHydrate(mutant, candidate, runtime, artifact);
   const verdict = judge(expectation, reference.trace, observed.trace);

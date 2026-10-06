@@ -46,7 +46,7 @@ function hasBrand(type, seen = new Set()) {
  * Whether `node` (an Identifier, a JSXIdentifier, a member expression) names a
  * yield component. With type information: it returns a marked view. Without:
  * imported from `solid-yield` (the flow controls and boundaries), or bound
- * to `$component(…)` / `lazy(…)`. Unknown (a component imported from another
+ * to `component(…)` / `lazy(…)`. Unknown (a component imported from another
  * module, without types) is not reported.
  */
 export function isYieldComponent(context, node) {
@@ -70,7 +70,7 @@ export function isYieldComponent(context, node) {
     !!init &&
     init.type === "CallExpression" &&
     init.callee.type === "Identifier" &&
-    (init.callee.name === "$component" || init.callee.name === "lazy")
+    (init.callee.name === "component" || init.callee.name === "lazy")
   );
 }
 

@@ -1,5 +1,5 @@
 import {
-  $component,
+  component,
   $event,
   $memo,
   $signal,
@@ -50,7 +50,7 @@ function* item(props: Props<{ id: string }>) {
   return { item, setId };
 }
 
-const Title = $component(function* Title(props: Props<{ item: Source<Item, ItemError, true> }>) {
+const Title = component(function* Title(props: Props<{ item: Source<Item, ItemError, true> }>) {
   return view(function* () {
     return <div>{yield* props.item.title}</div>;
   });
@@ -80,7 +80,7 @@ function fallback(setId: Setter<string | undefined>) {
 
 // A boundary tag hands on nothing it does not handle: the inner boundary of
 // each pair is a call whose content is built inside it.
-const InnerBoundaryItem = $component(function* InnerBoundaryItem(props: Props<{ id: string }>) {
+const InnerBoundaryItem = component(function* InnerBoundaryItem(props: Props<{ id: string }>) {
   const { item: loaded, setId } = yield* item(props);
   return view(function* () {
     return (
@@ -111,7 +111,7 @@ const InnerBoundaryItem = $component(function* InnerBoundaryItem(props: Props<{ 
   });
 });
 
-const OuterBoundaryItem = $component(function* OuterBoundaryItem(props: Props<{ id: string }>) {
+const OuterBoundaryItem = component(function* OuterBoundaryItem(props: Props<{ id: string }>) {
   const { item: loaded, setId } = yield* item(props);
   return view(function* () {
     return (
@@ -142,7 +142,7 @@ const OuterBoundaryItem = $component(function* OuterBoundaryItem(props: Props<{ 
   });
 });
 
-const ErrorStream = $component(function* ErrorStream() {
+const ErrorStream = component(function* ErrorStream() {
   return view(function* () {
     return (
       <>

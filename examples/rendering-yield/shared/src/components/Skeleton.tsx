@@ -1,5 +1,5 @@
 import {
-  $component,
+  component,
   $event,
   $memo,
   $projection,
@@ -56,7 +56,7 @@ async function fetchFeed(): Promise<Feed> {
   };
 }
 
-const FeedCard = $component(function* FeedCard(props: Props<{ feed: Source<Feed, FeedError> }>) {
+const FeedCard = component(function* FeedCard(props: Props<{ feed: Source<Feed, FeedError> }>) {
   return view(function* () {
     return (
       <div
@@ -84,7 +84,7 @@ const FeedCard = $component(function* FeedCard(props: Props<{ feed: Source<Feed,
   });
 });
 
-const Skeleton = $component(function* Skeleton() {
+const Skeleton = component(function* Skeleton() {
   const [version, setVersion] = yield* $signal(0);
 
   // `loadingValue`: commit #0 is the placeholder, so the memo is never pending

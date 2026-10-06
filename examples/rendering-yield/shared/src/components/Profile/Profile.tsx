@@ -1,5 +1,5 @@
 import {
-  $component,
+  component,
   Errored,
   For,
   Loading,
@@ -17,7 +17,7 @@ export interface User {
 
 // What a `<Loading>` covers is its own component: the facts list. Profile
 // only forwards `info`, so both take its color from the caller (D-029).
-const Facts = $component(function* Facts<E, P extends boolean>(
+const Facts = component(function* Facts<E, P extends boolean>(
   props: Props<{ info: Source<string[], E, P> }>
 ) {
   return view(function* () {
@@ -39,7 +39,7 @@ const Facts = $component(function* Facts<E, P extends boolean>(
 });
 
 // Its Errored shows a failure's message: the forwarded failure is a Failure.
-const Profile = $component(function* Profile<E extends Failure, P extends boolean>(
+const Profile = component(function* Profile<E extends Failure, P extends boolean>(
   props: Props<{
     info: Source<string[], E, P>;
     user: Source<User, ProfileError, true>;

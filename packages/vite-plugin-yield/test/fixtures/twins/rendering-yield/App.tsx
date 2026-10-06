@@ -1,12 +1,12 @@
 // The routes (examples/rendering's App, as a yield component). The pages are `lazy()`
 // chunks, as in the original (the library's `lazy`: pending while its chunk
-// loads, and colored as the page's `$component`): a page may be pending (Profile)
+// loads, and colored as the page's `component`): a page may be pending (Profile)
 // or fail (Stream's stream), and nothing here handles it — as in the
 // original, the root does (CSR's render defers, streaming SSR holds the
 // response, string SSR's entry wraps the app in a Loading). So the pages are
 // rendered in call form (`{yield* Profile()}`), which hands their pending /
 // failures on, and the app's type carries them.
-import { $component, isPendingOf, lazy, Match, Switch, view } from "solid-yield";
+import { component, isPendingOf, lazy, Match, Switch, view } from "solid-yield";
 import { Link, RouteHOC, useRouter } from "../router";
 import Profile from "./Profile";
 
@@ -20,7 +20,7 @@ const RevealPage = lazy(() => import("./Reveal"));
 const Skeleton = lazy(() => import("./Skeleton"));
 
 const App = RouteHOC(
-  $component(function* Routes() {
+  component(function* Routes() {
     const { location, matches } = yield* useRouter();
     const pending = isPendingOf(location);
 

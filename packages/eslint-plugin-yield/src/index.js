@@ -755,7 +755,7 @@ const requireViewWrapper = {
         "A setup's (or a row's) view is written `view(function* () { … })` (D-089: one spelling of a view; its type errors are reported where it is written, D-054)."
     },
     messages: {
-      wrap: "wrap the view: `return view(function* () { … })` — a bare `function*` returned from a setup is not a view (D-089); with `view(…)` its type errors are reported here, not at the `$component(` call."
+      wrap: "wrap the view: `return view(function* () { … })` — a bare `function*` returned from a setup is not a view (D-089); with `view(…)` its type errors are reported here, not at the `component(` call."
     },
     schema: []
   },
@@ -884,7 +884,7 @@ function isComponentCallee(context, callee) {
 const IDENT = /^[A-Za-z_$][\w$]*$/;
 
 /**
- * D-062 / D-067: a yield component (`$component`, `lazy`, the library's flow
+ * D-062 / D-067: a yield component (`component`, `lazy`, the library's flow
  * controls and boundaries) is called — `{yield* Card({ todo })}` — never a
  * JSX tag; tags are for DOM elements and foreign (plain-Solid) components.
  * Autofix: the tag becomes the call, its attributes props (D-065), its
@@ -1146,7 +1146,7 @@ const componentChildrenGenerator = {
 };
 
 /**
- * D-086: a yield component call (a `$component`, `lazy`, a flow control or a
+ * D-086: a yield component call (a `component`, `lazy`, a flow control or a
  * boundary) in JSX is delegated to with `yield*` — `{yield* Card({ todo })}`
  * — so its pending and failures join the holding view's type. Not delegated
  * (`<>{Card({ todo })}</>`, `{[Main(), Footer()]}`, `{ok ? A() : B()}`) the
@@ -1440,7 +1440,7 @@ function importFromYield(context, fixer, name) {
  * at the handoff; this rule reports a handoff written without it. With type
  * information any expression typed as a yield component is reported (a local
  * `route(Live)` bridge too) and the message names what it may fail with;
- * without, a `$component` / `lazy` binding. Suggestion: wrap in `foreign(…)`.
+ * without, a `component` / `lazy` binding. Suggestion: wrap in `foreign(…)`.
  */
 const noUncheckedForeignHandoff = {
   meta: {

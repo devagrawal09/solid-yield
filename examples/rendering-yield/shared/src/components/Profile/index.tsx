@@ -1,11 +1,11 @@
-import { $component, $memo, attempt, lazy, view } from "solid-yield";
+import { component, $memo, attempt, lazy, view } from "solid-yield";
 import type { User } from "./Profile";
 import { ProfileError } from "./errors";
 
 const Profile = lazy(() => import("./Profile"));
 
 // this component lazy loads data and code in parallel
-export default $component(function* ProfilePage() {
+export default component(function* ProfilePage() {
   const user = yield* $memo(function* () {
     // simulate data loading
     console.log("LOAD USER");

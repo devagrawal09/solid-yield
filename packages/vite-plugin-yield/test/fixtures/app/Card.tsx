@@ -1,9 +1,9 @@
 // A fixture app for the source-map test (test/vite.test.js): holes rewritten
 // above the deliberate throw, and a hole on the same line as a call.
-import { $component, type Props, view } from "solid-yield";
+import { component, type Props, view } from "solid-yield";
 import { renderToString } from "@solidjs/web";
 
-export const Card = $component(function* Card(props: Props<{ title: string; n: number }>) {
+export const Card = component(function* Card(props: Props<{ title: string; n: number }>) {
   return view(function* () {
     return (
       <article title={yield* props.title}>

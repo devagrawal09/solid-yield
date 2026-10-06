@@ -1,9 +1,9 @@
-import { $component, $event, $memo, attempt, Loading, view } from "solid-yield";
+import { component, $event, $memo, attempt, Loading, view } from "solid-yield";
 import { h, NotFound } from "conformance";
 
 export let setId: (v: number) => unknown;
 
-export const App = $component(function* App() {
+export const App = component(function* App() {
   const [id, si] = yield* h.$signal("id", 1);
   setId = $event(function* (v: number) {
     yield* si(v);

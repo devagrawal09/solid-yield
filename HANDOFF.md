@@ -30,6 +30,7 @@ The library is feature-complete for v0.1: through D-099 every ruling is implemen
 - Make the repository public, push `main` (from outside the sandbox: `gh` and SSH to GitHub fail here, see "Publishing" below).
 - Before the first release: collapse the changesets into one initial release note (they do not mention D-097–D-099 yet); decide the plugin's peer range (the 0.x caret, "Known, recorded, not fixed"); `@solidjs/h` as a peer, the ESLint plugin's peers and description; LICENSE / `author` and Solid's MIT notice (from "Fixes with no ruling needed", below; not yet done).
 - The upstream issue `documentation/upstream/solid-ssr-memo-loop-rc13.md` awaits "file it".
+- **λ-yield.** `documentation/calculus.md` states the soundness theorem (D-071) and its 52 proof obligations (11 unevidenced); its §6.3 lists findings F-1–F-3 (an `Errored` render-function / content fallback's dropped colors, `lazy`'s untyped chunk failure, `provide({ value: undefined })`) for Dev.
 - Earlier open items below still stand unless a ruling above closed them: D-088's added boundaries now count 4 (hackernews-spa 3, room 1; rendering's went with D-099).
 
 ## Where things are

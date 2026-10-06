@@ -60,6 +60,7 @@ Changesets: `pnpm changeset`. The `.changeset/` entries are the packages' unrele
 - [`documentation/getting-started.md`](documentation/getting-started.md): install, and the strict dialect on one page (setup, view, holes, call form, colors, failures), with a first program built rule by rule.
 - [`documentation/refusals.md`](documentation/refusals.md): what you cannot write in a view, and every refusal code by layer (types, the transform, development errors, lint).
 - [`documentation/yield-library.md`](documentation/yield-library.md): the reference. Covers what the library is, every rule and where it is enforced, the runtime cost, the limitations and the twins.
+- [`documentation/calculus.md`](documentation/calculus.md): λ-yield, the core calculus. Syntax, static and dynamic semantics, the soundness theorem (D-071) stated, and its proof obligations traced to the code and the tests.
 - [`documentation/DECISIONS.md`](documentation/DECISIONS.md): the decision log (D-001 onwards), with alternatives and reasoning.
 - [`documentation/yield-gate-baseline.md`](documentation/yield-gate-baseline.md): what "green" means.
 - [`HANDOFF.md`](HANDOFF.md): where the work stands and what comes next.

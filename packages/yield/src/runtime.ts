@@ -123,7 +123,10 @@ const PATH_READ = 1;
  * crash (D-019) and goes past the handler.
  */
 const FAILURE: unique symbol = Symbol.for("solid.yield.failure") as any;
+const TYPED_FAILURES = new WeakSet<object>();
 function brand<T>(e: T): T {
+  if (e !== null && (typeof e === "object" || typeof e === "function"))
+    TYPED_FAILURES.add(e as object);
   if (
     e !== null &&
     (typeof e === "object" || typeof e === "function") &&
@@ -138,7 +141,9 @@ export const brandFailure: <T>(e: T) => T = brand;
 /** A typed failure (D-087): branded by `raise` or an attempt's handler, in every build. */
 function isFailure(e: unknown): boolean {
   return (
-    e != null && (typeof e === "object" || typeof e === "function") && (e as any)[FAILURE] === true
+    e != null &&
+    (typeof e === "object" || typeof e === "function") &&
+    (TYPED_FAILURES.has(e as object) || (e as any)[FAILURE] === true)
   );
 }
 
@@ -160,7 +165,7 @@ function known<T>(e: T): T {
 function isKnown(e: unknown): boolean {
   let x: any = e;
   for (let i = 0; i < 8 && x !== null && (typeof x === "object" || typeof x === "function"); i++) {
-    if (KNOWN.has(x) || x[FAILURE] === true) return true;
+    if (KNOWN.has(x) || isFailure(x)) return true;
     x = x.cause;
   }
   return false;

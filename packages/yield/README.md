@@ -1,6 +1,6 @@
 # solid-yield
 
-Yield components for Solid 2 as a library. A runtime interpreter on Solid's public API, with strict types.
+`solid-yield` is a library for writing Solid 2 components as yield components (generator functions in which every read is a `yield*`), so that a component's type says whether it may be pending, which errors it may fail with, and which contexts it requires. To get started, read the [repository README](https://github.com/devagrawal09/solid-yield#readme), which covers the problem, the model and using the library from source.
 
 **This is the strict dialect; the compiler route is the ergonomic one.** Solid's `experiment/iterable-signals` branch builds the same model into its compiler and core. This package does it in userland, and makes every rule checkable: types first, then development errors, then [lint rules](https://github.com/devagrawal09/solid-yield/tree/main/packages/eslint-plugin-yield). It is a design lab (D-002), not a polished end-user API. Its types say exactly what the runtime does (D-071).
 

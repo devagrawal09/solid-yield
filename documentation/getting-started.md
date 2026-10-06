@@ -630,3 +630,26 @@ Each rule is checked as early as the tools allow:
 4. **Lint** (`eslint-plugin-solid-yield`), for what TypeScript cannot see. For example: `no-read-in-view-body`, `no-read-in-prop`, `component-children-generator`, `component-call-yielded`, `no-unbound-event`, `no-throw`.
 
 [`refusals.md`](./refusals.md) puts every one of them in one place, starting with what you cannot write in a view.
+
+## SSR and hydration
+
+`hydrate(App, root)` needs the hydration script **from the server build** before the client entry runs. Import `generateHydrationScript` from `@solidjs/web` in your server entry and put its HTML in the response before the client module script:
+
+```ts
+// entry-server.ts (server build)
+import { generateHydrationScript } from "@solidjs/web";
+import { renderToString } from "solid-yield";
+import { App } from "./app";
+
+const html = `${generateHydrationScript()}<div id="app">${renderToString(App)}</div>`;
+// Send html, followed by your client module script.
+```
+
+```ts
+// entry-client.ts (client build)
+import { hydrate } from "solid-yield";
+import { App } from "./app";
+hydrate(App, document.getElementById("app")!);
+```
+
+The client build's `generateHydrationScript()` returns `""`. Without the server script, development `hydrate()` reports `[NO_HYDRATION_SCRIPT]`. In jsdom, setting `innerHTML` does not execute scripts; execute the server scripts in order before hydrating.

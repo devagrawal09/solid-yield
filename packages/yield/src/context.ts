@@ -46,13 +46,31 @@ export declare const PROVIDES: unique symbol;
 export type ContextValue<T> = [T] extends [Source<infer V, infer E, infer P>]
   ? Path<V, E, P>
   : Path<T>;
-/** What `provide`'s `value` takes (D-065): a value, a source of it or a hole, within its declared colors. */
+/**
+ * What `provide`'s `value` takes (D-065): a value, a source of it or a hole,
+ * within its declared colors. Never `undefined` itself: Solid reads a
+ * provided `undefined` as unset — its default, else no provider (calculus
+ * F-3, S11). A context that may carry nothing models it inside the value:
+ * `null`, or a source of `T | null`. A source or a hole is a provided
+ * value whatever it reads.
+ */
 export type ProvidedValue<T> = [T] extends [Source<infer V, infer E, infer P>]
   ?
-      | V
+      | Exclude<V, undefined>
       | Source<V, E, [P] extends [true] ? boolean : P>
       | HoleProp<V, E, [P] extends [true] ? boolean : P>
-  : T | Source<T> | HoleProp<T>;
+      | ProvideUndefined<V>
+  : Exclude<T, undefined> | Source<T> | HoleProp<T> | ProvideUndefined<T>;
+/**
+ * The refusal's message, when the value type admits `undefined` (TypeScript
+ * prints it in the expected type). Written inline so that it is printed
+ * rather than an alias's name.
+ */
+type ProvideUndefined<T> = undefined extends T
+  ? {
+      readonly "[PROVIDE_UNDEFINED] a provided undefined reads as no provider: provide null, or a source": never;
+    }
+  : never;
 
 /**
  * A library context. `Q` is what a setup's read of it requires: the context

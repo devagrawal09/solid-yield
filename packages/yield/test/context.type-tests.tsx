@@ -700,3 +700,53 @@ const HWrong = component(function* HWrong() {
   });
 });
 type _hWrong = Expect<Equal<RequiresOfComponent<typeof HWrong>, typeof UserCtx>>;
+
+// --- F-3: provide's value is never undefined (Solid reads it as unset, S11) -------------------
+// A context that may carry nothing models it inside the value: null, or a source of T | null.
+const MaybeUserCtx = createContext<User | null | undefined, "MaybeUserCtx">();
+const MaybeAvatar = component(function* MaybeAvatar() {
+  const user = yield* MaybeUserCtx;
+  return view(function* () {
+    return <i>{(yield* user)?.name ?? "nobody"}</i>;
+  });
+});
+MaybeUserCtx.provide({
+  // @ts-expect-error [PROVIDE_UNDEFINED] a provided undefined reads as no provider
+  value: undefined,
+  children: function* () {
+    return <>{yield* MaybeAvatar()}</>;
+  }
+});
+const nobody = MaybeUserCtx.provide({
+  value: null,
+  children: function* () {
+    return <>{yield* MaybeAvatar()}</>;
+  }
+});
+render(() => nobody, root);
+declare const maybeUser: Source<User | undefined>;
+// a source is provided whatever it reads
+MaybeUserCtx.provide({
+  value: maybeUser,
+  children: function* () {
+    return <>{yield* MaybeAvatar()}</>;
+  }
+});
+// a context of sources: the source's value type is checked the same way
+const MaybeSourceCtx = createContext<Source<User | undefined>, "MaybeSourceCtx">();
+MaybeSourceCtx.provide({
+  // @ts-expect-error [PROVIDE_UNDEFINED]
+  value: undefined,
+  children: "x"
+});
+// h's provider overload too
+// @ts-expect-error [PROVIDE_UNDEFINED]
+h(MaybeUserCtx.provide, { value: undefined }, h(MaybeAvatar, {}));
+export const hNobody = h(MaybeUserCtx.provide, { value: null }, h(MaybeAvatar, {}));
+// a context whose type does not admit undefined has no message to show
+export type NoMessage = Expect<
+  Equal<
+    Extract<Parameters<typeof UserCtx.provide>[0]["value"], { readonly [k: string]: never }>,
+    never
+  >
+>;

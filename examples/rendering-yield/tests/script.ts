@@ -1,3 +1,4 @@
+import { executedBytesCheckpoint } from "yield-example-harness";
 // The interaction script shared by the behavior tests and the differential
 // parity test: it mounts the shared App (examples/rendering's or this twin's)
 // client-side in jsdom, as the CSR variant does, and records the DOM after
@@ -149,8 +150,9 @@ export const steps: Step[] = [
 
 export async function runScript(app: Mounted): Promise<string[]> {
   const out: string[] = [];
-  for (const [, run] of steps) {
+  for (const [name, run] of steps) {
     await run();
+    executedBytesCheckpoint(name);
     // The portal renders into <body>, outside #app.
     // `createUniqueId()` values: a process-wide counter on the client (both
     // apps run in this one process), owner-tree based under SSR.

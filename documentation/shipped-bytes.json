@@ -1,0 +1,117 @@
+{
+  "metric": "production client JS chunks from Vite build(write:false); UTF-8 and sum of independently gzipped chunks; all routes",
+  "rows": [
+    {
+      "twin": "effect-yield",
+      "route": "original",
+      "js": 241430,
+      "gzip": 81964,
+      "chunks": 1
+    },
+    {
+      "twin": "effect-yield",
+      "route": "library",
+      "js": 256752,
+      "gzip": 86980,
+      "chunks": 1
+    },
+    {
+      "twin": "hackernews-spa-yield",
+      "route": "original",
+      "js": 145771,
+      "gzip": 51536,
+      "chunks": 4
+    },
+    {
+      "twin": "hackernews-spa-yield",
+      "route": "library",
+      "js": 159690,
+      "gzip": 55733,
+      "chunks": 4
+    },
+    {
+      "twin": "rendering-yield",
+      "route": "original",
+      "js": 101372,
+      "gzip": 38004,
+      "chunks": 8
+    },
+    {
+      "twin": "rendering-yield",
+      "route": "library",
+      "js": 119619,
+      "gzip": 44143,
+      "chunks": 9
+    },
+    {
+      "twin": "room-yield",
+      "route": "original",
+      "js": 242516,
+      "gzip": 82927,
+      "chunks": 4
+    },
+    {
+      "twin": "room-yield",
+      "route": "library",
+      "js": 248206,
+      "gzip": 84502,
+      "chunks": 4
+    },
+    {
+      "twin": "sierpinski-yield",
+      "route": "original",
+      "js": 40452,
+      "gzip": 15703,
+      "chunks": 1
+    },
+    {
+      "twin": "sierpinski-yield",
+      "route": "library",
+      "js": 56361,
+      "gzip": 21120,
+      "chunks": 1
+    },
+    {
+      "twin": "sierpinski-yield-h",
+      "route": "original",
+      "js": 40452,
+      "gzip": 15703,
+      "chunks": 1
+    },
+    {
+      "twin": "sierpinski-yield-h",
+      "route": "library",
+      "js": 69852,
+      "gzip": 25788,
+      "chunks": 1
+    },
+    {
+      "twin": "todos-yield",
+      "route": "original",
+      "js": 89604,
+      "gzip": 32297,
+      "chunks": 1
+    },
+    {
+      "twin": "todos-yield",
+      "route": "library",
+      "js": 104159,
+      "gzip": 37120,
+      "chunks": 1
+    },
+    {
+      "twin": "todos-yield-h",
+      "route": "original",
+      "js": 89604,
+      "gzip": 32297,
+      "chunks": 1
+    },
+    {
+      "twin": "todos-yield-h",
+      "route": "library",
+      "js": 116953,
+      "gzip": 41434,
+      "chunks": 1
+    }
+  ]
+}

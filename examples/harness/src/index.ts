@@ -82,3 +82,8 @@ export async function timed<T>(phase: string, run: () => T | Promise<T>): Promis
   }
   return out;
 }
+
+/** Optional synchronous V8 checkpoint; absent in ordinary parity runs. */
+export function executedBytesCheckpoint(phase: string): void {
+  (globalThis as { __yieldExecutedBytes?: (phase: string) => void }).__yieldExecutedBytes?.(phase);
+}

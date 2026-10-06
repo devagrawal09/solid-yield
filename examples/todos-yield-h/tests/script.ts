@@ -1,3 +1,4 @@
+import { executedBytesCheckpoint } from "yield-example-harness";
 // The interaction script shared by the behavior tests and the differential
 // parity test: it drives whichever TodoMVC is mounted in `#root`
 // (examples/todos or a twin) and records the DOM after every step.
@@ -111,8 +112,9 @@ export const steps: [name: string, run: () => unknown][] = [
 
 export async function runScript(): Promise<string[]> {
   const out: string[] = [];
-  for (const [, run] of steps) {
+  for (const [name, run] of steps) {
     await run();
+    executedBytesCheckpoint(name);
     out.push(normalize(root().innerHTML));
   }
   return out;

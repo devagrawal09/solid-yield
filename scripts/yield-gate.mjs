@@ -255,6 +255,25 @@ function buildSteps(twins) {
     args: ["--test", "packages/compiler-yield/test/hydration-namespace.test.mjs"]
   });
 
+  steps.push(
+    {
+      name: "compiler:executed-bytes-test",
+      cwd: root,
+      cmd: process.execPath,
+      args: ["--test", "examples/harness/executed-bytes/coverage.test.mjs"]
+    },
+    {
+      name: "twins:executed-bytes",
+      cwd: root,
+      cmd: process.execPath,
+      args: [
+        "examples/harness/executed-bytes/measure.mjs",
+        "--baseline",
+        "documentation/executed-bytes.json"
+      ]
+    }
+  );
+
   // The exports-conditions matrix of each published package (scripts/exports-matrix.mjs):
   // every subpath under development / default / browser / node, resolved by esbuild, Node
   // and TypeScript from a consumer's node_modules. Needs the build, like everything here.
@@ -285,6 +304,7 @@ function buildSteps(twins) {
       "packages/*/test/*.mjs",
       "examples/harness/ssr-smoke/*.mjs",
       "examples/harness/hydrate-smoke/*.mjs",
+      "examples/harness/executed-bytes/*.mjs",
       "scripts/*.mjs"
     ]
   });

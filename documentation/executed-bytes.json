@@ -1,0 +1,1873 @@
+{
+  "node": "v24.18.0",
+  "metric": "UTF-8 source bytes in executed precise-coverage ranges per phase, inline maps excluded; ranges reset each checkpoint; jsdom production conditions, Vite transformed modules",
+  "allowance": "2 percent or 1024 bytes per phase, whichever is larger",
+  "results": [
+    {
+      "twin": "effect-yield",
+      "app": "original",
+      "phases": [
+        {
+          "phase": "load",
+          "bytes": 2466307,
+          "maxBytes": 2515634
+        },
+        {
+          "phase": "mount",
+          "bytes": 1703,
+          "maxBytes": 2727
+        },
+        {
+          "phase": "type s",
+          "bytes": 272110,
+          "maxBytes": 277553
+        },
+        {
+          "phase": "type so before s lands (supersedes the s flight)",
+          "bytes": 231333,
+          "maxBytes": 235960
+        },
+        {
+          "phase": "so lands",
+          "bytes": 239994,
+          "maxBytes": 244794
+        },
+        {
+          "phase": "type sol (stale while revalidating)",
+          "bytes": 228902,
+          "maxBytes": 233481
+        },
+        {
+          "phase": "halfway",
+          "bytes": 1703,
+          "maxBytes": 2727
+        },
+        {
+          "phase": "sol lands",
+          "bytes": 231080,
+          "maxBytes": 235702
+        },
+        {
+          "phase": "type zzz",
+          "bytes": 228027,
+          "maxBytes": 232588
+        },
+        {
+          "phase": "zzz lands (no matches)",
+          "bytes": 239211,
+          "maxBytes": 243996
+        },
+        {
+          "phase": "clear the query",
+          "bytes": 103188,
+          "maxBytes": 105252
+        },
+        {
+          "phase": "flaky network: every attempt fails",
+          "bytes": 252489,
+          "maxBytes": 257539
+        },
+        {
+          "phase": "retries back off",
+          "bytes": 160178,
+          "maxBytes": 163382
+        },
+        {
+          "phase": "retries give up",
+          "bytes": 285795,
+          "maxBytes": 291511
+        },
+        {
+          "phase": "network recovers, try again",
+          "bytes": 228639,
+          "maxBytes": 233212
+        },
+        {
+          "phase": "vite lands",
+          "bytes": 240583,
+          "maxBytes": 245395
+        },
+        {
+          "phase": "clear the log",
+          "bytes": 106596,
+          "maxBytes": 108728
+        },
+        {
+          "phase": "open the checkout tab",
+          "bytes": 206353,
+          "maxBytes": 210481
+        },
+        {
+          "phase": "orders load",
+          "bytes": 126889,
+          "maxBytes": 129427
+        },
+        {
+          "phase": "increment the first item",
+          "bytes": 101858,
+          "maxBytes": 103896
+        },
+        {
+          "phase": "decrement the second item",
+          "bytes": 100436,
+          "maxBytes": 102445
+        },
+        {
+          "phase": "place an order",
+          "bytes": 186870,
+          "maxBytes": 190608
+        },
+        {
+          "phase": "reserving done, charging",
+          "bytes": 169558,
+          "maxBytes": 172950
+        },
+        {
+          "phase": "charging done, finalizing",
+          "bytes": 169205,
+          "maxBytes": 172590
+        },
+        {
+          "phase": "order created",
+          "bytes": 194267,
+          "maxBytes": 198153
+        },
+        {
+          "phase": "orders refresh",
+          "bytes": 194711,
+          "maxBytes": 198606
+        },
+        {
+          "phase": "tick decline",
+          "bytes": 62107,
+          "maxBytes": 63350
+        },
+        {
+          "phase": "place a declined order",
+          "bytes": 185000,
+          "maxBytes": 188700
+        },
+        {
+          "phase": "charge declines",
+          "bytes": 176765,
+          "maxBytes": 180301
+        },
+        {
+          "phase": "compensations run",
+          "bytes": 171313,
+          "maxBytes": 174740
+        },
+        {
+          "phase": "untick decline",
+          "bytes": 62047,
+          "maxBytes": 63288
+        },
+        {
+          "phase": "place an order to cancel",
+          "bytes": 184940,
+          "maxBytes": 188639
+        },
+        {
+          "phase": "mid-charge",
+          "bytes": 168879,
+          "maxBytes": 172257
+        },
+        {
+          "phase": "cancel",
+          "bytes": 168982,
+          "maxBytes": 172362
+        },
+        {
+          "phase": "compensations after cancel",
+          "bytes": 170621,
+          "maxBytes": 174034
+        },
+        {
+          "phase": "back to the typeahead tab (fresh component)",
+          "bytes": 106046,
+          "maxBytes": 108167
+        },
+        {
+          "phase": "settle",
+          "bytes": 1703,
+          "maxBytes": 2727
+        }
+      ]
+    },
+    {
+      "twin": "effect-yield",
+      "app": "twin",
+      "phases": [
+        {
+          "phase": "load",
+          "bytes": 2484052,
+          "maxBytes": 2533734
+        },
+        {
+          "phase": "mount",
+          "bytes": 1703,
+          "maxBytes": 2727
+        },
+        {
+          "phase": "type s",
+          "bytes": 288992,
+          "maxBytes": 294772
+        },
+        {
+          "phase": "type so before s lands (supersedes the s flight)",
+          "bytes": 242011,
+          "maxBytes": 246852
+        },
+        {
+          "phase": "so lands",
+          "bytes": 252713,
+          "maxBytes": 257768
+        },
+        {
+          "phase": "type sol (stale while revalidating)",
+          "bytes": 239376,
+          "maxBytes": 244164
+        },
+        {
+          "phase": "halfway",
+          "bytes": 1703,
+          "maxBytes": 2727
+        },
+        {
+          "phase": "sol lands",
+          "bytes": 242352,
+          "maxBytes": 247200
+        },
+        {
+          "phase": "type zzz",
+          "bytes": 238501,
+          "maxBytes": 243272
+        },
+        {
+          "phase": "zzz lands (no matches)",
+          "bytes": 250841,
+          "maxBytes": 255858
+        },
+        {
+          "phase": "clear the query",
+          "bytes": 114726,
+          "maxBytes": 117021
+        },
+        {
+          "phase": "flaky network: every attempt fails",
+          "bytes": 269228,
+          "maxBytes": 274613
+        },
+        {
+          "phase": "retries back off",
+          "bytes": 177104,
+          "maxBytes": 180647
+        },
+        {
+          "phase": "retries give up",
+          "bytes": 298447,
+          "maxBytes": 304416
+        },
+        {
+          "phase": "network recovers, try again",
+          "bytes": 240881,
+          "maxBytes": 245699
+        },
+        {
+          "phase": "vite lands",
+          "bytes": 252248,
+          "maxBytes": 257293
+        },
+        {
+          "phase": "clear the log",
+          "bytes": 122860,
+          "maxBytes": 125318
+        },
+        {
+          "phase": "open the checkout tab",
+          "bytes": 227471,
+          "maxBytes": 232021
+        },
+        {
+          "phase": "orders load",
+          "bytes": 141569,
+          "maxBytes": 144401
+        },
+        {
+          "phase": "increment the first item",
+          "bytes": 120091,
+          "maxBytes": 122493
+        },
+        {
+          "phase": "decrement the second item",
+          "bytes": 118647,
+          "maxBytes": 121020
+        },
+        {
+          "phase": "place an order",
+          "bytes": 199802,
+          "maxBytes": 203799
+        },
+        {
+          "phase": "reserving done, charging",
+          "bytes": 184677,
+          "maxBytes": 188371
+        },
+        {
+          "phase": "charging done, finalizing",
+          "bytes": 184462,
+          "maxBytes": 188152
+        },
+        {
+          "phase": "order created",
+          "bytes": 208498,
+          "maxBytes": 212668
+        },
+        {
+          "phase": "orders refresh",
+          "bytes": 201703,
+          "maxBytes": 205738
+        },
+        {
+          "phase": "tick decline",
+          "bytes": 77533,
+          "maxBytes": 79084
+        },
+        {
+          "phase": "place a declined order",
+          "bytes": 196753,
+          "maxBytes": 200689
+        },
+        {
+          "phase": "charge declines",
+          "bytes": 192000,
+          "maxBytes": 195840
+        },
+        {
+          "phase": "compensations run",
+          "bytes": 183125,
+          "maxBytes": 186788
+        },
+        {
+          "phase": "untick decline",
+          "bytes": 77293,
+          "maxBytes": 78839
+        },
+        {
+          "phase": "place an order to cancel",
+          "bytes": 196562,
+          "maxBytes": 200494
+        },
+        {
+          "phase": "mid-charge",
+          "bytes": 183799,
+          "maxBytes": 187475
+        },
+        {
+          "phase": "cancel",
+          "bytes": 191048,
+          "maxBytes": 194869
+        },
+        {
+          "phase": "compensations after cancel",
+          "bytes": 182526,
+          "maxBytes": 186177
+        },
+        {
+          "phase": "back to the typeahead tab (fresh component)",
+          "bytes": 121050,
+          "maxBytes": 123471
+        },
+        {
+          "phase": "settle",
+          "bytes": 1703,
+          "maxBytes": 2727
+        }
+      ]
+    },
+    {
+      "twin": "hackernews-spa-yield",
+      "app": "original",
+      "phases": [
+        {
+          "phase": "load",
+          "bytes": 1155016,
+          "maxBytes": 1178117
+        },
+        {
+          "phase": "mount / (loading, then the top feed)",
+          "bytes": 130985,
+          "maxBytes": 133605
+        },
+        {
+          "phase": "next page",
+          "bytes": 231729,
+          "maxBytes": 236364
+        },
+        {
+          "phase": "previous page",
+          "bytes": 222851,
+          "maxBytes": 227309
+        },
+        {
+          "phase": "New",
+          "bytes": 230011,
+          "maxBytes": 234612
+        },
+        {
+          "phase": "Ask",
+          "bytes": 230267,
+          "maxBytes": 234873
+        },
+        {
+          "phase": "Jobs",
+          "bytes": 228943,
+          "maxBytes": 233522
+        },
+        {
+          "phase": "a job's story",
+          "bytes": 233557,
+          "maxBytes": 238229
+        },
+        {
+          "phase": "collapse the first thread",
+          "bytes": 64711,
+          "maxBytes": 66006
+        },
+        {
+          "phase": "expand it",
+          "bytes": 64719,
+          "maxBytes": 66014
+        },
+        {
+          "phase": "collapse the nested reply",
+          "bytes": 64711,
+          "maxBytes": 66006
+        },
+        {
+          "phase": "a commenter",
+          "bytes": 224827,
+          "maxBytes": 229324
+        },
+        {
+          "phase": "Show",
+          "bytes": 233575,
+          "maxBytes": 238247
+        },
+        {
+          "phase": "Show page 2 (last page)",
+          "bytes": 225235,
+          "maxBytes": 229740
+        },
+        {
+          "phase": "a story's author",
+          "bytes": 225595,
+          "maxBytes": 230107
+        },
+        {
+          "phase": "home",
+          "bytes": 228898,
+          "maxBytes": 233476
+        }
+      ]
+    },
+    {
+      "twin": "hackernews-spa-yield",
+      "app": "twin",
+      "phases": [
+        {
+          "phase": "load",
+          "bytes": 541596,
+          "maxBytes": 552428
+        },
+        {
+          "phase": "mount / (loading, then the top feed)",
+          "bytes": 129210,
+          "maxBytes": 131795
+        },
+        {
+          "phase": "next page",
+          "bytes": 239148,
+          "maxBytes": 243931
+        },
+        {
+          "phase": "previous page",
+          "bytes": 230422,
+          "maxBytes": 235031
+        },
+        {
+          "phase": "New",
+          "bytes": 236759,
+          "maxBytes": 241495
+        },
+        {
+          "phase": "Ask",
+          "bytes": 237086,
+          "maxBytes": 241828
+        },
+        {
+          "phase": "Jobs",
+          "bytes": 235430,
+          "maxBytes": 240139
+        },
+        {
+          "phase": "a job's story",
+          "bytes": 250569,
+          "maxBytes": 255581
+        },
+        {
+          "phase": "collapse the first thread",
+          "bytes": 79941,
+          "maxBytes": 81540
+        },
+        {
+          "phase": "expand it",
+          "bytes": 80043,
+          "maxBytes": 81644
+        },
+        {
+          "phase": "collapse the nested reply",
+          "bytes": 79941,
+          "maxBytes": 81540
+        },
+        {
+          "phase": "a commenter",
+          "bytes": 238409,
+          "maxBytes": 243178
+        },
+        {
+          "phase": "Show",
+          "bytes": 249689,
+          "maxBytes": 254683
+        },
+        {
+          "phase": "Show page 2 (last page)",
+          "bytes": 232366,
+          "maxBytes": 237014
+        },
+        {
+          "phase": "a story's author",
+          "bytes": 238747,
+          "maxBytes": 243522
+        },
+        {
+          "phase": "home",
+          "bytes": 245068,
+          "maxBytes": 249970
+        }
+      ]
+    },
+    {
+      "twin": "rendering-yield",
+      "app": "original",
+      "phases": [
+        {
+          "phase": "load",
+          "bytes": 385012,
+          "maxBytes": 392713
+        },
+        {
+          "phase": "mount (Home, lazy)",
+          "bytes": 118931,
+          "maxBytes": 121310
+        },
+        {
+          "phase": "Home ticks",
+          "bytes": 56218,
+          "maxBytes": 57343
+        },
+        {
+          "phase": "Profile",
+          "bytes": 197528,
+          "maxBytes": 201479
+        },
+        {
+          "phase": "profile data",
+          "bytes": 100649,
+          "maxBytes": 102662
+        },
+        {
+          "phase": "Settings",
+          "bytes": 184393,
+          "maxBytes": 188081
+        },
+        {
+          "phase": "type",
+          "bytes": 57576,
+          "maxBytes": 58728
+        },
+        {
+          "phase": "logical click inside the portal",
+          "bytes": 59509,
+          "maxBytes": 60700
+        },
+        {
+          "phase": "close the portal",
+          "bytes": 79542,
+          "maxBytes": 81133
+        },
+        {
+          "phase": "click the section (modal closed: not counted)",
+          "bytes": 5494,
+          "maxBytes": 6518
+        },
+        {
+          "phase": "reopen the portal",
+          "bytes": 86071,
+          "maxBytes": 87793
+        },
+        {
+          "phase": "close again",
+          "bytes": 80723,
+          "maxBytes": 82338
+        },
+        {
+          "phase": "Stream",
+          "bytes": 213345,
+          "maxBytes": 217612
+        },
+        {
+          "phase": "two items",
+          "bytes": 151362,
+          "maxBytes": 154390
+        },
+        {
+          "phase": "all items",
+          "bytes": 142135,
+          "maxBytes": 144978
+        },
+        {
+          "phase": "Error Stream",
+          "bytes": 196335,
+          "maxBytes": 200262
+        },
+        {
+          "phase": "items settle / fail",
+          "bytes": 118877,
+          "maxBytes": 121255
+        },
+        {
+          "phase": "reset the inner bad item",
+          "bytes": 134600,
+          "maxBytes": 137292
+        },
+        {
+          "phase": "reset the outer bad item",
+          "bytes": 135050,
+          "maxBytes": 137751
+        },
+        {
+          "phase": "Reveal",
+          "bytes": 209591,
+          "maxBytes": 213783
+        },
+        {
+          "phase": "cards reveal (sequential)",
+          "bytes": 118572,
+          "maxBytes": 120944
+        },
+        {
+          "phase": "order: natural, restart",
+          "bytes": 160104,
+          "maxBytes": 163307
+        },
+        {
+          "phase": "natural settles",
+          "bytes": 109632,
+          "maxBytes": 111825
+        },
+        {
+          "phase": "uncollapse (sequential)",
+          "bytes": 161775,
+          "maxBytes": 165011
+        },
+        {
+          "phase": "Skeleton",
+          "bytes": 218572,
+          "maxBytes": 222944
+        },
+        {
+          "phase": "feed lands",
+          "bytes": 155028,
+          "maxBytes": 158129
+        },
+        {
+          "phase": "refetch (pending)",
+          "bytes": 124041,
+          "maxBytes": 126522
+        },
+        {
+          "phase": "refetched",
+          "bytes": 188779,
+          "maxBytes": 192555
+        },
+        {
+          "phase": "Home again",
+          "bytes": 129365,
+          "maxBytes": 131953
+        },
+        {
+          "phase": "popstate back",
+          "bytes": 129116,
+          "maxBytes": 131699
+        }
+      ]
+    },
+    {
+      "twin": "rendering-yield",
+      "app": "twin",
+      "phases": [
+        {
+          "phase": "load",
+          "bytes": 405176,
+          "maxBytes": 413280
+        },
+        {
+          "phase": "mount (Home, lazy)",
+          "bytes": 112312,
+          "maxBytes": 114559
+        },
+        {
+          "phase": "Home ticks",
+          "bytes": 74946,
+          "maxBytes": 76445
+        },
+        {
+          "phase": "Profile",
+          "bytes": 210386,
+          "maxBytes": 214594
+        },
+        {
+          "phase": "profile data",
+          "bytes": 110642,
+          "maxBytes": 112855
+        },
+        {
+          "phase": "Settings",
+          "bytes": 192093,
+          "maxBytes": 195935
+        },
+        {
+          "phase": "type",
+          "bytes": 77905,
+          "maxBytes": 79464
+        },
+        {
+          "phase": "logical click inside the portal",
+          "bytes": 79938,
+          "maxBytes": 81537
+        },
+        {
+          "phase": "close the portal",
+          "bytes": 96587,
+          "maxBytes": 98519
+        },
+        {
+          "phase": "click the section (modal closed: not counted)",
+          "bytes": 31600,
+          "maxBytes": 32624
+        },
+        {
+          "phase": "reopen the portal",
+          "bytes": 104332,
+          "maxBytes": 106419
+        },
+        {
+          "phase": "close again",
+          "bytes": 97768,
+          "maxBytes": 99724
+        },
+        {
+          "phase": "Stream",
+          "bytes": 222327,
+          "maxBytes": 226774
+        },
+        {
+          "phase": "two items",
+          "bytes": 155538,
+          "maxBytes": 158649
+        },
+        {
+          "phase": "all items",
+          "bytes": 148132,
+          "maxBytes": 151095
+        },
+        {
+          "phase": "Error Stream",
+          "bytes": 208317,
+          "maxBytes": 212484
+        },
+        {
+          "phase": "items settle / fail",
+          "bytes": 126399,
+          "maxBytes": 128927
+        },
+        {
+          "phase": "reset the inner bad item",
+          "bytes": 143518,
+          "maxBytes": 146389
+        },
+        {
+          "phase": "reset the outer bad item",
+          "bytes": 143944,
+          "maxBytes": 146823
+        },
+        {
+          "phase": "Reveal",
+          "bytes": 226343,
+          "maxBytes": 230870
+        },
+        {
+          "phase": "cards reveal (sequential)",
+          "bytes": 122615,
+          "maxBytes": 125068
+        },
+        {
+          "phase": "order: natural, restart",
+          "bytes": 175191,
+          "maxBytes": 178695
+        },
+        {
+          "phase": "natural settles",
+          "bytes": 112820,
+          "maxBytes": 115077
+        },
+        {
+          "phase": "uncollapse (sequential)",
+          "bytes": 176751,
+          "maxBytes": 180287
+        },
+        {
+          "phase": "Skeleton",
+          "bytes": 231302,
+          "maxBytes": 235929
+        },
+        {
+          "phase": "feed lands",
+          "bytes": 161724,
+          "maxBytes": 164959
+        },
+        {
+          "phase": "refetch (pending)",
+          "bytes": 129935,
+          "maxBytes": 132534
+        },
+        {
+          "phase": "refetched",
+          "bytes": 196317,
+          "maxBytes": 200244
+        },
+        {
+          "phase": "Home again",
+          "bytes": 143398,
+          "maxBytes": 146266
+        },
+        {
+          "phase": "popstate back",
+          "bytes": 147086,
+          "maxBytes": 150028
+        }
+      ]
+    },
+    {
+      "twin": "room-yield",
+      "app": "original",
+      "phases": [
+        {
+          "phase": "load",
+          "bytes": 620950,
+          "maxBytes": 633369
+        },
+        {
+          "phase": "mount /live",
+          "bytes": 201565,
+          "maxBytes": 205597
+        },
+        {
+          "phase": "shell sources land",
+          "bytes": 1703,
+          "maxBytes": 2727
+        },
+        {
+          "phase": "the card's members land",
+          "bytes": 113217,
+          "maxBytes": 115482
+        },
+        {
+          "phase": "the activity samples",
+          "bytes": 99356,
+          "maxBytes": 101344
+        },
+        {
+          "phase": "post on /live (optimistic, held for the echo)",
+          "bytes": 245049,
+          "maxBytes": 249950
+        },
+        {
+          "phase": "the echo lands",
+          "bytes": 1703,
+          "maxBytes": 2727
+        },
+        {
+          "phase": "the summary is streaming",
+          "bytes": 109055,
+          "maxBytes": 111237
+        },
+        {
+          "phase": "kill every connection (the summary dies)",
+          "bytes": 200869,
+          "maxBytes": 204887
+        },
+        {
+          "phase": "live sources reconnect",
+          "bytes": 1703,
+          "maxBytes": 2727
+        },
+        {
+          "phase": "regenerate the summary",
+          "bytes": 137500,
+          "maxBytes": 140250
+        },
+        {
+          "phase": "the summary and the archive finish",
+          "bytes": 111203,
+          "maxBytes": 113428
+        },
+        {
+          "phase": "switch to #infra from the directory",
+          "bytes": 285518,
+          "maxBytes": 291229
+        },
+        {
+          "phase": "#infra lands",
+          "bytes": 107392,
+          "maxBytes": 109540
+        }
+      ]
+    },
+    {
+      "twin": "room-yield",
+      "app": "twin",
+      "phases": [
+        {
+          "phase": "load",
+          "bytes": 637159,
+          "maxBytes": 649903
+        },
+        {
+          "phase": "mount /live",
+          "bytes": 214881,
+          "maxBytes": 219179
+        },
+        {
+          "phase": "shell sources land",
+          "bytes": 1703,
+          "maxBytes": 2727
+        },
+        {
+          "phase": "the card's members land",
+          "bytes": 117705,
+          "maxBytes": 120060
+        },
+        {
+          "phase": "the activity samples",
+          "bytes": 120285,
+          "maxBytes": 122691
+        },
+        {
+          "phase": "post on /live (optimistic, held for the echo)",
+          "bytes": 253414,
+          "maxBytes": 258483
+        },
+        {
+          "phase": "the echo lands",
+          "bytes": 1703,
+          "maxBytes": 2727
+        },
+        {
+          "phase": "the summary is streaming",
+          "bytes": 129211,
+          "maxBytes": 131796
+        },
+        {
+          "phase": "kill every connection (the summary dies)",
+          "bytes": 216197,
+          "maxBytes": 220521
+        },
+        {
+          "phase": "live sources reconnect",
+          "bytes": 1703,
+          "maxBytes": 2727
+        },
+        {
+          "phase": "regenerate the summary",
+          "bytes": 144260,
+          "maxBytes": 147146
+        },
+        {
+          "phase": "the summary and the archive finish",
+          "bytes": 130974,
+          "maxBytes": 133594
+        },
+        {
+          "phase": "switch to #infra from the directory",
+          "bytes": 300011,
+          "maxBytes": 306012
+        },
+        {
+          "phase": "#infra lands",
+          "bytes": 127560,
+          "maxBytes": 130112
+        }
+      ]
+    },
+    {
+      "twin": "sierpinski-yield",
+      "app": "original",
+      "phases": [
+        {
+          "phase": "load",
+          "bytes": 383736,
+          "maxBytes": 391411
+        },
+        {
+          "phase": "mount",
+          "bytes": 1703,
+          "maxBytes": 2727
+        },
+        {
+          "phase": "idle callbacks resolve",
+          "bytes": 119675,
+          "maxBytes": 122069
+        },
+        {
+          "phase": "one second: seconds = 1, frames scale the container",
+          "bytes": 121569,
+          "maxBytes": 124001
+        },
+        {
+          "phase": "idle callbacks for the new seconds",
+          "bytes": 66279,
+          "maxBytes": 67605
+        },
+        {
+          "phase": "hover the first dot",
+          "bytes": 71926,
+          "maxBytes": 73365
+        },
+        {
+          "phase": "hover the last dot",
+          "bytes": 72012,
+          "maxBytes": 73453
+        },
+        {
+          "phase": "leave the first dot",
+          "bytes": 71659,
+          "maxBytes": 73093
+        },
+        {
+          "phase": "four more seconds",
+          "bytes": 123856,
+          "maxBytes": 126334
+        },
+        {
+          "phase": "settle",
+          "bytes": 66284,
+          "maxBytes": 67610
+        },
+        {
+          "phase": "eight more seconds (seconds wrap past 10)",
+          "bytes": 123325,
+          "maxBytes": 125792
+        },
+        {
+          "phase": "settle again",
+          "bytes": 66032,
+          "maxBytes": 67353
+        }
+      ]
+    },
+    {
+      "twin": "sierpinski-yield",
+      "app": "twin",
+      "phases": [
+        {
+          "phase": "load",
+          "bytes": 412251,
+          "maxBytes": 420497
+        },
+        {
+          "phase": "mount",
+          "bytes": 1703,
+          "maxBytes": 2727
+        },
+        {
+          "phase": "idle callbacks resolve",
+          "bytes": 129423,
+          "maxBytes": 132012
+        },
+        {
+          "phase": "one second: seconds = 1, frames scale the container",
+          "bytes": 127269,
+          "maxBytes": 129815
+        },
+        {
+          "phase": "idle callbacks for the new seconds",
+          "bytes": 78634,
+          "maxBytes": 80207
+        },
+        {
+          "phase": "hover the first dot",
+          "bytes": 86703,
+          "maxBytes": 88438
+        },
+        {
+          "phase": "hover the last dot",
+          "bytes": 86789,
+          "maxBytes": 88525
+        },
+        {
+          "phase": "leave the first dot",
+          "bytes": 86778,
+          "maxBytes": 88514
+        },
+        {
+          "phase": "four more seconds",
+          "bytes": 128956,
+          "maxBytes": 131536
+        },
+        {
+          "phase": "settle",
+          "bytes": 78639,
+          "maxBytes": 80212
+        },
+        {
+          "phase": "eight more seconds (seconds wrap past 10)",
+          "bytes": 128425,
+          "maxBytes": 130994
+        },
+        {
+          "phase": "settle again",
+          "bytes": 77630,
+          "maxBytes": 79183
+        }
+      ]
+    },
+    {
+      "twin": "sierpinski-yield-h",
+      "app": "original",
+      "phases": [
+        {
+          "phase": "load",
+          "bytes": 383736,
+          "maxBytes": 391411
+        },
+        {
+          "phase": "mount",
+          "bytes": 1703,
+          "maxBytes": 2727
+        },
+        {
+          "phase": "idle callbacks resolve",
+          "bytes": 119675,
+          "maxBytes": 122069
+        },
+        {
+          "phase": "one second: seconds = 1, frames scale the container",
+          "bytes": 121569,
+          "maxBytes": 124001
+        },
+        {
+          "phase": "idle callbacks for the new seconds",
+          "bytes": 66279,
+          "maxBytes": 67605
+        },
+        {
+          "phase": "hover the first dot",
+          "bytes": 71926,
+          "maxBytes": 73365
+        },
+        {
+          "phase": "hover the last dot",
+          "bytes": 72012,
+          "maxBytes": 73453
+        },
+        {
+          "phase": "leave the first dot",
+          "bytes": 71659,
+          "maxBytes": 73093
+        },
+        {
+          "phase": "four more seconds",
+          "bytes": 123856,
+          "maxBytes": 126334
+        },
+        {
+          "phase": "settle",
+          "bytes": 66284,
+          "maxBytes": 67610
+        },
+        {
+          "phase": "eight more seconds (seconds wrap past 10)",
+          "bytes": 123325,
+          "maxBytes": 125792
+        },
+        {
+          "phase": "settle again",
+          "bytes": 66032,
+          "maxBytes": 67353
+        }
+      ]
+    },
+    {
+      "twin": "sierpinski-yield-h",
+      "app": "twin",
+      "phases": [
+        {
+          "phase": "load",
+          "bytes": 414130,
+          "maxBytes": 422413
+        },
+        {
+          "phase": "mount",
+          "bytes": 1703,
+          "maxBytes": 2727
+        },
+        {
+          "phase": "idle callbacks resolve",
+          "bytes": 133467,
+          "maxBytes": 136137
+        },
+        {
+          "phase": "one second: seconds = 1, frames scale the container",
+          "bytes": 131515,
+          "maxBytes": 134146
+        },
+        {
+          "phase": "idle callbacks for the new seconds",
+          "bytes": 82147,
+          "maxBytes": 83790
+        },
+        {
+          "phase": "hover the first dot",
+          "bytes": 87121,
+          "maxBytes": 88864
+        },
+        {
+          "phase": "hover the last dot",
+          "bytes": 87207,
+          "maxBytes": 88952
+        },
+        {
+          "phase": "leave the first dot",
+          "bytes": 87212,
+          "maxBytes": 88957
+        },
+        {
+          "phase": "four more seconds",
+          "bytes": 133164,
+          "maxBytes": 135828
+        },
+        {
+          "phase": "settle",
+          "bytes": 82152,
+          "maxBytes": 83796
+        },
+        {
+          "phase": "eight more seconds (seconds wrap past 10)",
+          "bytes": 132671,
+          "maxBytes": 135325
+        },
+        {
+          "phase": "settle again",
+          "bytes": 81156,
+          "maxBytes": 82780
+        }
+      ]
+    },
+    {
+      "twin": "todos-yield",
+      "app": "original",
+      "phases": [
+        {
+          "phase": "load",
+          "bytes": 427338,
+          "maxBytes": 435885
+        },
+        {
+          "phase": "mount (loading)",
+          "bytes": 1703,
+          "maxBytes": 2727
+        },
+        {
+          "phase": "todos load",
+          "bytes": 165125,
+          "maxBytes": 168428
+        },
+        {
+          "phase": "add a todo (optimistic)",
+          "bytes": 163826,
+          "maxBytes": 167103
+        },
+        {
+          "phase": "add settles",
+          "bytes": 210726,
+          "maxBytes": 214941
+        },
+        {
+          "phase": "toggle the first",
+          "bytes": 118907,
+          "maxBytes": 121286
+        },
+        {
+          "phase": "toggle settles",
+          "bytes": 207333,
+          "maxBytes": 211480
+        },
+        {
+          "phase": "filter: active",
+          "bytes": 109660,
+          "maxBytes": 111854
+        },
+        {
+          "phase": "filter: completed",
+          "bytes": 127127,
+          "maxBytes": 129670
+        },
+        {
+          "phase": "filter: all",
+          "bytes": 131202,
+          "maxBytes": 133827
+        },
+        {
+          "phase": "toggle all",
+          "bytes": 119419,
+          "maxBytes": 121808
+        },
+        {
+          "phase": "toggle all settles",
+          "bytes": 207817,
+          "maxBytes": 211974
+        },
+        {
+          "phase": "toggle all back",
+          "bytes": 123878,
+          "maxBytes": 126356
+        },
+        {
+          "phase": "toggle all back settles",
+          "bytes": 208148,
+          "maxBytes": 212311
+        },
+        {
+          "phase": "failing save: toggle the second",
+          "bytes": 118803,
+          "maxBytes": 121180
+        },
+        {
+          "phase": "the failure shows a retry",
+          "bytes": 222682,
+          "maxBytes": 227136
+        },
+        {
+          "phase": "retry succeeds",
+          "bytes": 121881,
+          "maxBytes": 124319
+        },
+        {
+          "phase": "retry settles",
+          "bytes": 215532,
+          "maxBytes": 219843
+        },
+        {
+          "phase": "failing add",
+          "bytes": 162685,
+          "maxBytes": 165939
+        },
+        {
+          "phase": "failed add stays with an error",
+          "bytes": 224983,
+          "maxBytes": 229483
+        },
+        {
+          "phase": "retry the add",
+          "bytes": 115111,
+          "maxBytes": 117414
+        },
+        {
+          "phase": "retried add settles",
+          "bytes": 211548,
+          "maxBytes": 215779
+        },
+        {
+          "phase": "complete the first",
+          "bytes": 115818,
+          "maxBytes": 118135
+        },
+        {
+          "phase": "complete settles",
+          "bytes": 206869,
+          "maxBytes": 211007
+        },
+        {
+          "phase": "clear completed",
+          "bytes": 143301,
+          "maxBytes": 146168
+        },
+        {
+          "phase": "clear settles",
+          "bytes": 208807,
+          "maxBytes": 212984
+        },
+        {
+          "phase": "remove the first",
+          "bytes": 142163,
+          "maxBytes": 145007
+        },
+        {
+          "phase": "remove settles",
+          "bytes": 208716,
+          "maxBytes": 212891
+        }
+      ]
+    },
+    {
+      "twin": "todos-yield",
+      "app": "twin",
+      "phases": [
+        {
+          "phase": "load",
+          "bytes": 438644,
+          "maxBytes": 447417
+        },
+        {
+          "phase": "mount (loading)",
+          "bytes": 1703,
+          "maxBytes": 2727
+        },
+        {
+          "phase": "todos load",
+          "bytes": 181957,
+          "maxBytes": 185597
+        },
+        {
+          "phase": "add a todo (optimistic)",
+          "bytes": 166760,
+          "maxBytes": 170096
+        },
+        {
+          "phase": "add settles",
+          "bytes": 216719,
+          "maxBytes": 221054
+        },
+        {
+          "phase": "toggle the first",
+          "bytes": 130298,
+          "maxBytes": 132904
+        },
+        {
+          "phase": "toggle settles",
+          "bytes": 213475,
+          "maxBytes": 217745
+        },
+        {
+          "phase": "filter: active",
+          "bytes": 113991,
+          "maxBytes": 116271
+        },
+        {
+          "phase": "filter: completed",
+          "bytes": 143051,
+          "maxBytes": 145913
+        },
+        {
+          "phase": "filter: all",
+          "bytes": 141947,
+          "maxBytes": 144786
+        },
+        {
+          "phase": "toggle all",
+          "bytes": 130932,
+          "maxBytes": 133551
+        },
+        {
+          "phase": "toggle all settles",
+          "bytes": 216523,
+          "maxBytes": 220854
+        },
+        {
+          "phase": "toggle all back",
+          "bytes": 132326,
+          "maxBytes": 134973
+        },
+        {
+          "phase": "toggle all back settles",
+          "bytes": 213838,
+          "maxBytes": 218115
+        },
+        {
+          "phase": "failing save: toggle the second",
+          "bytes": 128964,
+          "maxBytes": 131544
+        },
+        {
+          "phase": "the failure shows a retry",
+          "bytes": 232556,
+          "maxBytes": 237208
+        },
+        {
+          "phase": "retry succeeds",
+          "bytes": 130945,
+          "maxBytes": 133564
+        },
+        {
+          "phase": "retry settles",
+          "bytes": 220797,
+          "maxBytes": 225213
+        },
+        {
+          "phase": "failing add",
+          "bytes": 165665,
+          "maxBytes": 168979
+        },
+        {
+          "phase": "failed add stays with an error",
+          "bytes": 233162,
+          "maxBytes": 237826
+        },
+        {
+          "phase": "retry the add",
+          "bytes": 121875,
+          "maxBytes": 124313
+        },
+        {
+          "phase": "retried add settles",
+          "bytes": 217112,
+          "maxBytes": 221455
+        },
+        {
+          "phase": "complete the first",
+          "bytes": 126844,
+          "maxBytes": 129381
+        },
+        {
+          "phase": "complete settles",
+          "bytes": 212689,
+          "maxBytes": 216943
+        },
+        {
+          "phase": "clear completed",
+          "bytes": 140395,
+          "maxBytes": 143203
+        },
+        {
+          "phase": "clear settles",
+          "bytes": 213106,
+          "maxBytes": 217369
+        },
+        {
+          "phase": "remove the first",
+          "bytes": 140911,
+          "maxBytes": 143730
+        },
+        {
+          "phase": "remove settles",
+          "bytes": 213077,
+          "maxBytes": 217339
+        }
+      ]
+    },
+    {
+      "twin": "todos-yield-h",
+      "app": "original",
+      "phases": [
+        {
+          "phase": "load",
+          "bytes": 427338,
+          "maxBytes": 435885
+        },
+        {
+          "phase": "mount (loading)",
+          "bytes": 1703,
+          "maxBytes": 2727
+        },
+        {
+          "phase": "todos load",
+          "bytes": 165125,
+          "maxBytes": 168428
+        },
+        {
+          "phase": "add a todo (optimistic)",
+          "bytes": 163826,
+          "maxBytes": 167103
+        },
+        {
+          "phase": "add settles",
+          "bytes": 210726,
+          "maxBytes": 214941
+        },
+        {
+          "phase": "toggle the first",
+          "bytes": 118907,
+          "maxBytes": 121286
+        },
+        {
+          "phase": "toggle settles",
+          "bytes": 207333,
+          "maxBytes": 211480
+        },
+        {
+          "phase": "filter: active",
+          "bytes": 109660,
+          "maxBytes": 111854
+        },
+        {
+          "phase": "filter: completed",
+          "bytes": 127127,
+          "maxBytes": 129670
+        },
+        {
+          "phase": "filter: all",
+          "bytes": 131202,
+          "maxBytes": 133827
+        },
+        {
+          "phase": "toggle all",
+          "bytes": 119419,
+          "maxBytes": 121808
+        },
+        {
+          "phase": "toggle all settles",
+          "bytes": 207817,
+          "maxBytes": 211974
+        },
+        {
+          "phase": "toggle all back",
+          "bytes": 123878,
+          "maxBytes": 126356
+        },
+        {
+          "phase": "toggle all back settles",
+          "bytes": 208148,
+          "maxBytes": 212311
+        },
+        {
+          "phase": "failing save: toggle the second",
+          "bytes": 118803,
+          "maxBytes": 121180
+        },
+        {
+          "phase": "the failure shows a retry",
+          "bytes": 222682,
+          "maxBytes": 227136
+        },
+        {
+          "phase": "retry succeeds",
+          "bytes": 121881,
+          "maxBytes": 124319
+        },
+        {
+          "phase": "retry settles",
+          "bytes": 215532,
+          "maxBytes": 219843
+        },
+        {
+          "phase": "failing add",
+          "bytes": 162685,
+          "maxBytes": 165939
+        },
+        {
+          "phase": "failed add stays with an error",
+          "bytes": 224983,
+          "maxBytes": 229483
+        },
+        {
+          "phase": "retry the add",
+          "bytes": 115111,
+          "maxBytes": 117414
+        },
+        {
+          "phase": "retried add settles",
+          "bytes": 211548,
+          "maxBytes": 215779
+        },
+        {
+          "phase": "complete the first",
+          "bytes": 115818,
+          "maxBytes": 118135
+        },
+        {
+          "phase": "complete settles",
+          "bytes": 206869,
+          "maxBytes": 211007
+        },
+        {
+          "phase": "clear completed",
+          "bytes": 143301,
+          "maxBytes": 146168
+        },
+        {
+          "phase": "clear settles",
+          "bytes": 208807,
+          "maxBytes": 212984
+        },
+        {
+          "phase": "remove the first",
+          "bytes": 142163,
+          "maxBytes": 145007
+        },
+        {
+          "phase": "remove settles",
+          "bytes": 208716,
+          "maxBytes": 212891
+        }
+      ]
+    },
+    {
+      "twin": "todos-yield-h",
+      "app": "twin",
+      "phases": [
+        {
+          "phase": "load",
+          "bytes": 444098,
+          "maxBytes": 452980
+        },
+        {
+          "phase": "mount (loading)",
+          "bytes": 1703,
+          "maxBytes": 2727
+        },
+        {
+          "phase": "todos load",
+          "bytes": 200242,
+          "maxBytes": 204247
+        },
+        {
+          "phase": "add a todo (optimistic)",
+          "bytes": 187233,
+          "maxBytes": 190978
+        },
+        {
+          "phase": "add settles",
+          "bytes": 220950,
+          "maxBytes": 225369
+        },
+        {
+          "phase": "toggle the first",
+          "bytes": 134459,
+          "maxBytes": 137149
+        },
+        {
+          "phase": "toggle settles",
+          "bytes": 218648,
+          "maxBytes": 223021
+        },
+        {
+          "phase": "filter: active",
+          "bytes": 147574,
+          "maxBytes": 150526
+        },
+        {
+          "phase": "filter: completed",
+          "bytes": 155473,
+          "maxBytes": 158583
+        },
+        {
+          "phase": "filter: all",
+          "bytes": 161047,
+          "maxBytes": 164268
+        },
+        {
+          "phase": "toggle all",
+          "bytes": 137786,
+          "maxBytes": 140542
+        },
+        {
+          "phase": "toggle all settles",
+          "bytes": 221608,
+          "maxBytes": 226041
+        },
+        {
+          "phase": "toggle all back",
+          "bytes": 143352,
+          "maxBytes": 146220
+        },
+        {
+          "phase": "toggle all back settles",
+          "bytes": 218237,
+          "maxBytes": 222602
+        },
+        {
+          "phase": "failing save: toggle the second",
+          "bytes": 138828,
+          "maxBytes": 141605
+        },
+        {
+          "phase": "the failure shows a retry",
+          "bytes": 245658,
+          "maxBytes": 250572
+        },
+        {
+          "phase": "retry succeeds",
+          "bytes": 140800,
+          "maxBytes": 143616
+        },
+        {
+          "phase": "retry settles",
+          "bytes": 226315,
+          "maxBytes": 230842
+        },
+        {
+          "phase": "failing add",
+          "bytes": 184882,
+          "maxBytes": 188580
+        },
+        {
+          "phase": "failed add stays with an error",
+          "bytes": 244875,
+          "maxBytes": 249773
+        },
+        {
+          "phase": "retry the add",
+          "bytes": 128752,
+          "maxBytes": 131328
+        },
+        {
+          "phase": "retried add settles",
+          "bytes": 222834,
+          "maxBytes": 227291
+        },
+        {
+          "phase": "complete the first",
+          "bytes": 130924,
+          "maxBytes": 133543
+        },
+        {
+          "phase": "complete settles",
+          "bytes": 217764,
+          "maxBytes": 222120
+        },
+        {
+          "phase": "clear completed",
+          "bytes": 171494,
+          "maxBytes": 174924
+        },
+        {
+          "phase": "clear settles",
+          "bytes": 213257,
+          "maxBytes": 217523
+        },
+        {
+          "phase": "remove the first",
+          "bytes": 170852,
+          "maxBytes": 174270
+        },
+        {
+          "phase": "remove settles",
+          "bytes": 213228,
+          "maxBytes": 217493
+        }
+      ]
+    }
+  ]
+}

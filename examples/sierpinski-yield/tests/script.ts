@@ -1,3 +1,4 @@
+import { executedBytesCheckpoint } from "yield-example-harness";
 // The interaction script shared by the behavior tests and the differential
 // parity test: it drives whichever app is mounted in `document.body`
 // (examples/sierpinski or this twin) and records the DOM after every step.
@@ -65,8 +66,9 @@ export const steps: [name: string, run: () => Promise<void> | void][] = [
 
 export async function runScript(): Promise<string[]> {
   const out: string[] = [];
-  for (const [, run] of steps) {
+  for (const [name, run] of steps) {
     await run();
+    executedBytesCheckpoint(name);
     out.push(snapshot());
   }
   return out;

@@ -38,6 +38,7 @@ import {
   type Element as YieldElement,
   type EventHandler,
   type Props,
+  type Source,
   type ViewFn,
   view
 } from "solid-yield";
@@ -1053,11 +1054,150 @@ describe("context", () => {
     const Child = component(function* () {
       const theme = yield* Theme;
       return view(function* () {
-        return <i>{theme}</i>;
+        return <i>{perform(theme)}</i>;
       });
     });
     mount(() => <Theme value="dark">{Child()}</Theme>);
     expect(root.textContent).toBe("dark");
+  });
+
+  describe("D-098: a context without a default is required", () => {
+    const UserCtx = createContext<{ name: string }, "UserCtx">(undefined, { name: "UserCtx" });
+    const Avatar = component(function* Avatar() {
+      const user = yield* UserCtx;
+      return view(function* () {
+        return <b>{yield* user.name}</b>;
+      });
+    });
+
+    devIt("read with no provider above: NO_PROVIDER at the read, naming the reader", () => {
+      expect(() => createRoot(() => Avatar())).toThrow(
+        /\[NO_PROVIDER\] <Avatar> reads the context UserCtx/
+      );
+      const Parent = component(function* Parent() {
+        return view(function* () {
+          return <div>{yield* Avatar()}</div>;
+        });
+      });
+      expect(() => mount(Parent as any)).toThrow("[NO_PROVIDER]");
+    });
+
+    devIt("a provide in the reader's own view does not give its setup (Solid's own rule)", () => {
+      const SelfProvider = component(function* SelfProvider() {
+        const user = yield* UserCtx;
+        return view(function* () {
+          return (
+            <>
+              {
+                yield* UserCtx.provide({
+                  value: { name: "inner" },
+                  children: function* () {
+                    return <b>{yield* user.name}</b>;
+                  }
+                })
+              }
+            </>
+          );
+        });
+      });
+      expect(() => createRoot(() => SelfProvider())).toThrow("[NO_PROVIDER]");
+    });
+
+    it("the provided value flows: a value, a source (live), a hole; the nearest provider wins", () => {
+      let set!: (name: string) => void;
+      const App = component(function* App() {
+        const [name, setName] = yield* $signal("ada");
+        set = v => write(() => setName(v));
+        return view(function* () {
+          return (
+            <>
+              {
+                yield* UserCtx.provide({
+                  value: { name: "plain" },
+                  children: function* () {
+                    return (
+                      <>
+                        {yield* Avatar()}
+                        {
+                          yield* UserCtx.provide({
+                            value: function* () {
+                              return { name: (yield* name).toUpperCase() };
+                            },
+                            children: function* () {
+                              return <>{yield* Avatar()}</>;
+                            }
+                          })
+                        }
+                      </>
+                    );
+                  }
+                })
+              }
+            </>
+          );
+        });
+      });
+      mount(App);
+      expect(root.textContent).toBe("plainADA");
+      set("lin");
+      flush();
+      expect(root.textContent).toBe("plainLIN");
+    });
+
+    it("a source as the value: the reader's holes read it live, its setup ran once", () => {
+      const NameCtx = createContext<Source<string>>();
+      let setups = 0;
+      let set!: (name: string) => void;
+      const Reader = component(function* Reader() {
+        setups++;
+        const name = yield* NameCtx;
+        return view(function* () {
+          return <i>{yield* name}</i>;
+        });
+      });
+      const App = component(function* App() {
+        const [name, setName] = yield* $signal("a");
+        set = v => write(() => setName(v));
+        return view(function* () {
+          return (
+            <>
+              {
+                yield* NameCtx.provide({
+                  value: name,
+                  children: function* () {
+                    return <>{yield* Reader()}</>;
+                  }
+                })
+              }
+            </>
+          );
+        });
+      });
+      mount(App);
+      expect(root.textContent).toBe("a");
+      set("b");
+      flush();
+      expect(root.textContent).toBe("b");
+      expect(setups).toBe(1);
+    });
+
+    it("a defaulted context with no provider reads its default; a constant default too (D-060)", () => {
+      const Theme = createContext("light");
+      const Who = createContext(constant<string | null>(null));
+      const Child = component(function* Child() {
+        const theme = yield* Theme;
+        const who = yield* Who;
+        return view(function* () {
+          return (
+            <i>
+              {yield* theme}/{String(yield* who)}
+            </i>
+          );
+        });
+      });
+      mount(Child);
+      expect(root.textContent).toBe("light/null");
+    });
   });
 });
 
@@ -3132,9 +3272,10 @@ describe("binding an event is a hole (D-072)", () => {
   describe("D-085: a bound event's failure routes to the bind site", () => {
     /** Binds the handler it finds in context: the bind site. */
     const Child = component(function* Child() {
-      const save = (yield* SaveContext)!;
+      // a context's value is read like a prop (D-098): read the handler, then bind it
+      const save = yield* SaveContext;
       return view(function* () {
-        return <button onClick={yield* save}>save</button>;
+        return <button onClick={yield* yield* save}>save</button>;
       });
     });
     /** Creates the handler, and renders `Child` under an `Errored` of `Child`'s own. */
@@ -3236,10 +3377,11 @@ describe("binding an event is a hole (D-072)", () => {
       const caught: unknown[] = [];
       let call!: () => Promise<unknown>;
       const Caller = component(function* Caller() {
-        const save = (yield* SaveContext)!;
+        const save = yield* SaveContext;
         call = $event(function* () {
+          const handler = yield* save;
           yield* attempt(
-            () => save(),
+            () => handler(),
             e => {
               caught.push(e);
             }

@@ -37,6 +37,11 @@ function mint(): Identity {
 /**
  * Outside an `IdentityProvider` there is no identity (the original throws; a
  * setup does not fail, so the default is "nobody": a constant source, D-060).
+ * It stays defaulted, not required (D-098): its readers are the room's
+ * components, below the router, which renders them as a foreign hand-off
+ * (`foreign(Live)`, D-088) and so cannot carry a requirement to this
+ * provider above it; and its `null` is also the identity the server renders
+ * with and the client has until it mints one, not only a missing provider.
  */
 const IdentityContext = createContext(constant<Identity | null>(null));
 
@@ -49,11 +54,22 @@ export const IdentityProvider = component(function* IdentityProvider(
     if (!isServer) yield* setMe(mint());
   });
   return view(function* () {
-    return <IdentityContext value={me}>{yield* props.children}</IdentityContext>;
+    return (
+      <>
+        {
+          yield* IdentityContext.provide({
+            value: me,
+            children: function* () {
+              return <>{yield* props.children}</>;
+            }
+          })
+        }
+      </>
+    );
   });
 });
 
-/** This tab's identity — `null` on the server and until the client mints it. */
+/** This tab's identity — `null` on the server and until the client mints it; read like a prop (a path). */
 export function* useIdentity() {
   return yield* IdentityContext;
 }

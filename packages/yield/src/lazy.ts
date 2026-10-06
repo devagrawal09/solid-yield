@@ -9,9 +9,9 @@ import { yieldComponent } from "./runtime.js";
 import type { ComponentView, View } from "./types.js";
 
 /** What a loaded component renders: its colors (a plain component is settled). */
-type ColorsOf<T> = T extends (props: any) => View<infer P, infer E, infer W>
-  ? [P, E, W]
-  : [false, never, false];
+type ColorsOf<T> = T extends (props: any) => View<infer P, infer E, infer W, infer R>
+  ? [P, E, W, R]
+  : [false, never, false, never];
 type PropsArg<T> = T extends (props: infer P) => any ? P : {};
 
 /**
@@ -19,8 +19,8 @@ type PropsArg<T> = T extends (props: infer P) => any ? P : {};
  * the loaded component does.
  */
 export type LazyComponent<T, M = { default: T }> = ({} extends PropsArg<T>
-  ? (props?: PropsArg<T>) => ComponentView<true, ColorsOf<T>[1], ColorsOf<T>[2]>
-  : (props: PropsArg<T>) => ComponentView<true, ColorsOf<T>[1], ColorsOf<T>[2]>) & {
+  ? (props?: PropsArg<T>) => ComponentView<true, ColorsOf<T>[1], ColorsOf<T>[2], ColorsOf<T>[3]>
+  : (props: PropsArg<T>) => ComponentView<true, ColorsOf<T>[1], ColorsOf<T>[2], ColorsOf<T>[3]>) & {
   preload: () => Promise<M>;
   moduleUrl?: string;
 };

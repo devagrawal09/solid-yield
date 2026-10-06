@@ -16,8 +16,10 @@ const Saver = component(function* Saver() {
   const [saved, setSaved] = yield* h.$signal("saved", "none");
   const save = $event(function* () {
     h.run("save");
+    // a context's value is read like a prop (D-098): in the event, not the setup
+    const endpoint = yield* api;
     const value = yield* attempt(
-      () => h.task<string>("save", api),
+      () => h.task<string>("save", endpoint),
       cause => new SaveError(String(cause))
     );
     h.run("resumed");

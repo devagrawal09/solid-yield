@@ -5,12 +5,10 @@ import {
   $event,
   $memo,
   $signal,
-  constant,
   createContext,
   type Setter,
   type Component,
   type Element,
-  type Read,
   type Source,
   type Props,
   view
@@ -20,26 +18,22 @@ import { isServer } from "@solidjs/web";
 interface RouterValue {
   location: Source<string>;
   setLocation: Setter<string>;
-  /** `yield* matches("profile")`: whether that route is current (read where it is delegated to). */
-  matches: (match: string) => Generator<Read<false, never>, boolean>;
 }
 
 /**
- * Outside a router there is no location to change (the original throws; a
- * setup does not fail, so the default is a detached router at "index": its
- * location a constant source, D-060).
+ * The router's location, for the components below `RouteHOC`. Outside a
+ * router there is none (the original throws): created without a default, a
+ * component that reads it requires it (D-098), and `RouteHOC` provides it
+ * around its page's call; a page rendered without one is refused by the
+ * types, and `NO_PROVIDER` at run time.
  */
-const RouterContext = createContext<RouterValue>({
-  location: constant("index"),
-  setLocation: () => {
-    throw new Error("RouterContext is not available");
-  },
-  *matches(match) {
-    return match === "index";
-  }
-});
+const RouterContext = createContext<RouterValue, "RouterContext">();
 
-function RouteHOC<P extends boolean, E>(Comp: Component<{}, P, E>) {
+/**
+ * The routed component: its requirements (`R`) pass on, less the router's,
+ * which this provides.
+ */
+function RouteHOC<P extends boolean, E, W extends boolean, R>(Comp: Component<{}, P, E, W, R>) {
   return component(function* Router(props: Props<{ url?: string }>) {
     // The location the router navigated to, or none yet: then the URL a
     // server render starts from (a prop: read where the location is derived,
@@ -51,9 +45,6 @@ function RouteHOC<P extends boolean, E>(Comp: Component<{}, P, E>) {
       const url = yield* props.url;
       return (url ?? (isServer ? "/" : window.location.pathname)).slice(1) || "index";
     });
-    const matches = function* (match: string) {
-      return match === ((yield* location) || "index");
-    };
 
     if (!isServer) {
       window.onpopstate = $event(function* () {
@@ -63,14 +54,36 @@ function RouteHOC<P extends boolean, E>(Comp: Component<{}, P, E>) {
 
     return view(function* () {
       return (
-        <RouterContext value={{ location, setLocation, matches }}>{yield* Comp()}</RouterContext>
+        <>
+          {
+            yield* RouterContext.provide({
+              value: { location, setLocation },
+              children: function* () {
+                return <>{yield* Comp()}</>;
+              }
+            })
+          }
+        </>
       );
     });
   });
 }
 
+/**
+ * The router, read in a setup: the location (a path, read like a prop,
+ * D-042), the setter (a source of it: read it in the event that calls it),
+ * and `yield* matches("profile")`, whether that route is current (read
+ * where it is delegated to).
+ */
 function* useRouter() {
-  return yield* RouterContext;
+  const router = yield* RouterContext;
+  return {
+    location: router.location,
+    setLocation: router.setLocation,
+    *matches(match: string) {
+      return match === ((yield* router.location) || "index");
+    }
+  };
 }
 
 const Link = component(function* Link(props: Props<{ path: string; children: Element }>) {
@@ -79,7 +92,7 @@ const Link = component(function* Link(props: Props<{ path: string; children: Ele
     event.preventDefault();
     const path = yield* props.path;
     window.history.pushState("", "", `/${path}`);
-    yield* setLocation(path);
+    yield* (yield* setLocation)(path);
   });
   return view(function* () {
     return (

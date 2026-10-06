@@ -83,7 +83,7 @@ const hosts: HostCase[] = [
     make: boom => ({
       App: component(function* App() {
         // Raise is not a SetupOp (raise.type-tests.tsx): reached through a cast
-        yield* raise(boom) as any;
+        yield* raise(boom) as unknown as Iterable<never>;
         return view(function* () {
           return <i>never</i>;
         });

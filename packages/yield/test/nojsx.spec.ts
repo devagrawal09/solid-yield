@@ -12,6 +12,7 @@ import {
   $signal,
   $store,
   attempt,
+  createContext,
   For,
   Errored,
   Loading,
@@ -159,6 +160,33 @@ describe("h", () => {
     (root.querySelector("#hide") as HTMLButtonElement).click();
     flush();
     expect(root.querySelector("#hide")).toBe(null);
+  });
+});
+
+describe("h: a context's provider (D-098)", () => {
+  it("h(Ctx.provide, { value }, ...children) gives the value to the components in its children", () => {
+    const Name = createContext<string, "Name">();
+    const Reader = component(function* Reader() {
+      const name = yield* Name;
+      return view(function* () {
+        return h("b", name);
+      });
+    });
+    let set!: (v: string) => void;
+    const App = component(function* App() {
+      const [n, setN] = yield* $signal("a");
+      set = v => write(() => setN(v));
+      return view(function* () {
+        // h(Reader, {}): created inside the provider (a direct call runs with the view)
+        return h(Name.provide, { value: n }, h("p", h(Reader, {})));
+      });
+    });
+    dispose = render(App, root);
+    flush();
+    expect(root.innerHTML).toBe("<p><b>a</b></p>");
+    set("b");
+    flush();
+    expect(root.innerHTML).toBe("<p><b>b</b></p>");
   });
 });
 

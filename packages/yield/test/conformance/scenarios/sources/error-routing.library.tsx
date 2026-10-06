@@ -74,7 +74,8 @@ const Save = createContext<EventHandler<[], Forbidden, void, false, false>>();
 
 /** Binds the handler it is given, under an Errored of its own: the bind site (D-085). */
 const Child = component(function* Child() {
-  const save = (yield* Save)!;
+  // a context's value is read like a prop (D-098): read the handler, then bind it
+  const save = yield* Save;
   return view(function* () {
     return (
       <>
@@ -86,7 +87,7 @@ const Child = component(function* Child() {
             },
             children: function* () {
               return (
-                <button class="save" onClick={yield* save}>
+                <button class="save" onClick={yield* yield* save}>
                   save
                 </button>
               );

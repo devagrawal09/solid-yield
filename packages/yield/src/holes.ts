@@ -28,6 +28,8 @@ import type {
   MayWaitOf,
   PendingOf,
   Read,
+  RequiresOf,
+  Created,
   Source,
   View
 } from "./types.js";
@@ -46,12 +48,12 @@ export type Hole =
   | null
   | undefined
   | Source<any, any, boolean>
-  | HView<boolean, any>
-  | View<boolean, any>
+  | HView<boolean, any, boolean, any>
+  | View<boolean, any, boolean, any>
   | readonly Hole[]
   | ((...args: any[]) => Generator<any, any, any>);
 
-export type OpsOfHole<V> =
+export type OpsOfHole<V, Eager extends boolean = false> =
   // an `$event` handler given to `h` as an attribute is bound there (D-072):
   // its failures and its may-wait marker join the output, as `yield* save` in JSX
   V extends EventHandler<any, infer E, any, infer P>
@@ -61,14 +63,15 @@ export type OpsOfHole<V> =
       ? never
       : V extends Source<any, infer E, infer P>
         ? Read<P, E>
-        : V extends HView<infer P, infer E, infer W>
-          ? ChildView<P, E, W>
-          : V extends View<infer P, infer E, infer W>
-            ? ChildView<P, E, W>
+        : V extends HView<infer P, infer E, infer W, infer R>
+          ? ChildView<P, E, W, R>
+          : V extends View<infer P, infer E, infer W, infer R>
+            ? // a view given to `h` as it is was created when the view ran (D-098)
+              ChildView<P, E, W, Eager extends true ? Created<R> : R>
             : V extends (...args: any[]) => Generator<infer Y, infer R, any>
               ? GeneratorOps<Y, R>
               : V extends readonly (infer U)[]
-                ? OpsOfHole<U>
+                ? OpsOfHole<U, Eager>
                 : never;
 /**
  * A generator's colors: a row's (it returns its view generator) or a hole's
@@ -83,11 +86,12 @@ type GeneratorOps<Y, R> = [R] extends [never]
     ? VY | OpsOfHole<VR>
     : Y | OpsOfHole<R>;
 
-/** The no-JSX output of holes `V`: its pending / failures (and may-wait marker) are theirs. */
+/** The no-JSX output of holes `V`: its pending / failures (may-wait marker, requirements) are theirs. */
 export type HViewOf<V> = HView<
   PendingOf<OpsOfHole<V>>,
   FailsOf<OpsOfHole<V>>,
-  MayWaitOf<OpsOfHole<V>>
+  MayWaitOf<OpsOfHole<V>>,
+  RequiresOf<OpsOfHole<V, true>>
 >;
 
 /**

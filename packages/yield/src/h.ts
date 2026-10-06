@@ -23,10 +23,12 @@ import type {
   MayWaitOf,
   HView,
   PendingOf,
+  RequiresOf,
   Source,
   View
 } from "./types.js";
 import type { Errored, Loading, Reset } from "./flow.js";
+import type { PROVIDES, ProvidedValue } from "./context.js";
 import type { Accessor } from "solid-js";
 
 type Intrinsic = JSX.IntrinsicElements;
@@ -54,8 +56,10 @@ type PropsOfComponent<C> = C extends (props: infer P) => any
   : never;
 type ChildrenOf<P> = "children" extends keyof P ? P["children"] : unknown;
 /** What a component's output (a view or `h` output) contributes. */
-type OpsOfOutput<R> = R extends View<infer P, infer E, infer W> | HView<infer P, infer E, infer W>
-  ? ChildView<P, E, W>
+type OpsOfOutput<R> = R extends
+  | View<infer P, infer E, infer W, infer Q>
+  | HView<infer P, infer E, infer W, infer Q>
+  ? ChildView<P, E, W, Q>
   : never;
 
 export interface YieldH {
@@ -86,7 +90,8 @@ export interface YieldH {
   ): HView<
     PendingOf<OpsOfHole<F>>,
     FailsOf<OpsOfHole<C[number]> | OpsOfHole<F> | OpsOfHole<O>>,
-    MayWaitOf<OpsOfHole<C[number]> | OpsOfHole<F> | OpsOfHole<O>>
+    MayWaitOf<OpsOfHole<C[number]> | OpsOfHole<F> | OpsOfHole<O>>,
+    RequiresOf<OpsOfHole<C[number], true> | OpsOfHole<F, true> | OpsOfHole<O, true>>
   >;
   /**
    * `Errored` handles the failures of its children; their pending passes on,
@@ -100,7 +105,8 @@ export interface YieldH {
   ): HView<
     PendingOf<OpsOfHole<C[number]> | OpsOfHole<R>>,
     FailsOf<OpsOfHole<R>>,
-    MayWaitOf<OpsOfHole<C[number]> | OpsOfHole<R>>
+    MayWaitOf<OpsOfHole<C[number]> | OpsOfHole<R>>,
+    RequiresOf<OpsOfHole<C[number], true> | OpsOfHole<R>>
   >;
   <const C extends readonly Hole[], F extends Exclude<Hole, (...args: any[]) => any>>(
     component: typeof Errored,
@@ -109,7 +115,22 @@ export interface YieldH {
   ): HView<
     PendingOf<OpsOfHole<C[number]> | OpsOfHole<F>>,
     FailsOf<OpsOfHole<F>>,
-    MayWaitOf<OpsOfHole<C[number]> | OpsOfHole<F>>
+    MayWaitOf<OpsOfHole<C[number]> | OpsOfHole<F>>,
+    RequiresOf<OpsOfHole<C[number], true> | OpsOfHole<F, true>>
+  >;
+  /**
+   * A context's provider, `h(Ctx.provide, { value }, ...children)` (D-098):
+   * the children's colors pass on, less their requirement of the context.
+   */
+  <T, Q, const C extends readonly Hole[]>(
+    component: { readonly [PROVIDES]: { readonly value: T; readonly discharges: Q } },
+    props: { value: ProvidedValue<T> },
+    ...children: C
+  ): HView<
+    PendingOf<OpsOfHole<C[number]>>,
+    FailsOf<OpsOfHole<C[number]>>,
+    MayWaitOf<OpsOfHole<C[number]>>,
+    Exclude<RequiresOf<OpsOfHole<C[number], true>>, Q>
   >;
   /**
    * A component: its props, then its children. The result carries the
@@ -124,9 +145,10 @@ export interface YieldH {
   ): HView<
     PendingOf<OpsOfOutput<ReturnType<Comp>> | OpsOfHole<C[number]>>,
     FailsOf<OpsOfOutput<ReturnType<Comp>> | OpsOfHole<C[number]>>,
-    MayWaitOf<OpsOfOutput<ReturnType<Comp>> | OpsOfHole<C[number]>>
+    MayWaitOf<OpsOfOutput<ReturnType<Comp>> | OpsOfHole<C[number]>>,
+    RequiresOf<OpsOfOutput<ReturnType<Comp>> | OpsOfHole<C[number], true>>
   >;
-  Fragment: (props: { children: Hole }) => HView<false, never, false>;
+  Fragment: (props: { children: Hole }) => HView<false, never, false, never>;
 }
 
 function convert(args: any[], name: string | null): any[] {

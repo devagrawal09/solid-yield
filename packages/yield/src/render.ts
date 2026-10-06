@@ -17,9 +17,32 @@ import { render as webRender, hydrate as webHydrate } from "@solidjs/web";
 import { ELEMENT_MARK } from "./runtime.js";
 import type { Element } from "./element.js";
 import type { View } from "./types.js";
+import type { ContextNames } from "./context.js";
 
-/** A root that is not pending; its failures, if any, are re-thrown (D-033). */
-type Root = (() => View<false, any>) | (() => Element);
+/**
+ * A root that is not pending; its failures, if any, are re-thrown (D-033).
+ * It requires no context (D-098): `RootCheck` names any it still does.
+ */
+type Root = (() => View<false, any, boolean, any>) | (() => Element);
+/** What a root still requires (D-098). */
+type RootRequires<C> = C extends () => infer V
+  ? 0 extends 1 & V
+    ? never
+    : V extends View<any, any, any, infer R>
+      ? R
+      : never
+  : never;
+/**
+ * The refusal of a root that requires a context (D-098), naming each: a
+ * requirement no provider above discharged has nowhere left to be given.
+ */
+export type RootCheck<C> = [RootRequires<C>] extends [never]
+  ? unknown
+  : {
+      readonly "[NO_PROVIDER] the root requires the contexts this property names: provide each above the components that read it (Ctx.provide({ value, children }) around their calls)": ContextNames<
+        RootRequires<C>
+      >;
+    };
 type MountableElement = Element & globalThis.Element;
 
 /** Whether a value is `solid-yield/h` / automatic-`jsx` output: the library's mark. */
@@ -44,9 +67,9 @@ function rootOf(code: () => unknown): () => unknown {
   };
 }
 
-/** Mount a root that is not pending. */
-export function render(
-  code: Root,
+/** Mount a root that is not pending and requires no context. */
+export function render<C extends Root>(
+  code: C & RootCheck<C>,
   element: MountableElement | Document | ShadowRoot | DocumentFragment | HTMLElement,
   init?: Element,
   options?: Parameters<typeof webRender>[3]
@@ -54,9 +77,9 @@ export function render(
   return webRender(rootOf(code) as any, element as any, init as any, options);
 }
 
-/** Hydrate a root (not pending) rendered on the server. */
-export function hydrate(
-  code: Root,
+/** Hydrate a root (not pending, requiring no context) rendered on the server. */
+export function hydrate<C extends Root>(
+  code: C & RootCheck<C>,
   element: MountableElement | Document | HTMLElement,
   options?: Parameters<typeof webHydrate>[2]
 ): () => void {

@@ -14,7 +14,10 @@
  * yield union into them. A third fact is a marker only: a view that binds an
  * event which may wait on a pending read *may wait* (`MayWaitOf`, D-075). It
  * never makes the view pending — the runtime does not suspend a view for a
- * call. Nothing here exists at runtime.
+ * call. A fourth fact is a context requirement (D-098): a component whose
+ * setup reads a context created without a default *requires* it
+ * (`RequiresOf`), until a `Ctx.provide(…)` around its call discharges it.
+ * Nothing here exists at runtime.
  */
 
 /** Phantom: may this value / operation be pending? */
@@ -26,6 +29,11 @@ export declare const PENDING: unique symbol;
  * `no-unshown-wait` warns where it is bound.
  */
 export declare const MAY_WAIT: unique symbol;
+/**
+ * Phantom (D-098): the contexts this operation or view requires — read in a
+ * setup, created without a default, not yet provided around the call.
+ */
+export declare const REQUIRES: unique symbol;
 /** Phantom: the failures reading this value / performing this operation may raise. */
 export declare const FAILS: unique symbol;
 /** Phantom: the operation kind. */
@@ -132,16 +140,32 @@ export interface Create<K extends string = string, E = never> {
 export interface Cleanup {
   readonly [KIND]: "cleanup";
 }
-/** `yield* Ctx`. */
-export interface ContextRead {
+/**
+ * `yield* Ctx` in a setup (D-036). `C` is the context it requires (D-098):
+ * the context itself when it was created without a default, `never` when it
+ * has one (a default is always there to read).
+ */
+export interface ContextRead<C = never> {
   readonly [KIND]: "context";
+  readonly [REQUIRES]: C;
 }
-/** `yield* Child(props)`: the child's pending and failures, propagated, and its may-wait marker (D-075). */
-export interface ChildView<P extends boolean = boolean, E = unknown, W extends boolean = boolean> {
+/**
+ * `yield* Child(props)`: the child's pending and failures, propagated, its
+ * may-wait marker (D-075), and the contexts it requires (D-098). `R`
+ * defaults to `never`: a hole prop that calls a component requiring a
+ * context is refused (`HoleProp`), since no prop declares a requirement.
+ */
+export interface ChildView<
+  P extends boolean = boolean,
+  E = unknown,
+  W extends boolean = boolean,
+  R = never
+> {
   readonly [KIND]: "child";
   readonly [PENDING]: P;
   readonly [FAILS]: E;
   readonly [MAY_WAIT]: W;
+  readonly [REQUIRES]: R;
 }
 
 export type AnyOp =
@@ -152,13 +176,13 @@ export type AnyOp =
   | EventCallOp<boolean, boolean, any>
   | Create<string, any>
   | Cleanup
-  | ContextRead
-  | ChildView<boolean, any>
+  | ContextRead<any>
+  | ChildView<boolean, any, boolean, any>
   | Bind<boolean, any>
   | StreamAttempt;
 
 /** Operations a component's (or a row routine's) setup may perform: it creates, never reads (D-042). */
-export type SetupOp = Create<string, any> | Cleanup | ContextRead;
+export type SetupOp = Create<string, any> | Cleanup | ContextRead<any>;
 /**
  * What a JSX view's generator yields, as TypeScript sees it: the reads and
  * child views of its holes (each `yield*` in a JSX position, which the
@@ -168,7 +192,10 @@ export type SetupOp = Create<string, any> | Cleanup | ContextRead;
  * a statement alike; the runtime (`READ_IN_VIEW`) and the lint
  * (`no-read-in-view-body`) hold it.
  */
-export type ViewOp = Read<boolean, any> | ChildView<boolean, any> | Bind<boolean, any>;
+export type ViewOp =
+  | Read<boolean, any>
+  | ChildView<boolean, any, boolean, any>
+  | Bind<boolean, any>;
 /** What a no-JSX view yields: nothing (D-032). Its reads are holes, its pending and failures its output's. */
 export type HViewOp = never;
 /** Operations a memo (or a projection) may perform; it may return a stream an `attempt` gave (D-091). */
@@ -231,6 +258,26 @@ type PendingBits<Y> = Y extends Wait
 export type PendingOf<Y> = [PendingBits<Y>] extends [never] ? false : true;
 /** The union of the failures of the operations in `Y`. */
 export type FailsOf<Y> = Y extends { readonly [FAILS]: infer E } ? E : never;
+
+/**
+ * The contexts the operations in `Y` require (D-098): a setup's context reads
+ * of contexts without a default, and the requirements of the components
+ * called (`ChildView`). A fourth color, folded like `FailsOf`.
+ */
+export type RequiresOf<Y> = Y extends { readonly [REQUIRES]: infer C } ? C : never;
+/** Phantom: a requirement of a component created eagerly in `h`'s arguments (`Created`). */
+export declare const CREATED: unique symbol;
+/**
+ * A requirement of a component called directly in `h`'s arguments
+ * (`h("div", Card())`): the call runs when the view runs, before an
+ * `h(Ctx.provide, …)` in the same view exists, so that provider cannot
+ * discharge it (D-098). It becomes a plain requirement where the view ends
+ * — a component's, a lazy view's, a row's (`Settle`) — so a provider around
+ * the component's own call does.
+ */
+export type Created<C> = C extends unknown ? { readonly [CREATED]: C } : never;
+/** A view's requirements as its component's: `Created` unwrapped (D-098). */
+export type Settle<R> = R extends { readonly [CREATED]: infer C } ? C : R;
 
 type MayWaitBits<Y> = Y extends { readonly [MAY_WAIT]: infer W }
   ? true extends W
@@ -412,7 +459,7 @@ type Widen<P extends boolean> = [P] extends [true] ? boolean : P;
  * return <…/>; }`, built where the child reads it.
  */
 export type HoleProp<T, E = never, P extends boolean = false> = () => Generator<
-  Read<P, E> | ChildView<P, E> | Raise<E>,
+  Read<P, E> | ChildView<P, E, boolean, never> | Raise<E>,
   T,
   any
 >;
@@ -444,16 +491,26 @@ export type PropsArgs<D> = {} extends D ? [props?: PropsInput<D>] : [props: Prop
  * `W` is the may-wait marker (D-075): the view binds a handler that may
  * wait on pending data. It is not a color — a may-wait view is settled when
  * `P` is `false` — so it defaults to `boolean` and every annotation without
- * it accepts either.
+ * it accepts either. `R` is the contexts it requires (D-098). It defaults
+ * to `never`, the quiet case (as a bare prop is settled, D-024): an
+ * annotation without it requires nothing, and a component that requires a
+ * context declares it (`Component<{}, P, E, W, R>`, generic when it only
+ * passes it on). An element requires none (`SettledView`).
  */
-export interface View<P extends boolean = boolean, E = unknown, W extends boolean = boolean> {
+export interface View<
+  P extends boolean = boolean,
+  E = unknown,
+  W extends boolean = boolean,
+  R = never
+> {
   readonly [VIEW]: true;
   readonly [PENDING]: P;
   readonly [FAILS]: E;
   readonly [MAY_WAIT]: W;
-  [Symbol.iterator](): Generator<ChildView<P, E, W>, SettledView, any>;
+  readonly [REQUIRES]: R;
+  [Symbol.iterator](): Generator<ChildView<P, E, W, R>, SettledView, any>;
 }
-export type SettledView = View<false, never>;
+export type SettledView = View<false, never, boolean, never>;
 
 /**
  * What calling a yield component returns: its view, marked as a component's
@@ -463,8 +520,9 @@ export type SettledView = View<false, never>;
 export type ComponentView<
   P extends boolean = boolean,
   E = unknown,
-  W extends boolean = boolean
-> = View<P, E, W> & {
+  W extends boolean = boolean,
+  R = never
+> = View<P, E, W, R> & {
   readonly [COMPONENT]: true;
 };
 
@@ -477,34 +535,43 @@ export type Component<
   D = {},
   Pd extends boolean = boolean,
   E = unknown,
-  W extends boolean = boolean
-> = (...props: PropsArgs<D>) => ComponentView<Pd, E, W>;
+  W extends boolean = boolean,
+  R = never
+> = (...props: PropsArgs<D>) => ComponentView<Pd, E, W, R>;
 
 /** A view generator's pending: its reads' and, for a no-JSX view, its output's. */
 export type ViewPending<VY, R> = PendingOf<VY | HOps<R>>;
 export type ViewFails<VY, R> = FailsOf<VY | HOps<R>>;
 /** A view generator's may-wait marker (D-075): its binds' and its children's. */
 export type ViewMayWait<VY, R> = MayWaitOf<VY | HOps<R>>;
+/** A view generator's requirements (D-098): those of the components it calls. */
+export type ViewRequires<VY, R> = Settle<RequiresOf<VY | HOps<R>>>;
 /**
  * The colors of what a view returns: `h` output's, or a flow control's view
  * (an `h` view may return `Show({ … })` itself). A JSX element is settled.
  */
 export type HOps<R> =
-  R extends HView<infer P, infer E, infer W>
-    ? ChildView<P, E, W>
-    : R extends View<infer P, infer E, infer W>
-      ? ChildView<P, E, W>
+  R extends HView<infer P, infer E, infer W, infer Q>
+    ? ChildView<P, E, W, Q>
+    : R extends View<infer P, infer E, infer W, infer Q>
+      ? ChildView<P, E, W, Q>
       : never;
 
 /**
  * Output of the no-JSX renderer (`h`): its pending / failures are
  * the union of its holes', and so is its may-wait marker (`W`, D-075).
  */
-export interface HView<P extends boolean = boolean, E = unknown, W extends boolean = boolean> {
+export interface HView<
+  P extends boolean = boolean,
+  E = unknown,
+  W extends boolean = boolean,
+  R = never
+> {
   readonly [HVIEW]: true;
   readonly [PENDING]: P;
   readonly [FAILS]: E;
   readonly [MAY_WAIT]: W;
+  readonly [REQUIRES]: R;
 }
 
 // --- events ----------------------------------------------------------------------------
@@ -599,7 +666,7 @@ export type RowRoutine<A extends readonly unknown[], Y, VY, R = unknown> = ((
   RowCheck<Y, VY, R>;
 
 type RowCheck<Y, VY, R> = [Y] extends [SetupOp]
-  ? [VY] extends [[R] extends [HView<any, any>] ? HViewOp : ViewOp]
+  ? [VY] extends [[R] extends [HView<any, any, any, any>] ? HViewOp : ViewOp]
     ? unknown
     : {
         readonly "[ROW_VIEW_OP] a row routine's view only reads: create state in its setup": never;

@@ -34,7 +34,7 @@ export interface ArrayElement extends Array<Element> {}
  * that may wait.
  */
 type SettledElementView = Omit<SettledView, typeof MAY_WAIT>;
-type SettledElementHView = Omit<HView<false, never>, typeof MAY_WAIT>;
+type SettledElementHView = Omit<HView<false, never, boolean, never>, typeof MAY_WAIT>;
 
 export type Element =
   | Node

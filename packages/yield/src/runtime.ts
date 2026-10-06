@@ -38,7 +38,6 @@ import {
   useContext,
   createContext as solidCreateContext,
   type Accessor,
-  type Context,
   type MemoOptions,
   type ProjectionOptions,
   type SignalOptions,
@@ -56,7 +55,6 @@ import type {
   StoreSetter,
   Cleanup,
   ComponentView,
-  ContextRead,
   Create,
   ComputeOp,
   EffectOp,
@@ -84,6 +82,8 @@ import type {
   ViewOp,
   ViewPending,
   ViewMayWait,
+  ViewRequires,
+  RequiresOf,
   ViewFn,
   ViewWrapped,
   Wait,
@@ -412,6 +412,14 @@ function asSource<T>(get: Accessor<T>): Source<T, any, any> {
   (get as any)[READ] = get;
   (get as any)[Symbol.iterator] = sourceIterator;
   return get as any;
+}
+
+/**
+ * @internal A source over a getter (a prop Solid's `h` turned into one: a
+ * provider's `value` given as a source or a hole, D-098).
+ */
+export function getterSource<T>(get: () => T): Source<T, any, any> {
+  return asSource(get);
 }
 
 /**
@@ -1406,22 +1414,32 @@ export function $cleanup(fn: () => void): Yieldable<Cleanup, void> {
 
 // --- context ------------------------------------------------------------------------------
 
-function* contextIterator(this: Context<unknown>): Generator<never, unknown, unknown> {
+/**
+ * @internal `yield* Ctx` (D-036, D-098): a setup's read of a library context.
+ * The value is read like a prop (D-042): a path over what the provider gave —
+ * a value, a source or a hole — read where the setup's view, memo or event
+ * reads it, never in the setup. A context created without a default that no
+ * provider above gives is `NO_PROVIDER` here, at the read.
+ */
+export function readContext(ctx: any): unknown {
   const host = state.host;
   if (__DEV__ && host !== SETUP && host !== NONE)
     throw devError(
       "CONTEXT_OUTSIDE_SETUP",
       `yield* Ctx belongs to a setup, not ${HOST_NAMES[host]}.`
     );
-  return useContext(this);
-}
-/** A context `yield*` can read in a setup: `const todos = yield* TodosContext`. */
-export type YieldContext<T> = Context<T> & Yieldable<ContextRead, T>;
-/** `createContext` whose contexts are readable with `yield*` in a setup. */
-export function createContext<T>(defaultValue?: T, options?: { name?: string }): YieldContext<T> {
-  const ctx = solidCreateContext<T>(defaultValue as T, options as any) as any;
-  ctx[Symbol.iterator] = contextIterator;
-  return ctx;
+  let raw: unknown;
+  try {
+    raw = useContext(ctx);
+  } catch (e) {
+    if (__DEV__ && getOwner() !== null && ctx.defaultValue === undefined)
+      throw devError(
+        "NO_PROVIDER",
+        `<${state.name ?? "anonymous"}> reads ${ctx.id.description ? `the context ${ctx.id.description}` : "a context"}, created without a default, and no provider above it gives one: call the component inside Ctx.provide({ value, children }).`
+      );
+    throw e;
+  }
+  return makePath(raw, false, []);
 }
 
 // --- events ---------------------------------------------------------------------------------
@@ -1433,6 +1451,7 @@ export function createContext<T>(defaultValue?: T, options?: { name?: string }):
  * reactive system rather than let the call reject.
  */
 export const BOUNDARY = solidCreateContext<boolean>(false);
+export { solidCreateContext };
 
 /** An `$event` handler's call, with where a failure nobody handles goes (D-085). */
 const CALL: unique symbol = Symbol("solid.yield.call") as any;
@@ -1727,6 +1746,10 @@ export function renderView(
  * hole to nothing of its own.
  * The component's failures are its view's and its setup's effects' (`FailsOf<Y>`,
  * D-073): an `$effect` or a `$settled` fails to the nearest `Errored` above it.
+ * Its requirements (D-098) are its view's — the components it calls, less
+ * what a `Ctx.provide` in the view gives them — and its setup's context
+ * reads (`RequiresOf<Y>`), which were resolved where the component was
+ * created: a provider in its own view cannot give them.
  */
 export function component<
   TP = unknown,
@@ -1740,7 +1763,8 @@ export function component<
 ) => ComponentView<
   ViewPending<ViewYield<V>, ViewReturn<V>>,
   ViewFails<ViewYield<V>, ViewReturn<V>> | FailsOf<Y>,
-  ViewMayWait<ViewYield<V>, ViewReturn<V>>
+  ViewMayWait<ViewYield<V>, ViewReturn<V>>,
+  ViewRequires<ViewYield<V>, ViewReturn<V>> | RequiresOf<Y>
 > {
   const comp: any = function (props?: object) {
     const view = runSetup(body as any, [typedProps(props || {})], body.name || "anonymous");
@@ -1781,7 +1805,7 @@ export function component<
 export function view<Y extends ViewOp = never, R = unknown>(
   fn: () => Generator<Y, R, any>,
   ..._rule: NoJsxViewRule<Y, R>
-): ViewFn<[R] extends [HView<any, any>] ? never : Y, R> {
+): ViewFn<[R] extends [HView<any, any, any, any>] ? never : Y, R> {
   // an `h` view's colors are its output's: its yields (refused above) are not
   // passed on, so `component` does not report the same mistake again
   return fn as any;
@@ -1811,7 +1835,7 @@ export type ViewReturn<V> = V extends () => Generator<any, infer R, any> ? R : n
  * own yield, and that is how the view's coloring is its holes'. There the
  * rule is the dev error `READ_IN_VIEW` and the lint `no-read-in-view-body`.)
  */
-export type NoJsxViewRule<VY, R> = [R] extends [HView<any, any>]
+export type NoJsxViewRule<VY, R> = [R] extends [HView<any, any, any, any>]
   ? [VY] extends [never]
     ? []
     : [

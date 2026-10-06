@@ -49,7 +49,7 @@ describe("server rendering", () => {
     const Item = component(function* (props: Props<{ text: string }>) {
       const theme = yield* Theme;
       return view(function* () {
-        return <li class={theme}>{perform(props.text)}</li>;
+        return <li class={perform(theme)}>{perform(props.text)}</li>;
       });
     });
     const App = component(function* () {

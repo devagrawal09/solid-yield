@@ -10,9 +10,18 @@
  * `no-unchecked-foreign-handoff` reports a handoff written without it.
  */
 import type { View } from "./types.js";
+import type { ContextNames } from "./context.js";
 
 /** What a component's view may fail with (`never` for a plain function's). */
-type FailsOfComponent<C> = C extends (...args: any[]) => View<any, infer E, any> ? E : never;
+type FailsOfComponent<C> = C extends (...args: any[]) => View<any, infer E, any, any> ? E : never;
+/** The contexts a component's view still requires (D-098; `never` for a plain function's). */
+type RequiresOfComponent<C> = C extends (...args: any[]) => infer V
+  ? 0 extends 1 & V
+    ? never
+    : V extends View<any, any, any, infer R>
+      ? R
+      : never
+  : never;
 /**
  * The failures as TypeScript will print them: their `kind`s (D-034: every
  * failure has a literal one), since a view's failure type is often printed
@@ -29,13 +38,20 @@ type FailureKinds<E> = unknown extends E
  * a named alias) so that TypeScript prints the message, its property's type
  * naming the failures: `{ "[FOREIGN_HANDOFF] …": NotFound | ApiError }`.
  */
-export type ForeignCheck<C> = [FailsOfComponent<C>] extends [never]
+export type ForeignCheck<C> = ([FailsOfComponent<C>] extends [never]
   ? unknown
   : {
       readonly "[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first": FailureKinds<
         FailsOfComponent<C>
       >;
-    };
+    }) &
+  ([RequiresOfComponent<C>] extends [never]
+    ? unknown
+    : {
+        readonly "[NO_PROVIDER] a yield component handed to plain Solid requires the contexts this property names: provide them inside it (Ctx.provide around the calls that read them)": ContextNames<
+          RequiresOfComponent<C>
+        >;
+      });
 
 /**
  * `defineRoute({ path: "/", component: foreign(Live) })`: hand a yield

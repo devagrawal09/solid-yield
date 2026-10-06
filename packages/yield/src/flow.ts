@@ -35,7 +35,8 @@ import {
   rowArg,
   runRow,
   throughHole,
-  flowControl
+  flowControl,
+  getterSource
 } from "./runtime.js";
 import type { Element } from "./element.js";
 import type {
@@ -51,7 +52,9 @@ import type {
   MayWaitOf,
   Path,
   PendingOf,
+  RequiresOf,
   RowRoutine,
+  Settle,
   Source
 } from "./types.js";
 import type { OpsOfHole } from "./holes.js";
@@ -67,7 +70,7 @@ type ValueOf<W> =
  * source's read, a hole's or a lazy view's reads, a row's view's, a render
  * callback's output's, content's (`h` output, a view).
  */
-type Ops<V> = V extends (...args: any[]) => infer R
+export type Ops<V> = V extends (...args: any[]) => infer R
   ? R extends Generator<any, any, any>
     ? OpsOfHole<V>
     : OpsOfHole<R>
@@ -76,7 +79,7 @@ type Ops<V> = V extends (...args: any[]) => infer R
  * A flow control's view: the colors of its sources and its content (D-059,
  * D-063, D-062), and their may-wait marker (D-075).
  */
-type FlowView<O> = ComponentView<PendingOf<O>, FailsOf<O>, MayWaitOf<O>>;
+type FlowView<O> = ComponentView<PendingOf<O>, FailsOf<O>, MayWaitOf<O>, Settle<RequiresOf<O>>>;
 /**
  * A row's colors: its view's yields and output's, and its setup's (`Y`): an
  * `$effect` / `$settled` the row creates fails to the boundary above the list
@@ -93,12 +96,12 @@ type Text = string | number | bigint | boolean | null | undefined;
  * a fallback's build claims a server node while hydrating, D-092). JSX is
  * written in a lazy view, `function* () { return <…/>; }`.
  */
-type Content = HView<boolean, any> | Text | readonly Content[];
+type Content = HView<boolean, any, boolean, any> | Text | readonly Content[];
 /**
  * What a plain callback returns — `h`'s render callback, a thunk
  * `() => Card()` — built when the control calls it: content, or a view.
  */
-type Rendered = Content | View<boolean, any>;
+type Rendered = Content | View<boolean, any, boolean, any>;
 /** A lazy view (D-066): built where (and each time) the control shows it. JSX goes here. */
 type LazyView = () => Generator<any, Element | Rendered, any>;
 /**
@@ -108,7 +111,7 @@ type LazyView = () => Generator<any, Element | Rendered, any>;
  * JSX element, nor a callback returning one. A row — a generator with the
  * control's arguments — has its own overload.
  */
-type Children<A extends unknown[]> = LazyView | Content | ((...args: A) => Rendered);
+export type Children<A extends unknown[]> = LazyView | Content | ((...args: A) => Rendered);
 /** A flow control's `fallback` (D-092, D-094): a lazy view, `h` output or text. */
 type Fallback = LazyView | Content;
 /**
@@ -124,7 +127,7 @@ type Fallback = LazyView | Content;
  * from the slot. The message is written inline, not as a named alias, so
  * that TypeScript prints it rather than the alias's name.
  */
-type LazyParam<V, A, Slot extends string> = [V] extends [A]
+export type LazyParam<V, A, Slot extends string> = [V] extends [A]
   ? V
   : [V] extends [Element]
     ? {
@@ -410,7 +413,8 @@ function LoadingYield<C, F, O = never>(props: {
 }): ComponentView<
   PendingOf<Ops<F>>,
   FailsOf<Ops<C> | Ops<F> | Ops<O>>,
-  MayWaitOf<Ops<C> | Ops<F> | Ops<O>>
+  MayWaitOf<Ops<C> | Ops<F> | Ops<O>>,
+  Settle<RequiresOf<Ops<C> | Ops<F> | Ops<O>>>
 >;
 function LoadingYield(props: any): any {
   const children = content(props, "Loading");
@@ -469,7 +473,8 @@ function ErroredYield<C, K extends readonly ErrorClass<Failure>[], Y, VY, R>(pro
 }): ComponentView<
   PendingOf<Ops<C> | RowOps<VY, R, Y>>,
   Exclude<FailsOf<Ops<C>>, InstanceType<K[number]>> | FailsOf<RowOps<VY, R, Y>>,
-  MayWaitOf<Ops<C> | RowOps<VY, R, Y>>
+  MayWaitOf<Ops<C> | RowOps<VY, R, Y>>,
+  Settle<RequiresOf<Ops<C> | RowOps<VY, R, Y>>>
 >;
 /** A lazy-view fallback carries its colors; content and a render function carry none. */
 function ErroredYield<
@@ -483,7 +488,8 @@ function ErroredYield<
 }): ComponentView<
   PendingOf<Ops<C> | FallbackYields<F>>,
   Exclude<FailsOf<Ops<C>>, InstanceType<K[number]>> | FailsOf<FallbackYields<F>>,
-  MayWaitOf<Ops<C> | FallbackYields<F>>
+  MayWaitOf<Ops<C> | FallbackYields<F>>,
+  Settle<RequiresOf<Ops<C> | FallbackYields<F>>>
 >;
 function ErroredYield<C, Y, VY, R>(props: {
   fallback: RowRoutine<[error: Path<FailsOf<Ops<C>>>, reset: Reset], Y, VY, R>;
@@ -491,7 +497,8 @@ function ErroredYield<C, Y, VY, R>(props: {
 }): ComponentView<
   PendingOf<Ops<C> | RowOps<VY, R, Y>>,
   FailsOf<RowOps<VY, R, Y>>,
-  MayWaitOf<Ops<C> | RowOps<VY, R, Y>>
+  MayWaitOf<Ops<C> | RowOps<VY, R, Y>>,
+  Settle<RequiresOf<Ops<C> | RowOps<VY, R, Y>>>
 >;
 function ErroredYield<C, F extends ErroredFallback<FailsOf<Ops<C>>> | Element>(props: {
   fallback: LazyParam<F, ErroredFallback<FailsOf<Ops<C>>>, "fallback">;
@@ -499,7 +506,8 @@ function ErroredYield<C, F extends ErroredFallback<FailsOf<Ops<C>>> | Element>(p
 }): ComponentView<
   PendingOf<Ops<C> | FallbackYields<F>>,
   FailsOf<FallbackYields<F>>,
-  MayWaitOf<Ops<C> | FallbackYields<F>>
+  MayWaitOf<Ops<C> | FallbackYields<F>>,
+  Settle<RequiresOf<Ops<C> | FallbackYields<F>>>
 >;
 function ErroredYield(props: any): any {
   const children = content(props, "Errored");
@@ -551,6 +559,28 @@ function untracked(fn: (props: any) => any): any {
     if (typeof out === "function") out[VIEW_MARK] = true;
     return out;
   };
+}
+
+/**
+ * @internal `Ctx.provide({ value, children })` (D-098): Solid's provider of
+ * `ctx`, created as a flow control is (untracked, its output a view), its
+ * `children` a lazy view built inside it. `value` is handed over as given —
+ * a value, a source or a hole — and a reader's `yield* Ctx` reads it like a
+ * prop.
+ */
+export function provideView(ctx: any, props: any): unknown {
+  return untracked((p: any) => {
+    const children = content(p, "provide");
+    // `h` hands a function prop (a source, a hole) over as a getter that
+    // reads it: kept a source, so readers read it where they read
+    const d = Object.getOwnPropertyDescriptor(p, "value");
+    return createComponent(ctx, {
+      value: d && d.get ? getterSource(() => p.value) : p.value,
+      get children() {
+        return children();
+      }
+    });
+  })(props);
 }
 
 export const For: typeof ForYield = untracked(ForYield);

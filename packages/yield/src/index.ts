@@ -24,7 +24,6 @@ export {
   $store,
   attempt,
   constant,
-  createContext,
   isComponent,
   isPendingOf,
   latestOf,
@@ -33,9 +32,18 @@ export {
   readStore,
   refresh,
   until,
-  view,
-  type YieldContext
+  view
 } from "./runtime.js";
+export { createContext } from "./context.js";
+export type {
+  ContextNames,
+  ContextOps,
+  Provide,
+  ContextValue,
+  ProvidedValue,
+  RequiredContext,
+  YieldContext
+} from "./context.js";
 export { For, Show, Switch, Match, Repeat, Loading, Errored } from "./flow.js";
 export type { Reset } from "./flow.js";
 export { render, hydrate } from "./render.js";
@@ -75,6 +83,10 @@ export type {
   MemoOp,
   Path,
   PendingOf,
+  RequiresOf,
+  Created,
+  Settle,
+  ViewRequires,
   HoleProp,
   Props,
   PropsArgs,

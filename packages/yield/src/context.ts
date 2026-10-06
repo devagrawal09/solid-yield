@@ -58,11 +58,11 @@ export type ContextValue<T> = [T] extends [Source<infer V, infer E, infer P>]
  */
 export type ProvidedValue<T> = [T] extends [Source<infer V, infer E, infer P>]
   ?
-      | Exclude<V, undefined>
+      | (V & ({} | null))
       | Source<V, E, [P] extends [true] ? boolean : P>
       | HoleProp<V, E, [P] extends [true] ? boolean : P>
       | ProvideUndefined<V>
-  : Exclude<T, undefined> | Source<T> | HoleProp<T> | ProvideUndefined<T>;
+  : (T & ({} | null)) | Source<T> | HoleProp<T> | ProvideUndefined<T>;
 /**
  * The refusal's message, when the value type admits `undefined` (TypeScript
  * prints it in the expected type). Written inline so that it is printed

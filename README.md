@@ -6,9 +6,7 @@
 
 In Solid 2 a component's signature hides what its reads do. The two components below render the same list:
 
-<table>
-<tr><th>Solid 2</th><th>solid-yield</th></tr>
-<tr><td valign="top">
+### In Solid 2
 
 ```tsx
 function TodoList(props: { listId: string }) {
@@ -25,7 +23,7 @@ function TodoList(props: { listId: string }) {
 
 `todos()` suspends until the fetch resolves, so a `<Loading>` must sit above it. If the fetch rejects, it throws, so an `<Errored>` must sit above it too. `ThemeCtx` must be provided. The type shows none of this.
 
-</td><td valign="top">
+### In solid-yield
 
 <!-- prettier-ignore -->
 ```tsx
@@ -53,9 +51,6 @@ const TodoList = component(function* TodoList(props: Props<{ listId: string }>) 
 //   W = false (binds no event that waits),
 //   R = RequiredContext<"light" | "dark", "ThemeCtx"> (requires ThemeCtx)
 ```
-
-</td></tr>
-</table>
 
 What this gets you:
 

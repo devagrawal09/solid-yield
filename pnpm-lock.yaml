@@ -54,21 +54,18 @@ importers:
       '@types/node':
         specifier: ^25.6.0
         version: 25.9.9
-      yield-example-harness:
-        specifier: workspace:*
-        version: link:../harness
       eslint:
         specifier: ^9.0.0
         version: 9.39.5
       jsdom:
         specifier: ^25.0.1
         version: 25.0.1
-      solid-yield:
-        specifier: workspace:*
-        version: link:../../packages/yield
       solid-js:
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13
+      solid-yield:
+        specifier: workspace:*
+        version: link:../../packages/yield
       typescript:
         specifier: ^6.0.2
         version: 6.0.3
@@ -81,6 +78,9 @@ importers:
       vitest:
         specifier: ^4.1.6
         version: 4.1.11(@types/node@25.9.9)(jsdom@25.0.1)(vite@7.3.6(@types/node@25.9.9)(lightningcss@1.33.0))
+      yield-example-harness:
+        specifier: workspace:*
+        version: link:../harness
 
   examples/hackernews-spa-yield:
     dependencies:
@@ -90,12 +90,12 @@ importers:
       '@solidjs/web':
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13(solid-js@2.0.0-rc.13)
-      solid-yield:
-        specifier: workspace:*
-        version: link:../../packages/yield
       solid-js:
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13
+      solid-yield:
+        specifier: workspace:*
+        version: link:../../packages/yield
     devDependencies:
       '@solidjs/vite-plugin':
         specifier: 3.0.0-next.35
@@ -103,9 +103,6 @@ importers:
       '@types/node':
         specifier: ^25.6.0
         version: 25.9.9
-      yield-example-harness:
-        specifier: workspace:*
-        version: link:../harness
       eslint:
         specifier: ^9.0.0
         version: 9.39.5
@@ -124,6 +121,9 @@ importers:
       vitest:
         specifier: ^4.1.6
         version: 4.1.11(@types/node@25.9.9)(jsdom@25.0.1)(vite@8.3.2(@types/node@25.9.9)(esbuild@0.27.7))
+      yield-example-harness:
+        specifier: workspace:*
+        version: link:../harness
 
   examples/harness:
     dependencies:
@@ -142,12 +142,12 @@ importers:
       eslint-plugin-solid-yield:
         specifier: workspace:*
         version: link:../../packages/eslint-plugin-yield
-      solid-yield:
-        specifier: workspace:*
-        version: link:../../packages/yield
       solid-js:
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13
+      solid-yield:
+        specifier: workspace:*
+        version: link:../../packages/yield
     devDependencies:
       '@solidjs/vite-plugin':
         specifier: 3.0.0-next.35
@@ -306,9 +306,6 @@ importers:
       '@types/node':
         specifier: ^25.6.0
         version: 25.9.9
-      yield-example-harness:
-        specifier: workspace:*
-        version: link:../harness
       eslint:
         specifier: ^9.0.0
         version: 9.39.5
@@ -333,6 +330,9 @@ importers:
       vitest:
         specifier: ^4.1.6
         version: 4.1.11(@types/node@25.9.9)(jsdom@25.0.1)(vite@7.3.6(@types/node@25.9.9)(lightningcss@1.33.0))
+      yield-example-harness:
+        specifier: workspace:*
+        version: link:../harness
 
   examples/room-yield:
     dependencies:
@@ -342,12 +342,12 @@ importers:
       '@solidjs/web':
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13(solid-js@2.0.0-rc.13)
-      solid-yield:
-        specifier: workspace:*
-        version: link:../../packages/yield
       solid-js:
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13
+      solid-yield:
+        specifier: workspace:*
+        version: link:../../packages/yield
     devDependencies:
       '@solidjs/vite-plugin':
         specifier: 3.0.0-next.35
@@ -358,9 +358,6 @@ importers:
       '@vitejs/plugin-basic-ssl':
         specifier: ^2.3.0
         version: 2.3.0(vite@8.3.2(@types/node@25.9.9)(esbuild@0.27.7))
-      yield-example-harness:
-        specifier: workspace:*
-        version: link:../harness
       eslint:
         specifier: ^9.0.0
         version: 9.39.5
@@ -379,6 +376,9 @@ importers:
       vitest:
         specifier: ^4.1.6
         version: 4.1.11(@types/node@25.9.9)(jsdom@25.0.1)(vite@8.3.2(@types/node@25.9.9)(esbuild@0.27.7))
+      yield-example-harness:
+        specifier: workspace:*
+        version: link:../harness
 
   examples/sierpinski-yield:
     devDependencies:
@@ -391,21 +391,18 @@ importers:
       '@types/node':
         specifier: ^25.6.0
         version: 25.9.9
-      yield-example-harness:
-        specifier: workspace:*
-        version: link:../harness
       eslint:
         specifier: ^9.0.0
         version: 9.39.5
       jsdom:
         specifier: ^25.0.1
         version: 25.0.1
-      solid-yield:
-        specifier: workspace:*
-        version: link:../../packages/yield
       solid-js:
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13
+      solid-yield:
+        specifier: workspace:*
+        version: link:../../packages/yield
       typescript:
         specifier: ^6.0.2
         version: 6.0.3
@@ -418,6 +415,9 @@ importers:
       vitest:
         specifier: ^4.1.6
         version: 4.1.11(@types/node@25.9.9)(jsdom@25.0.1)(vite@7.3.6(@types/node@25.9.9)(lightningcss@1.33.0))
+      yield-example-harness:
+        specifier: workspace:*
+        version: link:../harness
 
   examples/sierpinski-yield-h:
     devDependencies:
@@ -433,21 +433,18 @@ importers:
       '@types/node':
         specifier: ^25.6.0
         version: 25.9.9
-      yield-example-harness:
-        specifier: workspace:*
-        version: link:../harness
       eslint:
         specifier: ^9.0.0
         version: 9.39.5
       jsdom:
         specifier: ^25.0.1
         version: 25.0.1
-      solid-yield:
-        specifier: workspace:*
-        version: link:../../packages/yield
       solid-js:
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13
+      solid-yield:
+        specifier: workspace:*
+        version: link:../../packages/yield
       typescript:
         specifier: ^6.0.2
         version: 6.0.3
@@ -457,6 +454,9 @@ importers:
       vitest:
         specifier: ^4.1.6
         version: 4.1.11(@types/node@25.9.9)(jsdom@25.0.1)(vite@7.3.6(@types/node@25.9.9)(lightningcss@1.33.0))
+      yield-example-harness:
+        specifier: workspace:*
+        version: link:../harness
 
   examples/todos-yield:
     devDependencies:
@@ -469,21 +469,18 @@ importers:
       '@types/node':
         specifier: ^25.6.0
         version: 25.9.9
-      yield-example-harness:
-        specifier: workspace:*
-        version: link:../harness
       eslint:
         specifier: ^9.0.0
         version: 9.39.5
       jsdom:
         specifier: ^25.0.1
         version: 25.0.1
-      solid-yield:
-        specifier: workspace:*
-        version: link:../../packages/yield
       solid-js:
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13
+      solid-yield:
+        specifier: workspace:*
+        version: link:../../packages/yield
       typescript:
         specifier: ^6.0.2
         version: 6.0.3
@@ -496,6 +493,9 @@ importers:
       vitest:
         specifier: ^4.1.6
         version: 4.1.11(@types/node@25.9.9)(jsdom@25.0.1)(vite@7.3.6(@types/node@25.9.9)(lightningcss@1.33.0))
+      yield-example-harness:
+        specifier: workspace:*
+        version: link:../harness
 
   examples/todos-yield-h:
     devDependencies:
@@ -511,21 +511,18 @@ importers:
       '@types/node':
         specifier: ^25.6.0
         version: 25.9.9
-      yield-example-harness:
-        specifier: workspace:*
-        version: link:../harness
       eslint:
         specifier: ^9.0.0
         version: 9.39.5
       jsdom:
         specifier: ^25.0.1
         version: 25.0.1
-      solid-yield:
-        specifier: workspace:*
-        version: link:../../packages/yield
       solid-js:
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13
+      solid-yield:
+        specifier: workspace:*
+        version: link:../../packages/yield
       typescript:
         specifier: ^6.0.2
         version: 6.0.3
@@ -535,27 +532,9 @@ importers:
       vitest:
         specifier: ^4.1.6
         version: 4.1.11(@types/node@25.9.9)(jsdom@25.0.1)(vite@7.3.6(@types/node@25.9.9)(lightningcss@1.33.0))
-
-  packages/yield:
-    devDependencies:
-      '@solidjs/compiler':
-        specifier: ^2.0.0-rc.11
-        version: 2.0.0-rc.13
-      '@solidjs/h':
-        specifier: ^2.0.0-rc.11
-        version: 2.0.0-rc.13(@solidjs/web@2.0.0-rc.13(solid-js@2.0.0-rc.13))
-      '@solidjs/vite-plugin':
-        specifier: 3.0.0-next.35
-        version: 3.0.0-next.35(@solidjs/web@2.0.0-rc.13(solid-js@2.0.0-rc.13))(solid-js@2.0.0-rc.13)(vite@8.3.2(@types/node@25.9.9)(esbuild@0.27.7))
-      '@solidjs/web':
-        specifier: ^2.0.0-rc.11
-        version: 2.0.0-rc.13(solid-js@2.0.0-rc.13)
-      csstype:
-        specifier: ^3.1.0
-        version: 3.2.3
-      solid-js:
-        specifier: ^2.0.0-rc.11
-        version: 2.0.0-rc.13
+      yield-example-harness:
+        specifier: workspace:*
+        version: link:../harness
 
   packages/eslint-plugin-yield:
     devDependencies:
@@ -596,12 +575,12 @@ importers:
       '@types/node':
         specifier: ^25.6.0
         version: 25.9.9
-      solid-yield:
-        specifier: workspace:*
-        version: link:../yield
       solid-js:
         specifier: ^2.0.0-rc.11
         version: 2.0.0-rc.13
+      solid-yield:
+        specifier: workspace:*
+        version: link:../yield
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -611,6 +590,30 @@ importers:
       vitest:
         specifier: ^4.1.6
         version: 4.1.11(@types/node@25.9.9)(jsdom@25.0.1)(vite@7.3.6(@types/node@25.9.9)(lightningcss@1.33.0))
+
+  packages/yield:
+    devDependencies:
+      '@solidjs/compiler':
+        specifier: ^2.0.0-rc.11
+        version: 2.0.0-rc.13
+      '@solidjs/h':
+        specifier: ^2.0.0-rc.11
+        version: 2.0.0-rc.13(@solidjs/web@2.0.0-rc.13(solid-js@2.0.0-rc.13))
+      '@solidjs/router':
+        specifier: 2.0.0-next.35
+        version: 2.0.0-next.35(@solidjs/web@2.0.0-rc.13(solid-js@2.0.0-rc.13))(solid-js@2.0.0-rc.13)
+      '@solidjs/vite-plugin':
+        specifier: 3.0.0-next.35
+        version: 3.0.0-next.35(@solidjs/web@2.0.0-rc.13(solid-js@2.0.0-rc.13))(solid-js@2.0.0-rc.13)(vite@8.3.2(@types/node@25.9.9)(esbuild@0.27.7))
+      '@solidjs/web':
+        specifier: ^2.0.0-rc.11
+        version: 2.0.0-rc.13(solid-js@2.0.0-rc.13)
+      csstype:
+        specifier: ^3.1.0
+        version: 3.2.3
+      solid-js:
+        specifier: ^2.0.0-rc.11
+        version: 2.0.0-rc.13
 
 packages:
 
@@ -1486,6 +1489,16 @@ packages:
       '@solidjs/web': ^2.0.0-rc.9
       filesystem-routing: '>=0.4.0'
       solid-js: ^2.0.0-rc.9
+    peerDependenciesMeta:
+      filesystem-routing:
+        optional: true
+
+  '@solidjs/router@2.0.0-next.35':
+    resolution: {integrity: sha512-6+frAz9M2vrLSz+2hr51++nzGyxt3+nCo08dY3PkdieSOwDutAXdfSXj681FqTOvffv8kPDF5tdRqPUoLbKhlQ==}
+    peerDependencies:
+      '@solidjs/web': ^2.0.0-rc.13
+      filesystem-routing: '>=0.4.0'
+      solid-js: ^2.0.0-rc.13
     peerDependenciesMeta:
       filesystem-routing:
         optional: true
@@ -3631,6 +3644,11 @@ snapshots:
       '@solidjs/web': 2.0.0-rc.13(solid-js@2.0.0-rc.13)
 
   '@solidjs/router@2.0.0-next.29(@solidjs/web@2.0.0-rc.13(solid-js@2.0.0-rc.13))(solid-js@2.0.0-rc.13)':
+    dependencies:
+      '@solidjs/web': 2.0.0-rc.13(solid-js@2.0.0-rc.13)
+      solid-js: 2.0.0-rc.13
+
+  '@solidjs/router@2.0.0-next.35(@solidjs/web@2.0.0-rc.13(solid-js@2.0.0-rc.13))(solid-js@2.0.0-rc.13)':
     dependencies:
       '@solidjs/web': 2.0.0-rc.13(solid-js@2.0.0-rc.13)
       solid-js: 2.0.0-rc.13

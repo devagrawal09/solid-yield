@@ -535,9 +535,10 @@ test("audit: foreign-owned independent child roots cannot become slots", () => {
     'import {Foreign} from "opaque";const Child=component(function*(){const [n,set]=yield* $signal(0);const click=$event(function*(){yield* set(1)});return view(function*(){return <button onClick={yield* click}>{yield* n}</button>});});' +
       app("return view(function*(){return <Foreign><p>copy</p>{yield* Child()}</Foreign>});")
   );
-  assert.equal(r.roots.length, 1);
-  assert.equal(r.roots[0].slots.length, 0);
-  assert(r.merges.some(x => x.rule === "FOREIGN_OWNER"));
+  assert.equal(r.roots.length, 2);
+  assert(r.roots.every(x => x.slots.length === 0));
+  assert(r.roots.some(x => x.foreignAncestors.length === 1));
+  assert(!r.merges.some(x => x.rule === "FOREIGN_OWNER"));
 });
 test("audit: recursive opaque props widen every previously known field", () => {
   const r = instances(
@@ -564,4 +565,83 @@ test("audit: a recursive prop absent on the first call still widens earlier hole
       app("return view(function*(){return <>{yield* Child({})}</>});")
   );
   assert.equal(r.holes.inert, 0);
+});
+
+test("option A: a shared fresh promise helper does not join independent widgets", () => {
+  const r = instances(
+    "const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));" +
+      "const Widget=component(function*(){const m=yield* $memo(function*(){return yield* attempt(()=>delay(20),()=>0)});return view(function*(){return <section>{yield* Loading({children:function*(){return <b>{yield* m}</b>}})}</section>});});" +
+      app("return view(function*(){return <main>{yield* Widget()}{yield* Widget()}</main>});")
+  );
+  assert.equal(r.roots.length, 2);
+  assert(r.roots.every(x => x.mode === "visible"));
+  assert.deepEqual(
+    r.sources.map(x => x.provenance),
+    ["U", "U"]
+  );
+  // One diagnostic location, two allocations. Counting origins is not aliasing.
+  assert.equal(r.leaks.length, 1);
+});
+
+test("option A: a shared promise value and an opaque executor still join readers", () => {
+  for (const helper of [
+    "const promise=new Promise(resolve=>setTimeout(resolve,20));const delay=()=>promise;",
+    "const delay=()=>new Promise(resolve=>opaque(resolve));"
+  ]) {
+    const r = instances(
+      helper +
+        "const Widget=component(function*(){const m=yield* $memo(function*(){return yield* attempt(()=>delay(),()=>0)});return view(function*(){return <b>{yield* m}</b>});});" +
+        app("return view(function*(){return <main>{yield* Widget()}{yield* Widget()}</main>});")
+    );
+    assert.equal(r.roots.length, 1, helper);
+    assert(
+      r.merges.some(x => x.rule === "M6"),
+      helper
+    );
+  }
+});
+
+test("option A: a fresh promise retains shared captured inputs", () => {
+  const r = instances(
+    'import {data} from "opaque";const delay=()=>new Promise(resolve=>setTimeout(resolve,data));' +
+      "const Widget=component(function*(){const m=yield* $memo(function*(){return yield* attempt(()=>delay(),()=>0)});return view(function*(){return <b>{yield* m}</b>});});" +
+      app("return view(function*(){return <main>{yield* Widget()}{yield* Widget()}</main>});")
+  );
+  assert.equal(r.roots.length, 1);
+  assert(r.leaks.some(x => x.construct === "foreign primitive"));
+});
+
+test("option A: independent siblings below a foreign owner remain separate", () => {
+  const r = instances(
+    'import {Foreign} from "opaque";const Child=component(function*(){const [n,set]=yield* $signal(0);const click=$event(function*(){yield* set(1)});return view(function*(){return <button onClick={yield* click}>{yield* n}</button>});});' +
+      app("return view(function*(){return <Foreign>{yield* Child()}{yield* Child()}</Foreign>});")
+  );
+  assert.equal(r.roots.length, 3); // foreign owner plus its two independent children
+  assert(!r.merges.some(x => x.rule === "FOREIGN_OWNER"));
+  assert(r.roots.every(x => x.slots.length === 0));
+});
+
+test("option A: computed keys and template interpolation retain signal reads", () => {
+  const r = instances(
+    'const pictures=["a","b"];' +
+      app(
+        "const [index,set]=yield* $signal(0);const next=$event(function*(){yield* set(1)});return view(function*(){return <section><img src={pictures[yield* index]} alt={`Example ${yield* index}`}/><p>{`Image ${yield* index}`}</p><button onClick={yield* next}/></section>});"
+      )
+  );
+  assert.equal(r.roots.length, 1);
+  assert.equal(r.holes.inert, 0);
+  assert.equal(r.elements.inert, 0);
+  assert.equal(r.roots[0].parts.filter(x => x.kind === "hole").length, 3);
+  assert.equal(r.roots[0].slots.length, 0);
+});
+
+test("option A: two error accessor holes share a paragraph span", () => {
+  const r = instances(
+    app(
+      "return view(function*(){return <>{yield* Errored({fallback:err=><p>{err().kind}: {err().message}</p>,children:function*(){return <b>content</b>}})}</>});"
+    )
+  );
+  assert.equal(r.roots.length, 1);
+  assert.equal(r.roots[0].size, 2);
+  assert(r.merges.some(x => x.rule === "SPAN_OVERLAP"));
 });

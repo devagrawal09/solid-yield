@@ -69,6 +69,9 @@ export async function reportTwin(twin, { analysis = analyzeInstances } = {}) {
 const before = JSON.parse(
   readFileSync(resolve(repo, "documentation/compiler-c1-before.json"), "utf8")
 ).twins;
+const optionABefore = JSON.parse(
+  readFileSync(resolve(repo, "documentation/compiler-c1-option-a-before.json"), "utf8")
+).twins;
 const fraction = n => `${n.inert}/${n.total}`;
 const escape = s =>
   String(s).replaceAll("|", "\\|").replaceAll("`", "'").replace(/\s+/g, " ").trim();
@@ -135,6 +138,21 @@ export function markdown(reports) {
     out.push(`| ${r.twin} | unmeasured | ${fraction(r.hElements ?? { inert: 0, total: 0 })} |`);
   out.push(
     "",
+    "## Option A: changes since 3b51165",
+    "",
+    "All nine twins were rerun with the same entry graphs. These arrows compare the same instance-based units, unlike the older table above. E/V/L describes dependencies; every emitted tier-1 root must hydrate synchronously.",
+    "",
+    "| Twin | Inert holes before → after | Inert JSX before → after | Groups E/V/L before → after | Captures before → after |",
+    "| --- | ---: | ---: | --- | ---: |"
+  );
+  for (const r of reports) {
+    const b = optionABefore.find(x => x.twin === r.twin);
+    out.push(
+      `| ${r.twin} | ${fraction(b.holes)} → ${fraction(r.holes)} | ${fraction(b.jsxElements)} → ${fraction(r.jsxElements)} | ${modeCounts(b.roots)} → ${modeCounts(r.roots)} | ${b.captures} → ${r.captureFailures.length} |`
+    );
+  }
+  out.push(
+    "",
     "## U classification totals",
     "",
     "GENUINE means client execution/lifetime is required under C0's rules, including foreign output kept U by policy; it does not mean every result actually changes. ANALYSIS BLIND SPOT means source inspection identifies S or C but the current transfer rule cannot retain it.",
@@ -176,7 +194,7 @@ export function markdown(reports) {
     "",
     "Sierpinski's setup timers are explicit eager causes despite having no $effect. The h rule counts nonliteral native props/children as holes, onX props as binds, and literal tags as element sites; component/flow children are analysed under the caller's owner. JSX expression uses are also counted, including structural component-call holes. Literal strings/numbers are inert values. These working clarifications to F-C1–F-C3 are documented in compiler-findings.md; C0 itself is not silently rewritten.",
     "",
-    "Remaining precision limits: no serializer execution, no proof of physical hydration spans, foreign ownership is conservative, recursive families join all depths, and syntax-based boundary colors can over-merge. The Effect.runFork reference below is knowably module code (S at the edge), but a conditional return loses callable identity; resolving that requires preserving callable alternatives through helper returns. It stays U, with its rule and location visible. Fixing it cannot remove the adapter's genuine async lifetime or the foreign runtime owner. No new C2 code, delayed-hydration change or benchmark change is included."
+    "Remaining precision limits: no serializer execution, no proof of physical hydration spans, foreign lifetime/claim support is unproved, recursive families join all depths, and syntax-based boundary colors can over-merge. The Effect.runFork reference below is knowably module code (S at the edge), but a conditional return loses callable identity; resolving that requires preserving callable alternatives through helper returns. It stays U, with its rule and location visible. Fixing it cannot remove the adapter's genuine async lifetime or the foreign runtime owner. This table reports C1 only; see compiler-c2-finding.md and compiler-benchmarks.md for emission and measurements."
   );
   for (const r of reports) {
     out.push(
@@ -197,26 +215,24 @@ export function markdown(reports) {
     if (r.twin === "docs-yield") {
       out.push(
         "",
-        "### Content-site premise (new pair, no before measurement)",
+        "### Content-site premise after option A",
         "",
-        "The pair has six widget definitions with no shared signals or application context. Navigation, eight article sections (headings, paragraphs and code), on-this-page links, related links, a long fixed reading guide and footer come from delayed fake server API functions. The fake API runs in process; its use-server directives declare provenance for C1, without claiming an RPC transport or shipped-byte saving. Local widget APIs remain client promises.",
+        "The six widget definitions share no application signals or context. M6 now distinguishes the separate fresh promises returned by delay(): SearchBox and CommentList remain U/visible but form separate groups. The carousel src computed key and alt template interpolation both carry index's C provenance; its img is no longer an inert slot.",
         "",
-        "| Twin | Inert holes | Inert JSX | Groups E/V/L | Captures | U origins | Eager reach |",
-        "| --- | ---: | ---: | --- | ---: | ---: | --- |",
-        `| docs-yield | ${fraction(r.holes)} | ${fraction(r.jsxElements)} | ${modeCounts(r.roots)} | ${r.captureFailures.length} | ${r.leaks.length} | ThemeToggle only; 1 touched cell, 4 pulled-in parts |`,
+        `The actual result is **${r.roots.length} candidate groups (${modeCounts(r.roots)} E/V/L)**, ${fraction(r.holes)} inert holes and ${fraction(r.jsxElements)} inert JSX sites. ThemeToggle is the only eager cause; tier 1 nevertheless hydrates every emitted root at load.`,
         "",
-        "This is a majority of locally inert JSX sites (about 60%), but six candidate groups do not mean six widget roots. SearchBox and CommentList merge by M6: both non-server async paths reach the same delay helper's unknown Promise binding, even though they share no state. The router's FOREIGN_OWNER edges merge the two route alternatives, both LikeButton instances and routed article parts. Route props are U, so getArticle(slug) on DocPage stays U even though the function is server-declared; M6 propagates that origin, and M4 pulls its pending/error boundaries in. CAPTURE_FALLBACK also rejects DocPage's setup-local props object at the candidate edge. None of these merges reaches ThemeToggle, NewsletterForm or ImageCarousel.",
+        "Removing FOREIGN_OWNER edges separates the router owner, the Home foreign wrapper, Home's article error holes and Home's LikeButton. DocPage's article and like button still share the U route props: M6 and the rejected props capture join them. That is an actual input dependency, not foreign ancestry. Foreign descendants are reported separately and are still not offered as stable slots; navigation can recreate them.",
         "",
-        "The sixth group is the fixed reading guide's two error-fallback holes (err().kind and err().message), joined by SPAN_OVERLAP because they share the same paragraph span, and reported lazy despite having no bind; it is not an extra widget. The failure fallback remains U in this analysis even though the normal article source is S. Thus the diagnostic exposes conservative async sharing, foreign ownership, a prop capture and failure-fallback placement; it does not establish six small independently claimable roots. M1/M2 keep each widget's own cells and handlers together; the cross-widget merge above is M6. The original eight-twin results are unchanged.",
+        "The guide's two error holes stay joined by SPAN_OVERLAP: err().kind and err().message have the same paragraph span. The Home article has another instance of that pair. They are C/lazy in the analysis because the fallback error accessor is C, even with an S normal source. Neither is a seventh widget. Their span is absent during success and the accessor belongs to the Errored callback; codegen must preserve that boundary and edge, not hydrate a free-standing paragraph.",
         "",
-        "One further precision issue is visible in this fixture: ImageCarousel's changing img is offered as an S slot (widgets.tsx:257:9), while its src and alt expressions both read the written index signal. Those embedded yield expressions are absent from that group's part list, although the parity script and hydration interaction change the image. The raw 149/249 inert JSX count therefore includes at least one false-inert element; removing that one still leaves a majority (148/249). This finding is recorded here, without changing the analysis or treating its slots as safe codegen input."
+        "Relative to 3b51165, docs changes from six groups (1/2/3) to eleven (1/5/5); inert JSX changes from 149/249 to 148/249. The majority-inert premise survives. This count is not eleven independent physical hydration claims. Hackernews and room also split when foreign ancestry is removed; the table above records all changes, including newly visible expression reads."
       );
     }
     out.push("", "### Groups and eager reach", "");
     if (eagerNotes[r.twin]) out.push(eagerNotes[r.twin], "");
     else
       out.push(
-        "No eager group or $effect. The foreign router owns all route alternatives, so this remains one visible candidate group in the C0 classification.",
+        "No eager group or $effect. Foreign lifetime constraints are reported separately from dependency grouping.",
         ""
       );
     for (const x of r.roots) {
@@ -249,9 +265,7 @@ export function markdown(reports) {
     "",
     "## Premise verdict",
     "",
-    "The original eight interaction-heavy twins do not support “most UI is inert; apps split into small roots” under the current C0 rules: none has a majority of locally inert element sites, and each has one group (seven eager, one visible). The new contrived docs-yield content site has a majority of inert JSX and six groups, with only ThemeToggle eager. It demonstrates that content can dominate while several widget groups stay separate. It also exposes merging of independent async widgets and routed article/like parts, plus a separate failure-fallback group; it does not establish that all six widgets become small independent roots.",
-    "",
-    "This is not a universal disproof. The examples favour stateful demos, foreign owners and async boundaries; call-site/row counts are not DOM or byte weights, and conservative colors/ownership may hide useful splits. Locally inert markup is still useful evidence, but it does not establish extractable slots, independently claimable DOM or shipped-byte savings. The next decision can now use named client dependencies rather than the provisional U reduction alone."
+    "Dev's option A accepts the content-heavy premise. The corrected docs twin retains a majority of locally inert JSX and separate SearchBox, CommentList, ThemeToggle, NewsletterForm and ImageCarousel groups. It has eleven dependency groups in total, including route owners and error fallbacks. The other twins remain mostly interactive. Physical claims, capture serialization and byte savings require C2 evidence; these static counts alone establish none of them."
   );
   return out.join("\n").trimEnd() + "\n";
 }

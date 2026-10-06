@@ -85,6 +85,12 @@ How provenance flows through each construct:
 
 A hole's π is the join of its reads. A call's π is the π of the called component's instance.
 
+**Option A clarification, 2026-10-07.** Reads include computed property keys
+(`pictures[yield* index]`) and every template interpolation, including attributes.
+A template literal with interpolations is an expression, not a literal constant.
+Both the receiver and the computed key contribute provenance; a dynamic key
+must not change the stored equation of a statically selected field.
+
 ### 1.3 Inert region
 
 A view subtree at a site is **inert** (for a given instantiation) when all of these hold:
@@ -126,6 +132,36 @@ Two parts are put in one root when splitting them would cut a route of calculus 
 | M5 | **Re-creation.** A region inside the span that a flow control of the root can dispose and build again (a `Show` branch, a `For` row, a `Switch` arm) cannot be a slot. It joins the root. | Building it again needs its code. (Keeping the detached DOM instead is D-061's node migration. That is a later option, not C2.) |
 | M6 | **Unknown sharing.** Parts that touch the same U binding. | The analysis cannot prove that they are independent. |
 
+**M6 identity, option A.** Sharing code is not sharing a value. A helper that
+creates no reactive state, reads no signal and captures no shared mutable or U
+value does not connect its callers merely because its result is U. In particular,
+separate fresh promises returned by `delay(ms)` have separate allocation identity;
+their completion remains U, but the helper's source location is not a dependency.
+Two readers of the *same* promise still join. Captured inputs and shared state
+remain ordinary edges. Unknown calls whose independence has not been established
+retain the conservative M6 merge.
+
+The current proof is deliberately narrow: a `new Promise` executor may call its
+own settlement parameters, known pure built-ins and timer functions. It may not
+delegate, assign, update, allocate another instance or call an opaque function.
+Its captured inputs are analysed and retained. A diagnostic counts the source
+location once; dependency grouping distinguishes its separate proven allocations.
+This is independence of reactive state, not a claim that scheduling is pure.
+
+**Foreign ownership, option A.** Foreign ancestry alone adds no dependency edge.
+Independent children of one foreign component remain separate groups. Actual
+shared props, state, context, colors and unknown values still join them. Record
+the foreign ancestor separately: it can dispose or recreate a child, so an
+independent group is not by itself a stable server slot or an independently
+claimable DOM range. Codegen must preserve that lifetime or fall back; it must
+not infer a shared-state dependency from ownership alone.
+
+**Overlapping spans.** Equal smallest DOM spans join as `SPAN_OVERLAP`, even if
+there is no M1–M6 edge. The docs reading guide's `err().kind` and `err().message`
+are both in the same `<p>`: two hydration calls cannot each claim that paragraph.
+This merge is correct. It does not prove the error accessor can cross an edge,
+or that the paragraph exists while the successful branch is showing.
+
 ### 1.6 The capture rule at a root edge
 
 An **edge** is where a root's client code reads something defined outside the root. At C3 there is a second kind of edge, where a server component hands something to a slot. This is ML-L3 (markless's capture rule) stated for this model. Only these may cross:
@@ -141,6 +177,11 @@ An **edge** is where a root's client code reads something defined outside the ro
 Event handlers do not cross: a handler is created in a setup, so its creator is in the root (M2). **Anything else** — a closure over a setup-local non-source, an instance the serializer refuses, a function, a U value — cannot cross. The region that defines it is then client, and the analysis gives **a diagnostic at the variable** that names it and the reason (ML-L3, and ML-L8's "escalation is never silent"). In the C1 report that diagnostic is a *capture failure*.
 
 ### 1.7 Eager and lazy roots
+
+**Tier 1 ruling, 2026-10-07: all emitted roots hydrate synchronously at load.**
+The table below is a diagnostic classification only. No visible observer, event
+replay or delayed hydration is emitted. The delayed claim failure F-C5 remains
+recorded; it is not a blocker for this eager-only tier.
 
 | A root is | When | It hydrates |
 | --- | --- | --- |

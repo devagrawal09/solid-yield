@@ -146,8 +146,12 @@ export function analyzeInstances(
     for (const v of reads.get(p))
       if (parent.has(v)) edge(p, v, ["event", "timer"].includes(p.kind) ? "M2" : "M1");
   for (const leak of a.leaks.values()) {
-    const users = live.filter(p => [...leak.values].some(v => reads.get(p).has(v)));
-    for (const p of users.slice(1)) edge(users[0], p, "M6");
+    const shared = [...leak.values].filter(v => !v.freshAllocation);
+    const allocations = [...leak.values].filter(v => v.freshAllocation).map(v => [v]);
+    for (const values of [shared, ...allocations]) {
+      const users = live.filter(p => values.some(v => reads.get(p).has(v)));
+      for (const p of users.slice(1)) edge(users[0], p, "M6");
+    }
   }
   for (const c of a.contexts) {
     const parts = live.filter(p => p.context === c);
@@ -167,7 +171,8 @@ export function analyzeInstances(
         for (const x of children) edge(p, x, "M4");
       }
     }
-    if (p.foreignOwner) for (const x of under(p)) edge(p, x, "FOREIGN_OWNER");
+    // Foreign ancestry is a lifetime constraint, not a shared-state edge.
+    // Keep independent child groups, but do not offer them as stable slots.
   }
   const groups = () => {
     const map = new Map();
@@ -309,6 +314,9 @@ export function analyzeInstances(
           touched: ps.filter(p => p !== e && reads.get(e).has(p)).map(p => p.at),
           pulledIn: ps.filter(p => !reads.get(e).has(p)).map(p => p.at)
         })),
+      foreignAncestors: a.parts
+        .filter(p => p.foreignOwner && s && s !== p.anchor && inside(s, p.anchor))
+        .map(p => p.at),
       fallback: s ? null : "unresolved DOM owner"
     };
   });
@@ -323,7 +331,7 @@ export function analyzeInstances(
       markupBytes: "not measured",
       limitations: [
         "Recursive families are static representatives, not dynamic counts",
-        "Foreign owners merge conservatively",
+        "Foreign ancestry constrains lifetime and slot extraction, not dependency grouping",
         "No extraction or serializer execution"
       ]
     },

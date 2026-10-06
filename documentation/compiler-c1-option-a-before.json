@@ -1,0 +1,369 @@
+{
+  "commit": "3b51165",
+  "twins": [
+    {
+      "twin": "docs-yield",
+      "holes": {
+        "inert": 127,
+        "total": 243
+      },
+      "jsxElements": {
+        "inert": 149,
+        "total": 249
+      },
+      "hElements": {
+        "inert": 0,
+        "total": 0
+      },
+      "roots": [
+        {
+          "id": 1,
+          "mode": "eager",
+          "size": 6,
+          "components": [
+            "ThemeToggle"
+          ],
+          "span": "examples/docs-yield/src/widgets.tsx:32:7"
+        },
+        {
+          "id": 2,
+          "mode": "visible",
+          "size": 22,
+          "components": [
+            "SearchBox",
+            "CommentList"
+          ],
+          "span": "examples/docs-yield/src/app.tsx:42:7"
+        },
+        {
+          "id": 3,
+          "mode": "visible",
+          "size": 84,
+          "components": [
+            "App",
+            "ArticleContent",
+            "LikeButton",
+            "ArticleBody",
+            "DocPage"
+          ],
+          "span": "examples/docs-yield/src/app.tsx:51:13"
+        },
+        {
+          "id": 4,
+          "mode": "lazy",
+          "size": 15,
+          "components": [
+            "NewsletterForm"
+          ],
+          "span": "examples/docs-yield/src/widgets.tsx:168:7"
+        },
+        {
+          "id": 5,
+          "mode": "lazy",
+          "size": 4,
+          "components": [
+            "ImageCarousel"
+          ],
+          "span": "examples/docs-yield/src/widgets.tsx:255:7"
+        },
+        {
+          "id": 6,
+          "mode": "lazy",
+          "size": 2,
+          "components": [
+            "ArticleContent"
+          ],
+          "span": "examples/docs-yield/src/content.tsx:144:15"
+        }
+      ],
+      "captures": 1,
+      "unknowns": 6
+    },
+    {
+      "twin": "effect-yield",
+      "holes": {
+        "inert": 4,
+        "total": 77
+      },
+      "jsxElements": {
+        "inert": 22,
+        "total": 76
+      },
+      "hElements": {
+        "inert": 0,
+        "total": 0
+      },
+      "roots": [
+        {
+          "id": 1,
+          "mode": "eager",
+          "size": 94,
+          "components": [
+            "App",
+            "Typeahead",
+            "Results",
+            "Checkout",
+            "Orders",
+            "LogPanel"
+          ],
+          "span": "examples/effect-yield/src/app.tsx:91:18"
+        }
+      ],
+      "captures": 0,
+      "unknowns": 5
+    },
+    {
+      "twin": "hackernews-spa-yield",
+      "holes": {
+        "inert": 13,
+        "total": 75
+      },
+      "jsxElements": {
+        "inert": 24,
+        "total": 65
+      },
+      "hElements": {
+        "inert": 0,
+        "total": 0
+      },
+      "roots": [
+        {
+          "id": 1,
+          "mode": "visible",
+          "size": 68,
+          "components": [
+            "App",
+            "Stories",
+            "Story",
+            "Comment",
+            "Toggle",
+            "User"
+          ],
+          "span": "examples/hackernews-spa-yield/src/app.tsx:36:7"
+        }
+      ],
+      "captures": 0,
+      "unknowns": 7
+    },
+    {
+      "twin": "rendering-yield",
+      "holes": {
+        "inert": 47,
+        "total": 202
+      },
+      "jsxElements": {
+        "inert": 68,
+        "total": 153
+      },
+      "hElements": {
+        "inert": 0,
+        "total": 0
+      },
+      "roots": [
+        {
+          "id": 1,
+          "mode": "eager",
+          "size": 174,
+          "components": [
+            "Router",
+            "Routes",
+            "Link",
+            "Home",
+            "ProfilePage",
+            "Profile",
+            "Facts",
+            "Settings",
+            "Stream",
+            "MemoList",
+            "InnerBoundaryItem",
+            "Title",
+            "OuterBoundaryItem",
+            "RevealPage",
+            "AsyncCard",
+            "CardBody",
+            "Skeleton",
+            "FeedCard"
+          ],
+          "span": "examples/rendering-yield/csr/client.tsx:8:14"
+        }
+      ],
+      "captures": 0,
+      "unknowns": 15
+    },
+    {
+      "twin": "room-yield",
+      "holes": {
+        "inert": 10,
+        "total": 109
+      },
+      "jsxElements": {
+        "inert": 23,
+        "total": 78
+      },
+      "hElements": {
+        "inert": 0,
+        "total": 0
+      },
+      "roots": [
+        {
+          "id": 1,
+          "mode": "eager",
+          "size": 118,
+          "components": [
+            "IdentityProvider",
+            "Live",
+            "Header",
+            "Joined",
+            "Members",
+            "StatusPill",
+            "Chaos",
+            "Chat",
+            "Messages",
+            "Composer",
+            "DirectoryEntry",
+            "Count",
+            "Card",
+            "CardBody",
+            "MemberCount",
+            "ActivityLine",
+            "Summary",
+            "SummaryText",
+            "Archive",
+            "ArchiveCount",
+            "Transcript"
+          ],
+          "span": "examples/room-yield/src/app.tsx:20:17"
+        }
+      ],
+      "captures": 0,
+      "unknowns": 6
+    },
+    {
+      "twin": "sierpinski-yield",
+      "holes": {
+        "inert": 2,
+        "total": 18
+      },
+      "jsxElements": {
+        "inert": 0,
+        "total": 2
+      },
+      "hElements": {
+        "inert": 0,
+        "total": 0
+      },
+      "roots": [
+        {
+          "id": 1,
+          "mode": "eager",
+          "size": 19,
+          "components": [
+            "TriangleDemo",
+            "Container",
+            "Triangle",
+            "Dot"
+          ],
+          "span": "examples/sierpinski-yield/src/app.tsx:81:18"
+        }
+      ],
+      "captures": 0,
+      "unknowns": 1
+    },
+    {
+      "twin": "sierpinski-yield-h",
+      "holes": {
+        "inert": 1,
+        "total": 7
+      },
+      "jsxElements": {
+        "inert": 0,
+        "total": 0
+      },
+      "hElements": {
+        "inert": 0,
+        "total": 2
+      },
+      "roots": [
+        {
+          "id": 1,
+          "mode": "eager",
+          "size": 19,
+          "components": [
+            "TriangleDemo",
+            "Container",
+            "Triangle",
+            "Dot"
+          ],
+          "span": "examples/sierpinski-yield-h/src/app.ts:78:12"
+        }
+      ],
+      "captures": 0,
+      "unknowns": 1
+    },
+    {
+      "twin": "todos-yield",
+      "holes": {
+        "inert": 1,
+        "total": 36
+      },
+      "jsxElements": {
+        "inert": 3,
+        "total": 29
+      },
+      "hElements": {
+        "inert": 0,
+        "total": 0
+      },
+      "roots": [
+        {
+          "id": 1,
+          "mode": "eager",
+          "size": 54,
+          "components": [
+            "App",
+            "Header",
+            "MainSection",
+            "TodoItem",
+            "Footer",
+            "TodoApp"
+          ],
+          "span": "examples/todos-yield/src/app.tsx:306:28"
+        }
+      ],
+      "captures": 0,
+      "unknowns": 1
+    },
+    {
+      "twin": "todos-yield-h",
+      "holes": {
+        "inert": 9,
+        "total": 37
+      },
+      "jsxElements": {
+        "inert": 0,
+        "total": 0
+      },
+      "hElements": {
+        "inert": 7,
+        "total": 24
+      },
+      "roots": [
+        {
+          "id": 1,
+          "mode": "eager",
+          "size": 52,
+          "components": [
+            "App",
+            "Header",
+            "MainSection",
+            "TodoItem",
+            "Footer"
+          ],
+          "span": "examples/todos-yield-h/src/app.ts:241:12"
+        }
+      ],
+      "captures": 0,
+      "unknowns": 1
+    }
+  ]
+}

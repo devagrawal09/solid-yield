@@ -376,7 +376,8 @@ export class Analysis {
       v.class = true;
       return v;
     }
-    if (p.isLiteral() || p.isJSXText()) return this.scalar(p, env, p.node.value);
+    if ((p.isLiteral() && !p.isTemplateLiteral()) || p.isJSXText())
+      return this.scalar(p, env, p.node.value);
     if (p.isFunction()) {
       const v = this.value(p, env, "function");
       v.callable = { kind: "function", path: p, env };
@@ -396,8 +397,8 @@ export class Analysis {
       ctx.reads?.add(v);
       return v;
     }
-    if (p.isMemberExpression() || p.isOptionalMemberExpression())
-      return this.prop(
+    if (p.isMemberExpression() || p.isOptionalMemberExpression()) {
+      const value = this.prop(
         this.expr(p.get("object"), env, ctx),
         p.node.computed
           ? p.get("property").isLiteral()
@@ -407,6 +408,12 @@ export class Analysis {
         p,
         env
       );
+      // Choosing a field is itself a read. Do not mutate the stored field's
+      // equation: another use of that field may have a different key.
+      return p.node.computed
+        ? this.join(p, env, [value, this.expr(p.get("property"), env, ctx)], "computed-field")
+        : value;
+    }
     if (p.isObjectExpression()) {
       const out = this.value(p, env, "object");
       for (const field of p.get("properties")) {
@@ -1016,6 +1023,46 @@ export class Analysis {
         "plain function call",
         "Non-server promise; completion can change the client view"
       );
+      // A fresh, closed promise executor has per-invocation identity. Retain
+      // captured inputs as dependencies; only the allocation itself is local.
+      if (construct && global === "Promise" && args[0]?.callable?.kind === "function") {
+        const executor = args[0].callable;
+        let closed = true;
+        const inputs = [];
+        executor.path.traverse({
+          YieldExpression() {
+            closed = false;
+          },
+          AssignmentExpression() {
+            closed = false;
+          },
+          UpdateExpression() {
+            closed = false;
+          },
+          NewExpression() {
+            closed = false;
+          },
+          CallExpression(q) {
+            const callee = q.get("callee");
+            const binding = callee.isIdentifier() && callee.scope.getBinding(callee.node.name);
+            const settle = binding?.kind === "param" && binding.scope.path === executor.path;
+            const builtin =
+              !binding && (pure.has(callee.toString()) || timers.has(callee.toString()));
+            if (!settle && !builtin) closed = false;
+          },
+          ReferencedIdentifier: q => {
+            const binding = q.scope.getBinding(q.node.name);
+            if (
+              binding &&
+              binding.scope !== executor.path.scope &&
+              !binding.scope.path.findParent(x => x === executor.path)
+            )
+              inputs.push(this.expr(q, executor.env, ctx));
+          }
+        });
+        for (const input of inputs) v.deps.add(input);
+        v.freshAllocation = closed;
+      }
       v.pending = true;
       for (const a of args.filter(a => !a.callable)) v.deps.add(a);
       if (fn.receiver) v.deps.add(fn.receiver);
@@ -1235,7 +1282,7 @@ export class Analysis {
         native &&
         q.isJSXExpressionContainer() &&
         !q.get("expression").isJSXEmptyExpression() &&
-        !q.get("expression").isLiteral()
+        (!q.get("expression").isLiteral() || q.get("expression").isTemplateLiteral())
       )
         values.push(this.hole(q, v, env, sub));
       else values.push(v);

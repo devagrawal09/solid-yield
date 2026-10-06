@@ -1,4 +1,4 @@
-/** D-085 F-8: pins current behaviour, not the desired ruling. */
+/** D-109: disposed bind boundaries reject; live ones handle. */
 import { flush, resetErrorHalt } from "solid-js";
 import {
   $cleanup,
@@ -16,9 +16,13 @@ class Locked extends Error {
   readonly kind = "locked" as const;
 }
 const tick = () => new Promise<void>(r => setTimeout(r, 0));
-it.each([false, true])(
-  "pins current behaviour when the optimistic move disposes the binder: %s",
-  async moves => {
+it.each([
+  [false, true],
+  [true, true],
+  [true, false]
+])(
+  "rejects a failure when its optimistic move disposes the boundary: %s",
+  async (moves, localBoundary) => {
     let disposedRows = 0;
     let innerFailures = 0;
     let outerFailures = 0;
@@ -62,7 +66,7 @@ it.each([false, true])(
                             return view(function* () {
                               return (
                                 <article>
-                                  {
+                                  {localBoundary ? (
                                     yield* Errored({
                                       catch: [Locked],
                                       fallback: () => {
@@ -73,7 +77,9 @@ it.each([false, true])(
                                         return <button onClick={yield* move}>move</button>;
                                       }
                                     })
-                                  }
+                                  ) : (
+                                    <button onClick={yield* move}>move</button>
+                                  )}
                                 </article>
                               );
                             });
@@ -108,20 +114,26 @@ it.each([false, true])(
       );
       flush();
       if (moves) expect(root.querySelector("button")).toBeNull();
-      expect(await outcome).toEqual(["resolved", undefined]);
+      if (moves && localBoundary) {
+        expect(await outcome).toEqual(["rejected", expect.any(Locked)]);
+      } else expect(await outcome).toEqual(["resolved", undefined]);
       for (let i = 0; i < 3; i++) {
         await tick();
         flush();
       }
-      expect(innerFailures).toBe(moves ? 0 : 1);
-      expect(outerFailures).toBe(0);
-      if (moves) {
+      expect(innerFailures).toBe(localBoundary && !moves ? 1 : 0);
+      expect(outerFailures).toBe(localBoundary ? 0 : 1);
+      if (moves && localBoundary) {
         expect(disposedRows).toBeGreaterThan(0);
         expect(root.querySelector(".move-error")).toBeNull();
         const log = [...warnings.mock.calls, ...errors.mock.calls].flat().map(String).join("\n");
-        if (__DEV__) expect(log).toContain("[RUN_WITH_DISPOSED_OWNER]");
-        expect(log).not.toContain("[BOUNDARY_DISPOSED]");
-      } else expect(root.textContent).toBe("locked");
+        if (__DEV__)
+          expect(log).toContain(
+            "[BOUNDARY_DISPOSED] locked arrived after its Errored was disposed — the event's own optimistic write removed it; absorb the failure in the event, or move the boundary above what the write can dispose"
+          );
+        else expect(log).not.toContain("[BOUNDARY_DISPOSED]");
+        expect(log).not.toContain("[RUN_WITH_DISPOSED_OWNER]");
+      } else expect(root.textContent).toBe(localBoundary ? "locked" : "outer");
     } finally {
       dispose?.();
       root.remove();

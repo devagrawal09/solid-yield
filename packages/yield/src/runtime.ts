@@ -1469,6 +1469,8 @@ export function readContext(ctx: any): unknown {
  * (`null`: it takes every failure) and the `Errored` above it.
  */
 export interface Boundary {
+  disposed: boolean;
+  owner: ReturnType<typeof getOwner>;
   readonly catch: readonly (abstract new (...args: any) => unknown)[] | null;
   readonly parent: Boundary | null;
 }
@@ -1508,7 +1510,7 @@ type Route = ((error: unknown) => boolean) | null;
 /**
  * Bind an `$event` handler where it meets the DOM (D-085): `perform` in an
  * event attribute, `h`'s attribute bind. One wrapper per bind, which records
- * the bind site's owner and the `Errored`s above it: a call nobody handles (a
+ * the bind site's `Errored` scopes: a call nobody handles (a
  * DOM dispatch) reports its failure there when one of them takes it (its
  * `catch` covers it, or it has none), and otherwise the call's promise
  * rejects (F-7: reported, it would leave Solid's flush and halt it). A call
@@ -1517,12 +1519,26 @@ type Route = ((error: unknown) => boolean) | null;
  */
 export function bindEvent<H>(handler: H): H {
   const call = (handler as any)[CALL] as (route: Route, args: unknown[]) => unknown;
-  const owner = getOwner();
   const boundary = boundaryAbove();
   const route: Route = boundary
     ? error => {
-        if (!takes(boundary, error)) return false;
-        reportError(owner, error);
+        let accepting: Boundary | null = boundary;
+        while (accepting && accepting.catch && !accepting.catch.some(C => error instanceof C))
+          accepting = accepting.parent;
+        if (!accepting) return false;
+        if (boundary.disposed || accepting.disposed) {
+          if (__DEV__)
+            console.error(
+              devError(
+                "BOUNDARY_DISPOSED",
+                `${(error as any)?.kind ?? "failure"} arrived after its Errored was disposed — the event's own optimistic write removed it; absorb the failure in the event, or move the boundary above what the write can dispose`
+              )
+            );
+          return false;
+        }
+        // The boundary owns the report: a disposable row below a live boundary
+        // must not make delivery depend on that row's captured owner.
+        reportError(boundary.owner, error);
         return true;
       }
     : null;

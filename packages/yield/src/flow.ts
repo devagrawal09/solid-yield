@@ -21,6 +21,8 @@ import {
   Show as SolidShow,
   Switch as SolidSwitch,
   untrack,
+  onCleanup,
+  getOwner,
   type Accessor
 } from "solid-js";
 import {
@@ -556,7 +558,15 @@ function ErroredYield(props: any): any {
   const fallback = props.fallback as any;
   const handles = props.catch as readonly ErrorClass[] | undefined;
   // what a bind site below sees (D-085, F-7): what this one takes, and the one above
-  const boundary: Boundary = { catch: (handles as any) ?? null, parent: boundaryAbove() };
+  const boundary: Boundary = {
+    catch: (handles as any) ?? null,
+    parent: boundaryAbove(),
+    disposed: false,
+    owner: null
+  };
+  onCleanup(() => {
+    boundary.disposed = true;
+  });
   // a zero-arity `function*` is a lazy view (D-066), built each time the
   // fallback shows; a generator taking `(error, reset)` is a row
   const adapted =
@@ -578,6 +588,7 @@ function ErroredYield(props: any): any {
       };
     },
     get children() {
+      boundary.owner = getOwner();
       return createComponent(BOUNDARY as any, {
         value: boundary,
         get children() {

@@ -242,6 +242,8 @@ Only pending needs a position that admits it. A failure may reach a row, a call 
 
 ## 7. Limitations (without the yield compiler)
 
+**Event boundary lifetime (D-109).** A bound event's failure is handled while the boundary lives. If its captured boundary was disposed before the failure arrives, the call rejects with the original failure. Development reports `[BOUNDARY_DISPOSED] <kind> arrived after its Errored was disposed — the event's own optimistic write removed it; absorb the failure in the event, or move the boundary above what the write can dispose`. This rule does not select a different live ancestor. A boundary placed above the disposable row remains able to handle its failure. Keyed re-delivery to the re-created row is the v0.3 target.
+
 - **No islands.** Hydration is Solid's: every hydrated component runs. Island boundaries need per-handler reads / writes and a compiler to split chunks. (The per-module analysis that would feed one, `summarizeBlocks` with its `solid-yield-summary` schema, was removed with the type linker in Phase 1B. The schema and its mapping onto the experiment branch's summarizers, the old §6, are in git history before `f00b389a`.)
 - **No server components** (D-058). The yield dialect has none: the idea is that a future compiler finds inert regions and turns them into server components itself. Server _data_ (server functions, SSR) is supported; the twins whose point was server components (chat, hackernews, notes) were removed, and room's twin keeps only its live-server-function page.
 - **No runtime tiers.** The app ships the full runtime plus the interpreter; selecting a sync-only or smaller runtime needs a whole-graph capability proof and a compiler to lower routines.

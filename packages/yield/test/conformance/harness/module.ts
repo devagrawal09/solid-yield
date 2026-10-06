@@ -59,6 +59,12 @@ export function lowering(code: string): LoweringStats {
 export function compile(source: string, kind: SourceKind, options: CompileOptions): CompiledModule {
   const filename = kind === "library" ? "scenario.tsx" : "scenario.jsx";
   let code = source;
+  if (kind === "library" && process.env.YIELD_C2_ROOTS === "1") {
+    const { extractModule } = require("../../../../compiler-yield/src/emit.js") as {
+      extractModule(source: string, filename: string): { code: string };
+    };
+    code = extractModule(code, filename).code;
+  }
   if (kind === "library") {
     const ruled = yieldTransform(code, { filename, lazy: false });
     if (ruled) code = ruled.code;

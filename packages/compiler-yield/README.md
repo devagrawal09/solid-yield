@@ -15,8 +15,7 @@ the small definition fixtures.
 
 The CLI and Vite plugin use the audited instance engine: each reached component
 call has its own props/setup environment, while recursive rows reuse a widened
-family. Local helpers retain their caller's ownership; foreign owners merge
-conservatively. Imported data remains U through expressions and helper returns.
+family. Local helpers retain their caller's ownership; foreign ancestry constrains lifetime without merging independent children. Imported data remains U through expressions and helper returns.
 `--instances` is an alias for the default; `--joined --json` exposes the older
 engine for comparison. The before table is frozen in
 `documentation/compiler-c1-before.json`. The generated report classifies every U
@@ -41,5 +40,27 @@ The public namespace spike is separate from analysis. Run
 `node --test packages/compiler-yield/test/hydration-namespace.test.mjs`.
 Immediate roots retain their server nodes. The delayed schedule pins F-C5:
 the second root is silently replaced on Solid rc.13. See
-[the finding](../../documentation/compiler-c2-finding.md). C2 codegen is stopped
-at this public-API limitation, as C0 §3.1 requires.
+[the finding](../../documentation/compiler-c2-finding.md). Dev's 2026-10-07 ruling allows eager-only tier 1, so F-C5 no longer blocks it.
+
+
+## Experimental eager docs emission
+
+`src/eager.js` is a separate opt-in Vite pass. Place it before `solidYield()` and
+Solid, with `{directory: docsDirectory, onPlan}`. The docs example's
+`compiled/vite.config.mjs` does this. Seven physical roots cover C1's eleven
+groups through explicit route/error-boundary fallbacks. All hydrate
+synchronously; each uses the library runtime, its own key namespace and a
+public-serializer input record. Navigation/footer code is server-only.
+
+Scope is the docs shell's direct component calls with empty browser inputs.
+Unsupported captures fall back to the whole library entry with a variable
+location. A one-root plan leaves code unchanged. The plan reports expansions;
+it must not be read as a general purpose splitter.
+
+The `/` page passes 24 hydrated steps and `/docs/start` passes direct smoke.
+**C2 remains incomplete:** direct `/docs/missing` loses its typed failure during
+SSR and fails hydration on original, library and compiled routes (F-C9).
+Implementation stopped on the failure-preservation requirement. The expected
+failure is pinned separately; green tests do not turn it into passing smoke.
+See [the C2 record](../../documentation/compiler-c2-finding.md) for captures,
+source maps, conformance coverage, findings and reproduction commands.

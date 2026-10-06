@@ -11,7 +11,9 @@
     "start": "vite preview",
     "test": "vitest run --maxWorkers=2",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "lint": "eslint src tests stream"
+    "lint": "eslint src tests stream",
+    "build:compiled": "vite build --config compiled/vite.config.mjs",
+    "test:compiled": "node --test ../../packages/compiler-yield/test/eager-docs.test.mjs"
   },
   "devDependencies": {
     "solid-yield": "workspace:*",

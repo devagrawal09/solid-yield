@@ -294,6 +294,19 @@ This section says what the output contains, not how it is built.
 
 ### 3.1 C2: client roots
 
+**2026-10-07 tier-1 amendment (Dev, option A).** All roots hydrate synchronously
+at load, in document order; the visible/lazy scheduling proposal below is
+superseded for tier 1. Pending and typed-error input transport is not assumed:
+a failed capture widens to its defining client subtree with a variable
+location. The docs prototype accepts empty settled input records only, retaining
+route/error owners as needed. The default codec loses custom Error classes
+(F-C6), and direct failing-route SSR also loses the failure (F-C9), so the
+prototype has stopped short of the full correctness claim. See
+[the C2 record](compiler-c2-finding.md). One-root fallback is unchanged code.
+An inert native element still participates in public element-claim registration
+(e.g. router link attributes); its authored template/data code remains server-only.
+
+
 **Server build.** The app renders as on the library route, with three additions:
 
 - **Markers.** Each root's span is opened and closed by a marker carrying the root's id.

@@ -1,12 +1,13 @@
 # Compiler prototype findings and remaining work
 
-Branch: `proto/compiler`, started at `1da4d82`. C1 instance audit updated 2026-10-07. The current ruling is to finish C1 and ship eager islands only in v0.2; the historical C2 spike below is unchanged.
-No compiled twin, compiler-route parity result, or compiler-route conformance
-result is claimed. A separate public-API spike verifies immediate root claims
-and records a failed delayed claim (F-C5 below). No counterexample to calculus
-§4.3 has been established. C2 is stopped at the
-public-API spike: C0 §3.1 explicitly says a failed claim is a finding and “C2
-waits for Dev”. The library runtime was not changed to hide the failure.
+Branch: `proto/compiler`. Updated 2026-10-07 after Dev's option-A ruling.
+C1 fixes are complete across nine twins. The docs emitter produces seven eager
+physical roots from eleven dependency groups; `/` passes all 24 hydrated steps.
+**C2 is partial and stopped at F-C9:** direct failed-route SSR/hydration loses
+the typed failure on original, library and compiled routes. F-C5 is historical
+and no longer blocks the eager-only ruling. No complete theorem-preservation
+claim or compiler savings is made. See [the current C2 record](compiler-c2-finding.md).
+The library runtime was not changed to conceal either finding.
 
 The [per-twin C1 table](compiler-c1-report.md) contains candidate root sizes,
 merge counts, named leaks, capture candidates and each effect's reach. The
@@ -160,7 +161,7 @@ base64 metadata as executed code inflated an earlier draft measurement.
 
 ## F-C5: delayed hydration replaces the second server root on rc.13
 
-**Status: reproduced; C2 blocked at the public-API spike.**
+**Historical status: reproduced.** Superseded as a blocker by the eager-only ruling on 2026-10-07.
 
 C0 §3.1 requires namespaces that independent `hydrate(..., { renderId })` calls
 claim, and says “If it does not, that is a finding (D-004), and C2 waits for Dev”.
@@ -194,11 +195,9 @@ with a failed identity claim; it is not a passing delayed-hydration test. A futu
 fix that preserves the second node will make that test fail until the finding is
 updated deliberately. Source: `test/fixtures/roots.tsx` in the compiler package.
 
-No C2 loader, generated twin, root source map or compiled benchmark is emitted.
-A public way to hydrate later independent roots without losing their server
-claims is needed before that work can satisfy the ruling.
+This spike originally stopped C2. Eager codegen and its new blocker are recorded below.
 
-## Work required before C2
+## Historical checklist before the eager ruling
 
 Items 4–6 retain the original C0 checklist as historical context. Dev now rules
 that v0.2 ships eager islands only; delayed scheduling is not a requirement of
@@ -219,7 +218,7 @@ this C1 audit. The F-C5 record above is unchanged.
 6. Run compiled twins through parity, both smoke lanes, the applicable conformance
    scenarios, the byte gate and the byte-identical one-eager-root fallback check.
 
-## Premise assessment
+## Historical premise assessment (before the docs twin and option A)
 
 The audited corpus does **not support** “most UI is inert; apps split into small
 roots” under the current C0 rules. None of the twins has a majority of locally
@@ -234,3 +233,32 @@ are neither actual DOM counts nor bytes. Most importantly, locally S markup
 under a foreign owner is not automatically a server slot. No codegen, capture
 serialization, independent physical claims or compiler savings have been proved.
 The historical F-C5 finding and benchmarks were not changed by this audit.
+
+## 2026-10-07 tier-1 findings (docs twin)
+
+- **F-C6, open: default codec loses custom Error prototypes.** Serializing a
+  `NotFound` retains `kind`, but decoding it gives an ordinary `Error`.
+  `Errored.catch` uses class identity. The new edge guard refuses this capture;
+  the router and guide retain their whole defining subtrees. A codec round-trip
+  fixture pins the loss, including a nested error. No class revival is invented.
+- **F-C7, fixed emitter placement:** claiming a reactive-only Router root against
+  `document` retained server nodes without warnings but did not activate route
+  navigation or likes. Its existing sole-child parent is the supported mount.
+  The emitter rejects a foreign root without that container. Full interaction
+  parity, not just node identity, verifies it.
+- **F-C8, fixed emitter integration:** server-only footer links initially missed
+  `data-active` and `aria-current`. The router's public element-claim hook reaches
+  outside its own subtree. The loader now calls public `claimElementTree` for
+  inert ranges in document order and for subsequent inserted nodes, under a
+  disposable owner. Their template/data code is absent from client chunks.
+  Inert means no authored client render code; it does not mean native elements
+  can bypass public platform registration. No parity normalization was changed.
+- **F-C9, blocking: direct failed SSR loses the typed failure.** A fresh request
+  to `/docs/missing` emits a sanitized `Internal Server Error`, no `.not-found`
+  paragraph, and hydration rejects. This reproduces on the original, library
+  and compiled routes. `/` followed by client navigation to the same URL works
+  and passes step 24. The gate pins the direct-load failure as a finding, **not
+  a passing SSR/hydrate smoke**. The required typed-failure edge preservation
+  cannot be claimed. C2 implementation stopped here under Dev's instruction;
+  no runtime patch, class rewrite, new normalization or approval of this
+  difference is implied. See [the C2 record](compiler-c2-finding.md).

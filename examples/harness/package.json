@@ -1,6 +1,6 @@
 {
-  "name": "blocks-example-harness",
-  "description": "Shared test and lint setup for the examples' -blocks twins: DOM normalization, the parity runner, the lint config",
+  "name": "yield-example-harness",
+  "description": "Shared test and lint setup for the examples' -yield twins: DOM normalization, the parity runner, the lint config",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -9,8 +9,8 @@
     "./eslint": "./eslint.config.mjs"
   },
   "dependencies": {
-    "solid-blocks": "workspace:*",
-    "eslint-plugin-solid-blocks": "workspace:*",
+    "solid-yield": "workspace:*",
+    "eslint-plugin-solid-yield": "workspace:*",
     "@solidjs/web": "^2.0.0-rc.11",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",

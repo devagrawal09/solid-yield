@@ -1,13 +1,13 @@
 #!/usr/bin/env node
-// The runtime cost of each twin against its original (D-017; blocks-library.md §8).
+// The runtime cost of each twin against its original (D-017; yield-library.md §8).
 //
 //   node examples/harness/runtime-cost/twins.mjs [--runs N] [--dev] [twin …]
 //
 // Each twin's `tests/runtime-cost.test.ts(x)` runs its parity script (the
 // script the gate's parity test compares the two apps with) against one app
 // per process, the original or the twin, in jsdom under the twin's own
-// vitest config, on production builds of Solid and solid-blocks
-// (`BLOCKS_COST_PROD`; `--dev` keeps the development builds the tests use).
+// vitest config, on production builds of Solid and solid-yield
+// (`YIELD_COST_PROD`; `--dev` keeps the development builds the tests use).
 // It times the script's steps (`script`) and, where the script mounts a
 // component, the mount (`mount`); an app that renders as its module is
 // evaluated is not timed mounting, since that would time the transform too.
@@ -28,7 +28,7 @@ const dev = args.includes("--dev");
 const named = args.filter((a, i) => !a.startsWith("--") && args[i - 1] !== "--runs");
 
 const twins = readdirSync(EXAMPLES)
-  .filter(d => /-blocks(-h)?$/.test(d))
+  .filter(d => /-yield(-h)?$/.test(d))
   .filter(d => !named.length || named.includes(d))
   .sort();
 
@@ -45,7 +45,7 @@ function configArgs(twin) {
   return m ? ["--config", m[1]] : [];
 }
 
-const tmp = mkdtempSync(join(tmpdir(), "blocks-cost-"));
+const tmp = mkdtempSync(join(tmpdir(), "yield-cost-"));
 function once(twin, app) {
   const out = join(tmp, `${twin}-${app}-${Math.random().toString(36).slice(2)}.jsonl`);
   const r = spawnSync("pnpm", ["exec", "vitest", "run", ...configArgs(twin), costFile(twin)], {
@@ -53,9 +53,9 @@ function once(twin, app) {
     encoding: "utf8",
     env: {
       ...process.env,
-      BLOCKS_COST_APP: app,
-      BLOCKS_COST_OUT: out,
-      ...(dev ? {} : { BLOCKS_COST_PROD: "1" }),
+      YIELD_COST_APP: app,
+      YIELD_COST_OUT: out,
+      ...(dev ? {} : { YIELD_COST_PROD: "1" }),
       TZ: "UTC",
       FORCE_COLOR: "0"
     }

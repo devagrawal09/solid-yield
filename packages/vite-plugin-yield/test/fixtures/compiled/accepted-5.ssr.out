@@ -1,0 +1,34 @@
+import { scope as _$scope } from "@solidjs/web";
+import { escape as _$escape } from "@solidjs/web";
+import { ssr as _$ssr } from "@solidjs/web";
+import { ssrHydrationKey as _$ssrHydrationKey } from "@solidjs/web";
+import { For as _$For } from "@solidjs/web";
+var _tmpl$ = [
+	"<i",
+	">",
+	"</i>"
+];
+var _d$ = {
+	get() {
+		return _$perform(xs);
+	},
+	enumerable: true,
+	configurable: true
+};
+function _P$(_p) {
+	Object.defineProperty(this, "each", _d$);
+	this.children = _p;
+}
+_P$.prototype = Object.prototype;
+import { perform as _$perform } from "solid-yield";
+function* v() {
+	return _$For(new _P$(function* (x) {
+		const s = yield* $signal(1);
+		return function* () {
+			var _v$ = _$ssrHydrationKey(), _v$2 = _$scope(() => {
+				return _$escape(_$perform(s));
+			});
+			return _$ssr(_tmpl$, _v$, _v$2);
+		};
+	}));
+}

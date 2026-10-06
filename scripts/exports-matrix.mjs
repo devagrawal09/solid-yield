@@ -16,7 +16,7 @@
 //     "types" and "import"; a resolved .js file counts as untyped, as TS7016 does).
 //
 // It also checks that the table covers exactly the package's subpaths and
-// that every resolved file exists (build packages/blocks first: `pnpm build`).
+// that every resolved file exists (build packages/yield first: `pnpm build`).
 import { execFileSync } from "node:child_process";
 import {
   existsSync,

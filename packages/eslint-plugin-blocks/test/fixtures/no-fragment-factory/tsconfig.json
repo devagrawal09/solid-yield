@@ -1,9 +1,0 @@
-{
-  "compilerOptions": {
-    "jsx": "preserve",
-    "jsxImportSource": "solid-blocks",
-    "jsxFactory": "jsx",
-    "noEmit": true
-  },
-  "include": ["*.tsx"]
-}

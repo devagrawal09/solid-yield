@@ -1,5 +1,5 @@
 /**
- * Shared by the `-blocks` twins' tests.
+ * Shared by the `-yield` twins' tests.
  *
  * `normalize` strips only what hydration adds (keys, markers); `parity`
  * runs one script against the original and the twin, snapshotting after
@@ -51,20 +51,20 @@ export function firstDifference(steps: Step[], a: string[], b: string[]): string
 }
 
 /**
- * Runtime cost (D-017; blocks-library.md §8). A twin's `tests/runtime-cost.bench.ts(x)` runs
- * its parity script against one app per process — `BLOCKS_COST_APP` is `original` or `twin` —
- * and times phases with `timed`, which appends `{ app, phase, ms }` to `BLOCKS_COST_OUT`.
+ * Runtime cost (D-017; yield-library.md §8). A twin's `tests/runtime-cost.bench.ts(x)` runs
+ * its parity script against one app per process — `YIELD_COST_APP` is `original` or `twin` —
+ * and times phases with `timed`, which appends `{ app, phase, ms }` to `YIELD_COST_OUT`.
  * `examples/harness/runtime-cost/twins.mjs` drives it; the gate never runs it.
  */
 // the twins type-check without Node's types: the environment and fs are reached untyped
 const env = (): Record<string, string | undefined> =>
   (globalThis as { process?: { env: Record<string, string | undefined> } }).process?.env ?? {};
 /** Whether twins.mjs is running this process (a cost test is skipped otherwise). */
-export const costMode = env().BLOCKS_COST_APP !== undefined;
+export const costMode = env().YIELD_COST_APP !== undefined;
 export function costApp(): "original" | "twin" {
-  const app = env().BLOCKS_COST_APP;
+  const app = env().YIELD_COST_APP;
   if (app !== "original" && app !== "twin")
-    throw new Error("runtime cost: set BLOCKS_COST_APP to original or twin (run twins.mjs)");
+    throw new Error("runtime cost: set YIELD_COST_APP to original or twin (run twins.mjs)");
   return app;
 }
 // captured at import, before a script installs fake timers
@@ -73,7 +73,7 @@ export async function timed<T>(phase: string, run: () => T | Promise<T>): Promis
   const t0 = clock();
   const out = await run();
   const ms = clock() - t0;
-  const file = env().BLOCKS_COST_OUT;
+  const file = env().YIELD_COST_OUT;
   if (file) {
     const fs = (await import(/* @vite-ignore */ "node:" + "fs")) as {
       appendFileSync(path: string, data: string): void;

@@ -1,8 +1,0 @@
-import { ssr as _$ssr } from "@solidjs/web";
-import { ssrHydrationKey as _$ssrHydrationKey } from "@solidjs/web";
-var _tmpl$ = ["<b", "></b>"];
-import { perform as _$perform } from "solid-blocks";
-function* v() {
-	var _v$ = _$ssrHydrationKey();
-	return _$ssr(_tmpl$, _v$);
-}

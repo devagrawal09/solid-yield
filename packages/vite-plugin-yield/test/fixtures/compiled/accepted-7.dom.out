@@ -1,0 +1,11 @@
+import { template as _$template } from "@solidjs/web";
+import { addEvent as _$addEvent } from "@solidjs/web";
+import { delegateEvents as _$delegateEvents } from "@solidjs/web";
+var _tmpl$ = /* @__PURE__ */ _$template(`<b>`);
+import { perform as _$perform } from "solid-yield";
+function* v() {
+	var _el$ = _tmpl$();
+	_$addEvent(_el$, "click", _$perform(h), true);
+	return _el$;
+}
+_$delegateEvents(["click"]);

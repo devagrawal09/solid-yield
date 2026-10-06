@@ -1,0 +1,34 @@
+{
+  "name": "eslint-plugin-solid-yield",
+  "description": "ESLint rules for solid-yield: the rules of its strict dialect that TypeScript cannot express (19 rules; `recommended`: 17 errors, 2 warnings). The type-aware rules need @typescript-eslint/parser.",
+  "version": "0.0.0",
+  "author": "Dev Agrawal <dev@codemod.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/devagrawal09/solid-yield.git",
+    "directory": "packages/eslint-plugin-yield"
+  },
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "test": "vitest run --maxWorkers=2",
+    "test:exports": "node --test test/exports-matrix.test.mjs"
+  },
+  "peerDependencies": {
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": ">=9"
+  },
+  "devDependencies": {
+    "vite-plugin-solid-yield": "workspace:*",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0"
+  }
+}

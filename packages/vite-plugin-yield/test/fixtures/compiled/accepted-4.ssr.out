@@ -1,0 +1,29 @@
+import { scope as _$scope } from "@solidjs/web";
+import { escape as _$escape } from "@solidjs/web";
+import { ssr as _$ssr } from "@solidjs/web";
+import { ssrHydrationKey as _$ssrHydrationKey } from "@solidjs/web";
+var _tmpl$ = [
+	"<b",
+	">",
+	"</b>"
+];
+var _tmpl$2 = [
+	"<i",
+	">",
+	"</i>"
+];
+var _tmpl$3 = [
+	"<s",
+	">",
+	"</s>"
+];
+import { perform as _$perform } from "solid-yield";
+function* v() {
+	var _v$3, _v$4, _v$5, _v$6;
+	var _v$ = _$ssrHydrationKey(), _v$2 = cond ? (_v$3 = _$ssrHydrationKey(), _v$4 = _$scope(() => {
+		return _$escape(_$perform(a));
+	}), _$ssr(_tmpl$2, _v$3, _v$4)) : (_v$5 = _$ssrHydrationKey(), _v$6 = _$scope(() => {
+		return _$escape(_$perform(b));
+	}), _$ssr(_tmpl$3, _v$5, _v$6));
+	return _$ssr(_tmpl$, _v$, _v$2);
+}

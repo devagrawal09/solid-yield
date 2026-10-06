@@ -1,0 +1,20 @@
+import { template as _$template } from "@solidjs/web";
+import { effect as _$effect } from "@solidjs/web";
+import { setAttribute as _$setAttribute } from "@solidjs/web";
+var _tmpl$ = /* @__PURE__ */ _$template(`<p>`);
+import { perform as _$perform } from "solid-yield";
+function* v() {
+	var _el$ = _tmpl$();
+	_$effect(() => {
+		return {
+			e: String(_$perform(t)),
+			t: _$perform($(function* () {
+				return 1;
+			}))
+		};
+	}, ({ e, t }, _p$) => {
+		e !== _p$?.e && _$setAttribute(_el$, "title", e);
+		t !== _p$?.t && _$setAttribute(_el$, "data-x", t);
+	});
+	return _el$;
+}

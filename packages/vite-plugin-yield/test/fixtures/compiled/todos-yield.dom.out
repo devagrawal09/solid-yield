@@ -1,0 +1,307 @@
+import { template as _$template } from "@solidjs/web";
+import { insert as _$insert } from "@solidjs/web";
+import { memo as _$memo } from "@solidjs/web";
+import { createComponent as _$createComponent } from "@solidjs/web";
+import { effect as _$effect } from "@solidjs/web";
+import { setAttribute as _$setAttribute } from "@solidjs/web";
+import { claimElement as _$claimElement } from "@solidjs/web";
+import { addEvent as _$addEvent } from "@solidjs/web";
+import { delegateEvents as _$delegateEvents } from "@solidjs/web";
+var _tmpl$ = /* @__PURE__ */ _$template(`<header class=header><h1>todos</h1><input class=new-todo placeholder="What needs to be done?"autofocus>`);
+var _tmpl$2 = /* @__PURE__ */ _$template(`<li class=todo><div class=view><input class=toggle type=checkbox><label></label><button class=destroy>`);
+var _tmpl$3 = /* @__PURE__ */ _$template(`<button class=retry>`);
+var _tmpl$4 = /* @__PURE__ */ _$template(`<section class=main><input id=toggle-all class=toggle-all type=checkbox><label for=toggle-all>Mark all as complete</label><ul class=todo-list>`);
+var _tmpl$5 = /* @__PURE__ */ _$template(`<footer class=footer><span class=todo-count><strong></strong> <!> left</span><ul class=filters><li><a href=#/>All</a></li><li><a href=#/active>Active</a></li><li><a href=#/completed>Completed`);
+var _tmpl$6 = /* @__PURE__ */ _$template(`<button class=clear-completed>Clear completed`);
+var _tmpl$7 = /* @__PURE__ */ _$template(`<section class=todoapp><!><!>`);
+var _tmpl$8 = /* @__PURE__ */ _$template(`<p class=loading>Loading…`);
+var _tmpl$9 = /* @__PURE__ */ _$template(`<div class=app-error><p>Something went wrong: </p><button>Reset`);
+// TodoMVC from examples/todos with solid-yield (JSX flavor). The data
+// layer (`todos.ts`: an optimistic store over a projection, actions, the
+// error side-channel) and `filter.ts` are generator helpers the App's setup
+// delegates to; `api.ts` is the original's.
+//
+// What the library's rules change here:
+// - every read and write is a `yield*`: no plain Solid state in routine code;
+// - components are `$component`s: setups read the context (`yield* TodosContext`)
+//   and create handlers (`$event`); views read in JSX holes;
+// - the todos store is an `$optimisticStore` whose body fetches (pending
+//   until the first fetch lands); structural reads go through `readStore`;
+// - a view that reads a pending store is pending, so the loading boundary
+//   receives the two sections in its lazy view: `{yield* MainSection(…)}{yield* Footer(…)}`.
+import { perform as _$perform } from "solid-yield";
+import { $component, $event, $signal, $memo, createContext, Errored, For, Loading, readStore, Show, type Props, view } from "solid-yield";
+import { createTodos, type Todo } from "./todos";
+import { hashFilter, type Filter } from "./filter";
+/** What a generator helper returns once delegated to. */
+type Returned<F,> = F extends (...args: never[]) => Generator<unknown, infer R, unknown> ? R : never;
+const TodosContext = createContext<Returned<typeof createTodos>>();
+/** The todos store (pending until the first fetch lands) and the actions. */
+function* useTodos() {
+	return yield* TodosContext;
+}
+type Input = InputEvent & {
+	currentTarget: HTMLInputElement;
+};
+type Key = KeyboardEvent & {
+	currentTarget: HTMLInputElement;
+};
+const Header = $component(function* Header() {
+	const [s, set] = yield* $signal(0);
+	const ss = yield* $memo(function* () {
+		return yield* s;
+	});
+	const [, { addTodo }] = yield* useTodos();
+	const submit = $event(function* (e: Key) {
+		if (e.key !== "Enter") return;
+		const input = e.currentTarget;
+		const title = input.value.trim();
+		if (!title) return;
+		const id = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+		// the event is gone once the call waits: clear the input first
+		input.value = "";
+		yield* addTodo({
+			id,
+			title,
+			completed: false
+		});
+	});
+	return view(function* () {
+		var _el$ = _tmpl$();
+		var _el$2 = _el$.firstChild;
+		var _el$3 = _el$2.nextSibling;
+		_$addEvent(_el$3, "keydown", submit, true);
+		return _el$;
+	});
+});
+const TodoItem = $component(function* TodoItem(props: Props<{
+	todo: Todo;
+}>) {
+	const [, { toggleTodo, removeTodo, retryTodo }] = yield* useTodos();
+	const toggle = $event(function* (e: Input) {
+		yield* toggleTodo(yield* props.todo.id, e.currentTarget.checked);
+	});
+	const retry = $event(function* () {
+		yield* retryTodo(yield* props.todo);
+	});
+	const remove = $event(function* () {
+		yield* removeTodo(yield* props.todo.id);
+	});
+	return view(function* () {
+		var _el$4 = _tmpl$2();
+		var _el$5 = _el$4.firstChild;
+		var _el$6 = _el$5.firstChild;
+		var _el$7 = _el$6.nextSibling;
+		var _el$8 = _el$7.nextSibling;
+		_$addEvent(_el$6, "input", toggle, true);
+		_$insert(_el$7, () => {
+			return _$perform(props.todo.title);
+		});
+		_$insert(_el$5, () => {
+			return _$perform(Show({
+				when: props.todo.error,
+				children: function* (error) {
+					return view(function* () {
+						var _el$9 = _tmpl$3();
+						_$addEvent(_el$9, "click", retry, true);
+						_$effect(() => `Retry ${_$perform(error.type)}`, (_v$) => {
+							_$setAttribute(_el$9, "title", _v$);
+						});
+						return _el$9;
+					});
+				}
+			}));
+		}, _el$8);
+		_$addEvent(_el$8, "click", remove, true);
+		_$effect(() => {
+			return {
+				e: !!_$perform(props.todo.completed),
+				t: !!_$perform(props.todo.pending),
+				a: !!_$perform(props.todo.error),
+				o: _$perform(props.todo.completed)
+			};
+		}, ({ e, t, a, o }, _p$) => {
+			e !== _p$?.e && _el$4.classList.toggle("completed", e);
+			t !== _p$?.t && _el$4.classList.toggle("pending", t);
+			a !== _p$?.a && _el$4.classList.toggle("errored", a);
+			_el$6.checked = o;
+		});
+		return _el$4;
+	});
+});
+const MainSection = $component(function* MainSection(props: Props<{
+	filter: Filter;
+}>) {
+	const [todos, { toggleAll }] = yield* useTodos();
+	const filtered = yield* $memo(function* () {
+		const f = yield* props.filter;
+		return yield* readStore(todos, (t) => f === "active" ? t.filter((x) => !x.completed) : f === "completed" ? t.filter((x) => x.completed) : t);
+	});
+	const allCompleted = yield* $memo(function* () {
+		return yield* readStore(todos, (t) => t.length > 0 && t.every((x) => x.completed));
+	});
+	const toggle = $event(function* () {
+		yield* toggleAll(!(yield* allCompleted));
+	});
+	return view(function* () {
+		return _$memo(() => {
+			return _$perform(Show({
+				when: function* () {
+					return (yield* todos.length) > 0;
+				},
+				children: function* () {
+					var _el$10 = _tmpl$4();
+					var _el$11 = _el$10.firstChild;
+					var _el$12 = _el$11.nextSibling;
+					var _el$13 = _el$12.nextSibling;
+					_$addEvent(_el$11, "change", toggle);
+					_$insert(_el$13, () => {
+						return _$perform(For({
+							each: filtered,
+							children: function* (todo) {
+								return view(function* () {
+									return _$memo(() => {
+										return _$perform(TodoItem({ todo }));
+									});
+								});
+							}
+						}));
+					});
+					_$effect(() => _$perform(allCompleted), (_v$) => {
+						_el$11.checked = _v$;
+					});
+					return _el$10;
+				}
+			}));
+		});
+	});
+});
+const Footer = $component(function* Footer(props: Props<{
+	filter: Filter;
+}>) {
+	const [todos, { clearCompleted }] = yield* useTodos();
+	const remaining = yield* $memo(function* () {
+		return yield* readStore(todos, (t) => t.filter((x) => !x.completed).length);
+	});
+	const completed = yield* $memo(function* () {
+		return (yield* todos.length) - (yield* remaining);
+	});
+	const clear = $event(function* () {
+		yield* clearCompleted();
+	});
+	return view(function* () {
+		return _$memo(() => {
+			return _$perform(Show({
+				when: function* () {
+					return (yield* todos.length) > 0;
+				},
+				children: function* () {
+					var _el$14 = _tmpl$5();
+					var _el$15 = _el$14.firstChild;
+					var _el$16 = _el$15.firstChild;
+					var _el$17 = _el$16.nextSibling;
+					var _el$18 = _el$17.nextSibling;
+					var _el$19 = _el$18.nextSibling;
+					var _el$20 = _el$15.nextSibling;
+					var _el$21 = _el$20.firstChild;
+					var _el$22 = _el$21.firstChild;
+					var _el$23 = _el$21.nextSibling;
+					var _el$24 = _el$23.firstChild;
+					var _el$25 = _el$23.nextSibling;
+					var _el$26 = _el$25.firstChild;
+					_$insert(_el$16, () => {
+						return _$perform(remaining);
+					});
+					_$insert(_el$15, () => {
+						return _$perform(remaining) === 1 ? "item" : "items";
+					}, _el$18);
+					_$claimElement(_el$22);
+					_$claimElement(_el$24);
+					_$claimElement(_el$26);
+					_$insert(_el$14, () => {
+						return _$perform(Show({
+							when: function* () {
+								return (yield* completed) > 0;
+							},
+							children: function* () {
+								var _el$27 = _tmpl$6();
+								_$addEvent(_el$27, "click", clear, true);
+								return _el$27;
+							}
+						}));
+					}, null);
+					_$effect(() => {
+						return {
+							e: !!(_$perform(props.filter) === "all"),
+							t: !!(_$perform(props.filter) === "active"),
+							a: !!(_$perform(props.filter) === "completed")
+						};
+					}, ({ e, t, a }, _p$) => {
+						e !== _p$?.e && _el$22.classList.toggle("selected", e);
+						t !== _p$?.t && _el$24.classList.toggle("selected", t);
+						a !== _p$?.a && _el$26.classList.toggle("selected", a);
+					});
+					return _el$14;
+				}
+			}));
+		});
+	});
+});
+/** The app's section: its list and footer read the store, so it waits for it and fails with it. */
+const TodoApp = $component(function* TodoApp(props: Props<{
+	filter: Filter;
+}>) {
+	return view(function* () {
+		var _el$28 = _tmpl$7();
+		var _el$29 = _el$28.firstChild;
+		var _el$30 = _el$29.nextSibling;
+		_$insert(_el$28, () => {
+			return _$perform(Header());
+		}, _el$29);
+		_$insert(_el$28, () => {
+			return _$perform(Loading({
+				fallback: _tmpl$8(),
+				children: function* () {
+					return _$memo(() => {
+						return [MainSection({ filter: props.filter }), Footer({ filter: props.filter })];
+					});
+				}
+			}));
+		}, _el$30);
+		return _el$28;
+	});
+});
+export const App = $component(function* App() {
+	const filter = yield* hashFilter();
+	const todos = yield* createTodos();
+	return view(function* () {
+		return _$createComponent(TodosContext, {
+			value: todos,
+			get children() {
+				return Errored({
+					fallback: (err, reset) => (() => {
+						var _el$32 = _tmpl$9();
+						var _el$33 = _el$32.firstChild;
+						var _el$34 = _el$33.firstChild;
+						var _el$35 = _el$33.nextSibling;
+						_$insert(_el$33, () => {
+							return String(err());
+						}, null);
+						_$addEvent(_el$35, "click", reset, true);
+						return _el$32;
+					})(),
+					children: function* () {
+						return _$memo(() => {
+							return _$perform(TodoApp({ filter }));
+						});
+					}
+				});
+			}
+		});
+	});
+});
+_$delegateEvents([
+	"keydown",
+	"input",
+	"click"
+]);

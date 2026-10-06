@@ -1,0 +1,16 @@
+import { template as _$template } from "@solidjs/web";
+import { insert as _$insert } from "@solidjs/web";
+import { effect as _$effect } from "@solidjs/web";
+var _tmpl$ = /* @__PURE__ */ _$template(`<p>Hello `);
+import { perform as _$perform } from "solid-yield";
+function* v() {
+	var _el$ = _tmpl$();
+	var _el$2 = _el$.firstChild;
+	_$insert(_el$, () => {
+		return _$perform(user).name;
+	}, null);
+	_$effect(() => !!(_$perform(n) > 3), (_v$) => {
+		_el$.classList.toggle("big", _v$);
+	});
+	return _el$;
+}

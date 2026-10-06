@@ -4,10 +4,10 @@
 // builds, as `vite dev` serves them). Nothing is compared: a render passes if
 // it ends, without a throw and without a development error.
 //
-// - rendering-blocks: its own SSR entries, `string/entry-server.tsx`
+// - rendering-yield: its own SSR entries, `string/entry-server.tsx`
 //   (`renderToString`) and `stream/entry-server.tsx` (`renderToStream`,
 //   awaited to its end), for every route of its router.
-// - room-blocks, hackernews-spa-blocks: @solidjs/vite-plugin's generated
+// - room-yield, hackernews-spa-yield: @solidjs/vite-plugin's generated
 //   server entry (`virtual:solid-ssr-handler`), one page request each.
 //   hackernews' feed and user routes read the live HN API, so only the story
 //   it serves from its checked-in capture is rendered (no network in the
@@ -18,7 +18,7 @@
 // microtasks and starved every timer, its own included) fails as a timeout.
 //
 // A failure is: a throw out of the render; a non-200 response; an empty
-// document; a development error — a `[CODE]` message (solid-blocks' or
+// document; a development error — a `[CODE]` message (solid-yield's or
 // Solid's) logged with console.error / console.warn, raised as an unhandled
 // rejection, or written into the document; or no end within TIMEOUT_MS.
 //
@@ -36,14 +36,14 @@ const TIMEOUT_MS = 30_000;
 /** One entry per server entry: how to render it, and its routes. */
 const TARGETS = [
   ...["string", "stream"].map(entry => ({
-    twin: "rendering-blocks",
+    twin: "rendering-yield",
     entry,
     kind: "entry",
     urls: ["/", "/profile", "/settings", "/stream", "/error-stream", "/reveal", "/skeleton"]
   })),
-  { twin: "room-blocks", entry: "handler", kind: "handler", urls: ["/live"] },
+  { twin: "room-yield", entry: "handler", kind: "handler", urls: ["/live"] },
   {
-    twin: "hackernews-spa-blocks",
+    twin: "hackernews-spa-yield",
     entry: "handler",
     kind: "handler",
     urls: ["/stories/30186326"]

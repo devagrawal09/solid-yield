@@ -32,7 +32,7 @@ const ENTRIES = ["string", "stream"];
 const TIMEOUT_MS = 30_000;
 const PROJECTS = {
   original: join(examples, "originals", "rendering"),
-  twin: join(examples, "rendering-blocks")
+  twin: join(examples, "rendering-yield")
 };
 
 /** Child: render one URL, print `{ html }` or `{ failed }` as the last stdout line. */

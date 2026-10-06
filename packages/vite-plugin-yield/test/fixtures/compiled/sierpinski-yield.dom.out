@@ -1,0 +1,249 @@
+import { template as _$template } from "@solidjs/web";
+import { insert as _$insert } from "@solidjs/web";
+import { memo as _$memo } from "@solidjs/web";
+import { setStyleProperty as _$setStyleProperty } from "@solidjs/web";
+import { effect as _$effect } from "@solidjs/web";
+import { addEvent as _$addEvent } from "@solidjs/web";
+var _tmpl$ = /* @__PURE__ */ _$template(`<div class=container>`);
+var _tmpl$2 = /* @__PURE__ */ _$template(`<div class=dot>`);
+// The Sierpinski triangle stress test from examples/sierpinski, written with
+// solid-yield (JSX flavor). Same markup, same timing, same behavior.
+//
+// What the library's rules change in the source (see the README):
+// - A setup does not read (D-042) and a view does not branch (D-032): the
+//   leaf-or-branch choice the original makes from its destructured props is
+//   a `Switch` call over holes, and the positions are read in the holes that
+//   create the children (the props never change, so each runs once).
+// - `Loading({ children: function* () { return <div class="container">…</div>; } })`: a view
+//   that reads a pending child is pending itself, so the container moves
+//   into its own component and the boundary receives it as a pending view.
+// - Timer and frame callbacks are `$event`s.
+import { perform as _$perform } from "solid-yield";
+import { $cleanup, $component, $event, $memo, $signal, attempt, Errored, Loading, Match, Switch, type Component, type Props, type Source, view } from "solid-yield";
+import { onCleanup } from "solid-js";
+// `children` is the seconds a dot shows: Container passes them settled, a
+// triangle passes its own idle-time memo down — pending, failing with an
+// IdleError — so the prop declares that coloring (D-068).
+type TriangleProps = {
+	x: number;
+	y: number;
+	s: number;
+	children: Source<number, IdleError, true>;
+};
+/** The idle-time work failed: the color of a slow child's failure. */
+export class IdleError extends Error {
+	readonly kind = "idle" as const;
+	constructor(cause: unknown) {
+		super(cause instanceof Error ? cause.message : String(cause));
+	}
+}
+const TARGET = 25;
+export const TriangleDemo = $component(function* TriangleDemo() {
+	const [elapsed, setElapsed] = yield* $signal(0);
+	const [seconds, setSeconds] = yield* $signal(0);
+	const scale = yield* $memo(function* () {
+		const e = (yield* elapsed) / 1e3 % 10;
+		return 1 + (e > 5 ? 10 - e : e) / 10;
+	});
+	const start = Date.now();
+	const tick = $event(function* () {
+		yield* setSeconds((s) => s % 10 + 1);
+	});
+	const t = setInterval(tick, 1e3);
+	let f: number;
+	const update = $event(function* (_time: number) {
+		yield* setElapsed(Date.now() - start);
+		f = requestAnimationFrame(update);
+	});
+	f = requestAnimationFrame(update);
+	yield* $cleanup(() => {
+		clearInterval(t);
+		cancelAnimationFrame(f);
+	});
+	return view(function* () {
+		// the slow children wait on idle time, which may fail
+		return _$memo(() => {
+			return _$perform(Errored({
+				fallback: (err) => `Failed: ${err().message}`,
+				children: function* () {
+					return _$memo(() => {
+						return _$perform(Loading({
+							fallback: "Loading...",
+							children: function* () {
+								return _$memo(() => {
+									return _$perform(Container({
+										scale,
+										seconds
+									}));
+								});
+							}
+						}));
+					});
+				}
+			}));
+		});
+	});
+});
+const Container = $component(function* Container(props: Props<{
+	scale: number;
+	seconds: number;
+}>) {
+	return view(function* () {
+		var _el$ = _tmpl$();
+		_$insert(_el$, () => {
+			return _$perform(Triangle({
+				x: 0,
+				y: 0,
+				s: 1e3,
+				children: props.seconds
+			}));
+		});
+		_$effect(() => "scaleX(" + _$perform(props.scale) / 2.1 + ") scaleY(0.7) translateZ(0.1px)", (_v$) => {
+			_$setStyleProperty(_el$, "transform", _v$);
+		});
+		return _el$;
+	});
+});
+// A recursive component needs its type spelled out (TypeScript cannot infer
+// a const its own initializer references): a triangle may be pending — its
+// branches read an async memo. Its setup is left unnamed: a named setup
+// (`function* Triangle`) would shadow the component inside its own body.
+const Triangle: Component<TriangleProps, true, IdleError> = $component(function* (props: Props<TriangleProps>) {
+	// Created here, computed only when a branch reads it (`lazy`): a leaf
+	// never starts the idle-time work.
+	const slowChildren = yield* $memo(function* () {
+		const seconds = yield* props.children;
+		return yield* attempt(() => new Promise<number>((res) => {
+			const t = requestIdleCallback(() => {
+				const e = performance.now() + .8;
+				while (performance.now() < e) {}
+				res(seconds);
+			});
+			onCleanup(() => cancelIdleCallback(t));
+		}), (cause) => new IdleError(cause));
+	}, { lazy: true });
+	// The original destructures its position once (`let { x, y, s } = props`)
+	// and returns the leaf or the branch. A setup does not read (D-042) and a
+	// view does not branch (D-032): the choice is a `Switch` call over holes, and
+	// the children's positions are read where they are created — in the holes
+	// (the props never change, so each hole runs once).
+	return view(function* () {
+		return _$memo(() => {
+			return _$perform(Switch({ children: function* () {
+				return [_$memo(() => {
+					return _$perform(Match({
+						when: function* () {
+							return (yield* props.s) <= TARGET;
+						},
+						children: function* () {
+							return _$memo(() => {
+								return _$perform(Dot({
+									x: function* () {
+										return (yield* props.x) - TARGET / 2;
+									},
+									y: function* () {
+										return (yield* props.y) - TARGET / 2;
+									},
+									s: TARGET,
+									children: props.children
+								}));
+							});
+						}
+					}));
+				}), _$memo(() => {
+					return _$perform(Match({
+						when: function* () {
+							return (yield* props.s) > TARGET;
+						},
+						children: function* () {
+							return [
+								_$memo(() => {
+									return _$perform(Triangle({
+										x: props.x,
+										y: function* () {
+											return (yield* props.y) - (yield* props.s) / 4;
+										},
+										s: function* () {
+											return (yield* props.s) / 2;
+										},
+										children: slowChildren
+									}));
+								}),
+								_$memo(() => {
+									return _$perform(Triangle({
+										x: function* () {
+											return (yield* props.x) - (yield* props.s) / 2;
+										},
+										y: function* () {
+											return (yield* props.y) + (yield* props.s) / 4;
+										},
+										s: function* () {
+											return (yield* props.s) / 2;
+										},
+										children: slowChildren
+									}));
+								}),
+								_$memo(() => {
+									return _$perform(Triangle({
+										x: function* () {
+											return (yield* props.x) + (yield* props.s) / 2;
+										},
+										y: function* () {
+											return (yield* props.y) + (yield* props.s) / 4;
+										},
+										s: function* () {
+											return (yield* props.s) / 2;
+										},
+										children: slowChildren
+									}));
+								})
+							];
+						}
+					}));
+				})];
+			} }));
+		});
+	});
+});
+const Dot = $component(function* Dot(props: Props<TriangleProps>) {
+	const [hover, setHover] = yield* $signal(false);
+	const onEnter = $event(function* () {
+		yield* setHover(true);
+	});
+	const onExit = $event(function* () {
+		yield* setHover(false);
+	});
+	return view(function* () {
+		var _el$2 = _tmpl$2();
+		_$addEvent(_el$2, "mouseleave", onExit);
+		_$addEvent(_el$2, "mouseenter", onEnter);
+		_$insert(_el$2, (() => {
+			var _c$ = _$memo(() => {
+				return !!_$perform(hover);
+			});
+			return () => {
+				return _c$() ? "**" + _$perform(props.children) + "**" : _$perform(props.children);
+			};
+		})());
+		_$effect(() => {
+			return {
+				e: _$perform(props.s) + "px",
+				t: _$perform(props.s) + "px",
+				a: _$perform(props.x) + "px",
+				o: _$perform(props.y) + "px",
+				i: _$perform(props.s) / 2 + "px",
+				n: _$perform(props.s) + "px",
+				s: _$perform(hover) ? "#ff0" : "#61dafb"
+			};
+		}, ({ e, t, a, o, i, n, s }, _p$) => {
+			e !== _p$?.e && _$setStyleProperty(_el$2, "width", e);
+			t !== _p$?.t && _$setStyleProperty(_el$2, "height", t);
+			a !== _p$?.a && _$setStyleProperty(_el$2, "left", a);
+			o !== _p$?.o && _$setStyleProperty(_el$2, "top", o);
+			i !== _p$?.i && _$setStyleProperty(_el$2, "border-radius", i);
+			n !== _p$?.n && _$setStyleProperty(_el$2, "line-height", n);
+			s !== _p$?.s && _$setStyleProperty(_el$2, "background", s);
+		});
+		return _el$2;
+	});
+});

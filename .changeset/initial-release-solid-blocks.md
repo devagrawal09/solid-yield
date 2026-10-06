@@ -1,5 +1,0 @@
----
-"solid-blocks": minor
----
-
-Initial release: generator blocks for Solid 2 as a library, on Solid's public API. `$component(function* (props) { setup; return view(function* () { return <…/>; }); })`: a setup creates (`$signal`, `$store`, `$memo`, `$optimistic`, `$optimisticStore`, `$projection`, `$effect(compute, effect)`, `$settled`, `$cleanup`), a view only reads, in holes. Events are `$event`s (Solid actions), bound in a view with `onClick={yield* save}`. Failures are typed (`attempt`, `raise`, `until`, `Errored({ catch })`), and pending and failures travel in the types (`Source<T, E, P>`, `View<P, E, W>`): the types say what the runtime routes (D-071). Flow controls and boundaries are called (`yield* For(…)`, `Show`, `Switch` / `Match`, `Repeat`, `Loading`, `Errored`); `lazy`, `foreign`, `render` / `hydrate`; the no-JSX flavor `solid-blocks/h`; the automatic JSX runtime `solid-blocks/jsx-runtime` with a settled-only JSX namespace. Experimental: the API follows `documentation/DECISIONS.md`, which records its history.

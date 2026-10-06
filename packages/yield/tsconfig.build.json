@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist/types",
+    "rootDir": "./src",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "paths": {
+      "solid-yield": ["./src/index.ts"],
+      "solid-yield/internal": ["./src/internal.ts"],
+      "solid-yield/jsx-runtime": ["./jsx/jsx-runtime.d.ts"]
+    }
+  },
+  "include": ["./src"]
+}

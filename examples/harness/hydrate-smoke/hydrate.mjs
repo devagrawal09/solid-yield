@@ -7,7 +7,7 @@
 // A case passes when:
 // - the server render ends with a document and no development error;
 // - hydration claims it: no hydration mismatch, no `[CODE]` development error
-//   (solid-blocks' or Solid's) logged or thrown, no unhandled rejection, and
+//   (solid-yield's or Solid's) logged or thrown, no unhandled rejection, and
 //   the server's nodes are still the document's after hydration (the app
 //   claimed them; it did not re-render them);
 // - where the case names one, an interaction works afterwards (a click whose
@@ -61,15 +61,15 @@ const INTERACTIONS = {
  */
 const TARGETS = [
   ...["string", "stream"].map(entry => ({
-    twin: "rendering-blocks",
+    twin: "rendering-yield",
     entry,
     kind: "entry",
     urls: ["/", "/profile", "/settings", "/stream", "/error-stream", "/reveal", "/skeleton"],
     interactions: { "/settings": "close the portal" }
   })),
-  { twin: "room-blocks", entry: "handler", kind: "handler", urls: ["/live"] },
+  { twin: "room-yield", entry: "handler", kind: "handler", urls: ["/live"] },
   {
-    twin: "hackernews-spa-blocks",
+    twin: "hackernews-spa-yield",
     entry: "handler",
     kind: "handler",
     urls: ["/stories/30186326"]
@@ -124,7 +124,7 @@ async function hydrateOne(twin, entry, kind, url, interaction) {
   const require = createRequire(join(dir, "package.json"));
   const vite = await import(pathToFileURL(require.resolve("vite")).href);
   // jsdom and Vitest's populateGlobal from a twin that has them (an original may not)
-  const tools = createRequire(join(examples, "rendering-blocks", "package.json"));
+  const tools = createRequire(join(examples, "rendering-yield", "package.json"));
   const { JSDOM } = tools("jsdom");
   const { populateGlobal } = await import(pathToFileURL(tools.resolve("vitest/runtime")).href);
   const logged = [];
@@ -356,7 +356,7 @@ if (process.argv[2] === "--one") {
   const originals = args.includes("--originals");
   const jobs = args.includes("--jobs") ? Number(args[args.indexOf("--jobs") + 1]) : 4;
   const cases = TARGETS.map(t =>
-    originals ? { ...t, twin: join("originals", t.twin.replace(/-blocks(-h)?$/, "")) } : t
+    originals ? { ...t, twin: join("originals", t.twin.replace(/-yield(-h)?$/, "")) } : t
   )
     .flatMap(t => t.urls.map(url => ({ t, url })))
     .map(c => ({ ...c, name: `${c.t.twin} ${c.t.entry} ${c.url}` }))

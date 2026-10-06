@@ -1,4 +1,4 @@
-solid-blocks
+solid-yield
 Copyright (c) 2026 Dev Agrawal. Licensed under the MIT license (LICENSE).
 
 This repository includes material from Solid (https://github.com/solidjs/solid),
@@ -11,42 +11,42 @@ applies to:
    (effect, hackernews-spa, rendering, room, sierpinski, todos), vendored from
    the fork's examples.
 
-2. The twins, examples/*-blocks and examples/*-blocks-h, are ports of those
+2. The twins, examples/*-yield and examples/*-yield-h, are ports of those
    originals: their markup, behavior and wire are the originals', and these
    files are copied from them unchanged:
 
-   - examples/effect-blocks/index.html
-   - examples/effect-blocks/src/api.ts
-   - examples/effect-blocks/src/app.css
-   - examples/hackernews-spa-blocks/src/lib/api.ts
-   - examples/hackernews-spa-blocks/src/types.ts
-   - examples/hackernews-spa-blocks/src/vite-env.d.ts
-   - examples/rendering-blocks/csr/index.html
-   - examples/rendering-blocks/shared/static/favicon.ico
-   - examples/rendering-blocks/shared/static/styles.css
-   - examples/rendering-blocks/stream/server.js
-   - examples/rendering-blocks/string/server.js
-   - examples/rendering-blocks/types.d.ts
-   - examples/room-blocks/public/favicon.ico
-   - examples/room-blocks/src/app.css
-   - examples/room-blocks/src/lib/rooms.ts
-   - examples/room-blocks/src/lib/sources.ts
-   - examples/room-blocks/src/server-config.ts
-   - examples/room-blocks/src/vite-env.d.ts
-   - examples/sierpinski-blocks/index.html
-   - examples/sierpinski-blocks/src/app.css
-   - examples/sierpinski-blocks-h/src/app.css
-   - examples/todos-blocks/index.html
-   - examples/todos-blocks/src/api.ts
-   - examples/todos-blocks-h/src/api.ts
+   - examples/effect-yield/index.html
+   - examples/effect-yield/src/api.ts
+   - examples/effect-yield/src/app.css
+   - examples/hackernews-spa-yield/src/lib/api.ts
+   - examples/hackernews-spa-yield/src/types.ts
+   - examples/hackernews-spa-yield/src/vite-env.d.ts
+   - examples/rendering-yield/csr/index.html
+   - examples/rendering-yield/shared/static/favicon.ico
+   - examples/rendering-yield/shared/static/styles.css
+   - examples/rendering-yield/stream/server.js
+   - examples/rendering-yield/string/server.js
+   - examples/rendering-yield/types.d.ts
+   - examples/room-yield/public/favicon.ico
+   - examples/room-yield/src/app.css
+   - examples/room-yield/src/lib/rooms.ts
+   - examples/room-yield/src/lib/sources.ts
+   - examples/room-yield/src/server-config.ts
+   - examples/room-yield/src/vite-env.d.ts
+   - examples/sierpinski-yield/index.html
+   - examples/sierpinski-yield/src/app.css
+   - examples/sierpinski-yield-h/src/app.css
+   - examples/todos-yield/index.html
+   - examples/todos-yield/src/api.ts
+   - examples/todos-yield-h/src/api.ts
 
-3. packages/blocks/jsx/jsx.d.ts and packages/blocks/jsx/jsx-properties.d.ts —
+3. packages/yield/jsx/jsx.d.ts and packages/yield/jsx/jsx-properties.d.ts —
    generated from @solidjs/web's published types (types/jsx.d.ts,
-   types/jsx-properties.d.ts) by packages/blocks/scripts/jsx-from-web.mjs and
+   types/jsx-properties.d.ts) by packages/yield/scripts/jsx-from-web.mjs and
    jsx-web-shared.mjs; jsx-properties.d.ts is copied as it is. They ship in
-   the solid-blocks package (its jsx/ directory), with this notice.
+   the solid-yield package (its jsx/ directory), with this notice.
 
-4. packages/vite-plugin-blocks/test/fixtures/compiled/ — the output of Solid's
+4. packages/vite-plugin-yield/test/fixtures/compiled/ — the output of Solid's
    JSX compiler (@solidjs/compiler) over the plugin's fixtures, kept as the
    transform's oracle (D-043).
 

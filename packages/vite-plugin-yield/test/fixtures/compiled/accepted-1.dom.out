@@ -1,0 +1,10 @@
+import { createComponent as _$createComponent } from "@solidjs/web";
+import { perform as _$perform } from "solid-yield";
+function* v() {
+	return _$createComponent(Comp, {
+		get a() {
+			return _$perform(n);
+		},
+		b: x
+	});
+}

@@ -1,5 +1,5 @@
 > Status: **draft, not yet filed** (for solidjs/solid; awaiting Dev's "file it"). Copied verbatim from `/private/tmp/solid-ssr-memo-loop-issue.md`.
-> Found by D-082 (rendering-blocks' streamed `/profile`); the library side is fixed in `046387b`.
+> Found by D-082 (rendering-yield's streamed `/profile`); the library side is fixed in `046387b`.
 
 # [2.0.0-rc.13] SSR stream never ends: after a hole retry re-creates a component, a cascading memo spins in microtasks on a shared serialization slot
 
@@ -80,6 +80,6 @@ What each part does (each variant checked with the same script):
 - `@solidjs/compiler` 2.0.0-rc.13 (used to compile the repro for SSR)
 - Node v24.18.0, macOS (Darwin 25.5.0, arm64)
 
-## Workaround (solid-blocks, commit 046387b)
+## Workaround (solid-yield, commit 046387b)
 
-On the server, solid-blocks' `perform` (`packages/blocks/src/runtime.ts`) now returns a view that is a function (a flow control's or a lazy component's output) wrapped in a one-element array (`[view]`) instead of returning it bare into the hole. Solid's server renderer then resolves and retries that function as its own node, so the hole that created the component is not re-run. The page is set up once and the shared-slot loop is never reached. The workaround avoids the trigger and leaves the Solid bug in place. In handwritten code the same move, `{() => [<Page />]}`, or creating the component at template time, avoids it too (both verified above).
+On the server, solid-yield's `perform` (`packages/yield/src/runtime.ts`) now returns a view that is a function (a flow control's or a lazy component's output) wrapped in a one-element array (`[view]`) instead of returning it bare into the hole. Solid's server renderer then resolves and retries that function as its own node, so the hole that created the component is not re-run. The page is set up once and the shared-slot loop is never reached. The workaround avoids the trigger and leaves the Solid bug in place. In handwritten code the same move, `{() => [<Page />]}`, or creating the component at template time, avoids it too (both verified above).

@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-// The runtime cost of solid-blocks run uncompiled (the library's
+// The runtime cost of solid-yield run uncompiled (the library's
 // interpreter; the JSX transform's one rule) against handwritten Solid on
 // the same runtime.
 //
 //   node examples/harness/runtime-cost/measure.mjs [--reps N] [--wall]
 //
-// Each workload is bundled for production (vite + the blocks plugin + the
+// Each workload is bundled for production (vite + the yield plugin + the
 // solid plugin with the native compiler), mounted in jsdom, and run under Valgrind (cachegrind,
 // no cache simulation) with `node --jitless`: the instruction count of R
 // operations minus the count of the same process doing none, divided by R.
@@ -14,7 +14,7 @@
 // Workloads: todos (add a todo, then toggle it, on a growing list),
 // create (1,000 rows, then clear), update (every 10th of 1,000 rows).
 // Each run prints what the workload left in the DOM (`check()`); the two
-// flavors must agree, so a flavor that silently does nothing (a blocks
+// flavors must agree, so a flavor that silently does nothing (a yield
 // setter not delegated to writes nothing, D-021) cannot produce a number.
 // Without Valgrind (macOS on arm64 has none) instruction counts are skipped
 // and only wall time is reported: run it with --wall there.
@@ -28,29 +28,29 @@ import { fileURLToPath } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(here, "../../..");
 const HARNESS = resolve(here, "..");
-const OUT = process.env.OUT || join(ROOT, "node_modules/.cache/blocks-runtime-cost");
+const OUT = process.env.OUT || join(ROOT, "node_modules/.cache/yield-runtime-cost");
 const reps = Number(process.argv[process.argv.indexOf("--reps") + 1]) || 20;
 const hasValgrind = spawnSync("valgrind", ["--version"]).status === 0;
 const wall = process.argv.includes("--wall") || !hasValgrind;
 if (!hasValgrind) console.error("valgrind not found: instruction counts skipped, wall time only");
 
-// Bundle with an example's toolchain (vite, the blocks plugin before
-// @solidjs/vite-plugin, as the twins do). The blocks plugin carries the JSX
-// transform's rule since D-043; it is imported by path, as packages/blocks'
+// Bundle with an example's toolchain (vite, the yield plugin before
+// @solidjs/vite-plugin, as the twins do). The yield plugin carries the JSX
+// transform's rule since D-043; it is imported by path, as packages/yield'
 // test configs do.
 const require = createRequire(join(HARNESS, "package.json"));
 const { build } = await import(require.resolve("vite"));
 const pluginModule = await import(require.resolve("@solidjs/vite-plugin"));
 const solid = pluginModule.default?.default ?? pluginModule.default;
-const { default: blocks } = await import(join(ROOT, "packages/vite-plugin-blocks/src/index.js"));
+const { default: solidYield } = await import(join(ROOT, "packages/vite-plugin-yield/src/index.js"));
 mkdirSync(OUT, { recursive: true });
-const entries = ["solid-todos", "blocks-todos", "solid-rows", "blocks-rows"];
+const entries = ["solid-todos", "yield-todos", "solid-rows", "yield-rows"];
 for (const name of entries) {
   await build({
     configFile: false,
     logLevel: "silent",
     root: here,
-    plugins: [blocks(), solid()],
+    plugins: [solidYield(), solid()],
     resolve: { conditions: ["browser", "production"] },
     define: { "process.env.NODE_ENV": '"production"' },
     build: {
@@ -135,7 +135,7 @@ for (const [workload, kind] of [
 ]) {
   const result = { workload };
   const checks = {};
-  for (const flavor of ["solid", "blocks"]) {
+  for (const flavor of ["solid", "yield"]) {
     const bundle = join(OUT, `${flavor}-${kind}`, "bench.js");
     if (hasValgrind) {
       const base = run(bundle, workload, 0);
@@ -150,13 +150,13 @@ for (const [workload, kind] of [
     }
   }
   for (const [what, c] of Object.entries(checks))
-    if (c.solid !== c.blocks)
+    if (c.solid !== c.yield)
       throw new Error(
-        `${workload} (${what}): the flavors disagree: solid "${c.solid}", blocks "${c.blocks}"`
+        `${workload} (${what}): the flavors disagree: solid "${c.solid}", yield "${c.yield}"`
       );
   result.check = checks.wall?.solid ?? checks.count?.solid;
-  if (hasValgrind) result.ratio = result.blocks / result.solid;
-  if (wall) result.wallRatio = result.blocksWall / result.solidWall;
+  if (hasValgrind) result.ratio = result.yield / result.solid;
+  if (wall) result.wallRatio = result.yieldWall / result.solidWall;
   rows.push(result);
   console.error(JSON.stringify(result));
 }
@@ -171,25 +171,25 @@ if (hasValgrind) {
     `\nInstructions per operation (valgrind cachegrind, node --jitless, ${reps} reps, minus a 0-rep baseline):\n`
   );
   console.log(
-    "| workload | handwritten Solid | solid-blocks (uncompiled) | ratio |" +
-      (wall ? " wall Solid / blocks (JIT, ms) |" : "")
+    "| workload | handwritten Solid | solid-yield (uncompiled) | ratio |" +
+      (wall ? " wall Solid / yield (JIT, ms) |" : "")
   );
   console.log("| --- | ---: | ---: | ---: |" + (wall ? " ---: |" : ""));
   for (const r of rows)
     console.log(
-      `| ${label[r.workload]} | ${r.solid.toLocaleString("en-US")} | ${r.blocks.toLocaleString("en-US")} | ${r.ratio.toFixed(2)}x |` +
-        (wall ? ` ${r.solidWall.toFixed(3)} / ${r.blocksWall.toFixed(3)} |` : "")
+      `| ${label[r.workload]} | ${r.solid.toLocaleString("en-US")} | ${r.yield.toLocaleString("en-US")} | ${r.ratio.toFixed(2)}x |` +
+        (wall ? ` ${r.solidWall.toFixed(3)} / ${r.yieldWall.toFixed(3)} |` : "")
     );
 } else {
   console.log(
     `\nWall time per operation (JIT on, 200 operations, median of 5 runs; no valgrind):\n`
   );
   console.log(
-    "| workload | handwritten Solid (ms / op) | solid-blocks (ms / op) | ratio | DOM after 200 ops (both) |"
+    "| workload | handwritten Solid (ms / op) | solid-yield (ms / op) | ratio | DOM after 200 ops (both) |"
   );
   console.log("| --- | ---: | ---: | ---: | --- |");
   for (const r of rows)
     console.log(
-      `| ${label[r.workload]} | ${r.solidWall.toFixed(3)} | ${r.blocksWall.toFixed(3)} | ${r.wallRatio.toFixed(2)}x | ${r.check} |`
+      `| ${label[r.workload]} | ${r.solidWall.toFixed(3)} | ${r.yieldWall.toFixed(3)} | ${r.wallRatio.toFixed(2)}x | ${r.check} |`
     );
 }

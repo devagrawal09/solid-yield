@@ -1,4 +1,4 @@
-# CI = the gate (D-015): the same scripts/blocks-gate.mjs a commit is gated by
+# CI = the gate (D-015): the same scripts/yield-gate.mjs a commit is gated by
 # locally, on Node 24 / pnpm 11, against published Solid (D-016: a Solid RC that
 # breaks a twin's parity test is a finding, not a reason to pin).
 name: gate
@@ -22,18 +22,18 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build
         run: pnpm build
-      # The build regenerates packages/blocks/jsx/ from the installed @solidjs/web
+      # The build regenerates packages/yield/jsx/ from the installed @solidjs/web
       # (types:jsx); a Solid bump in the lockfile without the regenerated files
       # committed shows up here.
       - name: Vendored JSX types are current
         run: git diff --exit-code
       - name: Gate
         run: |
-          baseline=documentation/blocks-gate-baseline.json
+          baseline=documentation/yield-gate-baseline.json
           if [ -f "$baseline" ]; then
-            node scripts/blocks-gate.mjs --json gate.json --baseline "$baseline"
+            node scripts/yield-gate.mjs --json gate.json --baseline "$baseline"
           else
-            node scripts/blocks-gate.mjs --json gate.json
+            node scripts/yield-gate.mjs --json gate.json
           fi
       - name: Gate result
         if: always()

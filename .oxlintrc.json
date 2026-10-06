@@ -3,11 +3,11 @@
   "overrides": [
     {
       "files": [
-        "examples/*-blocks/**",
-        "examples/*-blocks-h/**",
+        "examples/*-yield/**",
+        "examples/*-yield-h/**",
         "examples/harness/**",
-        "packages/blocks/**",
-        "packages/vite-plugin-blocks/test/fixtures/**"
+        "packages/yield/**",
+        "packages/vite-plugin-yield/test/fixtures/**"
       ],
       "rules": {
         "require-yield": "off"

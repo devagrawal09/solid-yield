@@ -1,14 +1,14 @@
 {
-  "name": "solid-blocks-monorepo",
-  "description": "solid-blocks, its Vite plugin and its ESLint plugin, with the example twins that pin it to Solid's behaviour",
+  "name": "solid-yield-monorepo",
+  "description": "solid-yield, its Vite plugin and its ESLint plugin, with the example twins that pin it to Solid's behaviour",
   "private": true,
   "license": "MIT",
   "type": "module",
   "scripts": {
     "build": "pnpm --filter \"./packages/*\" --if-present run build",
     "test": "pnpm --filter \"./packages/*\" --if-present run test",
-    "gate": "node scripts/blocks-gate.mjs",
-    "format": "prettier --write --cache \"packages/**/*.[tj]s?(x)\" \"packages/*/test/*.mjs\" \"examples/*-blocks*/**/*.[tj]s?(x)\" \"scripts/*.mjs\"",
+    "gate": "node scripts/yield-gate.mjs",
+    "format": "prettier --write --cache \"packages/**/*.[tj]s?(x)\" \"packages/*/test/*.mjs\" \"examples/*-yield*/**/*.[tj]s?(x)\" \"scripts/*.mjs\"",
     "changeset": "changeset"
   },
   "devDependencies": {

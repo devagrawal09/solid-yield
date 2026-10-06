@@ -1739,8 +1739,8 @@ export function renderView(
 /**
  * `component(function* (props) { setup; return function* () { view } })`.
  *
- * The setup runs once, under the component's owner: it creates state and
- * reads context. The returned generator is the view: it only reads. Neither
+ * The setup runs once, in the hole that calls it (`component` creates no owner):
+ * it creates state there and reads context from there up. The view only reads. Neither
  * is wrapped in an untrack (D-097): a setup does not read (D-042; the types,
  * and `READ_IN_SETUP` in development) and a view reads only in its holes,
  * each its own computation, so a component called in a hole subscribes that

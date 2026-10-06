@@ -110,8 +110,8 @@ export function renderToString<C extends Root>(
 
 /**
  * Stream a root (not pending, requiring no context) from the server
- * (D-099): Solid's `renderToStream`, whose response a `Loading` at the root
- * with no fallback holds as Solid holds a pending root's.
+ * (D-099): Solid's `renderToStream`. Not held (D-099 amended): a root `Loading`,
+ * with or without a fallback, is a boundary; the shell goes out, the content streams in.
  */
 export function renderToStream<C extends Root>(
   code: C & RootCheck<C>,

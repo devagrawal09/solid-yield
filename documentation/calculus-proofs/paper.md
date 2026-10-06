@@ -307,7 +307,7 @@ foreign(C,{provided:Q}) is safe in this environment
 There is no dynamic discharge construct here: `foreign` is identity, returns
 C's original type, and ignores its options. The first premise prevents typed
 failure crossing. The next two ensure actual context lookup succeeds
-(`foreign_context`). The last supplies the pending destination lost when
+(`foreign_context`). The last supplies the pending destination (`foreign_pending`) lost when
 foreign code erases colors. No static root proof can manufacture these
 premises from a JSX tag. F06 records both missing contracts in §4.1.
 

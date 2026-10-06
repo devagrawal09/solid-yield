@@ -163,11 +163,11 @@ const page = foreign(Reader, { provided: [C] });
 
 Render that page through a plain-Solid router with **no C provider**. This is
 explicitly accepted by D-102, and the runtime read is explicitly allowed to
-report NO*PROVIDER by that decision. The claim does not install a provider;
+report `NO_PROVIDER` by that decision. The claim does not install a provider;
 `foreign` ignores options and returns the original component/type. The exact
 probe uses `Router() { return h(page, {}); }` and a yield root returning
 `<Router />`. It is accepted and fails at Reader's creation (`ForeignRoot`).
-C6 excludes a foreign component's \_own* failures, but this is the yield
+C6 excludes a foreign component's _own_ failures, but this is the yield
 component's context lookup after a sanctioned handoff. C1–C7 do not require the
 provided claim to be true. R-Foreign/O43 still saying R=never is stale after D-102.
 

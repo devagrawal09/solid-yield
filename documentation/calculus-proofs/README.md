@@ -30,7 +30,8 @@ findings for Dev to rule on, not proposed changes to the dialect.
   the root's failure color. A failure-free position cannot leak a failure.
 - The foreign-edge context result **with an actual-provider premise**.
   Listing a context installs no owner or provider. Pending at a foreign edge
-  additionally needs a surrounding loading contract (paper lemma P-FOREIGN).
+  additionally needs a surrounding loading contract (`foreign_pending`);
+  P-FOREIGN explains the runtime environment premise.
 
 The important theorem names are `routine_preservation`, `preservation`,
 `owner_preservation`, `discharge`, `route_nearest`, `execution_root`,

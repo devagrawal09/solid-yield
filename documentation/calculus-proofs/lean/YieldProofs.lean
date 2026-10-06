@@ -354,6 +354,16 @@ theorem foreign_context {t provided path q} (ok : ForeignCheck (color t) provide
   obtain ⟨f, hf, hit⟩ := actual n hp
   exact (route_none_iff path _).mp hn f hf hit
 
+/-- A foreign consumer must supply Loading at each possible pending read path.
+    This is an environment contract, not a property of the identity wrapper. -/
+def LoadingAt (path : List Frame) := ∃ f ∈ path, Handles f .pending
+
+theorem foreign_pending {t path} (ambient : color t .pending → LoadingAt path)
+    (run : Emits t .pending) : route path .pending ≠ none := by
+  intro hn
+  obtain ⟨f, hf, hit⟩ := ambient (preservation run)
+  exact (route_none_iff path _).mp hn f hf hit
+
 /-- Routing starts at the saved site, not at the producer's owner. -/
 inductive Origin where
   | read | bind | creation
@@ -444,4 +454,5 @@ theorem execution_root {t xs} (ok : RootOK t) (run : Execution t xs) :
 #print axioms settled_no_failure
 #print axioms execution_root
 #print axioms foreign_context
+#print axioms foreign_pending
 end Yield

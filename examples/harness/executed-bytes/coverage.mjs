@@ -24,7 +24,7 @@ export function executedBytes(source, functions) {
   return bytes;
 }
 
-export function beginCoverage({ file, app, twin }) {
+export function beginCoverage({ file, app, twin, select }) {
   const session = new Session();
   session.connect();
   const call = (method, params = {}) => {
@@ -48,6 +48,7 @@ export function beginCoverage({ file, app, twin }) {
   const sources = new Map();
   const selected = url => {
     const normalized = url.replaceAll("\\", "/");
+    if (select) return select(normalized);
     if (/\/(tests|test|harness|\.executed-bytes-[^/]+)\//.test(normalized)) return false;
     return (
       normalized.includes(

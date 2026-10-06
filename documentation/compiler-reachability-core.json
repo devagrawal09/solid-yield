@@ -1,0 +1,70 @@
+{
+  "node": "v24.18.0",
+  "metric": "V8 executed UTF-8 ranges; production empty hydrated root, cold imports; inline maps excluded",
+  "phases": [
+    {
+      "phase": "load",
+      "bytes": 348751,
+      "core": 346631,
+      "shell": 2120,
+      "scripts": [
+        {
+          "url": "packages/compiler-yield/test/fixtures/reach-empty.tsx",
+          "bytes": 2120
+        },
+        {
+          "url": "node_modules/.pnpm/@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13/node_modules/@solidjs/web/dist/web.dev.js",
+          "bytes": 21869
+        },
+        {
+          "url": "node_modules/.pnpm/solid-js@2.0.0-rc.13/node_modules/solid-js/dist/solid.dev.js",
+          "bytes": 13030
+        },
+        {
+          "url": "node_modules/.pnpm/@solidjs+signals@2.0.0-rc.13/node_modules/@solidjs/signals/dist/dev.js",
+          "bytes": 150143
+        },
+        {
+          "url": "node_modules/.pnpm/@solidjs+signals@2.0.0-rc.13/node_modules/@solidjs/signals/dist/dev-shared.js",
+          "bytes": 146875
+        },
+        {
+          "url": "node_modules/.pnpm/solid-js@2.0.0-rc.13/node_modules/solid-js/dist/internal.js",
+          "bytes": 3545
+        },
+        {
+          "url": "packages/yield/dist/yield.dev.js",
+          "bytes": 4706
+        },
+        {
+          "url": "packages/yield/dist/internal.dev.js",
+          "bytes": 6463
+        }
+      ]
+    },
+    {
+      "phase": "idle",
+      "bytes": 1910,
+      "core": 1841,
+      "shell": 69,
+      "scripts": [
+        {
+          "url": "packages/compiler-yield/test/fixtures/reach-empty.tsx",
+          "bytes": 69
+        },
+        {
+          "url": "node_modules/.pnpm/solid-js@2.0.0-rc.13/node_modules/solid-js/dist/solid.dev.js",
+          "bytes": 53
+        },
+        {
+          "url": "node_modules/.pnpm/@solidjs+signals@2.0.0-rc.13/node_modules/@solidjs/signals/dist/dev.js",
+          "bytes": 50
+        },
+        {
+          "url": "node_modules/.pnpm/@solidjs+signals@2.0.0-rc.13/node_modules/@solidjs/signals/dist/dev-shared.js",
+          "bytes": 1738
+        }
+      ]
+    }
+  ]
+}

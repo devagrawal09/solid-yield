@@ -5,6 +5,11 @@ reference run used as the baseline; the machine-readable copy is
 [`yield-gate-baseline.json`](./yield-gate-baseline.json). CI runs the same gate
 against this file (`.github/workflows/gate.yml`).
 
+**Compiler branch additions (C1 checkpoint).** `compiler:analysis-test` pins the
+small analysis fixtures, and `compiler:report` visits all eight source graphs.
+The report is provisional: this checks that it runs, not that its candidate roots
+are safe to extract. Baseline: 39 steps, all PASS. Historical reference below.
+
 **Reference summary: `37 pass / 0 fail / 0 skip in 36s`** (37 steps, `--jobs 3`,
 every step under `TZ=UTC`). Re-recorded when `pkg:yield:dist-fresh` was added, on the
 working tree of that commit (the JSON's `head` is its parent, `3c14584`); the other 36

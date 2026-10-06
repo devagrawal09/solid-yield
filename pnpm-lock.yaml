@@ -536,6 +536,34 @@ importers:
         specifier: workspace:*
         version: link:../harness
 
+  packages/compiler-yield:
+    dependencies:
+      vite-plugin-solid-yield:
+        specifier: workspace:*
+        version: link:../vite-plugin-yield
+    devDependencies:
+      '@solidjs/vite-plugin':
+        specifier: 3.0.0-next.35
+        version: 3.0.0-next.35(@solidjs/web@2.0.0-rc.13(solid-js@2.0.0-rc.13))(solid-js@2.0.0-rc.13)(vite@7.3.6(@types/node@25.9.9)(lightningcss@1.33.0))
+      '@solidjs/web':
+        specifier: ^2.0.0-rc.11
+        version: 2.0.0-rc.13(solid-js@2.0.0-rc.13)
+      jsdom:
+        specifier: ^25.0.1
+        version: 25.0.1
+      solid-js:
+        specifier: ^2.0.0-rc.11
+        version: 2.0.0-rc.13
+      solid-yield:
+        specifier: workspace:*
+        version: link:../yield
+      vite:
+        specifier: ^7.0.0
+        version: 7.3.6(@types/node@25.9.9)(lightningcss@1.33.0)
+      vitest:
+        specifier: ^4.1.6
+        version: 4.1.11(@types/node@25.9.9)(jsdom@25.0.1)(vite@7.3.6(@types/node@25.9.9)(lightningcss@1.33.0))
+
   packages/eslint-plugin-yield:
     devDependencies:
       '@typescript-eslint/parser':

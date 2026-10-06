@@ -143,6 +143,7 @@ const LINT_DIRS = twins => [
   "packages/yield",
   "packages/eslint-plugin-yield",
   "packages/vite-plugin-yield",
+  "packages/compiler-yield",
   ...twins.map(t => `examples/${t}`)
 ];
 
@@ -231,6 +232,21 @@ function buildSteps(twins) {
     cwd: root,
     ...pnpmRun("packages/yield", "test:conformance")
   });
+
+  steps.push(
+    {
+      name: "compiler:analysis-test",
+      cwd: root,
+      cmd: process.execPath,
+      args: ["--test", "packages/compiler-yield/test/analysis.test.mjs"]
+    },
+    {
+      name: "compiler:report",
+      cwd: root,
+      cmd: process.execPath,
+      args: ["packages/compiler-yield/src/report.js"]
+    }
+  );
 
   // The exports-conditions matrix of each published package (scripts/exports-matrix.mjs):
   // every subpath under development / default / browser / node, resolved by esbuild, Node

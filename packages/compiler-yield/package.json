@@ -1,0 +1,23 @@
+{
+  "name": "compiler-yield",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.js",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "report": "node src/report.js"
+  },
+  "dependencies": {
+    "vite-plugin-solid-yield": "workspace:*"
+  },
+  "devDependencies": {
+    "solid-yield": "workspace:*",
+    "solid-js": "^2.0.0-rc.11",
+    "@solidjs/web": "^2.0.0-rc.11",
+    "@solidjs/vite-plugin": "3.0.0-next.35",
+    "vite": "^7.0.0",
+    "jsdom": "^25.0.1",
+    "vitest": "^4.1.6"
+  }
+}

@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 // The gate's server-render smoke step: every twin with a server entry renders
 // each of its routes on the server, through Vite's SSR loader (development
-// builds, as `vite dev` serves them). Nothing is compared: a render passes if
-// it ends, without a throw and without a development error.
+// builds, as `vite dev` serves them). Docs also has a production stream case
+// and four plain-Solid string rejection controls (dev/prod, safe/unsafe).
+// A streamed docs rejection must carry the typed error; its fallback is
+// rendered by the hydrated client, after the server has flushed the shell.
 //
 // - rendering-yield: its own SSR entries, `string/entry-server.tsx`
 //   (`renderToString`) and `stream/entry-server.tsx` (`renderToStream`,
@@ -25,9 +27,17 @@
 // document; a development error — a `[CODE]` message (solid-yield's or
 // Solid's) logged with console.error / console.warn, raised as an unhandled
 // rejection, or written into the document; or no end within TIMEOUT_MS.
+// The docs rejection permits only SSR_RENDER_ERROR_CONTAINED, and requires
+// the serialized kind and message. Hydrate-smoke checks its typed fallback.
 //
-// Usage: node examples/harness/ssr-smoke/smoke.mjs [--only <substring>] [--jobs <n>]
+// Usage: node examples/harness/ssr-smoke/smoke.mjs [--only <substring>] [--jobs <n>] [--originals]
 // Exit code 0 when every render passes.
+import { buildProduction } from "./production.mjs";
+import {
+  expectsDocsRejection,
+  serializedDocsError,
+  unexpectedRenderLog
+} from "./docs-contract.mjs";
 import { createRequire } from "node:module";
 import { spawn } from "node:child_process";
 import { join, dirname } from "node:path";
@@ -46,6 +56,20 @@ const TARGETS = [
     kind: "entry",
     urls: ["/", "/docs/start", "/docs/missing"]
   },
+  {
+    twin: "docs-yield",
+    entry: "stream",
+    kind: "entry",
+    build: "production",
+    urls: ["/docs/missing"]
+  },
+  ...["development", "production"].map(build => ({
+    twin: "docs-yield",
+    entry: "string",
+    kind: "boundary",
+    build,
+    urls: ["/unsafe", "/safe"]
+  })),
   ...["string", "stream"].map(entry => ({
     twin: "rendering-yield",
     entry,
@@ -66,10 +90,17 @@ const DEV_ERROR = /\[([A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+)\]/;
 
 // --- child: one render -------------------------------------------------------------
 
-async function renderOne(twin, entry, kind, url) {
+async function renderOne(twin, entry, kind, url, build) {
+  if (kind === "boundary") {
+    const { checkStringRejection } = await import("./string-rejection.mjs");
+    process.stdout.write(JSON.stringify(checkStringRejection(url === "/safe")) + "\n");
+    process.exit(0);
+  }
+  const expectedRejection = expectsDocsRejection(twin, entry, url);
   const dir = join(examples, twin);
   const require = createRequire(join(dir, "package.json"));
-  const { createServer } = await import(require.resolve("vite"));
+  const vite = await import(require.resolve("vite"));
+  const { createServer } = vite;
   const logged = [];
   for (const level of ["error", "warn"]) {
     const original = console[level];
@@ -83,20 +114,25 @@ async function renderOne(twin, entry, kind, url) {
   // the step a render is in, for the parent to name if it kills the render
   const step = name => process.stdout.write(`\nstep ${name}\n`);
   step("start");
-  const server = await createServer({
-    ...(kind === "entry"
-      ? { configFile: join(dir, entry, "vite.config.mjs"), root: join(dir, entry) }
-      : { root: dir }),
-    logLevel: "silent",
-    appType: "custom",
-    server: { middlewareMode: true, hmr: false, ws: false }
-  });
+  const server =
+    build === "production"
+      ? null
+      : await createServer({
+          ...(kind === "entry"
+            ? { configFile: join(dir, entry, "vite.config.mjs"), root: join(dir, entry) }
+            : { root: dir }),
+          logLevel: "silent",
+          appType: "custom",
+          server: { middlewareMode: true, hmr: false, ws: false }
+        });
+  let production;
   let html = "";
   let failed = null;
   step("render");
   try {
     if (kind === "entry") {
-      const mod = await server.ssrLoadModule("/entry-server.tsx");
+      production = build === "production" ? await buildProduction(vite, dir) : null;
+      const mod = production?.server ?? (await server.ssrLoadModule("/entry-server.tsx"));
       // the stream is a thenable that resolves to the whole document
       html = String(await mod.render(url));
     } else {
@@ -115,15 +151,26 @@ async function renderOne(twin, entry, kind, url) {
   await new Promise(r => setTimeout(r, 50));
   if (!failed) {
     // a development error names the cause, so it is reported before its effects
-    const devError = logged.find(m => DEV_ERROR.test(m));
+    const devError = logged.find(
+      m => DEV_ERROR.test(m) && unexpectedRenderLog(m, expectedRejection)
+    );
     const rejection = logged.find(m => m.startsWith("unhandled rejection"));
     if (devError) failed = `development error: ${devError.split("\n")[0]}`;
     else if (rejection) failed = rejection;
     else if (DEV_ERROR.test(html))
       failed = `development error in the document: ${html.match(DEV_ERROR)[0]}`;
     else if (!html.trim()) failed = "empty document";
+    else if (expectedRejection && !serializedDocsError(html))
+      failed = "stream lacks the typed not-found error";
   }
-  process.stdout.write("\n" + JSON.stringify(failed ? { failed } : { bytes: html.length }) + "\n");
+  production?.cleanup();
+  process.stdout.write(
+    "\n" +
+      JSON.stringify(
+        failed ? { failed } : { bytes: html.length, serializedError: expectedRejection }
+      ) +
+      "\n"
+  );
   process.exit(0);
 }
 
@@ -134,7 +181,16 @@ function runOne(target, url) {
     const started = Date.now();
     const child = spawn(
       process.execPath,
-      [self, "--one", target.twin, target.entry, target.kind, url],
+      [
+        ...(target.build === "development" ? ["--conditions=development"] : []),
+        self,
+        "--one",
+        target.twin,
+        target.entry,
+        target.kind,
+        url,
+        target.build ?? "development"
+      ],
       {
         // room's dev config serves HTTPS unless HTTPS=0; nothing listens here
         env: { ...process.env, HTTPS: "0" },
@@ -159,13 +215,20 @@ function runOne(target, url) {
 }
 
 if (process.argv[2] === "--one") {
-  await renderOne(...process.argv.slice(3, 7));
+  await renderOne(...process.argv.slice(3, 8));
 } else {
   const args = process.argv.slice(2);
   const only = args.includes("--only") ? args[args.indexOf("--only") + 1] : null;
+  const originals = args.includes("--originals");
   const jobs = args.includes("--jobs") ? Number(args[args.indexOf("--jobs") + 1]) : 4;
-  const renders = TARGETS.flatMap(t => t.urls.map(url => ({ t, url })))
-    .map(r => ({ ...r, name: `${r.t.twin} ${r.t.entry} ${r.url}` }))
+  const renders = TARGETS.map(t =>
+    originals ? { ...t, twin: join("originals", t.twin.replace(/-yield(-h)?$/, "")) } : t
+  )
+    .flatMap(t => t.urls.map(url => ({ t, url })))
+    .map(r => ({
+      ...r,
+      name: `${r.t.twin} ${r.t.entry} ${r.url}${r.t.build ? ` ${r.t.build}` : ""}`
+    }))
     .filter(r => !only || r.name.includes(only));
   const results = new Map();
   const queue = renders.slice();

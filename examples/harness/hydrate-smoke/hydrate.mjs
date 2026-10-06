@@ -5,7 +5,10 @@
 // entry, compiled for the DOM (hydratable) by the same Vite server.
 //
 // A case passes when:
-// - the server render ends with a document and no development error;
+// - the server render ends with a document and no unexpected development error;
+// - docs /docs/missing carries a serialized not-found Error and shows the typed
+//   .not-found fallback after hydration (including real production bundles);
+//   its expected SSR_RENDER_ERROR_CONTAINED diagnostic is allowed;
 // - hydration claims it: no hydration mismatch, no `[CODE]` development error
 //   (solid-yield's or Solid's) logged or thrown, no unhandled rejection, and
 //   the server's nodes are still the document's after hydration (the app
@@ -29,6 +32,12 @@
 // (HYDRATE_SMOKE_VERBOSE=1 passes the cases' console through; HYDRATE_SMOKE_DUMP=<file>
 // writes a case's server document, with --only one case)
 // Exit code 0 when every case passes.
+import { buildProduction } from "../ssr-smoke/production.mjs";
+import {
+  expectsDocsRejection,
+  serializedDocsError,
+  unexpectedRenderLog
+} from "../ssr-smoke/docs-contract.mjs";
 import { createRequire } from "node:module";
 import { spawn } from "node:child_process";
 import { writeFileSync } from "node:fs";
@@ -82,6 +91,13 @@ const TARGETS = [
     kind: "entry",
     urls: ["/", "/docs/start", "/docs/missing"],
     interactions: { "/": "docs theme and carousel", "/docs/start": "docs theme and carousel" }
+  },
+  {
+    twin: "docs-yield",
+    entry: "stream",
+    kind: "entry",
+    build: "production",
+    urls: ["/docs/missing"]
   },
   ...["string", "stream"].map(entry => ({
     twin: "rendering-yield",
@@ -142,7 +158,9 @@ const noHmrClient = {
   }
 };
 
-async function hydrateOne(twin, entry, kind, url, interaction) {
+async function hydrateOne(twin, entry, kind, url, interaction, build) {
+  const expectedRejection = expectsDocsRejection(twin, entry, url);
+  let production;
   const dir = join(examples, twin);
   const require = createRequire(join(dir, "package.json"));
   const vite = await import(pathToFileURL(require.resolve("vite")).href);
@@ -166,6 +184,7 @@ async function hydrateOne(twin, entry, kind, url, interaction) {
   const step = name => process.stdout.write(`\nstep ${name}\n`);
   step("start");
   const report = result => {
+    production?.cleanup();
     process.stdout.write("\n" + JSON.stringify(result) + "\n");
     process.exit(0);
   };
@@ -217,7 +236,8 @@ async function hydrateOne(twin, entry, kind, url, interaction) {
   let html;
   try {
     if (kind === "entry") {
-      const mod = await server.ssrLoadModule("/entry-server.tsx");
+      production = build === "production" ? await buildProduction(vite, dir, true) : null;
+      const mod = production?.server ?? (await server.ssrLoadModule("/entry-server.tsx"));
       html = String(await mod.render(url));
     } else {
       const handler = await server.environments.ssr.runner.import("virtual:solid-ssr-handler");
@@ -234,9 +254,13 @@ async function hydrateOne(twin, entry, kind, url, interaction) {
   await new Promise(r => setTimeout(r, 50));
   // a diagnosis aid: HYDRATE_SMOKE_DUMP=<file> writes the server's document
   if (process.env.HYDRATE_SMOKE_DUMP) writeFileSync(process.env.HYDRATE_SMOKE_DUMP, html);
-  const renderError = logged.find(m => DEV_ERROR.test(m));
+  const renderError = logged.find(
+    m => DEV_ERROR.test(m) && unexpectedRenderLog(m, expectedRejection)
+  );
   if (renderError) return report({ failed: `development error: ${renderError.split("\n")[0]}` });
   if (!html.trim()) return report({ failed: "empty document" });
+  if (expectedRejection && !serializedDocsError(html))
+    return report({ failed: "stream lacks the typed not-found error" });
 
   // 2. the document in jsdom, its inline scripts run as a browser runs them
   phase = "hydrate";
@@ -294,7 +318,8 @@ async function hydrateOne(twin, entry, kind, url, interaction) {
     for (let i = 0; i < 10; i++) await new Promise(r => setTimeout(r, 20));
   };
   try {
-    await server.environments.hydrate.runner.import(clientEntry);
+    if (production) await import(production.clientEntry);
+    else await server.environments.hydrate.runner.import(clientEntry);
   } catch (e) {
     return report({
       failed: `client threw: ${String(e?.stack ?? e)
@@ -322,6 +347,12 @@ async function hydrateOne(twin, entry, kind, url, interaction) {
       failed: `hydration replaced ${serverRoots.length - kept} of the body's ${serverRoots.length} server elements`
     });
 
+  if (expectedRejection) {
+    const fallback = document.querySelector(".not-found");
+    if (fallback?.textContent.trim() !== "not-found: No article: missing")
+      return report({ failed: "hydrated client lacks the typed not-found fallback" });
+  }
+
   // 4. one interaction
   phase = "interact";
   if (interaction) {
@@ -335,7 +366,12 @@ async function hydrateOne(twin, entry, kind, url, interaction) {
     if (after) return report({ failed: after.split("\n")[0] });
   }
   await server.close();
-  report({ claimed, nodes: serverNodes.length, interaction: interaction || null });
+  report({
+    claimed,
+    nodes: serverNodes.length,
+    interaction: interaction || null,
+    typedFallback: expectedRejection
+  });
 }
 
 // --- parent: every case, each in its own process -----------------------------------
@@ -352,7 +388,8 @@ function runOne(target, url) {
         target.entry,
         target.kind,
         url,
-        target.interactions?.[url] ?? ""
+        target.interactions?.[url] ?? "",
+        target.build ?? "development"
       ],
       {
         // room's dev config serves HTTPS unless HTTPS=0; nothing listens here
@@ -378,7 +415,7 @@ function runOne(target, url) {
 }
 
 if (process.argv[2] === "--one") {
-  await hydrateOne(...process.argv.slice(3, 8));
+  await hydrateOne(...process.argv.slice(3, 9));
 } else {
   const args = process.argv.slice(2);
   const only = args.includes("--only") ? args[args.indexOf("--only") + 1] : null;
@@ -390,7 +427,10 @@ if (process.argv[2] === "--one") {
     originals ? { ...t, twin: join("originals", t.twin.replace(/-yield(-h)?$/, "")) } : t
   )
     .flatMap(t => t.urls.map(url => ({ t, url })))
-    .map(c => ({ ...c, name: `${c.t.twin} ${c.t.entry} ${c.url}` }))
+    .map(c => ({
+      ...c,
+      name: `${c.t.twin} ${c.t.entry} ${c.url}${c.t.build ? ` ${c.t.build}` : ""}`
+    }))
     .filter(c => !only || c.name.includes(only));
   const results = new Map();
   const queue = cases.slice();

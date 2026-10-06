@@ -959,6 +959,8 @@ _Documented (Phase 5)._
 
 - **Upstream update (2026-10-07).** [solidjs/solid#3815](https://github.com/solidjs/solid/issues/3815) was fixed upstream by [#3816](https://github.com/solidjs/solid/pull/3816), merged into `next` (`759a9b6`): a re-created memo that joins a pending slot adopts that slot's answer. Re-test and remove the `/profile` workaround (`046387b`) at the next Solid RC bump; this checkout still uses rc.13. [#3845](https://github.com/solidjs/solid/issues/3845) is **closed as by-design**: the completion guard for late hydration is deliberate (API checked 2026-10-07: closed/not_planned; closing comment confirms the design).
 
+- **F-C9 update (2026-10-07).** F-C9 is by design for streams: after the shell containing the outer `Errored` is flushed, the server serializes the rejection and the hydrated client renders the fallback. Plain Solid rc.13 `renderToString` does **not** wait for async work: development/production, safe/unsafe all return `Loading article…`, zero error-fallback calls, before the rejection. Its implementation resolves synchronously and disposes before returning (`@solidjs/web/dist/server.js:1547,1563,1567`). The [draft](upstream/solid-ssr-boundary-rejection-rc13.md) is narrowed to a renderToString-only contract question, not filed; Dev decides whether to file. The smoke contract requires the serialized typed error plus the hydrated `.not-found` fallback, not server fallback HTML. Four plain-Solid string controls pin the synchronous result.
+
 ## Phase 1A findings (agent report, items 4c–8; verbatim, 2026-10-04)
 
 Rulings on these are D-058+ once taken; the D-013 and D-032 findings from items 4/4b are already decided as D-050 / D-051 and omitted here.
@@ -1417,3 +1419,9 @@ _Alternatives considered at the ruling:_ stop the compiler and go directly to v0
 _Reasoning:_ the original demos fail the premise, but the content-heavy twin establishes a useful next experiment with named analysis defects. Test tier 1 and executed-byte savings there before expanding the claim.
 
 _Upstream status evidence (refreshed 2026-10-07):_ #3815 is **fixed upstream** by #3816 on `next`; #3845 is **closed as by-design** (closed/not_planned at 2026-10-06T21:49:30Z; its closing comment confirms the deliberate completion guard). Re-test the `/profile` workaround at the next Solid RC bump (D-082). The maintainer's design position still rules out tier 2.
+
+### D-115 — Typed failures are serialization-safe
+
+**Decided (Dev, 2026-10-07); implemented.** `Failure(kind)` instances are marked safe in their constructor with the public `markSafeError` from `@solidjs/web`, before an instance can be frozen. Runtime branding for `raise`, `attempt` and lazy failures also marks extensible errors safe (and avoids re-marking already safe errors). Their kind, message and own properties are public failure data and survive Solid production serialization. Untyped crashes retain Solid's default sanitization. Frozen nominal failures stay safe and D-087's WeakSet branding remains intact.
+
+**Evidence.** Unit tests pin safe marks before branding/freezing and on raise/attempt failures in development and production. The docs `/docs/missing` stream and hydration smoke cases compile real production server and client bundles: the stream contains `new Error("No article: missing")` with `kind:"not-found"`; the hydrated client shows `.not-found` with `not-found: No article: missing` and retains 145/145 server nodes. The plain-Solid original explicitly opts its failure factory into the same public safe-error API and passes the same assertions. Development cases allow only the expected `SSR_RENDER_ERROR_CONTAINED` diagnostic; other errors still fail. This does not require the flushed server region to render a fallback (D-082 F-C9).

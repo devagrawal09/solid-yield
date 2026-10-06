@@ -1,25 +1,36 @@
-# [2.0.0-rc.13] Streamed async rejection under Loading bypasses the outer Errored fallback
+# [2.0.0-rc.13] renderToString returns the Loading fallback before an async rejection
 
-Status: **draft, not filed**.
+Status: **draft, not filed; narrowed to renderToString only** (2026-10-07).
+This is a contract question, not a demonstrated async boundary defect: the
+installed implementation is synchronous. Dev decides whether to file.
 
 ## Summary
 
-An async memo created inside `Errored` rejects while its child `Loading` is
-pending. Completed `renderToStream` output has no error fallback; production
-output serializes `Error("Internal Server Error")`. No router, loader, JSX
-compiler or other library is involved. `Errored` is rc.13's error boundary.
+An async memo created inside `Errored` rejects after 10 ms while its child
+`Loading` is pending. `renderToString` returns `Loading article…` immediately,
+with zero calls to the outer error fallback. Awaiting its result does not wait
+for the rejection: its return value is already a string. Development and
+production, with and without `markSafeError`, give the same result.
 
 ## Repro
 
 Install `solid-js@2.0.0-rc.13` and `@solidjs/web@2.0.0-rc.13`. Save as
-`repro.mjs`; run `node repro.mjs`, then `node repro.mjs safe`.
+`repro.mjs`; run these four commands:
+
+```sh
+node repro.mjs
+node repro.mjs safe
+node --conditions=development repro.mjs
+node --conditions=development repro.mjs safe
+```
 
 ```js
 import { createMemo, Errored, Loading } from "solid-js";
-import { renderToStream, ssrElement, markSafeError } from "@solidjs/web";
+import { renderToString, ssrElement, markSafeError } from "@solidjs/web";
 
 class NotFound extends Error { kind = "not-found"; }
 let calls = 0;
+let rejected = false;
 function App() {
   let answer;
   return Errored({
@@ -31,6 +42,7 @@ function App() {
     get children() {
       answer ??= createMemo(() => new Promise((_, reject) => {
         setTimeout(() => {
+          rejected = true;
           const error = new NotFound("No article: missing");
           reject(process.argv.includes("safe") ? markSafeError(error) : error);
         }, 10);
@@ -42,47 +54,39 @@ function App() {
     }
   });
 }
-const html = String(await renderToStream(App));
-console.log({ calls, fallback: html.includes('class="not-found"'),
-  sanitized: html.includes("Internal Server Error") });
+const html = renderToString(App);
+console.log({ type: typeof html, rejected, calls,
+  fallback: html.includes('class="not-found"'), html });
 ```
 
 ## Expected / actual
 
-Expected: the outer error fallback appears in completed server output. With
-`markSafeError`, it shows `not-found: No article: missing`.
+The expectation under review was that a non-streaming render waits for all
+async work and then contains the outer `Errored` fallback. If that contract
+applies, the result should contain `not-found: No article: missing` when safe.
 
-Actual: `{ calls: 0, fallback: false, sanitized: true }`. With `safe`, the
-message and kind survive serialization, but `calls: 0` and `fallback: false`
-remain. Thus disabling sanitization does not restore the server fallback.
-
-Controls run separately: moving the memo outside `Errored` gives the same
-async result; replacing the async rejection with a synchronous throw inside
-`Errored` calls the fallback once. `renderToString` returns `Loading article…`
-without waiting, as expected; it is not an async rejection test.
-`node --conditions=development` also skips the error fallback and reports
-`[SSR_RENDER_ERROR_CONTAINED]`; its default error policy preserves the message.
-This repro checks server output, not hydration.
+Actual in all four runs: `type: "string", rejected: false, calls: 0,
+fallback: false`. The markup starts with `Loading article…`; it records the
+pending boundary's fallback, with no error payload. The implementation instead
+supports a synchronous, fallback-only contract. Please confirm that contract
+before treating this observation as a bug.
 
 ## Cause
 
-In the installed production bundles:
+In the installed `@solidjs/web` bundles:
 
-- `solid-js/dist/server.js:2133`: `runLoadingPhase` sends a retry's error to
-  `done(undefined, err)` once a fragment exists (`:2137–2144`), bypassing
-  `parentHandler` (`:2146`). `finalizeError` returns for that handled error
-  (`:2153–2157`). `done` was registered at `:2270`.
-- `@solidjs/web/dist/server.js:2054` and `:2095`: fragment rejection is
-  sanitized for serialization / client handling.
-- `solid-js/dist/server.js:1641`: an unmarked error becomes
-  `Error("Internal Server Error")`. Sanitization is separate from the missing
-  fallback, as the `markSafeError` control shows.
+- `dist/server.js:1547` resolves the synchronous tree via `resolveSSRSync`;
+  `:1552–1553` closes serialization, `:1563` returns the document and
+  `:1567` disposes the root immediately.
+- `dist/server.dev.js:1812` follows the same synchronous resolution path;
+  `:1817–1818` closes serialization, `:1828` returns and `:1832` disposes.
+- `dist/server.js:1506–1508` explicitly refuses serialization of async values.
 
-The current path explicitly hands the failure to the client. Is skipping the
-outer server error fallback intended, or should this boundary shape render it?
+No async wait exists in this renderer. Marking the error safe cannot change
+when the renderer returns.
 
 ## Versions
 
 `solid-js` and `@solidjs/web`: **2.0.0-rc.13**; Node **v24.18.0**;
-macOS arm64. Production and development server builds tested. No newer Solid
-version tested.
+macOS arm64. Both production (default Node exports) and development
+(`--conditions=development`) tested on 2026-10-07. No newer version tested.

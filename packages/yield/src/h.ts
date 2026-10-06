@@ -29,7 +29,7 @@ import type {
   PropsInput
 } from "./types.js";
 import type { DECLARED } from "./types.js";
-import type { Errored, Loading, Reset } from "./flow.js";
+import type { BOUNDARY_KIND, Reset } from "./flow.js";
 import type { PROVIDES, ProvidedValue } from "./context.js";
 import type { Accessor } from "solid-js";
 
@@ -89,7 +89,7 @@ export interface YieldH {
    * call form: `on`'s pending is the boundary's own.
    */
   <const C extends readonly Hole[], F extends Hole = never, O extends Hole = never>(
-    component: typeof Loading,
+    component: { readonly [BOUNDARY_KIND]: "loading" },
     props: { fallback?: F; on?: O },
     ...children: C
   ): HView<
@@ -104,7 +104,7 @@ export interface YieldH {
    * (`Reset`, D-072): `h("button", { onClick: reset })`.
    */
   <const C extends readonly Hole[], R extends Hole>(
-    component: typeof Errored,
+    component: { readonly [BOUNDARY_KIND]: "errored" },
     props: { fallback: (error: Accessor<unknown>, reset: Reset) => R },
     ...children: C
   ): HView<
@@ -114,7 +114,7 @@ export interface YieldH {
     RequiresOf<OpsOfHole<C[number], true> | OpsOfHole<R>>
   >;
   <const C extends readonly Hole[], F extends Exclude<Hole, (...args: any[]) => any>>(
-    component: typeof Errored,
+    component: { readonly [BOUNDARY_KIND]: "errored" },
     props: { fallback: F },
     ...children: C
   ): HView<

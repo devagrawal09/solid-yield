@@ -783,6 +783,78 @@ export const LazyFallback = component(function* LazyFallback() {
 });
 export type LazyFallbackView = Expect<Equal<ViewPendingOf<ReturnType<typeof LazyFallback>>, true>>;
 
+// F-1 (D-071): every fallback form carries its colors, in the call form as in `h`. A render
+// function's output, `h` output and a lazy view are rendered when the fallback shows, outside
+// this boundary's handling: their pending reads and failures reach the boundaries above.
+declare const pendingFailing: Source<number, Boom, true>;
+const FailsPending = component(function* FailsPending(
+  props: Props<{ s: Source<number, Boom, true> }>
+) {
+  return view(function* () {
+    return <i>{yield* props.s}</i>;
+  });
+});
+const failingChildren = function* () {
+  return <>{yield* Fails()}</>;
+};
+// a render function (error, reset) => a colored view
+const renderFallback = Errored({
+  fallback: (_e, _r) => FailsPending({ s: pendingFailing }),
+  children: failingChildren
+});
+export type RenderFallbackFails = Expect<Equal<ViewFailsOf<typeof renderFallback>, Boom>>;
+export type RenderFallbackPending = Expect<Equal<ViewPendingOf<typeof renderFallback>, true>>;
+// a render function returning JSX: settled by construction
+const renderJsxFallback = Errored({
+  fallback: (_e, reset) => <button onClick={reset}>retry</button>,
+  children: failingChildren
+});
+export type RenderJsxFallback = Expect<
+  Equal<ViewFailsOf<typeof renderJsxFallback> | ViewPendingOf<typeof renderJsxFallback>, false>
+>;
+// h output
+const hOutputFallback = Errored({ fallback: h(Fails, {}), children: failingChildren });
+export type HOutputFallbackFails = Expect<Equal<ViewFailsOf<typeof hOutputFallback>, Boom>>;
+const hPendingFallback = Errored({
+  fallback: h(Pends, { n: pendingN }),
+  children: failingChildren
+});
+export type HPendingFallback = Expect<Equal<ViewPendingOf<typeof hPendingFallback>, true>>;
+export type HPendingFallbackFails = Expect<Equal<ViewFailsOf<typeof hPendingFallback>, never>>;
+// a lazy view's failure too (its pending: LazyFallback above)
+const lazyFailingFallback = Errored({
+  fallback: function* () {
+    return <>{yield* Fails()}</>;
+  },
+  children: "x"
+});
+export type LazyFailingFallback = Expect<Equal<ViewFailsOf<typeof lazyFailingFallback>, Boom>>;
+// text carries nothing
+const textFallback = Errored({ fallback: "failed", children: failingChildren });
+export type TextFallback = Expect<
+  Equal<ViewFailsOf<typeof textFallback> | ViewPendingOf<typeof textFallback>, false>
+>;
+// with catch: the handled class leaves the children's, the fallback's own stays
+const caughtRenderFallback = Errored({
+  catch: [Boom],
+  fallback: (_e, _r) => FailsPending({ s: pendingFailing }),
+  children: failingChildren
+});
+export type CaughtRenderFallback = Expect<Equal<ViewFailsOf<typeof caughtRenderFallback>, Boom>>;
+const caughtHFallback = Errored({
+  catch: [Boom],
+  fallback: h(Pends, { n: pendingN }),
+  children: failingChildren
+});
+export type CaughtHFallback = Expect<
+  Equal<[ViewFailsOf<typeof caughtHFallback>, ViewPendingOf<typeof caughtHFallback>], [never, true]>
+>;
+// the h flavour says the same
+const hErroredRender = h(Errored, { fallback: (_e, _r) => h(Fails, {}) }, h(Fails, {}));
+export type HErroredRender = Expect<Equal<HFails<typeof hErroredRender>, Boom>>;
+const hErroredContent = h(Errored, { fallback: h(Pends, { n: pendingN }) }, h(Fails, {}));
+export type HErroredContent = Expect<Equal<HPending<typeof hErroredContent>, true>>;
+
 // --- Loading: `on`'s failures and the fallback's colors pass on (D-071) ---------------------
 // `on`'s pending is the boundary's own (runtime.spec, "Loading's on"); its failure is not a
 // Loading's to handle. The h flavor says the same as the call form.

@@ -437,14 +437,13 @@ export type Reset = BoundEvent<[]>;
  * An `Errored` fallback (D-094): a lazy view, `h` output or text, or a render
  * function receiving the error and `reset`. A render function is called when
  * the fallback shows, so it may return JSX; a JSX element given as it is may
- * not. Only a lazy view's colors are carried (`FallbackYields`).
+ * not. Every form's colors are carried (`Ops`): a lazy view's reads, a render
+ * function's output's, `h` output's (D-071, as `h(Errored, …)` does).
  */
 type ErroredFallback<E> =
   | LazyView
   | Content
   | ((error: Accessor<E>, reset: Reset) => Element | Rendered);
-/** What a lazy-view fallback yields: its colors. Content and a render function carry none. */
-type FallbackYields<F> = F extends () => Generator<infer Y, any, any> ? Y : never;
 
 /**
  * Handles failures below it. The fallback is content, a lazy view
@@ -476,7 +475,7 @@ function ErroredYield<C, K extends readonly ErrorClass<Failure>[], Y, VY, R>(pro
   MayWaitOf<Ops<C> | RowOps<VY, R, Y>>,
   Settle<RequiresOf<Ops<C> | RowOps<VY, R, Y>>>
 >;
-/** A lazy-view fallback carries its colors; content and a render function carry none. */
+/** A lazy view, a render function, `h` output or text: each carries its colors. */
 function ErroredYield<
   C,
   K extends readonly ErrorClass<Failure>[],
@@ -486,10 +485,10 @@ function ErroredYield<
   fallback: LazyParam<F, ErroredFallback<InstanceType<K[number]>>, "fallback">;
   children: LazyParam<C, Children<[]>, "children">;
 }): ComponentView<
-  PendingOf<Ops<C> | FallbackYields<F>>,
-  Exclude<FailsOf<Ops<C>>, InstanceType<K[number]>> | FailsOf<FallbackYields<F>>,
-  MayWaitOf<Ops<C> | FallbackYields<F>>,
-  Settle<RequiresOf<Ops<C> | FallbackYields<F>>>
+  PendingOf<Ops<C> | Ops<F>>,
+  Exclude<FailsOf<Ops<C>>, InstanceType<K[number]>> | FailsOf<Ops<F>>,
+  MayWaitOf<Ops<C> | Ops<F>>,
+  Settle<RequiresOf<Ops<C> | Ops<F>>>
 >;
 function ErroredYield<C, Y, VY, R>(props: {
   fallback: RowRoutine<[error: Path<FailsOf<Ops<C>>>, reset: Reset], Y, VY, R>;
@@ -504,10 +503,10 @@ function ErroredYield<C, F extends ErroredFallback<FailsOf<Ops<C>>> | Element>(p
   fallback: LazyParam<F, ErroredFallback<FailsOf<Ops<C>>>, "fallback">;
   children: LazyParam<C, Children<[]>, "children">;
 }): ComponentView<
-  PendingOf<Ops<C> | FallbackYields<F>>,
-  FailsOf<FallbackYields<F>>,
-  MayWaitOf<Ops<C> | FallbackYields<F>>,
-  Settle<RequiresOf<Ops<C> | FallbackYields<F>>>
+  PendingOf<Ops<C> | Ops<F>>,
+  FailsOf<Ops<F>>,
+  MayWaitOf<Ops<C> | Ops<F>>,
+  Settle<RequiresOf<Ops<C> | Ops<F>>>
 >;
 function ErroredYield(props: any): any {
   const children = content(props, "Errored");
@@ -588,5 +587,14 @@ export const Repeat: typeof RepeatYield = untracked(RepeatYield);
 export const Show: typeof ShowYield = untracked(ShowYield);
 export const Match: typeof MatchYield = untracked(MatchYield);
 export const Switch: typeof SwitchYield = untracked(SwitchYield);
-export const Loading: typeof LoadingYield = untracked(LoadingYield);
-export const Errored: typeof ErroredYield = untracked(ErroredYield);
+/**
+ * Phantom: which boundary a value is. `h`'s `Loading` and `Errored` overloads
+ * match on it rather than on `typeof Loading`: comparing the two boundaries'
+ * overload sets structurally instantiates every fallback form's colors, which
+ * TypeScript gives up on (TS2589) once those are carried (F-1).
+ */
+export declare const BOUNDARY_KIND: unique symbol;
+export const Loading: typeof LoadingYield & { readonly [BOUNDARY_KIND]: "loading" } =
+  untracked(LoadingYield);
+export const Errored: typeof ErroredYield & { readonly [BOUNDARY_KIND]: "errored" } =
+  untracked(ErroredYield);

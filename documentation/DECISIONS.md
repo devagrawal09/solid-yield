@@ -788,6 +788,7 @@ A root handler that wants the typed failure reads `error.cause ?? error`.
 
 **Decided (Dev, 2026-10-05).** Wherever the runtime routes a color — pending, a failure — the type carries it to the same place. A channel the runtime has and the type lacks is a bug, never a §7 limitation. D-034, D-044, D-047, D-059, D-063, D-072, D-073 and D-074 are instances. A future finding of the form "the runtime does X but the type says Y" is resolved by making the type say X. A finding where the type cannot say X is reported to Dev; it is not documented away.
 _Consequence._ §7's "two library-mediated failures are in no view type (open, D-070)" is not a limitation: D-070 F2 is ruled by D-072 and F1 by D-073.
+_Instance (2026-10-06, calculus §6.3 F-1)._ `Errored`'s call form carried only a lazy view's and a row's fallback colors. A render function `(error, reset) => …`'s output and `h` output were dropped, though the runtime sends their pending reads and failures to the boundaries above and `h(Errored, …)` carried them. Every fallback form now carries its colors (`Ops<F>`, as `Loading`'s fallback). `h`'s boundary overloads match a phantom `[BOUNDARY_KIND]` rather than `typeof Loading` / `typeof Errored`: with the colors carried, comparing the two overload sets was TS2589 ("excessively deep") in the `h` twins. Type tests for each form (raise.type-tests); runtime tests that each form's failure reaches the `Errored` above, and an `h` fallback's pending the `Loading` above (obligations.spec, O28 / O29).
 
 ### D-072 — Binding an event in a view is a hole (D-070 F2)
 

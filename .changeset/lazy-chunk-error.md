@@ -1,0 +1,5 @@
+---
+"solid-yield": minor
+---
+
+`lazy`'s chunk-load failure is typed (D-100, calculus §6.3 F-2). `lazy(() => import("./Page"))` now fails with `ChunkError` (exported: `kind: "chunk"`, `cause` the import's rejection, `specifier` the module URL when the build gives one, as vite-plugin-solid-yield does), branded as a typed failure (D-087), so a view that calls a lazy page carries `ChunkError` and an `Errored` (no `catch`, or `catch: [ChunkError]`) discharges it. At run time it reaches the nearest `Errored` above the call that takes it, whose reset loads the chunk again. With none it is re-thrown (D-033) as an uncaught `ChunkError`, and the call renders nothing: the `Loading`'s fallback no longer stays forever and Solid's reactive system no longer halts (`[REACTIVITY_HALTED]`), as it did when the import's rejection reached the root unhandled. On the server Solid's own route is kept (a `Loading` above contains it in its fragment, which the client renders again). `foreign(lazy(…))` is now refused (`[FOREIGN_HANDOFF]`, `"chunk"`): wrap the call in an `Errored` first.

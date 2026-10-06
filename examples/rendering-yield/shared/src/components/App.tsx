@@ -1,12 +1,14 @@
 // The routes (examples/rendering's App, as a yield component). The pages are `lazy()`
 // chunks, as in the original (the library's `lazy`: pending while its chunk
-// loads, and colored as the page's `component`): a page may be pending (Profile)
-// or fail (Stream's stream). The pages are rendered in call form
+// loads, failing with a `ChunkError` when it does not load, D-100, and colored
+// as the page's `component`): a page may be pending (Profile) or fail (Stream's
+// stream, any page's chunk). The pages are rendered in call form
 // (`{yield* Profile()}`), which hands their pending / failures on. Pending is
 // the root's, as in the original: each entry wraps the app in a `Loading` at
 // the root (D-099; without a fallback, as the original's CSR and streaming
 // entries show nothing until it settles; the string entry's has the
-// original's fallback). A failure reaches the root and is re-thrown there
+// original's fallback). A failure, a `ChunkError` too (the original has no
+// `Errored` around its pages), reaches the root and is re-thrown there
 // (D-033), as in the original: the entries use the library's renderers, the
 // root edge, not a foreign hand-off.
 import { component, isPendingOf, lazy, Match, Switch, view } from "solid-yield";

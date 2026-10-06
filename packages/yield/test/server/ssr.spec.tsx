@@ -39,6 +39,7 @@ import {
   perform,
   Show,
   type Props,
+  type Element as YieldElement,
   type Source,
   view
 } from "solid-yield";
@@ -368,5 +369,36 @@ describe("the library's server renderers (D-099)", () => {
   it("renderToStream: the app's content arrives when it settles", async () => {
     const html = await pipe(yieldRenderToStream(() => Loading({ children: App })));
     expect(strip(html)).toContain("<h3>Ada</h3>");
+  });
+});
+
+describe("a lazy component whose import rejects, on the server (D-100)", () => {
+  it("the rejection is a kinded ChunkError; under a Loading, Solid contains it in the boundary's fragment and the client renders it again", async () => {
+    const Page = lazy(
+      () => Promise.reject(new Error("net")) as Promise<{ default: () => YieldElement }>
+    );
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    let html: string;
+    try {
+      html = await pipe(
+        yieldRenderToStream(
+          () =>
+            Loading({
+              fallback: "loading",
+              children: function* () {
+                return <>{perform(Page())}</>;
+              }
+            }),
+          { manifest: {} } as any
+        )
+      );
+    } finally {
+      error.mockRestore();
+      warn.mockRestore();
+    }
+    expect(html).toContain('name:"ChunkError"');
+    expect(html).toContain('kind:"chunk"');
+    expect(html).toContain('new Error("net")');
   });
 });

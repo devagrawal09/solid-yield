@@ -14,6 +14,7 @@ import {
   $memo,
   $settled,
   attempt,
+  ChunkError,
   createContext,
   Errored,
   For,
@@ -773,29 +774,83 @@ describe("O37: an unhandled bound call under an Errored that does not catch its 
   });
 });
 
-// --- O45: a lazy component's chunk-load failure (F-2: the type is Dev's ruling) ---------------
-describe("O45: a lazy component whose import rejects (the route today)", () => {
-  const failingPage = (message: string) =>
-    lazy(() => Promise.reject(new Error(message)) as Promise<{ default: () => YieldElement }>);
+// --- O45: a lazy component's chunk-load failure is a ChunkError (F-2 → D-100) -----------------
+describe("O45: a lazy component whose import rejects fails with a ChunkError (D-100)", () => {
+  const netError = new Error("net down");
+  const failingPage = () =>
+    lazy(() => Promise.reject(netError) as Promise<{ default: () => YieldElement }>);
+  const underLoading = (Page: () => any) =>
+    function* () {
+      return (
+        <>
+          {perform(
+            Loading({
+              fallback: "loading",
+              children: function* () {
+                return <>{perform(Page())}</>;
+              }
+            })
+          )}
+        </>
+      );
+    };
 
-  it("with an Errored above: the import's own Error reaches it, unbranded, with no kind", async () => {
-    const Page = failingPage("chunk failed");
+  for (const mode of ["development", "production"] as const) {
+    if ((mode === "development") !== __DEV__) continue;
+    it(`with an Errored above: it shows a kinded, branded ChunkError whose cause is the import's rejection (${mode})`, async () => {
+      const Page = failingPage();
+      const seen: unknown[] = [];
+      mount(() =>
+        Errored({
+          fallback: (e: any) => (
+            seen.push(e()),
+            (
+              <p>
+                {e().name} / {e().kind}
+              </p>
+            )
+          ),
+          children: underLoading(Page)
+        })
+      );
+      expect(root.textContent).toBe("loading");
+      await settle(5);
+      expect(root.textContent).toBe("ChunkError / chunk");
+      const e = seen[0] as ChunkError;
+      expect(e).toBeInstanceOf(ChunkError);
+      expect(e.cause).toBe(netError);
+      expect(e.specifier).toBe(undefined);
+      expect((e as any)[Symbol.for("solid.yield.failure")]).toBe(true);
+    });
+  }
+
+  it("the module URL the build gives lazy is the ChunkError's specifier", async () => {
+    const Page = lazy(
+      () => Promise.reject(netError) as Promise<{ default: () => YieldElement }>,
+      undefined,
+      "src/pages/Page.tsx"
+    );
+    await expect(Page.preload()).rejects.toMatchObject({
+      kind: "chunk",
+      specifier: "src/pages/Page.tsx",
+      cause: netError
+    });
+  });
+
+  it("an Errored whose catch lists ChunkError takes it; one listing another class passes it on", async () => {
+    const Page = failingPage();
     mount(() =>
       Errored({
-        fallback: (e: any) => (
-          <p>
-            {e().message} / {String(e().kind)}
-          </p>
-        ),
+        catch: [ChunkError],
+        fallback: () => <p>chunk</p>,
         children: function* () {
           return (
             <>
               {perform(
-                Loading({
-                  fallback: "loading",
-                  children: function* () {
-                    return <>{perform(Page())}</>;
-                  }
+                Errored({
+                  catch: [Other],
+                  fallback: () => <p>other</p>,
+                  children: underLoading(Page)
                 })
               )}
             </>
@@ -803,21 +858,61 @@ describe("O45: a lazy component whose import rejects (the route today)", () => {
         }
       })
     );
-    expect(root.textContent).toBe("loading");
     await settle(5);
-    expect(root.textContent).toBe("chunk failed / undefined");
+    expect(root.textContent).toBe("chunk");
   });
 
-  it("with none: nothing is thrown out of render or flush; the Loading's fallback stays, Solid halts, and the rejection is unhandled", async () => {
-    const Page = failingPage("chunk failed");
+  it("the Errored's reset loads the chunk again, as often as it fails", async () => {
+    let fail = true;
+    let imports = 0;
+    const Loaded = component(function* Loaded() {
+      return view(function* () {
+        return <b>loaded</b>;
+      });
+    });
+    const Page = lazy(() =>
+      ++imports && fail ? Promise.reject(netError) : Promise.resolve({ default: Loaded })
+    );
+    let reset!: Reset;
+    mount(() =>
+      Errored({
+        fallback: (_e: any, r: Reset) => ((reset = r), (<p>failed</p>)),
+        children: underLoading(Page)
+      })
+    );
+    await settle(5);
+    expect([root.textContent, imports]).toEqual(["failed", 1]);
+    reset();
+    await settle(5);
+    expect([root.textContent, imports]).toEqual(["failed", 2]);
+    fail = false;
+    reset();
+    await settle(5);
+    expect([root.textContent, imports]).toEqual(["loaded", 3]);
+  });
+
+  it("with none: the ChunkError is re-thrown (D-033), the call renders nothing, the Loading's fallback goes, and Solid does not halt", async () => {
+    const Page = failingPage();
     let thrown: unknown;
+    let setN!: (n: number) => void;
+    const Counter = component(function* Counter() {
+      const [n, set] = yield* $signal(0);
+      setN = v => write(() => set(v));
+      return view(function* () {
+        return <i>{perform(n)}</i>;
+      });
+    });
     const { errors, uncaught, unhandled } = await captured(async () => {
       try {
         mount(() =>
           Loading({
             fallback: "loading",
             children: function* () {
-              return <>{perform(Page())}</>;
+              return (
+                <>
+                  [{perform(Page())}]{perform(Counter())}
+                </>
+              );
             }
           })
         );
@@ -825,12 +920,32 @@ describe("O45: a lazy component whose import rejects (the route today)", () => {
       } catch (e) {
         thrown = e;
       }
+      expect(root.textContent).toBe("[]0");
+      setN(1);
+      flush();
+      expect(root.textContent).toBe("[]1");
     });
     expect(thrown).toBe(undefined);
-    expect(root.textContent).toBe("loading");
-    expect(errors.some(e => e.includes("[REACTIVITY_HALTED]"))).toBe(true);
-    expect(unhandled).toEqual(["Error: chunk failed"]);
-    expect(uncaught).toEqual([]);
+    expect(uncaught).toEqual(["ChunkError: lazy: a component's chunk failed to load"]);
+    expect(errors.some(e => e.includes("[REACTIVITY_HALTED]"))).toBe(false);
+    expect(unhandled).toEqual([]);
+  });
+
+  it("under an Errored whose catch excludes it, with none above that takes it: re-thrown, as with none", async () => {
+    const Page = failingPage();
+    const { errors, uncaught } = await captured(async () => {
+      mount(() =>
+        Errored({
+          catch: [Other],
+          fallback: () => <p>other</p>,
+          children: underLoading(Page)
+        })
+      );
+      await settle(5);
+    });
+    expect(root.textContent).toBe("");
+    expect(uncaught).toEqual(["ChunkError: lazy: a component's chunk failed to load"]);
+    expect(errors.some(e => e.includes("[REACTIVITY_HALTED]"))).toBe(false);
   });
 });
 

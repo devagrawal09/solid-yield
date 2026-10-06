@@ -6,6 +6,7 @@
  */
 import {
   attempt,
+  ChunkError,
   $cleanup,
   component,
   $effect,
@@ -1167,9 +1168,72 @@ export type ForeignNames = Expect<
     }
   >
 >;
-// a lazy component pends while its chunk loads; it fails as the loaded one does
+// a lazy component pends while its chunk loads, and may fail with a ChunkError (D-100)
+// @ts-expect-error [FOREIGN_HANDOFF] its chunk may fail to load: "chunk"
 export const foreignLazy = foreign(lazy(() => Promise.resolve({ default: FPends })));
 // @ts-expect-error [FOREIGN_HANDOFF] the loaded component may fail
 export const foreignLazyFails = foreign(lazy(() => Promise.resolve({ default: FFails })));
 // a plain function returning an element is not a yield component: nothing to check
 export const foreignPlain = foreign(() => <i />);
+
+// --- D-100: a lazy component's chunk may fail to load: ChunkError (calculus §6.3 F-2) -----------
+const LPage = component(function* LPage() {
+  return view(function* () {
+    return <p>page</p>;
+  });
+});
+const LBoomPage = component(function* LBoomPage() {
+  const m = yield* $memo(function* () {
+    return yield* raise(new Boom());
+  });
+  return view(function* () {
+    return <p>{yield* m}</p>;
+  });
+});
+const LazyPage = lazy(() => Promise.resolve({ default: LPage }));
+const LazyBoomPage = lazy(() => Promise.resolve({ default: LBoomPage }));
+// a view calling a lazy page fails with ChunkError; a page's own failures join it
+export const LazyCaller = component(function* LazyCaller() {
+  return view(function* () {
+    return <main>{yield* LazyPage()}</main>;
+  });
+});
+export type LazyCallerFails = Expect<Equal<ViewFailsOf<ReturnType<typeof LazyCaller>>, ChunkError>>;
+export type LazyCallerPends = Expect<Equal<ViewPendingOf<ReturnType<typeof LazyCaller>>, true>>;
+export const LazyBoomCaller = component(function* LazyBoomCaller() {
+  return view(function* () {
+    return <main>{yield* LazyBoomPage()}</main>;
+  });
+});
+export type LazyBoomCallerFails = Expect<
+  Equal<ViewFailsOf<ReturnType<typeof LazyBoomCaller>>, Boom | ChunkError>
+>;
+// ChunkError has a literal kind: catch: [ChunkError] discharges it, and only it
+const chunkCaught = Errored({
+  catch: [ChunkError],
+  fallback: () => <p>the chunk failed</p>,
+  children: function* () {
+    return <>{yield* LazyBoomPage()}</>;
+  }
+});
+export type ChunkCaught = Expect<Equal<ViewFailsOf<typeof chunkCaught>, Boom>>;
+const chunkAndBoomCaught = Errored({
+  catch: [ChunkError, Boom],
+  fallback: () => <p>failed</p>,
+  children: function* () {
+    return <>{yield* LazyBoomPage()}</>;
+  }
+});
+export type ChunkAndBoomCaught = Expect<Equal<ViewFailsOf<typeof chunkAndBoomCaught>, never>>;
+// an Errored with no catch takes it too
+const chunkTaken = Errored({
+  fallback: () => <p>failed</p>,
+  children: function* () {
+    return <>{yield* LazyPage()}</>;
+  }
+});
+export type ChunkTaken = Expect<Equal<ViewFailsOf<typeof chunkTaken>, never>>;
+// what a ChunkError carries
+export type ChunkKind = Expect<Equal<ChunkError["kind"], "chunk">>;
+export type ChunkSpecifier = Expect<Equal<ChunkError["specifier"], string | undefined>>;
+export type ChunkCause = Expect<Equal<ChunkError["cause"], unknown>>;

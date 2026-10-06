@@ -9,6 +9,7 @@ import {
   attempt,
   component,
   hydrate,
+  lazy,
   Loading,
   render,
   renderToStream,
@@ -59,3 +60,7 @@ renderToStream(() => Loading({ children: App }));
 // the root may fail (D-033): its failure is re-thrown there
 const html: string = renderToString(() => Loading({ children: () => App() }));
 void html;
+// a lazy page's ChunkError may reach the root too (D-100: re-thrown there, D-033), as the
+// rendering twin's pages do
+const LazyApp = lazy(() => Promise.resolve({ default: App }));
+render(() => Loading({ children: () => LazyApp() }), root);

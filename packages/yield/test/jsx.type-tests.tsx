@@ -13,6 +13,7 @@ import {
   $signal,
   $store,
   attempt,
+  ChunkError,
   constant,
   createContext,
   Errored,
@@ -831,7 +832,7 @@ export const StreamedWithoutAttempt = component(function* () {
   });
 });
 
-// --- lazy: pending while its chunk loads, and colored as the loaded component (D-047) -----------
+// --- lazy: pending while its chunk loads, failing with ChunkError (D-100), and colored as the loaded component (D-047)
 const LazyPending = lazy(() => Promise.resolve({ default: Pending }));
 // @ts-expect-error still pending: a lazy component is never a tag, and called it is pending
 export const lazyBad: View<false, never> = LazyPending({ id: "1" });
@@ -846,7 +847,7 @@ export const LazyHost = component(function* () {
     return <div>{yield* LazyPending({ id: "1" })}</div>;
   });
 });
-const lazyHostView: View<true, never> = LazyHost();
+const lazyHostView: View<true, ChunkError> = LazyHost();
 void lazyHostView;
 // a view rendering a loading lazy is pending, even when the loaded component is settled
 const LazySettled = lazy(() => Promise.resolve({ default: Settled }));
@@ -857,11 +858,13 @@ export const LazySettledHost = component(function* () {
     return <div>{yield* LazySettled({ label: "x" })}</div>;
   });
 });
-const lazySettledView: View<true, never> = LazySettledHost();
+const lazySettledView: View<true, ChunkError> = LazySettledHost();
 void lazySettledView;
-// and it fails as the loaded component does
+// and it fails as the loaded component does, and with a ChunkError
 const LazyFallible = lazy(() => Promise.resolve({ default: Fallible }));
-const lazyFallibleView: View<true, NotFound> = LazyFallible({ id: "1" });
+const lazyFallibleView: View<true, NotFound | ChunkError> = LazyFallible({ id: "1" });
+// @ts-expect-error a ChunkError is in the type, not only the loaded component's failures
+export const lazyFallibleBad: View<true, NotFound> = LazyFallible({ id: "1" });
 void lazyFallibleView;
 // the export option and preload, as Solid's lazy
 const LazyNamed = lazy(() => Promise.resolve({ Settled }), { export: "Settled" });

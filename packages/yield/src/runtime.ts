@@ -135,6 +135,8 @@ function brand<T>(e: T): T {
     Object.defineProperty(e, FAILURE, { value: true, enumerable: false, configurable: true });
   return known(e);
 }
+/** Brand a failure the runtime routes (D-087): `lazy`'s `ChunkError` (D-100). */
+export const brandFailure: <T>(e: T) => T = brand;
 /** A typed failure (D-087): branded by `raise` or an attempt's handler, in every build. */
 function isFailure(e: unknown): boolean {
   return (
@@ -1475,7 +1477,7 @@ export function boundaryAbove(): Boundary | null {
 }
 
 /** Whether some `Errored` in the chain will take `error`: the first whose `catch` covers it. */
-function takes(boundary: Boundary | null, error: unknown): boolean {
+export function takes(boundary: Boundary | null, error: unknown): boolean {
   for (let b = boundary; b; b = b.parent)
     if (!b.catch || b.catch.some(C => error instanceof C)) return true;
   return false;

@@ -94,5 +94,18 @@ slots register their existing elements under that root. The default remains
 chunks; the production build bundles the app together. Select it in the docs
 config with `C2_ROOTS=single`.
 
-The four-way comparison and its limits are in
-[compiler-single-root.md](../../documentation/compiler-single-root.md).
+The fresh control measurements and the C3 stop finding are in
+[compiler-c3-server-components.md](../../documentation/compiler-c3-server-components.md).
+
+## C3 server-recomputable analysis and stop finding
+
+`src/recomputable.js` applies the R server-call cut alongside C1's existing
+groups. `node src/recomputable-report.js --write` regenerates the nine-twin
+C3 appendix and JSON. Direct U reads and C-cell reads remain client; the
+fixtures cover typed scalar inputs, rejected functions and error/reset routing.
+
+`src/server-region.js` emits the first extracted server template for a public
+frame probe. **It is not wired into the client emitter.** The failing article
+frame loses NotFound's kind and message (F-C10), so integration stopped under
+the requested theorem/capture rule. A passing `test/server-region.test.mjs`
+pins that failure, not completed R parity. See the C3 report above.

@@ -245,14 +245,14 @@ Reading order with the rest of the plan: `blocks-library.md` (the reference), th
 | Twin | Components with props | Props | Colored **before** (linker-inferred / declared `Source<…>` at `fbd9fb97`, union) | Colored **after** (declared) | of which generic (D-029) | Generic components | Boundaries added for typing |
 | --- | ---: | ---: | --- | ---: | ---: | ---: | ---: |
 | effect | 3 | 4 | 1 / 2, 2 | 2 | 0 | 0 | 0 |
-| hackernews-spa | 6 | 15 | 0 / 0, 0 | 0 | 0 | 0 | 0 |
-| rendering | 13 | 19 | 3 / 7, 8 | 8 | 2 | 2 | 0 |
-| room | 23 | 37 | 8 / 10, 11 | 11 | 6 | 5 | 0 |
+| hackernews-spa | 6 | 15 | 0 / 0, 0 | 0 | 0 | 0 | ~~0~~ 3 (D-088) |
+| rendering | 13 | 19 | 3 / 7, 8 | 8 | 2 | 2 | ~~0~~ 1 (D-088) |
+| room | 23 | 37 | 8 / 10, 11 | 11 | 6 | 5 | ~~0~~ 1 (D-088) |
 | sierpinski | 3 | 10 | 2 / 0, 2 | 2 | 0 | 0 | 0 |
 | sierpinski-h | 3 | 10 | 2 / 0, 2 | 2 | 0 | 0 | 0 |
 | todos | 4 | 4 | 0 / 0, 0 | 0 | 0 | 0 | 0 |
 | todos-h | 3 | 3 | 0 / 0, 0 | 0 | 0 | 0 | 0 |
-| **all** | **58** | **102** | **16 / 19, 25** | **25** | **8** | **7** | **0** |
+| **all** | **58** | **102** | **16 / 19, 25** | **25** | **8** | **7** | **~~0~~ 5** |
 
 The "before" column is from the last linker run. The first figure is the 16 props the linker inferred as pending or failing (the preliminary survey's "~16 of ~85": the linker listed only keyed components' props). The second is the props already declared with a colored `Source<…>` in `TypedProps`, which the linker could not override. Their union is the colors the twins actually had. The declared colors after the migration are the same 25 props, so no prop gained or lost a color. Three changed shape:
 
@@ -279,6 +279,7 @@ No twin needed a boundary, a cast or an `any` for typing (not so for room; see t
 
 *After D-088 (implemented).* A block component handed to foreign code handles its own failures, so a twin whose original lets a failure reach the app root through the router or `@solidjs/web` now has an `Errored` there; nowhere else is one added for typing. The column, corrected: **room 1** (the `Live` root: `foreign(Live)` refuses `Live` without it, its failures being `"archive" | "live"`; the four per-row `DirectoryEntry` boundaries are removed, a row's failure reaching the page's `Errored`, parity green), **hackernews-spa 3** (one at the root of each route's view, `Stories` / `Story` / `User`, each may fail with `ApiError`; the original has no `Errored` at all), **rendering 1** (around the pages in `App`, which may fail with `"profile" | "feed" | "stream"`; its entries hand `App` to `@solidjs/web`), every other twin 0. Each is at a foreign handoff, and with no failure the markup is the original's. These are boundaries the originals lack: they change only what a failure shows (a fallback, where the original's failure reaches the root).
 
+*Count corrected (2026-10-06).* The table's last column now says what the tree has: hackernews-spa 3, room 1, rendering 1, the other five 0 (5 in all), every one at a foreign handoff. The count is pending a ruling on the library's own `render` / `hydrate`, which accept a root that may fail (D-033) and so add none: that ruling is open (D-095). Seen while counting, not ruled: rendering's twin has 5 `Errored`s against the original's 2. ErrorStream's two mirror the original's, and App's is D-088's. Profile's (around its facts) and Reveal's (around each card's body) have no counterpart in the original and are not at a handoff. They came from the fork, before D-088. If they count here, rendering is 3.
 
 The decision text's `Async<T, E>` is spelled `Source<T, E, true>` (D-068). D-018 (open components) has nothing left to dissolve into: no component's color depends on who calls it.
 

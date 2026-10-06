@@ -685,10 +685,13 @@ export type Handler<Args extends unknown[] = [], E = never> = EventHandler<
  */
 export interface BoundEvent<Args extends unknown[] = any[]> {
   (...args: Args): unknown;
+  readonly "[UNBOUND_EVENT] bind the event in the view: onClick={yield* handler}": never;
   readonly [BOUND]: true;
 }
 /** A DOM handler type `H` as an event attribute takes it: bound in a view (D-072). */
-export type Bound<H> = H & { readonly [BOUND]: true };
+export type Bound<H> = H & {
+  readonly "[UNBOUND_EVENT] bind the event in the view: onClick={yield* handler}": never;
+};
 
 /** Setter of a `$signal`: writes when called; `yield*` on the receipt is the new value. */
 export type Setter<T> = <U extends T>(value: U | ((prev: T) => U)) => Receipt<U>;

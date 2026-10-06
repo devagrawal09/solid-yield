@@ -31,7 +31,7 @@ const LiveRoom = component(function* LiveRoom() {
     return <p>{(yield* messages).join(",")}</p>;
   });
 });
-const IdentityCtx = createContext<string, "ReviewIdentity">();
+const IdentityCtx = createContext<string, "ReviewIdentity">(undefined, { name: "ReviewIdentity" });
 const RoomPage = component(function* RoomPage(props: Props<{ roomId: string }>) {
   const identity = yield* IdentityCtx;
   return view(function* () {

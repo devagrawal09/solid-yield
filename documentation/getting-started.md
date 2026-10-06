@@ -243,7 +243,7 @@ Every flow control and boundary is called in a hole, `{yield* Show({ … })}`. I
 - **A child that takes nothing is a lazy view**: `function* () { return <…/>; }`, built where (and each time) the control shows it.
 - **A child that takes a value is a row**: `function* (value) { …; return view(function* () { return <…/>; }); }`. A row's body is a setup, as a component's is: it runs once per row (per item, per shown branch), may create (`yield* $memo(…)`, owned by the row), and returns its view. Its argument is a path, read in the view's holes (`{yield* note.title}`).
 
-Writing a row's JSX directly, `children: function* (f) { return <p>{yield* f.message}</p>; }`, is a type error. TypeScript reports it as "No overload matches this call", the first overload's "Type 'Element' is not assignable to type 'ViewFn'", and the second's "Target signature provides too few arguments" (it tried the lazy view, which takes none), often with a "Type instantiation is excessively deep" (TS2589) beside it. The fix is the `return view(…)`.
+Writing a row's JSX directly, `children: function* (f) { return <p>{yield* f.message}</p>; }`, is a type error. The first row overload prints `[ROW_VIEW] a row returns its view: return view(function* () { return <.../>; })`. Wrap the markup in `return view(…)`. The `For` callback overload checks generators before expanding recursive element types, avoiding the extra TS2589 error.
 
 | Control   | Called as                                                                                                       | `children`                                                                                                                                      |
 | --------- | --------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -386,7 +386,7 @@ export const ThemePicker = component(function* ThemePicker(
 - **`Handler<Args, E = never>`** is `EventHandler<Args, E, unknown, false, boolean>`: it takes `Args`, may fail with `E`, returns anything, may or may not do async work of its own, and does **not** wait on pending data. Any `$event` within those colors is accepted.
 - **A handler that reads data which may be pending** is refused there; declare the colors it has, `EventHandler<Args, E, unknown, true>` — and a view binding a call of it is marked _may wait_ (the lint asks you to show it). A bare `EventHandler<[Theme]>` defaults to "may wait", so it warns even for a handler that only calls a setter: prefer `Handler`.
 - **A plain function type** (`onPick: (t: Theme) => void`) is not a handler: reading the prop gives a function, and `yield*` of its call fails with "Type 'void' must have a '[Symbol.iterator]()' method". Routine code calls events, not functions.
-- **In a context**, the same: `createContext<Handler<[Theme]>, "SetThemeCtx">()`, read with `yield* (yield* setTheme)("dark")` in an event.
+- **In a context**, the same: `createContext<Handler<[Theme]>, "SetThemeCtx">(undefined, { name: "SetThemeCtx" })`, read with `yield* (yield* setTheme)("dark")` in an event.
 
 ### Form inputs
 
@@ -467,7 +467,9 @@ export const Editor = component(function* Editor() {
 - if it does, show the wait with an `$optimistic` written at the start of the event, then silence that one line with the reason: `// eslint-disable-next-line solid-yield/no-unshown-wait -- shown by saving`;
 - an event that waits on its own async work (an `attempt` over a fetch) is not flagged — that wait is not a pending read — but it is still a wait to show, the same way.
 
-**A context holding a changing value.** Declare the value's type, `createContext<Theme, "ThemeCtx">()`, and provide a source, `ThemeCtx.provide({ value: theme, children })`: readers read it like a prop, in holes, memos and events, and see each change. Declare the context as `Source<T, E, true>` only when the provided source may be pending or fail.
+A required context passes its name twice: as the type's identity and in `{ name: "ThemeCtx" }` for runtime errors. Type arguments disappear when JavaScript is built. The options name must match the type name; `[CONTEXT_NAME]` explains a missing runtime name.
+
+**A context holding a changing value.** Declare the value's type, `createContext<Theme, "ThemeCtx">(undefined, { name: "ThemeCtx" })`, and provide a source, `ThemeCtx.provide({ value: theme, children })`: readers read it like a prop, in holes, memos and events, and see each change. Declare the context as `Source<T, E, true>` only when the provided source may be pending or fail.
 
 ## Recipe: an app shell
 
@@ -483,7 +485,7 @@ import { createContext } from "solid-yield";
 
 export type Theme = "light" | "dark";
 /** App-wide: provided once, above the router. No default, so a reader requires it. */
-export const ThemeCtx = createContext<Theme, "ThemeCtx">();
+export const ThemeCtx = createContext<Theme, "ThemeCtx">(undefined, { name: "ThemeCtx" });
 ```
 
 ```tsx
@@ -618,7 +620,7 @@ it("renders the routed page under the app-wide context", async () => {
 - **`foreign(Page, { provided: [Ctx] })`** says which contexts are provided above the router. Without it, a page that reads `ThemeCtx` is refused, `[NO_PROVIDER] … "ThemeCtx"`: plain Solid carries no requirement from the page to the provider. Listing a context the page does not require is refused too (`[NOT_REQUIRED]`). The claim is checked where the page is created: with no provider above, `NO_PROVIDER` at run time.
 - **Links** are plain `<a href>`; the router intercepts them. A route page reads its URL from its props, declared with the router's types: `component(function* Notes(props: Props<RouteProps<"/notes/:mode">>) { … })`, then `yield* props.params.mode` in a memo or a hole (as the hackernews twin's pages do). The router's hooks (`useParams`, `useLocation`) are plain Solid reactive state, which routine code does not read (`no-foreign-reactive`).
 - **A route whose page reads params is registered with `defineRoute`**: `defineRoute({ path: "/notes/:mode", component: foreign(Notes) })`. `defineRoute` types the page's `params` from its `path`. A bare `{ path, component }` object types `component` as a page with no params, so a page that requires `params.mode` is refused there (`TS2322 … Type '{}' is missing the following properties … params, location, data`). A plain Solid page declared with `RouteProps<…>` is refused the same way: this is the router's rule, not `foreign`'s. Pages that read no params (`Home`, `Settings`) can stay bare objects. [`router.type-tests.tsx`](https://github.com/devagrawal09/solid-yield/blob/main/packages/yield/test/router.type-tests.tsx) pins both against the router version above.
-- **A callback for the pages** (a setter, `toggle`) goes in a context too — `createContext<Handler<[Theme]>, "SetThemeCtx">()` — since a route component gets no props from you; list it in `provided` beside `ThemeCtx`.
+- **A callback for the pages** (a setter, `toggle`) goes in a context too — `createContext<Handler<[Theme]>, "SetThemeCtx">(undefined, { name: "SetThemeCtx" })` — since a route component gets no props from you; list it in `provided` beside `ThemeCtx`.
 
 ## Where a refusal is reported
 

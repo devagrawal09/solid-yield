@@ -60,7 +60,11 @@ export type Element =
 export type TagType = string | ((props: any) => NotAComponentView);
 /** Anything a foreign component may return (solid-yield's `Element` included). */
 type NotAComponentView =
-  | (object & { readonly [COMPONENT]?: never })
+  | (object & {
+      readonly [COMPONENT]?: {
+        readonly "[COMPONENT_TAG] call a yield component in a hole: {yield* Comp(props)}": never;
+      };
+    })
   | string
   | number
   | bigint

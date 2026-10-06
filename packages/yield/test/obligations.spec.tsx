@@ -631,7 +631,9 @@ describe("O33: a requirement through a flow control, a row and h resolves as typ
 
 // --- O34: a provided value is never unset (F-3, S11) --------------------------------------------
 describe("O34: provide's value is never undefined; nothing is modelled inside the value", () => {
-  const MaybeUser = createContext<{ name: string } | null | undefined, "MaybeUser">();
+  const MaybeUser = createContext<{ name: string } | null | undefined, "MaybeUser">(undefined, {
+    name: "MaybeUser"
+  });
   const Who = component(function* Who() {
     const user = yield* MaybeUser;
     return view(function* () {

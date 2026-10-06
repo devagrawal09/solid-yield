@@ -17,9 +17,7 @@ it("the chat review's one-element fixture needs the server hydration script", ()
   expect(() => hydrate(App, root)).toThrow(
     __DEV__
       ? /\[NO_HYDRATION_SCRIPT\].*generateHydrationScript\(\).*server render/
-      : __DEV__
-        ? /\[NO_HYDRATION_SCRIPT\].*generateHydrationScript\(\).*server render/
-        : /Cannot read properties of undefined \(reading 'done'\)/
+      : /Cannot read properties of undefined \(reading 'done'\)/
   );
 });
 

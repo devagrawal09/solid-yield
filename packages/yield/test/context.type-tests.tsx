@@ -48,7 +48,7 @@ class FetchFailure extends Error {
   readonly kind = "fetch" as const;
 }
 declare const failing: Source<Element, FetchFailure>;
-const UserCtx = createContext<User, "UserCtx">();
+const UserCtx = createContext<User, "UserCtx">(undefined, { name: "UserCtx" });
 const ThemeCtx = createContext("light");
 declare const root: HTMLElement;
 
@@ -219,7 +219,9 @@ UserCtx.provide({
 });
 
 // a provider of another context does not discharge it (the value type is invariant)
-const OtherCtx = createContext<{ name: string; admin: true }, "OtherCtx">();
+const OtherCtx = createContext<{ name: string; admin: true }, "OtherCtx">(undefined, {
+  name: "OtherCtx"
+});
 const Wrong = component(function* Wrong() {
   return view(function* () {
     return (
@@ -313,7 +315,7 @@ type _named = Expect<Equal<ContextNames<typeof UserCtx>, "UserCtx">>;
 export const pageUnderRouter = foreign(Page, { provided: [UserCtx] });
 type _providedIdentity = Expect<Equal<typeof pageUnderRouter, typeof Page>>;
 // two requirements: both listed is accepted, in either order
-const SessionCtx = createContext<{ id: string }, "SessionCtx">();
+const SessionCtx = createContext<{ id: string }, "SessionCtx">(undefined, { name: "SessionCtx" });
 const TwoReads = component(function* TwoReads() {
   const user = yield* UserCtx;
   const session = yield* SessionCtx;
@@ -407,8 +409,8 @@ render(ReadsFallback, root);
 
 // two contexts of one value type are two requirements: the second's provider does not satisfy
 // the first, and the root names the first
-const AuthorCtx = createContext<User, "AuthorCtx">();
-const EditorCtx = createContext<User, "EditorCtx">();
+const AuthorCtx = createContext<User, "AuthorCtx">(undefined, { name: "AuthorCtx" });
+const EditorCtx = createContext<User, "EditorCtx">(undefined, { name: "EditorCtx" });
 const Byline = component(function* Byline() {
   const author = yield* AuthorCtx;
   return view(function* () {
@@ -769,7 +771,9 @@ type _hWrong = Expect<Equal<RequiresOfComponent<typeof HWrong>, typeof UserCtx>>
 
 // --- F-3: provide's value is never undefined (Solid reads it as unset, S11) -------------------
 // A context that may carry nothing models it inside the value: null, or a source of T | null.
-const MaybeUserCtx = createContext<User | null | undefined, "MaybeUserCtx">();
+const MaybeUserCtx = createContext<User | null | undefined, "MaybeUserCtx">(undefined, {
+  name: "MaybeUserCtx"
+});
 const MaybeAvatar = component(function* MaybeAvatar() {
   const user = yield* MaybeUserCtx;
   return view(function* () {
@@ -799,7 +803,9 @@ MaybeUserCtx.provide({
   }
 });
 // a context of sources: the source's value type is checked the same way
-const MaybeSourceCtx = createContext<Source<User | undefined>, "MaybeSourceCtx">();
+const MaybeSourceCtx = createContext<Source<User | undefined>, "MaybeSourceCtx">(undefined, {
+  name: "MaybeSourceCtx"
+});
 MaybeSourceCtx.provide({
   // @ts-expect-error [PROVIDE_UNDEFINED]
   value: undefined,
@@ -816,3 +822,10 @@ export type NoMessage = Expect<
     never
   >
 >;
+
+// A name in a type argument is erased: the runtime name must match it.
+// @ts-expect-error [CONTEXT_NAME] pass the name at runtime too
+createContext<User, "RuntimeUser">();
+// @ts-expect-error the runtime name is the same literal as the type-level name
+createContext<User, "RuntimeUser">(undefined, { name: "Different" });
+createContext<User, "RuntimeUser">(undefined, { name: "RuntimeUser" });

@@ -1357,17 +1357,32 @@ function resume(
  * failure is Solid's uncaught effect error. An attempt whose `onError`
  * absorbs the failure adds none.
  */
+export function $effect(
+  compute: (() => Generator<any, any, any>) & {
+    readonly "[EFFECT_PHASES] $effect takes two functions: a tracked compute and an untracked effect": never;
+  }
+): never;
 export function $effect<YC extends ComputeOp = never, V = void, YE extends EffectPhaseOp = never>(
   compute: () => Generator<YC, V, any>,
   effect: (value: V, prev: V | undefined) => Generator<YE, void, any>,
   options?: { name?: string }
+): Yieldable<Create<"effect", FailsOf<YC> | FailsOf<YE>>, void>;
+export function $effect<YC extends ComputeOp = never, V = void, YE extends EffectPhaseOp = never>(
+  compute: () => Generator<YC, V, any>,
+  effect?: (value: V, prev: V | undefined) => Generator<YE, void, any>,
+  options?: { name?: string }
 ): Yieldable<Create<"effect", FailsOf<YC> | FailsOf<YE>>, void> {
+  if (__DEV__ && !effect)
+    throw devError(
+      "EFFECT_PHASES",
+      "$effect takes two functions: a tracked compute and an untracked effect."
+    );
   return new CreateOp("effect", () => {
     const name = state.name;
     createEffect<V>(
       () => runAs(COMPUTE, () => drive(compute(), SYNC_RUN) as V, null, null, false, false, name),
       {
-        effect: (value: V, prev?: V) => runEffect(() => effect(value, prev), name, EFFECT),
+        effect: (value: V, prev?: V) => runEffect(() => effect!(value, prev), name, EFFECT),
         // a compute failure reaches the nearest Errored, as an effect-phase one
         // does (D-073): rethrown, it escalates to the boundary
         error: (err: unknown) => {

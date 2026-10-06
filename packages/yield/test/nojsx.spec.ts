@@ -165,7 +165,7 @@ describe("h", () => {
 
 describe("h: a context's provider (D-098)", () => {
   it("h(Ctx.provide, { value }, ...children) gives the value to the components in its children", () => {
-    const Name = createContext<string, "Name">();
+    const Name = createContext<string, "Name">(undefined, { name: "Name" });
     const Reader = component(function* Reader() {
       const name = yield* Name;
       return view(function* () {

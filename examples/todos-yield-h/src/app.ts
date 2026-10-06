@@ -35,7 +35,9 @@ type Todos = Returned<typeof createTodos>;
  * `todos` is a path over the store, an action a source of the handler,
  * called in an event as `yield* (yield* addTodo)(todo)`.
  */
-const TodosContext = createContext<{ todos: Todos[0] } & Todos[1], "TodosContext">();
+const TodosContext = createContext<{ todos: Todos[0] } & Todos[1], "TodosContext">(undefined, {
+  name: "TodosContext"
+});
 
 /** The todos store (pending until the first fetch lands) and the actions. */
 function* useTodos() {

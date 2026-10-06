@@ -20,7 +20,7 @@ import type { JSX } from "@solidjs/web";
 import { component, createContext, foreign, type Props, view } from "solid-yield";
 
 type Theme = "light" | "dark";
-const ThemeCtx = createContext<Theme, "ThemeCtx">();
+const ThemeCtx = createContext<Theme, "ThemeCtx">(undefined, { name: "ThemeCtx" });
 
 const Home = component(function* Home() {
   return view(function* () {

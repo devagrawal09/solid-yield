@@ -27,7 +27,9 @@ export interface RouterValue {
  * around its page's call; a page rendered without one is refused by the
  * types, and `NO_PROVIDER` at run time.
  */
-const RouterContext = createContext<RouterValue, "RouterContext">();
+const RouterContext = createContext<RouterValue, "RouterContext">(undefined, {
+  name: "RouterContext"
+});
 
 /**
  * The routed component: its requirements (`R`) pass on, less the router's,

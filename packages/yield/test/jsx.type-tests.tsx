@@ -662,11 +662,9 @@ export type UnwrappedRefused = Expect<
   >
 >;
 export type WrappedAccepted = Expect<Equal<ViewWrapperCheck<ViewFn<never, Element>>, unknown>>;
-// a row's setup returns its view through view(…) too. Refused as no overload of For matching
-// (the first ends "… is not assignable to type 'ViewWrapped'"), and TypeScript also reports TS2589
-// ("excessively deep") at the call: not by the message. The lint `require-view-wrapper` reports
-// an inline row with its message (and the autofix)
-// @ts-expect-error TS2589 at the call
+// A row's setup returns its view through view(…). The row is refused below;
+// the callback overload checks a generator before expanding recursive Element types,
+// so there is no extra TS2589 at the call. Lint also reports require-view-wrapper.
 export const UnwrappedRow = For({
   each: comments,
   // @ts-expect-error a row's bare view lacks view's brand

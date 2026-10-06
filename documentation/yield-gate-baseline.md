@@ -5,27 +5,20 @@ reference run used as the baseline; the machine-readable copy is
 [`yield-gate-baseline.json`](./yield-gate-baseline.json). CI runs the same gate
 against this file (`.github/workflows/gate.yml`).
 
-**Docs content-site addition (2026-10-07).** Baseline regenerated from the full
-GREEN run on `proto/compiler` at parent `8cb1ae8`: **46 PASS / 0 FAIL / 0 SKIP
-in 116 s**. The inventory is nine twins. New steps are `twin:docs-yield:test`,
-`:typecheck`, `:lint`, and `original:docs:typecheck`. The parity script checks 24
-states. SSR and hydrate smoke each add `/`, `/docs/start`, `/docs/missing` (19
-cases total); hydration also clicks the local theme and carousel. The docs
-original separately hydrates all three cases. C1 visits the new source graph;
-the executed-byte step includes both new apps with thresholds recorded for
-load and all 24 parity steps. Existing byte thresholds are unchanged. The
-format check also covers the new original's source and stream entries.
-
-**Compiler branch additions (C1 checkpoint).** `compiler:analysis-test` pins the
-small analysis fixtures, and `compiler:report` visits all eight source graphs.
-The report is provisional: this checks that it runs, not that its candidate roots
-are safe to extract. Baseline: 42 steps, all PASS. `compiler:namespace-spike` additionally pins
-immediate claims and the **known delayed-claim failure F-C5**. A green result for
-that step means the finding reproduced; it does not mean delayed hydration is
-correct. `compiler:executed-bytes-test` checks the byte counter and
-`twins:executed-bytes` checks load and each parity phase for all eight twins,
-original and library routes. See [the metric, limits and results](compiler-benchmarks.md).
-Historical reference below.
+**Docs content-site addition on main (2026-10-07).** Baseline regenerated
+from the full GREEN run on the working tree after ba2d604: **43 PASS / 0 FAIL /
+0 SKIP in 90 s**, nine twins. The docs pair adds four steps over
+main's 39-step gate: twin:docs-yield:test, :typecheck, :lint, and
+original:docs:typecheck. The prior committed 37-step baseline also now records
+both D-105 executed-byte steps. Docs parity checks 24 states; SSR and hydrate
+smokes each check 19 cases, including /, /docs/start and /docs/missing for docs.
+The docs original separately passes 3/3 hydrations with all server nodes retained;
+its first two routes also change theme and carousel. Existing executed-byte
+thresholds are unchanged; docs thresholds cover load and all 24 parity steps.
+The compiler branch has 46 steps; main omits its three compiler-only checks and
+keeps main's twins:executed-bytes-test name. Twin route data is explicitly void
+and failures use main's D-110 library base; the original and parity steps are
+unchanged. The older reference runs below are historical.
 
 **Reference summary: `37 pass / 0 fail / 0 skip in 36s`** (37 steps, `--jobs 3`,
 every step under `TZ=UTC`). Re-recorded when `pkg:yield:dist-fresh` was added, on the

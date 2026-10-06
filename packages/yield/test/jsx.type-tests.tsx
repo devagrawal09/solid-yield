@@ -1,3 +1,4 @@
+import { Failure } from "solid-yield";
 /**
  * The strict rules, JSX flavor — checked by `tsc -p tsconfig.json`, never
  * executed. Every `@ts-expect-error` is a rule the editor enforces; every
@@ -48,9 +49,7 @@ type Expect<T extends true> = T;
 declare function fetchUser(id: string): Promise<{ name: string }>;
 /** Pending until its first value, and never failing (as a server border states it). */
 declare const pendingUser: Source<{ name: string }, never, true>;
-class NotFound extends Error {
-  readonly kind = "not-found";
-}
+class NotFound extends Failure("not-found") {}
 
 // --- setup creates; views and memos read; reads only via yield* -------------------------
 export const Settled = component(function* (props: Props<{ label: string }>) {
@@ -662,11 +661,9 @@ export type UnwrappedRefused = Expect<
   >
 >;
 export type WrappedAccepted = Expect<Equal<ViewWrapperCheck<ViewFn<never, Element>>, unknown>>;
-// a row's setup returns its view through view(…) too. Refused as no overload of For matching
-// (the first ends "… is not assignable to type 'ViewWrapped'"), and TypeScript also reports TS2589
-// ("excessively deep") at the call: not by the message. The lint `require-view-wrapper` reports
-// an inline row with its message (and the autofix)
-// @ts-expect-error TS2589 at the call
+// A row's setup returns its view through view(…). The row is refused below;
+// the callback overload checks a generator before expanding recursive Element types,
+// so there is no extra TS2589 at the call. Lint also reports require-view-wrapper.
 export const UnwrappedRow = For({
   each: comments,
   // @ts-expect-error a row's bare view lacks view's brand
@@ -942,12 +939,8 @@ export const EventColors = component(function* () {
 });
 
 // each error type is its own color; an Errored with `catch` handles only the types it lists
-class NotFoundE extends Error {
-  readonly kind = "not-found" as const;
-}
-class ForbiddenE extends Error {
-  readonly kind = "forbidden" as const;
-}
+class NotFoundE extends Failure("not-found") {}
+class ForbiddenE extends Failure("forbidden") {}
 const Fetches = component(function* () {
   const [id] = yield* $signal("1");
   const user = yield* $memo(function* () {
@@ -1071,12 +1064,8 @@ class PlainB extends Error {}
 class StringKind extends Error {
   readonly kind: string = "s";
 }
-class KindA extends Error {
-  readonly kind = "a" as const;
-}
-class KindB extends Error {
-  readonly kind = "b" as const;
-}
+class KindA extends Failure("a") {}
+class KindB extends Failure("b") {}
 const one = () => 1;
 const toPlainA = () => new PlainA();
 const toStringKind = () => new StringKind();
@@ -1208,16 +1197,10 @@ export const lazyFallback: View<true, never> = Show({
 
 // --- declared prop colors (D-023, D-024, D-029, D-034, D-040, D-056, D-068) ------------------------
 type Todo = { title: string; done: boolean };
-class FetchError extends Error {
-  readonly kind = "fetch" as const;
-}
-class SaveError extends Error {
-  readonly kind = "save" as const;
-}
+class FetchError extends Failure("fetch") {}
+class SaveError extends Failure("save") {}
 /** The same shape as FetchError, its own literal kind (D-034). */
-class FetchErrorTwin extends Error {
-  readonly kind = "fetch-twin" as const;
-}
+class FetchErrorTwin extends Failure("fetch-twin") {}
 declare const settledTodo: Source<Todo>;
 declare const settledTodoPath: Path<Todo>;
 declare const pendingTodo: Source<Todo, never, true>;

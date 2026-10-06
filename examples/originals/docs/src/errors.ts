@@ -1,10 +1,11 @@
-// The library exports a structural Failure type, not a class factory.
-// This local factory gives each API failure its own class and literal kind.
+import { markSafeError } from "@solidjs/web";
+// Plain Solid's local failure factory opts public API failures into serialization.
 function Failure<K extends string>(kind: K) {
   return class extends Error {
     readonly kind = kind;
     constructor(cause: unknown) {
       super(cause instanceof Error ? cause.message : String(cause));
+      markSafeError(this);
     }
   };
 }

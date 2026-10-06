@@ -34,6 +34,7 @@ export {
   until,
   view
 } from "./runtime.js";
+export { Failure } from "./failure.js";
 export { createContext } from "./context.js";
 export type {
   ContextNames,
@@ -75,7 +76,6 @@ export type {
   WaitsOf,
   EventOp,
   FailsOf,
-  Failure,
   KindCheck,
   MayWaitOf,
   NeedsKind,

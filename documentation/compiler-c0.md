@@ -1,6 +1,6 @@
 # The solid-yield compiler, C0: definitions, analysis, codegen, correctness claim, open decisions
 
-Status: **a design for Dev to rule on**. Nothing here is decided. It records no decision, and the open questions in §5 are framed the way the project takes decisions (code, options, recommendation). Written 2026-10-06 against `main` at `61d2a65` (v0.1, through D-102).
+Status: **C0 ruled by Dev on 2026-10-07 (D-103–D-108), with D-111 withdrawing delayed hydration and D-113 ruling the corpus and four tiers**. The original design was written against `main` at `61d2a65`; §5 preserves alternatives and records the rulings. C1/codegen remains on proto/compiler. v0.2 ships eager islands only.
 
 Read with: `calculus.md` (its §4 theorem is the spec the compiler must preserve, and its §7 lists what the compiler route must keep), `DECISIONS.md`, `reviews/2026-10-06-markless-comparison.md` (cited as **ML-L*n*** for its §3 lessons and **ML-Q*n*** for its §6 questions), and `yield-library.md` §7–§8 (what the library route cannot do and what it costs).
 
@@ -10,7 +10,16 @@ Vocabulary is the project's (D-096): a **routine**, its **host**, a **hole**, a 
 
 ## 0. The plan
 
-The plan (Dev, 2026-10-06), restated so that each part can be tested:
+The plan (Dev, 2026-10-06), amended by D-103–D-108 and D-113 (2026-10-07), so that each part can be tested:
+
+**Four tiers of partial hydration** (Dev with the Solid maintainer, Discord, 2026-10-07):
+
+1. **Eager islands, v0.2:** C2 uses Solid's public hydration API; every emitted island hydrates at load. Lazy/visible are analysis report classes only.
+2. **Lazy islands, rejected:** Ryan reports little value without changing serialization and unsafe attachment; Dev notes that delaying events needs much machinery. D-111's private reset was withdrawn; Dev reports #3845 closed by design (live metadata differs; see HANDOFF).
+3. **resume(root), v0.3, the library's lazy builder:** Solid's public API, descriptors, keyed attachment and materialisation on first interaction; its own event queue and payload, validated claims and render fallback.
+4. **Full resumability with the library's own runtime:** the same semantics, at the horizon.
+
+D-113 proceeds with tier 1 on the docs content-site twin: refine M6/pure-helper and FOREIGN_OWNER/route rules, fix the carousel image analysis, then C2 eager islands and measured executed-byte savings. The longer-term value is Marko-like pruning: move much of the graph to the server and serialize only what an interaction needs. Syntactic provenance makes this analysable. C1b will measure per-interaction reachability and required data; C1's connected groups answer a different question.
 
 - **Where.** The compiler lives in this repository. It changes nothing in Solid: D-004 (Solid's public API only) holds for the compiler route as it does for the runtime. Its input is the yield dialect as it is today: any program that is admissible by calculus §4.1 (C1–C7). It has no dialect of its own until C4, and Q6 asks whether it ever should.
 - **What it does.**
@@ -19,7 +28,7 @@ The plan (Dev, 2026-10-06), restated so that each part can be tested:
 - **Its fallback is the library route.** Anything the compiler cannot analyse compiles to "this region is a client root running the library runtime". That is always correct, because inside a root the program *is* the library route. In the limit (nothing analysable) the whole app is one eager root, which is today's output.
 - **Sequencing**, in the style of D-057 (each step starts after the previous one has landed and been ruled on):
   - **C1** is a report and nothing else (§2.5).
-  - **C2** emits client roots (§3.1).
+  - **C2** emits eager islands only (§3.1); lazy/visible stay report classes.
   - **C3** emits server components (§3.2).
   - **C4** is the ergonomic layer: `$hoistedEffect` (D-079's note), and possibly Q6.
 
@@ -234,22 +243,24 @@ An **edge** is where a root's client code reads something defined outside the ro
 
 Event handlers do not cross: a handler is created in a setup, so its creator is in the root (M2). **Anything else** — a closure over a setup-local non-source, an instance the serializer refuses, a function, or a U value outside the checked R-argument edge — cannot cross. The region that defines it is then client, and the analysis gives **a diagnostic at the variable** that names it and the reason (ML-L3, and ML-L8's "escalation is never silent"). In the C1 report that diagnostic is a *capture failure*.
 
-### 1.7 Eager and lazy roots
+### 1.7 Root report classes (D-104, D-111)
 
 **Tier 1 ruling, 2026-10-07: all emitted roots hydrate synchronously at load.**
 The table below is a diagnostic classification only. No visible observer, event
 replay or delayed hydration is emitted. The delayed claim failure F-C5 remains
 recorded; it is not a blocker for this eager-only tier.
 
-| A root is | When | It hydrates |
+| Report class | When | Proposed later schedule |
 | --- | --- | --- |
 | **eager** | some setup or row setup in it yields `Create<"effect">`, the run-once form included (D-079, D-101) | at load (ML-L4, ML-Q2-B) |
 | **visible** | it has no effect, but it has a C or U source that changes without a bind: a memo whose attempt targets a non-server promise or stream, a foreign source | when its span becomes visible |
 | **lazy** | every change in it starts at one of its binds | on the first event at one of its binds; the event is captured before hydration and replayed after it |
 
-Laziness is sound in this dialect for a reason that is specific to it. A setup only creates (D-042: it never reads, writes or builds JSX). Effects are the only code that runs because a component exists (D-079), and they make the root eager. So deferring a lazy root's setups until its first event cannot be seen in the DOM. It *can* be seen in a conformance trace (the setup runs later), which §4 declares.
+These are analysis report classes. In v0.2 **every emitted island hydrates eagerly**; neither visible nor lazy schedules use delayed Solid hydrate (D-111). The proposed independent v0.3 builder needs its own event queue, payload and validated DOM claims with render fallback. Every eager island must report its effect reach: the effects making it eager and the dependent parts/providers/readers merged with them (D-104).
 
-The fact "this component is eager" is already in each setup's yield union (`Create<"effect">`, calculus §1.2). Q2 asks whether to surface it as a marker on `ComponentView`, as may-wait is (D-075).
+The original lazy design argument was that a setup only creates (D-042: it never reads, writes or builds JSX), so effects would be its only visible work. C1 finding F-C2 qualifies that argument: the Sierpinski setups register timers directly without an effect. Unproved setup calls therefore make a candidate group eager too. Absence of an effect alone does not justify deferral. Tier 3 must validate its independent builder; v0.2 defers no island.
+
+The fact "this component is eager" is already in each setup's yield union (`Create<"effect">`, calculus §1.2). D-104 requires a marker on `ComponentView`, folded like may-wait (D-075), and effect-reach diagnostics. This main branch records that compiler requirement. C1 effect-reach reports and build diagnostics are implemented on proto/compiler at 8cb1ae8; the EAGER type marker remains unimplemented.
 
 ---
 
@@ -270,7 +281,7 @@ For each module:
 
 - **exports**: which bindings are components, contexts (with or without a default), events or server functions (a module-level `"use server"`, or a function directive);
 - **for each `component(…)`**: its declared props; its setup's parts (cells and whether they are written, memos with their pre-attempt reads and attempt target, effects, events with their writes and calls, context reads); its view's holes, binds, calls (with their props literal), flow controls, boundaries and provides;
-- **colors by syntax**: whether a part may pend (an async attempt or `until`, a pending read through a memo) or fail (a `raise`, an attempt whose handler returns an `Error`). This is a sound over-approximation of κ that M4 needs. The type checker would make it exact, and the C1 CLI report may use it (§2.5). The Vite pass does not.
+- **colors by syntax**: whether a part may pend (an async attempt or `until`, a pending read through a memo) or fail (a `raise`, an attempt whose handler returns an `Error`). This is a sound over-approximation of κ that M4 needs. The type checker would preserve declared color bounds, and the C1 CLI report may use it (§2.5). The Vite pass does not.
 
 What the dialect guarantees is what makes this syntactic:
 
@@ -377,11 +388,7 @@ An inert native element still participates in public element-claim registration
 - a streamed one as a source that pends until it lands;
 - a failure re-branded as its class.
 
-**A loader.** A small client entry, the only new client code, schedules the roots:
-
-- eager roots at once, in document order;
-- visible roots by `IntersectionObserver`;
-- lazy roots on the first delegated event at their span, replayed after hydration. Solid's public `HydrationScript({ eventNames })` / `generateHydrationScript` already captures events that happen before hydration. That is to be verified per root, not assumed.
+**A loader (v0.2, tier 1).** A small client entry hydrates every emitted island at once, in document order, regardless of its eager/visible/lazy report class. Per-root claims and pre-hydration event handling must be verified, not assumed. Delayed visible/lazy Solid hydration is rejected (tier 2, D-111/D-113); first-interaction attachment belongs to the independent v0.3 resume(root) builder (tier 3).
 
 **What is preserved:**
 
@@ -433,7 +440,7 @@ C4 comes only after C3 and only as sugar that desugars to the dialect before the
 **Declared differences** (each one pinned in `declared.ts`, as D-069's were, so that a change in either direction turns the gate red):
 
 1. **Hydration keys** (D-074).
-2. **A lazy root's setups run at its first event, not at load.** This is unobservable in the DOM by D-042 and D-101 (§1.7). It is observable only in a trace that logs setup runs.
+2. **Future tier 3 only: a lazy builder's setups materialise at its first interaction.** This is not a v0.2 trace difference or a justification for delayed Solid hydrate. Setup calls can start timers without an effect (compiler finding F-C2); C1 must report those eager causes, and tier 3 must validate any deferred work.
 3. **On the server, an inert region's server-component render order**, which D-084 already rules unobservable.
 4. **R refetch completion may arrive after an RPC.** A parity checkpoint may be labelled `server-refetched` only after the same DOM arrives. This is not permission to normalize DOM differences or change Loading/Errored behavior. Record both the original checkpoint and the eventual observation.
 
@@ -465,9 +472,11 @@ Measuring what v0.2 saves is Q3.
 
 ---
 
-## 5. Open decisions for Dev
+## 5. Decisions (Dev, 2026-10-07)
 
-### Q1. What does v0.2 split the app into? (ML-Q1)
+Q1–Q6 are ruled by D-103–D-108: C, B (also report each eager island's effect reach), B (with a measured tolerance), A, B (implemented on proto/compiler), B after C3. The alternatives below remain the design record. D-111 overrides delayed hydration: **v0.2 emits eager islands only**. Lazy/visible describe analysis report classes, not v0.2 attachment schedules. v0.3 will attach by key without Solid's hydrate, with its own delegated event queue and payload, validated claims and render fallback. No reset of Solid's private hydration completion flag is permitted.
+
+### Q1. What does v0.2 split the app into? (ML-Q1) — ruled C (D-103)
 
 ```tsx
 // hackernews-spa-yield/src/components/toggle.tsx (abridged)
@@ -493,7 +502,7 @@ const Toggle = component(function* Toggle(props: Props<{ children: Element }>) {
 
 **Recommendation: C.** It ships on Solid and keeps D-004. The rules that are expensive to add later get fixed while there are 8 twins to migrate.
 
-### Q2. What does an `$effect` do to a root? (ML-Q2)
+### Q2. What does an `$effect` do to a root? (ML-Q2) — ruled B, with effect reach (D-104)
 
 ```tsx
 // room-yield/src/lib/identity.tsx: mints the tab's identity on the client (D-101)
@@ -512,12 +521,13 @@ Under §1, `me` is a written cell (C) provided above the whole app. M3 puts ever
 - **A.** Nothing special: every root hydrates at load.
 - **B.** A root with `Create<"effect">` in any of its setups is **eager**, and the others are lazy or visible (§1.7). The fact is surfaced in two places:
   - **as a marker in the types**: a phantom `[EAGER]` on `ComponentView`, folded like may-wait (D-075). It is not a color, has no boundary and is never discharged, so a component's eagerness is visible at its call;
-  - **as a diagnostic** in the report and in the build, at the effect, naming the root it made eager (ML-L8).
+  - **as a diagnostic** in the report and in the build, at the effect, naming the root it made eager (ML-L8);
+  - **effect reach (D-104 addition):** for every eager island, list the effects, their transitive reads/writes/calls and the dependent parts, providers and readers merged with them. Report unproved setup work separately as an eager cause (F-C2).
 - **C.** Remove `$effect` in favour of triggered behaviours, as markless does (no effects, `onVisible` / `attach`).
 
 **Recommendation: B.** It keeps D-079 and D-101 (4 run-once sites migrated). The fact is already in the types. And it makes an effect's cost visible exactly where v0.2 pays for it. Revisit C only if C1's eager-root counts are high.
 
-### Q3. Should the gate measure what v0.2 is meant to save? (ML-Q3)
+### Q3. Should the gate measure what v0.2 is meant to save? (ML-Q3) — ruled B, with measured tolerance (D-105)
 
 ```sh
 # proposed step: executed bytes (V8 coverage), twin vs original, at load and per parity step
@@ -525,12 +535,12 @@ node examples/harness/executed-bytes/measure.mjs --baseline documentation/execut
 ```
 
 - **A.** Keep D-017: no performance in the gate.
-- **B.** Amend D-017 for **executed bytes** only (ML-L1). These are V8 coverage's bytes of JS run at load and per parity step, for each twin against its original. They are deterministic across machines, and that removes D-017's stated reason ("noisy across machines"). Wall time stays manual.
+- **B.** Amend D-017 for **executed bytes** only (ML-L1). These are V8 coverage's bytes of JS run at load and per parity step, for each twin against its original. The prototype observed run-to-run drift, so an explicit tolerance is required (D-105). Wall time stays manual.
 - **C.** B, plus per-root payload and registration checks and a real-browser lane (amending D-037).
 
-**Recommendation: B now, C with roots (C2).** v0.2's whole claim is "less code runs", and §8 shows that a manual measurement can silently measure nothing ("timed a list that never grew"). The per-root checks only mean something once roots exist.
+**Recommendation: B now, C with roots (C2).** v0.2's whole claim is "less code runs", and yield-library.md §8 shows that a manual measurement can silently measure nothing ("timed a list that never grew"). The per-root checks only mean something once roots exist.
 
-### Q4. Provenance annotations at leaks
+### Q4. Provenance annotations at leaks — ruled A (D-106)
 
 ```ts
 // a claim, D-102-style: the author states what the analysis cannot see
@@ -543,7 +553,7 @@ export const getStory = server(query(hn.getStory, "story")); // "this is server-
 
 **Recommendation: A until C1's report shows the need.** If the report shows that a few named sources (the router's `query`, route props) make most parts U, then B for exactly those, as D-029 waited for its count before `Inherit<T>`.
 
-### Q5. A foreign-primitive bridge
+### Q5. A foreign-primitive bridge — ruled B on proto/compiler (D-107)
 
 ```ts
 // today: refused (no-foreign-reactive, D-006); a router param cannot enter routine code except as a prop
@@ -562,7 +572,7 @@ The compiler will meet foreign primitives constantly: the router's params and `q
 
 **Recommendation: B, as an edge and not an escape hatch.** It is the reactive counterpart of `foreign(C)` (D-088). It gives the analysis one named site per leak instead of a whole region of U. It amends `no-foreign-reactive`, so it is Dev's call against D-006. Take C only if C1 shows foreign failures that need kinds.
 
-### Q6. Does the compiler route elide `yield*`, and are components plain functions there?
+### Q6. Does the compiler route elide `yield*`, and are components plain functions there? — ruled B after C3 (D-108)
 
 ```tsx
 // C4 spelling (sugar) …                          … desugars to the dialect before the analysis
@@ -598,4 +608,10 @@ D-098's rejected alternative was components as plain functions, with lazy contex
 | R10 | **Scope creep toward a framework.** A router, a bundler, a runtime of its own, resumability. | ML §5 "contradicts" 4 | C1 is a report only. Q1-C keeps Solid's client. The compiler adds a loader and nothing else. B (resumability) is a separate ruling, not drift. |
 | R11 | **Partial hydration may not fit Solid's public hydration** (nested namespaces, event replay per root). | §3.1 | C2's first spike checks it. A gap is a finding (D-004), not a workaround. |
 | R12 | **Failures crossing an edge must keep their class and brand,** or `catch: [K]` and `attempt` mis-handle them (calculus T4, D-087). | §1.6 | Failure classes are registered with the serializer by module id. A failure class that cannot be registered makes its region client (a capture failure). |
-| R13 | **Deferred setups.** Code that relies on setup timing would break under lazy roots. | §1.7 | Ruled unobservable by D-042 and D-101 (setups only create; effects make a root eager). A trace difference is declared in §4. A development-only check can flag a setup that logs. |
+| R13 | **Deferred setups.** Code that relies on setup timing would break under lazy roots. | §1.7 | v0.2 defers no island. C1 reports effects and unproved setup work as eager causes (F-C2); the future tier 3 builder must validate deferral and its declared trace differences. |
+
+---
+
+## 8. Corpus
+
+D-113 distinguishes the original eight interaction-dense twins, each one connected group with inert holes a minority (todos 1/36, room 10/109, rendering 47/202), from the new content-heavy docs-yield pair (71e8e4f). The instance pass finds 37 origins from the original 275 leak entries, 36 genuine; these counts differ in precision and are not savings. Docs reports 127/243 inert holes, 149/249 inert JSX and six candidate groups (1 eager, 2 visible, 3 lazy), with one effect confined to ThemeToggle. M6 through a shared pure helper and FOREIGN_OWNER under a route over-merge; the changing carousel img is falsely inert (148/249 after removing that element). Six groups are not six proven widget roots. The report at origin/proto/compiler (3b51165), documentation/compiler-c1-report.md, records the limits. Proceed to rule/bug fixes and C2 eager islands on docs, then measure executed bytes. Planned C1b measures per-interaction reachability and required data, separately from group connectivity.

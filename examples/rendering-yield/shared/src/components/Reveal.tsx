@@ -1,3 +1,4 @@
+import { Failure } from "solid-yield";
 import { Reveal, type RevealOrder } from "solid-js";
 import {
   component,
@@ -31,8 +32,7 @@ const CardBody = component(function* CardBody(
 });
 
 /** A card\u0027s value failed: the color of its failure. */
-export class RevealError extends Error {
-  readonly kind = "reveal" as const;
+export class RevealError extends Failure("reveal") {
   constructor(cause: unknown) {
     super(cause instanceof Error ? cause.message : String(cause));
   }

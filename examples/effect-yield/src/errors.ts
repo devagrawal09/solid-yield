@@ -1,6 +1,6 @@
+import { Failure } from "solid-yield";
 /** A package search failed: the color of its failure. */
-export class SearchError extends Error {
-  readonly kind = "search" as const;
+export class SearchError extends Failure("search") {
   constructor(cause: unknown) {
     super(cause instanceof Error ? cause.message : String(cause));
   }
@@ -11,8 +11,7 @@ export class SearchError extends Error {
  * layer's `TransientNetworkError` (a tagged error, which has `_tag` but no
  * `kind`, D-034). It shows as the original does (`String(error)`).
  */
-export class TransientError extends Error {
-  readonly kind = "transient" as const;
+export class TransientError extends Failure("transient") {
   constructor(readonly error: Error) {
     super(error.message);
   }

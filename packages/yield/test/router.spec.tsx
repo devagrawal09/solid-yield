@@ -9,9 +9,9 @@ import { flush } from "solid-js";
 import { component, createContext, foreign, Loading, render, view, type Props } from "solid-yield";
 
 type Theme = "light" | "dark";
-const ThemeCtx = createContext<Theme, "ThemeCtx">();
+const ThemeCtx = createContext<Theme, "ThemeCtx">(undefined, { name: "ThemeCtx" });
 
-const Notes = component(function* Notes(props: Props<RouteProps<"/notes/:mode">>) {
+const Notes = component(function* Notes(props: Props<RouteProps<"/notes/:mode", undefined>>) {
   return view(function* () {
     return <h1 class="notes">notes: {yield* props.params.mode}</h1>;
   });

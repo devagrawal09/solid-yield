@@ -44,7 +44,9 @@ function mint(): Identity {
  * `Identity | null`: its `null` is the identity the server renders with and
  * the client has until it mints one — no longer also "no provider".
  */
-const IdentityContext = createContext<Source<Identity | null>, "IdentityCtx">();
+const IdentityContext = createContext<Source<Identity | null>, "IdentityCtx">(undefined, {
+  name: "IdentityCtx"
+});
 export { IdentityContext as IdentityCtx };
 
 /** Holds this tab's identity for the tree below; mints it on the client once mounted. */

@@ -1,9 +1,8 @@
+import { Failure } from "solid-yield";
 import { component, $event, attempt, createContext, view } from "solid-yield";
 import { h } from "conformance";
 
-class SaveError extends Error {
-  readonly kind = "save" as const;
-}
+class SaveError extends Failure("save") {}
 
 const Api = createContext("api");
 /** A helper that reads a context: delegated to, so its read is the setup's context read. */

@@ -1,3 +1,4 @@
+import { Failure } from "solid-yield";
 /**
  * Runtime evidence for λ-yield's proof obligations (`documentation/calculus.md`
  * §5): one `describe` per obligation that had no runtime test. Each test pins
@@ -63,12 +64,8 @@ function mount(App: () => any) {
   flush();
 }
 
-class Boom extends Error {
-  readonly kind = "boom" as const;
-}
-class Other extends Error {
-  readonly kind = "other" as const;
-}
+class Boom extends Failure("boom") {}
+class Other extends Failure("other") {}
 
 /** A component whose view reads a memo that raises `e`. */
 function failing(make: () => Boom | Other) {
@@ -631,7 +628,9 @@ describe("O33: a requirement through a flow control, a row and h resolves as typ
 
 // --- O34: a provided value is never unset (F-3, S11) --------------------------------------------
 describe("O34: provide's value is never undefined; nothing is modelled inside the value", () => {
-  const MaybeUser = createContext<{ name: string } | null | undefined, "MaybeUser">();
+  const MaybeUser = createContext<{ name: string } | null | undefined, "MaybeUser">(undefined, {
+    name: "MaybeUser"
+  });
   const Who = component(function* Who() {
     const user = yield* MaybeUser;
     return view(function* () {
@@ -667,12 +666,8 @@ describe("O34: provide's value is never undefined; nothing is modelled inside th
 
 // --- O37: an event bound under an Errored whose catch excludes its failure (D-085) ----------
 describe("O37: an unhandled bound call under an Errored that does not catch its failure", () => {
-  class NotFound extends Error {
-    readonly kind = "not-found" as const;
-  }
-  class Forbidden extends Error {
-    readonly kind = "forbidden" as const;
-  }
+  class NotFound extends Failure("not-found") {}
+  class Forbidden extends Failure("forbidden") {}
   let bump!: () => void;
   const app = (failure: () => Error) =>
     component(function* App() {

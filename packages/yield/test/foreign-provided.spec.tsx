@@ -34,7 +34,7 @@ function mount(App: () => any) {
 }
 
 type Theme = "light" | "dark";
-const ThemeCtx = createContext<Theme, "ThemeCtx">();
+const ThemeCtx = createContext<Theme, "ThemeCtx">(undefined, { name: "ThemeCtx" });
 
 const Settings = component(function* Settings() {
   const theme = yield* ThemeCtx;
@@ -82,7 +82,7 @@ describe("D-102: foreign(Comp, { provided }) — a provider above the foreign ed
     try {
       expect(() => mount(() => <Router routes={routes} />)).toThrow(
         __DEV__
-          ? /\[NO_PROVIDER\] <Settings> reads a context, created without a default/
+          ? /\[NO_PROVIDER\] <Settings> reads the context ThemeCtx, created without a default/
           : /context/i
       );
     } finally {

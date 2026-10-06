@@ -21,6 +21,8 @@ import {
   Show as SolidShow,
   Switch as SolidSwitch,
   untrack,
+  onCleanup,
+  getOwner,
   type Accessor
 } from "solid-js";
 import {
@@ -211,6 +213,10 @@ function propRead(v: unknown): unknown {
   return flowControl(() => throughHole(v));
 }
 
+type MarkupRow<A extends unknown[]> = ((...args: A) => Generator<any, Element, any>) & {
+  readonly "[ROW_VIEW] a row returns its view: return view(function* () { return <.../>; })": never;
+};
+
 // --- For ------------------------------------------------------------------------------------------
 
 type EachOf<T> = T extends readonly (infer U)[] ? U : never;
@@ -222,6 +228,13 @@ type ItemOf<W> = Path<EachOf<NonNullable<ValueOf<W>>>>;
  * row's item is a path (D-055), its index a source. The rows' pending and
  * failures join the list's view (D-059, D-063), and so the holding view.
  */
+/** Refuse JSX returned from a row before inferring its view's recursive colors. */
+function ForYield<W, F>(props: {
+  each: W;
+  keyed?: boolean;
+  fallback?: LazyParam<F, Fallback, "fallback">;
+  children: MarkupRow<[item: ItemOf<W>, index: Source<number>]>;
+}): ComponentView<false, never>;
 function ForYield<W, Y, VY, R, F>(props: {
   each: W;
   fallback?: LazyParam<F, Fallback, "fallback">;
@@ -229,11 +242,19 @@ function ForYield<W, Y, VY, R, F>(props: {
   children: RowRoutine<[item: ItemOf<W>, index: Source<number>], Y, VY, R>;
 }): FlowView<Ops<W> | Ops<F> | RowOps<VY, R, Y>>;
 /** `h`: `For({ each: todos, children: todo => h(TodoItem, { todo }) })`. */
-function ForYield<W, C extends Rendered | Element, F>(props: {
+function ForYield<W, C, F>(props: {
   each: W;
   fallback?: LazyParam<F, Fallback, "fallback">;
   keyed?: boolean | ((item: EachOf<NonNullable<ValueOf<W>>>) => any);
-  children: (item: ItemOf<W>, index: Source<number>) => LazyParam<C, Rendered, "children">;
+  children: (
+    item: ItemOf<W>,
+    index: Source<number>
+  ) => C &
+    (C extends Generator<any, any, any>
+      ? {
+          readonly "[ROW_VIEW] a row returns its view: return view(function* () { return <.../>; })": never;
+        }
+      : LazyParam<C, Rendered, "children">);
 }): FlowView<Ops<W> | Ops<F> | OpsOfHole<C>>;
 function ForYield(props: any): any {
   const keyedFalse = props.keyed === false;
@@ -254,6 +275,13 @@ function ForYield(props: any): any {
 // --- Repeat ---------------------------------------------------------------------------------------
 
 /** `{yield* Repeat({ count: n, children: function* (index) { … } })}`: the index is a source. */
+/** Refuse JSX returned from a row before inferring its view's recursive colors. */
+function RepeatYield<W, F>(props: {
+  count: W;
+  keyed?: boolean;
+  fallback?: LazyParam<F, Fallback, "fallback">;
+  children: MarkupRow<[index: Source<number>]>;
+}): ComponentView<false, never>;
 function RepeatYield<W, Y, VY, R, F>(props: {
   count: W;
   from?: number | undefined;
@@ -282,6 +310,13 @@ type ValuePath<W> = Path<NonNullable<ValueOf<W>>>;
  * <…/>; }` built when the branch shows. `when` is a value, a source or a hole
  * (`when: function* () { return (yield* n) > 1; }`).
  */
+/** Refuse JSX returned from a row before inferring its view's recursive colors. */
+function ShowYield<W, F>(props: {
+  when: W;
+  keyed?: boolean;
+  fallback?: LazyParam<F, Fallback, "fallback">;
+  children: MarkupRow<[value: ValuePath<W>]>;
+}): ComponentView<false, never>;
 function ShowYield<W, Y, VY, R, F>(props: {
   when: W;
   keyed?: boolean;
@@ -320,6 +355,13 @@ function SwitchYield(props: any): any {
 }
 
 /** A branch of `Switch`; its children a row (its value a path) or a lazy view. */
+/** Refuse JSX returned from a row before inferring its view's recursive colors. */
+function MatchYield<W, F>(props: {
+  when: W;
+  keyed?: boolean;
+  fallback?: LazyParam<F, Fallback, "fallback">;
+  children: MarkupRow<[value: ValuePath<W>]>;
+}): ComponentView<false, never>;
 function MatchYield<W, Y, VY, R>(props: {
   when: W;
   keyed?: boolean;
@@ -516,7 +558,15 @@ function ErroredYield(props: any): any {
   const fallback = props.fallback as any;
   const handles = props.catch as readonly ErrorClass[] | undefined;
   // what a bind site below sees (D-085, F-7): what this one takes, and the one above
-  const boundary: Boundary = { catch: (handles as any) ?? null, parent: boundaryAbove() };
+  const boundary: Boundary = {
+    catch: (handles as any) ?? null,
+    parent: boundaryAbove(),
+    disposed: false,
+    owner: null
+  };
+  onCleanup(() => {
+    boundary.disposed = true;
+  });
   // a zero-arity `function*` is a lazy view (D-066), built each time the
   // fallback shows; a generator taking `(error, reset)` is a row
   const adapted =
@@ -538,6 +588,7 @@ function ErroredYield(props: any): any {
       };
     },
     get children() {
+      boundary.owner = getOwner();
       return createComponent(BOUNDARY as any, {
         value: boundary,
         get children() {

@@ -1,3 +1,4 @@
+import { Failure } from "solid-yield";
 /**
  * The strict rules, no-JSX flavor (`h`) — checked by `tsc`, never
  * executed.
@@ -180,9 +181,7 @@ export const HRowSignature = component(function* () {
 });
 
 // --- declared prop colors at h(Comp, props) (D-024, D-029, D-068) ------------------------------
-class FetchError extends Error {
-  readonly kind = "fetch" as const;
-}
+class FetchError extends Failure("fetch") {}
 type Todo = { title: string };
 declare const settledTodo: Source<Todo>;
 declare const asyncTodo: Source<Todo, FetchError, true>;

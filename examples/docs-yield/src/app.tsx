@@ -10,7 +10,7 @@ import {
   ImageCarousel
 } from "./widgets";
 import "./app.css";
-const Home = component(function* Home(_props: Props<RouteSectionProps>) {
+const Home = component(function* Home(_props: Props<RouteSectionProps<void>>) {
   return view(function* () {
     return (
       <main>
@@ -20,7 +20,7 @@ const Home = component(function* Home(_props: Props<RouteSectionProps>) {
     );
   });
 });
-const DocPage = component(function* DocPage(props: Props<RouteSectionProps>) {
+const DocPage = component(function* DocPage(props: Props<RouteSectionProps<void>>) {
   return view(function* () {
     return (
       <main>

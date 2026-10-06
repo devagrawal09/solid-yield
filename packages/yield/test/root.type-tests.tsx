@@ -1,3 +1,4 @@
+import { Failure } from "solid-yield";
 /**
  * Type tests for the root edge (D-033, D-095, D-099): `render`, `hydrate`,
  * `renderToString` and `renderToStream` take a root that is settled and
@@ -19,9 +20,7 @@ import {
   type RootCheck
 } from "solid-yield";
 
-class Gone extends Error {
-  readonly kind = "gone" as const;
-}
+class Gone extends Failure("gone") {}
 declare const root: HTMLElement;
 
 /** Pending by design, and may fail. */
@@ -83,7 +82,7 @@ type _pendingThunk = Expect<Equal<keyof RootCheck<() => ReturnType<typeof App>>,
 type _wrapped = Expect<
   Equal<RootCheck<() => ReturnType<typeof Loading<typeof App, never>>>, unknown>
 >;
-const NeedsCtx = createContext<string, "NeedsCtx">();
+const NeedsCtx = createContext<string, "NeedsCtx">(undefined, { name: "NeedsCtx" });
 const Reader = component(function* Reader() {
   const v = yield* NeedsCtx;
   return view(function* () {

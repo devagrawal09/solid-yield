@@ -1,6 +1,6 @@
+import { Failure } from "solid-yield";
 /** A stream of items failed: the color of its failure. */
-export class StreamError extends Error {
-  readonly kind = "stream" as const;
+export class StreamError extends Failure("stream") {
   constructor(cause: unknown) {
     super(cause instanceof Error ? cause.message : String(cause));
   }
@@ -10,8 +10,7 @@ export class StreamError extends Error {
  * An item failed to load: the color of its failure. Its text is the
  * original's (`Error: …`, as `String(error)` shows it).
  */
-export class ItemError extends Error {
-  readonly kind = "item" as const;
+export class ItemError extends Failure("item") {
   constructor(cause: unknown) {
     super(cause instanceof Error ? cause.message : String(cause));
   }

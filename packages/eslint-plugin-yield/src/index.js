@@ -4,6 +4,7 @@
  *
  *   no-throw               a routine raises typed failures: `yield* raise(e)`
  *   no-try-catch           a routine handles a failure with `attempt` or an `Errored`, never `try` / `catch`
+ *   no-read-in-setup       a setup creates; read a source in a view hole, memo, effect or event
  *   no-read-in-view-body   a view has no body: every read is a hole (D-032)
  *   yield-in-jsx-hole      every `yield*` in JSX is in a position the transform turns into a hole
  *   read-before-attempt    a $memo reads before its first `attempt`
@@ -162,6 +163,55 @@ function isJsxView(fn) {
   jsxViews.set(fn, found);
   return found;
 }
+
+/** A setup may yield creations and context reads, but never a source read. */
+const noReadInSetup = {
+  meta: {
+    type: "problem",
+    docs: {
+      description: "A setup creates state; read sources in a view hole, $memo, $effect or $event."
+    },
+    messages: {
+      read: "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
+    },
+    schema: []
+  },
+  create(context) {
+    const services = context.sourceCode.parserServices;
+    const checker =
+      services?.program && services.esTreeNodeToTSNodeMap
+        ? services.program.getTypeChecker()
+        : null;
+    const isRead = node => {
+      if (checker) {
+        const at = services.esTreeNodeToTSNodeMap.get(node);
+        if (at && phantomType(checker, checker.getTypeAtLocation(at), "SOURCE", at)) return true;
+      }
+      if (isPathExpression(context, node)) return true;
+      if (node.type !== "Identifier") return false;
+      const def = resolve(context, node)?.defs[0];
+      const decl = def?.type === "Variable" ? def.node : null;
+      const init = decl?.init;
+      if (init?.type !== "YieldExpression" || !init.delegate) return false;
+      if (decl.id.type === "ArrayPattern")
+        return (
+          decl.id.elements[0] === def.name &&
+          isCallTo(init.argument, ["$signal", "$optimistic", "$store", "$optimisticStore"])
+        );
+      return (
+        isCallTo(init.argument, ["$memo", "$projection"]) || init.argument.type === "Identifier"
+      );
+    };
+    return {
+      YieldExpression(node) {
+        if (!node.delegate || jsxPosition(node)) return;
+        const kind = kindAt(node);
+        if ((kind === "setup" || kind === "row") && isRead(node.argument))
+          context.report({ node, messageId: "read" });
+      }
+    };
+  }
+};
 
 const noReadInViewBody = {
   meta: {
@@ -1742,6 +1792,7 @@ const requireJsxFactory = {
 export const rules = {
   "no-throw": noThrow,
   "no-try-catch": noTryCatch,
+  "no-read-in-setup": noReadInSetup,
   "no-read-in-view-body": noReadInViewBody,
   "yield-in-jsx-hole": yieldInJsxHole,
   "read-before-attempt": readBeforeAttempt,

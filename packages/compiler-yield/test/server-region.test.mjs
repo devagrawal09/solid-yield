@@ -8,7 +8,7 @@ import solidYield from "../../vite-plugin-yield/src/index.js";
 import { emitServerRegion } from "../src/server-region.js";
 
 const require = createRequire(new URL("../package.json", import.meta.url));
-test("C3 stop finding: a failed generated article frame loses the typed failure at the edge", async () => {
+test("D-115: generated article frames preserve the public failure message", async () => {
   const { createServer } = await import(pathToFileURL(require.resolve("vite")));
   const { default: plugin } = await import(pathToFileURL(require.resolve("@solidjs/vite-plugin")));
   const solid = typeof plugin === "function" ? plugin : plugin.default;
@@ -67,11 +67,11 @@ export async function probe(slug) {
       );
     const errors = failure.chunks.filter(c => c.type === "error");
     assert(errors.length > 0);
-    assert(errors.every(c => JSON.stringify(c.error).includes("Internal Server Error")));
-    assert(!JSON.stringify(failure.chunks).includes("No article: missing"));
-    assert(!failure.chunks.some(c => c.html?.includes('class="not-found"')));
-    // This pins a failed edge, not a successful R parity check. Stop emission
-    // integration until the public transport preserves the boundary semantics.
+    assert(errors.every(c => JSON.stringify(c.error).includes("No article: missing")));
+    assert(!JSON.stringify(failure.chunks).includes("Internal Server Error"));
+    // The frame error protocol carries the message only. C3's region emitter
+    // must retain typed handling inside the template rather than rely on this
+    // generic frame error as the authored NotFound value.
   } finally {
     await vite.close();
   }

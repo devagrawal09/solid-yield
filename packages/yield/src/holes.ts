@@ -83,7 +83,7 @@ export type OpsOfHole<V, Eager extends boolean = false> =
 type GeneratorOps<Y, R> = [R] extends [never]
   ? Y
   : R extends () => Generator<infer VY, infer VR, any>
-    ? VY | OpsOfHole<VR>
+    ? Y | VY | OpsOfHole<VR>
     : Y | OpsOfHole<R>;
 
 /** The no-JSX output of holes `V`: its pending / failures (may-wait marker, requirements) are theirs. */

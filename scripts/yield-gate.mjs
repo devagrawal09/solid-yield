@@ -314,6 +314,13 @@ function buildSteps(twins) {
     args: ["--test", "packages/compiler-yield/test/hydration-namespace.test.mjs"]
   });
 
+  steps.push({
+    name: "twins:executed-bytes-test",
+    cwd: root,
+    cmd: process.execPath,
+    args: ["--test", "examples/harness/executed-bytes/coverage.test.mjs"]
+  });
+
   steps.push(
     {
       name: "compiler:executed-bytes-test",

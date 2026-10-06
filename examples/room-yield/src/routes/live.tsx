@@ -61,7 +61,7 @@ import { LiveError } from "~/lib/errors";
 
 const ROOMS = ["lobby", "design", "infra", "random"];
 
-const Live = component(function* Live(props: Props<RouteSectionProps>) {
+const Live = component(function* Live(props: Props<RouteSectionProps<undefined>>) {
   const room = yield* $memo(function* () {
     const q = String((yield* props.location.query.room) || "lobby");
     return ROOMS.includes(q) ? q : "lobby";

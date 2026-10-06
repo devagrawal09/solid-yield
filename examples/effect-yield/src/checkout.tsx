@@ -1,3 +1,4 @@
+import { Failure } from "solid-yield";
 // Action path: a cancellable checkout saga — examples/effect's checkout with
 // solid-yield.
 //
@@ -112,8 +113,7 @@ const Orders = component(function* Orders(
 });
 
 /** Fetching the orders failed: the color of the orders list's failure. */
-export class OrdersError extends Error {
-  readonly kind = "orders" as const;
+export class OrdersError extends Failure("orders") {
   constructor(cause: unknown) {
     super(cause instanceof Error ? cause.message : String(cause));
   }

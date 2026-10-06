@@ -29,7 +29,7 @@ import type {
   PropsInput
 } from "./types.js";
 import type { DECLARED } from "./types.js";
-import type { BOUNDARY_KIND, Reset } from "./flow.js";
+import type { Children, LazyParam, BOUNDARY_KIND, Reset } from "./flow.js";
 import type { PROVIDES, ProvidedValue } from "./context.js";
 import type { Accessor } from "solid-js";
 
@@ -67,6 +67,11 @@ type OpsOfOutput<R> = R extends
   ? ChildView<P, E, W, Q>
   : never;
 
+/** Boundaries build children inside their owner, never from an eager component call. */
+type BoundaryChildren<C extends readonly Hole[]> = {
+  readonly [I in keyof C]: LazyParam<C[I], Children<[]>, "children">;
+};
+
 export interface YieldH {
   /** A fragment: `h([a, b, c])`. It carries its holes' pending / failures. */
   <const C extends readonly Hole[]>(children: C): HViewOf<C[number]>;
@@ -91,7 +96,7 @@ export interface YieldH {
   <const C extends readonly Hole[], F extends Hole = never, O extends Hole = never>(
     component: { readonly [BOUNDARY_KIND]: "loading" },
     props: { fallback?: F; on?: O },
-    ...children: C
+    ...children: C & BoundaryChildren<C>
   ): HView<
     PendingOf<OpsOfHole<F>>,
     FailsOf<OpsOfHole<C[number]> | OpsOfHole<F> | OpsOfHole<O>>,
@@ -106,7 +111,7 @@ export interface YieldH {
   <const C extends readonly Hole[], R extends Hole>(
     component: { readonly [BOUNDARY_KIND]: "errored" },
     props: { fallback: (error: Accessor<unknown>, reset: Reset) => R },
-    ...children: C
+    ...children: C & BoundaryChildren<C>
   ): HView<
     PendingOf<OpsOfHole<C[number]> | OpsOfHole<R>>,
     FailsOf<OpsOfHole<R>>,
@@ -116,7 +121,7 @@ export interface YieldH {
   <const C extends readonly Hole[], F extends Exclude<Hole, (...args: any[]) => any>>(
     component: { readonly [BOUNDARY_KIND]: "errored" },
     props: { fallback: F },
-    ...children: C
+    ...children: C & BoundaryChildren<C>
   ): HView<
     PendingOf<OpsOfHole<C[number]> | OpsOfHole<F>>,
     FailsOf<OpsOfHole<F>>,
@@ -144,7 +149,7 @@ export interface YieldH {
    * a JSX tag.
    */
   <Comp extends (props: any) => unknown, const C extends readonly Hole[]>(
-    component: Comp,
+    component: Comp & { readonly [BOUNDARY_KIND]?: never },
     props: PropsOfComponent<Comp>,
     ...children: C
   ): HView<
@@ -153,7 +158,7 @@ export interface YieldH {
     MayWaitOf<OpsOfOutput<ReturnType<Comp>> | OpsOfHole<C[number]>>,
     RequiresOf<OpsOfOutput<ReturnType<Comp>> | OpsOfHole<C[number], true>>
   >;
-  Fragment: (props: { children: Hole }) => HView<false, never, false, never>;
+  Fragment: <const C extends Hole>(props: { children: C }) => HViewOf<C>;
 }
 
 function convert(args: any[], name: string | null): any[] {

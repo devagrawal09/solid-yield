@@ -1,10 +1,15 @@
-import { attempt, foreignSource, type FailsOf, type PendingOf, type Source } from "solid-yield";
+import {
+  Failure,
+  attempt,
+  foreignSource,
+  type FailsOf,
+  type PendingOf,
+  type Source
+} from "solid-yield";
 type Equal<A, B> =
   (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
 type Expect<T extends true> = T;
-class ForeignError extends Error {
-  readonly kind = "foreign" as const;
-}
+class ForeignError extends Failure("foreign") {}
 const source = foreignSource(() => 1);
 type _Source = Expect<Equal<typeof source, Source<number, unknown, boolean>>>;
 const read = attempt(

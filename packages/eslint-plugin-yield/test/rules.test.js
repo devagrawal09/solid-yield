@@ -1355,3 +1355,65 @@ describe("require-jsx-factory reports a project once", () => {
     expect(plugin.configs.recommended.rules["solid-yield/require-jsx-factory"]).toBe("warn");
   });
 });
+
+tester.run("no-read-in-setup", rules["no-read-in-setup"], {
+  valid: [
+    component(
+      "const [n] = yield* $signal(0); const m = yield* $memo(function* () { return yield* n; }); return view(function* () { return <p>{yield* m}</p>; });"
+    ),
+    component(
+      "const theme = yield* ThemeCtx; return view(function* () { return <p>{yield* theme}</p>; });"
+    ),
+    component(
+      "yield* $effect(function* () { return yield* props.name; }, function* (name) { console.log(name); }); return view(function* () { return <p/>; });"
+    ),
+    "const row = For({each: items, children: function* (item) { const [n] = yield* $signal(0); return view(function* () { return <p>{yield* item.name}{yield* n}</p>; }); }});"
+  ],
+  invalid: [
+    {
+      code: component(
+        "const [n] = yield* $signal(0); const value = yield* n; return view(function* () { return <p>{value}</p>; });"
+      ),
+      errors: [{ messageId: "read" }]
+    },
+    {
+      code: "const C = component(function* (props) { const value = yield* props.name; return view(function* () { return <p>{value}</p>; }); });",
+      errors: [{ messageId: "read" }]
+    },
+    {
+      code: component(
+        "const m = yield* $memo(function* () { return 1; }); const value = yield* m; return view(function* () { return <p>{value}</p>; });"
+      ),
+      errors: [{ messageId: "read" }]
+    },
+    {
+      code: "const row = For({each: items, children: function* (item) { const name = yield* item.name; return view(function* () { return <p>{name}</p>; }); }});",
+      errors: [{ messageId: "read" }]
+    }
+  ]
+});
+
+typedTester.run("no-read-in-setup (source aliases with types)", rules["no-read-in-setup"], {
+  valid: [
+    {
+      filename,
+      code: `
+    declare const ctx: Iterable<unknown>;
+    declare function component(fn: () => Generator<any, any, any>): unknown;
+    component(function* () { const value = yield* ctx; return value; });
+  `
+    }
+  ],
+  invalid: [
+    {
+      filename,
+      code: `
+    declare const SOURCE: unique symbol;
+    declare const remoteSource: Iterable<unknown> & {readonly [SOURCE]: string};
+    declare function component(fn: () => Generator<any, any, any>): unknown;
+    component(function* () { const alias = remoteSource; const value = yield* alias; return value; });
+  `,
+      errors: [{ messageId: "read" }]
+    }
+  ]
+});

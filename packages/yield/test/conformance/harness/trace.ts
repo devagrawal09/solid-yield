@@ -1,3 +1,4 @@
+import { Failure } from "solid-yield";
 /**
  * Trace recording for the semantic conformance harness (ported from the Solid
  * fork's `packages/web/test/conformance/harness/trace.ts`, D-039).
@@ -36,13 +37,11 @@ type Lib = typeof import("solid-yield");
  * Typed failures shared by every source of a scenario (same class identity).
  * Each carries a literal `kind` (D-034), which the trace never prints.
  */
-export class NotFound extends Error {
+export class NotFound extends Failure("not-found") {
   override name = "NotFound";
-  readonly kind = "not-found" as const;
 }
-export class Forbidden extends Error {
+export class Forbidden extends Failure("forbidden") {
   override name = "Forbidden";
-  readonly kind = "forbidden" as const;
 }
 
 export function format(value: unknown): string {

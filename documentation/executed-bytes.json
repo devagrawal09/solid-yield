@@ -271,8 +271,8 @@
       "phases": [
         {
           "phase": "load",
-          "bytes": 2466307,
-          "maxBytes": 2515634
+          "bytes": 2466032,
+          "maxBytes": 2515353
         },
         {
           "phase": "mount",
@@ -462,8 +462,8 @@
       "phases": [
         {
           "phase": "load",
-          "bytes": 2484052,
-          "maxBytes": 2533734
+          "bytes": 2484871,
+          "maxBytes": 2534569
         },
         {
           "phase": "mount",
@@ -472,13 +472,13 @@
         },
         {
           "phase": "type s",
-          "bytes": 288992,
-          "maxBytes": 294772
+          "bytes": 289352,
+          "maxBytes": 295140
         },
         {
           "phase": "type so before s lands (supersedes the s flight)",
-          "bytes": 242011,
-          "maxBytes": 246852
+          "bytes": 241967,
+          "maxBytes": 246807
         },
         {
           "phase": "so lands",
@@ -487,8 +487,8 @@
         },
         {
           "phase": "type sol (stale while revalidating)",
-          "bytes": 239376,
-          "maxBytes": 244164
+          "bytes": 239332,
+          "maxBytes": 244119
         },
         {
           "phase": "halfway",
@@ -502,8 +502,8 @@
         },
         {
           "phase": "type zzz",
-          "bytes": 238501,
-          "maxBytes": 243272
+          "bytes": 238457,
+          "maxBytes": 243227
         },
         {
           "phase": "zzz lands (no matches)",
@@ -512,13 +512,13 @@
         },
         {
           "phase": "clear the query",
-          "bytes": 114726,
-          "maxBytes": 117021
+          "bytes": 115206,
+          "maxBytes": 117511
         },
         {
           "phase": "flaky network: every attempt fails",
-          "bytes": 269228,
-          "maxBytes": 274613
+          "bytes": 269588,
+          "maxBytes": 274980
         },
         {
           "phase": "retries back off",
@@ -527,68 +527,68 @@
         },
         {
           "phase": "retries give up",
-          "bytes": 298447,
-          "maxBytes": 304416
+          "bytes": 298761,
+          "maxBytes": 304737
         },
         {
           "phase": "network recovers, try again",
-          "bytes": 240881,
-          "maxBytes": 245699
+          "bytes": 240736,
+          "maxBytes": 245551
         },
         {
           "phase": "vite lands",
-          "bytes": 252248,
-          "maxBytes": 257293
+          "bytes": 252147,
+          "maxBytes": 257190
         },
         {
           "phase": "clear the log",
-          "bytes": 122860,
-          "maxBytes": 125318
+          "bytes": 122759,
+          "maxBytes": 125215
         },
         {
           "phase": "open the checkout tab",
-          "bytes": 227471,
-          "maxBytes": 232021
+          "bytes": 228182,
+          "maxBytes": 232746
         },
         {
           "phase": "orders load",
-          "bytes": 141569,
-          "maxBytes": 144401
+          "bytes": 141468,
+          "maxBytes": 144298
         },
         {
           "phase": "increment the first item",
-          "bytes": 120091,
-          "maxBytes": 122493
+          "bytes": 120092,
+          "maxBytes": 122494
         },
         {
           "phase": "decrement the second item",
-          "bytes": 118647,
-          "maxBytes": 121020
+          "bytes": 118648,
+          "maxBytes": 121021
         },
         {
           "phase": "place an order",
-          "bytes": 199802,
-          "maxBytes": 203799
+          "bytes": 199605,
+          "maxBytes": 203598
         },
         {
           "phase": "reserving done, charging",
-          "bytes": 184677,
-          "maxBytes": 188371
+          "bytes": 184532,
+          "maxBytes": 188223
         },
         {
           "phase": "charging done, finalizing",
-          "bytes": 184462,
-          "maxBytes": 188152
+          "bytes": 184317,
+          "maxBytes": 188004
         },
         {
           "phase": "order created",
-          "bytes": 208498,
-          "maxBytes": 212668
+          "bytes": 208356,
+          "maxBytes": 212524
         },
         {
           "phase": "orders refresh",
-          "bytes": 201703,
-          "maxBytes": 205738
+          "bytes": 201550,
+          "maxBytes": 205581
         },
         {
           "phase": "tick decline",
@@ -597,18 +597,18 @@
         },
         {
           "phase": "place a declined order",
-          "bytes": 196753,
-          "maxBytes": 200689
+          "bytes": 196556,
+          "maxBytes": 200488
         },
         {
           "phase": "charge declines",
-          "bytes": 192000,
-          "maxBytes": 195840
+          "bytes": 191855,
+          "maxBytes": 195693
         },
         {
           "phase": "compensations run",
-          "bytes": 183125,
-          "maxBytes": 186788
+          "bytes": 183204,
+          "maxBytes": 186869
         },
         {
           "phase": "untick decline",
@@ -617,28 +617,28 @@
         },
         {
           "phase": "place an order to cancel",
-          "bytes": 196562,
-          "maxBytes": 200494
+          "bytes": 196365,
+          "maxBytes": 200293
         },
         {
           "phase": "mid-charge",
-          "bytes": 183799,
-          "maxBytes": 187475
+          "bytes": 183654,
+          "maxBytes": 187328
         },
         {
           "phase": "cancel",
-          "bytes": 191048,
-          "maxBytes": 194869
+          "bytes": 190903,
+          "maxBytes": 194722
         },
         {
           "phase": "compensations after cancel",
-          "bytes": 182526,
-          "maxBytes": 186177
+          "bytes": 182605,
+          "maxBytes": 186258
         },
         {
           "phase": "back to the typeahead tab (fresh component)",
-          "bytes": 121050,
-          "maxBytes": 123471
+          "bytes": 121375,
+          "maxBytes": 123803
         },
         {
           "phase": "settle",
@@ -653,8 +653,8 @@
       "phases": [
         {
           "phase": "load",
-          "bytes": 1155016,
-          "maxBytes": 1178117
+          "bytes": 1154174,
+          "maxBytes": 1177258
         },
         {
           "phase": "mount / (loading, then the top feed)",
@@ -739,8 +739,8 @@
       "phases": [
         {
           "phase": "load",
-          "bytes": 541596,
-          "maxBytes": 552428
+          "bytes": 541486,
+          "maxBytes": 552316
         },
         {
           "phase": "mount / (loading, then the top feed)",
@@ -749,33 +749,33 @@
         },
         {
           "phase": "next page",
-          "bytes": 239148,
-          "maxBytes": 243931
+          "bytes": 239104,
+          "maxBytes": 243887
         },
         {
           "phase": "previous page",
-          "bytes": 230422,
-          "maxBytes": 235031
+          "bytes": 230378,
+          "maxBytes": 234986
         },
         {
           "phase": "New",
-          "bytes": 236759,
-          "maxBytes": 241495
+          "bytes": 236715,
+          "maxBytes": 241450
         },
         {
           "phase": "Ask",
-          "bytes": 237086,
-          "maxBytes": 241828
+          "bytes": 237042,
+          "maxBytes": 241783
         },
         {
           "phase": "Jobs",
-          "bytes": 235430,
-          "maxBytes": 240139
+          "bytes": 235386,
+          "maxBytes": 240094
         },
         {
           "phase": "a job's story",
-          "bytes": 250569,
-          "maxBytes": 255581
+          "bytes": 251101,
+          "maxBytes": 256124
         },
         {
           "phase": "collapse the first thread",
@@ -794,28 +794,28 @@
         },
         {
           "phase": "a commenter",
-          "bytes": 238409,
-          "maxBytes": 243178
+          "bytes": 238556,
+          "maxBytes": 243328
         },
         {
           "phase": "Show",
-          "bytes": 249689,
-          "maxBytes": 254683
+          "bytes": 249836,
+          "maxBytes": 254833
         },
         {
           "phase": "Show page 2 (last page)",
-          "bytes": 232366,
-          "maxBytes": 237014
+          "bytes": 232322,
+          "maxBytes": 236969
         },
         {
           "phase": "a story's author",
-          "bytes": 238747,
-          "maxBytes": 243522
+          "bytes": 238894,
+          "maxBytes": 243672
         },
         {
           "phase": "home",
-          "bytes": 245068,
-          "maxBytes": 249970
+          "bytes": 245215,
+          "maxBytes": 250120
         }
       ]
     },
@@ -825,13 +825,13 @@
       "phases": [
         {
           "phase": "load",
-          "bytes": 385012,
-          "maxBytes": 392713
+          "bytes": 384857,
+          "maxBytes": 392555
         },
         {
           "phase": "mount (Home, lazy)",
-          "bytes": 118931,
-          "maxBytes": 121310
+          "bytes": 118896,
+          "maxBytes": 121274
         },
         {
           "phase": "Home ticks",
@@ -840,8 +840,8 @@
         },
         {
           "phase": "Profile",
-          "bytes": 197528,
-          "maxBytes": 201479
+          "bytes": 197483,
+          "maxBytes": 201433
         },
         {
           "phase": "profile data",
@@ -850,8 +850,8 @@
         },
         {
           "phase": "Settings",
-          "bytes": 184393,
-          "maxBytes": 188081
+          "bytes": 184323,
+          "maxBytes": 188010
         },
         {
           "phase": "type",
@@ -885,8 +885,8 @@
         },
         {
           "phase": "Stream",
-          "bytes": 213345,
-          "maxBytes": 217612
+          "bytes": 213300,
+          "maxBytes": 217566
         },
         {
           "phase": "two items",
@@ -900,8 +900,8 @@
         },
         {
           "phase": "Error Stream",
-          "bytes": 196335,
-          "maxBytes": 200262
+          "bytes": 196285,
+          "maxBytes": 200211
         },
         {
           "phase": "items settle / fail",
@@ -920,8 +920,8 @@
         },
         {
           "phase": "Reveal",
-          "bytes": 209591,
-          "maxBytes": 213783
+          "bytes": 209531,
+          "maxBytes": 213722
         },
         {
           "phase": "cards reveal (sequential)",
@@ -935,8 +935,8 @@
         },
         {
           "phase": "natural settles",
-          "bytes": 109632,
-          "maxBytes": 111825
+          "bytes": 109723,
+          "maxBytes": 111918
         },
         {
           "phase": "uncollapse (sequential)",
@@ -945,8 +945,8 @@
         },
         {
           "phase": "Skeleton",
-          "bytes": 218572,
-          "maxBytes": 222944
+          "bytes": 218512,
+          "maxBytes": 222883
         },
         {
           "phase": "feed lands",
@@ -981,8 +981,8 @@
       "phases": [
         {
           "phase": "load",
-          "bytes": 405176,
-          "maxBytes": 413280
+          "bytes": 405596,
+          "maxBytes": 413708
         },
         {
           "phase": "mount (Home, lazy)",
@@ -996,8 +996,8 @@
         },
         {
           "phase": "Profile",
-          "bytes": 210386,
-          "maxBytes": 214594
+          "bytes": 210758,
+          "maxBytes": 214974
         },
         {
           "phase": "profile data",
@@ -1006,8 +1006,8 @@
         },
         {
           "phase": "Settings",
-          "bytes": 192093,
-          "maxBytes": 195935
+          "bytes": 192496,
+          "maxBytes": 196346
         },
         {
           "phase": "type",
@@ -1031,8 +1031,8 @@
         },
         {
           "phase": "reopen the portal",
-          "bytes": 104332,
-          "maxBytes": 106419
+          "bytes": 104278,
+          "maxBytes": 106364
         },
         {
           "phase": "close again",
@@ -1041,8 +1041,8 @@
         },
         {
           "phase": "Stream",
-          "bytes": 222327,
-          "maxBytes": 226774
+          "bytes": 222621,
+          "maxBytes": 227074
         },
         {
           "phase": "two items",
@@ -1056,38 +1056,38 @@
         },
         {
           "phase": "Error Stream",
-          "bytes": 208317,
-          "maxBytes": 212484
+          "bytes": 208679,
+          "maxBytes": 212853
         },
         {
           "phase": "items settle / fail",
-          "bytes": 126399,
-          "maxBytes": 128927
+          "bytes": 126596,
+          "maxBytes": 129128
         },
         {
           "phase": "reset the inner bad item",
-          "bytes": 143518,
-          "maxBytes": 146389
+          "bytes": 143725,
+          "maxBytes": 146600
         },
         {
           "phase": "reset the outer bad item",
-          "bytes": 143944,
-          "maxBytes": 146823
+          "bytes": 144151,
+          "maxBytes": 147035
         },
         {
           "phase": "Reveal",
-          "bytes": 226343,
-          "maxBytes": 230870
+          "bytes": 227311,
+          "maxBytes": 231858
         },
         {
           "phase": "cards reveal (sequential)",
-          "bytes": 122615,
-          "maxBytes": 125068
+          "bytes": 122574,
+          "maxBytes": 125026
         },
         {
           "phase": "order: natural, restart",
-          "bytes": 175191,
-          "maxBytes": 178695
+          "bytes": 175456,
+          "maxBytes": 178966
         },
         {
           "phase": "natural settles",
@@ -1096,13 +1096,13 @@
         },
         {
           "phase": "uncollapse (sequential)",
-          "bytes": 176751,
-          "maxBytes": 180287
+          "bytes": 177057,
+          "maxBytes": 180599
         },
         {
           "phase": "Skeleton",
-          "bytes": 231302,
-          "maxBytes": 235929
+          "bytes": 231534,
+          "maxBytes": 236165
         },
         {
           "phase": "feed lands",
@@ -1111,8 +1111,8 @@
         },
         {
           "phase": "refetch (pending)",
-          "bytes": 129935,
-          "maxBytes": 132534
+          "bytes": 129891,
+          "maxBytes": 132489
         },
         {
           "phase": "refetched",
@@ -1121,13 +1121,13 @@
         },
         {
           "phase": "Home again",
-          "bytes": 143398,
-          "maxBytes": 146266
+          "bytes": 143455,
+          "maxBytes": 146325
         },
         {
           "phase": "popstate back",
-          "bytes": 147086,
-          "maxBytes": 150028
+          "bytes": 147069,
+          "maxBytes": 150011
         }
       ]
     },
@@ -1137,8 +1137,8 @@
       "phases": [
         {
           "phase": "load",
-          "bytes": 620950,
-          "maxBytes": 633369
+          "bytes": 620198,
+          "maxBytes": 632602
         },
         {
           "phase": "mount /live",
@@ -1213,13 +1213,13 @@
       "phases": [
         {
           "phase": "load",
-          "bytes": 637159,
-          "maxBytes": 649903
+          "bytes": 637393,
+          "maxBytes": 650141
         },
         {
           "phase": "mount /live",
-          "bytes": 214881,
-          "maxBytes": 219179
+          "bytes": 214837,
+          "maxBytes": 219134
         },
         {
           "phase": "shell sources land",
@@ -1238,8 +1238,8 @@
         },
         {
           "phase": "post on /live (optimistic, held for the echo)",
-          "bytes": 253414,
-          "maxBytes": 258483
+          "bytes": 253370,
+          "maxBytes": 258438
         },
         {
           "phase": "the echo lands",
@@ -1253,8 +1253,8 @@
         },
         {
           "phase": "kill every connection (the summary dies)",
-          "bytes": 216197,
-          "maxBytes": 220521
+          "bytes": 216350,
+          "maxBytes": 220677
         },
         {
           "phase": "live sources reconnect",
@@ -1263,8 +1263,8 @@
         },
         {
           "phase": "regenerate the summary",
-          "bytes": 144260,
-          "maxBytes": 147146
+          "bytes": 144307,
+          "maxBytes": 147194
         },
         {
           "phase": "the summary and the archive finish",
@@ -1273,8 +1273,8 @@
         },
         {
           "phase": "switch to #infra from the directory",
-          "bytes": 300011,
-          "maxBytes": 306012
+          "bytes": 299967,
+          "maxBytes": 305967
         },
         {
           "phase": "#infra lands",
@@ -1289,8 +1289,8 @@
       "phases": [
         {
           "phase": "load",
-          "bytes": 383736,
-          "maxBytes": 391411
+          "bytes": 383676,
+          "maxBytes": 391350
         },
         {
           "phase": "mount",
@@ -1355,8 +1355,8 @@
       "phases": [
         {
           "phase": "load",
-          "bytes": 412251,
-          "maxBytes": 420497
+          "bytes": 412798,
+          "maxBytes": 421054
         },
         {
           "phase": "mount",
@@ -1365,13 +1365,13 @@
         },
         {
           "phase": "idle callbacks resolve",
-          "bytes": 129423,
-          "maxBytes": 132012
+          "bytes": 129379,
+          "maxBytes": 131967
         },
         {
           "phase": "one second: seconds = 1, frames scale the container",
-          "bytes": 127269,
-          "maxBytes": 129815
+          "bytes": 127225,
+          "maxBytes": 129770
         },
         {
           "phase": "idle callbacks for the new seconds",
@@ -1395,8 +1395,8 @@
         },
         {
           "phase": "four more seconds",
-          "bytes": 128956,
-          "maxBytes": 131536
+          "bytes": 128912,
+          "maxBytes": 131491
         },
         {
           "phase": "settle",
@@ -1405,8 +1405,8 @@
         },
         {
           "phase": "eight more seconds (seconds wrap past 10)",
-          "bytes": 128425,
-          "maxBytes": 130994
+          "bytes": 128381,
+          "maxBytes": 130949
         },
         {
           "phase": "settle again",
@@ -1421,8 +1421,8 @@
       "phases": [
         {
           "phase": "load",
-          "bytes": 383736,
-          "maxBytes": 391411
+          "bytes": 383676,
+          "maxBytes": 391350
         },
         {
           "phase": "mount",
@@ -1487,8 +1487,8 @@
       "phases": [
         {
           "phase": "load",
-          "bytes": 414130,
-          "maxBytes": 422413
+          "bytes": 414692,
+          "maxBytes": 422986
         },
         {
           "phase": "mount",
@@ -1497,13 +1497,13 @@
         },
         {
           "phase": "idle callbacks resolve",
-          "bytes": 133467,
-          "maxBytes": 136137
+          "bytes": 133423,
+          "maxBytes": 136092
         },
         {
           "phase": "one second: seconds = 1, frames scale the container",
-          "bytes": 131515,
-          "maxBytes": 134146
+          "bytes": 131471,
+          "maxBytes": 134101
         },
         {
           "phase": "idle callbacks for the new seconds",
@@ -1527,8 +1527,8 @@
         },
         {
           "phase": "four more seconds",
-          "bytes": 133164,
-          "maxBytes": 135828
+          "bytes": 133120,
+          "maxBytes": 135783
         },
         {
           "phase": "settle",
@@ -1537,8 +1537,8 @@
         },
         {
           "phase": "eight more seconds (seconds wrap past 10)",
-          "bytes": 132671,
-          "maxBytes": 135325
+          "bytes": 132627,
+          "maxBytes": 135280
         },
         {
           "phase": "settle again",
@@ -1553,8 +1553,8 @@
       "phases": [
         {
           "phase": "load",
-          "bytes": 427338,
-          "maxBytes": 435885
+          "bytes": 427228,
+          "maxBytes": 435773
         },
         {
           "phase": "mount (loading)",
@@ -1699,8 +1699,8 @@
       "phases": [
         {
           "phase": "load",
-          "bytes": 438644,
-          "maxBytes": 447417
+          "bytes": 439452,
+          "maxBytes": 448242
         },
         {
           "phase": "mount (loading)",
@@ -1709,28 +1709,28 @@
         },
         {
           "phase": "todos load",
-          "bytes": 181957,
-          "maxBytes": 185597
+          "bytes": 181903,
+          "maxBytes": 185542
         },
         {
           "phase": "add a todo (optimistic)",
-          "bytes": 166760,
-          "maxBytes": 170096
+          "bytes": 166662,
+          "maxBytes": 169996
         },
         {
           "phase": "add settles",
-          "bytes": 216719,
-          "maxBytes": 221054
+          "bytes": 216675,
+          "maxBytes": 221009
         },
         {
           "phase": "toggle the first",
-          "bytes": 130298,
-          "maxBytes": 132904
+          "bytes": 130254,
+          "maxBytes": 132860
         },
         {
           "phase": "toggle settles",
-          "bytes": 213475,
-          "maxBytes": 217745
+          "bytes": 213431,
+          "maxBytes": 217700
         },
         {
           "phase": "filter: active",
@@ -1739,103 +1739,103 @@
         },
         {
           "phase": "filter: completed",
-          "bytes": 143051,
-          "maxBytes": 145913
+          "bytes": 142997,
+          "maxBytes": 145857
         },
         {
           "phase": "filter: all",
-          "bytes": 141947,
-          "maxBytes": 144786
+          "bytes": 141893,
+          "maxBytes": 144731
         },
         {
           "phase": "toggle all",
-          "bytes": 130932,
-          "maxBytes": 133551
+          "bytes": 130888,
+          "maxBytes": 133506
         },
         {
           "phase": "toggle all settles",
-          "bytes": 216523,
-          "maxBytes": 220854
+          "bytes": 216479,
+          "maxBytes": 220809
         },
         {
           "phase": "toggle all back",
-          "bytes": 132326,
-          "maxBytes": 134973
+          "bytes": 132282,
+          "maxBytes": 134928
         },
         {
           "phase": "toggle all back settles",
-          "bytes": 213838,
-          "maxBytes": 218115
+          "bytes": 213794,
+          "maxBytes": 218070
         },
         {
           "phase": "failing save: toggle the second",
-          "bytes": 128964,
-          "maxBytes": 131544
+          "bytes": 128866,
+          "maxBytes": 131444
         },
         {
           "phase": "the failure shows a retry",
-          "bytes": 232556,
-          "maxBytes": 237208
+          "bytes": 232458,
+          "maxBytes": 237108
         },
         {
           "phase": "retry succeeds",
-          "bytes": 130945,
-          "maxBytes": 133564
+          "bytes": 130847,
+          "maxBytes": 133464
         },
         {
           "phase": "retry settles",
-          "bytes": 220797,
-          "maxBytes": 225213
+          "bytes": 220753,
+          "maxBytes": 225169
         },
         {
           "phase": "failing add",
-          "bytes": 165665,
-          "maxBytes": 168979
+          "bytes": 165608,
+          "maxBytes": 168921
         },
         {
           "phase": "failed add stays with an error",
-          "bytes": 233162,
-          "maxBytes": 237826
+          "bytes": 233064,
+          "maxBytes": 237726
         },
         {
           "phase": "retry the add",
-          "bytes": 121875,
-          "maxBytes": 124313
+          "bytes": 121831,
+          "maxBytes": 124268
         },
         {
           "phase": "retried add settles",
-          "bytes": 217112,
-          "maxBytes": 221455
+          "bytes": 217068,
+          "maxBytes": 221410
         },
         {
           "phase": "complete the first",
-          "bytes": 126844,
-          "maxBytes": 129381
+          "bytes": 126800,
+          "maxBytes": 129336
         },
         {
           "phase": "complete settles",
-          "bytes": 212689,
-          "maxBytes": 216943
+          "bytes": 212645,
+          "maxBytes": 216898
         },
         {
           "phase": "clear completed",
-          "bytes": 140395,
-          "maxBytes": 143203
+          "bytes": 140351,
+          "maxBytes": 143159
         },
         {
           "phase": "clear settles",
-          "bytes": 213106,
-          "maxBytes": 217369
+          "bytes": 213062,
+          "maxBytes": 217324
         },
         {
           "phase": "remove the first",
-          "bytes": 140911,
-          "maxBytes": 143730
+          "bytes": 140867,
+          "maxBytes": 143685
         },
         {
           "phase": "remove settles",
-          "bytes": 213077,
-          "maxBytes": 217339
+          "bytes": 213033,
+          "maxBytes": 217294
         }
       ]
     },
@@ -1845,8 +1845,8 @@
       "phases": [
         {
           "phase": "load",
-          "bytes": 427338,
-          "maxBytes": 435885
+          "bytes": 427228,
+          "maxBytes": 435773
         },
         {
           "phase": "mount (loading)",
@@ -1991,8 +1991,8 @@
       "phases": [
         {
           "phase": "load",
-          "bytes": 444098,
-          "maxBytes": 452980
+          "bytes": 444933,
+          "maxBytes": 453832
         },
         {
           "phase": "mount (loading)",
@@ -2001,133 +2001,133 @@
         },
         {
           "phase": "todos load",
-          "bytes": 200242,
-          "maxBytes": 204247
+          "bytes": 200188,
+          "maxBytes": 204192
         },
         {
           "phase": "add a todo (optimistic)",
-          "bytes": 187233,
-          "maxBytes": 190978
+          "bytes": 187135,
+          "maxBytes": 190878
         },
         {
           "phase": "add settles",
-          "bytes": 220950,
-          "maxBytes": 225369
+          "bytes": 220906,
+          "maxBytes": 225325
         },
         {
           "phase": "toggle the first",
-          "bytes": 134459,
-          "maxBytes": 137149
+          "bytes": 134415,
+          "maxBytes": 137104
         },
         {
           "phase": "toggle settles",
-          "bytes": 218648,
-          "maxBytes": 223021
+          "bytes": 218604,
+          "maxBytes": 222977
         },
         {
           "phase": "filter: active",
-          "bytes": 147574,
-          "maxBytes": 150526
+          "bytes": 147520,
+          "maxBytes": 150471
         },
         {
           "phase": "filter: completed",
-          "bytes": 155473,
-          "maxBytes": 158583
+          "bytes": 155419,
+          "maxBytes": 158528
         },
         {
           "phase": "filter: all",
-          "bytes": 161047,
-          "maxBytes": 164268
+          "bytes": 160993,
+          "maxBytes": 164213
         },
         {
           "phase": "toggle all",
-          "bytes": 137786,
-          "maxBytes": 140542
+          "bytes": 137742,
+          "maxBytes": 140497
         },
         {
           "phase": "toggle all settles",
-          "bytes": 221608,
-          "maxBytes": 226041
+          "bytes": 221564,
+          "maxBytes": 225996
         },
         {
           "phase": "toggle all back",
-          "bytes": 143352,
-          "maxBytes": 146220
+          "bytes": 143308,
+          "maxBytes": 146175
         },
         {
           "phase": "toggle all back settles",
-          "bytes": 218237,
-          "maxBytes": 222602
+          "bytes": 218193,
+          "maxBytes": 222557
         },
         {
           "phase": "failing save: toggle the second",
-          "bytes": 138828,
-          "maxBytes": 141605
+          "bytes": 138730,
+          "maxBytes": 141505
         },
         {
           "phase": "the failure shows a retry",
-          "bytes": 245658,
-          "maxBytes": 250572
+          "bytes": 245560,
+          "maxBytes": 250472
         },
         {
           "phase": "retry succeeds",
-          "bytes": 140800,
-          "maxBytes": 143616
+          "bytes": 140702,
+          "maxBytes": 143517
         },
         {
           "phase": "retry settles",
-          "bytes": 226315,
-          "maxBytes": 230842
+          "bytes": 226957,
+          "maxBytes": 231497
         },
         {
           "phase": "failing add",
-          "bytes": 184882,
-          "maxBytes": 188580
+          "bytes": 184784,
+          "maxBytes": 188480
         },
         {
           "phase": "failed add stays with an error",
-          "bytes": 244875,
-          "maxBytes": 249773
+          "bytes": 244777,
+          "maxBytes": 249673
         },
         {
           "phase": "retry the add",
-          "bytes": 128752,
-          "maxBytes": 131328
+          "bytes": 128708,
+          "maxBytes": 131283
         },
         {
           "phase": "retried add settles",
-          "bytes": 222834,
-          "maxBytes": 227291
+          "bytes": 222762,
+          "maxBytes": 227218
         },
         {
           "phase": "complete the first",
-          "bytes": 130924,
-          "maxBytes": 133543
+          "bytes": 130880,
+          "maxBytes": 133498
         },
         {
           "phase": "complete settles",
-          "bytes": 217764,
-          "maxBytes": 222120
+          "bytes": 217720,
+          "maxBytes": 222075
         },
         {
           "phase": "clear completed",
-          "bytes": 171494,
-          "maxBytes": 174924
+          "bytes": 171396,
+          "maxBytes": 174824
         },
         {
           "phase": "clear settles",
-          "bytes": 213257,
-          "maxBytes": 217523
+          "bytes": 213213,
+          "maxBytes": 217478
         },
         {
           "phase": "remove the first",
-          "bytes": 170852,
-          "maxBytes": 174270
+          "bytes": 170754,
+          "maxBytes": 174170
         },
         {
           "phase": "remove settles",
-          "bytes": 213228,
-          "maxBytes": 217493
+          "bytes": 213184,
+          "maxBytes": 217448
         }
       ]
     }

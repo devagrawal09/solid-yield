@@ -1,4 +1,4 @@
-import { test } from "node:test";
+import { test as nodeTest } from "node:test";
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 import { resolve } from "node:path";
@@ -8,9 +8,23 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import solidYield from "../../vite-plugin-yield/src/index.js";
 import eagerIslands from "../src/eager.js";
+import {
+  serializedDocsError,
+  unexpectedRenderLog
+} from "../../../examples/harness/ssr-smoke/docs-contract.mjs";
 import { beginCoverage } from "../../../examples/harness/executed-bytes/coverage.mjs";
 const require = createRequire(new URL("../package.json", import.meta.url));
 const mode = process.env.C2_DOCS_MODE;
+const test = mode
+  ? async (_name, run) => {
+      try {
+        await run();
+      } catch (error) {
+        console.error(error);
+        process.exitCode = 1;
+      }
+    }
+  : nodeTest;
 const compiled = mode?.startsWith("compiled");
 const single = mode === "compiled-single";
 const variants = ["original", "library", "compiled", "compiled-single"];
@@ -18,7 +32,7 @@ if (!mode) {
   test("tier 1 docs: original, library, seven roots and single root match all 24 hydrated steps", () => {
     const results = [];
     for (const route of variants) {
-      const child = spawnSync(process.execPath, ["--test", fileURLToPath(import.meta.url)], {
+      const child = spawnSync(process.execPath, [fileURLToPath(import.meta.url)], {
         encoding: "utf8",
         timeout: 60000,
         env: {
@@ -50,11 +64,11 @@ if (!mode) {
     assert.equal(results[3].roots, 1);
     assert.deepEqual(results[3].snapshots, results[1].snapshots, "single root vs library");
   });
-  for (const url of ["/docs/start"])
+  for (const url of ["/docs/start", "/docs/missing"])
     test(`tier 1 direct SSR/hydrate ${url}`, () => {
       const snapshots = [];
       for (const route of variants) {
-        const child = spawnSync(process.execPath, ["--test", fileURLToPath(import.meta.url)], {
+        const child = spawnSync(process.execPath, [fileURLToPath(import.meta.url)], {
           encoding: "utf8",
           timeout: 60000,
           env: {
@@ -74,31 +88,8 @@ if (!mode) {
       assert.deepEqual(snapshots[2], snapshots[1]);
       assert.deepEqual(snapshots[3], snapshots[1]);
     });
-  test("F-C9 finding: direct failed SSR loses the typed error on all four variants (not a passing smoke)", () => {
-    for (const route of variants) {
-      const child = spawnSync(process.execPath, ["--test", fileURLToPath(import.meta.url)], {
-        encoding: "utf8",
-        timeout: 60000,
-        env: {
-          ...Object.fromEntries(
-            Object.entries(process.env).filter(([k]) => k !== "NODE_TEST_CONTEXT")
-          ),
-          C2_DOCS_MODE: route,
-          C2_URL: "/docs/missing",
-          C2_SMOKE: "1"
-        }
-      });
-      assert.equal(
-        child.status,
-        1,
-        `review F-C9 if the failure changes: ${child.stdout} ${child.stderr}`
-      );
-      assert.match(child.stdout + child.stderr, /Internal Server Error/);
-      assert.match(child.stdout + child.stderr, /ssrSanitizeError/);
-    }
-  });
 } else
-  test(`tier 1 docs ${mode}`, async () => {
+  await test(`tier 1 docs ${mode}`, async () => {
     const { createServer, createRunnableDevEnvironment } = await import(
       pathToFileURL(require.resolve("vite"))
     );
@@ -112,6 +103,11 @@ if (!mode) {
       "../../../examples",
       mode === "original" ? "originals/docs" : "docs-yield"
     );
+    const unhandled = new Map();
+    const rejected = (error, promise) => unhandled.set(promise, error);
+    const handled = promise => unhandled.delete(promise);
+    process.on("unhandledRejection", rejected);
+    process.on("rejectionHandled", handled);
     let plan;
     const logs = [];
     const warn = console.warn,
@@ -177,6 +173,8 @@ if (!mode) {
         const ssr = await server.ssrLoadModule("/entry-server.tsx");
         html = String(await ssr.render(process.env.C2_URL ?? "/"));
       }
+      if (process.env.C2_URL === "/docs/missing")
+        assert(serializedDocsError(html), "stream preserves typed failure data");
       if (process.env.C2_SSR_ONLY) {
         writeFileSync(process.env.C2_HTML, html);
         return;
@@ -251,7 +249,7 @@ if (!mode) {
         const output = await server.environments.hydrate.transformRequest(root.module);
         writeFileSync(resolve(tmpdir(), "c2-router.js"), output.code);
       }
-      await new Promise(r => setTimeout(r, 10));
+      await new Promise(r => setTimeout(r, process.env.C2_URL === "/docs/missing" ? 200 : 10));
       assert(
         claimed.every(node => node.isConnected),
         "every server node must be retained at hydration"
@@ -287,7 +285,11 @@ if (!mode) {
       );
       endCoverage?.();
       endCoverage = undefined;
-      assert.deepEqual(logs, []);
+      assert.deepEqual(
+        logs.filter(log => unexpectedRenderLog(log, process.env.C2_URL === "/docs/missing")),
+        []
+      );
+      assert.equal(unhandled.size, 0, "all streamed rejections must be handled after hydration");
       console.log("C2_RESULT " + JSON.stringify({ snapshots, roots: plan?.roots.length ?? 1 }));
     } catch (failure) {
       error(failure.stack);
@@ -302,5 +304,7 @@ if (!mode) {
       console.warn = warn;
       console.error = error;
       await server.close();
+      process.off("unhandledRejection", rejected);
+      process.off("rejectionHandled", handled);
     }
   });

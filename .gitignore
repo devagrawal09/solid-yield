@@ -15,3 +15,5 @@ gate.json
 
 # Temporary parity entry created and removed by the executed-byte runner.
 examples/*-yield*/.executed-bytes-*/
+# Temporary coverage probes, removed by the executed-bytes runner.
+examples/*/.executed-bytes-*/

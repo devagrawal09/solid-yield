@@ -81,3 +81,9 @@ The tests also use, as devDependencies:
 - the twins' sources, for the `h`-twin no-op check and the rendering twin's lazy pages. Those tests skip when `examples/` is absent.
 
 There is no build step: `src/` is plain ESM with JSDoc types, checked by `tsc --checkJs`, and `src/index.d.ts` is written by hand.
+
+## Lazy pages on the server
+
+The annotated `moduleUrl` is the key the server render looks up in the **client asset manifest**. Pass that manifest to `renderToString` or `renderToStream`; without it an annotated lazy page throws on the server and a contained SSR error can leave blank content. The client and server must use the same module keys and app tree. Solid serializes the matching client entries and preloads them before hydration. Missing entries report `[LAZY_HYDRATION_PRELOAD]` in development.
+
+Use a separate server JSX config, `solid({ ssr: true, hydratable: true })`, and import `generateHydrationScript` from the server build of `@solidjs/web`. The client build returns an empty string. The [SSR and hydration recipe](https://github.com/devagrawal09/solid-yield/blob/main/documentation/getting-started.md#ssr-and-hydration) includes both configs, the manifest, an awaited stream and the non-test-mode Vitest setup. [Lazy/ChunkError retry](https://github.com/devagrawal09/solid-yield/blob/main/documentation/getting-started.md#lazy-pages-and-chunk-retry) uses an `Errored` catching the import failure.

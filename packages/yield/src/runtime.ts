@@ -42,6 +42,7 @@ import {
   type SignalOptions,
   type Store
 } from "solid-js";
+import { isSafeError, markSafeError } from "@solidjs/web";
 import type {
   Handled,
   StreamAttempt,
@@ -117,13 +118,19 @@ const PATH_READ = 1;
 
 /**
  * Every build (D-087): the brand of a typed failure — `raise`'s error, and the
- * `Error` an `attempt`'s handler returns. One non-enumerable symbol on the
- * object already being thrown. An `attempt` over an event call hands its
+ * `Error` an `attempt`'s handler returns. A WeakSet tracks every object, including frozen Errors; extensible objects
+ * also retain the non-enumerable symbol property. An `attempt` over an event call hands its
  * handler only a branded failure; anything else the call rejects with is a
  * crash (D-019) and goes past the handler.
  */
 const FAILURE: unique symbol = Symbol.for("solid.yield.failure") as any;
+const TYPED_FAILURES = new WeakSet<object>();
 function brand<T>(e: T): T {
+  // Failure instances are safe before they can be frozen. Other branded
+  // failures use the same public serialization policy when extensible.
+  if (e != null && Object.isExtensible(e) && !isSafeError(e)) markSafeError(e);
+  if (e !== null && (typeof e === "object" || typeof e === "function"))
+    TYPED_FAILURES.add(e as object);
   if (
     e !== null &&
     (typeof e === "object" || typeof e === "function") &&
@@ -138,7 +145,9 @@ export const brandFailure: <T>(e: T) => T = brand;
 /** A typed failure (D-087): branded by `raise` or an attempt's handler, in every build. */
 function isFailure(e: unknown): boolean {
   return (
-    e != null && (typeof e === "object" || typeof e === "function") && (e as any)[FAILURE] === true
+    e != null &&
+    (typeof e === "object" || typeof e === "function") &&
+    (TYPED_FAILURES.has(e as object) || (e as any)[FAILURE] === true)
   );
 }
 
@@ -160,7 +169,7 @@ function known<T>(e: T): T {
 function isKnown(e: unknown): boolean {
   let x: any = e;
   for (let i = 0; i < 8 && x !== null && (typeof x === "object" || typeof x === "function"); i++) {
-    if (KNOWN.has(x) || x[FAILURE] === true) return true;
+    if (KNOWN.has(x) || isFailure(x)) return true;
     x = x.cause;
   }
   return false;
@@ -843,8 +852,8 @@ type AttemptWait<T> =
 type IsStream<T> =
   T extends EventCall<any, any, any, any>
     ? false
-    : T extends Source<infer V, any, any>
-      ? V
+    : [Awaited<T>] extends [never]
+      ? false
       : Awaited<T> extends AsyncIterable<any>
         ? true
         : false;
@@ -887,13 +896,18 @@ type AttemptResult<T, H> =
  * not (it absorbs the failure, with nothing or a value), never sometimes one
  * and sometimes the other (D-076, D-078).
  */
-type HandlerCheck<H> = [HandlerReturn<H>] extends [Error]
-  ? KindCheck<HandlerReturn<H>>
-  : [Extract<HandlerReturn<H>, Error>] extends [never]
-    ? unknown
-    : {
-        readonly "[ATTEMPT_ABSORBS] a handler returns the failure (an Error with a literal kind) or absorbs it (returns nothing or a value), not sometimes one and sometimes the other": never;
-      };
+type HandlerCheck<H> =
+  unknown extends HandlerReturn<H>
+    ? {
+        readonly "[ATTEMPT_RETURN] declare the handler's return type: Error, void, or a non-unknown value": never;
+      }
+    : [HandlerReturn<H>] extends [Error]
+      ? KindCheck<HandlerReturn<H>>
+      : [Extract<HandlerReturn<H>, Error>] extends [never]
+        ? unknown
+        : {
+            readonly "[ATTEMPT_ABSORBS] a handler returns the failure (an Error with a literal kind) or absorbs it (returns nothing or a value), not sometimes one and sometimes the other": never;
+          };
 /**
  * A stream's failures arrive after the host's run (D-091), so a stream
  * attempt's handler is a plain function that transforms (returns an `Error`:
@@ -1398,17 +1412,32 @@ function resume(
  * failure is Solid's uncaught effect error. An attempt whose `onError`
  * absorbs the failure adds none.
  */
+export function $effect(
+  compute: (() => Generator<any, any, any>) & {
+    readonly "[EFFECT_PHASES] $effect takes two functions: a tracked compute and an untracked effect": never;
+  }
+): never;
 export function $effect<YC extends ComputeOp = never, V = void, YE extends EffectPhaseOp = never>(
   compute: () => Generator<YC, V, any>,
   effect: (value: V, prev: V | undefined) => Generator<YE, void, any>,
   options?: { name?: string }
+): Yieldable<Create<"effect", FailsOf<YC> | FailsOf<YE>>, void>;
+export function $effect<YC extends ComputeOp = never, V = void, YE extends EffectPhaseOp = never>(
+  compute: () => Generator<YC, V, any>,
+  effect?: (value: V, prev: V | undefined) => Generator<YE, void, any>,
+  options?: { name?: string }
 ): Yieldable<Create<"effect", FailsOf<YC> | FailsOf<YE>>, void> {
+  if (__DEV__ && !effect)
+    throw devError(
+      "EFFECT_PHASES",
+      "$effect takes two functions: a tracked compute and an untracked effect."
+    );
   return new CreateOp("effect", () => {
     const name = state.name;
     createEffect<V>(
       () => runAs(COMPUTE, () => drive(compute(), SYNC_RUN) as V, null, null, false, false, name),
       {
-        effect: (value: V, prev?: V) => runEffect(() => effect(value, prev), name, EFFECT),
+        effect: (value: V, prev?: V) => runEffect(() => effect!(value, prev), name, EFFECT),
         // a compute failure reaches the nearest Errored, as an effect-phase one
         // does (D-073): rethrown, it escalates to the boundary
         error: (err: unknown) => {
@@ -1488,6 +1517,8 @@ export function readContext(ctx: any): unknown {
  * (`null`: it takes every failure) and the `Errored` above it.
  */
 export interface Boundary {
+  disposed: boolean;
+  owner: ReturnType<typeof getOwner>;
   readonly catch: readonly (abstract new (...args: any) => unknown)[] | null;
   readonly parent: Boundary | null;
 }
@@ -1527,7 +1558,7 @@ type Route = ((error: unknown) => boolean) | null;
 /**
  * Bind an `$event` handler where it meets the DOM (D-085): `perform` in an
  * event attribute, `h`'s attribute bind. One wrapper per bind, which records
- * the bind site's owner and the `Errored`s above it: a call nobody handles (a
+ * the bind site's `Errored` scopes: a call nobody handles (a
  * DOM dispatch) reports its failure there when one of them takes it (its
  * `catch` covers it, or it has none), and otherwise the call's promise
  * rejects (F-7: reported, it would leave Solid's flush and halt it). A call
@@ -1536,12 +1567,26 @@ type Route = ((error: unknown) => boolean) | null;
  */
 export function bindEvent<H>(handler: H): H {
   const call = (handler as any)[CALL] as (route: Route, args: unknown[]) => unknown;
-  const owner = getOwner();
   const boundary = boundaryAbove();
   const route: Route = boundary
     ? error => {
-        if (!takes(boundary, error)) return false;
-        reportError(owner, error);
+        let accepting: Boundary | null = boundary;
+        while (accepting && accepting.catch && !accepting.catch.some(C => error instanceof C))
+          accepting = accepting.parent;
+        if (!accepting) return false;
+        if (boundary.disposed || accepting.disposed) {
+          if (__DEV__)
+            console.error(
+              devError(
+                "BOUNDARY_DISPOSED",
+                `${(error as any)?.kind ?? "failure"} arrived after its Errored was disposed — the event's own optimistic write removed it; absorb the failure in the event, or move the boundary above what the write can dispose`
+              )
+            );
+          return false;
+        }
+        // The boundary owns the report: a disposable row below a live boundary
+        // must not make delivery depend on that row's captured owner.
+        reportError(boundary.owner, error);
         return true;
       }
     : null;

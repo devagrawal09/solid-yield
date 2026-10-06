@@ -1,3 +1,4 @@
+import { Failure } from "./failure.js";
 /*
  * `lazy`: Solid's `lazy()` as a yield component (D-047). The same signature
  * (`fn`, `options`, `moduleUrl`; `preload` / `moduleUrl` kept on the result);
@@ -6,9 +7,10 @@
  * component's own colors, and usable in call form in a hole (`{yield* Page()}`).
  */
 import { lazy as solidLazy } from "solid-js";
-import { boundaryAbove, brandFailure, takes, yieldComponent } from "./runtime.js";
+import { boundaryAbove, brandFailure, devError, takes, yieldComponent } from "./runtime.js";
 import type { ComponentView, PlainCall, View } from "./types.js";
 
+declare const __DEV__: boolean;
 declare const __SERVER__: boolean;
 
 /**
@@ -18,8 +20,7 @@ declare const __SERVER__: boolean;
  * failure (branded, D-087): it reaches the nearest `Errored` above the call
  * that takes it, or is re-thrown (D-033).
  */
-export class ChunkError extends Error {
-  readonly kind = "chunk" as const;
+export class ChunkError extends Failure("chunk") {
   /** The import's rejection. */
   declare readonly cause: unknown;
   /** The module's URL, when the build gave one. */
@@ -135,7 +136,25 @@ export function lazy(
     return solid;
   };
   let current = attempt();
-  const call: any = (props: object) => current(props);
+  const call: any = (props: object) => {
+    try {
+      return current(props);
+    } catch (error) {
+      if (
+        __DEV__ &&
+        error instanceof Error &&
+        /^lazy\(\) module .* was not preloaded before hydration/.test(error.message)
+      ) {
+        const diagnostic = devError(
+          "LAZY_HYDRATION_PRELOAD",
+          `a lazy page's chunk was not preloaded for hydration. Pass the client asset manifest to the server render and load its entry before hydrate(). ${error.message}`
+        );
+        Object.defineProperty(diagnostic, "cause", { value: error });
+        throw diagnostic;
+      }
+      throw error;
+    }
+  };
   call.preload = () => {
     const solid = current;
     return solid.preload().then((m: unknown) => {

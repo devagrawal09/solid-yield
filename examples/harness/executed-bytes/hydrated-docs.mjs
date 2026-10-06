@@ -27,7 +27,7 @@ try {
       for (const server of [true, false]) {
         const child = spawnSync(
           process.execPath,
-          ["--test", join(repo, "packages/compiler-yield/test/eager-docs.test.mjs")],
+          [join(repo, "packages/compiler-yield/test/eager-docs.test.mjs")],
           {
             cwd: repo,
             encoding: "utf8",

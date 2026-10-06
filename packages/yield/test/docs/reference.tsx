@@ -1,3 +1,4 @@
+import { Failure } from "solid-yield";
 // The examples of documentation/getting-started.md's "Flow controls and
 // events" and "Events, transactions and in-flight state". Type-checked
 // (test-types), linted with the twins' lint (test:conformance's lint step)
@@ -23,12 +24,8 @@ import {
 
 export type Theme = "light" | "dark";
 export type Note = { id: number; title: string };
-export class BadTitle extends Error {
-  readonly kind = "bad-title" as const;
-}
-export class LoadFailed extends Error {
-  readonly kind = "load-failed" as const;
-}
+export class BadTitle extends Failure("bad-title") {}
+export class LoadFailed extends Failure("load-failed") {}
 
 // --- For: a child that takes a value is a row; a row returns view(…) ------------------------
 export const NoteList = component(function* NoteList(

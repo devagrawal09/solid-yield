@@ -1,14 +1,22 @@
-// The library exports a structural Failure type, not a class factory.
-// This local factory gives each API failure its own class and literal kind.
-function Failure<K extends string>(kind: K) {
-  return class extends Error {
-    readonly kind = kind;
-    constructor(cause: unknown) {
-      super(cause instanceof Error ? cause.message : String(cause));
-    }
-  };
+import { Failure } from "solid-yield";
+// Main's D-110 requires nominal library failures; preserve the original messages.
+export class NotFound extends Failure("not-found") {
+  constructor(cause: unknown) {
+    super(cause instanceof Error ? cause.message : String(cause));
+  }
 }
-export class NotFound extends Failure("not-found") {}
-export class SearchError extends Failure("search-error") {}
-export class RateLimited extends Failure("rate-limited") {}
-export class BadEmail extends Failure("bad-email") {}
+export class SearchError extends Failure("search-error") {
+  constructor(cause: unknown) {
+    super(cause instanceof Error ? cause.message : String(cause));
+  }
+}
+export class RateLimited extends Failure("rate-limited") {
+  constructor(cause: unknown) {
+    super(cause instanceof Error ? cause.message : String(cause));
+  }
+}
+export class BadEmail extends Failure("bad-email") {
+  constructor(cause: unknown) {
+    super(cause instanceof Error ? cause.message : String(cause));
+  }
+}

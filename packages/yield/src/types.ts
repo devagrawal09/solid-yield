@@ -1,3 +1,5 @@
+import type { Failure } from "./failure.js";
+export type { Failure } from "./failure.js";
 /*
  * The type model of yield components.
  *
@@ -401,11 +403,15 @@ export type Props<D extends PropsCheck<D>> = {
 
 /** D-034 at the declaration: a prop's declared failures are `Failure`s with a literal `kind`. */
 export type PropsCheck<D> = {
-  [N in keyof D]: [Exclude<D[N], undefined>] extends [Source<any, infer E, any>]
-    ? KindCheck<E> extends NeedsKind
-      ? NeedsKind
-      : unknown
-    : unknown;
+  [N in keyof D]: unknown extends D[N]
+    ? DeclareProp<N>
+    : [Exclude<D[N], undefined>] extends [never]
+      ? unknown
+      : [Exclude<D[N], undefined>] extends [Source<any, infer E, any>]
+        ? KindCheck<E> extends NeedsKind
+          ? NeedsKind
+          : unknown
+        : unknown;
 };
 
 /** The read a declared prop is: a path (a source with keys), `children` a source. */
@@ -434,9 +440,14 @@ export type PropsInput<D, Q = never> = {
     Q
   >;
 };
-type PropInput<V, U, N, Q> = [V] extends [Source<infer T, infer E, infer P>]
-  ? T | U | Source<T | U, E, Widen<P>> | HoleProp<T | U, E, Widen<P>, Q>
-  : V | U | Source<V | U> | HoleProp<V | U, never, false, Q> | SettledProp<SettledMessage<N>>;
+type DeclareProp<N> = {
+  readonly "[PROP_TYPE] declare the prop's type; a bare unknown or any could hide a colored Source": N;
+};
+type PropInput<V, U, N, Q> = unknown extends V
+  ? DeclareProp<N>
+  : [V] extends [Source<infer T, infer E, infer P>]
+    ? T | U | Source<T | U, E, Widen<P>> | HoleProp<T | U, E, Widen<P>, Q>
+    : V | U | Source<V | U> | HoleProp<V | U, never, false, Q> | SettledProp<SettledMessage<N>>;
 /** A declared pending prop also takes a settled source (settled ⊂ pending). */
 type Widen<P extends boolean> = [P] extends [true] ? boolean : P;
 /**
@@ -685,10 +696,13 @@ export type Handler<Args extends unknown[] = [], E = never> = EventHandler<
  */
 export interface BoundEvent<Args extends unknown[] = any[]> {
   (...args: Args): unknown;
+  readonly "[UNBOUND_EVENT] bind the event in the view: onClick={yield* handler}": never;
   readonly [BOUND]: true;
 }
 /** A DOM handler type `H` as an event attribute takes it: bound in a view (D-072). */
-export type Bound<H> = H & { readonly [BOUND]: true };
+export type Bound<H> = H & {
+  readonly "[UNBOUND_EVENT] bind the event in the view: onClick={yield* handler}": never;
+};
 
 /** Setter of a `$signal`: writes when called; `yield*` on the receipt is the new value. */
 export type Setter<T> = <U extends T>(value: U | ((prev: T) => U)) => Receipt<U>;
@@ -745,17 +759,17 @@ export type RowFails<VY, R, Y = never> = ViewFails<VY, R> | FailsOf<Y>;
 export type ErrorClass<E = unknown> = abstract new (...args: any[]) => E;
 
 /**
- * What a routine may fail with (D-034): an `Error` with a literal `kind`.
+ * What a routine may fail with (D-110): a nominal Failure instance with a literal kind.
  * Failures are removed from a type structurally (TypeScript compares shapes)
  * but matched at run time with `instanceof`, so two error classes with the
  * same shape would be one type: the literal `kind` tells them apart. Every
  * entry point of a failure type checks it — `attempt`, `until`, `raise`,
  * `Errored`'s `catch`.
  */
-export type Failure = Error & { readonly kind: string };
-/** The branded refusal of an error type without a literal `kind`. */
+
+/** The refusal of a structural error shape or a failure without a literal kind. */
 export interface NeedsKind {
-  readonly '[FAILURE_KIND] an error class needs `readonly kind = "x" as const` so its failure can be told apart': never;
+  readonly '[FAILURE_CLASS] declare a failure class with class Boom extends Failure("boom") {}': never;
 }
 /** `unknown` when every member of `E` is a `Failure` with a literal `kind`; else `NeedsKind`. */
 export type KindCheck<E> = [E] extends [never]
@@ -763,7 +777,7 @@ export type KindCheck<E> = [E] extends [never]
   : [KindBits<E>] extends [never]
     ? unknown
     : NeedsKind;
-type KindBits<E> = E extends Error & { readonly kind: infer K }
+type KindBits<E> = E extends Failure & { readonly kind: infer K }
   ? string extends K
     ? true
     : never

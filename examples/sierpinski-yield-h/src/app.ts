@@ -1,3 +1,4 @@
+import { Failure } from "solid-yield";
 // The Sierpinski triangle stress test from examples/sierpinski, written with
 // solid-yield, no-JSX flavor: views are built with `h`. Same markup,
 // same timing, same behavior as the original and the JSX twin
@@ -39,8 +40,7 @@ type TriangleProps = {
 };
 
 /** The idle-time work failed: the color of a slow child's failure. */
-export class IdleError extends Error {
-  readonly kind = "idle" as const;
+export class IdleError extends Failure("idle") {
   constructor(cause: unknown) {
     super(cause instanceof Error ? cause.message : String(cause));
   }

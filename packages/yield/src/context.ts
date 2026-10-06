@@ -1,7 +1,7 @@
 /*
  * Contexts for yield components (D-036, D-060, D-098).
  *
- * `createContext<T, "Name">()` — no default, named — makes a context a
+ * `createContext<T, "Name">(undefined, { name: "Name" })` — no default, named — makes a context a
  * component *requires*: a setup that reads it (`yield* Ctx`) adds the context to its
  * component's type (`ComponentView`'s `R`, folded with `RequiresOf`), and the
  * requirement travels through calls, holes and rows like a failure, until a
@@ -15,8 +15,10 @@
  * read it. `provide`'s `value` takes what a prop takes (D-065): a value, a
  * source or a hole.
  */
+declare const __DEV__: boolean;
+
 import type { Context } from "solid-js";
-import { readContext, solidCreateContext } from "./runtime.js";
+import { devError, readContext, solidCreateContext } from "./runtime.js";
 import { provideView, type Children, type LazyParam, type Ops } from "./flow.js";
 import type {
   CREATED,
@@ -56,11 +58,11 @@ export type ContextValue<T> = [T] extends [Source<infer V, infer E, infer P>]
  */
 export type ProvidedValue<T> = [T] extends [Source<infer V, infer E, infer P>]
   ?
-      | Exclude<V, undefined>
+      | (V & ({} | null))
       | Source<V, E, [P] extends [true] ? boolean : P>
       | HoleProp<V, E, [P] extends [true] ? boolean : P>
       | ProvideUndefined<V>
-  : Exclude<T, undefined> | Source<T> | HoleProp<T> | ProvideUndefined<T>;
+  : (T & ({} | null)) | Source<T> | HoleProp<T> | ProvideUndefined<T>;
 /**
  * The refusal's message, when the value type admits `undefined` (TypeScript
  * prints it in the expected type). Written inline so that it is printed
@@ -144,24 +146,32 @@ export type ContextNames<R> = R extends { readonly [CREATED]: infer C }
     : R;
 
 /**
- * `createContext<T, "Name">()`: a context a reader requires (D-098). The name
+ * `createContext<T, "Name">(undefined, { name: "Name" })`: a context a reader requires (D-098). The name
  * is its requirement's identity (D-098 amended: two contexts are two
  * providers, whatever their value types) and what the refusal at the root
  * prints. Without a name it is refused: the call (its `this`) and its result
  * (`UnnamedContext`) say "name the context". A provided value is read like
  * a prop.
  */
+/** A required context's name must exist at runtime too: type arguments are erased. */
+export function createContext<T, N extends string = string>(
+  this: string extends N
+    ? UnnamedContextCall
+    : {
+        readonly "[CONTEXT_NAME] pass the context's name at runtime: createContext<T, 'Name'>(undefined, { name: 'Name' })": never;
+      }
+): string extends N ? UnnamedContext : RequiredContext<T, N>;
 export function createContext<T, N extends string = string>(
   this: string extends N ? UnnamedContextCall : void,
-  defaultValue?: undefined,
-  options?: { name?: N }
+  defaultValue: undefined,
+  options: { name: N }
 ): string extends N ? UnnamedContext : RequiredContext<T, N>;
 /**
  * `createContext(defaultValue)`: a context that is always there to read
  * (D-060: `constant(value)` for a default that is a source).
  */
 export function createContext<T, N extends string = string>(
-  defaultValue: T,
+  defaultValue: T & ({} | null),
   options?: { name?: N }
 ): YieldContext<T, N>;
 export function createContext(
@@ -169,6 +179,11 @@ export function createContext(
   defaultValue?: unknown,
   options?: { name?: string }
 ): unknown {
+  if (__DEV__ && defaultValue === undefined && !options?.name)
+    throw devError(
+      "CONTEXT_NAME",
+      "a context without a default needs a runtime name: createContext<T, 'Name'>(undefined, { name: 'Name' }). Type arguments disappear at runtime."
+    );
   const ctx = solidCreateContext(defaultValue as any, options as any) as any;
   ctx[Symbol.iterator] = function* (this: unknown): Generator<never, unknown, unknown> {
     return readContext(ctx);

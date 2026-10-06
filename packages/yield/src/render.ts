@@ -24,7 +24,7 @@ import {
   renderToString as webRenderToString,
   renderToStream as webRenderToStream
 } from "@solidjs/web";
-import { ELEMENT_MARK } from "./runtime.js";
+import { devError, ELEMENT_MARK } from "./runtime.js";
 import type { Element } from "./element.js";
 import type { View } from "./types.js";
 import type { ContextNames } from "./context.js";
@@ -78,6 +78,8 @@ export type RootCheck<C> = (RootPending<C> extends true
           RootRequires<C>
         >;
       });
+declare const __DEV__: boolean;
+
 type MountableElement = Element & globalThis.Element;
 
 /** Whether a value is `solid-yield/h` / automatic-`jsx` output: the library's mark. */
@@ -118,6 +120,11 @@ export function hydrate<C extends () => unknown>(
   element: MountableElement | Document | HTMLElement,
   options?: Parameters<typeof webHydrate>[2]
 ): () => void {
+  if (__DEV__ && !(globalThis as any)._$HY)
+    throw devError(
+      "NO_HYDRATION_SCRIPT",
+      "hydrate() needs the server hydration script before the client entry: include generateHydrationScript() from the server render (@solidjs/web's server build). The client build returns an empty string."
+    );
   return webHydrate(rootOf(code) as any, element as any, options as any);
 }
 

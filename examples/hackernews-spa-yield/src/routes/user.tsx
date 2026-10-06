@@ -9,7 +9,7 @@ export const preload = ({ params }: RoutePreloadFuncArgs<RouteParams<Path>>) => 
   void getUser(params.id);
 };
 
-const User = component(function* User(props: Props<RouteProps<Path>>) {
+const User = component(function* User(props: Props<RouteProps<Path, void>>) {
   const user = yield* $memo(function* () {
     const id2 = yield* props.params.id;
     return yield* attempt(

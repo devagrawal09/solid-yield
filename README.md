@@ -18,14 +18,14 @@ They depend on **published** Solid: `solid-js`, `@solidjs/web` and, for `h`, `@s
 
 ## The twins: how drift from Solid shows up
 
-`examples/` holds eight **twins**, real Solid apps rewritten with `solid-yield`:
+`examples/` holds nine **twins**, real Solid apps rewritten with `solid-yield`:
 
-- six JSX twins: `effect-yield`, `hackernews-spa-yield`, `rendering-yield`, `room-yield`, `sierpinski-yield`, `todos-yield`;
+- seven JSX twins: `docs-yield`, `effect-yield`, `hackernews-spa-yield`, `rendering-yield`, `room-yield`, `sierpinski-yield`, `todos-yield`;
 - two no-JSX twins: `sierpinski-yield-h`, `todos-yield-h`.
 
-`examples/originals/` holds the six original apps, vendored and runnable (the two `h` twins share their originals with the JSX twins). Each twin's parity test runs one script against the original and against the twin, both on the installed Solid, and compares the DOM after every step.
+`examples/originals/` holds seven original apps: six vendored apps and the new docs site, all runnable (the two `h` twins share their originals with the JSX twins). Each twin's parity test runs one script against the original and against the twin, both on the installed Solid, and compares the DOM after every step.
 
-That test is the only check for Solid drift (D-045). If a Solid release changes the original and the twin the same way, parity still passes: the library followed Solid. If it breaks a twin, that is a finding about Solid's public API, not a reason to pin an RC. `examples/harness` is the twins' shared parity runner and lint config.
+That test is the only check for Solid drift (D-045). If a Solid release changes the original and the twin the same way, parity still passes: the library followed Solid. If it breaks a twin, that is a finding about Solid's public API, not a reason to pin an RC. `examples/harness` is the twins' shared parity runner and lint config. The [content-site twin](examples/docs-yield) contrasts the interaction-heavy demos: delayed article content surrounds six widgets with local state.
 
 ## Working here
 

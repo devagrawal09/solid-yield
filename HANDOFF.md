@@ -1,5 +1,34 @@
 # HANDOFF — solid-yield (checkpoint 2026-10-06: v0.1, through D-101)
 
+## Content-site pair (2026-10-07, proto/compiler)
+
+`71e8e4f` adds `examples/originals/docs` and `examples/docs-yield`: a content-heavy site with
+`/` and `/docs/:slug`, delayed content and a typed missing slug, and six local
+widgets. The only effect belongs to ThemeToggle; no app context or signal is
+shared. The fake API runs in process: use-server directives declare C1 server
+provenance, without an RPC or byte-saving claim.
+
+The common script compares 24 DOM states, including optimistic likes/rate limits,
+search errors, newsletter pending/good/bad submissions, row avatars and carousel.
+Both production client builds pass. Server and hydration smoke cover all three
+twin routes, including failure; the original also hydrates those routes and
+both entries respond to theme/carousel clicks. The gate baseline was regenerated:
+**46 steps, all PASS**, nine twins (docs test/typecheck/lint plus original docs
+typecheck). Executed-byte thresholds add only the new pair; older limits stay.
+
+[C1 report](documentation/compiler-c1-report.md#docs-yield): inert holes 127/243,
+inert JSX 149/249 (59.8%), E/V/L 1/2/3, one rejected capture, six U origins.
+Groups: ThemeToggle 6E; SearchBox + CommentList 22V; router/article/likes 84V;
+NewsletterForm 15L; ImageCarousel 4L; fixed-guide error fallback 2L.
+Only ThemeToggle is eager (one touched cell, four pulled-in parts). M6 merges
+search/comments through the shared delay helper's U promise origin. FOREIGN_OWNER
+merges route alternatives and likes, with route-prop U/M6, M4 boundaries and a
+CAPTURE_FALLBACK at DocPage's props. The extra failure-fallback group is not a
+widget. C1 also offers the carousel's changing image as an S slot: the raw
+inert count includes at least one false-inert element (148/249 after removing
+that one, still a majority). The original eight analysis rows are unchanged; C2 remains stopped at
+F-C5. Work stays local on `proto/compiler`; nothing is pushed or changed on main.
+
 ## Compiler branch checkpoint (2026-10-07)
 
 Local work on `proto/compiler`, based on `1da4d82`; nothing pushed and main

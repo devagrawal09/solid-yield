@@ -5,7 +5,7 @@ The pass returns `null`: it does not change emitted code. It collects source in
 memory, resolves imports through Vite, and reports at `buildEnd`. No summary is
 written to disk or consumed by another build.
 
-Run `node packages/compiler-yield/src/report.js` for all eight twins. `--json`
+Run `node packages/compiler-yield/src/report.js` for all nine twins. `--json`
 prints the detailed report; `--markdown <path>` writes a review document only.
 The CLI traverses each twin's entry with Vite's resolver and reads source without
 executing application modules. It excludes dependency packages. The plugin
@@ -22,7 +22,7 @@ engine for comparison. The before table is frozen in
 `documentation/compiler-c1-before.json`. The generated report classifies every U
 origin and lists each eager cause's touched and pulled-in sites.
 
-This is a diagnostic C1 checkpoint, not C2 codegen input. All twin groups have
+This is a diagnostic C1 checkpoint, not C2 codegen input. Twin groups have
 abstract spans, but physical DOM claims and serializer round trips are unproved.
 JSX/h counts are separate and count call-site instances, not runtime DOM nodes.
 The remaining callable-alternative blind spot and the definition clarifications

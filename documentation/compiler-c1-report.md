@@ -10,6 +10,7 @@ Each arrow is the report's previous value → audited value. E/V/L are eager/vis
 
 | Twin | Inert holes | Inert JSX | Groups E/V/L | Captures | U origins | After parts |
 | --- | ---: | ---: | --- | ---: | ---: | --- |
+| docs-yield | 127/243 | 149/249 | 1/2/3 | 1 | 6 | 6E, 22V, 84V, 15L, 4L, 2L |
 | effect-yield | 8/69 → 4/77 | 24/77 → 22/76 | 1/1/0 → 1/0/0 | 6 → 0 | 58 → 5 | 94E |
 | hackernews-spa-yield | 28/70 → 13/75 | 43/66 → 24/65 | 0/4/0 → 0/1/0 | 0 → 0 | 12 → 7 | 68V |
 | rendering-yield | 13/124 → 47/202 | 56/114 → 68/153 | 2/7/1 → 1/0/0 | 5 → 0 | 55 → 15 | 174E |
@@ -32,17 +33,18 @@ GENUINE means client execution/lifetime is required under C0's rules, including 
 
 | Construct | Blind spot | Genuine | Total |
 | --- | ---: | ---: | ---: |
-| plain function call | 0 | 15 | 15 |
+| plain function call | 0 | 18 | 18 |
 | helper routine | 0 | 1 | 1 |
-| foreign primitive | 1 | 13 | 14 |
+| foreign primitive | 1 | 14 | 15 |
 | router query | 0 | 3 | 3 |
-| route props | 0 | 4 | 4 |
+| route props | 0 | 6 | 6 |
 | serialization edge | 0 | 0 | 0 |
 | other | 0 | 0 | 0 |
-| **Total** | **1** | **36** | **37** |
+| **Total** | **1** | **42** | **43** |
 
 | Twin | Blind spot | Genuine |
 | --- | ---: | ---: |
+| docs-yield | 0 | 6 |
 | effect-yield | 1 | 4 |
 | hackernews-spa-yield | 0 | 7 |
 | rendering-yield | 0 | 15 |
@@ -59,6 +61,64 @@ The inherited import, recursive-prop and foreign-slot fixtures were retained. Ad
 Sierpinski's setup timers are explicit eager causes despite having no $effect. The h rule counts nonliteral native props/children as holes, onX props as binds, and literal tags as element sites; component/flow children are analysed under the caller's owner. JSX expression uses are also counted, including structural component-call holes. Literal strings/numbers are inert values. These working clarifications to F-C1–F-C3 are documented in compiler-findings.md; C0 itself is not silently rewritten.
 
 Remaining precision limits: no serializer execution, no proof of physical hydration spans, foreign ownership is conservative, recursive families join all depths, and syntax-based boundary colors can over-merge. The Effect.runFork reference below is knowably module code (S at the edge), but a conditional return loses callable identity; resolving that requires preserving callable alternatives through helper returns. It stays U, with its rule and location visible. Fixing it cannot remove the adapter's genuine async lifetime or the foreign runtime owner. No new C2 code, delayed-hydration change or benchmark change is included.
+
+## docs-yield
+
+### Every remaining U origin
+
+Expressions are abbreviated only for display; file:line:column identifies the full source expression. A repeated origin has one row even if several instances use it.
+
+| Expression and location | Construct | Classification and resolving rule / client dependency |
+| --- | --- | --- |
+| `<Router url={yield* props.url} />` — examples/docs-yield/src/app.tsx:51:13 | foreign primitive | **GENUINE**: Client router controls route ownership and navigation. A client input remains U under C0 §1.2. |
+| `foreign(Home)` — examples/docs-yield/src/app.tsx:35:41 | route props | **GENUINE**: Router supplies params and navigation props. A client input remains U under C0 §1.2. |
+| `foreign(DocPage)` — examples/docs-yield/src/app.tsx:36:51 | route props | **GENUINE**: Router supplies params and navigation props. A client input remains U under C0 §1.2. |
+| `new Promise<void>(resolve => setTimeout(resolve, ms))` — examples/docs-yield/src/api.ts:32:31 | plain function call | **GENUINE**: Non-server promise; completion can change the client view. A client input remains U under C0 §1.2. |
+| `search(value)` — examples/docs-yield/src/widgets.tsx:47:13 | plain function call | **GENUINE**: Non-server async function; its result is a client promise under C0 §1.2. A client input remains U under C0 §1.2. |
+| `comments()` — examples/docs-yield/src/widgets.tsx:186:13 | plain function call | **GENUINE**: Non-server async function; its result is a client promise under C0 §1.2. A client input remains U under C0 §1.2. |
+
+### Content-site premise (new pair, no before measurement)
+
+The pair has six widget definitions with no shared signals or application context. Navigation, eight article sections (headings, paragraphs and code), on-this-page links, related links, a long fixed reading guide and footer come from delayed fake server API functions. The fake API runs in process; its use-server directives declare provenance for C1, without claiming an RPC transport or shipped-byte saving. Local widget APIs remain client promises.
+
+| Twin | Inert holes | Inert JSX | Groups E/V/L | Captures | U origins | Eager reach |
+| --- | ---: | ---: | --- | ---: | ---: | --- |
+| docs-yield | 127/243 | 149/249 | 1/2/3 | 1 | 6 | ThemeToggle only; 1 touched cell, 4 pulled-in parts |
+
+This is a majority of locally inert JSX sites (about 60%), but six candidate groups do not mean six widget roots. SearchBox and CommentList merge by M6: both non-server async paths reach the same delay helper's unknown Promise binding, even though they share no state. The router's FOREIGN_OWNER edges merge the two route alternatives, both LikeButton instances and routed article parts. Route props are U, so getArticle(slug) on DocPage stays U even though the function is server-declared; M6 propagates that origin, and M4 pulls its pending/error boundaries in. CAPTURE_FALLBACK also rejects DocPage's setup-local props object at the candidate edge. None of these merges reaches ThemeToggle, NewsletterForm or ImageCarousel.
+
+The sixth group is the fixed reading guide's two error-fallback holes (err().kind and err().message), joined by SPAN_OVERLAP because they share the same paragraph span, and reported lazy despite having no bind; it is not an extra widget. The failure fallback remains U in this analysis even though the normal article source is S. Thus the diagnostic exposes conservative async sharing, foreign ownership, a prop capture and failure-fallback placement; it does not establish six small independently claimable roots. M1/M2 keep each widget's own cells and handlers together; the cross-widget merge above is M6. The original eight-twin results are unchanged.
+
+One further precision issue is visible in this fixture: ImageCarousel's changing img is offered as an S slot (widgets.tsx:257:9), while its src and alt expressions both read the written index signal. Those embedded yield expressions are absent from that group's part list, although the parity script and hydration interaction change the image. The raw 149/249 inert JSX count therefore includes at least one false-inert element; removing that one still leaves a majority (148/249). This finding is recorded here, without changing the analysis or treating its slots as safe codegen input.
+
+### Groups and eager reach
+
+ThemeToggle has the only $effect. It reads dark, writes no state and touches only its own cell. Its event, class hole, bind and label are pulled into that six-part eager group; no other widget is in eager reach.
+
+Group 1: **eager, 6 parts**, element span examples/docs-yield/src/widgets.tsx:32:7. Components: ThemeToggle. Candidate slots: 0.
+
+- $effect at examples/docs-yield/src/widgets.tsx:21:10.
+  - Touched (1 parts, transitive reads/writes/calls): examples/docs-yield/src/widgets.tsx:19:34.
+  - Pulled in (4 other parts through merges): examples/docs-yield/src/widgets.tsx:27:18, examples/docs-yield/src/widgets.tsx:32:22, examples/docs-yield/src/widgets.tsx:33:25, examples/docs-yield/src/widgets.tsx:33:48.
+
+Group 2: **visible, 22 parts**, element span examples/docs-yield/src/app.tsx:42:7. Components: SearchBox, CommentList. Candidate slots: 18.
+
+
+Group 3: **visible, 84 parts**, foreign span examples/docs-yield/src/app.tsx:51:13. Components: App, ArticleContent, LikeButton, ArticleBody, DocPage. Candidate slots: 0.
+
+
+Group 4: **lazy, 15 parts**, element span examples/docs-yield/src/widgets.tsx:168:7. Components: NewsletterForm. Candidate slots: 1.
+
+
+Group 5: **lazy, 4 parts**, element span examples/docs-yield/src/widgets.tsx:255:7. Components: ImageCarousel. Candidate slots: 2.
+
+
+Group 6: **lazy, 2 parts**, element span examples/docs-yield/src/content.tsx:144:15. Components: ArticleContent. Candidate slots: 0.
+
+
+Merge pairs M1/M2/M3/M4/M5/M6: 114/16/0/117/13/69. Additional pairs: SPAN_OVERLAP 1, FOREIGN_OWNER 158, CAPTURE_FALLBACK 52. Counts include redundant union pairs; they are not counts of independent reasons or saved roots.
+
+Capture: examples/docs-yield/src/app.tsx:23:45 `props`: setup-local non-source client value would cross the root edge.
 
 ## effect-yield
 
@@ -290,6 +350,6 @@ Merge pairs M1/M2/M3/M4/M5/M6: 296/70/10/74/22/44. Additional pairs: SPAN_OVERLA
 
 ## Premise verdict
 
-This corpus does not support “most UI is inert; apps split into small roots” under the current C0 rules and conservative ownership analysis. None of the twins has a majority of locally inert measured element sites, and each has one connected candidate group (seven eager, one visible). Small independent counter fixtures do split, so the mechanism is possible; these applications do not establish that it is typical.
+The original eight interaction-heavy twins do not support “most UI is inert; apps split into small roots” under the current C0 rules: none has a majority of locally inert element sites, and each has one group (seven eager, one visible). The new contrived docs-yield content site has a majority of inert JSX and six groups, with only ThemeToggle eager. It demonstrates that content can dominate while several widget groups stay separate. It also exposes merging of independent async widgets and routed article/like parts, plus a separate failure-fallback group; it does not establish that all six widgets become small independent roots.
 
 This is not a universal disproof. The examples favour stateful demos, foreign owners and async boundaries; call-site/row counts are not DOM or byte weights, and conservative colors/ownership may hide useful splits. Locally inert markup is still useful evidence, but it does not establish extractable slots, independently claimable DOM or shipped-byte savings. The next decision can now use named client dependencies rather than the provisional U reduction alone.

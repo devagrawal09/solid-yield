@@ -20,8 +20,13 @@ const { default: yieldConfig } = await import(
 );
 
 process.chdir(pkg); // the config's projectService reads ./tsconfig.json
-// …and so does the program documentation/getting-started.md builds
-const files = ["test/conformance/scenarios/sources/*.library.tsx", "test/docs/getting-started.tsx"];
+// …and so do the program documentation/getting-started.md builds and its
+// reference examples
+const files = [
+  "test/conformance/scenarios/sources/*.library.tsx",
+  "test/docs/getting-started.tsx",
+  "test/docs/reference.tsx"
+];
 const eslint = new ESLint({
   cwd: pkg,
   overrideConfigFile: true,

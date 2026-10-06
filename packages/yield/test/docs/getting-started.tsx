@@ -69,7 +69,7 @@ export const App = component(function* App() {
       function* () {
         return yield* attempt(
           () => fetchUser(current),
-          cause => new NotFound(String(cause))
+          cause => new NotFound(cause instanceof Error ? cause.message : String(cause))
         );
       }
     );

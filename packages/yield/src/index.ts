@@ -69,6 +69,7 @@ export type {
   EventCall,
   EventCallOp,
   EventHandler,
+  Handler,
   ReadsPendingOf,
   WaitsOf,
   EventOp,

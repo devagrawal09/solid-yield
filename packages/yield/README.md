@@ -2,7 +2,7 @@
 
 Yield components for Solid 2 as a library. A runtime interpreter on Solid's public API, with strict types.
 
-**This is the strict dialect; the compiler route is the ergonomic one.** Solid's `experiment/iterable-signals` branch builds the same model into its compiler and core. This package does it in userland, and makes every rule checkable: types first, then development errors, then [lint rules](../eslint-plugin-yield). It is a design lab (D-002), not a polished end-user API. Its types say exactly what the runtime does (D-071).
+**This is the strict dialect; the compiler route is the ergonomic one.** Solid's `experiment/iterable-signals` branch builds the same model into its compiler and core. This package does it in userland, and makes every rule checkable: types first, then development errors, then [lint rules](https://github.com/devagrawal09/solid-yield/tree/main/packages/eslint-plugin-yield). It is a design lab (D-002), not a polished end-user API. Its types say exactly what the runtime does (D-071).
 
 Do not mix it with the compiler route in one app (D-074): the markup is the same, but the hydration keys are numbered differently, so the server and the client must be built with the same route.
 
@@ -29,14 +29,20 @@ export const Counter = component(function* Counter(props: Props<{ step: number }
 - Failures are typed: `attempt`, `raise`, and `Errored` with `catch`.
 - A prop's pending/failure color is declared: `Props<{ todo: Source<Todo, FetchError, true> }>`.
 
-Start with [`documentation/getting-started.md`](../../documentation/getting-started.md): install, and the dialect on one page. Every refusal (type message, development error, lint rule, transform code) is in [`documentation/refusals.md`](../../documentation/refusals.md). The full rules, where each is enforced, and what the library cannot do without a compiler are in [`documentation/yield-library.md`](../../documentation/yield-library.md).
+Start with [`documentation/getting-started.md`](https://github.com/devagrawal09/solid-yield/blob/main/documentation/getting-started.md): install, and the dialect on one page. Every refusal (type message, development error, lint rule, transform code) is in [`documentation/refusals.md`](https://github.com/devagrawal09/solid-yield/blob/main/documentation/refusals.md). The full rules, where each is enforced, and what the library cannot do without a compiler are in [`documentation/yield-library.md`](https://github.com/devagrawal09/solid-yield/blob/main/documentation/yield-library.md).
+
+Codes such as D-074 here and in the messages cite the design's decision log, [`DECISIONS.md`](https://github.com/devagrawal09/solid-yield/blob/main/documentation/DECISIONS.md) (each rule, its alternatives and its reasoning).
 
 ## Setup
 
 ```sh
-pnpm add solid-yield solid-js @solidjs/web
-pnpm add -D vite-plugin-solid-yield @solidjs/vite-plugin eslint-plugin-solid-yield
+pnpm add solid-yield solid-js@^2.0.0-rc.13 @solidjs/web@^2.0.0-rc.13
+pnpm add -D vite@^8 @solidjs/vite-plugin@3.0.0-next.47 vite-plugin-solid-yield \
+  typescript@~6.0 eslint@^10 @typescript-eslint/parser@^8 eslint-plugin-solid-yield \
+  vitest@^5 jsdom
 ```
+
+`@solidjs/vite-plugin`'s `3.0.0-next.*` releases need `vite` `^8`; `@typescript-eslint/parser` 8 supports TypeScript `<6.1`, so TypeScript is pinned to `~6.0`; vitest with jsdom picks the client build. Getting started has [why each version, the configs, and an app-shell recipe](https://github.com/devagrawal09/solid-yield/blob/main/documentation/getting-started.md#install) (a router under an app-wide context, a test).
 
 ```js
 // vite.config.mjs: the yield rule runs before Solid's JSX compiler

@@ -655,7 +655,7 @@ tester.run("no-foreign-reactive", rules["no-foreign-reactive"], {
           data: {
             name: "dynamic",
             source: "@solidjs/web",
-            hint: " Use `<Switch>` / `<Show>` over the components."
+            hint: " Use `Switch(…)` / `Show(…)` over the components."
           }
         }
       ]

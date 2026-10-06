@@ -45,5 +45,5 @@ it("counts, loads a user, shows the hint, and shows the typed failure", async ()
   $(".next")!.click();
   flush();
   await settle();
-  expect($(".error")!.textContent).toBe("Error: no user 3");
+  expect($(".error")!.textContent).toBe("no user 3");
 });

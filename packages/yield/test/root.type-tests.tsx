@@ -8,13 +8,15 @@ import {
   $memo,
   attempt,
   component,
+  createContext,
   hydrate,
   lazy,
   Loading,
   render,
   renderToStream,
   renderToString,
-  view
+  view,
+  type RootCheck
 } from "solid-yield";
 
 class Gone extends Error {
@@ -64,3 +66,44 @@ void html;
 // rendering twin's pages do
 const LazyApp = lazy(() => Promise.resolve({ default: App }));
 render(() => Loading({ children: () => LazyApp() }), root);
+
+// --- the refusal printed is the cause's (a first-time-user review, log item 21) ---------------
+// A pending root failed `render`'s constraint, TypeScript fell back to the constraint, whose
+// view's requirement is `any`, and the message printed was `[NO_PROVIDER]` — with no context
+// missing. A pending root now prints `[PENDING_ROOT]`; `[NO_PROVIDER]` only names a context.
+type Equal<A, B> =
+  (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
+type Expect<T extends true> = T;
+type PendingMessage =
+  "[PENDING_ROOT] the root may be pending (a read under it has no Loading above): wrap the root, render(() => Loading({ children: App }), el), or put a Loading around the pending part";
+type ProviderMessage =
+  "[NO_PROVIDER] the root requires the contexts this property names: provide each above the components that read it (Ctx.provide({ value, children }) around their calls)";
+type _pendingOnly = Expect<Equal<keyof RootCheck<typeof App>, PendingMessage>>;
+type _pendingThunk = Expect<Equal<keyof RootCheck<() => ReturnType<typeof App>>, PendingMessage>>;
+type _wrapped = Expect<
+  Equal<RootCheck<() => ReturnType<typeof Loading<typeof App, never>>>, unknown>
+>;
+const NeedsCtx = createContext<string, "NeedsCtx">();
+const Reader = component(function* Reader() {
+  const v = yield* NeedsCtx;
+  return view(function* () {
+    return <i>{yield* v}</i>;
+  });
+});
+type _providerOnly = Expect<Equal<keyof RootCheck<typeof Reader>, ProviderMessage>>;
+type _providerNames = Expect<Equal<RootCheck<typeof Reader>[ProviderMessage], "NeedsCtx">>;
+const PendingReader = component(function* PendingReader() {
+  const v = yield* NeedsCtx;
+  return view(function* () {
+    return (
+      <i>
+        {yield* v}
+        {yield* App()}
+      </i>
+    );
+  });
+});
+// both: each with its own message
+type _both = Expect<Equal<keyof RootCheck<typeof PendingReader>, PendingMessage | ProviderMessage>>;
+// @ts-expect-error [PENDING_ROOT] and [NO_PROVIDER] "NeedsCtx"
+render(PendingReader, root);

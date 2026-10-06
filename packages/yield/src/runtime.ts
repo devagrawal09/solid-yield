@@ -350,7 +350,7 @@ function checkRead(inJsx: boolean): void {
   if (!inJsx && view !== null && host === VIEW && getObserver() === observer)
     throw devError(
       "READ_IN_VIEW",
-      `<${view}>: read outside a JSX position. A view has no body: read in a hole ({yield* …} in JSX, a bare function* in h), branch with <Show> / <Match>, derive with a $memo in the setup.`
+      `<${view}>: read outside a JSX position. A view has no body: read in a hole ({yield* …} in JSX, a bare function* in h), branch with a flow control (Show(…) / Match(…) in a hole), derive with a $memo in the setup.`
     );
   if (state.resumed)
     throw devError(

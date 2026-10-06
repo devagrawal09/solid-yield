@@ -171,7 +171,7 @@ const noReadInViewBody = {
         "A view does not read: every read is a hole (a `yield*` in JSX, a bare `function*` hole in `h`); structure comes from flow controls."
     },
     messages: {
-      read: "a view does not read: read in a hole (`{yield* …}` in JSX, a bare `function*` in `h`), branch with <Show> / <Match>, derive with a $memo in the setup.",
+      read: "a view does not read: read in a hole (`{yield* …}` in JSX, a bare `function*` in `h`), branch with a flow control, `Show(…)` / `Match(…)` in a hole, derive with a $memo in the setup.",
       child:
         "a view does not read: a child view is rendered by a hole (`{yield* Child(props)}` in JSX, `h(Child, props)` without JSX)."
     },
@@ -405,8 +405,8 @@ export const FOREIGN_REACTIVE = {
     createAsyncStore: "`$optimisticStore` or `$projection`"
   },
   // no routine form: a server-component call has no place in the model (D-058);
-  // a component chosen at run time is a `<Switch>` / `<Show>` over components
-  "@solidjs/web": { dynamic: "`<Switch>` / `<Show>` over the components" }
+  // a component chosen at run time is a `Switch(…)` / `Show(…)` over components
+  "@solidjs/web": { dynamic: "`Switch(…)` / `Show(…)` over the components" }
 };
 
 const noForeignReactive = {

@@ -39,20 +39,45 @@ type RootRequires<C> = C extends () => infer V
   ? 0 extends 1 & V
     ? never
     : V extends View<any, any, any, infer R>
-      ? R
+      ? 0 extends 1 & R
+        ? never
+        : R
       : never
   : never;
+/** Whether a root's view may be pending (D-099). */
+type RootPending<C> = C extends () => infer V
+  ? 0 extends 1 & V
+    ? false
+    : V extends View<infer P, any, any, any>
+      ? true extends P
+        ? true
+        : false
+      : false
+  : false;
 /**
- * The refusal of a root that requires a context (D-098), naming each: a
+ * The root's refusals, each with its own message. A pending root (D-099):
+ * `[PENDING_ROOT]`, naming the wrap. Without its own case a pending root
+ * failed `render`'s constraint, TypeScript fell back to the constraint
+ * itself, whose view's requirement is `any`, and the refusal printed was
+ * `[NO_PROVIDER]` with `any` (a first-time-user review, log item 21). A
+ * root that requires a context (D-098): `[NO_PROVIDER]`, naming each — a
  * requirement no provider above discharged has nowhere left to be given.
+ * Anything else that is not a root is refused as one (`Root`).
  */
-export type RootCheck<C> = [RootRequires<C>] extends [never]
-  ? unknown
-  : {
-      readonly "[NO_PROVIDER] the root requires the contexts this property names: provide each above the components that read it (Ctx.provide({ value, children }) around their calls)": ContextNames<
-        RootRequires<C>
-      >;
-    };
+export type RootCheck<C> = (RootPending<C> extends true
+  ? {
+      readonly "[PENDING_ROOT] the root may be pending (a read under it has no Loading above): wrap the root, render(() => Loading({ children: App }), el), or put a Loading around the pending part": true;
+    }
+  : C extends Root
+    ? unknown
+    : Root) &
+  ([RootRequires<C>] extends [never]
+    ? unknown
+    : {
+        readonly "[NO_PROVIDER] the root requires the contexts this property names: provide each above the components that read it (Ctx.provide({ value, children }) around their calls)": ContextNames<
+          RootRequires<C>
+        >;
+      });
 type MountableElement = Element & globalThis.Element;
 
 /** Whether a value is `solid-yield/h` / automatic-`jsx` output: the library's mark. */
@@ -78,7 +103,7 @@ function rootOf(code: () => unknown): () => unknown {
 }
 
 /** Mount a root that is not pending and requires no context. */
-export function render<C extends Root>(
+export function render<C extends () => unknown>(
   code: C & RootCheck<C>,
   element: MountableElement | Document | ShadowRoot | DocumentFragment | HTMLElement,
   init?: Element,
@@ -88,7 +113,7 @@ export function render<C extends Root>(
 }
 
 /** Hydrate a root (not pending, requiring no context) rendered on the server. */
-export function hydrate<C extends Root>(
+export function hydrate<C extends () => unknown>(
   code: C & RootCheck<C>,
   element: MountableElement | Document | HTMLElement,
   options?: Parameters<typeof webHydrate>[2]
@@ -101,7 +126,7 @@ export function hydrate<C extends Root>(
  * server (D-099). Synchronous: every pending read is under a `Loading`,
  * which renders its fallback (nothing, without one).
  */
-export function renderToString<C extends Root>(
+export function renderToString<C extends () => unknown>(
   code: C & RootCheck<C>,
   options?: Parameters<typeof webRenderToString>[1]
 ): string {
@@ -113,7 +138,7 @@ export function renderToString<C extends Root>(
  * (D-099): Solid's `renderToStream`. Not held (D-099 amended): a root `Loading`,
  * with or without a fallback, is a boundary; the shell goes out, the content streams in.
  */
-export function renderToStream<C extends Root>(
+export function renderToStream<C extends () => unknown>(
   code: C & RootCheck<C>,
   options?: Parameters<typeof webRenderToStream>[1]
 ): ReturnType<typeof webRenderToStream> {

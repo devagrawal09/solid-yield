@@ -1052,8 +1052,8 @@ export const tagPartly: View<false, never> = Errored({
   }
 });
 render(
+  // @ts-expect-error [PENDING_ROOT] async data outside a Loading: the tree would suspend
   () =>
-    // @ts-expect-error async data outside a Loading: the tree would suspend
     Errored({
       fallback: "!",
       children: function* () {

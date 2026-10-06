@@ -661,6 +661,24 @@ export interface EventHandler<
 }
 
 /**
+ * `Handler<[Theme]>`: how to declare an event prop (or a context holding a
+ * handler) — a handler taking `Args`, failing with `E` (default: never),
+ * returning anything, that does not wait on pending data (`P = false`: a
+ * view binding it is not marked may-wait, so no `no-unshown-wait`) and may or
+ * may not do async work of its own. Any `$event` within those colors is
+ * accepted: `$event(function* (t: Theme) { yield* setTheme(t); })` is one.
+ * A handler that reads data which may be pending is refused here; declare
+ * the colors it has, `EventHandler<Args, E, unknown, true>`.
+ */
+export type Handler<Args extends unknown[] = [], E = never> = EventHandler<
+  Args,
+  E,
+  unknown,
+  false,
+  boolean
+>;
+
+/**
  * An `$event` handler bound in a view (`yield* save`, D-072): what an event
  * attribute of the yield JSX namespace takes. At run time it is the handler
  * itself; the brand says a `Bind` op put its colors in the view's type.

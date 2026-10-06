@@ -1,8 +1,10 @@
 # vite-plugin-solid-yield
 
-The JSX transform's one rule for [`solid-yield`](../yield) (D-003): inside a JSX expression or attribute value, `yield* e` becomes `perform(e)`, imported from `solid-yield`. Each read is then its own hole, and the view generator runs once. Nothing else is lowered. Published as `vite-plugin-solid-yield` (D-011; `@solidjs/vite-plugin-yield` in the Solid fork).
+The JSX transform's one rule for [`solid-yield`](https://github.com/devagrawal09/solid-yield/tree/main/packages/yield) (D-003): inside a JSX expression or attribute value, `yield* e` becomes `perform(e)`, imported from `solid-yield`. Each read is then its own hole, and the view generator runs once. Nothing else is lowered. Published as `vite-plugin-solid-yield` (D-011; `@solidjs/vite-plugin-yield` in the Solid fork).
 
-**This is the strict dialect; the compiler route is the ergonomic one** (D-002): this plugin is the strict dialect's transform, and Solid's `experiment/iterable-signals` branch bakes the model into its compiler and core. Its four refusal codes are listed with the matching lint rule and development errors in [`documentation/refusals.md`](../../documentation/refusals.md).
+**This is the strict dialect; the compiler route is the ergonomic one** (D-002): this plugin is the strict dialect's transform, and Solid's `experiment/iterable-signals` branch bakes the model into its compiler and core. Its four refusal codes are listed with the matching lint rule and development errors in [`documentation/refusals.md`](https://github.com/devagrawal09/solid-yield/blob/main/documentation/refusals.md).
+
+Codes such as D-074 here and in the messages cite the design's decision log, [`DECISIONS.md`](https://github.com/devagrawal09/solid-yield/blob/main/documentation/DECISIONS.md) (each rule, its alternatives and its reasoning).
 
 ## Use
 

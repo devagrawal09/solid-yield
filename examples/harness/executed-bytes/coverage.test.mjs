@@ -29,3 +29,15 @@ test("coverage excludes inline source-map metadata", () => {
     Buffer.byteLength(code)
   );
 });
+
+test("chunk attribution partitions mapped UTF-8 and unmapped suffixes", async () => {
+  const { chunkAttribution } = await import("./chunk-attribution.mjs");
+  const code = "éx();\n// map\n";
+  const attribution = chunkAttribution(code, {
+    version: 3,
+    names: [],
+    sources: ["/src/widgets.tsx"],
+    mappings: "AAAA,E"
+  });
+  assert.deepEqual(attribution, { widgets: 3, unmapped: Buffer.byteLength(code) - 3 });
+});

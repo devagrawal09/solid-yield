@@ -2,12 +2,12 @@
 // (sessionStorage) so two tabs of the same browser are two members.
 //
 // It is a `$signal` provided through context, starting `null` — the value
-// the server renders with — and minted by a `$settled` once the app has
-// settled on the client, so the null→identity change flows through the
+// the server renders with — and minted by an `$effect` (an empty compute: its
+// effect phase runs once, after the first render, D-101) on the client, so the null→identity change flows through the
 // graph: the composer enables, presence re-invokes and this tab joins.
 import {
   component,
-  $settled,
+  $effect,
   $signal,
   constant,
   createContext,
@@ -45,14 +45,17 @@ function mint(): Identity {
  */
 const IdentityContext = createContext(constant<Identity | null>(null));
 
-/** Holds this tab's identity for the tree below; mints it on the client once settled. */
+/** Holds this tab's identity for the tree below; mints it on the client once mounted. */
 export const IdentityProvider = component(function* IdentityProvider(
   props: Props<{ children: Element }>
 ) {
   const [me, setMe] = yield* $signal<Identity | null>(null);
-  yield* $settled(function* () {
-    if (!isServer) yield* setMe(mint());
-  });
+  yield* $effect(
+    function* () {},
+    function* () {
+      if (!isServer) yield* setMe(mint());
+    }
+  );
   return view(function* () {
     return (
       <>

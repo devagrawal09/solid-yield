@@ -168,7 +168,7 @@ export const asyncMemo = $memo(async function* () {
 });
 export const asyncInEffect = $effect(
   function* () {},
-  // @ts-expect-error an effect's attempt is synchronous (Wait is not an EffectOp)
+  // @ts-expect-error an effect's attempt is synchronous (Wait is not an EffectPhaseOp)
   function* () {
     yield* attempt(
       () => fetchUser("1"),

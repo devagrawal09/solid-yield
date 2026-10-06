@@ -1,7 +1,7 @@
 /**
  * `raise` at every host (Phase 4 item 2): a kinded failure raised in a setup,
  * a hole (a prop's, a flow control's), a memo (before and after an async
- * attempt), an effect, a `$settled`, an event and a row reaches the nearest
+ * attempt), an effect (either phase), an event and a row reaches the nearest
  * `Errored` as itself — an `Errored` whose `catch` does not list it passes it
  * up — and with no `Errored` it is re-thrown at the root (D-033): the library
  * installs no boundary. raise.type-tests.tsx is the type half (`FailsOf` at
@@ -13,7 +13,6 @@ import {
   $effect,
   $event,
   $memo,
-  $settled,
   $signal,
   attempt,
   constant,
@@ -222,20 +221,6 @@ const hosts: HostCase[] = [
       })
     }),
     atRoot: "thrown"
-  },
-  {
-    host: "$settled",
-    make: boom => ({
-      App: component(function* App() {
-        yield* $settled(function* () {
-          yield* raise(boom);
-        });
-        return view(function* () {
-          return <i>ok</i>;
-        });
-      })
-    }),
-    atRoot: "cause"
   },
   {
     host: "event",

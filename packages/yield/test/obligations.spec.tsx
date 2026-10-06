@@ -8,11 +8,11 @@
  */
 import { flush, resetErrorHalt } from "solid-js";
 import {
+  $cleanup,
   component,
   $effect,
   $event,
   $memo,
-  $settled,
   attempt,
   ChunkError,
   createContext,
@@ -127,17 +127,48 @@ async function captured(body: () => Promise<void> | void) {
   return { errors, uncaught, unhandled };
 }
 
-// --- O14: $settled admits a read that may be pending (S9) -------------------------------------
-describe("O14: what onSettled does with a pending read", () => {
-  it("a source the view reads under a Loading: the body runs once, after it lands, with its value", async () => {
-    const log: unknown[] = [];
+// --- O14: run once after mount is an $effect with an empty compute (D-101) --------------------
+describe("O14: an $effect with an empty compute runs its effect phase once, after the first render (D-101)", () => {
+  it("once: after the mount, before nothing else; a later write re-runs nothing; its $cleanup runs on disposal", async () => {
+    const log: string[] = [];
+    let setN!: (n: number) => void;
+    const C = component(function* C() {
+      const [n, set] = yield* $signal(0);
+      setN = v => write(() => set(v));
+      yield* $effect(
+        function* () {},
+        function* () {
+          // a settled read in the effect phase: its current value, untracked (D-083)
+          log.push(`effect ${yield* n}`);
+          yield* $cleanup(() => log.push("cleanup"));
+        }
+      );
+      return view(function* () {
+        return <b>{perform(n)}</b>;
+      });
+    });
+    mount(() => C());
+    expect(log).toEqual(["effect 0"]);
+    setN(1);
+    await settle();
+    expect(root.textContent).toBe("1");
+    expect(log).toEqual(["effect 0"]);
+    dispose!();
+    dispose = undefined;
+    expect(log).toEqual(["effect 0", "cleanup"]);
+  });
+
+  it("under a pending Loading: held until the boundary shows its content, as onSettled was", async () => {
+    const log: string[] = [];
     const d = deferred();
     const C = component(function* C() {
       const m = yield* $memo(d.body);
-      yield* $settled(function* () {
-        log.push("start");
-        log.push(yield* m);
-      });
+      yield* $effect(
+        function* () {},
+        function* () {
+          log.push("effect");
+        }
+      );
       return view(function* () {
         return <b>{perform(m)}</b>;
       });
@@ -151,46 +182,49 @@ describe("O14: what onSettled does with a pending read", () => {
       })
     );
     await settle();
-    expect(log).toEqual([]);
+    expect([log, root.textContent]).toEqual([[], "loading"]);
     d.land("done");
     await settle();
-    expect(log).toEqual(["start", "done"]);
-    expect(root.textContent).toBe("done");
+    expect([log, root.textContent]).toEqual([["effect"], "done"]);
   });
 
-  it("FINDING: a source nothing else waits for is still pending when onSettled fires; the read pends silently and the body runs again, from its start, when it lands", async () => {
-    const log: unknown[] = [];
+  it("pending work under another boundary does not hold it (nor did it hold onSettled)", async () => {
+    const log: string[] = [];
     const d = deferred();
-    const C = component(function* C() {
+    const Slow = component(function* Slow() {
       const m = yield* $memo(d.body);
-      yield* $settled(function* () {
-        log.push("start");
-        log.push(yield* m);
-      });
       return view(function* () {
-        return <b>settled view</b>;
+        return <b>{perform(m)}</b>;
       });
     });
-    const { errors, uncaught, unhandled } = await captured(async () => {
-      mount(() =>
-        Errored({
-          fallback: (e: any) => <p>failed: {String(e())}</p>,
-          children: function* () {
-            return <>{perform(C())}</>;
-          }
-        })
+    const C = component(function* C() {
+      yield* $effect(
+        function* () {},
+        function* () {
+          log.push("effect");
+        }
       );
-      // fired at once; the read threw NotReadyError: no value, no boundary, nothing reported
-      expect(log).toEqual(["start"]);
-      await settle();
-      expect(log).toEqual(["start"]);
-      d.land("done");
-      await settle();
+      return view(function* () {
+        return <i>c</i>;
+      });
     });
-    // not "once" (S9): the body before the read ran twice
-    expect(log).toEqual(["start", "start", "done"]);
-    expect(root.textContent).toBe("settled view");
-    expect([errors, uncaught, unhandled]).toEqual([[], [], []]);
+    mount(() => (
+      <>
+        {perform(C())}
+        {perform(
+          Loading({
+            fallback: "loading",
+            children: function* () {
+              return <>{perform(Slow())}</>;
+            }
+          })
+        )}
+      </>
+    ));
+    expect([log, root.textContent]).toEqual([["effect"], "cloading"]);
+    d.land("done");
+    await settle();
+    expect([log, root.textContent]).toEqual([["effect"], "cdone"]);
   });
 });
 

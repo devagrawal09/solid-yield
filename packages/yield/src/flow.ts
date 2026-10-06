@@ -84,7 +84,7 @@ export type Ops<V> = V extends (...args: any[]) => infer R
 type FlowView<O> = ComponentView<PendingOf<O>, FailsOf<O>, MayWaitOf<O>, Settle<RequiresOf<O>>>;
 /**
  * A row's colors: its view's yields and output's, and its setup's (`Y`): an
- * `$effect` / `$settled` the row creates fails to the boundary above the list
+ * `$effect` the row creates fails to the boundary above the list
  * (D-073).
  */
 type RowOps<VY, R, Y> = VY | HOps<R> | Y;

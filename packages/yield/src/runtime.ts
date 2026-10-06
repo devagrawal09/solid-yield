@@ -32,7 +32,6 @@ import {
   latest as solidLatest,
   NotReadyError,
   onCleanup,
-  onSettled,
   runWithOwner,
   untrack,
   useContext,
@@ -57,7 +56,6 @@ import type {
   ComponentView,
   Create,
   ComputeOp,
-  EffectOp,
   EffectPhaseOp,
   ErrorClass,
   EventCall,
@@ -211,9 +209,7 @@ const EVENT = 5;
 const HOLE = 6;
 /** An `$effect`'s compute (D-079): tracked reads, no writes. (`EFFECT` is its effect phase.) */
 const COMPUTE = 7;
-/** A `$settled` body: runs once after settle, reads current values, writes (D-053). */
-const SETTLED = 8;
-type Host = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+type Host = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 const HOST_NAMES = [
   "plain code",
   "a setup",
@@ -222,8 +218,7 @@ const HOST_NAMES = [
   "an effect",
   "an event",
   "a hole",
-  "an effect's compute",
-  "a $settled"
+  "an effect's compute"
 ];
 
 /**
@@ -1382,21 +1377,6 @@ function runCleanups(sink: (() => void)[]): void {
   for (let i = sink.length - 1; i >= 0; i--) sink[i]();
 }
 
-/**
- * `yield* $settled(function* () {…})` in a setup: runs once, after the graph
- * settles (`onSettled`). Reads are current values; `$cleanup`s run when the
- * owner is disposed. Its failures join the component's, as an `$effect`'s
- * do (D-073).
- */
-export function $settled<Y extends EffectOp = never>(
-  body: () => Generator<Y, void, any>
-): Yieldable<Create<"settled", FailsOf<Y>>, void> {
-  return new CreateOp("settled", () => {
-    const name = state.name;
-    onSettled(() => untrack(() => runEffect(body, name, SETTLED)));
-  }) as any;
-}
-
 class CleanupOp {
   constructor(readonly fn: () => void) {}
   *[Symbol.iterator](): Generator<never, void, unknown> {
@@ -1777,7 +1757,7 @@ export function renderView(
  * each its own computation, so a component called in a hole subscribes that
  * hole to nothing of its own.
  * The component's failures are its view's and its setup's effects' (`FailsOf<Y>`,
- * D-073): an `$effect` or a `$settled` fails to the nearest `Errored` above it.
+ * D-073): an `$effect` fails to the nearest `Errored` above it.
  * Its requirements (D-098) are its view's — the components it calls, less
  * what a `Ctx.provide` in the view gives them — and its setup's context
  * reads (`RequiresOf<Y>`), which were resolved where the component was

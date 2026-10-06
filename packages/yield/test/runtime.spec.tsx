@@ -15,7 +15,6 @@ import {
   $projection,
   isPendingOf,
   lazy,
-  $settled,
   $signal,
   $store,
   attempt,
@@ -251,7 +250,7 @@ describe("components", () => {
 });
 
 describe("setup operations", () => {
-  it("$memo derives; $effect runs after changes and cleans up; $settled runs once", () => {
+  it("$memo derives; $effect runs after changes and cleans up; with an empty compute it runs once (D-101)", () => {
     const log: string[] = [];
     let set!: (v: number) => void;
     const App = component(function* () {
@@ -269,9 +268,12 @@ describe("setup operations", () => {
           yield* $cleanup(() => log.push(`cleanup ${d}`));
         }
       );
-      yield* $settled(function* () {
-        log.push(`settled ${yield* doubled}`);
-      });
+      yield* $effect(
+        function* () {},
+        function* () {
+          log.push(`once ${yield* doubled}`);
+        }
+      );
       return view(function* () {
         return <span>{perform(doubled)}</span>;
       });
@@ -281,7 +283,7 @@ describe("setup operations", () => {
     set(2);
     flush();
     expect(root.textContent).toBe("4");
-    expect(log).toEqual(["effect 2", "settled 2", "cleanup 2", "effect 4"]);
+    expect(log).toEqual(["effect 2", "once 2", "cleanup 2", "effect 4"]);
   });
 
   it("an $effect's writes apply", () => {

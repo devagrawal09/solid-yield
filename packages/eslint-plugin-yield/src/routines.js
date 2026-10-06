@@ -4,7 +4,7 @@
  * A routine is a generator function that is
  * - the argument of a routine constructor (`component` → setup, `$memo`,
  *   `$effect` (both its compute and its effect phase, D-079), `$event`,
- *   `$settled`, `$` → hole, or row when it has
+ *   `$` → hole, or row when it has
  *   parameters, `$scope` → row);
  * - returned by a setup or a row routine's setup (→ view), also as a branch of
  *   a conditional or logical return (a setup may return one of several views);
@@ -21,7 +21,6 @@ export const CONSTRUCTORS = {
   $memo: "memo",
   $effect: "effect",
   $event: "event",
-  $settled: "settled",
   $scope: "row"
 };
 

@@ -12,7 +12,6 @@ import {
   $effect,
   $event,
   $memo,
-  $settled,
   $signal,
   Errored,
   For,
@@ -43,6 +42,7 @@ import {
   type Wait,
   type Yieldable
 } from "solid-yield";
+import * as yieldExports from "solid-yield";
 import { h } from "solid-yield/h";
 import type { Handled } from "../src/types.js";
 
@@ -166,8 +166,8 @@ export const MemoTwo = component(function* MemoTwo() {
 export type MemoTwoView = Expect<Equal<ViewFailsOf<ReturnType<typeof MemoTwo>>, Boom | Other>>;
 
 // --- effect: its raise joins the component's failures (D-073) -------------------------------
-// `$effect` / `$settled` give `Yieldable<Create<…, FailsOf<body>>, void>`: what the body
-// raises is in the setup's yield union, and so in the component's view, as it fails at run
+// `$effect` gives `Yieldable<Create<…, FailsOf<compute> | FailsOf<effect>>, void>`: what either
+// half raises is in the setup's yield union, and so in the component's view, as it fails at run
 // time (to the nearest Errored above the component, or re-thrown; raise.spec.tsx).
 export const Effect = component(function* Effect() {
   yield* $effect(
@@ -176,9 +176,13 @@ export const Effect = component(function* Effect() {
       yield* raise(new Boom());
     }
   );
-  yield* $settled(function* () {
-    yield* raise(new Other());
-  });
+  // run once after mount (D-101): an empty compute
+  yield* $effect(
+    function* () {},
+    function* () {
+      yield* raise(new Other());
+    }
+  );
   return view(function* () {
     return <i />;
   });
@@ -204,20 +208,23 @@ export const EffectAbsorbs = component(function* EffectAbsorbs() {
       type _v = Expect<Equal<typeof v, unknown>>;
     }
   );
-  yield* $settled(function* () {
-    const n = yield* attempt(
-      () => 1,
-      () => undefined
-    );
-    type _n = Expect<Equal<typeof n, number | undefined>>;
-    // a fallback is `??`
-    const m =
-      (yield* attempt(
+  yield* $effect(
+    function* () {},
+    function* () {
+      const n = yield* attempt(
         () => 1,
-        () => {}
-      )) ?? 0;
-    type _m = Expect<Equal<typeof m, number>>;
-  });
+        () => undefined
+      );
+      type _n = Expect<Equal<typeof n, number | undefined>>;
+      // a fallback is `??`
+      const m =
+        (yield* attempt(
+          () => 1,
+          () => {}
+        )) ?? 0;
+      type _m = Expect<Equal<typeof m, number>>;
+    }
+  );
   return view(function* () {
     return <i />;
   });
@@ -345,7 +352,7 @@ export const HandlerHosts = component(function* HandlerHosts() {
     });
   });
   type _failing = Expect<Equal<typeof failing, Source<string, Boom, true>>>;
-  // an effect's handler is synchronous: a wait in it is not an EffectOp
+  // an effect's handler is synchronous: a wait in it is not an EffectPhaseOp
   yield* $effect(
     function* () {},
     // @ts-expect-error an async nested attempt in an effect's handler
@@ -970,7 +977,7 @@ export type AttemptCallEffectView = Expect<
 export const AttemptAsyncCallEffect = component(function* AttemptAsyncCallEffect() {
   yield* $effect(
     function* () {},
-    // @ts-expect-error an $effect does not wait: EventCallOp<true, true> is not an EffectOp
+    // @ts-expect-error an $effect does not wait: EventCallOp<true, true> is not an EffectPhaseOp
     function* () {
       yield* attempt(
         () => failing(),
@@ -1237,3 +1244,7 @@ export type ChunkTaken = Expect<Equal<ViewFailsOf<typeof chunkTaken>, never>>;
 export type ChunkKind = Expect<Equal<ChunkError["kind"], "chunk">>;
 export type ChunkSpecifier = Expect<Equal<ChunkError["specifier"], string | undefined>>;
 export type ChunkCause = Expect<Equal<ChunkError["cause"], unknown>>;
+
+// --- D-101: $settled is removed; run once after mount is an $effect with an empty compute ------
+// @ts-expect-error $settled is not exported (D-101)
+export const noSettled = yieldExports.$settled;

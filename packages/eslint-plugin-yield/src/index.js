@@ -97,8 +97,7 @@ const TRY_WHERE = {
   row: "a row",
   memo: "a $memo",
   effect: "an $effect",
-  event: "an $event",
-  settled: "a $settled"
+  event: "an $event"
 };
 /**
  * D-077: `try` / `catch` is not a routine form. A failure it catches at run
@@ -375,7 +374,8 @@ const SOLID_FOREIGN = {
   createTrackedEffect:
     "`$effect(compute, effect)` (a tracked effect is the compute; its writes go in the effect phase)",
   createReaction: "`$effect`",
-  onSettled: "`$settled`",
+  onSettled:
+    "`$effect(function* () {}, function* () { … })` (an empty compute: its effect phase runs once, after the first render, D-101)",
   action: "`$event`",
   until: "`until` from solid-yield",
   refresh: "`refresh` from solid-yield",
@@ -795,7 +795,7 @@ const requireViewWrapper = {
 };
 
 /** Routine kinds whose body never builds elements: JSX is a view's, a hole's or a row's view's (D-041). */
-const NO_JSX_KINDS = new Set(["setup", "row", "memo", "effect", "event", "settled"]);
+const NO_JSX_KINDS = new Set(["setup", "row", "memo", "effect", "event"]);
 
 /**
  * JSX only as the return of a view, a hole, or a row's view (D-041): a setup
@@ -822,8 +822,7 @@ const jsxOnlyInView = {
       row: "a row's setup",
       memo: "a $memo",
       effect: "an $effect",
-      event: "an $event",
-      settled: "a $settled"
+      event: "an $event"
     };
     const check = node => {
       // the outermost JSX only

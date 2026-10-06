@@ -1,4 +1,4 @@
-import { $cleanup, $event, $settled, $signal } from "solid-yield";
+import { $cleanup, $effect, $event, $signal } from "solid-yield";
 
 export type Filter = "all" | "active" | "completed";
 
@@ -13,17 +13,21 @@ function parseHash(hash: string): Filter {
  *
  * The value is set externally via `location.hash` (see the `<a href="#/...">`
  * links in `<Footer>`), so there is no public setter. The `hashchange`
- * listener is an `$event` (its write is a `yield*`), attached once the first
- * render settles and removed with the component.
+ * listener is an `$event` (its write is a `yield*`), attached by an effect
+ * with an empty compute, whose effect phase runs once after the first render
+ * (D-101), and removed with the component.
  */
 export function* hashFilter() {
   const [filter, setFilter] = yield* $signal<Filter>(parseHash(location.hash));
   const onChange = $event(function* () {
     yield* setFilter(parseHash(location.hash));
   });
-  yield* $settled(function* () {
-    window.addEventListener("hashchange", onChange);
-    yield* $cleanup(() => window.removeEventListener("hashchange", onChange));
-  });
+  yield* $effect(
+    function* () {},
+    function* () {
+      window.addEventListener("hashchange", onChange);
+      yield* $cleanup(() => window.removeEventListener("hashchange", onChange));
+    }
+  );
   return filter;
 }

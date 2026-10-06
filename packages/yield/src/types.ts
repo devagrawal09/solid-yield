@@ -124,9 +124,9 @@ export interface StreamAttempt {
   readonly [KIND]: "stream";
 }
 /**
- * Creating owned state (`$signal`, `$store`, `$memo`, `$effect`, `$settled`).
+ * Creating owned state (`$signal`, `$store`, `$memo`, `$effect`).
  * `E` is what the created computation may fail with where nothing reads it:
- * an `$effect`'s or a `$settled`'s body (D-073). Its failure reaches the
+ * an `$effect`'s compute or effect phase (D-073). Its failure reaches the
  * nearest `Errored` above the component, so it joins the component's
  * failures. A memo's failures are its source's (they reach whoever reads it),
  * so a memo's `Create` carries none.
@@ -200,17 +200,6 @@ export type ViewOp =
 export type HViewOp = never;
 /** Operations a memo (or a projection) may perform; it may return a stream an `attempt` gave (D-091). */
 export type MemoOp = Read<boolean, any> | Wait | Raise<any> | StreamAttempt;
-/**
- * Operations a `$settled` may perform (a sync `attempt` only): it runs once
- * after the graph settles, untracked (D-053).
- */
-export type EffectOp =
-  | Read<boolean, any>
-  | Write
-  | Cleanup
-  | Raise<any>
-  | EventCallOp<false, false, any>
-  | StreamAttempt;
 /**
  * Operations an `$effect`'s compute may perform (D-079): tracked reads and
  * failures (`raise`, a sync `attempt`'s). It is pure: a write, a `$cleanup`

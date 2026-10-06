@@ -1,4 +1,4 @@
-# HANDOFF — solid-yield (checkpoint 2026-10-06: v0.1, through D-099)
+# HANDOFF — solid-yield (checkpoint 2026-10-06: v0.1, through D-101)
 
 This repository was extracted from the Solid fork `devagrawal09/solid`, branch `blocks-lib`, at commit **`6978eb83`** (D-015). Git history was not carried; the fork keeps it. The fork's own handoff at that commit (Phases 1A, 1B and 2, and its environment notes) is `git show 6978eb83:HANDOFF.md` in the fork.
 
@@ -6,7 +6,9 @@ This repository was extracted from the Solid fork `devagrawal09/solid`, branch `
 
 ## v0.1 (2026-10-06): state, and what is left
 
-The library is feature-complete for v0.1: through D-099 every ruling is implemented or recorded, and the gate is green (36 / 36 steps, against `documentation/yield-gate-baseline.json`; the step list did not change, so the baseline was not re-recorded). `main` is local and ahead of `origin/main` (`d3638bb`) by the four commits below; nothing was pushed.
+> **Status (2026-10-06).** The repository `devagrawal09/solid-yield` is **public** (Dev flipped it). `origin/main` is at `53b664a`; the commits after it (D-100, D-101) are local, for Dev to push. **npm publish waits for credentials**: nothing is on the registry yet (`solid-yield`, `vite-plugin-solid-yield`, `eslint-plugin-solid-yield` are unpublished).
+
+The library is feature-complete for v0.1: through D-101 every ruling is implemented or recorded, and the gate is green (37 / 37 steps, against `documentation/yield-gate-baseline.json`; the step list did not change, so the baseline was not re-recorded). The table below is the checkpoint at D-099 (pushed since).
 
 | Commit | What |
 | --- | --- |
@@ -27,10 +29,11 @@ The library is feature-complete for v0.1: through D-099 every ruling is implemen
 
 ### What is left: public / publish
 
-- Make the repository public, push `main` (from outside the sandbox: `gh` and SSH to GitHub fail here, see "Publishing" below).
-- Before the first release: collapse the changesets into one initial release note (they do not mention D-097–D-099 yet); decide the plugin's peer range (the 0.x caret, "Known, recorded, not fixed"); `@solidjs/h` as a peer, the ESLint plugin's peers and description; LICENSE / `author` and Solid's MIT notice (from "Fixes with no ruling needed", below; not yet done).
+- ~~Make the repository public, push `main`.~~ Done: public (Dev, 2026-10-06), `main` pushed through `53b664a`. Later commits are pushed by Dev (this sandbox cannot reach GitHub, see "Publishing" below).
+- **Publish to npm: waits for credentials** (an npm login or automation token with publish rights for the three unscoped names). Then `pnpm changeset version` and `pnpm changeset publish` after the items below.
+- Before the first release: collapse the changesets into one initial release note (they do not mention D-097–D-099 yet; D-100 and D-101 have their own); decide the plugin's peer range (the 0.x caret, "Known, recorded, not fixed"); `@solidjs/h` as a peer, the ESLint plugin's peers and description; LICENSE / `author` and Solid's MIT notice (from "Fixes with no ruling needed", below; not yet done).
 - The upstream issue `documentation/upstream/solid-ssr-memo-loop-rc13.md` awaits "file it".
-- **λ-yield.** `documentation/calculus.md` states the soundness theorem (D-071) and its 52 proof obligations, each now evidenced (`test/obligations.spec.tsx` holds the runtime tests that were missing). §6.3's findings: F-1 (an `Errored` fallback's dropped colors) and F-3 (`provide({ value: undefined })`) are fixed, F-4 / F-5 (comments) fixed. **Open for Dev:** F-2 (`lazy`'s untyped chunk failure; its route today is pinned, O45), F-6 (a `$settled` body that reads a pending source runs again from its start, O14), F-7 (an unhandled bound call under an `Errored` whose `catch` excludes its failure, with none above: the call resolves and Solid halts, O37).
+- **λ-yield.** `documentation/calculus.md` states the soundness theorem (D-071) and its 52 proof obligations, each now evidenced (`test/obligations.spec.tsx` holds the runtime tests that were missing). §6.3's findings are all closed, and no obligation is violated as tested: F-1 (an `Errored` fallback's dropped colors) and F-3 (`provide({ value: undefined })`) fixed, F-4 / F-5 (comments) fixed, F-7 fixed (a bound call no `Errored` takes rejects, D-085 note), **F-2 fixed by D-100** (`lazy` fails with a typed `ChunkError`; with no `Errored` it is re-thrown and the call renders nothing, no halt; rendering's pages let it reach the root, as the original), **F-6 closed by D-101** (`$settled` removed; run once after mount is `$effect(function* () {}, function* () { … })`; the 4 twin sites migrated with parity, SSR and hydrate smoke green).
 - Earlier open items below still stand unless a ruling above closed them: D-088's added boundaries now count 4 (hackernews-spa 3, room 1; rendering's went with D-099).
 
 ## Where things are
@@ -43,7 +46,7 @@ The library is feature-complete for v0.1: through D-099 every ruling is implemen
 | 4 `test: exports-conditions matrix …` | `pkg:*:exports` gate steps. CI checks that the build leaves no diff in the vendored types. Baseline re-recorded: **33 / 33**. |
 | 5 `docs: …` | READMEs (repo, `solid-yield`, `eslint-plugin-solid-yield`; the plugin's existed), this file, D-011/D-015 marked implemented. |
 
-**Publishing.** Dev's ruling was a private GitHub repository `devagrawal09/solid-yield`, created after commit 1 and pushed after every commit. The extraction session could not do this from its sandbox:
+**Publishing.** _(History: the repository is public since 2026-10-06.)_ Dev's ruling was a private GitHub repository `devagrawal09/solid-yield`, created after commit 1 and pushed after every commit. The extraction session could not do this from its sandbox:
 
 - `gh` failed TLS verification (`x509: OSStatus -26276`);
 - SSH to github.com failed (broken pipe);
@@ -92,7 +95,7 @@ node scripts/yield-gate.mjs --baseline documentation/yield-gate-baseline.json   
 - **Changesets would release `vite-plugin-solid-yield` as a major.** It peer-depends on `solid-yield` as `workspace:^` since the review fixes (a caret on the current version, `^0.0.0` today), and a caret on a 0.x version admits no minor: `solid-yield`' first minor (0.0.0 → 0.1.0) leaves the range, and `pnpm changeset status` plans the plugin at major (0.0.0 → 1.0.0). `onlyUpdatePeerDependentsWhenOutOfRange` does not change it (the bump is out of range). Before the first release, decide: an explicit 0.x range (`>=0.1.0 <1`), releasing at 1.0, or versioning the plugin by hand for the first release.
 - **`pnpm peers check` reports one unmet peer.** `@solidjs/vite-plugin@3.0.0-next.35` wants `vite ^8 || ^9`; the twins, their originals and the plugin's tests use `vite ^7`, as in the fork.
 - **Not carried.** The fork's `scripts/example-blocks/{browser,bytes}.mjs`, the manual Chromium check and the client-bytes measurement (not gated, D-037). They need Playwright and the originals' production builds. The twins' `tests/browser.steps.mjs` are here; port the runner if the browser check is wanted again.
-- **CI.** The repository is on GitHub (`devagrawal09/solid-yield`, private), and CI's first Linux run of the gate was green (2026-10-04T19:24Z, Node 24 / pnpm 11). That run was the first check of the `linux-x64-gnu` compiler binary and of oxlint on Linux. Phase 4's commits are local until the orchestrator pushes them.
+- **CI.** The repository is on GitHub (`devagrawal09/solid-yield`, private then; public since 2026-10-06), and CI's first Linux run of the gate was green (2026-10-04T19:24Z, Node 24 / pnpm 11). That run was the first check of the `linux-x64-gnu` compiler binary and of oxlint on Linux. Phase 4's commits are local until the orchestrator pushes them.
 
 ## Phase 4 ("extend"), 2026-10-05
 

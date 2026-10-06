@@ -401,11 +401,15 @@ export type Props<D extends PropsCheck<D>> = {
 
 /** D-034 at the declaration: a prop's declared failures are `Failure`s with a literal `kind`. */
 export type PropsCheck<D> = {
-  [N in keyof D]: [Exclude<D[N], undefined>] extends [Source<any, infer E, any>]
-    ? KindCheck<E> extends NeedsKind
-      ? NeedsKind
-      : unknown
-    : unknown;
+  [N in keyof D]: unknown extends D[N]
+    ? DeclareProp<N>
+    : [Exclude<D[N], undefined>] extends [never]
+      ? unknown
+      : [Exclude<D[N], undefined>] extends [Source<any, infer E, any>]
+        ? KindCheck<E> extends NeedsKind
+          ? NeedsKind
+          : unknown
+        : unknown;
 };
 
 /** The read a declared prop is: a path (a source with keys), `children` a source. */
@@ -434,9 +438,14 @@ export type PropsInput<D, Q = never> = {
     Q
   >;
 };
-type PropInput<V, U, N, Q> = [V] extends [Source<infer T, infer E, infer P>]
-  ? T | U | Source<T | U, E, Widen<P>> | HoleProp<T | U, E, Widen<P>, Q>
-  : V | U | Source<V | U> | HoleProp<V | U, never, false, Q> | SettledProp<SettledMessage<N>>;
+type DeclareProp<N> = {
+  readonly "[PROP_TYPE] declare the prop's type; a bare unknown or any could hide a colored Source": N;
+};
+type PropInput<V, U, N, Q> = unknown extends V
+  ? DeclareProp<N>
+  : [V] extends [Source<infer T, infer E, infer P>]
+    ? T | U | Source<T | U, E, Widen<P>> | HoleProp<T | U, E, Widen<P>, Q>
+    : V | U | Source<V | U> | HoleProp<V | U, never, false, Q> | SettledProp<SettledMessage<N>>;
 /** A declared pending prop also takes a settled source (settled ⊂ pending). */
 type Widen<P extends boolean> = [P] extends [true] ? boolean : P;
 /**

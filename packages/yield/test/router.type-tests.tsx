@@ -4,7 +4,7 @@
  * Type-checked by `test-types`.
  *
  * A route page that reads its URL declares its props with the router's
- * types, `Props<RouteProps<"/notes/:mode">>`. The router types such a page
+ * types, `Props<RouteProps<"/notes/:mode", undefined>>`. The router types such a page
  * only through `defineRoute({ path, component })`, which reads the params
  * from the path: a bare `{ path, component }` object's `component` is the
  * router's `RouteSectionComponent`, whose props carry no params (`{}` or the
@@ -35,7 +35,7 @@ const Settings = component(function* Settings() {
   });
 });
 
-const Notes = component(function* Notes(props: Props<RouteProps<"/notes/:mode">>) {
+const Notes = component(function* Notes(props: Props<RouteProps<"/notes/:mode", undefined>>) {
   return view(function* () {
     return <h1>notes: {yield* props.params.mode}</h1>;
   });
@@ -53,7 +53,7 @@ export const Router = createRouter({
 
 // defineRoute types the page's params from the path: a page declared for
 // another pattern is refused there.
-const Story = component(function* Story(props: Props<RouteProps<"/stories/:id">>) {
+const Story = component(function* Story(props: Props<RouteProps<"/stories/:id", undefined>>) {
   return view(function* () {
     return <h1>story {yield* props.params.id}</h1>;
   });

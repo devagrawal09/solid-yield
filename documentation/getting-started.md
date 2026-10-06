@@ -744,7 +744,8 @@ export const Home = component(function* Home() {
 });
 
 // A page that reads its URL declares its props with the router's types.
-export const Notes = component(function* Notes(props: Props<RouteProps<"/notes/:mode">>) {
+// No preload here: data is undefined, rather than an unchecked unknown prop.
+export const Notes = component(function* Notes(props: Props<RouteProps<"/notes/:mode", undefined>>) {
   return view(function* () {
     return <h1>notes: {yield* props.params.mode}</h1>;
   });
@@ -861,7 +862,7 @@ it("renders the routed page under the app-wide context", async () => {
 
 - **`foreign(Page)`** is the hand-off to plain Solid: a page may pend (the `Loading` around the outlet holds it) and must handle its own failures (an `Errored` in its view); a page that may fail is refused, `[FOREIGN_HANDOFF]`, naming the failures.
 - **`foreign(Page, { provided: [Ctx] })`** says which contexts are provided above the router. Without it, a page that reads `ThemeCtx` is refused, `[NO_PROVIDER] … "ThemeCtx"`: plain Solid carries no requirement from the page to the provider. Listing a context the page does not require is refused too (`[NOT_REQUIRED]`). The claim is checked where the page is created: with no provider above, `NO_PROVIDER` at run time.
-- **Links** are plain `<a href>`; the router intercepts them. A route page reads its URL from its props, declared with the router's types: `component(function* Notes(props: Props<RouteProps<"/notes/:mode">>) { … })`, then `yield* props.params.mode` in a memo or a hole (as the hackernews twin's pages do). The router's hooks (`useParams`, `useLocation`) are plain Solid reactive state, which routine code does not read (`no-foreign-reactive`).
+- **Links** are plain `<a href>`; the router intercepts them. A route page reads its URL from its props, declared with the router's types: `component(function* Notes(props: Props<RouteProps<"/notes/:mode", undefined>>) { … })`, then `yield* props.params.mode` in a memo or a hole (as the hackernews twin's pages do). The router's hooks (`useParams`, `useLocation`) are plain Solid reactive state, which routine code does not read (`no-foreign-reactive`).
 - **A route whose page reads params is registered with `defineRoute`**: `defineRoute({ path: "/notes/:mode", component: foreign(Notes) })`. `defineRoute` types the page's `params` from its `path`. A bare `{ path, component }` object types `component` as a page with no params, so a page that requires `params.mode` is refused there (`TS2322 … Type '{}' is missing the following properties … params, location, data`). A plain Solid page declared with `RouteProps<…>` is refused the same way: this is the router's rule, not `foreign`'s. Pages that read no params (`Home`, `Settings`) can stay bare objects. [`router.type-tests.tsx`](https://github.com/devagrawal09/solid-yield/blob/main/packages/yield/test/router.type-tests.tsx) pins both against the router version above.
 - **A callback for the pages** (a setter, `toggle`) goes in a context too — `createContext<Handler<[Theme]>, "SetThemeCtx">(undefined, { name: "SetThemeCtx" })` — since a route component gets no props from you; list it in `provided` beside `ThemeCtx`.
 

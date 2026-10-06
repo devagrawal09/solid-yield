@@ -17,7 +17,7 @@ export const preload = ({ location }: RoutePreloadFuncArgs) => {
 // The page and the feed are hole routines over the location (derived reads,
 // not memoized, as the original's plain functions); the stories are a
 // `$memo` over the query — pending until it lands, and it may fail.
-const Stories = component(function* Stories(props: Props<RouteSectionProps>) {
+const Stories = component(function* Stories(props: Props<RouteSectionProps<void>>) {
   const page = yield* $memo(function* () {
     return Number(yield* props.location.query.page) || 1;
   });

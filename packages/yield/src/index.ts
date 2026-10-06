@@ -42,6 +42,7 @@ export type {
   ContextValue,
   ProvidedValue,
   RequiredContext,
+  UnnamedContext,
   YieldContext
 } from "./context.js";
 export { For, Show, Switch, Match, Repeat, Loading, Errored } from "./flow.js";

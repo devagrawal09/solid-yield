@@ -1145,7 +1145,7 @@ describe("context", () => {
     });
 
     it("a source as the value: the reader's holes read it live, its setup ran once", () => {
-      const NameCtx = createContext<Source<string>>();
+      const NameCtx = createContext<Source<string>, "NameCtx">();
       let setups = 0;
       let set!: (name: string) => void;
       const Reader = component(function* Reader() {
@@ -3193,7 +3193,7 @@ class SaveError extends Error {
 // describe) callback, at a view's root under an outer Errored, keeps an inner
 // Errored's fallback out of the DOM — with Solid's own createContext too, and
 // before D-085 (recorded in D-085, not fixed here).
-const SaveContext = createContext<EventHandler<[], SaveError, void, false, false>>();
+const SaveContext = createContext<EventHandler<[], SaveError, void, false, false>, "SaveContext">();
 
 describe("binding an event is a hole (D-072)", () => {
   it("onClick={yield* save} binds the handler: the click calls it, the bind does not", async () => {

@@ -25,6 +25,7 @@ import {
   type RequiredContext,
   type RequiresOf,
   type Source,
+  type UnnamedContext,
   type View,
   type YieldContext
 } from "solid-yield";
@@ -298,13 +299,89 @@ hydrate(Page, document);
 // @ts-expect-error [NO_PROVIDER] a component handed to plain Solid requires UserCtx
 foreign(Page);
 foreign(App);
-// the refusal names a named context by its name, an unnamed one by its type
+// the refusal names the context by its name
 type _named = Expect<Equal<ContextNames<typeof UserCtx>, "UserCtx">>;
-const Unnamed = createContext<User>();
-type _unnamed = Expect<Equal<ContextNames<typeof Unnamed>, RequiredContext<User, string>>>;
 type _fold = Expect<
   Equal<RequiresOf<ContextRead<typeof UserCtx> | ContextRead<never>>, typeof UserCtx>
 >;
+
+// --- requirements are nominal (D-098 amended): two contexts are two providers -----------------
+
+// a context without a default and without a name is refused, at the call and in its result
+// @ts-expect-error [UNNAMED_CONTEXT] a context without a default needs a name
+const Unnamed = createContext<User>();
+type _unnamed = Expect<Equal<typeof Unnamed, UnnamedContext>>;
+// @ts-expect-error [UNNAMED_CONTEXT] an explicit `string` is no name
+export const UnnamedString = createContext<User, string>();
+export const ReadsUnnamed = component(function* ReadsUnnamed() {
+  // @ts-expect-error the unnamed context cannot be read
+  const user = yield* Unnamed;
+  return view(function* () {
+    return <b>{user}</b>;
+  });
+});
+// @ts-expect-error nor provided
+Unnamed.provide;
+// a context with a default needs no name: it carries no requirement
+const Fallback = createContext<User>({ name: "anonymous" });
+type _defaultedUnnamed = Expect<Equal<typeof Fallback, YieldContext<User, string>>>;
+const ReadsFallback = component(function* ReadsFallback() {
+  const user = yield* Fallback;
+  return view(function* () {
+    return <b>{yield* user.name}</b>;
+  });
+});
+render(ReadsFallback, root);
+
+// two contexts of one value type are two requirements: the second's provider does not satisfy
+// the first, and the root names the first
+const AuthorCtx = createContext<User, "AuthorCtx">();
+const EditorCtx = createContext<User, "EditorCtx">();
+const Byline = component(function* Byline() {
+  const author = yield* AuthorCtx;
+  return view(function* () {
+    return <i>{yield* author.name}</i>;
+  });
+});
+const EditorOnly = component(function* EditorOnly() {
+  return view(function* () {
+    return (
+      <>
+        {
+          yield* EditorCtx.provide({
+            value: { name: "ed" },
+            children: function* () {
+              return <>{yield* Byline()}</>;
+            }
+          })
+        }
+      </>
+    );
+  });
+});
+type _twoTypes = Expect<Equal<RequiresOfComponent<typeof EditorOnly>, typeof AuthorCtx>>;
+type _twoNames = Expect<Equal<ContextNames<RequiresOfComponent<typeof EditorOnly>>, "AuthorCtx">>;
+// @ts-expect-error [NO_PROVIDER] the root requires "AuthorCtx"
+render(EditorOnly, root);
+// its own (named) provider discharges it
+const AuthorProvided = component(function* AuthorProvided() {
+  return view(function* () {
+    return (
+      <>
+        {
+          yield* AuthorCtx.provide({
+            value: { name: "au" },
+            children: function* () {
+              return <>{yield* Byline()}</>;
+            }
+          })
+        }
+      </>
+    );
+  });
+});
+type _ownDischarges = Expect<Equal<RequiresOfComponent<typeof AuthorProvided>, never>>;
+render(AuthorProvided, root);
 
 // --- a hole prop does not carry a requirement ----------------------------------------------
 

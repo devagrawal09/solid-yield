@@ -70,7 +70,7 @@ const Value = component(function* Value() {
   });
 });
 
-const Save = createContext<EventHandler<[], Forbidden, void, false, false>>();
+const Save = createContext<EventHandler<[], Forbidden, void, false, false>, "Save">();
 
 /** Binds the handler it is given, under an Errored of its own: the bind site (D-085). */
 const Child = component(function* Child() {

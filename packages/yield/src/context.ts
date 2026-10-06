@@ -1,8 +1,8 @@
 /*
  * Contexts for yield components (D-036, D-060, D-098).
  *
- * `createContext<T>()` — no default — makes a context a component
- * *requires*: a setup that reads it (`yield* Ctx`) adds the context to its
+ * `createContext<T, "Name">()` — no default, named — makes a context a
+ * component *requires*: a setup that reads it (`yield* Ctx`) adds the context to its
  * component's type (`ComponentView`'s `R`, folded with `RequiresOf`), and the
  * requirement travels through calls, holes and rows like a failure, until a
  * `Ctx.provide({ value, children })` around the call discharges it.
@@ -56,12 +56,13 @@ export type ProvidedValue<T> = [T] extends [Source<infer V, infer E, infer P>]
 
 /**
  * A library context. `Q` is what a setup's read of it requires: the context
- * itself when it has no default (`RequiredContext`), else `never`. Its value
- * type is invariant (`[CONTEXT]`), so a provider of one context never
- * discharges another of a narrower or wider type; `N` is an optional name,
- * `createContext<User, "UserCtx">()`, which the root's refusal prints and
- * which tells apart two contexts of one value type (without it they are one
- * requirement to the types).
+ * itself when it has no default (`RequiredContext`), else `never`.
+ * Requirements are nominal, as the runtime's providers are (D-098 amended):
+ * a context without a default is named, `createContext<User, "UserCtx">()`,
+ * and the name brands its requirement, so two contexts of one value type are
+ * two requirements and a provider discharges only its own. The value type is
+ * invariant too (`[CONTEXT]`): a provider of another value type, narrower or
+ * wider, discharges nothing. The root's refusal prints the name.
  */
 export interface ContextOps<T, N extends string, Q> {
   readonly [CONTEXT]: { readonly value: (value: T) => T; readonly name: N };
@@ -99,8 +100,22 @@ export interface RequiredContext<T, N extends string = string>
   extends Context<T>, ContextOps<T, N, RequiredContext<T, N>> {}
 
 /**
- * The contexts a root still requires, as the refusal prints them: a named
- * context by its name, an unnamed one by its type.
+ * What `createContext<T>()` gives without a name (D-098 amended): nothing a
+ * routine can read or provide. A context without a default is a requirement,
+ * and a requirement is told apart by its name, so it must have one. The
+ * property's name is the message TypeScript prints where it is used.
+ */
+export interface UnnamedContext {
+  readonly '[UNNAMED_CONTEXT] a context without a default needs a name: createContext<User, "UserCtx">()': never;
+}
+
+/** The same refusal at the call: TypeScript prints this `this` type where `createContext<User>()` is written. */
+export type UnnamedContextCall =
+  '[UNNAMED_CONTEXT] a context without a default needs a name: createContext<User, "UserCtx">()';
+
+/**
+ * The contexts a root still requires, as the refusal prints them: by name
+ * (a context with a type-level name only, `string`, cannot be required).
  */
 export type ContextNames<R> = R extends { readonly [CREATED]: infer C }
   ? ContextNames<C>
@@ -111,14 +126,18 @@ export type ContextNames<R> = R extends { readonly [CREATED]: infer C }
     : R;
 
 /**
- * `createContext<T>()`: a context a reader requires (D-098). With
- * `createContext<T, "Name">()` the refusal at the root names it. A provided
- * value is read like a prop.
+ * `createContext<T, "Name">()`: a context a reader requires (D-098). The name
+ * is its requirement's identity (D-098 amended: two contexts are two
+ * providers, whatever their value types) and what the refusal at the root
+ * prints. Without a name it is refused: the call (its `this`) and its result
+ * (`UnnamedContext`) say "name the context". A provided value is read like
+ * a prop.
  */
 export function createContext<T, N extends string = string>(
+  this: string extends N ? UnnamedContextCall : void,
   defaultValue?: undefined,
   options?: { name?: N }
-): RequiredContext<T, N>;
+): string extends N ? UnnamedContext : RequiredContext<T, N>;
 /**
  * `createContext(defaultValue)`: a context that is always there to read
  * (D-060: `constant(value)` for a default that is a source).
@@ -127,7 +146,11 @@ export function createContext<T, N extends string = string>(
   defaultValue: T,
   options?: { name?: N }
 ): YieldContext<T, N>;
-export function createContext(defaultValue?: unknown, options?: { name?: string }): unknown {
+export function createContext(
+  this: unknown,
+  defaultValue?: unknown,
+  options?: { name?: string }
+): unknown {
   const ctx = solidCreateContext(defaultValue as any, options as any) as any;
   ctx[Symbol.iterator] = function* (this: unknown): Generator<never, unknown, unknown> {
     return readContext(ctx);

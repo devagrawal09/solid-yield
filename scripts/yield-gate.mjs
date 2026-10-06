@@ -255,6 +255,38 @@ function buildSteps(twins) {
     }
   );
 
+  steps.push(
+    {
+      name: "compiler:emission-test",
+      cwd: root,
+      cmd: process.execPath,
+      args: ["--test", "packages/compiler-yield/test/emission.test.mjs"]
+    },
+    {
+      name: "compiler:docs-eager",
+      cwd: root,
+      cmd: process.execPath,
+      args: ["--test", "packages/compiler-yield/test/eager-docs.test.mjs"]
+    },
+    {
+      name: "compiler:root-conformance",
+      cwd: root,
+      ...pnpmRun("packages/yield", "test:conformance"),
+      env: { YIELD_C2_ROOTS: "1" }
+    },
+    {
+      name: "compiler:docs-executed-bytes",
+      cwd: root,
+      cmd: process.execPath,
+      args: [
+        "examples/harness/executed-bytes/hydrated-docs.mjs",
+        "--no-shipped",
+        "--baseline",
+        "documentation/docs-hydrated-bytes.json"
+      ]
+    }
+  );
+
   steps.push({
     name: "compiler:namespace-spike",
     cwd: root,
@@ -345,7 +377,7 @@ function runStep(step) {
     const chunks = [];
     const child = spawn(step.cmd, step.args, {
       cwd: step.cwd,
-      env: { ...process.env, ...CHILD_ENV },
+      env: { ...process.env, ...CHILD_ENV, ...step.env },
       stdio: ["ignore", "pipe", "pipe"]
     });
     child.stdout.on("data", c => chunks.push(c));

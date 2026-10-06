@@ -1,8 +1,93 @@
 # Compiler prototype byte measurements
 
-Recorded on Node v24.18.0, Solid rc.13, with the existing parity scripts. The
-compiler route is **not built**: the public-API spike failed a delayed root claim
-([F-C5](compiler-c2-finding.md)). No compiler savings are claimed.
+The current docs tier-1 measurements are below. The older eight-twin tables
+remain historical CSR measurements without compiler output. See
+[the C2 record](compiler-c2-finding.md) for the new blocking failure finding.
+
+## docs-yield eager tier 1
+
+Measured 2026-10-07, Node v24.18.0 / Solid rc.13. **This is an experimental,
+partial C2 result:** F-C9 blocks direct failed-route SSR/hydration. The supported
+`/` entry passes the 24 interactions. These numbers do not claim C2 completion.
+
+All three versions use complete streamed SSR, then hydrate in a **fresh process**.
+Coverage starts before any browser app/runtime import. This keeps server module
+initialization out of client coverage. It uses the existing `coverage.mjs` V8
+counter and the unchanged 24 named parity steps. Timer advances are real; the
+initial server content is already settled, despite the CSR script's historical
+“pending” step names. Server rendering itself is not counted. Do not compare
+these load numbers with the CSR load column in the older tables below.
+
+Each physical root has its own production chunk and all seven hydrate
+synchronously. Fourteen total chunks include shared code and the dynamic
+server-forms chunk. Shipped bytes include every production JS chunk and exclude
+maps/CSS/HTML. Gzip compresses each chunk separately. Production validation
+rejects navigation/footer template or site-data strings in the compiled chunks.
+The route and guide article bodies remain client-wide fallbacks.
+
+| Metric (bytes) | Original | Library | Compiled | Compiled saving vs library |
+| --- | ---: | ---: | ---: | ---: |
+| Executed at load | 550,893 | 584,641 | 642,511 | -57,870 (-9.90%) |
+| Executed across load + 24 checkpoints (sum, not a page-wide union) | 2,600,828 | 2,774,497 | 2,840,436 | -65,939 (-2.38%) |
+| Shipped JS | 152,339 | 166,658 | 174,148 | -7,490 (-4.49%) |
+| Shipped gzip | 54,285 | 58,755 | 65,281 | -6,526 (-11.11%) |
+
+**No savings at this checkpoint.** Root modules, public decoding, inert element
+registration and separate chunk overhead outweigh the removed nav/footer code.
+This is observed cost, not evidence against the content-heavy premise in every
+possible implementation. No bundle optimization was attempted after F-C9.
+
+### Every hydrated parity step
+
+Each number below was identical in all three runs.
+
+| Step | Original | Library | Compiled | Saving vs library (bytes) |
+| --- | ---: | ---: | ---: | ---: |
+| 1. load / (pending) | 1,841 | 1,841 | 1,841 | +0 |
+| 2. content loads | 1,841 | 1,841 | 1,841 | +0 |
+| 3. comment list loads, avatars pending | 1,841 | 1,841 | 1,841 | +0 |
+| 4. avatars load | 1,841 | 1,841 | 1,841 | +0 |
+| 5. navigate to /docs/start | 224,025 | 238,733 | 239,118 | -385 |
+| 6. article loads | 122,428 | 129,679 | 130,233 | -554 |
+| 7. toggle theme | 70,059 | 86,684 | 86,677 | +7 |
+| 8. search starts | 89,069 | 95,766 | 95,759 | +7 |
+| 9. search results | 116,381 | 121,873 | 122,425 | -552 |
+| 10. like (optimistic) | 86,222 | 91,028 | 92,197 | -1,169 |
+| 11. like saved | 93,887 | 97,553 | 98,138 | -585 |
+| 12. second like (optimistic) | 86,398 | 91,178 | 92,347 | -1,169 |
+| 13. like rate limited | 93,955 | 97,295 | 97,880 | -585 |
+| 14. newsletter good email | 67,520 | 80,100 | 80,091 | +9 |
+| 15. newsletter in flight | 84,464 | 88,623 | 88,612 | +11 |
+| 16. newsletter success | 92,830 | 96,508 | 97,311 | -803 |
+| 17. newsletter bad email | 70,337 | 82,669 | 82,660 | +9 |
+| 18. bad newsletter in flight | 84,635 | 88,661 | 88,650 | +11 |
+| 19. newsletter typed error | 94,939 | 98,298 | 98,874 | -576 |
+| 20. carousel next | 69,018 | 85,232 | 85,221 | +11 |
+| 21. search failure starts | 89,202 | 95,899 | 95,892 | +7 |
+| 22. search typed error | 109,848 | 113,060 | 113,929 | -869 |
+| 23. navigate to failing slug | 164,536 | 167,718 | 167,763 | -45 |
+| 24. not-found typed error | 132,818 | 135,935 | 136,784 | -849 |
+
+### Drift and gate
+
+Across **3 runs × 3 versions × 25 phases**, the maximum minus minimum was
+**0 bytes in every phase**. The new hydrated-docs baseline keeps the established
+allowance of `max(2%, 1,024 bytes)` above the observed maximum. Three identical
+same-machine runs do not establish cross-machine stability. The existing CSR
+byte baseline is unchanged. Its docs load was also stable in three separate
+runs: original **519,971**, library **543,843** bytes. Those are different load
+paths and are not used to compute compiled savings.
+
+[docs-hydrated-bytes.json](docs-hydrated-bytes.json) contains all 225 observations,
+phase ranges, limits and shipped sizes. The new `compiler:docs-executed-bytes`
+gate checks all 75 phases against that separate baseline; the original
+`twins:executed-bytes` gate retains its baseline. F-C9's expected failure is
+checked separately and is not described as a successful hydrate smoke.
+
+```sh
+node examples/harness/executed-bytes/hydrated-docs.mjs --runs 3 --record /tmp/docs-bytes.json
+node examples/harness/executed-bytes/hydrated-docs.mjs --no-shipped --baseline documentation/docs-hydrated-bytes.json
+```
 
 ## What is measured
 
@@ -263,7 +348,7 @@ between repeated runs are possible; see the gate allowance below.
 ## Gate and reproduction
 
 `compiler:executed-bytes-test` checks the range counter (nested exclusions, UTF-8
-and source-map exclusion). `twins:executed-bytes` measures all 16 original/library
+and source-map exclusion). `twins:executed-bytes` measures all 18 original/library
 runs and compares every phase to [executed-bytes.json](executed-bytes.json).
 Phase names, counts and twin/route inventory must match. The limit is the recorded
 value plus the greater of 2% or 1,024 bytes. Decreases pass. This allowance covers

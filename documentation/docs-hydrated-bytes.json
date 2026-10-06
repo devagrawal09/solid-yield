@@ -1,0 +1,1594 @@
+{
+  "node": "v24.18.0",
+  "metric": "Hydrated docs; V8 executed UTF-8 ranges reset each phase; production Vite module runner; completed SSR in a separate process; same 24 authored steps; all roots synchronous",
+  "runs": [
+    [
+      {
+        "app": "original",
+        "phases": [
+          {
+            "phase": "load",
+            "bytes": 550893
+          },
+          {
+            "phase": "load / (pending)",
+            "bytes": 1841
+          },
+          {
+            "phase": "content loads",
+            "bytes": 1841
+          },
+          {
+            "phase": "comment list loads, avatars pending",
+            "bytes": 1841
+          },
+          {
+            "phase": "avatars load",
+            "bytes": 1841
+          },
+          {
+            "phase": "navigate to /docs/start",
+            "bytes": 224025
+          },
+          {
+            "phase": "article loads",
+            "bytes": 122428
+          },
+          {
+            "phase": "toggle theme",
+            "bytes": 70059
+          },
+          {
+            "phase": "search starts",
+            "bytes": 89069
+          },
+          {
+            "phase": "search results",
+            "bytes": 116381
+          },
+          {
+            "phase": "like (optimistic)",
+            "bytes": 86222
+          },
+          {
+            "phase": "like saved",
+            "bytes": 93887
+          },
+          {
+            "phase": "second like (optimistic)",
+            "bytes": 86398
+          },
+          {
+            "phase": "like rate limited",
+            "bytes": 93955
+          },
+          {
+            "phase": "newsletter good email",
+            "bytes": 67520
+          },
+          {
+            "phase": "newsletter in flight",
+            "bytes": 84464
+          },
+          {
+            "phase": "newsletter success",
+            "bytes": 92830
+          },
+          {
+            "phase": "newsletter bad email",
+            "bytes": 70337
+          },
+          {
+            "phase": "bad newsletter in flight",
+            "bytes": 84635
+          },
+          {
+            "phase": "newsletter typed error",
+            "bytes": 94939
+          },
+          {
+            "phase": "carousel next",
+            "bytes": 69018
+          },
+          {
+            "phase": "search failure starts",
+            "bytes": 89202
+          },
+          {
+            "phase": "search typed error",
+            "bytes": 109848
+          },
+          {
+            "phase": "navigate to failing slug",
+            "bytes": 164536
+          },
+          {
+            "phase": "not-found typed error",
+            "bytes": 132818
+          }
+        ]
+      },
+      {
+        "app": "library",
+        "phases": [
+          {
+            "phase": "load",
+            "bytes": 584641
+          },
+          {
+            "phase": "load / (pending)",
+            "bytes": 1841
+          },
+          {
+            "phase": "content loads",
+            "bytes": 1841
+          },
+          {
+            "phase": "comment list loads, avatars pending",
+            "bytes": 1841
+          },
+          {
+            "phase": "avatars load",
+            "bytes": 1841
+          },
+          {
+            "phase": "navigate to /docs/start",
+            "bytes": 238733
+          },
+          {
+            "phase": "article loads",
+            "bytes": 129679
+          },
+          {
+            "phase": "toggle theme",
+            "bytes": 86684
+          },
+          {
+            "phase": "search starts",
+            "bytes": 95766
+          },
+          {
+            "phase": "search results",
+            "bytes": 121873
+          },
+          {
+            "phase": "like (optimistic)",
+            "bytes": 91028
+          },
+          {
+            "phase": "like saved",
+            "bytes": 97553
+          },
+          {
+            "phase": "second like (optimistic)",
+            "bytes": 91178
+          },
+          {
+            "phase": "like rate limited",
+            "bytes": 97295
+          },
+          {
+            "phase": "newsletter good email",
+            "bytes": 80100
+          },
+          {
+            "phase": "newsletter in flight",
+            "bytes": 88623
+          },
+          {
+            "phase": "newsletter success",
+            "bytes": 96508
+          },
+          {
+            "phase": "newsletter bad email",
+            "bytes": 82669
+          },
+          {
+            "phase": "bad newsletter in flight",
+            "bytes": 88661
+          },
+          {
+            "phase": "newsletter typed error",
+            "bytes": 98298
+          },
+          {
+            "phase": "carousel next",
+            "bytes": 85232
+          },
+          {
+            "phase": "search failure starts",
+            "bytes": 95899
+          },
+          {
+            "phase": "search typed error",
+            "bytes": 113060
+          },
+          {
+            "phase": "navigate to failing slug",
+            "bytes": 167718
+          },
+          {
+            "phase": "not-found typed error",
+            "bytes": 135935
+          }
+        ]
+      },
+      {
+        "app": "compiled",
+        "phases": [
+          {
+            "phase": "load",
+            "bytes": 642511
+          },
+          {
+            "phase": "load / (pending)",
+            "bytes": 1841
+          },
+          {
+            "phase": "content loads",
+            "bytes": 1841
+          },
+          {
+            "phase": "comment list loads, avatars pending",
+            "bytes": 1841
+          },
+          {
+            "phase": "avatars load",
+            "bytes": 1841
+          },
+          {
+            "phase": "navigate to /docs/start",
+            "bytes": 239118
+          },
+          {
+            "phase": "article loads",
+            "bytes": 130233
+          },
+          {
+            "phase": "toggle theme",
+            "bytes": 86677
+          },
+          {
+            "phase": "search starts",
+            "bytes": 95759
+          },
+          {
+            "phase": "search results",
+            "bytes": 122425
+          },
+          {
+            "phase": "like (optimistic)",
+            "bytes": 92197
+          },
+          {
+            "phase": "like saved",
+            "bytes": 98138
+          },
+          {
+            "phase": "second like (optimistic)",
+            "bytes": 92347
+          },
+          {
+            "phase": "like rate limited",
+            "bytes": 97880
+          },
+          {
+            "phase": "newsletter good email",
+            "bytes": 80091
+          },
+          {
+            "phase": "newsletter in flight",
+            "bytes": 88612
+          },
+          {
+            "phase": "newsletter success",
+            "bytes": 97311
+          },
+          {
+            "phase": "newsletter bad email",
+            "bytes": 82660
+          },
+          {
+            "phase": "bad newsletter in flight",
+            "bytes": 88650
+          },
+          {
+            "phase": "newsletter typed error",
+            "bytes": 98874
+          },
+          {
+            "phase": "carousel next",
+            "bytes": 85221
+          },
+          {
+            "phase": "search failure starts",
+            "bytes": 95892
+          },
+          {
+            "phase": "search typed error",
+            "bytes": 113929
+          },
+          {
+            "phase": "navigate to failing slug",
+            "bytes": 167763
+          },
+          {
+            "phase": "not-found typed error",
+            "bytes": 136784
+          }
+        ]
+      }
+    ],
+    [
+      {
+        "app": "original",
+        "phases": [
+          {
+            "phase": "load",
+            "bytes": 550893
+          },
+          {
+            "phase": "load / (pending)",
+            "bytes": 1841
+          },
+          {
+            "phase": "content loads",
+            "bytes": 1841
+          },
+          {
+            "phase": "comment list loads, avatars pending",
+            "bytes": 1841
+          },
+          {
+            "phase": "avatars load",
+            "bytes": 1841
+          },
+          {
+            "phase": "navigate to /docs/start",
+            "bytes": 224025
+          },
+          {
+            "phase": "article loads",
+            "bytes": 122428
+          },
+          {
+            "phase": "toggle theme",
+            "bytes": 70059
+          },
+          {
+            "phase": "search starts",
+            "bytes": 89069
+          },
+          {
+            "phase": "search results",
+            "bytes": 116381
+          },
+          {
+            "phase": "like (optimistic)",
+            "bytes": 86222
+          },
+          {
+            "phase": "like saved",
+            "bytes": 93887
+          },
+          {
+            "phase": "second like (optimistic)",
+            "bytes": 86398
+          },
+          {
+            "phase": "like rate limited",
+            "bytes": 93955
+          },
+          {
+            "phase": "newsletter good email",
+            "bytes": 67520
+          },
+          {
+            "phase": "newsletter in flight",
+            "bytes": 84464
+          },
+          {
+            "phase": "newsletter success",
+            "bytes": 92830
+          },
+          {
+            "phase": "newsletter bad email",
+            "bytes": 70337
+          },
+          {
+            "phase": "bad newsletter in flight",
+            "bytes": 84635
+          },
+          {
+            "phase": "newsletter typed error",
+            "bytes": 94939
+          },
+          {
+            "phase": "carousel next",
+            "bytes": 69018
+          },
+          {
+            "phase": "search failure starts",
+            "bytes": 89202
+          },
+          {
+            "phase": "search typed error",
+            "bytes": 109848
+          },
+          {
+            "phase": "navigate to failing slug",
+            "bytes": 164536
+          },
+          {
+            "phase": "not-found typed error",
+            "bytes": 132818
+          }
+        ]
+      },
+      {
+        "app": "library",
+        "phases": [
+          {
+            "phase": "load",
+            "bytes": 584641
+          },
+          {
+            "phase": "load / (pending)",
+            "bytes": 1841
+          },
+          {
+            "phase": "content loads",
+            "bytes": 1841
+          },
+          {
+            "phase": "comment list loads, avatars pending",
+            "bytes": 1841
+          },
+          {
+            "phase": "avatars load",
+            "bytes": 1841
+          },
+          {
+            "phase": "navigate to /docs/start",
+            "bytes": 238733
+          },
+          {
+            "phase": "article loads",
+            "bytes": 129679
+          },
+          {
+            "phase": "toggle theme",
+            "bytes": 86684
+          },
+          {
+            "phase": "search starts",
+            "bytes": 95766
+          },
+          {
+            "phase": "search results",
+            "bytes": 121873
+          },
+          {
+            "phase": "like (optimistic)",
+            "bytes": 91028
+          },
+          {
+            "phase": "like saved",
+            "bytes": 97553
+          },
+          {
+            "phase": "second like (optimistic)",
+            "bytes": 91178
+          },
+          {
+            "phase": "like rate limited",
+            "bytes": 97295
+          },
+          {
+            "phase": "newsletter good email",
+            "bytes": 80100
+          },
+          {
+            "phase": "newsletter in flight",
+            "bytes": 88623
+          },
+          {
+            "phase": "newsletter success",
+            "bytes": 96508
+          },
+          {
+            "phase": "newsletter bad email",
+            "bytes": 82669
+          },
+          {
+            "phase": "bad newsletter in flight",
+            "bytes": 88661
+          },
+          {
+            "phase": "newsletter typed error",
+            "bytes": 98298
+          },
+          {
+            "phase": "carousel next",
+            "bytes": 85232
+          },
+          {
+            "phase": "search failure starts",
+            "bytes": 95899
+          },
+          {
+            "phase": "search typed error",
+            "bytes": 113060
+          },
+          {
+            "phase": "navigate to failing slug",
+            "bytes": 167718
+          },
+          {
+            "phase": "not-found typed error",
+            "bytes": 135935
+          }
+        ]
+      },
+      {
+        "app": "compiled",
+        "phases": [
+          {
+            "phase": "load",
+            "bytes": 642511
+          },
+          {
+            "phase": "load / (pending)",
+            "bytes": 1841
+          },
+          {
+            "phase": "content loads",
+            "bytes": 1841
+          },
+          {
+            "phase": "comment list loads, avatars pending",
+            "bytes": 1841
+          },
+          {
+            "phase": "avatars load",
+            "bytes": 1841
+          },
+          {
+            "phase": "navigate to /docs/start",
+            "bytes": 239118
+          },
+          {
+            "phase": "article loads",
+            "bytes": 130233
+          },
+          {
+            "phase": "toggle theme",
+            "bytes": 86677
+          },
+          {
+            "phase": "search starts",
+            "bytes": 95759
+          },
+          {
+            "phase": "search results",
+            "bytes": 122425
+          },
+          {
+            "phase": "like (optimistic)",
+            "bytes": 92197
+          },
+          {
+            "phase": "like saved",
+            "bytes": 98138
+          },
+          {
+            "phase": "second like (optimistic)",
+            "bytes": 92347
+          },
+          {
+            "phase": "like rate limited",
+            "bytes": 97880
+          },
+          {
+            "phase": "newsletter good email",
+            "bytes": 80091
+          },
+          {
+            "phase": "newsletter in flight",
+            "bytes": 88612
+          },
+          {
+            "phase": "newsletter success",
+            "bytes": 97311
+          },
+          {
+            "phase": "newsletter bad email",
+            "bytes": 82660
+          },
+          {
+            "phase": "bad newsletter in flight",
+            "bytes": 88650
+          },
+          {
+            "phase": "newsletter typed error",
+            "bytes": 98874
+          },
+          {
+            "phase": "carousel next",
+            "bytes": 85221
+          },
+          {
+            "phase": "search failure starts",
+            "bytes": 95892
+          },
+          {
+            "phase": "search typed error",
+            "bytes": 113929
+          },
+          {
+            "phase": "navigate to failing slug",
+            "bytes": 167763
+          },
+          {
+            "phase": "not-found typed error",
+            "bytes": 136784
+          }
+        ]
+      }
+    ],
+    [
+      {
+        "app": "original",
+        "phases": [
+          {
+            "phase": "load",
+            "bytes": 550893
+          },
+          {
+            "phase": "load / (pending)",
+            "bytes": 1841
+          },
+          {
+            "phase": "content loads",
+            "bytes": 1841
+          },
+          {
+            "phase": "comment list loads, avatars pending",
+            "bytes": 1841
+          },
+          {
+            "phase": "avatars load",
+            "bytes": 1841
+          },
+          {
+            "phase": "navigate to /docs/start",
+            "bytes": 224025
+          },
+          {
+            "phase": "article loads",
+            "bytes": 122428
+          },
+          {
+            "phase": "toggle theme",
+            "bytes": 70059
+          },
+          {
+            "phase": "search starts",
+            "bytes": 89069
+          },
+          {
+            "phase": "search results",
+            "bytes": 116381
+          },
+          {
+            "phase": "like (optimistic)",
+            "bytes": 86222
+          },
+          {
+            "phase": "like saved",
+            "bytes": 93887
+          },
+          {
+            "phase": "second like (optimistic)",
+            "bytes": 86398
+          },
+          {
+            "phase": "like rate limited",
+            "bytes": 93955
+          },
+          {
+            "phase": "newsletter good email",
+            "bytes": 67520
+          },
+          {
+            "phase": "newsletter in flight",
+            "bytes": 84464
+          },
+          {
+            "phase": "newsletter success",
+            "bytes": 92830
+          },
+          {
+            "phase": "newsletter bad email",
+            "bytes": 70337
+          },
+          {
+            "phase": "bad newsletter in flight",
+            "bytes": 84635
+          },
+          {
+            "phase": "newsletter typed error",
+            "bytes": 94939
+          },
+          {
+            "phase": "carousel next",
+            "bytes": 69018
+          },
+          {
+            "phase": "search failure starts",
+            "bytes": 89202
+          },
+          {
+            "phase": "search typed error",
+            "bytes": 109848
+          },
+          {
+            "phase": "navigate to failing slug",
+            "bytes": 164536
+          },
+          {
+            "phase": "not-found typed error",
+            "bytes": 132818
+          }
+        ]
+      },
+      {
+        "app": "library",
+        "phases": [
+          {
+            "phase": "load",
+            "bytes": 584641
+          },
+          {
+            "phase": "load / (pending)",
+            "bytes": 1841
+          },
+          {
+            "phase": "content loads",
+            "bytes": 1841
+          },
+          {
+            "phase": "comment list loads, avatars pending",
+            "bytes": 1841
+          },
+          {
+            "phase": "avatars load",
+            "bytes": 1841
+          },
+          {
+            "phase": "navigate to /docs/start",
+            "bytes": 238733
+          },
+          {
+            "phase": "article loads",
+            "bytes": 129679
+          },
+          {
+            "phase": "toggle theme",
+            "bytes": 86684
+          },
+          {
+            "phase": "search starts",
+            "bytes": 95766
+          },
+          {
+            "phase": "search results",
+            "bytes": 121873
+          },
+          {
+            "phase": "like (optimistic)",
+            "bytes": 91028
+          },
+          {
+            "phase": "like saved",
+            "bytes": 97553
+          },
+          {
+            "phase": "second like (optimistic)",
+            "bytes": 91178
+          },
+          {
+            "phase": "like rate limited",
+            "bytes": 97295
+          },
+          {
+            "phase": "newsletter good email",
+            "bytes": 80100
+          },
+          {
+            "phase": "newsletter in flight",
+            "bytes": 88623
+          },
+          {
+            "phase": "newsletter success",
+            "bytes": 96508
+          },
+          {
+            "phase": "newsletter bad email",
+            "bytes": 82669
+          },
+          {
+            "phase": "bad newsletter in flight",
+            "bytes": 88661
+          },
+          {
+            "phase": "newsletter typed error",
+            "bytes": 98298
+          },
+          {
+            "phase": "carousel next",
+            "bytes": 85232
+          },
+          {
+            "phase": "search failure starts",
+            "bytes": 95899
+          },
+          {
+            "phase": "search typed error",
+            "bytes": 113060
+          },
+          {
+            "phase": "navigate to failing slug",
+            "bytes": 167718
+          },
+          {
+            "phase": "not-found typed error",
+            "bytes": 135935
+          }
+        ]
+      },
+      {
+        "app": "compiled",
+        "phases": [
+          {
+            "phase": "load",
+            "bytes": 642511
+          },
+          {
+            "phase": "load / (pending)",
+            "bytes": 1841
+          },
+          {
+            "phase": "content loads",
+            "bytes": 1841
+          },
+          {
+            "phase": "comment list loads, avatars pending",
+            "bytes": 1841
+          },
+          {
+            "phase": "avatars load",
+            "bytes": 1841
+          },
+          {
+            "phase": "navigate to /docs/start",
+            "bytes": 239118
+          },
+          {
+            "phase": "article loads",
+            "bytes": 130233
+          },
+          {
+            "phase": "toggle theme",
+            "bytes": 86677
+          },
+          {
+            "phase": "search starts",
+            "bytes": 95759
+          },
+          {
+            "phase": "search results",
+            "bytes": 122425
+          },
+          {
+            "phase": "like (optimistic)",
+            "bytes": 92197
+          },
+          {
+            "phase": "like saved",
+            "bytes": 98138
+          },
+          {
+            "phase": "second like (optimistic)",
+            "bytes": 92347
+          },
+          {
+            "phase": "like rate limited",
+            "bytes": 97880
+          },
+          {
+            "phase": "newsletter good email",
+            "bytes": 80091
+          },
+          {
+            "phase": "newsletter in flight",
+            "bytes": 88612
+          },
+          {
+            "phase": "newsletter success",
+            "bytes": 97311
+          },
+          {
+            "phase": "newsletter bad email",
+            "bytes": 82660
+          },
+          {
+            "phase": "bad newsletter in flight",
+            "bytes": 88650
+          },
+          {
+            "phase": "newsletter typed error",
+            "bytes": 98874
+          },
+          {
+            "phase": "carousel next",
+            "bytes": 85221
+          },
+          {
+            "phase": "search failure starts",
+            "bytes": 95892
+          },
+          {
+            "phase": "search typed error",
+            "bytes": 113929
+          },
+          {
+            "phase": "navigate to failing slug",
+            "bytes": 167763
+          },
+          {
+            "phase": "not-found typed error",
+            "bytes": 136784
+          }
+        ]
+      }
+    ]
+  ],
+  "summary": [
+    {
+      "app": "original",
+      "phases": [
+        {
+          "phase": "load",
+          "observations": [550893, 550893, 550893],
+          "min": 550893,
+          "max": 550893,
+          "drift": 0,
+          "maxBytes": 561911
+        },
+        {
+          "phase": "load / (pending)",
+          "observations": [1841, 1841, 1841],
+          "min": 1841,
+          "max": 1841,
+          "drift": 0,
+          "maxBytes": 2865
+        },
+        {
+          "phase": "content loads",
+          "observations": [1841, 1841, 1841],
+          "min": 1841,
+          "max": 1841,
+          "drift": 0,
+          "maxBytes": 2865
+        },
+        {
+          "phase": "comment list loads, avatars pending",
+          "observations": [1841, 1841, 1841],
+          "min": 1841,
+          "max": 1841,
+          "drift": 0,
+          "maxBytes": 2865
+        },
+        {
+          "phase": "avatars load",
+          "observations": [1841, 1841, 1841],
+          "min": 1841,
+          "max": 1841,
+          "drift": 0,
+          "maxBytes": 2865
+        },
+        {
+          "phase": "navigate to /docs/start",
+          "observations": [224025, 224025, 224025],
+          "min": 224025,
+          "max": 224025,
+          "drift": 0,
+          "maxBytes": 228506
+        },
+        {
+          "phase": "article loads",
+          "observations": [122428, 122428, 122428],
+          "min": 122428,
+          "max": 122428,
+          "drift": 0,
+          "maxBytes": 124877
+        },
+        {
+          "phase": "toggle theme",
+          "observations": [70059, 70059, 70059],
+          "min": 70059,
+          "max": 70059,
+          "drift": 0,
+          "maxBytes": 71461
+        },
+        {
+          "phase": "search starts",
+          "observations": [89069, 89069, 89069],
+          "min": 89069,
+          "max": 89069,
+          "drift": 0,
+          "maxBytes": 90851
+        },
+        {
+          "phase": "search results",
+          "observations": [116381, 116381, 116381],
+          "min": 116381,
+          "max": 116381,
+          "drift": 0,
+          "maxBytes": 118709
+        },
+        {
+          "phase": "like (optimistic)",
+          "observations": [86222, 86222, 86222],
+          "min": 86222,
+          "max": 86222,
+          "drift": 0,
+          "maxBytes": 87947
+        },
+        {
+          "phase": "like saved",
+          "observations": [93887, 93887, 93887],
+          "min": 93887,
+          "max": 93887,
+          "drift": 0,
+          "maxBytes": 95765
+        },
+        {
+          "phase": "second like (optimistic)",
+          "observations": [86398, 86398, 86398],
+          "min": 86398,
+          "max": 86398,
+          "drift": 0,
+          "maxBytes": 88126
+        },
+        {
+          "phase": "like rate limited",
+          "observations": [93955, 93955, 93955],
+          "min": 93955,
+          "max": 93955,
+          "drift": 0,
+          "maxBytes": 95835
+        },
+        {
+          "phase": "newsletter good email",
+          "observations": [67520, 67520, 67520],
+          "min": 67520,
+          "max": 67520,
+          "drift": 0,
+          "maxBytes": 68871
+        },
+        {
+          "phase": "newsletter in flight",
+          "observations": [84464, 84464, 84464],
+          "min": 84464,
+          "max": 84464,
+          "drift": 0,
+          "maxBytes": 86154
+        },
+        {
+          "phase": "newsletter success",
+          "observations": [92830, 92830, 92830],
+          "min": 92830,
+          "max": 92830,
+          "drift": 0,
+          "maxBytes": 94687
+        },
+        {
+          "phase": "newsletter bad email",
+          "observations": [70337, 70337, 70337],
+          "min": 70337,
+          "max": 70337,
+          "drift": 0,
+          "maxBytes": 71744
+        },
+        {
+          "phase": "bad newsletter in flight",
+          "observations": [84635, 84635, 84635],
+          "min": 84635,
+          "max": 84635,
+          "drift": 0,
+          "maxBytes": 86328
+        },
+        {
+          "phase": "newsletter typed error",
+          "observations": [94939, 94939, 94939],
+          "min": 94939,
+          "max": 94939,
+          "drift": 0,
+          "maxBytes": 96838
+        },
+        {
+          "phase": "carousel next",
+          "observations": [69018, 69018, 69018],
+          "min": 69018,
+          "max": 69018,
+          "drift": 0,
+          "maxBytes": 70399
+        },
+        {
+          "phase": "search failure starts",
+          "observations": [89202, 89202, 89202],
+          "min": 89202,
+          "max": 89202,
+          "drift": 0,
+          "maxBytes": 90987
+        },
+        {
+          "phase": "search typed error",
+          "observations": [109848, 109848, 109848],
+          "min": 109848,
+          "max": 109848,
+          "drift": 0,
+          "maxBytes": 112045
+        },
+        {
+          "phase": "navigate to failing slug",
+          "observations": [164536, 164536, 164536],
+          "min": 164536,
+          "max": 164536,
+          "drift": 0,
+          "maxBytes": 167827
+        },
+        {
+          "phase": "not-found typed error",
+          "observations": [132818, 132818, 132818],
+          "min": 132818,
+          "max": 132818,
+          "drift": 0,
+          "maxBytes": 135475
+        }
+      ]
+    },
+    {
+      "app": "library",
+      "phases": [
+        {
+          "phase": "load",
+          "observations": [584641, 584641, 584641],
+          "min": 584641,
+          "max": 584641,
+          "drift": 0,
+          "maxBytes": 596334
+        },
+        {
+          "phase": "load / (pending)",
+          "observations": [1841, 1841, 1841],
+          "min": 1841,
+          "max": 1841,
+          "drift": 0,
+          "maxBytes": 2865
+        },
+        {
+          "phase": "content loads",
+          "observations": [1841, 1841, 1841],
+          "min": 1841,
+          "max": 1841,
+          "drift": 0,
+          "maxBytes": 2865
+        },
+        {
+          "phase": "comment list loads, avatars pending",
+          "observations": [1841, 1841, 1841],
+          "min": 1841,
+          "max": 1841,
+          "drift": 0,
+          "maxBytes": 2865
+        },
+        {
+          "phase": "avatars load",
+          "observations": [1841, 1841, 1841],
+          "min": 1841,
+          "max": 1841,
+          "drift": 0,
+          "maxBytes": 2865
+        },
+        {
+          "phase": "navigate to /docs/start",
+          "observations": [238733, 238733, 238733],
+          "min": 238733,
+          "max": 238733,
+          "drift": 0,
+          "maxBytes": 243508
+        },
+        {
+          "phase": "article loads",
+          "observations": [129679, 129679, 129679],
+          "min": 129679,
+          "max": 129679,
+          "drift": 0,
+          "maxBytes": 132273
+        },
+        {
+          "phase": "toggle theme",
+          "observations": [86684, 86684, 86684],
+          "min": 86684,
+          "max": 86684,
+          "drift": 0,
+          "maxBytes": 88418
+        },
+        {
+          "phase": "search starts",
+          "observations": [95766, 95766, 95766],
+          "min": 95766,
+          "max": 95766,
+          "drift": 0,
+          "maxBytes": 97682
+        },
+        {
+          "phase": "search results",
+          "observations": [121873, 121873, 121873],
+          "min": 121873,
+          "max": 121873,
+          "drift": 0,
+          "maxBytes": 124311
+        },
+        {
+          "phase": "like (optimistic)",
+          "observations": [91028, 91028, 91028],
+          "min": 91028,
+          "max": 91028,
+          "drift": 0,
+          "maxBytes": 92849
+        },
+        {
+          "phase": "like saved",
+          "observations": [97553, 97553, 97553],
+          "min": 97553,
+          "max": 97553,
+          "drift": 0,
+          "maxBytes": 99505
+        },
+        {
+          "phase": "second like (optimistic)",
+          "observations": [91178, 91178, 91178],
+          "min": 91178,
+          "max": 91178,
+          "drift": 0,
+          "maxBytes": 93002
+        },
+        {
+          "phase": "like rate limited",
+          "observations": [97295, 97295, 97295],
+          "min": 97295,
+          "max": 97295,
+          "drift": 0,
+          "maxBytes": 99241
+        },
+        {
+          "phase": "newsletter good email",
+          "observations": [80100, 80100, 80100],
+          "min": 80100,
+          "max": 80100,
+          "drift": 0,
+          "maxBytes": 81702
+        },
+        {
+          "phase": "newsletter in flight",
+          "observations": [88623, 88623, 88623],
+          "min": 88623,
+          "max": 88623,
+          "drift": 0,
+          "maxBytes": 90396
+        },
+        {
+          "phase": "newsletter success",
+          "observations": [96508, 96508, 96508],
+          "min": 96508,
+          "max": 96508,
+          "drift": 0,
+          "maxBytes": 98439
+        },
+        {
+          "phase": "newsletter bad email",
+          "observations": [82669, 82669, 82669],
+          "min": 82669,
+          "max": 82669,
+          "drift": 0,
+          "maxBytes": 84323
+        },
+        {
+          "phase": "bad newsletter in flight",
+          "observations": [88661, 88661, 88661],
+          "min": 88661,
+          "max": 88661,
+          "drift": 0,
+          "maxBytes": 90435
+        },
+        {
+          "phase": "newsletter typed error",
+          "observations": [98298, 98298, 98298],
+          "min": 98298,
+          "max": 98298,
+          "drift": 0,
+          "maxBytes": 100264
+        },
+        {
+          "phase": "carousel next",
+          "observations": [85232, 85232, 85232],
+          "min": 85232,
+          "max": 85232,
+          "drift": 0,
+          "maxBytes": 86937
+        },
+        {
+          "phase": "search failure starts",
+          "observations": [95899, 95899, 95899],
+          "min": 95899,
+          "max": 95899,
+          "drift": 0,
+          "maxBytes": 97817
+        },
+        {
+          "phase": "search typed error",
+          "observations": [113060, 113060, 113060],
+          "min": 113060,
+          "max": 113060,
+          "drift": 0,
+          "maxBytes": 115322
+        },
+        {
+          "phase": "navigate to failing slug",
+          "observations": [167718, 167718, 167718],
+          "min": 167718,
+          "max": 167718,
+          "drift": 0,
+          "maxBytes": 171073
+        },
+        {
+          "phase": "not-found typed error",
+          "observations": [135935, 135935, 135935],
+          "min": 135935,
+          "max": 135935,
+          "drift": 0,
+          "maxBytes": 138654
+        }
+      ]
+    },
+    {
+      "app": "compiled",
+      "phases": [
+        {
+          "phase": "load",
+          "observations": [642511, 642511, 642511],
+          "min": 642511,
+          "max": 642511,
+          "drift": 0,
+          "maxBytes": 655362
+        },
+        {
+          "phase": "load / (pending)",
+          "observations": [1841, 1841, 1841],
+          "min": 1841,
+          "max": 1841,
+          "drift": 0,
+          "maxBytes": 2865
+        },
+        {
+          "phase": "content loads",
+          "observations": [1841, 1841, 1841],
+          "min": 1841,
+          "max": 1841,
+          "drift": 0,
+          "maxBytes": 2865
+        },
+        {
+          "phase": "comment list loads, avatars pending",
+          "observations": [1841, 1841, 1841],
+          "min": 1841,
+          "max": 1841,
+          "drift": 0,
+          "maxBytes": 2865
+        },
+        {
+          "phase": "avatars load",
+          "observations": [1841, 1841, 1841],
+          "min": 1841,
+          "max": 1841,
+          "drift": 0,
+          "maxBytes": 2865
+        },
+        {
+          "phase": "navigate to /docs/start",
+          "observations": [239118, 239118, 239118],
+          "min": 239118,
+          "max": 239118,
+          "drift": 0,
+          "maxBytes": 243901
+        },
+        {
+          "phase": "article loads",
+          "observations": [130233, 130233, 130233],
+          "min": 130233,
+          "max": 130233,
+          "drift": 0,
+          "maxBytes": 132838
+        },
+        {
+          "phase": "toggle theme",
+          "observations": [86677, 86677, 86677],
+          "min": 86677,
+          "max": 86677,
+          "drift": 0,
+          "maxBytes": 88411
+        },
+        {
+          "phase": "search starts",
+          "observations": [95759, 95759, 95759],
+          "min": 95759,
+          "max": 95759,
+          "drift": 0,
+          "maxBytes": 97675
+        },
+        {
+          "phase": "search results",
+          "observations": [122425, 122425, 122425],
+          "min": 122425,
+          "max": 122425,
+          "drift": 0,
+          "maxBytes": 124874
+        },
+        {
+          "phase": "like (optimistic)",
+          "observations": [92197, 92197, 92197],
+          "min": 92197,
+          "max": 92197,
+          "drift": 0,
+          "maxBytes": 94041
+        },
+        {
+          "phase": "like saved",
+          "observations": [98138, 98138, 98138],
+          "min": 98138,
+          "max": 98138,
+          "drift": 0,
+          "maxBytes": 100101
+        },
+        {
+          "phase": "second like (optimistic)",
+          "observations": [92347, 92347, 92347],
+          "min": 92347,
+          "max": 92347,
+          "drift": 0,
+          "maxBytes": 94194
+        },
+        {
+          "phase": "like rate limited",
+          "observations": [97880, 97880, 97880],
+          "min": 97880,
+          "max": 97880,
+          "drift": 0,
+          "maxBytes": 99838
+        },
+        {
+          "phase": "newsletter good email",
+          "observations": [80091, 80091, 80091],
+          "min": 80091,
+          "max": 80091,
+          "drift": 0,
+          "maxBytes": 81693
+        },
+        {
+          "phase": "newsletter in flight",
+          "observations": [88612, 88612, 88612],
+          "min": 88612,
+          "max": 88612,
+          "drift": 0,
+          "maxBytes": 90385
+        },
+        {
+          "phase": "newsletter success",
+          "observations": [97311, 97311, 97311],
+          "min": 97311,
+          "max": 97311,
+          "drift": 0,
+          "maxBytes": 99258
+        },
+        {
+          "phase": "newsletter bad email",
+          "observations": [82660, 82660, 82660],
+          "min": 82660,
+          "max": 82660,
+          "drift": 0,
+          "maxBytes": 84314
+        },
+        {
+          "phase": "bad newsletter in flight",
+          "observations": [88650, 88650, 88650],
+          "min": 88650,
+          "max": 88650,
+          "drift": 0,
+          "maxBytes": 90423
+        },
+        {
+          "phase": "newsletter typed error",
+          "observations": [98874, 98874, 98874],
+          "min": 98874,
+          "max": 98874,
+          "drift": 0,
+          "maxBytes": 100852
+        },
+        {
+          "phase": "carousel next",
+          "observations": [85221, 85221, 85221],
+          "min": 85221,
+          "max": 85221,
+          "drift": 0,
+          "maxBytes": 86926
+        },
+        {
+          "phase": "search failure starts",
+          "observations": [95892, 95892, 95892],
+          "min": 95892,
+          "max": 95892,
+          "drift": 0,
+          "maxBytes": 97810
+        },
+        {
+          "phase": "search typed error",
+          "observations": [113929, 113929, 113929],
+          "min": 113929,
+          "max": 113929,
+          "drift": 0,
+          "maxBytes": 116208
+        },
+        {
+          "phase": "navigate to failing slug",
+          "observations": [167763, 167763, 167763],
+          "min": 167763,
+          "max": 167763,
+          "drift": 0,
+          "maxBytes": 171119
+        },
+        {
+          "phase": "not-found typed error",
+          "observations": [136784, 136784, 136784],
+          "min": 136784,
+          "max": 136784,
+          "drift": 0,
+          "maxBytes": 139520
+        }
+      ]
+    }
+  ],
+  "shipped": [
+    {
+      "app": "original",
+      "js": 152339,
+      "gzip": 54285,
+      "chunks": 3
+    },
+    {
+      "app": "library",
+      "js": 166658,
+      "gzip": 58755,
+      "chunks": 3
+    },
+    {
+      "app": "compiled",
+      "js": 174148,
+      "gzip": 65281,
+      "chunks": 14
+    }
+  ]
+}

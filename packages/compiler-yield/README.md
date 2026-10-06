@@ -85,3 +85,14 @@ The report also gives a per-phase reset estimate, prices first materialization,
 and separates authored event medians from scripted interaction medians. Runtime
 work above an empty root, opaque package calls and descriptor/transport costs
 remain unpriced. No resumer or runtime behavior is added here.
+
+`eagerIslands({directory, roots: "single"})` keeps the same eleven C1 groups
+and conservative route/error fallbacks, but emits one eager App root, one
+`cs-` key space and one public-serializer input record. Server-only nav/footer
+slots register their existing elements under that root. The default remains
+`roots: "per-group"` (seven physical roots). Single mode does not force island
+chunks; the production build bundles the app together. Select it in the docs
+config with `C2_ROOTS=single`.
+
+The four-way comparison and its limits are in
+[compiler-single-root.md](../../documentation/compiler-single-root.md).

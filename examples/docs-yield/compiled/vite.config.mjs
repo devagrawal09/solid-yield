@@ -6,7 +6,11 @@ import { resolve } from "node:path";
 const directory = resolve(import.meta.dirname, "..");
 export default defineConfig({
   root: resolve(directory, "stream"),
-  plugins: [eagerIslands({ directory }), solidYield(), solid({ ssr: true })],
+  plugins: [
+    eagerIslands({ directory, roots: process.env.C2_ROOTS ?? "per-group" }),
+    solidYield(),
+    solid({ ssr: true })
+  ],
   build: {
     sourcemap: true,
     emptyOutDir: true,

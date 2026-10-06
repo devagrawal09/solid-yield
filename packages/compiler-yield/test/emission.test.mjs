@@ -130,3 +130,27 @@ test("C2 unproved input falls back at its variable; one root leaves both entries
     rmSync(directory, { recursive: true, force: true });
   }
 });
+
+test("single root retains C1 groups, strips inert imports and chains both edit maps", () => {
+  const directory = resolve(import.meta.dirname, "../../../examples/docs-yield");
+  let plan;
+  const plugin = eagerIslands({ directory, roots: "single", onPlan: p => (plan = p) });
+  plugin.buildStart();
+  assert.equal(plan.report.roots.length, 11);
+  assert.equal(plan.roots.length, 1);
+  assert.equal(new Set(plan.roots[0].groups).size, 11);
+  assert.deepEqual(plugin.config(), {}, "no per-group chunk boundaries");
+  const module = plan.roots[0].module;
+  const loaded = plugin.load(module);
+  const transformed = plugin.transform(loaded.code, module, { ssr: false });
+  assert.equal(
+    loaded.map.sourcesContent[0],
+    readFileSync(resolve(directory, "src/app.tsx"), "utf8")
+  );
+  assert.equal(transformed.map.sourcesContent[0], loaded.code);
+  assert(!/SiteNav|SiteFooter/.test(transformed.code), "inert component imports are absent");
+  const entry = plugin.load(resolve(directory, "src/__compiler_client.tsx")).code;
+  assert.equal([...entry.matchAll(/\bhydrate\(/g)].length, 1);
+  assert.equal([...entry.matchAll(/createJSONDeserializer\(\)/g)].length, 1);
+  assert.throws(() => eagerIslands({ directory, roots: "unknown" }), /Unknown eager roots mode/);
+});

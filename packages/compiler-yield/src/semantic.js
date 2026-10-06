@@ -67,7 +67,10 @@ const methods = new Set([
   "reduce",
   "forEach",
   "sort",
-  "at"
+  "at",
+  "toLocaleTimeString",
+  "toLocaleString",
+  "pipe"
 ]);
 const timers = new Set([
   "setInterval",
@@ -121,7 +124,8 @@ export class Analysis {
           if (d?.isVariableDeclaration())
             for (const v of d.get("declarations"))
               record.exports.set(key(v.node.id), v.get("init"));
-          if (d?.isFunctionDeclaration()) record.exports.set(d.node.id.name, d);
+          if (d?.isFunctionDeclaration() || d?.isClassDeclaration())
+            record.exports.set(d.node.id.name, d);
           for (const s of p.get("specifiers"))
             record.exports.set(
               key(s.node.exported),
@@ -322,11 +326,9 @@ export class Analysis {
       this.bind(path.get("id"), placeholder, moduleEnv);
       const v = this.expr(path.get("init"), moduleEnv);
       this.bind(path.get("id"), v, moduleEnv);
-      if (!b.constant) {
-        v.mutable = true;
-        for (const w of b.constantViolations)
-          if (w.isAssignmentExpression()) v.deps.add(this.expr(w.get("right"), moduleEnv));
-      }
+      // Writes are visited in the environment that executes them. Evaluating a
+      // nested assignment here would invent a second, module-owned helper call.
+      if (!b.constant) v.mutable = true;
       return this.lookup(b, moduleEnv) ?? v;
     }
     if (path.isClassDeclaration()) {
@@ -347,6 +349,11 @@ export class Analysis {
     const p = unwrap(input);
     if (!p?.node) return this.value(null, env, "undefined");
     if (p.isIdentifier()) return this.identifier(p, env);
+    if (p.isClassDeclaration() || p.isClassExpression()) {
+      const v = this.value(p, env, "class");
+      v.class = true;
+      return v;
+    }
     if (p.isLiteral() || p.isJSXText()) return this.scalar(p, env, p.node.value);
     if (p.isFunction()) {
       const v = this.value(p, env, "function");
@@ -354,7 +361,9 @@ export class Analysis {
       return v;
     }
     if (p.isYieldExpression() || p.isAwaitExpression()) {
-      const v = this.expr(p.get("argument"), env, ctx);
+      let v = this.expr(p.get("argument"), env, ctx);
+      if (v.callable?.kind === "function" && v.callable.path.node.generator)
+        v = this.invoke(v, [], p, env, ctx, "hole-prop");
       if (v.callable?.kind === "context") {
         const out = this.part(p, env, "context-read", [v], ctx);
         out.context = v;
@@ -386,7 +395,9 @@ export class Analysis {
           const v = field.isObjectMethod()
             ? this.expr(field, env, ctx)
             : this.expr(field.get("value"), env, ctx);
-          out.fields.set(key(field.node.key) ?? "*", v);
+          const name = key(field.node.key) ?? field.get("key").toString();
+          out.fields.set(name, v);
+          if (name === "Symbol.asyncIterator") out.asyncIterable = true;
           out.deps.add(v);
         }
       }
@@ -414,6 +425,7 @@ export class Analysis {
       const value = this.expr(p.get("right"), env, ctx),
         old = this.expr(p.get("left"), env, ctx);
       old.deps.add(value);
+      if (old.receiver) old.receiver.deps.add(value);
       old.mutable = true;
       if (["event", "effect", "timer"].includes(ctx.host)) old.base = 2;
       return old;
@@ -474,9 +486,8 @@ export class Analysis {
         visit(p.get("body"));
       } else if (p.isForStatement() || p.isWhileStatement() || p.isDoWhileStatement()) {
         if (p.node.init)
-          p.get("init").isVariableDeclaration()
-            ? visit(p.get("init"))
-            : this.expr(p.get("init"), env, ctx);
+          if (p.get("init").isVariableDeclaration()) visit(p.get("init"));
+          else this.expr(p.get("init"), env, ctx);
         if (p.node.test) this.expr(p.get("test"), env, ctx);
         visit(p.get("body"));
         if (p.node.update) this.expr(p.get("update"), env, ctx);
@@ -535,6 +546,7 @@ export class Analysis {
     result.fields = returned.fields;
     result.callable = returned.callable;
     result.rendered = returned.rendered;
+    result.asyncIterable = returned.asyncIterable;
     if (path.node.async) {
       result.pending = true;
       result.async = true;
@@ -687,7 +699,7 @@ export class Analysis {
       }
       if (name === "h") {
         const v = this.value(p, env, "h");
-        v.callable = { kind: "h", args };
+        v.callable = { kind: "h", args, path: p };
         return v;
       }
       if (flows.has(name) || boundaries.has(name)) return this.control(name, args[0], p, env, ctx);
@@ -710,9 +722,22 @@ export class Analysis {
           v.pending = true;
           return v;
         }
-        return this.invoke(fn, args, p, env, ctx);
+        const result = this.invoke(fn, args, p, env, ctx);
+        if (result.asyncIterable) {
+          const out = this.unknown(
+            p,
+            env,
+            "helper routine",
+            "Local adapter returns a non-server async iterable; its client lifetime is not inert"
+          );
+          out.pending = true;
+          out.deps.add(result);
+          args.forEach(v => out.deps.add(v));
+          return out;
+        }
+        return result;
       }
-      if (c.kind === "h") return this.h(p, env, ctx, c.args);
+      if (c.kind === "h") return this.h(c.path, env, ctx, c.args);
       if (c.kind === "fragment") {
         const values = c.children.map(v => this.materialize(v, v.path ?? p, env, ctx));
         const out = this.join(p, env, values, "fragment-output");
@@ -749,6 +774,17 @@ export class Analysis {
           "Router query cache/RPC remains U under C0 §2.2"
         );
         args.forEach(a => v.deps.add(a));
+        v.pending = true;
+        return v;
+      }
+      if (c.kind === "live") {
+        const v = this.unknown(
+          p,
+          env,
+          "foreign primitive",
+          "live server-function wrapper reconnects and supplies changing client data"
+        );
+        args.forEach(x => v.deps.add(x));
         v.pending = true;
         return v;
       }
@@ -820,6 +856,51 @@ export class Analysis {
         return v;
       }
     }
+    if (fn?.external?.source === "@solidjs/web/server-functions") {
+      if (name === "GET") return args[0];
+      if (name === "live") {
+        const v = this.value(p, env, "live-source");
+        v.callable = { kind: "live", fn: args[0] };
+        return v;
+      }
+    }
+    if (fn?.external?.source === "solid-js") {
+      if (name === "createUniqueId") return this.value(p, env, "stable-owner-id");
+      if (name === "createContext") {
+        const v = this.value(p, env, "context");
+        v.callable = { kind: "context" };
+        v.providers = args.length ? [args[0]] : [];
+        this.contexts.push(v);
+        return v;
+      }
+      if (name === "useContext") {
+        const v = this.join(p, env, args, "foreign-context-read");
+        v.context = args[0];
+        return v;
+      }
+      if (name === "onCleanup") return this.value(p, env, "cleanup");
+    }
+    if (
+      fn?.external?.source === "effect" &&
+      /^(Effect\.(sleep|map|gen|sync|tryPromise|timeout|retry|onInterrupt|onExit|flatMap|tap|tapError|catchAll|fail|succeed|promise|all|ensuring|as|catchTag)|Layer\.succeed|Schedule\.exponential)$/.test(
+        name
+      )
+    ) {
+      const values = args.filter(v => !v.callable);
+      for (const arg of args)
+        if (arg.callable)
+          values.push(
+            this.invoke(
+              arg,
+              [this.join(p, env, values, "effect-input")],
+              p,
+              env,
+              { ...ctx, host: "event" },
+              `effect-program:${args.indexOf(arg)}`
+            )
+          );
+      return this.join(p, env, values, "effect-program");
+    }
     const global = fn?.global;
     if (pure.has(global) || (fn?.method && methods.has(fn.method))) {
       const values = [fn?.receiver, ...args.filter(a => !a.callable)];
@@ -874,6 +955,16 @@ export class Analysis {
       /\.(then|catch|finally)$/.test(global ?? "") ||
       ["then", "catch", "finally"].includes(fn?.method)
     ) {
+      if (["event", "effect", "timer"].includes(ctx.host)) {
+        const v = this.join(
+          p,
+          env,
+          [fn.receiver, ...args.filter(a => !a.callable)],
+          "client-promise"
+        );
+        v.base = 2;
+        return v;
+      }
       const v = this.unknown(
         p,
         env,
@@ -903,6 +994,7 @@ export class Analysis {
       // The invocation is client by host, but follow arguments to preserve calls/writes.
       const v = this.join(p, env, [fn, ...args], "client-call");
       v.base = 2;
+      ctx.event?.deps.add(v);
       return v;
     }
     const foreign = !!fn?.external;
@@ -918,6 +1010,16 @@ export class Analysis {
     );
     v.deps.add(fn);
     for (const a of args.filter(a => !a.callable)) v.deps.add(a);
+    if (ctx.host === "setup" && env.frame) {
+      const work = this.part(p, env, "setup-work", [v], ctx);
+      work.base = 2;
+      work.eager = true;
+      this.findings.push({
+        at: this.at(p),
+        rule: "1.7",
+        message: "Opaque setup call may start observable work; eager fallback"
+      });
+    }
     return v;
   }
   materialize(v, p, env, ctx, args = []) {
@@ -1062,7 +1164,10 @@ export class Analysis {
     return result;
   }
   foreign(target, props, p, env, ctx) {
-    const anchor = this.node(p, env, ctx, "foreign-owner");
+    const anchor =
+      ctx.dom?.kind === "foreign" && ctx.dom.path.node === p.node
+        ? ctx.dom
+        : this.node(p, env, ctx, "foreign-owner");
     const v = this.part(
       p,
       env,
@@ -1073,8 +1178,13 @@ export class Analysis {
       { ...ctx, dom: anchor }
     );
     v.foreignOwner = true;
+    for (const [name, value] of props?.fields ?? []) if (name !== "children") v.deps.add(value);
     const values = [v];
-    if (target?.callable) values.push(this.call(target, [props], p, env, { ...ctx, dom: anchor }));
+    if (target?.callable?.kind === "context") {
+      const value = props?.fields.get("value");
+      if (value) target.providers.push(value);
+    } else if (target?.callable)
+      values.push(this.call(target, [props], p, env, { ...ctx, dom: anchor }));
     for (const child of props?.fields.get("children")?.fields.values() ?? [])
       values.push(this.materialize(child, p, env, { ...ctx, dom: anchor }));
     const result = this.join(p, env, values, "foreign-output");
@@ -1091,7 +1201,7 @@ export class Analysis {
     const input = source?.callable
       ? this.materialize(source, p, env, { ...ctx, dom: anchor })
       : source;
-    const part = this.part(p, env, flows.has(name) ? "flow" : "boundary", input ? [input] : [], {
+    this.part(p, env, flows.has(name) ? "flow" : "boundary", input ? [input] : [], {
       ...ctx,
       dom: anchor
     });
@@ -1153,7 +1263,9 @@ export class Analysis {
             this.hole(v.path ?? p, v, env, { ...ctx, dom: anchor }, /^on[A-Z]/.test(name))
           );
       for (const v of children)
-        values.push(v.rendered ? v : this.hole(v.path ?? p, v, env, { ...ctx, dom: anchor }));
+        values.push(
+          v.rendered || v.known ? v : this.hole(v.path ?? p, v, env, { ...ctx, dom: anchor })
+        );
       const out = this.join(p, env, values, "h-output");
       out.rendered = true;
       anchor.value = out;

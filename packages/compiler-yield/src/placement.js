@@ -164,12 +164,51 @@ export function analyzeInstances(
   };
   const span = ps => {
     const anchors = ps
-      .filter(p => ["hole", "bind", "foreign", "flow", "boundary"].includes(p.kind))
+      .filter(p =>
+        ["hole", "bind", "foreign", "flow", "boundary", "capture-owner"].includes(p.kind)
+      )
       .map(p => p.anchor)
       .filter(Boolean);
     if (!anchors.length) anchors.push(...ps.map(p => p.owner?.anchor).filter(Boolean));
     return common(anchors);
   };
+  const captureFailures = [];
+  for (const ps of groups()) {
+    const owners = new Set(ps.map(p => p.owner));
+    for (const p of ps)
+      for (const value of reads.get(p) ?? []) {
+        const binding = value.binding;
+        if (!binding?.frame || owners.has(binding.frame) || value.part) continue;
+        const closure = value.callable?.kind === "function" && !value.callable.path.node.generator;
+        if (!value.nonserializable && !closure && value.p === 0) continue;
+        const id = `${binding.frame.id}:capture:${binding.at}`;
+        let owner = live.find(x => x.id === id);
+        if (!owner) {
+          owner = {
+            id,
+            at: binding.at,
+            kind: "capture-owner",
+            p: 2,
+            deps: new Set([value]),
+            owner: binding.frame,
+            anchor: binding.frame.anchor
+          };
+          live.push(owner);
+          parent.set(owner, owner);
+          reads.set(owner, resources(owner));
+          captureFailures.push({
+            variable: binding.name,
+            at: binding.at,
+            reason: closure
+              ? "setup-local function would cross the root edge"
+              : value.nonserializable
+                ? "setup-local instance has no proved serialization"
+                : "setup-local non-source client value would cross the root edge"
+          });
+        }
+        edge(p, owner, "CAPTURE_FALLBACK");
+      }
+  }
   // Equal spans cannot be claimed independently. Strict containment can be a slot.
   changed = true;
   while (changed) {
@@ -263,7 +302,7 @@ export function analyzeInstances(
     })),
     roots,
     merges,
-    captureFailures: [],
+    captureFailures,
     leaks: [...a.leaks.values()]
       .filter(l => [...l.values].some(v => used.has(v)))
       .map(({ values, ...l }) => ({

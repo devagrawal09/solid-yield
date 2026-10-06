@@ -361,3 +361,65 @@ test("instances: h source children and event props have parts and DOM owners", (
   assert.equal(result.roots[0].spanKind, "element");
   assert.equal(result.leaks.length, 0);
 });
+
+test("instances: GET preserves server provenance; live keeps client lifetime unknown", () => {
+  const result = instances(
+    'import {GET,live} from "@solidjs/web/server-functions";const get=GET(async ()=>{"use server";return 1});const watch=live(get);' +
+      app(
+        "const a=yield* $memo(function*(){return yield* attempt(()=>get(),e=>e)});const b=yield* $memo(function*(){return yield* attempt(()=>watch(),e=>e)});return view(function*(){return <main><b>{yield* a}</b><i>{yield* b}</i></main>});"
+      )
+  );
+  assert.deepEqual(
+    result.sources.map(x => x.provenance),
+    ["S", "U"]
+  );
+  assert.equal(result.leaks.length, 1);
+  assert.equal(result.leaks[0].classification, "genuine");
+});
+test("instances: boundary accessors and stable IDs do not invent U", () => {
+  const result = instances(
+    'import {createUniqueId} from "solid-js";' +
+      app(
+        "const id=createUniqueId();return view(function*(){return <>{yield* Errored({fallback:(err,reset)=><button id={id} onClick={reset}>{String(err())}</button>,children:function*(){return <p/>}})}</>});"
+      )
+  );
+  assert.equal(result.leaks.length, 0);
+});
+test("instances: helper assignment to a module callback keeps one creator", () => {
+  const result = instances(
+    "let sink;function* create(){const [n,set]=yield* $signal(0);const write=$event(function*(){yield* set(1)});sink=write;return n;}" +
+      app("const n=yield* create();return view(function*(){return <b>{yield* n}</b>});")
+  );
+  assert.equal(result.sources.length, 1);
+  assert(result.sources.every(x => x.instance));
+});
+test("instances: overlapping spans merge, recreated content is never a slot", () => {
+  const result = instances(
+    app(
+      "const [a,sa]=yield* $signal(0);const [b,sb]=yield* $signal(0);const ca=$event(function*(){yield* sa(1)});const cb=$event(function*(){yield* sb(1)});return view(function*(){return <div><i>{yield* a}</i><i>{yield* b}</i><button onClick={yield* ca}/><button onClick={yield* cb}/>{yield* Show({when:a,children:function*(){return <p>rebuilt</p>}})}</div>});"
+    )
+  );
+  assert.equal(result.roots.length, 1);
+  assert(result.merges.some(x => x.rule === "SPAN_OVERLAP"));
+  assert.equal(result.roots[0].slots.length, 0);
+});
+test("instances: opaque setup work and direct timers make their owner eager", () => {
+  const result = instances(
+    'import {start} from "opaque";' +
+      app(
+        "start();const click=$event(function*(){});setInterval(click,10);return view(function*(){return <button onClick={yield* click}/>});"
+      )
+  );
+  assert(result.roots.every(x => x.mode === "eager"));
+  assert(result.findings.some(x => x.message.includes("setInterval")));
+});
+test("instances: a setup instance crossing into a child names the capture", () => {
+  const result = instances(
+    "class Box {} const Child=component(function*(props){const click=$event(function*(){consume(props.box)});return view(function*(){return <button onClick={yield* click}/>});});" +
+      app(
+        "const box=new Box();return view(function*(){return <main>{yield* Child({box})}</main>});"
+      )
+  );
+  assert(result.captureFailures.some(x => x.variable === "box"));
+  assert.equal(result.roots.length, 1);
+});

@@ -1387,7 +1387,11 @@ const noUnshownWait = {
   }
 };
 
-/** The modules whose `render` / `hydrate` / `renderTo…` mount a component as plain Solid. */
+/**
+ * The modules whose `render` / `hydrate` / `renderTo…` mount a component as
+ * plain Solid. Not solid-blocks: its `render` / `hydrate` are the root edge
+ * (D-095), typed, and not a hand-off.
+ */
 const FOREIGN_RENDER_MODULES = new Set(["@solidjs/web", "solid-js/web"]);
 const FOREIGN_RENDERERS = new Set([
   "render",
@@ -1429,9 +1433,10 @@ function importFromBlocks(context, fixer, name) {
  * D-088: a block component handed to foreign code as a value — the router's
  * `component` (`defineRoute({ component })`, a route object, `<Route
  * component={…}>`, `<Dynamic component={…}>`), `@solidjs/web`'s `render` /
- * `hydrate` / `renderTo…` (not the library's own, which are typed), Solid's
- * `lazy` over a module whose export is a block component — loses its colors
- * there: plain Solid renders it with no `yield*`. It may pend (the app's
+ * `hydrate` / `renderTo…`, Solid's `lazy` over a module whose export is a
+ * block component — loses its colors there: plain Solid renders it with no
+ * `yield*`. The library's own `render` / `hydrate` are not a hand-off: they
+ * are the root edge, typed (a settled root that may fail, D-033; D-095). It may pend (the app's
  * `Loading`); it must handle its own failures. `foreign(Comp)` checks that
  * at the handoff; this rule reports a handoff written without it. With type
  * information any expression typed as a block component is reported (a local

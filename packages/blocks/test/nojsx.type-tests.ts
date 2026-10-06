@@ -20,6 +20,7 @@ import {
   view
 } from "solid-blocks";
 import { h } from "solid-blocks/h";
+import solidH from "@solidjs/h";
 
 declare const root: HTMLElement;
 declare function fetchUser(): Promise<{ name: string }>;
@@ -86,6 +87,14 @@ void pendingOut;
 // @ts-expect-error the root would suspend
 render(() => Pending(), root);
 render(() => Loading({ children: () => Pending() }), root);
+// D-095: the root is the library's forms; `solid-blocks/h` output is one
+render(() => h(Settled, {}), root);
+render(() => h("p", "x"), root);
+// …and a raw `@solidjs/h` thunk is not (nothing public marks it apart from any function)
+// @ts-expect-error a raw @solidjs/h element is not a root
+render(() => solidH("p", "x"), root);
+// @ts-expect-error a raw @solidjs/h component element is not a root
+render(() => solidH(Settled, {}), root);
 export const handled = h("div", Loading({ fallback: "…", children: () => Pending() }));
 const handledOut: HView<false, never> = handled;
 void handledOut;

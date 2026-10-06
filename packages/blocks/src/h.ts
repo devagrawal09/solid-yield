@@ -14,7 +14,7 @@
 import solidH from "@solidjs/h";
 import type { JSX } from "solid-blocks/jsx-runtime";
 import { toHole, toHoleProps, type Hole, type HViewOf, type OpsOfHole } from "./holes.js";
-import { blockName, READ } from "solid-blocks/internal";
+import { blockName, ELEMENT_MARK, READ } from "solid-blocks/internal";
 import type {
   ChildView,
   Component,
@@ -129,12 +129,6 @@ export interface BlocksH {
   Fragment: (props: { children: Hole }) => HView<false, never, false>;
 }
 
-/**
- * The brand Solid's `h` puts on its element thunks (so a thunk passed as a
- * child is materialized in place rather than wrapped in an effect).
- */
-const ELEMENT: symbol | undefined = Object.getOwnPropertySymbols((solidH as any)("div"))[0];
-
 function convert(args: any[], name: string | null): any[] {
   const out = new Array(args.length);
   out[0] = args[0];
@@ -163,13 +157,22 @@ function convert(args: any[], name: string | null): any[] {
  * props object it is given, so materializing one thunk twice (a `Loading`
  * re-rendering its content) failed on the second pass ("Cannot set property
  * children … which has only a getter"), with or without blocks.
+ *
+ * So the output is Solid's `h` over a component that converts and builds
+ * them (`solidH(build)`): an element thunk of Solid's own making, which
+ * Solid's `h` materializes in place where it meets one (a child, a
+ * component's output) — no copy of `@solidjs/h`'s internal brand (D-004).
+ * The library's own `ELEMENT_MARK` is what `render` and the boundaries
+ * recognise (D-095).
  */
 export const h: BlocksH = ((...args: any[]) => {
   if (args.length === 1 && Array.isArray(args[0])) return args[0];
   // the holes are the block's that built this output (dev errors name it)
   const name = blockName();
-  const thunk: any = () => (solidH as any)(...convert(args, name))();
-  if (ELEMENT) thunk[ELEMENT] = true;
+  // named: Solid's dev owner labels show it as `<h>`
+  const build = { h: () => (solidH as any)(...convert(args, name)) }.h;
+  const thunk: any = (solidH as any)(build);
+  thunk[ELEMENT_MARK] = true;
   return thunk;
 }) as any;
 (h as any).Fragment = (solidH as any).Fragment;

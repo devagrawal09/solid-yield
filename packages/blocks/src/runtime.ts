@@ -101,6 +101,13 @@ export const READ: unique symbol = Symbol.for("solid.blocks.read") as any;
 export const VIEW_MARK: unique symbol = Symbol.for("solid.blocks.view") as any;
 /** Marks `$component` functions. */
 export const COMPONENT_MARK: unique symbol = Symbol.for("solid.blocks.component") as any;
+/**
+ * Marks `solid-blocks/h` output (and so the automatic `jsx()` runtime's,
+ * built on it): an element thunk, built where it is inserted. The library's
+ * own mark, so `render` and the boundaries recognise it with no reach into
+ * `@solidjs/h` (D-004, D-095).
+ */
+export const ELEMENT_MARK: unique symbol = Symbol.for("solid.blocks.element") as any;
 /** Marks `$event` handlers (`perform` binds one: returns it unread and uncalled, D-072). */
 export const EVENT_MARK: unique symbol = Symbol.for("solid.blocks.event") as any;
 /** Marks a call of an `$event` handler (an `attempt` over one delegates to it, D-077). */

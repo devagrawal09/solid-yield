@@ -1,12 +1,20 @@
 /*
- * Mounting: the root must not be pending — every pending read handled by a
- * `Loading` above it. It may fail: a failure with no `Errored` above it is
- * re-thrown (D-033), at the root as anywhere (D-059), so no boundary is
- * required for it. Every form behaves the same:
+ * Mounting: the root edge (D-095). The root must not be pending — every
+ * pending read handled by a `Loading` above it. It may fail: a failure with
+ * no `Errored` above it is re-thrown (D-033), at the root as anywhere
+ * (D-059), so no boundary is required for it. The root is not a hand-off to
+ * foreign code: `foreign()` (D-088) is for plain Solid that takes a
+ * component (the router, `@solidjs/web`'s own `render`, Solid's `lazy`).
+ * Every form behaves the same:
  * `render(App, root)`, `render(() => <App />, root)`,
  * `render(() => jsx(App, {}), root)` and `render(() => h(App), root)`.
+ * Those are the library's forms: an element thunk is recognised by the
+ * library's own mark (`solid-blocks/h`, and `solid-blocks/jsx-runtime` built
+ * on it); a raw `@solidjs/h` thunk is not a root (its type is not one, and
+ * nothing public tells it apart from any function; D-004, D-095).
  */
 import { render as webRender, hydrate as webHydrate } from "@solidjs/web";
+import { ELEMENT_MARK } from "./runtime.js";
 import type { Element } from "./element.js";
 import type { View } from "./types.js";
 
@@ -14,13 +22,9 @@ import type { View } from "./types.js";
 type Root = (() => View<false, any>) | (() => Element);
 type MountableElement = Element & globalThis.Element;
 
-/** Whether a value is an `h` / automatic-`jsx` element thunk (Solid's `h` brands them). */
+/** Whether a value is `solid-blocks/h` / automatic-`jsx` output: the library's mark. */
 function isElementThunk(value: unknown): value is () => unknown {
-  if (typeof value !== "function" || value.length !== 0) return false;
-  const symbols = Object.getOwnPropertySymbols(value);
-  for (let i = 0; i < symbols.length; i++)
-    if (symbols[i].description === "hyper-element") return true;
-  return false;
+  return typeof value === "function" && (value as any)[ELEMENT_MARK] === true;
 }
 
 /**

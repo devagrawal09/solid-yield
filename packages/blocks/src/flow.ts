@@ -28,6 +28,7 @@ import {
   isGeneratorFunction,
   renderView,
   devError,
+  ELEMENT_MARK,
   READ,
   VIEW_MARK,
   isRowBlock,
@@ -346,12 +347,12 @@ function lazyView(body: any): unknown {
 
 declare const __DEV__: boolean;
 
-/** Whether a value is an `h` / automatic-`jsx` element thunk (built where it is inserted). */
+/**
+ * Whether a value is `solid-blocks/h` / automatic-`jsx` output, an element
+ * thunk built where it is inserted: the library's own mark (D-004, D-095).
+ */
 function isElementThunk(value: any): boolean {
-  const symbols = Object.getOwnPropertySymbols(value);
-  for (let i = 0; i < symbols.length; i++)
-    if (symbols[i].description === "hyper-element") return true;
-  return false;
+  return value[ELEMENT_MARK] === true;
 }
 
 /** Content that was built before the boundary: a component's DOM. */

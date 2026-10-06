@@ -1072,8 +1072,10 @@ tester.run("no-unchecked-foreign-handoff", rules["no-unchecked-foreign-handoff"]
     live + "const r = <Route path='/' component={foreign(Live)} />;",
     live + 'import { render } from "@solidjs/web";\nrender(foreign(Live), root);',
     live + 'import { render } from "@solidjs/web";\nrender(() => foreign(Live)(), root);',
-    // the library's own render is typed (a pending root is refused; D-033)
+    // the library's own render / hydrate are the root edge, not a handoff (D-095):
+    // typed (a pending root is refused; a failing one re-throws, D-033)
     live + 'import { render } from "solid-blocks";\nrender(Live, root);',
+    live + 'import { hydrate } from "solid-blocks";\nhydrate(() => Live(), document);',
     // a plain Solid component: nothing to check
     "const Page = () => <i />;\ndefineRoute({ path: '/', component: Page });",
     // a block component called in a block is not a handoff
@@ -1147,7 +1149,18 @@ typedTester.run(
   {
     valid: [
       { filename, code: handoffDecls + "defineRoute({ path: '/', component: foreign(Page) });" },
-      { filename, code: handoffDecls + "defineRoute({ path: '/', component: Plain });" }
+      { filename, code: handoffDecls + "defineRoute({ path: '/', component: Plain });" },
+      // the library's render / hydrate: the root edge, which may fail (D-033, D-095)
+      {
+        filename,
+        code: handoffDecls + 'import { render } from "solid-blocks";\nrender(Failing, root);'
+      },
+      {
+        filename,
+        code:
+          handoffDecls +
+          'import { hydrate } from "solid-blocks";\nhydrate(() => Failing({ id: "1" }), document);'
+      }
     ],
     invalid: [
       {
@@ -1176,6 +1189,24 @@ typedTester.run(
         filename,
         code: handoffDecls + "defineRoute({ path: '/', component: route(Failing) });",
         errors: [{ messageId: "uncheckedFails", suggestions: 1 }]
+      },
+      {
+        // @solidjs/web's renderers are foreign (D-095): a failing root is named
+        filename,
+        code:
+          handoffDecls +
+          'import { renderToString } from "@solidjs/web";\nrenderToString(() => Failing({ id: "1" }));',
+        errors: [
+          {
+            messageId: "uncheckedFails",
+            data: {
+              name: "Failing",
+              fails: "ApiError",
+              where: "`renderToString` from @solidjs/web"
+            },
+            suggestions: 1
+          }
+        ]
       },
       {
         // Solid's lazy over a module whose default export is a block component

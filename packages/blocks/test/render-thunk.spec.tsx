@@ -1,11 +1,15 @@
 /**
- * `render(App, root)`, `render(() => <App />, root)` and
- * `render(() => jsx(App, {}), root)` behave the same: the component is created
- * once and keeps its state, including across a Loading / async round trip.
+ * `render(App, root)`, `render(() => <App />, root)`,
+ * `render(() => jsx(App, {}), root)` and `render(() => h(App, {}), root)`
+ * behave the same: the component is created once and keeps its state,
+ * including across a Loading / async round trip. These are the library's
+ * forms (D-095): a raw `@solidjs/h` thunk is not a root (its type is refused,
+ * nojsx.type-tests), since only the library's own mark tells an element
+ * thunk apart (D-004).
  */
 import { flush } from "solid-js";
 import { jsx } from "solid-blocks/jsx-runtime";
-import { jsx as coreJsx } from "@solidjs/h/jsx-runtime";
+import { h } from "solid-blocks/h";
 import {
   $component,
   $event,
@@ -41,8 +45,8 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-type Form = "component" | "jsx-thunk" | "jsx-runtime-thunk" | "core-h-jsx-runtime-thunk";
-const forms: Form[] = ["component", "jsx-thunk", "jsx-runtime-thunk", "core-h-jsx-runtime-thunk"];
+type Form = "component" | "jsx-thunk" | "jsx-runtime-thunk" | "h-thunk";
+const forms: Form[] = ["component", "jsx-thunk", "jsx-runtime-thunk", "h-thunk"];
 function mount(form: Form, App: any) {
   dispose =
     form === "component"
@@ -51,7 +55,7 @@ function mount(form: Form, App: any) {
         ? render(() => <App />, root)
         : form === "jsx-runtime-thunk"
           ? render(() => jsx(App, {}) as any, root)
-          : render(() => coreJsx(App, {}) as any, root);
+          : render(() => h(App, {}) as any, root);
   flush();
 }
 

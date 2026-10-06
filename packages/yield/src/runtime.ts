@@ -818,9 +818,11 @@ type AttemptWait<T> =
 type IsStream<T> =
   T extends EventCall<any, any, any, any>
     ? false
-    : Awaited<T> extends AsyncIterable<any>
-      ? true
-      : false;
+    : [Awaited<T>] extends [never]
+      ? false
+      : Awaited<T> extends AsyncIterable<any>
+        ? true
+        : false;
 /** A stream given back is a `StreamAttempt`: reactive routines take it, an `$event` does not (D-091). */
 type AttemptStream<T> =
   true extends IsStream<T>

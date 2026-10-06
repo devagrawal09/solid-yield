@@ -23,6 +23,7 @@ import {
   raise,
   render,
   Show,
+  $signal,
   view,
   type Element as YieldElement,
   type Path,
@@ -32,6 +33,7 @@ import {
 } from "solid-yield";
 import { h } from "solid-yield/h";
 import { toFailed, type Failed } from "./failed.js";
+import { write } from "./write.js";
 
 declare const __DEV__: boolean;
 
@@ -636,22 +638,29 @@ describe("O37: an unhandled bound call under an Errored that does not catch its 
   class Forbidden extends Error {
     readonly kind = "forbidden" as const;
   }
-  const App = component(function* App() {
-    const go = $event(function* () {
-      yield* raise(new Forbidden("forbidden"));
+  let bump!: () => void;
+  const app = (failure: () => Error) =>
+    component(function* App() {
+      const [n, setN] = yield* $signal(0);
+      bump = () => write(() => setN(v => v + 1));
+      const go = $event(function* () {
+        yield* raise(failure() as Forbidden);
+      });
+      return view(function* () {
+        return <button onClick={perform(go)}>{perform(n)}</button>;
+      });
     });
-    return view(function* () {
-      return <button onClick={perform(go)}>go</button>;
-    });
-  });
-  const notFoundOnly = () =>
-    Errored({
-      catch: [NotFound],
-      fallback: (e: any) => <p>inner: {e().message}</p>,
-      children: function* () {
-        return <>{perform(App())}</>;
-      }
-    });
+  const App = app(() => new Forbidden("forbidden"));
+  const notFoundOnly =
+    (Child = App) =>
+    () =>
+      Errored({
+        catch: [NotFound],
+        fallback: (e: any) => <p>inner: {e().message}</p>,
+        children: function* () {
+          return <>{perform(Child())}</>;
+        }
+      });
   /** What the DOM calls (Solid's delegated handler), called as the DOM does: nobody handles its promise. */
   async function click() {
     const button = root.querySelector("button") as any;
@@ -669,31 +678,97 @@ describe("O37: an unhandled bound call under an Errored that does not catch its 
       Errored({
         fallback: (e: any) => <p>outer: {e().message}</p>,
         children: function* () {
-          return <>{perform(notFoundOnly())}</>;
+          return <>{perform(notFoundOnly()())}</>;
         }
       })
     );
-    await click();
+    expect(await click()).toEqual(["resolved", undefined]);
     await settle();
     expect(root.innerHTML).toBe("<p>outer: forbidden</p>");
   });
 
-  it("FINDING: with none above, the call does not reject (D-085 says it does): it resolves, the failure is thrown out of Solid's flush and halts the reactive system", async () => {
-    mount(notFoundOnly);
+  it("with none above, the call rejects (D-085, F-7): nothing is reported, Solid does not halt, and a later write still updates the DOM", async () => {
+    mount(notFoundOnly());
     let outcome: unknown;
     const { errors, uncaught, unhandled } = await captured(async () => {
       outcome = await click();
-      for (let i = 0; i < 3; i++) {
-        await tick();
-        try {
-          flush();
-        } catch {}
-      }
+      await settle();
     });
-    expect(outcome).toEqual(["resolved", undefined]);
-    expect(uncaught).toEqual(["Error: forbidden"]);
+    expect(outcome).toEqual(["rejected", "forbidden"]);
+    expect(uncaught).toEqual([]);
     expect(unhandled).toEqual([]);
-    expect(errors.some(e => e.includes("[REACTIVITY_HALTED]"))).toBe(true);
+    expect(errors.some(e => e.includes("[REACTIVITY_HALTED]"))).toBe(false);
+    expect(root.innerHTML).toBe("<button>0</button>");
+    bump();
+    flush();
+    expect(root.innerHTML).toBe("<button>1</button>");
+  });
+
+  it("the failure its catch covers: that Errored shows it, and the call resolves", async () => {
+    mount(notFoundOnly(app(() => new NotFound("missing"))));
+    expect(await click()).toEqual(["resolved", undefined]);
+    await settle();
+    expect(root.innerHTML).toBe("<p>inner: missing</p>");
+  });
+
+  it("an Errored with no catch takes every failure: it shows it, and the call resolves", async () => {
+    mount(() =>
+      Errored({
+        fallback: (e: any) => <p>all: {e().message}</p>,
+        children: function* () {
+          return <>{perform(App())}</>;
+        }
+      })
+    );
+    expect(await click()).toEqual(["resolved", undefined]);
+    await settle();
+    expect(root.innerHTML).toBe("<p>all: forbidden</p>");
+  });
+
+  it("the nearest that covers it, past one that does not and under one that would: the middle one shows it", async () => {
+    mount(() =>
+      Errored({
+        fallback: (e: any) => <p>outer: {e().message}</p>,
+        children: function* () {
+          return (
+            <>
+              {perform(
+                Errored({
+                  catch: [Forbidden],
+                  fallback: (e: any) => <p>middle: {e().message}</p>,
+                  children: function* () {
+                    return <>{perform(notFoundOnly()())}</>;
+                  }
+                })
+              )}
+            </>
+          );
+        }
+      })
+    );
+    expect(await click()).toEqual(["resolved", undefined]);
+    await settle();
+    expect(root.innerHTML).toBe("<p>middle: forbidden</p>");
+  });
+
+  it("a crash under catch-only Errored: no class covers it, so the call rejects and Solid does not halt", async () => {
+    const Crash = component(function* Crash() {
+      const go = $event(function* () {
+        (null as any).boom;
+      });
+      return view(function* () {
+        return <button onClick={perform(go)}>go</button>;
+      });
+    });
+    mount(notFoundOnly(Crash as any));
+    let outcome: any;
+    const { errors, uncaught } = await captured(async () => {
+      outcome = await click();
+      await settle();
+    });
+    expect(outcome[0]).toBe("rejected");
+    expect(uncaught).toEqual([]);
+    expect(errors.some(e => e.includes("[REACTIVITY_HALTED]"))).toBe(false);
     expect(root.innerHTML).toBe("<button>go</button>");
   });
 });

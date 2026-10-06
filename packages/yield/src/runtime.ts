@@ -1446,36 +1446,67 @@ export function readContext(ctx: any): unknown {
 // --- events ---------------------------------------------------------------------------------
 
 /**
- * Provided by `Errored` so a bind site knows a boundary will take a failure
- * nobody handles (D-085). Solid has no public way to ask whether an owner has
- * an error boundary above it, and with none `reportError` would halt the
- * reactive system rather than let the call reject.
+ * An `Errored` as a bind site sees it (D-085): the classes its `catch` lists
+ * (`null`: it takes every failure) and the `Errored` above it.
  */
-export const BOUNDARY = solidCreateContext<boolean>(false);
+export interface Boundary {
+  readonly catch: readonly (abstract new (...args: any) => unknown)[] | null;
+  readonly parent: Boundary | null;
+}
+
+/**
+ * Provided by `Errored` so a bind site knows which boundaries are above it
+ * and what each takes (D-085, F-7). Solid has no public way to ask whether an
+ * owner has an error boundary above it that will take a failure, and with
+ * none `reportError` would halt the reactive system rather than let the call
+ * reject.
+ */
+export const BOUNDARY = solidCreateContext<Boundary | null>(null);
 export { solidCreateContext };
+
+/** The nearest `Errored` above the current owner, as `BOUNDARY` gives it. */
+export function boundaryAbove(): Boundary | null {
+  if (!getOwner()) return null;
+  try {
+    return useContext(BOUNDARY) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Whether some `Errored` in the chain will take `error`: the first whose `catch` covers it. */
+function takes(boundary: Boundary | null, error: unknown): boolean {
+  for (let b = boundary; b; b = b.parent)
+    if (!b.catch || b.catch.some(C => error instanceof C)) return true;
+  return false;
+}
 
 /** An `$event` handler's call, with where a failure nobody handles goes (D-085). */
 const CALL: unique symbol = Symbol("solid.yield.call") as any;
-type Route = ((error: unknown) => void) | null;
+/** Takes a failure nobody handles, or answers `false`: then the call rejects. */
+type Route = ((error: unknown) => boolean) | null;
 
 /**
  * Bind an `$event` handler where it meets the DOM (D-085): `perform` in an
  * event attribute, `h`'s attribute bind. One wrapper per bind, which records
- * the bind site's owner and whether an `Errored` is above it: a call nobody
- * handles (a DOM dispatch) reports its failure to that boundary, and with
- * none the call's promise rejects. A call that is handled — `yield*`,
- * `await` — fails at its caller, wherever it was bound.
+ * the bind site's owner and the `Errored`s above it: a call nobody handles (a
+ * DOM dispatch) reports its failure there when one of them takes it (its
+ * `catch` covers it, or it has none), and otherwise the call's promise
+ * rejects (F-7: reported, it would leave Solid's flush and halt it). A call
+ * that is handled — `yield*`, `await` — fails at its caller, wherever it was
+ * bound.
  */
 export function bindEvent<H>(handler: H): H {
   const call = (handler as any)[CALL] as (route: Route, args: unknown[]) => unknown;
   const owner = getOwner();
-  let boundary = false;
-  if (owner) {
-    try {
-      boundary = useContext(BOUNDARY);
-    } catch {}
-  }
-  const route: Route = boundary ? error => reportError(owner, error) : null;
+  const boundary = boundaryAbove();
+  const route: Route = boundary
+    ? error => {
+        if (!takes(boundary, error)) return false;
+        reportError(owner, error);
+        return true;
+      }
+    : null;
   const bound: any = (...args: unknown[]) => call(route, args);
   bound[EVENT_MARK] = true;
   bound[CALL] = call;
@@ -1562,9 +1593,10 @@ function* eventSteps(
  *
  * A failure goes to whoever handles the returned promise (`await`, `.then`,
  * `.catch`, `yield*`). One nobody handles — a DOM dispatch ignores the result
- * — goes to the nearest `Errored` above where the handler was bound (D-085;
- * the promise then resolves `undefined`); with no boundary there, or for a
- * call of the unbound handler, the promise rejects.
+ * — goes to the nearest `Errored` above where the handler was bound that
+ * takes it (D-085; the promise then resolves `undefined`); with no such
+ * boundary there (none, or only ones whose `catch` excludes it, F-7), or for
+ * a call of the unbound handler, the promise rejects.
  * Like any action it is called from an event or other imperative code, not
  * synchronously inside a computation (ACTION_CALLED_IN_OWNED_SCOPE).
  */
@@ -1597,10 +1629,7 @@ export function $event<Args extends unknown[] = [], Y extends EventOp = never, R
     const rec: CallRecord = {};
     let handled = false;
     const result = run(rec, ...args).then(undefined, (error: unknown) => {
-      if (!handled && route) {
-        route(error);
-        return undefined;
-      }
+      if (!handled && route && route(error)) return undefined;
       throw error;
     });
     (result as any)[EVENT_CALL_MARK] = true;

@@ -25,6 +25,8 @@ import {
 } from "solid-js";
 import {
   BOUNDARY,
+  boundaryAbove,
+  type Boundary,
   isGeneratorFunction,
   renderView,
   devError,
@@ -452,7 +454,8 @@ type ErroredFallback<E> =
  * a `reset`, or a row `function* (error, reset) { …; return view(…); }` whose
  * `error` is a path (a view that binds an event needs one, D-072). The
  * failure of an `$event` bound under it that nobody handles is routed here
- * (D-085).
+ * when this boundary, or one above it, takes it (D-085); when none does, the
+ * call rejects (F-7).
  *
  * The fallback's own colors are not this boundary's to handle: what it reads
  * pending, and how it fails, reach the boundaries above (D-071), so they are
@@ -512,6 +515,8 @@ function ErroredYield(props: any): any {
   const children = content(props, "Errored");
   const fallback = props.fallback as any;
   const handles = props.catch as readonly ErrorClass[] | undefined;
+  // what a bind site below sees (D-085, F-7): what this one takes, and the one above
+  const boundary: Boundary = { catch: (handles as any) ?? null, parent: boundaryAbove() };
   // a zero-arity `function*` is a lazy view (D-066), built each time the
   // fallback shows; a generator taking `(error, reset)` is a row
   const adapted =
@@ -534,7 +539,7 @@ function ErroredYield(props: any): any {
     },
     get children() {
       return createComponent(BOUNDARY as any, {
-        value: true,
+        value: boundary,
         get children() {
           return children();
         }

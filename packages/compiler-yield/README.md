@@ -27,3 +27,10 @@ that join their root. The `[EAGER]` type marker is not implemented.
 
 The report cannot yet establish how many independently hydratable roots an app
 has. In particular, an unresolved span is not permission to emit a root.
+
+The public namespace spike is separate from analysis. Run
+`node --test packages/compiler-yield/test/hydration-namespace.test.mjs`.
+Immediate roots retain their server nodes. The delayed schedule pins F-C5:
+the second root is silently replaced on Solid rc.13. See
+[the finding](../../documentation/compiler-c2-finding.md). C2 codegen is stopped
+at this public-API limitation, as C0 §3.1 requires.

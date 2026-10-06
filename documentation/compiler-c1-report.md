@@ -1074,4 +1074,3 @@ Limits: Joined props lose per-call precision; Spans unresolved across foreign ow
 - examples/todos-yield-h/src/app.ts:189:31: `label` — unresolved parameter (row, callback or foreign props); 3 client parts.
 
 ### Setup findings
-

@@ -8,7 +8,10 @@ against this file (`.github/workflows/gate.yml`).
 **Compiler branch additions (C1 checkpoint).** `compiler:analysis-test` pins the
 small analysis fixtures, and `compiler:report` visits all eight source graphs.
 The report is provisional: this checks that it runs, not that its candidate roots
-are safe to extract. Baseline: 39 steps, all PASS. Historical reference below.
+are safe to extract. Baseline: 40 steps, all PASS. `compiler:namespace-spike` additionally pins
+immediate claims and the **known delayed-claim failure F-C5**. A green result for
+that step means the finding reproduced; it does not mean delayed hydration is
+correct. Historical reference below.
 
 **Reference summary: `37 pass / 0 fail / 0 skip in 36s`** (37 steps, `--jobs 3`,
 every step under `TZ=UTC`). Re-recorded when `pkg:yield:dist-fresh` was added, on the

@@ -109,7 +109,7 @@ export function markdown(reports) {
     out.push("", "### Setup findings", "");
     for (const f of r.findings) out.push(`- ${f.at}: ${f.message}.`);
   }
-  return out.join("\n") + "\n";
+  return out.join("\n").trimEnd() + "\n";
 }
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const twins = readdirSync(resolve(repo, "examples"))

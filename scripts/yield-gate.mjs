@@ -248,6 +248,13 @@ function buildSteps(twins) {
     }
   );
 
+  steps.push({
+    name: "compiler:namespace-spike",
+    cwd: root,
+    cmd: process.execPath,
+    args: ["--test", "packages/compiler-yield/test/hydration-namespace.test.mjs"]
+  });
+
   // The exports-conditions matrix of each published package (scripts/exports-matrix.mjs):
   // every subpath under development / default / browser / node, resolved by esbuild, Node
   // and TypeScript from a consumer's node_modules. Needs the build, like everything here.

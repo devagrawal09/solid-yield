@@ -1,0 +1,404 @@
+{
+  "success": {
+    "chunks": [
+      {
+        "type": "start",
+        "id": "",
+        "version": 1
+      },
+      {
+        "type": "html",
+        "id": "",
+        "version": 1,
+        "html": "<template id=\"pl-01000000\"></template>Loading article…<!--pl-01000000-->",
+        "digest": "3b8e6dbb7311f995"
+      },
+      {
+        "type": "fragment",
+        "id": "",
+        "version": 1,
+        "key": "01000000",
+        "html": "<!--lh:44--><div class=\"reading\"><article><h1><!--lh:0-->Getting started<!--lh:/0--></h1><p><!--lh:1-->Content first, with a few small tools beside it.<!--lh:/1--></p><section data-lha=\"45\" data-lha=\"2\" id=\"section-0\"><h2><!--lh:3-->Read the page<!--lh:/3--></h2><p><!--lh:4-->A page can carry useful information before its controls start.<!--lh:/4--></p><p><!--lh:5-->Each tool owns its state. Reading this chapter needs no shared browser state or background work.<!--lh:/5--></p><pre><code><!--lh:6-->const chapter = await getArticle(\"start\"); // section 1<!--lh:/6--></code></pre></section><section data-lha=\"46\" data-lha=\"7\" id=\"section-1\"><h2><!--lh:8-->Choose a route<!--lh:/8--></h2><p><!--lh:9-->A page can carry useful information before its controls start.<!--lh:/9--></p><p><!--lh:10-->Each tool owns its state. Reading this chapter needs no shared browser state or background work.<!--lh:/10--></p><pre><code><!--lh:11-->const chapter = await getArticle(\"start\"); // section 2<!--lh:/11--></code></pre></section><section data-lha=\"47\" data-lha=\"12\" id=\"section-2\"><h2><!--lh:13-->Keep state local<!--lh:/13--></h2><p><!--lh:14-->A page can carry useful information before its controls start.<!--lh:/14--></p><p><!--lh:15-->Each tool owns its state. Reading this chapter needs no shared browser state or background work.<!--lh:/15--></p><pre><code><!--lh:16-->const chapter = await getArticle(\"start\"); // section 3<!--lh:/16--></code></pre></section><section data-lha=\"48\" data-lha=\"17\" id=\"section-3\"><h2><!--lh:18-->Load an answer<!--lh:/18--></h2><p><!--lh:19-->A page can carry useful information before its controls start.<!--lh:/19--></p><p><!--lh:20-->Each tool owns its state. Reading this chapter needs no shared browser state or background work.<!--lh:/20--></p><pre><code><!--lh:21-->const chapter = await getArticle(\"start\"); // section 4<!--lh:/21--></code></pre></section><section data-lha=\"49\" data-lha=\"22\" id=\"section-4\"><h2><!--lh:23-->Handle a failure<!--lh:/23--></h2><p><!--lh:24-->A page can carry useful information before its controls start.<!--lh:/24--></p><p><!--lh:25-->Each tool owns its state. Reading this chapter needs no shared browser state or background work.<!--lh:/25--></p><pre><code><!--lh:26-->const chapter = await getArticle(\"start\"); // section 5<!--lh:/26--></code></pre></section><section data-lha=\"50\" data-lha=\"27\" id=\"section-5\"><h2><!--lh:28-->Use a small boundary<!--lh:/28--></h2><p><!--lh:29-->A page can carry useful information before its controls start.<!--lh:/29--></p><p><!--lh:30-->Each tool owns its state. Reading this chapter needs no shared browser state or background work.<!--lh:/30--></p><pre><code><!--lh:31-->const chapter = await getArticle(\"start\"); // section 6<!--lh:/31--></code></pre></section><section data-lha=\"51\" data-lha=\"32\" id=\"section-6\"><h2><!--lh:33-->Check the result<!--lh:/33--></h2><p><!--lh:34-->A page can carry useful information before its controls start.<!--lh:/34--></p><p><!--lh:35-->Each tool owns its state. Reading this chapter needs no shared browser state or background work.<!--lh:/35--></p><pre><code><!--lh:36-->const chapter = await getArticle(\"start\"); // section 7<!--lh:/36--></code></pre></section><section data-lha=\"52\" data-lha=\"37\" id=\"section-7\"><h2><!--lh:38-->Continue reading<!--lh:/38--></h2><p><!--lh:39-->A page can carry useful information before its controls start.<!--lh:/39--></p><p><!--lh:40-->Each tool owns its state. Reading this chapter needs no shared browser state or background work.<!--lh:/40--></p><pre><code><!--lh:41-->const chapter = await getArticle(\"start\"); // section 8<!--lh:/41--></code></pre></section></article><aside class=\"on-this-page\"><h2>On this page</h2><ol><!--lh:42--><li><a href=\"#section-0\">Read the page</a></li><li><a href=\"#section-1\">Choose a route</a></li><li><a href=\"#section-2\">Keep state local</a></li><li><a href=\"#section-3\">Load an answer</a></li><li><a href=\"#section-4\">Handle a failure</a></li><li><a href=\"#section-5\">Use a small boundary</a></li><li><a href=\"#section-6\">Check the result</a></li><li><a href=\"#section-7\">Continue reading</a></li><!--lh:/42--></ol></aside><section class=\"related\"><h2>Related reading</h2><ul><!--lh:43--><li><a href=\"/docs/start\">Getting started</a></li><li><a href=\"/docs/widgets\">Independent widgets</a></li><!--lh:/43--></ul></section></div><!--lh:/44-->",
+        "digest": "b66a01073314d9f5",
+        "holes": {
+          "lh:44": "267bfbbc6a733d82",
+          "lh:0": "c050521e605c7038",
+          "lh:1": "fbcd1e7c67df2c02",
+          "lh:3": "414e6a75293ebd93",
+          "lh:4": "f603cb032c3bfe4d",
+          "lh:5": "b8e3f919d49d99c7",
+          "lh:6": "a997a88c6f99690e",
+          "lh:8": "596f7d7aea9e6e0c",
+          "lh:9": "f603cb032c3bfe4d",
+          "lh:10": "b8e3f919d49d99c7",
+          "lh:11": "ac97ad456e99677b",
+          "lh:13": "9465c2c648107be0",
+          "lh:14": "f603cb032c3bfe4d",
+          "lh:15": "b8e3f919d49d99c7",
+          "lh:16": "ab97abb26d9965e8",
+          "lh:18": "eb6b669a2422e594",
+          "lh:19": "f603cb032c3bfe4d",
+          "lh:20": "b8e3f919d49d99c7",
+          "lh:21": "a697a3d3749970ed",
+          "lh:23": "a5614feaabe77930",
+          "lh:24": "f603cb032c3bfe4d",
+          "lh:25": "b8e3f919d49d99c7",
+          "lh:26": "a597a24073996f5a",
+          "lh:28": "ff7935eadc00afa4",
+          "lh:29": "f603cb032c3bfe4d",
+          "lh:30": "b8e3f919d49d99c7",
+          "lh:31": "a897a6f972996dc7",
+          "lh:33": "f252e06de266f5ab",
+          "lh:34": "f603cb032c3bfe4d",
+          "lh:35": "b8e3f919d49d99c7",
+          "lh:36": "a797a56671996c34",
+          "lh:38": "7734fcc87f642996",
+          "lh:39": "f603cb032c3bfe4d",
+          "lh:40": "b8e3f919d49d99c7",
+          "lh:41": "b297b6b768995e09",
+          "lh:42": "99d8de55be9aa48f",
+          "lh:43": "62525f9ee93a93e8",
+          "lha:45": "74de0b5c2b0895fa",
+          "lha:46": "3820115a6ab3fc18",
+          "lha:47": "4c73170f81fb2fb5",
+          "lha:48": "c2808a556e78a493",
+          "lha:49": "09954382b1c7c6c8",
+          "lha:50": "42cf3438ec519b9e",
+          "lha:51": "b3abaf6578ee6137",
+          "lha:52": "ffbd4633fd9f0b65"
+        }
+      },
+      {
+        "type": "reveal",
+        "id": "",
+        "version": 1,
+        "keys": [
+          "01000000"
+        ],
+        "waitForStyles": false
+      },
+      {
+        "type": "complete",
+        "id": "",
+        "version": 1
+      }
+    ],
+    "errors": []
+  },
+  "failure": {
+    "chunks": [
+      {
+        "type": "start",
+        "id": "",
+        "version": 1
+      },
+      {
+        "type": "html",
+        "id": "",
+        "version": 1,
+        "html": "<template id=\"pl-01000000\"></template>Loading article…<!--pl-01000000-->",
+        "digest": "3b8e6dbb7311f995"
+      },
+      {
+        "type": "fragment",
+        "id": "",
+        "version": 1,
+        "key": "01000000",
+        "html": " ",
+        "digest": "250c8f7f3176ca2d"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "01000000",
+        "error": {
+          "message": "Internal Server Error"
+        }
+      },
+      {
+        "type": "reveal",
+        "id": "",
+        "version": 1,
+        "keys": [
+          "01000000"
+        ],
+        "waitForStyles": false
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:0",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:1",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:3",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:4",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:5",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:6",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:8",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:9",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:10",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:11",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:13",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:14",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:15",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:16",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:18",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:19",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:20",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:21",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:23",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:24",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:25",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:26",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:28",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:29",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:30",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:31",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:33",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:34",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:35",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:36",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:38",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:39",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:40",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:41",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:42",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:43",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "error",
+        "id": "",
+        "version": 1,
+        "key": "lh:44",
+        "error": "Internal Server Error"
+      },
+      {
+        "type": "complete",
+        "id": "",
+        "version": 1
+      }
+    ],
+    "errors": [
+      {
+        "message": "No article: missing",
+        "kind": "not-found"
+      },
+      {
+        "message": "No article: missing",
+        "kind": "not-found"
+      }
+    ]
+  }
+}

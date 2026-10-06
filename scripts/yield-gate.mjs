@@ -245,7 +245,11 @@ function buildSteps(twins) {
       name: "compiler:analysis-test",
       cwd: root,
       cmd: process.execPath,
-      args: ["--test", "packages/compiler-yield/test/analysis.test.mjs"]
+      args: [
+        "--test",
+        "packages/compiler-yield/test/analysis.test.mjs",
+        "packages/compiler-yield/test/recomputable.test.mjs"
+      ]
     },
     {
       name: "compiler:report",
@@ -272,7 +276,11 @@ function buildSteps(twins) {
       name: "compiler:emission-test",
       cwd: root,
       cmd: process.execPath,
-      args: ["--test", "packages/compiler-yield/test/emission.test.mjs"]
+      args: [
+        "--test",
+        "packages/compiler-yield/test/emission.test.mjs",
+        "packages/compiler-yield/test/server-region.test.mjs"
+      ]
     },
     {
       name: "compiler:docs-eager",

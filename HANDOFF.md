@@ -36,6 +36,40 @@ The library is feature-complete for v0.1: through D-101 every ruling is implemen
 - **λ-yield.** `documentation/calculus.md` states the soundness theorem (D-071) and its 52 proof obligations, each now evidenced (`test/obligations.spec.tsx` holds the runtime tests that were missing). §6.3's findings are all closed, and no obligation is violated as tested: F-1 (an `Errored` fallback's dropped colors) and F-3 (`provide({ value: undefined })`) fixed, F-4 / F-5 (comments) fixed, F-7 fixed (a bound call no `Errored` takes rejects, D-085 note), **F-2 fixed by D-100** (`lazy` fails with a typed `ChunkError`; with no `Errored` it is re-thrown and the call renders nothing, no halt; rendering's pages let it reach the root, as the original), **F-6 closed by D-101** (`$settled` removed; run once after mount is `$effect(function* () {}, function* () { … })`; the 4 twin sites migrated with parity, SSR and hydrate smoke green).
 - Earlier open items below still stand unless a ruling above closed them: D-088's added boundaries now count 4 (hackernews-spa 3, room 1; rendering's went with D-099).
 
+## Reviews (2026-10-07): kanban and chat
+
+The first-time reviews built larger apps from published docs alone: kanban at `/private/tmp/sy-review-3/{log.md,app}`, chat at `/private/tmp/sy-review-4/{log.md,app}`. Both logs were read in full; those references were not modified. This follow-up started at `bd3716b`. The [reproduction notes](./documentation/review-reproductions.md) separate confirmed findings from reports that could not be reproduced.
+
+The counts below group each log's **new product reports**, rather than counting each symptom or recounting overlapping historical items. Sandbox install, port, browser and jsdom warnings are excluded. Kanban's six are N1–N5 and D1; chat's seven are missing lazy docs, `any` handoff, array length, SSR compilation, hydration bootstrap, reconnect and keyed halt.
+
+| Review | New reports in its log | Fixed / documented here | Still present | Not reproduced |
+| --- | --- | --- | --- | --- |
+| Kanban | 6 | 5 | 1 (N2 / F-8) | 0 |
+| Chat | 7 | 5 | 0 confirmed | 2 (A2, A3) |
+
+- **A1: reproduced, setup error.** Client `generateHydrationScript()` returns an empty string. The script must come from the server build and execute before hydration. Missing it now gives development `[NO_HYDRATION_SCRIPT]`, with the recipe, instead of the undefined `done` TypeError. A one-element test and a separate SSR/Vitest test verify the real server script; the latter preserves and clicks the server button for both string and streamed output.
+- **A2: not reproduced.** Removing the chat's outer catch-all in memory, using its own tsconfig and declarations, left zero type errors. Its stream fails with `TransportError`, its lazy call with `ChunkError`, and typed catches leave `never` at `foreign`. A type test pins those exact stages and no `any`. The earlier source producing `any` is not retained; no type fix was guessed.
+- **A3: not reproduced.** The chat removed its keyed experiment. Both the library and plain Solid remount tests subscribe again without `[REACTIVITY_HALTED]`. An outer-boundary probe also did not halt. There is no evidence to assign the removed `insertBefore` failure to the library or Solid, so no failing upstream repro was invented.
+- **N2 / D-085 F-8: reproduced, still present.** An optimistic list move disposes the event's bind row before its typed failure arrives. Neither its fallback nor the live outer fallback runs; the call resolves, and development only logs `[RUN_WITH_DISPOSED_OWNER]`. The runtime test explicitly pins current behaviour. **Dev's ruling is open:** A skips disposed boundaries in the captured chain, uses the nearest live one, else rejects and emits development `[BOUNDARY_DISPOSED]`; B adds only a development error; C holds disposal. **No option was chosen.**
+
+Messages now name missing contexts and missing lazy preloads. Required contexts pass their name at runtime as well as in the type: `createContext<T, "Name">(undefined, { name: "Name" })`; existing named uses were migrated. The four beginner refusals have readable text pinned against TypeScript's actual diagnostics, without TS2589 for a JSX row. Recommended lint now catches source reads in component and row setup, including typed aliases.
+
+The guide and package docs now cover lazy/`ChunkError` retry; stores, derived optimistic lists, both effect phases and `refresh`; D-073's component-level effect failures; reading an array source before `.length`; and SSR/hydration. The SSR recipe uses separate JSX configs, the server hydration script, the matching client manifest, awaited `pipeTo`, and Vitest outside test mode. The tested reconnect pattern keeps one iterator per attempt: reset cannot reopen an exhausted iterator, and caching avoids two fresh subscriptions when reset runs before an event write commits. All documented local and same-repository file/anchor targets were checked: zero broken targets. Those GitHub links refer to repository files, not files included in the npm tarball; remote availability of these local changes awaits Dev's push.
+
+**New in this follow-up: one confirmed type bug, fixed.** A rejected `Promise<never>` was classified as a stream because its awaited type is `never`. It is now a wait, with its typed failure pinned. This does not explain A2's unconfirmed `any`.
+
+| Commit | Change |
+| --- | --- |
+| `8ea4798` | Missing server hydration script: reproduction and development error |
+| `c1e90f7` | Exact reviewed stream/lazy failure handoff type tests |
+| `cff93f7` | Library and plain Solid keyed recovery; retained-iterator reconnect tests |
+| `3d05b2a` | Disposed event binding: current-behaviour test and open D-085 F-8 |
+| `523497c` | Runtime/type messages, runtime context names, setup-read lint |
+| `3438ca0` | Rejected promises are waits, not streams |
+| `f9fc7fb` | Worked docs, tested state/reconnect and SSR hydration recipes |
+
+Every commit, including this handoff, follows `pnpm build` and the **full 37/37 GREEN gate** against the unchanged baseline. The separate documented hydration command also passes 2/2 tests. Commits are local on `main`; nothing was pushed. Remaining limits are F-8's ruling, the missing A2/A3 intermediate fixtures, and real-browser lazy preload verification (the documented jsdom workaround is not that check).
+
 ## Where things are
 
 | Commit | What |

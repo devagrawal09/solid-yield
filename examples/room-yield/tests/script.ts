@@ -1,3 +1,4 @@
+import { executedBytesCheckpoint } from "yield-example-harness";
 // The interaction script shared by the behavior tests and the differential
 // parity test: it mounts an App (examples/room's or this twin's) client-only
 // in jsdom over the in-process fake wire (see vitest.config.ts), drives both
@@ -119,8 +120,9 @@ export const steps: Step[] = [
 
 export async function runScript(app: Mounted): Promise<string[]> {
   const out: string[] = [];
-  for (const [, run] of steps) {
+  for (const [name, run] of steps) {
     await run(app);
+    executedBytesCheckpoint(name);
     out.push(snapshot(app));
   }
   return out;

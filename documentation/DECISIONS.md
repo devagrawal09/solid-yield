@@ -1348,7 +1348,7 @@ _Reasoning:_ Keep the split effect model and show which effects prevent a smalle
 
 ### D-105 — C0 Q3: executed bytes in the gate
 
-**Decided (Dev, 2026-10-07).** B: V8 executed bytes at load and each parity step enter the gate, with an explicit tolerance for the prototype's observed run-to-run drift. Wall time stays manual.
+**Decided (Dev, 2026-10-07); implemented on main.** B: V8 executed bytes at load and each authored parity step enter the gate for all eight twins and their originals. The baseline documentation/executed-bytes.json allows **2% or 1024 bytes per phase, whichever is larger**, for the prototype's observed run-to-run drift. The measure uses jsdom production conditions and Vite-transformed modules, counts UTF-8 bytes of executed ranges, excludes inline source maps and resets counts at each checkpoint. It does not claim production bundle size. Both the range-count tests and measurement are full gate steps (39 total). Wall time stays manual.
 _Alternatives:_ A: manual measurements only; C: add browser and per-root payload lanes immediately.
 _Reasoning:_ Gate the savings claim without treating V8 coverage as perfectly deterministic.
 

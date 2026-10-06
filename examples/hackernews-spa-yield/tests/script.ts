@@ -1,3 +1,4 @@
+import { executedBytesCheckpoint } from "yield-example-harness";
 // The interaction script shared by the behavior tests and the differential
 // parity test: it mounts an App (examples/hackernews-spa's or this twin's)
 // client-only in jsdom, with `fetch` answering the HN API from fixtures
@@ -78,8 +79,9 @@ export const steps: Step[] = [
 
 export async function runScript(app: Mounted): Promise<string[]> {
   const out: string[] = [];
-  for (const [, run] of steps) {
+  for (const [name, run] of steps) {
     await run(app);
+    executedBytesCheckpoint(name);
     out.push(`${location.pathname}${location.search}\n${normalize(app.root.innerHTML)}`);
   }
   return out;

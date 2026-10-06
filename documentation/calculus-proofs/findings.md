@@ -11,7 +11,9 @@ unless explicitly stated.
 Use this shared failure declaration:
 
 ```tsx
-class Boom extends Error { readonly kind = "boom"; }
+class Boom extends Error {
+  readonly kind = "boom";
+}
 ```
 
 “Root accepted” below means the inferred view is assignable to
@@ -28,9 +30,14 @@ admissibility claim; the exact scope of each precondition issue is stated below.
 ```tsx
 const NeverFails = component(function* () {
   const n = yield* $memo(function* () {
-    return yield* attempt(() => 1, () => new Boom());
+    return yield* attempt(
+      () => 1,
+      () => new Boom()
+    );
   });
-  return view(function* () { return <b>{yield* n}</b>; });
+  return view(function* () {
+    return <b>{yield* n}</b>;
+  });
 });
 ```
 
@@ -55,7 +62,9 @@ const App = component(function* () {
   const n = yield* $memo(function* () {
     return yield* attempt(() => BigInt("invalid"), handle);
   });
-  return view(function* () { return <b>{String(yield* n)}</b>; });
+  return view(function* () {
+    return <b>{String(yield* n)}</b>;
+  });
 });
 render(App, el);
 ```
@@ -74,11 +83,17 @@ Witness: `WidenedHandler`; reproduced with library dev checks on and off.
 
 ```tsx
 const Child = component(function* (p: Props<{ value: unknown }>) {
-  return view(function* () { return <b>{String(yield* p.value)}</b>; });
+  return view(function* () {
+    return <b>{String(yield* p.value)}</b>;
+  });
 });
 const App = component(function* () {
-  const bad = yield* $memo(function* () { return yield* raise(new Boom()); });
-  return view(function* () { return <>{yield* Child({ value: bad })}</>; });
+  const bad = yield* $memo(function* () {
+    return yield* raise(new Boom());
+  });
+  return view(function* () {
+    return <>{yield* Child({ value: bad })}</>;
+  });
 });
 render(App, el);
 ```
@@ -99,7 +114,9 @@ colored source or generator. Witness: `UnknownProp`; both library modes.
 const C = createContext<string | undefined>(undefined);
 const App = component(function* () {
   const c = yield* C;
-  return view(function* () { return <b>{yield* c}</b>; });
+  return view(function* () {
+    return <b>{yield* c}</b>;
+  });
 });
 render(App, el);
 ```
@@ -118,14 +135,16 @@ NO_PROVIDER/context error. No context-name collision is needed. Witness:
 const C = createContext<unknown, "C">();
 const Reader = component(function* () {
   const c = yield* C;
-  return view(function* () { return <b>{String(yield* c)}</b>; });
+  return view(function* () {
+    return <b>{String(yield* c)}</b>;
+  });
 });
 render(() => C.provide({ value: undefined, children: Reader }), el);
 ```
 
 `Exclude<unknown,undefined>` remains unknown. The refusal alternative in the
 union cannot exclude undefined from that branch. The type discharges C but
-Solid stores an unset value. This is distinct from a source whose *read* gives
+Solid stores an unset value. This is distinct from a source whose _read_ gives
 undefined: that source object really is present. Witness: `UndefinedProvided`;
 both modes report missing context.
 
@@ -145,7 +164,7 @@ report NO_PROVIDER by that decision. The claim does not install a provider;
 `foreign` ignores options and returns the original component/type. The exact
 probe uses `Router() { return h(page, {}); }` and a yield root returning
 `<Router />`. It is accepted and fails at Reader's creation (`ForeignRoot`).
-C6 excludes a foreign component's *own* failures, but this is the yield
+C6 excludes a foreign component's _own_ failures, but this is the yield
 component's context lookup after a sanctioned handoff. C1–C7 do not require the
 provided claim to be true. R-Foreign/O43 still saying R=never is stale after D-102.
 
@@ -154,21 +173,30 @@ Pending has the analogous pre-existing gap:
 ```tsx
 const Pending = component(function* () {
   const n = yield* $memo(function* () {
-    return yield* attempt(() => new Promise<string>(() => {}), () => "");
+    return yield* attempt(
+      () => new Promise<string>(() => {}),
+      () => ""
+    );
   });
-  return view(function* () { return <b>{yield* n}</b>; });
+  return view(function* () {
+    return <b>{yield* n}</b>;
+  });
 });
 const page = foreign(Pending); // permitted to pend
-function Router() { return h(page, {}); }
+function Router() {
+  return h(page, {});
+}
 const App = component(function* () {
-  return view(function* () { return <Router />; });
+  return view(function* () {
+    return <Router />;
+  });
 });
 render(App, el); // accepted, no Loading above Pending's read
 ```
 
 The test pins the empty output while the source remains pending; the construction
 shows there is no Loading ancestor. Root acceptance loses the foreign tag's P.
-The required repair to the *theorem's premises* is actual provider availability
+The required repair to the _theorem's premises_ is actual provider availability
 and an ambient Loading contract at foreign reads. Whether to change the API is
 Dev's decision. Witnesses: `ForeignRoot`, `ForeignPendingRoot`; both modes.
 
@@ -179,7 +207,9 @@ Dev's decision. Witnesses: `ForeignRoot`, `ForeignPendingRoot`; both modes.
 
 ```tsx
 const App = component(function* () {
-  return view(function* () { return h.Fragment({ children: h(Reader, {}) }); });
+  return view(function* () {
+    return h.Fragment({ children: h(Reader, {}) });
+  });
 });
 render(App, el);
 ```
@@ -197,11 +227,20 @@ for R-Load. **Counterexample:**
 
 ```tsx
 const Child = component(function* () {
-  yield* $effect(function* () {}, function* () { yield* raise(new Boom("early")); });
-  return view(function* () { return <b>child</b>; });
+  yield* $effect(
+    function* () {},
+    function* () {
+      yield* raise(new Boom("early"));
+    }
+  );
+  return view(function* () {
+    return <b>child</b>;
+  });
 });
 const App = component(function* () {
-  return view(function* () { return h(Errored, { fallback: "caught" }, Child()); });
+  return view(function* () {
+    return h(Errored, { fallback: "caught" }, Child());
+  });
 });
 render(App, el);
 ```
@@ -225,8 +264,12 @@ structural matching nominal.
 ```tsx
 const e: Boom = { name: "Error", message: "shaped", kind: "boom" };
 const Child = component(function* () {
-  const n = yield* $memo(function* () { return yield* raise(e); });
-  return view(function* () { return <b>{yield* n}</b>; });
+  const n = yield* $memo(function* () {
+    return yield* raise(e);
+  });
+  return view(function* () {
+    return <b>{yield* n}</b>;
+  });
 });
 render(() => Errored({ catch: [Boom], fallback: "caught", children: Child }), el);
 ```
@@ -245,16 +288,21 @@ The test observes `[object Object]`, not a fabricated Error.message.
 **Counterexample:**
 
 ```tsx
-const inner = $event(function* () { yield* raise(Object.freeze(new Boom())); });
+const inner = $event(function* () {
+  yield* raise(Object.freeze(new Boom()));
+});
 const outer = $event(function* () {
-  yield* attempt(() => inner(), () => {});
+  yield* attempt(
+    () => inner(),
+    () => {}
+  );
 });
 outer();
 ```
 
 `brand` skips non-extensible objects. The call's attempt sees an unbranded
 failure and bypasses its absorbing handler. Outer is inferred never-failing
-but rejects with Boom. C7's *brand-defined* restriction excludes this object
+but rejects with Boom. C7's _brand-defined_ restriction excludes this object
 from the main typed-failure theorem, so this alone is not a counterexample to
 its restricted (a). It **is** a counterexample to “raise brands every failure”
 and the unconditional attempt-discharge claim. Require successful branding
@@ -269,7 +317,10 @@ Witness: `frozenAbsorbed`; rejection in both modes.
 ```tsx
 const n = constant(1);
 $memo(function* () {
-  yield* attempt(() => Promise.resolve(1), () => new Boom());
+  yield* attempt(
+    () => Promise.resolve(1),
+    () => new Boom()
+  );
   return yield* n;
 });
 ```
@@ -325,7 +376,9 @@ const App = component(function* () {
   return view(function* () {
     return h(Rows, {}, function* (_item: Source<number>) {
       const c = yield* C;
-      return view(function* () { return h("b", c); });
+      return view(function* () {
+        return h("b", c);
+      });
     });
   });
 });
@@ -353,17 +406,42 @@ For receive-versus-handle, put a Child that raises B under
 Solid's inner error boundary necessarily receives B so its library wrapper
 can reject it. Only the user's fallback does not receive B. Define the position
 as accepted delivery to the user fallback, not the internal interception.
+Finally O46's blanket “an unyielded call in a fragment is refused” is too broad:
+
+```tsx
+const Child = component(function* () {
+  return view(function* () {
+    return <i />;
+  });
+});
+const App = component(function* () {
+  return view(function* () {
+    return <>{Child()}</>;
+  });
+});
+```
+
+This settled call is an Element; the existing `SettledInFragment` type test
+explicitly accepts it. C3's component-call-yielded lint can reject its syntax,
+but that is distinct from R-Elem's color check. This is a counterexample to the
+unqualified O46 wording, not a C3-admissible counterexample to root safety.
 These are specification ambiguities, not additional runtime bugs.
 
-## F15 — The Solid assumption list is too weak for two behavioral obligations
+## F15 — The Solid assumption list omits needed behavioral contracts
 
 **Rules:** O14's once/after-render/hold/dispose claim, O21's seeded nonpending
 claim, and all-interleavings delivery of O36.
 Small programs exposing the missing premises are respectively:
 
 ```tsx
-yield* $effect(function* () {}, function* () { log.push("mounted"); });
-yield* $memo(asyncBody, { loadingValue: "seed" });
+yield *
+  $effect(
+    function* () {},
+    function* () {
+      log.push("mounted");
+    }
+  );
+yield * $memo(asyncBody, { loadingValue: "seed" });
 // Bind a waiting event, remove its owner before it rejects, then settle it.
 ```
 

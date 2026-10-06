@@ -4,10 +4,20 @@ export default {
   ...base,
   resolve: {
     ...base.resolve,
-    alias: [...base.resolve.alias,
-      { find: /^solid-js\/refresh$/, replacement: resolve("packages/yield/node_modules/solid-js/dist/refresh.dev.js") },
-      { find: /^solid-js$/, replacement: resolve("packages/yield/node_modules/solid-js/dist/solid.dev.js") },
-      { find: /^@solidjs\/web$/, replacement: resolve("packages/yield/node_modules/@solidjs/web/dist/web.dev.js") }
+    alias: [
+      ...base.resolve.alias,
+      {
+        find: /^solid-js\/refresh$/,
+        replacement: resolve("packages/yield/node_modules/solid-js/dist/refresh.dev.js")
+      },
+      {
+        find: /^solid-js$/,
+        replacement: resolve("packages/yield/node_modules/solid-js/dist/solid.dev.js")
+      },
+      {
+        find: /^@solidjs\/web$/,
+        replacement: resolve("packages/yield/node_modules/@solidjs/web/dist/web.dev.js")
+      }
     ]
   },
   define: { ...base.define, __DEV__: process.env.PROOF_PRODUCTION ? "false" : "true" },

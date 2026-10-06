@@ -91,23 +91,23 @@ must not be retroactively moved beneath a later boundary.
 
 [paper.md](paper.md) gives explicit inference rules and case proofs for:
 
-| Lemma | Work covered |
-| --- | --- |
-| P-STATE | Source/environment invariant, host runs, finite-prefix simulation |
-| P-FOLD | Union folds, event flags, hole return and `never` cases |
-| P-HOST | Admission, view-position lint, pure compute, cleanup and stream hosts |
-| P-COMP | Component, hole props, return colors, rows and flows |
-| P-MEMO | Memo source invariant, seeded values, superseded runs |
-| P-SITES | Read/bind/creation origins; effects outside a component's view |
-| P-BOUND | Loading/on, selective errors, fallback scope and provider scope |
-| P-ATTEMPT | Handling, delegation, transforms, stream termination, brand precondition |
-| P-EVENT | Bound versus handled calls and independent action records |
-| P-CONTEXT | Provider values, context identity, defaults, `Created` staging |
-| P-ROOT | Root/element judgments, every position, arbitrary finite prefixes |
-| P-FOREIGN | D-102 actual environment contract; pending across foreign code |
-| P-LAZY | ChunkError and client/server routes |
-| P-ONCE | Empty-compute effect timing and disposal |
-| P-ENCODING | Exact scope of TypeScript checks, failure identity, compiler obligation |
+| Lemma      | Work covered                                                             |
+| ---------- | ------------------------------------------------------------------------ |
+| P-STATE    | Source/environment invariant, host runs, finite-prefix simulation        |
+| P-FOLD     | Union folds, event flags, hole return and `never` cases                  |
+| P-HOST     | Admission, view-position lint, pure compute, cleanup and stream hosts    |
+| P-COMP     | Component, hole props, return colors, rows and flows                     |
+| P-MEMO     | Memo source invariant, seeded values, superseded runs                    |
+| P-SITES    | Read/bind/creation origins; effects outside a component's view           |
+| P-BOUND    | Loading/on, selective errors, fallback scope and provider scope          |
+| P-ATTEMPT  | Handling, delegation, transforms, stream termination, brand precondition |
+| P-EVENT    | Bound versus handled calls and independent action records                |
+| P-CONTEXT  | Provider values, context identity, defaults, `Created` staging           |
+| P-ROOT     | Root/element judgments, every position, arbitrary finite prefixes        |
+| P-FOREIGN  | D-102 actual environment contract; pending across foreign code           |
+| P-LAZY     | ChunkError and client/server routes                                      |
+| P-ONCE     | Empty-compute effect timing and disposal                                 |
+| P-ENCODING | Exact scope of TypeScript checks, failure identity, compiler obligation  |
 
 These are **relative proofs**. They state their premises, including premises
 that the current implementation does not establish for all well-typed programs.
@@ -120,21 +120,21 @@ compiler that proves the missing correspondence.
 The following are assumptions, not Lean axioms and not proved by tests. They are
 exactly the external behavior relied on in calculus §3.6, separated by role:
 
-| Assumption | Use |
-| --- | --- |
-| S1 | Owner parentage; current-owner context lookup; owner-based propagation. P-SITES connects this to the path model. |
-| S2 | A pending read throws `NotReadyError` at its reader; a render effect uses the nearest Loading; a memo transports pending to its readers. |
-| S3 | Error propagation, memo error caching/rethrow, and fallbacks outside their own boundary. |
-| S4 | Unhandled synchronous/computation errors rethrow, possibly with the original as `cause`. Events and lazy imports have the explicit different routes below. |
-| S5 | Compute pending waits silently; the error arm prevents logging-and-dropping; the effect phase is untracked and its errors go above its owner. |
-| S6 | An action runs to its first yield, holds ordinary writes until settlement, and a nested action joins its transaction. |
-| S7 | Promise-returning memos pend; only the latest run's promise lands. |
-| S8 | Loading's `on` is read beside the boundary, with its pending absorbed by that boundary. This does not imply that its fallback becomes visible. |
-| S9 | Retired; no `onSettled` premise is used. D-101 removed `$settled`. |
-| S10 | `createComponent`/`untrack` do not subscribe the creating computation to the untracked work. |
-| S11 | A provider supplies descendants; undefined is unset, with default lookup before missing-context failure. |
-| S12 | Hydration keys/order, server hole evaluation and pending-first-read retry. Only P-LAZY/P-ENCODING use server-specific claims. |
-| S13 | A list row is owned by the mapping under its list and keyed rows persist with their items. |
+| Assumption | Use                                                                                                                                                        |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| S1         | Owner parentage; current-owner context lookup; owner-based propagation. P-SITES connects this to the path model.                                           |
+| S2         | A pending read throws `NotReadyError` at its reader; a render effect uses the nearest Loading; a memo transports pending to its readers.                   |
+| S3         | Error propagation, memo error caching/rethrow, and fallbacks outside their own boundary.                                                                   |
+| S4         | Unhandled synchronous/computation errors rethrow, possibly with the original as `cause`. Events and lazy imports have the explicit different routes below. |
+| S5         | Compute pending waits silently; the error arm prevents logging-and-dropping; the effect phase is untracked and its errors go above its owner.              |
+| S6         | An action runs to its first yield, holds ordinary writes until settlement, and a nested action joins its transaction.                                      |
+| S7         | Promise-returning memos pend; only the latest run's promise lands.                                                                                         |
+| S8         | Loading's `on` is read beside the boundary, with its pending absorbed by that boundary. This does not imply that its fallback becomes visible.             |
+| S9         | Retired; no `onSettled` premise is used. D-101 removed `$settled`.                                                                                         |
+| S10        | `createComponent`/`untrack` do not subscribe the creating computation to the untracked work.                                                               |
+| S11        | A provider supplies descendants; undefined is unset, with default lookup before missing-context failure.                                                   |
+| S12        | Hydration keys/order, server hole evaluation and pending-first-read retry. Only P-LAZY/P-ENCODING use server-specific claims.                              |
+| S13        | A list row is owned by the mapping under its list and keyed rows persist with their items.                                                                 |
 
 S1–S13 alone do not specify seeded memo behavior or the once-after-render timing
 of an empty-compute effect. P-MEMO and P-ONCE name these additional contracts;

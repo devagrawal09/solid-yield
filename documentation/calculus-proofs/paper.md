@@ -67,7 +67,7 @@ boundary frame. Apply `owner_preservation`. Induction over a finite sequence
 then yields `execution_preservation`; every prefix of an infinite execution
 satisfies the same safety property.
 
-This is a proof *given I and the rules*, not a proof that the JS implementation
+This is a proof _given I and the rules_, not a proof that the JS implementation
 always preserves I. It makes the missing refinement step reviewable.
 
 ## Folds and hosts (P-FOLD, P-HOST)
@@ -95,7 +95,7 @@ Y in this branch (F13). `RowOps` itself does retain Y.
 
 Host admission is case analysis on the operation constructor and the table in
 §1.3 (`Admits` in Lean). Setup admits create/cleanup/context, with “never reads”
-meaning *never reads a source*, not never resolves context. JSX views admit
+meaning _never reads a source_, not never resolves context. JSX views admit
 read/child/bind, h-views no yielded operations. Hole/hole-prop differ exactly as
 the table says. Memo admits read/wait/raise/stream; compute omits wait; phase
 admits only settled reads and synchronous calls, plus write/cleanup/raise/stream;
@@ -110,7 +110,7 @@ and restores the whole host state in `finally`; a nested run cannot overwrite
 the outer run's restrictions. An attempt's generator handler is delegated,
 not run in a new host, so its operations receive exactly these checks.
 
-“Pure compute” here means *no admitted Write/Cleanup/EventCall*, not absence of
+“Pure compute” here means _no admitted Write/Cleanup/EventCall_, not absence of
 arbitrary JS mutation. Under I.2, a write can happen only by advancing a Receipt
 iterator (or the separate refresh iterator). Its body checks the host in dev
 then invokes the setter. Constructing a receipt never calls that setter;
@@ -149,7 +149,7 @@ This proof therefore excludes loss of source contracts such as F03.
 Proof of FLOW/ROW: a row's setup and view are under its mapping (S13), under the
 holding hole. Apply COMP to each row, then union introduction to the source,
 fallback, and every possible row/branch. Nothing is removed. Keyed persistence
-changes how many times a row runs, not this bound. The claim of *exactly* the
+changes how many times a row runs, not this bound. The claim of _exactly_ the
 same requirements at runtime is false for untaken branches (F01).
 
 **Origin lemma P-SITES.** `readOf` executes its accessor at the current observer.
@@ -192,7 +192,7 @@ ancestor and TAKE to the first matching one proves `route_nearest`.
 A static catch set matches the runtime `instanceof` set only under I.3.
 Distinct kind literals distinguish ordinary instances but do not ensure that
 an accepted value is an instance (F09). “An Errored never receives an excluded
-class” must mean *its user's fallback never receives that class*. The Solid
+class” must mean _its user's fallback never receives that class_. The Solid
 boundary internally receives it and the library's fallback wrapper rethrows it.
 The fallback wrapper is not the user's fallback position.
 
@@ -289,7 +289,7 @@ does not mean failure-free. These are `root_no_pending`,
 `root_no_missing_context`, `root_failure_in_color`, and `settled_no_failure`.
 For any inner boundary input/caller position apply the same argument to that
 subterm and its input color. Internal pending in a memo, compute or event is
-measured at that routine's channel; an effect/bind suppresses the *render*
+measured at that routine's channel; an effect/bind suppresses the _render_
 channel, not the routine's declared permission. May-wait does not prevent a
 view from being a settled Element.
 
@@ -332,7 +332,7 @@ hold and disposal contract. O14's three tests distinguish boundary-local holding
 from a global graph-settled claim. S5 does not state that contract in full.
 Recreating a component creates a new effect instance; this is not global once.
 
-TypeScript conditional types implement the *syntactic* folds by union
+TypeScript conditional types implement the _syntactic_ folds by union
 distribution; `true extends P` treats boolean as may-pend. `never` is empty.
 Readonly source/view fields support permission widening. Elements demand
 P=false, E=never, R=never, with arbitrary W. Fragment rejection depends on C1's

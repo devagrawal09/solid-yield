@@ -861,13 +861,18 @@ type AttemptResult<T, H> =
  * not (it absorbs the failure, with nothing or a value), never sometimes one
  * and sometimes the other (D-076, D-078).
  */
-type HandlerCheck<H> = [HandlerReturn<H>] extends [Error]
-  ? KindCheck<HandlerReturn<H>>
-  : [Extract<HandlerReturn<H>, Error>] extends [never]
-    ? unknown
-    : {
-        readonly "[ATTEMPT_ABSORBS] a handler returns the failure (an Error with a literal kind) or absorbs it (returns nothing or a value), not sometimes one and sometimes the other": never;
-      };
+type HandlerCheck<H> =
+  unknown extends HandlerReturn<H>
+    ? {
+        readonly "[ATTEMPT_RETURN] declare the handler's return type: Error, void, or a non-unknown value": never;
+      }
+    : [HandlerReturn<H>] extends [Error]
+      ? KindCheck<HandlerReturn<H>>
+      : [Extract<HandlerReturn<H>, Error>] extends [never]
+        ? unknown
+        : {
+            readonly "[ATTEMPT_ABSORBS] a handler returns the failure (an Error with a literal kind) or absorbs it (returns nothing or a value), not sometimes one and sometimes the other": never;
+          };
 /**
  * A stream's failures arrive after the host's run (D-091), so a stream
  * attempt's handler is a plain function that transforms (returns an `Error`:

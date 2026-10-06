@@ -252,6 +252,18 @@ function buildSteps(twins) {
       cwd: root,
       cmd: process.execPath,
       args: ["packages/compiler-yield/src/report.js"]
+    },
+    {
+      name: "compiler:reachability-test",
+      cwd: root,
+      cmd: process.execPath,
+      args: ["--test", "packages/compiler-yield/test/reachability.test.mjs"]
+    },
+    {
+      name: "compiler:reachability-report",
+      cwd: root,
+      cmd: process.execPath,
+      args: ["packages/compiler-yield/src/reachability-report.js"]
     }
   );
 

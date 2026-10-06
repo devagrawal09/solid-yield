@@ -64,3 +64,24 @@ Implementation stopped on the failure-preservation requirement. The expected
 failure is pinned separately; green tests do not turn it into passing smoke.
 See [the C2 record](../../documentation/compiler-c2-finding.md) for captures,
 source maps, conformance coverage, findings and reproduction commands.
+
+## C1b interaction reachability
+
+`src/reachability.js` adds directed read/write/call facts in a separate analysis
+subclass. It does not change the existing C1 placement result or C2 emission.
+`node packages/compiler-yield/src/reachability-report.js --write` regenerates
+[the report](../../documentation/compiler-reachability.md) and its range/edge
+records for all nine twins. Omit `--write` for a report-only run; `--only docs-yield`
+limits the inventory. The gate runs the full report without byte thresholds.
+
+`test/reachability.test.mjs` covers pending reads, event calls through context,
+computed retry actions, optimistic/error writes, effects, returned fallback
+handlers, runtime reset binds, flow recreation and UTF-8 range accounting.
+The byte mapper uses the transform package's existing source-map dependency.
+The empty-root and SSR-data probes are in `examples/harness/executed-bytes/`.
+
+The tier-3 number is an optimistic first-use code budget, not measured execution.
+The report also gives a per-phase reset estimate, prices first materialization,
+and separates authored event medians from scripted interaction medians. Runtime
+work above an empty root, opaque package calls and descriptor/transport costs
+remain unpriced. No resumer or runtime behavior is added here.

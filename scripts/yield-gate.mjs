@@ -5,7 +5,8 @@
 // this (.github/workflows/gate.yml): CI = the gate.
 //
 // It never builds anything: build first (`pnpm build`, which builds
-// packages/yield; the twins resolve it through its dist/).
+// packages/yield; the twins resolve it through its dist/). Step
+// pkg:yield:dist-fresh fails when that dist/ is older than its src/.
 //
 // Every step runs with TZ=UTC in its environment, whatever the machine's
 // timezone, so results depend on the commit and not on the clock's locale
@@ -14,7 +15,8 @@
 // Usage: node scripts/yield-gate.mjs [options]   (or `pnpm gate`)
 //   --only <substring>  run only steps whose name contains the substring
 //                       (repeatable; a step matching any of them runs)
-//   --fast              run only the quick subset: twin:*:typecheck, twin:*:lint,
+//   --fast              run only the quick subset: pkg:yield:dist-fresh,
+//                       twin:*:typecheck, twin:*:lint,
 //                       pkg:yield:test, pkg:vite-plugin-yield:typecheck,
 //                       pkg:*:exports and repo:prettier (skips twin tests, the
 //                       server-render smoke, the other package suites and oxlint)
@@ -147,6 +149,16 @@ const LINT_DIRS = twins => [
 function buildSteps(twins) {
   const steps = [];
   const pnpmRun = (dir, script) => ({ cmd: "pnpm", args: ["-C", dir, "run", script] });
+
+  // The build is not stale (scripts/dist-fresh.mjs): the gate never builds, so a
+  // packages/yield/dist older than its src would gate the old library. mtimes only.
+  steps.push({
+    name: "pkg:yield:dist-fresh",
+    cwd: root,
+    fast: true,
+    cmd: process.execPath,
+    args: ["scripts/dist-fresh.mjs"]
+  });
 
   for (const twin of twins) {
     const dir = `examples/${twin}`;

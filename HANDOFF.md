@@ -80,7 +80,7 @@ pnpm build                       # packages/yield: dist/ + vendored JSX types
 node scripts/yield-gate.mjs --baseline documentation/yield-gate-baseline.json   # ≈30 s; --fast ≈15 s
 ```
 
-- The gate never builds; a stale `dist/` gives spurious reds, so rebuild after pulling.
+- The gate never builds; a stale `dist/` gives spurious reds, so rebuild after pulling. Step `pkg:yield:dist-fresh` (`scripts/dist-fresh.mjs`, also in `--fast`) fails when any file in `packages/yield/dist/` is older than the newest file in its `src/`, build scripts or `tsconfig.build.json`. It goes by mtimes, so it fails after a checkout that touched `src/` until you run `pnpm build`.
 - When the step list changes, re-record the baseline in the same commit (`--json documentation/yield-gate-baseline.json`) and update `yield-gate-baseline.md`.
 - There is no pre-commit hook. `repo:prettier` in the gate covers formatting; prettier is pinned to the fork's 3.8.1.
 - Patch docs with function-form replacements (`s.replace(a, () => b)`). A string replacement expands `` $` `` and once pasted DECISIONS.md into itself (fork incident).

@@ -5,8 +5,21 @@ reference run used as the baseline; the machine-readable copy is
 [`yield-gate-baseline.json`](./yield-gate-baseline.json). CI runs the same gate
 against this file (`.github/workflows/gate.yml`).
 
-**Reference summary: `36 pass / 0 fail / 0 skip in 41s`** (36 steps, `--jobs 3`,
-every step under `TZ=UTC`). Re-recorded for D-096 (the rename to `solid-yield`: the gate script, the
+**Reference summary: `37 pass / 0 fail / 0 skip in 36s`** (37 steps, `--jobs 3`,
+every step under `TZ=UTC`). Re-recorded when `pkg:yield:dist-fresh` was added, on the
+working tree of that commit (the JSON's `head` is its parent, `3c14584`); the other 36
+steps are unchanged, all PASS.
+
+**The stale-build check added one step** (37 now): `pkg:yield:dist-fresh`
+(`scripts/dist-fresh.mjs`, also in `--fast`). The gate never builds (D-008), so a change
+to `packages/yield/src` could pass the gate against an old `dist/` and then fail the
+twins' typecheck after a rebuild (it happened once: an inferred type named an unexported
+`HoleCall`). The step fails when `packages/yield/dist/` is missing or any file in it is
+older (by mtime) than the newest of `src/`, `scripts/` and `tsconfig.build.json`, and
+it tells you to run `pnpm build`. The plugins ship `src/` unbuilt, so they have no output
+to check. Touching `src/index.ts` turns it red, and `pnpm build` turns it green again.
+
+The 36-step baseline was re-recorded for D-096 (the rename to `solid-yield`: the gate script, the
 package directories and the twins moved, so did the step names) on the staged tree of that commit, so
 the JSON's `head` is its parent (`8abef3f`). Same 36 steps, all PASS before and after.
 Environment: Node v24.18.0, pnpm 11.1.1, darwin/arm64.
@@ -115,6 +128,7 @@ so results depend on the commit, not on the machine's clock locale (D-027).
 
 | Step | Result | Duration |
 | --- | --- | --- |
+| `pkg:yield:dist-fresh` | PASS | 0.0 s |
 | `twin:effect-yield:test` | PASS | 1.7 s |
 | `twin:effect-yield:typecheck` | PASS | 1.4 s |
 | `twin:effect-yield:lint` | PASS | 1.7 s |

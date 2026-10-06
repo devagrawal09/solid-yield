@@ -1393,3 +1393,25 @@ _Reasoning:_ Respect the deliberate guard and D-004. The chosen eager path prese
 **Decided (Dev, 2026-10-07).** Reword calculus §4.3(d) as "no over-statement of discharge": colors are sound upper bounds. Update D-071; no route-existence converse is claimed. The proofs branch remains unchanged.
 _Alternatives:_ Require every union member to execute in some environment; enumerate dead branches as exceptions.
 _Reasoning:_ An unreachable attempt handler contributes its failure type. A union is a safe bound, not a reachability proof.
+
+### D-113 — The compiler's premise failed on the original corpus and holds on content-heavy pages
+
+**Decided (Dev, 2026-10-07).** Proceed to **tier 1 on docs-yield**: refine the analysis rules, fix the carousel analysis bug, emit C2 eager islands, and measure executed-byte savings. This is a ruling to proceed, not a claim that C2 or savings exist.
+
+**Corpus evidence.** C1's instance pass reduced 275 leak entries to 37 named origins across the original eight twins, 36 genuine under C0's rules. These counts have different precision and coverage; the reduction is not a savings figure. Every original twin is **one connected reactive group** (seven eager, one visible). Inert holes are a minority: todos 1/36, room 10/109, rendering 47/202. These are interaction-dense demos where everything on screen is live; they do not support the premise that most UI is inert.
+
+The new article-site pair **docs-yield** (71e8e4f, audited at 3b51165 on proto/compiler) has six mutually independent widget definitions, no shared application signals or context, and content that dominates: **127/243 inert holes, 149/249 inert JSX sites, six candidate groups (1 eager by its one effect, 2 visible, 3 lazy)**. ThemeToggle alone is in effect reach. Candidate groups are not six proven widget roots: M6 joins SearchBox and CommentList through a shared pure delay helper's unknown Promise binding; FOREIGN_OWNER joins routed article/like parts under the route owner. Refine both rules without cutting real state, boundary or owner dependencies. The carousel image is a bug: embedded src/alt reads of its written index are missing, so the changing img is falsely offered as an S slot. Correcting that element still leaves a majority (148/249). Physical DOM claims, capture serialization and compiler savings remain unproved. The sixth group is a failure fallback, not a seventh widget.
+
+**Four tiers of partial hydration** (Dev with the Solid maintainer, Discord, 2026-10-07):
+
+1. **Eager islands (v0.2).** Solid's public hydration API; all emitted islands attach at load. Lazy/visible remain report classes, with effect reach reported (D-103/D-104).
+2. **Lazy islands — rejected.** Ryan: little value if serialization does not change, and unsafe. Dev: events only get delayed and much machinery is needed. Dev reports solidjs/solid#3845 closed as by-design; D-111's private completion reset was withdrawn before implementation. Do not delay Solid hydrate or reset private state.
+3. **resume(root) on Solid's public API in the library (v0.3, the lazy builder).** Descriptors, keyed attachment and materialisation on first interaction, with the library's own event queue and payload, validated claims and render fallback. It does not depend on delayed Solid hydrate. Keyed failure re-delivery (D-109) is a related future target.
+4. **Full resumability with the library's own runtime.** Preserve the same semantics; this is the horizon, not v0.2 or v0.3 scope.
+
+**Why it may be worth it.** Move much of the graph to the server and serialize only the data an interaction needs, with Marko-like pruning. The yield compiler can pursue this because provenance is syntactic. C1's connected groups and this claim use different decompositions: undirected connectivity versus per-interaction reachability. A single connected group does not decide how much any one interaction needs. **C1b is planned:** report each interaction's reachable reads/writes/calls and required data, including effect and boundary dependencies, to measure the pruning opportunity. This is not yet a measured serialization saving.
+
+_Alternatives considered at the ruling:_ stop the compiler and go directly to v0.3; static-markup extraction only; one more rule-refinement round before choosing a tier.
+_Reasoning:_ the original demos fail the premise, but the content-heavy twin establishes a useful next experiment with named analysis defects. Test tier 1 and executed-byte savings there before expanding the claim.
+
+_Upstream status evidence:_ Dev's ruling checkpoint says #3815 open and #3845 closed by design. A separate GitHub API check during this documentation update reports #3815 **closed/completed** (closed_at 2026-10-06T06:29:43Z) and #3845 **open**. Preserve the checkpoint and distinguish it from live issue metadata; the maintainer's reported design position still rules out tier 2.

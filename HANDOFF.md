@@ -1,8 +1,17 @@
-# HANDOFF — solid-yield (checkpoint 2026-10-07: through D-112)
+# HANDOFF — solid-yield (checkpoint 2026-10-07: through D-113)
 
 This repository was extracted from the Solid fork `devagrawal09/solid`, branch `blocks-lib`, at commit **`6978eb83`** (D-015). Git history was not carried; the fork keeps it. The fork's own handoff at that commit (Phases 1A, 1B and 2, and its environment notes) is `git show 6978eb83:HANDOFF.md` in the fork.
 
 > **Names (D-096, 2026-10-06).** The product is `solid-yield` (was `solid-blocks`), with `vite-plugin-solid-yield` and `eslint-plugin-solid-yield`; the unit is a **routine** (was "block"), the model is **yield components**. Package directories are `packages/yield`, `packages/vite-plugin-yield`, `packages/eslint-plugin-yield`; twins are `examples/*-yield(-h)`; the gate is `scripts/yield-gate.mjs`. Text below written before D-096 was updated to the new names, except quoted fork paths and the extraction's own history.
+
+## Roadmap and compiler checkpoint (2026-10-07, D-113)
+
+- **v0.1:** the library runtime, transform and lint; feature-complete, awaiting npm credentials. Main was pushed through 66b870d before this follow-up; this work adds local commits only.
+- **v0.2, tier 1:** C2 eager islands on Solid's public hydration API. Lazy/visible are report classes. D-113 proceeds on docs-yield: refine M6's pure-helper sharing and FOREIGN_OWNER under routes, fix the carousel image analysis, verify captures/physical claims, then measure executed-byte savings. Tier 2, delayed lazy islands through Solid hydrate, is rejected: little value without changing serialization, unsafe attachment and much machinery just to delay events. D-111 was withdrawn before implementation.
+- **v0.3, tier 3:** resume(root), the library's lazy builder on Solid's public API: descriptors, keyed attachment, materialisation on first interaction, its own event queue and payload, validated claims and render fallback. D-109's keyed failure re-delivery is a related target.
+- **Tier 4, horizon:** full resumability with the library's own runtime, preserving the same semantics. Marko-like pruning could keep much of the graph on the server and serialize only data an interaction needs; planned C1b measures per-interaction reachability, distinct from C1's undirected connectivity.
+
+**Read-only compiler branch:** origin/proto/compiler is fetched at **3b51165**. It contains C1's instance pass, effect-reach diagnostics, foreignSource, the public hydration spike, the docs pair at **71e8e4f**, and its audit report. The original eight twins each form one connected group (37 U origins, 36 genuine, versus 275 earlier leak entries). Docs has 127/243 inert holes, 149/249 inert JSX and six candidate groups (1 eager/2 visible/3 lazy); its changing carousel img is a known false-inert analysis bug. No C2 codegen, compiled savings or independently claimable physical roots are established. Main receives the docs pair separately; compiler analysis and foreignSource stay on that branch, and the EAGER marker remains due.
 
 ## v0.1 (2026-10-06): state, and what is left
 
@@ -80,14 +89,14 @@ D-103–D-112 are recorded with alternatives and reasoning in documentation/DECI
 - F06 pins NO_PROVIDER at foreign child's creation and the accepted pending-without-Loading case's empty output. No new API was designed. F11/F12/F14/F15 correct the theorem's lint premises, fallback/provider equations and terminology, and state once-effect, seeded-memo and disposed-owner contracts with test evidence. D-112 removes the route-existence converse: colors are sound upper bounds, with no over-statement of discharge.
 - D-105 adds V8 executed-range byte checks at load and each authored parity step for all eight twins and originals. The baseline allows 2% or 1024 bytes per phase, whichever is larger. Wall time stays manual. The full gate now has **39 steps**, still checked against the unchanged 37-step yield-gate baseline; both new steps must pass.
 
-**Compiler scope.** C0 records the ruled path: v0.2 eager islands on Solid hydration, capture/claim checks, effects make eager; lazy/visible are report classes. C1 and foreignSource remain on proto/compiler: foreignSource is implemented there, and the current head 8cb1ae8 includes effect-reach reports and build diagnostics (8c426cc). This main worktree does not emit C2 islands, an EAGER type marker or compiler reports. Eager C2 codegen and the EAGER marker are still due under D-103/D-104; no provenance annotations are added (D-106). Sugar waits until after C3 (D-108). D-111's private hydration reset was withdrawn before implementation; v0.3's independent keyed attachment and D-109 keyed failure re-delivery are future targets.
+**Compiler scope.** See the current roadmap/branch checkpoint above and D-113. C0 records v0.2 eager islands only, capture/claim checks and effect reach; lazy/visible are report classes. Main does not contain C1/codegen or foreignSource. C2 eager codegen and the EAGER marker are still due; no provenance annotations are added (D-106), and sugar waits until after C3 (D-108).
 
-All changes here are local commits on main, above the pushed head f8b7131. Every commit follows pnpm build and the full GREEN gate. Nothing was pushed.
+The earlier proof/ruling changes are pushed through 66b870d. This D-113/docs follow-up commits locally on main after pnpm build and the full GREEN gate; it never pushes.
 
 ## Upstream
 
-- [solidjs/solid#3815](https://github.com/solidjs/solid/issues/3815): rc.13 SSR memo/serialization-slot loop. Filed; issue open at the 2026-10-07 check. The library avoids re-creating the component (D-082); the upstream report remains.
-- [solidjs/solid#3845](https://github.com/solidjs/solid/issues/3845): delayed second hydrate root replaces server nodes. Filed; issue open at the 2026-10-07 check. Dev reports the maintainer says the completion guard is deliberate (event replay, serialized-data lifetime, DOM drift). The private reset workaround was **withdrawn before implementation** (D-111). v0.2 uses eager islands only; v0.3's keyed attachment owns its event queue and payload, validates claims and falls back to render.
+- [solidjs/solid#3815](https://github.com/solidjs/solid/issues/3815): rc.13 SSR memo/serialization-slot loop. Dev's supplied ruling checkpoint says **open**; the GitHub API checked during this update instead says **closed/completed**, closed at 2026-10-06T06:29:43Z. The library avoids re-creating the component (D-082).
+- [solidjs/solid#3845](https://github.com/solidjs/solid/issues/3845): delayed second hydrate root replaces server nodes. Dev's Discord ruling checkpoint says **closed by design**; the GitHub API checked during this update still says **open**. The reported maintainer position is deliberate completion guarding for event replay, serialized-data lifetime and DOM drift. Tier 2 is rejected and the private reset was withdrawn (D-111); v0.2 is eager islands only, while v0.3 owns keyed attachment, its event queue and payload, with validated claims and render fallback.
 
 ## Where things are
 

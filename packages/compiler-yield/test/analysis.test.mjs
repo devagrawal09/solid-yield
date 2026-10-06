@@ -547,3 +547,21 @@ test("audit: recursive opaque props widen every previously known field", () => {
   assert.equal(r.sources[0].provenance, "U");
   assert.equal(r.leaks.length, 1);
 });
+test("audit: effect reach includes its timer, event callback and written cell", () => {
+  const r = instances(
+    app(
+      "const [n,set]=yield* $signal(0);const tick=$event(function*(){yield* set(1)});yield* $effect(function*(){},function*(){setInterval(tick,100)});return view(function*(){return <b>{yield* n}</b>});"
+    )
+  );
+  const root = r.roots[0];
+  assert.equal(root.mode, "eager");
+  for (const kind of ["timer", "event", "cell"])
+    assert(root.effectReach[0].touched.includes(root.parts.find(p => p.kind === kind).at), kind);
+});
+test("audit: a recursive prop absent on the first call still widens earlier holes", () => {
+  const r = instances(
+    "const Child=component(function*(props){const [n]=yield* $optimistic(1);return view(function*(){return <main><b>{yield* props.x}</b>{yield* Child({x:n})}</main>});});" +
+      app("return view(function*(){return <>{yield* Child({})}</>});")
+  );
+  assert.equal(r.holes.inert, 0);
+});

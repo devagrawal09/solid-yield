@@ -268,6 +268,9 @@ export class Analysis {
       return v;
     }
     const v = this.join(p, env, [obj], `field:${name}`);
+    // Keep a stable equation for reads visited before a recursive call adds
+    // this prop. Replacing the field later would leave those reads at S.
+    if (obj.kind === "props") obj.fields.set(name, v);
     v.receiver = obj;
     v.method = name;
     if (obj.callable?.kind === "context" && name === "provide")
@@ -964,6 +967,7 @@ export class Analysis {
     if (timers.has(global)) {
       const v = this.part(p, env, "timer", args, ctx);
       v.base = 2;
+      ctx.event?.deps.add(v);
       if (!ctx.host || ctx.host === "setup") {
         v.eager = true;
         this.findings.push({

@@ -20,3 +20,7 @@ The same shape is pinned against this checkout in `packages/yield/test/review-fa
 There is no evidence here to assign the reported `insertBefore` error to the library or Solid, and no failing upstream repro was invented. The report remains open pending the removed tree.
 
 The retained-iterator test also pins a reconnect pattern: a memo reads an attempt counter and creates a fresh iterator when it changes; the button changes the counter and resets the boundary. `reset` re-renders children, but cannot reopen an exhausted iterator. With a factory that creates a fresh iterator on each memo run, reset alone did retry in the tested shape; it is not a universal promise about a network subscription.
+
+## Kanban: optimistic move loses the event failure (A4 / N2)
+
+**Reproduced; decision left open.** `packages/yield/test/review-disposed.spec.tsx` pins the current behaviour in both builds: the optimistic list write disposes the binding row before the API failure, no fallback runs (including the live outer boundary), and the call resolves. Development logs `[RUN_WITH_DISPOSED_OWNER]`. The control without the move shows the typed failure. D-085 F-8 records options A (skip disposed boundaries, nearest live else reject and diagnose), B (dev error only), and C (hold disposal). None was selected.

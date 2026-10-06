@@ -423,3 +423,127 @@ test("instances: a setup instance crossing into a child names the capture", () =
   assert(result.captureFailures.some(x => x.variable === "box"));
   assert.equal(result.roots.length, 1);
 });
+
+test("instances: foreign imported values are one named shared U origin", () => {
+  const result = instances(
+    'import {data} from "foreign";' +
+      app(
+        "return view(function*(){return <main><b>{yield* data.x}</b><i>{yield* data.y}</i></main>});"
+      )
+  );
+  assert.equal(result.holes.inert, 0);
+  assert.equal(result.leaks.length, 1);
+  assert.equal(result.roots.length, 1);
+  assert(result.merges.some(x => x.rule === "M6"));
+});
+test("instances: recursive hole props widen from S to C", () => {
+  const result = instances(
+    "const Child=component(function*(props){const [n,set]=yield* $optimistic(1);const m=yield* $memo(function*(){return yield* props.x});return view(function*(){return <main><b>{yield* m}</b>{yield* Child({x:function*(){return yield* n}})}</main>});});" +
+      app("return view(function*(){return <>{yield* Child({x:0})}</>});")
+  );
+  assert.equal(result.sources.find(x => x.kind === "memo").provenance, "C");
+  assert(result.components.some(x => x.recursive));
+});
+test("instances: a server-pending input does not make an event-only root visible", () => {
+  const result = instances(
+    'async function get(){"use server";return 1;}' +
+      app(
+        "const m=yield* $memo(function*(){return yield* attempt(()=>get(),e=>e)});const click=$event(function*(){const x=yield* m; consume(x)});return view(function*(){return <button onClick={yield* click}/>});"
+      )
+  );
+  assert.equal(result.roots[0].mode, "lazy");
+});
+test("instances: nested independent roots become slots instead of forced merges", () => {
+  const result = instances(
+    "const Child=component(function*(){const [n,set]=yield* $signal(0);const click=$event(function*(){yield* set(1)});return view(function*(){return <button onClick={yield* click}>{yield* n}</button>});});" +
+      app(
+        "const [n,set]=yield* $signal(0);const click=$event(function*(){yield* set(1)});return view(function*(){return <main><button onClick={yield* click}/>{yield* Child()}<b>{yield* n}</b></main>});"
+      )
+  );
+  assert.equal(result.roots.length, 2);
+  assert(result.roots.some(x => x.slots.some(s => s.kind === "client-root")));
+});
+test("instances: opaque foreign ownership prevents an unproved inert slot", () => {
+  const result = instances(
+    'import {Foreign} from "foreign";' +
+      app("return view(function*(){return <Foreign><p>copy</p></Foreign>});")
+  );
+  assert.equal(result.roots.length, 1);
+  assert.equal(result.roots[0].slots.length, 0);
+});
+
+test("instances: a local async literal is U unless declared use server", () => {
+  const r = instances(
+    "async function data(){return 1;}" +
+      app(
+        "const n=yield* $memo(function*(){return yield* attempt(()=>data(),e=>e)});return view(function*(){return <b>{yield* n}</b>});"
+      )
+  );
+  assert.equal(r.sources[0].provenance, "U");
+  assert.equal(r.leaks.length, 1);
+});
+test("instances: top-level reassignment is followed without entering nested helpers", () => {
+  const r = instances(
+    "let data=0;data=window.value;" +
+      app(
+        "const n=yield* $memo(function*(){return data});return view(function*(){return <b>{yield* n}</b>});"
+      )
+  );
+  assert.equal(r.sources[0].provenance, "C");
+});
+test("instances: an opaque class method is not guessed pure from its name", () => {
+  const r = instances(
+    "class Thing {map(){return window.data}}" +
+      app(
+        "const thing=new Thing();const n=yield* $memo(function*(){return thing.map()});return view(function*(){return <b>{yield* n}</b>});"
+      )
+  );
+  assert.equal(r.sources[0].provenance, "U");
+  assert(r.leaks.some(x => x.classification === "blind spot"));
+});
+
+test("audit: imported values stay U through expressions, cells and helpers", () => {
+  for (const value of ["data + 1", "String(data)", "identity(data)", "({x:data}).x"]) {
+    const r = instances(
+      'import {data} from "opaque";function identity(x){return x;}' +
+        app(
+          `const [n]=yield* $signal(${value});return view(function*(){return <b>{yield* n}</b>});`
+        )
+    );
+    assert.equal(r.sources[0].provenance, "U", value);
+    assert.equal(r.leaks.length, 1, value);
+  }
+});
+test("audit: recursive initial hole props cannot hide later client inputs", () => {
+  const r = instances(
+    "const Child=component(function*(props){const [n]=yield* $optimistic(1);const m=yield* $memo(function*(){return yield* props.x});return view(function*(){return <main><b>{yield* m}</b>{yield* Child({x:function*(){return yield* n}})}</main>});});" +
+      app("return view(function*(){return <>{yield* Child({x:function*(){return 0}})}</>});")
+  );
+  assert.equal(r.sources.find(x => x.kind === "memo").provenance, "C");
+});
+test("audit: recursive widening does not taint another call's shared S argument", () => {
+  const r = instances(
+    "const fixed=0;const Child=component(function*(props){const [n]=yield* $optimistic(1);return view(function*(){return <main>{yield* props.x}{yield* Child({x:n})}</main>});});const Label=component(function*(props){const m=yield* $memo(function*(){return yield* props.x});return view(function*(){return <b>{yield* m}</b>});});" +
+      app(
+        "return view(function*(){return <>{yield* Child({x:fixed})}{yield* Label({x:fixed})}</>});"
+      )
+  );
+  assert.equal(r.sources.find(x => x.kind === "memo").provenance, "S");
+});
+test("audit: foreign-owned independent child roots cannot become slots", () => {
+  const r = instances(
+    'import {Foreign} from "opaque";const Child=component(function*(){const [n,set]=yield* $signal(0);const click=$event(function*(){yield* set(1)});return view(function*(){return <button onClick={yield* click}>{yield* n}</button>});});' +
+      app("return view(function*(){return <Foreign><p>copy</p>{yield* Child()}</Foreign>});")
+  );
+  assert.equal(r.roots.length, 1);
+  assert.equal(r.roots[0].slots.length, 0);
+  assert(r.merges.some(x => x.rule === "FOREIGN_OWNER"));
+});
+test("audit: recursive opaque props widen every previously known field", () => {
+  const r = instances(
+    'import {data} from "opaque";const Child=component(function*(props){const m=yield* $memo(function*(){return yield* props.x});return view(function*(){return <main>{yield* m}{yield* Child(data)}</main>});});' +
+      app("return view(function*(){return <>{yield* Child({x:0})}</>});")
+  );
+  assert.equal(r.sources[0].provenance, "U");
+  assert.equal(r.leaks.length, 1);
+});

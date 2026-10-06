@@ -80,10 +80,26 @@ export function analyzeInstances(
         v.deps.add(a.prop(provider, name, v.path, { id: v.id, frame: v.owner }));
       if (!context.providers.length) v.deps.add(context);
     }
+  // Imports used as data remain U even under arithmetic, a helper return or a
+  // cell initializer. Callee-only imports are code and are not dependencies.
+  const dataSeen = new Set();
+  const imports = v => {
+    if (!v || dataSeen.has(v)) return;
+    dataSeen.add(v);
+    const foreign = a.readForeign(v, { id: v.id, frame: v.owner });
+    if (foreign !== v) v.deps.add(foreign);
+    for (const dep of v.deps) imports(dep);
+  };
+  for (const p of a.parts) imports(p);
   let changed = true;
   while (changed) {
     changed = false;
     for (const v of a.facts.values()) {
+      if (v.boundValue?.p === 2 && v.base !== 2) {
+        v.base = 2;
+        v.resolved = true;
+        changed = true;
+      }
       const p = Math.max(v.base, ...[...v.deps].map(x => x?.p ?? 1));
       const pending = v.pending || [...v.deps].some(x => x?.pending);
       const failing = v.failing || [...v.deps].some(x => x?.failing);
@@ -224,13 +240,15 @@ export function analyzeInstances(
       }
   }
   const gs = groups();
+  const mayRecreate = n =>
+    a.parts.some(p => ((p.kind === "flow" && p.p > 0) || p.foreignOwner) && inside(n, p.anchor));
   const roots = gs.map((ps, i) => {
     const s = span(ps),
       effects = ps.filter(p => p.kind === "effect");
     const mode =
       effects.length || ps.some(p => p.eager)
         ? "eager"
-        : ps.some(p => p.p === 1 || p.pending)
+        : ps.some(p => p.p === 1 || [...(reads.get(p) ?? [])].some(v => v.base === 1))
           ? "visible"
           : "lazy";
     const slots = a.dom
@@ -241,7 +259,7 @@ export function analyzeInstances(
           inside(n, s) &&
           n.value?.p === 0 &&
           !ps.some(p => inside(p.anchor, n)) &&
-          !a.parts.some(p => p.kind === "flow" && p.p > 0 && inside(n, p.anchor))
+          !mayRecreate(n)
       )
       .filter(n => !n.parent || n.parent.value?.p !== 0);
     return {
@@ -253,11 +271,26 @@ export function analyzeInstances(
       sites: ps.map(p => p.at),
       instances: [...new Set(ps.map(p => p.owner?.id).filter(Boolean))],
       components: [...new Set(ps.map(p => p.owner?.name).filter(Boolean))],
-      slots: slots.map(n => ({
-        at: n.at,
-        kind: n.kind,
-        reason: "S subtree, no root part, no client re-creation"
-      })),
+      slots: [
+        ...slots.map(n => ({
+          at: n.at,
+          kind: n.kind,
+          reason: "S subtree, no root part, no client re-creation"
+        })),
+        ...gs.flatMap((other, j) => {
+          const child = span(other);
+          return i !== j && s && child && child !== s && inside(child, s) && !mayRecreate(child)
+            ? [
+                {
+                  at: child.at,
+                  kind: "client-root",
+                  root: j + 1,
+                  reason: "Independent child group; parent has no re-creation path"
+                }
+              ]
+            : [];
+        })
+      ],
       effectReach: effects.map(e => ({
         at: e.at,
         touched: ps.filter(p => p !== e && reads.get(e).has(p)).map(p => p.at),
@@ -304,7 +337,7 @@ export function analyzeInstances(
     merges,
     captureFailures,
     leaks: [...a.leaks.values()]
-      .filter(l => [...l.values].some(v => used.has(v)))
+      .filter(l => [...l.values].some(v => used.has(v) && !v.resolved))
       .map(({ values, ...l }) => ({
         ...l,
         clientParts: live.filter(p => [...values].some(v => reads.get(p).has(v))).length

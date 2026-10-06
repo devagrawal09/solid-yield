@@ -246,7 +246,10 @@ export class Analysis {
         "blind spot",
         "Resolve the object's defining expression."
       );
-    if (obj.fields.has(name)) return obj.fields.get(name);
+    if (obj.fields.has(name)) {
+      const field = obj.fields.get(name);
+      return obj.propInput ? this.join(p, env, [field, obj], `input-field:${name}`) : field;
+    }
     if (obj.context) {
       const v = this.value(p, env, `context-field:${name}`);
       v.contextField = { context: obj.context, name };
@@ -317,6 +320,7 @@ export class Analysis {
       }
       const v = this.value(path, this.moduleOf.get(path.node).env);
       v.external = { source, name: path.isImportNamespaceSpecifier() ? "" : name };
+      v.external.origin = path;
       return v;
     }
     if (path.isFunctionDeclaration()) return this.expr(path, this.moduleOf.get(path.node).env);
@@ -329,6 +333,21 @@ export class Analysis {
       // Writes are visited in the environment that executes them. Evaluating a
       // nested assignment here would invent a second, module-owned helper call.
       if (!b.constant) v.mutable = true;
+      if (!path.scope.getFunctionParent()) {
+        for (const write of b.constantViolations)
+          if (write.isAssignmentExpression() && !write.scope.getFunctionParent())
+            v.deps.add(this.expr(write.get("right"), moduleEnv));
+        if (["let", "var"].includes(b.kind)) {
+          const origin = this.unknown(
+            path,
+            moduleEnv,
+            "other",
+            "Module-level mutable binding (C0 §1.6)"
+          );
+          origin.boundValue = v;
+          v.deps.add(origin);
+        }
+      }
       return this.lookup(b, moduleEnv) ?? v;
     }
     if (path.isClassDeclaration()) {
@@ -362,6 +381,7 @@ export class Analysis {
     }
     if (p.isYieldExpression() || p.isAwaitExpression()) {
       let v = this.expr(p.get("argument"), env, ctx);
+      v = this.readForeign(v, env);
       if (v.callable?.kind === "function" && v.callable.path.node.generator)
         v = this.invoke(v, [], p, env, ctx, "hole-prop");
       if (v.callable?.kind === "context") {
@@ -543,6 +563,8 @@ export class Analysis {
     const returned = this.statements(path.get("body"), env, ctx);
     this.running.pop();
     result.deps.add(returned);
+    // A recursive hole prop can widen after this invocation was visited.
+    result.deps.add(fn);
     result.fields = returned.fields;
     result.callable = returned.callable;
     result.rendered = returned.rendered;
@@ -735,6 +757,25 @@ export class Analysis {
           args.forEach(v => out.deps.add(v));
           return out;
         }
+        if (c.path.node.async && !["event", "effect", "timer"].includes(ctx.host)) {
+          const seen = new Set();
+          const hasUnknown = v => {
+            if (seen.has(v)) return false;
+            seen.add(v);
+            return v.base === 1 || [...v.deps].some(hasUnknown);
+          };
+          if (!hasUnknown(result)) {
+            const out = this.unknown(
+              p,
+              env,
+              "plain function call",
+              "Non-server async function; its result is a client promise under C0 §1.2"
+            );
+            out.pending = true;
+            out.deps.add(result);
+            return out;
+          }
+        }
         return result;
       }
       if (c.kind === "h") return this.h(c.path, env, ctx, c.args);
@@ -902,7 +943,7 @@ export class Analysis {
       return this.join(p, env, values, "effect-program");
     }
     const global = fn?.global;
-    if (pure.has(global) || (fn?.method && methods.has(fn.method))) {
+    if (pure.has(global) || (fn?.method && methods.has(fn.method) && !fn.receiver?.nominalClass)) {
       const values = [fn?.receiver, ...args.filter(a => !a.callable)];
       for (const arg of args)
         if (arg.callable)
@@ -983,6 +1024,7 @@ export class Analysis {
     ) {
       const v = this.join(p, env, args, "instance");
       v.nonserializable = !["Date", "Set", "Map"].includes(global);
+      v.nominalClass = !!fn?.class;
       return v;
     }
     if (fn?.method && ["push", "splice", "set", "delete", "add"].includes(fn.method)) {
@@ -992,7 +1034,7 @@ export class Analysis {
     }
     if (ctx.host === "event" || ctx.host === "effect" || ctx.host === "timer") {
       // The invocation is client by host, but follow arguments to preserve calls/writes.
-      const v = this.join(p, env, [fn, ...args], "client-call");
+      const v = this.join(p, env, [fn?.external ? null : fn, ...args], "client-call");
       v.base = 2;
       ctx.event?.deps.add(v);
       return v;
@@ -1008,7 +1050,7 @@ export class Analysis {
         ? "Foreign output is U under C0 §1.2; its owner stays client."
         : "Resolve the callable and substitute its arguments and captured values."
     );
-    v.deps.add(fn);
+    if (!fn?.external) v.deps.add(fn);
     for (const a of args.filter(a => !a.callable)) v.deps.add(a);
     if (ctx.host === "setup" && env.frame) {
       const work = this.part(p, env, "setup-work", [v], ctx);
@@ -1035,14 +1077,41 @@ export class Analysis {
     }
     return v;
   }
+  readForeign(v, env) {
+    if (!v?.external || ["solid-yield", "solid-yield/h"].includes(v.external.source)) return v;
+    if (v.external.source === "@solidjs/web" && v.external.name === "isServer") return v;
+    const origin = v.external.origin ?? v.path;
+    const module = this.moduleOf.get(origin.node);
+    const codeReference = v.external.source === "effect" && v.external.name === "Effect.runFork";
+    const unknown = this.unknown(
+      origin,
+      module?.env ?? env,
+      "foreign primitive",
+      codeReference
+        ? "Effect.runFork is passed as module code, not read as reactive data"
+        : `Value imported from ${v.external.source}; its reactive provenance is not available`,
+      codeReference ? "blind spot" : "genuine",
+      codeReference
+        ? "S as a module function reference under C0 §1.6; preserve callable identity through a conditional return. Calling the adapter still has a genuine client lifetime."
+        : "Unread imported data remains U under C0 §1.2."
+    );
+    v.deps.add(unknown);
+    return v;
+  }
   component(comp, props, p, env, ctx) {
     const c = comp.callable;
     const ancestor = this.running.find(x => x.component === comp);
     if (ancestor) {
+      if (props && !props.fields.size)
+        for (const value of ancestor.props.fields.values()) value.deps.add(props);
       if (props)
         for (const [name, v] of props.fields) {
-          if (ancestor.props.fields.has(name)) ancestor.props.fields.get(name).deps.add(v);
-          else ancestor.props.fields.set(name, v);
+          const incoming =
+            v.callable?.kind === "function" && v.callable.path.node.generator
+              ? this.invoke(v, [], p, env, ctx, `recursive-prop:${name}`)
+              : v;
+          if (ancestor.props.fields.has(name)) ancestor.props.fields.get(name).deps.add(incoming);
+          else ancestor.props.fields.set(name, incoming);
         }
       ancestor.frame.recursive = true;
       this.findings.push({
@@ -1066,7 +1135,26 @@ export class Analysis {
     const anchor = this.node(p, child, ctx, "component");
     frame.anchor = anchor;
     this.frames.push(frame);
-    const input = props ?? this.value(p, child, "props");
+    // Own the prop equations: widening must never mutate a caller's constant.
+    const input = this.value(p, child, "props");
+    if (props) {
+      input.deps.add(props);
+      for (const [name, value] of props.fields) {
+        const proxy = this.join(p, child, [value], `prop-input:${name}`);
+        for (const field of [
+          "callable",
+          "fields",
+          "rendered",
+          "external",
+          "namespace",
+          "nonserializable",
+          "nominalClass"
+        ])
+          if (value[field] !== undefined) proxy[field] = value[field];
+        proxy.propInput = true;
+        input.fields.set(name, proxy);
+      }
+    }
     const result = this.value(p, child, "component-output");
     result.rendered = true;
     this.callCache.set(id, result);
@@ -1102,6 +1190,7 @@ export class Analysis {
     return n;
   }
   hole(p, v, env, ctx, bind = false) {
+    v = this.readForeign(v, env);
     if (v.callable && !["event", "setter"].includes(v.callable.kind))
       v = this.materialize(v, p, env, { ...ctx, host: "hole" });
     const out = this.part(p, env, bind ? "bind" : "hole", [v], ctx);

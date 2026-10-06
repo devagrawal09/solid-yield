@@ -40,6 +40,12 @@ const TIMEOUT_MS =
 
 /** One entry per server entry: how to render it, and its routes. */
 const TARGETS = [
+  {
+    twin: "docs-yield",
+    entry: "stream",
+    kind: "entry",
+    urls: ["/", "/docs/start", "/docs/missing"]
+  },
   ...["string", "stream"].map(entry => ({
     twin: "rendering-yield",
     entry,

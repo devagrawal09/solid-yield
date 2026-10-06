@@ -5,6 +5,21 @@ reference run used as the baseline; the machine-readable copy is
 [`yield-gate-baseline.json`](./yield-gate-baseline.json). CI runs the same gate
 against this file (`.github/workflows/gate.yml`).
 
+**Docs content-site addition on main (2026-10-07).** Baseline regenerated
+from the full GREEN run on the working tree after ba2d604: **43 PASS / 0 FAIL /
+0 SKIP in 90 s**, nine twins. The docs pair adds four steps over
+main's 39-step gate: twin:docs-yield:test, :typecheck, :lint, and
+original:docs:typecheck. The prior committed 37-step baseline also now records
+both D-105 executed-byte steps. Docs parity checks 24 states; SSR and hydrate
+smokes each check 19 cases, including /, /docs/start and /docs/missing for docs.
+The docs original separately passes 3/3 hydrations with all server nodes retained;
+its first two routes also change theme and carousel. Existing executed-byte
+thresholds are unchanged; docs thresholds cover load and all 24 parity steps.
+The compiler branch has 46 steps; main omits its three compiler-only checks and
+keeps main's twins:executed-bytes-test name. Twin route data is explicitly void
+and failures use main's D-110 library base; the original and parity steps are
+unchanged. The older reference runs below are historical.
+
 **Reference summary: `37 pass / 0 fail / 0 skip in 36s`** (37 steps, `--jobs 3`,
 every step under `TZ=UTC`). Re-recorded when `pkg:yield:dist-fresh` was added, on the
 working tree of that commit (the JSON's `head` is its parent, `3c14584`); the other 36

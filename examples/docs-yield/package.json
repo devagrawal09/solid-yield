@@ -1,0 +1,31 @@
+{
+  "name": "docs-yield-example",
+  "description": "Content site with six independent widgets and delayed fake API data",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "start": "vite preview",
+    "test": "vitest run --maxWorkers=2",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "eslint src tests stream"
+  },
+  "devDependencies": {
+    "solid-yield": "workspace:*",
+    "@solidjs/vite-plugin": "3.0.0-next.35",
+    "vite-plugin-solid-yield": "workspace:*",
+    "@solidjs/web": "2.0.0-rc.13",
+    "@types/node": "^25.6.0",
+    "yield-example-harness": "workspace:*",
+    "eslint": "^9.0.0",
+    "jsdom": "^25.0.1",
+    "solid-js": "2.0.0-rc.13",
+    "typescript": "^6.0.2",
+    "vite": "^7.0.0",
+    "vitest": "^4.1.6",
+    "@solidjs/router": "2.0.0-next.29"
+  }
+}

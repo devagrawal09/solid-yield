@@ -104,7 +104,7 @@ function fail(message) {
 // Steps
 
 const TWIN_SCRIPTS = ["test", "typecheck", "lint"];
-const EXPECTED_TWINS = 8;
+const EXPECTED_TWINS = 9;
 
 function readJson(path) {
   return JSON.parse(readFileSync(path, "utf8"));
@@ -170,6 +170,13 @@ function buildSteps(twins) {
       steps.push(step);
     }
   }
+
+  steps.push({
+    name: "original:docs:typecheck",
+    cwd: root,
+    fast: true,
+    ...pnpmRun("examples/originals/docs", "typecheck")
+  });
 
   // Server-render smoke (examples/harness/ssr-smoke/smoke.mjs): every twin with a server
   // entry renders each of its routes through Vite's SSR loader, each render in its own
@@ -280,6 +287,8 @@ function buildSteps(twins) {
       "prettier",
       "--check",
       ...dirs.map(d => `${d}/**/*.[tj]s?(x)`),
+      "examples/originals/docs/src/**/*.[tj]s?(x)",
+      "examples/originals/docs/stream/**/*.[tj]s?(x)",
       "packages/*/test/*.mjs",
       "examples/harness/ssr-smoke/*.mjs",
       "examples/harness/hydrate-smoke/*.mjs",

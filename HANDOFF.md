@@ -11,7 +11,17 @@ This repository was extracted from the Solid fork `devagrawal09/solid`, branch `
 - **v0.3, tier 3:** resume(root), the library's lazy builder on Solid's public API: descriptors, keyed attachment, materialisation on first interaction, its own event queue and payload, validated claims and render fallback. D-109's keyed failure re-delivery is a related target.
 - **Tier 4, horizon:** full resumability with the library's own runtime, preserving the same semantics. Marko-like pruning could keep much of the graph on the server and serialize only data an interaction needs; planned C1b measures per-interaction reachability, distinct from C1's undirected connectivity.
 
-**Read-only compiler branch:** origin/proto/compiler is fetched at **3b51165**. It contains C1's instance pass, effect-reach diagnostics, foreignSource, the public hydration spike, the docs pair at **71e8e4f**, and its audit report. The original eight twins each form one connected group (37 U origins, 36 genuine, versus 275 earlier leak entries). Docs has 127/243 inert holes, 149/249 inert JSX and six candidate groups (1 eager/2 visible/3 lazy); its changing carousel img is a known false-inert analysis bug. No C2 codegen, compiled savings or independently claimable physical roots are established. Main receives the docs pair separately; compiler analysis and foreignSource stay on that branch, and the EAGER marker remains due.
+**Read-only compiler branch:** origin/proto/compiler is fetched at **3b51165**. It contains C1's instance pass, effect-reach diagnostics, foreignSource, the public hydration spike, the docs pair at **71e8e4f**, and its audit report. The original eight twins each form one connected group (37 U origins, 36 genuine, versus 275 earlier leak entries). Docs has 127/243 inert holes, 149/249 inert JSX and six candidate groups (1 eager/2 visible/3 lazy); its changing carousel img is a known false-inert analysis bug. No C2 codegen, compiled savings or independently claimable physical roots are established. Main now contains the docs pair (adapted from 71e8e4f); compiler analysis and foreignSource stay on that branch, and the EAGER marker remains due.
+
+**Docs pair on main:** nine twins, with 24 docs parity steps; typecheck, lint,
+SSR and hydrate smoke all pass. The docs original separately passes all three
+hydration cases with server nodes retained. After pnpm build the full gate is
+**43/43 GREEN**; the yield-gate baseline is regenerated for the grown inventory.
+Existing executed-byte thresholds are unchanged. Main needs explicit void route
+data under its strict prop checks and nominal Failure(kind) classes (D-110),
+so the twin's app.tsx/errors.ts and README differ from 71e8e4f; compiler-only
+report changes stay on proto/compiler. The originals, authored parity script
+and smoke harness entries are unchanged from that cherry-pick.
 
 ## v0.1 (2026-10-06): state, and what is left
 

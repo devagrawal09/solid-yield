@@ -1,6 +1,6 @@
-import { analyze } from "./analysis.js";
+import { analyzeInstances as analyze } from "./placement.js";
 import { parseProgram } from "../../vite-plugin-yield/src/transform.js";
-export { analyze } from "./analysis.js";
+export { analyzeInstances as analyze } from "./placement.js";
 
 export function importsOf(code, id) {
   const imports = new Set();

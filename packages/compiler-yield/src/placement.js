@@ -269,6 +269,11 @@ export function analyzeInstances(
       size: ps.length,
       mode,
       sites: ps.map(p => p.at),
+      parts: ps.map(p => ({
+        at: p.at,
+        kind: p.kind,
+        expression: p.path?.toString() ?? "capture owner"
+      })),
       instances: [...new Set(ps.map(p => p.owner?.id).filter(Boolean))],
       components: [...new Set(ps.map(p => p.owner?.name).filter(Boolean))],
       slots: [
@@ -296,6 +301,14 @@ export function analyzeInstances(
         touched: ps.filter(p => p !== e && reads.get(e).has(p)).map(p => p.at),
         pulledIn: ps.filter(p => !reads.get(e).has(p)).map(p => p.at)
       })),
+      eagerSetupReach: ps
+        .filter(p => p.eager)
+        .map(e => ({
+          at: e.at,
+          expression: e.path?.toString(),
+          touched: ps.filter(p => p !== e && reads.get(e).has(p)).map(p => p.at),
+          pulledIn: ps.filter(p => !reads.get(e).has(p)).map(p => p.at)
+        })),
       fallback: s ? null : "unresolved DOM owner"
     };
   });
@@ -317,6 +330,14 @@ export function analyzeInstances(
     modules: [...a.modules.keys()],
     holes: { inert: holes.filter(p => p.p === 0).length, total: holes.length },
     elements: { inert: elements.filter(n => n.value?.p === 0).length, total: elements.length },
+    jsxElements: {
+      inert: elements.filter(n => n.path.isJSXElement() && n.value?.p === 0).length,
+      total: elements.filter(n => n.path.isJSXElement()).length
+    },
+    hElements: {
+      inert: elements.filter(n => !n.path.isJSXElement() && n.value?.p === 0).length,
+      total: elements.filter(n => !n.path.isJSXElement()).length
+    },
     sources: a.parts
       .filter(p => ["cell", "memo"].includes(p.kind))
       .map(p => ({

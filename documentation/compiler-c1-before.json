@@ -1,0 +1,85 @@
+{
+  "source": "compiler-c1-report.md at a77745e; joined static-site analysis",
+  "twins": [
+    {
+      "twin": "effect-yield",
+      "holes": "8/69",
+      "jsx": "24/77",
+      "groups": "101 eager, 1 visible",
+      "merges": "876/10/0/13/55/821",
+      "captures": "6",
+      "leaks": "58",
+      "effects": "0"
+    },
+    {
+      "twin": "hackernews-spa-yield",
+      "holes": "28/70",
+      "jsx": "43/66",
+      "groups": "16 visible, 33 visible, 13 visible, 1 visible",
+      "merges": "326/1/0/32/16/388",
+      "captures": "0",
+      "leaks": "12",
+      "effects": "0"
+    },
+    {
+      "twin": "rendering-yield",
+      "holes": "13/124",
+      "jsx": "56/114",
+      "groups": "58 visible, 4 eager, 16 eager, 16 visible, 15 visible, 2 lazy, 42 visible, 9 visible, 8 visible, 1 visible",
+      "merges": "542/13/3/14/63/547",
+      "captures": "5",
+      "leaks": "55",
+      "effects": "1"
+    },
+    {
+      "twin": "room-yield",
+      "holes": "28/96",
+      "jsx": "31/75",
+      "groups": "117 eager",
+      "merges": "991/20/3/13/11/2629",
+      "captures": "10",
+      "leaks": "47",
+      "effects": "1"
+    },
+    {
+      "twin": "sierpinski-yield",
+      "holes": "8/26",
+      "jsx": "0/2",
+      "groups": "32 eager",
+      "merges": "325/4/0/4/12/171",
+      "captures": "1",
+      "leaks": "2",
+      "effects": "0"
+    },
+    {
+      "twin": "sierpinski-yield-h",
+      "holes": "1/6",
+      "jsx": "0/0",
+      "groups": "17 eager",
+      "merges": "48/4/0/1/0/10",
+      "captures": "1",
+      "leaks": "4",
+      "effects": "0"
+    },
+    {
+      "twin": "todos-yield",
+      "holes": "6/34",
+      "jsx": "4/29",
+      "groups": "57 eager",
+      "merges": "765/59/55/3/20/1410",
+      "captures": "1",
+      "leaks": "44",
+      "effects": "1"
+    },
+    {
+      "twin": "todos-yield-h",
+      "holes": "3/16",
+      "jsx": "0/0",
+      "groups": "43 eager",
+      "merges": "158/17/0/0/10/471",
+      "captures": "2",
+      "leaks": "53",
+      "effects": "1"
+    }
+  ]
+}

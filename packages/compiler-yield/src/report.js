@@ -1,6 +1,6 @@
 import { createRequire } from "node:module";
 import { readFile, writeFile } from "node:fs/promises";
-import { readdirSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { analyze } from "./analysis.js";
@@ -8,7 +8,7 @@ import { analyzeInstances } from "./placement.js";
 import { importsOf } from "./index.js";
 
 const repo = resolve(fileURLToPath(new URL("../../..", import.meta.url)));
-export async function reportTwin(twin, { analysis = analyze } = {}) {
+export async function reportTwin(twin, { analysis = analyzeInstances } = {}) {
   const dir = resolve(repo, "examples", twin);
   const require = createRequire(resolve(dir, "package.json"));
   const { createServer } = await import(pathToFileURL(require.resolve("vite")));
@@ -66,53 +66,171 @@ export async function reportTwin(twin, { analysis = analyze } = {}) {
   }
 }
 
+const before = JSON.parse(
+  readFileSync(resolve(repo, "documentation/compiler-c1-before.json"), "utf8")
+).twins;
+const fraction = n => `${n.inert}/${n.total}`;
+const escape = s =>
+  String(s).replaceAll("|", "\\|").replaceAll("`", "'").replace(/\s+/g, " ").trim();
+const expression = s => {
+  s = escape(s);
+  if (s.startsWith("<")) return s.slice(0, s.indexOf(">") + 1);
+  return s.length > 170 ? s.slice(0, 167) + "…" : s;
+};
+const modeCounts = roots =>
+  ["eager", "visible", "lazy"].map(m => roots.filter(r => r.mode === m).length).join("/");
+const oldModes = groups =>
+  ["eager", "visible", "lazy"]
+    .map(m => groups.split(", ").filter(g => g.endsWith(m)).length)
+    .join("/");
+const eagerNotes = {
+  "effect-yield":
+    "No $effect. createRuntime calls ManagedRuntime.make during setup; its unknown lifetime and the RuntimeContext owner pull Typeahead, Results, Checkout, Orders and LogPanel into the eager group.",
+  "rendering-yield":
+    "Home's run-once effect registers a 100 ms interval, invokes tick and writes s. The route flow can recreate pages; its boundary, shared router context and foreign Portal/Reveal owners pull all analysed route alternatives into this eager group. This is a static union of possible pages, not simultaneous mounted pages.",
+  "room-yield":
+    "IdentityProvider's run-once effect calls mint and writes me. Identity context readers, presence/transcript/live data, the foreign router and its boundaries pull the room controls, chat, directory, summaries and archive into the group.",
+  "sierpinski-yield":
+    "No $effect. Setup registers setInterval(tick, 1000) and requestAnimationFrame(update). They write seconds and elapsed; scale, recursive Triangle/Dot reads and their pending/error boundaries join the group.",
+  "sierpinski-yield-h":
+    "No $effect. Setup registers the same interval and animation-frame loop as the JSX twin. seconds, elapsed, scale and the recursive Triangle/Dot family join through reads and boundaries.",
+  "todos-yield":
+    "hashFilter's run-once effect installs the hashchange listener. onChange writes filter; the filtered list, shared store/actions, context, row recreation and boundaries pull Header, MainSection, TodoItem and Footer into the group.",
+  "todos-yield-h":
+    "The same hashchange effect reaches onChange and filter. Shared store/actions, context, row recreation and boundaries pull Header, MainSection, TodoItem and Footer into the group."
+};
 export function markdown(reports) {
   const out = [
-    "# C1 analysis prototype",
+    "# C1 instance audit",
     "",
-    "Status: diagnostic prototype; not a completed C1 or a codegen input. Counts are static sites, not dynamic islands. The implementation limits below prevent a C0 premise verdict.",
+    "C1 diagnostic checkpoint, 2026-10-07. This is an audit of source analysis, not emitted islands or measured savings. The CLI and Vite pre-pass now use the instance pass. The old static-site table is preserved in compiler-c1-before.json.",
     "",
-    "Definitions actually used: S < U < C, join=max; written cells C (including setter aliases); unproved calls/imports and observed mutable bindings U; each named prop joined across call sites (cap 1); contexts joined over all resolved providers and their default, or U when neither is known. Every effect forces eager. Unproved setup work forces an eager fallback. Remaining roots with unknown or possibly pending parts are visible; others are lazy. Merge counts count distinct reported pairs, not successful union operations. SPAN_OVERLAP and CAPTURE_FALLBACK are listed separately from M1-M6. Capture failures describe candidate edges, not emitted edges. JSX fractions exclude h element sites; markup bytes are not measured.",
+    "Reproduce: `node packages/compiler-yield/src/report.js --markdown documentation/compiler-c1-report.md`; `--json` exposes full expressions, instance IDs, all merge edges and reach lists. `--joined` runs the earlier engine; `--instances` remains an accepted alias for the default. No application module is executed by the analysis.",
     "",
-    "| Twin | Inert holes | Inert JSX elements | Candidate roots (parts; mode) | M1/M2/M3/M4/M5/M6 | Capture candidates | U sources | Effects |",
-    "| --- | ---: | ---: | --- | --- | ---: | ---: | ---: |"
+    "## Before / after",
+    "",
+    "Each arrow is the report's previous value → audited value. E/V/L are eager/visible/lazy candidate group counts, not the v0.2 loading policy (v0.2 ships eager islands only). Group sizes are non-inert parts. Captures are rejected candidate edges, not serializer results. U counts are named syntactic origins, counted even when C dominates their consumers. The previous 275 entries and the new origin count have different precision and coverage; their difference is not a savings figure.",
+    "",
+    "| Twin | Inert holes | Inert JSX | Groups E/V/L | Captures | U origins | After parts |",
+    "| --- | ---: | ---: | --- | ---: | ---: | --- |"
   ];
-  for (const r of reports)
+  for (const r of reports) {
+    const b = before.find(b => b.twin === r.twin);
     out.push(
-      `| ${r.twin} | ${r.holes.inert}/${r.holes.total} | ${r.elements.inert}/${r.elements.total} | ${r.roots.map(x => `${x.size} ${x.mode}`).join(", ")} | ${[1, 2, 3, 4, 5, 6].map(i => r.merges.filter(m => m.rule === `M${i}`).length).join("/")} | ${r.captureFailures.length} | ${r.leaks.length} | ${r.roots.reduce((n, x) => n + x.effectReach.length, 0)} |`
+      `| ${r.twin} | ${b.holes} → ${fraction(r.holes)} | ${b.jsx} → ${fraction(r.jsxElements ?? r.elements)} | ${oldModes(b.groups)} → ${modeCounts(r.roots)} | ${b.captures} → ${r.captureFailures.length} | ${b.leaks} → ${r.leaks.length} | ${r.roots.map(x => `${x.size}${x.mode[0].toUpperCase()}`).join(", ")} |`
     );
+  }
+  out.push(
+    "",
+    "The denominators changed: after counts are reached call-site instances, with one widened representative per recursive family/row; before counts were joined static sites. Repeated component calls count repeatedly, while uncalled module syntax no longer counts. These are neither runtime node counts nor markup bytes. JSX counts exclude foreign tags; locally S descendants beneath a foreign owner can still be unavailable as slots. Zero captures mainly reflects the broad merged groups: setup-local values stay inside them.",
+    "",
+    "| h twin | Before h elements | After inert h elements |",
+    "| --- | --- | ---: |"
+  );
+  for (const r of reports.filter(r => r.twin.endsWith("-h")))
+    out.push(`| ${r.twin} | unmeasured | ${fraction(r.hElements ?? { inert: 0, total: 0 })} |`);
+  out.push(
+    "",
+    "## U classification totals",
+    "",
+    "GENUINE means client execution/lifetime is required under C0's rules, including foreign output kept U by policy; it does not mean every result actually changes. ANALYSIS BLIND SPOT means source inspection identifies S or C but the current transfer rule cannot retain it.",
+    "",
+    "| Construct | Blind spot | Genuine | Total |",
+    "| --- | ---: | ---: | ---: |"
+  );
+  const constructs = [
+    "plain function call",
+    "helper routine",
+    "foreign primitive",
+    "router query",
+    "route props",
+    "serialization edge",
+    "other"
+  ];
+  const leaks = reports.flatMap(r => r.leaks);
+  for (const c of constructs) {
+    const ls = leaks.filter(l => l.construct === c),
+      blind = ls.filter(l => l.classification === "blind spot").length;
+    out.push(`| ${c} | ${blind} | ${ls.length - blind} | ${ls.length} |`);
+  }
+  const blind = leaks.filter(l => l.classification === "blind spot").length;
+  out.push(
+    `| **Total** | **${blind}** | **${leaks.length - blind}** | **${leaks.length}** |`,
+    "",
+    "| Twin | Blind spot | Genuine |",
+    "| --- | ---: | ---: |"
+  );
+  for (const r of reports) {
+    const b = r.leaks.filter(l => l.classification === "blind spot").length;
+    out.push(`| ${r.twin} | ${b} | ${r.leaks.length - b} |`);
+  }
+  out.push(
+    "",
+    "## Audit rules and limits",
+    "",
+    "The inherited import, recursive-prop and foreign-slot fixtures were retained. Additional failing fixtures exposed imported data hidden by expressions/helpers, an initially S generator prop hiding a recursive C input, and recursion mutating a shared caller constant. These now pass: imported data flows to a named U origin; each instance owns its prop equations; recursive generator/opaque inputs widen those equations without changing caller values. Foreign owners and client-controlled flows never offer their descendants as independent slots. Equal spans merge as SPAN_OVERLAP; strictly nested groups can be candidate slots only without a recreation path. A timer registered in an effect is included in that effect's reach.",
+    "",
+    "Sierpinski's setup timers are explicit eager causes despite having no $effect. The h rule counts nonliteral native props/children as holes, onX props as binds, and literal tags as element sites; component/flow children are analysed under the caller's owner. JSX expression uses are also counted, including structural component-call holes. Literal strings/numbers are inert values. These working clarifications to F-C1–F-C3 are documented in compiler-findings.md; C0 itself is not silently rewritten.",
+    "",
+    "Remaining precision limits: no serializer execution, no proof of physical hydration spans, foreign ownership is conservative, recursive families join all depths, and syntax-based boundary colors can over-merge. The Effect.runFork reference below is knowably module code (S at the edge), but a conditional return loses callable identity; resolving that requires preserving callable alternatives through helper returns. It stays U, with its rule and location visible. Fixing it cannot remove the adapter's genuine async lifetime or the foreign runtime owner. No new C2 code, delayed-hydration change or benchmark change is included."
+  );
   for (const r of reports) {
     out.push(
       "",
       `## ${r.twin}`,
       "",
-      "Limits: " + r.definitions.limitations.join("; ") + ".",
+      "### Every remaining U origin",
       "",
-      "### Roots and effect reach",
-      ""
+      "Expressions are abbreviated only for display; file:line:column identifies the full source expression. A repeated origin has one row even if several instances use it.",
+      "",
+      "| Expression and location | Construct | Classification and resolving rule / client dependency |",
+      "| --- | --- | --- |"
     );
-    for (const x of r.roots) {
-      out.push(
-        `- Root ${x.id}: ${x.mode}, ${x.size} parts; span ${x.span ?? "unresolved"}; components ${x.components.join(", ") || "unresolved"}; sites ${x.sites.join(", ")}.${x.fallback ? " Fallback: " + x.fallback + "." : ""}`
-      );
-      for (const e of x.effectReach)
-        out.push(
-          `  - Effect ${e.at}; touched: ${e.touched.join(", ") || "none"}; pulled in: ${e.pulledIn.join(", ") || "none"}.`
-        );
-    }
-    out.push("", "### Additional safety merges", "");
-    for (const m of r.merges.filter(m => !/^M[1-6]$/.test(m.rule)))
-      out.push(`- ${m.rule}: ${m.sites.join(" ↔ ")}.`);
-    out.push("", "### Capture candidates", "");
-    for (const c of r.captureFailures) out.push(`- ${c.at}: \`${c.variable}\`: ${c.reason}.`);
-    out.push("", "### Named U sources", "");
     for (const l of r.leaks)
       out.push(
-        `- ${l.at}: \`${l.name.replaceAll("`", "'").replaceAll("\n", " ")}\` — ${l.reason}; ${l.clientParts} client parts.`
+        `| \`${expression(l.name)}\` — ${l.at} | ${l.construct} | **${l.classification === "blind spot" ? "ANALYSIS BLIND SPOT" : "GENUINE"}**: ${escape(l.reason)}. ${escape(l.rule)} |`
       );
-    out.push("", "### Setup findings", "");
-    for (const f of r.findings) out.push(`- ${f.at}: ${f.message}.`);
+    out.push("", "### Groups and eager reach", "");
+    if (eagerNotes[r.twin]) out.push(eagerNotes[r.twin], "");
+    else
+      out.push(
+        "No eager group or $effect. The foreign router owns all route alternatives, so this remains one visible candidate group in the C0 classification.",
+        ""
+      );
+    for (const x of r.roots) {
+      out.push(
+        `Group ${x.id}: **${x.mode}, ${x.size} parts**, ${x.spanKind ?? "unknown"} span ${x.span ?? "unresolved"}. Components: ${x.components.join(", ")}. Candidate slots: ${x.slots?.length ?? 0}.`,
+        ""
+      );
+      const causes = [
+        ...x.effectReach.map(e => ({ ...e, kind: "$effect" })),
+        ...(x.eagerSetupReach ?? []).map(e => ({ ...e, kind: "setup work" }))
+      ];
+      for (const e of causes) {
+        out.push(
+          `- ${e.kind} at ${e.at}${e.expression ? `: \`${expression(e.expression)}\`` : ""}.`,
+          `  - Touched (${e.touched.length} parts, transitive reads/writes/calls): ${e.touched.join(", ") || "none"}.`,
+          `  - Pulled in (${e.pulledIn.length} other parts through merges): ${e.pulledIn.join(", ") || "none"}.`
+        );
+      }
+      out.push("");
+    }
+    out.push(
+      `Merge pairs M1/M2/M3/M4/M5/M6: ${[1, 2, 3, 4, 5, 6].map(i => r.merges.filter(m => m.rule === `M${i}`).length).join("/")}. Additional pairs: ${["SPAN_OVERLAP", "FOREIGN_OWNER", "CAPTURE_FALLBACK"].map(k => `${k} ${r.merges.filter(m => m.rule === k).length}`).join(", ")}. Counts include redundant union pairs; they are not counts of independent reasons or saved roots.`,
+      ""
+    );
+    for (const c of r.captureFailures)
+      out.push(`Capture: ${c.at} \`${escape(c.variable)}\`: ${c.reason}.`);
+    for (const f of r.findings) out.push(`Finding: ${f.at}: ${f.message}`);
   }
+  out.push(
+    "",
+    "## Premise verdict",
+    "",
+    "This corpus does not support “most UI is inert; apps split into small roots” under the current C0 rules and conservative ownership analysis. None of the twins has a majority of locally inert measured element sites, and each has one connected candidate group (seven eager, one visible). Small independent counter fixtures do split, so the mechanism is possible; these applications do not establish that it is typical.",
+    "",
+    "This is not a universal disproof. The examples favour stateful demos, foreign owners and async boundaries; call-site/row counts are not DOM or byte weights, and conservative colors/ownership may hide useful splits. Locally inert markup is still useful evidence, but it does not establish extractable slots, independently claimable DOM or shipped-byte savings. The next decision can now use named client dependencies rather than the provisional U reduction alone."
+  );
   return out.join("\n").trimEnd() + "\n";
 }
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
@@ -122,10 +240,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const reports = [];
   for (const twin of twins) {
     reports.push(
-      await reportTwin(
-        twin,
-        process.argv.includes("--instances") ? { analysis: analyzeInstances } : {}
-      )
+      await reportTwin(twin, process.argv.includes("--joined") ? { analysis: analyze } : {})
     );
     console.error(`analysed ${twin}`);
   }

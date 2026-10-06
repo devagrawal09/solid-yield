@@ -11,10 +11,17 @@ const MagicString = require("magic-string");
  * named component calls or a foreign router. Foreign lifetime and rejected
  * captures widen to the whole direct child. Nested slots are not extracted.
  */
-export default function eagerIslands({ directory, onPlan = () => {} }) {
+export default function eagerIslands({
+  directory,
+  roots: rootMode = "per-group",
+  onPlan = () => {}
+}) {
+  if (!["single", "per-group"].includes(rootMode))
+    throw new Error("Unknown eager roots mode: " + rootMode);
   const dir = resolve(directory),
     app = resolve(dir, "src/app.tsx");
   const virtual = new Map();
+  const transforms = new Map();
   let plan;
   class ClientWide extends Error {
     constructor(at, variable, reason) {
@@ -77,8 +84,8 @@ export default function eagerIslands({ directory, onPlan = () => {} }) {
       inert = [],
       diagnostics = [];
     const dependencies = new Map();
-    const extract = (filename, names) =>
-      extractModule(modules.get(filename), filename, names, (spec, imported) => {
+    const extract = (filename, names, source = modules.get(filename)) =>
+      extractModule(source, filename, names, (spec, imported) => {
         if (!spec.startsWith(".") || imported.some(n => n === "default" || n === "*")) return spec;
         const source = ["", ".tsx", ".ts"]
           .map(ext => resolve(dirname(filename), spec + ext))
@@ -199,6 +206,25 @@ export default function eagerIslands({ directory, onPlan = () => {} }) {
             });
     }
     roots.sort((a, b) => a.path.node.start - b.path.node.start);
+    if (rootMode === "single") {
+      const exported = ast
+        .get("body")
+        .find(
+          p => p.isExportDefaultDeclaration() && p.get("declaration").isIdentifier({ name: "App" })
+        );
+      if (!exported) decline(app, "App", "single root requires App as the default export");
+      prepareSingle({
+        code,
+        exported: exported.node,
+        roots,
+        inert,
+        report,
+        diagnostics,
+        dependencies,
+        extract
+      });
+      return;
+    }
     const edits = new MagicString(code);
     edits.prepend(
       `import { Island as __CompilerIsland, Inert as __CompilerInert } from ${JSON.stringify(helper)};\n`
@@ -308,6 +334,131 @@ for(const record of document.querySelectorAll('script[data-cy],script[data-ci]')
     };
     onPlan(plan);
   }
+  function prepareSingle({
+    code,
+    exported,
+    roots,
+    inert,
+    report,
+    diagnostics,
+    dependencies,
+    extract
+  }) {
+    const single = resolve(dir, "src/__compiler_single.tsx");
+    const slots = resolve(dir, "src/__compiler_slots.tsx");
+    const server = new MagicString(code),
+      browser = new MagicString(code);
+    server.prepend(
+      `import {Island as __CompilerIsland, Inert as __CompilerInert} from ${JSON.stringify(helper)};\n`
+    );
+    browser.prepend(`import {Inert as __CompilerInert} from ${JSON.stringify(slots)};\n`);
+    for (const region of inert) {
+      server.overwrite(
+        region.path.node.start,
+        region.path.node.end,
+        `<__CompilerInert id=${JSON.stringify(region.id)} component={${region.name}} />`
+      );
+      browser.overwrite(
+        region.path.node.start,
+        region.path.node.end,
+        `<__CompilerInert id=${JSON.stringify(region.id)} />`
+      );
+    }
+    // Both sides create the same App owner and slot owners. Only server slots
+    // reference inert component bodies; extraction removes those client imports.
+    server.overwrite(
+      exported.start,
+      exported.end,
+      'export default function Single(props){return <__CompilerIsland id="cs-" component={App} inputs={props} clientInputs={{}}/>;}'
+    );
+    virtual.set(app, {
+      code: server.toString(),
+      map: server.generateMap({ source: app, includeContent: true, hires: true })
+    });
+    // Keep edits and extraction as separate Vite map stages, so generated slot
+    // imports do not shift authored stack frames in the client root.
+    const sliced = extract(app, ["App"], browser.toString());
+    virtual.set(single, {
+      code: browser.toString(),
+      map: browser.generateMap({ source: app, includeContent: true, hires: true })
+    });
+    transforms.set(single, sliced);
+    let previous;
+    do {
+      previous = [...dependencies].map(([id, d]) => id + [...d.names].sort().join(",")).join(";");
+      for (const [filename, dependency] of dependencies)
+        virtual.set(dependency.module, extract(filename, [...dependency.names]));
+    } while (
+      previous !== [...dependencies].map(([id, d]) => id + [...d.names].sort().join(",")).join(";")
+    );
+    virtual.set(helper, {
+      code: `import {Hydration,NoHydration} from "solid-js";
+import {foreign} from "solid-yield";
+import {serializeJSON,createJSONDeserializer} from "@solidjs/web/serialization";
+import {capture} from ${JSON.stringify(resolve(import.meta.dirname, "capture.js"))};
+export function Island(props){
+ const edge=capture(props.clientInputs,{serializeJSON,createJSONDeserializer},props.id);
+ if(!edge.ok)throw new Error(edge.at+": "+edge.reason);
+ const json=JSON.stringify(edge.node).replaceAll("<","\\\\u003c");
+ const Child=foreign(props.component);
+ return <><script type="application/json" data-cy={props.id} innerHTML={json}/><Hydration id={props.id}>{Child(props.inputs)}</Hydration></>;
+}
+export function Inert(props){
+ const Child=foreign(props.component);
+ return <NoHydration><script type="application/json" data-ci={props.id}/>{Child({})}<script type="application/json" data-ci-end={props.id}/></NoHydration>;
+}`,
+      map: null
+    });
+    virtual.set(slots, {
+      code: `import {NoHydration,getOwner,runWithOwner,onCleanup} from "solid-js";
+import {claimElementTree} from "@solidjs/web";
+export function Inert(props){
+ NoHydration({});
+ const record=document.querySelector('script[data-ci="'+props.id+'"]');
+ const endRecord=document.querySelector('script[data-ci-end="'+props.id+'"]');
+ if(!record||!endRecord)throw new Error('Missing inert range');
+ const start=document.createComment('inert'),end=document.createComment('/inert'),parent=record.parentNode;
+ record.replaceWith(start);endRecord.replaceWith(end);
+ const owner=getOwner();
+ for(let node=start.nextSibling;node&&node!==end;node=node.nextSibling)claimElementTree(node);
+ const observer=new MutationObserver(records=>runWithOwner(owner,()=>{
+  for(const change of records)for(const node of change.addedNodes){
+   let top=node;while(top&&top.parentNode!==parent)top=top.parentNode;
+   for(let child=start.nextSibling;child&&child!==end;child=child.nextSibling)
+    if(child===top){claimElementTree(node);break;}
+  }
+ }));
+ observer.observe(parent,{childList:true,subtree:true});
+ onCleanup(()=>observer.disconnect());
+}`,
+      map: null
+    });
+    virtual.set(client, {
+      code: `import {App} from ${JSON.stringify(single)};
+import {hydrate} from "solid-yield";
+import {createJSONDeserializer} from "@solidjs/web/serialization/decode";
+const record=document.querySelector('script[data-cy="cs-"]');
+const inputs=createJSONDeserializer()(JSON.parse(record.textContent));
+record.remove();
+export const disposers=[hydrate(()=>App(inputs),document,{renderId:"cs-"})];
+`,
+      map: null
+    });
+    plan = {
+      report,
+      diagnostics,
+      mode: "single",
+      roots: [
+        {
+          id: "cs-",
+          module: single,
+          groups: roots.flatMap(r => r.groups),
+          hydration: "synchronous"
+        }
+      ]
+    };
+    onPlan(plan);
+  }
   const checkedPrepare = () => {
     if (plan) return;
     try {
@@ -315,6 +466,7 @@ for(const record of document.querySelectorAll('script[data-cy],script[data-ci]')
     } catch (error) {
       if (!(error instanceof ClientWide)) throw error;
       virtual.clear();
+      transforms.clear();
       plan = { roots: [], fallback: true, diagnostics: [error.diagnostic] };
       onPlan(plan);
     }
@@ -323,6 +475,7 @@ for(const record of document.querySelectorAll('script[data-cy],script[data-ci]')
     name: "compiler-yield:eager-islands",
     enforce: "pre",
     config() {
+      if (rootMode === "single") return {};
       return {
         build: {
           rollupOptions: {
@@ -351,6 +504,7 @@ for(const record of document.querySelectorAll('script[data-cy],script[data-ci]')
     transform(code, id, options) {
       checkedPrepare();
       if (plan.fallback) return null;
+      if (transforms.has(id)) return { ...transforms.get(id) };
       if (id === app && options?.ssr) return { ...virtual.get(app) };
       if (id === resolve(dir, "stream/client.tsx") || id === resolve(dir, "src/main.tsx"))
         if (!options?.ssr)

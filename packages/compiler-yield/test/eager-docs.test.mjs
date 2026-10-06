@@ -11,10 +11,13 @@ import eagerIslands from "../src/eager.js";
 import { beginCoverage } from "../../../examples/harness/executed-bytes/coverage.mjs";
 const require = createRequire(new URL("../package.json", import.meta.url));
 const mode = process.env.C2_DOCS_MODE;
+const compiled = mode?.startsWith("compiled");
+const single = mode === "compiled-single";
+const variants = ["original", "library", "compiled", "compiled-single"];
 if (!mode) {
-  test("tier 1 docs: original, library and emitted roots match all 24 hydrated steps", () => {
+  test("tier 1 docs: original, library, seven roots and single root match all 24 hydrated steps", () => {
     const results = [];
-    for (const route of ["original", "library", "compiled"]) {
+    for (const route of variants) {
       const child = spawnSync(process.execPath, ["--test", fileURLToPath(import.meta.url)], {
         encoding: "utf8",
         timeout: 60000,
@@ -44,11 +47,13 @@ if (!mode) {
       );
     }
     assert.equal(results[2].roots, 7);
+    assert.equal(results[3].roots, 1);
+    assert.deepEqual(results[3].snapshots, results[1].snapshots, "single root vs library");
   });
   for (const url of ["/docs/start"])
     test(`tier 1 direct SSR/hydrate ${url}`, () => {
       const snapshots = [];
-      for (const route of ["original", "library", "compiled"]) {
+      for (const route of variants) {
         const child = spawnSync(process.execPath, ["--test", fileURLToPath(import.meta.url)], {
           encoding: "utf8",
           timeout: 60000,
@@ -67,9 +72,10 @@ if (!mode) {
       }
       assert.deepEqual(snapshots[1], snapshots[0]);
       assert.deepEqual(snapshots[2], snapshots[1]);
+      assert.deepEqual(snapshots[3], snapshots[1]);
     });
-  test("F-C9 finding: direct failed SSR loses the typed error on all three routes (not a passing smoke)", () => {
-    for (const route of ["original", "library", "compiled"]) {
+  test("F-C9 finding: direct failed SSR loses the typed error on all four variants (not a passing smoke)", () => {
+    for (const route of variants) {
       const child = spawnSync(process.execPath, ["--test", fileURLToPath(import.meta.url)], {
         encoding: "utf8",
         timeout: 60000,
@@ -119,7 +125,15 @@ if (!mode) {
       appType: "custom",
       logLevel: "silent",
       plugins: [
-        ...(mode === "compiled" ? [eagerIslands({ directory, onPlan: p => (plan = p) })] : []),
+        ...(compiled
+          ? [
+              eagerIslands({
+                directory,
+                roots: single ? "single" : "per-group",
+                onPlan: p => (plan = p)
+              })
+            ]
+          : []),
         {
           name: "c2:no-hmr",
           enforce: "pre",
@@ -129,7 +143,7 @@ if (!mode) {
               return "export const createHotContext=()=>({data:{},accept(){},acceptExports(){},dispose(){},prune(){},decline(){},invalidate(){},on(){},off(){},send(){}});export const updateStyle=()=>{};export const removeStyle=()=>{};export const injectQuery=x=>x;export class ErrorOverlay {}";
           },
           transform(code, id) {
-            if (mode !== "compiled" && id === resolve(directory, "stream/client.tsx"))
+            if (!compiled && id === resolve(directory, "stream/client.tsx"))
               return code.replace(/\bhydrate\(/, "export const dispose = hydrate(");
           }
         },
@@ -193,12 +207,22 @@ if (!mode) {
       for (const script of scripts) (0, eval)(script);
       const claimed = [...document.querySelectorAll("[_hk]")];
       const inertNodes = [document.querySelector("nav"), document.querySelector("footer")];
-      if (mode === "compiled") {
+      if (compiled) {
+        assert.equal(
+          document.querySelectorAll("script[data-cy]").length,
+          single ? 1 : 7,
+          "one serialized input block per hydration root"
+        );
         const keys = claimed.map(node => node.getAttribute("_hk"));
-        assert.equal(new Set(keys).size, keys.length, "hydration keys are unique");
-        for (let i = 1; i <= 7; i++)
+        if (single)
           assert(
-            keys.some(key => key.startsWith(`cy${i}-`)),
+            keys.every(key => key.startsWith("cs-")),
+            "one key space"
+          );
+        assert.equal(new Set(keys).size, keys.length, "hydration keys are unique");
+        for (let i = 1; i <= (single ? 1 : 7); i++)
+          assert(
+            keys.some(key => key.startsWith(single ? "cs-" : `cy${i}-`)),
             `root ${i} namespace`
           );
       }
@@ -222,7 +246,7 @@ if (!mode) {
           twin: "docs-yield"
         });
       mounted = await server.environments.hydrate.runner.import("/client.tsx");
-      if (process.env.C2_DUMP && plan) {
+      if (process.env.C2_DUMP && plan && !single) {
         const root = plan.roots.find(r => r.foreign);
         const output = await server.environments.hydrate.transformRequest(root.module);
         writeFileSync(resolve(tmpdir(), "c2-router.js"), output.code);
@@ -232,8 +256,10 @@ if (!mode) {
         claimed.every(node => node.isConnected),
         "every server node must be retained at hydration"
       );
-      if (mode === "compiled") {
-        assert.equal(plan.roots.length, 7);
+      if (compiled) {
+        assert.equal(plan.roots.length, single ? 1 : 7);
+        assert.equal(plan.report.roots.length, 11);
+        if (single) assert.equal(mounted.disposers.length, 1, "one hydration owner/disposer");
         assert.equal(document.querySelector("nav").hasAttribute("_hk"), false);
         assert.equal(document.querySelector("footer").hasAttribute("_hk"), false);
         assert.equal(document.querySelectorAll("script[data-cy]").length, 0);

@@ -1,8 +1,9 @@
-import { RuleTester } from "eslint";
+import { Linter, RuleTester } from "eslint";
 import tsParser from "@typescript-eslint/parser";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { rules, REFUSALS } from "../src/index.js";
+import plugin, { rules, REFUSALS } from "../src/index.js";
+import { relative } from "node:path";
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -1187,3 +1188,81 @@ typedTester.run(
     ]
   }
 );
+
+// --- require-jsx-factory (D-093): once per tsconfig, typed or not ----------------------
+// Each case names its own tsconfig: the rule reports a project once per lint run
+// (module state), so two cases sharing one would depend on their order.
+const factoryFixture = dir => fileURLToPath(new URL(`./fixtures/${dir}/file.tsx`, import.meta.url));
+tester.run("require-jsx-factory (from the nearest tsconfig)", rules["require-jsx-factory"], {
+  valid: [
+    // both options, through `extends`
+    { filename: factoryFixture("jsx-factory"), code: "const a = <>{x}</>;" },
+    // not a JSX file: nothing to check
+    { filename: factoryFixture("no-fragment-factory").replace(/x$/, ""), code: "const a = 1;" }
+  ],
+  invalid: [
+    {
+      filename: factoryFixture("no-fragment-factory"),
+      code: "const a = <>{x}</>;",
+      errors: [
+        {
+          messageId: "missing",
+          data: {
+            config: relative(process.cwd(), factoryFixture("no-fragment-factory")).replace(
+              /file\.tsx$/,
+              "tsconfig.json"
+            ),
+            missing: '`"jsxFragmentFactory": "Fragment"`'
+          },
+          line: 1
+        }
+      ]
+    }
+  ]
+});
+typedTester.run("require-jsx-factory (with types)", rules["require-jsx-factory"], {
+  valid: [{ filename: factoryFixture("jsx-factory"), code: "const a = <p />;" }],
+  invalid: [
+    {
+      // the fixtures' own tsconfig sets neither
+      filename,
+      code: "const a = <p />;",
+      errors: [
+        {
+          messageId: "missing",
+          data: {
+            config: relative(process.cwd(), `${typedFixtures}/tsconfig.json`),
+            missing: '`"jsxFactory": "jsx"` and `"jsxFragmentFactory": "Fragment"`'
+          }
+        }
+      ]
+    }
+  ]
+});
+describe("require-jsx-factory reports a project once", () => {
+  it("the first JSX file of a tsconfig lacking the options, not the next ones", () => {
+    const linter = new Linter({ configType: "flat" });
+    const config = [
+      {
+        files: ["**/*.tsx"],
+        languageOptions: { parser: tsParser, parserOptions: { ecmaFeatures: { jsx: true } } },
+        plugins: { "solid-blocks": { rules } },
+        rules: { "solid-blocks/require-jsx-factory": "warn" }
+      }
+    ];
+    const lint = name =>
+      linter.verify(
+        "const a = <>{x}</>;",
+        config,
+        fileURLToPath(new URL(`./fixtures/once/${name}`, import.meta.url))
+      );
+    const first = lint("a.tsx");
+    expect(first.map(m => [m.ruleId, m.severity, m.line])).toEqual([
+      ["solid-blocks/require-jsx-factory", 1, 1]
+    ]);
+    expect(lint("b.tsx")).toEqual([]);
+  });
+  it("is a warning in recommended", () => {
+    expect(plugin.configs.recommended.rules["solid-blocks/require-jsx-factory"]).toBe("warn");
+  });
+});

@@ -35,7 +35,7 @@ export default { plugins: [blocks(), solid()] };
 }
 ```
 
-`jsxFactory` / `jsxFragmentFactory`: TypeScript checks a fragment's children (against `Fragment`, typed `Element`) only with them set; without them an unyielded block call in `<>…</>` passes the types (D-086), and only the lint `component-call-yielded` reports it.
+`jsxFactory` / `jsxFragmentFactory`: TypeScript checks a fragment's children (against `Fragment`, typed `Element`) only with them set; without them an unyielded block call in `<>…</>` passes the types (D-086), and only the lint `component-call-yielded` reports it. They are part of the setup (D-093): the lint `require-jsx-factory` warns, once per project, when the tsconfig lacks them.
 
 ```js
 // eslint.config.mjs (flat config): the rules TypeScript cannot express

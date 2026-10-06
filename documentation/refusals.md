@@ -23,7 +23,7 @@ A view is `return view(function* () { return <…/>; })`: it has no body (D-032)
 | a read in a call's argument: `Card({ n: yield* count })` | pass the source (`n: count`) or a hole (`n: function* () { return (yield* count) * 2; }`) | — | — | — | `no-read-in-prop` (autofix) |
 | plain JSX as a call's `children`: `Show({ when, children: <p /> })` | a lazy view `children: function* () { return <p />; }`, or a row `function* (item) { … }` | — (content is accepted) | — | — | `component-children-generator` (autofix) |
 | JSX as a flow control's `fallback`: `Loading({ fallback: <p>…</p>, … })` (built with the holding view, shown or not; while hydrating it claims a server node that is there only if the server showed the fallback: Solid's "Hydration key miss", D-092) | a lazy view `fallback: function* () { return <p>…</p>; }`, built when it shows | — (an element is accepted) | — | — | `component-children-generator` (autofix) |
-| a block call not `yield*`-ed: `{Card({ todo })}`, `<>{Card({ todo })}</>`, `{[Main(), Footer()]}` | `{yield* Card({ todo })}`, under a `Loading` / `Errored` as its colors need (D-086) | `JSX.Element` is settled only: a pending or failing view is not one, in an element and in a fragment (`Fragment`'s children are `Element`; checked when the tsconfig sets `jsxFactory` / `jsxFragmentFactory`) | — | — | `component-call-yielded` (autofix: the `yield*`) |
+| a block call not `yield*`-ed: `{Card({ todo })}`, `<>{Card({ todo })}</>`, `{[Main(), Footer()]}` | `{yield* Card({ todo })}`, under a `Loading` / `Errored` as its colors need (D-086) | `JSX.Element` is settled only: a pending or failing view is not one, in an element and in a fragment (`Fragment`'s children are `Element`; checked when the tsconfig sets `jsxFactory` / `jsxFragmentFactory`; `require-jsx-factory` warns when it does not, D-093) | — | — | `component-call-yielded` (autofix: the `yield*`) |
 | a thunk as a child or attribute: `{() => x}`, `class={() => c}` | a hole: `{yield* x}` | JSX and `h` reject plain thunks | — | — | — |
 | a source called: `count()` | `yield* count` | `Source` has no call signature | — | — | — |
 | an `$event` handler given unbound: `onClick={save}` | bind it: `onClick={yield* save}` (D-072) | the JSX namespace's event attributes take only a bound handler (`[BOUND]` is missing) | — | — | `no-unbound-event` (autofix) |
@@ -71,7 +71,7 @@ The neighbours of a view, for completeness:
 
 ## Every code, by layer
 
-Counted against the code (2026-10-06): 4 transform codes (`REFUSALS` in `vite-plugin-solid-blocks`), 22 development errors, 10 type-level messages, 18 lint rules (17 errors and 1 warning in `recommended`).
+Counted against the code (2026-10-06): 4 transform codes (`REFUSALS` in `vite-plugin-solid-blocks`), 22 development errors, 10 type-level messages, 19 lint rules (17 errors and 2 warnings in `recommended`).
 
 **The transform** (`vite-plugin-solid-blocks`). A compile error lists each refusal as `[CODE] message (line:column)`. The lint rule `yield-in-jsx-hole` reports the same list.
 
@@ -126,7 +126,7 @@ Counted against the code (2026-10-06): 4 transform codes (`REFUSALS` in `vite-pl
 
 Every other type refusal is a plain assignability error. The common ones: an op that is not a `SetupOp` / `ViewOp` / `MemoOp` / `EffectOp` / `HoleOp` (reported at `view(` or `$component(`); a component tag (`ElementType`); a pending view as a child or at the root; a source called as a function; a plain thunk as a child.
 
-**Lint rules** (`eslint-plugin-solid-blocks`, `recommended`: every rule an error, `no-unshown-wait` a warning):
+**Lint rules** (`eslint-plugin-solid-blocks`, `recommended`: every rule an error, `no-unshown-wait` and `require-jsx-factory` warnings):
 
 | Rule | Reports |
 | --- | --- |
@@ -148,3 +148,4 @@ Every other type refusal is a plain assignability error. The common ones: an op 
 | `no-dollar-block` | `$` / `$scope` (removed, D-013; autofix) |
 | `require-view-wrapper` | a view not wrapped in `view(…)` (D-089; autofix) |
 | `no-unshown-wait` | a bound handler that may wait on pending data (warning, with types; D-075) |
+| `require-jsx-factory` | a tsconfig without `"jsxFactory": "jsx"` / `"jsxFragmentFactory": "Fragment"`, so fragments are not type-checked (warning, once per project; D-093) |

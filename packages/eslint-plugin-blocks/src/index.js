@@ -20,7 +20,11 @@
  *   require-view-wrapper   a setup's (or a row's) view is `view(function* () { … })`: one spelling (D-089; autofix)
  *   no-path-object-use     a path is a read: no spread, no `===`, no `JSON.stringify` of one
  *   no-dollar-block        `$` / `$scope` are removed: bare `function*` holes and rows, `$memo` derivations (autofix)
+ *   require-jsx-factory    (warning) the tsconfig sets jsxFactory / jsxFragmentFactory, so fragments are type-checked (D-093)
  */
+import { existsSync } from "node:fs";
+import { createRequire } from "node:module";
+import { dirname, join, relative, resolve as resolvePath } from "node:path";
 import {
   childrenFromFunction,
   childrenFromJsx,
@@ -1576,6 +1580,97 @@ const noUncheckedForeignHandoff = {
   }
 };
 
+/**
+ * D-093 (D-086's type half): TypeScript checks a fragment's children — so
+ * refuses `<>{Card({ todo })}</>` — only when the tsconfig in effect sets
+ * `"jsxFactory": "jsx"` and `"jsxFragmentFactory": "Fragment"` beside
+ * `jsxImportSource`. Without them a fragment is `any` to the checker and its
+ * children pass. Reported once per tsconfig (the first JSX file linted in
+ * it), at line 1. With type information the options are the program's; without,
+ * the nearest `tsconfig.json` above the file, read through TypeScript (so
+ * `extends` is followed); with neither TypeScript nor a tsconfig, nothing.
+ */
+const JSX_FACTORY = { jsxFactory: "jsx", jsxFragmentFactory: "Fragment" };
+/** The tsconfigs already reported (once per project). */
+const reportedConfigs = new Set();
+let typescript;
+function loadTypescript() {
+  if (typescript === undefined) {
+    try {
+      typescript = createRequire(import.meta.url)("typescript");
+    } catch {
+      try {
+        typescript = createRequire(join(process.cwd(), "package.json"))("typescript");
+      } catch {
+        typescript = null;
+      }
+    }
+  }
+  return typescript;
+}
+/** The nearest tsconfig.json above `file` and its compiler options in effect, or null. */
+function tsconfigFor(file) {
+  const ts = loadTypescript();
+  if (!ts) return null;
+  let dir = dirname(resolvePath(file));
+  for (;;) {
+    const candidate = join(dir, "tsconfig.json");
+    if (existsSync(candidate)) {
+      const read = ts.readConfigFile(candidate, ts.sys.readFile);
+      if (read.error) return null;
+      const parsed = ts.parseJsonConfigFileContent(read.config, ts.sys, dir, undefined, candidate);
+      return { path: candidate, options: parsed.options };
+    }
+    const up = dirname(dir);
+    if (up === dir) return null;
+    dir = up;
+  }
+}
+
+const requireJsxFactory = {
+  meta: {
+    type: "suggestion",
+    docs: {
+      description:
+        'The tsconfig sets `"jsxFactory": "jsx"` and `"jsxFragmentFactory": "Fragment"`, so TypeScript checks a fragment\'s children (D-086, D-093).'
+    },
+    messages: {
+      missing:
+        'The tsconfig in effect ({{config}}) lacks {{missing}}: without them TypeScript does not check a fragment\'s children, and an unyielded block call in `<>…</>` passes the types (D-086). Add them beside `jsxImportSource`, as in the setup block of getting-started ("Install") and the solid-blocks README (D-093).'
+    },
+    schema: []
+  },
+  create(context) {
+    const filename = context.filename || "";
+    if (!/\.[jt]sx$/.test(filename)) return {};
+    return {
+      Program(node) {
+        const services = context.sourceCode.parserServices;
+        let config = null;
+        if (services && services.program) {
+          const options = services.program.getCompilerOptions();
+          config = { path: options.configFilePath || "(the program's)", options };
+        } else config = tsconfigFor(filename);
+        if (!config || reportedConfigs.has(config.path)) return;
+        const missing = Object.entries(JSX_FACTORY)
+          .filter(([key, value]) => config.options[key] !== value)
+          .map(([key, value]) => `\`"${key}": "${value}"\``);
+        if (missing.length === 0) return;
+        reportedConfigs.add(config.path);
+        context.report({
+          node,
+          loc: { line: 1, column: 0 },
+          messageId: "missing",
+          data: {
+            config: relative(process.cwd(), config.path) || config.path,
+            missing: missing.join(" and ")
+          }
+        });
+      }
+    };
+  }
+};
+
 export const rules = {
   "no-throw": noThrow,
   "no-try-catch": noTryCatch,
@@ -1594,7 +1689,8 @@ export const rules = {
   "component-call-yielded": componentCallYielded,
   "no-unbound-event": noUnboundEvent,
   "no-unshown-wait": noUnshownWait,
-  "no-unchecked-foreign-handoff": noUncheckedForeignHandoff
+  "no-unchecked-foreign-handoff": noUncheckedForeignHandoff,
+  "require-jsx-factory": requireJsxFactory
 };
 
 const plugin = {
@@ -1604,7 +1700,7 @@ const plugin = {
 };
 
 /** Rules `recommended` sets to warn (a suggestion, not a rule of the model). */
-const WARNINGS = new Set(["no-unshown-wait"]);
+const WARNINGS = new Set(["no-unshown-wait", "require-jsx-factory"]);
 /** `recommended`: every rule an error, but the suggestions (`WARNINGS`), which warn (flat config). */
 plugin.configs.recommended = {
   plugins: { "solid-blocks": plugin },

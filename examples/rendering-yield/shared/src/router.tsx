@@ -15,7 +15,7 @@ import {
 } from "solid-yield";
 import { isServer } from "@solidjs/web";
 
-interface RouterValue {
+export interface RouterValue {
   location: Source<string>;
   setLocation: Setter<string>;
 }

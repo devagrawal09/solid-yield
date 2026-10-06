@@ -1,4 +1,4 @@
-import { component, type Element, type Props, view } from "solid-yield";
+import { component, type Element, type Failure, type Props, type Source, view } from "solid-yield";
 import { HydrationScript } from "@solidjs/web";
 
 /**
@@ -9,8 +9,14 @@ import { HydrationScript } from "@solidjs/web";
  * `clientEntry` is the dev module path of the mode's client entry (e.g.
  * `/client.tsx`); in production builds the server harness rewrites it to the
  * hashed asset from the Vite client manifest.
+ *
+ * Its `children` (the app, under the root's `Loading`) may fail: the
+ * failures pass on to the root, where they are re-thrown (D-033), as in the
+ * original (D-029: a generic forwards each caller's color).
  */
-const Shell = component(function* Shell(props: Props<{ clientEntry: string; children: Element }>) {
+const Shell = component(function* Shell<E extends Failure>(
+  props: Props<{ clientEntry: string; children: Source<Element, E> }>
+) {
   return view(function* () {
     return (
       <html lang="en">

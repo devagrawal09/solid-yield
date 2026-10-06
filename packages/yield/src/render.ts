@@ -1,6 +1,11 @@
 /*
- * Mounting: the root edge (D-095). The root must not be pending — every
- * pending read handled by a `Loading` above it. It may fail: a failure with
+ * Mounting and server rendering: the root edge (D-095, D-099). The root
+ * must not be pending — every pending read handled by a `Loading` above it.
+ * An app that is pending by design is wrapped, explicitly, at the root:
+ * `render(() => Loading({ children: App }), el)`. A `Loading` without a
+ * fallback shows nothing until the app settles, as Solid's own `render` of
+ * a pending root does; with one, the fallback shows. It requires no context
+ * (D-098). It may fail: a failure with
  * no `Errored` above it is re-thrown (D-033), at the root as anywhere
  * (D-059), so no boundary is required for it. The root is not a hand-off to
  * foreign code: `foreign()` (D-088) is for plain Solid that takes a
@@ -13,7 +18,12 @@
  * on it); a raw `@solidjs/h` thunk is not a root (its type is not one, and
  * nothing public tells it apart from any function; D-004, D-095).
  */
-import { render as webRender, hydrate as webHydrate } from "@solidjs/web";
+import {
+  render as webRender,
+  hydrate as webHydrate,
+  renderToString as webRenderToString,
+  renderToStream as webRenderToStream
+} from "@solidjs/web";
 import { ELEMENT_MARK } from "./runtime.js";
 import type { Element } from "./element.js";
 import type { View } from "./types.js";
@@ -84,4 +94,28 @@ export function hydrate<C extends Root>(
   options?: Parameters<typeof webHydrate>[2]
 ): () => void {
   return webHydrate(rootOf(code) as any, element as any, options as any);
+}
+
+/**
+ * Render a root (not pending, requiring no context) to a string on the
+ * server (D-099). Synchronous: every pending read is under a `Loading`,
+ * which renders its fallback (nothing, without one).
+ */
+export function renderToString<C extends Root>(
+  code: C & RootCheck<C>,
+  options?: Parameters<typeof webRenderToString>[1]
+): string {
+  return webRenderToString(rootOf(code) as any, options);
+}
+
+/**
+ * Stream a root (not pending, requiring no context) from the server
+ * (D-099): Solid's `renderToStream`, whose response a `Loading` at the root
+ * with no fallback holds as Solid holds a pending root's.
+ */
+export function renderToStream<C extends Root>(
+  code: C & RootCheck<C>,
+  options?: Parameters<typeof webRenderToStream>[1]
+): ReturnType<typeof webRenderToStream> {
+  return webRenderToStream(rootOf(code) as any, options);
 }

@@ -1389,8 +1389,8 @@ const noUnshownWait = {
 
 /**
  * The modules whose `render` / `hydrate` / `renderTo…` mount a component as
- * plain Solid. Not solid-yield: its `render` / `hydrate` are the root edge
- * (D-095), typed, and not a hand-off.
+ * plain Solid. Not solid-yield: its `render` / `hydrate` / `renderToString` /
+ * `renderToStream` are the root edge (D-095, D-099), typed, and not a hand-off.
  */
 const FOREIGN_RENDER_MODULES = new Set(["@solidjs/web", "solid-js/web"]);
 const FOREIGN_RENDERERS = new Set([
@@ -1434,8 +1434,9 @@ function importFromYield(context, fixer, name) {
  * component={…}>`, `<Dynamic component={…}>`), `@solidjs/web`'s `render` /
  * `hydrate` / `renderTo…`, Solid's `lazy` over a module whose export is a
  * yield component — loses its colors there: plain Solid renders it with no
- * `yield*`. The library's own `render` / `hydrate` are not a hand-off: they
- * are the root edge, typed (a settled root that may fail, D-033; D-095). It may pend (the app's
+ * `yield*`. The library's own `render` / `hydrate` / `renderTo…` are not a
+ * hand-off: they are the root edge, typed (a settled root that may fail, D-033;
+ * D-095, D-099). It may pend (the app's
  * `Loading`); it must handle its own failures. `foreign(Comp)` checks that
  * at the handoff; this rule reports a handoff written without it. With type
  * information any expression typed as a yield component is reported (a local

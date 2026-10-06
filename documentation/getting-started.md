@@ -206,7 +206,7 @@ At the call, `UserCard({ user })` type-checks because the declaration admits the
 - **Structure comes from flow controls.** A view may not `if`. `Show`'s `when` is a source or, here, a hole. Its `children` is a lazy view, built only when the branch shows.
 - **`Loading`** handles the pending color.
 - **`Errored`** with `catch: [NotFound]` handles that failure type and removes it from the type. Any other failure passes to the boundary above.
-- **The root.** With both handled, `App` is a settled view, which `render` accepts. A root that may fail is accepted too (D-033: re-thrown), but a pending root is not.
+- **The root.** With both handled, `App` is a settled view, which `render` accepts. A root that may fail is accepted too (D-033: re-thrown), but a pending root is not: an app that is pending by design is wrapped at the root, `render(() => Loading({ children: App }), el)` (D-099).
 
 The whole program is [`getting-started.tsx`](../packages/yield/test/docs/getting-started.tsx).
 

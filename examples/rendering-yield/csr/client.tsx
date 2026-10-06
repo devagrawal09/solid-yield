@@ -1,11 +1,8 @@
-/** @jsxImportSource @solidjs/web */
-// The original's entry, typed for @solidjs/web's JSX: it mounts the app as
-// the original does, pending pages included (see shared/src/components/App.tsx).
-import { render } from "@solidjs/web";
-import { foreign } from "solid-yield";
-import YieldApp from "../shared/src/components/App";
+// The original's entry, on the library's renderer (D-099): the app is pending
+// at its root by design (see shared/src/components/App.tsx), so it is wrapped
+// in a `Loading` at the root. Without a fallback, as the original's
+// `render()` deferred the mount: nothing shows until the app settles.
+import { Loading, render } from "solid-yield";
+import App from "../shared/src/components/App";
 
-// the app handed to plain Solid: it may pend, and handles its failures (D-088)
-const App = foreign(YieldApp);
-
-render(() => <App />, document.getElementById("app")!);
+render(() => Loading({ children: App }), document.getElementById("app")!);

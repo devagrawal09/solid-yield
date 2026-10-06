@@ -1,21 +1,17 @@
-/** @jsxImportSource @solidjs/web */
-// The original's entry, typed for @solidjs/web's JSX: it mounts the app as
-// the original does, pending pages included (see shared/src/components/App.tsx).
-import { hydrate } from "@solidjs/web";
-import { foreign } from "solid-yield";
-import YieldApp from "../shared/src/components/App";
-import YieldShell from "../shared/src/components/Shell";
-
-// the yield components handed to plain Solid: they may pend, and handle
-// their own failures (D-088)
-const App = foreign(YieldApp);
-const Shell = foreign(YieldShell);
+// The original's entry, on the library's renderer (D-099): hydrates the tree
+// the server rendered, the app under a `Loading` at the root, without a
+// fallback (see ./entry-server.tsx).
+import { hydrate, Loading } from "solid-yield";
+import App from "../shared/src/components/App";
+import Shell from "../shared/src/components/Shell";
 
 hydrate(
-  () => (
-    <Shell clientEntry="/client.tsx">
-      <App />
-    </Shell>
-  ),
+  () =>
+    Shell({
+      clientEntry: "/client.tsx",
+      children: function* () {
+        return <>{yield* Loading({ children: App })}</>;
+      }
+    }),
   document
 );

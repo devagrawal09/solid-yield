@@ -1,24 +1,21 @@
-/** @jsxImportSource @solidjs/web */
-// The original's entry, typed for @solidjs/web's JSX: it mounts the app as
-// the original does, pending pages included (see shared/src/components/App.tsx).
-import { renderToStream } from "@solidjs/web";
+// The original's entry, on the library's renderer (D-099): the app is pending
+// at its root by design (see shared/src/components/App.tsx), so it is wrapped
+// in a `Loading` at the root, without a fallback, as the original showed
+// nothing until it settled.
 import manifest from "virtual:solid-manifest";
-import { foreign } from "solid-yield";
-import YieldApp from "../shared/src/components/App";
-import YieldShell from "../shared/src/components/Shell";
-
-// the yield components handed to plain Solid: they may pend, and handle
-// their own failures (D-088)
-const App = foreign(YieldApp);
-const Shell = foreign(YieldShell);
+import { Loading, renderToStream } from "solid-yield";
+import App from "../shared/src/components/App";
+import Shell from "../shared/src/components/Shell";
 
 export function render(url: string) {
   return renderToStream(
-    () => (
-      <Shell clientEntry="/client.tsx">
-        <App url={url} />
-      </Shell>
-    ),
+    () =>
+      Shell({
+        clientEntry: "/client.tsx",
+        children: function* () {
+          return <>{yield* Loading({ children: () => App({ url }) })}</>;
+        }
+      }),
     { manifest }
   );
 }

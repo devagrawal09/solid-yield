@@ -3,11 +3,18 @@
  * memos stream through Loading, row routines and context work on the server.
  */
 import { renderToString, renderToStream } from "@solidjs/web";
+import {
+  renderToString as yieldRenderToString,
+  renderToStream as yieldRenderToStream
+} from "solid-yield";
 
 function stream(code: () => any, options?: object): Promise<string> {
+  return pipe(renderToStream(code, options as any));
+}
+function pipe(s: { pipe(w: { write(c: string): void; end(): void }): void }): Promise<string> {
   return new Promise(resolve => {
     const chunks: string[] = [];
-    renderToStream(code, options as any).pipe({
+    s.pipe({
       write(chunk: string) {
         chunks.push(chunk);
       },
@@ -320,6 +327,46 @@ describe("server rendering", () => {
         }
       })
     );
+    expect(strip(html)).toContain("<h3>Ada</h3>");
+  });
+});
+
+describe("the library's server renderers (D-099)", () => {
+  const App = component(function* App() {
+    const user = yield* $memo(function* () {
+      return yield* attempt(
+        () => new Promise<{ name: string }>(r => setTimeout(() => r({ name: "Ada" }), 5)),
+        e => new Failed(e)
+      );
+    });
+    return view(function* () {
+      return <h3>{perform(user).name}</h3>;
+    });
+  });
+
+  it("renderToString: a Loading at the root without a fallback renders nothing for the pending app; with one, the fallback", () => {
+    expect(
+      strip(yieldRenderToString(() => Loading({ children: App }))).replace(
+        /<script>.*<\/script>/s,
+        ""
+      )
+    ).toBe("");
+    expect(
+      strip(
+        yieldRenderToString(() =>
+          Loading({
+            fallback: function* () {
+              return <i>wait</i>;
+            },
+            children: App
+          })
+        )
+      ).replace(/<script>.*<\/script>/s, "")
+    ).toBe("<i>wait</i>");
+  });
+
+  it("renderToStream: the app's content arrives when it settles", async () => {
+    const html = await pipe(yieldRenderToStream(() => Loading({ children: App })));
     expect(strip(html)).toContain("<h3>Ada</h3>");
   });
 });

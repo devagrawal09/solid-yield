@@ -145,3 +145,47 @@ for (const form of forms) {
     });
   });
 }
+
+describe("D-099: a pending app is wrapped at the root", () => {
+  function pendingApp() {
+    let resolve!: (v: string) => void;
+    const App = component(function* App() {
+      const data = yield* $memo(function* () {
+        return yield* attempt(() => new Promise<string>(r => (resolve = r)), fail);
+      });
+      return view(function* () {
+        return <p>{yield* data}</p>;
+      });
+    });
+    return { App, resolve: (v: string) => resolve(v) };
+  }
+
+  it("Loading without a fallback shows nothing until the app settles, as Solid's render of a pending root", async () => {
+    const { App, resolve } = pendingApp();
+    dispose = render(() => Loading({ children: App }), root);
+    flush();
+    expect(root.innerHTML).toBe("");
+    resolve("ready");
+    await settle();
+    expect(root.innerHTML).toBe("<p>ready</p>");
+  });
+
+  it("with a fallback the fallback shows", async () => {
+    const { App, resolve } = pendingApp();
+    dispose = render(
+      () =>
+        Loading({
+          fallback: function* () {
+            return <i>wait</i>;
+          },
+          children: App
+        }),
+      root
+    );
+    flush();
+    expect(root.innerHTML).toBe("<i>wait</i>");
+    resolve("ready");
+    await settle();
+    expect(root.innerHTML).toBe("<p>ready</p>");
+  });
+});

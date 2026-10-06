@@ -19,7 +19,11 @@
 // this process. jsdom's window is put on Node's global the way Vitest's jsdom
 // environment does (`populateGlobal`), so the server's inline scripts (the
 // `_$HY` bootstrap, the streamed chunks) and Solid's client read the same
-// global. Each case runs in its own process, killed after TIMEOUT_MS.
+// global. Each case runs in its own process, killed after TIMEOUT_MS: 30 s, or
+// 120 s on GitHub Actions (GITHUB_ACTIONS; not CI, which the gate sets on every
+// run), whose runners are several times slower than a laptop (hackernews' story,
+// ~2.5 s here, ran past 30 s there); SMOKE_TIMEOUT_MS overrides both. A case
+// that times out names the step it was in (start, render, hydrate, interact).
 //
 // Usage: node examples/harness/hydrate-smoke/hydrate.mjs [--only <substring>] [--jobs <n>] [--originals]
 // (HYDRATE_SMOKE_VERBOSE=1 passes the cases' console through; HYDRATE_SMOKE_DUMP=<file>
@@ -33,7 +37,8 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const self = fileURLToPath(import.meta.url);
 const examples = join(dirname(self), "..", "..");
-const TIMEOUT_MS = 30_000;
+const TIMEOUT_MS =
+  Number(process.env.SMOKE_TIMEOUT_MS) || (process.env.GITHUB_ACTIONS ? 120_000 : 30_000);
 
 /**
  * Interactions, by name: each runs after hydration and returns an error
@@ -139,6 +144,9 @@ async function hydrateOne(twin, entry, kind, url, interaction) {
     };
   }
   console.log = () => {};
+  // the step a case is in, for the parent to name if it kills the case
+  const step = name => process.stdout.write(`\nstep ${name}\n`);
+  step("start");
   const report = result => {
     process.stdout.write("\n" + JSON.stringify(result) + "\n");
     process.exit(0);
@@ -187,6 +195,7 @@ async function hydrateOne(twin, entry, kind, url, interaction) {
     fetchModule(id.startsWith(ORIGIN + "/") ? id.slice(ORIGIN.length) : id, ...rest);
 
   // 1. the server render
+  step("render");
   let html;
   try {
     if (kind === "entry") {
@@ -213,6 +222,7 @@ async function hydrateOne(twin, entry, kind, url, interaction) {
 
   // 2. the document in jsdom, its inline scripts run as a browser runs them
   phase = "hydrate";
+  step("hydrate");
   const dom = new JSDOM("<!doctype html><html><head></head><body></body></html>", {
     url: `${ORIGIN}${url}`,
     pretendToBeVisual: true
@@ -297,6 +307,7 @@ async function hydrateOne(twin, entry, kind, url, interaction) {
   // 4. one interaction
   phase = "interact";
   if (interaction) {
+    step("interact");
     const problem = await INTERACTIONS[interaction](document, settle);
     if (problem) return report({ failed: `${interaction}: ${problem}` });
     await settle();
@@ -340,7 +351,9 @@ function runOne(target, url) {
       try {
         resolve({ ...JSON.parse(stdout.trim().split("\n").pop()), ms });
       } catch {
-        resolve({ failed: `no end after ${TIMEOUT_MS / 1000} s`, ms });
+        const steps = [...stdout.matchAll(/^step (\w+)$/gm)];
+        const during = steps.length ? ` (during ${steps.at(-1)[1]})` : "";
+        resolve({ failed: `no end after ${TIMEOUT_MS / 1000} s${during}`, ms });
       }
     });
   });

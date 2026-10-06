@@ -173,10 +173,11 @@ function buildSteps(twins) {
 
   // Server-render smoke (examples/harness/ssr-smoke/smoke.mjs): every twin with a server
   // entry renders each of its routes through Vite's SSR loader, each render in its own
-  // process with a 30 s timeout — rendering-yield's string and stream entries for all 7
-  // routes, room-yield's /live, hackernews-spa-yield's cached story. Nothing is compared:
-  // a throw, a development error or a render that never ends fails it. The twins' own
-  // tests render on the client only, so this is the only server render of their pages.
+  // process with a 30 s timeout (120 s on GitHub Actions) — rendering-yield's string and
+  // stream entries for all 7 routes, room-yield's /live, hackernews-spa-yield's cached
+  // story. Nothing is compared: a throw, a development error or a render that never ends
+  // fails it. The twins' own tests render on the client only, so this is the only server
+  // render of their pages.
   steps.push({
     name: "twins:ssr-smoke",
     cwd: root,
@@ -186,12 +187,12 @@ function buildSteps(twins) {
 
   // Twin-hydration smoke (examples/harness/hydrate-smoke/hydrate.mjs): each of those 16
   // server renders is hydrated in jsdom by the twin's own client entry, compiled for the
-  // DOM by the same Vite server, each case in its own process with a 30 s timeout. A
-  // hydration mismatch (Solid's dev diagnostics), a development error, an unhandled
-  // rejection, a replaced server root or a failed interaction (rendering's /settings
-  // portal) fails it. The network is held (no listening server). Five twin cases are
-  // recorded known failures (KNOWN_FAILURES; the originals hydrate clean): each must
-  // still fail with its recorded key miss.
+  // DOM by the same Vite server, each case in its own process with a 30 s timeout (120 s
+  // on GitHub Actions). A hydration mismatch (Solid's dev diagnostics), a development
+  // error, an unhandled rejection, a replaced server root or a failed interaction
+  // (rendering's /settings portal) fails it. The network is held (no listening server).
+  // A case listed in KNOWN_FAILURES must keep failing with its recorded message (the list
+  // is empty since D-092).
   steps.push({
     name: "twins:hydrate-smoke",
     cwd: root,

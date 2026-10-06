@@ -15,7 +15,11 @@
 //
 // Each render runs in its own process and is killed after TIMEOUT_MS: a render
 // that never ends (rendering's streamed /profile before its fix spun in
-// microtasks and starved every timer, its own included) fails as a timeout.
+// microtasks and starved every timer, its own included) fails as a timeout,
+// naming the step it was in (start: the Vite server; render). TIMEOUT_MS is
+// 30 s, or 120 s on GitHub Actions (GITHUB_ACTIONS; not CI, which the gate sets
+// on every run), whose runners are several times slower than a laptop;
+// SMOKE_TIMEOUT_MS overrides both.
 //
 // A failure is: a throw out of the render; a non-200 response; an empty
 // document; a development error — a `[CODE]` message (solid-yield's or
@@ -31,7 +35,8 @@ import { fileURLToPath } from "node:url";
 
 const self = fileURLToPath(import.meta.url);
 const examples = join(dirname(self), "..", "..");
-const TIMEOUT_MS = 30_000;
+const TIMEOUT_MS =
+  Number(process.env.SMOKE_TIMEOUT_MS) || (process.env.GITHUB_ACTIONS ? 120_000 : 30_000);
 
 /** One entry per server entry: how to render it, and its routes. */
 const TARGETS = [
@@ -69,6 +74,9 @@ async function renderOne(twin, entry, kind, url) {
   }
   console.log = () => {};
   process.on("unhandledRejection", e => logged.push(`unhandled rejection: ${e?.message ?? e}`));
+  // the step a render is in, for the parent to name if it kills the render
+  const step = name => process.stdout.write(`\nstep ${name}\n`);
+  step("start");
   const server = await createServer({
     ...(kind === "entry"
       ? { configFile: join(dir, entry, "vite.config.mjs"), root: join(dir, entry) }
@@ -79,6 +87,7 @@ async function renderOne(twin, entry, kind, url) {
   });
   let html = "";
   let failed = null;
+  step("render");
   try {
     if (kind === "entry") {
       const mod = await server.ssrLoadModule("/entry-server.tsx");
@@ -135,7 +144,9 @@ function runOne(target, url) {
       try {
         resolve({ ...JSON.parse(stdout.trim().split("\n").pop()), ms });
       } catch {
-        resolve({ failed: `no end after ${TIMEOUT_MS / 1000} s`, ms });
+        const steps = [...stdout.matchAll(/^step (\w+)$/gm)];
+        const during = steps.length ? ` (during ${steps.at(-1)[1]})` : "";
+        resolve({ failed: `no end after ${TIMEOUT_MS / 1000} s${during}`, ms });
       }
     });
   });

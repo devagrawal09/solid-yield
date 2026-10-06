@@ -10,6 +10,26 @@ every step under `TZ=UTC`). Re-recorded when `pkg:yield:dist-fresh` was added, o
 working tree of that commit (the JSON's `head` is its parent, `3c14584`); the other 36
 steps are unchanged, all PASS.
 
+**The smokes' timeouts are CI-aware.** `twins:ssr-smoke` and `twins:hydrate-smoke` kill a
+case that has not ended after 30 s, or **120 s on GitHub Actions** (keyed on
+`GITHUB_ACTIONS`, not `CI`: the gate sets `CI=1` on every run, local ones too).
+`SMOKE_TIMEOUT_MS` overrides both. A killed case names the step it was in: `no end after
+120 s (during hydrate)`; the steps are `start` (Vite's server), `render`, `hydrate`,
+`interact`. CI run 37483424565 (on `3c14584`) failed one case, hackernews' story, as
+`no end after 30 s`: 15 / 16 passed, in 11–14 s each where they take 1–2 s here. The
+budget covers the whole process (Vite's server start, the module transforms, which no
+process shares with another, the render and the hydration), and a runner with 4 slow vCPUs
+runs 3 gate steps at once, each smoke 4 cases at once. hackernews' case is the only one whose
+time is all CPU: its document is ~1.5 MB with 10,388 server elements (the story's whole
+comment tree from its checked-in capture), which jsdom parses and the client claims one by
+one; here it takes ~2.5 s (~0.3 s to render, ~0.4 s to parse, ~1.4 s to compile the client
+entry and hydrate), against ~0.9 s for a rendering case. room's `/live` and the streamed
+`/stream` take longer here (~5 s) but are waiting on their own timers, which a slow CPU
+does not stretch. The longer budget is enough on its own: a warm-up request would only
+move the same work earlier in the same process (each case has its own server), and Vite's
+browser dependency pre-bundle, which also starts in each case's server, costs ~4% of the
+step's CPU here. What a case checks is unchanged.
+
 **The stale-build check added one step** (37 now): `pkg:yield:dist-fresh`
 (`scripts/dist-fresh.mjs`, also in `--fast`). The gate never builds (D-008), so a change
 to `packages/yield/src` could pass the gate against an old `dist/` and then fail the
@@ -64,7 +84,7 @@ also checks `examples/harness/hydrate-smoke/*.mjs`.
 **Phase 5 added one step** (35 then): `twins:ssr-smoke`
 (`examples/harness/ssr-smoke/smoke.mjs`). Every twin with a server entry renders each of its
 routes on the server through Vite's SSR loader (development builds, as `vite dev` serves
-them), each render in its own process, killed after 30 s. That is rendering-yield's `string`
+them), each render in its own process, killed after 30 s (120 s on GitHub Actions). That is rendering-yield's `string`
 (`renderToString`) and `stream` (`renderToStream`, awaited to its end) entries for all 7
 routes (`/`, `/profile`, `/settings`, `/stream`, `/error-stream`, `/reveal`,
 `/skeleton`), room-yield's `/live` and hackernews-spa-yield's `/stories/30186326`, the

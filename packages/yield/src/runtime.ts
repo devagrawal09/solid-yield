@@ -490,16 +490,18 @@ export function perform<T>(target: Yieldable<any, T> | (() => T) | T): T {
     if (x[VIEW_MARK] === true) return (__SERVER__ ? [x] : x) as T;
     if (x[EVENT_MARK] === true) return bindEvent(x);
     if (typeof x === "function") return x();
-    if (typeof x === "object" && !Array.isArray(x) && typeof x[Symbol.iterator] === "function")
-      return runAs(
-        HOLE,
-        () => drive(x[Symbol.iterator](), HOLE_RUN),
-        null,
-        null,
-        false,
-        false,
-        state.name
-      ) as T;
+    // A routine operation (an attempt, a raise, a context, an event call, …)
+    // is an object whose iterator is a generator. Being iterable is not
+    // enough: a `<form>` or a `<select>` has an indexed getter, so WebIDL
+    // makes it iterable over its controls — a component whose view's root is
+    // one, called in a hole, was driven as a routine (`NOT_AN_OPERATION` on
+    // its first control). Any other iterable is content, passed on as it is.
+    if (typeof x === "object" && !Array.isArray(x) && typeof x[Symbol.iterator] === "function") {
+      if (typeof Node !== "undefined" && x instanceof Node) return x as T;
+      const it = x[Symbol.iterator]();
+      if (!isGeneratorObject(it)) return x as T;
+      return runAs(HOLE, () => drive(it, HOLE_RUN), null, null, false, false, state.name) as T;
+    }
   }
   return x;
 }
@@ -656,8 +658,16 @@ function drive(it: Iterator<unknown>, _mode: number): unknown {
       )
     : devError(
         "NOT_AN_OPERATION",
-        "a routine delegated to something that is not a routine operation (`yield*` a source, a store path, a prop, attempt, raise or a setter receipt)."
+        `a routine delegated to something that is not a routine operation (\`yield*\` a source, a store path, a prop, attempt, raise or a setter receipt). It received: ${describeYielded(r.value)}. A \`yield*\` of an iterable that is not an operation (an array, a Set, a <form> or <select> element) delegates to its items.`
       );
+}
+
+/** What a routine yielded, for `NOT_AN_OPERATION`: its constructor's name, or its type. */
+function describeYielded(v: unknown): string {
+  if (v == null) return String(v);
+  if (typeof v === "function") return `a function${v.name ? ` ${v.name}` : ""}`;
+  if (typeof v !== "object") return `${typeof v} ${String(v)}`;
+  return (v as any).constructor?.name || "an object with no constructor";
 }
 
 // --- operations ------------------------------------------------------------------------
@@ -756,14 +766,19 @@ function isStream(v: any): boolean {
     typeof v[Symbol.asyncIterator] === "function"
   );
 }
-/** A generator object (what a `function*` handler returns), not any iterable. */
+/**
+ * A generator object (what a `function*` returns), not any iterable: it has
+ * `next`, `throw` and `return`. An iterable's iterator (an array's, a DOM
+ * collection's, a `<form>`'s) has `next` alone; `Symbol.iterator` says
+ * nothing (every iterable has one).
+ */
 function isGeneratorObject(r: any): r is Generator<unknown, unknown, unknown> {
   return (
     r != null &&
     typeof r === "object" &&
     typeof r.next === "function" &&
     typeof r.throw === "function" &&
-    typeof r[Symbol.iterator] === "function"
+    typeof r.return === "function"
   );
 }
 /**

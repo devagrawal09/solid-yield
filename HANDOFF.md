@@ -1,8 +1,35 @@
-# HANDOFF — solid-yield (checkpoint 2026-10-05; Phase 5 through D-083; review rulings D-084–D-090)
+# HANDOFF — solid-yield (checkpoint 2026-10-06: v0.1, through D-099)
 
 This repository was extracted from the Solid fork `devagrawal09/solid`, branch `blocks-lib`, at commit **`6978eb83`** (D-015). Git history was not carried; the fork keeps it. The fork's own handoff at that commit (Phases 1A, 1B and 2, and its environment notes) is `git show 6978eb83:HANDOFF.md` in the fork.
 
 > **Names (D-096, 2026-10-06).** The product is `solid-yield` (was `solid-blocks`), with `vite-plugin-solid-yield` and `eslint-plugin-solid-yield`; the unit is a **routine** (was "block"), the model is **yield components**. Package directories are `packages/yield`, `packages/vite-plugin-yield`, `packages/eslint-plugin-yield`; twins are `examples/*-yield(-h)`; the gate is `scripts/yield-gate.mjs`. Text below written before D-096 was updated to the new names, except quoted fork paths and the extraction's own history.
+
+## v0.1 (2026-10-06): state, and what is left
+
+The library is feature-complete for v0.1: through D-099 every ruling is implemented or recorded, and the gate is green (36 / 36 steps, against `documentation/yield-gate-baseline.json`; the step list did not change, so the baseline was not re-recorded). `main` is local and ahead of `origin/main` (`d3638bb`) by the four commits below; nothing was pushed.
+
+| Commit | What |
+| --- | --- |
+| `73573e6` `refactor: a component's setup and view are not wrapped in an untrack (D-097)` | The `untrack()` in `component` removed (dead under D-042). The dev read checks took "no observer" to mean "the run's own read"; each run now records the observer it started under, so `READ_IN_SETUP` / `READ_IN_VIEW` still fire for a component called inside a hole. Tests: one setup per instance; the creating hole never re-runs; both dev errors inside a hole. |
+| `9c79862` `refactor: $component is component (D-096 amended)` | A clean rename (no alias) across the packages, lint, twins, harness, conformance, the plugin's fixtures and compiled oracle, docs. `$` marks an operation a routine `yield*`s; module-level calls have none. |
+| `a6f5dfd` `feat: context requirements are a fourth color (D-098)` | `ContextRead<C>`, `RequiresOf`, `ComponentView<P, E, W, R>`; `createContext<T>()` is a requirement, `Ctx.provide({ value, children })` discharges it for the components called inside (not the reader's own setup read), `render` / `hydrate` / `foreign()` refuse what remains (`[NO_PROVIDER]`, naming the context), `NO_PROVIDER` at run time. A context's value is read like a prop (a path). Twins: todos, todos-h, rendering converted; room and effect stay defaulted (D-098 has the per-twin table). |
+| `6e57607` `feat: pending roots are wrapped, explicitly; library renderToString / renderToStream (D-099)` | `render(() => Loading({ children: App }), el)`; library `renderToString` / `renderToStream` with the root rule; rendering's entries on the library's renderers, `foreign(App)` / `foreign(Shell)` and App's `Errored` removed; D-023's count is 4. |
+
+### Not done as ruled (open for Dev)
+
+- **D-098's message cannot name the component.** The refusal names the context (by its name literal, `createContext<User, "UserCtx">()`, else by its type), not "App requires …": a type has no access to a component's or a variable's name (as for D-088).
+- **D-098: a requirement does not cross a hole prop.** A prop declares no requirement and a component's type is a plain function's (D-068), so a requiring component called in a user component's hole prop (`children`) is refused; provide inside the hole. Flow controls, boundaries and `provide` carry their children's. A declared requirement on a prop (`Source<T, E, P, R>`) would lift it; not built.
+- **D-098: two unnamed contexts of one value type are one requirement** to the types (name one). A direct component call in `h`'s arguments is not discharged by an `h(Ctx.provide, …)` in the same expression (it is created first; `Created` / `Settle`).
+- **D-098 (d) costs a double `yield*` for an event in a context**: `yield* (yield* save)(x)`, `onClick={yield* (yield* save)}` (as an event prop, D-042). todos' six action calls read so.
+- **D-099: the stream is not held.** A root `Loading` is a boundary: Solid flushes the shell with its empty placeholder and streams the content in (rendering: +80–350 characters per streamed document; hydration claims unchanged). What shows is the same. Holding it needs Solid's stream protocol (D-004), a `Loading` that is not a boundary (D-071), or buffering everything.
+- **D-099: rendering's string entries keep the original's fallback page** (`renderToString` cannot wait; the original has it); CSR and streaming have none.
+
+### What is left: public / publish
+
+- Make the repository public, push `main` (from outside the sandbox: `gh` and SSH to GitHub fail here, see "Publishing" below).
+- Before the first release: collapse the changesets into one initial release note (they do not mention D-097–D-099 yet); decide the plugin's peer range (the 0.x caret, "Known, recorded, not fixed"); `@solidjs/h` as a peer, the ESLint plugin's peers and description; LICENSE / `author` and Solid's MIT notice (from "Fixes with no ruling needed", below; not yet done).
+- The upstream issue `documentation/upstream/solid-ssr-memo-loop-rc13.md` awaits "file it".
+- Earlier open items below still stand unless a ruling above closed them: D-088's added boundaries now count 4 (hackernews-spa 3, room 1; rendering's went with D-099).
 
 ## Where things are
 

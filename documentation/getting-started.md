@@ -67,7 +67,7 @@ import solidYield from "eslint-plugin-solid-yield";
 
 export default [
   {
-    files: ["src/**/*.{ts,tsx}"],
+    files: ["src/**/*.{ts,tsx}", "test/**/*.{ts,tsx}"],
     languageOptions: {
       parser: tsParser,
       parserOptions: { ecmaFeatures: { jsx: true }, projectService: true }
@@ -77,6 +77,8 @@ export default [
   }
 ];
 ```
+
+The one recommended config covers tests too: a test's `import { flush } from "solid-js"` is admitted (`flush` is not reactive state); `no-foreign-reactive` reports only a `flush` used inside a routine.
 
 Then mount the root:
 

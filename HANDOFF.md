@@ -212,3 +212,12 @@ The Solid rc.13 SSR loop found under rendering's `/profile` (D-082) is drafted a
 - `@solidjs/h` as a peer dependency; the plugin's peer range.
 - The ESLint plugin's description, and `@typescript-eslint/parser` as a peer.
 - Collapse the changesets into one initial release note (43 at `f608fa7`; the Claude review counts 44, its README included).
+
+## First-time-user review #2 (Codex, 2026-10-06)
+
+A second first-time user (Codex) built a notes app from the published docs only (log and app outside the repository, `/private/tmp/sy-review-2/{log.md,app}`). Its classification against the first review, tallied: **fixed 6, still present 3, new 3**; 2 not re-tested.
+
+- **Fixed (6):** F2, install and version advice (was 3/4/5); 1/22, real router and app-wide context (`foreign(Settings, { provided: [ThemeCtx] })`); 2/14, test setup and client build; 8/9, `Handler` and the wait warning's defaults (documentation); 17/18, error extraction and `reset` (documentation); 23, package-relative links and `yield *` spacing (the root README still links repository-relative).
+- **Still present (3):** **F1**, event writes held until the transaction ends: *still present (behaviour); fixed (documentation)*. That is the model (an `$optimistic` written at the event's start shows the in-flight state, and the guide says so); no change. **F5**, row / view / context structure: still present (the rules); fixed (documentation). Sandbox network and port-binding failures: still present (environment, not the library).
+- **New (3):** **F3**, a parameterized route did not typecheck as the recipe wrote it (`Props<RouteProps<"/notes/:mode">>` in a bare `{ path, component: foreign(Notes) }` object: TS2322). This is the router's contract: a bare route's `component` takes no params, and a plain Solid page fails the same way. Fixed in the recipe: it now registers the page with `defineRoute`. `router.type-tests.tsx` and `router.spec.tsx` pin it against `@solidjs/router` 2.0.0-next.35, now a devDependency of `packages/yield`. **F4**, the recommended lint extended to tests reported the guide's `import { flush } from "solid-js"`. Fixed in the rule, keeping one recommended config (D-005): the import is allowed, and only a `flush` used in a routine is reported. A lint test runs the recommended config over the guide's test block. jsdom's `scrollTo` "not implemented" warning under router navigation: new (environment); the router spec stubs it.
+- **Not re-tested (2):** 15, form/select view roots (fixed since, `0007462`); 19/20/21, the deliberate-mistake diagnostics.

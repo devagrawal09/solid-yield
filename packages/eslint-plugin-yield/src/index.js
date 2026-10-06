@@ -382,8 +382,7 @@ const SOLID_FOREIGN = {
   isPending: "`isPendingOf`",
   latest: "`latestOf`",
   untrack:
-    "a plain `yield*` where the host does not track: an `$event`, or an `$effect`'s effect phase",
-  flush: null
+    "a plain `yield*` where the host does not track: an `$event`, or an `$effect`'s effect phase"
 };
 /**
  * Reactive state that routines cannot see: importing it into routine code would
@@ -409,6 +408,24 @@ export const FOREIGN_REACTIVE = {
   "@solidjs/web": { dynamic: "`Switch(…)` / `Show(…)` over the components" }
 };
 
+/**
+ * Not reactive state, so its import is admitted: Solid's `flush` commits the
+ * pending writes now. A test calls it between two dispatched events (the
+ * getting-started guide's tests import it so). Only a use in routine code is
+ * reported: a routine's writes commit when its transaction ends.
+ */
+export const ROUTINE_FORBIDDEN = {
+  "solid-js": new Set(["flush"]),
+  "@solidjs/signals": new Set(["flush"])
+};
+
+/** Whether `node` sits inside a routine, at any depth of plain functions. */
+function inRoutine(node) {
+  for (let fn = enclosingFunction(node); fn; fn = enclosingFunction(fn))
+    if (routineKind(fn)) return true;
+  return false;
+}
+
 const noForeignReactive = {
   meta: {
     type: "problem",
@@ -418,7 +435,9 @@ const noForeignReactive = {
     },
     messages: {
       foreign:
-        '`{{name}}` from "{{source}}" is reactive state routines cannot see: routines read and write only with `yield*`.{{hint}}'
+        '`{{name}}` from "{{source}}" is reactive state routines cannot see: routines read and write only with `yield*`.{{hint}}',
+      inRoutine:
+        '`{{name}}` from "{{source}}" in a routine: a routine\'s writes commit when its transaction ends. `{{name}}` is for code outside routines (a test, between two dispatched events).'
     },
     schema: []
   },
@@ -427,10 +446,22 @@ const noForeignReactive = {
       ImportDeclaration(node) {
         const banned = FOREIGN_REACTIVE[node.source.value];
         if (!banned || node.importKind === "type") return;
+        const routineOnly = ROUTINE_FORBIDDEN[node.source.value];
         for (const spec of node.specifiers) {
           if (spec.type !== "ImportSpecifier" || spec.importKind === "type") continue;
           const name =
             spec.imported.type === "Identifier" ? spec.imported.name : spec.imported.value;
+          if (routineOnly && routineOnly.has(name)) {
+            for (const variable of context.sourceCode.getDeclaredVariables(spec))
+              for (const ref of variable.references)
+                if (inRoutine(ref.identifier))
+                  context.report({
+                    node: ref.identifier,
+                    messageId: "inRoutine",
+                    data: { name, source: node.source.value }
+                  });
+            continue;
+          }
           if (!Object.prototype.hasOwnProperty.call(banned, name)) continue;
           const use = banned[name];
           context.report({

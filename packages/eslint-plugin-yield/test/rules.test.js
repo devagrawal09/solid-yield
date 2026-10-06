@@ -623,7 +623,12 @@ tester.run("no-foreign-reactive", rules["no-foreign-reactive"], {
     'import { lazy, createUniqueId, onCleanup } from "solid-js";',
     'import { query, useNavigate } from "@solidjs/router";',
     'import type { Accessor } from "solid-js";',
-    'import { type Signal } from "solid-js";'
+    'import { type Signal } from "solid-js";',
+    // flush is not reactive state: a test calls it between two dispatched events
+    'import { flush } from "solid-js"; it("t", async () => { flush(); await 0; flush(); });',
+    'import { flush as commit } from "@solidjs/signals"; function settle() { commit(); }',
+    // a plain function beside a component, not inside a routine
+    'import { flush } from "solid-js"; const C = component(function* () { return view(function* () { return <p />; }); }); export const go = () => flush();'
   ],
   invalid: [
     {
@@ -675,10 +680,51 @@ tester.run("no-foreign-reactive", rules["no-foreign-reactive"], {
       ]
     },
     {
-      code: 'import { flush } from "solid-js";',
-      errors: [{ messageId: "foreign", data: { name: "flush", source: "solid-js", hint: "" } }]
+      // in a routine: its writes commit when its transaction ends
+      code: 'import { flush } from "solid-js"; const save = $event(function* () { yield* setA(1); flush(); });',
+      errors: [{ messageId: "inRoutine", data: { name: "flush", source: "solid-js" } }]
+    },
+    {
+      // at any depth of plain functions inside a routine; aliased
+      code: `import { flush as commit } from "solid-js"; ${component(
+        "const later = () => commit(); return view(function* () { return <p />; });"
+      )}`,
+      errors: [{ messageId: "inRoutine", data: { name: "flush", source: "solid-js" } }]
     }
   ]
+});
+
+// The guide's test file (getting-started's app-shell recipe), linted with the
+// recommended config extended to tests: nothing is reported (its `flush`
+// import is not reactive state; it is called outside routines).
+describe("the getting-started test file under the recommended config", () => {
+  it("reports nothing", () => {
+    const guide = readFileSync(
+      fileURLToPath(new URL("../../../documentation/getting-started.md", import.meta.url)),
+      "utf8"
+    );
+    const block = /```tsx\n(\/\/ test\/app\.test\.tsx[^]*?)```/.exec(guide);
+    expect(block).not.toBeNull();
+    const source = block[1];
+    expect(source).toContain('import { flush } from "solid-js";');
+    const linter = new Linter({ configType: "flat" });
+    const messages = linter.verify(
+      source,
+      [
+        {
+          files: ["**/*.tsx"],
+          languageOptions: {
+            parser: tsParser,
+            parserOptions: { ecmaFeatures: { jsx: true } }
+          },
+          plugins: { "solid-yield": plugin },
+          rules: { ...plugin.configs.recommended.rules }
+        }
+      ],
+      fileURLToPath(new URL("./fixtures/jsx-factory/app.test.tsx", import.meta.url))
+    );
+    expect(messages.map(m => `${m.ruleId}: ${m.message}`)).toEqual([]);
+  });
 });
 
 // --- the lint's refusals ARE the transform's refusals --------------------------------------------------

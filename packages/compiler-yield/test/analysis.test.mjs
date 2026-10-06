@@ -300,3 +300,64 @@ test("C0 gap: disjoint state can have overlapping spans; never allow two claims 
   assert.equal(a.roots.length, 1);
   assert(a.roots[0].span);
 });
+
+// The instance engine is tested beside the previous report until its twin audit lands.
+import { analyzeInstances } from "../src/placement.js";
+const instances = body => analyzeInstances(new Map([["/fixture.tsx", prefix + body]]));
+test("instances: the same component called twice owns two independent cells", () => {
+  const result = instances(
+    "const Counter=component(function*(props){const [n,set]=yield* $signal(0);const click=$event(function*(){yield* set(1)});return view(function*(){return <button onClick={yield* click}>{yield* n}</button>});});" +
+      app(
+        "return view(function*(){return <main><section>{yield* Counter()}</section><aside>{yield* Counter()}</aside></main>});"
+      )
+  );
+  assert.equal(result.sources.length, 2);
+  assert.equal(result.roots.length, 2);
+  assert.equal(new Set(result.sources.map(x => x.instance)).size, 2);
+  assert(result.roots.every(x => x.span && x.mode === "lazy"));
+});
+test("instances: props from separate calls retain their own provenance", () => {
+  const result = instances(
+    "const Child=component(function*(props){const m=yield* $memo(function*(){return yield* props.x});return view(function*(){return <b>{yield* m}</b>});});" +
+      app(
+        "const [n,set]=yield* $optimistic(0);return view(function*(){return <main>{yield* Child({x:1})}{yield* Child({x:n})}</main>});"
+      )
+  );
+  assert.deepEqual(
+    result.sources.filter(x => x.kind === "memo").map(x => x.provenance),
+    ["S", "C"]
+  );
+});
+test("instances: generator helpers create state in their caller", () => {
+  const result = instances(
+    "function* state(){const [n,set]=yield* $signal(0);const click=$event(function*(){yield* set(1)});return {n,click};}" +
+      app(
+        "const {n,click}=yield* state();return view(function*(){return <button onClick={yield* click}>{yield* n}</button>});"
+      )
+  );
+  assert.equal(result.sources[0].provenance, "C");
+  assert.equal(result.roots.length, 1);
+  assert.equal(result.roots[0].components[0], "App");
+  assert.equal(result.leaks.length, 0);
+});
+test("instances: inert markup inside a root is a slot", () => {
+  const result = instances(
+    app(
+      "const [n,set]=yield* $signal(0);const click=$event(function*(){yield* set(1)});return view(function*(){return <main><b>{yield* n}</b><p>server copy</p><button onClick={yield* click}/></main>});"
+    )
+  );
+  assert.equal(result.roots.length, 1);
+  assert.equal(result.roots[0].slots.length, 1);
+});
+test("instances: h source children and event props have parts and DOM owners", () => {
+  const result = instances(
+    'import {h} from "solid-yield/h";' +
+      app(
+        'const [n,set]=yield* $signal(0);const click=$event(function*(){yield* set(1)});return view(function*(){return h("button",{onClick:click},n)});'
+      )
+  );
+  assert.equal(result.holes.total, 2);
+  assert.equal(result.roots.length, 1);
+  assert.equal(result.roots[0].spanKind, "element");
+  assert.equal(result.leaks.length, 0);
+});

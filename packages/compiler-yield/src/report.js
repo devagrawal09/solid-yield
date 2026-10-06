@@ -4,10 +4,11 @@ import { readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { analyze } from "./analysis.js";
+import { analyzeInstances } from "./placement.js";
 import { importsOf } from "./index.js";
 
 const repo = resolve(fileURLToPath(new URL("../../..", import.meta.url)));
-export async function reportTwin(twin) {
+export async function reportTwin(twin, { analysis = analyze } = {}) {
   const dir = resolve(repo, "examples", twin);
   const require = createRequire(resolve(dir, "package.json"));
   const { createServer } = await import(pathToFileURL(require.resolve("vite")));
@@ -50,7 +51,10 @@ export async function reportTwin(twin) {
           ? "src/main.ts"
           : "src/main.tsx";
     await visit(resolve(dir, entry));
-    const result = analyze(modules, { resolve: (spec, from) => links.get(`${from}\0${spec}`) });
+    const result = analysis(modules, {
+      entry: resolve(dir, entry),
+      resolve: (spec, from) => links.get(`${from}\0${spec}`)
+    });
     // Paths are build-local; the review document is portable.
     return JSON.parse(
       JSON.stringify({ twin, ...result })
@@ -117,7 +121,12 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     .sort();
   const reports = [];
   for (const twin of twins) {
-    reports.push(await reportTwin(twin));
+    reports.push(
+      await reportTwin(
+        twin,
+        process.argv.includes("--instances") ? { analysis: analyzeInstances } : {}
+      )
+    );
     console.error(`analysed ${twin}`);
   }
   const md = markdown(reports);

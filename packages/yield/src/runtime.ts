@@ -117,8 +117,8 @@ const PATH_READ = 1;
 
 /**
  * Every build (D-087): the brand of a typed failure — `raise`'s error, and the
- * `Error` an `attempt`'s handler returns. One non-enumerable symbol on the
- * object already being thrown. An `attempt` over an event call hands its
+ * `Error` an `attempt`'s handler returns. A WeakSet tracks every object, including frozen Errors; extensible objects
+ * also retain the non-enumerable symbol property. An `attempt` over an event call hands its
  * handler only a branded failure; anything else the call rejects with is a
  * crash (D-019) and goes past the handler.
  */

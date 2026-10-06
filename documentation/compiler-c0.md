@@ -1,6 +1,6 @@
 # The solid-yield compiler, C0: definitions, analysis, codegen, correctness claim, open decisions
 
-Status: **a design for Dev to rule on**. Nothing here is decided. It records no decision, and the open questions in §5 are framed the way the project takes decisions (code, options, recommendation). Written 2026-10-06 against `main` at `61d2a65` (v0.1, through D-102).
+Status: **C0 ruled by Dev on 2026-10-07 (D-103–D-108), with D-111 overriding delayed hydration**. The original design was written against `main` at `61d2a65`; §5 preserves alternatives and records the rulings. C1/codegen remains on proto/compiler. v0.2 ships eager islands only.
 
 Read with: `calculus.md` (its §4 theorem is the spec the compiler must preserve, and its §7 lists what the compiler route must keep), `DECISIONS.md`, `reviews/2026-10-06-markless-comparison.md` (cited as **ML-L*n*** for its §3 lessons and **ML-Q*n*** for its §6 questions), and `yield-library.md` §7–§8 (what the library route cannot do and what it costs).
 
@@ -140,17 +140,19 @@ An **edge** is where a root's client code reads something defined outside the ro
 
 Event handlers do not cross: a handler is created in a setup, so its creator is in the root (M2). **Anything else** — a closure over a setup-local non-source, an instance the serializer refuses, a function, a U value — cannot cross. The region that defines it is then client, and the analysis gives **a diagnostic at the variable** that names it and the reason (ML-L3, and ML-L8's "escalation is never silent"). In the C1 report that diagnostic is a *capture failure*.
 
-### 1.7 Eager and lazy roots
+### 1.7 Root report classes (D-104, D-111)
 
-| A root is | When | It hydrates |
+| Report class | When | Proposed later schedule |
 | --- | --- | --- |
 | **eager** | some setup or row setup in it yields `Create<"effect">`, the run-once form included (D-079, D-101) | at load (ML-L4, ML-Q2-B) |
 | **visible** | it has no effect, but it has a C or U source that changes without a bind: a memo whose attempt targets a non-server promise or stream, a foreign source | when its span becomes visible |
 | **lazy** | every change in it starts at one of its binds | on the first event at one of its binds; the event is captured before hydration and replayed after it |
 
-Laziness is sound in this dialect for a reason that is specific to it. A setup only creates (D-042: it never reads, writes or builds JSX). Effects are the only code that runs because a component exists (D-079), and they make the root eager. So deferring a lazy root's setups until its first event cannot be seen in the DOM. It *can* be seen in a conformance trace (the setup runs later), which §4 declares.
+These are analysis report classes. In v0.2 **every emitted island hydrates eagerly**; neither visible nor lazy schedules use delayed Solid hydrate (D-111). The proposed independent v0.3 builder needs its own event queue, payload and validated DOM claims with render fallback. Every eager island must report its effect reach: the effects making it eager and the dependent parts/providers/readers merged with them (D-104).
 
-The fact "this component is eager" is already in each setup's yield union (`Create<"effect">`, calculus §1.2). Q2 asks whether to surface it as a marker on `ComponentView`, as may-wait is (D-075).
+The original lazy design argument, subject to that independent builder, is specific to this dialect. A setup only creates (D-042: it never reads, writes or builds JSX). Effects are the only code that runs because a component exists (D-079), and they make the root eager. So deferring a lazy root's setups until its first event cannot be seen in the DOM. It *can* be seen in a conformance trace (the setup runs later), which §4 declares.
+
+The fact "this component is eager" is already in each setup's yield union (`Create<"effect">`, calculus §1.2). D-104 requires a marker on `ComponentView`, folded like may-wait (D-075), and effect-reach diagnostics. This main branch records that compiler requirement; the marker/report implementation is still due on the compiler path.
 
 ---
 
@@ -171,7 +173,7 @@ For each module:
 
 - **exports**: which bindings are components, contexts (with or without a default), events or server functions (a module-level `"use server"`, or a function directive);
 - **for each `component(…)`**: its declared props; its setup's parts (cells and whether they are written, memos with their pre-attempt reads and attempt target, effects, events with their writes and calls, context reads); its view's holes, binds, calls (with their props literal), flow controls, boundaries and provides;
-- **colors by syntax**: whether a part may pend (an async attempt or `until`, a pending read through a memo) or fail (a `raise`, an attempt whose handler returns an `Error`). This is a sound over-approximation of κ that M4 needs. The type checker would make it exact, and the C1 CLI report may use it (§2.5). The Vite pass does not.
+- **colors by syntax**: whether a part may pend (an async attempt or `until`, a pending read through a memo) or fail (a `raise`, an attempt whose handler returns an `Error`). This is a sound over-approximation of κ that M4 needs. The type checker would preserve declared color bounds, and the C1 CLI report may use it (§2.5). The Vite pass does not.
 
 What the dialect guarantees is what makes this syntactic:
 

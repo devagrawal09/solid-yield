@@ -18,9 +18,12 @@ class Boom extends Error {
 
 “Root accepted” below means the inferred view is assignable to
 `View<false, never, false, never>` and the library's root check accepts it.
-It is not a claim that all C3 lint rules have been independently run over every
-snippet. The type/runtime contradictions stand independently of that stronger
-admissibility claim; the exact scope of each precondition issue is stated below.
+The [lint check](probes/lint.mjs) finds zero diagnostics from all eight rules
+explicitly named in C3. With the full current recommended configuration, the
+only diagnostic is the deliberate ReadAfterWait witness (F11). Thus the other
+witness code also passes the full recommended rules. This still does not turn
+an API counterexample outside another precondition (for example F10's failed
+branding or F14's unyielded fragment) into an admissible-program counterexample.
 
 ## F01 — Exactness / route existence is false
 
@@ -160,11 +163,11 @@ const page = foreign(Reader, { provided: [C] });
 
 Render that page through a plain-Solid router with **no C provider**. This is
 explicitly accepted by D-102, and the runtime read is explicitly allowed to
-report NO_PROVIDER by that decision. The claim does not install a provider;
+report NO*PROVIDER by that decision. The claim does not install a provider;
 `foreign` ignores options and returns the original component/type. The exact
 probe uses `Router() { return h(page, {}); }` and a yield root returning
 `<Router />`. It is accepted and fails at Reader's creation (`ForeignRoot`).
-C6 excludes a foreign component's _own_ failures, but this is the yield
+C6 excludes a foreign component's \_own* failures, but this is the yield
 component's context lookup after a sanctioned handoff. C1–C7 do not require the
 provided claim to be true. R-Foreign/O43 still saying R=never is stale after D-102.
 
@@ -330,7 +333,11 @@ Development throws READ_AFTER_ATTEMPT on resumption; production reads untracked.
 No permutation-sensitive rule exists in the union. `ReadAfterWait` is a
 positive tsc probe; the existing runtime test of READ_AFTER_ATTEMPT supplies
 the runtime evidence. The paper host lemma proves only admission, not ordering.
-The calculus's explicit C3 list does not impose this ordering either.
+The calculus's explicit C3 list omits `read-before-attempt`, but the current
+full recommended lint configuration **does catch this witness**. The probe's
+lint check verifies that exact diagnostic. Therefore this is a type/host-table
+limitation and an ambiguity in C3's enumeration, not a demonstrated counterexample
+to safety when the full recommended lint rules run.
 
 ## F12 — Written fallback and provider equations are stale/ambiguous
 

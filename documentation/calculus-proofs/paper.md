@@ -102,7 +102,9 @@ admits only settled reads and synchronous calls, plus write/cleanup/raise/stream
 event admits read/write/wait/call/raise. `only_memo_event_wait`,
 `phase_read_settled` and `event_no_stream` prove the restrictive cases.
 
-The host table gives no temporal fact. In particular it cannot prove “read
+The host table gives no temporal fact. The current recommended lint rule
+`read-before-attempt` rejects the F11 witness, but C3's explicit list omits that
+rule; the table alone cannot replace it. In particular it cannot prove “read
 before the first wait”: permuting operations leaves Y unchanged (F11). A JSX
 hole position also requires a syntactic/lint premise. Under that premise the
 transform puts the read in a render effect, and S1–S2 apply there. `runAs` saves

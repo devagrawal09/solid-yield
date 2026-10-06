@@ -162,6 +162,7 @@ From the worktree root:
 
 ```sh
 node node_modules/typescript/bin/tsc -p documentation/calculus-proofs/probes/tsconfig.json
+node documentation/calculus-proofs/probes/lint.mjs
 node node_modules/vitest/vitest.mjs run --config documentation/calculus-proofs/probes/vite.config.mjs
 PROOF_PRODUCTION=1 node node_modules/vitest/vitest.mjs run --config documentation/calculus-proofs/probes/vite.config.mjs
 pnpm build

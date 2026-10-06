@@ -80,3 +80,5 @@ export default { plugins: [solidYield(), solid()] };
 ## Vendored JSX types
 
 `jsx/jsx.d.ts` and `jsx/jsx-properties.d.ts` are generated from the installed `@solidjs/web`'s `types/` by `scripts/jsx-from-web.mjs`, which then runs `scripts/jsx-web-shared.mjs`. They are checked in and regenerated on every build (`pnpm run types:jsx`), so they follow a Solid bump in the lockfile.
+
+For larger apps: [lazy pages and `ChunkError` retry](https://github.com/devagrawal09/solid-yield/blob/main/documentation/getting-started.md#lazy-pages-and-chunk-retry), [stores, optimistic lists, both effect phases and `refresh`](https://github.com/devagrawal09/solid-yield/blob/main/documentation/getting-started.md#stores-optimistic-lists-effects-and-refresh), [stream reconnect](https://github.com/devagrawal09/solid-yield/blob/main/documentation/getting-started.md#reconnecting-a-stream), and [SSR/hydration with the server script and asset manifest](https://github.com/devagrawal09/solid-yield/blob/main/documentation/getting-started.md#ssr-and-hydration). Effect failures belong to the component, not its view: catch them above its call, or absorb them in the effect.

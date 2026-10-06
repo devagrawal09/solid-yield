@@ -30,8 +30,8 @@ import solidYield from "vite-plugin-solid-yield";
 import solid from "@solidjs/vite-plugin";
 
 export default defineConfig({
-  plugins: [solidYield(), solid()],
-  // vitest with jsdom picks the client build
+  plugins: [solidYield(), solid({ hydratable: true })],
+  // Client tests. Hydration tests use the separate recipe below.
   test: { environment: "jsdom" }
 });
 ```
@@ -231,7 +231,7 @@ return view(function* () {
 
 - **Structure comes from flow controls.** A view may not `if`. `Show`'s `when` is a source or, here, a hole. Its `children` is a lazy view, built only when the branch shows.
 - **`Loading`** handles the pending color.
-- **`Errored`** with `catch: [NotFound]` handles that failure type and removes it from the type. Any other failure passes to the boundary above.
+- **`Errored`** with `catch: [NotFound]` handles that failure type and removes it from the type. Any other failure passes to the boundary above. **Effect failures belong to the component, not its view** (D-073): an `Errored` in a component's own view does not catch that component's `$effect`. Put the boundary around the component call, or absorb the failure with `attempt` inside the effect.
 - **The root.** With both handled, `App` is a settled view, which `render` accepts. A root that may fail is accepted too (the failure is re-thrown there), but a pending root is not (`[PENDING_ROOT]`): an app that is pending by design is wrapped at the root, `render(() => Loading({ children: App }), el)`.
 
 ## Flow controls and events
@@ -353,6 +353,8 @@ One example each (from [`reference.tsx`](https://github.com/devagrawal09/solid-y
 
 `NoteList` declares the colors it accepts, `props: Props<{ notes: Source<Note[], LoadFailed, true> }>`; declared `Source<Note[]>`, the call is refused. `Errored`'s `reset` is the one plain function an event attribute takes (`onClick={reset}`): it has no colors to bind.
 
+An array `Source` has no `.length`. Read it first: `{(yield* messages).length}` in a view hole, or `(yield* messages).length` in a memo or event.
+
 ### Event props: `Handler<[T]>`
 
 A component that takes a callback declares it as a `Handler`:
@@ -470,6 +472,247 @@ export const Editor = component(function* Editor() {
 A required context passes its name twice: as the type's identity and in `{ name: "ThemeCtx" }` for runtime errors. Type arguments disappear when JavaScript is built. The options name must match the type name; `[CONTEXT_NAME]` explains a missing runtime name.
 
 **A context holding a changing value.** Declare the value's type, `createContext<Theme, "ThemeCtx">(undefined, { name: "ThemeCtx" })`, and provide a source, `ThemeCtx.provide({ value: theme, children })`: readers read it like a prop, in holes, memos and events, and see each change. Declare the context as `Source<T, E, true>` only when the provided source may be pending or fail.
+
+## Lazy pages and chunk retry
+
+`lazy` from `solid-yield` loads a yield component. Its import can fail with `ChunkError` (`kind: "chunk"`, the rejection in `cause`, the module URL in `specifier`). A `Loading` covers the import's wait; an `Errored` that catches `ChunkError` covers an import failure. Its reset tries the import again:
+
+```tsx
+import { ChunkError, Errored, Loading, component, lazy, view } from "solid-yield";
+const Page = lazy(() => import("./page"));
+const PageRoute = component(function* PageRoute() {
+  return view(function* () {
+    return <>{yield* Errored({
+      catch: [ChunkError],
+      fallback: (err, reset) => <section>
+        <p>{err().message}</p>
+        <button onClick={reset}>Retry loading the page</button>
+      </section>,
+      children: function* () {
+        return <>{yield* Loading({
+          fallback: "Loading page…",
+          children: function* () { return <>{yield* Page()}</>; }
+        })}</>;
+      }
+    })}</>;
+  });
+});
+```
+
+`reset` is already a bound handler: use `onClick={reset}`. This catch handles the import failure; add the page's own failure classes if it can fail too. `Page.preload()` can start the import before navigation and rejects with `ChunkError` on failure. SSR also needs the [client asset manifest](#ssr-and-hydration).
+
+## Stores, optimistic lists, effects and refresh
+
+These examples are [type-checked and run](https://github.com/devagrawal09/solid-yield/blob/main/packages/yield/test/docs/state.tsx).
+
+### A store
+
+`$store` holds an object. Read its paths in holes; change it through its setter in an event:
+
+```tsx
+import { $event, $store, component, view } from "solid-yield";
+const Preferences = component(function* Preferences() {
+  const [settings, setSettings] = yield* $store<{ theme: "light" | "dark" }>({ theme: "light" });
+  const toggle = $event(function* () {
+    yield* setSettings(draft => {
+      draft.theme = draft.theme === "light" ? "dark" : "light";
+    });
+  });
+  return view(function* () {
+    return (
+      <button class="theme" onClick={yield* toggle}>
+        {yield* settings.theme}
+      </button>
+    );
+  });
+});
+```
+
+### Both effect phases
+
+The compute tracks reads and returns a value. The effect phase receives it, runs untracked after render, and may write state or the DOM. It does not run on the server:
+
+```tsx
+import { $effect, $event, $signal, component, view } from "solid-yield";
+const EffectCounter = component(function* EffectCounter() {
+  const [count, setCount] = yield* $signal(0);
+  const [label, setLabel] = yield* $signal("");
+  yield* $effect(
+    function* () {
+      return yield* count;
+    },
+    function* (value) {
+      document.title = `Count ${value}`;
+      yield* setLabel(`Count ${value}`);
+    }
+  );
+  const increment = $event(function* () {
+    yield* setCount(n => n + 1);
+  });
+  return view(function* () {
+    return (
+      <button class="effect-counter" onClick={yield* increment}>
+        {yield* label}
+      </button>
+    );
+  });
+});
+```
+
+An effect's failures belong to the component, not its view. A boundary must sit above that component's call; one inside its returned view cannot catch its compute or effect-phase failure. An `attempt` that absorbs the failure in the effect adds no failure to the component's type.
+
+### An optimistic list and refresh
+
+A derived `$optimisticStore(body, seed)` follows a source and overlays writes while an event is in flight. A successful save refreshes the server source. `refresh` is a write, so delegate to it in an event or effect phase: `yield* refresh(remote)`.
+
+```tsx
+import {
+  $event, $memo, $optimisticStore, attempt, component,
+  Errored, For, Loading, refresh, view
+} from "solid-yield";
+class NetworkError extends Error {
+  readonly kind = "network" as const;
+  constructor(cause: unknown) {
+    super(cause instanceof Error ? cause.message : String(cause));
+  }
+}
+type Card = { id: number; column: "todo" | "done" };
+type BoardApi = {
+  readCards(): Promise<Card[]>;
+  moveCard(id: number, column: Card["column"]): Promise<void>;
+};
+function boardWith(api: BoardApi) {
+  return component(function* Board() {
+    const remote = yield* $memo(function* () {
+      return yield* attempt(
+        () => api.readCards(),
+        cause => new NetworkError(cause)
+      );
+    });
+    const [cards, setCards] = yield* $optimisticStore(function* (_draft: Card[]) {
+      return yield* remote;
+    }, []);
+    const move = $event(function* () {
+      yield* setCards(draft => {
+        draft[0].column = "done";
+      });
+      yield* attempt(
+        () => api.moveCard(1, "done"),
+        cause => new NetworkError(cause)
+      );
+      yield* refresh(remote);
+    });
+    return view(function* () {
+      return (
+        <main>
+          {
+            yield* Errored({
+              catch: [NetworkError],
+              fallback: err => <p role="alert">{err().message}</p>,
+              children: function* () {
+                return (
+                  <>
+                    {
+                      yield* Loading({
+                        fallback: "Loading cards…",
+                        children: function* () {
+                          return (
+                            <section>
+                              <button class="move" onClick={yield* move}>
+                                Move card 1
+                              </button>
+                              <ul>
+                                {
+                                  yield* For({
+                                    each: cards,
+                                    children: function* (card) {
+                                      return view(function* () {
+                                        return <li>{yield* card.column}</li>;
+                                      });
+                                    }
+                                  })
+                                }
+                              </ul>
+                            </section>
+                          );
+                        }
+                      })
+                    }
+                  </>
+                );
+              }
+            })
+          }
+        </main>
+      );
+    });
+  });
+}
+// Supply your API: const Board = boardWith(api);
+```
+
+The derived body may update its draft or return the next object/array. The seed is the initial store shape; it is not a promise that a pending read is settled. This example uses `Loading` for that wait. The move button is outside the rows under the page boundary, so moving a card keeps its binding owner alive. A handler bound in a row that its own optimistic write disposes can currently lose its failure; that case is pinned and awaits a ruling (D-085 F-8).
+
+## Reconnecting a stream
+
+`Errored`'s reset re-renders its children. It can retry code that creates a fresh iterator, but cannot reopen an exhausted iterator or reconnect a socket by itself. Make the memo read an attempt counter and create a fresh subscription on each attempt. Change that counter before resetting the boundary:
+
+```tsx
+import {
+  $event, $memo, $signal, attempt, component, Errored, Loading, view,
+  type Path, type Props, type Reset
+} from "solid-yield";
+class TransportError extends Error {
+  readonly kind = "transport" as const;
+  constructor(cause: unknown) { super(cause instanceof Error ? cause.message : String(cause)); }
+}
+type Message = { text: string };
+// Your transport must return a fresh iterator for each call.
+declare function watchRoom(id: string): AsyncIterable<Message[]>;
+const Room = component(function* Room(props: Props<{ roomId: string }>) {
+  const [attemptNumber, setAttempt] = yield* $signal(0);
+  let current: { number: number; id: string; stream: AsyncIterable<Message[]> } | undefined;
+  const messages = yield* $memo(function* () {
+    const number = yield* attemptNumber;
+    const id = yield* props.roomId;
+    return yield* attempt(() => {
+      // Reset may re-read this memo before the event's writes commit.
+      // Keep one iterator per attempt, including those extra reads.
+      if (!current || current.number !== number || current.id !== id) {
+        current = { number, id, stream: watchRoom(id) };
+      }
+      return current.stream;
+    }, cause => new TransportError(cause));
+  });
+  return view(function* () {
+    return <>{yield* Errored({
+      catch: [TransportError],
+      fallback: function* (error: Path<TransportError>, reset: Reset) {
+        const reconnect = $event(function* () {
+          yield* setAttempt(n => n + 1);
+          reset();
+        });
+        return view(function* () {
+          return <section>
+            <p>{yield* error.message}</p>
+            <button onClick={yield* reconnect}>Reconnect</button>
+          </section>;
+        });
+      },
+      children: function* () {
+        return <>{yield* Loading({
+          fallback: "Connecting…",
+          children: function* () {
+            return <p>{(yield* messages).map(message => message.text).join("; ")}</p>;
+          }
+        })}</>;
+      }
+    })}</>;
+  });
+});
+```
+
+The [example test](https://github.com/devagrawal09/solid-yield/blob/main/packages/yield/test/docs/stream.spec.tsx) checks exactly one new subscription per reconnect. The [retained-iterator test](https://github.com/devagrawal09/solid-yield/blob/main/packages/yield/test/review-keyed.spec.tsx) also checks that reset alone cannot reopen an exhausted iterator. The cache prevents a reset and the event’s committed write from opening two subscriptions. A lazy import's retry and a transport reconnect are different operations.
 
 ## Recipe: an app shell
 
@@ -629,29 +872,140 @@ Each rule is checked as early as the tools allow:
 1. **Types.** For example: a component tag, a read in a setup, a create or write in a view, a source called like a function, an unbound event handler, an unhandled pending at the root (`[PENDING_ROOT]`), `[SETTLED_PROP]`, `[FAILURE_KIND]`, `[HVIEW_READ]`.
 2. **The transform** (at build time). A `yield*` in a JSX position it cannot make a hole: `YIELD_IN_REF`, `…_SPREAD`, `…_SPREAD_CHILD`, `PLAIN_YIELD_IN_JSX`.
 3. **Development errors**, thrown where they happen and stripped from production builds. For example: `READ_IN_VIEW`, `READ_IN_SETUP`, `UNYIELDED_WRITE`, `UNTYPED_THROW`, `JSX_IN_SETUP`, `PATH_OBJECT`, `NOT_AN_OPERATION` (which names what it received).
-4. **Lint** (`eslint-plugin-solid-yield`), for what TypeScript cannot see. For example: `no-read-in-view-body`, `no-read-in-prop`, `component-children-generator`, `component-call-yielded`, `no-unbound-event`, `no-throw`.
+4. **Lint** (`eslint-plugin-solid-yield`), for what TypeScript cannot see. For example: `no-read-in-setup`, `no-read-in-view-body`, `no-read-in-prop`, `component-children-generator`, `component-call-yielded`, `no-unbound-event`, `no-throw`.
 
 [`refusals.md`](./refusals.md) puts every one of them in one place, starting with what you cannot write in a view.
 
 ## SSR and hydration
 
-`hydrate(App, root)` needs the hydration script **from the server build** before the client entry runs. Import `generateHydrationScript` from `@solidjs/web` in your server entry and put its HTML in the response before the client module script:
+Build JSX for the server and client separately. `vite build --ssr` alone does not turn the guide's client JSX config into an SSR compiler config. Client-only `template(...)` calls in a server bundle produce Solid's "Client-only API called on the server side" error.
+
+For the client, keep `solid({ hydratable: true })` and enable the client manifest:
 
 ```ts
-// entry-server.ts (server build)
+// vite.config.ts: add this build option to the client config above
+build: { outDir: "dist/client", manifest: true }
+```
+
+```ts
+// vite.ssr.config.ts: separate server JSX config
+import { defineConfig } from "vite";
+import solidYield from "vite-plugin-solid-yield";
+import solid from "@solidjs/vite-plugin";
+export default defineConfig({
+  plugins: [solidYield(), solid({ ssr: true, hydratable: true })],
+  ssr: { noExternal: ["solid-yield"] },
+  build: { outDir: "dist/server" }
+});
+```
+
+```sh
+pnpm exec vite build
+pnpm exec vite build --ssr src/entry-server.tsx --config vite.ssr.config.ts
+```
+
+**Root rule:** all four renderers take a root whose pending reads have a `Loading` above them and whose required contexts are provided. A root may fail: an unhandled failure is re-thrown there. If the app can pend, share the same root wrapper between both entries:
+
+```ts
+// root.ts
+import { Loading } from "solid-yield";
+import { App } from "./app";
+export const Root = () => Loading({ children: App });
+```
+
+### Server script, manifest and render functions
+
+`generateHydrationScript()` must come from **the server build** of `@solidjs/web` and run before the client entry. The client build returns `""`; development `hydrate` then reports `[NO_HYDRATION_SCRIPT]`. Do not manufacture `_$HY` in production.
+
+The Vite client manifest names each lazy page's client chunk, CSS and imports. Pass that parsed manifest to both server render functions. For example, an entry can look like `{ "src/pages/page.tsx": { file: "assets/page-abc.js" } }`; its key must match the `moduleUrl` the yield plugin annotated. The actual manifest, not that illustrative filename, must come from the matching client build.
+
+Without a manifest, a server call to an annotated lazy page throws; if SSR contains the error, the page can be blank. A manifest missing that module emits no preload entry. Hydration then reports `[LAZY_HYDRATION_PRELOAD]`. When the manifest is correct, Solid serializes the module mapping and `hydrate` loads those client entries before rendering the lazy page. Serve the real files at those URLs; a failed preload is not a successful hydration. Use the same app tree, wrappers and URL on both sides.
+
+```ts
+// entry-server.ts: built by vite.ssr.config.ts
+import { readFileSync } from "node:fs";
 import { generateHydrationScript } from "@solidjs/web";
-import { renderToString } from "solid-yield";
-import { App } from "./app";
+import { renderToString, renderToStream } from "solid-yield";
+import { Root } from "./root";
+const manifest = JSON.parse(readFileSync("dist/client/.vite/manifest.json", "utf8"));
 
-const html = `${generateHydrationScript()}<div id="app">${renderToString(App)}</div>`;
-// Send html, followed by your client module script.
+// Synchronous: pending content shows its Loading fallback.
+const syncBody = renderToString(Root, { manifest });
+
+// Complete streamed body, including the scripts that swap pending fragments.
+let body = "";
+const decoder = new TextDecoder();
+await renderToStream(Root, { manifest }).pipeTo(new WritableStream({
+  write(chunk) {
+    body += typeof chunk === "string" ? chunk : decoder.decode(chunk, { stream: true });
+  },
+  close() { body += decoder.decode(); }
+}));
+
+// With Vite's default index.html entry; use your manifest's actual entry key.
+const entry = manifest["index.html"].file;
+const html = `<!doctype html><html><head>${generateHydrationScript()}</head><body>` +
+  `<div id="app">${body}</div><script type="module" src="/${entry}"></script></body></html>`;
+// Send html from your server. Use syncBody instead for a synchronous response.
 ```
+
+Await `pipeTo`; `onCompleteAll` alone can fire before the last bytes reach the writable. Synchronous `renderToString` does not await lazy imports or async data; use streaming when you need their content. A live stream that never ends also never completes this collected-body example: pipe it to the response rather than collecting it.
 
 ```ts
-// entry-client.ts (client build)
+// entry-client.ts: built by the client config
 import { hydrate } from "solid-yield";
-import { App } from "./app";
-hydrate(App, document.getElementById("app")!);
+import { Root } from "./root";
+hydrate(Root, document.getElementById("app")!);
 ```
 
-The client build's `generateHydrationScript()` returns `""`. Without the server script, development `hydrate()` reports `[NO_HYDRATION_SCRIPT]`. In jsdom, setting `innerHTML` does not execute scripts; execute the server scripts in order before hydrating.
+### Vitest hydration recipe
+
+The Solid plugin deliberately forces non-hydratable JSX in Vitest's **test mode**. Use a separate config and run it in a non-test mode. `ssr: true` enables the SSR compiler when Vite's SSR loader compiles the server fixture; the jsdom test still gets hydratable client JSX.
+
+```ts
+// vitest.hydrate.config.ts
+import { defineConfig } from "vitest/config";
+import solidYield from "vite-plugin-solid-yield";
+import solid from "@solidjs/vite-plugin";
+export default defineConfig({
+  plugins: [solidYield(), solid({ ssr: true, hydratable: true })],
+  resolve: { conditions: ["browser", "development"] },
+  test: {
+    environment: "jsdom",
+    server: { deps: { inline: [/solid/] } },
+    include: ["test-hydrate/**/*.test.tsx"],
+    globalSetup: ["test-hydrate/ssr-setup.ts"]
+  }
+});
+```
+
+```sh
+pnpm exec vitest run --config vitest.hydrate.config.ts --mode hydrate
+```
+
+In global setup, use `createServer` from Vite with `configFile: "vite.ssr.config.ts"`, `mode: "hydrate"`, `appType: "custom"`, and `server: { middlewareMode: true, hmr: false, ws: false }`. The last options avoid a WebSocket listener in a restricted test environment. Load `solid-yield`, `@solidjs/web` and your root with `vite.ssrLoadModule`. Render on that server side, collect streams with **awaited** `pipeTo`, prepend its `generateHydrationScript()`, provide the HTML to the test, and close Vite in `finally`.
+
+In jsdom, `innerHTML` does not execute scripts. For your own server fixture, execute its inline scripts in document order before hydrating:
+
+```tsx
+// Use inject() for the server HTML supplied by your Vitest global setup.
+document.body.innerHTML = serverHtml;
+for (const script of [...document.body.querySelectorAll("script")]) {
+  (0, eval)(script.textContent!);
+  script.remove();
+}
+const root = document.getElementById("app")!;
+const before = root.querySelector("button")!;
+const dispose = hydrate(Root, root);
+flush();
+await Promise.resolve();
+expect(root.querySelector("button")).toBe(before);
+before.click();
+flush();
+expect(before.textContent).toBe("1");
+dispose();
+```
+
+Start with a non-lazy counter fixture, then add streaming and lazy pages. Node cannot natively import an HTTP chunk URL during a jsdom test. A test for one known lazy page may pre-seed `_$HY.modules[id]` with its real imported module, using the IDs from the server's `_$HY.r._assets` mapping, before `hydrate`; that is a test harness, not a browser preload check. Keep the real manifest and verify server node identity and interaction. For router tests, stub `window.scrollTo` (for example, `vi.spyOn(window, "scrollTo").mockImplementation(() => {})`).
+
+The [complete repository fixture](https://github.com/devagrawal09/solid-yield/blob/main/packages/yield/test/docs/hydration/global-setup.mjs) renders a counter to a string and through `pipeTo`; [its client test](https://github.com/devagrawal09/solid-yield/blob/main/packages/yield/test/docs/hydration/hydrate.test.tsx) keeps the server button and clicks it. In this workspace run `pnpm -C packages/yield exec vitest run --config vite.config.docs-hydrate.mjs --mode hydrate` after `pnpm build`. The consumer config above imports the installed plugins; the repository configs use source aliases.

@@ -352,7 +352,9 @@ Measuring what v0.2 saves is Q3.
 
 ---
 
-## 5. Open decisions for Dev
+## 5. Decisions (Dev, 2026-10-07)
+
+Q1–Q6 are ruled by D-103–D-108: C, B (also report each eager island's effect reach), B (with a measured tolerance), A, B (implemented on proto/compiler), B after C3. The alternatives below remain the design record. D-111 overrides delayed hydration: **v0.2 emits eager islands only**. Lazy/visible describe analysis report classes, not v0.2 attachment schedules. v0.3 will attach by key without Solid's hydrate, with its own delegated event queue and payload, validated claims and render fallback. No reset of Solid's private hydration completion flag is permitted.
 
 ### Q1. What does v0.2 split the app into? (ML-Q1)
 
@@ -412,7 +414,7 @@ node examples/harness/executed-bytes/measure.mjs --baseline documentation/execut
 ```
 
 - **A.** Keep D-017: no performance in the gate.
-- **B.** Amend D-017 for **executed bytes** only (ML-L1). These are V8 coverage's bytes of JS run at load and per parity step, for each twin against its original. They are deterministic across machines, and that removes D-017's stated reason ("noisy across machines"). Wall time stays manual.
+- **B.** Amend D-017 for **executed bytes** only (ML-L1). These are V8 coverage's bytes of JS run at load and per parity step, for each twin against its original. The prototype observed run-to-run drift, so an explicit tolerance is required (D-105). Wall time stays manual.
 - **C.** B, plus per-root payload and registration checks and a real-browser lane (amending D-037).
 
 **Recommendation: B now, C with roots (C2).** v0.2's whole claim is "less code runs", and §8 shows that a manual measurement can silently measure nothing ("timed a list that never grew"). The per-root checks only mean something once roots exist.

@@ -788,9 +788,9 @@ A root handler that wants the typed failure reads `error.cause ?? error`.
   - accept it and say so in §7.
 - **F3 (fixed): a hole that always raises lost its failure.** `GeneratorOps<Y, R>` in `holes.ts` distributed over the hole's return type. A hole that always raises returns `never`, so the whole result was `never` and its own `Raise` was dropped. `Show({ when: function* () { return yield* raise(e); } })` typed as settled and never failing. `never` is now its own case. The type test is "a flow control's source hole" and the changeset is `blocks-raising-hole-type.md`.
 
-### D-071 — Meta-rule: the types say exactly what the runtime does
+### D-071 — Meta-rule: colors are sound upper bounds on runtime routes
 
-**Decided (Dev, 2026-10-05).** Wherever the runtime routes a color — pending, a failure — the type carries it to the same place. A channel the runtime has and the type lacks is a bug, never a §7 limitation. D-034, D-044, D-047, D-059, D-063, D-072, D-073 and D-074 are instances. A future finding of the form "the runtime does X but the type says Y" is resolved by making the type say X. A finding where the type cannot say X is reported to Dev; it is not documented away.
+**Decided (Dev, 2026-10-05; clarified by D-112).** Colors are sound upper bounds, not proofs that a route executes. No discharge may erase a route the runtime can take. Wherever the runtime routes a color — pending, a failure — the type carries it to the same place. A channel the runtime has and the type lacks is a bug, never a §7 limitation. D-034, D-044, D-047, D-059, D-063, D-072, D-073 and D-074 are instances. A future finding of the form "the runtime does X but the type says Y" is resolved by making the type say X. A finding where the type cannot say X is reported to Dev; it is not documented away.
 _Consequence._ §7's "two library-mediated failures are in no view type (open, D-070)" is not a limitation: D-070 F2 is ruled by D-072 and F1 by D-073.
 _Instance (2026-10-06, calculus §6.3 F-1)._ `Errored`'s call form carried only a lazy view's and a row's fallback colors. A render function `(error, reset) => …`'s output and `h` output were dropped, though the runtime sends their pending reads and failures to the boundaries above and `h(Errored, …)` carried them. Every fallback form now carries its colors (`Ops<F>`, as `Loading`'s fallback). `h`'s boundary overloads match a phantom `[BOUNDARY_KIND]` rather than `typeof Loading` / `typeof Errored`: with the colors carried, comparing the two overload sets was TS2589 ("excessively deep") in the `h` twins. Type tests for each form (raise.type-tests); runtime tests that each form's failure reaches the `Errored` above, and an `h` fallback's pending the `Loading` above (obligations.spec, O28 / O29).
 
@@ -1333,3 +1333,63 @@ _Implemented._
 | 2026-10-04 | `bl/bootstrap` off `dfe692cf`                        | Reconstruction of the lost commits from the handoff: `09fa9de5` changeset, `08d7a7d3` gate + baseline, `f26f5ca2` gitlink removal (D-022), then this file (`da03be74`); D-030…D-033 added after the design review. ff'd into `blocks-lib` and pushed to `fork` at `da03be74`; the review commit follows. |
 | 2026-10-04 | `bl/tighten`, `bl/colors` (container)                | Provisioned, no commits landed; recreated on demand.                                                                                                                                                                                                                                                     |
 | 2026-10-04 | `bl/plugin` off `blocks-lib` + the 1B HANDOFF commit | Phase 2: `a6575ff8` package and fixture parity, `188a99fb` Vite plugin, `5770f1a5` twins and lazy module URLs, `013d20ce` D-043, then the docs and baseline commit.                                                                                                                                      |
+
+### D-103 — C0 Q1: eager islands on Solid hydration
+
+**Decided (Dev, 2026-10-07).** C: retain Solid hydration under the capture rule, effects-make-eager and per-root claim checks. D-111 limits v0.2 to eager islands.
+_Alternatives:_ A: hydration without those constraints; B: resumable handlers now.
+_Reasoning:_ The capture and claim rules must be fixed before codegen; eager islands keep the public Solid API.
+
+### D-104 — C0 Q2: effects make eager; report effect reach
+
+**Decided (Dev, 2026-10-07).** B: each effect makes its island eager; the analysis reports every eager island's effect reach, with the type marker and build diagnostic described in C0.
+_Alternatives:_ A: make all roots eager without explanation; C: remove effects.
+_Reasoning:_ Keep the split effect model and show which effects prevent a smaller island. C1/codegen implementation stays on proto/compiler.
+
+### D-105 — C0 Q3: executed bytes in the gate
+
+**Decided (Dev, 2026-10-07).** B: V8 executed bytes at load and each parity step enter the gate, with an explicit tolerance for the prototype's observed run-to-run drift. Wall time stays manual.
+_Alternatives:_ A: manual measurements only; C: add browser and per-root payload lanes immediately.
+_Reasoning:_ Gate the savings claim without treating V8 coverage as perfectly deterministic.
+
+### D-106 — C0 Q4: no provenance annotations yet
+
+**Decided (Dev, 2026-10-07).** A: unknown provenance remains unknown and the report names its source.
+_Alternatives:_ B: checked server annotations; C: trusted annotations.
+_Reasoning:_ Wait for the analysis report to establish a concrete need.
+
+### D-107 — C0 Q5: foreignSource
+
+**Decided (Dev, 2026-10-07).** B: foreignSource is a conservative edge whose unknown failures must be handled by an attempt and whose reads may pend. Already implemented on proto/compiler; do not claim it landed on main here.
+_Alternatives:_ A: rewrite all foreign integrations; C: author-declared colors.
+_Reasoning:_ One visible bridge preserves uncertainty instead of hiding it.
+
+### D-108 — C0 Q6: sugar after C3
+
+**Decided (Dev, 2026-10-07).** B: C4 sugar desugars to the yield dialect, after C3.
+_Alternatives:_ A: dialect only forever; C: independent compiler semantics.
+_Reasoning:_ Keep one semantics and delay spelling changes until the analysis and codegen are established.
+
+### D-109 — Disposed bind boundary: reject and report (N2 / F-8)
+
+**Decided (Dev, 2026-10-07).** B now: reject the call when its accepting captured boundary has been disposed, and emit development error "[BOUNDARY_DISPOSED] <kind> arrived after its Errored was disposed — the event's own optimistic write removed it; absorb the failure in the event, or move the boundary above what the write can dispose". §7 promises handling while the boundary lives. D later: keyed re-delivery to the re-created row is the v0.3 target.
+_Alternatives:_ A: route to a live ancestor; C: hold disposal; D: keyed re-delivery now.
+_Reasoning:_ Never silently resolve a lost failure, and do not send it to a different boundary under this ruling. Supersedes the open D-085 F-8 alternatives.
+
+### D-110 — Failures are nominal class instances (proofs F09)
+
+**Decided (Dev, 2026-10-07).** Export Failure("kind") as a class factory with readonly literal kind, a nominal brand and toJSON. A failure declaration is one line: class Boom extends Failure("boom") {}. raise, attempt and catch refuse structural objects with a message pointing to Failure(...); runtime selective matching keeps instanceof. Migrate and count the twins' failure classes.
+_Alternatives:_ Keep structural Error plus kind; rely on lint or an unstated instance premise.
+_Reasoning:_ A shaped object can pass structural subtraction but cannot match instanceof. The base class closes that gap.
+
+### D-111 — WITHDRAWN: reset Solid hydration completion
+
+**Decided (Dev, 2026-10-07).** Withdrawn before implementation: do not reset _$HY.done for delayed hydration. The maintainer says the guard is deliberate: lazy hydration is unsafe because of event replay, serialized-data lifetime and DOM drift (solidjs/solid#3845). v0.2 ships EAGER islands only; lazy/visible are report classes. v0.3 attaches by key without Solid hydrate, with its own delegated event queue, payload and validated claims with render fallback.
+_Alternatives:_ Reset private state; continue delayed Solid hydration; ship eager islands and defer an independent lazy builder.
+_Reasoning:_ Respect the deliberate guard and D-004. The chosen eager path preserves claims without a private workaround.
+
+### D-112 — No over-statement of discharge (proofs F01)
+
+**Decided (Dev, 2026-10-07).** Reword calculus §4.3(d) as "no over-statement of discharge": colors are sound upper bounds. Update D-071; no route-existence converse is claimed. The proofs branch remains unchanged.
+_Alternatives:_ Require every union member to execute in some environment; enumerate dead branches as exceptions.
+_Reasoning:_ An unreachable attempt handler contributes its failure type. A union is a safe bound, not a reachability proof.

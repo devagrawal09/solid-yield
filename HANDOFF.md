@@ -70,6 +70,11 @@ The guide and package docs now cover lazy/`ChunkError` retry; stores, derived op
 
 Every commit, including this handoff, follows `pnpm build` and the **full 37/37 GREEN gate** against the unchanged baseline. The separate documented hydration command also passes 2/2 tests. Commits are local on `main`; nothing was pushed. Remaining limits are F-8's ruling, the missing A2/A3 intermediate fixtures, and real-browser lazy preload verification (the documented jsdom workaround is not that check).
 
+## Upstream
+
+- [solidjs/solid#3815](https://github.com/solidjs/solid/issues/3815): rc.13 SSR memo/serialization-slot loop. Filed; issue open at the 2026-10-07 check. The library avoids re-creating the component (D-082); the upstream report remains.
+- [solidjs/solid#3845](https://github.com/solidjs/solid/issues/3845): delayed second hydrate root replaces server nodes. Filed; issue open at the 2026-10-07 check. Dev reports the maintainer says the completion guard is deliberate (event replay, serialized-data lifetime, DOM drift). The private reset workaround was **withdrawn before implementation** (D-111). v0.2 uses eager islands only; v0.3's keyed attachment owns its event queue and payload, validates claims and falls back to render.
+
 ## Where things are
 
 | Commit | What |

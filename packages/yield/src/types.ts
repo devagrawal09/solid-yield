@@ -1,3 +1,5 @@
+import type { Failure } from "./failure.js";
+export type { Failure } from "./failure.js";
 /*
  * The type model of yield components.
  *
@@ -757,17 +759,17 @@ export type RowFails<VY, R, Y = never> = ViewFails<VY, R> | FailsOf<Y>;
 export type ErrorClass<E = unknown> = abstract new (...args: any[]) => E;
 
 /**
- * What a routine may fail with (D-034): an `Error` with a literal `kind`.
+ * What a routine may fail with (D-110): a nominal Failure instance with a literal kind.
  * Failures are removed from a type structurally (TypeScript compares shapes)
  * but matched at run time with `instanceof`, so two error classes with the
  * same shape would be one type: the literal `kind` tells them apart. Every
  * entry point of a failure type checks it — `attempt`, `until`, `raise`,
  * `Errored`'s `catch`.
  */
-export type Failure = Error & { readonly kind: string };
-/** The branded refusal of an error type without a literal `kind`. */
+
+/** The refusal of a structural error shape or a failure without a literal kind. */
 export interface NeedsKind {
-  readonly '[FAILURE_KIND] an error class needs `readonly kind = "x" as const` so its failure can be told apart': never;
+  readonly '[FAILURE_CLASS] declare a failure class with class Boom extends Failure("boom") {}': never;
 }
 /** `unknown` when every member of `E` is a `Failure` with a literal `kind`; else `NeedsKind`. */
 export type KindCheck<E> = [E] extends [never]
@@ -775,7 +777,7 @@ export type KindCheck<E> = [E] extends [never]
   : [KindBits<E>] extends [never]
     ? unknown
     : NeedsKind;
-type KindBits<E> = E extends Error & { readonly kind: infer K }
+type KindBits<E> = E extends Failure & { readonly kind: infer K }
   ? string extends K
     ? true
     : never

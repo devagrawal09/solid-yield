@@ -83,12 +83,12 @@ Here is a todo list with three of the colors in it. `TodoList`'s view is pending
 
 <!-- prettier-ignore -->
 ```tsx
+import { Failure } from "solid-yield";
 import { $event, $optimisticStore, attempt, component, createContext } from "solid-yield";
 import { Errored, For, Loading, refresh, render, view } from "solid-yield";
 import { api, type Todo } from "./api"; // list(): Promise<Todo[]>, add(todo): Promise<void>
 
-class FetchError extends Error {
-  readonly kind = "fetch" as const; // fails: a failure is an Error with a literal `kind`
+class FetchError extends Failure("fetch") { // fails: a failure is a nominal Error instance
 }
 const fetchError = (cause: unknown) => new FetchError(String(cause));
 const ThemeCtx = createContext<"light" | "dark", "ThemeCtx">(); // no default: readers require it

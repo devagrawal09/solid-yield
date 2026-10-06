@@ -1,3 +1,4 @@
+import { Failure } from "solid-yield";
 import {
   component,
   $event,
@@ -13,8 +14,7 @@ import {
 } from "solid-yield";
 
 /** Fetching the feed failed: the color of its failure. */
-export class FeedError extends Error {
-  readonly kind = "feed" as const;
+export class FeedError extends Failure("feed") {
   constructor(cause: unknown) {
     super(cause instanceof Error ? cause.message : String(cause));
   }

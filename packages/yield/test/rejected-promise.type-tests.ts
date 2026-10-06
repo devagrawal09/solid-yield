@@ -1,7 +1,6 @@
+import { Failure } from "solid-yield";
 import { $event, attempt, type EventCall } from "solid-yield";
-class TransportError extends Error {
-  readonly kind = "transport" as const;
-}
+class TransportError extends Failure("transport") {}
 // Promise.reject infers Promise<never>. It is a wait, never a stream.
 const rejectOnly = $event(function* () {
   yield* attempt(
@@ -9,9 +8,9 @@ const rejectOnly = $event(function* () {
     cause => new TransportError(String(cause))
   );
 });
-type Failure<C> = C extends (...args: any[]) => EventCall<any, infer E, any, any> ? E : never;
+type CallFailures<C> = C extends (...args: any[]) => EventCall<any, infer E, any, any> ? E : never;
 type Equal<A, B> =
   (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
 type Expect<T extends true> = T;
 // After the fix this event has the exact failure, without an any color.
-type _failure = Expect<Equal<Failure<typeof rejectOnly>, TransportError>>;
+type _failure = Expect<Equal<CallFailures<typeof rejectOnly>, TransportError>>;

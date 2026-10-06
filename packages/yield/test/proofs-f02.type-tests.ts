@@ -1,7 +1,6 @@
+import { Failure } from "solid-yield";
 import { attempt, until } from "solid-yield";
-class Boom extends Error {
-  readonly kind = "boom" as const;
-}
+class Boom extends Failure("boom") {}
 const handle = (): unknown => new Boom("hidden");
 // F02: unknown could hide an Error, erasing its failure color.
 // @ts-expect-error [ATTEMPT_RETURN] declare the handler's return type

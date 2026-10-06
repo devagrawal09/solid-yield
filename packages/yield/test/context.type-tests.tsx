@@ -1,3 +1,4 @@
+import { Failure } from "solid-yield";
 /**
  * Type tests for context requirements, the fourth color (D-098). A setup's
  * read of a context created without a default adds the context to its
@@ -44,9 +45,7 @@ type RequiresOfComponent<C> = C extends (...args: any[]) => View<any, any, any, 
 interface User {
   name: string;
 }
-class FetchFailure extends Error {
-  readonly kind = "fetch" as const;
-}
+class FetchFailure extends Failure("fetch") {}
 declare const failing: Source<Element, FetchFailure>;
 const UserCtx = createContext<User, "UserCtx">(undefined, { name: "UserCtx" });
 const ThemeCtx = createContext("light");

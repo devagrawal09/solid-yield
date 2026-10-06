@@ -1,3 +1,4 @@
+import { Failure } from "solid-yield";
 /**
  * Type tests for the root edge (D-033, D-095, D-099): `render`, `hydrate`,
  * `renderToString` and `renderToStream` take a root that is settled and
@@ -19,9 +20,7 @@ import {
   type RootCheck
 } from "solid-yield";
 
-class Gone extends Error {
-  readonly kind = "gone" as const;
-}
+class Gone extends Failure("gone") {}
 declare const root: HTMLElement;
 
 /** Pending by design, and may fail. */

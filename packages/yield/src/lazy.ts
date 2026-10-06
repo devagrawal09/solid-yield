@@ -1,3 +1,4 @@
+import { Failure } from "./failure.js";
 /*
  * `lazy`: Solid's `lazy()` as a yield component (D-047). The same signature
  * (`fn`, `options`, `moduleUrl`; `preload` / `moduleUrl` kept on the result);
@@ -19,8 +20,7 @@ declare const __SERVER__: boolean;
  * failure (branded, D-087): it reaches the nearest `Errored` above the call
  * that takes it, or is re-thrown (D-033).
  */
-export class ChunkError extends Error {
-  readonly kind = "chunk" as const;
+export class ChunkError extends Failure("chunk") {
   /** The import's rejection. */
   declare readonly cause: unknown;
   /** The module's URL, when the build gave one. */

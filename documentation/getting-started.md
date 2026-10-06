@@ -150,8 +150,8 @@ A prop is a value (`2`), a source (`step: count`), or a hole (`step: function* (
 
 <!-- prettier-ignore -->
 ```tsx
-export class NotFound extends Error {
-  readonly kind = "not-found" as const;
+import { Failure } from "solid-yield";
+export class NotFound extends Failure("not-found") {
 }
 
 // in the setup:
@@ -566,12 +566,12 @@ An effect's failures belong to the component, not its view. A boundary must sit 
 A derived `$optimisticStore(body, seed)` follows a source and overlays writes while an event is in flight. A successful save refreshes the server source. `refresh` is a write, so delegate to it in an event or effect phase: `yield* refresh(remote)`.
 
 ```tsx
+import { Failure } from "solid-yield";
 import {
   $event, $memo, $optimisticStore, attempt, component,
   Errored, For, Loading, refresh, view
 } from "solid-yield";
-class NetworkError extends Error {
-  readonly kind = "network" as const;
+class NetworkError extends Failure("network") {
   constructor(cause: unknown) {
     super(cause instanceof Error ? cause.message : String(cause));
   }
@@ -658,12 +658,12 @@ The derived body may update its draft or return the next object/array. The seed 
 `Errored`'s reset re-renders its children. It can retry code that creates a fresh iterator, but cannot reopen an exhausted iterator or reconnect a socket by itself. Make the memo read an attempt counter and create a fresh subscription on each attempt. Change that counter before resetting the boundary:
 
 ```tsx
+import { Failure } from "solid-yield";
 import {
   $event, $memo, $signal, attempt, component, Errored, Loading, view,
   type Path, type Props, type Reset
 } from "solid-yield";
-class TransportError extends Error {
-  readonly kind = "transport" as const;
+class TransportError extends Failure("transport") {
   constructor(cause: unknown) { super(cause instanceof Error ? cause.message : String(cause)); }
 }
 type Message = { text: string };

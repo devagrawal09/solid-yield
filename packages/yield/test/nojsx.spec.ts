@@ -1,3 +1,4 @@
+import { Failure } from "solid-yield";
 /**
  * The no-JSX flavor (`h`), no build step: holes are sources and
  * bare `function*`s, the view runs once, async suspends and
@@ -299,9 +300,7 @@ describe("h argument shapes", () => {
 });
 
 describe("h binds an event attribute where its output is materialized (D-085)", () => {
-  class SaveError extends Error {
-    readonly kind = "save" as const;
-  }
+  class SaveError extends Failure("save") {}
   it("created in Parent, bound in Child under Child's Errored: that Errored shows it, not the one above both", async () => {
     let save!: EventHandler<[], SaveError, void, false, false>;
     const Child = component(function* Child() {

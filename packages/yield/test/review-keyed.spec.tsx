@@ -1,3 +1,4 @@
+import { Failure } from "solid-yield";
 import { flush, resetErrorHalt } from "solid-js";
 import {
   $event,
@@ -12,9 +13,7 @@ import {
   view,
   type Props
 } from "solid-yield";
-class Drop extends Error {
-  readonly kind = "drop" as const;
-}
+class Drop extends Failure("drop") {}
 const tick = () => new Promise<void>(r => setTimeout(r, 0));
 async function settle() {
   for (let i = 0; i < 4; i++) {

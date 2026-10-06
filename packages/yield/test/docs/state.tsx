@@ -1,3 +1,4 @@
+import { Failure } from "solid-yield";
 import {
   $effect,
   $event,
@@ -54,8 +55,7 @@ export const EffectCounter = component(function* EffectCounter() {
   });
 });
 
-export class NetworkError extends Error {
-  readonly kind = "network" as const;
+export class NetworkError extends Failure("network") {
   constructor(cause: unknown) {
     super(cause instanceof Error ? cause.message : String(cause));
   }

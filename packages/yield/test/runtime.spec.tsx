@@ -1,3 +1,4 @@
+import { Failure } from "solid-yield";
 /**
  * Runtime tests. Views here are written in the form the JSX transform's yield
  * rule produces (`{perform(x)}` for `{yield* x}`), so they run with or
@@ -1277,9 +1278,7 @@ describe("events", () => {
   });
 
   it("$event takes arguments, returns its result, and throws a rejection at the yield*", async () => {
-    class SaveError extends Error {
-      readonly kind = "save" as const;
-    }
+    class SaveError extends Failure("save") {}
     const after: string[] = [];
     const save = $event(function* (id: string, times: number, fail: boolean) {
       yield* attempt(
@@ -1458,9 +1457,7 @@ describe("events", () => {
   });
 
   it("a failing $event goes to the nearest Errored", async () => {
-    class SaveError extends Error {
-      readonly kind = "save" as const;
-    }
+    class SaveError extends Failure("save") {}
     const App = component(function* () {
       const click = $event(function* () {
         yield* raise(new SaveError("nope"));
@@ -1483,9 +1480,7 @@ describe("events", () => {
   });
 
   it("an Errored with catch handles the error types it lists", () => {
-    class NotFound extends Error {
-      readonly kind = "not-found";
-    }
+    class NotFound extends Failure("not-found") {}
     const Fails = component(function* () {
       const m = yield* $memo(function* () {
         yield* raise(new NotFound("nf"));
@@ -1519,12 +1514,8 @@ describe("events", () => {
   });
 
   it("an Errored with catch rethrows any other error to the boundary above", () => {
-    class NotFound extends Error {
-      readonly kind = "not-found";
-    }
-    class Forbidden extends Error {
-      readonly kind = "forbidden";
-    }
+    class NotFound extends Failure("not-found") {}
+    class Forbidden extends Failure("forbidden") {}
     const Fails = component(function* () {
       const m = yield* $memo(function* () {
         yield* raise(new Forbidden("no"));
@@ -1558,9 +1549,7 @@ describe("events", () => {
   });
 
   it("a body's attempt types a returned promise's failure", async () => {
-    class LoadError extends Error {
-      readonly kind = "load";
-    }
+    class LoadError extends Failure("load") {}
     const Loads = component(function* () {
       const m = yield* $memo(function* () {
         return yield* attempt(
@@ -1599,9 +1588,7 @@ describe("events", () => {
   });
 
   it("a body's attempt gives back a stream whose failures it types", async () => {
-    class StreamError extends Error {
-      readonly kind = "stream";
-    }
+    class StreamError extends Failure("stream") {}
     const Streams = component(function* () {
       const m = yield* $memo(function* () {
         return yield* attempt(
@@ -1694,9 +1681,7 @@ describe("events", () => {
   });
 
   it("a memo's raise reaches Errored", () => {
-    class Missing extends Error {
-      readonly kind = "missing" as const;
-    }
+    class Missing extends Failure("missing") {}
     const App = component(function* () {
       const m = yield* $memo(function* () {
         yield* raise(new Missing("missing"));
@@ -3230,9 +3215,7 @@ describe("attempt / isPending interplay", () => {
   });
 });
 
-class SaveError extends Error {
-  readonly kind = "save" as const;
-}
+class SaveError extends Failure("save") {}
 // At module scope: a provider whose context is created inside a test (or a
 // describe) callback, at a view's root under an outer Errored, keeps an inner
 // Errored's fallback out of the DOM — with Solid's own createContext too, and

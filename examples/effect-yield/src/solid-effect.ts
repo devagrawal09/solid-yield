@@ -1,3 +1,4 @@
+import { Failure } from "solid-yield";
 // The entire Solid 2.0 × Effect integration. A few exports, no wrapper types.
 //
 // Context propagation — the `R` channel: services are provided by a
@@ -114,8 +115,7 @@ export class ActionInterruptedError extends Error {
 type SagaStep = YieldWrap<Effect.Effect<any, any, any>>;
 
 /** The saga driver itself failed (not a step: a step's failure is in its exit). */
-export class SagaDriverError extends Error {
-  readonly kind = "saga-driver" as const;
+export class SagaDriverError extends Failure("saga-driver") {
   constructor(cause: unknown) {
     super(cause instanceof Error ? cause.message : String(cause));
   }
@@ -127,8 +127,7 @@ export class SagaDriverError extends Error {
  * plain code, so its `throw` is not a typed failure until the driver's
  * `attempt` gives it one (D-087). The original is the `cause`.
  */
-export class SagaError extends Error {
-  readonly kind = "saga" as const;
+export class SagaError extends Failure("saga") {
   constructor(cause: unknown) {
     super(cause instanceof Error ? cause.message : String(cause), { cause });
   }

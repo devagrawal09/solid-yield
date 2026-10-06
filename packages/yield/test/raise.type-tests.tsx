@@ -1,3 +1,4 @@
+import { Failure } from "solid-yield";
 /**
  * Type tests for `raise` at every host (Phase 4 item 2; raise.spec.tsx is
  * the runtime half). Each position pins what `FailsOf` makes of a raised
@@ -56,12 +57,8 @@ type ViewPendingOf<V> = V extends View<infer P, unknown> ? P : never;
 /** A view's may-wait marker (D-075): not a color. */
 type ViewMayWaitOf<V> = V extends View<boolean, unknown, infer W> ? W : never;
 
-class Boom extends Error {
-  readonly kind = "boom" as const;
-}
-class Other extends Error {
-  readonly kind = "other" as const;
-}
+class Boom extends Failure("boom") {}
+class Other extends Failure("other") {}
 
 // --- the op itself --------------------------------------------------------------------
 // `raise(e)` is a `Raise<E>` op: FailsOf of it is E, and of a union of raises the union

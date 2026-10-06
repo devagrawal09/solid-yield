@@ -1,3 +1,4 @@
+import { Failure } from "solid-yield";
 // If you came here to enumerate React-vs-Solid syntax differences, you've
 // already misread this example. The thing that matters is what ~170 lines
 // accomplishes — fetch + per-item optimistic writes + per-item errors +
@@ -35,8 +36,7 @@ import { $event, $optimisticStore, attempt, readStore, refresh, type EventCall }
 import { api, type Todo as ServerTodo } from "./api";
 
 /** The todo API failed: the color of every todo request's failure. */
-export class ApiError extends Error {
-  readonly kind = "api" as const;
+export class ApiError extends Failure("api") {
   constructor(cause: unknown) {
     super(cause instanceof Error ? cause.message : String(cause));
   }

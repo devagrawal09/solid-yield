@@ -1,3 +1,4 @@
+import { Failure } from "solid-yield";
 import {
   component,
   $event,
@@ -18,8 +19,8 @@ export let setMode: (m: string) => unknown;
 export let reset: () => unknown;
 
 /** The untyped failure, given a type by the attempt that catches it (D-034). */
-class ParseFailure extends SyntaxError {
-  readonly kind = "parse" as const;
+class ParseFailure extends Failure("parse") {
+  override name = "SyntaxError";
 }
 const parse = (text: string): never => {
   throw new SyntaxError("cannot parse " + text);

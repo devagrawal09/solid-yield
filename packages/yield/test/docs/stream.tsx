@@ -1,3 +1,4 @@
+import { Failure } from "solid-yield";
 import {
   $event,
   $memo,
@@ -11,8 +12,7 @@ import {
   type Props,
   type Reset
 } from "solid-yield";
-class TransportError extends Error {
-  readonly kind = "transport" as const;
+class TransportError extends Failure("transport") {
   constructor(cause: unknown) {
     super(cause instanceof Error ? cause.message : String(cause));
   }

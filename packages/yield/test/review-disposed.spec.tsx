@@ -1,3 +1,4 @@
+import { Failure } from "solid-yield";
 /** D-109: disposed bind boundaries reject; live ones handle. */
 import { flush, resetErrorHalt } from "solid-js";
 import {
@@ -12,9 +13,7 @@ import {
   view
 } from "solid-yield";
 declare const __DEV__: boolean;
-class Locked extends Error {
-  readonly kind = "locked" as const;
-}
+class Locked extends Failure("locked") {}
 const tick = () => new Promise<void>(r => setTimeout(r, 0));
 it.each([
   [false, true],

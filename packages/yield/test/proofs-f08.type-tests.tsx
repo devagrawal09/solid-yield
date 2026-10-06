@@ -1,8 +1,7 @@
+import { Failure } from "solid-yield";
 import { component, view, $effect, raise, Errored, Loading, type Source } from "solid-yield";
 import { h } from "solid-yield/h";
-class Boom extends Error {
-  readonly kind = "boom" as const;
-}
+class Boom extends Failure("boom") {}
 const Child = component(function* () {
   yield* $effect(
     function* () {},

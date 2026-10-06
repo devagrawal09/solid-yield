@@ -1378,7 +1378,7 @@ _Reasoning:_ Never silently resolve a lost failure, and do not send it to a diff
 
 ### D-110 — Failures are nominal class instances (proofs F09)
 
-**Decided (Dev, 2026-10-07).** Export Failure("kind") as a class factory with readonly literal kind, a nominal brand and toJSON. A failure declaration is one line: class Boom extends Failure("boom") {}. raise, attempt and catch refuse structural objects with a message pointing to Failure(...); runtime selective matching keeps instanceof. Migrate and count the twins' failure classes.
+**Decided (Dev, 2026-10-07).** Export Failure("kind") as a class factory with readonly literal kind, a nominal brand and toJSON. A failure declaration is one line: class Boom extends Failure("boom") {}. raise, attempt and catch refuse structural objects with a message pointing to Failure(...); runtime selective matching keeps instanceof. Migrated **20 typed failure classes across 13 twin files**. The saga interruption Error remains plain: the driver's attempt wraps it in SagaError. Package test fixtures and tested docs use the same base.
 _Alternatives:_ Keep structural Error plus kind; rely on lint or an unstated instance premise.
 _Reasoning:_ A shaped object can pass structural subtraction but cannot match instanceof. The base class closes that gap.
 

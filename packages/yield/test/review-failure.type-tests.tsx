@@ -1,3 +1,4 @@
+import { Failure } from "solid-yield";
 import {
   $memo,
   attempt,
@@ -13,9 +14,7 @@ import {
   type Props,
   type Reset
 } from "solid-yield";
-class TransportError extends Error {
-  readonly kind = "transport" as const;
-}
+class TransportError extends Failure("transport") {}
 async function* watchRoom() {
   yield ["hello"];
   throw new Error("drop");
@@ -90,17 +89,17 @@ const RoomRoute = component(function* RoomRoute(props: Props<{ params: { id: str
   });
 });
 foreign(RoomRoute, { provided: [IdentityCtx] });
-type Failure<C> = C extends (...args: any[]) => View<any, infer E, any, any> ? E : never;
+type CallFailures<C> = C extends (...args: any[]) => View<any, infer E, any, any> ? E : never;
 type NoAny<T> = 0 extends 1 & T ? false : true;
 type Expect<T extends true> = T;
-type _live = Expect<NoAny<Failure<typeof LiveRoom>>>;
-type _page = Expect<NoAny<Failure<typeof RoomPage>>>;
-type _lazy = Expect<NoAny<Failure<typeof LazyRoom>>>;
-type _route = Expect<NoAny<Failure<typeof RoomRoute>>>;
+type _live = Expect<NoAny<CallFailures<typeof LiveRoom>>>;
+type _page = Expect<NoAny<CallFailures<typeof RoomPage>>>;
+type _lazy = Expect<NoAny<CallFailures<typeof LazyRoom>>>;
+type _route = Expect<NoAny<CallFailures<typeof RoomRoute>>>;
 
 type Equal<A, B> =
   (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
-type _streamFailure = Expect<Equal<Failure<typeof LiveRoom>, TransportError>>;
-type _caughtStream = Expect<Equal<Failure<typeof RoomPage>, never>>;
-type _chunkOnly = Expect<Equal<Failure<typeof LazyRoom>, ChunkError>>;
-type _caughtChunk = Expect<Equal<Failure<typeof RoomRoute>, never>>;
+type _streamFailure = Expect<Equal<CallFailures<typeof LiveRoom>, TransportError>>;
+type _caughtStream = Expect<Equal<CallFailures<typeof RoomPage>, never>>;
+type _chunkOnly = Expect<Equal<CallFailures<typeof LazyRoom>, ChunkError>>;
+type _caughtChunk = Expect<Equal<CallFailures<typeof RoomRoute>, never>>;

@@ -1,3 +1,4 @@
+import { Failure } from "solid-yield";
 // The program documentation/getting-started.md builds, rule by rule. It is
 // type-checked (test-types), linted with the twins' lint (test:conformance's
 // lint step) and run (getting-started.spec.tsx): edit the two together.
@@ -16,9 +17,7 @@ import {
 } from "solid-yield";
 
 // --- a typed failure: an Error with a literal `kind` --------------------------------------
-export class NotFound extends Error {
-  readonly kind = "not-found" as const;
-}
+export class NotFound extends Failure("not-found") {}
 
 export type User = { id: number; name: string };
 /** A stand-in for a server: users 1 and 2 exist. */

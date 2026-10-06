@@ -153,7 +153,7 @@ export interface YieldH {
     MayWaitOf<OpsOfOutput<ReturnType<Comp>> | OpsOfHole<C[number]>>,
     RequiresOf<OpsOfOutput<ReturnType<Comp>> | OpsOfHole<C[number], true>>
   >;
-  Fragment: (props: { children: Hole }) => HView<false, never, false, never>;
+  Fragment: <const C extends Hole>(props: { children: C }) => HViewOf<C>;
 }
 
 function convert(args: any[], name: string | null): any[] {

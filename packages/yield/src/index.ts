@@ -49,7 +49,7 @@ export type { Reset } from "./flow.js";
 export { render, hydrate, renderToString, renderToStream } from "./render.js";
 export type { RootCheck } from "./render.js";
 export { lazy, ChunkError } from "./lazy.js";
-export { foreign, type ForeignCheck } from "./foreign.js";
+export { foreign, type ForeignCheck, type ForeignOptions, type ProvidedCheck } from "./foreign.js";
 export type { Element, ArrayElement, RenderedObject, TagType } from "./element.js";
 export type { ViewYield, ViewReturn, NoJsxViewRule, ViewWrapperCheck } from "./runtime.js";
 export type {

@@ -9,10 +9,10 @@ import {
   component,
   $effect,
   $signal,
-  constant,
   createContext,
   type Element,
   type Props,
+  type Source,
   view
 } from "solid-yield";
 import { isServer } from "@solidjs/web";
@@ -35,15 +35,17 @@ function mint(): Identity {
 }
 
 /**
- * Outside an `IdentityProvider` there is no identity (the original throws; a
- * setup does not fail, so the default is "nobody": a constant source, D-060).
- * It stays defaulted, not required (D-098): its readers are the room's
- * components, below the router, which renders them as a foreign hand-off
- * (`foreign(Live)`, D-088) and so cannot carry a requirement to this
- * provider above it; and its `null` is also the identity the server renders
- * with and the client has until it mints one, not only a missing provider.
+ * Required (D-098): outside an `IdentityProvider` there is no identity, as
+ * in the original (which throws there): a reader's component requires
+ * `IdentityCtx`, and `NO_PROVIDER` is the run-time half. Its readers are the
+ * room's components, below the router, which renders them as a foreign
+ * hand-off; `foreign(Live, { provided: [IdentityCtx] })` (D-102) states that
+ * this provider sits above the router. The provided value is a source of
+ * `Identity | null`: its `null` is the identity the server renders with and
+ * the client has until it mints one — no longer also "no provider".
  */
-const IdentityContext = createContext(constant<Identity | null>(null));
+const IdentityContext = createContext<Source<Identity | null>, "IdentityCtx">();
+export { IdentityContext as IdentityCtx };
 
 /** Holds this tab's identity for the tree below; mints it on the client once mounted. */
 export const IdentityProvider = component(function* IdentityProvider(

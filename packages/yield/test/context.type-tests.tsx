@@ -307,6 +307,72 @@ foreign(Page);
 foreign(App);
 // the refusal names the context by its name
 type _named = Expect<Equal<ContextNames<typeof UserCtx>, "UserCtx">>;
+// --- D-102: foreign(Comp, { provided }) — providers above the foreign edge --------------------
+
+// an app-wide provider above a router: the author lists it, the requirement is discharged
+export const pageUnderRouter = foreign(Page, { provided: [UserCtx] });
+type _providedIdentity = Expect<Equal<typeof pageUnderRouter, typeof Page>>;
+// two requirements: both listed is accepted, in either order
+const SessionCtx = createContext<{ id: string }, "SessionCtx">();
+const TwoReads = component(function* TwoReads() {
+  const user = yield* UserCtx;
+  const session = yield* SessionCtx;
+  return view(function* () {
+    return (
+      <b>
+        {yield* user.name} {yield* session.id}
+      </b>
+    );
+  });
+});
+foreign(TwoReads, { provided: [SessionCtx, UserCtx] });
+// one of two listed: the other is still refused, named
+// @ts-expect-error [NO_PROVIDER] "SessionCtx" still required
+foreign(TwoReads, { provided: [UserCtx] });
+// a listed context the component does not require is refused, named ([NOT_REQUIRED])
+// @ts-expect-error [NOT_REQUIRED] App requires nothing
+foreign(App, { provided: [UserCtx] });
+// @ts-expect-error [NOT_REQUIRED] SessionCtx is not Page's
+foreign(Page, { provided: [UserCtx, SessionCtx] });
+// a defaulted context is never required, so never listed
+// @ts-expect-error [NOT_REQUIRED] ThemeCtx has a default
+foreign(Themed, { provided: [ThemeCtx] });
+// an empty list is the one-argument form
+foreign(App, { provided: [] });
+// @ts-expect-error [NO_PROVIDER]
+foreign(Page, { provided: [] });
+// a provided list does not discharge failures: [FOREIGN_HANDOFF] stands
+const FailingReader = component(function* FailingReader() {
+  const user = yield* UserCtx;
+  return view(function* () {
+    return (
+      <b>
+        {yield* user.name}
+        {yield* failing}
+      </b>
+    );
+  });
+});
+// @ts-expect-error [FOREIGN_HANDOFF] "fetch"
+foreign(FailingReader, { provided: [UserCtx] });
+// the messages, as TypeScript prints them
+type _notRequiredNames = Expect<
+  Equal<
+    import("solid-yield").ProvidedCheck<typeof Page, typeof UserCtx | typeof SessionCtx>,
+    {
+      readonly "[NOT_REQUIRED] foreign's provided lists contexts the component does not require (this property names them): remove them": "SessionCtx";
+    }
+  >
+>;
+type _remainingNames = Expect<
+  Equal<
+    import("solid-yield").ForeignCheck<typeof TwoReads, typeof UserCtx>,
+    {
+      readonly "[NO_PROVIDER] a yield component handed to plain Solid requires the contexts this property names: provide them inside it (Ctx.provide around the calls that read them), or list the ones provided above the foreign edge: foreign(Comp, { provided: [Ctx] })": "SessionCtx";
+    }
+  >
+>;
+
 type _fold = Expect<
   Equal<RequiresOf<ContextRead<typeof UserCtx> | ContextRead<never>>, typeof UserCtx>
 >;

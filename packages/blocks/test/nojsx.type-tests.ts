@@ -85,8 +85,8 @@ const pendingOut: HView<true, never> = h("p", Pending());
 void pendingOut;
 // @ts-expect-error the root would suspend
 render(() => Pending(), root);
-render(() => Loading({ children: Pending() }), root);
-export const handled = h("div", Loading({ fallback: "…", children: Pending() }));
+render(() => Loading({ children: () => Pending() }), root);
+export const handled = h("div", Loading({ fallback: "…", children: () => Pending() }));
 const handledOut: HView<false, never> = handled;
 void handledOut;
 // a fragment, h([a, b]), carries its holes' pending

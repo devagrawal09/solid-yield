@@ -111,7 +111,9 @@ for (const form of forms) {
                       <>
                         {
                           yield* Loading({
-                            fallback: <i>…</i>,
+                            fallback: function* () {
+                              return <i>…</i>;
+                            },
                             children: function* () {
                               return <>{yield* Inner()}</>;
                             }

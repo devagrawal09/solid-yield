@@ -1055,6 +1055,8 @@ const noReadInProp = {
  * JSX in the call it is built with the holding view, shown or not, and while
  * hydrating that build claims a server node that is not there whenever the
  * server rendered the content (Solid's "Hydration key miss").
+ * D-094: for the library's flow controls and boundaries both are type errors
+ * too (`[LAZY_VIEW]`); this rule is their autofix.
  */
 const componentChildrenGenerator = {
   meta: {

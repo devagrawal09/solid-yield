@@ -125,7 +125,9 @@ describe("views are fine-grained", () => {
     });
     mount(() =>
       Loading({
-        fallback: <i>loading</i>,
+        fallback: function* () {
+          return <i>loading</i>;
+        },
         children: function* () {
           return <>{yield* User()}</>;
         }
@@ -408,7 +410,9 @@ describe("setup operations", () => {
     });
     mount(() =>
       Loading({
-        fallback: <p>loading</p>,
+        fallback: function* () {
+          return <p>loading</p>;
+        },
         children: function* () {
           return <>{yield* Watcher()}</>;
         }
@@ -450,7 +454,9 @@ describe("setup operations", () => {
             {
               yield* Loading({
                 on: key,
-                fallback: <p>inner</p>,
+                fallback: function* () {
+                  return <p>inner</p>;
+                },
                 children: function* () {
                   return <i>content</i>;
                 }
@@ -465,7 +471,9 @@ describe("setup operations", () => {
         fallback: (e: () => unknown) => <p>failed {(e() as Error).message}</p>,
         children: () =>
           Loading({
-            fallback: <p>outer</p>,
+            fallback: function* () {
+              return <p>outer</p>;
+            },
             children: () => Page()
           })
       })
@@ -941,7 +949,9 @@ describe("props", () => {
     });
     mount(() =>
       Loading({
-        fallback: <b>wait</b>,
+        fallback: function* () {
+          return <b>wait</b>;
+        },
         children: function* () {
           return <>{yield* App()}</>;
         }
@@ -1704,7 +1714,9 @@ describe("row blocks", () => {
     });
     mount(() =>
       Loading({
-        fallback: <i>loading</i>,
+        fallback: function* () {
+          return <i>loading</i>;
+        },
         children: function* () {
           return <>{yield* List()}</>;
         }
@@ -2003,7 +2015,9 @@ describe("reads from JSX positions are never a view's or a setup's own", () => {
           <>
             {
               yield* Loading({
-                fallback: <i>loading</i>,
+                fallback: function* () {
+                  return <i>loading</i>;
+                },
                 children: function* () {
                   return <b>{perform(v)}</b>;
                 }
@@ -2132,7 +2146,9 @@ describe("lazy", () => {
     });
     mount(() =>
       Loading({
-        fallback: <i>wait</i>,
+        fallback: function* () {
+          return <i>wait</i>;
+        },
         children: function* () {
           return <>{yield* App()}</>;
         }
@@ -2388,7 +2404,9 @@ describe("Loading on a source", () => {
             {perform(
               Loading({
                 on: k,
-                fallback: <i>wait</i>,
+                fallback: function* () {
+                  return <i>wait</i>;
+                },
                 children: function* () {
                   return <>{yield* Content()}</>;
                 }
@@ -2440,7 +2458,9 @@ describe("boundaries in call form", () => {
             <p>shell</p>
             {perform(
               Loading({
-                fallback: <i>inner</i>,
+                fallback: function* () {
+                  return <i>inner</i>;
+                },
                 children: function* () {
                   return <>{yield* Pending()}</>;
                 }
@@ -2452,7 +2472,9 @@ describe("boundaries in call form", () => {
     });
     mount(() =>
       Loading({
-        fallback: <i>outer</i>,
+        fallback: function* () {
+          return <i>outer</i>;
+        },
         children: function* () {
           return <>{yield* Page()}</>;
         }
@@ -2491,7 +2513,9 @@ describe("boundaries in call form", () => {
     });
     mount(() =>
       Errored({
-        fallback: <i>outer</i>,
+        fallback: function* () {
+          return <i>outer</i>;
+        },
         children: function* () {
           return <>{yield* Page()}</>;
         }
@@ -2505,6 +2529,7 @@ describe("boundaries in call form", () => {
     expect(() =>
       createRoot(dispose => {
         try {
+          // @ts-expect-error a built view is not content: the types refuse it too (D-094)
           Loading({ fallback: "…", children: Pending() });
         } finally {
           dispose();
@@ -2528,7 +2553,9 @@ describe("flow controls take holes (D-038)", () => {
                 when: function* () {
                   return (yield* n) > 1;
                 },
-                fallback: <i>small</i>,
+                fallback: function* () {
+                  return <i>small</i>;
+                },
                 children: function* () {
                   return <b>big</b>;
                 }
@@ -2536,7 +2563,9 @@ describe("flow controls take holes (D-038)", () => {
             }
             {
               yield* Switch({
-                fallback: <s>odd</s>,
+                fallback: function* () {
+                  return <s>odd</s>;
+                },
                 children: function* () {
                   return (
                     <>

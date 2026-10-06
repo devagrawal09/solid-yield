@@ -21,8 +21,8 @@ A view is `return view(function* () { return <…/>; })`: it has no body (D-032)
 | a component as a tag: `<Card todo={todo} />` | `{yield* Card({ todo })}` | the JSX namespace's `ElementType` (a block component's view is branded) | — | — | `no-component-tag` (autofix) |
 | a flow control or boundary as a tag: `<Show when={…}>` | `{yield* Show({ when, children: function* () { … } })}` | `ElementType` | — | — | `no-component-tag` (autofix) |
 | a read in a call's argument: `Card({ n: yield* count })` | pass the source (`n: count`) or a hole (`n: function* () { return (yield* count) * 2; }`) | — | — | — | `no-read-in-prop` (autofix) |
-| plain JSX as a call's `children`: `Show({ when, children: <p /> })` | a lazy view `children: function* () { return <p />; }`, or a row `function* (item) { … }` | — (content is accepted) | — | — | `component-children-generator` (autofix) |
-| JSX as a flow control's `fallback`: `Loading({ fallback: <p>…</p>, … })` (built with the holding view, shown or not; while hydrating it claims a server node that is there only if the server showed the fallback: Solid's "Hydration key miss", D-092) | a lazy view `fallback: function* () { return <p>…</p>; }`, built when it shows | — (an element is accepted) | — | — | `component-children-generator` (autofix) |
+| plain JSX as a call's `children`: `Show({ when, children: <p /> })` | a lazy view `children: function* () { return <p />; }`, or a row `function* (item) { … }` | `[LAZY_VIEW] children is a lazy view: function* () { return <.../>; }` (D-094; a render callback returning JSX, and a component's view built in the call, are refused too) | — | — | `component-children-generator` (autofix) |
+| JSX as a flow control's `fallback`: `Loading({ fallback: <p>…</p>, … })` (built with the holding view, shown or not; while hydrating it claims a server node that is there only if the server showed the fallback: Solid's "Hydration key miss", D-092) | a lazy view `fallback: function* () { return <p>…</p>; }`, built when it shows | `[LAZY_VIEW] fallback is a lazy view: …` (D-094; `h` output, text and `Errored`'s render function `err => <p>…</p>` pass) | — | — | `component-children-generator` (autofix) |
 | a block call not `yield*`-ed: `{Card({ todo })}`, `<>{Card({ todo })}</>`, `{[Main(), Footer()]}` | `{yield* Card({ todo })}`, under a `Loading` / `Errored` as its colors need (D-086) | `JSX.Element` is settled only: a pending or failing view is not one, in an element and in a fragment (`Fragment`'s children are `Element`; checked when the tsconfig sets `jsxFactory` / `jsxFragmentFactory`; `require-jsx-factory` warns when it does not, D-093) | — | — | `component-call-yielded` (autofix: the `yield*`) |
 | a thunk as a child or attribute: `{() => x}`, `class={() => c}` | a hole: `{yield* x}` | JSX and `h` reject plain thunks | — | — | — |
 | a source called: `count()` | `yield* count` | `Source` has no call signature | — | — | — |
@@ -57,7 +57,7 @@ The neighbours of a view, for completeness:
 | a read of a source that may be pending in an `$effect`'s effect phase | read it in the compute and pass the value (D-079; a settled source the effect phase reads, untracked, D-083) | `Read<true>` is not an `EffectPhaseOp`: the effect phase does not wait | — (Solid's `NotReadyError` if it is pending) | — |
 | a memo read after its first async `attempt` | read before it | — | `READ_AFTER_ATTEMPT` | `read-before-attempt` |
 | `$optimistic(body)` / `$optimisticStore(scalar)` | `$optimistic(value)`; `$optimisticStore(object \| body)` (D-014) | overloads | `OPTIMISTIC_FORM` | — |
-| a boundary's content built before the boundary | pass it as a function | overloads | `BOUNDARY_CONTENT_BUILT` | — |
+| a boundary's content built before the boundary | pass it as a lazy view (or, in `h`, a thunk) | `[LAZY_VIEW]` (D-094) | `BOUNDARY_CONTENT_BUILT` | — |
 | a non-operation delegated to: `yield* 42` | `yield*` a source, a path, a prop, `attempt`, `raise` or a receipt | `Yieldable` ops | `NOT_AN_OPERATION` | — |
 | `try { yield* save(); } catch (e) { … }` in a block | `yield* attempt(() => save(), e => { … })` (absorb: return nothing; transform: return an `Error` with a literal `kind`), or an `Errored` above (D-077) | — (the types cannot see a catch: the failure stays in the type) | — | `no-try-catch` |
 | an op in a generator handler its host does not take: a write in a `$memo`'s, a wait in an `$effect`'s | the handler is the host's block code (D-078): write in an `$event`'s handler; wait in a `$memo` or an `$event` | the host's op union (`MemoOp`, `EffectOp`) | `WRITE_IN_REACTIVE`, `ASYNC_NOT_ALLOWED` | — |
@@ -71,7 +71,7 @@ The neighbours of a view, for completeness:
 
 ## Every code, by layer
 
-Counted against the code (2026-10-06): 4 transform codes (`REFUSALS` in `vite-plugin-solid-blocks`), 22 development errors, 10 type-level messages, 19 lint rules (17 errors and 2 warnings in `recommended`).
+Counted against the code (2026-10-06): 4 transform codes (`REFUSALS` in `vite-plugin-solid-blocks`), 22 development errors, 11 type-level messages, 19 lint rules (17 errors and 2 warnings in `recommended`).
 
 **The transform** (`vite-plugin-solid-blocks`). A compile error lists each refusal as `[CODE] message (line:column)`. The lint rule `yield-in-jsx-hole` reports the same list.
 
@@ -123,6 +123,7 @@ Counted against the code (2026-10-06): 4 transform codes (`REFUSALS` in `vite-pl
 | `[ROW_SETUP_OP]` | a row's setup that reads |
 | `[ROW_VIEW_OP]` | a row's view that creates |
 | `[VIEW_WRAPPER]` | a setup that returns a bare `function*`: "wrap the view: return view(function* () { ... })" (D-089) |
+| `[LAZY_VIEW]` | a JSX element as a flow control's or a boundary's `fallback` or `children` (call form; `h` form's `fallback`): "fallback is a lazy view: function* () { return <.../>; }" (D-094) |
 
 Every other type refusal is a plain assignability error. The common ones: an op that is not a `SetupOp` / `ViewOp` / `MemoOp` / `EffectOp` / `HoleOp` (reported at `view(` or `$component(`); a component tag (`ElementType`); a pending view as a child or at the root; a source called as a function; a plain thunk as a child.
 

@@ -189,7 +189,9 @@ describe("server rendering", () => {
           <div>
             {
               yield* Loading({
-                fallback: <i>…</i>,
+                fallback: function* () {
+                  return <i>…</i>;
+                },
                 children: function* () {
                   return <>{yield* List({ items })}</>;
                 }
@@ -251,7 +253,9 @@ describe("server rendering", () => {
                     <>
                       {
                         yield* Loading({
-                          fallback: <i>…</i>,
+                          fallback: function* () {
+                            return <i>…</i>;
+                          },
                           children: function* () {
                             return <>{yield* Facts({ info: props.info })}</>;
                           }
@@ -310,7 +314,9 @@ describe("server rendering", () => {
     });
     const html = await stream(() =>
       Loading({
-        fallback: <i>…</i>,
+        fallback: function* () {
+          return <i>…</i>;
+        },
         children: function* () {
           return <>{yield* User()}</>;
         }

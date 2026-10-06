@@ -38,6 +38,7 @@ import {
   isPendingOf,
   view
 } from "solid-blocks";
+import { h } from "solid-blocks/h";
 
 declare const root: HTMLElement;
 type Equal<A, B> =
@@ -238,7 +239,9 @@ void calledPending;
 // @ts-expect-error a pending view is not an element
 export const bad2 = <div>{Pending({ id: "1" })}</div>;
 export const ok2 = Loading({
-  fallback: <p>…</p>,
+  fallback: function* () {
+    return <p>…</p>;
+  },
   children: function* () {
     return <>{yield* Pending({ id: "1" })}</>;
   }
@@ -247,7 +250,9 @@ export const ok2 = Loading({
 export const ok3 = (
   <div>
     {Loading({
-      fallback: <p>…</p>,
+      fallback: function* () {
+        return <p>…</p>;
+      },
       children: function* () {
         return <>{yield* Pending({ id: "1" })}</>;
       }
@@ -263,7 +268,20 @@ export const bad3: View<false, never> = Loading({
 export const ok4 = Errored({
   fallback: err => <p>{err().kind}</p>,
   children: function* () {
-    return <>{yield* Loading({ fallback: <p>…</p>, children: Fallible({ id: "1" }) })}</>;
+    return (
+      <>
+        {
+          yield* Loading({
+            fallback: function* () {
+              return <p>…</p>;
+            },
+            children: function* () {
+              return <>{yield* Fallible({ id: "1" })}</>;
+            }
+          })
+        }
+      </>
+    );
   }
 });
 
@@ -276,7 +294,9 @@ export const Parent = $component(function* () {
 // @ts-expect-error Parent inherits Fallible's pending and failures
 export const bad4: View<false, never> = Parent();
 export const ok5 = Errored({
-  fallback: <p>error</p>,
+  fallback: function* () {
+    return <p>error</p>;
+  },
   children: function* () {
     return (
       <>
@@ -494,7 +514,9 @@ export const FlowHoles = $component(function* () {
             when: function* () {
               return (yield* n) > 1;
             },
-            fallback: <i>small</i>,
+            fallback: function* () {
+              return <i>small</i>;
+            },
             children: function* () {
               return <b>big</b>;
             }
@@ -1501,3 +1523,102 @@ export const SettledInFragment = $component(function* () {
     );
   });
 });
+
+// --- D-094: fallback and children are lazy views; a JSX element there is refused ---------------
+// A JSX element written in the call is built with the holding view, shown or not (D-066; a
+// fallback's build is the twins' hydration key miss, D-092). `h` output (`HView`, h's own branded
+// subtype of Element) and text are built where they are inserted, and pass.
+export const JsxFallbackRefused = Loading({
+  // @ts-expect-error [LAZY_VIEW] fallback is a lazy view: function* () { return <.../>; }
+  fallback: <p>…</p>,
+  children: function* () {
+    return <>{yield* Pending({ id: "1" })}</>;
+  }
+});
+export const JsxFragmentFallbackRefused = Show({
+  when: true,
+  // @ts-expect-error a fragment too
+  fallback: <>no</>,
+  children: function* () {
+    return <b>yes</b>;
+  }
+});
+export const JsxErroredFallbackRefused = Errored({
+  // @ts-expect-error Errored's: no overload takes a JSX element (the last one prints [LAZY_VIEW])
+  fallback: <p>failed</p>,
+  children: function* () {
+    return <>{yield* Fallible({ id: "1" })}</>;
+  }
+});
+export const JsxChildrenRefused = Loading({
+  fallback: "…",
+  // @ts-expect-error [LAZY_VIEW] children is a lazy view: function* () { return <.../>; }
+  children: <p>content</p>
+});
+// @ts-expect-error a flow control's too (reported as no overload of Show matching)
+export const JsxShowChildrenRefused = Show({ when: true, children: <p>content</p> });
+export const JsxRenderArrowRefused = For({
+  each: comments,
+  // @ts-expect-error a render callback returning JSX is a second spelling of a row (I-5)
+  children: c => <li>{String(c)}</li>
+});
+// a component's view built in the call (its setup ran in the caller) is not content either
+export const BuiltViewRefused = Loading({
+  // @ts-expect-error a built view: children: function* () { return <>{yield* Pending(…)}</>; }
+  children: Pending({ id: "1" })
+});
+// the lazy view, written as a generator: accepted, and its colors are carried
+export const GeneratorAccepted = Loading({
+  fallback: function* () {
+    return <p class="loader">…</p>;
+  },
+  children: function* () {
+    return <>{yield* Pending({ id: "1" })}</>;
+  }
+});
+const generatorAcceptedView: View<false, never> = GeneratorAccepted;
+void generatorAcceptedView;
+export const GeneratorFallbackColors = Loading({
+  fallback: function* () {
+    return <p>{yield* Fallible({ id: "1" })}</p>;
+  },
+  children: "settled"
+});
+// @ts-expect-error a lazy-view fallback's failure is not this Loading's to handle (D-071)
+export const generatorFallbackColors: View<boolean, never> = GeneratorFallbackColors;
+// h output, text and an Errored render function returning JSX (called when it shows): accepted;
+// the render function carries no colors, Errored handles the failure and passes the pending on
+export const HOutputAccepted = Loading({
+  fallback: h("p", { class: "loader" }, "…"),
+  children: h("b", "content")
+});
+export const TextAccepted = Show({ when: true, fallback: "no", children: "yes" });
+export const RenderFunctionAccepted = Errored({
+  fallback: err => <p>{err().kind}</p>,
+  children: function* () {
+    return <>{yield* Fallible({ id: "1" })}</>;
+  }
+});
+const renderFunctionAcceptedView: View<true, never> = RenderFunctionAccepted;
+void renderFunctionAcceptedView;
+// the h form: a JSX fallback is refused there too, with the message
+// @ts-expect-error [LAZY_VIEW] fallback is a lazy view (the h overloads' last one prints it)
+export const HFormJsxFallback = h(Loading, { fallback: <p>…</p> }, "x");
+export const HFormHFallback = h(Loading, { fallback: h("p", "…") }, "x");
+// the message, pinned: what a JSX element meets in a fallback
+type LoadingFallbackSlot = NonNullable<Parameters<typeof Loading>[0]["fallback"]>;
+export type LazyViewMessagePinned = Expect<
+  Equal<
+    [
+      Extract<
+        LoadingFallbackSlot,
+        {
+          readonly "[LAZY_VIEW] fallback is a lazy view: function* () { return <.../>; }": never;
+        }
+      >
+    ] extends [never]
+      ? false
+      : true,
+    true
+  >
+>;

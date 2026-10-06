@@ -40,6 +40,8 @@ import type { Element } from "./element.js";
 import type {
   BoundEvent,
   ComponentView,
+  HView,
+  View,
   ErrorClass,
   Failure,
   KindCheck,
@@ -51,7 +53,7 @@ import type {
   RowBlock,
   Source
 } from "./types.js";
-import type { Hole, OpsOfHole } from "./holes.js";
+import type { OpsOfHole } from "./holes.js";
 
 /**
  * What a flow control's source prop reads as (D-065): a value, a source's
@@ -80,21 +82,58 @@ type FlowView<O> = ComponentView<PendingOf<O>, FailsOf<O>, MayWaitOf<O>>;
  * (D-073).
  */
 type RowOps<VY, R, Y> = VY | HOps<R> | Y;
+/** Text a flow control shows as it is. */
+type Text = string | number | bigint | boolean | null | undefined;
 /**
- * Content a flow control renders: anything `h` takes (not a generator — a
- * generator is a lazy view or a row) or a JSX element.
+ * Content a flow control takes as it is (D-094): `h` output — `HView`, the
+ * branded subtype of `Element` that `h` returns, built where it is inserted —
+ * and text. Not a JSX element: written in the call, a JSX element is built
+ * there, with the holding view, before the control decides to show it (D-066;
+ * a fallback's build claims a server node while hydrating, D-092). JSX is
+ * written in a lazy view, `function* () { return <…/>; }`.
  */
-type Content = Exclude<Hole, (...args: any[]) => Generator<any, any, any>> | Element;
+type Content = HView<boolean, any> | Text | readonly Content[];
 /**
- * `children` in call form (D-066): a lazy view `function* () { return <…/>; }`
- * built inside the flow control (it may hold holes), content (`h` output, a
- * view), or a render callback returning content (`h`). A row — a generator
- * with the control's arguments — has its own overload.
+ * What a plain callback returns — `h`'s render callback, a thunk
+ * `() => Card()` — built when the control calls it: content, or a view.
  */
-type Children<A extends unknown[]> =
-  | (() => Generator<any, Content, any>)
-  | Content
-  | ((...args: A) => Content);
+type Rendered = Content | View<boolean, any>;
+/** A lazy view (D-066): built where (and each time) the control shows it. JSX goes here. */
+type LazyView = () => Generator<any, Element | Rendered, any>;
+/**
+ * `children` in call form (D-066, D-094): a lazy view `function* () { return
+ * <…/>; }` built inside the flow control (it may hold holes), `h` output or
+ * text, or a callback returning one (`h`'s render callback, a thunk). Never a
+ * JSX element, nor a callback returning one. A row — a generator with the
+ * control's arguments — has its own overload.
+ */
+type Children<A extends unknown[]> = LazyView | Content | ((...args: A) => Rendered);
+/** A flow control's `fallback` (D-092, D-094): a lazy view, `h` output or text. */
+type Fallback = LazyView | Content;
+/**
+ * D-094: the type of a slot that takes `A` and was given `V`. Within `A`, `V`
+ * itself. A JSX element (an `Element` that is not `h` output or text) is
+ * refused with the message alone: a property TypeScript prints in full
+ * (`...`: it escapes `…`). Anything else is checked against `A` with the
+ * message beside it, so it shows there too (a built component view, `h`'s
+ * generic component overload, where `V` is erased to `unknown`). A
+ * conditional rather than an intersection: TypeScript infers `V` through
+ * both branches, prints the message rather than distributing it over
+ * `Element`'s members, and a render callback's parameters are still typed
+ * from the slot. The message is written inline, not as a named alias, so
+ * that TypeScript prints it rather than the alias's name.
+ */
+type LazyParam<V, A, Slot extends string> = [V] extends [A]
+  ? V
+  : [V] extends [Element]
+    ? {
+        readonly [K in `[LAZY_VIEW] ${Slot} is a lazy view: function* () { return <.../>; }`]: never;
+      }
+    :
+        | A
+        | {
+            readonly [K in `[LAZY_VIEW] ${Slot} is a lazy view: function* () { return <.../>; }`]: never;
+          };
 
 /** Forward every prop as a getter, replacing `children` (and `fallback` when given). */
 function forward(props: any, adaptChildren: (children: unknown) => unknown): any {
@@ -177,18 +216,18 @@ type ItemOf<W> = Path<EachOf<NonNullable<ValueOf<W>>>>;
  * row's item is a path (D-055), its index a source. The rows' pending and
  * failures join the list's view (D-059, D-063), and so the holding view.
  */
-function ForBlocks<W, Y, VY, R, F = never>(props: {
+function ForBlocks<W, Y, VY, R, F>(props: {
   each: W;
-  fallback?: F;
+  fallback?: LazyParam<F, Fallback, "fallback">;
   keyed?: boolean | ((item: EachOf<NonNullable<ValueOf<W>>>) => any);
   children: RowBlock<[item: ItemOf<W>, index: Source<number>], Y, VY, R>;
 }): FlowView<Ops<W> | Ops<F> | RowOps<VY, R, Y>>;
 /** `h`: `For({ each: todos, children: todo => h(TodoItem, { todo }) })`. */
-function ForBlocks<W, C extends Content, F = never>(props: {
+function ForBlocks<W, C extends Rendered | Element, F>(props: {
   each: W;
-  fallback?: F;
+  fallback?: LazyParam<F, Fallback, "fallback">;
   keyed?: boolean | ((item: EachOf<NonNullable<ValueOf<W>>>) => any);
-  children: (item: ItemOf<W>, index: Source<number>) => C;
+  children: (item: ItemOf<W>, index: Source<number>) => LazyParam<C, Rendered, "children">;
 }): FlowView<Ops<W> | Ops<F> | OpsOfHole<C>>;
 function ForBlocks(props: any): any {
   const keyedFalse = props.keyed === false;
@@ -209,17 +248,17 @@ function ForBlocks(props: any): any {
 // --- Repeat ---------------------------------------------------------------------------------------
 
 /** `{yield* Repeat({ count: n, children: function* (index) { … } })}`: the index is a source. */
-function RepeatBlocks<W, Y, VY, R, F = never>(props: {
+function RepeatBlocks<W, Y, VY, R, F>(props: {
   count: W;
   from?: number | undefined;
-  fallback?: F;
+  fallback?: LazyParam<F, Fallback, "fallback">;
   children: RowBlock<[index: Source<number>], Y, VY, R>;
 }): FlowView<Ops<W> | Ops<F> | RowOps<VY, R, Y>>;
-function RepeatBlocks<W, C extends Children<[index: Source<number>]>, F = never>(props: {
+function RepeatBlocks<W, C extends Children<[index: Source<number>]> | Element, F>(props: {
   count: W;
   from?: number | undefined;
-  fallback?: F;
-  children: C;
+  fallback?: LazyParam<F, Fallback, "fallback">;
+  children: LazyParam<C, Children<[index: Source<number>]>, "children">;
 }): FlowView<Ops<W> | Ops<F> | Ops<C>>;
 function RepeatBlocks(props: any): any {
   return SolidRepeat(
@@ -237,17 +276,17 @@ type ValuePath<W> = Path<NonNullable<ValueOf<W>>>;
  * <…/>; }` built when the branch shows. `when` is a value, a source or a hole
  * (`when: function* () { return (yield* n) > 1; }`).
  */
-function ShowBlocks<W, Y, VY, R, F = never>(props: {
+function ShowBlocks<W, Y, VY, R, F>(props: {
   when: W;
   keyed?: boolean;
-  fallback?: F;
+  fallback?: LazyParam<F, Fallback, "fallback">;
   children: RowBlock<[value: ValuePath<W>], Y, VY, R>;
 }): FlowView<Ops<W> | Ops<F> | RowOps<VY, R, Y>>;
-function ShowBlocks<W, C extends Children<[value: ValuePath<W>]>, F = never>(props: {
+function ShowBlocks<W, C extends Children<[value: ValuePath<W>]> | Element, F>(props: {
   when: W;
   keyed?: boolean;
-  fallback?: F;
-  children: C;
+  fallback?: LazyParam<F, Fallback, "fallback">;
+  children: LazyParam<C, Children<[value: ValuePath<W>]>, "children">;
 }): FlowView<Ops<W> | Ops<F> | Ops<C>>;
 function ShowBlocks(props: any): any {
   const keyed = !!props.keyed;
@@ -260,9 +299,9 @@ function ShowBlocks(props: any): any {
  * `{yield* Switch({ fallback, children: function* () { return <>{yield*
  * Match({ … })}…</>; } })}`: the first `Match` whose `when` holds.
  */
-function SwitchBlocks<C extends Children<[]>, F = never>(props: {
-  fallback?: F;
-  children: C;
+function SwitchBlocks<C extends Children<[]> | Element, F>(props: {
+  fallback?: LazyParam<F, Fallback, "fallback">;
+  children: LazyParam<C, Children<[]>, "children">;
 }): FlowView<Ops<C> | Ops<F>>;
 function SwitchBlocks(props: any): any {
   const children = content(props, "Switch");
@@ -280,10 +319,10 @@ function MatchBlocks<W, Y, VY, R>(props: {
   keyed?: boolean;
   children: RowBlock<[value: ValuePath<W>], Y, VY, R>;
 }): FlowView<Ops<W> | RowOps<VY, R, Y>>;
-function MatchBlocks<W, C extends Children<[value: ValuePath<W>]>>(props: {
+function MatchBlocks<W, C extends Children<[value: ValuePath<W>]> | Element>(props: {
   when: W;
   keyed?: boolean;
-  children: C;
+  children: LazyParam<C, Children<[value: ValuePath<W>]>, "children">;
 }): FlowView<Ops<W> | Ops<C>>;
 function MatchBlocks(props: any): any {
   const keyed = !!props.keyed;
@@ -363,10 +402,10 @@ function content(props: any, name: string): () => unknown {
  * `Loading`'s to handle and reaches the boundary above (runtime.spec,
  * "Loading's on"). The fallback's colors pass on too.
  */
-function LoadingBlocks<C, F = never, O = never>(props: {
-  fallback?: F;
+function LoadingBlocks<C, F, O = never>(props: {
+  fallback?: LazyParam<F, Fallback, "fallback">;
   on?: O;
-  children: C;
+  children: LazyParam<C, Children<[]>, "children">;
 }): ComponentView<
   PendingOf<Ops<F>>,
   FailsOf<Ops<C> | Ops<F> | Ops<O>>,
@@ -389,8 +428,18 @@ function LoadingBlocks(props: any): any {
  * for a `Bind` to carry, so it is typed as already bound (D-072).
  */
 export type Reset = BoundEvent<[]>;
-/** An `Errored` fallback that carries no colors: content, or a render function returning content. */
-type PlainFallback<E> = Content | ((error: Accessor<E>, reset: Reset) => Content);
+/**
+ * An `Errored` fallback (D-094): a lazy view, `h` output or text, or a render
+ * function receiving the error and `reset`. A render function is called when
+ * the fallback shows, so it may return JSX; a JSX element given as it is may
+ * not. Only a lazy view's colors are carried (`FallbackYields`).
+ */
+type ErroredFallback<E> =
+  | LazyView
+  | Content
+  | ((error: Accessor<E>, reset: Reset) => Element | Rendered);
+/** What a lazy-view fallback yields: its colors. Content and a render function carry none. */
+type FallbackYields<F> = F extends () => Generator<infer Y, any, any> ? Y : never;
 
 /**
  * Handles failures below it. The fallback is content, a lazy view
@@ -415,34 +464,42 @@ type PlainFallback<E> = Content | ((error: Accessor<E>, reset: Reset) => Content
 function ErroredBlocks<C, K extends readonly ErrorClass<Failure>[], Y, VY, R>(props: {
   catch: K & KindCheck<InstanceType<K[number]>>;
   fallback: RowBlock<[error: Path<InstanceType<K[number]>>, reset: Reset], Y, VY, R>;
-  children: C;
+  children: LazyParam<C, Children<[]>, "children">;
 }): ComponentView<
   PendingOf<Ops<C> | RowOps<VY, R, Y>>,
   Exclude<FailsOf<Ops<C>>, InstanceType<K[number]>> | FailsOf<RowOps<VY, R, Y>>,
   MayWaitOf<Ops<C> | RowOps<VY, R, Y>>
 >;
-/** A lazy-view fallback carries its colors (`FY`); content and a render function carry none. */
-function ErroredBlocks<C, K extends readonly ErrorClass<Failure>[], FY = never>(props: {
+/** A lazy-view fallback carries its colors; content and a render function carry none. */
+function ErroredBlocks<
+  C,
+  K extends readonly ErrorClass<Failure>[],
+  F extends ErroredFallback<InstanceType<K[number]>> | Element
+>(props: {
   catch: K & KindCheck<InstanceType<K[number]>>;
-  fallback: (() => Generator<FY, Content, any>) | PlainFallback<InstanceType<K[number]>>;
-  children: C;
+  fallback: LazyParam<F, ErroredFallback<InstanceType<K[number]>>, "fallback">;
+  children: LazyParam<C, Children<[]>, "children">;
 }): ComponentView<
-  PendingOf<Ops<C> | FY>,
-  Exclude<FailsOf<Ops<C>>, InstanceType<K[number]>> | FailsOf<FY>,
-  MayWaitOf<Ops<C> | FY>
+  PendingOf<Ops<C> | FallbackYields<F>>,
+  Exclude<FailsOf<Ops<C>>, InstanceType<K[number]>> | FailsOf<FallbackYields<F>>,
+  MayWaitOf<Ops<C> | FallbackYields<F>>
 >;
 function ErroredBlocks<C, Y, VY, R>(props: {
   fallback: RowBlock<[error: Path<FailsOf<Ops<C>>>, reset: Reset], Y, VY, R>;
-  children: C;
+  children: LazyParam<C, Children<[]>, "children">;
 }): ComponentView<
   PendingOf<Ops<C> | RowOps<VY, R, Y>>,
   FailsOf<RowOps<VY, R, Y>>,
   MayWaitOf<Ops<C> | RowOps<VY, R, Y>>
 >;
-function ErroredBlocks<C, FY = never>(props: {
-  fallback: (() => Generator<FY, Content, any>) | PlainFallback<FailsOf<Ops<C>>>;
-  children: C;
-}): ComponentView<PendingOf<Ops<C> | FY>, FailsOf<FY>, MayWaitOf<Ops<C> | FY>>;
+function ErroredBlocks<C, F extends ErroredFallback<FailsOf<Ops<C>>> | Element>(props: {
+  fallback: LazyParam<F, ErroredFallback<FailsOf<Ops<C>>>, "fallback">;
+  children: LazyParam<C, Children<[]>, "children">;
+}): ComponentView<
+  PendingOf<Ops<C> | FallbackYields<F>>,
+  FailsOf<FallbackYields<F>>,
+  MayWaitOf<Ops<C> | FallbackYields<F>>
+>;
 function ErroredBlocks(props: any): any {
   const children = content(props, "Errored");
   const fallback = props.fallback as any;

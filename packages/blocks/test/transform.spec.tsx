@@ -73,7 +73,9 @@ it("measured case: runs once, suspends to Loading, updates text and class indepe
             <>
               {
                 yield* Loading({
-                  fallback: <i>loading</i>,
+                  fallback: function* () {
+                    return <i>loading</i>;
+                  },
                   children: function* () {
                     return <>{yield* Greeting()}</>;
                   }

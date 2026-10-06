@@ -582,7 +582,9 @@ describe("D-077: an attempt over an event call", () => {
     dispose = render(
       () =>
         Errored({
-          fallback: <p>caught</p>,
+          fallback: function* () {
+            return <p>caught</p>;
+          },
           children: function* () {
             return <>{yield* App()}</>;
           }

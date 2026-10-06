@@ -671,10 +671,20 @@ describe("D-077: an attempt over an event call", () => {
     await top();
     expect(got.map(e => (e as Error).constructor)).toEqual([Boom, Other]);
     for (const e of got) {
+      expect((e as any)[Symbol.for("solid.SafeError")]).toBe(true);
       const d = Object.getOwnPropertyDescriptor(e, BRAND);
       expect(d?.value).toBe(true);
       expect(d?.enumerable).toBe(false);
     }
+  });
+
+  it("Failure instances are serialization-safe before branding or freezing (D-115)", () => {
+    const error = Object.freeze(new Boom("public message"));
+    expect(error.kind).toBe("boom");
+    expect(error.message).toBe("public message");
+    const safe = Object.getOwnPropertyDescriptor(error, Symbol.for("solid.SafeError"));
+    expect(safe?.value).toBe(true);
+    expect(safe?.enumerable).toBe(false);
   });
 
   it("a crash inside the called event goes past the handler: a bug, not a failure (D-087)", async () => {

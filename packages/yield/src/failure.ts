@@ -1,3 +1,5 @@
+import { markSafeError } from "@solidjs/web";
+
 /** D-110: typed failures are class instances, not structural Error shapes. */
 const INSTANCE = Symbol("solid.yield.failure.instance");
 export class FailureInstance<K extends string> extends Error {
@@ -8,6 +10,8 @@ export class FailureInstance<K extends string> extends Error {
     options?: ErrorOptions
   ) {
     super(message, options);
+    // D-115: their kind and message are part of the public failure contract.
+    markSafeError(this);
   }
   toJSON() {
     return {

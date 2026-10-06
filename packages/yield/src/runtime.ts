@@ -42,6 +42,7 @@ import {
   type SignalOptions,
   type Store
 } from "solid-js";
+import { isSafeError, markSafeError } from "@solidjs/web";
 import type {
   Handled,
   StreamAttempt,
@@ -125,6 +126,9 @@ const PATH_READ = 1;
 const FAILURE: unique symbol = Symbol.for("solid.yield.failure") as any;
 const TYPED_FAILURES = new WeakSet<object>();
 function brand<T>(e: T): T {
+  // Failure instances are safe before they can be frozen. Other branded
+  // failures use the same public serialization policy when extensible.
+  if (e != null && Object.isExtensible(e) && !isSafeError(e)) markSafeError(e);
   if (e !== null && (typeof e === "object" || typeof e === "function"))
     TYPED_FAILURES.add(e as object);
   if (

@@ -206,7 +206,8 @@ The rules are written Γ ⊢ e : τ ! Y, read "e has type τ and yields Y". Only
 (R-h)       h(tag, attrs, …c) : HViewOf(attrs ∪ c)                        (holes.ts:90; h.ts:73–85)
             h(C, props, …c)   : HView⟨κ(C's view) ⊔ κ(c)⟩, c's eagerly built views' ρ as Created (h.ts:146–155)
             h(Loading | Errored, …): as R-Load / R-Err over OpsOfHole, with lazy children only (D-066, F08)
-            h(Ctx.provide, …): ρ = settle(req(c) ∖ Q), not settle(req(c)) ∖ Q; eager Created(Q) survives (F12)
+            h(Ctx.provide, …): its HView carries ρ = req(c) ∖ Q, including eager Created(Q).
+            Only the holding view settles afterward: settle(req(c) ∖ Q), never settle(req(c)) ∖ Q (F12)
             h.Fragment({ children: c }): HViewOf(c); generator rows fold Y ∪ VY ∪ OpsOfHole(VR) (F07, F13)   (h.ts:91–139)
 (R-Root)    code : () → View⟨⊥, any, ·, ρ⟩ ∨ () → Element,   ρ = ∅  (RootCheck)
             ⊢ render(code, el), hydrate(code, el), renderToString(code), renderToStream(code)   (render.ts:36–121)

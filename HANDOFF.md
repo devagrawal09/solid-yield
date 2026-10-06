@@ -1,4 +1,4 @@
-# HANDOFF — solid-yield (checkpoint 2026-10-06: v0.1, through D-101)
+# HANDOFF — solid-yield (checkpoint 2026-10-07: through D-112)
 
 This repository was extracted from the Solid fork `devagrawal09/solid`, branch `blocks-lib`, at commit **`6978eb83`** (D-015). Git history was not carried; the fork keeps it. The fork's own handoff at that commit (Phases 1A, 1B and 2, and its environment notes) is `git show 6978eb83:HANDOFF.md` in the fork.
 
@@ -32,7 +32,7 @@ The library is feature-complete for v0.1: through D-101 every ruling is implemen
 - ~~Make the repository public, push `main`.~~ Done: public (Dev, 2026-10-06), `main` pushed through `53b664a`. Later commits are pushed by Dev (this sandbox cannot reach GitHub, see "Publishing" below).
 - **Publish to npm: waits for credentials** (an npm login or automation token with publish rights for the three unscoped names). Then `pnpm changeset version` and `pnpm changeset publish` after the items below.
 - Before the first release: collapse the changesets into one initial release note (they do not mention D-097–D-099 yet; D-100 and D-101 have their own); decide the plugin's peer range (the 0.x caret, "Known, recorded, not fixed"); `@solidjs/h` as a peer, the ESLint plugin's peers and description; LICENSE / `author` and Solid's MIT notice (from "Fixes with no ruling needed", below; not yet done).
-- The upstream issue `documentation/upstream/solid-ssr-memo-loop-rc13.md` awaits "file it".
+- The upstream memo-loop report was filed as [solidjs/solid#3815](https://github.com/solidjs/solid/issues/3815); see Upstream.
 - **λ-yield.** `documentation/calculus.md` states the soundness theorem (D-071) and its 52 proof obligations, each now evidenced (`test/obligations.spec.tsx` holds the runtime tests that were missing). §6.3's findings are all closed, and no obligation is violated as tested: F-1 (an `Errored` fallback's dropped colors) and F-3 (`provide({ value: undefined })`) fixed, F-4 / F-5 (comments) fixed, F-7 fixed (a bound call no `Errored` takes rejects, D-085 note), **F-2 fixed by D-100** (`lazy` fails with a typed `ChunkError`; with no `Errored` it is re-thrown and the call renders nothing, no halt; rendering's pages let it reach the root, as the original), **F-6 closed by D-101** (`$settled` removed; run once after mount is `$effect(function* () {}, function* () { … })`; the 4 twin sites migrated with parity, SSR and hydrate smoke green).
 - Earlier open items below still stand unless a ruling above closed them: D-088's added boundaries now count 4 (hackernews-spa 3, room 1; rendering's went with D-099).
 
@@ -44,13 +44,13 @@ The counts below group each log's **new product reports**, rather than counting 
 
 | Review | New reports in its log | Fixed / documented here | Still present | Not reproduced |
 | --- | --- | --- | --- | --- |
-| Kanban | 6 | 5 | 1 (N2 / F-8) | 0 |
+| Kanban | 6 | 6 | 0 | 0 |
 | Chat | 7 | 5 | 0 confirmed | 2 (A2, A3) |
 
 - **A1: reproduced, setup error.** Client `generateHydrationScript()` returns an empty string. The script must come from the server build and execute before hydration. Missing it now gives development `[NO_HYDRATION_SCRIPT]`, with the recipe, instead of the undefined `done` TypeError. A one-element test and a separate SSR/Vitest test verify the real server script; the latter preserves and clicks the server button for both string and streamed output.
 - **A2: not reproduced.** Removing the chat's outer catch-all in memory, using its own tsconfig and declarations, left zero type errors. Its stream fails with `TransportError`, its lazy call with `ChunkError`, and typed catches leave `never` at `foreign`. A type test pins those exact stages and no `any`. The earlier source producing `any` is not retained; no type fix was guessed.
 - **A3: not reproduced.** The chat removed its keyed experiment. Both the library and plain Solid remount tests subscribe again without `[REACTIVITY_HALTED]`. An outer-boundary probe also did not halt. There is no evidence to assign the removed `insertBefore` failure to the library or Solid, so no failing upstream repro was invented.
-- **N2 / D-085 F-8: reproduced, still present.** An optimistic list move disposes the event's bind row before its typed failure arrives. Neither its fallback nor the live outer fallback runs; the call resolves, and development only logs `[RUN_WITH_DISPOSED_OWNER]`. The runtime test explicitly pins current behaviour. **Dev's ruling is open:** A skips disposed boundaries in the captured chain, uses the nearest live one, else rejects and emits development `[BOUNDARY_DISPOSED]`; B adds only a development error; C holds disposal. **No option was chosen.**
+- **N2 / D-085 F-8: reproduced, resolved by D-109.** An optimistic list move can dispose the event's bind row before its failure arrives. If its captured accepting boundary was disposed, the call now rejects with the original failure and development reports `[BOUNDARY_DISPOSED] <kind> arrived after its Errored was disposed — the event's own optimistic write removed it; absorb the failure in the event, or move the boundary above what the write can dispose`. A boundary above the disposable row still handles it. Tests pin all three modes in development and production. No live ancestor is selected after the captured boundary dies. Keyed re-delivery to a re-created row is a v0.3 target.
 
 Messages now name missing contexts and missing lazy preloads. Required contexts pass their name at runtime as well as in the type: `createContext<T, "Name">(undefined, { name: "Name" })`; existing named uses were migrated. The four beginner refusals have readable text pinned against TypeScript's actual diagnostics, without TS2589 for a JSX row. Recommended lint now catches source reads in component and row setup, including typed aliases.
 
@@ -68,7 +68,21 @@ The guide and package docs now cover lazy/`ChunkError` retry; stores, derived op
 | `3438ca0` | Rejected promises are waits, not streams |
 | `f9fc7fb` | Worked docs, tested state/reconnect and SSR hydration recipes |
 
-Every commit, including this handoff, follows `pnpm build` and the **full 37/37 GREEN gate** against the unchanged baseline. The separate documented hydration command also passes 2/2 tests. Commits are local on `main`; nothing was pushed. Remaining limits are F-8's ruling, the missing A2/A3 intermediate fixtures, and real-browser lazy preload verification (the documented jsdom workaround is not that check).
+Those review commits followed `pnpm build` and the **full 37/37 GREEN gate** against the unchanged baseline; D-105 below expands the current gate to 39 steps. The separate documented hydration command also passes 2/2 tests. Commits are local on `main`; nothing was pushed. Remaining limits are the missing A2/A3 intermediate fixtures and real-browser lazy preload verification (the documented jsdom workaround is not that check).
+
+## Proof audit and Dev rulings (2026-10-07)
+
+D-103–D-112 are recorded with alternatives and reasoning in documentation/DECISIONS.md. The read-only proto/calculus-proofs findings F01–F15 guided the repairs; that branch was not changed.
+
+- F02–F05, F07–F08 and F13 close the handler, prop, context, Fragment and h row/boundary type holes, each with its counterexample type test.
+- D-109 rejects a failure arriving after its accepting captured boundary was disposed, with the specified development error; §7 states “handled while the boundary lives”.
+- D-110 / F09 exports the one-line nominal base `class Boom extends Failure("boom") {}`. Structural errors are refused at raise/attempt/catch; selective runtime matching remains instanceof. **20 typed failure classes across 13 twin files** migrated. The saga interruption Error remains plain and is wrapped by the attempt handler into SagaError. F10 uses a WeakSet to route frozen failures and keeps the serialization property on extensible failures.
+- F06 pins NO_PROVIDER at foreign child's creation and the accepted pending-without-Loading case's empty output. No new API was designed. F11/F12/F14/F15 correct the theorem's lint premises, fallback/provider equations and terminology, and state once-effect, seeded-memo and disposed-owner contracts with test evidence. D-112 removes the route-existence converse: colors are sound upper bounds, with no over-statement of discharge.
+- D-105 adds V8 executed-range byte checks at load and each authored parity step for all eight twins and originals. The baseline allows 2% or 1024 bytes per phase, whichever is larger. Wall time stays manual. The full gate now has **39 steps**, still checked against the unchanged 37-step yield-gate baseline; both new steps must pass.
+
+**Compiler scope.** C0 records the ruled path: v0.2 eager islands on Solid hydration, capture/claim checks, effects make eager; lazy/visible are report classes. C1 and foreignSource remain on proto/compiler: foreignSource is implemented there, and the current head 8cb1ae8 includes effect-reach reports and build diagnostics (8c426cc). This main worktree does not emit C2 islands, an EAGER type marker or compiler reports. Eager C2 codegen and the EAGER marker are still due under D-103/D-104; no provenance annotations are added (D-106). Sugar waits until after C3 (D-108). D-111's private hydration reset was withdrawn before implementation; v0.3's independent keyed attachment and D-109 keyed failure re-delivery are future targets.
+
+All changes here are local commits on main, above the pushed head f8b7131. Every commit follows pnpm build and the full GREEN gate. Nothing was pushed.
 
 ## Upstream
 

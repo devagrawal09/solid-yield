@@ -152,7 +152,7 @@ These are analysis report classes. In v0.2 **every emitted island hydrates eager
 
 The original lazy design argument, subject to that independent builder, is specific to this dialect. A setup only creates (D-042: it never reads, writes or builds JSX). Effects are the only code that runs because a component exists (D-079), and they make the root eager. So deferring a lazy root's setups until its first event cannot be seen in the DOM. It *can* be seen in a conformance trace (the setup runs later), which §4 declares.
 
-The fact "this component is eager" is already in each setup's yield union (`Create<"effect">`, calculus §1.2). D-104 requires a marker on `ComponentView`, folded like may-wait (D-075), and effect-reach diagnostics. This main branch records that compiler requirement; the marker/report implementation is still due on the compiler path.
+The fact "this component is eager" is already in each setup's yield union (`Create<"effect">`, calculus §1.2). D-104 requires a marker on `ComponentView`, folded like may-wait (D-075), and effect-reach diagnostics. This main branch records that compiler requirement. C1 effect-reach reports and build diagnostics are implemented on proto/compiler at 8cb1ae8; the EAGER type marker remains unimplemented.
 
 ---
 

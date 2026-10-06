@@ -11,6 +11,7 @@ import {
   constant,
   For,
   foreign,
+  lazy,
   hydrate,
   render,
   Show,
@@ -19,6 +20,7 @@ import {
   type ContextNames,
   type ContextValue,
   type ContextRead,
+  type Component,
   type Element,
   type Path,
   type Props,
@@ -42,6 +44,10 @@ type RequiresOfComponent<C> = C extends (...args: any[]) => View<any, any, any, 
 interface User {
   name: string;
 }
+class FetchFailure extends Error {
+  readonly kind = "fetch" as const;
+}
+declare const failing: Source<Element, FetchFailure>;
 const UserCtx = createContext<User, "UserCtx">();
 const ThemeCtx = createContext("light");
 declare const root: HTMLElement;
@@ -383,43 +389,36 @@ const AuthorProvided = component(function* AuthorProvided() {
 type _ownDischarges = Expect<Equal<RequiresOfComponent<typeof AuthorProvided>, never>>;
 render(AuthorProvided, root);
 
-// --- a hole prop does not carry a requirement ----------------------------------------------
+// --- a requirement flows out of a hole prop through the call (D-098 amended) -----------------
 
-const Frame = component(function* Frame(props: Props<{ children: Element }>) {
+// a hole runs under the component it is given to, so a provider around that component's call is
+// above it: the call carries what the props literal's holes require
+const Greeting = component(function* Greeting() {
+  const user = yield* UserCtx;
   return view(function* () {
-    return <section>{yield* props.children}</section>;
+    return <p>hello {yield* user.name}</p>;
   });
 });
-const Framed = component(function* Framed() {
+const Layout = component(function* Layout(props: Props<{ children: Element }>) {
+  return view(function* () {
+    return <main>{yield* props.children}</main>;
+  });
+});
+// the ruling's example: Greeting's requirement reaches the provide around Layout's call
+const HoleApp = component(function* HoleApp() {
   return view(function* () {
     return (
       <>
         {
-          yield* Frame({
-            // @ts-expect-error a prop declares no requirement: provide it inside the hole
-            children: function* () {
-              return <>{yield* Avatar()}</>;
-            }
-          })
-        }
-      </>
-    );
-  });
-});
-const FramedProvided = component(function* FramedProvided() {
-  return view(function* () {
-    return (
-      <>
-        {
-          yield* Frame({
+          yield* UserCtx.provide({
+            value: { name: "ada" },
             children: function* () {
               return (
                 <>
                   {
-                    yield* UserCtx.provide({
-                      value: { name: "x" },
+                    yield* Layout({
                       children: function* () {
-                        return <>{yield* Avatar()}</>;
+                        return <>{yield* Greeting({})}</>;
                       }
                     })
                   }
@@ -432,8 +431,243 @@ const FramedProvided = component(function* FramedProvided() {
     );
   });
 });
+type _holeApp = Expect<Equal<RequiresOfComponent<typeof HoleApp>, never>>;
+render(HoleApp, root);
+// the call itself carries it
+const LaidOut = component(function* LaidOut() {
+  return view(function* () {
+    return (
+      <>
+        {
+          yield* Layout({
+            children: function* () {
+              return <>{yield* Greeting({})}</>;
+            }
+          })
+        }
+      </>
+    );
+  });
+});
+type _holeCarried = Expect<Equal<RequiresOfComponent<typeof LaidOut>, typeof UserCtx>>;
+// no provider: the root refuses it, naming the context
+type _holeNamed = Expect<Equal<ContextNames<RequiresOfComponent<typeof LaidOut>>, "UserCtx">>;
+// @ts-expect-error [NO_PROVIDER] the root requires "UserCtx"
+render(LaidOut, root);
+// a provider wrapping the call discharges it (as above), one around the component that holds the
+// call too
+const AroundLaidOut = component(function* AroundLaidOut() {
+  return view(function* () {
+    return (
+      <>
+        {
+          yield* UserCtx.provide({
+            value: { name: "x" },
+            children: function* () {
+              return <>{yield* LaidOut()}</>;
+            }
+          })
+        }
+      </>
+    );
+  });
+});
+type _aroundHolder = Expect<Equal<RequiresOfComponent<typeof AroundLaidOut>, never>>;
+// a provider of another context does not
+const WrongAroundCall = component(function* WrongAroundCall() {
+  return view(function* () {
+    return (
+      <>
+        {
+          yield* OtherCtx.provide({
+            value: { name: "x", admin: true },
+            children: function* () {
+              return (
+                <>
+                  {
+                    yield* Layout({
+                      children: function* () {
+                        return <>{yield* Greeting({})}</>;
+                      }
+                    })
+                  }
+                </>
+              );
+            }
+          })
+        }
+      </>
+    );
+  });
+});
+type _wrongAround = Expect<Equal<RequiresOfComponent<typeof WrongAroundCall>, typeof UserCtx>>;
+// any hole prop, not only children; each hole's requirements join the call's
+const Pair = component(function* Pair(props: Props<{ left: Element; right: Element; n: number }>) {
+  return view(function* () {
+    return (
+      <div>
+        {yield* props.left}
+        {yield* props.right}
+        {yield* props.n}
+      </div>
+    );
+  });
+});
+const Paired = component(function* Paired() {
+  return view(function* () {
+    return (
+      <>
+        {
+          yield* Pair({
+            left: function* () {
+              return <>{yield* Greeting({})}</>;
+            },
+            right: function* () {
+              return <>{yield* Both()}</>;
+            },
+            n: 1
+          })
+        }
+      </>
+    );
+  });
+});
+type _paired = Expect<Equal<RequiresOfComponent<typeof Paired>, typeof UserCtx | typeof OtherCtx>>;
+// a hole that provides inside itself carries nothing out
+const FramedProvided = component(function* FramedProvided() {
+  return view(function* () {
+    return (
+      <>
+        {
+          yield* Layout({
+            children: function* () {
+              return (
+                <>
+                  {
+                    yield* UserCtx.provide({
+                      value: { name: "x" },
+                      children: function* () {
+                        return <>{yield* Greeting({})}</>;
+                      }
+                    })
+                  }
+                </>
+              );
+            }
+          })
+        }
+      </>
+    );
+  });
+});
+type _holeProvided = Expect<Equal<RequiresOfComponent<typeof FramedProvided>, never>>;
 render(FramedProvided, root);
-void Framed;
+// conservative: a provider inside Layout's own view, around `props.children`, is above the hole at
+// run time, but Layout's type does not say what it provides, so the requirement still reaches
+// the call (and the root refuses it)
+const ProvidingLayout = component(function* ProvidingLayout(props: Props<{ children: Element }>) {
+  return view(function* () {
+    return (
+      <>
+        {
+          yield* UserCtx.provide({
+            value: { name: "inside" },
+            children: function* () {
+              return <main>{yield* props.children}</main>;
+            }
+          })
+        }
+      </>
+    );
+  });
+});
+const InsideProvided = component(function* InsideProvided() {
+  return view(function* () {
+    return (
+      <>
+        {
+          yield* ProvidingLayout({
+            children: function* () {
+              return <>{yield* Greeting({})}</>;
+            }
+          })
+        }
+      </>
+    );
+  });
+});
+type _inside = Expect<Equal<RequiresOfComponent<typeof InsideProvided>, typeof UserCtx>>;
+// a hole given as a source (forwarded) requires nothing: its requirements were its caller's
+const Forwards = component(function* Forwards(props: Props<{ children: Element }>) {
+  return view(function* () {
+    return <>{yield* Layout({ children: props.children })}</>;
+  });
+});
+type _forwarded = Expect<Equal<RequiresOfComponent<typeof Forwards>, never>>;
+// the props literal is generic, so an undeclared prop is refused by name (an excess-property check
+// does not apply to it)
+// @ts-expect-error [UNDECLARED_PROP] `extra` is not a declared prop
+export const undeclared = Layout({ children: "x", extra: 1 });
+// a component's type without a literal (`ReturnType`, a plain `Component<D>`) requires its own only
+type _returnType = Expect<Equal<RequiresOfComponent<typeof Layout>, never>>;
+export const asPlain: Component<{ children: Element }> = Layout;
+
+// D-029's generic pass-through components keep their type parameters, and their hole props carry
+// no requirement (TypeScript cannot keep both: a generic component's call is not generic in its
+// props literal): provide inside the hole
+const GenericFrame = component(function* GenericFrame<E>(
+  props: Props<{ children: Source<Element, E> }>
+) {
+  return view(function* () {
+    return <section>{yield* props.children}</section>;
+  });
+});
+export const genericKept: View<false, FetchFailure> = GenericFrame({ children: failing });
+const GenericFramed = component(function* GenericFramed() {
+  return view(function* () {
+    return (
+      <>
+        {
+          yield* GenericFrame({
+            // @ts-expect-error a generic component's hole prop carries no requirement
+            children: function* () {
+              return <>{yield* Greeting({})}</>;
+            }
+          })
+        }
+      </>
+    );
+  });
+});
+void GenericFramed;
+
+// `h(Comp, props)` and `lazy` do not take a props literal's requirements: there a hole prop that
+// requires a context is refused (children given to `h` as arguments carry theirs, as before)
+export const hPair = h(Pair, {
+  // @ts-expect-error a hole prop given to h(Comp, props) carries no requirement
+  left: function* () {
+    return <>{yield* Greeting({})}</>;
+  },
+  right: "r",
+  n: 1
+});
+const LazyLayout = lazy(() => Promise.resolve({ default: Layout }));
+export const LazyLaidOut = component(function* LazyLaidOut() {
+  return view(function* () {
+    return (
+      <>
+        {
+          yield* LazyLayout({
+            // @ts-expect-error a lazy component's hole prop carries no requirement
+            children: function* () {
+              return <>{yield* Greeting({})}</>;
+            }
+          })
+        }
+      </>
+    );
+  });
+});
 
 // --- `h`: h(Ctx.provide, { value }, ...children) discharges as the call form does ------------
 

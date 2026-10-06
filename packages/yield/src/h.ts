@@ -25,8 +25,10 @@ import type {
   PendingOf,
   RequiresOf,
   Source,
-  View
+  View,
+  PropsInput
 } from "./types.js";
+import type { DECLARED } from "./types.js";
 import type { Errored, Loading, Reset } from "./flow.js";
 import type { PROVIDES, ProvidedValue } from "./context.js";
 import type { Accessor } from "solid-js";
@@ -51,9 +53,12 @@ type NotCallable = { readonly call?: never; readonly apply?: never };
  * (their colors join the output), or in the props object, checked against
  * the declared `children` like any prop (D-024).
  */
-type PropsOfComponent<C> = C extends (props: infer P) => any
-  ? Omit<NonNullable<P>, "children"> & { children?: ChildrenOf<NonNullable<P>> }
-  : never;
+type PropsOfComponent<C> = C extends { readonly [DECLARED]?: (props: infer D) => any }
+  ? PropsShape<PropsInput<D>>
+  : C extends (props: infer P) => any
+    ? PropsShape<NonNullable<P>>
+    : never;
+type PropsShape<P> = Omit<P, "children"> & { children?: ChildrenOf<P> };
 type ChildrenOf<P> = "children" extends keyof P ? P["children"] : unknown;
 /** What a component's output (a view or `h` output) contributes. */
 type OpsOfOutput<R> = R extends

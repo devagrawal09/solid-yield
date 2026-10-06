@@ -152,8 +152,8 @@ export interface ContextRead<C = never> {
 /**
  * `yield* Child(props)`: the child's pending and failures, propagated, its
  * may-wait marker (D-075), and the contexts it requires (D-098). `R`
- * defaults to `never`: a hole prop that calls a component requiring a
- * context is refused (`HoleProp`), since no prop declares a requirement.
+ * defaults to `never`. A hole prop's requirements are its call's
+ * (`HoleCall`, D-098 amended) where the call is generic in its props.
  */
 export interface ChildView<
   P extends boolean = boolean,
@@ -437,16 +437,17 @@ type PropRead<V, U, N> = [V] extends [Source<infer T, infer E, infer P>]
  * `P` is `true`), or a hole within that; with `E` / `P` type parameters (a
  * pass-through component) they are the caller's.
  */
-export type PropsInput<D> = {
+export type PropsInput<D, Q = never> = {
   [N in keyof D]: PropInput<
     Exclude<D[N], undefined>,
     undefined extends D[N] ? undefined : never,
-    N
+    N,
+    Q
   >;
 };
-type PropInput<V, U, N> = [V] extends [Source<infer T, infer E, infer P>]
-  ? T | U | Source<T | U, E, Widen<P>> | HoleProp<T | U, E, Widen<P>>
-  : V | U | Source<V | U> | HoleProp<V | U> | SettledProp<SettledMessage<N>>;
+type PropInput<V, U, N, Q> = [V] extends [Source<infer T, infer E, infer P>]
+  ? T | U | Source<T | U, E, Widen<P>> | HoleProp<T | U, E, Widen<P>, Q>
+  : V | U | Source<V | U> | HoleProp<V | U, never, false, Q> | SettledProp<SettledMessage<N>>;
 /** A declared pending prop also takes a settled source (settled ⊂ pending). */
 type Widen<P extends boolean> = [P] extends [true] ? boolean : P;
 /**
@@ -458,11 +459,25 @@ type Widen<P extends boolean> = [P] extends [true] ? boolean : P;
  * prop. `children` is always one (D-066): a lazy view, `function* () {
  * return <…/>; }`, built where the child reads it.
  */
-export type HoleProp<T, E = never, P extends boolean = false> = () => Generator<
-  Read<P, E> | ChildView<P, E, boolean, never> | Raise<E>,
+export type HoleProp<T, E = never, P extends boolean = false, Q = never> = () => Generator<
+  Read<P, E> | ChildView<P, E, boolean, Q> | Raise<E>,
   T,
   any
 >;
+/**
+ * The contexts the hole props of a call's props literal require (D-098
+ * amended): what the components called in them require. A hole runs under
+ * the component it is given to, so a provider around that call is above it,
+ * and the call's view carries them.
+ */
+export type HoleRequires<A> = A extends object
+  ? { [K in keyof A]-?: HoleRequiresOf<A[K]> }[keyof A]
+  : never;
+type HoleRequiresOf<V> = V extends () => Generator<infer Y, any, any>
+  ? unknown extends RequiresOf<Y>
+    ? never // the call's constraint itself (`ReturnType<typeof Comp>`, a plain `Component<D>`): no literal
+    : Settle<RequiresOf<Y>>
+  : never;
 /**
  * The call-site refusal of a pending or failing value for a settled prop
  * (D-024): TypeScript prints the alias with its message, `Todo | Source<Todo>
@@ -481,6 +496,41 @@ export type PropsOf<TP> = unknown extends TP
 
 /** A component's arguments: the props object, optional when every prop is. */
 export type PropsArgs<D> = {} extends D ? [props?: PropsInput<D>] : [props: PropsInput<D>];
+/**
+ * A component's call (D-098 amended): generic in its props literal `A`, so
+ * the view carries what the literal's hole props require (`HoleRequires`).
+ */
+export type HoleCall<D, P extends boolean, E, W extends boolean, R> = (<
+  A extends PropsInput<D, unknown> = PropsInput<D>
+>(
+  ...props: {} extends D
+    ? [props?: A & NoInfer<Undeclared<A, D>>]
+    : [props: A & NoInfer<Undeclared<A, D>>]
+) => ComponentView<P, E, W, R | HoleRequires<A>>) & {
+  /** Phantom: the declared props (`lazy`, `h(Comp, props)` read them: their holes require nothing there). */
+  readonly [DECLARED]?: (props: D) => D;
+};
+/**
+ * A generic props literal is not checked for excess properties, so
+ * `HoleCall` refuses an undeclared prop itself.
+ */
+export type Undeclared<A, D> = {
+  readonly [K in Exclude<keyof A, keyof D>]: {
+    readonly [M in `[UNDECLARED_PROP] \`${K & string}\` is not a declared prop`]: never;
+  };
+};
+/** Phantom key of a component's declared props (`HoleCall`). */
+export declare const DECLARED: unique symbol;
+/**
+ * A component's call as a plain function, its hole props requiring nothing:
+ * what `lazy` and `h(Comp, props)` see of a `HoleCall` (they do not take
+ * the props literal's requirements).
+ */
+export type PlainCall<C> = C extends { readonly [DECLARED]?: (props: infer D) => any }
+  ? C extends (...args: any[]) => ComponentView<infer P, infer E, infer W, infer R>
+    ? (...props: PropsArgs<D>) => ComponentView<P, E, W, R>
+    : C
+  : C;
 
 // --- views and components ---------------------------------------------------------
 
@@ -515,7 +565,7 @@ export type SettledView = View<false, never, boolean, never>;
 /**
  * What calling a yield component returns: its view, marked as a component's
  * — a JSX tag refuses a function returning one (D-067), and the mark sits on
- * the view, not the function, so a component stays a plain function type.
+ * the view, not the function, so a component stays a function type.
  */
 export type ComponentView<
   P extends boolean = boolean,
@@ -527,9 +577,10 @@ export type ComponentView<
 };
 
 /**
- * A component built by `component`: calling it renders it and returns its
- * view. A plain function type, so a component whose props are generic in
- * their colors (D-029) keeps its type parameters (D-068).
+ * A component as a plain function type: calling it renders it and returns
+ * its view. A component whose props are generic in their colors (D-029)
+ * has this type, and keeps its type parameters (D-068); one that is not
+ * has a `HoleCall`, assignable to it.
  */
 export type Component<
   D = {},

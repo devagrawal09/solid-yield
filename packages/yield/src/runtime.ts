@@ -71,6 +71,7 @@ import type {
   Path,
   PendingOf,
   PropsArgs,
+  HoleCall,
   PropsOf,
   Raise,
   Read,
@@ -1750,7 +1751,44 @@ export function renderView(
  * what a `Ctx.provide` in the view gives them — and its setup's context
  * reads (`RequiresOf<Y>`), which were resolved where the component was
  * created: a provider in its own view cannot give them.
+ *
+ * Two signatures (D-098 amended). A setup that is not generic gets a call
+ * generic in its props literal (`HoleCall`), so the call's view carries
+ * what its hole props require (`HoleRequires`). A generic setup (D-029)
+ * fails that overload (TypeScript cannot infer its props) and gets the
+ * plain function type, which keeps its type parameters: TypeScript passes a
+ * generic argument's type parameters on only to a result with one
+ * non-generic call signature. Its hole props carry no requirement.
  */
+export function component<
+  TP = unknown,
+  Y extends SetupOp = never,
+  V extends () => Generator<ViewOp, unknown, any> = ViewFn<never, unknown>
+>(
+  body: ((props: TP) => Generator<Y, V, any>) & ViewWrapperCheck<V>,
+  ..._rule: NoJsxViewRule<ViewYield<V>, ViewReturn<V>>
+): HoleCall<
+  PropsOf<TP>,
+  ViewPending<ViewYield<V>, ViewReturn<V>>,
+  ViewFails<ViewYield<V>, ViewReturn<V>> | FailsOf<Y>,
+  ViewMayWait<ViewYield<V>, ViewReturn<V>>,
+  ViewRequires<ViewYield<V>, ViewReturn<V>> | RequiresOf<Y>
+>;
+export function component<
+  TP = unknown,
+  Y extends SetupOp = never,
+  V extends () => Generator<ViewOp, unknown, any> = ViewFn<never, unknown>
+>(
+  body: ((props: TP) => Generator<Y, V, any>) & ViewWrapperCheck<V>,
+  ..._rule: NoJsxViewRule<ViewYield<V>, ViewReturn<V>>
+): (
+  ...props: PropsArgs<PropsOf<TP>>
+) => ComponentView<
+  ViewPending<ViewYield<V>, ViewReturn<V>>,
+  ViewFails<ViewYield<V>, ViewReturn<V>> | FailsOf<Y>,
+  ViewMayWait<ViewYield<V>, ViewReturn<V>>,
+  ViewRequires<ViewYield<V>, ViewReturn<V>> | RequiresOf<Y>
+>;
 export function component<
   TP = unknown,
   Y extends SetupOp = never,

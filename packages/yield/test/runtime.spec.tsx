@@ -1082,6 +1082,48 @@ describe("context", () => {
       expect(() => mount(Parent as any)).toThrow("[NO_PROVIDER]");
     });
 
+    it("a requirement out of a hole prop: the provide around the holder's call gives it (D-098 amended)", () => {
+      const Greeting = component(function* Greeting() {
+        const user = yield* UserCtx;
+        return view(function* () {
+          return <p>hello {yield* user.name}</p>;
+        });
+      });
+      const Layout = component(function* Layout(props: Props<{ children: YieldElement }>) {
+        return view(function* () {
+          return <main>{yield* props.children}</main>;
+        });
+      });
+      const App = component(function* App() {
+        return view(function* () {
+          return (
+            <>
+              {
+                yield* UserCtx.provide({
+                  value: { name: "ada" },
+                  children: function* () {
+                    return (
+                      <>
+                        {
+                          yield* Layout({
+                            children: function* () {
+                              return <>{yield* Greeting({})}</>;
+                            }
+                          })
+                        }
+                      </>
+                    );
+                  }
+                })
+              }
+            </>
+          );
+        });
+      });
+      mount(App);
+      expect(root.innerHTML).toBe("<main><p>hello ada</p></main>");
+    });
+
     devIt("a provide in the reader's own view does not give its setup (Solid's own rule)", () => {
       const SelfProvider = component(function* SelfProvider() {
         const user = yield* UserCtx;

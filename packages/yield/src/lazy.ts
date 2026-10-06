@@ -6,13 +6,16 @@
  */
 import { lazy as solidLazy } from "solid-js";
 import { yieldComponent } from "./runtime.js";
-import type { ComponentView, View } from "./types.js";
+import type { ComponentView, PlainCall, View } from "./types.js";
 
 /** What a loaded component renders: its colors (a plain component is settled). */
-type ColorsOf<T> = T extends (props: any) => View<infer P, infer E, infer W, infer R>
-  ? [P, E, W, R]
-  : [false, never, false, never];
-type PropsArg<T> = T extends (props: infer P) => any ? P : {};
+type ColorsOf<T> =
+  PlainCall<T> extends (...args: any[]) => infer V
+    ? V extends View<infer P, infer E, infer W, infer R>
+      ? [P, E, W, R]
+      : [false, never, false, never]
+    : [false, never, false, never];
+type PropsArg<T> = PlainCall<T> extends (props: infer P) => any ? P : {};
 
 /**
  * A lazily loaded yield component: pending while its chunk loads, failing as

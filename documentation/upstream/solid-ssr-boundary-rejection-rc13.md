@@ -1,8 +1,6 @@
 # [2.0.0-rc.13] renderToString returns the Loading fallback before an async rejection
 
-Status: **draft, not filed; narrowed to renderToString only** (2026-10-07).
-This is a contract question, not a demonstrated async boundary defect: the
-installed implementation is synchronous. Dev decides whether to file.
+Status: **withdrawn** (2026-10-07). Not a defect: `renderToString` is Solid 2's synchronous renderer and emits the `Loading` fallback by contract (the project already recorded this under D-099: "`renderToString` cannot wait"); `renderToStream` serializes a late rejection for the client-side `Errored` to render, also by design. The one real gap, typed failures sanitized to `Internal Server Error` in production, is fixed on our side by D-115 (`markSafeError`). Kept for the repro.
 
 ## Summary
 

@@ -250,6 +250,14 @@ interface HostState {
    * steps share one list), each to be delegated to before the run ends.
    */
   readonly receipts: Receipt<unknown>[] | null;
+  /**
+   * Dev only: the observer the run started under — the hole a component was
+   * called in, or none. A setup and a view run under whatever computation
+   * called the component (D-097: no untrack), so a read whose observer is this
+   * one is the run's own; a read under another observer belongs to a
+   * computation the run created, running its first pass.
+   */
+  readonly observer: unknown;
 }
 let state: HostState = {
   host: NONE,
@@ -258,7 +266,8 @@ let state: HostState = {
   view: null,
   jsx: false,
   name: null,
-  receipts: null
+  receipts: null,
+  observer: null
 };
 
 /**
@@ -281,7 +290,16 @@ function runAs<T>(
   // a run checks the receipts it minted when it ends (an `$event` call
   // hands its own list to every step and checks it when the body ends)
   const own = __DEV__ && receipts === null ? [] : null;
-  state = { host, sink, resumed, view, jsx, name, receipts: receipts ?? own };
+  state = {
+    host,
+    sink,
+    resumed,
+    view,
+    jsx,
+    name,
+    receipts: receipts ?? own,
+    observer: __DEV__ ? getObserver() : null
+  };
   try {
     const result = run();
     if (own !== null && own.length) checkReceipts(own, host, name);
@@ -318,19 +336,20 @@ export function devError(code: string, message: string): Error {
 }
 
 function checkRead(inJsx: boolean): void {
-  // A setup runs untracked. A tracked read while the host is a setup belongs
-  // to a plain Solid computation the setup created (a `dynamic`, a derived
-  // store) running its first pass: that read is the computation's own. A
-  // read from a JSX position is never the setup's (see `perform`).
-  const { host, view } = state;
-  if (!inJsx && host === SETUP && getObserver() === null)
+  // A setup never reads (D-042). A read under the observer the setup started
+  // under is the setup's own; under another, it belongs to a plain Solid
+  // computation the setup created (a `dynamic`, a derived store) running its
+  // first pass: that read is the computation's. A read from a JSX position
+  // is never the setup's (see `perform`).
+  const { host, view, observer } = state;
+  if (!inJsx && host === SETUP && getObserver() === observer)
     throw devError(
       "READ_IN_SETUP",
       "a setup creates; it does not read. Read in the view's holes, a $memo, an $effect or an $event (an $event and an $effect's effect phase read untracked)."
     );
   // The same for a view's top level: a computation the view's run created
   // (a flow control reading its props, a hole's first pass) reads for itself.
-  if (!inJsx && view !== null && host === VIEW && getObserver() === null)
+  if (!inJsx && view !== null && host === VIEW && getObserver() === observer)
     throw devError(
       "READ_IN_VIEW",
       `<${view}>: read outside a JSX position. A view has no body: read in a hole ({yield* …} in JSX, a bare function* in h), branch with <Show> / <Match>, derive with a $memo in the setup.`
@@ -1700,8 +1719,12 @@ export function renderView(
 /**
  * `$component(function* (props) { setup; return function* () { view } })`.
  *
- * The setup runs once, untracked, under the component's owner: it creates
- * state and reads context. The returned generator is the view: it only reads.
+ * The setup runs once, under the component's owner: it creates state and
+ * reads context. The returned generator is the view: it only reads. Neither
+ * is wrapped in an untrack (D-097): a setup does not read (D-042; the types,
+ * and `READ_IN_SETUP` in development) and a view reads only in its holes,
+ * each its own computation, so a component called in a hole subscribes that
+ * hole to nothing of its own.
  * The component's failures are its view's and its setup's effects' (`FailsOf<Y>`,
  * D-073): an `$effect` or a `$settled` fails to the nearest `Errored` above it.
  */
@@ -1720,26 +1743,24 @@ export function $component<
   ViewMayWait<ViewYield<V>, ViewReturn<V>>
 > {
   const component: any = function (props?: object) {
-    return untrack(() => {
-      const view = runSetup(body as any, [typedProps(props || {})], body.name || "anonymous");
-      if (typeof view !== "function")
-        throw devError(
-          "COMPONENT_VIEW",
-          "a $component's setup returns its view: `return view(function* () { return <…/>; })`."
-        );
-      const out = renderView(view as any, body.name || "anonymous");
-      // A view that returns a function — a foreign component's output at its
-      // root (a context provider's tag: Solid's provider returns its
-      // `children` memo), an `h` thunk — returns content, as a lazy
-      // component's does (`yieldComponent`): `perform` passes it on to be
-      // inserted. Unmarked, the holding hole called it, so the hole read
-      // what it shows and re-ran when that changed — an `Errored` under the
-      // provider switching to its fallback re-created the component, its
-      // setup and state, and the fallback never showed (D-085's note).
-      if (typeof out === "function" && (out as any)[READ] === undefined)
-        (out as any)[VIEW_MARK] = true;
-      return out;
-    });
+    const view = runSetup(body as any, [typedProps(props || {})], body.name || "anonymous");
+    if (typeof view !== "function")
+      throw devError(
+        "COMPONENT_VIEW",
+        "a $component's setup returns its view: `return view(function* () { return <…/>; })`."
+      );
+    const out = renderView(view as any, body.name || "anonymous");
+    // A view that returns a function — a foreign component's output at its
+    // root (a context provider's tag: Solid's provider returns its
+    // `children` memo), an `h` thunk — returns content, as a lazy
+    // component's does (`yieldComponent`): `perform` passes it on to be
+    // inserted. Unmarked, the holding hole called it, so the hole read
+    // what it shows and re-ran when that changed — an `Errored` under the
+    // provider switching to its fallback re-created the component, its
+    // setup and state, and the fallback never showed (D-085's note).
+    if (typeof out === "function" && (out as any)[READ] === undefined)
+      (out as any)[VIEW_MARK] = true;
+    return out;
   };
   component[COMPONENT_MARK] = true;
   // Dev owner labels (`in <App> › <Card> › …`) use the component's name: a

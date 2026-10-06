@@ -2382,6 +2382,118 @@ describe("computations created in a setup", () => {
   });
 });
 
+describe("D-097: a component runs in its caller's computation (no untrack)", () => {
+  it("a setup runs exactly once per instance, and its own reads never re-run the hole that created it", () => {
+    let setups = 0;
+    let holeRuns = 0;
+    let effects = 0;
+    const [n, setN] = plainSignal(1);
+    const Foreign = (props: { value: number }) => <u>{props.value}</u>;
+    const Child = $component(function* Child(props: Props<{ n: number; label: string }>) {
+      setups++;
+      const doubled = yield* $memo(function* () {
+        return (yield* props.n) * 2;
+      });
+      yield* $effect(
+        function* () {
+          return yield* props.n;
+        },
+        function* () {
+          effects++;
+        }
+      );
+      const [items] = yield* $store([{ id: 1 }, { id: 2 }]);
+      return view(function* () {
+        return (
+          <p>
+            {perform(props.label)}:{perform(doubled)}
+            {perform(
+              Show({
+                when: function* () {
+                  return (yield* props.n) > 1;
+                },
+                children: function* () {
+                  return <s>big</s>;
+                }
+              })
+            )}
+            {perform(
+              For({
+                each: items,
+                children: function* (item: any) {
+                  return view(function* () {
+                    return <i>{perform(item.id)}</i>;
+                  });
+                }
+              })
+            )}
+            <Foreign value={perform(props.n)} />
+          </p>
+        );
+      });
+    });
+    const nHole = function* () {
+      return n();
+    };
+    const Parent = $component(function* Parent() {
+      return view(function* () {
+        return (
+          <div>
+            {perform((holeRuns++, Child({ n: nHole, label: "a" })))}
+            {perform(Child({ n: nHole, label: "b" }))}
+          </div>
+        );
+      });
+    });
+    mount(Parent);
+    expect(root.textContent).toBe("a:2121b:2121");
+    expect([setups, holeRuns, effects]).toEqual([2, 1, 2]);
+    setN(2);
+    flush();
+    expect(root.textContent).toBe("a:4big122b:4big122");
+    // each child's memo, effect, Show, row and foreign prop re-ran; the
+    // child's setup and the parent's hole did not
+    expect([setups, holeRuns, effects]).toEqual([2, 1, 4]);
+  });
+
+  devIt(
+    "a read in a setup called inside a hole is still READ_IN_SETUP (the hole's observer is the setup's)",
+    () => {
+      const Bad = $component(function* Bad(props: Props<{ n: number }>) {
+        yield* props.n as unknown as Iterable<never>;
+        return view(function* () {
+          return <b />;
+        });
+      });
+      const Parent = $component(function* Parent() {
+        return view(function* () {
+          return <div>{perform(Bad({ n: 1 }))}</div>;
+        });
+      });
+      expect(() => mount(Parent)).toThrow("[READ_IN_SETUP]");
+    }
+  );
+
+  devIt("a read at a view's top level inside a hole is still READ_IN_VIEW", () => {
+    const [n] = plainSignal(1);
+    const Bad = $component(function* Bad() {
+      const s = yield* $memo(function* () {
+        return n();
+      });
+      return view(function* () {
+        const v = yield* s;
+        return <b>{v}</b>;
+      });
+    });
+    const Parent = $component(function* Parent() {
+      return view(function* () {
+        return <div>{perform(Bad())}</div>;
+      });
+    });
+    expect(() => mount(Parent)).toThrow(/READ_IN_VIEW.*<Bad>/);
+  });
+});
+
 describe("Loading on a source", () => {
   it("the call form's `on` may be a source: a new key shows the fallback", async () => {
     let setKey!: (v: string) => void;

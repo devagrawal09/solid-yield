@@ -1,6 +1,6 @@
 # Compiler prototype findings and remaining work
 
-Branch: `proto/compiler`, started at `1da4d82`. This is a partial implementation.
+Branch: `proto/compiler`, started at `1da4d82`. C1 instance audit updated 2026-10-07. The current ruling is to finish C1 and ship eager islands only in v0.2; the historical C2 spike below is unchanged.
 No compiled twin, compiler-route parity result, or compiler-route conformance
 result is claimed. A separate public-API spike verifies immediate root claims
 and records a failed delayed claim (F-C5 below). No counterexample to calculus
@@ -26,19 +26,24 @@ plus shipped JS and gzip bytes. Both state their actual measurement definitions.
   import bindings, builds monotone provenance equations, computes connected
   groups, and reports effects, unknown sources and candidate capture failures.
   The CLI visits all eight twins through Vite's resolver. The report explicitly
-  describes its reduced precision and unresolved spans. It is not yet complete C1.
+  uses separate call-site environments and widened recursive families. The CLI and
+  Vite pre-pass both use it. It remains diagnostic, not a codegen input.
 - Inspector precise coverage over the existing parity scripts, plus production
   client chunk sizes. The benchmark document describes the measured scope and
   the baseline allowance. Compiler columns explicitly say not built.
 
 ## Validation and limits
 
-The full gate has 42 passing steps after `pnpm build`. This includes the eight
-twins' existing parity tests, the library's SSR and hydration smoke lanes, and
-the existing 12-scenario conformance harness. It also includes 25 small analysis
-fixtures, the eight source-graph reports, both namespace-spike schedules, three
-coverage-counter fixtures, and all 16 original/library byte runs. The byte
-baseline was also checked in a separate repeat run.
+Final validation on 2026-10-07: `pnpm build` passed, then
+`node scripts/yield-gate.mjs --baseline documentation/yield-gate-baseline.json`
+finished **GREEN: 42 pass / 0 fail / 0 skip** (118 seconds, no baseline changes).
+A fresh report generation matched the checked-in report byte for byte.
+An earlier gate run caught formatting in an in-progress test edit; the final
+formatted tree passed the full gate, including the existing byte checks.
+The analysis suite has 51 fixtures: 25 historical joined-engine tests and 26
+instance-engine tests. The instance fixtures cover imported values composed
+through expressions/helpers/cells, recursive generator and opaque props,
+independent caller constants, foreign-owned slots, captures and timer reach.
 
 These are **library-route** parity/conformance results. The existing conformance
 harness's frozen compiler oracle predates this prototype and is not evidence of
@@ -47,11 +52,31 @@ known replacement; the immediate schedule must retain both nodes.
 
 The prototype has not delivered the requested two compiled twins, codegen,
 chained maps, capture serialization, an eager type marker, compiled parity,
-compiled smoke/conformance or compiled byte measurements. C1 itself remains
-partial: props are joined at cap 1 without separate call-site instances; helper,
-foreign and h ownership is incomplete; spans/slots are unresolved in some
-groups; capture checking is conservative syntax rather than a serializer check.
-The report is diagnostic only and is never read by a build for correctness.
+compiled smoke/conformance or compiled byte measurements. C1 now uses call-site instances, follows local helpers and
+records foreign ownership. All eight analysed twins have a resolved *abstract*
+span, but this is not a physical DOM claim test. Recursive rows are one widened
+family; foreign owners and syntax-based colors remain conservative. Capture
+checking is still syntax-based, not a serializer test. The report is diagnostic
+only and is never consumed by a build for correctness.
+
+The audit retained the three inherited uncommitted files and found additional
+bugs with failing fixtures: composed imported data became S; an initially S
+hole-generator prop hid a later recursive C input; recursive widening mutated
+caller values shared by another instance. Instance-owned prop equations and
+import-data propagation fix these. Further fixtures fixed effect reach omitting
+a timer registered by an effect and a missing first-call prop leaving earlier
+recursive holes at S. No fixture is evidence of general soundness for
+all JavaScript. Unknown calls remain conservative U.
+
+The previous report had 275 U entries; the audited pass has **37 named origins**:
+**1 analysis blind spot, 36 genuine client dependencies**. Every origin has a
+per-twin expression/location, construct, classification and rule in
+[the report](compiler-c1-report.md). The remaining blind spot is Effect.runFork
+passed through a conditional helper return: the function reference is module
+code (S at the edge), but callable alternatives are not retained. It remains U;
+fixing it does not eliminate the runtime owner or async adapter. Counts before
+and after have different units, so the reduction is not an inert-UI or savings
+percentage.
 
 ## C0 definitions that need more detail
 
@@ -71,6 +96,14 @@ The prototype follows §1.5's general safety rule by merging overlapping spans.
 It names the reason `SPAN_OVERLAP`; it does not misreport it as shared state.
 This is an additional merge case for the design, not evidence that a compiler
 with that conservative merge violates the calculus.
+
+The audited pass applies SPAN_OVERLAP to equal abstract spans. Strictly nested
+independent groups may become parent slots only if no client flow or foreign
+owner can recreate them. Fixtures cover both an allowed nested independent root
+and forbidden slots beneath foreign owners/client flows. S markup beneath a
+foreign owner is locally inert but is **not** an extractable slot. Physical DOM
+ranges and independent hydration claims remain unproved; these are candidate
+spans and slots, not an extra C0 guarantee.
 
 ### F-C2: setup can start work without an effect
 
@@ -93,9 +126,21 @@ also lists flow sources and hole props. The two h twins
 also bind event values directly in `h` props and pass source values as children.
 They need equivalent parts without a `yield*` at the use site. Setup generator
 helpers such as `hashFilter()` and `createTodos()` create state owned by their
-caller, although their syntax is in another module. The prototype recognises
-some h positions but does not recover all helper or foreign ownership. Its JSX
-element fraction is therefore not an h element fraction; `0/0` means unmeasured.
+caller, although their syntax is in another module. The audited pass uses this explicit working rule:
+
+- A literal native h tag creates an element site. Nonliteral prop/child positions
+  create holes; onX props create binds even without yield* at the use site.
+- Component/flow children are instantiated beneath their caller's DOM owner.
+  Generator helpers execute in their caller's setup environment and create its
+  cells/events/effects. Foreign owners conservatively absorb descendants.
+- Plain literal values are inert. JSX expression positions are counted too,
+  including structural component-call holes. Counts are reached call-site
+  instances; a row/recursive family has one widened representative.
+
+The report separates JSX elements from h elements. For h twins JSX 0/0 is not an
+inertness claim; h is now measured separately (Sierpinski 0/2, todos 7/24).
+These are operational C1 rules with fixtures, not edits to C0 §1.1. Exact mapping
+from these abstract sites to physical DOM ranges is still a C2 task.
 
 ### F-C4: executed-byte equality is not deterministic in this harness
 
@@ -155,11 +200,15 @@ claims is needed before that work can satisfy the ruling.
 
 ## Work required before C2
 
-1. Replace the joined cap-1 component summaries with call-site instantiation and
-   explicit widening, including recursive components and helpers. The current
-   report deliberately over-merges; it cannot establish the actual root count.
-2. Resolve all proposed root spans and slots, including foreign ownership and
-   context requirements. Do not emit a root with an unresolved span.
+Items 4–6 retain the original C0 checklist as historical context. Dev now rules
+that v0.2 ships eager islands only; delayed scheduling is not a requirement of
+this C1 audit. The F-C5 record above is unchanged.
+
+1. C1 call-site instantiation and recursive widening are now implemented and
+   audited. The remaining callable-alternative blind spot is named in the report;
+   recursive families and foreign ownership still over-approximate runtime roots.
+2. All twin groups now have abstract spans. Verify their physical DOM ranges and
+   slot ownership before emission; an abstract span is not a claim proof.
 3. Check edge values with the public serializer, including pending records,
    branded failures and class identity. The current capture list is conservative
    syntax checking, not a serializer round-trip test.
@@ -172,11 +221,16 @@ claims is needed before that work can satisfy the ruling.
 
 ## Premise assessment
 
-Not established. In this report, TodoMVC's store, context readers and actions
-join the hash-change effect into one eager group; room's identity and live data
-also join broadly. Sierpinski has setup timers. These cases do not currently
-supply the requested two useful C2 splits, including todos. Hackernews and
-rendering have candidates, but their foreign ownership and the joined analysis
-prevent a reliable count of independently hydratable roots. Improve C1's
-precision before deciding whether “most UI is inert; apps split into small
-roots” holds for this corpus. No compiler savings have been measured.
+The audited corpus does **not support** “most UI is inert; apps split into small
+roots” under the current C0 rules. None of the twins has a majority of locally
+inert measured element sites. Each has one conservative group: seven eager,
+one visible. Effects/timers, shared state/context, recreation, boundaries and
+foreign ownership explain those groups; the report names what each eager cause
+touches and pulls in. The small independent-counter fixtures do split.
+
+This is not a universal disproof: the corpus favours stateful and async demos,
+foreign ownership and syntax-based colors over-merge, and static call-site counts
+are neither actual DOM counts nor bytes. Most importantly, locally S markup
+under a foreign owner is not automatically a server slot. No codegen, capture
+serialization, independent physical claims or compiler savings have been proved.
+The historical F-C5 finding and benchmarks were not changed by this audit.

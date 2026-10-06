@@ -13,11 +13,20 @@ collects the modules visited by the build, so its coverage can differ from the
 CLI's source graph. `node --test packages/compiler-yield/test/*.test.mjs` runs
 the small definition fixtures.
 
-This is a partial C1 implementation, not a C2 codegen input. It joins a component's
-props across calls (context-sensitivity cap 1), has no separate instances of a
-recursive component, and cannot recover all ownership across foreign components.
-It reports unresolved spans. Capture checks conservatively reject setup-local
-values rather than executing Solid's serializer. Unknown calls stay U.
+The CLI and Vite plugin use the audited instance engine: each reached component
+call has its own props/setup environment, while recursive rows reuse a widened
+family. Local helpers retain their caller's ownership; foreign owners merge
+conservatively. Imported data remains U through expressions and helper returns.
+`--instances` is an alias for the default; `--joined --json` exposes the older
+engine for comparison. The before table is frozen in
+`documentation/compiler-c1-before.json`. The generated report classifies every U
+origin and lists each eager cause's touched and pulled-in sites.
+
+This is a diagnostic C1 checkpoint, not C2 codegen input. All twin groups have
+abstract spans, but physical DOM claims and serializer round trips are unproved.
+JSX/h counts are separate and count call-site instances, not runtime DOM nodes.
+The remaining callable-alternative blind spot and the definition clarifications
+are documented in `documentation/compiler-findings.md`.
 
 `SPAN_OVERLAP` records an unnumbered C0 case: independent state can have the same
 smallest DOM span. `CAPTURE_FALLBACK` records conservative merging at a rejected

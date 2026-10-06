@@ -619,6 +619,8 @@ tester.run("no-unyielded-write", rules["no-unyielded-write"], {
 
 tester.run("no-foreign-reactive", rules["no-foreign-reactive"], {
   valid: [
+    'import { useParams } from "@solidjs/router"; import { foreignSource as bridge } from "solid-yield"; const id = bridge(() => useParams().id);',
+
     'import { $signal, $optimisticStore, until, refresh } from "solid-yield";',
     'import { lazy, createUniqueId, onCleanup } from "solid-js";',
     'import { query, useNavigate } from "@solidjs/router";',
@@ -631,6 +633,14 @@ tester.run("no-foreign-reactive", rules["no-foreign-reactive"], {
     'import { flush } from "solid-js"; const C = component(function* () { return view(function* () { return <p />; }); }); export const go = () => flush();'
   ],
   invalid: [
+    {
+      code: 'import { useParams } from "@solidjs/router"; const foreignSource = x => x; const id = foreignSource(() => useParams().id);',
+      errors: [{ messageId: "foreign" }]
+    },
+    {
+      code: 'import { useParams } from "@solidjs/router"; import { foreignSource } from "solid-yield"; const id = foreignSource(() => useParams().id); useParams();',
+      errors: [{ messageId: "foreign" }]
+    },
     {
       code: 'import { createSignal, createOptimisticStore } from "solid-js";',
       errors: [

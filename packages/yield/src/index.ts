@@ -23,6 +23,7 @@ export {
   $store,
   attempt,
   constant,
+  foreignSource,
   isComponent,
   isPendingOf,
   latestOf,

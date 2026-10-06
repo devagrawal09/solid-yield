@@ -463,6 +463,37 @@ const noForeignReactive = {
             continue;
           }
           if (!Object.prototype.hasOwnProperty.call(banned, name)) continue;
+          // Q5: only references inside an accessor handed directly to the
+          // imported bridge are allowed. A shadowed spelling grants nothing.
+          const refs = context.sourceCode.getDeclaredVariables(spec).flatMap(v => v.references);
+          const bridged = ref => {
+            let node = ref.identifier;
+            while (node.parent) {
+              const call = node.parent;
+              if (
+                call.type === "CallExpression" &&
+                call.arguments[0] === node &&
+                (node.type === "ArrowFunctionExpression" || node.type === "FunctionExpression") &&
+                call.callee.type === "Identifier"
+              ) {
+                let scope = context.sourceCode.getScope(call.callee);
+                while (scope) {
+                  const binding = scope.set.get(call.callee.name);
+                  if (binding)
+                    return binding.defs.some(
+                      d =>
+                        d.type === "ImportBinding" &&
+                        d.parent.source.value === "solid-yield" &&
+                        d.node.imported?.name === "foreignSource"
+                    );
+                  scope = scope.upper;
+                }
+              }
+              node = call;
+            }
+            return false;
+          };
+          if (refs.length && refs.every(bridged)) continue;
           const use = banned[name];
           context.report({
             node: spec,

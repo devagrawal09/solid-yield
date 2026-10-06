@@ -430,6 +430,24 @@ export function constant<T>(value: T): Source<T> {
   return asSource(() => value) as any;
 }
 
+/** Foreign getters never gain trusted provenance, even when they return a literal. */
+const foreignReaders = new WeakMap<object, () => unknown>();
+
+/**
+ * An untrusted reactive accessor. Read with
+ * `yield* attempt(() => source, cause => new KindedError(cause))`.
+ * The attempt preserves tracking and pending, and names the unknown failure.
+ */
+export function foreignSource<T>(get: () => T): Source<T, unknown, boolean> {
+  const source = asSource<T>(() => {
+    throw new Error(
+      "[FOREIGN_SOURCE_ATTEMPT] read a foreign source inside attempt(() => source, cause => new KindedError(cause))"
+    );
+  });
+  foreignReaders.set(source, get);
+  return source;
+}
+
 /**
  * `yield* latestOf(results)`: the latest value of a source — while a newer
  * one is pending, the previous one (Solid's `latest`: stale while
@@ -689,6 +707,13 @@ class Attempt {
     let v: unknown;
     try {
       v = this.run();
+      if (v != null && (v as any)[READ] !== undefined) {
+        // Keep the guard on the public source. Only this read can reach the
+        // raw getter; returning an alias or nesting another read cannot bypass it.
+        const get = foreignReaders.get(v as object);
+        const source = get ? asSource(get) : v;
+        return state.host === EVENT ? yield* eventRead(source) : readOf(source);
+      }
     } catch (e) {
       if (e instanceof NotReadyError) throw e;
       return yield* handle(this.onError, e);
@@ -818,9 +843,11 @@ type AttemptWait<T> =
 type IsStream<T> =
   T extends EventCall<any, any, any, any>
     ? false
-    : Awaited<T> extends AsyncIterable<any>
-      ? true
-      : false;
+    : T extends Source<infer V, any, any>
+      ? V
+      : Awaited<T> extends AsyncIterable<any>
+        ? true
+        : false;
 /** A stream given back is a `StreamAttempt`: reactive routines take it, an `$event` does not (D-091). */
 type AttemptStream<T> =
   true extends IsStream<T>
@@ -846,6 +873,7 @@ type Fails<R> = [R] extends [Error] ? true : false;
  */
 type AttemptOps<T, H> =
   | AttemptWait<T>
+  | (T extends Source<any, any, infer P> ? Read<P, never> : never)
   | AttemptStream<T>
   | HandlerYields<H>
   | (Fails<HandlerReturn<H>> extends true ? Raise<HandlerReturn<H>> : never);
@@ -887,9 +915,11 @@ interface StreamHandlerRefused {
 type Attempted<T> =
   T extends EventCall<infer R, any, any, any>
     ? R
-    : Awaited<T> extends AsyncIterable<any>
-      ? Awaited<T> & Handled
-      : Awaited<T>;
+    : T extends Source<infer V, any, any>
+      ? V
+      : Awaited<T> extends AsyncIterable<any>
+        ? Awaited<T> & Handled
+        : Awaited<T>;
 /**
  * `yield* attempt(fn, onError)`: call `fn`; when it throws, or the promise it
  * returns rejects, `onError` handles what it caught (D-076, D-078). It may
@@ -924,9 +954,20 @@ type Attempted<T> =
  * (D-087). This is how a routine handles a failure — `try` /
  * `catch` is not a routine form (`no-try-catch`).
  */
+type ForeignHandlerCheck<T, H> = [T] extends [never]
+  ? unknown
+  : T extends Source<any, infer E, boolean>
+    ? unknown extends E
+      ? [H] extends [Error]
+        ? KindCheck<H>
+        : { readonly "[FOREIGN_SOURCE_KIND] give the foreign failure a kind": never }
+      : unknown
+    : unknown;
 export function attempt<T, H>(
   fn: () => T,
-  onError: (error: Caught<T>) => H & HandlerCheck<H> & StreamHandlerCheck<T, H>
+  onError: (
+    error: Caught<T>
+  ) => H & HandlerCheck<H> & StreamHandlerCheck<T, H> & ForeignHandlerCheck<T, H>
 ): Yieldable<AttemptOps<T, H>, AttemptResult<T, H>>;
 export function attempt(fn: () => unknown, onError: (error: unknown) => unknown): unknown {
   return new Attempt(fn, onError);

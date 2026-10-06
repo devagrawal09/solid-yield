@@ -171,7 +171,7 @@ export function createContext<T, N extends string = string>(
  * (D-060: `constant(value)` for a default that is a source).
  */
 export function createContext<T, N extends string = string>(
-  defaultValue: Exclude<T, undefined>,
+  defaultValue: T & ({} | null),
   options?: { name?: N }
 ): YieldContext<T, N>;
 export function createContext(

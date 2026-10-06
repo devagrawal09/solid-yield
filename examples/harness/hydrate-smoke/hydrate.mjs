@@ -45,6 +45,17 @@ const TIMEOUT_MS =
  * string, or nothing when the page responded.
  */
 const INTERACTIONS = {
+  async "docs theme and carousel"(document, settle) {
+    const theme = document.querySelector(".theme button");
+    const carousel = document.querySelector(".carousel button");
+    if (!theme || !carousel) return "missing widget buttons";
+    theme.dispatchEvent(new document.defaultView.MouseEvent("click", { bubbles: true }));
+    carousel.dispatchEvent(new document.defaultView.MouseEvent("click", { bubbles: true }));
+    await settle();
+    if (!document.querySelector(".theme.dark")) return "theme did not change";
+    if (!document.querySelector(".carousel").textContent.includes("Image 2 of 2"))
+      return "carousel did not change";
+  },
   /** rendering /settings: the portal's close button removes the portal. */
   async "close the portal"(document, settle) {
     const button = [...document.querySelectorAll("button")].find(
@@ -65,6 +76,13 @@ const INTERACTIONS = {
  * their interactions.
  */
 const TARGETS = [
+  {
+    twin: "docs-yield",
+    entry: "stream",
+    kind: "entry",
+    urls: ["/", "/docs/start", "/docs/missing"],
+    interactions: { "/": "docs theme and carousel", "/docs/start": "docs theme and carousel" }
+  },
   ...["string", "stream"].map(entry => ({
     twin: "rendering-yield",
     entry,

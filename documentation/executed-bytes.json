@@ -4,6 +4,268 @@
   "allowance": "2 percent or 1024 bytes per phase, whichever is larger",
   "results": [
     {
+      "twin": "docs-yield",
+      "app": "original",
+      "phases": [
+        {
+          "phase": "load",
+          "bytes": 519971,
+          "maxBytes": 530371
+        },
+        {
+          "phase": "load / (pending)",
+          "bytes": 1703,
+          "maxBytes": 2727
+        },
+        {
+          "phase": "content loads",
+          "bytes": 129406,
+          "maxBytes": 131995
+        },
+        {
+          "phase": "comment list loads, avatars pending",
+          "bytes": 135221,
+          "maxBytes": 137926
+        },
+        {
+          "phase": "avatars load",
+          "bytes": 99131,
+          "maxBytes": 101114
+        },
+        {
+          "phase": "navigate to /docs/start",
+          "bytes": 208770,
+          "maxBytes": 212946
+        },
+        {
+          "phase": "article loads",
+          "bytes": 117147,
+          "maxBytes": 119490
+        },
+        {
+          "phase": "toggle theme",
+          "bytes": 67964,
+          "maxBytes": 69324
+        },
+        {
+          "phase": "search starts",
+          "bytes": 87830,
+          "maxBytes": 89587
+        },
+        {
+          "phase": "search results",
+          "bytes": 111390,
+          "maxBytes": 113618
+        },
+        {
+          "phase": "like (optimistic)",
+          "bytes": 82761,
+          "maxBytes": 84417
+        },
+        {
+          "phase": "like saved",
+          "bytes": 90522,
+          "maxBytes": 92333
+        },
+        {
+          "phase": "second like (optimistic)",
+          "bytes": 82937,
+          "maxBytes": 84596
+        },
+        {
+          "phase": "like rate limited",
+          "bytes": 90647,
+          "maxBytes": 92460
+        },
+        {
+          "phase": "newsletter good email",
+          "bytes": 65525,
+          "maxBytes": 66836
+        },
+        {
+          "phase": "newsletter in flight",
+          "bytes": 80587,
+          "maxBytes": 82199
+        },
+        {
+          "phase": "newsletter success",
+          "bytes": 88830,
+          "maxBytes": 90607
+        },
+        {
+          "phase": "newsletter bad email",
+          "bytes": 68209,
+          "maxBytes": 69574
+        },
+        {
+          "phase": "bad newsletter in flight",
+          "bytes": 80758,
+          "maxBytes": 82374
+        },
+        {
+          "phase": "newsletter typed error",
+          "bytes": 90928,
+          "maxBytes": 92747
+        },
+        {
+          "phase": "carousel next",
+          "bytes": 67241,
+          "maxBytes": 68586
+        },
+        {
+          "phase": "search failure starts",
+          "bytes": 87963,
+          "maxBytes": 89723
+        },
+        {
+          "phase": "search typed error",
+          "bytes": 105383,
+          "maxBytes": 107491
+        },
+        {
+          "phase": "navigate to failing slug",
+          "bytes": 158843,
+          "maxBytes": 162020
+        },
+        {
+          "phase": "not-found typed error",
+          "bytes": 126974,
+          "maxBytes": 129514
+        }
+      ]
+    },
+    {
+      "twin": "docs-yield",
+      "app": "twin",
+      "phases": [
+        {
+          "phase": "load",
+          "bytes": 543843,
+          "maxBytes": 554720
+        },
+        {
+          "phase": "load / (pending)",
+          "bytes": 1703,
+          "maxBytes": 2727
+        },
+        {
+          "phase": "content loads",
+          "bytes": 137781,
+          "maxBytes": 140537
+        },
+        {
+          "phase": "comment list loads, avatars pending",
+          "bytes": 143420,
+          "maxBytes": 146289
+        },
+        {
+          "phase": "avatars load",
+          "bytes": 101122,
+          "maxBytes": 103145
+        },
+        {
+          "phase": "navigate to /docs/start",
+          "bytes": 222026,
+          "maxBytes": 226467
+        },
+        {
+          "phase": "article loads",
+          "bytes": 124076,
+          "maxBytes": 126558
+        },
+        {
+          "phase": "toggle theme",
+          "bytes": 83885,
+          "maxBytes": 85563
+        },
+        {
+          "phase": "search starts",
+          "bytes": 93775,
+          "maxBytes": 95651
+        },
+        {
+          "phase": "search results",
+          "bytes": 116782,
+          "maxBytes": 119118
+        },
+        {
+          "phase": "like (optimistic)",
+          "bytes": 87411,
+          "maxBytes": 89160
+        },
+        {
+          "phase": "like saved",
+          "bytes": 94058,
+          "maxBytes": 95940
+        },
+        {
+          "phase": "second like (optimistic)",
+          "bytes": 87587,
+          "maxBytes": 89339
+        },
+        {
+          "phase": "like rate limited",
+          "bytes": 93857,
+          "maxBytes": 95735
+        },
+        {
+          "phase": "newsletter good email",
+          "bytes": 77587,
+          "maxBytes": 79139
+        },
+        {
+          "phase": "newsletter in flight",
+          "bytes": 84616,
+          "maxBytes": 86309
+        },
+        {
+          "phase": "newsletter success",
+          "bytes": 92411,
+          "maxBytes": 94260
+        },
+        {
+          "phase": "newsletter bad email",
+          "bytes": 80023,
+          "maxBytes": 81624
+        },
+        {
+          "phase": "bad newsletter in flight",
+          "bytes": 84654,
+          "maxBytes": 86348
+        },
+        {
+          "phase": "newsletter typed error",
+          "bytes": 94190,
+          "maxBytes": 96074
+        },
+        {
+          "phase": "carousel next",
+          "bytes": 82753,
+          "maxBytes": 84409
+        },
+        {
+          "phase": "search failure starts",
+          "bytes": 93908,
+          "maxBytes": 95787
+        },
+        {
+          "phase": "search typed error",
+          "bytes": 108304,
+          "maxBytes": 110471
+        },
+        {
+          "phase": "navigate to failing slug",
+          "bytes": 161868,
+          "maxBytes": 165106
+        },
+        {
+          "phase": "not-found typed error",
+          "bytes": 129477,
+          "maxBytes": 132067
+        }
+      ]
+    },
+    {
       "twin": "effect-yield",
       "app": "original",
       "phases": [

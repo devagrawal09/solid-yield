@@ -1,0 +1,8 @@
+body { margin: 0; font: 16px/1.6 system-ui, sans-serif; color: #24313a; background: #f8f7f2; }
+.site { max-width: 1080px; margin: auto; padding: 24px; }
+.layout { display: grid; grid-template-columns: 200px 1fr; gap: 32px; }
+a { color: #286467; } button, input { font: inherit; padding: 6px 12px; }
+.widget { margin: 20px 0; padding: 12px; border: 1px solid #b9c8c5; }
+.dark { background: #24313a; color: #f8f7f2; } pre { overflow: auto; background: #e8ece8; padding: 12px; }
+article section { margin: 28px 0; } .comments li { margin: 12px 0; } .carousel img { width: 120px; height: 60px; }
+@media (max-width: 700px) { .layout { grid-template-columns: 1fr; } }

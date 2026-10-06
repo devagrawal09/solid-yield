@@ -5,6 +5,17 @@ reference run used as the baseline; the machine-readable copy is
 [`yield-gate-baseline.json`](./yield-gate-baseline.json). CI runs the same gate
 against this file (`.github/workflows/gate.yml`).
 
+**Docs content-site addition (2026-10-07).** Baseline regenerated from the full
+GREEN run on `proto/compiler` at parent `8cb1ae8`: **46 PASS / 0 FAIL / 0 SKIP
+in 116 s**. The inventory is nine twins. New steps are `twin:docs-yield:test`,
+`:typecheck`, `:lint`, and `original:docs:typecheck`. The parity script checks 24
+states. SSR and hydrate smoke each add `/`, `/docs/start`, `/docs/missing` (19
+cases total); hydration also clicks the local theme and carousel. The docs
+original separately hydrates all three cases. C1 visits the new source graph;
+the executed-byte step includes both new apps with thresholds recorded for
+load and all 24 parity steps. Existing byte thresholds are unchanged. The
+format check also covers the new original's source and stream entries.
+
 **Compiler branch additions (C1 checkpoint).** `compiler:analysis-test` pins the
 small analysis fixtures, and `compiler:report` visits all eight source graphs.
 The report is provisional: this checks that it runs, not that its candidate roots

@@ -84,6 +84,8 @@ const oldModes = groups =>
     .map(m => groups.split(", ").filter(g => g.endsWith(m)).length)
     .join("/");
 const eagerNotes = {
+  "docs-yield":
+    "ThemeToggle has the only $effect. It reads dark, writes no state and touches only its own cell. Its event, class hole, bind and label are pulled into that six-part eager group; no other widget is in eager reach.",
   "effect-yield":
     "No $effect. createRuntime calls ManagedRuntime.make during setup; its unknown lifetime and the RuntimeContext owner pull Typeahead, Results, Checkout, Orders and LogPanel into the eager group.",
   "rendering-yield":
@@ -117,7 +119,9 @@ export function markdown(reports) {
   for (const r of reports) {
     const b = before.find(b => b.twin === r.twin);
     out.push(
-      `| ${r.twin} | ${b.holes} → ${fraction(r.holes)} | ${b.jsx} → ${fraction(r.jsxElements ?? r.elements)} | ${oldModes(b.groups)} → ${modeCounts(r.roots)} | ${b.captures} → ${r.captureFailures.length} | ${b.leaks} → ${r.leaks.length} | ${r.roots.map(x => `${x.size}${x.mode[0].toUpperCase()}`).join(", ")} |`
+      b
+        ? `| ${r.twin} | ${b.holes} → ${fraction(r.holes)} | ${b.jsx} → ${fraction(r.jsxElements ?? r.elements)} | ${oldModes(b.groups)} → ${modeCounts(r.roots)} | ${b.captures} → ${r.captureFailures.length} | ${b.leaks} → ${r.leaks.length} | ${r.roots.map(x => `${x.size}${x.mode[0].toUpperCase()}`).join(", ")} |`
+        : `| ${r.twin} | ${fraction(r.holes)} | ${fraction(r.jsxElements ?? r.elements)} | ${modeCounts(r.roots)} | ${r.captureFailures.length} | ${r.leaks.length} | ${r.roots.map(x => `${x.size}${x.mode[0].toUpperCase()}`).join(", ")} |`
     );
   }
   out.push(
@@ -190,6 +194,22 @@ export function markdown(reports) {
       out.push(
         `| \`${expression(l.name)}\` — ${l.at} | ${l.construct} | **${l.classification === "blind spot" ? "ANALYSIS BLIND SPOT" : "GENUINE"}**: ${escape(l.reason)}. ${escape(l.rule)} |`
       );
+    if (r.twin === "docs-yield") {
+      out.push(
+        "",
+        "### Content-site premise (new pair, no before measurement)",
+        "",
+        "The pair has six widget definitions with no shared signals or application context. Navigation, eight article sections (headings, paragraphs and code), on-this-page links, related links, a long fixed reading guide and footer come from delayed fake server API functions. The fake API runs in process; its use-server directives declare provenance for C1, without claiming an RPC transport or shipped-byte saving. Local widget APIs remain client promises.",
+        "",
+        "| Twin | Inert holes | Inert JSX | Groups E/V/L | Captures | U origins | Eager reach |",
+        "| --- | ---: | ---: | --- | ---: | ---: | --- |",
+        `| docs-yield | ${fraction(r.holes)} | ${fraction(r.jsxElements)} | ${modeCounts(r.roots)} | ${r.captureFailures.length} | ${r.leaks.length} | ThemeToggle only; 1 touched cell, 4 pulled-in parts |`,
+        "",
+        "This is a majority of locally inert JSX sites (about 60%), but six candidate groups do not mean six widget roots. SearchBox and CommentList merge by M6: both non-server async paths reach the same delay helper's unknown Promise binding, even though they share no state. The router's FOREIGN_OWNER edges merge the two route alternatives, both LikeButton instances and routed article parts. Route props are U, so getArticle(slug) on DocPage stays U even though the function is server-declared; M6 propagates that origin, and M4 pulls its pending/error boundaries in. CAPTURE_FALLBACK also rejects DocPage's setup-local props object at the candidate edge. None of these merges reaches ThemeToggle, NewsletterForm or ImageCarousel.",
+        "",
+        "The sixth group is the fixed reading guide's two error-fallback holes (err().kind and err().message), reported lazy despite having no bind; it is not an extra widget. The failure fallback remains U in this analysis even though the normal article source is S. Thus the diagnostic exposes conservative async sharing, foreign ownership, a prop capture and failure-fallback placement; it does not establish six small independently claimable roots. M1/M2 keep each widget's own cells and handlers together; the cross-widget merge above is M6. The original eight-twin results are unchanged."
+      );
+    }
     out.push("", "### Groups and eager reach", "");
     if (eagerNotes[r.twin]) out.push(eagerNotes[r.twin], "");
     else
@@ -227,7 +247,7 @@ export function markdown(reports) {
     "",
     "## Premise verdict",
     "",
-    "This corpus does not support “most UI is inert; apps split into small roots” under the current C0 rules and conservative ownership analysis. None of the twins has a majority of locally inert measured element sites, and each has one connected candidate group (seven eager, one visible). Small independent counter fixtures do split, so the mechanism is possible; these applications do not establish that it is typical.",
+    "The original eight interaction-heavy twins do not support “most UI is inert; apps split into small roots” under the current C0 rules: none has a majority of locally inert element sites, and each has one group (seven eager, one visible). The new contrived docs-yield content site has a majority of inert JSX and six groups, with only ThemeToggle eager. It demonstrates that content can dominate while several widget groups stay separate. It also exposes merging of independent async widgets and routed article/like parts, plus a separate failure-fallback group; it does not establish that all six widgets become small independent roots.",
     "",
     "This is not a universal disproof. The examples favour stateful demos, foreign owners and async boundaries; call-site/row counts are not DOM or byte weights, and conservative colors/ownership may hide useful splits. Locally inert markup is still useful evidence, but it does not establish extractable slots, independently claimable DOM or shipped-byte savings. The next decision can now use named client dependencies rather than the provisional U reduction alone."
   );

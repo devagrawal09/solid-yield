@@ -5,3 +5,10 @@
  * apps import `solid-yield` and `solid-yield/h`.
  */
 export * from "./runtime.js";
+export {
+  NativeFailure,
+  nativeFailure,
+  nativeFailureValue,
+  registerNativeFailure
+} from "./native-failure.js";
+export type { NativeCaught } from "./native-failure.js";

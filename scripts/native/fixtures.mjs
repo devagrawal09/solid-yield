@@ -4,6 +4,32 @@ const counter = body =>
   `${signal} export function Counter(){const [count,set]=createSignal(0);${body}}`;
 export const fixtures = [
   {
+    id: "class-memo",
+    source: `import {createMemo} from 'solid-js'; class Failed extends Error{} function load(){throw new Failed('bad')} export function App(){const value=createMemo(()=>load());return <p>{value()}</p>}`,
+    expected: "accepted"
+  },
+  {
+    id: "unknown-memo",
+    source: `import {createMemo} from 'solid-js'; function load(){throw 'bad'} export function App(){const value=createMemo(()=>load());return <p>{value()}</p>}`,
+    expected: "accepted"
+  },
+  {
+    id: "async-event",
+    source: `export function App(){return <button onClick={async()=>{throw new Error('bad')}}/>}`,
+    expected: "accepted"
+  },
+  {
+    id: "named-async-event",
+    source: `async function save(){throw new Error('bad')} export function App(){return <button onClick={save}/>}`,
+    expected: "accepted"
+  },
+  {
+    id: "promise-catch",
+    source: `import {createMemo} from 'solid-js'; export function App(){const value=createMemo(()=>Promise.reject(new Error('bad')).catch(()=>1));return <p>{value()}</p>}`,
+    expected: "accepted"
+  },
+
+  {
     id: "promise-event",
     source: counter('return <button onClick={()=>Promise.reject("failed")}/>;')
   },

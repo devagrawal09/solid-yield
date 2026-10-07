@@ -49,3 +49,26 @@ assert.match(html, /name:"NativeFailure"/);
 assert.match(html, /kind:"production#Rejected"/);
 assert.match(html, /public native failure/);
 console.log("native failure: production stream retains class identity and safe message");
+
+// F-S17: D-115 intentionally differs from unmarked Solid Error sanitization.
+// Use a fresh production Vite server outside Vitest's development module graph.
+const { devServer } = await import("../packages/vite-plugin-yield/test/server.js");
+const { resolve } = await import("node:path");
+const fixture = resolve(
+  import.meta.dirname,
+  "../packages/vite-plugin-yield/test/fixtures/native-app"
+);
+const server = await devServer(fixture, {
+  mode: "native",
+  include: file => file === resolve(fixture, "FailureView.tsx")
+});
+try {
+  const entry = await server.ssrLoadModule("/failure-entry.tsx");
+  assert.match(entry.original(), /<p[^>]*>wrong identity<\/p>/);
+  assert.match(entry.native(), /<p[^>]*>author failure<\/p>/);
+  console.log(
+    "F-S17: original SSR sanitizes the unmarked Error; native D-115 retains its safe message"
+  );
+} finally {
+  await server.close();
+}

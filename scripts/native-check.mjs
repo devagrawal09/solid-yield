@@ -7,6 +7,7 @@ import { format, resolveConfig } from "prettier";
 import assert from "node:assert/strict";
 import {
   inspectNativeProject,
+  nativeFailures,
   lowerNativeProject
 } from "../packages/vite-plugin-yield/src/native.js";
 import { sugarFacts } from "../packages/compiler-yield/src/sugar-facts.js";
@@ -53,7 +54,7 @@ writeFileSync(
         types: [],
         lib: ["ESNext", "DOM"]
       },
-      include: ["*.tsx"]
+      include: ["**/*.tsx", "**/*.ts"]
     },
     null,
     2
@@ -64,7 +65,7 @@ const eslint = new ESLint({
   overrideConfigFile: true,
   overrideConfig: [
     {
-      files: ["**/*.tsx"],
+      files: ["**/*.tsx", "**/*.ts"],
       languageOptions: { parser, parserOptions: { project: tsconfig, tsconfigRootDir: root } },
       plugins: { "solid-yield": plugin },
       rules: plugin.configs.recommended.rules
@@ -98,8 +99,28 @@ for (const fixture of fixtures) {
   }
   console.log(`native fixture ${fixture.id}: ${results.at(-1).stage}`);
 }
+const foreignEdges = ["class-memo", "unknown-memo"].map(id => {
+  const file = join(generated, `foreign-${id}.tsx`);
+  const code = `import {foreign} from "solid-yield"; import {App} from "./${id}"; export const NativeHandoff=foreign(App);`;
+  writeFileSync(file, code);
+  outputs.set(file, code);
+  return { id, file: relative(root, file), source: code, diagnostics: [] };
+});
 const program = ts.createProgram([...outputs.keys()], compilerOptions);
 const diagnostics = ts.getPreEmitDiagnostics(program);
+for (const edge of foreignEdges) {
+  edge.diagnostics = diagnostics
+    .filter(d => d.file?.fileName === join(root, edge.file))
+    .map(d => ({
+      stage: "type",
+      code: `TS${d.code}`,
+      message: ts.flattenDiagnosticMessageText(d.messageText, "\n")
+    }));
+  assert.ok(
+    edge.diagnostics.some(d => d.message.includes("FOREIGN_HANDOFF")),
+    `${edge.id}: foreign edge must reject inferred failures`
+  );
+}
 for (const result of results.filter(r => r.stage === "generated")) {
   const file = join(root, result.file);
   result.diagnostics = diagnostics
@@ -160,6 +181,7 @@ for (const twin of twins) {
     original === "rendering" ? "shared/src" : "src"
   );
   const input = new Map(filesUnder(dir).map(file => [file, readFileSync(file, "utf8")]));
+  const failureReport = nativeFailures(input);
   let errors = inspectNativeProject(input);
   let output;
   if (!errors.length)
@@ -170,16 +192,66 @@ for (const twin of twins) {
         { code: error.message.match(/\[(\w+)\]/)?.[1] ?? "TRANSFORM", message: error.message }
       ];
     }
+  if (output) {
+    const emitted = [];
+    for (const [file, code] of output.files) {
+      const dest = join(generated, "originals", twin, relative(dir, file));
+      mkdirSync(resolve(dest, ".."), { recursive: true });
+      writeFileSync(dest, code);
+      emitted.push(dest);
+    }
+    const checked = ts.createProgram(emitted, compilerOptions);
+    errors.push(
+      ...ts.getPreEmitDiagnostics(checked).map(d => ({
+        stage: "type",
+        code: `TS${d.code}`,
+        message: ts.flattenDiagnosticMessageText(d.messageText, "\n"),
+        file: d.file?.fileName,
+        line:
+          d.file && d.start !== undefined
+            ? d.file.getLineAndCharacterOfPosition(d.start).line + 1
+            : undefined
+      }))
+    );
+    for (const file of emitted) {
+      const [lint] = await eslint.lintText(readFileSync(file, "utf8"), { filePath: file });
+      errors.push(
+        ...lint.messages.map(m => ({
+          stage: "lint",
+          code: m.ruleId ?? "parse",
+          message: m.message,
+          file,
+          line: m.line,
+          severity: m.severity
+        }))
+      );
+    }
+  }
   originals.push({
     twin: original + "-yield" + (twin.endsWith("-h") ? "-h" : ""),
     original,
     files: input.size,
-    status: errors.length ? "refused" : "generated-unverified",
+    inference: {
+      status: "source call-graph estimate; generated colors unchecked until transform succeeds",
+      iterations: failureReport.iterations,
+      classes: failureReport.classes,
+      components: failureReport.functions
+        .filter(f => f.component)
+        .map(({ id, calls, rejection, ...f }) => f),
+      serverRejections: failureReport.functions
+        .filter(f => f.server)
+        .map(({ id, calls, ...f }) => f)
+    },
+    status: output
+      ? errors.length
+        ? "generated-with-diagnostics"
+        : "generated-unverified"
+      : "refused",
     diagnostics: errors,
     parity: "not run: no checked native program",
     ssr: "not run: no checked native program",
     differingStatements: null,
-    diffReason: errors.length
+    diffReason: !output
       ? "No output emitted; a distance for a nonexistent transform is undefined."
       : "Generated output still requires a checked app harness.",
     reasons: [...new Set(errors.map(d => d.code))]
@@ -209,6 +281,7 @@ const report = {
   historicalCorpus:
     "27 named categories reconstructed; seven original identities and all verbatim originals unavailable",
   missingSlots,
+  foreignEdges,
   fixtures: results.map(r => ({ ...r, diagnostics: r.diagnostics.map(normalize) })),
   originals: originals.map(r => ({ ...r, diagnostics: r.diagnostics.map(normalize) })),
   analyzer: { roots: facts.roots.length }

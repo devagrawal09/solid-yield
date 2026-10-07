@@ -187,6 +187,13 @@ function buildSteps(twins) {
     args: ["scripts/native-check.mjs"]
   });
   steps.push({
+    name: "native:failure:production-serialization",
+    cwd: root,
+    cmd: process.execPath,
+    args: ["scripts/native-serialization.mjs"],
+    env: { NODE_ENV: "production" }
+  });
+  steps.push({
     name: "native:counter:ssr-hydrate-parity",
     cwd: root,
     cmd: process.execPath,
@@ -373,7 +380,7 @@ function runStep(step) {
     const chunks = [];
     const child = spawn(step.cmd, step.args, {
       cwd: step.cwd,
-      env: { ...process.env, ...CHILD_ENV },
+      env: { ...process.env, ...CHILD_ENV, ...step.env },
       stdio: ["ignore", "pipe", "pipe"]
     });
     child.stdout.on("data", c => chunks.push(c));

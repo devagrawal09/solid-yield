@@ -1115,7 +1115,9 @@ const live =
   'import { component, view } from "solid-yield";\nconst Live = component(function* () { return view(function* () { return <i />; }); });\n';
 tester.run("no-unchecked-foreign-handoff", rules["no-unchecked-foreign-handoff"], {
   valid: [
-    // checked at the handoff
+    // checked at the handoff, including generated import aliases
+    live +
+      'import { foreign as checked } from "solid-yield"; defineRoute({ component: checked(Live) });',
     live + "defineRoute({ path: '/', component: foreign(Live) });",
     live + "const r = <Route path='/' component={foreign(Live)} />;",
     live + 'import { render } from "@solidjs/web";\nrender(foreign(Live), root);',
@@ -1348,6 +1350,9 @@ describe("require-jsx-factory reports a project once", () => {
 
 tester.run("no-read-in-setup", rules["no-read-in-setup"], {
   valid: [
+    component(
+      "const [n] = yield* $signal(0); function* read() { return yield* n; } const m = yield* $memo(function* () { return yield* read(); }); return view(function* () { return <p>{yield* m}</p>; });"
+    ),
     component(
       "const [n] = yield* $signal(0); const m = yield* $memo(function* () { return yield* n; }); return view(function* () { return <p>{yield* m}</p>; });"
     ),

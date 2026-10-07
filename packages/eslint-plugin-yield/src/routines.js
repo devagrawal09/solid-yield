@@ -101,7 +101,7 @@ function computeKind(fn) {
     (parent.key.name === "children" || parent.key.name === "fallback")
   )
     return fn.params.length > 0 ? "row" : "view";
-  if (fn.type === "FunctionDeclaration") {
+  if (fn.type === "FunctionDeclaration" && returnsGenerator(fn)) {
     const outer = enclosingFunction(fn);
     const k = routineKind(outer);
     if (k === "setup" || k === "row") return "row";

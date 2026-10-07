@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { nativeTry, nativeMap, nativeCallback } from "../src/native-control.js";
+import { nativeTry, nativeMap, nativeCallback, nativeInvoke } from "../src/native-control.js";
 import { nativeFailure, nativeFailureValue } from "../src/native-failure.js";
 import { raise, $event } from "../src/runtime.js";
 import type { FailsOf, Raise, Read, Write, Create } from "../src/types.js";
@@ -114,3 +114,15 @@ function callbackColorChecks() {
   nativeCallback(fails);
 }
 void callbackColorChecks;
+
+it("invokes a captured method with its receiver even when .call is overridden", () => {
+  function add(this: { n: number }, value: number) {
+    return this.n + value;
+  }
+  Object.defineProperty(add, "call", {
+    value: () => {
+      throw new Error("wrong call");
+    }
+  });
+  expect(nativeInvoke(add, { n: 3 }, [4])).toBe(7);
+});

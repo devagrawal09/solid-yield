@@ -57,3 +57,12 @@ export function nativeCallback<H>(
 ): H {
   return handler;
 }
+
+/** Invoke a captured method without consulting its user-visible .call property. */
+export function nativeInvoke<F extends (...args: any[]) => any>(
+  fn: F,
+  receiver: unknown,
+  args: Parameters<F>
+): ReturnType<F> {
+  return Reflect.apply(fn, receiver, args);
+}

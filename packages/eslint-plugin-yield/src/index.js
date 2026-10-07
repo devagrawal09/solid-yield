@@ -1570,7 +1570,9 @@ const noUncheckedForeignHandoff = {
     const isForeignCall = node =>
       node.type === "CallExpression" &&
       node.callee.type === "Identifier" &&
-      node.callee.name === "foreign";
+      (node.callee.name === "foreign" ||
+        (importedFrom(context, node.callee)?.module === "solid-yield" &&
+          importedFrom(context, node.callee)?.imported === "foreign"));
     /** Report `value` (a component handed over) when it is a yield component not checked. */
     const check = (value, where) => {
       if (!value || isForeignCall(value)) return;

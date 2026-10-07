@@ -3,13 +3,14 @@ import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 import { pathToFileURL } from "node:url";
 const require = createRequire(new URL("../packages/yield/package.json", import.meta.url));
-const { component, $memo, attempt, view, Loading, renderToStream } = await import(
+const { component, $memo, attempt, view, Loading, renderToStream, ChunkError } = await import(
   pathToFileURL(require.resolve("solid-yield")).href
 );
 const { nativeFailure, registerNativeFailure } = await import(
   pathToFileURL(require.resolve("solid-yield/internal")).href
 );
 const { isSafeError } = await import(pathToFileURL(require.resolve("@solidjs/web")).href);
+assert.ok(nativeFailure(["ChunkError"], new Error("transport"), ChunkError) instanceof ChunkError);
 class Rejected extends Error {}
 registerNativeFailure("production#Rejected", Rejected);
 assert.equal(

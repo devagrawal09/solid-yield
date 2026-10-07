@@ -74,3 +74,14 @@ test("named Promise handlers contribute their own failures; opaque catch methods
   assert.deepEqual(summary(report, "named"), [kind]);
   assert.deepEqual(summary(report, "opaque"), ["unknown"]);
 });
+
+test("shadowed intrinsic names are not treated as pure builtins", () => {
+  const report = infer({
+    "shadow.ts": `export {}; class Failure extends globalThis.Error{} class Error {constructor(){throw new Failure()}}
+ function fail(){return new Error()} const Promise={reject(){throw 'not a promise'}};
+ function reject(){return Promise.reject()}`
+  });
+  const kind = report.classes.find(c => c.name === "Failure").id;
+  assert.deepEqual(summary(report, "fail"), [kind]);
+  assert.deepEqual(summary(report, "reject"), ["unknown"]);
+});

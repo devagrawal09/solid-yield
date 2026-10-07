@@ -218,9 +218,18 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
       const method = callee.isMemberExpression() && name(callee.node.property);
       const receiver = callee.isMemberExpression() ? callee.get("object") : null;
       const argEffects = union(...args.map(a => evaluate(a, owner, caught)));
-      if (receiver?.isIdentifier({ name: "Promise" }) && method === "reject")
+      if (
+        receiver?.isIdentifier({ name: "Promise" }) &&
+        !receiver.scope.getBinding("Promise") &&
+        method === "reject"
+      )
         return union(argEffects, args[0] ? classSet(args[0]) : new Set(["unknown"]));
-      if (receiver?.isIdentifier({ name: "Promise" }) && method === "resolve") return argEffects;
+      if (
+        receiver?.isIdentifier({ name: "Promise" }) &&
+        !receiver.scope.getBinding("Promise") &&
+        method === "resolve"
+      )
+        return argEffects;
       if (["catch", "then", "finally"].includes(method)) {
         const input = evaluate(receiver, owner, caught);
         const handler = args[method === "then" ? 1 : 0];
@@ -283,12 +292,7 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
         return union(argEffects, ...callbacks);
       }
       // Intrinsics are explicit contracts, not a claim that arbitrary packages are pure.
-      if (
-        p.isNewExpression() &&
-        /^(Error|TypeError|RangeError|SyntaxError|ReferenceError|URIError|EvalError|AggregateError)$/.test(
-          callee.node.name ?? ""
-        )
-      )
+      if (p.isNewExpression() && [...classSet(p)].some(k => k.startsWith("global:")))
         return argEffects;
       if (p.isNewExpression() && !classSet(p).has("unknown")) {
         const type = checker.getTypeAtLocation(nodeFor(p));

@@ -340,7 +340,16 @@ function surface(code, filename, modules) {
         const target = q.node.arguments[0];
         if (t.isIdentifier(target)) {
           needed.add("foreign");
-          q.node.arguments[0] = t.callExpression(t.identifier("foreign"), [target]);
+          needed.add("RootCheck");
+          q.node.arguments[0] = t.callExpression(t.identifier("foreign"), [
+            t.tsSatisfiesExpression(
+              target,
+              t.tsTypeReference(
+                t.identifier("RootCheck"),
+                t.tsTypeParameterInstantiation([t.tsTypeQuery(t.identifier(target.name))])
+              )
+            )
+          ]);
         }
         return;
       }
@@ -654,7 +663,7 @@ function surface(code, filename, modules) {
       t.importDeclaration(
         [...needed].map(name => {
           const spec = t.importSpecifier(t.identifier(name), t.identifier(name));
-          if (name === "Props") spec.importKind = "type";
+          if (name === "Props" || name === "RootCheck") spec.importKind = "type";
           return spec;
         }),
         t.stringLiteral("solid-yield")

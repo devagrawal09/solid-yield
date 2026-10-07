@@ -101,7 +101,7 @@ it("keeps foreign entry rendering checked and out of routine inference", () => {
     ])
   ).files.get(main);
   expect(out).toMatch(/from ['"]@solidjs\/web['"]/);
-  expect(out).toContain("render(__nativeForeign(App), document.body)");
+  expect(out).toContain("__nativeForeign(App satisfies __NativeRootCheck<typeof App>)");
   expect(out).not.toContain("function*");
 });
 it("preserves native catches through the SSR runtime", async () => {

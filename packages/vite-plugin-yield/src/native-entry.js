@@ -58,7 +58,15 @@ export function nativeEntry(code, file) {
       }
       if (t.isIdentifier(arg) && /^[A-Z]/.test(arg.name)) {
         adapted = true;
-        q.node.arguments[0] = t.callExpression(t.identifier("__nativeForeign"), [arg]);
+        q.node.arguments[0] = t.callExpression(t.identifier("__nativeForeign"), [
+          t.tsSatisfiesExpression(
+            arg,
+            t.tsTypeReference(
+              t.identifier("__NativeRootCheck"),
+              t.tsTypeParameterInstantiation([t.tsTypeQuery(t.identifier(arg.name))])
+            )
+          )
+        ]);
       }
     }
   });
@@ -69,7 +77,13 @@ export function nativeEntry(code, file) {
       );
     p.node.body.unshift(
       t.importDeclaration(
-        [t.importSpecifier(t.identifier("__nativeForeign"), t.identifier("foreign"))],
+        [
+          t.importSpecifier(t.identifier("__nativeForeign"), t.identifier("foreign")),
+          Object.assign(
+            t.importSpecifier(t.identifier("__NativeRootCheck"), t.identifier("RootCheck")),
+            { importKind: "type" }
+          )
+        ],
         t.stringLiteral("solid-yield")
       )
     );

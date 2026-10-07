@@ -4,24 +4,48 @@ This repository was extracted from the Solid fork `devagrawal09/solid`, branch `
 
 > **Names (D-096, 2026-10-06).** The product is `solid-yield` (was `solid-blocks`), with `vite-plugin-solid-yield` and `eslint-plugin-solid-yield`; the unit is a **routine** (was "block"), the model is **yield components**. Package directories are `packages/yield`, `packages/vite-plugin-yield`, `packages/eslint-plugin-yield`; twins are `examples/*-yield(-h)`; the gate is `scripts/yield-gate.mjs`. Text below written before D-096 was updated to the new names, except quoted fork paths and the extraction's own history.
 
-## Roadmap and compiler checkpoint (2026-10-07, D-113)
+## Roadmap and compiler checkpoint (2026-10-07, D-114)
 
-- **v0.1:** the library runtime, transform and lint; feature-complete, awaiting npm credentials. Main was pushed through 66b870d before this follow-up; this work adds local commits only.
-- **v0.2, tier 1:** C2 eager islands on Solid's public hydration API. Lazy/visible are report classes. D-113 proceeds on docs-yield: refine M6's pure-helper sharing and FOREIGN_OWNER under routes, fix the carousel image analysis, verify captures/physical claims, then measure executed-byte savings. Tier 2, delayed lazy islands through Solid hydrate, is rejected: little value without changing serialization, unsafe attachment and much machinery just to delay events. D-111 was withdrawn before implementation.
-- **v0.3, tier 3:** resume(root), the library's lazy builder on Solid's public API: descriptors, keyed attachment, materialisation on first interaction, its own event queue and payload, validated claims and render fallback. D-109's keyed failure re-delivery is a related target.
-- **Tier 4, horizon:** full resumability with the library's own runtime, preserving the same semantics. Marko-like pruning could keep much of the graph on the server and serialize only data an interaction needs; planned C1b measures per-interaction reachability, distinct from C1's undirected connectivity.
+- **v0.1: done in code.** The library runtime, transform and lint are feature-complete; npm publication still awaits credentials.
+- **v0.2: the next library release**, including D-115's serialization-safe typed failures. It is no longer “the compiler”.
+- **v0.3: the lazy builder on the library route.** resume(root), descriptors, keyed attachment and materialization on first interaction, with its own event queue/payload, validated claims and render fallback; keyed failure re-delivery remains a related target (D-109).
+- **Compiler: measured and parked (D-114, option A).** Eager-islands and R emission stay on the experimental branch. R needs about **76 KB raw / 25.6 KB gzip** of removable server-derived code to pay its fixed frame/RPC plus shell/slot integration cost; successful markup refetches add about **0.94 KB gzip per navigation** against equivalent Markdown JSON. Return when **the frames runtime shrinks** or **a user has the payload**. See [compiler-c3b-payload.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-c3b-payload.md) and D-114 for the full chain and scope differences.
+- **Full resumability with the library's own runtime:** horizon, preserving the same semantics.
 
-**Read-only compiler branch:** origin/proto/compiler is fetched at **3b51165**. It contains C1's instance pass, effect-reach diagnostics, foreignSource, the public hydration spike, the docs pair at **71e8e4f**, and its audit report. The original eight twins each form one connected group (37 U origins, 36 genuine, versus 275 earlier leak entries). Docs has 127/243 inert holes, 149/249 inert JSX and six candidate groups (1 eager/2 visible/3 lazy); its changing carousel img is a known false-inert analysis bug. No C2 codegen, compiled savings or independently claimable physical roots are established. Main now contains the docs pair (adapted from 71e8e4f); compiler analysis and foreignSource stay on that branch, and the EAGER marker remains due.
+| Read-only branch | Head | Role |
+| --- | --- | --- |
+| proto/compiler | **778a0d5** | C1/C1b/R analysis and eager/single-root/R experiments; pinned reports linked from compiler-c0.md |
+| proto/compiler-single-root | **43bb41b** | Single-root cost decomposition; historical F-C9 stop predates D-115 |
+| proto/calculus-proofs | **950a71b** | Proof audit; its ruled repairs and evidence are in main, branch retained as history |
 
-**Docs pair on main:** nine twins, with 24 docs parity steps; typecheck, lint,
-SSR and hydrate smoke all pass. The docs original separately passes all three
-hydration cases with server nodes retained. After pnpm build the full gate is
-**43/43 GREEN**; the yield-gate baseline is regenerated for the grown inventory.
-Existing executed-byte thresholds are unchanged. Main needs explicit void route
-data under its strict prop checks and nominal Failure(kind) classes (D-110),
-so the twin's app.tsx/errors.ts and README differ from 71e8e4f; compiler-only
-report changes stay on proto/compiler. The originals, authored parity script
-and smoke harness entries are unchanged from that cherry-pick.
+**Analyzer on main:** a clean port of the analysis passes and fixtures, without
+emitters. Run `pnpm run analyze docs-yield` or omit the example for all nine;
+`--json` prints full groups, eager causes, directed event reach, S/R/client
+provenance and refused captures. The report imposes no thresholds. The branch's
+Markdown purity contract and historical byte-budget/phase reports remain there;
+opaque module calls stay U on main. Graph reach is not measured savings and
+groups are not physical-root claims. The EAGER type marker and foreignSource
+runtime remain unmerged, rather than scheduled requirements of v0.2.
+
+**Main corpus:** nine twins, docs' existing 24 parity steps, and the existing
+library/original byte thresholds. C3b's marked/highlight.js fixture and 28-step
+script remain on proto/compiler. Build and the full gate are **45/45 GREEN**;
+the gate baseline was regenerated only because `analyzer:test` and
+`analyzer:report` were added. No executed-byte baseline was changed. This
+session starts at pushed main **c797bb3** and makes local commits only; no push.
+
+### Candidates, not scheduled (Dev's “come up with ideas” exchange)
+
+1. Dashboard twin.
+2. Soak test.
+3. Mutation-tested lints.
+4. Serializable color.
+5. Keyed re-delivery for rollback UI.
+6. TypeScript plugin for error locality.
+7. Analyzer as a product — the repo tool is now done; a public product is not scheduled.
+8. Static-markup skip in the resumer.
+9. Retire the proofs branch into main — its ruled repairs are in main; retiring the branch is a candidate.
+10. Public roadmap issue.
 
 ## v0.1 (2026-10-06): state, and what is left
 
@@ -99,15 +123,19 @@ D-103–D-112 are recorded with alternatives and reasoning in documentation/DECI
 - F06 pins NO_PROVIDER at foreign child's creation and the accepted pending-without-Loading case's empty output. No new API was designed. F11/F12/F14/F15 correct the theorem's lint premises, fallback/provider equations and terminology, and state once-effect, seeded-memo and disposed-owner contracts with test evidence. D-112 removes the route-existence converse: colors are sound upper bounds, with no over-statement of discharge.
 - D-105 adds V8 executed-range byte checks at load and each authored parity step for all eight twins and originals. The baseline allows 2% or 1024 bytes per phase, whichever is larger. Wall time stays manual. The full gate now has **39 steps**, still checked against the unchanged 37-step yield-gate baseline; both new steps must pass.
 
-**Compiler scope.** See the current roadmap/branch checkpoint above and D-113. C0 records v0.2 eager islands only, capture/claim checks and effect reach; lazy/visible are report classes. Main does not contain C1/codegen or foreignSource. C2 eager codegen and the EAGER marker are still due; no provenance annotations are added (D-106), and sugar waits until after C3 (D-108).
-
-The earlier proof/ruling changes are pushed through 66b870d. This D-113/docs follow-up commits locally on main after pnpm build and the full GREEN gate; it never pushes.
+**Compiler scope.** D-114 supersedes the old eager-islands v0.2 plan. Main
+contains the analyzer tool; emitters, foreignSource and the unimplemented EAGER
+marker remain on proto/compiler. The compiler design and sugar proposals are
+parked. Earlier proof/ruling commits were pushed through c797bb3; this session
+builds and runs the full GREEN gate before each local main commit and never pushes.
 
 ## Upstream
 
 - [solidjs/solid#3815](https://github.com/solidjs/solid/issues/3815): rc.13 SSR memo/serialization-slot loop, **fixed upstream** by [#3816](https://github.com/solidjs/solid/pull/3816), merged into `next` on 2026-10-06 (`759a9b6`): a re-created memo that joins a pending slot adopts that slot's answer. Re-test and remove the `/profile` workaround (`046387b`) at the next Solid RC bump (D-082); rc.13 remains installed here.
-- [solidjs/solid#3845](https://github.com/solidjs/solid/issues/3845): delayed second hydrate root replaces server nodes, **closed as by-design** (API checked 2026-10-07: closed/not_planned at 2026-10-06T21:49:30Z; closing comment confirms the deliberate completion guard for event replay, serialized-data lifetime and DOM drift). Tier 2 is rejected and the private reset was withdrawn (D-111); v0.2 is eager islands only, while v0.3 owns keyed attachment, its event queue and payload, with validated claims and render fallback.
-- **F-C9 — streams are by design; string-only draft, not filed:** after the shell with the outer `Errored` has flushed, the stream carries the error and the hydrated client renders `.not-found`. Plain Solid rc.13 `renderToString` is synchronous: all four development/production × safe/unsafe runs return `Loading article…` before rejection with zero error-fallback calls. The [draft](documentation/upstream/solid-ssr-boundary-rejection-rc13.md) is narrowed to that string-render contract question; Dev decides whether to file. D-115 marks typed failures safe using the public `markSafeError`. The docs twin and original pass stream-error plus hydrated typed-fallback assertions in development and actual production bundles, retaining 145/145 server nodes on `/docs/missing`. Four plain-Solid string controls retain the measured synchronous behavior. **Withdrawn (2026-10-07):** `renderToString` is the synchronous renderer by contract (D-099); nothing to file. D-115 fixes the production sanitization on our side.
+- [solidjs/solid#3845](https://github.com/solidjs/solid/issues/3845): delayed second hydrate root replaces server nodes, **closed as by-design** (API checked 2026-10-07: closed/not_planned at 2026-10-06T21:49:30Z; closing comment confirms the deliberate completion guard for event replay, serialized-data lifetime and DOM drift). Tier 2 is rejected and the private reset was withdrawn (D-111). D-114 parks eager emission; v0.2 is the next library release. v0.3 owns keyed attachment, its event queue and payload, with validated claims and render fallback.
+- **F-C9 — withdrawn; nothing filed.** Streams carry the typed failure and the hydrated client renders its fallback; renderToString is synchronous by contract (D-099), so the string-render draft is withdrawn. D-115 fixes production sanitization on our side with public markSafeError. Historical compiler-C2/single-root reports still describe the earlier stop; the merged branch's README and C3 reports supersede it.
+- **F-C14 — upstream candidate, needs a plain-Solid reproduction.** The generic-frame probe exceeded 10001 discovery passes when a derived memo lived below Loading. Hoisting it beside the loader stabilizes the experimental fixture. This is a placement constraint, not an upstream fix; draft only after reproducing without solid-yield. F-C12 is a purity-contract design item, F-C13 is differing link claims, and F-C11 still prevents exact R DOM parity ([compiler-findings.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-findings.md) and [compiler-c3b-payload.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-c3b-payload.md)).
+
 
 ## Where things are
 

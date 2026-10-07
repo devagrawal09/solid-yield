@@ -1,6 +1,8 @@
 # The solid-yield compiler, C0: definitions, analysis, codegen, correctness claim, open decisions
 
-Status: **C0 ruled by Dev on 2026-10-07 (D-103–D-108), with D-111 withdrawing delayed hydration and D-113 ruling the corpus and four tiers**. The original design was written against `main` at `61d2a65`; §5 preserves alternatives and records the rulings. C1/codegen remains on proto/compiler. v0.2 ships eager islands only.
+Status: **D-114 (Dev, 2026-10-07): the compiler line is measured and parked.** Main has the analysis tool; eager-islands, single-root and R emission remain experiments on proto/compiler at 778a0d5 (single-root report at 43bb41b). v0.2 is the next library release, including D-115; v0.3 is the library's lazy builder. §§2–6 preserve the compiler design and earlier rulings, not a release commitment.
+
+Read the evidence on the pinned branch: [compiler-c1-report.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-c1-report.md), [compiler-reachability.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-reachability.md), [compiler-c2-finding.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-c2-finding.md), [compiler-single-root.md](https://github.com/devagrawal09/solid-yield/blob/43bb41b77af461df199315485b8cdec259efd51a/documentation/compiler-single-root.md), [compiler-c3-server-components.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-c3-server-components.md), [compiler-c3b-payload.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-c3b-payload.md) and [compiler-findings.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-findings.md). D-114 in DECISIONS.md records the chain and its differing measurement scopes.
 
 Read with: `calculus.md` (its §4 theorem is the spec the compiler must preserve, and its §7 lists what the compiler route must keep), `DECISIONS.md`, `reviews/2026-10-06-markless-comparison.md` (cited as **ML-L*n*** for its §3 lessons and **ML-Q*n*** for its §6 questions), and `yield-library.md` §7–§8 (what the library route cannot do and what it costs).
 
@@ -10,16 +12,24 @@ Vocabulary is the project's (D-096): a **routine**, its **host**, a **hole**, a 
 
 ## 0. The plan
 
-The plan (Dev, 2026-10-06), amended by D-103–D-108 and D-113 (2026-10-07), so that each part can be tested:
+D-114 amends D-103–D-108 and D-113: **measured and parked**. The four tiers retain their distinct attachment models:
 
-**Four tiers of partial hydration** (Dev with the Solid maintainer, Discord, 2026-10-07):
+| Tier | Result / route | Status |
+| --- | --- | --- |
+| 1. Eager islands | Solid's public hydration; seven roots cost +9.9% load execution / +4.5% raw shipping; single root saves about 800 raw bytes but costs +3.8% load execution | Measured; emission parked on the branch |
+| 2. Lazy islands | Delayed Solid hydrate is unsafe; #3845 by design, D-111 withdrawn | Rejected |
+| 3. resume(root) | Library route on Solid's public API: descriptors, keyed attachment, first-interaction materialization, own event queue/payload, validated claims and render fallback | v0.3 lazy builder proceeds |
+| 4. Full resumability | Library's own runtime, preserving the same semantics | Horizon |
 
-1. **Eager islands, v0.2:** C2 uses Solid's public hydration API; every emitted island hydrates at load. Lazy/visible are analysis report classes only.
-2. **Lazy islands, rejected:** Ryan reports little value without changing serialization and unsafe attachment; Dev notes that delaying events needs much machinery. D-111's private reset was withdrawn; Dev reports #3845 closed by design (live metadata differs; see HANDOFF).
-3. **resume(root), v0.3, the library's lazy builder:** Solid's public API, descriptors, keyed attachment and materialisation on first interaction; its own event queue and payload, validated claims and render fallback.
-4. **Full resumability with the library's own runtime:** the same semantics, at the horizon.
-
-D-113 proceeds with tier 1 on the docs content-site twin: refine M6/pure-helper and FOREIGN_OWNER/route rules, fix the carousel image analysis, then C2 eager islands and measured executed-byte savings. The longer-term value is Marko-like pruning: move much of the graph to the server and serialize only what an interaction needs. Syntactic provenance makes this analysable. C1b will measure per-interaction reachability and required data; C1's connected groups answer a different question.
+C1 groups, eager causes, C1b directed per-event reach and S/R/client provenance
+join main as an analyzer tool, with capture checks and a report-only gate step
+for all nine twins. Their graph counts do not prove hydration roots or savings.
+The R experiment removes server-derived code but needs about **76 KB raw /
+25.6 KB gzip** to pay the fixed frame/RPC and shell/slot integration cost;
+successful markup refetches add about **0.94 KB gzip** per navigation versus
+Markdown JSON ([compiler-c3b-payload.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-c3b-payload.md)). Return when that runtime
+shrinks or a user has the payload. v0.2 is the next library release, not the
+compiler. The remaining plan below describes the parked experiment.
 
 - **Where.** The compiler lives in this repository. It changes nothing in Solid: D-004 (Solid's public API only) holds for the compiler route as it does for the runtime. Its input is the yield dialect as it is today: any program that is admissible by calculus §4.1 (C1–C7). It has no dialect of its own until C4, and Q6 asks whether it ever should.
 - **What it does.**
@@ -65,11 +75,12 @@ A cell is **written** when some setter receipt of it, or a `refresh` of it, is d
 
 ### 1.2 Provenance
 
-Every value a routine reads has a **provenance** π ∈ {**S**, **U**, **C**}, ordered S < U < C, with join = max:
+Every value a routine reads has a **provenance** π ∈ {**S**, **R**, **U**, **C**}. Pure expression joins use S < R < U < C. A server call is a cut in this ordering, as defined below:
 
 - **S, server-derived.** The server can compute it from the request and server functions alone, and it does not change on the client until the region is next rendered by the server.
+- **R, server-recomputable (Dev, 2026-10-07).** A server-function memo with serializable U arguments, and every pure downstream derivation of it. S is the special case of R with no U inputs. Reports use disjoint S and R columns: R means at least one U input.
 - **C, client.** It can change in the browser: something written by an event or an effect phase, an event's arguments, or anything computed from those.
-- **U, unknown.** The analysis cannot tell. U is placed exactly as C (it is never on the server), but it is reported apart. U is the **leak** metric (R1).
+- **U, unknown.** The analysis cannot tell. A direct U read is client. Its settled value may enter a generated server function only through the checked argument edge below; its producer stays client. It is reported apart from C. U is the **leak** metric (R1).
 
 The base cases:
 
@@ -78,7 +89,7 @@ The base cases:
 | a literal, a module-level `const` of a serializable value, `constant(v)` | π(v); S for a literal |
 | a cell | C if it is written (§1.1); otherwise π of its initial value |
 | `$optimistic` / `$optimisticStore` | C (they exist to be written by events, D-014, D-081) |
-| `$memo(body)` | the join of the reads before its attempt (the run's key, D-080) and its attempt's target: a **server function** (a `"use server"` module export or a function with the directive) called with arguments of π = S gives S; any other promise or stream gives U |
+| `$memo(body)` | an attempt targeting a **server function** (a `"use server"` module export or a function with the directive) gives S for S arguments, R for S/U arguments that pass §1.6, and C if any argument reads C. Pre-attempt U reads must be accounted for by the argument vector; an unrelated U read keeps the memo client. Non-server promises/streams remain U |
 | an event's parameters, a DOM event | C |
 | a value read in an event or an effect phase | not a provenance source: those hosts run on the client by definition. Their *writes* make cells C |
 | a foreign value: a foreign component's output, a router's route props, `query(…)`, a module the analysis does not parse | U (§2.2, Q5) |
@@ -86,13 +97,26 @@ The base cases:
 How provenance flows through each construct:
 
 - **Through `Source`.** A path over a source has the source's π: `yield* story.title` has π(story).
-- **Through `$memo` bodies.** A memo's π is the join described above. A memo is atomic: C2 does not split a memo whose branches mix S and C (R3). The whole memo is C.
+- **Through pure derivations.** Memos, holes, settled values, paths and flow sources derived only from S/R are S/R. Any C read, event/effect write, browser operation or unproved impure operation keeps the affected computation client. A U value is not made R just because another operand is R.
+- **Through `$memo` bodies.** A memo's π is the transfer described above. A memo is atomic: C2 does not split a memo whose branches mix S and C (R3). The whole memo is C.
 - **Through props (call form, D-065).** At a call site `C({ x: v })`, the prop `x` has π(v): a source's π, a hole prop's join over its reads, or a settled value's π. Inside C, `yield* props.x` has the π of the call site's argument. A component therefore has a **summary** parameterised by its props' provenance, which each call site instantiates (§2.3).
 - **Through context (D-098).** `yield* Ctx` has the join of the π of every `value` given by a `Ctx.provide` that can be above the reader, plus the default if the context has one. Statically, "can be above" is over-approximated as every `provide` of Ctx in the module graph. Across a `foreign(C, { provided: [Ctx] })` edge (D-102) the analysis cannot see the tree, so it uses all of Ctx's providers.
 - **Through events.** An event is always client. A bind is always a client part. What the event writes becomes C; what it reads does not matter to provenance. An event that calls a server function is still client code: the call is an RPC.
 - **Through effects.** Both halves run in the browser. The compute's reads do not change any provenance. The effect phase's writes make cells C.
 
 A hole's π is the join of its reads. A call's π is the π of the called component's instance.
+
+**Option A clarification, 2026-10-07.** Reads include computed property keys
+(`pictures[yield* index]`) and every template interpolation, including attributes.
+A template literal with interpolations is an expression, not a literal constant.
+Both the receiver and the computed key contribute provenance; a dynamic key
+must not change the stored equation of a statically selected field.
+
+**R execution (parked C3 experiment).** Pure derivation on the server data runs
+inside a generated "use server" function; client navigation refetches its markup,
+with slots for client children. Only settled serializable inputs cross; their
+producers stay client. Event-written C inputs remain client under the branch's
+rule. See the recomputable-region definition and capture rows below.
 
 ### 1.3 Inert region
 
@@ -107,6 +131,60 @@ A view subtree at a site is **inert** (for a given instantiation) when all of th
 So an inert region renders with props whose provenance is S (the "inert-prop sources" of the brief).
 
 **Inert does not mean static.** An inert region may be pending (a server function's memo, under a `Loading` that is itself inert) and may fail (under an inert `Errored`). What it cannot do is change after the server has sent it. A `Loading` or `Errored` whose children and fallback are all inert is inert.
+
+**C3 generalization: recomputable regions.** An R region is a view subtree whose
+server-owned reads are all S/R, including attribute holes, flow sources, row
+setups and pure derivations. It owns the server-function loaders that produce
+those reads. An all-S region is its zero-U-input case. A direct U read, C read,
+effect, event or bind cannot execute in its server template. A client yield
+component or client hole can instead be a **slot**, provided it has a separate
+client group and every edge passes §1.6. Shared C state, a context provider, or a
+pending/failure route across that cut must remain together or be carried by a
+proved public transport. Moving the U producer itself is never authorized.
+Foreign ownership keeps the router shell client; it does not disqualify a
+server region invoked beneath it.
+
+A region's argument vector is the ordered set of distinct external settled
+inputs needed by its server loaders and template. Order is first lexical use;
+identity is binding plus selected property path, not display name. Constants
+may be baked into its generated server function. A dynamic path includes its
+selector. Route `props.params.slug` crosses as its string/undefined value,
+never as the router props object, Source, accessor or closure. Collecting a
+closure or a nonserializable value is a capture failure with a source location,
+not permission to run it on the server. A value derived from an event-written C
+cell remains C even if its current value happens to be serializable.
+
+A slot key is `(region call-site, slot site, enclosing keyed row identities)`;
+repeated rows require stable serializable entity keys, not response positions.
+The region call-site distinguishes two uses of ArticleContent. The key preserves
+state only while the original library owner would survive; route disposal also
+disposes its slots. Slot inputs are serialized settled values, checked at the
+edge; the fill code and its events stay in their own client group. Missing,
+duplicate or unproved keys refuse extraction. Public frame slots reconnect the
+fills during markup replacement; a second page-level hydrate is not a refetch
+mechanism. Initial client groups hydrate eagerly within the single root.
+
+When a U argument changes, its tracked client stub calls the generated server
+function with the new vector. The server reruns the loader and derivation and
+returns the region template as markup plus keyed slot input records. The public
+frame API applies that response and reconnects the client fills. The library's
+own memo, Loading, Errored and owner disposal semantics govern pending reads,
+stale responses, failures and cancellation; no independent loading state or
+last-response-wins scheduler is introduced. Pending/failing reads must still
+reach the same nearest boundary (calculus §3.4). A boundary internal to the
+region may handle the failure there only if its observable fallback timing is
+preserved. Otherwise the transport must rethrow the typed failure at the stub's
+read, using the authored class and brand. D-115 marks public typed failure data
+safe; this does **not** by itself restore a custom class after a codec round trip.
+A class-losing transport or changed boundary route is a stop finding, not a
+successful extraction. Streamed SSR may leave a pending region flushed and
+carry its failure to hydration; it need not print the fallback in that stream.
+
+Cost model: one RPC for each changed argument vector actually observed by the
+memo (writes batched by the library are one observation). It returns **markup,
+not the article data**; slot inputs and transport framing are extra bytes.
+No debounce, cache, prefetch, or byte saving is assumed. Measure navigation
+request/response bytes and pending/failing checkpoints alongside client code.
 
 ### 1.4 Client root
 
@@ -143,11 +221,13 @@ An **edge** is where a root's client code reads something defined outside the ro
 | --- | --- |
 | a **serializable constant** | serialized by `@solidjs/web`'s serializer (its public `serialization` entry), not by a list of the project's own |
 | an **S value** read by the root (an S memo, an S prop, an S context value) | its value is serialized at the edge, and on the client it is a `constant(v)`. If it is still pending at flush it is streamed as Solid streams an async memo, and the root's `Loading` waits for it (M4 put that `Loading` in the root). If it failed on the server, the failure is serialized and re-thrown at the client read, **as its own class and branded** (D-087), so that `catch: [K]`'s `instanceof` and `attempt`'s brand check still hold (R12) |
+| a **U argument** to an R region | only the settled serializable value at its selected path, encoded by the public serializer and checked at the edge. The U producer, reactive source and closures remain client. A rejected value refuses extraction; no JSON-only substitute |
+| an **R value** passed to a client slot | its settled serialized value, with the same pending and typed-failure obligations as S; never its loader or derivation code |
 | a **prop** from a parent outside the root | an S value as above, or a hole prop whose reads are S (a constant). A hole prop whose body calls components crosses as a slot |
 | an **element handle (a slot)** | server-rendered DOM that the root places and does not render (§1.4) |
 | a **module import** | code, not a capture. Module-level mutable state is U |
 
-Event handlers do not cross: a handler is created in a setup, so its creator is in the root (M2). **Anything else** — a closure over a setup-local non-source, an instance the serializer refuses, a function, a U value — cannot cross. The region that defines it is then client, and the analysis gives **a diagnostic at the variable** that names it and the reason (ML-L3, and ML-L8's "escalation is never silent"). In the C1 report that diagnostic is a *capture failure*.
+Event handlers do not cross: a handler is created in a setup, so its creator is in the root (M2). **Anything else** — a closure over a setup-local non-source, an instance the serializer refuses, a function, or a U value outside the checked R-argument edge — cannot cross. The region that defines it is then client, and the analysis gives **a diagnostic at the variable** that names it and the reason (ML-L3, and ML-L8's "escalation is never silent"). In the C1 report that diagnostic is a *capture failure*.
 
 ### 1.7 Root report classes (D-104, D-111)
 
@@ -157,11 +237,11 @@ Event handlers do not cross: a handler is created in a setup, so its creator is 
 | **visible** | it has no effect, but it has a C or U source that changes without a bind: a memo whose attempt targets a non-server promise or stream, a foreign source | when its span becomes visible |
 | **lazy** | every change in it starts at one of its binds | on the first event at one of its binds; the event is captured before hydration and replayed after it |
 
-These are analysis report classes. In v0.2 **every emitted island hydrates eagerly**; neither visible nor lazy schedules use delayed Solid hydrate (D-111). The proposed independent v0.3 builder needs its own event queue, payload and validated DOM claims with render fallback. Every eager island must report its effect reach: the effects making it eager and the dependent parts/providers/readers merged with them (D-104).
+These are analysis report classes. In the parked tier-1 experiment **every emitted island hydrates eagerly**; neither visible nor lazy schedules use delayed Solid hydrate (D-111). The proposed independent v0.3 builder needs its own event queue, payload and validated DOM claims with render fallback. Every eager island must report its effect reach: the effects making it eager and the dependent parts/providers/readers merged with them (D-104).
 
-The original lazy design argument was that a setup only creates (D-042: it never reads, writes or builds JSX), so effects would be its only visible work. C1 finding F-C2 qualifies that argument: the Sierpinski setups register timers directly without an effect. Unproved setup calls therefore make a candidate group eager too. Absence of an effect alone does not justify deferral. Tier 3 must validate its independent builder; v0.2 defers no island.
+The original lazy design argument was that a setup only creates (D-042: it never reads, writes or builds JSX), so effects would be its only visible work. C1 finding F-C2 qualifies that argument: the Sierpinski setups register timers directly without an effect. Unproved setup calls therefore make a candidate group eager too. Absence of an effect alone does not justify deferral. Tier 3 must validate its independent builder; the parked tier-1 experiment defers no island.
 
-The fact "this component is eager" is already in each setup's yield union (`Create<"effect">`, calculus §1.2). D-104 requires a marker on `ComponentView`, folded like may-wait (D-075), and effect-reach diagnostics. This main branch records that compiler requirement. C1 effect-reach reports and build diagnostics are implemented on proto/compiler at 8cb1ae8; the EAGER type marker remains unimplemented.
+The fact "this component is eager" is already in each setup's yield union (`Create<"effect">`, calculus §1.2). D-104 requires a marker on `ComponentView`, folded like may-wait (D-075), and effect-reach diagnostics. D-114 parks that compiler requirement. C1 effect-reach reports and build diagnostics now belong to the analyzer tool on main; the EAGER type marker remains unimplemented.
 
 ---
 
@@ -276,7 +356,7 @@ This section says what the output contains, not how it is built.
 - a streamed one as a source that pends until it lands;
 - a failure re-branded as its class.
 
-**A loader (v0.2, tier 1).** A small client entry hydrates every emitted island at once, in document order, regardless of its eager/visible/lazy report class. Per-root claims and pre-hydration event handling must be verified, not assumed. Delayed visible/lazy Solid hydration is rejected (tier 2, D-111/D-113); first-interaction attachment belongs to the independent v0.3 resume(root) builder (tier 3).
+**A loader (parked tier-1 experiment).** A small client entry hydrates every emitted island at once, in document order, regardless of its eager/visible/lazy report class. Per-root claims and pre-hydration event handling must be verified, not assumed. Delayed visible/lazy Solid hydration is rejected (tier 2, D-111/D-113); first-interaction attachment belongs to the independent v0.3 resume(root) builder (tier 3).
 
 **What is preserved:**
 
@@ -350,16 +430,18 @@ calculus §7's four items are the cases of this lemma. Its §5 obligations becom
 
 | Stage | Gate steps added |
 | --- | --- |
-| C1 | `compiler:report` (it runs, numbers printed); the analysis's fixture tests (a new package step; not `pkg:compiler:test`, the name D-043 removed with Solid's compiler) |
+| C1 | `analyzer:report` (all nine twins, report only, no thresholds) and `analyzer:test` (analysis and capture fixtures); implemented on main under D-114 |
 | C2 | Every twin's parity test runs **both ways**. The conformance scenarios gain a compiler-route mode. (`*/yield-compiled` is taken by the fork's frozen artifacts, so a new name is needed.) `obligations.spec` and `raise.spec` run through the compiler route. `twins:ssr-smoke` and `twins:hydrate-smoke` run both ways, and the hydrate smoke gains ML-L2's check (each root's server claims equal its client registrations; a root that hydrates silently onto the wrong node fails). The degenerate check: a one-root app's output equals the library route's, byte for byte. |
 | C3 | Server-component output in the SSR and hydrate smokes. A check that an inert region's code is absent from the client chunks (its module ids are in no client chunk). |
 | C4 | Desugaring fixtures: each sugared program and its dialect form, same report, same output. |
 
-Measuring what v0.2 saves is Q3.
+Q3 was the compiler's savings question; D-114 records its measured answer.
 
 ---
 
-## 5. Decisions (Dev, 2026-10-07)
+## 5. Earlier decisions (Dev, 2026-10-07; release plan superseded by D-114)
+
+These Q1–Q6 rulings describe the parked experiment. D-114 keeps analysis as a tool and makes v0.2 the next library release.
 
 Q1–Q6 are ruled by D-103–D-108: C, B (also report each eager island's effect reach), B (with a measured tolerance), A, B (implemented on proto/compiler), B after C3. The alternatives below remain the design record. D-111 overrides delayed hydration: **v0.2 emits eager islands only**. Lazy/visible describe analysis report classes, not v0.2 attachment schedules. v0.3 will attach by key without Solid's hydrate, with its own delegated event queue and payload, validated claims and render fallback. No reset of Solid's private hydration completion flag is permitted.
 
@@ -501,4 +583,24 @@ D-098's rejected alternative was components as plain functions, with lazy contex
 
 ## 8. Corpus
 
-D-113 distinguishes the original eight interaction-dense twins, each one connected group with inert holes a minority (todos 1/36, room 10/109, rendering 47/202), from the new content-heavy docs-yield pair (71e8e4f). The instance pass finds 37 origins from the original 275 leak entries, 36 genuine; these counts differ in precision and are not savings. Docs reports 127/243 inert holes, 149/249 inert JSX and six candidate groups (1 eager, 2 visible, 3 lazy), with one effect confined to ThemeToggle. M6 through a shared pure helper and FOREIGN_OWNER under a route over-merge; the changing carousel img is falsely inert (148/249 after removing that element). Six groups are not six proven widget roots. The report at origin/proto/compiler (3b51165), documentation/compiler-c1-report.md, records the limits. Proceed to rule/bug fixes and C2 eager islands on docs, then measure executed bytes. Planned C1b measures per-interaction reachability and required data, separately from group connectivity.
+The nine twins on main keep the library route and the earlier docs article
+fixture (24 authored steps). C1 now runs as a tool against these live sources;
+its current counts may differ from the branch's corpus. The branch's corrected
+C1 report distinguishes eleven docs dependency groups from seven emitted roots,
+and fixes the earlier pure-helper, foreign-owner and carousel classifications
+([compiler-c1-report.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-c1-report.md)). C1b measures per-interaction reach rather
+than undirected connectivity: docs' scripted-interaction median is 4.3%, versus
+about 29–59% on the other twins; its empty-root budget is conditional, not savings
+([compiler-reachability.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-reachability.md)).
+
+C3's trivial article template could not pay frames/RPC overhead. C3b replaces
+that template with six Markdown sources and marked + highlight.js (three
+languages), TOC and a fixed-locale date, adding four pipeline/TOC checks for
+28 branch steps. The standalone removable libraries weigh 84.6 KB raw / 26.3 KB
+gzip. R saves 16.0% load execution, 3.2% execution over steps excluding load,
+and 4.5% gzip shipping against the library. Its gzip shipping is within 1% of
+the original while load execution is 12% lower. The fake embedded corpus,
+byte-budget scopes, purity contract and F-C11/F-C13/F-C14 limits are explicit in
+[compiler-c3b-payload.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-c3b-payload.md). That fixture and all emitters remain on
+the branch; no main twin, authored script or executed-byte baseline is replaced.
+D-114 parks the compiler and keeps the analyzer as a report-only tool.

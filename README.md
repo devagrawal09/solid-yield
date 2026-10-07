@@ -258,11 +258,27 @@ const id = yield* props.id;                                                  // 
 ## Status
 
 - **This is a design lab, and this is the strict dialect.** The compiler route is the ergonomic one. Here every read and write is spelled out, so each rule of the model can be checked and every awkward spot shows up as a finding.
-- **What is stated:** [calculus.md](documentation/calculus.md) is a core calculus for the dialect. It states the soundness theorem the types claim ("the types say exactly what the runtime does"), and it traces each of its 52 proof obligations to the code and the tests that support it. The theorem is stated and supported by tests; it is not a formal proof.
+- **What is stated:** [calculus.md](documentation/calculus.md) is a core calculus for the dialect. It states the soundness theorem the types claim ("the types say exactly what the runtime does"), and it traces each of its 52 proof obligations to the code and the tests that support it. The whole-dialect theorem is stated and supported by tests; the abstract core has the partial formal proofs described below.
 - **What is tested:** every commit is gated. The gate runs nine example twins (docs-yield, effect-yield, hackernews-spa-yield, rendering-yield, room-yield, sierpinski-yield, sierpinski-yield-h, todos-yield and todos-yield-h), which are real Solid apps rewritten in this dialect, checked for DOM parity against the originals step by step. It also renders the twins on the server and hydrates that output, runs a conformance suite against handwritten Solid, and runs the packages' type, runtime and lint tests.
 - **Decisions:** each rule comes with its alternatives and its reasoning in [DECISIONS.md](documentation/DECISIONS.md). Where the work stands, and how to work on the repository and run the gate, is in [HANDOFF.md](HANDOFF.md).
 
 Read next: [getting-started.md](documentation/getting-started.md) (the setup, and the dialect on one page), [refusals.md](documentation/refusals.md) (every refusal, layer by layer) and [yield-library.md](documentation/yield-library.md) (the reference).
+
+## Calculus proofs
+
+The [proof audit](documentation/calculus-proofs/README.md) includes **12
+obligations mechanized in Lean, 26 paper proofs, and 14 unprovable as worded** at
+its audited revision. The abstract proofs cover color preservation, boundary
+handling and root safety; later main repairs supersede some historical findings.
+They do not prove the whole TypeScript/runtime connection.
+
+Run `pnpm proofs` to build the Lean project and run the 11 runtime probes.
+Install elan for the pinned `leanprover/lean4:v4.24.0` toolchain. Lake lookup is
+`$LAKE`, PATH, then `/private/tmp/elan/bin/lake` with `ELAN_HOME=/private/tmp/elan`.
+The report-only `proofs` gate step runs the same checks without coverage thresholds;
+when Lake is absent, it reports SKIP with an install hint and keeps the gate green.
+The [verification record](documentation/calculus-proofs/verification.md) separates
+the historical audit from the adapted checks on main.
 
 ## License
 

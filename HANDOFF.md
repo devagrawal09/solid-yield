@@ -16,7 +16,7 @@ This repository was extracted from the Solid fork `devagrawal09/solid`, branch `
 | --- | --- | --- |
 | proto/compiler | **778a0d5** | C1/C1b/R analysis and eager/single-root/R experiments; pinned reports linked from compiler-c0.md |
 | proto/compiler-single-root | **43bb41b** | Single-root cost decomposition; historical F-C9 stop predates D-115 |
-| proto/calculus-proofs | **950a71b** | Proof audit; its ruled repairs and evidence are in main, branch retained as history |
+| proto/calculus-proofs | **950a71b** | Merged into main at **5d50680**; Lean proofs, paper proofs and probes; branch retained as history |
 
 **Analyzer on main:** a clean port of the analysis passes and fixtures, without
 emitters. Run `pnpm run analyze docs-yield` or omit the example for all nine;
@@ -29,10 +29,10 @@ runtime remain unmerged, rather than scheduled requirements of v0.2.
 
 **Main corpus:** nine twins, docs' existing 24 parity steps, and the existing
 library/original byte thresholds. C3b's marked/highlight.js fixture and 28-step
-script remain on proto/compiler. Build and the full gate are **45/45 GREEN**;
-the gate baseline was regenerated only because `analyzer:test` and
-`analyzer:report` were added. No executed-byte baseline was changed. This
-session starts at pushed main **c797bb3** and makes local commits only; no push.
+script remain on proto/compiler. Build and the full gate are **46/46 GREEN**, including `proofs`;
+the gate baseline was regenerated only for that added step. No executed-byte
+baseline was changed. This session starts at pushed main **9478fe5** and makes
+local commits only; no push.
 
 ### Candidates, not scheduled (Dev's “come up with ideas” exchange)
 
@@ -44,7 +44,7 @@ session starts at pushed main **c797bb3** and makes local commits only; no push.
 6. TypeScript plugin for error locality.
 7. Analyzer as a product — the repo tool is now done; a public product is not scheduled.
 8. Static-markup skip in the resumer.
-9. Retire the proofs branch into main — its ruled repairs are in main; retiring the branch is a candidate.
+9. Retire the proofs branch into main — done at **5d50680**; branch retained as history.
 10. Public roadmap issue.
 
 ## v0.1 (2026-10-06): state, and what is left
@@ -129,12 +129,29 @@ marker remain on proto/compiler. The compiler design and sugar proposals are
 parked. Earlier proof/ruling commits were pushed through c797bb3; this session
 builds and runs the full GREEN gate before each local main commit and never pushes.
 
+## Calculus proofs
+
+The [proof audit](documentation/calculus-proofs/README.md) is merged into main:
+**12 obligations mechanized in Lean, 26 paper proofs, and 14 unprovable as worded**
+at the audited revision. These counts are the historical classification; later
+main repairs supersede some findings. The abstract proofs do not prove the whole
+TypeScript/runtime connection.
+
+Run `pnpm proofs` from the root to build the Lean project and run the 11 runtime
+probes. `lean-toolchain` pins `leanprover/lean4:v4.24.0`; install elan if needed.
+Lake lookup is `$LAKE`, PATH, then `/private/tmp/elan/bin/lake` with
+`ELAN_HOME=/private/tmp/elan`. The report-only `proofs` gate step runs the same
+checks without coverage thresholds; absent Lake is SKIP with an install hint and
+does not fail the gate. Lean rebuilt clean and the adapted main probes pass
+11/11; runtime context names and frozen-failure absorption differ from the old
+branch. See the [verification record](documentation/calculus-proofs/verification.md).
+
 ## Upstream
 
 - [solidjs/solid#3815](https://github.com/solidjs/solid/issues/3815): rc.13 SSR memo/serialization-slot loop, **fixed upstream** by [#3816](https://github.com/solidjs/solid/pull/3816), merged into `next` on 2026-10-06 (`759a9b6`): a re-created memo that joins a pending slot adopts that slot's answer. Re-test and remove the `/profile` workaround (`046387b`) at the next Solid RC bump (D-082); rc.13 remains installed here.
 - [solidjs/solid#3845](https://github.com/solidjs/solid/issues/3845): delayed second hydrate root replaces server nodes, **closed as by-design** (API checked 2026-10-07: closed/not_planned at 2026-10-06T21:49:30Z; closing comment confirms the deliberate completion guard for event replay, serialized-data lifetime and DOM drift). Tier 2 is rejected and the private reset was withdrawn (D-111). D-114 parks eager emission; v0.2 is the next library release. v0.3 owns keyed attachment, its event queue and payload, with validated claims and render fallback.
 - **F-C9 — withdrawn; nothing filed.** Streams carry the typed failure and the hydrated client renders its fallback; renderToString is synchronous by contract (D-099), so the string-render draft is withdrawn. D-115 fixes production sanitization on our side with public markSafeError. Historical compiler-C2/single-root reports still describe the earlier stop; the merged branch's README and C3 reports supersede it.
-- **F-C14 — upstream candidate, needs a plain-Solid reproduction.** The generic-frame probe exceeded 10001 discovery passes when a derived memo lived below Loading. Hoisting it beside the loader stabilizes the experimental fixture. This is a placement constraint, not an upstream fix; draft only after reproducing without solid-yield. F-C12 is a purity-contract design item, F-C13 is differing link claims, and F-C11 still prevents exact R DOM parity ([compiler-findings.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-findings.md) and [compiler-c3b-payload.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-c3b-payload.md)).
+- **F-C14 — resolved; nothing to file.** The [plain-Solid rc.13 check](documentation/upstream/solid-frames-f-c14-check-rc13.md) recreates an async memo inside a `Loading` child on every SSR pass and fails under ordinary `renderToStream` too: it is [#3815](https://github.com/solidjs/solid/issues/3815)'s class, fixed by [#3816](https://github.com/solidjs/solid/pull/3816) on `next`. The actual F-C14 shape (hoisted loader, synchronous derived memo beneath `Loading`) converges. This is not frames-specific. Re-test at the next Solid RC bump together with the `/profile` workaround (D-082).
 
 
 ## Where things are

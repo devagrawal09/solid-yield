@@ -78,6 +78,10 @@ export declare function transform(code: string, options: TransformOptions): Tran
 export declare function parserPlugins(filename: string): string[];
 
 export interface YieldPluginOptions {
+  /** Experimental native Solid front end; requires include. */
+  mode?: "native" | "explicit";
+  /** Select native source files; dependencies and explicit modules stay outside. */
+  include?: (file: string) => boolean;
   /** Where `perform` and `lazy` come from (default `"solid-yield"`). */
   yieldModule?: string;
   /** Annotate `lazy(() => import("…"))` from the yield module with its module URL (default `true`, D-047). */

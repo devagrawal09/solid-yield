@@ -10,7 +10,7 @@ import solid from "@solidjs/vite-plugin";
 import { createServer } from "vite";
 import solidYield from "../src/index.js";
 
-export async function devServer(root) {
+export async function devServer(root, options = {}) {
   const cacheDir = mkdtempSync(join(tmpdir(), "vite-plugin-yield-"));
   const server = await createServer({
     root,
@@ -20,7 +20,7 @@ export async function devServer(root) {
     appType: "custom",
     server: { middlewareMode: true, hmr: false, ws: false },
     optimizeDeps: { noDiscovery: true, include: [] },
-    plugins: [solidYield(), solid({ ssr: true })]
+    plugins: [solidYield(options), solid({ ssr: true })]
   });
   const close = server.close.bind(server);
   server.close = async () => {

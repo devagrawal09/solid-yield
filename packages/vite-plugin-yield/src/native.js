@@ -1,0 +1,571 @@
+/** Native Solid front end. Refuse unsupported contracts before emitting any file.
+ * The existing sugar engine and library checker remain the only color machinery. */
+// @ts-check
+import babel from "@babel/core";
+import ts from "typescript";
+import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { parseProgram } from "./transform.js";
+import { lowerSugarProject } from "./sugar.js";
+const t = babel.types;
+/** @typedef {import('@babel/core').NodePath<any>} Path */
+/** @typedef {{code:string,message:string,file:string,line:number,column:number}} Diagnostic */
+/** @type {Readonly<Record<string,string|null>>} */
+export const nativeMapping = Object.freeze({
+  createSignal: "$signal",
+  createMemo: "$memo",
+  createEffect: "$effect",
+  createContext: "createContext",
+  useContext: null,
+  onCleanup: "$cleanup",
+  Loading: "Loading",
+  Errored: "Errored",
+  For: "For",
+  Show: "Show",
+  Match: "Match",
+  Switch: "Switch",
+  Repeat: "Repeat"
+});
+const controls = new Set(["Loading", "Errored", "For", "Show", "Match", "Switch", "Repeat"]);
+const print = /** @param {any} p */ p =>
+  babel.transformFromAstSync(t.file(p.node), undefined, {
+    configFile: false,
+    babelrc: false,
+    comments: false
+  })?.code ?? "";
+/** @param {Path} p */
+function imported(p) {
+  if (!p.isIdentifier() && !p.isJSXIdentifier()) return null;
+  const b = p.scope.getBinding(p.node.name);
+  if (!b?.path.isImportSpecifier()) return null;
+  if (!b.path.parentPath.isImportDeclaration()) return null;
+  return {
+    module: b.path.parentPath.node.source.value,
+    name: t.isIdentifier(b.path.node.imported)
+      ? b.path.node.imported.name
+      : b.path.node.imported.value
+  };
+}
+/** Inspect all selected files, accumulating refusals instead of stopping at the first one.
+ * @param {Map<string,string>} files */
+export function inspectNativeProject(files) {
+  /** @type {Diagnostic[]} */
+  const diagnostics = [];
+  const host = ts.createCompilerHost({});
+  const read = host.readFile.bind(host);
+  host.readFile = f => files.get(f) ?? read(f);
+  const program = ts.createProgram(
+    [...files.keys()],
+    {
+      target: ts.ScriptTarget.ESNext,
+      module: ts.ModuleKind.ESNext,
+      moduleResolution: ts.ModuleResolutionKind.Bundler,
+      jsx: ts.JsxEmit.Preserve,
+      strict: true,
+      skipLibCheck: true,
+      allowJs: true
+    },
+    host
+  );
+  const checker = program.getTypeChecker();
+  for (const [file, code] of files) {
+    const p = parseProgram(code, file);
+    if (!p) continue;
+    const source = program.getSourceFile(file);
+    const nodes = new Map();
+    /** @param {ts.Node} n */
+    function walk(n) {
+      nodes.set(`${n.getStart(source)}:${n.end}`, n);
+      ts.forEachChild(n, walk);
+    }
+    if (source) walk(source);
+    /** @param {Path} q @param {string} code @param {string} message */
+    const report = (q, code, message) =>
+      diagnostics.push({
+        code,
+        message,
+        file,
+        line: q.node.loc?.start.line ?? 1,
+        column: (q.node.loc?.start.column ?? 0) + 1
+      });
+    p.traverse({
+      ImportDeclaration(q) {
+        const module = q.node.source.value;
+        if (module === "solid-yield")
+          report(
+            q,
+            "NATIVE_LIBRARY",
+            "Native source must import Solid APIs; solid-yield imports belong in explicit mode."
+          );
+        if (module !== "solid-js" && module !== "@solidjs/web") return;
+        for (const s of q.get("specifiers")) {
+          if (
+            q.node.importKind === "type" ||
+            (s.isImportSpecifier() && s.node.importKind === "type")
+          ) {
+            if (
+              s.isImportSpecifier() &&
+              ["Accessor", "Component", "ParentProps", "Setter", "Store"].includes(
+                t.isIdentifier(s.node.imported) ? s.node.imported.name : s.node.imported.value
+              )
+            )
+              report(
+                s,
+                "NATIVE_TYPE",
+                "This Solid value contract needs a virtual routine/source type facade."
+              );
+            continue;
+          }
+          if (!s.isImportSpecifier()) {
+            report(
+              s,
+              "NATIVE_IMPORT",
+              "Namespace and default Solid imports need a checked native mapping."
+            );
+            continue;
+          }
+          const name = t.isIdentifier(s.node.imported)
+            ? s.node.imported.name
+            : s.node.imported.value;
+          if (
+            module === "solid-js" ? !(name in nativeMapping) : !["render", "hydrate"].includes(name)
+          )
+            report(s, "NATIVE_API", `Solid API ${name} has no verified native lowering.`);
+        }
+      },
+      ThrowStatement(q) {
+        report(
+          q,
+          "NATIVE_FAILURE",
+          "A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged."
+        );
+      },
+      TryStatement(q) {
+        report(
+          q,
+          "NATIVE_CATCH",
+          "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract."
+        );
+      },
+      Function(q) {
+        if (q.node.generator)
+          report(
+            q,
+            "NATIVE_GENERATOR",
+            "Solid action/stream generators need a separate suspension and rejection mapping."
+          );
+      },
+      CallExpression(q) {
+        const api = imported(q.get("callee"));
+        if (api?.module !== "solid-js") return;
+        if (api.name === "createEffect" && q.node.arguments.length < 2)
+          report(
+            q,
+            "NATIVE_EFFECT_PHASES",
+            "createEffect needs a tracked compute and an untracked effect phase."
+          );
+        if (
+          !["createMemo", "createEffect", "createProjection", "createOptimisticStore"].includes(
+            api.name
+          )
+        )
+          return;
+        const arg = q.get("arguments.0");
+        if (!arg?.node) return;
+        const n = nodes.get(`${arg.node.start}:${arg.node.end}`);
+        const signatures = n ? checker.getTypeAtLocation(n).getCallSignatures() : [];
+        const promise = signatures?.some(s =>
+          checker.getReturnTypeOfSignature(s).getProperty("then")
+        );
+        if ((arg.isFunction() && arg.node.async) || promise)
+          report(
+            arg,
+            "NATIVE_REJECTION",
+            "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures."
+          );
+      },
+      JSXSpreadAttribute(q) {
+        report(
+          q,
+          "NATIVE_SPREAD",
+          "A JSX spread may hide reads or event bindings; native spread lowering is not verified."
+        );
+      },
+      JSXAttribute(q) {
+        if (q.node.name.name === "ref")
+          report(
+            q,
+            "NATIVE_REF",
+            "Native ref callbacks need an explicit owner and invocation contract."
+          );
+      }
+    });
+  }
+  return diagnostics;
+}
+export class NativeDiagnosticError extends Error {
+  /** @param {Diagnostic[]} diagnostics */
+  constructor(diagnostics) {
+    super(
+      diagnostics.map(d => `[${d.code}] ${d.message} (${d.file}:${d.line}:${d.column})`).join("\n")
+    );
+    this.name = "NativeDiagnosticError";
+    this.diagnostics = diagnostics;
+  }
+}
+/** Translate only known surface contracts, then use the existing routine inference.
+ * @param {string} code @param {string} filename @param {Map<string,string>} modules */
+function surface(code, filename, modules) {
+  const p = parseProgram(code, filename);
+  if (!p) throw new Error(`Cannot parse ${filename}`);
+  const needed = new Set();
+  const contexts = new Set();
+  /** Native scalar values from context/rows are sources in library IR.
+   * @param {Path} bindingPath @param {string} name */
+  const valueReads = (bindingPath, name) => {
+    const binding = bindingPath.scope.getBinding(name);
+    for (const ref of binding?.referencePaths ?? []) {
+      if (ref.findParent(q => q.isTSType())) continue;
+      if (ref.parentPath?.isMemberExpression() && ref.key === "object") continue;
+      if (ref.parentPath?.isCallExpression() && ref.key === "callee") continue;
+      ref.replaceWith(t.callExpression(t.identifier(name), []));
+    }
+  };
+  /** @param {Path} q @param {string} code @param {string} message @returns {never} */
+  const fail = (q, code, message) => {
+    throw new NativeDiagnosticError([
+      {
+        code,
+        message,
+        file: filename,
+        line: q.node.loc?.start.line ?? 1,
+        column: (q.node.loc?.start.column ?? 0) + 1
+      }
+    ]);
+  };
+  // Annotate component props before source signatures are queried.
+  p.traverse({
+    Function(q) {
+      const name =
+        ("id" in q.node ? q.node.id?.name : "") ||
+        (q.parentPath.isVariableDeclarator() && t.isIdentifier(q.parentPath.node.id)
+          ? q.parentPath.node.id.name
+          : "");
+      if (q.getFunctionParent() || !/^[A-Z]/.test(name ?? "")) return;
+      const param = q.node.params[0];
+      if (param && !t.isIdentifier(param))
+        fail(
+          q,
+          "NATIVE_PROPS",
+          "Destructured component parameters need a checked snapshot-versus-path mapping."
+        );
+      if (param?.typeAnnotation?.type === "TSTypeAnnotation") {
+        needed.add("Props");
+        param.typeAnnotation.typeAnnotation = t.tsTypeReference(
+          t.identifier("Props"),
+          t.tsTypeParameterInstantiation([param.typeAnnotation.typeAnnotation])
+        );
+      }
+      if (q.node.returnType)
+        fail(
+          q,
+          "NATIVE_RETURN_TYPE",
+          "A component return annotation needs a virtual value-to-routine type mapping."
+        );
+    },
+    CallExpression(q) {
+      const api = imported(q.get("callee"));
+      if (api?.module !== "solid-js") return;
+      if (api.name === "useContext") {
+        if (q.node.arguments.length !== 1 || !t.isExpression(q.node.arguments[0]))
+          fail(q, "NATIVE_CONTEXT", "useContext requires one statically resolved context.");
+        if (q.parentPath.isVariableDeclarator() && t.isIdentifier(q.parentPath.node.id))
+          valueReads(q.parentPath, q.parentPath.node.id.name);
+        q.replaceWith(t.callExpression(q.node.arguments[0], []));
+      } else if (api.name === "createContext") {
+        if (!q.parentPath.isVariableDeclarator() || !t.isIdentifier(q.parentPath.node.id))
+          fail(
+            q,
+            "NATIVE_CONTEXT",
+            "A native context needs a named declaration for its generated requirement identity."
+          );
+        contexts.add(q.parentPath.node.id.name);
+        if (q.node.arguments.length === 0) {
+          // Full module identity, not just a potentially colliding display name.
+          const name = `${filename}#${q.parentPath.node.id.name}`;
+          q.node.arguments = [
+            t.identifier("undefined"),
+            t.objectExpression([t.objectProperty(t.identifier("name"), t.stringLiteral(name))])
+          ];
+          const params = q.node.typeParameters?.params;
+          if (!params?.length)
+            fail(q, "NATIVE_CONTEXT_TYPE", "A defaultless native context needs its value type.");
+          params.push(t.tsLiteralType(t.stringLiteral(name)));
+        }
+      }
+    }
+  });
+  p.traverse({
+    JSXElement: {
+      exit(q) {
+        const opening = q.get("openingElement"),
+          tag = opening.get("name");
+        if (!tag.isJSXIdentifier())
+          fail(
+            tag,
+            "NATIVE_TAG",
+            "Member and namespaced JSX tags need a resolved component contract."
+          );
+        const name = tag.node.name;
+        if (/^[a-z]/.test(name)) {
+          for (const attr of opening.get("attributes")) {
+            if (
+              !attr.isJSXAttribute() ||
+              !t.isJSXIdentifier(attr.node.name) ||
+              !/^on[A-Z]/.test(attr.node.name.name)
+            )
+              continue;
+            const value = attr.get("value");
+            if (!value.isJSXExpressionContainer()) continue;
+            const fn = value.get("expression");
+            if (fn.isIdentifier()) {
+              const binding = fn.scope.getBinding(fn.node.name);
+              const declaration = binding?.path;
+              const target = declaration?.isVariableDeclarator()
+                ? declaration.get("init")
+                : declaration;
+              if (!target?.isFunction() || target.node.async || !binding?.constant)
+                fail(
+                  fn,
+                  "NATIVE_HANDLER",
+                  "This event handler needs a statically resolved synchronous function contract."
+                );
+              const args = t.identifier("args");
+              args.typeAnnotation = t.tsTypeAnnotation(
+                t.tsTypeReference(
+                  t.identifier("Parameters"),
+                  t.tsTypeParameterInstantiation([t.tsTypeQuery(t.identifier(fn.node.name))])
+                )
+              );
+              const rest = t.restElement(t.identifier("args"));
+              rest.typeAnnotation = args.typeAnnotation;
+              fn.replaceWith(
+                t.arrowFunctionExpression(
+                  [rest],
+                  t.callExpression(t.identifier(fn.node.name), [
+                    t.spreadElement(t.identifier("args"))
+                  ])
+                )
+              );
+            }
+            if (!fn.isArrowFunctionExpression() && !fn.isFunctionExpression())
+              fail(
+                fn,
+                "NATIVE_HANDLER",
+                "A property event handler needs a checked shared event-call contract."
+              );
+            if (fn.node.async)
+              fail(
+                fn,
+                "NATIVE_REJECTION",
+                "An async event has no declared rejection type; a checked rejection adapter is required."
+              );
+            for (const param of fn.node.params)
+              if (t.isIdentifier(param) && !param.typeAnnotation) {
+                const event = /Key/.test(attr.node.name.name)
+                  ? "KeyboardEvent"
+                  : /Input/.test(attr.node.name.name)
+                    ? "InputEvent"
+                    : /Mouse|Click/.test(attr.node.name.name)
+                      ? "MouseEvent"
+                      : "Event";
+                param.typeAnnotation = t.tsTypeAnnotation(
+                  t.tsIntersectionType([
+                    t.tsTypeReference(t.identifier(event)),
+                    t.tsTypeLiteral([
+                      t.tsPropertySignature(
+                        t.identifier("currentTarget"),
+                        t.tsTypeAnnotation(
+                          t.tsIndexedAccessType(
+                            t.tsTypeReference(t.identifier("HTMLElementTagNameMap")),
+                            t.tsLiteralType(t.stringLiteral(name))
+                          )
+                        )
+                      )
+                    ])
+                  ])
+                );
+              }
+            needed.add("$event");
+            fn.replaceWith(t.callExpression(t.identifier("$event"), [fn.node]));
+          }
+          return;
+        }
+        const api = imported(tag);
+        let importedContext = false;
+        if (api && !(api.module === "solid-js" && controls.has(api.name))) {
+          const base = resolve(dirname(filename), api.module);
+          const target =
+            api.module.startsWith(".") &&
+            [base, base + ".tsx", base + ".ts", base + "/index.tsx", base + "/index.ts"].find(f =>
+              modules.has(f)
+            );
+          const program = target ? parseProgram(modules.get(target) ?? "", target) : null;
+          const binding = program?.scope.getBinding(api.name);
+          const declaration = binding?.path;
+          const init = declaration?.isVariableDeclarator() ? declaration.get("init") : declaration;
+          importedContext = !!(
+            init?.isCallExpression() && imported(init.get("callee"))?.name === "createContext"
+          );
+          let jsx = false;
+          if (init?.isFunction())
+            init.traverse({
+              Function(q) {
+                q.skip();
+              },
+              JSXElement() {
+                jsx = true;
+              },
+              JSXFragment() {
+                jsx = true;
+              }
+            });
+          if (!importedContext && !jsx)
+            fail(
+              tag,
+              "NATIVE_FOREIGN",
+              "A foreign JSX component needs a checked boundary contract before library colors can cross it."
+            );
+        }
+        if (api?.name === "For") {
+          const keyed = opening.node.attributes.find(
+            a => t.isJSXAttribute(a) && t.isJSXIdentifier(a.name) && a.name.name === "keyed"
+          );
+          if (keyed)
+            fail(
+              opening,
+              "NATIVE_KEYED",
+              "Native keyed row modes need separate value/accessor mappings; only default For is verified."
+            );
+          const child = q
+            .get("children")
+            .find(c => c.isJSXExpressionContainer() && t.isFunction(c.node.expression));
+          const fn = child?.get("expression");
+          if (fn?.isFunction() && t.isIdentifier(fn.node.params[0]))
+            valueReads(fn, fn.node.params[0].name);
+        }
+        const props = [];
+        for (const attr of opening.node.attributes) {
+          if (!t.isJSXAttribute(attr) || !t.isJSXIdentifier(attr.name))
+            fail(opening, "NATIVE_SPREAD", "Unsupported JSX attribute contract.");
+          let value = !attr.value
+            ? t.booleanLiteral(true)
+            : t.isJSXExpressionContainer(attr.value)
+              ? attr.value.expression
+              : attr.value;
+          if (t.isJSXEmptyExpression(value)) continue;
+          if (api && ["when", "each", "fallback"].includes(attr.name.name) && !t.isFunction(value))
+            value = t.arrowFunctionExpression([], value);
+          props.push(t.objectProperty(t.identifier(attr.name.name), value));
+        }
+        const children = t.react.buildChildren(q.node);
+        if (children.length) {
+          let child =
+            children.length === 1
+              ? children[0]
+              : t.jsxFragment(t.jsxOpeningFragment(), t.jsxClosingFragment(), q.node.children);
+          if (!t.isExpression(child)) fail(q, "NATIVE_CHILD", "Unsupported native JSX child.");
+          if (!t.isFunction(child)) child = t.arrowFunctionExpression([], child);
+          props.push(t.objectProperty(t.identifier("children"), child));
+        }
+        const callee =
+          contexts.has(name) || importedContext
+            ? t.memberExpression(t.identifier(name), t.identifier("provide"))
+            : t.identifier(name);
+        const call = t.callExpression(callee, [t.objectExpression(props)]);
+        if (q.parentPath.isJSXElement() || q.parentPath.isJSXFragment())
+          q.replaceWith(t.jsxExpressionContainer(call));
+        else
+          q.replaceWith(
+            t.jsxFragment(t.jsxOpeningFragment(), t.jsxClosingFragment(), [
+              t.jsxExpressionContainer(call)
+            ])
+          );
+      }
+    }
+  });
+  p.traverse({
+    ImportDeclaration(q) {
+      const module = q.node.source.value;
+      if (!["solid-js", "@solidjs/web"].includes(module)) return;
+      const specs = [];
+      for (const spec of q.node.specifiers) {
+        if (!t.isImportSpecifier(spec)) continue;
+        if (q.node.importKind === "type" || spec.importKind === "type") continue;
+        const name = t.isIdentifier(spec.imported) ? spec.imported.name : spec.imported.value;
+        const mapped = module === "solid-js" ? nativeMapping[name] : name;
+        if (!mapped) continue;
+        specs.push(t.importSpecifier(spec.local, t.identifier(mapped)));
+      }
+      const types = q.node.specifiers.filter(
+        s => q.node.importKind === "type" || (t.isImportSpecifier(s) && s.importKind === "type")
+      );
+      if (types.length) {
+        const declaration = t.importDeclaration(types, t.stringLiteral(module));
+        declaration.importKind = q.node.importKind;
+        q.insertBefore(declaration);
+      }
+      if (specs.length) q.replaceWith(t.importDeclaration(specs, t.stringLiteral("solid-yield")));
+      else q.remove();
+    }
+  });
+  for (const name of needed)
+    if (p.scope.hasBinding(name))
+      fail(p, "NATIVE_NAME", `Reserve ${name} for the generated native import.`);
+  if (needed.size)
+    p.node.body.unshift(
+      t.importDeclaration(
+        [...needed].map(name => {
+          const spec = t.importSpecifier(t.identifier(name), t.identifier(name));
+          if (name === "Props") spec.importKind = "type";
+          return spec;
+        }),
+        t.stringLiteral("solid-yield")
+      )
+    );
+  p.node.directives.unshift(t.directive(t.directiveLiteral("use yield")));
+  return print(p);
+}
+/** @param {Map<string,string>} input @param {{compilerOptions?: ts.CompilerOptions}} [options] */
+export function lowerNativeProject(input, options = {}) {
+  const files = new Map([...input].map(([id, code]) => [resolve(id), code]));
+  const diagnostics = inspectNativeProject(files);
+  if (diagnostics.length) throw new NativeDiagnosticError(diagnostics);
+  return lowerSugarProject(
+    new Map([...files].map(([id, code]) => [id, surface(code, id, files)])),
+    options
+  );
+}
+/** @param {string} code @param {string} filename @param {(file:string)=>boolean} include @param {Map<string,any>} cache */
+export function lowerNativeFile(code, filename, include, cache) {
+  const configPath = ts.findConfigFile(dirname(filename), ts.sys.fileExists);
+  if (!configPath) throw new Error("[NATIVE_PROJECT] Native mode requires a tsconfig.json.");
+  const config = ts.readConfigFile(configPath, ts.sys.readFile);
+  const parsed = ts.parseJsonConfigFileContent(config.config, ts.sys, dirname(configPath));
+  const files = new Map(
+    parsed.fileNames
+      .filter(f => include(f) && !f.endsWith(".d.ts") && !f.includes("/.generated/"))
+      .map(f => [f, readFileSync(f, "utf8")])
+  );
+  files.set(filename, code);
+  const signature = JSON.stringify([parsed.options, [...files]]);
+  let entry = cache.get(configPath);
+  if (entry?.signature !== signature) {
+    entry = {
+      signature,
+      files: lowerNativeProject(files, { compilerOptions: parsed.options }).files
+    };
+    cache.set(configPath, entry);
+  }
+  return entry.files.get(filename) ?? code;
+}

@@ -16,6 +16,7 @@
  * eligible `lazy` call. The source map is returned to Vite, which chains it
  * with the JSX compiler's.
  */
+import { lowerNativeFile } from "./native.js";
 import { isSugar, lowerSugarFile } from "./sugar.js";
 import { DEFAULT_YIELD_MODULE } from "./rule.js";
 import { mayTransform, transform } from "./transform.js";
@@ -25,6 +26,8 @@ const SCRIPT = /\.[mc]?[jt]sx?$/i;
 /**
  * @typedef {object} YieldPluginOptions
  * @property {string} [yieldModule] the module `perform` and `lazy` come from (default `solid-yield`)
+ * @property {"native" | "explicit"} [mode] native Solid front end (opt-in)
+ * @property {(file: string) => boolean} [include] required native file selection
  * @property {boolean} [lazy] annotate `lazy(() => import("…"))` from the yield module with its module URL (default `true`)
  * @property {(file: string) => boolean} [filter] which files to look at (default: `.js`/`.jsx`/`.ts`/`.tsx` and their `m`/`c` forms, outside `node_modules`)
  */
@@ -39,6 +42,8 @@ function defaultFilter(file) {
  * @returns {import("vite").Plugin}
  */
 export default function solidYield(options = {}) {
+  if (options.mode === "native" && !options.include)
+    throw new Error("[NATIVE_INCLUDE] Native mode requires an explicit include(file) predicate.");
   const yieldModule = options.yieldModule ?? DEFAULT_YIELD_MODULE;
   const lazy = options.lazy ?? true;
   const filter = options.filter ?? defaultFilter;
@@ -59,6 +64,11 @@ export default function solidYield(options = {}) {
       if (id.startsWith("\0")) return null;
       const file = id.replace(/[?#].*$/, "");
       if (!filter(file)) return null;
+      if (options.mode === "native" && options.include?.(file)) {
+        code = lowerNativeFile(code, file, options.include, sugarCache);
+        const result = transform(code, { filename: file, yieldModule, lazy });
+        return { code: result?.code ?? code, map: null };
+      }
       if (isSugar(code)) {
         code = lowerSugarFile(code, file, sugarCache);
         const result = transform(code, { filename: file, yieldModule, lazy });

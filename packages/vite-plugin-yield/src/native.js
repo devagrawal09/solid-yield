@@ -192,6 +192,29 @@ export function inspectNativeProject(files) {
         );
       },
       JSXAttribute(q) {
+        if (
+          t.isJSXIdentifier(q.node.name) &&
+          /^on[A-Z]/.test(q.node.name.name) &&
+          t.isJSXExpressionContainer(q.node.value)
+        ) {
+          /** @type {Path} */
+          let handler = q.get("value.expression");
+          if (handler.isIdentifier()) {
+            const binding = handler.scope.getBinding(handler.node.name)?.path;
+            if (binding?.isVariableDeclarator()) handler = binding.get("init");
+            else if (binding?.isFunctionDeclaration()) handler = binding;
+          }
+          if (handler?.isFunction())
+            handler.traverse({
+              ThisExpression(site) {
+                report(
+                  site,
+                  "NATIVE_RECEIVER",
+                  "An event handler using this needs a verified receiver-preserving binding."
+                );
+              }
+            });
+        }
         if (q.node.name.name === "ref")
           report(
             q,
@@ -252,6 +275,16 @@ function surface(code, filename, modules) {
           ? q.parentPath.node.id.name
           : "");
       if (q.getFunctionParent() || !/^[A-Z]/.test(name ?? "")) return;
+      let jsx = t.isJSXElement(q.node.body) || t.isJSXFragment(q.node.body);
+      q.traverse({
+        Function(inner) {
+          inner.skip();
+        },
+        ReturnStatement(inner) {
+          jsx ||= t.isJSXElement(inner.node.argument) || t.isJSXFragment(inner.node.argument);
+        }
+      });
+      if (!jsx) return;
       const param = q.node.params[0];
       if (param && !t.isIdentifier(param))
         fail(
@@ -290,7 +323,11 @@ function surface(code, filename, modules) {
             "A native context needs a named declaration for its generated requirement identity."
           );
         contexts.add(q.parentPath.node.id.name);
-        if (q.node.arguments.length === 0) {
+        if (
+          q.node.arguments.length === 0 ||
+          (q.node.arguments.length === 1 &&
+            t.isIdentifier(q.node.arguments[0], { name: "undefined" }))
+        ) {
           // Full module identity, not just a potentially colliding display name.
           const name = `${filename}#${q.parentPath.node.id.name}`;
           q.node.arguments = [

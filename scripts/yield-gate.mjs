@@ -181,6 +181,19 @@ function buildSteps(twins) {
   });
 
   steps.push({
+    name: "native:contracts",
+    cwd: root,
+    cmd: process.execPath,
+    args: ["scripts/native-check.mjs"]
+  });
+  steps.push({
+    name: "native:counter:ssr-hydrate-parity",
+    cwd: root,
+    cmd: process.execPath,
+    args: ["scripts/native-runtime.mjs"]
+  });
+
+  steps.push({
     name: "original:docs:typecheck",
     cwd: root,
     fast: true,

@@ -24,6 +24,11 @@ describe("native front end", { timeout: 30_000 }, () => {
     expect(out).toContain("yield* p.n");
     expect(out).toContain("yield* Child({");
   });
+  it("leaves a capitalized plain helper's value contract alone", () => {
+    const out = lower(`export function Value(p: {n: number}) { return p.n + 1; }`);
+    expect(out).not.toContain("Props");
+    expect(out).not.toContain("yield");
+  });
   it("resolves selected component imports before lowering tags", () => {
     const child = resolve(import.meta.dirname, "fixtures/native-child.tsx");
     const out = lowerNativeProject(
@@ -34,6 +39,13 @@ describe("native front end", { timeout: 30_000 }, () => {
     ).files;
     expect(out.get(id)).toContain("yield* Child({");
     expect(out.get(child)).toContain("yield* p.n");
+  });
+  it("refuses an event receiver whose binding would change", () => {
+    expect(() =>
+      lower(
+        `export function App(){return <button onClick={function(this: HTMLButtonElement){this.focus();}}/>;}`
+      )
+    ).toThrow(/NATIVE_RECEIVER/);
   });
   it("reports every incompatible native failure site before emitting", () => {
     const diagnostics = inspectNativeProject(

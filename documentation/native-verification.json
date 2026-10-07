@@ -1,0 +1,1557 @@
+{
+  "schema": 1,
+  "solidVersion": "2.0.0-rc.13",
+  "typing": "generated TypeScript + recommended generated lint; source mapping/editor not implemented",
+  "historicalCorpus": "27 named categories reconstructed; seven original identities and all verbatim originals unavailable",
+  "missingSlots": [
+    "T12",
+    "T13",
+    "T14",
+    "T15",
+    "R10",
+    "R11",
+    "R12"
+  ],
+  "fixtures": [
+    {
+      "id": "counter",
+      "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; export function Counter(){const [count,set]=createSignal(0);const twice=createMemo(()=>count()*2);return <button onClick={()=>set(count()+1)}>{twice()}</button>;}",
+      "expected": "accepted",
+      "file": "packages/vite-plugin-yield/test/.native-generated/counter.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "conditional",
+      "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; export function Counter(){const [count,set]=createSignal(0);return <p>{count()>0 ? count() : 0}</p>;}",
+      "expected": "accepted",
+      "file": "packages/vite-plugin-yield/test/.native-generated/conditional.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "loop",
+      "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; export function Counter(){const [count,set]=createSignal(0);return <button onClick={()=>{if(count()===0)return;for(let i=0;i<2;i++)set(i);}}>{count()}</button>;}",
+      "expected": "accepted",
+      "file": "packages/vite-plugin-yield/test/.native-generated/loop.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "props",
+      "source": "export function Child(props:{value:number}){return <p>{props.value}</p>;}",
+      "expected": "accepted",
+      "file": "packages/vite-plugin-yield/test/.native-generated/props.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "tag",
+      "source": "function Child(){return <p/>;} export function Parent(){return <Child/>;}",
+      "expected": "accepted",
+      "slots": [
+        "T01",
+        "L01"
+      ],
+      "file": "packages/vite-plugin-yield/test/.native-generated/tag.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "setup-read",
+      "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; export function Counter(){const [count,set]=createSignal(0);const n=count();return <p>{n}</p>;}",
+      "slots": [
+        "T02",
+        "L02",
+        "R01",
+        "R04"
+      ],
+      "file": "packages/vite-plugin-yield/test/.native-generated/setup-read.tsx",
+      "stage": "checked-error",
+      "diagnostics": [
+        {
+          "stage": "type",
+          "code": "TS2769",
+          "message": "No overload matches this call.\n  Overload 1 of 2, '(body: (props: unknown) => Generator<SetupOp, ViewFn<never, Element>, any>): HoleCall<{}, false, any, false, any>', gave the following error.\n    Argument of type '() => Generator<Create<\"signal\", never> | Read<false, never>, ViewFn<never, Element>, any>' is not assignable to parameter of type '(props: unknown) => Generator<SetupOp, ViewFn<never, Element>, any>'.\n      Call signature return types 'Generator<Create<\"signal\", never> | Read<false, never>, ViewFn<never, Element>, any>' and 'Generator<SetupOp, ViewFn<never, Element>, any>' are incompatible.\n        The types returned by 'next(...)' are incompatible between these types.\n          Type 'IteratorResult<Create<\"signal\", never> | Read<false, never>, ViewFn<never, Element>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<never, Element>>'.\n            Type 'IteratorYieldResult<Create<\"signal\", never> | Read<false, never>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<never, Element>>'.\n              Type 'IteratorYieldResult<Create<\"signal\", never> | Read<false, never>>' is not assignable to type 'IteratorYieldResult<SetupOp>'.\n                Type 'Create<\"signal\", never> | Read<false, never>' is not assignable to type 'SetupOp'.\n                  Type 'Read<false, never>' is not assignable to type 'SetupOp'.\n                    Property 'kind' is missing in type 'Read<false, never>' but required in type 'Create<string, any>'.\n  Overload 2 of 2, '(body: (props: unknown) => Generator<SetupOp, ViewFn<never, Element>, any>): (props?: PropsInput<{}, never> | undefined) => ComponentView<...>', gave the following error.\n    Argument of type '() => Generator<Create<\"signal\", never> | Read<false, never>, ViewFn<never, Element>, any>' is not assignable to parameter of type '(props: unknown) => Generator<SetupOp, ViewFn<never, Element>, any>'.\n      Call signature return types 'Generator<Create<\"signal\", never> | Read<false, never>, ViewFn<never, Element>, any>' and 'Generator<SetupOp, ViewFn<never, Element>, any>' are incompatible.\n        The types returned by 'next(...)' are incompatible between these types.\n          Type 'IteratorResult<Create<\"signal\", never> | Read<false, never>, ViewFn<never, Element>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<never, Element>>'.\n            Type 'IteratorYieldResult<Create<\"signal\", never> | Read<false, never>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<never, Element>>'.\n              Type 'IteratorYieldResult<Create<\"signal\", never> | Read<false, never>>' is not assignable to type 'IteratorYieldResult<SetupOp>'.\n                Type 'Create<\"signal\", never> | Read<false, never>' is not assignable to type 'SetupOp'.\n                  Type 'Read<false, never>' is not assignable to type 'SetupOp'.\n                    Property 'kind' is missing in type 'Read<false, never>' but required in type 'Create<string, any>'.",
+          "line": 11
+        },
+        {
+          "stage": "lint",
+          "code": "solid-yield/no-read-in-setup",
+          "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event.",
+          "line": 13,
+          "severity": 2
+        }
+      ]
+    },
+    {
+      "id": "named-event",
+      "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; export function Counter(){const [count,set]=createSignal(0);const save=()=>set(1);return <button onClick={save}/>;}",
+      "slots": [
+        "T03",
+        "L04"
+      ],
+      "file": "packages/vite-plugin-yield/test/.native-generated/named-event.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "inline-event",
+      "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; export function Counter(){const [count,set]=createSignal(0);return <button onClick={()=>set(1)}/>;}",
+      "expected": "accepted",
+      "slots": [
+        "T04",
+        "L03",
+        "R02"
+      ],
+      "file": "packages/vite-plugin-yield/test/.native-generated/inline-event.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "effect-arity",
+      "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; export function Counter(){const [count,set]=createSignal(0);createEffect(()=>{});return <p/>;}",
+      "slots": [
+        "T05"
+      ],
+      "stage": "transform",
+      "diagnostics": [
+        {
+          "code": "NATIVE_EFFECT_PHASES",
+          "message": "createEffect needs a tracked compute and an untracked effect phase.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/effect-arity.tsx",
+          "line": 1,
+          "column": 166
+        }
+      ]
+    },
+    {
+      "id": "row",
+      "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; export function List(){return <For each={[1,2]}>{n=><li>{n}</li>}</For>;}",
+      "expected": "accepted",
+      "slots": [
+        "T06",
+        "L07"
+      ],
+      "file": "packages/vite-plugin-yield/test/.native-generated/row.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "pending-root",
+      "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; import {render} from '@solidjs/web';function App(){const n=createMemo(async()=>1);return <p>{n()}</p>;}render(App,document.body);",
+      "slots": [
+        "T07"
+      ],
+      "stage": "transform",
+      "diagnostics": [
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/pending-root.tsx",
+          "line": 1,
+          "column": 176
+        }
+      ]
+    },
+    {
+      "id": "colored-prop",
+      "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; function Child(p:{n:number}){return <p>{p.n}</p>;}export function App(){const n=createMemo(async()=>1);return <Child n={n()}/>;}",
+      "slots": [
+        "T08"
+      ],
+      "stage": "transform",
+      "diagnostics": [
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/colored-prop.tsx",
+          "line": 1,
+          "column": 197
+        }
+      ]
+    },
+    {
+      "id": "throw-error",
+      "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; export function Counter(){const [count,set]=createSignal(0);return <button onClick={()=>{throw new Error(\"oops\");}}/>;}",
+      "slots": [
+        "T09",
+        "R03"
+      ],
+      "stage": "transform",
+      "diagnostics": [
+        {
+          "code": "NATIVE_FAILURE",
+          "message": "A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/throw-error.tsx",
+          "line": 1,
+          "column": 195
+        }
+      ]
+    },
+    {
+      "id": "context",
+      "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; const C=createContext<number>();export function Child(){const n=useContext(C);return <p>{n}</p>;}export function App(){return <C value={1}><Child/></C>;}",
+      "expected": "accepted",
+      "slots": [
+        "T10"
+      ],
+      "file": "packages/vite-plugin-yield/test/.native-generated/context.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "lazy-child",
+      "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; export function App(){return <Loading fallback={<p>wait</p>}><p>ready</p></Loading>;}",
+      "expected": "accepted",
+      "slots": [
+        "T11"
+      ],
+      "file": "packages/vite-plugin-yield/test/.native-generated/lazy-child.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "eager-jsx",
+      "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; export function Counter(){const [count,set]=createSignal(0);const child=<p>{count()}</p>;return <div>{child}</div>;}",
+      "slots": [
+        "L05"
+      ],
+      "file": "packages/vite-plugin-yield/test/.native-generated/eager-jsx.tsx",
+      "stage": "checked-error",
+      "diagnostics": [
+        {
+          "stage": "type",
+          "code": "TS2769",
+          "message": "No overload matches this call.\n  Overload 1 of 2, '(body: (props: unknown) => Generator<SetupOp, ViewFn<never, Element>, any>): HoleCall<{}, false, any, false, any>', gave the following error.\n    Argument of type '() => Generator<Create<\"signal\", never> | Read<false, never>, ViewFn<never, Element>, any>' is not assignable to parameter of type '(props: unknown) => Generator<SetupOp, ViewFn<never, Element>, any>'.\n      Call signature return types 'Generator<Create<\"signal\", never> | Read<false, never>, ViewFn<never, Element>, any>' and 'Generator<SetupOp, ViewFn<never, Element>, any>' are incompatible.\n        The types returned by 'next(...)' are incompatible between these types.\n          Type 'IteratorResult<Create<\"signal\", never> | Read<false, never>, ViewFn<never, Element>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<never, Element>>'.\n            Type 'IteratorYieldResult<Create<\"signal\", never> | Read<false, never>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<never, Element>>'.\n              Type 'IteratorYieldResult<Create<\"signal\", never> | Read<false, never>>' is not assignable to type 'IteratorYieldResult<SetupOp>'.\n                Type 'Create<\"signal\", never> | Read<false, never>' is not assignable to type 'SetupOp'.\n                  Type 'Read<false, never>' is not assignable to type 'SetupOp'.\n                    Property 'kind' is missing in type 'Read<false, never>' but required in type 'Create<string, any>'.\n  Overload 2 of 2, '(body: (props: unknown) => Generator<SetupOp, ViewFn<never, Element>, any>): (props?: PropsInput<{}, never> | undefined) => ComponentView<...>', gave the following error.\n    Argument of type '() => Generator<Create<\"signal\", never> | Read<false, never>, ViewFn<never, Element>, any>' is not assignable to parameter of type '(props: unknown) => Generator<SetupOp, ViewFn<never, Element>, any>'.\n      Call signature return types 'Generator<Create<\"signal\", never> | Read<false, never>, ViewFn<never, Element>, any>' and 'Generator<SetupOp, ViewFn<never, Element>, any>' are incompatible.\n        The types returned by 'next(...)' are incompatible between these types.\n          Type 'IteratorResult<Create<\"signal\", never> | Read<false, never>, ViewFn<never, Element>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<never, Element>>'.\n            Type 'IteratorYieldResult<Create<\"signal\", never> | Read<false, never>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<never, Element>>'.\n              Type 'IteratorYieldResult<Create<\"signal\", never> | Read<false, never>>' is not assignable to type 'IteratorYieldResult<SetupOp>'.\n                Type 'Create<\"signal\", never> | Read<false, never>' is not assignable to type 'SetupOp'.\n                  Type 'Read<false, never>' is not assignable to type 'SetupOp'.\n                    Property 'kind' is missing in type 'Read<false, never>' but required in type 'Create<string, any>'.",
+          "line": 11
+        },
+        {
+          "stage": "lint",
+          "code": "solid-yield/jsx-only-in-view",
+          "message": "JSX in a setup: elements are built by the view it returns (`return view(function* () { return <…/>; })`).",
+          "line": 13,
+          "severity": 2
+        }
+      ]
+    },
+    {
+      "id": "catch",
+      "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; export function Counter(){const [count,set]=createSignal(0);return <button onClick={()=>{try{set(1);}catch{set(2);}}}/>;}",
+      "slots": [
+        "L06"
+      ],
+      "stage": "transform",
+      "diagnostics": [
+        {
+          "code": "NATIVE_CATCH",
+          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/catch.tsx",
+          "line": 1,
+          "column": 195
+        }
+      ]
+    },
+    {
+      "id": "memo-write",
+      "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; export function Counter(){const [count,set]=createSignal(0);const n=createMemo(()=>{set(1);return count();});return <p>{n()}</p>;}",
+      "slots": [
+        "R05"
+      ],
+      "file": "packages/vite-plugin-yield/test/.native-generated/memo-write.tsx",
+      "stage": "checked-error",
+      "diagnostics": [
+        {
+          "stage": "type",
+          "code": "TS2345",
+          "message": "Argument of type '() => Generator<Write | Read<false, never>, number, any>' is not assignable to parameter of type '() => Generator<MemoOp, number, any>'.\n  Call signature return types 'Generator<Write | Read<false, never>, number, any>' and 'Generator<MemoOp, number, any>' are incompatible.\n    The types returned by 'next(...)' are incompatible between these types.\n      Type 'IteratorResult<Write | Read<false, never>, number>' is not assignable to type 'IteratorResult<MemoOp, number>'.\n        Type 'IteratorYieldResult<Write | Read<false, never>>' is not assignable to type 'IteratorResult<MemoOp, number>'.\n          Type 'IteratorYieldResult<Write | Read<false, never>>' is not assignable to type 'IteratorYieldResult<MemoOp>'.\n            Type 'Write | Read<false, never>' is not assignable to type 'MemoOp'.\n              Type 'Write' is not assignable to type 'MemoOp'.\n                Type 'Write' is not assignable to type 'StreamAttempt'.\n                  Types of property '[KIND]' are incompatible.\n                    Type '\"write\"' is not assignable to type '\"stream\"'.",
+          "line": 13
+        }
+      ]
+    },
+    {
+      "id": "hole-create",
+      "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; export function Counter(){const [count,set]=createSignal(0);return <p>{createSignal(1)[0]()}</p>;}",
+      "slots": [
+        "R06"
+      ],
+      "file": "packages/vite-plugin-yield/test/.native-generated/hole-create.tsx",
+      "stage": "checked-error",
+      "diagnostics": [
+        {
+          "stage": "type",
+          "code": "TS2345",
+          "message": "Argument of type '() => Generator<Create<\"signal\", never> | Read<false, never>, Element, any>' is not assignable to parameter of type '() => Generator<ViewOp, Element, any>'.\n  Call signature return types 'Generator<Create<\"signal\", never> | Read<false, never>, Element, any>' and 'Generator<ViewOp, Element, any>' are incompatible.\n    The types returned by 'next(...)' are incompatible between these types.\n      Type 'IteratorResult<Create<\"signal\", never> | Read<false, never>, Element>' is not assignable to type 'IteratorResult<ViewOp, Element>'.\n        Type 'IteratorYieldResult<Create<\"signal\", never> | Read<false, never>>' is not assignable to type 'IteratorResult<ViewOp, Element>'.\n          Type 'IteratorYieldResult<Create<\"signal\", never> | Read<false, never>>' is not assignable to type 'IteratorYieldResult<ViewOp>'.\n            Type 'Create<\"signal\", never> | Read<false, never>' is not assignable to type 'ViewOp'.\n              Type 'Create<\"signal\", never>' is not assignable to type 'ViewOp'.\n                Property '[MAY_WAIT]' is missing in type 'Create<\"signal\", never>' but required in type 'Bind<boolean, any>'.",
+          "line": 13
+        }
+      ]
+    },
+    {
+      "id": "async-effect",
+      "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; export function Counter(){const [count,set]=createSignal(0);createEffect(()=>count(),async n=>{set(n);});return <p/>;}",
+      "slots": [
+        "R07"
+      ],
+      "stage": "transform",
+      "diagnostics": [
+        {
+          "code": "SUGAR_ASYNC",
+          "message": "[SUGAR_ASYNC] Use attempt inside a synchronous routine; async functions are not routines. (<root>/packages/vite-plugin-yield/test/.native-generated/async-effect.tsx:6:31)"
+        }
+      ]
+    },
+    {
+      "id": "missing-context",
+      "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; import {render} from '@solidjs/web';const C=createContext<number>();function App(){const n=useContext(C);return <p>{n}</p>;}render(App,document.body);",
+      "slots": [
+        "R08"
+      ],
+      "file": "packages/vite-plugin-yield/test/.native-generated/missing-context.tsx",
+      "stage": "checked-error",
+      "diagnostics": [
+        {
+          "stage": "type",
+          "code": "TS2345",
+          "message": "Argument of type 'HoleCall<{}, false, never, false, RequiredContext<number, \"<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C\">>' is not assignable to parameter of type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<false, never, false, RequiredContext<...> | HoleRequires<...>>) & { ...; } & { ...; }'.\n  Type 'HoleCall<{}, false, never, false, RequiredContext<number, \"<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C\">>' is not assignable to type '{ readonly \"[NO_PROVIDER] the root requires the contexts this property names: provide each above the components that read it (Ctx.provide({ value, children }) around their calls)\": \"<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C\"; }'.",
+          "line": 24
+        }
+      ]
+    },
+    {
+      "id": "unhandled-failure",
+      "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; export function Counter(){const [count,set]=createSignal(0);return <button onClick={()=>{throw new Error(\"nope!\");}}/>;}",
+      "slots": [
+        "R09"
+      ],
+      "stage": "transform",
+      "diagnostics": [
+        {
+          "code": "NATIVE_FAILURE",
+          "message": "A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/unhandled-failure.tsx",
+          "line": 1,
+          "column": 195
+        }
+      ]
+    },
+    {
+      "id": "callback-read",
+      "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; export function Counter(){const [count,set]=createSignal(0);const n=createMemo(()=>[1].map(()=>count()));return <p>{n()}</p>;}",
+      "stage": "transform",
+      "diagnostics": [
+        {
+          "code": "SUGAR_CALLBACK",
+          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/packages/vite-plugin-yield/test/.native-generated/callback-read.tsx:6:26)"
+        }
+      ]
+    },
+    {
+      "id": "async-read",
+      "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; export function Counter(){const [count,set]=createSignal(0);const n=createMemo(async()=>count());return <p>{n()}</p>;}",
+      "stage": "transform",
+      "diagnostics": [
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/async-read.tsx",
+          "line": 1,
+          "column": 185
+        }
+      ]
+    },
+    {
+      "id": "method-read",
+      "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; export function Counter(){const [count,set]=createSignal(0);const obj={read(){return count();}};return <p>{obj.read()}</p>;}",
+      "stage": "transform",
+      "diagnostics": [
+        {
+          "code": "SUGAR_HOST",
+          "message": "[SUGAR_HOST] Reactive operations in async functions or methods are unsupported. (<root>/packages/vite-plugin-yield/test/.native-generated/method-read.tsx:7:14)"
+        }
+      ]
+    },
+    {
+      "id": "feedback",
+      "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; export function Counter(){const [count,set]=createSignal(0);const n=createMemo(()=>count());createEffect(()=>n(),n=>{set(n+1);});return <p>{n()}</p>;}",
+      "expected": "accepted",
+      "file": "packages/vite-plugin-yield/test/.native-generated/feedback.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "unknown-throw",
+      "source": "export function fail(e:unknown){throw e;}",
+      "stage": "transform",
+      "diagnostics": [
+        {
+          "code": "NATIVE_FAILURE",
+          "message": "A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/unknown-throw.tsx",
+          "line": 1,
+          "column": 33
+        }
+      ]
+    },
+    {
+      "id": "server-rejection",
+      "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; async function load(){\"use server\";return 1;}export function App(){const n=createMemo(()=>load());return <p>{n()}</p>;}",
+      "stage": "transform",
+      "diagnostics": [
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/server-rejection.tsx",
+          "line": 1,
+          "column": 192
+        }
+      ]
+    },
+    {
+      "id": "spread",
+      "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; export function Counter(){const [count,set]=createSignal(0);const attributes={onClick:()=>set(1)};return <button {...attributes}/>;}",
+      "stage": "transform",
+      "diagnostics": [
+        {
+          "code": "NATIVE_SPREAD",
+          "message": "A JSX spread may hide reads or event bindings; native spread lowering is not verified.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/spread.tsx",
+          "line": 1,
+          "column": 219
+        }
+      ]
+    },
+    {
+      "id": "ref",
+      "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; export function Counter(){const [count,set]=createSignal(0);return <button ref={el=>el.focus()}/>;}",
+      "stage": "transform",
+      "diagnostics": [
+        {
+          "code": "NATIVE_REF",
+          "message": "Native ref callbacks need an explicit owner and invocation contract.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/ref.tsx",
+          "line": 1,
+          "column": 181
+        }
+      ]
+    },
+    {
+      "id": "effect-bundle",
+      "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; export function Counter(){const [count,set]=createSignal(0);createEffect(()=>count(),{effect:n=>set(n)});return <p/>;}",
+      "stage": "transform",
+      "diagnostics": [
+        {
+          "code": "SUGAR_CALLBACK",
+          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/packages/vite-plugin-yield/test/.native-generated/effect-bundle.tsx:8:18)"
+        }
+      ]
+    }
+  ],
+  "originals": [
+    {
+      "twin": "docs-yield",
+      "original": "docs",
+      "files": 7,
+      "status": "refused",
+      "diagnostics": [
+        {
+          "code": "NATIVE_FAILURE",
+          "message": "A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged.",
+          "file": "examples/originals/docs/src/api.ts",
+          "line": 67,
+          "column": 57
+        },
+        {
+          "code": "NATIVE_FAILURE",
+          "message": "A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged.",
+          "file": "examples/originals/docs/src/api.ts",
+          "line": 103,
+          "column": 25
+        },
+        {
+          "code": "NATIVE_FAILURE",
+          "message": "A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged.",
+          "file": "examples/originals/docs/src/api.ts",
+          "line": 108,
+          "column": 17
+        },
+        {
+          "code": "NATIVE_FAILURE",
+          "message": "A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged.",
+          "file": "examples/originals/docs/src/api.ts",
+          "line": 113,
+          "column": 47
+        },
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
+          "file": "examples/originals/docs/src/content.tsx",
+          "line": 5,
+          "column": 27
+        },
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
+          "file": "examples/originals/docs/src/content.tsx",
+          "line": 34,
+          "column": 27
+        },
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
+          "file": "examples/originals/docs/src/content.tsx",
+          "line": 53,
+          "column": 30
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API markSafeError has no verified native lowering.",
+          "file": "examples/originals/docs/src/errors.ts",
+          "line": 1,
+          "column": 10
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API HydrationScript has no verified native lowering.",
+          "file": "examples/originals/docs/src/shell.tsx",
+          "line": 1,
+          "column": 10
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API createOptimistic has no verified native lowering.",
+          "file": "examples/originals/docs/src/widgets.tsx",
+          "line": 3,
+          "column": 3
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API action has no verified native lowering.",
+          "file": "examples/originals/docs/src/widgets.tsx",
+          "line": 6,
+          "column": 3
+        },
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
+          "file": "examples/originals/docs/src/widgets.tsx",
+          "line": 27,
+          "column": 30
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/docs/src/widgets.tsx",
+          "line": 63,
+          "column": 22
+        },
+        {
+          "code": "NATIVE_CATCH",
+          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
+          "file": "examples/originals/docs/src/widgets.tsx",
+          "line": 67,
+          "column": 5
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/docs/src/widgets.tsx",
+          "line": 94,
+          "column": 25
+        },
+        {
+          "code": "NATIVE_CATCH",
+          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
+          "file": "examples/originals/docs/src/widgets.tsx",
+          "line": 98,
+          "column": 5
+        },
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
+          "file": "examples/originals/docs/src/widgets.tsx",
+          "line": 127,
+          "column": 27
+        },
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
+          "file": "examples/originals/docs/src/widgets.tsx",
+          "line": 135,
+          "column": 42
+        }
+      ],
+      "parity": "not run: no checked native program",
+      "ssr": "not run: no checked native program",
+      "differingStatements": null,
+      "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
+      "reasons": [
+        "NATIVE_FAILURE",
+        "NATIVE_REJECTION",
+        "NATIVE_API",
+        "NATIVE_GENERATOR",
+        "NATIVE_CATCH"
+      ]
+    },
+    {
+      "twin": "effect-yield",
+      "original": "effect",
+      "files": 7,
+      "status": "refused",
+      "diagnostics": [
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/effect/src/api.ts",
+          "line": 87,
+          "column": 30
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/effect/src/api.ts",
+          "line": 102,
+          "column": 21
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/effect/src/api.ts",
+          "line": 169,
+          "column": 21
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/effect/src/api.ts",
+          "line": 184,
+          "column": 21
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/effect/src/api.ts",
+          "line": 195,
+          "column": 21
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/effect/src/api.ts",
+          "line": 214,
+          "column": 30
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/effect/src/api.ts",
+          "line": 222,
+          "column": 21
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/effect/src/api.ts",
+          "line": 237,
+          "column": 21
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API createOptimistic has no verified native lowering.",
+          "file": "examples/originals/effect/src/checkout.tsx",
+          "line": 17,
+          "column": 3
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API createOptimisticStore has no verified native lowering.",
+          "file": "examples/originals/effect/src/checkout.tsx",
+          "line": 18,
+          "column": 3
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API createStore has no verified native lowering.",
+          "file": "examples/originals/effect/src/checkout.tsx",
+          "line": 20,
+          "column": 3
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API refresh has no verified native lowering.",
+          "file": "examples/originals/effect/src/checkout.tsx",
+          "line": 23,
+          "column": 3
+        },
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
+          "file": "examples/originals/effect/src/checkout.tsx",
+          "line": 62,
+          "column": 51
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/effect/src/checkout.tsx",
+          "line": 73,
+          "column": 35
+        },
+        {
+          "code": "NATIVE_CATCH",
+          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
+          "file": "examples/originals/effect/src/checkout.tsx",
+          "line": 77,
+          "column": 5
+        },
+        {
+          "code": "NATIVE_FAILURE",
+          "message": "A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged.",
+          "file": "examples/originals/effect/src/checkout.tsx",
+          "line": 107,
+          "column": 7
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API createStore has no verified native lowering.",
+          "file": "examples/originals/effect/src/log.ts",
+          "line": 6,
+          "column": 10
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API action has no verified native lowering.",
+          "file": "examples/originals/effect/src/solid-effect.ts",
+          "line": 34,
+          "column": 10
+        },
+        {
+          "code": "NATIVE_FAILURE",
+          "message": "A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged.",
+          "file": "examples/originals/effect/src/solid-effect.ts",
+          "line": 88,
+          "column": 11
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/effect/src/solid-effect.ts",
+          "line": 135,
+          "column": 23
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API isPending has no verified native lowering.",
+          "file": "examples/originals/effect/src/typeahead.tsx",
+          "line": 11,
+          "column": 50
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API latest has no verified native lowering.",
+          "file": "examples/originals/effect/src/typeahead.tsx",
+          "line": 11,
+          "column": 61
+        }
+      ],
+      "parity": "not run: no checked native program",
+      "ssr": "not run: no checked native program",
+      "differingStatements": null,
+      "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
+      "reasons": [
+        "NATIVE_GENERATOR",
+        "NATIVE_API",
+        "NATIVE_REJECTION",
+        "NATIVE_CATCH",
+        "NATIVE_FAILURE"
+      ]
+    },
+    {
+      "twin": "hackernews-spa-yield",
+      "original": "hackernews-spa",
+      "files": 11,
+      "status": "refused",
+      "diagnostics": [
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API Component has no verified native lowering.",
+          "file": "examples/originals/hackernews-spa/src/components/comment.tsx",
+          "line": 1,
+          "column": 10
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API Component has no verified native lowering.",
+          "file": "examples/originals/hackernews-spa/src/components/story.tsx",
+          "line": 1,
+          "column": 10
+        },
+        {
+          "code": "NATIVE_CATCH",
+          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
+          "file": "examples/originals/hackernews-spa/src/lib/hn.ts",
+          "line": 33,
+          "column": 3
+        }
+      ],
+      "parity": "not run: no checked native program",
+      "ssr": "not run: no checked native program",
+      "differingStatements": null,
+      "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
+      "reasons": [
+        "NATIVE_API",
+        "NATIVE_CATCH"
+      ]
+    },
+    {
+      "twin": "rendering-yield",
+      "original": "rendering",
+      "files": 11,
+      "status": "refused",
+      "diagnostics": [
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API isPending has no verified native lowering.",
+          "file": "examples/originals/rendering/shared/src/components/App.tsx",
+          "line": 1,
+          "column": 10
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API lazy has no verified native lowering.",
+          "file": "examples/originals/rendering/shared/src/components/App.tsx",
+          "line": 1,
+          "column": 21
+        },
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
+          "file": "examples/originals/rendering/shared/src/components/ErrorStream.tsx",
+          "line": 22,
+          "column": 33
+        },
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
+          "file": "examples/originals/rendering/shared/src/components/ErrorStream.tsx",
+          "line": 49,
+          "column": 33
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API onSettled has no verified native lowering.",
+          "file": "examples/originals/rendering/shared/src/components/Home.tsx",
+          "line": 1,
+          "column": 24
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API lazy has no verified native lowering.",
+          "file": "examples/originals/rendering/shared/src/components/Profile/index.tsx",
+          "line": 1,
+          "column": 22
+        },
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
+          "file": "examples/originals/rendering/shared/src/components/Profile/index.tsx",
+          "line": 8,
+          "column": 33
+        },
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
+          "file": "examples/originals/rendering/shared/src/components/Profile/index.tsx",
+          "line": 16,
+          "column": 37
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API Reveal has no verified native lowering.",
+          "file": "examples/originals/rendering/shared/src/components/Reveal.tsx",
+          "line": 1,
+          "column": 45
+        },
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
+          "file": "examples/originals/rendering/shared/src/components/Reveal.tsx",
+          "line": 8,
+          "column": 28
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API createUniqueId has no verified native lowering.",
+          "file": "examples/originals/rendering/shared/src/components/Settings.tsx",
+          "line": 1,
+          "column": 24
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API Portal has no verified native lowering.",
+          "file": "examples/originals/rendering/shared/src/components/Settings.tsx",
+          "line": 2,
+          "column": 10
+        },
+        {
+          "code": "NATIVE_TYPE",
+          "message": "This Solid value contract needs a virtual routine/source type facade.",
+          "file": "examples/originals/rendering/shared/src/components/Shell.tsx",
+          "line": 1,
+          "column": 15
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API HydrationScript has no verified native lowering.",
+          "file": "examples/originals/rendering/shared/src/components/Shell.tsx",
+          "line": 2,
+          "column": 10
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API createStore has no verified native lowering.",
+          "file": "examples/originals/rendering/shared/src/components/Skeleton.tsx",
+          "line": 1,
+          "column": 36
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API isPending has no verified native lowering.",
+          "file": "examples/originals/rendering/shared/src/components/Skeleton.tsx",
+          "line": 1,
+          "column": 54
+        },
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
+          "file": "examples/originals/rendering/shared/src/components/Skeleton.tsx",
+          "line": 60,
+          "column": 5
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API createProjection has no verified native lowering.",
+          "file": "examples/originals/rendering/shared/src/components/Stream.tsx",
+          "line": 1,
+          "column": 22
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/rendering/shared/src/components/Stream.tsx",
+          "line": 8,
+          "column": 1
+        },
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
+          "file": "examples/originals/rendering/shared/src/components/Stream.tsx",
+          "line": 24,
+          "column": 46
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/rendering/shared/src/components/Stream.tsx",
+          "line": 24,
+          "column": 46
+        },
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
+          "file": "examples/originals/rendering/shared/src/components/Stream.tsx",
+          "line": 32,
+          "column": 52
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/rendering/shared/src/components/Stream.tsx",
+          "line": 32,
+          "column": 52
+        },
+        {
+          "code": "NATIVE_TYPE",
+          "message": "This Solid value contract needs a virtual routine/source type facade.",
+          "file": "examples/originals/rendering/shared/src/router.tsx",
+          "line": 5,
+          "column": 3
+        },
+        {
+          "code": "NATIVE_TYPE",
+          "message": "This Solid value contract needs a virtual routine/source type facade.",
+          "file": "examples/originals/rendering/shared/src/router.tsx",
+          "line": 6,
+          "column": 3
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API isServer has no verified native lowering.",
+          "file": "examples/originals/rendering/shared/src/router.tsx",
+          "line": 8,
+          "column": 10
+        },
+        {
+          "code": "NATIVE_FAILURE",
+          "message": "A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged.",
+          "file": "examples/originals/rendering/shared/src/router.tsx",
+          "line": 41,
+          "column": 5
+        }
+      ],
+      "parity": "not run: no checked native program",
+      "ssr": "not run: no checked native program",
+      "differingStatements": null,
+      "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
+      "reasons": [
+        "NATIVE_API",
+        "NATIVE_REJECTION",
+        "NATIVE_TYPE",
+        "NATIVE_GENERATOR",
+        "NATIVE_FAILURE"
+      ]
+    },
+    {
+      "twin": "room-yield",
+      "original": "room",
+      "files": 11,
+      "status": "refused",
+      "diagnostics": [
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API HydrationScript has no verified native lowering.",
+          "file": "examples/originals/room/src/Document.tsx",
+          "line": 1,
+          "column": 10
+        },
+        {
+          "code": "NATIVE_TYPE",
+          "message": "This Solid value contract needs a virtual routine/source type facade.",
+          "file": "examples/originals/room/src/components/status-pill.tsx",
+          "line": 9,
+          "column": 24
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API isServer has no verified native lowering.",
+          "file": "examples/originals/room/src/components/status-pill.tsx",
+          "line": 10,
+          "column": 10
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API onSettled has no verified native lowering.",
+          "file": "examples/originals/room/src/lib/identity.tsx",
+          "line": 18,
+          "column": 3
+        },
+        {
+          "code": "NATIVE_TYPE",
+          "message": "This Solid value contract needs a virtual routine/source type facade.",
+          "file": "examples/originals/room/src/lib/identity.tsx",
+          "line": 20,
+          "column": 3
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API isServer has no verified native lowering.",
+          "file": "examples/originals/room/src/lib/identity.tsx",
+          "line": 23,
+          "column": 10
+        },
+        {
+          "code": "NATIVE_FAILURE",
+          "message": "A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged.",
+          "file": "examples/originals/room/src/lib/identity.tsx",
+          "line": 56,
+          "column": 12
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/room/src/lib/rooms.ts",
+          "line": 153,
+          "column": 8
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/room/src/lib/rooms.ts",
+          "line": 166,
+          "column": 8
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API getRequestEvent has no verified native lowering.",
+          "file": "examples/originals/room/src/lib/sources.ts",
+          "line": 29,
+          "column": 10
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/room/src/lib/sources.ts",
+          "line": 64,
+          "column": 7
+        },
+        {
+          "code": "NATIVE_CATCH",
+          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
+          "file": "examples/originals/room/src/lib/sources.ts",
+          "line": 72,
+          "column": 5
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/room/src/lib/sources.ts",
+          "line": 81,
+          "column": 7
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/room/src/lib/sources.ts",
+          "line": 112,
+          "column": 23
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/room/src/lib/sources.ts",
+          "line": 124,
+          "column": 28
+        },
+        {
+          "code": "NATIVE_FAILURE",
+          "message": "A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged.",
+          "file": "examples/originals/room/src/lib/sources.ts",
+          "line": 153,
+          "column": 17
+        },
+        {
+          "code": "NATIVE_FAILURE",
+          "message": "A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged.",
+          "file": "examples/originals/room/src/lib/sources.ts",
+          "line": 154,
+          "column": 37
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API action has no verified native lowering.",
+          "file": "examples/originals/room/src/routes/home.tsx",
+          "line": 17,
+          "column": 10
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API latest has no verified native lowering.",
+          "file": "examples/originals/room/src/routes/home.tsx",
+          "line": 17,
+          "column": 32
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API dynamic has no verified native lowering.",
+          "file": "examples/originals/room/src/routes/home.tsx",
+          "line": 18,
+          "column": 10
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/room/src/routes/home.tsx",
+          "line": 95,
+          "column": 23
+        },
+        {
+          "code": "NATIVE_CATCH",
+          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
+          "file": "examples/originals/room/src/routes/home.tsx",
+          "line": 99,
+          "column": 5
+        },
+        {
+          "code": "NATIVE_CATCH",
+          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
+          "file": "examples/originals/room/src/routes/home.tsx",
+          "line": 140,
+          "column": 5
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API action has no verified native lowering.",
+          "file": "examples/originals/room/src/routes/live.tsx",
+          "line": 14,
+          "column": 3
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API createOptimistic has no verified native lowering.",
+          "file": "examples/originals/room/src/routes/live.tsx",
+          "line": 16,
+          "column": 3
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API createOptimisticStore has no verified native lowering.",
+          "file": "examples/originals/room/src/routes/live.tsx",
+          "line": 17,
+          "column": 3
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API latest has no verified native lowering.",
+          "file": "examples/originals/room/src/routes/live.tsx",
+          "line": 21,
+          "column": 3
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API until has no verified native lowering.",
+          "file": "examples/originals/room/src/routes/live.tsx",
+          "line": 24,
+          "column": 3
+        },
+        {
+          "code": "NATIVE_TYPE",
+          "message": "This Solid value contract needs a virtual routine/source type facade.",
+          "file": "examples/originals/room/src/routes/live.tsx",
+          "line": 25,
+          "column": 3
+        },
+        {
+          "code": "NATIVE_TYPE",
+          "message": "This Solid value contract needs a virtual routine/source type facade.",
+          "file": "examples/originals/room/src/routes/live.tsx",
+          "line": 26,
+          "column": 3
+        },
+        {
+          "code": "NATIVE_CATCH",
+          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
+          "file": "examples/originals/room/src/routes/live.tsx",
+          "line": 119,
+          "column": 5
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/room/src/routes/live.tsx",
+          "line": 169,
+          "column": 23
+        },
+        {
+          "code": "NATIVE_CATCH",
+          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
+          "file": "examples/originals/room/src/routes/live.tsx",
+          "line": 178,
+          "column": 5
+        }
+      ],
+      "parity": "not run: no checked native program",
+      "ssr": "not run: no checked native program",
+      "differingStatements": null,
+      "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
+      "reasons": [
+        "NATIVE_API",
+        "NATIVE_TYPE",
+        "NATIVE_FAILURE",
+        "NATIVE_GENERATOR",
+        "NATIVE_CATCH"
+      ]
+    },
+    {
+      "twin": "sierpinski-yield",
+      "original": "sierpinski",
+      "files": 1,
+      "status": "refused",
+      "diagnostics": [
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
+          "file": "examples/originals/sierpinski/src/main.tsx",
+          "line": 62,
+          "column": 35
+        }
+      ],
+      "parity": "not run: no checked native program",
+      "ssr": "not run: no checked native program",
+      "differingStatements": null,
+      "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
+      "reasons": [
+        "NATIVE_REJECTION"
+      ]
+    },
+    {
+      "twin": "sierpinski-yield-h",
+      "original": "sierpinski",
+      "files": 1,
+      "status": "refused",
+      "diagnostics": [
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
+          "file": "examples/originals/sierpinski/src/main.tsx",
+          "line": 62,
+          "column": 35
+        }
+      ],
+      "parity": "not run: no checked native program",
+      "ssr": "not run: no checked native program",
+      "differingStatements": null,
+      "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
+      "reasons": [
+        "NATIVE_REJECTION"
+      ]
+    },
+    {
+      "twin": "todos-yield",
+      "original": "todos",
+      "files": 5,
+      "status": "refused",
+      "diagnostics": [
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API onSettled has no verified native lowering.",
+          "file": "examples/originals/todos/src/filter.ts",
+          "line": 1,
+          "column": 24
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API action has no verified native lowering.",
+          "file": "examples/originals/todos/src/todos.ts",
+          "line": 34,
+          "column": 10
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API createOptimisticStore has no verified native lowering.",
+          "file": "examples/originals/todos/src/todos.ts",
+          "line": 34,
+          "column": 18
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API refresh has no verified native lowering.",
+          "file": "examples/originals/todos/src/todos.ts",
+          "line": 34,
+          "column": 41
+        },
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
+          "file": "examples/originals/todos/src/todos.ts",
+          "line": 86,
+          "column": 59
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/todos/src/todos.ts",
+          "line": 93,
+          "column": 21
+        },
+        {
+          "code": "NATIVE_CATCH",
+          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
+          "file": "examples/originals/todos/src/todos.ts",
+          "line": 99,
+          "column": 7
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/todos/src/todos.ts",
+          "line": 107,
+          "column": 24
+        },
+        {
+          "code": "NATIVE_CATCH",
+          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
+          "file": "examples/originals/todos/src/todos.ts",
+          "line": 109,
+          "column": 7
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/todos/src/todos.ts",
+          "line": 117,
+          "column": 24
+        },
+        {
+          "code": "NATIVE_CATCH",
+          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
+          "file": "examples/originals/todos/src/todos.ts",
+          "line": 125,
+          "column": 7
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/todos/src/todos.ts",
+          "line": 133,
+          "column": 23
+        },
+        {
+          "code": "NATIVE_CATCH",
+          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
+          "file": "examples/originals/todos/src/todos.ts",
+          "line": 144,
+          "column": 7
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/todos/src/todos.ts",
+          "line": 156,
+          "column": 28
+        },
+        {
+          "code": "NATIVE_CATCH",
+          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
+          "file": "examples/originals/todos/src/todos.ts",
+          "line": 159,
+          "column": 7
+        }
+      ],
+      "parity": "not run: no checked native program",
+      "ssr": "not run: no checked native program",
+      "differingStatements": null,
+      "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
+      "reasons": [
+        "NATIVE_API",
+        "NATIVE_REJECTION",
+        "NATIVE_GENERATOR",
+        "NATIVE_CATCH"
+      ]
+    },
+    {
+      "twin": "todos-yield-h",
+      "original": "todos",
+      "files": 5,
+      "status": "refused",
+      "diagnostics": [
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API onSettled has no verified native lowering.",
+          "file": "examples/originals/todos/src/filter.ts",
+          "line": 1,
+          "column": 24
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API action has no verified native lowering.",
+          "file": "examples/originals/todos/src/todos.ts",
+          "line": 34,
+          "column": 10
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API createOptimisticStore has no verified native lowering.",
+          "file": "examples/originals/todos/src/todos.ts",
+          "line": 34,
+          "column": 18
+        },
+        {
+          "code": "NATIVE_API",
+          "message": "Solid API refresh has no verified native lowering.",
+          "file": "examples/originals/todos/src/todos.ts",
+          "line": 34,
+          "column": 41
+        },
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
+          "file": "examples/originals/todos/src/todos.ts",
+          "line": 86,
+          "column": 59
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/todos/src/todos.ts",
+          "line": 93,
+          "column": 21
+        },
+        {
+          "code": "NATIVE_CATCH",
+          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
+          "file": "examples/originals/todos/src/todos.ts",
+          "line": 99,
+          "column": 7
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/todos/src/todos.ts",
+          "line": 107,
+          "column": 24
+        },
+        {
+          "code": "NATIVE_CATCH",
+          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
+          "file": "examples/originals/todos/src/todos.ts",
+          "line": 109,
+          "column": 7
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/todos/src/todos.ts",
+          "line": 117,
+          "column": 24
+        },
+        {
+          "code": "NATIVE_CATCH",
+          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
+          "file": "examples/originals/todos/src/todos.ts",
+          "line": 125,
+          "column": 7
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/todos/src/todos.ts",
+          "line": 133,
+          "column": 23
+        },
+        {
+          "code": "NATIVE_CATCH",
+          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
+          "file": "examples/originals/todos/src/todos.ts",
+          "line": 144,
+          "column": 7
+        },
+        {
+          "code": "NATIVE_GENERATOR",
+          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
+          "file": "examples/originals/todos/src/todos.ts",
+          "line": 156,
+          "column": 28
+        },
+        {
+          "code": "NATIVE_CATCH",
+          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
+          "file": "examples/originals/todos/src/todos.ts",
+          "line": 159,
+          "column": 7
+        }
+      ],
+      "parity": "not run: no checked native program",
+      "ssr": "not run: no checked native program",
+      "differingStatements": null,
+      "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
+      "reasons": [
+        "NATIVE_API",
+        "NATIVE_REJECTION",
+        "NATIVE_GENERATOR",
+        "NATIVE_CATCH"
+      ]
+    }
+  ],
+  "analyzer": {
+    "roots": 1
+  }
+}

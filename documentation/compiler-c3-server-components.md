@@ -1,179 +1,201 @@
-# C3: server-recomputable regions — stopped at the typed-failure edge
+# C3: server-recomputable docs regions
 
-2026-10-07, `proto/compiler`, based on `d9b94e7`. **C3 is incomplete.** The R
-rule and nine-twin analysis are implemented. The single-root C2 mode is imported
-from `proto/compiler-single-root`. The first generated article server function
-passes a successful frame-render probe but loses its typed failure on the
-`missing` input. Per Dev's instruction to stop on a theorem/capture failure,
-client integration, slot refetch parity and R byte measurement stopped there.
-No R speedup or completed server-component compiler is claimed.
+2026-10-07, `proto/compiler`, after merging main at `c797bb3` (merge
+`85931f6`). **R emission, refetch, slots and measurement are implemented for
+the docs fixture. Exact DOM parity is not achieved:** the public frame API adds
+transport nodes. The 24 authored-content comparisons and direct-route
+SSR/hydration checks pass; the exact differences are recorded below. This is a
+bounded prototype, not a general server-component compiler.
 
-## Rule and analysis
+## Rule and region list
 
-C0 §1.2 now distinguishes S, R, U and C. A memo whose attempt calls a declared
-server function with serializable S/U inputs produces server data; a U argument
-makes its result R. S is the zero-U case. Pure downstream memos, holes and
-settled values follow that provenance. Any C-cell read, event/effect write,
-unrelated U read or rejected capture keeps the affected computation client.
-The producer of a U input remains client. C0 §§1.3/1.6 define the argument vector,
-slot keys, capture checks, refetch behavior, typed-failure route and cost model.
-One observed argument-vector change means one RPC returning markup plus slot
-inputs. No cache or debounce saving is assumed.
+C0 §§1.2, 1.3 and 1.6 define R. A memo that attempts a declared server function
+with serializable S/U arguments produces server data. With U inputs its result
+is R; with no U inputs it is S. Pure downstream memos, holes and settled values
+follow that result. A C-cell read, event/effect write, unrelated U read or
+unproved capture keeps the affected work client. The argument vector consists
+of the distinct external U inputs in first-read order; their producers remain
+client. A change causes one region RPC returning markup and serialized slot
+inputs, rather than returning article data for client rendering. No caching,
+debouncing or batching saving is assumed.
 
-`src/recomputable.js` computes R alongside the existing C1 facts. It preserves
-the old grouping for comparison, rather than pretending the eleven docs groups
-are eleven verified transport boundaries. The public codec must still check
-actual inputs at emission. The analysis proves scalar call-edge shapes from
-literal values or typed server-function parameters in a well-typed program;
-unproved shapes are refused. An error accessor may follow its server boundary
-only while it stays inside that boundary. A reset handler remains client.
+The [nine-twin C1 rerun](compiler-c1-report.md#c3-server-recomputable-provenance-2026-10-07)
+and [analysis data](compiler-c3-analysis.json) retain before/after fractions and
+all candidate argument vectors. Docs holes change from **124 S / 0 R / 119
+client** to **133 S / 56 R / 54 client**, of 243. JSX sites change from **148 S /
+0 R / 101 client** to **151 S / 61 R / 37 client**, of 249. The other eight twins
+find no R sites: their relevant dependencies are event-written cells, unknown
+async/query/live adapters or unproved inputs. Room's refused inputs are recorded
+in the analysis. These are site counts, not byte savings.
 
-The [nine-twin rerun](compiler-c1-report.md#c3-server-recomputable-provenance-2026-10-07)
-and [machine-readable facts](compiler-c3-analysis.json) record all fractions,
-regions and refused inputs. Docs changes from **124 S / 0 R / 119 client holes**
-to **133 S / 56 R / 54 client**, out of 243. JSX changes from **148 S / 0 R /
-101 client** to **151 S / 61 R / 37 client**, out of 249. The nine newly S holes
-include structural sites and internal error fallback reads, not extra widgets.
-The other eight twins gain no R sites: their relevant work uses client-written
-state, unknown async/query/live adapters, or unproved input edges. Room's two
-rejected candidate inputs are listed with their locations.
+The emitted docs regions are:
 
-Docs region candidates (S is the constant-input case of R):
+- **Home's article**, S: logical arguments `[]`, fixed slug `overview`. Its
+  `<main>` is emitted by the shared `routeRegion("overview")` function. There
+  is no article-list component in this Home.
+- **DocPage's article**, R: arguments `[props.params.slug]`, emitted by
+  `routeRegion(slug)`. Slug defaulting, `getArticle`, ArticleBody, eight chapter
+  sections, table of contents and related links run on the server.
+- **ReadingGuide**, S: arguments `[]`, emitted by `guideRegion()`, with fixed
+  slug `widgets` and no client slot.
+- **SiteNav and SiteFooter**, already S: arguments `[]`, no slots. They retain
+  the existing server-only eager-islands output and need no refetch stub.
 
-- **Home → ArticleContent**, `app.tsx:17`: S, argument vector `[]`, baked-in slug
-  `overview`, slots `[]`. There is no article-list component in this Home.
-- **DocPage → ArticleContent**, `app.tsx:27`: R, argument vector
-  `[props.params.slug]`, slots `[]`. The loader, slug default, ArticleBody,
-  eight chapter sections, table of contents and related links are eligible for
-  server placement.
-- **ReadingGuide**, `app.tsx:57`: S, arguments `[]`, baked-in slug `widgets`,
-  slots `[]`. Its internal article error boundary is no longer a C-only accessor.
-- **SiteNav / SiteFooter**, `app.tsx:49` / `:58`: already S, arguments `[]`,
-  slots `[]`.
+Home and DocPage place their authored sibling **LikeButton** inside the emitted
+`<main>` through the markup slot `like#route-like`, with serialized `{slug}`.
+The fixed site key preserves its node/state when DocPage's slug changes; the
+router's Home/DocPage ownership still controls remounts between route types.
+No function or Error instance is passed as slot data. ThemeToggle, SearchBox,
+NewsletterForm, CommentList and avatars, ImageCarousel, LikeButton and the
+router shell remain client. The eleven C1 dependency groups are preserved as
+the analysis result; the application has one eager hydration owner plus the
+public frame slot ownership below it.
 
-Home and DocPage each call LikeButton as a **sibling** of ArticleContent. A
-larger server wrapper could include each as a slot, keyed by its route call-site
-and LikeButton site, with serialized `{slug}` inputs; that wrapper and its slot
-transport are unimplemented. The narrower candidates above do not claim slots
-that the source does not contain. Client work remains ThemeToggle, SearchBox,
-NewsletterForm, CommentList and its avatars, ImageCarousel, both LikeButton
-instances, and the router/route shell. The old C1 “client input remains U” leak
-rows describe those input producers; they no longer imply their server-function
-results must also ship.
+## Emit and F-C10 resolution
 
-## F-C10: the generated article frame discards NotFound
+`src/server-components.js` follows `eagerIslands({roots:"single"})`. It emits
+`"use server"` functions returning templates, using the installed public server
+function transform and frame codec. SSR calls the same functions in a request
+scope. The client gets the small `dynamic` refetch stubs and the frame/RPC
+runtime. The production shipping check rejects article template/data strings
+in client chunks; the old article API export is also removed from the browser
+module slice. Both islands-only single-root and the default seven-root mode
+remain working.
 
-`src/server-region.js` extracts ArticleContent and its template dependencies,
-then emits a `"use server"` function returning that template. Its `slug` crosses
-the public capture codec successfully. The test uses the installed Vite plugin
-with `serverFunctions: {components: true}`, a public request scope, and
-`renderServerComponent`. It retains the authored memo, Loading and Errored
-inside the region; it does not write a replacement article implementation.
+This lowering verifies the supported setup/wrapper shapes and reruns R analysis
+before editing. Changed shapes or a newly client-dependent article/guide are
+refused, rather than silently dropped. ArticleBody and the authored fallback
+markup are extracted from source. This is deliberately narrower than automatic
+lowering of every R candidate in an arbitrary program.
 
-For `start`, the emitted frames contain the complete article, contents list and
-related links, with no server errors. For `missing`, server `onError` observes
-`{kind: "not-found", message: "No article: missing"}`. The outgoing frame
-instead contains:
+**F-C10 is resolved, not an upstream or calculus finding.** Main's D-115
+(`96a567b`) marks nominal library failures safe through public `markSafeError`.
+The separate [generic frame probe](compiler-c3-frame-finding.json) now carries
+`No article: missing`, rather than `Internal Server Error`. A generic frame
+error record still is not the authored nominal error boundary. The integrated
+emitter therefore retains that boundary on the server: its loader records a
+settled success/failure, then raises the same `NotFound` through the library's
+`raise`/safe-error path inside a fresh `Errored` boundary after suspension.
+The authored fallback becomes a frame fragment containing both `not-found`
+and `No article: missing`. No plain Error rethrow or client class reconstruction
+is involved. The loader remains under the authored Loading boundary.
 
-```json
-{"type":"error","key":"01000000","error":{"message":"Internal Server Error"}}
-```
+The production-mode tests verify the typed fallback after an RPC to `missing`
+and after direct `/docs/missing` hydration. The normal library/compiled smokes
+use main's corrected criterion (`8a5f2b8`): streamed typed error data followed
+by the hydrated `.not-found` fallback. There is no `renderToString` workaround;
+that draft was withdrawn by `c797bb3` and D-099 remains synchronous.
 
-Subsequent hole-error chunks also carry only `Internal Server Error`; neither
-the original message/kind nor `.not-found` fallback markup is present. The
-[recorded frames](compiler-c3-frame-finding.json) include both inputs. This is a
-failed edge-preservation check: removing the server region's client code would
-remove its authored error handling while the transport has discarded the data
-needed to reproduce it. It is not a claim of a new Solid-wide theorem failure;
-it is the concrete failure of this generated region on this branch.
+## Parity and findings
 
-The finding does **not** assume a flushed SSR region must print its fallback.
-Main's D-115 and corrected `/docs/missing` smoke criterion were read without
-changing main: typed error data may stream and the hydrated client must display
-the typed fallback while retaining its server nodes. This compiler branch lacks
-that D-115 implementation and still has the old F-C9 expected-failure harness.
-In the new frame probe the failure information itself is gone, independently of
-whether fallback markup appears in the initial stream. Safe-error marking and
-preservation of a custom error class are distinct obligations: C0 §1.6's public
-codec capture test also still refuses a custom Error whose prototype is lost.
-A later resumption should bring the intended typed-failure path to this branch
-and test actual frame application before proceeding. This run makes no private
-runtime patch and does not replace the failure with successful markup.
+[Recorded comparison](compiler-c3-parity.json): **24/24 authored-content
+comparisons pass; 0/24 exact normalized DOM snapshots match.** The ordinary
+parity normalizer is unchanged. A separate diagnostic comparison identifies
+the differences rather than hiding them. Original, library, seven-root and
+islands-only single-root still match all 24 exact snapshots.
 
-## Measurements
+**F-C11 — frame transport changes the DOM.** Each R region uses a public
+`<solid-frame data-fid="…" style="display:contents">` container. Both containers
+are present in all 24 R snapshots. The first navigation's pending snapshot also
+contains `<template id="pl-0010"></template>`. Thus this output does not meet a
+strict DOM-identical compiler contract, even though the content, controls and
+state match. The test explicitly asserts and records these differences. It is
+not reported as a passing exact-parity run or an upstream theorem failure.
 
-Three fresh control runs in this checkout, Node v24.18.0 / Solid rc.13. All 100
-phases across original, library, single-root and seven-root had zero drift.
-The seven-root observations remain in the [raw record](compiler-c3-controls-bytes.json)
-for reproducibility; the requested comparison is one table below. Steps exclude
-load. Shipped sizes are minified production JS, gzip summed per chunk; HTML,
-CSS, maps and response payloads are excluded.
+The first navigation initially has an empty route until the RPC's first frame
+arrives; then it displays the authored `Loading article…` and LikeButton. The
+comparison waits for that first frame, marking step 4 **server-refetched**.
+Steps 5 and 23 settle after the streamed response. Step 22 preserves the old
+content while DocPage refetches, matching the library's stale-content behavior.
+The initial empty interval is an additional pending-state limitation, not an
+identical synchronous Loading fallback. No transport-node stripping is applied
+to the stored snapshots. Removing these differences requires further lowering
+work; the current public high-level frame integration does not satisfy that
+remaining acceptance criterion.
+
+Both direct `/docs/start` and `/docs/missing` SSR/hydration smokes pass with
+server nodes retained. Hydration makes **zero RPCs**. Navigation makes exactly
+two, with no guide refetch. LikeButton is eagerly attached; its `Like: 1`,
+rate-limit message and node survive the `start` → `missing` refetch. The
+extracted-root conformance lane also passes; it exercises the existing extracted
+library roots, while the new docs test covers R transport/slot behavior.
+
+## Measured execution and shipping
+
+Three fresh runs of all four variants in the same merged checkout, Node
+v24.18.0 / Solid rc.13. All **100 phases have zero run-to-run byte drift**.
+[Raw observations, payloads and chunk attribution](compiler-c3-bytes.json).
 
 | Variant | Executed at load | Executed over 24 steps | Shipped raw | Shipped gzip |
 | --- | ---: | ---: | ---: | ---: |
-| Original | 550,893 | 2,049,935 | 152,339 | 54,285 |
-| Library | 584,641 | 2,189,856 | 166,658 | 58,755 |
-| Compiled single-root, islands only | 606,992 | 2,197,136 | 165,855 | 58,482 |
-| Compiled single-root + R | **not measured — F-C10** | **not measured** | **not measured** | **not measured** |
+| Original | 556,430 | 2,051,203 | 152,527 | 54,345 |
+| Library | 591,236 | 2,193,437 | 167,560 | 58,953 |
+| Compiled single-root, islands only | 613,587 | 2,200,717 | 166,757 | 58,695 |
+| Compiled single-root + R | 628,086 | 2,242,673 | 239,978 | 83,745 |
 
-These fresh load controls differ from the other worktree's 549,717 / 583,325 /
-605,662 because this harness counts path-bearing transformed module bytes.
-Shipped sizes and step totals reproduce that branch. Do not subtract load
-values from different checkouts. This is V8 executed source-range coverage,
-reset at every checkpoint, not execution time or CPU instruction counts.
+Execution means V8 executed UTF-8 source ranges, reset at each checkpoint;
+“24 steps” excludes load and sums those checkpoints. It is not CPU time or a
+count of unique bytes across the whole script. This uses the existing
+production-mode Vite module-runner harness; its installed runtime modules
+resolve to `*.dev.js`. Shipped sizes come from the separate minified production
+build, gzip summed per chunk, excluding HTML/CSS/maps/RPC responses. These are
+harness execution counts, not coverage of a production browser bundle.
 
-Navigation-step executed bytes, in original / library / single-root order:
+The coverage selector now includes nested `@solidjs/web/server-functions/dist`
+and `@solidjs/web/frames/dist` paths. Leaving those out would undercount the new
+runtime. All four controls were rerun with that correction and merged main;
+the older branch's load/shipping numbers must not be subtracted from this row.
+The existing checked-in gate baselines were not regenerated.
 
-- Navigate to `/docs/start`: **224,025 / 238,733 / 239,121**.
-- Article settles: **122,428 / 129,679 / 130,209**.
-- Navigate to `/docs/missing`: **164,536 / 167,718 / 167,763**.
-- Typed error settles: **132,818 / 135,935 / 136,760**.
+Navigation execution, including the server-refetched checkpoint timing:
 
-R navigation execution and RPC payload bytes are unavailable because its
-refetch stub was not integrated. The existing library API is explicitly an
-in-process fake; its `"use server"` directives are not transformed into RPCs by
-the control configuration. Therefore those navigation controls fetch **zero
-network payload bytes**; there is no measured library JSON response to compare.
-The successful isolated frame probe contains 4,444 HTML bytes, or 6,088 bytes
-as a JSON array of frame chunks. The failing probe contains 75 HTML bytes and
-3,565 JSON-array bytes. These are probe outputs, **not measured HTTP navigation
-responses**, and the failure payload is not behaviorally valid. They cannot
-supply the requested markup-versus-JSON RPC comparison.
+| Step (zero-based) | Original | Library | Single-root | Single-root + R |
+| --- | ---: | ---: | ---: | ---: |
+| 4: navigate to `/docs/start` | 224,025 | 239,744 | 240,132 | 257,469 |
+| 5: article settles | 122,428 | 129,679 | 130,209 | 85,048 |
+| 22: navigate to `/docs/missing` | 164,536 | 167,718 | 167,763 | 171,510 |
+| 23: typed failure settles | 133,135 | 136,729 | 137,554 | 194,509 |
 
-**Savings answer.** Moving server-derived logic to the server has no established
-load or script saving on docs yet: the R variant stopped at a failed typed-error
-edge before comparable execution and shipping measurements. The working
-islands-only single-root variant saves 803 raw bytes (0.48%) and 273 gzip bytes
-(0.46%) versus the library, but executes 22,351 more bytes at load (3.82%) and
-7,280 more over the 24 steps (0.33%). The proposed R cost is one markup RPC per
-observed input-vector change; neither its actual navigation cost nor its net
-client-code saving is measured here.
+RPC response bodies are **4,121 bytes** for `start` and **915 bytes** for
+`missing`. Their HTML/fragment fields total **3,437** and **285 bytes**;
+the remaining bytes carry framing, slot inputs, digests and reveal records.
+Request bodies are the slug strings, 5 and 7 bytes. These are uncompressed
+HTTP Request/Response body bytes transported intact over the test worker's IPC
+carrier, not a network-latency benchmark. RPC handling runs in a separate
+process and is excluded from client coverage.
+
+The library fixture explicitly uses an in-process fake API: it fetches **zero
+network JSON bytes**. For a meaningful data-size reference, the worker also
+measures `JSON.stringify` of the same API result: **2,581 bytes** for `start`,
+and **52 bytes** for an explicit `{kind,message}` missing-article error envelope.
+These are equivalent JSON sizes, **not invented library HTTP observations**.
+Against those data sizes, the R response adds 1,540 and 863 bytes respectively.
+A production data-RPC codec could have its own envelope cost.
+
+**Savings answer.** On this docs fixture, moving server-derived logic to the
+server saves no total client execution or shipping with this implementation.
+Versus islands-only single-root it adds **14,499 load bytes (2.36%)**, **41,956
+bytes over the 24 steps (1.91%)**, **73,221 shipped raw bytes (43.91%)** and
+**25,050 gzip bytes (42.68%)**. Versus the library it adds **36,850 load bytes
+(6.23%)**, **49,236 step bytes (2.24%)**, **72,418 raw bytes (43.22%)** and
+**24,792 gzip bytes (42.05%)**. The successful article-settle phase is cheaper,
+but transport/slot work and the new frame/RPC runtime outweigh that removal
+at this scale. Each navigation now costs one markup RPC, 4,121 bytes for the
+successful article or 915 for its typed failure, with the pending-state and
+DOM differences described above.
 
 ## Validation and reproduction
 
-`pnpm build` passed. The required full gate is **GREEN: 52 pass, 0 fail,
-0 skip, 90 seconds**, with no baseline change. The analysis lane passes 65
-fixtures (59 existing plus six R checks); the emission lane includes the new
-frame-failure probe. Original, library, single-root and seven-root match all
-24 hydrated snapshots and direct `/docs/start` smoke. The existing extracted-root
-conformance lane passes. Direct `/docs/missing` remains the old F-C9 expected
-failure in this branch's harness, not a passing corrected smoke.
-
-The baseline is unchanged. Successful C2 checks do not establish C3 parity:
-there is no R 24-step run, no R navigation marked `server-refetched`, and no R
-slot hydration/conformance result. No DOM difference has been normalized away.
+`pnpm build` passes. The required full gate is **GREEN: 53 pass / 0 fail /
+0 skip in 127 seconds**, with no baseline regeneration. No dependency was installed and no commit was pushed. The test gate
+checks the explicit C3 findings; green does not mean exact R DOM parity passed.
 
 ```sh
 node packages/compiler-yield/src/recomputable-report.js --write
-node --test packages/compiler-yield/test/recomputable.test.mjs
 C3_FRAME_RECORD=/tmp/c3-frames.json node --test packages/compiler-yield/test/server-region.test.mjs
-node examples/harness/executed-bytes/hydrated-docs.mjs --single --runs 3 \
-  --record /tmp/c3-controls.json
+C3_PARITY_RECORD=/tmp/c3-parity.json node --test packages/compiler-yield/test/server-components.test.mjs
+node examples/harness/executed-bytes/hydrated-docs.mjs --regions --runs 3 \
+  --record /tmp/c3-bytes.json
 pnpm build
 node scripts/yield-gate.mjs --baseline documentation/yield-gate-baseline.json
 ```
-
-The new analysis tests and frame-failure test are included in the existing
-compiler gate steps. The frame test passing means F-C10 still reproduces;
-it does not mean failed-region rendering is correct. No dependency was installed,
-no baseline was re-recorded, and no commit was pushed.

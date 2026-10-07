@@ -1,0 +1,171 @@
+{
+  "exactMatches": 0,
+  "steps": 24,
+  "contentMatches": 24,
+  "serverRefetchedSteps": [
+    4,
+    5,
+    22,
+    23
+  ],
+  "differences": [
+    {
+      "step": 0,
+      "reason": "solid-frame wrappers",
+      "librarySha256": "b2fd1a80f383d92c298877dacec8f44f656bae136cb48177f802b4652aba368c",
+      "compiledSha256": "acb140e7fcee4774babafb0f8945b6a0aa9691c0a60a598455b85f682126a7be"
+    },
+    {
+      "step": 1,
+      "reason": "solid-frame wrappers",
+      "librarySha256": "b2fd1a80f383d92c298877dacec8f44f656bae136cb48177f802b4652aba368c",
+      "compiledSha256": "acb140e7fcee4774babafb0f8945b6a0aa9691c0a60a598455b85f682126a7be"
+    },
+    {
+      "step": 2,
+      "reason": "solid-frame wrappers",
+      "librarySha256": "b2fd1a80f383d92c298877dacec8f44f656bae136cb48177f802b4652aba368c",
+      "compiledSha256": "acb140e7fcee4774babafb0f8945b6a0aa9691c0a60a598455b85f682126a7be"
+    },
+    {
+      "step": 3,
+      "reason": "solid-frame wrappers",
+      "librarySha256": "b2fd1a80f383d92c298877dacec8f44f656bae136cb48177f802b4652aba368c",
+      "compiledSha256": "acb140e7fcee4774babafb0f8945b6a0aa9691c0a60a598455b85f682126a7be"
+    },
+    {
+      "step": 4,
+      "reason": "solid-frame wrappers and pending template",
+      "librarySha256": "a079892b1b2528eba5e9f5fad0f7ec8e63914f6a8c43d9d37d15876f5adfdc32",
+      "compiledSha256": "af82e64522a6672dcc4c2be4ca4a1c10f3e1aa977dace3671b0b0c36a3e181e5"
+    },
+    {
+      "step": 5,
+      "reason": "solid-frame wrappers",
+      "librarySha256": "25628ac35e04b9b735a18ac9fe42205ec0fb3ce3c81a159b2c2b1cb15fe14a30",
+      "compiledSha256": "ea14950122aa2abb7db170300280e40a6a24af94599ad6d8ed909fb61beffe4b"
+    },
+    {
+      "step": 6,
+      "reason": "solid-frame wrappers",
+      "librarySha256": "efeea336cfe01c2781481281ba9452a33b4a714d094789cde7d02daefc0b3396",
+      "compiledSha256": "08b5c2ff1423a4352b1bd69beed7143199f64422524899cbcca2c424a6ede507"
+    },
+    {
+      "step": 7,
+      "reason": "solid-frame wrappers",
+      "librarySha256": "efeea336cfe01c2781481281ba9452a33b4a714d094789cde7d02daefc0b3396",
+      "compiledSha256": "08b5c2ff1423a4352b1bd69beed7143199f64422524899cbcca2c424a6ede507"
+    },
+    {
+      "step": 8,
+      "reason": "solid-frame wrappers",
+      "librarySha256": "81b4303f508166790542d3b3702c949006115c6e7624a0302803469edf84e78f",
+      "compiledSha256": "826affcd0d02f0da9f42ccdbc18696f29403d5afb669a71593697e068233dda8"
+    },
+    {
+      "step": 9,
+      "reason": "solid-frame wrappers",
+      "librarySha256": "8df357fd158331cf5fbb9a6de749d553d435d88f24c1dc8f3469ac6015c3a501",
+      "compiledSha256": "ce5fe88424f6cdd478ae2160ab0825f9042c278c499ae9597f737fada1d46e37"
+    },
+    {
+      "step": 10,
+      "reason": "solid-frame wrappers",
+      "librarySha256": "289e271e84251e5d02f463174115dc6ea8b2493ebd25d5aed33ac32a21f9435d",
+      "compiledSha256": "8d03810f609b52b8044b68108e73fe26607ea278bfe949f44d096f27a569fd55"
+    },
+    {
+      "step": 11,
+      "reason": "solid-frame wrappers",
+      "librarySha256": "82e2eefa3e49b028c16f653fbf993edd66f2105d8c110140e069bca70e0cb975",
+      "compiledSha256": "776c2252545e442b1b9a5a1139372b3316ff3c863f6df0e4304daca2e81ef701"
+    },
+    {
+      "step": 12,
+      "reason": "solid-frame wrappers",
+      "librarySha256": "58b2935db7f3e540daa3afb768969b1bcad02ff86590bfe765502b8daf971ddc",
+      "compiledSha256": "46b75461375fe2de5b6ea34b58d834c891e6244b36323cc3e6471e570180b9d3"
+    },
+    {
+      "step": 13,
+      "reason": "solid-frame wrappers",
+      "librarySha256": "58b2935db7f3e540daa3afb768969b1bcad02ff86590bfe765502b8daf971ddc",
+      "compiledSha256": "46b75461375fe2de5b6ea34b58d834c891e6244b36323cc3e6471e570180b9d3"
+    },
+    {
+      "step": 14,
+      "reason": "solid-frame wrappers",
+      "librarySha256": "c200c3e3907ff87a6a109675d27425823fc214092ccf87c1654ec4da73c3f9a4",
+      "compiledSha256": "48df5a4636ec4f9a261b7777f1d2cdf85dd9f04e33436127efc73960c7293d06"
+    },
+    {
+      "step": 15,
+      "reason": "solid-frame wrappers",
+      "librarySha256": "bf18546aa762eef449de5a084313b4964678d1babc851fdd5af7992902667a55",
+      "compiledSha256": "9e74ca0c62635f521c9b9c9bd69369dc245b53bd7291c7a25a48f467a7c72eb1"
+    },
+    {
+      "step": 16,
+      "reason": "solid-frame wrappers",
+      "librarySha256": "bf18546aa762eef449de5a084313b4964678d1babc851fdd5af7992902667a55",
+      "compiledSha256": "9e74ca0c62635f521c9b9c9bd69369dc245b53bd7291c7a25a48f467a7c72eb1"
+    },
+    {
+      "step": 17,
+      "reason": "solid-frame wrappers",
+      "librarySha256": "767eccd28d4cf7ba943eb738946d4e66a5b987a8c96af32e8bbb584506daff25",
+      "compiledSha256": "cf621a6e0ae7e3b73cb3b13150be0c8888bf6a0c08a4d4f9a02a904ce12491c5"
+    },
+    {
+      "step": 18,
+      "reason": "solid-frame wrappers",
+      "librarySha256": "972740ecedbb89119042598628b8311e9b9a4e22087d06d823a4ce5bd3b1692b",
+      "compiledSha256": "77c26de7bcc6e46c99fa86e05e23b3808eed5319b0225126d20ac039cdbd335a"
+    },
+    {
+      "step": 19,
+      "reason": "solid-frame wrappers",
+      "librarySha256": "1f102292db62bdc84759f5c4e7042ee4abf639dc217c5c51f41d209d3ae31ca3",
+      "compiledSha256": "4cad9c0673bc18d1040fa8f3c3c729b833d96a5d3005e121eee8c4deb8195be8"
+    },
+    {
+      "step": 20,
+      "reason": "solid-frame wrappers",
+      "librarySha256": "1f102292db62bdc84759f5c4e7042ee4abf639dc217c5c51f41d209d3ae31ca3",
+      "compiledSha256": "4cad9c0673bc18d1040fa8f3c3c729b833d96a5d3005e121eee8c4deb8195be8"
+    },
+    {
+      "step": 21,
+      "reason": "solid-frame wrappers",
+      "librarySha256": "1e9a33f278d8783c2de87304e754f059a44cae171305ec69441bd437ad59e134",
+      "compiledSha256": "e260b9db837a38a8e86af84831a8f8c8fe4583d6209a127a89e0568d8cc074fc"
+    },
+    {
+      "step": 22,
+      "reason": "solid-frame wrappers",
+      "librarySha256": "c168f3617b9672e868da93ef34a8f9d8c1dcd3a03086634af0b3f2d0102c6887",
+      "compiledSha256": "1c184424dd63d2bf58c6a16d0bdf5a963a2e4368b06c625ee5f88ee661e3eb0c"
+    },
+    {
+      "step": 23,
+      "reason": "solid-frame wrappers",
+      "librarySha256": "21b6b6e4edd7aee4d7d5f7818e243ef89f8b2bf9ea4b15443dea659671dfc116",
+      "compiledSha256": "72f2d2aee485212e91a38637e3ce790f1fd46a2c3747034a20af2e4f7b03bb0e"
+    }
+  ],
+  "payloads": [
+    {
+      "url": "http://localhost/_server/data/routeRegion-db0eace7",
+      "request": "start",
+      "bytes": 4121,
+      "body": ";0x00000038;{\"type\":\"start\",\"id\":\"routeRegion-db0eace7\",\"version\":1};0x00000067;{\"type\":\"slot\",\"id\":\"routeRegion-db0eace7\",\"version\":1,\"key\":\"like#route-like\",\"args\":{\"slug\":\"start\"}};0x0000010e;{\"type\":\"html\",\"id\":\"routeRegion-db0eace7\",\"version\":1,\"html\":\"<main><!--$--><template id=\\\"pl-0010\\\"></template>Loading article…<!--pl-0010--><!--/--><!--$--><!--slot:like#route-like:start--><!--slot:like#route-like:end--><!--/--></main>\",\"digest\":\"9e1ca329bae0e97f\"};0x00000d8a;{\"type\":\"fragment\",\"id\":\"routeRegion-db0eace7\",\"version\":1,\"key\":\"0010\",\"html\":\"<!--lh:0--><div class=\\\"reading\\\"><article><h1>Getting started</h1><p>Content first, with a few small tools beside it.</p><section id=\\\"section-0\\\"><h2>Read the page</h2><p>A page can carry useful information before its controls start.</p><p>Each tool owns its state. Reading this chapter needs no shared browser state or background work.</p><pre><code>const chapter = await getArticle(\\\"start\\\"); // section 1</code></pre></section><section id=\\\"section-1\\\"><h2>Choose a route</h2><p>A page can carry useful information before its controls start.</p><p>Each tool owns its state. Reading this chapter needs no shared browser state or background work.</p><pre><code>const chapter = await getArticle(\\\"start\\\"); // section 2</code></pre></section><section id=\\\"section-2\\\"><h2>Keep state local</h2><p>A page can carry useful information before its controls start.</p><p>Each tool owns its state. Reading this chapter needs no shared browser state or background work.</p><pre><code>const chapter = await getArticle(\\\"start\\\"); // section 3</code></pre></section><section id=\\\"section-3\\\"><h2>Load an answer</h2><p>A page can carry useful information before its controls start.</p><p>Each tool owns its state. Reading this chapter needs no shared browser state or background work.</p><pre><code>const chapter = await getArticle(\\\"start\\\"); // section 4</code></pre></section><section id=\\\"section-4\\\"><h2>Handle a failure</h2><p>A page can carry useful information before its controls start.</p><p>Each tool owns its state. Reading this chapter needs no shared browser state or background work.</p><pre><code>const chapter = await getArticle(\\\"start\\\"); // section 5</code></pre></section><section id=\\\"section-5\\\"><h2>Use a small boundary</h2><p>A page can carry useful information before its controls start.</p><p>Each tool owns its state. Reading this chapter needs no shared browser state or background work.</p><pre><code>const chapter = await getArticle(\\\"start\\\"); // section 6</code></pre></section><section id=\\\"section-6\\\"><h2>Check the result</h2><p>A page can carry useful information before its controls start.</p><p>Each tool owns its state. Reading this chapter needs no shared browser state or background work.</p><pre><code>const chapter = await getArticle(\\\"start\\\"); // section 7</code></pre></section><section id=\\\"section-7\\\"><h2>Continue reading</h2><p>A page can carry useful information before its controls start.</p><p>Each tool owns its state. Reading this chapter needs no shared browser state or background work.</p><pre><code>const chapter = await getArticle(\\\"start\\\"); // section 8</code></pre></section></article><aside class=\\\"on-this-page\\\"><h2>On this page</h2><ol><li><a href=\\\"#section-0\\\">Read the page</a></li><li><a href=\\\"#section-1\\\">Choose a route</a></li><li><a href=\\\"#section-2\\\">Keep state local</a></li><li><a href=\\\"#section-3\\\">Load an answer</a></li><li><a href=\\\"#section-4\\\">Handle a failure</a></li><li><a href=\\\"#section-5\\\">Use a small boundary</a></li><li><a href=\\\"#section-6\\\">Check the result</a></li><li><a href=\\\"#section-7\\\">Continue reading</a></li></ol></aside><section class=\\\"related\\\"><h2>Related reading</h2><ul><li><a href=\\\"/docs/start\\\">Getting started</a></li><li><a href=\\\"/docs/widgets\\\">Independent widgets</a></li></ul></section></div><!--lh:/0-->\",\"digest\":\"7d3bfc702dc25cc2\",\"holes\":{\"lh:0\":\"914519e37b48f495\"}};0x0000005f;{\"type\":\"reveal\",\"id\":\"routeRegion-db0eace7\",\"version\":1,\"keys\":[\"0010\"],\"waitForStyles\":false};0x0000003b;{\"type\":\"complete\",\"id\":\"routeRegion-db0eace7\",\"version\":1}"
+    },
+    {
+      "url": "http://localhost/_server/data/routeRegion-db0eace7",
+      "request": "missing",
+      "bytes": 915,
+      "body": ";0x00000038;{\"type\":\"start\",\"id\":\"routeRegion-db0eace7\",\"version\":1};0x00000069;{\"type\":\"slot\",\"id\":\"routeRegion-db0eace7\",\"version\":1,\"key\":\"like#route-like\",\"args\":{\"slug\":\"missing\"}};0x0000010e;{\"type\":\"html\",\"id\":\"routeRegion-db0eace7\",\"version\":1,\"html\":\"<main><!--$--><template id=\\\"pl-0010\\\"></template>Loading article…<!--pl-0010--><!--/--><!--$--><!--slot:like#route-like:start--><!--slot:like#route-like:end--><!--/--></main>\",\"digest\":\"9e1ca329bae0e97f\"};0x00000102;{\"type\":\"fragment\",\"id\":\"routeRegion-db0eace7\",\"version\":1,\"key\":\"0010\",\"html\":\"<!--lh:0--><p class=\\\"not-found\\\"><!--$-->not-found<!--/-->: <!--$-->No article: missing<!--/--></p><!--lh:/0-->\",\"digest\":\"f43369df49d51985\",\"holes\":{\"lh:0\":\"148f84804a49b976\"}};0x0000005f;{\"type\":\"reveal\",\"id\":\"routeRegion-db0eace7\",\"version\":1,\"keys\":[\"0010\"],\"waitForStyles\":false};0x0000003b;{\"type\":\"complete\",\"id\":\"routeRegion-db0eace7\",\"version\":1}"
+    }
+  ]
+}

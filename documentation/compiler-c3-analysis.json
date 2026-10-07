@@ -26,7 +26,7 @@
         "provenance": "S",
         "arguments": [],
         "slots": [],
-        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1453"
+        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1465"
       },
       {
         "component": "ArticleContent",
@@ -34,7 +34,7 @@
         "provenance": "S",
         "arguments": [],
         "slots": [],
-        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1028>1028:view>component:531"
+        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1040>1040:view>component:537"
       },
       {
         "component": "ArticleContent",
@@ -49,7 +49,7 @@
           }
         ],
         "slots": [],
-        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1096>1096:view>component:800"
+        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1108>1108:view>component:812"
       },
       {
         "component": "ReadingGuide",
@@ -57,7 +57,7 @@
         "provenance": "S",
         "arguments": [],
         "slots": [],
-        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1680"
+        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1692"
       },
       {
         "component": "SiteFooter",
@@ -65,42 +65,42 @@
         "provenance": "S",
         "arguments": [],
         "slots": [],
-        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1712"
+        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1724"
       }
     ],
     "captures": [],
     "serverCalls": [
       {
         "at": "examples/docs-yield/src/content.tsx:17:13",
-        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1453",
+        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1465",
         "target": "getSite",
         "provenance": "S",
         "captureEligible": true
       },
       {
         "at": "examples/docs-yield/src/content.tsx:133:13",
-        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1028>1028:view>component:531",
+        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1040>1040:view>component:537",
         "target": "getArticle",
         "provenance": "S",
         "captureEligible": true
       },
       {
         "at": "examples/docs-yield/src/content.tsx:133:13",
-        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1096>1096:view>component:800",
+        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1108>1108:view>component:812",
         "target": "getArticle",
         "provenance": "R",
         "captureEligible": true
       },
       {
         "at": "examples/docs-yield/src/content.tsx:133:13",
-        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1680>1680:view>component:8959",
+        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1692>1692:view>component:8959",
         "target": "getArticle",
         "provenance": "S",
         "captureEligible": true
       },
       {
         "at": "examples/docs-yield/src/content.tsx:81:13",
-        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1712",
+        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1724",
         "target": "getSite",
         "provenance": "S",
         "captureEligible": true
@@ -467,7 +467,7 @@
     "serverCalls": [],
     "sources": [
       {
-        "at": "examples/rendering-yield/shared/src/router.tsx:42:29",
+        "at": "examples/rendering-yield/shared/src/router.tsx:44:29",
         "component": "Router",
         "provenance": "C"
       },
@@ -625,14 +625,14 @@
     "serverCalls": [
       {
         "at": "examples/room-yield/src/routes/live.tsx:724:15",
-        "instance": "examples/room-yield/src/app.tsx>component:497>497:view>component:603>603:view>2581:call>2620:hole-prop>component:1089>1089:view>2630:call>component:2676>2676:view>component:3236>3236:view>22172:call>22456:call>component:22512",
+        "instance": "examples/room-yield/src/app.tsx>component:497>497:view>component:603>603:view>2617:call>2656:hole-prop>component:1089>1089:view>2641:call>component:2687>2687:view>component:3247>3247:view>22183:call>22467:call>component:22523",
         "target": "summary",
         "provenance": "C",
         "captureEligible": false
       },
       {
         "at": "examples/room-yield/src/routes/live.tsx:743:13",
-        "instance": "examples/room-yield/src/app.tsx>component:497>497:view>component:603>603:view>2581:call>2620:hole-prop>component:1089>1089:view>2630:call>component:2676>2676:view>component:3287",
+        "instance": "examples/room-yield/src/app.tsx>component:497>497:view>component:603>603:view>2617:call>2656:hole-prop>component:1089>1089:view>2641:call>component:2687>2687:view>component:3298",
         "target": "archive",
         "provenance": "U",
         "captureEligible": false
@@ -929,27 +929,27 @@
     "serverCalls": [],
     "sources": [
       {
-        "at": "examples/todos-yield/src/app.tsx:55:21",
+        "at": "examples/todos-yield/src/app.tsx:57:21",
         "component": "Header",
         "provenance": "S"
       },
       {
-        "at": "examples/todos-yield/src/app.tsx:140:27",
+        "at": "examples/todos-yield/src/app.tsx:142:27",
         "component": "MainSection",
         "provenance": "C"
       },
       {
-        "at": "examples/todos-yield/src/app.tsx:150:31",
+        "at": "examples/todos-yield/src/app.tsx:152:31",
         "component": "MainSection",
         "provenance": "C"
       },
       {
-        "at": "examples/todos-yield/src/app.tsx:199:28",
+        "at": "examples/todos-yield/src/app.tsx:201:28",
         "component": "Footer",
         "provenance": "C"
       },
       {
-        "at": "examples/todos-yield/src/app.tsx:202:28",
+        "at": "examples/todos-yield/src/app.tsx:204:28",
         "component": "Footer",
         "provenance": "C"
       }
@@ -1009,37 +1009,37 @@
     "serverCalls": [],
     "sources": [
       {
-        "at": "examples/todos-yield-h/src/app.ts:132:27",
+        "at": "examples/todos-yield-h/src/app.ts:134:27",
         "component": "MainSection",
         "provenance": "C"
       },
       {
-        "at": "examples/todos-yield-h/src/app.ts:142:31",
+        "at": "examples/todos-yield-h/src/app.ts:144:31",
         "component": "MainSection",
         "provenance": "C"
       },
       {
-        "at": "examples/todos-yield-h/src/app.ts:145:27",
+        "at": "examples/todos-yield-h/src/app.ts:147:27",
         "component": "MainSection",
         "provenance": "C"
       },
       {
-        "at": "examples/todos-yield-h/src/app.ts:86:26",
+        "at": "examples/todos-yield-h/src/app.ts:88:26",
         "component": "TodoItem",
         "provenance": "C"
       },
       {
-        "at": "examples/todos-yield-h/src/app.ts:177:28",
+        "at": "examples/todos-yield-h/src/app.ts:179:28",
         "component": "Footer",
         "provenance": "C"
       },
       {
-        "at": "examples/todos-yield-h/src/app.ts:180:28",
+        "at": "examples/todos-yield-h/src/app.ts:182:28",
         "component": "Footer",
         "provenance": "C"
       },
       {
-        "at": "examples/todos-yield-h/src/app.ts:183:27",
+        "at": "examples/todos-yield-h/src/app.ts:185:27",
         "component": "Footer",
         "provenance": "C"
       }

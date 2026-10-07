@@ -57,13 +57,10 @@ Unsupported captures fall back to the whole library entry with a variable
 location. A one-root plan leaves code unchanged. The plan reports expansions;
 it must not be read as a general purpose splitter.
 
-The `/` page passes 24 hydrated steps and `/docs/start` passes direct smoke.
-**C2 remains incomplete:** direct `/docs/missing` loses its typed failure during
-SSR and fails hydration on original, library and compiled routes (F-C9).
-Implementation stopped on the failure-preservation requirement. The expected
-failure is pinned separately; green tests do not turn it into passing smoke.
-See [the C2 record](../../documentation/compiler-c2-finding.md) for captures,
-source maps, conformance coverage, findings and reproduction commands.
+The `/` page passes 24 hydrated steps. Direct `/docs/start` and `/docs/missing`
+pass SSR/hydration after merging main's D-115 and its corrected streamed-error
+criterion. F-C9 is resolved; the old expected-failure check is gone. See
+[the C2 record](../../documentation/compiler-c2-finding.md).
 
 ## C1b interaction reachability
 
@@ -94,18 +91,38 @@ slots register their existing elements under that root. The default remains
 chunks; the production build bundles the app together. Select it in the docs
 config with `C2_ROOTS=single`.
 
-The fresh control measurements and the C3 stop finding are in
-[compiler-c3-server-components.md](../../documentation/compiler-c3-server-components.md).
-
-## C3 server-recomputable analysis and stop finding
+## C3 server-recomputable regions
 
 `src/recomputable.js` applies the R server-call cut alongside C1's existing
-groups. `node src/recomputable-report.js --write` regenerates the nine-twin
-C3 appendix and JSON. Direct U reads and C-cell reads remain client; the
-fixtures cover typed scalar inputs, rejected functions and error/reset routing.
+groups. `node src/recomputable-report.js --write` reruns all nine twins. Direct U
+reads, C-cell reads, event writes and unproved captures remain client.
 
-`src/server-region.js` emits the first extracted server template for a public
-frame probe. **It is not wired into the client emitter.** The failing article
-frame loses NotFound's kind and message (F-C10), so integration stopped under
-the requested theorem/capture rule. A passing `test/server-region.test.mjs`
-pins that failure, not completed R parity. See the C3 report above.
+Set `C3_REGIONS=1` in the docs compiled config. This selects one eager root,
+then `src/server-components.js` emits a route region with a keyed LikeButton
+slot and a constant-input ReadingGuide region. Public server functions and
+frames carry the templates; `dynamic` tracks slug changes and swaps their
+markup. The article loader/body and its data do not ship. The existing S nav
+and footer remain server-only. The default per-group and islands-only single
+modes still work.
+
+This is a bounded docs prototype. Setup/wrapper shapes are checked before
+rewriting; R analysis must still approve both articles and the guide. Changed
+or unsupported shapes stop compilation instead of silently dropping work.
+The general-purpose region emitter is not implemented.
+
+D-115 resolves production error sanitization. The R emitter keeps the nominal
+failure and error boundary server-side, so streamed frames contain the authored
+`not-found` fallback, including kind/message. `test/server-region.test.mjs`
+also preserves the separate generic-frame message probe.
+
+Run `node --test test/server-components.test.mjs` for the 24-step comparison,
+keyed-slot state/node checks and production direct-route smokes. **Exact DOM
+parity is not achieved:** the public frame API adds wrapper elements and a
+pending template marker. The test records those differences; it does not change
+the parity normalizer. All 24 authored-content comparisons pass once those
+known transport nodes are accounted for in a separate diagnostic comparison.
+
+The [C3 report](../../documentation/compiler-c3-server-components.md) contains
+three-run executed/shipped measurements, RPC payloads, findings and scope.
+`node examples/harness/executed-bytes/hydrated-docs.mjs --regions --runs 3`
+measures all four variants. Server execution runs in a separate process.

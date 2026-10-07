@@ -8,6 +8,8 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import solidYield from "../../vite-plugin-yield/src/index.js";
 import eagerIslands from "../src/eager.js";
+import serverComponents from "../src/server-components.js";
+import { rpcTransport } from "./rpc-transport.mjs";
 import {
   serializedDocsError,
   unexpectedRenderLog
@@ -26,7 +28,8 @@ const test = mode
     }
   : nodeTest;
 const compiled = mode?.startsWith("compiled");
-const single = mode === "compiled-single";
+const regions = mode === "compiled-r";
+const single = mode === "compiled-single" || regions;
 const variants = ["original", "library", "compiled", "compiled-single"];
 if (!mode) {
   test("tier 1 docs: original, library, seven roots and single root match all 24 hydrated steps", () => {
@@ -108,7 +111,7 @@ if (!mode) {
     const handled = promise => unhandled.delete(promise);
     process.on("unhandledRejection", rejected);
     process.on("rejectionHandled", handled);
-    let plan;
+    let plan, rpc;
     const logs = [];
     const warn = console.warn,
       error = console.error;
@@ -143,8 +146,20 @@ if (!mode) {
               return code.replace(/\bhydrate\(/, "export const dispose = hydrate(");
           }
         },
+        ...(regions ? [serverComponents({ directory })] : []),
         solidYield(),
-        solid({ hot: false, ssr: true })
+        solid({
+          hot: false,
+          ssr: true,
+          ...(regions
+            ? {
+                serverFunctions: {
+                  components: true,
+                  filter: { include: [directory + "/src/__compiler_regions.tsx"] }
+                }
+              }
+            : {})
+        })
       ],
       server: { middlewareMode: true, hmr: false, ws: false },
       environments: {
@@ -171,9 +186,15 @@ if (!mode) {
         html = readFileSync(process.env.C2_HTML, "utf8");
       else {
         const ssr = await server.ssrLoadModule("/entry-server.tsx");
-        html = String(await ssr.render(process.env.C2_URL ?? "/"));
+        const stream = ssr.render(process.env.C2_URL ?? "/");
+        const timeout = setTimeout(() => {
+          if (regions) error("C3 SSR still pending", logs);
+        }, 3000);
+        timeout.unref();
+        html = String(await stream);
+        clearTimeout(timeout);
       }
-      if (process.env.C2_URL === "/docs/missing")
+      if (process.env.C2_URL === "/docs/missing" && !regions)
         assert(serializedDocsError(html), "stream preserves typed failure data");
       if (process.env.C2_SSR_ONLY) {
         writeFileSync(process.env.C2_HTML, html);
@@ -214,7 +235,7 @@ if (!mode) {
         const keys = claimed.map(node => node.getAttribute("_hk"));
         if (single)
           assert(
-            keys.every(key => key.startsWith("cs-")),
+            keys.every(key => key.startsWith("cs-") || (regions && key.startsWith("sc"))),
             "one key space"
           );
         assert.equal(new Set(keys).size, keys.length, "hydration keys are unique");
@@ -237,12 +258,19 @@ if (!mode) {
         })
       };
       window.scrollTo = () => {};
+      if (regions) rpc = await rpcTransport();
       if (process.env.C2_COVERAGE)
         endCoverage = beginCoverage({
           file: process.env.C2_COVERAGE,
           app: mode,
           twin: "docs-yield"
         });
+      if (regions) {
+        const transport = await server.environments.hydrate.runner.import(
+          resolve(directory, "src/__compiler_refetch.tsx")
+        );
+        transport.configureServerFunctionsClient({ fetch: rpc.fetch });
+      }
       mounted = await server.environments.hydrate.runner.import("/client.tsx");
       if (process.env.C2_DUMP && plan && !single) {
         const root = plan.roots.find(r => r.foreign);
@@ -278,6 +306,33 @@ if (!mode) {
             process.env.C2_URL.endsWith("missing") ? "main .not-found" : "main article h1"
           )
         );
+      } else if (regions) {
+        const { normalize } = await server.environments.hydrate.runner.import(
+          resolve(import.meta.dirname, "../../../examples/harness/src/index.ts")
+        );
+        snapshots = [];
+        let likeNode;
+        for (const [name, run] of script.steps) {
+          await run();
+          if (name === "navigate to /docs/start") {
+            const deadline = Date.now() + 3000;
+            while (!document.querySelector("main .like button") && Date.now() < deadline)
+              await new Promise(r => setTimeout(r, 1));
+            assert(
+              document.querySelector("main .like button"),
+              "first frame reattaches the route slot"
+            );
+          }
+          if (name === "like saved") likeNode = document.querySelector("main .like");
+          if (name === "not-found typed error")
+            assert.equal(
+              document.querySelector("main .like"),
+              likeNode,
+              "keyed slot retains its node across a slug refetch"
+            );
+          globalThis.__yieldExecutedBytes?.(name);
+          snapshots.push(normalize(document.getElementById("root").innerHTML));
+        }
       } else snapshots = await script.runScript();
       assert(
         inertNodes.every(node => node.isConnected),
@@ -290,12 +345,24 @@ if (!mode) {
         []
       );
       assert.equal(unhandled.size, 0, "all streamed rejections must be handled after hydration");
-      console.log("C2_RESULT " + JSON.stringify({ snapshots, roots: plan?.roots.length ?? 1 }));
+      console.log(
+        "C2_RESULT " +
+          JSON.stringify({
+            snapshots,
+            roots: plan?.roots.length ?? 1,
+            ...(rpc ? { payloads: rpc.payloads, jsonComparison: rpc.jsonComparison } : {})
+          })
+      );
     } catch (failure) {
+      if (regions) {
+        error(logs);
+        if (dom) writeFileSync("/tmp/c3-failed-dom.html", document.documentElement.outerHTML);
+      }
       error(failure.stack);
       throw failure;
     } finally {
       endCoverage?.();
+      rpc?.close();
       mounted?.dispose?.();
       for (const dispose of mounted?.disposers ?? []) dispose();
       intervals.forEach(clearInterval);

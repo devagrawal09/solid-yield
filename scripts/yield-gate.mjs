@@ -279,7 +279,8 @@ function buildSteps(twins) {
       args: [
         "--test",
         "packages/compiler-yield/test/emission.test.mjs",
-        "packages/compiler-yield/test/server-region.test.mjs"
+        "packages/compiler-yield/test/server-region.test.mjs",
+        "packages/compiler-yield/test/server-components.test.mjs"
       ]
     },
     {

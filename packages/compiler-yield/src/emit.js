@@ -46,6 +46,12 @@ export function extractModule(code, filename, names, rewriteImport) {
   // component factory and expressions Babel proves pure may be discarded.
   for (const statement of program.get("body")) {
     if (keep.has(statement) || statement.isImportDeclaration()) continue;
+    if (
+      statement.isExportNamedDeclaration() &&
+      !statement.node.declaration &&
+      !statement.node.source
+    )
+      continue;
     const declaration = statement.isExportNamedDeclaration()
       ? statement.get("declaration")
       : statement;

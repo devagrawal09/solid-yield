@@ -47,6 +47,12 @@ test("C2 modules keep dependencies, side-effect imports and only selected export
   assert(!out.code.includes("export const Root"));
   assert(out.code.includes("export { Root }"));
   assert.deepEqual(out.map.sources, ["/app/widgets.tsx"]);
+  const again = extractModule(out.code, "/app/widgets.tsx", ["Root"]);
+  assert.equal(
+    (again.code.match(/export \{ Root \}/g) ?? []).length,
+    1,
+    "a second extraction does not duplicate exports"
+  );
 });
 
 test("C2 extraction maps chain through yield, Solid and Vite to authored frames", async () => {

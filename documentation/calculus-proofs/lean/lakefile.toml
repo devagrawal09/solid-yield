@@ -1,0 +1,6 @@
+name = "yield-proofs"
+version = "0.1.0"
+defaultTargets = ["YieldProofs"]
+
+[[lean_lib]]
+name = "YieldProofs"

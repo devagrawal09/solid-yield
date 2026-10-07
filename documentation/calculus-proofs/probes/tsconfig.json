@@ -1,0 +1,21 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "emitDeclarationOnly": false,
+    "declaration": false,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsxImportSource": "solid-yield",
+    "jsxFactory": "jsx",
+    "jsxFragmentFactory": "Fragment",
+    "types": ["vitest/globals"],
+    "paths": {
+      "solid-yield": ["../../../packages/yield/src/index.ts"],
+      "solid-yield/h": ["../../../packages/yield/src/h.ts"],
+      "solid-yield/internal": ["../../../packages/yield/src/internal.ts"],
+      "solid-yield/jsx-runtime": ["../../../packages/yield/jsx/jsx-runtime.d.ts"],
+      "solid-js": ["../../../packages/yield/node_modules/solid-js/types/index.d.ts"]
+    }
+  },
+  "include": ["*.tsx"]
+}

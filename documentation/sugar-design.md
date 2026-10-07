@@ -1,5 +1,7 @@
 # Sugar mode: a spelling of the library route
 
+**Current direction (2026-10-08): see [Native mode](#native-mode).** Native source uses Solid APIs; virtual-code typing is decided. The earlier sections record the directive-sugar experiment.
+
 Prototype, 2026-10-07, branch `proto/sugar`, based on `28ff9bb`.
 This is the requested follow-up to D-108's C0 Q6 (“sugar after C3”). It does not
 restart the parked server-region compiler in D-114, change the runtime, or decide
@@ -394,7 +396,7 @@ manual color annotations would change the requested surface. Generating those
 annotations moves back to route 1 or 2. Stop this route here; it is not a third
 viable implementation of “ordinary plain calls, unchanged semantics”.
 
-### Recommendation and question for Dev
+### Historical recommendation (decision superseded on 2026-10-08)
 
 Recommend **route 1 first**, with compiler provenance used for local messages and
 color hovers. It keeps TypeScript's existing color folds as the authority and adds
@@ -402,11 +404,10 @@ one main semantic obligation: faithful lowering. Keep route 2 as a serious later
 option if editor performance or source-facing generic types prove unacceptable.
 Do not ship sugar with only runtime tests and a value-only `.d.ts` facade.
 
-**Exact question:** “Should sugar v1 require a virtual-code TypeScript integration
-(editor plugin plus matching CLI check), keeping the existing library types as
-the authority for pending/fails/may-wait/requires, or should we fund a compiler-owned
-color checker and its new soundness proof before shipping sugar? I recommend the
-virtual-code route. Do you accept that tooling requirement?”
+**Decision, 2026-10-08:** Dev chose virtual-code typing for native mode. The
+comparison above is retained as design history. There is no remaining request
+to fund or choose a compiler-owned checker; the current questions are in Native mode.
+
 
 ## 4. DX evidence and the 34 mistakes
 
@@ -431,3 +432,237 @@ The final code includes 12 sugar transform tests, generated TS/lint checks, exac
 normalized todo-source comparison, the reused analyzer report, original-vs-sugar
 DOM parity, SSR, and interactive hydration. No LS implementation or room runtime
 parity is claimed. The 34-probe evidence limit remains F-S7.
+
+## Native mode
+
+**2026-10-08 result: a working, deliberately limited native front end; the requested
+native todos acceptance target is NOT achieved.** Eleven small fixtures pass
+transformed TypeScript and recommended lint. A native counter matches a plain
+Solid control in SSR and hydrated clicks, retaining the server button. All nine
+original-to-twin inputs are refused. This is a feasibility result, not nine
+working native apps or a replacement for the passing directive-sugar todos.
+
+The 2026-10-08 direction supersedes §1's authored library API and §3's open typing
+choice. **Virtual-code typing is decided. There is no compiler-owned color checker.**
+The editor plugin, value-facing hovers, source maps and related-location messages
+remain planned. This prototype runs ordinary TypeScript and the existing lint on
+emitted library code. Those type/lint locations are still generated locations;
+only native preflight diagnostics currently use authored positions. A later
+SUGAR_* diagnostic can also refer to an intermediate position. We do not call
+these diagnostics “mapped back” yet.
+
+### Selection and native syntax
+
+No directive, marker or library import appears in a selected source file:
+
+```tsx
+import { createSignal, createMemo } from "solid-js";
+export function Counter() {
+  const [count, setCount] = createSignal(1);
+  const twice = createMemo(() => count() * 2);
+  const increment = () => setCount(count() + 1);
+  return <button onClick={increment}>{twice()}</button>;
+}
+```
+
+Select a closed source set with the same plugin, before Solid's plugin:
+
+```js
+solidYield({
+  mode: "native",
+  include: file => file.startsWith(appSourceDirectory + "/") && /\.tsx?$/.test(file)
+});
+```
+
+`appSourceDirectory` must be an absolute normalized path. `include(file)` is an
+explicit predicate, not a new glob package; callers may supply their own glob
+matcher. Native mode without it is `[NATIVE_INCLUDE] Native mode requires an
+explicit include(file) predicate.` Existing `filter` still bounds all processing.
+Unselected files keep explicit/directive behavior. Dependencies are excluded by
+the default filter. The nearest tsconfig supplies selected project modules; Vite
+caches whole source snapshots and invalidates on changes. Do not exclude a module
+merely to hide an unsupported routine or failure from the check.
+
+The installed **solid-js 2.0.0-rc.13** declares `createContext<T>(defaultValue?,
+options?)`, `useContext(context)`, and a context provider used as
+`<Context value={value}>`. Its client declarations explicitly say there is no
+context call form. `createEffect` has separate compute and effect phases; `For`
+has three different keyed callback shapes. These facts were checked in the
+installed `types/client/core.d.ts`, `types/client/flow.d.ts`, and re-exports in
+`types/index.d.ts`; this design does not assume Solid 1 APIs.
+
+### Mapping table
+
+“Implemented” describes this prototype; other entries are required design work,
+not silent fallbacks to native reactive state inside a library routine.
+
+| Native source | Library output / contract | Prototype |
+| --- | --- | --- |
+| `createSignal(v)` / getter `count()` / setter `set(v)` | `$signal(v)` / `yield* count` / `yield* set(v)` | Implemented; option/value compatibility checked on output |
+| `createMemo(() => expression)` | `$memo(function* () { return expression′; })` | Synchronous callbacks implemented; Promise results refused |
+| `createEffect(compute, effect)` | `$effect(compute′, effect′)` (the actual export is `$effect`, not `effect`) | Two synchronous function phases; bundle/cleanup-return overloads incomplete |
+| `onCleanup(fn)` | `$cleanup(fn)` | Same owner position; generated host checking still required |
+| Inline `onClick={e => …}` and other `onX` props | `yield* $event(function* (e) { … })` at binding site | Implemented for intrinsic tags; event parameter receives its DOM type |
+| Local synchronous `onClick={fn}` | `yield* $event(function* (...args: Parameters<typeof fn>) { return fn′(...args); })` | Implemented; calls to a reactive helper delegate; unresolved/property handlers refused |
+| `createContext<T>()` | `createContext<T, ID>(undefined, { name: ID })` | Compiler-generated module-and-binding identity; no author name marker |
+| `<Ctx value={v}>children</Ctx>` | `Ctx.provide({ value: v′, children: function* () { … } })` | Local and directly imported selected contexts; same provider location |
+| `useContext(Ctx)` | `yield* Ctx`, followed by source reads where its value is used | Implemented; requirement checked at root; no provider insertion |
+| Plain typed `props.x` | Generated `Props<T>` plus path reads | Simple identifier parameter; destructured parameters refused |
+| `<Child p={v}/>` | `yield* Child({ p: v′ })` | Local/direct selected imports; foreign tags need a boundary contract |
+| `For` / `Show` / `Loading` / `Errored` etc. | Same library calls with lazy children, row views and bound events | Basic forms; default For row-value mapping; nondefault keyed modes refused; complex fallback forms remain limited |
+| `render` / `hydrate` from `@solidjs/web` | Library `render` / `hydrate` | Direct named component form; generated root checking required |
+| `throw X` | Intended `raise(X)` with X's type | **Refused**: native X is not necessarily a nominal `Failure` |
+| Async/server-function memo | Intended `attempt(() => f(), rejectionAdapter)` | **Refused**: `Promise<T>` has no declared rejection parameter; `unknown` is not a `Failure` |
+| `action`, optimistic stores, projections, `onSettled`, `latest`, `isPending`, router/lazy edges | Dedicated library mappings with transaction, selector, owner and foreign-boundary checks | Not implemented; `[NATIVE_API] Solid API NAME has no verified native lowering.` |
+
+`"use server"` remains a server-function directive. It says nothing about the
+function's rejection type. It cannot by itself supply an `attempt` adapter.
+The output uses existing imports/driver/one-rule JSX lowering. No runtime or
+failure-brand changes were made.
+
+### Routine rule and current limits
+
+The target rule is still the closure over a component's reachable call graph:
+any function that reads a reactive source (or creates/writes/delegates) is a
+routine at every call site. Calling the same helper from a memo and an event
+must retain both hosts' admission checks. A conditional or loop remains in its
+original position; its operations are not hoisted. Components are top-level
+PascalCase JSX-returning functions; native tags become calls, unlike historical
+§1. No callback becomes a routine merely because it is nested in a component.
+
+The front end changes native imports, component props, context/value reads,
+event bindings and JSX contracts before reusing `lowerSugarProject`. Its
+cross-module TS fixed point inserts operations into the reconstructed files.
+The **existing** compiler analyzer consumes that explicit IR through
+`sugarFacts` for provenance/reach; no second ownership or color engine was
+introduced. Direct selected component imports are tested. Imported function
+contracts such as native `Accessor`, re-exports of context/component tags,
+recursive groups and generic return-type facades are not fully implemented.
+The 24-pass guard is not a proof of recursive inference. These are implementation
+gaps, not claims that ordinary Solid disallows those programs.
+
+### Disagreements and executable fixtures
+
+Every snippet below has an executable counterpart in the native transform tests or
+[scripts/native/fixtures.mjs](../scripts/native/fixtures.mjs). The full source and
+actual messages are preserved in [native-verification.json](native-verification.json).
+The report distinguishes transform refusals from generated type/lint errors.
+A refusal in this table may reflect an unfinished prototype mapping, rather
+than a fundamental incompatibility.
+
+| Native case (tiny fixture) | Outcome | Actual diagnostic / observation |
+| --- | --- | --- |
+| `count() > 0 ? count() : 0` in JSX; event loops/early returns | Faithful lowering on tested forms | `conditional`, `loop`: generated TS/lint pass |
+| `createMemo(() => [1].map(() => count()))` | Refusal | `SUGAR_CALLBACK`: “A reactive read in an unknown callback has no routine host; use a memo, event, or hole.” |
+| `onClick={() => Promise.reject("failed")}` | Refusal | `NATIVE_REJECTION`: “An event returning a Promise has no declared rejection type; a checked rejection adapter is required.” |
+| `createMemo(async () => count())` | Refusal | `NATIVE_REJECTION`: “Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.” |
+| `throw new Error("oops")` / `throw e` with `e: unknown` | Refusal | `NATIVE_FAILURE`: “A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged.” |
+| `try { set(1) } catch { set(2) }` | Refusal | `NATIVE_CATCH`: “JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.” |
+| `useContext(C)` with no provider at root | Transform, then diagnostic | TS2345 includes `[NO_PROVIDER] the root requires the contexts this property names…` |
+| Unhandled failure at a library root | **Allowed by D-033 once nominally typed** | The native `throw` fixture is currently refused before this question is reached. Do not claim that refusal proves failure completeness. Foreign handoffs are stricter. |
+| `const n = count(); return <p>{n}</p>` | Transform, then diagnostic | TS2769; lint `[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event.` |
+| `const x = <p>{count()}</p>` in setup | Transform, then diagnostic | `jsx-only-in-view`: “JSX in a setup: elements are built by the view it returns…” |
+| `createMemo(() => { set(1); return count() })` | Transform, then diagnostic | TS2345: generated `Write` is not admitted by `MemoOp` |
+| `createEffect(() => memo(), n => { set(n + 1) })` where memo reads that signal | Transform; **cycle not diagnosed** | `feedback` passes TS/lint. No termination guarantee; no runtime execution of this deliberate infinite feedback fixture. |
+| `createEffect(() => {})` | Refusal | `NATIVE_EFFECT_PHASES`: “createEffect needs a tracked compute and an untracked effect phase.” This is also invalid under the installed native two-phase signature. |
+| Async effect phase | Refusal | `SUGAR_ASYNC`: “Use attempt inside a synchronous routine; async functions are not routines.” |
+| `{ read() { return count() } }` | Refusal | `SUGAR_HOST`: “Reactive operations in async functions or methods are unsupported.” |
+| State creation in JSX hole | Transform, then diagnostic | TS2345: generated `Create<"signal", never>` is not admitted by `ViewOp` |
+| `<button {...attributes}/>` / `<button ref={fn}/>` | Refusal | `NATIVE_SPREAD` / `NATIVE_REF`: hidden bindings and ref ownership need verified contracts |
+| Event handler using `this` | Refusal | `NATIVE_RECEIVER`: “An event handler using this needs a verified receiver-preserving binding.” Tested in `native.test.js`. |
+| Named synchronous local handler | Faithful lowering on tested form | `named-event`: generated TS/lint pass; counter hydration exercises it |
+| `createEffect(compute, {effect: fn})` | Refusal in this implementation | `SUGAR_CALLBACK`; native effect bundles still need a dedicated mapping |
+
+A native effect compute can also fail through a plain throw. The library deliberately
+routes effect failures differently from Solid's log-and-skip path (runtime.ts,
+D-073). “Map createEffect” therefore needs an explicit failure-semantics agreement,
+not just renaming the call.
+
+### Nine original-to-twin results
+
+There are **seven original app directories**, paired with **nine yield twins**:
+`todos-yield-h` and `sierpinski-yield-h` share their JSX twins' originals. The native
+probe reads each app's source tree (`rendering/shared/src` for rendering). It
+accumulates all preflight findings; it emits no partial app once any is found.
+The actual inputs and all source positions are in the JSON report.
+
+| Yield twin | Native transform | Preflight diagnostics | Parity vs original / SSR / hydration | Differing output statements vs twin | Main reasons |
+| --- | --- | ---: | --- | --- | --- |
+| docs-yield | Refused | 20 | Blocked, not run | Undefined: no output | Throws/rejections, generators, catches, APIs |
+| effect-yield | Refused | 23 | Blocked, not run | Undefined: no output | Actions/generators, rejections, catches, APIs |
+| hackernews-spa-yield | Refused | 3 | Blocked, not run | Undefined: no output | `lazy`/API mapping and catch |
+| rendering-yield | Refused | 27 | Blocked, not run | Undefined: no output | Rejections, streams, value-type facade, APIs |
+| room-yield | Refused | 35 | Blocked, not run | Undefined: no output | Actions/streams, failure contracts, type facade, APIs |
+| sierpinski-yield | Refused | 1 | Blocked, not run | Undefined: no output | Promise-returning memo with no rejection contract |
+| sierpinski-yield-h | Refused | 1 | Blocked, not run | Undefined: no output | Same original; target additionally uses the h dialect |
+| todos-yield | Refused | 19 | Blocked, not run | Undefined: no output | Optimistic store/actions/refresh/onSettled, rejection, generator catches |
+| todos-yield-h | Refused | 19 | Blocked, not run | Undefined: no output | Same original; target additionally uses the h dialect |
+
+A statement-distance count requires an emitted program. Reporting zero, comparing
+an empty file, or comparing the handwritten twin to itself would manufacture the
+requested evidence. Consequently this deliverable remains **incomplete**: native
+todos is not in the gate as a passing app, and none of the other originals is
+eligible. The gate adds the real native contract audit and small counter parity
+control instead. Earlier directive-sugar todos continues to run its original
+parity/type/lint/SSR/hydration checks; it is not relabeled “native todos”.
+
+### Further findings
+
+| Finding | Source and reason |
+| --- | --- |
+| F-S8: native failures lack the library contract | Original todos `reject`: `setTimeout(rej, time, "Failed to Save")`; store `async () => { const todos = await api.getTodos(); … }`. The rejected value can be a string or anything else. `unknown` cannot satisfy nominal `Failure` (D-110). TS return types do not declare throws. A generated wrapper/brand would be a new adapter policy; its identity, `instanceof`, root rethrow, serialization and fallback value must be specified before claiming preservation. |
+| F-S9: handwritten target is not a transliteration | Todos Header has no signal/memo in the original; the yield twin adds unused `$signal`/`$memo`. Original calls `addTodo` then clears input; twin clears before delegated waiting. The twin changes the context tuple into an object, adds `TodoApp`, moves store creation/provider relative to Errored, and changes derived accessors into memos. These are categorized as extra operations, event order, data shape, owner/boundary placement and memoization. Whitespace/import normalization cannot erase them. A general compiler must not invent this source-specific rewrite to win a diff. |
+| F-S10: unfinished native contracts | Todos `action(function*(){ try { yield request } catch { … } })`, `createOptimisticStore`, `refresh`, `onSettled`; room streams/foreign callbacks; native `Accessor`/Component annotations. Dedicated lowering, selector placement, external-call summaries and alias/re-export support remain. `[NATIVE_API]` is an implementation limit, not a claim of mathematical impossibility. Preflight currently also refuses throws/catches in selected plain I/O functions; excluding proven foreign I/O is future work. |
+| F-S11: static feedback limit | `feedback` passes generated TS/lint. The types check which phase may write, not whether repeated effects terminate. A separate optional feedback analysis needs provenance and a clear policy; it must not be confused with the typed-failure theorem. |
+| F-S12: complete native proof not established | Only a small synchronous subset has behavioral evidence. Generated checks and counter parity do not establish lowering preservation across all native primitives. Source diagnostic mapping, stable public context IDs, package summaries and recursion remain. |
+
+Under virtual-code typing, the theorem's premises apply to the **generated**
+program (C1 and C3), with the same no-erasure/nominal/foreign/runtime assumptions
+(C2, C4–C7) and an additional lowering-preservation obligation. Refusing unknown
+failure contracts protects those premises; it does not finish the native feature.
+No compiler-owned checker or new theorem is claimed.
+
+### Reproduce and remaining questions for Dev
+
+```sh
+node scripts/native-check.mjs           # exact diagnostic snapshot; includes generated TS/lint
+node scripts/native-runtime.mjs         # counter SSR + hydrated parity control
+# To deliberately update reviewed evidence:
+node scripts/native-check.mjs --write
+```
+
+The 34-slot native DX ledger is appended to [sugar-dx.md](reviews/sugar-dx.md).
+It runs reconstructions for the 27 named categories and marks the seven missing
+historical identities unavailable. It does not invent seven successful tests.
+
+The typing route is settled. The remaining decisions are concrete:
+
+1. **May the compiler generate nominal Failure adapters for arbitrary native
+   throws/rejections, including `unknown`, with an explicit rule for restoring
+   original values at native fallbacks and external rethrow edges?** Recommend
+   designing and testing that adapter contract before enabling async originals.
+   Plain `raise(X)` cannot implement the requested surface for arbitrary X today.
+2. **Should native acceptance require operation/behavior parity with the original,
+   while reporting an honest nonzero diff from the manually revised yield twin?**
+   Recommend yes. Keep exact diff equality for the earlier sugar transliteration.
+3. Which native overloads/foreign router/server contracts are in v1? Recommend
+   finishing todos' action/optimistic-store/settled-effect mappings next, then
+   adding only genuinely passing apps to the gate. The editor plugin remains a
+   planned deliverable after source ranges and generated contracts are stable.
+
+### Native verification and baseline
+
+Final run, 2026-10-08: **52 PASS / 0 FAIL / 0 SKIP in 149 seconds**, GREEN against
+the updated baseline. [Full gate record](native-gate-verification.json) tests code
+commit `ea5acae` plus the documentation working tree. `pnpm build` passed; the
+final gate also confirmed that the generated distribution was fresh. The plugin
+suite includes ten native tests, and the gate runs the 32-fixture diagnostic
+snapshot, a real analyzer root, and native counter SSR/hydrated parity.
+
+**The baseline was regenerated solely to add six passing steps:** the four
+previously unbaselined todos-sugar checks (test, generated typecheck, generated
+lint, generated-parity), plus `native:contracts` and
+`native:counter:ssr-hydrate-parity`. All 46 prior PASS entries remain PASS. The
+subsequent final run above passed all 52 baseline entries. No executed-bytes
+threshold, runtime rule, or existing test was relaxed. Native todos and the
+other refused originals were not added as purportedly passing applications.

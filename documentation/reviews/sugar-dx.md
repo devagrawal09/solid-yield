@@ -105,3 +105,74 @@ remain and must still be checked. Dynamic disposal of a bound boundary (reviewer
 3 N2) still needs D-109's runtime rejection; neither static route can prove every
 possible interleaving. Hydration bootstrap, remote module loading and plain-Solid
 crashes remain runtime/build concerns, not missing typed colors.
+
+
+## Native mode: executed reconstructions (2026-10-08)
+
+The native direction chooses virtual-code typing. Route 2 above is retained only
+as historical design discussion; **no compiler-owned color checker is planned
+in this prototype**. The native runner actually lowered each source below and,
+when it emitted output, ran TypeScript and the full existing recommended lint.
+These are reconstructed categories, not recovered verbatim historical probes.
+The seven missing identities remain unavailable. A native rejection occurring
+before a historical mistake is reached is an earlier refusal, not evidence that
+that historical color error was detected.
+
+[scripts/native/fixtures.mjs](../../scripts/native/fixtures.mjs) contains every
+reconstructed source. [native-verification.json](../native-verification.json)
+contains all exact messages, source/generated positions and emitted-check stages.
+`node scripts/native-check.mjs` reruns and compares them. There is **no source
+mapping for generated type/lint diagnostics yet**, and no editor plugin. Native
+preflight messages use source positions; SUGAR_* messages may use intermediate
+positions. Thus the “mapped back” part of the requested DX result is unfinished.
+
+| Slot | Executed native fixture | Caught where / actual message excerpt | Interpretation |
+| --- | --- | --- | --- |
+| T01 | `tag` | Generated TypeScript and lint: no diagnostics | Repaired by native lowering; not a missed error |
+| T02 | `setup-read` | type: `TS2769` — No overload matches this call.<br>lint: `solid-yield/no-read-in-setup` — [READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event. | Generated location; mapping planned |
+| T03 | `named-event` | Generated TypeScript and lint: no diagnostics | Repaired by native lowering; not a missed error |
+| T04 | `inline-event` | Generated TypeScript and lint: no diagnostics | Repaired by native lowering; not a missed error |
+| T05 | `effect-arity` | transform: `NATIVE_EFFECT_PHASES` — createEffect needs a tracked compute and an untracked effect phase. | Refused before output |
+| T06 | `row` | Generated TypeScript and lint: no diagnostics | Repaired by native lowering; not a missed error |
+| T07 | `pending-root` | transform: `NATIVE_REJECTION` — Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures. | Earlier failure-contract refusal; does not test the historical boundary check |
+| T08 | `colored-prop` | transform: `NATIVE_REJECTION` — Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures. | Earlier failure-contract refusal; does not test the historical boundary check |
+| T09 | `throw-error` | transform: `NATIVE_FAILURE` — A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged. | Refused before output |
+| T10 | `context` | Generated TypeScript and lint: no diagnostics | Repaired by native lowering; not a missed error |
+| T11 | `lazy-child` | Generated TypeScript and lint: no diagnostics | Repaired by native lowering; not a missed error |
+| T12 | Unavailable | Not run; original identity/source missing | Cannot claim caught or missed |
+| T13 | Unavailable | Not run; original identity/source missing | Cannot claim caught or missed |
+| T14 | Unavailable | Not run; original identity/source missing | Cannot claim caught or missed |
+| T15 | Unavailable | Not run; original identity/source missing | Cannot claim caught or missed |
+| L01 | `tag` | Generated TypeScript and lint: no diagnostics | Repaired by native lowering; not a missed error |
+| L02 | `setup-read` | type: `TS2769` — No overload matches this call.<br>lint: `solid-yield/no-read-in-setup` — [READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event. | Generated location; mapping planned |
+| L03 | `inline-event` | Generated TypeScript and lint: no diagnostics | Repaired by native lowering; not a missed error |
+| L04 | `named-event` | Generated TypeScript and lint: no diagnostics | Repaired by native lowering; not a missed error |
+| L05 | `eager-jsx` | type: `TS2769` — No overload matches this call.<br>lint: `solid-yield/jsx-only-in-view` — JSX in a setup: elements are built by the view it returns ('return view(function* () { return <…/>; })'). | Generated location; mapping planned |
+| L06 | `catch` | transform: `NATIVE_CATCH` — JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract. | Refused before output |
+| L07 | `row` | Generated TypeScript and lint: no diagnostics | Repaired by native lowering; not a missed error |
+| R01 | `setup-read` | type: `TS2769` — No overload matches this call.<br>lint: `solid-yield/no-read-in-setup` — [READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event. | Generated location; mapping planned |
+| R02 | `inline-event` | Generated TypeScript and lint: no diagnostics | Repaired by native lowering; not a missed error |
+| R03 | `throw-error` | transform: `NATIVE_FAILURE` — A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged. | Refused before output |
+| R04 | `setup-read` | type: `TS2769` — No overload matches this call.<br>lint: `solid-yield/no-read-in-setup` — [READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event. | Generated location; mapping planned |
+| R05 | `memo-write` | type: `TS2345` — Argument of type '() => Generator<Write \| Read<false, never>, number, any>' is not assignable to parameter of type '() => Generator<MemoOp, number, any>'. | Generated location; mapping planned |
+| R06 | `hole-create` | type: `TS2345` — Argument of type '() => Generator<Create<"signal", never> \| Read<false, never>, Element, any>' is not assignable to parameter of type '() => Generator<ViewOp, El… | Generated location; mapping planned |
+| R07 | `async-effect` | transform: `SUGAR_ASYNC` — [SUGAR_ASYNC] Use attempt inside a synchronous routine; async functions are not routines. (<root>/packages/vite-plugin-yield/test/.native-generated/async-effect.t… | Refused before output |
+| R08 | `missing-context` | type: `TS2345` — Argument of type 'HoleCall<{}, false, never, false, RequiredContext<number, "<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C">>' is… | Generated location; mapping planned |
+| R09 | `unhandled-failure` | transform: `NATIVE_FAILURE` — A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged. | Earlier failure-contract refusal; does not test the historical boundary check |
+| R10 | Unavailable | Not run; original identity/source missing | Cannot claim caught or missed |
+| R11 | Unavailable | Not run; original identity/source missing | Cannot claim caught or missed |
+| R12 | Unavailable | Not run; original identity/source missing | Cannot claim caught or missed |
+
+The live run has **32 fixtures, 11 accepted by generated TS/lint**; several
+fixtures cover more than one historical layer/category. It provides a result
+for each of the **27 named slots**, not 34 recovered programs. `feedback` is
+an additional finding outside the named ledger: it is accepted, so cycle
+termination is **not checked**. It is not executed as a runtime test because it
+is an intentional infinite loop of effects. The counter is the only native
+behavioral control: SSR and hydrated clicks match the plain Solid source.
+
+D-033 still permits an unhandled nominal failure at a library root. The native
+R09 reconstruction throws a plain Error, which is refused for lacking the
+nominal contract. It must not be presented as a newly strict root rule. The
+pending-source and settled-prop reconstructions are also stopped at their async
+computation contract before those downstream type conditions can be exercised.

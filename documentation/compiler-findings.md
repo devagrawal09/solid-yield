@@ -262,3 +262,34 @@ The historical F-C5 finding and benchmarks were not changed by this audit.
   cannot be claimed. C2 implementation stopped here under Dev's instruction;
   no runtime patch, class rewrite, new normalization or approval of this
   difference is implied. See [the C2 record](compiler-c2-finding.md).
+
+
+## F-C12 — the article payload needs a bounded purity contract
+
+The C3b adapter's opaque marked/highlight.js calls cannot be proved pure by the
+source graph. A checked contract covers only the reviewed docs renderArticle
+export, exact adapter digest and pinned package versions. Fresh local renderer,
+highlighter registry and heading counters depend only on the Article input.
+Changed code stays unproved; tests retain U/C inputs and reject changed adapters.
+This is a prototype contract, not a general third-party purity inference.
+See [C3b placement and measurements](compiler-c3b-payload.md).
+
+## F-C13 — frames and ordinary HTML claim article links differently
+
+Frame morphing claims anchors inside Markdown innerHTML and adds router active
+attributes that ordinary innerHTML hydration does not. TOC claim attributes
+also differ when mounting after the missing-route fallback. Original/library
+parity remains exact; R exact DOM parity fails in all 28 steps. Only a separate
+diagnostic comparison removes those router attributes on Markdown/TOC anchors,
+alongside F-C11's transport nodes. It preserves the exact comparisons and records their snapshot hashes.
+See [C3b](compiler-c3b-payload.md) and [the record](compiler-c3b-parity.json).
+
+## F-C14 — derived memo placement in generic frames
+
+Creating the article pipeline memo inside ArticleBody below Loading caused the
+generic frame probe to exceed 10001 discovery passes. Hoisting that memo beside
+the loader in ArticleContent setup, identically in both apps, stabilizes its
+owner. The R emitter mirrors the setup pair; its typed success/failure probe
+and integrated parity checks pass. This records a placement constraint of the
+current frame integration, not an upstream runtime fix or permission to ignore
+an unbounded discovery loop. [C3b](compiler-c3b-payload.md) retains the limits.

@@ -1,0 +1,286 @@
+{
+  "exactMatches": 0,
+  "steps": 28,
+  "contentMatches": 28,
+  "serverRefetchedSteps": [
+    4,
+    5,
+    22,
+    23,
+    24,
+    25
+  ],
+  "differences": [
+    {
+      "step": 0,
+      "reason": [
+        "solid-frame wrappers"
+      ],
+      "librarySha256": "e605ec21e55caabe6dec52c0045dc835977090ae7724a136b79cbc37721b5866",
+      "compiledSha256": "cad5a9a314c554da1344fb21c052d6184a8e4c2a894e6bd27376bd69f1ad6b31"
+    },
+    {
+      "step": 1,
+      "reason": [
+        "solid-frame wrappers"
+      ],
+      "librarySha256": "e605ec21e55caabe6dec52c0045dc835977090ae7724a136b79cbc37721b5866",
+      "compiledSha256": "cad5a9a314c554da1344fb21c052d6184a8e4c2a894e6bd27376bd69f1ad6b31"
+    },
+    {
+      "step": 2,
+      "reason": [
+        "solid-frame wrappers"
+      ],
+      "librarySha256": "e605ec21e55caabe6dec52c0045dc835977090ae7724a136b79cbc37721b5866",
+      "compiledSha256": "cad5a9a314c554da1344fb21c052d6184a8e4c2a894e6bd27376bd69f1ad6b31"
+    },
+    {
+      "step": 3,
+      "reason": [
+        "solid-frame wrappers"
+      ],
+      "librarySha256": "e605ec21e55caabe6dec52c0045dc835977090ae7724a136b79cbc37721b5866",
+      "compiledSha256": "cad5a9a314c554da1344fb21c052d6184a8e4c2a894e6bd27376bd69f1ad6b31"
+    },
+    {
+      "step": 4,
+      "reason": [
+        "solid-frame wrappers",
+        "pending template",
+        "F-C13 article link claim attributes"
+      ],
+      "librarySha256": "5a33134bbfb356ee3efa45508f6c30013114aaa45c26195d0c63291ebadab109",
+      "compiledSha256": "5f33e0440b7773ceb6e2b5e72922a2fc755000731524f7791ded1ef495589d90"
+    },
+    {
+      "step": 5,
+      "reason": [
+        "solid-frame wrappers",
+        "F-C13 article link claim attributes"
+      ],
+      "librarySha256": "05c2b99a03a9a3602235b6ed3dd6f62782d461b750f0516448e22011dd26800d",
+      "compiledSha256": "d27caad08bbcf7af274fd1ba015b57ae0e64eead87e7cd72c925b32c7d47d934"
+    },
+    {
+      "step": 6,
+      "reason": [
+        "solid-frame wrappers",
+        "F-C13 article link claim attributes"
+      ],
+      "librarySha256": "0809c52fba5a72224d639454234a97db5c429b49893d57c7f5e1b9472edfb911",
+      "compiledSha256": "35d517aacb5128daed1dc0883aa4449053f9d8b447e4f06c8cba69effae6e4b6"
+    },
+    {
+      "step": 7,
+      "reason": [
+        "solid-frame wrappers",
+        "F-C13 article link claim attributes"
+      ],
+      "librarySha256": "0809c52fba5a72224d639454234a97db5c429b49893d57c7f5e1b9472edfb911",
+      "compiledSha256": "35d517aacb5128daed1dc0883aa4449053f9d8b447e4f06c8cba69effae6e4b6"
+    },
+    {
+      "step": 8,
+      "reason": [
+        "solid-frame wrappers",
+        "F-C13 article link claim attributes"
+      ],
+      "librarySha256": "467bc0a0b6cb8c87963291c43c96122607464c130b1192a2b5dafeae5dc548dd",
+      "compiledSha256": "b54f3febbe7d4a9cdbfb1dd5ddee14d138934b38ffac9fbbd0003a46892f25b3"
+    },
+    {
+      "step": 9,
+      "reason": [
+        "solid-frame wrappers",
+        "F-C13 article link claim attributes"
+      ],
+      "librarySha256": "d432ca7e772c06acd72a84570658fcbd972b6fcd7e8fe17fb7311e1f443ceb29",
+      "compiledSha256": "f685ad14bfe6786a48b743d078cc7b99ca6e88a005bcb4025653adbf3103155a"
+    },
+    {
+      "step": 10,
+      "reason": [
+        "solid-frame wrappers",
+        "F-C13 article link claim attributes"
+      ],
+      "librarySha256": "6c731800d9c893b4b9036ca918b94b6b93b0e376f85469af9ef347bd823f0203",
+      "compiledSha256": "0a423badacdf71e3aaa33fdf27e753fbff4b1a7d7222a8a682298be6afca3518"
+    },
+    {
+      "step": 11,
+      "reason": [
+        "solid-frame wrappers",
+        "F-C13 article link claim attributes"
+      ],
+      "librarySha256": "6af4fdb35016dfe0eede402bfaf833edfbf1a6bc2faa2159673c5e219c2970b8",
+      "compiledSha256": "2d0797fafec926ee1b32c9b0c0f98ba1111998f068f820d761ab9f46bfceb65a"
+    },
+    {
+      "step": 12,
+      "reason": [
+        "solid-frame wrappers",
+        "F-C13 article link claim attributes"
+      ],
+      "librarySha256": "e5b31ebaefaa4c5e98039ead7304a49dabb2e8f958fe0f552fb28a379b8d82cb",
+      "compiledSha256": "c0c721c2141bf4815a89ad5d158c33ae404980147af2c8597e837f9da0512d77"
+    },
+    {
+      "step": 13,
+      "reason": [
+        "solid-frame wrappers",
+        "F-C13 article link claim attributes"
+      ],
+      "librarySha256": "e5b31ebaefaa4c5e98039ead7304a49dabb2e8f958fe0f552fb28a379b8d82cb",
+      "compiledSha256": "c0c721c2141bf4815a89ad5d158c33ae404980147af2c8597e837f9da0512d77"
+    },
+    {
+      "step": 14,
+      "reason": [
+        "solid-frame wrappers",
+        "F-C13 article link claim attributes"
+      ],
+      "librarySha256": "ecb8e957ce0dc84fcb0812572d2358919d3eb26fca5994779091300c854db985",
+      "compiledSha256": "b736d2848e05e495ff3d7bb24cf24f7131cadce06e1b6b59fd089d830a825055"
+    },
+    {
+      "step": 15,
+      "reason": [
+        "solid-frame wrappers",
+        "F-C13 article link claim attributes"
+      ],
+      "librarySha256": "e3bf374f6840e1d52fc5afbc98a03ef75b5750c48f5c8cbfae8be7d46eac7f6d",
+      "compiledSha256": "7e9c203fe8bfc4ca7dfe5eb1ec4c31af97df847afcb35ddd44fe65646f904b02"
+    },
+    {
+      "step": 16,
+      "reason": [
+        "solid-frame wrappers",
+        "F-C13 article link claim attributes"
+      ],
+      "librarySha256": "e3bf374f6840e1d52fc5afbc98a03ef75b5750c48f5c8cbfae8be7d46eac7f6d",
+      "compiledSha256": "7e9c203fe8bfc4ca7dfe5eb1ec4c31af97df847afcb35ddd44fe65646f904b02"
+    },
+    {
+      "step": 17,
+      "reason": [
+        "solid-frame wrappers",
+        "F-C13 article link claim attributes"
+      ],
+      "librarySha256": "90795ddea5cbc2104450d5020ed349d67c5a2fc695b6c52aa7905d49ed27bf6f",
+      "compiledSha256": "3ca85a72a50fabfef4b92cffa5dedf3a36cc2255ed304b473984e3c35b4c2620"
+    },
+    {
+      "step": 18,
+      "reason": [
+        "solid-frame wrappers",
+        "F-C13 article link claim attributes"
+      ],
+      "librarySha256": "1330ef289889f11b3975a13b25b10be3d43a32f8e84c73b31e01e55ab7a1f88b",
+      "compiledSha256": "f1b3f388812f5e89dfb47cf062cd9edca697e2213498cadb1266d1c03f7a9122"
+    },
+    {
+      "step": 19,
+      "reason": [
+        "solid-frame wrappers",
+        "F-C13 article link claim attributes"
+      ],
+      "librarySha256": "7c0857ed3f928f75b295e3a656af38ae5932176a071580f10c5250755a9151c2",
+      "compiledSha256": "4593a60d4d206eb6ba86a923ccd7ad81f6f7ce7f64456ea760a0264f81b94bca"
+    },
+    {
+      "step": 20,
+      "reason": [
+        "solid-frame wrappers",
+        "F-C13 article link claim attributes"
+      ],
+      "librarySha256": "7c0857ed3f928f75b295e3a656af38ae5932176a071580f10c5250755a9151c2",
+      "compiledSha256": "4593a60d4d206eb6ba86a923ccd7ad81f6f7ce7f64456ea760a0264f81b94bca"
+    },
+    {
+      "step": 21,
+      "reason": [
+        "solid-frame wrappers",
+        "F-C13 article link claim attributes"
+      ],
+      "librarySha256": "56ee28f948670d3a6f7532cb85db23624b7283e9fcd4cdf286b9faf9018a982e",
+      "compiledSha256": "e2daab33bfc438d0915f66ef59d59793c3a7729f3b337faa2ebe70a02d5dbf78"
+    },
+    {
+      "step": 22,
+      "reason": [
+        "solid-frame wrappers",
+        "F-C13 article link claim attributes"
+      ],
+      "librarySha256": "492a6fb0da275f1a7a7a82ccdc5f6396dd19925e9a813f2ca59e2d8eb91c52bb",
+      "compiledSha256": "aad38678ec854b65bca19e86e5dcbe7bd59d7e7ecad891d29d6dc3f44157119f"
+    },
+    {
+      "step": 23,
+      "reason": [
+        "solid-frame wrappers"
+      ],
+      "librarySha256": "f68c9b4f737f069ba64f47510fbe6486e3e83f4a7c328fdec761f3674a48beec",
+      "compiledSha256": "ed3e3ba1607b17fc3fd5654e266a84ba50eed3178b8d234f6e265e6f31b53185"
+    },
+    {
+      "step": 24,
+      "reason": [
+        "solid-frame wrappers",
+        "F-C13 article link claim attributes"
+      ],
+      "librarySha256": "27e9638a6fd0357f26899b71e8dfebd68329140474de6c5c66c249d92553a6ad",
+      "compiledSha256": "f96000b2f1e85b7a5e0f81c7b440f861feab2cab838db349f54054881f4d919d"
+    },
+    {
+      "step": 25,
+      "reason": [
+        "solid-frame wrappers",
+        "F-C13 article link claim attributes"
+      ],
+      "librarySha256": "f024e0b24c4b50b650428ef8883157898db78b49d3acbcffe047f4e78f9c6c07",
+      "compiledSha256": "8ad150acb7973b9033b5e173739a91371df7571d89863c05e0d246a5f66d889b"
+    },
+    {
+      "step": 26,
+      "reason": [
+        "solid-frame wrappers",
+        "F-C13 article link claim attributes"
+      ],
+      "librarySha256": "a60666ba29ee51da75604c97dddf922955030cac6456314924574a2aaa1d7901",
+      "compiledSha256": "007d552d69f3a5c56777e76914774d56474db05f4a6ef8a7e5c4759905d0fede"
+    },
+    {
+      "step": 27,
+      "reason": [
+        "solid-frame wrappers",
+        "F-C13 article link claim attributes"
+      ],
+      "librarySha256": "a60666ba29ee51da75604c97dddf922955030cac6456314924574a2aaa1d7901",
+      "compiledSha256": "007d552d69f3a5c56777e76914774d56474db05f4a6ef8a7e5c4759905d0fede"
+    }
+  ],
+  "payloads": [
+    {
+      "url": "http://localhost/_server/data/routeRegion-db0eace7",
+      "request": "start",
+      "bytes": 10147,
+      "gzipBytes": 3314,
+      "body": ";0x00000038;{\"type\":\"start\",\"id\":\"routeRegion-db0eace7\",\"version\":1};0x00000067;{\"type\":\"slot\",\"id\":\"routeRegion-db0eace7\",\"version\":1,\"key\":\"like#route-like\",\"args\":{\"slug\":\"start\"}};0x0000010e;{\"type\":\"html\",\"id\":\"routeRegion-db0eace7\",\"version\":1,\"html\":\"<main><!--$--><template id=\\\"pl-0020\\\"></template>Loading article…<!--pl-0020--><!--/--><!--$--><!--slot:like#route-like:start--><!--slot:like#route-like:end--><!--/--></main>\",\"digest\":\"cdaca3d1b6c60e1f\"};0x00002514;{\"type\":\"fragment\",\"id\":\"routeRegion-db0eace7\",\"version\":1,\"key\":\"0020\",\"html\":\"<!--lh:0--><div class=\\\"reading\\\"><article><h1>Getting started</h1><p>Content first, with a few small tools beside it.</p><time datetime=\\\"2026-10-01T12:00:00Z\\\">October 1, 2026</time><div class=\\\"markdown\\\"><h2 id=\\\"start-plan-the-page\\\">Plan the page</h2>\\n<p>This guide builds a local development setup. Start with the reader&#39;s question and keep the answer close to the example. A useful article has a short introduction, a working example, a description of failure cases, and links to the next task. Readers should be able to copy a small example without first learning the whole application.</p>\\n<p>The content lives in Markdown so an editor can review a change as ordinary text. Headings describe tasks, links explain their destination, and fenced blocks declare their language. The renderer derives navigation from the same headings it prints, so the page and its table of contents cannot drift apart.</p>\\n<ul>\\n<li>Give every article a stable slug and a descriptive title.</li>\\n<li>Keep publication dates explicit so builds are repeatable.</li>\\n<li>Return article data from one loader and derive the display from that result.</li>\\n<li>Keep likes, search and subscriptions independent of the article body.</li>\\n</ul>\\n<p>Read the <a href=\\\"/docs/start\\\">getting started guide</a> before changing a project. The <a href=\\\"/docs/widgets\\\">widget reference</a> explains how controls keep their own state.</p>\\n<h2 id=\\\"start-install-the-tools\\\">Install the tools</h2>\\n<p>Use a small project directory and install only the languages your examples need. The following commands create a workspace, install the renderer, and run the checks. A fresh checkout should produce the same output without a global language registry or a background download.</p>\\n<pre><code class=\\\"hljs language-sh\\\"><span class=\\\"hljs-built_in\\\">mkdir</span> field-notes\\n<span class=\\\"hljs-built_in\\\">cd</span> field-notes\\npnpm init\\npnpm add marked highlight.js\\npnpm run build</code></pre>\\n<p>Record dependencies in the lockfile. A language grammar is code too: loading every grammar would add work for readers who only need three languages. Check the shipped output after adding a new formatter instead of assuming that an unused import disappears.</p>\\n<h2 id=\\\"start-model-the-article\\\">Model the article</h2>\\n<p>Keep transport data plain. The loader can read a file, query a service, or reject an unknown slug. None of those choices requires the article template to own browser state. This type describes the data that crosses the boundary, including the Markdown source rather than a prebuilt component.</p>\\n<pre><code class=\\\"hljs language-ts\\\"><span class=\\\"hljs-keyword\\\">interface</span> <span class=\\\"hljs-title class_\\\">Article</span> {\\n  <span class=\\\"hljs-attr\\\">slug</span>: <span class=\\\"hljs-built_in\\\">string</span>;\\n  <span class=\\\"hljs-attr\\\">title</span>: <span class=\\\"hljs-built_in\\\">string</span>;\\n  <span class=\\\"hljs-attr\\\">markdown</span>: <span class=\\\"hljs-built_in\\\">string</span>;\\n  <span class=\\\"hljs-attr\\\">published</span>: <span class=\\\"hljs-built_in\\\">string</span>;\\n}\\n\\n<span class=\\\"hljs-keyword\\\">export</span> <span class=\\\"hljs-keyword\\\">async</span> <span class=\\\"hljs-keyword\\\">function</span> <span class=\\\"hljs-title function_\\\">loadArticle</span>(<span class=\\\"hljs-params\\\"><span class=\\\"hljs-attr\\\">slug</span>: <span class=\\\"hljs-built_in\\\">string</span></span>): <span class=\\\"hljs-title class_\\\">Promise</span>&lt;<span class=\\\"hljs-title class_\\\">Article</span>&gt; {\\n  <span class=\\\"hljs-keyword\\\">const</span> article = <span class=\\\"hljs-keyword\\\">await</span> repository.<span class=\\\"hljs-title function_\\\">find</span>(slug);\\n  <span class=\\\"hljs-keyword\\\">if</span> (!article) <span class=\\\"hljs-keyword\\\">throw</span> <span class=\\\"hljs-keyword\\\">new</span> <span class=\\\"hljs-title class_\\\">Error</span>(<span class=\\\"hljs-string\\\">`Unknown article: <span class=\\\"hljs-subst\\\">${slug}</span>`</span>);\\n  <span class=\\\"hljs-keyword\\\">return</span> article;\\n}</code></pre>\\n<p>A derived result should depend only on this input. Avoid reading the current clock or the visitor&#39;s locale inside the formatter. Use an explicit locale and UTC when formatting a stored date so the server and browser agree on the text.</p>\\n<h3 id=\\\"start-derive-the-display\\\">Derive the display</h3>\\n<p>Transform data once when the selected article changes. Keep the table of contents beside the rendered HTML in the derived value. Heading identifiers should be stable, scoped to the article, and disambiguated when two headings use the same title.</p>\\n<pre><code class=\\\"hljs language-js\\\"><span class=\\\"hljs-keyword\\\">export</span> <span class=\\\"hljs-keyword\\\">function</span> <span class=\\\"hljs-title function_\\\">summarize</span>(<span class=\\\"hljs-params\\\">article</span>) {\\n  <span class=\\\"hljs-keyword\\\">const</span> words = article.<span class=\\\"hljs-property\\\">markdown</span>.<span class=\\\"hljs-title function_\\\">trim</span>().<span class=\\\"hljs-title function_\\\">split</span>(<span class=\\\"hljs-regexp\\\">/\\\\s+/</span>);\\n  <span class=\\\"hljs-keyword\\\">return</span> {\\n    <span class=\\\"hljs-attr\\\">title</span>: article.<span class=\\\"hljs-property\\\">title</span>,\\n    <span class=\\\"hljs-attr\\\">minutes</span>: <span class=\\\"hljs-title class_\\\">Math</span>.<span class=\\\"hljs-title function_\\\">max</span>(<span class=\\\"hljs-number\\\">1</span>, <span class=\\\"hljs-title class_\\\">Math</span>.<span class=\\\"hljs-title function_\\\">ceil</span>(words.<span class=\\\"hljs-property\\\">length</span> / <span class=\\\"hljs-number\\\">220</span>)),\\n    <span class=\\\"hljs-attr\\\">href</span>: <span class=\\\"hljs-string\\\">`/docs/<span class=\\\"hljs-subst\\\">${article.slug}</span>`</span>\\n  };\\n}</code></pre>\\n<table>\\n<thead>\\n<tr>\\n<th>Input</th>\\n<th>Derived output</th>\\n<th>Changes when</th>\\n</tr>\\n</thead>\\n<tbody><tr>\\n<td>Markdown headings</td>\\n<td>Table of contents</td>\\n<td>The article changes</td>\\n</tr>\\n<tr>\\n<td>Fenced source code</td>\\n<td>Highlighted tokens</td>\\n<td>The article changes</td>\\n</tr>\\n<tr>\\n<td>Publication date</td>\\n<td>Readable date</td>\\n<td>The stored date changes</td>\\n</tr>\\n<tr>\\n<td>Like count</td>\\n<td>Button label</td>\\n<td>The reader clicks</td>\\n</tr>\\n</tbody></table>\\n<h2 id=\\\"start-check-the-result\\\">Check the result</h2>\\n<p>Open the page directly, then navigate to it from another article. Both paths should show the same heading, highlighted code, list and table. Follow a table-of-contents link and check that its target exists. A useful check also visits a missing slug, since success alone does not prove that the nearest error boundary still receives a failure.</p>\\n<pre><code class=\\\"hljs language-ts\\\"><span class=\\\"hljs-keyword\\\">const</span> expectedSlug = <span class=\\\"hljs-string\\\">&quot;start&quot;</span>;\\n<span class=\\\"hljs-keyword\\\">const</span> result = <span class=\\\"hljs-title function_\\\">summarize</span>(<span class=\\\"hljs-keyword\\\">await</span> <span class=\\\"hljs-title function_\\\">loadArticle</span>(expectedSlug));\\n<span class=\\\"hljs-keyword\\\">if</span> (result.<span class=\\\"hljs-property\\\">href</span> !== <span class=\\\"hljs-string\\\">`/docs/<span class=\\\"hljs-subst\\\">${expectedSlug}</span>`</span>) {\\n  <span class=\\\"hljs-keyword\\\">throw</span> <span class=\\\"hljs-keyword\\\">new</span> <span class=\\\"hljs-title class_\\\">Error</span>(<span class=\\\"hljs-string\\\">&quot;The article link changed&quot;</span>);\\n}\\n<span class=\\\"hljs-variable language_\\\">console</span>.<span class=\\\"hljs-title function_\\\">log</span>(result.<span class=\\\"hljs-property\\\">title</span>, result.<span class=\\\"hljs-property\\\">minutes</span>);</code></pre>\\n<p>Keep the pending state visible while a new article loads. When a page already has useful content, preserving it during a refetch avoids a blank reading area. Controls beside the text should retain their state for as long as their route owner survives.</p>\\n<h2 id=\\\"start-continue-reading\\\">Continue reading</h2>\\n<p>For a local development setup, measure the full path: initial load, the first successful navigation, repeated navigation, and a typed failure. Count client code separately from response data. Sending HTML can remove a renderer from the browser while increasing the bytes returned for each article; both changes belong in the result.</p>\\n<p>Continue with <a href=\\\"/docs/pipeline\\\">the typed pipeline</a>, <a href=\\\"/docs/routing\\\">route design</a>, or <a href=\\\"/docs/testing\\\">content testing</a>. Review changes with someone who has not seen the implementation and ask whether each example answers a concrete question.</p>\\n</div></article><aside class=\\\"on-this-page\\\"><h2>On this page</h2><ol><li><a href=\\\"#start-plan-the-page\\\">Plan the page</a></li><li><a href=\\\"#start-install-the-tools\\\">Install the tools</a></li><li><a href=\\\"#start-model-the-article\\\">Model the article</a></li><li><a href=\\\"#start-derive-the-display\\\">Derive the display</a></li><li><a href=\\\"#start-check-the-result\\\">Check the result</a></li><li><a href=\\\"#start-continue-reading\\\">Continue reading</a></li></ol></aside><section class=\\\"related\\\"><h2>Related reading</h2><ul><li><a href=\\\"/docs/start\\\">Getting started</a></li><li><a href=\\\"/docs/widgets\\\">Independent widgets</a></li><li><a href=\\\"/docs/pipeline\\\">A typed content pipeline</a></li></ul></section></div><!--lh:/0-->\",\"digest\":\"db9d7d6e640c79fc\",\"holes\":{\"lh:0\":\"5fc51e5ff34c8c5d\"}};0x0000005f;{\"type\":\"reveal\",\"id\":\"routeRegion-db0eace7\",\"version\":1,\"keys\":[\"0020\"],\"waitForStyles\":false};0x0000003b;{\"type\":\"complete\",\"id\":\"routeRegion-db0eace7\",\"version\":1}"
+    },
+    {
+      "url": "http://localhost/_server/data/routeRegion-db0eace7",
+      "request": "missing",
+      "bytes": 915,
+      "gzipBytes": 409,
+      "body": ";0x00000038;{\"type\":\"start\",\"id\":\"routeRegion-db0eace7\",\"version\":1};0x00000069;{\"type\":\"slot\",\"id\":\"routeRegion-db0eace7\",\"version\":1,\"key\":\"like#route-like\",\"args\":{\"slug\":\"missing\"}};0x0000010e;{\"type\":\"html\",\"id\":\"routeRegion-db0eace7\",\"version\":1,\"html\":\"<main><!--$--><template id=\\\"pl-0020\\\"></template>Loading article…<!--pl-0020--><!--/--><!--$--><!--slot:like#route-like:start--><!--slot:like#route-like:end--><!--/--></main>\",\"digest\":\"cdaca3d1b6c60e1f\"};0x00000102;{\"type\":\"fragment\",\"id\":\"routeRegion-db0eace7\",\"version\":1,\"key\":\"0020\",\"html\":\"<!--lh:0--><p class=\\\"not-found\\\"><!--$-->not-found<!--/-->: <!--$-->No article: missing<!--/--></p><!--lh:/0-->\",\"digest\":\"f43369df49d51985\",\"holes\":{\"lh:0\":\"148f84804a49b976\"}};0x0000005f;{\"type\":\"reveal\",\"id\":\"routeRegion-db0eace7\",\"version\":1,\"keys\":[\"0020\"],\"waitForStyles\":false};0x0000003b;{\"type\":\"complete\",\"id\":\"routeRegion-db0eace7\",\"version\":1}"
+    },
+    {
+      "url": "http://localhost/_server/data/routeRegion-db0eace7",
+      "request": "pipeline",
+      "bytes": 10196,
+      "gzipBytes": 3313,
+      "body": ";0x00000038;{\"type\":\"start\",\"id\":\"routeRegion-db0eace7\",\"version\":1};0x0000006a;{\"type\":\"slot\",\"id\":\"routeRegion-db0eace7\",\"version\":1,\"key\":\"like#route-like\",\"args\":{\"slug\":\"pipeline\"}};0x0000010e;{\"type\":\"html\",\"id\":\"routeRegion-db0eace7\",\"version\":1,\"html\":\"<main><!--$--><template id=\\\"pl-0020\\\"></template>Loading article…<!--pl-0020--><!--/--><!--$--><!--slot:like#route-like:start--><!--slot:like#route-like:end--><!--/--></main>\",\"digest\":\"cdaca3d1b6c60e1f\"};0x00002542;{\"type\":\"fragment\",\"id\":\"routeRegion-db0eace7\",\"version\":1,\"key\":\"0020\",\"html\":\"<!--lh:0--><div class=\\\"reading\\\"><article><h1>A typed content pipeline</h1><p>Content first, with a few small tools beside it.</p><time datetime=\\\"2026-10-01T12:00:00Z\\\">October 1, 2026</time><div class=\\\"markdown\\\"><h2 id=\\\"pipeline-plan-the-page\\\">Plan the page</h2>\\n<p>This guide builds a typed article pipeline. Start with the reader&#39;s question and keep the answer close to the example. A useful article has a short introduction, a working example, a description of failure cases, and links to the next task. Readers should be able to copy a small example without first learning the whole application.</p>\\n<p>The content lives in Markdown so an editor can review a change as ordinary text. Headings describe tasks, links explain their destination, and fenced blocks declare their language. The renderer derives navigation from the same headings it prints, so the page and its table of contents cannot drift apart.</p>\\n<ul>\\n<li>Give every article a stable slug and a descriptive title.</li>\\n<li>Keep publication dates explicit so builds are repeatable.</li>\\n<li>Return article data from one loader and derive the display from that result.</li>\\n<li>Keep likes, search and subscriptions independent of the article body.</li>\\n</ul>\\n<p>Read the <a href=\\\"/docs/start\\\">getting started guide</a> before changing a project. The <a href=\\\"/docs/widgets\\\">widget reference</a> explains how controls keep their own state.</p>\\n<h2 id=\\\"pipeline-install-the-tools\\\">Install the tools</h2>\\n<p>Use a small project directory and install only the languages your examples need. The following commands create a workspace, install the renderer, and run the checks. A fresh checkout should produce the same output without a global language registry or a background download.</p>\\n<pre><code class=\\\"hljs language-sh\\\"><span class=\\\"hljs-built_in\\\">mkdir</span> field-notes\\n<span class=\\\"hljs-built_in\\\">cd</span> field-notes\\npnpm init\\npnpm add marked highlight.js\\npnpm run build</code></pre>\\n<p>Record dependencies in the lockfile. A language grammar is code too: loading every grammar would add work for readers who only need three languages. Check the shipped output after adding a new formatter instead of assuming that an unused import disappears.</p>\\n<h2 id=\\\"pipeline-model-the-article\\\">Model the article</h2>\\n<p>Keep transport data plain. The loader can read a file, query a service, or reject an unknown slug. None of those choices requires the article template to own browser state. This type describes the data that crosses the boundary, including the Markdown source rather than a prebuilt component.</p>\\n<pre><code class=\\\"hljs language-ts\\\"><span class=\\\"hljs-keyword\\\">interface</span> <span class=\\\"hljs-title class_\\\">Article</span> {\\n  <span class=\\\"hljs-attr\\\">slug</span>: <span class=\\\"hljs-built_in\\\">string</span>;\\n  <span class=\\\"hljs-attr\\\">title</span>: <span class=\\\"hljs-built_in\\\">string</span>;\\n  <span class=\\\"hljs-attr\\\">markdown</span>: <span class=\\\"hljs-built_in\\\">string</span>;\\n  <span class=\\\"hljs-attr\\\">published</span>: <span class=\\\"hljs-built_in\\\">string</span>;\\n}\\n\\n<span class=\\\"hljs-keyword\\\">export</span> <span class=\\\"hljs-keyword\\\">async</span> <span class=\\\"hljs-keyword\\\">function</span> <span class=\\\"hljs-title function_\\\">loadArticle</span>(<span class=\\\"hljs-params\\\"><span class=\\\"hljs-attr\\\">slug</span>: <span class=\\\"hljs-built_in\\\">string</span></span>): <span class=\\\"hljs-title class_\\\">Promise</span>&lt;<span class=\\\"hljs-title class_\\\">Article</span>&gt; {\\n  <span class=\\\"hljs-keyword\\\">const</span> article = <span class=\\\"hljs-keyword\\\">await</span> repository.<span class=\\\"hljs-title function_\\\">find</span>(slug);\\n  <span class=\\\"hljs-keyword\\\">if</span> (!article) <span class=\\\"hljs-keyword\\\">throw</span> <span class=\\\"hljs-keyword\\\">new</span> <span class=\\\"hljs-title class_\\\">Error</span>(<span class=\\\"hljs-string\\\">`Unknown article: <span class=\\\"hljs-subst\\\">${slug}</span>`</span>);\\n  <span class=\\\"hljs-keyword\\\">return</span> article;\\n}</code></pre>\\n<p>A derived result should depend only on this input. Avoid reading the current clock or the visitor&#39;s locale inside the formatter. Use an explicit locale and UTC when formatting a stored date so the server and browser agree on the text.</p>\\n<h3 id=\\\"pipeline-derive-the-display\\\">Derive the display</h3>\\n<p>Transform data once when the selected article changes. Keep the table of contents beside the rendered HTML in the derived value. Heading identifiers should be stable, scoped to the article, and disambiguated when two headings use the same title.</p>\\n<pre><code class=\\\"hljs language-js\\\"><span class=\\\"hljs-keyword\\\">export</span> <span class=\\\"hljs-keyword\\\">function</span> <span class=\\\"hljs-title function_\\\">summarize</span>(<span class=\\\"hljs-params\\\">article</span>) {\\n  <span class=\\\"hljs-keyword\\\">const</span> words = article.<span class=\\\"hljs-property\\\">markdown</span>.<span class=\\\"hljs-title function_\\\">trim</span>().<span class=\\\"hljs-title function_\\\">split</span>(<span class=\\\"hljs-regexp\\\">/\\\\s+/</span>);\\n  <span class=\\\"hljs-keyword\\\">return</span> {\\n    <span class=\\\"hljs-attr\\\">title</span>: article.<span class=\\\"hljs-property\\\">title</span>,\\n    <span class=\\\"hljs-attr\\\">minutes</span>: <span class=\\\"hljs-title class_\\\">Math</span>.<span class=\\\"hljs-title function_\\\">max</span>(<span class=\\\"hljs-number\\\">1</span>, <span class=\\\"hljs-title class_\\\">Math</span>.<span class=\\\"hljs-title function_\\\">ceil</span>(words.<span class=\\\"hljs-property\\\">length</span> / <span class=\\\"hljs-number\\\">220</span>)),\\n    <span class=\\\"hljs-attr\\\">href</span>: <span class=\\\"hljs-string\\\">`/docs/<span class=\\\"hljs-subst\\\">${article.slug}</span>`</span>\\n  };\\n}</code></pre>\\n<table>\\n<thead>\\n<tr>\\n<th>Input</th>\\n<th>Derived output</th>\\n<th>Changes when</th>\\n</tr>\\n</thead>\\n<tbody><tr>\\n<td>Markdown headings</td>\\n<td>Table of contents</td>\\n<td>The article changes</td>\\n</tr>\\n<tr>\\n<td>Fenced source code</td>\\n<td>Highlighted tokens</td>\\n<td>The article changes</td>\\n</tr>\\n<tr>\\n<td>Publication date</td>\\n<td>Readable date</td>\\n<td>The stored date changes</td>\\n</tr>\\n<tr>\\n<td>Like count</td>\\n<td>Button label</td>\\n<td>The reader clicks</td>\\n</tr>\\n</tbody></table>\\n<h2 id=\\\"pipeline-check-the-result\\\">Check the result</h2>\\n<p>Open the page directly, then navigate to it from another article. Both paths should show the same heading, highlighted code, list and table. Follow a table-of-contents link and check that its target exists. A useful check also visits a missing slug, since success alone does not prove that the nearest error boundary still receives a failure.</p>\\n<pre><code class=\\\"hljs language-ts\\\"><span class=\\\"hljs-keyword\\\">const</span> expectedSlug = <span class=\\\"hljs-string\\\">&quot;pipeline&quot;</span>;\\n<span class=\\\"hljs-keyword\\\">const</span> result = <span class=\\\"hljs-title function_\\\">summarize</span>(<span class=\\\"hljs-keyword\\\">await</span> <span class=\\\"hljs-title function_\\\">loadArticle</span>(expectedSlug));\\n<span class=\\\"hljs-keyword\\\">if</span> (result.<span class=\\\"hljs-property\\\">href</span> !== <span class=\\\"hljs-string\\\">`/docs/<span class=\\\"hljs-subst\\\">${expectedSlug}</span>`</span>) {\\n  <span class=\\\"hljs-keyword\\\">throw</span> <span class=\\\"hljs-keyword\\\">new</span> <span class=\\\"hljs-title class_\\\">Error</span>(<span class=\\\"hljs-string\\\">&quot;The article link changed&quot;</span>);\\n}\\n<span class=\\\"hljs-variable language_\\\">console</span>.<span class=\\\"hljs-title function_\\\">log</span>(result.<span class=\\\"hljs-property\\\">title</span>, result.<span class=\\\"hljs-property\\\">minutes</span>);</code></pre>\\n<p>Keep the pending state visible while a new article loads. When a page already has useful content, preserving it during a refetch avoids a blank reading area. Controls beside the text should retain their state for as long as their route owner survives.</p>\\n<h2 id=\\\"pipeline-continue-reading\\\">Continue reading</h2>\\n<p>For a typed article pipeline, measure the full path: initial load, the first successful navigation, repeated navigation, and a typed failure. Count client code separately from response data. Sending HTML can remove a renderer from the browser while increasing the bytes returned for each article; both changes belong in the result.</p>\\n<p>Continue with <a href=\\\"/docs/pipeline\\\">the typed pipeline</a>, <a href=\\\"/docs/routing\\\">route design</a>, or <a href=\\\"/docs/testing\\\">content testing</a>. Review changes with someone who has not seen the implementation and ask whether each example answers a concrete question.</p>\\n</div></article><aside class=\\\"on-this-page\\\"><h2>On this page</h2><ol><li><a href=\\\"#pipeline-plan-the-page\\\">Plan the page</a></li><li><a href=\\\"#pipeline-install-the-tools\\\">Install the tools</a></li><li><a href=\\\"#pipeline-model-the-article\\\">Model the article</a></li><li><a href=\\\"#pipeline-derive-the-display\\\">Derive the display</a></li><li><a href=\\\"#pipeline-check-the-result\\\">Check the result</a></li><li><a href=\\\"#pipeline-continue-reading\\\">Continue reading</a></li></ol></aside><section class=\\\"related\\\"><h2>Related reading</h2><ul><li><a href=\\\"/docs/start\\\">Getting started</a></li><li><a href=\\\"/docs/widgets\\\">Independent widgets</a></li><li><a href=\\\"/docs/pipeline\\\">A typed content pipeline</a></li></ul></section></div><!--lh:/0-->\",\"digest\":\"df0ab17d1d3a0287\",\"holes\":{\"lh:0\":\"622d9dc8b0119942\"}};0x0000005f;{\"type\":\"reveal\",\"id\":\"routeRegion-db0eace7\",\"version\":1,\"keys\":[\"0020\"],\"waitForStyles\":false};0x0000003b;{\"type\":\"complete\",\"id\":\"routeRegion-db0eace7\",\"version\":1}"
+    }
+  ]
+}

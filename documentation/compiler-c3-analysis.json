@@ -2,16 +2,16 @@
   {
     "twin": "docs-yield",
     "holes": {
-      "S": 133,
-      "R": 56,
+      "S": 59,
+      "R": 19,
       "client": 54,
-      "total": 243
+      "total": 132
     },
     "jsx": {
-      "S": 151,
-      "R": 61,
+      "S": 59,
+      "R": 15,
       "client": 37,
-      "total": 249
+      "total": 111
     },
     "h": {
       "S": 0,
@@ -71,35 +71,35 @@
     "captures": [],
     "serverCalls": [
       {
-        "at": "examples/docs-yield/src/content.tsx:17:13",
+        "at": "examples/docs-yield/src/content.tsx:18:13",
         "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1465",
         "target": "getSite",
         "provenance": "S",
         "captureEligible": true
       },
       {
-        "at": "examples/docs-yield/src/content.tsx:133:13",
+        "at": "examples/docs-yield/src/content.tsx:134:13",
         "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1040>1040:view>component:537",
         "target": "getArticle",
         "provenance": "S",
         "captureEligible": true
       },
       {
-        "at": "examples/docs-yield/src/content.tsx:133:13",
+        "at": "examples/docs-yield/src/content.tsx:134:13",
         "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1108>1108:view>component:812",
         "target": "getArticle",
         "provenance": "R",
         "captureEligible": true
       },
       {
-        "at": "examples/docs-yield/src/content.tsx:133:13",
-        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1692>1692:view>component:8959",
+        "at": "examples/docs-yield/src/content.tsx:134:13",
+        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1692>1692:view>component:6477",
         "target": "getArticle",
         "provenance": "S",
         "captureEligible": true
       },
       {
-        "at": "examples/docs-yield/src/content.tsx:81:13",
+        "at": "examples/docs-yield/src/content.tsx:82:13",
         "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1724",
         "target": "getSite",
         "provenance": "S",
@@ -113,17 +113,27 @@
         "provenance": "C"
       },
       {
-        "at": "examples/docs-yield/src/content.tsx:15:23",
+        "at": "examples/docs-yield/src/content.tsx:16:23",
         "component": "SiteNav",
         "provenance": "S"
       },
       {
-        "at": "examples/docs-yield/src/content.tsx:130:26",
+        "at": "examples/docs-yield/src/content.tsx:131:26",
         "component": "ArticleContent",
         "provenance": "S"
       },
       {
-        "at": "examples/docs-yield/src/content.tsx:130:26",
+        "at": "examples/docs-yield/src/content.tsx:138:27",
+        "component": "ArticleContent",
+        "provenance": "S"
+      },
+      {
+        "at": "examples/docs-yield/src/content.tsx:131:26",
+        "component": "ArticleContent",
+        "provenance": "R"
+      },
+      {
+        "at": "examples/docs-yield/src/content.tsx:138:27",
         "component": "ArticleContent",
         "provenance": "R"
       },
@@ -138,24 +148,29 @@
         "provenance": "U"
       },
       {
-        "at": "examples/docs-yield/src/content.tsx:130:26",
+        "at": "examples/docs-yield/src/content.tsx:131:26",
         "component": "ArticleContent",
         "provenance": "S"
       },
       {
-        "at": "examples/docs-yield/src/content.tsx:79:23",
+        "at": "examples/docs-yield/src/content.tsx:138:27",
+        "component": "ArticleContent",
+        "provenance": "S"
+      },
+      {
+        "at": "examples/docs-yield/src/content.tsx:80:23",
         "component": "SiteFooter",
         "provenance": "S"
       }
     ],
     "before": {
       "holes": {
-        "inert": 124,
-        "total": 243
+        "inert": 50,
+        "total": 132
       },
       "jsx": {
-        "inert": 148,
-        "total": 249
+        "inert": 56,
+        "total": 111
       },
       "h": {
         "inert": 0,
@@ -221,7 +236,7 @@
           "DocPage"
         ],
         "mode": "visible",
-        "size": 69
+        "size": 33
       },
       {
         "id": 8,

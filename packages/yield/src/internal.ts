@@ -12,3 +12,7 @@ export {
   registerNativeFailure
 } from "./native-failure.js";
 export type { NativeCaught } from "./native-failure.js";
+
+export { nativeTry, nativeMap } from "./native-control.js";
+
+export type { NativeArguments } from "./native-control.js";

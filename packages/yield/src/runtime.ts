@@ -143,7 +143,7 @@ function brand<T>(e: T): T {
 /** Brand a failure the runtime routes (D-087): `lazy`'s `ChunkError` (D-100). */
 export const brandFailure: <T>(e: T) => T = brand;
 /** A typed failure (D-087): branded by `raise` or an attempt's handler, in every build. */
-function isFailure(e: unknown): boolean {
+export function isFailure(e: unknown): boolean {
   return (
     e != null &&
     (typeof e === "object" || typeof e === "function") &&

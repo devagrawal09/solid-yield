@@ -4,6 +4,62 @@ const counter = body =>
   `${signal} export function Counter(){const [count,set]=createSignal(0);${body}}`;
 export const fixtures = [
   {
+    id: "timer-callback-failure",
+    expectedDiagnostic: "NATIVE_CALLBACK_FAILURE",
+    source: `import {createSignal,createMemo} from 'solid-js';declare function risk():void;export function App(){const [n]=createSignal(2);const timer=createMemo(()=>setTimeout(()=>{n();risk()},10));return <p>{timer()}</p>}`
+  },
+  {
+    id: "native-latest-pending",
+    expected: "accepted",
+    source: `import {createSignal,latest,isPending} from 'solid-js';export function App(){const [n]=createSignal(2);return <p>{latest(n)}{isPending(n)?"pending":"ready"}</p>}`
+  },
+  {
+    id: "handled-catch",
+    expected: "accepted",
+    source: `import {createMemo} from 'solid-js';export function App(){const n=createMemo(()=>{try{throw new Error('bad')}catch{return 7}});return <p>{n()}</p>}`
+  },
+  {
+    id: "rethrow-catch",
+    expected: "accepted",
+    source: `import {createMemo} from 'solid-js';export function App(){const n=createMemo(()=>{try{throw new Error('bad')}catch(e){throw e}});return <p>{n()}</p>}`
+  },
+  {
+    id: "unknown-rethrow-catch",
+    expected: "accepted",
+    source: `import {createMemo} from 'solid-js';export function App(){const n=createMemo(()=>{try{throw new Error('bad')}catch(e){String(e);throw e}});return <p>{n()}</p>}`
+  },
+  {
+    id: "generator-action",
+    expected: "accepted",
+    source: `import {action,createSignal} from 'solid-js';export function App(){const [n,set]=createSignal(0);const save=action(function*(){try{yield Promise.resolve(2);set(n()+1)}catch{set(-1)}});return <button onClick={save}>{n()}</button>}`
+  },
+  {
+    id: "native-store",
+    expected: "accepted",
+    source: `import {createStore} from 'solid-js';export function App(){const [state,set]=createStore({n:1});return <button onClick={()=>set(s=>{s.n++})}>{state.n}</button>}`
+  },
+  {
+    id: "native-optimistic",
+    expected: "accepted",
+    source: `import {createOptimistic} from 'solid-js';export function App(){const [n,set]=createOptimistic(0);return <button onClick={()=>set(n()+1)}>{n()}</button>}`
+  },
+  {
+    id: "timer-callback",
+    expected: "accepted",
+    source: `import {createSignal,createMemo} from 'solid-js';export function App(){const [n,set]=createSignal(0);const timer=createMemo(()=>setTimeout(()=>set(n()+1),10));return <p>{timer()}{n()}</p>}`
+  },
+  {
+    id: "native-settled",
+    expected: "accepted",
+    source: `import {onSettled} from 'solid-js';export function App(){onSettled(()=>{return ()=>{}});return <p/>}`
+  },
+  {
+    id: "reactive-array-map",
+    expected: "accepted",
+    source: `import {createSignal,createMemo} from 'solid-js';export function App(){const [n]=createSignal(2);const values=createMemo(()=>[1,2].map(x=>x*n()));return <p>{values().join(',')}</p>}`
+  },
+
+  {
     id: "class-memo",
     source: `import {createMemo} from 'solid-js'; class Failed extends Error{} function load(){throw new Failed('bad')} export function App(){const value=createMemo(()=>load());return <p>{value()}</p>}`,
     expected: "accepted"
@@ -88,6 +144,7 @@ export const fixtures = [
   },
   {
     id: "pending-root",
+    expectedDiagnostic: "PENDING_ROOT",
     source: `${signal} import {render} from '@solidjs/web';function App(){const n=createMemo(async()=>1);return <p>{n()}</p>;}render(App,document.body);`,
     slots: ["T07"]
   },

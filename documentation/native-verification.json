@@ -21,7 +21,7 @@
         {
           "stage": "type",
           "code": "TS2345",
-          "message": "Argument of type 'HoleCall<{}, false, NativeFailure<\"packages/vite-plugin-yield/test/.native-generated/class-memo.tsx#Failed@36\">, false, never>' is not assignable to parameter of type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<false, NativeFailure<\"packages/vite-plugin-yield/test/.native-generated/class-memo.tsx#Failed@36\">, false, HoleRequires<...>>) & { ...; } & { ...; }'.\n  Type 'HoleCall<{}, false, NativeFailure<\"packages/vite-plugin-yield/test/.native-generated/class-memo.tsx#Failed@36\">, false, never>' is not assignable to type '{ readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"packages/vite-plugin-yield/test/.native-generated/class-memo.tsx#Failed@36\"; }'."
+          "message": "Argument of type 'HoleCall<{}, false, NativeFailure<\"packages/vite-plugin-yield/test/.native-generated/class-memo.tsx#Failed@38\">, false, never>' is not assignable to parameter of type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<false, NativeFailure<\"packages/vite-plugin-yield/test/.native-generated/class-memo.tsx#Failed@38\">, false, HoleRequires<...>>) & { ...; } & { ...; }'.\n  Type 'HoleCall<{}, false, NativeFailure<\"packages/vite-plugin-yield/test/.native-generated/class-memo.tsx#Failed@38\">, false, never>' is not assignable to type '{ readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"packages/vite-plugin-yield/test/.native-generated/class-memo.tsx#Failed@38\"; }'."
         }
       ]
     },
@@ -39,6 +39,101 @@
     }
   ],
   "fixtures": [
+    {
+      "id": "timer-callback-failure",
+      "expectedDiagnostic": "NATIVE_CALLBACK_FAILURE",
+      "source": "import {createSignal,createMemo} from 'solid-js';declare function risk():void;export function App(){const [n]=createSignal(2);const timer=createMemo(()=>setTimeout(()=>{n();risk()},10));return <p>{timer()}</p>}",
+      "file": "packages/vite-plugin-yield/test/.native-generated/timer-callback-failure.tsx",
+      "stage": "checked-error",
+      "diagnostics": [
+        {
+          "stage": "type",
+          "code": "TS2345",
+          "message": "Argument of type 'EventHandler<[], NativeFailure<\"unknown\">, void, false, false>' is not assignable to parameter of type 'EventHandler<[], NativeFailure<\"unknown\">, void, false, false> & { readonly \"[NATIVE_CALLBACK_FAILURE] foreign callback failure registration is not implemented; handle failures inside the callback\": NativeFailure<...>; }'.\n  Property '\"[NATIVE_CALLBACK_FAILURE] foreign callback failure registration is not implemented; handle failures inside the callback\"' is missing in type 'EventHandler<[], NativeFailure<\"unknown\">, void, false, false>' but required in type '{ readonly \"[NATIVE_CALLBACK_FAILURE] foreign callback failure registration is not implemented; handle failures inside the callback\": NativeFailure<\"unknown\">; }'.",
+          "line": 13
+        }
+      ]
+    },
+    {
+      "id": "native-latest-pending",
+      "expected": "accepted",
+      "source": "import {createSignal,latest,isPending} from 'solid-js';export function App(){const [n]=createSignal(2);return <p>{latest(n)}{isPending(n)?\"pending\":\"ready\"}</p>}",
+      "file": "packages/vite-plugin-yield/test/.native-generated/native-latest-pending.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "handled-catch",
+      "expected": "accepted",
+      "source": "import {createMemo} from 'solid-js';export function App(){const n=createMemo(()=>{try{throw new Error('bad')}catch{return 7}});return <p>{n()}</p>}",
+      "file": "packages/vite-plugin-yield/test/.native-generated/handled-catch.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "rethrow-catch",
+      "expected": "accepted",
+      "source": "import {createMemo} from 'solid-js';export function App(){const n=createMemo(()=>{try{throw new Error('bad')}catch(e){throw e}});return <p>{n()}</p>}",
+      "file": "packages/vite-plugin-yield/test/.native-generated/rethrow-catch.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "unknown-rethrow-catch",
+      "expected": "accepted",
+      "source": "import {createMemo} from 'solid-js';export function App(){const n=createMemo(()=>{try{throw new Error('bad')}catch(e){String(e);throw e}});return <p>{n()}</p>}",
+      "file": "packages/vite-plugin-yield/test/.native-generated/unknown-rethrow-catch.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "generator-action",
+      "expected": "accepted",
+      "source": "import {action,createSignal} from 'solid-js';export function App(){const [n,set]=createSignal(0);const save=action(function*(){try{yield Promise.resolve(2);set(n()+1)}catch{set(-1)}});return <button onClick={save}>{n()}</button>}",
+      "file": "packages/vite-plugin-yield/test/.native-generated/generator-action.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "native-store",
+      "expected": "accepted",
+      "source": "import {createStore} from 'solid-js';export function App(){const [state,set]=createStore({n:1});return <button onClick={()=>set(s=>{s.n++})}>{state.n}</button>}",
+      "file": "packages/vite-plugin-yield/test/.native-generated/native-store.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "native-optimistic",
+      "expected": "accepted",
+      "source": "import {createOptimistic} from 'solid-js';export function App(){const [n,set]=createOptimistic(0);return <button onClick={()=>set(n()+1)}>{n()}</button>}",
+      "file": "packages/vite-plugin-yield/test/.native-generated/native-optimistic.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "timer-callback",
+      "expected": "accepted",
+      "source": "import {createSignal,createMemo} from 'solid-js';export function App(){const [n,set]=createSignal(0);const timer=createMemo(()=>setTimeout(()=>set(n()+1),10));return <p>{timer()}{n()}</p>}",
+      "file": "packages/vite-plugin-yield/test/.native-generated/timer-callback.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "native-settled",
+      "expected": "accepted",
+      "source": "import {onSettled} from 'solid-js';export function App(){onSettled(()=>{return ()=>{}});return <p/>}",
+      "file": "packages/vite-plugin-yield/test/.native-generated/native-settled.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "reactive-array-map",
+      "expected": "accepted",
+      "source": "import {createSignal,createMemo} from 'solid-js';export function App(){const [n]=createSignal(2);const values=createMemo(()=>[1,2].map(x=>x*n()));return <p>{values().join(',')}</p>}",
+      "file": "packages/vite-plugin-yield/test/.native-generated/reactive-array-map.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
     {
       "id": "class-memo",
       "source": "import {createMemo} from 'solid-js'; class Failed extends Error{} function load(){throw new Failed('bad')} export function App(){const value=createMemo(()=>load());return <p>{value()}</p>}",
@@ -212,6 +307,7 @@
     },
     {
       "id": "pending-root",
+      "expectedDiagnostic": "PENDING_ROOT",
       "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; import {render} from '@solidjs/web';function App(){const n=createMemo(async()=>1);return <p>{n()}</p>;}render(App,document.body);",
       "slots": [
         "T07"
@@ -221,9 +317,9 @@
       "diagnostics": [
         {
           "stage": "type",
-          "code": "TS2345",
-          "message": "Argument of type 'HoleCall<{}, true, never, false, never>' is not assignable to parameter of type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<true, never, false, HoleRequires<...>>) & { ...; } & { ...; }'.\n  Type 'HoleCall<{}, true, never, false, never>' is not assignable to type '{ readonly \"[PENDING_ROOT] the root may be pending (a read under it has no Loading above): wrap the root, render(() => Loading({ children: App }), el), or put a Loading around the pending part\": true; }'.",
-          "line": 25
+          "code": "TS1360",
+          "message": "Type 'HoleCall<{}, true, never, false, never>' does not satisfy the expected type '{ readonly \"[PENDING_ROOT] the root may be pending (a read under it has no Loading above): wrap the root, render(() => Loading({ children: App }), el), or put a Loading around the pending part\": true; }'.",
+          "line": 26
         }
       ]
     },
@@ -239,7 +335,7 @@
         {
           "stage": "type",
           "code": "TS2322",
-          "message": "Type '() => Generator<Read<true, never>, number, any>' is not assignable to type 'number | Source<number, never, false> | SettledProp<\"[SETTLED_PROP] prop `n` is settled: pass a settled value, or declare it Source<T, E, true>\"> | HoleProp<...>'.\n  Type '() => Generator<Read<true, never>, number, any>' is not assignable to type 'HoleProp<number, never, false, unknown>'.\n    Call signature return types 'Generator<Read<true, never>, number, any>' and 'Generator<Raise<never> | Read<false, never> | ChildView<false, never, boolean, unknown>, number, any>' are incompatible.\n      The types returned by 'next(...)' are incompatible between these types.\n        Type 'IteratorResult<Read<true, never>, number>' is not assignable to type 'IteratorResult<Raise<never> | Read<false, never> | ChildView<false, never, boolean, unknown>, number>'.\n          Type 'IteratorYieldResult<Read<true, never>>' is not assignable to type 'IteratorResult<Raise<never> | Read<false, never> | ChildView<false, never, boolean, unknown>, number>'.\n            Type 'IteratorYieldResult<Read<true, never>>' is not assignable to type 'IteratorYieldResult<Raise<never> | Read<false, never> | ChildView<false, never, boolean, unknown>>'.\n              Type 'Read<true, never>' is not assignable to type 'Raise<never> | Read<false, never> | ChildView<false, never, boolean, unknown>'.\n                Type 'Read<true, never>' is not assignable to type 'Read<false, never>'.\n                  Type 'true' is not assignable to type 'false'.",
+          "message": "Type '() => Generator<Read<true, never>, number, any>' is not assignable to type 'number | Source<number, never, false> | SettledProp<\"[SETTLED_PROP] prop `n` is settled: pass a settled value, or declare it Source<T, E, true>\"> | HoleProp<...>'.\n  Type '() => Generator<Read<true, never>, number, any>' is not assignable to type 'HoleProp<number, never, false, unknown>'.\n    Call signature return types 'Generator<Read<true, never>, number, any>' and 'Generator<Read<false, never> | Raise<never> | ChildView<false, never, boolean, unknown>, number, any>' are incompatible.\n      The types returned by 'next(...)' are incompatible between these types.\n        Type 'IteratorResult<Read<true, never>, number>' is not assignable to type 'IteratorResult<Read<false, never> | Raise<never> | ChildView<false, never, boolean, unknown>, number>'.\n          Type 'IteratorYieldResult<Read<true, never>>' is not assignable to type 'IteratorResult<Read<false, never> | Raise<never> | ChildView<false, never, boolean, unknown>, number>'.\n            Type 'IteratorYieldResult<Read<true, never>>' is not assignable to type 'IteratorYieldResult<Read<false, never> | Raise<never> | ChildView<false, never, boolean, unknown>>'.\n              Type 'Read<true, never>' is not assignable to type 'Read<false, never> | Raise<never> | ChildView<false, never, boolean, unknown>'.\n                Type 'Read<true, never>' is not assignable to type 'Read<false, never>'.\n                  Type 'true' is not assignable to type 'false'.",
           "line": 35
         }
       ]
@@ -307,16 +403,9 @@
       "slots": [
         "L06"
       ],
-      "stage": "transform",
-      "diagnostics": [
-        {
-          "code": "NATIVE_CATCH",
-          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/catch.tsx",
-          "line": 1,
-          "column": 195
-        }
-      ]
+      "file": "packages/vite-plugin-yield/test/.native-generated/catch.tsx",
+      "stage": "accepted",
+      "diagnostics": []
     },
     {
       "id": "memo-write",
@@ -330,7 +419,7 @@
         {
           "stage": "type",
           "code": "TS2345",
-          "message": "Argument of type '() => Generator<Write | Read<false, never>, number, any>' is not assignable to parameter of type '() => Generator<MemoOp, number, any>'.\n  Call signature return types 'Generator<Write | Read<false, never>, number, any>' and 'Generator<MemoOp, number, any>' are incompatible.\n    The types returned by 'next(...)' are incompatible between these types.\n      Type 'IteratorResult<Write | Read<false, never>, number>' is not assignable to type 'IteratorResult<MemoOp, number>'.\n        Type 'IteratorYieldResult<Write | Read<false, never>>' is not assignable to type 'IteratorResult<MemoOp, number>'.\n          Type 'IteratorYieldResult<Write | Read<false, never>>' is not assignable to type 'IteratorYieldResult<MemoOp>'.\n            Type 'Write | Read<false, never>' is not assignable to type 'MemoOp'.\n              Type 'Write' is not assignable to type 'MemoOp'.\n                Type 'Write' is not assignable to type 'StreamAttempt'.\n                  Types of property '[KIND]' are incompatible.\n                    Type '\"write\"' is not assignable to type '\"stream\"'.",
+          "message": "Argument of type '() => Generator<Read<false, never> | Write, number, any>' is not assignable to parameter of type '() => Generator<MemoOp, number, any>'.\n  Call signature return types 'Generator<Read<false, never> | Write, number, any>' and 'Generator<MemoOp, number, any>' are incompatible.\n    The types returned by 'next(...)' are incompatible between these types.\n      Type 'IteratorResult<Read<false, never> | Write, number>' is not assignable to type 'IteratorResult<MemoOp, number>'.\n        Type 'IteratorYieldResult<Read<false, never> | Write>' is not assignable to type 'IteratorResult<MemoOp, number>'.\n          Type 'IteratorYieldResult<Read<false, never> | Write>' is not assignable to type 'IteratorYieldResult<MemoOp>'.\n            Type 'Read<false, never> | Write' is not assignable to type 'MemoOp'.\n              Type 'Write' is not assignable to type 'MemoOp'.\n                Type 'Write' is not assignable to type 'StreamAttempt'.\n                  Types of property '[KIND]' are incompatible.\n                    Type '\"write\"' is not assignable to type '\"stream\"'.",
           "line": 13
         }
       ]
@@ -375,8 +464,14 @@
         {
           "stage": "type",
           "code": "TS2345",
-          "message": "Argument of type 'HoleCall<{}, false, never, false, RequiredContext<number, \"<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C\">>' is not assignable to parameter of type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<false, never, false, RequiredContext<...> | HoleRequires<...>>) & { ...; } & { ...; }'.\n  Type 'HoleCall<{}, false, never, false, RequiredContext<number, \"<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C\">>' is not assignable to type '{ readonly \"[NO_PROVIDER] the root requires the contexts this property names: provide each above the components that read it (Ctx.provide({ value, children }) around their calls)\": \"<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C\"; }'.",
-          "line": 24
+          "message": "Argument of type 'HoleCall<{}, false, never, false, RequiredContext<number, \"<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C\">>' is not assignable to parameter of type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<false, never, false, RequiredContext<...> | HoleRequires<...>>) & { ...; } & { ...; }'.\n  Type 'HoleCall<{}, false, never, false, RequiredContext<number, \"<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C\">>' is not assignable to type '{ readonly \"[NO_PROVIDER] a yield component handed to plain Solid requires the contexts this property names: provide them inside it (Ctx.provide around the calls that read them), or list the ones provided above the foreign edge: foreign(Comp, { provided: [Ctx] })\": \"<root>/packages/vite-plugin-yield/t...'.",
+          "line": 25
+        },
+        {
+          "stage": "type",
+          "code": "TS1360",
+          "message": "Type 'HoleCall<{}, false, never, false, RequiredContext<number, \"<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C\">>' does not satisfy the expected type '{ readonly \"[NO_PROVIDER] the root requires the contexts this property names: provide each above the components that read it (Ctx.provide({ value, children }) around their calls)\": \"<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C\"; }'.",
+          "line": 25
         }
       ]
     },
@@ -393,13 +488,9 @@
     {
       "id": "callback-read",
       "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; export function Counter(){const [count,set]=createSignal(0);const n=createMemo(()=>[1].map(()=>count()));return <p>{n()}</p>;}",
-      "stage": "transform",
-      "diagnostics": [
-        {
-          "code": "SUGAR_CALLBACK",
-          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/packages/vite-plugin-yield/test/.native-generated/callback-read.tsx:8:55)"
-        }
-      ]
+      "file": "packages/vite-plugin-yield/test/.native-generated/callback-read.tsx",
+      "stage": "accepted",
+      "diagnostics": []
     },
     {
       "id": "async-read",
@@ -719,60 +810,8 @@
       "status": "refused",
       "diagnostics": [
         {
-          "code": "NATIVE_API",
-          "message": "Solid API markSafeError has no verified native lowering.",
-          "file": "examples/originals/docs/src/errors.ts",
-          "line": 1,
-          "column": 10
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API HydrationScript has no verified native lowering.",
-          "file": "examples/originals/docs/src/shell.tsx",
-          "line": 1,
-          "column": 10
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API createOptimistic has no verified native lowering.",
-          "file": "examples/originals/docs/src/widgets.tsx",
-          "line": 3,
-          "column": 3
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API action has no verified native lowering.",
-          "file": "examples/originals/docs/src/widgets.tsx",
-          "line": 6,
-          "column": 3
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/docs/src/widgets.tsx",
-          "line": 63,
-          "column": 22
-        },
-        {
-          "code": "NATIVE_CATCH",
-          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
-          "file": "examples/originals/docs/src/widgets.tsx",
-          "line": 67,
-          "column": 5
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/docs/src/widgets.tsx",
-          "line": 94,
-          "column": 25
-        },
-        {
-          "code": "NATIVE_CATCH",
-          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
-          "file": "examples/originals/docs/src/widgets.tsx",
-          "line": 98,
-          "column": 5
+          "code": "SUGAR_CALLBACK",
+          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/examples/originals/docs/src/content.tsx:91:45)"
         }
       ],
       "parity": "not run: no checked native program",
@@ -780,9 +819,7 @@
       "differingStatements": null,
       "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
       "reasons": [
-        "NATIVE_API",
-        "NATIVE_GENERATOR",
-        "NATIVE_CATCH"
+        "SUGAR_CALLBACK"
       ]
     },
     {
@@ -872,137 +909,8 @@
       "status": "refused",
       "diagnostics": [
         {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/effect/src/api.ts",
-          "line": 87,
-          "column": 30
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/effect/src/api.ts",
-          "line": 102,
-          "column": 21
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/effect/src/api.ts",
-          "line": 169,
-          "column": 21
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/effect/src/api.ts",
-          "line": 184,
-          "column": 21
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/effect/src/api.ts",
-          "line": 195,
-          "column": 21
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/effect/src/api.ts",
-          "line": 214,
-          "column": 30
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/effect/src/api.ts",
-          "line": 222,
-          "column": 21
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/effect/src/api.ts",
-          "line": 237,
-          "column": 21
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API createOptimistic has no verified native lowering.",
-          "file": "examples/originals/effect/src/checkout.tsx",
-          "line": 17,
-          "column": 3
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API createOptimisticStore has no verified native lowering.",
-          "file": "examples/originals/effect/src/checkout.tsx",
-          "line": 18,
-          "column": 3
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API createStore has no verified native lowering.",
-          "file": "examples/originals/effect/src/checkout.tsx",
-          "line": 20,
-          "column": 3
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API refresh has no verified native lowering.",
-          "file": "examples/originals/effect/src/checkout.tsx",
-          "line": 23,
-          "column": 3
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/effect/src/checkout.tsx",
-          "line": 73,
-          "column": 35
-        },
-        {
-          "code": "NATIVE_CATCH",
-          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
-          "file": "examples/originals/effect/src/checkout.tsx",
-          "line": 77,
-          "column": 5
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API createStore has no verified native lowering.",
-          "file": "examples/originals/effect/src/log.ts",
-          "line": 6,
-          "column": 10
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API action has no verified native lowering.",
-          "file": "examples/originals/effect/src/solid-effect.ts",
-          "line": 34,
-          "column": 10
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/effect/src/solid-effect.ts",
-          "line": 135,
-          "column": 23
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API isPending has no verified native lowering.",
-          "file": "examples/originals/effect/src/typeahead.tsx",
-          "line": 11,
-          "column": 50
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API latest has no verified native lowering.",
-          "file": "examples/originals/effect/src/typeahead.tsx",
-          "line": 11,
-          "column": 61
+          "code": "SUGAR_CALLBACK",
+          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/examples/originals/effect/src/api.ts:154:17)"
         }
       ],
       "parity": "not run: no checked native program",
@@ -1010,9 +918,7 @@
       "differingStatements": null,
       "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
       "reasons": [
-        "NATIVE_GENERATOR",
-        "NATIVE_API",
-        "NATIVE_CATCH"
+        "SUGAR_CALLBACK"
       ]
     },
     {
@@ -1185,25 +1091,8 @@
       "status": "refused",
       "diagnostics": [
         {
-          "code": "NATIVE_API",
-          "message": "Solid API Component has no verified native lowering.",
-          "file": "examples/originals/hackernews-spa/src/components/comment.tsx",
-          "line": 1,
-          "column": 10
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API Component has no verified native lowering.",
-          "file": "examples/originals/hackernews-spa/src/components/story.tsx",
-          "line": 1,
-          "column": 10
-        },
-        {
-          "code": "NATIVE_CATCH",
-          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
-          "file": "examples/originals/hackernews-spa/src/lib/hn.ts",
-          "line": 33,
-          "column": 3
+          "code": "SUGAR_CALLBACK",
+          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/examples/originals/hackernews-spa/src/routes/stories.tsx:20:45)"
         }
       ],
       "parity": "not run: no checked native program",
@@ -1211,8 +1100,7 @@
       "differingStatements": null,
       "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
       "reasons": [
-        "NATIVE_API",
-        "NATIVE_CATCH"
+        "SUGAR_CALLBACK"
       ]
     },
     {
@@ -1266,9 +1154,7 @@
             "line": 3,
             "server": false,
             "component": true,
-            "fails": [
-              "unknown"
-            ]
+            "fails": []
           },
           {
             "file": "examples/originals/rendering/shared/src/components/Profile/Profile.tsx",
@@ -1362,129 +1248,10 @@
       "status": "refused",
       "diagnostics": [
         {
-          "code": "NATIVE_API",
-          "message": "Solid API isPending has no verified native lowering.",
-          "file": "examples/originals/rendering/shared/src/components/App.tsx",
-          "line": 1,
-          "column": 10
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API lazy has no verified native lowering.",
-          "file": "examples/originals/rendering/shared/src/components/App.tsx",
-          "line": 1,
-          "column": 21
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API onSettled has no verified native lowering.",
-          "file": "examples/originals/rendering/shared/src/components/Home.tsx",
-          "line": 1,
-          "column": 24
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API lazy has no verified native lowering.",
-          "file": "examples/originals/rendering/shared/src/components/Profile/index.tsx",
-          "line": 1,
-          "column": 22
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API Reveal has no verified native lowering.",
+          "code": "NATIVE_FOREIGN",
+          "message": "A foreign JSX component needs a checked boundary contract before library colors can cross it.",
           "file": "examples/originals/rendering/shared/src/components/Reveal.tsx",
-          "line": 1,
-          "column": 45
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API createUniqueId has no verified native lowering.",
-          "file": "examples/originals/rendering/shared/src/components/Settings.tsx",
-          "line": 1,
-          "column": 24
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API Portal has no verified native lowering.",
-          "file": "examples/originals/rendering/shared/src/components/Settings.tsx",
-          "line": 2,
-          "column": 10
-        },
-        {
-          "code": "NATIVE_TYPE",
-          "message": "This Solid value contract needs a virtual routine/source type facade.",
-          "file": "examples/originals/rendering/shared/src/components/Shell.tsx",
-          "line": 1,
-          "column": 15
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API HydrationScript has no verified native lowering.",
-          "file": "examples/originals/rendering/shared/src/components/Shell.tsx",
-          "line": 2,
-          "column": 10
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API createStore has no verified native lowering.",
-          "file": "examples/originals/rendering/shared/src/components/Skeleton.tsx",
-          "line": 1,
-          "column": 36
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API isPending has no verified native lowering.",
-          "file": "examples/originals/rendering/shared/src/components/Skeleton.tsx",
-          "line": 1,
-          "column": 54
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API createProjection has no verified native lowering.",
-          "file": "examples/originals/rendering/shared/src/components/Stream.tsx",
-          "line": 1,
-          "column": 22
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/rendering/shared/src/components/Stream.tsx",
-          "line": 8,
-          "column": 1
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/rendering/shared/src/components/Stream.tsx",
-          "line": 24,
-          "column": 46
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/rendering/shared/src/components/Stream.tsx",
-          "line": 32,
-          "column": 52
-        },
-        {
-          "code": "NATIVE_TYPE",
-          "message": "This Solid value contract needs a virtual routine/source type facade.",
-          "file": "examples/originals/rendering/shared/src/router.tsx",
-          "line": 5,
-          "column": 3
-        },
-        {
-          "code": "NATIVE_TYPE",
-          "message": "This Solid value contract needs a virtual routine/source type facade.",
-          "file": "examples/originals/rendering/shared/src/router.tsx",
-          "line": 6,
-          "column": 3
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API isServer has no verified native lowering.",
-          "file": "examples/originals/rendering/shared/src/router.tsx",
-          "line": 8,
+          "line": 72,
           "column": 10
         }
       ],
@@ -1493,9 +1260,7 @@
       "differingStatements": null,
       "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
       "reasons": [
-        "NATIVE_API",
-        "NATIVE_TYPE",
-        "NATIVE_GENERATOR"
+        "NATIVE_FOREIGN"
       ]
     },
     {
@@ -1813,214 +1578,11 @@
       "status": "refused",
       "diagnostics": [
         {
-          "code": "NATIVE_API",
-          "message": "Solid API HydrationScript has no verified native lowering.",
-          "file": "examples/originals/room/src/Document.tsx",
-          "line": 1,
-          "column": 10
-        },
-        {
-          "code": "NATIVE_TYPE",
-          "message": "This Solid value contract needs a virtual routine/source type facade.",
-          "file": "examples/originals/room/src/components/status-pill.tsx",
-          "line": 9,
-          "column": 24
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API isServer has no verified native lowering.",
-          "file": "examples/originals/room/src/components/status-pill.tsx",
+          "code": "NATIVE_FOREIGN",
+          "message": "A foreign JSX component needs a checked boundary contract before library colors can cross it.",
+          "file": "examples/originals/room/src/app.tsx",
           "line": 10,
-          "column": 10
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API onSettled has no verified native lowering.",
-          "file": "examples/originals/room/src/lib/identity.tsx",
-          "line": 18,
-          "column": 3
-        },
-        {
-          "code": "NATIVE_TYPE",
-          "message": "This Solid value contract needs a virtual routine/source type facade.",
-          "file": "examples/originals/room/src/lib/identity.tsx",
-          "line": 20,
-          "column": 3
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API isServer has no verified native lowering.",
-          "file": "examples/originals/room/src/lib/identity.tsx",
-          "line": 23,
-          "column": 10
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/room/src/lib/rooms.ts",
-          "line": 153,
-          "column": 8
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/room/src/lib/rooms.ts",
-          "line": 166,
-          "column": 8
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API getRequestEvent has no verified native lowering.",
-          "file": "examples/originals/room/src/lib/sources.ts",
-          "line": 29,
-          "column": 10
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/room/src/lib/sources.ts",
-          "line": 64,
-          "column": 7
-        },
-        {
-          "code": "NATIVE_CATCH",
-          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
-          "file": "examples/originals/room/src/lib/sources.ts",
-          "line": 72,
-          "column": 5
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/room/src/lib/sources.ts",
-          "line": 81,
-          "column": 7
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/room/src/lib/sources.ts",
-          "line": 112,
-          "column": 23
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/room/src/lib/sources.ts",
-          "line": 124,
-          "column": 28
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API action has no verified native lowering.",
-          "file": "examples/originals/room/src/routes/home.tsx",
-          "line": 17,
-          "column": 10
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API latest has no verified native lowering.",
-          "file": "examples/originals/room/src/routes/home.tsx",
-          "line": 17,
-          "column": 32
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API dynamic has no verified native lowering.",
-          "file": "examples/originals/room/src/routes/home.tsx",
-          "line": 18,
-          "column": 10
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/room/src/routes/home.tsx",
-          "line": 95,
-          "column": 23
-        },
-        {
-          "code": "NATIVE_CATCH",
-          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
-          "file": "examples/originals/room/src/routes/home.tsx",
-          "line": 99,
-          "column": 5
-        },
-        {
-          "code": "NATIVE_CATCH",
-          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
-          "file": "examples/originals/room/src/routes/home.tsx",
-          "line": 140,
-          "column": 5
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API action has no verified native lowering.",
-          "file": "examples/originals/room/src/routes/live.tsx",
-          "line": 14,
-          "column": 3
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API createOptimistic has no verified native lowering.",
-          "file": "examples/originals/room/src/routes/live.tsx",
-          "line": 16,
-          "column": 3
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API createOptimisticStore has no verified native lowering.",
-          "file": "examples/originals/room/src/routes/live.tsx",
-          "line": 17,
-          "column": 3
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API latest has no verified native lowering.",
-          "file": "examples/originals/room/src/routes/live.tsx",
-          "line": 21,
-          "column": 3
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API until has no verified native lowering.",
-          "file": "examples/originals/room/src/routes/live.tsx",
-          "line": 24,
-          "column": 3
-        },
-        {
-          "code": "NATIVE_TYPE",
-          "message": "This Solid value contract needs a virtual routine/source type facade.",
-          "file": "examples/originals/room/src/routes/live.tsx",
-          "line": 25,
-          "column": 3
-        },
-        {
-          "code": "NATIVE_TYPE",
-          "message": "This Solid value contract needs a virtual routine/source type facade.",
-          "file": "examples/originals/room/src/routes/live.tsx",
-          "line": 26,
-          "column": 3
-        },
-        {
-          "code": "NATIVE_CATCH",
-          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
-          "file": "examples/originals/room/src/routes/live.tsx",
-          "line": 119,
-          "column": 5
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/room/src/routes/live.tsx",
-          "line": 169,
-          "column": 23
-        },
-        {
-          "code": "NATIVE_CATCH",
-          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
-          "file": "examples/originals/room/src/routes/live.tsx",
-          "line": 178,
-          "column": 5
+          "column": 11
         }
       ],
       "parity": "not run: no checked native program",
@@ -2028,10 +1590,7 @@
       "differingStatements": null,
       "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
       "reasons": [
-        "NATIVE_API",
-        "NATIVE_TYPE",
-        "NATIVE_GENERATOR",
-        "NATIVE_CATCH"
+        "NATIVE_FOREIGN"
       ]
     },
     {
@@ -2040,7 +1599,7 @@
       "files": 1,
       "inference": {
         "status": "source call-graph estimate; generated colors unchecked until transform succeeds",
-        "iterations": 3,
+        "iterations": 4,
         "classes": [],
         "components": [
           {
@@ -2074,19 +1633,174 @@
         ],
         "serverRejections": []
       },
-      "status": "refused",
+      "status": "generated-with-diagnostics",
       "diagnostics": [
         {
-          "code": "SUGAR_CALLBACK",
-          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/examples/originals/sierpinski/src/main.tsx:65:27)"
+          "stage": "type",
+          "code": "TS7023",
+          "message": "'Triangle' implicitly has return type 'any' because it does not have a return type annotation and is referenced directly or indirectly in one of its return expressions.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
+          "line": 61
+        },
+        {
+          "stage": "type",
+          "code": "TS2365",
+          "message": "Operator '<=' cannot be applied to types 'Source<number, never, false>' and 'number'.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
+          "line": 67
+        },
+        {
+          "stage": "type",
+          "code": "TS2362",
+          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
+          "line": 70
+        },
+        {
+          "stage": "type",
+          "code": "TS2362",
+          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
+          "line": 71
+        },
+        {
+          "stage": "type",
+          "code": "TS2322",
+          "message": "Type 'number' is not assignable to type 'Source<number, never, false>'.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
+          "line": 79
+        },
+        {
+          "stage": "type",
+          "code": "TS2362",
+          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
+          "line": 79
+        },
+        {
+          "stage": "type",
+          "code": "TS7024",
+          "message": "Function implicitly has return type 'any' because it does not have a return type annotation and is referenced directly or indirectly in one of its return expressions.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
+          "line": 91
+        },
+        {
+          "stage": "type",
+          "code": "TS2322",
+          "message": "Type 'number' is not assignable to type 'Source<number, never, false>'.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
+          "line": 95
+        },
+        {
+          "stage": "type",
+          "code": "TS2362",
+          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
+          "line": 95
+        },
+        {
+          "stage": "type",
+          "code": "TS2362",
+          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
+          "line": 95
+        },
+        {
+          "stage": "type",
+          "code": "TS2322",
+          "message": "Type '() => Generator<Read<true, NativeFailure<\"unknown\">>, number, any>' is not assignable to type 'Source<number, never, false>'.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
+          "line": 97
+        },
+        {
+          "stage": "type",
+          "code": "TS2322",
+          "message": "Type 'number' is not assignable to type 'Source<number, never, false>'.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
+          "line": 102
+        },
+        {
+          "stage": "type",
+          "code": "TS2362",
+          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
+          "line": 102
+        },
+        {
+          "stage": "type",
+          "code": "TS2363",
+          "message": "The right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
+          "line": 102
+        },
+        {
+          "stage": "type",
+          "code": "TS2365",
+          "message": "Operator '+' cannot be applied to types 'Source<number, never, false>' and 'number'.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
+          "line": 103
+        },
+        {
+          "stage": "type",
+          "code": "TS2362",
+          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
+          "line": 103
+        },
+        {
+          "stage": "type",
+          "code": "TS2322",
+          "message": "Type '() => Generator<Read<true, NativeFailure<\"unknown\">>, number, any>' is not assignable to type 'Source<number, never, false>'.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
+          "line": 105
+        },
+        {
+          "stage": "type",
+          "code": "TS2365",
+          "message": "Operator '+' cannot be applied to types 'import(\"<root>/packages/yield/dist/types/types\").Source<number, never, false>' and 'import(\"<root>/packages/yield/dist/types/types\").Source<number, never, false>'.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
+          "line": 110
+        },
+        {
+          "stage": "type",
+          "code": "TS2365",
+          "message": "Operator '+' cannot be applied to types 'Source<number, never, false>' and 'number'.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
+          "line": 111
+        },
+        {
+          "stage": "type",
+          "code": "TS2362",
+          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
+          "line": 111
+        },
+        {
+          "stage": "type",
+          "code": "TS2322",
+          "message": "Type '() => Generator<Read<true, NativeFailure<\"unknown\">>, number, any>' is not assignable to type 'Source<number, never, false>'.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
+          "line": 113
+        },
+        {
+          "stage": "type",
+          "code": "TS2362",
+          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
+          "line": 139
         }
       ],
       "parity": "not run: no checked native program",
       "ssr": "not run: no checked native program",
       "differingStatements": null,
-      "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
+      "diffReason": "Generated output still requires a checked app harness.",
       "reasons": [
-        "SUGAR_CALLBACK"
+        "TS7023",
+        "TS2365",
+        "TS2362",
+        "TS2322",
+        "TS7024",
+        "TS2363"
       ]
     },
     {
@@ -2095,7 +1809,7 @@
       "files": 1,
       "inference": {
         "status": "source call-graph estimate; generated colors unchecked until transform succeeds",
-        "iterations": 3,
+        "iterations": 4,
         "classes": [],
         "components": [
           {
@@ -2129,19 +1843,174 @@
         ],
         "serverRejections": []
       },
-      "status": "refused",
+      "status": "generated-with-diagnostics",
       "diagnostics": [
         {
-          "code": "SUGAR_CALLBACK",
-          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/examples/originals/sierpinski/src/main.tsx:65:27)"
+          "stage": "type",
+          "code": "TS7023",
+          "message": "'Triangle' implicitly has return type 'any' because it does not have a return type annotation and is referenced directly or indirectly in one of its return expressions.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
+          "line": 61
+        },
+        {
+          "stage": "type",
+          "code": "TS2365",
+          "message": "Operator '<=' cannot be applied to types 'Source<number, never, false>' and 'number'.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
+          "line": 67
+        },
+        {
+          "stage": "type",
+          "code": "TS2362",
+          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
+          "line": 70
+        },
+        {
+          "stage": "type",
+          "code": "TS2362",
+          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
+          "line": 71
+        },
+        {
+          "stage": "type",
+          "code": "TS2322",
+          "message": "Type 'number' is not assignable to type 'Source<number, never, false>'.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
+          "line": 79
+        },
+        {
+          "stage": "type",
+          "code": "TS2362",
+          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
+          "line": 79
+        },
+        {
+          "stage": "type",
+          "code": "TS7024",
+          "message": "Function implicitly has return type 'any' because it does not have a return type annotation and is referenced directly or indirectly in one of its return expressions.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
+          "line": 91
+        },
+        {
+          "stage": "type",
+          "code": "TS2322",
+          "message": "Type 'number' is not assignable to type 'Source<number, never, false>'.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
+          "line": 95
+        },
+        {
+          "stage": "type",
+          "code": "TS2362",
+          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
+          "line": 95
+        },
+        {
+          "stage": "type",
+          "code": "TS2362",
+          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
+          "line": 95
+        },
+        {
+          "stage": "type",
+          "code": "TS2322",
+          "message": "Type '() => Generator<Read<true, NativeFailure<\"unknown\">>, number, any>' is not assignable to type 'Source<number, never, false>'.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
+          "line": 97
+        },
+        {
+          "stage": "type",
+          "code": "TS2322",
+          "message": "Type 'number' is not assignable to type 'Source<number, never, false>'.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
+          "line": 102
+        },
+        {
+          "stage": "type",
+          "code": "TS2362",
+          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
+          "line": 102
+        },
+        {
+          "stage": "type",
+          "code": "TS2363",
+          "message": "The right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
+          "line": 102
+        },
+        {
+          "stage": "type",
+          "code": "TS2365",
+          "message": "Operator '+' cannot be applied to types 'Source<number, never, false>' and 'number'.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
+          "line": 103
+        },
+        {
+          "stage": "type",
+          "code": "TS2362",
+          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
+          "line": 103
+        },
+        {
+          "stage": "type",
+          "code": "TS2322",
+          "message": "Type '() => Generator<Read<true, NativeFailure<\"unknown\">>, number, any>' is not assignable to type 'Source<number, never, false>'.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
+          "line": 105
+        },
+        {
+          "stage": "type",
+          "code": "TS2365",
+          "message": "Operator '+' cannot be applied to types 'import(\"<root>/packages/yield/dist/types/types\").Source<number, never, false>' and 'import(\"<root>/packages/yield/dist/types/types\").Source<number, never, false>'.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
+          "line": 110
+        },
+        {
+          "stage": "type",
+          "code": "TS2365",
+          "message": "Operator '+' cannot be applied to types 'Source<number, never, false>' and 'number'.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
+          "line": 111
+        },
+        {
+          "stage": "type",
+          "code": "TS2362",
+          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
+          "line": 111
+        },
+        {
+          "stage": "type",
+          "code": "TS2322",
+          "message": "Type '() => Generator<Read<true, NativeFailure<\"unknown\">>, number, any>' is not assignable to type 'Source<number, never, false>'.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
+          "line": 113
+        },
+        {
+          "stage": "type",
+          "code": "TS2362",
+          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
+          "line": 139
         }
       ],
       "parity": "not run: no checked native program",
       "ssr": "not run: no checked native program",
       "differingStatements": null,
-      "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
+      "diffReason": "Generated output still requires a checked app harness.",
       "reasons": [
-        "SUGAR_CALLBACK"
+        "TS7023",
+        "TS2365",
+        "TS2362",
+        "TS2322",
+        "TS7024",
+        "TS2363"
       ]
     },
     {
@@ -2209,102 +2078,8 @@
       "status": "refused",
       "diagnostics": [
         {
-          "code": "NATIVE_API",
-          "message": "Solid API onSettled has no verified native lowering.",
-          "file": "examples/originals/todos/src/filter.ts",
-          "line": 1,
-          "column": 24
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API action has no verified native lowering.",
-          "file": "examples/originals/todos/src/todos.ts",
-          "line": 34,
-          "column": 10
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API createOptimisticStore has no verified native lowering.",
-          "file": "examples/originals/todos/src/todos.ts",
-          "line": 34,
-          "column": 18
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API refresh has no verified native lowering.",
-          "file": "examples/originals/todos/src/todos.ts",
-          "line": 34,
-          "column": 41
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/todos/src/todos.ts",
-          "line": 93,
-          "column": 21
-        },
-        {
-          "code": "NATIVE_CATCH",
-          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
-          "file": "examples/originals/todos/src/todos.ts",
-          "line": 99,
-          "column": 7
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/todos/src/todos.ts",
-          "line": 107,
-          "column": 24
-        },
-        {
-          "code": "NATIVE_CATCH",
-          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
-          "file": "examples/originals/todos/src/todos.ts",
-          "line": 109,
-          "column": 7
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/todos/src/todos.ts",
-          "line": 117,
-          "column": 24
-        },
-        {
-          "code": "NATIVE_CATCH",
-          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
-          "file": "examples/originals/todos/src/todos.ts",
-          "line": 125,
-          "column": 7
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/todos/src/todos.ts",
-          "line": 133,
-          "column": 23
-        },
-        {
-          "code": "NATIVE_CATCH",
-          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
-          "file": "examples/originals/todos/src/todos.ts",
-          "line": 144,
-          "column": 7
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/todos/src/todos.ts",
-          "line": 156,
-          "column": 28
-        },
-        {
-          "code": "NATIVE_CATCH",
-          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
-          "file": "examples/originals/todos/src/todos.ts",
-          "line": 159,
-          "column": 7
+          "code": "SUGAR_CALLBACK",
+          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/examples/originals/todos/src/app.tsx:52:51)"
         }
       ],
       "parity": "not run: no checked native program",
@@ -2312,9 +2087,7 @@
       "differingStatements": null,
       "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
       "reasons": [
-        "NATIVE_API",
-        "NATIVE_GENERATOR",
-        "NATIVE_CATCH"
+        "SUGAR_CALLBACK"
       ]
     },
     {
@@ -2382,102 +2155,8 @@
       "status": "refused",
       "diagnostics": [
         {
-          "code": "NATIVE_API",
-          "message": "Solid API onSettled has no verified native lowering.",
-          "file": "examples/originals/todos/src/filter.ts",
-          "line": 1,
-          "column": 24
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API action has no verified native lowering.",
-          "file": "examples/originals/todos/src/todos.ts",
-          "line": 34,
-          "column": 10
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API createOptimisticStore has no verified native lowering.",
-          "file": "examples/originals/todos/src/todos.ts",
-          "line": 34,
-          "column": 18
-        },
-        {
-          "code": "NATIVE_API",
-          "message": "Solid API refresh has no verified native lowering.",
-          "file": "examples/originals/todos/src/todos.ts",
-          "line": 34,
-          "column": 41
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/todos/src/todos.ts",
-          "line": 93,
-          "column": 21
-        },
-        {
-          "code": "NATIVE_CATCH",
-          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
-          "file": "examples/originals/todos/src/todos.ts",
-          "line": 99,
-          "column": 7
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/todos/src/todos.ts",
-          "line": 107,
-          "column": 24
-        },
-        {
-          "code": "NATIVE_CATCH",
-          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
-          "file": "examples/originals/todos/src/todos.ts",
-          "line": 109,
-          "column": 7
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/todos/src/todos.ts",
-          "line": 117,
-          "column": 24
-        },
-        {
-          "code": "NATIVE_CATCH",
-          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
-          "file": "examples/originals/todos/src/todos.ts",
-          "line": 125,
-          "column": 7
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/todos/src/todos.ts",
-          "line": 133,
-          "column": 23
-        },
-        {
-          "code": "NATIVE_CATCH",
-          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
-          "file": "examples/originals/todos/src/todos.ts",
-          "line": 144,
-          "column": 7
-        },
-        {
-          "code": "NATIVE_GENERATOR",
-          "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
-          "file": "examples/originals/todos/src/todos.ts",
-          "line": 156,
-          "column": 28
-        },
-        {
-          "code": "NATIVE_CATCH",
-          "message": "JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.",
-          "file": "examples/originals/todos/src/todos.ts",
-          "line": 159,
-          "column": 7
+          "code": "SUGAR_CALLBACK",
+          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/examples/originals/todos/src/app.tsx:52:51)"
         }
       ],
       "parity": "not run: no checked native program",
@@ -2485,9 +2164,7 @@
       "differingStatements": null,
       "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
       "reasons": [
-        "NATIVE_API",
-        "NATIVE_GENERATOR",
-        "NATIVE_CATCH"
+        "SUGAR_CALLBACK"
       ]
     }
   ],

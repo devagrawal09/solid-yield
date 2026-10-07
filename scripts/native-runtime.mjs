@@ -7,9 +7,9 @@ import { execFileSync } from "node:child_process";
 import solidYield from "../packages/vite-plugin-yield/src/vite.js";
 const root = resolve(import.meta.dirname, "..");
 if (!process.argv.includes("--child")) {
-  const run = mode =>
+  const run = (mode, family = "") =>
     JSON.parse(
-      execFileSync(process.execPath, [import.meta.filename, "--child", mode], {
+      execFileSync(process.execPath, [import.meta.filename, "--child", mode, family], {
         encoding: "utf8",
         timeout: 30000
       })
@@ -19,6 +19,12 @@ if (!process.argv.includes("--child")) {
   assert.deepEqual(native, original);
   assert.deepEqual(native.values, ["2", "4", "6"]);
   assert.equal(native.retained, true);
+  const originalAction = run("original", "Action"),
+    nativeAction = run("native", "Action");
+  assert.deepEqual(nativeAction, originalAction);
+  assert.deepEqual(nativeAction.values, ["0", "1", "2"]);
+  assert.equal(nativeAction.retained, true);
+  console.log("native caught generator action: SSR and hydrated rejection/write parity pass");
   console.log("native counter: SSR and hydrated clicks match original; server button retained");
 } else {
   const require = createRequire(join(root, "examples/rendering-yield/package.json"));
@@ -39,7 +45,11 @@ if (!process.argv.includes("--child")) {
     server: { middlewareMode: true, hmr: false, ws: false },
     optimizeDeps: { noDiscovery: true, include: [] },
     plugins: [
-      solidYield({ mode: "native", include: file => file === join(fixture, "Counter.tsx") }),
+      solidYield({
+        mode: "native",
+        include: file =>
+          ["Counter.tsx", "CatchAction.tsx"].some(name => file === join(fixture, name))
+      }),
       solid({ ssr: true }),
       {
         name: "native-probe:no-hmr",
@@ -66,8 +76,9 @@ if (!process.argv.includes("--child")) {
   let dom;
   try {
     const entry = await server.ssrLoadModule("/entry.tsx");
-    const mode = process.argv.at(-1);
-    const html = entry[mode]();
+    const mode = process.argv.at(-2),
+      family = process.argv.at(-1);
+    const html = entry[mode + family]();
     const scripts = entry.generateHydrationScript();
     dom = new JSDOM(`<html><head></head><body><div id="root">${html}</div></body></html>`, {
       url: "http://localhost",
@@ -77,7 +88,13 @@ if (!process.argv.includes("--child")) {
     for (const match of scripts.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/g)) (0, eval)(match[1]);
     const before = document.querySelector("button");
     await server.environments.hydrate.runner.import(
-      mode === "native" ? "/client.tsx" : "/original-client.tsx"
+      family
+        ? mode === "native"
+          ? "/action-client.tsx"
+          : "/original-action-client.tsx"
+        : mode === "native"
+          ? "/client.tsx"
+          : "/original-client.tsx"
     );
     const values = [before.textContent];
     for (let i = 0; i < 2; i++) {

@@ -1,0 +1,516 @@
+{
+  "note": "Seven source trees feed nine twin parity targets (JSX/h variants). Mapping is not a parity result. No produce import occurs.",
+  "apis": [
+    {
+      "module": "@solidjs/web",
+      "api": "dynamic",
+      "status": "refused-with-reason",
+      "form": null,
+      "reason": "NATIVE_FOREIGN: child colors need a checked foreign component adapter.",
+      "files": [
+        "examples/originals/room/src/routes/home.tsx"
+      ]
+    },
+    {
+      "module": "@solidjs/web",
+      "api": "getRequestEvent",
+      "status": "mapped",
+      "form": "pass-through",
+      "reason": "",
+      "files": [
+        "examples/originals/room/src/lib/sources.ts"
+      ]
+    },
+    {
+      "module": "@solidjs/web",
+      "api": "HydrationScript",
+      "status": "excluded-as-entry",
+      "form": "Solid entry API + foreign(component) at direct handoffs",
+      "reason": "",
+      "files": [
+        "examples/originals/docs/src/shell.tsx",
+        "examples/originals/rendering/shared/src/components/Shell.tsx",
+        "examples/originals/room/src/Document.tsx"
+      ]
+    },
+    {
+      "module": "@solidjs/web",
+      "api": "isServer",
+      "status": "mapped",
+      "form": "pass-through",
+      "reason": "",
+      "files": [
+        "examples/originals/rendering/shared/src/router.tsx",
+        "examples/originals/room/src/components/status-pill.tsx",
+        "examples/originals/room/src/lib/identity.tsx"
+      ]
+    },
+    {
+      "module": "@solidjs/web",
+      "api": "JSX",
+      "status": "mapped",
+      "form": "retained type-only",
+      "reason": "Higher-order component contracts and accessor/store color facades remain incomplete.",
+      "files": [
+        "examples/originals/docs/src/shell.tsx",
+        "examples/originals/room/src/Document.tsx"
+      ]
+    },
+    {
+      "module": "@solidjs/web",
+      "api": "markSafeError",
+      "status": "mapped",
+      "form": "pass-through",
+      "reason": "",
+      "files": [
+        "examples/originals/docs/src/errors.ts"
+      ]
+    },
+    {
+      "module": "@solidjs/web",
+      "api": "Portal",
+      "status": "refused-with-reason",
+      "form": null,
+      "reason": "NATIVE_FOREIGN: child colors need a checked foreign component adapter.",
+      "files": [
+        "examples/originals/rendering/shared/src/components/Settings.tsx"
+      ]
+    },
+    {
+      "module": "@solidjs/web",
+      "api": "render",
+      "status": "excluded-as-entry",
+      "form": "Solid entry API + foreign(component) at direct handoffs",
+      "reason": "",
+      "files": [
+        "examples/originals/docs/src/main.tsx",
+        "examples/originals/effect/src/main.tsx",
+        "examples/originals/sierpinski/src/main.tsx",
+        "examples/originals/todos/src/main.tsx"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "Accessor",
+      "status": "mapped",
+      "form": "retained type-only",
+      "reason": "Higher-order component contracts and accessor/store color facades remain incomplete.",
+      "files": [
+        "examples/originals/room/src/components/status-pill.tsx",
+        "examples/originals/room/src/lib/identity.tsx",
+        "examples/originals/room/src/routes/live.tsx"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "action",
+      "status": "mapped",
+      "form": "$event",
+      "reason": "",
+      "files": [
+        "examples/originals/docs/src/widgets.tsx",
+        "examples/originals/effect/src/solid-effect.ts",
+        "examples/originals/room/src/routes/home.tsx",
+        "examples/originals/room/src/routes/live.tsx",
+        "examples/originals/todos/src/todos.ts"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "Component",
+      "status": "mapped",
+      "form": "component variable annotation erased; props copied into Props<T>",
+      "reason": "Higher-order component contracts and accessor/store color facades remain incomplete.",
+      "files": [
+        "examples/originals/hackernews-spa/src/components/comment.tsx",
+        "examples/originals/hackernews-spa/src/components/story.tsx",
+        "examples/originals/rendering/shared/src/router.tsx"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "createContext",
+      "status": "mapped",
+      "form": "createContext",
+      "reason": "",
+      "files": [
+        "examples/originals/effect/src/solid-effect.ts",
+        "examples/originals/rendering/shared/src/router.tsx",
+        "examples/originals/room/src/lib/identity.tsx",
+        "examples/originals/todos/src/app.tsx"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "createEffect",
+      "status": "mapped",
+      "form": "$effect",
+      "reason": "",
+      "files": [
+        "examples/originals/docs/src/widgets.tsx"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "createMemo",
+      "status": "mapped",
+      "form": "$memo",
+      "reason": "",
+      "files": [
+        "examples/originals/docs/src/content.tsx",
+        "examples/originals/docs/src/widgets.tsx",
+        "examples/originals/effect/src/typeahead.tsx",
+        "examples/originals/hackernews-spa/src/routes/stories.tsx",
+        "examples/originals/hackernews-spa/src/routes/story.tsx",
+        "examples/originals/hackernews-spa/src/routes/user.tsx",
+        "examples/originals/rendering/shared/src/components/ErrorStream.tsx",
+        "examples/originals/rendering/shared/src/components/Profile/index.tsx",
+        "examples/originals/rendering/shared/src/components/Reveal.tsx",
+        "examples/originals/rendering/shared/src/components/Skeleton.tsx",
+        "examples/originals/rendering/shared/src/components/Stream.tsx",
+        "examples/originals/room/src/lib/room-panel.tsx",
+        "examples/originals/room/src/routes/live.tsx",
+        "examples/originals/sierpinski/src/main.tsx"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "createOptimistic",
+      "status": "mapped",
+      "form": "$optimistic",
+      "reason": "",
+      "files": [
+        "examples/originals/docs/src/widgets.tsx",
+        "examples/originals/effect/src/checkout.tsx",
+        "examples/originals/room/src/routes/live.tsx"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "createOptimisticStore",
+      "status": "mapped",
+      "form": "$optimisticStore",
+      "reason": "Primitive import is mapped; not every overload, selector, or callback contract is implemented. See application diagnostics.",
+      "files": [
+        "examples/originals/effect/src/checkout.tsx",
+        "examples/originals/room/src/routes/live.tsx",
+        "examples/originals/todos/src/todos.ts"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "createProjection",
+      "status": "mapped",
+      "form": "$projection",
+      "reason": "Primitive import is mapped; not every overload, selector, or callback contract is implemented. See application diagnostics.",
+      "files": [
+        "examples/originals/rendering/shared/src/components/Stream.tsx"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "createSignal",
+      "status": "mapped",
+      "form": "$signal",
+      "reason": "",
+      "files": [
+        "examples/originals/docs/src/widgets.tsx",
+        "examples/originals/effect/src/app.tsx",
+        "examples/originals/effect/src/checkout.tsx",
+        "examples/originals/effect/src/typeahead.tsx",
+        "examples/originals/hackernews-spa/src/components/toggle.tsx",
+        "examples/originals/rendering/shared/src/components/ErrorStream.tsx",
+        "examples/originals/rendering/shared/src/components/Home.tsx",
+        "examples/originals/rendering/shared/src/components/Reveal.tsx",
+        "examples/originals/rendering/shared/src/components/Settings.tsx",
+        "examples/originals/rendering/shared/src/components/Skeleton.tsx",
+        "examples/originals/rendering/shared/src/router.tsx",
+        "examples/originals/room/src/components/status-pill.tsx",
+        "examples/originals/room/src/lib/identity.tsx",
+        "examples/originals/room/src/routes/home.tsx",
+        "examples/originals/room/src/routes/live.tsx",
+        "examples/originals/sierpinski/src/main.tsx",
+        "examples/originals/todos/src/filter.ts"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "createStore",
+      "status": "mapped",
+      "form": "$store",
+      "reason": "Primitive import is mapped; not every overload, selector, or callback contract is implemented. See application diagnostics.",
+      "files": [
+        "examples/originals/effect/src/checkout.tsx",
+        "examples/originals/effect/src/log.ts",
+        "examples/originals/rendering/shared/src/components/Skeleton.tsx"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "createUniqueId",
+      "status": "mapped",
+      "form": "pass-through",
+      "reason": "",
+      "files": [
+        "examples/originals/rendering/shared/src/components/Settings.tsx"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "Errored",
+      "status": "mapped",
+      "form": "Errored",
+      "reason": "",
+      "files": [
+        "examples/originals/docs/src/content.tsx",
+        "examples/originals/docs/src/widgets.tsx",
+        "examples/originals/effect/src/app.tsx",
+        "examples/originals/effect/src/typeahead.tsx",
+        "examples/originals/rendering/shared/src/components/ErrorStream.tsx",
+        "examples/originals/room/src/routes/live.tsx",
+        "examples/originals/todos/src/app.tsx"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "For",
+      "status": "mapped",
+      "form": "For",
+      "reason": "",
+      "files": [
+        "examples/originals/docs/src/content.tsx",
+        "examples/originals/docs/src/widgets.tsx",
+        "examples/originals/effect/src/app.tsx",
+        "examples/originals/effect/src/checkout.tsx",
+        "examples/originals/effect/src/typeahead.tsx",
+        "examples/originals/hackernews-spa/src/components/comment.tsx",
+        "examples/originals/hackernews-spa/src/routes/stories.tsx",
+        "examples/originals/hackernews-spa/src/routes/story.tsx",
+        "examples/originals/rendering/shared/src/components/Profile/Profile.tsx",
+        "examples/originals/rendering/shared/src/components/Skeleton.tsx",
+        "examples/originals/rendering/shared/src/components/Stream.tsx",
+        "examples/originals/room/src/lib/room-panel.tsx",
+        "examples/originals/room/src/routes/live.tsx",
+        "examples/originals/todos/src/app.tsx"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "isPending",
+      "status": "mapped",
+      "form": "isPendingOf",
+      "reason": "Primitive import is mapped; not every overload, selector, or callback contract is implemented. See application diagnostics.",
+      "files": [
+        "examples/originals/effect/src/typeahead.tsx",
+        "examples/originals/rendering/shared/src/components/App.tsx",
+        "examples/originals/rendering/shared/src/components/Skeleton.tsx"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "latest",
+      "status": "mapped",
+      "form": "latestOf",
+      "reason": "Primitive import is mapped; not every overload, selector, or callback contract is implemented. See application diagnostics.",
+      "files": [
+        "examples/originals/effect/src/typeahead.tsx",
+        "examples/originals/room/src/routes/home.tsx",
+        "examples/originals/room/src/routes/live.tsx"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "lazy",
+      "status": "mapped",
+      "form": "lazy",
+      "reason": "Primitive import is mapped; not every overload, selector, or callback contract is implemented. See application diagnostics.",
+      "files": [
+        "examples/originals/rendering/shared/src/components/App.tsx",
+        "examples/originals/rendering/shared/src/components/Profile/index.tsx"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "Loading",
+      "status": "mapped",
+      "form": "Loading",
+      "reason": "",
+      "files": [
+        "examples/originals/docs/src/content.tsx",
+        "examples/originals/docs/src/widgets.tsx",
+        "examples/originals/effect/src/checkout.tsx",
+        "examples/originals/effect/src/typeahead.tsx",
+        "examples/originals/hackernews-spa/src/app.tsx",
+        "examples/originals/rendering/shared/src/components/ErrorStream.tsx",
+        "examples/originals/rendering/shared/src/components/Profile/Profile.tsx",
+        "examples/originals/rendering/shared/src/components/Reveal.tsx",
+        "examples/originals/rendering/shared/src/components/Stream.tsx",
+        "examples/originals/room/src/app.tsx",
+        "examples/originals/room/src/routes/home.tsx",
+        "examples/originals/room/src/routes/live.tsx",
+        "examples/originals/sierpinski/src/main.tsx",
+        "examples/originals/todos/src/app.tsx"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "Match",
+      "status": "mapped",
+      "form": "Match",
+      "reason": "",
+      "files": [
+        "examples/originals/rendering/shared/src/components/App.tsx"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "onCleanup",
+      "status": "mapped",
+      "form": "$cleanup",
+      "reason": "",
+      "files": [
+        "examples/originals/effect/src/solid-effect.ts",
+        "examples/originals/room/src/lib/room-panel.tsx",
+        "examples/originals/sierpinski/src/main.tsx"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "onSettled",
+      "status": "mapped",
+      "form": "$effect + $cleanup",
+      "reason": "",
+      "files": [
+        "examples/originals/rendering/shared/src/components/Home.tsx",
+        "examples/originals/room/src/lib/identity.tsx",
+        "examples/originals/todos/src/filter.ts"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "ParentComponent",
+      "status": "mapped",
+      "form": "component variable annotation erased; props copied into Props<T>",
+      "reason": "Higher-order component contracts and accessor/store color facades remain incomplete.",
+      "files": [
+        "examples/originals/room/src/lib/identity.tsx"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "ParentProps",
+      "status": "mapped",
+      "form": "retained type-only",
+      "reason": "Higher-order component contracts and accessor/store color facades remain incomplete.",
+      "files": [
+        "examples/originals/rendering/shared/src/components/Shell.tsx",
+        "examples/originals/rendering/shared/src/router.tsx"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "refresh",
+      "status": "mapped",
+      "form": "refresh",
+      "reason": "",
+      "files": [
+        "examples/originals/effect/src/checkout.tsx",
+        "examples/originals/todos/src/todos.ts"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "Repeat",
+      "status": "mapped",
+      "form": "Repeat",
+      "reason": "",
+      "files": [
+        "examples/originals/rendering/shared/src/components/Stream.tsx"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "Reveal",
+      "status": "refused-with-reason",
+      "form": null,
+      "reason": "NATIVE_FOREIGN: child colors need a checked foreign component adapter.",
+      "files": [
+        "examples/originals/rendering/shared/src/components/Reveal.tsx"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "RevealOrder",
+      "status": "mapped",
+      "form": "retained type-only",
+      "reason": "Higher-order component contracts and accessor/store color facades remain incomplete.",
+      "files": [
+        "examples/originals/rendering/shared/src/components/Reveal.tsx"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "Show",
+      "status": "mapped",
+      "form": "Show",
+      "reason": "",
+      "files": [
+        "examples/originals/effect/src/app.tsx",
+        "examples/originals/effect/src/checkout.tsx",
+        "examples/originals/effect/src/typeahead.tsx",
+        "examples/originals/hackernews-spa/src/components/comment.tsx",
+        "examples/originals/hackernews-spa/src/components/story.tsx",
+        "examples/originals/hackernews-spa/src/routes/stories.tsx",
+        "examples/originals/hackernews-spa/src/routes/story.tsx",
+        "examples/originals/hackernews-spa/src/routes/user.tsx",
+        "examples/originals/rendering/shared/src/components/Reveal.tsx",
+        "examples/originals/room/src/routes/home.tsx",
+        "examples/originals/room/src/routes/live.tsx",
+        "examples/originals/todos/src/app.tsx"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "Store",
+      "status": "mapped",
+      "form": "retained type-only",
+      "reason": "Higher-order component contracts and accessor/store color facades remain incomplete.",
+      "files": [
+        "examples/originals/room/src/routes/live.tsx"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "Switch",
+      "status": "mapped",
+      "form": "Switch",
+      "reason": "",
+      "files": [
+        "examples/originals/rendering/shared/src/components/App.tsx"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "until",
+      "status": "mapped",
+      "form": "until",
+      "reason": "Primitive import is mapped; not every overload, selector, or callback contract is implemented. See application diagnostics.",
+      "files": [
+        "examples/originals/room/src/routes/live.tsx"
+      ]
+    },
+    {
+      "module": "solid-js",
+      "api": "useContext",
+      "status": "mapped",
+      "form": "context source read",
+      "reason": "",
+      "files": [
+        "examples/originals/effect/src/solid-effect.ts",
+        "examples/originals/rendering/shared/src/router.tsx",
+        "examples/originals/room/src/lib/identity.tsx",
+        "examples/originals/todos/src/app.tsx"
+      ]
+    }
+  ]
+}

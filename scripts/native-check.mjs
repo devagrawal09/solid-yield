@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 // Real diagnostics from reconstructed probes and all nine twin inputs.
+import "./native-inventory.mjs";
 import { readFileSync, readdirSync, mkdirSync, writeFileSync } from "node:fs";
 import { resolve, relative, join } from "node:path";
 import { createRequire } from "node:module";
@@ -149,6 +150,11 @@ for (const result of results.filter(r => r.stage === "generated")) {
     : "accepted";
   if (result.expected === "accepted")
     assert.equal(result.stage, "accepted", `${result.id}: ${JSON.stringify(result.diagnostics)}`);
+  if (result.expectedDiagnostic)
+    assert.ok(
+      result.diagnostics.some(d => d.message.includes(result.expectedDiagnostic)),
+      `${result.id}: missing ${result.expectedDiagnostic}`
+    );
 }
 const filesUnder = dir =>
   readdirSync(dir, { withFileTypes: true }).flatMap(d => {

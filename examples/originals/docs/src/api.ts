@@ -1,20 +1,20 @@
+import overviewMarkdown from "./articles/overview.md?raw";
+import startMarkdown from "./articles/start.md?raw";
+import widgetsMarkdown from "./articles/widgets.md?raw";
+import pipelineMarkdown from "./articles/pipeline.md?raw";
+import routingMarkdown from "./articles/routing.md?raw";
+import testingMarkdown from "./articles/testing.md?raw";
 import { NotFound, SearchError, RateLimited, BadEmail } from "./errors";
 export interface Link {
   title: string;
   href: string;
 }
-export interface Chapter {
-  id: string;
-  title: string;
-  intro: string;
-  detail: string;
-  code: string;
-}
 export interface Article {
   slug: string;
   title: string;
   summary: string;
-  chapters: Chapter[];
+  markdown: string;
+  published: string;
   related: Link[];
 }
 export interface Site {
@@ -50,7 +50,8 @@ export async function getSite(): Promise<Site> {
         title: "Reference",
         links: [
           { title: "Independent widgets", href: "/docs/widgets" },
-          { title: "Missing page", href: "/docs/missing" }
+          { title: "Missing page", href: "/docs/missing" },
+          { title: "A typed content pipeline", href: "/docs/pipeline" }
         ]
       }
     ],
@@ -64,36 +65,24 @@ export async function getSite(): Promise<Site> {
 export async function getArticle(slug: string): Promise<Article> {
   "use server";
   await delay(60);
-  if (!["overview", "start", "widgets"].includes(slug)) throw new NotFound("No article: " + slug);
+  const articles: Record<string, { title: string; markdown: string }> = {
+    overview: { title: "Welcome to Field Notes", markdown: overviewMarkdown },
+    start: { title: "Getting started", markdown: startMarkdown },
+    widgets: { title: "Independent widgets", markdown: widgetsMarkdown },
+    pipeline: { title: "A typed content pipeline", markdown: pipelineMarkdown },
+    routing: { title: "Routes and links", markdown: routingMarkdown },
+    testing: { title: "Testing content pages", markdown: testingMarkdown }
+  };
+  if (!Object.hasOwn(articles, slug)) throw new NotFound("No article: " + slug);
   return {
     slug,
-    title:
-      slug === "overview"
-        ? "Welcome to Field Notes"
-        : slug === "start"
-          ? "Getting started"
-          : "Independent widgets",
+    ...articles[slug],
     summary: "Content first, with a few small tools beside it.",
-    chapters: Array.from({ length: 8 }, (_, i) => ({
-      id: "section-" + i,
-      title: [
-        "Read the page",
-        "Choose a route",
-        "Keep state local",
-        "Load an answer",
-        "Handle a failure",
-        "Use a small boundary",
-        "Check the result",
-        "Continue reading"
-      ][i],
-      intro: "A page can carry useful information before its controls start.",
-      detail:
-        "Each tool owns its state. Reading this chapter needs no shared browser state or background work.",
-      code: 'const chapter = await getArticle("start"); // section ' + (i + 1)
-    })),
+    published: "2026-10-01T12:00:00Z",
     related: [
       { title: "Getting started", href: "/docs/start" },
-      { title: "Independent widgets", href: "/docs/widgets" }
+      { title: "Independent widgets", href: "/docs/widgets" },
+      { title: "A typed content pipeline", href: "/docs/pipeline" }
     ]
   };
 }

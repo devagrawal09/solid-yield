@@ -32,6 +32,7 @@
 // (HYDRATE_SMOKE_VERBOSE=1 passes the cases' console through; HYDRATE_SMOKE_DUMP=<file>
 // writes a case's server document, with --only one case)
 // Exit code 0 when every case passes.
+import { highlightCoreForModuleRunner } from "../module-runner-highlight.mjs";
 import { buildProduction } from "../ssr-smoke/production.mjs";
 import {
   expectsDocsRejection,
@@ -143,6 +144,7 @@ const HYDRATION = /hydrat/i;
 const ORIGIN = "http://localhost";
 const noHmrClient = {
   name: "hydrate-smoke:no-hmr-client",
+  transform: highlightCoreForModuleRunner,
   enforce: "pre",
   applyToEnvironment: environment => environment.name === "hydrate",
   load(id) {

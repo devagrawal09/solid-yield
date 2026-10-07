@@ -18,19 +18,25 @@ export function chunkAttribution(code, map) {
       add("unmapped", line.slice(0, segments[0]?.[0] ?? line.length));
     segments.forEach((segment, i) => {
       const source = segment.length < 4 ? "unmapped" : trace.sources[segment[1]];
-      const key = /__compiler_(client|slots)\.tsx$/.test(source)
-        ? "bootstrap and inert registration"
-        : /\/src\/content\.tsx$/.test(source)
-          ? "content"
-          : /\/src\/widgets\.tsx$/.test(source)
-            ? "widgets"
-            : /\/src\/app\.tsx$/.test(source)
-              ? "app and router assembly"
-              : /\/src\/(api|errors)\.ts$/.test(source)
-                ? "app data and errors"
-                : source === "unmapped"
-                  ? source
-                  : "runtime";
+      const key = /\/(marked|highlight\.js)\/(lib|es)\//.test(source)
+        ? "article payload libraries"
+        : /\/src\/article-pipeline(?:__compiler_dep)?\.ts$/.test(source)
+          ? "article pipeline adapter"
+          : /\/articles\/[^/]+\.md/.test(source)
+            ? "embedded Markdown data"
+            : /__compiler_(client|slots)\.tsx$/.test(source)
+              ? "bootstrap and inert registration"
+              : /\/src\/content\.tsx$/.test(source)
+                ? "content"
+                : /\/src\/widgets\.tsx$/.test(source)
+                  ? "widgets"
+                  : /\/src\/app\.tsx$/.test(source)
+                    ? "app and router assembly"
+                    : /\/src\/(api|errors)\.ts$/.test(source)
+                      ? "app data and errors"
+                      : source === "unmapped"
+                        ? source
+                        : "runtime";
       add(key, line.slice(segment[0], segments[i + 1]?.[0] ?? line.length));
     });
     if (index < lines.length - 1) add("unmapped", "\n");

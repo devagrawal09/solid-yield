@@ -1,3 +1,4 @@
+import { auditedArticlePipeline } from "./article-contract.js";
 import { parseProgram } from "../../vite-plugin-yield/src/transform.js";
 
 const key = n => n?.name ?? n?.value;
@@ -583,6 +584,9 @@ export class Analysis {
     return result;
   }
   call(fn, args, p, env, ctx = {}, construct = false) {
+    const target = fn?.callable?.path;
+    if (!construct && target && auditedArticlePipeline(this.moduleOf.get(target.node), target))
+      return this.join(p, env, args, "audited-article-derivation");
     const name = fn?.external?.name;
     const library = ["solid-yield", "solid-yield/h"].includes(fn?.external?.source);
     if (library) {

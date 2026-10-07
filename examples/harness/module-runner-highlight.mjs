@@ -1,0 +1,9 @@
+// highlight.js's ESM core delegates to a standalone CommonJS file. Vite's
+// browser module runner has no CommonJS loader. Adapt only that export here;
+// production builds keep Vite's normal CommonJS transform and tree shaking.
+export function highlightCoreForModuleRunner(code, id) {
+  if (!id.endsWith("/highlight.js/lib/core.js")) return;
+  if (!code.includes("module.exports = highlight;") || code.includes("require("))
+    throw new Error("Review the highlight.js module-runner export adapter");
+  return code.replace("module.exports = highlight;", "export default highlight;");
+}

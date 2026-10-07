@@ -35,6 +35,7 @@ try {
             cwd: repo,
             encoding: "utf8",
             timeout: 120000,
+            maxBuffer: 8 * 1024 * 1024,
             env: {
               ...process.env,
               TZ: "UTC",
@@ -54,7 +55,7 @@ try {
         .split("\n")
         .map(line => JSON.parse(line));
       const phases = observations.map(({ phase, bytes }) => ({ phase, bytes }));
-      if (phases.length !== 25 || phases[0].phase !== "load" || !phases[0].bytes)
+      if (phases.length !== 29 || phases[0].phase !== "load" || !phases[0].bytes)
         throw new Error("Missing coverage");
       results.push({
         app,
@@ -67,7 +68,7 @@ try {
           bytes
         }))
       });
-      console.error(`run ${n + 1} ${app}: ${phases[0].bytes} load bytes, 24 steps`);
+      console.error(`run ${n + 1} ${app}: ${phases[0].bytes} load bytes, 28 steps`);
     }
     runs.push(results);
   }
@@ -133,6 +134,16 @@ try {
                       /on-this-page|Related reading|No article:|Read the page/.test(output.code)
                     )
                       throw new Error("R article code/data shipped");
+                    if (
+                      app === "compiled-r" &&
+                      Object.keys(output.modules).some(
+                        id =>
+                          /(?:marked|highlight\.js)\/(?:lib|es)\//.test(id) ||
+                          id.includes("article-pipeline") ||
+                          /\/articles\/.*\.md/.test(id)
+                      )
+                    )
+                      throw new Error("R Markdown/highlighter module shipped");
                   }
               }
             }
@@ -166,7 +177,7 @@ try {
   const output = {
     node: process.version,
     metric:
-      "Hydrated docs; V8 executed UTF-8 ranges reset each phase; production Vite module runner; completed SSR in a separate process; same 24 authored steps; all roots synchronous",
+      "Hydrated docs; V8 executed UTF-8 ranges reset each phase; production Vite module runner; completed SSR in a separate process; same 28 authored steps; all roots synchronous",
     runs,
     summary,
     shipped,
@@ -179,9 +190,9 @@ try {
     if (baseline.summary.length !== summary.length) throw new Error("Baseline inventory changed");
     for (let a = 0; a < summary.length; a++) {
       const old = baseline.summary[a];
-      if (old.app !== summary[a].app || old.phases.length !== 25)
+      if (old.app !== summary[a].app || old.phases.length !== 29)
         throw new Error("Baseline inventory changed");
-      for (let p = 0; p < 25; p++)
+      for (let p = 0; p < summary[a].phases.length; p++)
         if (
           old.phases[p].phase !== summary[a].phases[p].phase ||
           summary[a].phases[p].max > old.phases[p].maxBytes

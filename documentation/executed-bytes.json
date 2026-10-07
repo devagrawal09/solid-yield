@@ -9,8 +9,8 @@
       "phases": [
         {
           "phase": "load",
-          "bytes": 519971,
-          "maxBytes": 530371
+          "bytes": 598184,
+          "maxBytes": 610148
         },
         {
           "phase": "load / (pending)",
@@ -19,33 +19,33 @@
         },
         {
           "phase": "content loads",
-          "bytes": 129406,
-          "maxBytes": 131995
+          "bytes": 220970,
+          "maxBytes": 225390
         },
         {
           "phase": "comment list loads, avatars pending",
-          "bytes": 135221,
-          "maxBytes": 137926
+          "bytes": 135398,
+          "maxBytes": 138106
         },
         {
           "phase": "avatars load",
-          "bytes": 99131,
-          "maxBytes": 101114
+          "bytes": 99172,
+          "maxBytes": 101156
         },
         {
           "phase": "navigate to /docs/start",
-          "bytes": 208770,
-          "maxBytes": 212946
+          "bytes": 202490,
+          "maxBytes": 206540
         },
         {
           "phase": "article loads",
-          "bytes": 117147,
-          "maxBytes": 119490
+          "bytes": 208203,
+          "maxBytes": 212368
         },
         {
           "phase": "toggle theme",
-          "bytes": 67964,
-          "maxBytes": 69324
+          "bytes": 68029,
+          "maxBytes": 69390
         },
         {
           "phase": "search starts",
@@ -54,58 +54,58 @@
         },
         {
           "phase": "search results",
-          "bytes": 111390,
-          "maxBytes": 113618
+          "bytes": 111455,
+          "maxBytes": 113685
         },
         {
           "phase": "like (optimistic)",
-          "bytes": 82761,
-          "maxBytes": 84417
+          "bytes": 82826,
+          "maxBytes": 84483
         },
         {
           "phase": "like saved",
-          "bytes": 90522,
-          "maxBytes": 92333
+          "bytes": 90587,
+          "maxBytes": 92399
         },
         {
           "phase": "second like (optimistic)",
-          "bytes": 82937,
-          "maxBytes": 84596
+          "bytes": 83002,
+          "maxBytes": 84663
         },
         {
           "phase": "like rate limited",
-          "bytes": 90647,
-          "maxBytes": 92460
+          "bytes": 90989,
+          "maxBytes": 92809
         },
         {
           "phase": "newsletter good email",
-          "bytes": 65525,
-          "maxBytes": 66836
+          "bytes": 65734,
+          "maxBytes": 67049
         },
         {
           "phase": "newsletter in flight",
-          "bytes": 80587,
-          "maxBytes": 82199
+          "bytes": 80652,
+          "maxBytes": 82266
         },
         {
           "phase": "newsletter success",
-          "bytes": 88830,
-          "maxBytes": 90607
+          "bytes": 88895,
+          "maxBytes": 90673
         },
         {
           "phase": "newsletter bad email",
-          "bytes": 68209,
-          "maxBytes": 69574
+          "bytes": 68418,
+          "maxBytes": 69787
         },
         {
           "phase": "bad newsletter in flight",
-          "bytes": 80758,
-          "maxBytes": 82374
+          "bytes": 80823,
+          "maxBytes": 82440
         },
         {
           "phase": "newsletter typed error",
-          "bytes": 90928,
-          "maxBytes": 92747
+          "bytes": 91270,
+          "maxBytes": 93096
         },
         {
           "phase": "carousel next",
@@ -119,18 +119,38 @@
         },
         {
           "phase": "search typed error",
-          "bytes": 105383,
-          "maxBytes": 107491
+          "bytes": 105660,
+          "maxBytes": 107774
         },
         {
           "phase": "navigate to failing slug",
-          "bytes": 158843,
-          "maxBytes": 162020
+          "bytes": 158629,
+          "maxBytes": 161802
         },
         {
           "phase": "not-found typed error",
-          "bytes": 126974,
-          "maxBytes": 129514
+          "bytes": 128611,
+          "maxBytes": 131184
+        },
+        {
+          "phase": "navigate to code-heavy article",
+          "bytes": 158585,
+          "maxBytes": 161757
+        },
+        {
+          "phase": "code-heavy article loads",
+          "bytes": 250250,
+          "maxBytes": 255255
+        },
+        {
+          "phase": "check table of contents",
+          "bytes": 124158,
+          "maxBytes": 126642
+        },
+        {
+          "phase": "check highlighted token",
+          "bytes": 0,
+          "maxBytes": 1024
         }
       ]
     },
@@ -140,8 +160,8 @@
       "phases": [
         {
           "phase": "load",
-          "bytes": 543843,
-          "maxBytes": 554720
+          "bytes": 621328,
+          "maxBytes": 633755
         },
         {
           "phase": "load / (pending)",
@@ -150,13 +170,13 @@
         },
         {
           "phase": "content loads",
-          "bytes": 137781,
-          "maxBytes": 140537
+          "bytes": 228425,
+          "maxBytes": 232994
         },
         {
           "phase": "comment list loads, avatars pending",
-          "bytes": 143420,
-          "maxBytes": 146289
+          "bytes": 143565,
+          "maxBytes": 146437
         },
         {
           "phase": "avatars load",
@@ -165,48 +185,48 @@
         },
         {
           "phase": "navigate to /docs/start",
-          "bytes": 222026,
-          "maxBytes": 226467
+          "bytes": 215313,
+          "maxBytes": 219620
         },
         {
           "phase": "article loads",
-          "bytes": 124076,
-          "maxBytes": 126558
+          "bytes": 214269,
+          "maxBytes": 218555
         },
         {
           "phase": "toggle theme",
-          "bytes": 83885,
-          "maxBytes": 85563
+          "bytes": 83991,
+          "maxBytes": 85671
         },
         {
           "phase": "search starts",
-          "bytes": 93775,
-          "maxBytes": 95651
+          "bytes": 93816,
+          "maxBytes": 95693
         },
         {
           "phase": "search results",
-          "bytes": 116782,
-          "maxBytes": 119118
+          "bytes": 116986,
+          "maxBytes": 119326
         },
         {
           "phase": "like (optimistic)",
-          "bytes": 87411,
-          "maxBytes": 89160
+          "bytes": 87615,
+          "maxBytes": 89368
         },
         {
           "phase": "like saved",
-          "bytes": 94058,
-          "maxBytes": 95940
+          "bytes": 94164,
+          "maxBytes": 96048
         },
         {
           "phase": "second like (optimistic)",
-          "bytes": 87587,
-          "maxBytes": 89339
+          "bytes": 87791,
+          "maxBytes": 89547
         },
         {
           "phase": "like rate limited",
-          "bytes": 93857,
-          "maxBytes": 95735
+          "bytes": 94414,
+          "maxBytes": 96303
         },
         {
           "phase": "newsletter good email",
@@ -225,8 +245,8 @@
         },
         {
           "phase": "newsletter bad email",
-          "bytes": 80023,
-          "maxBytes": 81624
+          "bytes": 79932,
+          "maxBytes": 81531
         },
         {
           "phase": "bad newsletter in flight",
@@ -235,8 +255,8 @@
         },
         {
           "phase": "newsletter typed error",
-          "bytes": 94190,
-          "maxBytes": 96074
+          "bytes": 94641,
+          "maxBytes": 96534
         },
         {
           "phase": "carousel next",
@@ -250,18 +270,38 @@
         },
         {
           "phase": "search typed error",
-          "bytes": 108304,
-          "maxBytes": 110471
+          "bytes": 109021,
+          "maxBytes": 111202
         },
         {
           "phase": "navigate to failing slug",
-          "bytes": 161868,
-          "maxBytes": 165106
+          "bytes": 161752,
+          "maxBytes": 164988
         },
         {
           "phase": "not-found typed error",
-          "bytes": 129477,
-          "maxBytes": 132067
+          "bytes": 131555,
+          "maxBytes": 134187
+        },
+        {
+          "phase": "navigate to code-heavy article",
+          "bytes": 161708,
+          "maxBytes": 164943
+        },
+        {
+          "phase": "code-heavy article loads",
+          "bytes": 256428,
+          "maxBytes": 261557
+        },
+        {
+          "phase": "check table of contents",
+          "bytes": 124158,
+          "maxBytes": 126642
+        },
+        {
+          "phase": "check highlighted token",
+          "bytes": 0,
+          "maxBytes": 1024
         }
       ]
     },

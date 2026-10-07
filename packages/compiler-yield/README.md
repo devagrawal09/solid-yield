@@ -57,7 +57,7 @@ Unsupported captures fall back to the whole library entry with a variable
 location. A one-root plan leaves code unchanged. The plan reports expansions;
 it must not be read as a general purpose splitter.
 
-The `/` page passes 24 hydrated steps. Direct `/docs/start` and `/docs/missing`
+The `/` page passes 28 hydrated steps. Direct `/docs/start` and `/docs/missing`
 pass SSR/hydration after merging main's D-115 and its corrected streamed-error
 criterion. F-C9 is resolved; the old expected-failure check is gone. See
 [the C2 record](../../documentation/compiler-c2-finding.md).
@@ -115,14 +115,30 @@ failure and error boundary server-side, so streamed frames contain the authored
 `not-found` fallback, including kind/message. `test/server-region.test.mjs`
 also preserves the separate generic-frame message probe.
 
-Run `node --test test/server-components.test.mjs` for the 24-step comparison,
+Run `node --test test/server-components.test.mjs` for the 28-step comparison,
 keyed-slot state/node checks and production direct-route smokes. **Exact DOM
 parity is not achieved:** the public frame API adds wrapper elements and a
 pending template marker. The test records those differences; it does not change
-the parity normalizer. All 24 authored-content comparisons pass once those
-known transport nodes are accounted for in a separate diagnostic comparison.
+the parity normalizer. All 28 authored-content comparisons pass once the known transport nodes and
+F-C13 article-link claim attributes are accounted for in a separate diagnostic
+comparison. Exact R DOM parity still fails.
 
 The [C3 report](../../documentation/compiler-c3-server-components.md) contains
 three-run executed/shipped measurements, RPC payloads, findings and scope.
 `node examples/harness/executed-bytes/hydrated-docs.mjs --regions --runs 3`
 measures all four variants. Server execution runs in a separate process.
+
+## C3b realistic article payload
+
+Both docs apps now use the same six Markdown sources and a memoized marked /
+highlight.js pipeline (TypeScript, JavaScript, shell), TOC and fixed-locale date.
+The loader and derived memo live beside each other in ArticleContent setup;
+F-C14 records why recreating the derived memo below Loading fails the generic
+frame probe. F-C12 is a narrow source/version-pinned purity contract for this
+adapter, not inference of arbitrary package purity. Changed adapters are refused.
+
+The production shipping check rejects renderer, highlighter, adapter and Markdown
+module IDs from every R client chunk. See [C3b](../../documentation/compiler-c3b-payload.md)
+for three-run execution, library-only bundles, shipping-only ablations,
+markup-versus-equivalent-JSON response sizes and code break-even. The main gate
+baseline is unchanged; docs byte baselines have 28 authored steps.

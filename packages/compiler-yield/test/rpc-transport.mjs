@@ -1,3 +1,4 @@
+import { gzipSync } from "node:zlib";
 import { fork } from "node:child_process";
 export async function rpcTransport() {
   const child = fork(new URL("./rpc-worker.mjs", import.meta.url), [], {
@@ -35,7 +36,13 @@ export async function rpcTransport() {
     if (message.end) {
       entry.controller.close();
       const body = Buffer.concat(entry.parts).toString();
-      payloads.push({ url: entry.url, request: entry.body, bytes: Buffer.byteLength(body), body });
+      payloads.push({
+        url: entry.url,
+        request: entry.body,
+        bytes: Buffer.byteLength(body),
+        gzipBytes: gzipSync(body).length,
+        body
+      });
       pending.delete(message.id);
     }
   });

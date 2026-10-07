@@ -1,3 +1,4 @@
+import { renderArticle } from "./article-pipeline";
 import {
   component,
   $memo,
@@ -134,6 +135,9 @@ export const ArticleContent = component(function* ArticleContent(
       cause => new NotFound(cause)
     );
   });
+  const rendered = yield* $memo(function* () {
+    return renderArticle(yield* article);
+  });
   return view(function* () {
     return (
       <>
@@ -152,7 +156,7 @@ export const ArticleContent = component(function* ArticleContent(
                     yield* Loading({
                       fallback: "Loading article…",
                       children: function* () {
-                        return <>{yield* ArticleBody({ article })}</>;
+                        return <>{yield* ArticleBody({ article, rendered })}</>;
                       }
                     })
                   }
@@ -166,7 +170,10 @@ export const ArticleContent = component(function* ArticleContent(
   });
 });
 const ArticleBody = component(function* ArticleBody(
-  props: Props<{ article: Source<Article, NotFound, true> }>
+  props: Props<{
+    article: Source<Article, NotFound, true>;
+    rendered: Source<ReturnType<typeof renderArticle>, NotFound, true>;
+  }>
 ) {
   return view(function* () {
     return (
@@ -174,82 +181,22 @@ const ArticleBody = component(function* ArticleBody(
         <article>
           <h1>{yield* props.article.title}</h1>
           <p>{yield* props.article.summary}</p>
-          <section id={yield* props.article.chapters[0].id}>
-            <h2>{yield* props.article.chapters[0].title}</h2>
-            <p>{yield* props.article.chapters[0].intro}</p>
-            <p>{yield* props.article.chapters[0].detail}</p>
-            <pre>
-              <code>{yield* props.article.chapters[0].code}</code>
-            </pre>
-          </section>
-          <section id={yield* props.article.chapters[1].id}>
-            <h2>{yield* props.article.chapters[1].title}</h2>
-            <p>{yield* props.article.chapters[1].intro}</p>
-            <p>{yield* props.article.chapters[1].detail}</p>
-            <pre>
-              <code>{yield* props.article.chapters[1].code}</code>
-            </pre>
-          </section>
-          <section id={yield* props.article.chapters[2].id}>
-            <h2>{yield* props.article.chapters[2].title}</h2>
-            <p>{yield* props.article.chapters[2].intro}</p>
-            <p>{yield* props.article.chapters[2].detail}</p>
-            <pre>
-              <code>{yield* props.article.chapters[2].code}</code>
-            </pre>
-          </section>
-          <section id={yield* props.article.chapters[3].id}>
-            <h2>{yield* props.article.chapters[3].title}</h2>
-            <p>{yield* props.article.chapters[3].intro}</p>
-            <p>{yield* props.article.chapters[3].detail}</p>
-            <pre>
-              <code>{yield* props.article.chapters[3].code}</code>
-            </pre>
-          </section>
-          <section id={yield* props.article.chapters[4].id}>
-            <h2>{yield* props.article.chapters[4].title}</h2>
-            <p>{yield* props.article.chapters[4].intro}</p>
-            <p>{yield* props.article.chapters[4].detail}</p>
-            <pre>
-              <code>{yield* props.article.chapters[4].code}</code>
-            </pre>
-          </section>
-          <section id={yield* props.article.chapters[5].id}>
-            <h2>{yield* props.article.chapters[5].title}</h2>
-            <p>{yield* props.article.chapters[5].intro}</p>
-            <p>{yield* props.article.chapters[5].detail}</p>
-            <pre>
-              <code>{yield* props.article.chapters[5].code}</code>
-            </pre>
-          </section>
-          <section id={yield* props.article.chapters[6].id}>
-            <h2>{yield* props.article.chapters[6].title}</h2>
-            <p>{yield* props.article.chapters[6].intro}</p>
-            <p>{yield* props.article.chapters[6].detail}</p>
-            <pre>
-              <code>{yield* props.article.chapters[6].code}</code>
-            </pre>
-          </section>
-          <section id={yield* props.article.chapters[7].id}>
-            <h2>{yield* props.article.chapters[7].title}</h2>
-            <p>{yield* props.article.chapters[7].intro}</p>
-            <p>{yield* props.article.chapters[7].detail}</p>
-            <pre>
-              <code>{yield* props.article.chapters[7].code}</code>
-            </pre>
-          </section>
+          <time datetime={yield* props.article.published}>{yield* props.rendered.date}</time>
+          <div class="markdown" innerHTML={yield* props.rendered.html} />
         </article>
         <aside class="on-this-page">
           <h2>On this page</h2>
           <ol>
             {
               yield* For({
-                each: props.article.chapters,
+                each: function* () {
+                  return yield* props.rendered.toc;
+                },
                 children: function* (chapter) {
                   return view(function* () {
                     return (
                       <li>
-                        <a href={`#${yield* chapter.id}`}>{yield* chapter.title}</a>
+                        <a href={`#${(yield* chapter).id}`}>{(yield* chapter).title}</a>
                       </li>
                     );
                   });

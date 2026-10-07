@@ -1,6 +1,6 @@
 {
   "node": "v24.18.0",
-  "metric": "Hydrated docs; V8 executed UTF-8 ranges reset each phase; production Vite module runner; completed SSR in a separate process; same 24 authored steps; all roots synchronous",
+  "metric": "Hydrated docs; V8 executed UTF-8 ranges reset each phase; production Vite module runner; completed SSR in a separate process; same 28 authored steps; all roots synchronous",
   "runs": [
     [
       {
@@ -8,7 +8,7 @@
         "phases": [
           {
             "phase": "load",
-            "bytes": 550893
+            "bytes": 714548
           },
           {
             "phase": "load / (pending)",
@@ -28,15 +28,15 @@
           },
           {
             "phase": "navigate to /docs/start",
-            "bytes": 224025
+            "bytes": 215085
           },
           {
             "phase": "article loads",
-            "bytes": 122428
+            "bytes": 213985
           },
           {
             "phase": "toggle theme",
-            "bytes": 70059
+            "bytes": 70124
           },
           {
             "phase": "search starts",
@@ -44,51 +44,51 @@
           },
           {
             "phase": "search results",
-            "bytes": 116381
+            "bytes": 116446
           },
           {
             "phase": "like (optimistic)",
-            "bytes": 86222
+            "bytes": 86287
           },
           {
             "phase": "like saved",
-            "bytes": 93887
+            "bytes": 93952
           },
           {
             "phase": "second like (optimistic)",
-            "bytes": 86398
+            "bytes": 86463
           },
           {
             "phase": "like rate limited",
-            "bytes": 93955
+            "bytes": 94337
           },
           {
             "phase": "newsletter good email",
-            "bytes": 67520
+            "bytes": 67585
           },
           {
             "phase": "newsletter in flight",
-            "bytes": 84464
+            "bytes": 84529
           },
           {
             "phase": "newsletter success",
-            "bytes": 92830
+            "bytes": 92895
           },
           {
             "phase": "newsletter bad email",
-            "bytes": 70337
+            "bytes": 70402
           },
           {
             "phase": "bad newsletter in flight",
-            "bytes": 84635
+            "bytes": 84700
           },
           {
             "phase": "newsletter typed error",
-            "bytes": 94939
+            "bytes": 95321
           },
           {
             "phase": "carousel next",
-            "bytes": 69018
+            "bytes": 69083
           },
           {
             "phase": "search failure starts",
@@ -96,15 +96,213 @@
           },
           {
             "phase": "search typed error",
-            "bytes": 109848
+            "bytes": 110230
           },
           {
             "phase": "navigate to failing slug",
-            "bytes": 164536
+            "bytes": 164387
           },
           {
             "phase": "not-found typed error",
-            "bytes": 132818
+            "bytes": 134561
+          },
+          {
+            "phase": "navigate to code-heavy article",
+            "bytes": 164438
+          },
+          {
+            "phase": "code-heavy article loads",
+            "bytes": 258127
+          },
+          {
+            "phase": "check table of contents",
+            "bytes": 129363
+          },
+          {
+            "phase": "check highlighted token",
+            "bytes": 0
+          }
+        ],
+        "loadScripts": [
+          {
+            "url": "file://<repo>/node_modules/.pnpm/@solidjs+vite-plugin@3.0.0-next.35_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid_9a9da99f652951377ec711159c15c0d8/node_modules/@solidjs/vite-plugin/dist/cjs/index.cjs",
+            "bytes": 6704
+          },
+          {
+            "url": "<repo>/examples/originals/docs/stream/client.tsx",
+            "bytes": 1399
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13/node_modules/@solidjs/web/dist/web.dev.js",
+            "bytes": 27570
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/solid-js@2.0.0-rc.13/node_modules/solid-js/dist/solid.dev.js",
+            "bytes": 21447
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+signals@2.0.0-rc.13/node_modules/@solidjs/signals/dist/dev.js",
+            "bytes": 168784
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+signals@2.0.0-rc.13/node_modules/@solidjs/signals/dist/dev-shared.js",
+            "bytes": 173328
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/solid-js@2.0.0-rc.13/node_modules/solid-js/dist/internal.js",
+            "bytes": 3545
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/app.tsx",
+            "bytes": 7159
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/index.jsx",
+            "bytes": 3313
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/index.js",
+            "bytes": 1523
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/factory.jsx",
+            "bytes": 8226
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/claims.js",
+            "bytes": 6917
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/utils.js",
+            "bytes": 4330
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/events.js",
+            "bytes": 1998
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/paths.js",
+            "bytes": 1734
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/serverRouteShared.js",
+            "bytes": 1717
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routing.js",
+            "bytes": 25097
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/components.jsx",
+            "bytes": 4537
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/history.js",
+            "bytes": 2489
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/scrollRestoration.js",
+            "bytes": 6015
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/lifecycle.js",
+            "bytes": 2223
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/serverRouteComponent.js",
+            "bytes": 4239
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/index.js",
+            "bytes": 1571
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/action.js",
+            "bytes": 7312
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13/node_modules/@solidjs/web/server-functions/dist/client.dev.js",
+            "bytes": 5302
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/query.js",
+            "bytes": 4945
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/liveQuery.js",
+            "bytes": 5941
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/content.tsx",
+            "bytes": 13903
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/article-pipeline.ts",
+            "bytes": 3091
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
+            "bytes": 28674
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/core.js",
+            "bytes": 849
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js",
+            "bytes": 58586
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/typescript.js",
+            "bytes": 20006
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/javascript.js",
+            "bytes": 16454
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/bash.js",
+            "bytes": 6912
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/api.ts",
+            "bytes": 2348
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/articles/overview.md?raw",
+            "bytes": 5335
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/articles/start.md?raw",
+            "bytes": 5351
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/articles/widgets.md?raw",
+            "bytes": 5357
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/articles/pipeline.md?raw",
+            "bytes": 5355
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/articles/routing.md?raw",
+            "bytes": 5349
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/articles/testing.md?raw",
+            "bytes": 5355
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/errors.ts",
+            "bytes": 979
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/widgets.tsx",
+            "bytes": 17897
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/shell.tsx",
+            "bytes": 3382
           }
         ]
       },
@@ -113,7 +311,7 @@
         "phases": [
           {
             "phase": "load",
-            "bytes": 584641
+            "bytes": 747726
           },
           {
             "phase": "load / (pending)",
@@ -133,15 +331,15 @@
           },
           {
             "phase": "navigate to /docs/start",
-            "bytes": 238733
+            "bytes": 229512
           },
           {
             "phase": "article loads",
-            "bytes": 129679
+            "bytes": 220443
           },
           {
             "phase": "toggle theme",
-            "bytes": 86684
+            "bytes": 86749
           },
           {
             "phase": "search starts",
@@ -149,35 +347,35 @@
           },
           {
             "phase": "search results",
-            "bytes": 121873
+            "bytes": 122101
           },
           {
             "phase": "like (optimistic)",
-            "bytes": 91028
+            "bytes": 91191
           },
           {
             "phase": "like saved",
-            "bytes": 97553
+            "bytes": 97618
           },
           {
             "phase": "second like (optimistic)",
-            "bytes": 91178
+            "bytes": 91341
           },
           {
             "phase": "like rate limited",
-            "bytes": 97295
+            "bytes": 97851
           },
           {
             "phase": "newsletter good email",
-            "bytes": 80100
+            "bytes": 80165
           },
           {
             "phase": "newsletter in flight",
-            "bytes": 88623
+            "bytes": 88688
           },
           {
             "phase": "newsletter success",
-            "bytes": 96508
+            "bytes": 96573
           },
           {
             "phase": "newsletter bad email",
@@ -189,7 +387,7 @@
           },
           {
             "phase": "newsletter typed error",
-            "bytes": 98298
+            "bytes": 98789
           },
           {
             "phase": "carousel next",
@@ -201,15 +399,221 @@
           },
           {
             "phase": "search typed error",
-            "bytes": 113060
+            "bytes": 113919
           },
           {
             "phase": "navigate to failing slug",
-            "bytes": 167718
+            "bytes": 167602
           },
           {
             "phase": "not-found typed error",
-            "bytes": 135935
+            "bytes": 138155
+          },
+          {
+            "phase": "navigate to code-heavy article",
+            "bytes": 167653
+          },
+          {
+            "phase": "code-heavy article loads",
+            "bytes": 264769
+          },
+          {
+            "phase": "check table of contents",
+            "bytes": 129363
+          },
+          {
+            "phase": "check highlighted token",
+            "bytes": 0
+          }
+        ],
+        "loadScripts": [
+          {
+            "url": "file://<repo>/node_modules/.pnpm/@solidjs+vite-plugin@3.0.0-next.35_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid_9a9da99f652951377ec711159c15c0d8/node_modules/@solidjs/vite-plugin/dist/cjs/index.cjs",
+            "bytes": 6704
+          },
+          {
+            "url": "<repo>/examples/docs-yield/stream/client.tsx",
+            "bytes": 1454
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13/node_modules/@solidjs/web/dist/web.dev.js",
+            "bytes": 27570
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/solid-js@2.0.0-rc.13/node_modules/solid-js/dist/solid.dev.js",
+            "bytes": 21506
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+signals@2.0.0-rc.13/node_modules/@solidjs/signals/dist/dev.js",
+            "bytes": 168834
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+signals@2.0.0-rc.13/node_modules/@solidjs/signals/dist/dev-shared.js",
+            "bytes": 173515
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/solid-js@2.0.0-rc.13/node_modules/solid-js/dist/internal.js",
+            "bytes": 3545
+          },
+          {
+            "url": "<repo>/packages/yield/dist/yield.dev.js",
+            "bytes": 9109
+          },
+          {
+            "url": "<repo>/packages/yield/dist/internal.dev.js",
+            "bytes": 13822
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/app.tsx",
+            "bytes": 8866
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/index.jsx",
+            "bytes": 3313
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/index.js",
+            "bytes": 1523
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/factory.jsx",
+            "bytes": 8226
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/claims.js",
+            "bytes": 6917
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/utils.js",
+            "bytes": 4330
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/events.js",
+            "bytes": 1998
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/paths.js",
+            "bytes": 1734
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/serverRouteShared.js",
+            "bytes": 1717
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routing.js",
+            "bytes": 25097
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/components.jsx",
+            "bytes": 4537
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/history.js",
+            "bytes": 2489
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/scrollRestoration.js",
+            "bytes": 6015
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/lifecycle.js",
+            "bytes": 2223
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/serverRouteComponent.js",
+            "bytes": 4239
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/index.js",
+            "bytes": 1571
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/action.js",
+            "bytes": 7312
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13/node_modules/@solidjs/web/server-functions/dist/client.dev.js",
+            "bytes": 5302
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/query.js",
+            "bytes": 4945
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/liveQuery.js",
+            "bytes": 5941
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/content.tsx",
+            "bytes": 17779
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/article-pipeline.ts",
+            "bytes": 3087
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
+            "bytes": 28674
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/core.js",
+            "bytes": 849
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js",
+            "bytes": 58586
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/typescript.js",
+            "bytes": 20006
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/javascript.js",
+            "bytes": 16454
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/bash.js",
+            "bytes": 6912
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/api.ts",
+            "bytes": 2316
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/overview.md?raw",
+            "bytes": 5331
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/start.md?raw",
+            "bytes": 5347
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/widgets.md?raw",
+            "bytes": 5353
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/pipeline.md?raw",
+            "bytes": 5351
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/routing.md?raw",
+            "bytes": 5345
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/testing.md?raw",
+            "bytes": 5351
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/errors.ts",
+            "bytes": 1008
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/widgets.tsx",
+            "bytes": 21747
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/shell.tsx",
+            "bytes": 3876
           }
         ]
       },
@@ -218,7 +622,7 @@
         "phases": [
           {
             "phase": "load",
-            "bytes": 642511
+            "bytes": 794843
           },
           {
             "phase": "load / (pending)",
@@ -238,15 +642,15 @@
           },
           {
             "phase": "navigate to /docs/start",
-            "bytes": 239118
+            "bytes": 229897
           },
           {
             "phase": "article loads",
-            "bytes": 130233
+            "bytes": 221021
           },
           {
             "phase": "toggle theme",
-            "bytes": 86677
+            "bytes": 86742
           },
           {
             "phase": "search starts",
@@ -254,51 +658,51 @@
           },
           {
             "phase": "search results",
-            "bytes": 122425
+            "bytes": 122588
           },
           {
             "phase": "like (optimistic)",
-            "bytes": 92197
+            "bytes": 92360
           },
           {
             "phase": "like saved",
-            "bytes": 98138
+            "bytes": 98203
           },
           {
             "phase": "second like (optimistic)",
-            "bytes": 92347
+            "bytes": 92510
           },
           {
             "phase": "like rate limited",
-            "bytes": 97880
+            "bytes": 98436
           },
           {
             "phase": "newsletter good email",
-            "bytes": 80091
+            "bytes": 80156
           },
           {
             "phase": "newsletter in flight",
-            "bytes": 88612
+            "bytes": 88677
           },
           {
             "phase": "newsletter success",
-            "bytes": 97311
+            "bytes": 97376
           },
           {
             "phase": "newsletter bad email",
-            "bytes": 82660
+            "bytes": 82725
           },
           {
             "phase": "bad newsletter in flight",
-            "bytes": 88650
+            "bytes": 88715
           },
           {
             "phase": "newsletter typed error",
-            "bytes": 98874
+            "bytes": 99430
           },
           {
             "phase": "carousel next",
-            "bytes": 85221
+            "bytes": 85286
           },
           {
             "phase": "search failure starts",
@@ -306,15 +710,265 @@
           },
           {
             "phase": "search typed error",
-            "bytes": 113929
+            "bytes": 114788
           },
           {
             "phase": "navigate to failing slug",
-            "bytes": 167763
+            "bytes": 167712
           },
           {
             "phase": "not-found typed error",
-            "bytes": 136784
+            "bytes": 139004
+          },
+          {
+            "phase": "navigate to code-heavy article",
+            "bytes": 167763
+          },
+          {
+            "phase": "code-heavy article loads",
+            "bytes": 265319
+          },
+          {
+            "phase": "check table of contents",
+            "bytes": 129756
+          },
+          {
+            "phase": "check highlighted token",
+            "bytes": 0
+          }
+        ],
+        "loadScripts": [
+          {
+            "url": "file://<repo>/node_modules/.pnpm/@solidjs+vite-plugin@3.0.0-next.35_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid_9a9da99f652951377ec711159c15c0d8/node_modules/@solidjs/vite-plugin/dist/cjs/index.cjs",
+            "bytes": 6704
+          },
+          {
+            "url": "<repo>/examples/docs-yield/stream/client.tsx",
+            "bytes": 506
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/__compiler_client.tsx",
+            "bytes": 4473
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/__compiler_ThemeToggle.tsx",
+            "bytes": 4739
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13/node_modules/@solidjs/web/dist/web.dev.js",
+            "bytes": 27651
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/solid-js@2.0.0-rc.13/node_modules/solid-js/dist/solid.dev.js",
+            "bytes": 21512
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+signals@2.0.0-rc.13/node_modules/@solidjs/signals/dist/dev.js",
+            "bytes": 168952
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+signals@2.0.0-rc.13/node_modules/@solidjs/signals/dist/dev-shared.js",
+            "bytes": 174420
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/solid-js@2.0.0-rc.13/node_modules/solid-js/dist/internal.js",
+            "bytes": 3545
+          },
+          {
+            "url": "<repo>/packages/yield/dist/yield.dev.js",
+            "bytes": 9162
+          },
+          {
+            "url": "<repo>/packages/yield/dist/internal.dev.js",
+            "bytes": 13897
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/__compiler_SearchBox.tsx",
+            "bytes": 7330
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/api__compiler_dep.ts",
+            "bytes": 2200
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/overview.md?raw",
+            "bytes": 5331
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/start.md?raw",
+            "bytes": 5347
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/widgets.md?raw",
+            "bytes": 5353
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/pipeline.md?raw",
+            "bytes": 5351
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/routing.md?raw",
+            "bytes": 5345
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/testing.md?raw",
+            "bytes": 5351
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/errors__compiler_dep.ts",
+            "bytes": 1019
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/__compiler_Router.tsx",
+            "bytes": 4569
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/index.jsx",
+            "bytes": 3313
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/index.js",
+            "bytes": 1523
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/factory.jsx",
+            "bytes": 8226
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/claims.js",
+            "bytes": 6917
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/utils.js",
+            "bytes": 4330
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/events.js",
+            "bytes": 1998
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/paths.js",
+            "bytes": 1734
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/serverRouteShared.js",
+            "bytes": 1717
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routing.js",
+            "bytes": 25097
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/components.jsx",
+            "bytes": 4537
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/history.js",
+            "bytes": 2489
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/scrollRestoration.js",
+            "bytes": 6015
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/lifecycle.js",
+            "bytes": 2223
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/serverRouteComponent.js",
+            "bytes": 4239
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/index.js",
+            "bytes": 1571
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/action.js",
+            "bytes": 7312
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13/node_modules/@solidjs/web/server-functions/dist/client.dev.js",
+            "bytes": 5302
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/query.js",
+            "bytes": 4945
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/liveQuery.js",
+            "bytes": 5941
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/content__compiler_dep.tsx",
+            "bytes": 10168
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/article-pipeline__compiler_dep.ts",
+            "bytes": 3101
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
+            "bytes": 28674
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/core.js",
+            "bytes": 849
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js",
+            "bytes": 58586
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/typescript.js",
+            "bytes": 20006
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/javascript.js",
+            "bytes": 16454
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/bash.js",
+            "bytes": 6912
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/widgets__compiler_dep.tsx",
+            "bytes": 6775
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/__compiler_NewsletterForm.tsx",
+            "bytes": 7426
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/__compiler_CommentList.tsx",
+            "bytes": 6879
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/__compiler_ImageCarousel.tsx",
+            "bytes": 5433
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/__compiler_ReadingGuide.tsx",
+            "bytes": 10957
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13/node_modules/@solidjs/web/serialization/dist/decode.js",
+            "bytes": 3982
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/seroval@1.6.8/node_modules/seroval/dist/dev/index.js",
+            "bytes": 18065
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/seroval-plugins@1.6.8_seroval@1.6.8/node_modules/seroval-plugins/dist/dev/web.js",
+            "bytes": 1814
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/seroval-plugins@1.6.8_seroval@1.6.8/node_modules/seroval-plugins/dist/dev/web-CDQeyEaf.js",
+            "bytes": 5791
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/seroval-plugins@1.6.8_seroval@1.6.8/node_modules/seroval-plugins/dist/dev/rolldown-runtime-D7D4PA-g.js",
+            "bytes": 785
           }
         ]
       }
@@ -325,7 +979,7 @@
         "phases": [
           {
             "phase": "load",
-            "bytes": 550893
+            "bytes": 714548
           },
           {
             "phase": "load / (pending)",
@@ -345,15 +999,15 @@
           },
           {
             "phase": "navigate to /docs/start",
-            "bytes": 224025
+            "bytes": 215085
           },
           {
             "phase": "article loads",
-            "bytes": 122428
+            "bytes": 213985
           },
           {
             "phase": "toggle theme",
-            "bytes": 70059
+            "bytes": 70124
           },
           {
             "phase": "search starts",
@@ -361,51 +1015,51 @@
           },
           {
             "phase": "search results",
-            "bytes": 116381
+            "bytes": 116446
           },
           {
             "phase": "like (optimistic)",
-            "bytes": 86222
+            "bytes": 86287
           },
           {
             "phase": "like saved",
-            "bytes": 93887
+            "bytes": 93952
           },
           {
             "phase": "second like (optimistic)",
-            "bytes": 86398
+            "bytes": 86463
           },
           {
             "phase": "like rate limited",
-            "bytes": 93955
+            "bytes": 94337
           },
           {
             "phase": "newsletter good email",
-            "bytes": 67520
+            "bytes": 67585
           },
           {
             "phase": "newsletter in flight",
-            "bytes": 84464
+            "bytes": 84529
           },
           {
             "phase": "newsletter success",
-            "bytes": 92830
+            "bytes": 92895
           },
           {
             "phase": "newsletter bad email",
-            "bytes": 70337
+            "bytes": 70402
           },
           {
             "phase": "bad newsletter in flight",
-            "bytes": 84635
+            "bytes": 84700
           },
           {
             "phase": "newsletter typed error",
-            "bytes": 94939
+            "bytes": 95321
           },
           {
             "phase": "carousel next",
-            "bytes": 69018
+            "bytes": 69083
           },
           {
             "phase": "search failure starts",
@@ -413,15 +1067,213 @@
           },
           {
             "phase": "search typed error",
-            "bytes": 109848
+            "bytes": 110230
           },
           {
             "phase": "navigate to failing slug",
-            "bytes": 164536
+            "bytes": 164387
           },
           {
             "phase": "not-found typed error",
-            "bytes": 132818
+            "bytes": 134561
+          },
+          {
+            "phase": "navigate to code-heavy article",
+            "bytes": 164438
+          },
+          {
+            "phase": "code-heavy article loads",
+            "bytes": 258127
+          },
+          {
+            "phase": "check table of contents",
+            "bytes": 129363
+          },
+          {
+            "phase": "check highlighted token",
+            "bytes": 0
+          }
+        ],
+        "loadScripts": [
+          {
+            "url": "file://<repo>/node_modules/.pnpm/@solidjs+vite-plugin@3.0.0-next.35_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid_9a9da99f652951377ec711159c15c0d8/node_modules/@solidjs/vite-plugin/dist/cjs/index.cjs",
+            "bytes": 6704
+          },
+          {
+            "url": "<repo>/examples/originals/docs/stream/client.tsx",
+            "bytes": 1399
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13/node_modules/@solidjs/web/dist/web.dev.js",
+            "bytes": 27570
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/solid-js@2.0.0-rc.13/node_modules/solid-js/dist/solid.dev.js",
+            "bytes": 21447
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+signals@2.0.0-rc.13/node_modules/@solidjs/signals/dist/dev.js",
+            "bytes": 168784
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+signals@2.0.0-rc.13/node_modules/@solidjs/signals/dist/dev-shared.js",
+            "bytes": 173328
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/solid-js@2.0.0-rc.13/node_modules/solid-js/dist/internal.js",
+            "bytes": 3545
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/app.tsx",
+            "bytes": 7159
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/index.jsx",
+            "bytes": 3313
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/index.js",
+            "bytes": 1523
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/factory.jsx",
+            "bytes": 8226
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/claims.js",
+            "bytes": 6917
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/utils.js",
+            "bytes": 4330
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/events.js",
+            "bytes": 1998
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/paths.js",
+            "bytes": 1734
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/serverRouteShared.js",
+            "bytes": 1717
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routing.js",
+            "bytes": 25097
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/components.jsx",
+            "bytes": 4537
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/history.js",
+            "bytes": 2489
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/scrollRestoration.js",
+            "bytes": 6015
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/lifecycle.js",
+            "bytes": 2223
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/serverRouteComponent.js",
+            "bytes": 4239
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/index.js",
+            "bytes": 1571
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/action.js",
+            "bytes": 7312
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13/node_modules/@solidjs/web/server-functions/dist/client.dev.js",
+            "bytes": 5302
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/query.js",
+            "bytes": 4945
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/liveQuery.js",
+            "bytes": 5941
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/content.tsx",
+            "bytes": 13903
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/article-pipeline.ts",
+            "bytes": 3091
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
+            "bytes": 28674
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/core.js",
+            "bytes": 849
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js",
+            "bytes": 58586
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/typescript.js",
+            "bytes": 20006
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/javascript.js",
+            "bytes": 16454
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/bash.js",
+            "bytes": 6912
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/api.ts",
+            "bytes": 2348
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/articles/overview.md?raw",
+            "bytes": 5335
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/articles/start.md?raw",
+            "bytes": 5351
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/articles/widgets.md?raw",
+            "bytes": 5357
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/articles/pipeline.md?raw",
+            "bytes": 5355
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/articles/routing.md?raw",
+            "bytes": 5349
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/articles/testing.md?raw",
+            "bytes": 5355
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/errors.ts",
+            "bytes": 979
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/widgets.tsx",
+            "bytes": 17897
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/shell.tsx",
+            "bytes": 3382
           }
         ]
       },
@@ -430,7 +1282,7 @@
         "phases": [
           {
             "phase": "load",
-            "bytes": 584641
+            "bytes": 747726
           },
           {
             "phase": "load / (pending)",
@@ -450,15 +1302,15 @@
           },
           {
             "phase": "navigate to /docs/start",
-            "bytes": 238733
+            "bytes": 229512
           },
           {
             "phase": "article loads",
-            "bytes": 129679
+            "bytes": 220443
           },
           {
             "phase": "toggle theme",
-            "bytes": 86684
+            "bytes": 86749
           },
           {
             "phase": "search starts",
@@ -466,35 +1318,35 @@
           },
           {
             "phase": "search results",
-            "bytes": 121873
+            "bytes": 122101
           },
           {
             "phase": "like (optimistic)",
-            "bytes": 91028
+            "bytes": 91191
           },
           {
             "phase": "like saved",
-            "bytes": 97553
+            "bytes": 97618
           },
           {
             "phase": "second like (optimistic)",
-            "bytes": 91178
+            "bytes": 91341
           },
           {
             "phase": "like rate limited",
-            "bytes": 97295
+            "bytes": 97851
           },
           {
             "phase": "newsletter good email",
-            "bytes": 80100
+            "bytes": 80165
           },
           {
             "phase": "newsletter in flight",
-            "bytes": 88623
+            "bytes": 88688
           },
           {
             "phase": "newsletter success",
-            "bytes": 96508
+            "bytes": 96573
           },
           {
             "phase": "newsletter bad email",
@@ -506,7 +1358,7 @@
           },
           {
             "phase": "newsletter typed error",
-            "bytes": 98298
+            "bytes": 98789
           },
           {
             "phase": "carousel next",
@@ -518,15 +1370,221 @@
           },
           {
             "phase": "search typed error",
-            "bytes": 113060
+            "bytes": 113919
           },
           {
             "phase": "navigate to failing slug",
-            "bytes": 167718
+            "bytes": 167602
           },
           {
             "phase": "not-found typed error",
-            "bytes": 135935
+            "bytes": 138155
+          },
+          {
+            "phase": "navigate to code-heavy article",
+            "bytes": 167653
+          },
+          {
+            "phase": "code-heavy article loads",
+            "bytes": 264769
+          },
+          {
+            "phase": "check table of contents",
+            "bytes": 129363
+          },
+          {
+            "phase": "check highlighted token",
+            "bytes": 0
+          }
+        ],
+        "loadScripts": [
+          {
+            "url": "file://<repo>/node_modules/.pnpm/@solidjs+vite-plugin@3.0.0-next.35_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid_9a9da99f652951377ec711159c15c0d8/node_modules/@solidjs/vite-plugin/dist/cjs/index.cjs",
+            "bytes": 6704
+          },
+          {
+            "url": "<repo>/examples/docs-yield/stream/client.tsx",
+            "bytes": 1454
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13/node_modules/@solidjs/web/dist/web.dev.js",
+            "bytes": 27570
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/solid-js@2.0.0-rc.13/node_modules/solid-js/dist/solid.dev.js",
+            "bytes": 21506
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+signals@2.0.0-rc.13/node_modules/@solidjs/signals/dist/dev.js",
+            "bytes": 168834
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+signals@2.0.0-rc.13/node_modules/@solidjs/signals/dist/dev-shared.js",
+            "bytes": 173515
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/solid-js@2.0.0-rc.13/node_modules/solid-js/dist/internal.js",
+            "bytes": 3545
+          },
+          {
+            "url": "<repo>/packages/yield/dist/yield.dev.js",
+            "bytes": 9109
+          },
+          {
+            "url": "<repo>/packages/yield/dist/internal.dev.js",
+            "bytes": 13822
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/app.tsx",
+            "bytes": 8866
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/index.jsx",
+            "bytes": 3313
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/index.js",
+            "bytes": 1523
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/factory.jsx",
+            "bytes": 8226
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/claims.js",
+            "bytes": 6917
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/utils.js",
+            "bytes": 4330
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/events.js",
+            "bytes": 1998
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/paths.js",
+            "bytes": 1734
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/serverRouteShared.js",
+            "bytes": 1717
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routing.js",
+            "bytes": 25097
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/components.jsx",
+            "bytes": 4537
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/history.js",
+            "bytes": 2489
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/scrollRestoration.js",
+            "bytes": 6015
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/lifecycle.js",
+            "bytes": 2223
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/serverRouteComponent.js",
+            "bytes": 4239
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/index.js",
+            "bytes": 1571
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/action.js",
+            "bytes": 7312
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13/node_modules/@solidjs/web/server-functions/dist/client.dev.js",
+            "bytes": 5302
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/query.js",
+            "bytes": 4945
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/liveQuery.js",
+            "bytes": 5941
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/content.tsx",
+            "bytes": 17779
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/article-pipeline.ts",
+            "bytes": 3087
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
+            "bytes": 28674
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/core.js",
+            "bytes": 849
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js",
+            "bytes": 58586
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/typescript.js",
+            "bytes": 20006
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/javascript.js",
+            "bytes": 16454
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/bash.js",
+            "bytes": 6912
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/api.ts",
+            "bytes": 2316
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/overview.md?raw",
+            "bytes": 5331
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/start.md?raw",
+            "bytes": 5347
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/widgets.md?raw",
+            "bytes": 5353
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/pipeline.md?raw",
+            "bytes": 5351
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/routing.md?raw",
+            "bytes": 5345
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/testing.md?raw",
+            "bytes": 5351
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/errors.ts",
+            "bytes": 1008
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/widgets.tsx",
+            "bytes": 21747
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/shell.tsx",
+            "bytes": 3876
           }
         ]
       },
@@ -535,7 +1593,7 @@
         "phases": [
           {
             "phase": "load",
-            "bytes": 642511
+            "bytes": 794843
           },
           {
             "phase": "load / (pending)",
@@ -555,15 +1613,15 @@
           },
           {
             "phase": "navigate to /docs/start",
-            "bytes": 239118
+            "bytes": 229897
           },
           {
             "phase": "article loads",
-            "bytes": 130233
+            "bytes": 221021
           },
           {
             "phase": "toggle theme",
-            "bytes": 86677
+            "bytes": 86742
           },
           {
             "phase": "search starts",
@@ -571,51 +1629,51 @@
           },
           {
             "phase": "search results",
-            "bytes": 122425
+            "bytes": 122588
           },
           {
             "phase": "like (optimistic)",
-            "bytes": 92197
+            "bytes": 92360
           },
           {
             "phase": "like saved",
-            "bytes": 98138
+            "bytes": 98203
           },
           {
             "phase": "second like (optimistic)",
-            "bytes": 92347
+            "bytes": 92510
           },
           {
             "phase": "like rate limited",
-            "bytes": 97880
+            "bytes": 98436
           },
           {
             "phase": "newsletter good email",
-            "bytes": 80091
+            "bytes": 80156
           },
           {
             "phase": "newsletter in flight",
-            "bytes": 88612
+            "bytes": 88677
           },
           {
             "phase": "newsletter success",
-            "bytes": 97311
+            "bytes": 97376
           },
           {
             "phase": "newsletter bad email",
-            "bytes": 82660
+            "bytes": 82725
           },
           {
             "phase": "bad newsletter in flight",
-            "bytes": 88650
+            "bytes": 88715
           },
           {
             "phase": "newsletter typed error",
-            "bytes": 98874
+            "bytes": 99430
           },
           {
             "phase": "carousel next",
-            "bytes": 85221
+            "bytes": 85286
           },
           {
             "phase": "search failure starts",
@@ -623,15 +1681,265 @@
           },
           {
             "phase": "search typed error",
-            "bytes": 113929
+            "bytes": 114788
           },
           {
             "phase": "navigate to failing slug",
-            "bytes": 167763
+            "bytes": 167712
           },
           {
             "phase": "not-found typed error",
-            "bytes": 136784
+            "bytes": 139004
+          },
+          {
+            "phase": "navigate to code-heavy article",
+            "bytes": 167763
+          },
+          {
+            "phase": "code-heavy article loads",
+            "bytes": 265319
+          },
+          {
+            "phase": "check table of contents",
+            "bytes": 129756
+          },
+          {
+            "phase": "check highlighted token",
+            "bytes": 0
+          }
+        ],
+        "loadScripts": [
+          {
+            "url": "file://<repo>/node_modules/.pnpm/@solidjs+vite-plugin@3.0.0-next.35_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid_9a9da99f652951377ec711159c15c0d8/node_modules/@solidjs/vite-plugin/dist/cjs/index.cjs",
+            "bytes": 6704
+          },
+          {
+            "url": "<repo>/examples/docs-yield/stream/client.tsx",
+            "bytes": 506
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/__compiler_client.tsx",
+            "bytes": 4473
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/__compiler_ThemeToggle.tsx",
+            "bytes": 4739
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13/node_modules/@solidjs/web/dist/web.dev.js",
+            "bytes": 27651
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/solid-js@2.0.0-rc.13/node_modules/solid-js/dist/solid.dev.js",
+            "bytes": 21512
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+signals@2.0.0-rc.13/node_modules/@solidjs/signals/dist/dev.js",
+            "bytes": 168952
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+signals@2.0.0-rc.13/node_modules/@solidjs/signals/dist/dev-shared.js",
+            "bytes": 174420
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/solid-js@2.0.0-rc.13/node_modules/solid-js/dist/internal.js",
+            "bytes": 3545
+          },
+          {
+            "url": "<repo>/packages/yield/dist/yield.dev.js",
+            "bytes": 9162
+          },
+          {
+            "url": "<repo>/packages/yield/dist/internal.dev.js",
+            "bytes": 13897
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/__compiler_SearchBox.tsx",
+            "bytes": 7330
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/api__compiler_dep.ts",
+            "bytes": 2200
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/overview.md?raw",
+            "bytes": 5331
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/start.md?raw",
+            "bytes": 5347
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/widgets.md?raw",
+            "bytes": 5353
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/pipeline.md?raw",
+            "bytes": 5351
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/routing.md?raw",
+            "bytes": 5345
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/testing.md?raw",
+            "bytes": 5351
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/errors__compiler_dep.ts",
+            "bytes": 1019
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/__compiler_Router.tsx",
+            "bytes": 4569
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/index.jsx",
+            "bytes": 3313
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/index.js",
+            "bytes": 1523
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/factory.jsx",
+            "bytes": 8226
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/claims.js",
+            "bytes": 6917
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/utils.js",
+            "bytes": 4330
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/events.js",
+            "bytes": 1998
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/paths.js",
+            "bytes": 1734
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/serverRouteShared.js",
+            "bytes": 1717
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routing.js",
+            "bytes": 25097
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/components.jsx",
+            "bytes": 4537
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/history.js",
+            "bytes": 2489
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/scrollRestoration.js",
+            "bytes": 6015
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/lifecycle.js",
+            "bytes": 2223
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/serverRouteComponent.js",
+            "bytes": 4239
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/index.js",
+            "bytes": 1571
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/action.js",
+            "bytes": 7312
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13/node_modules/@solidjs/web/server-functions/dist/client.dev.js",
+            "bytes": 5302
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/query.js",
+            "bytes": 4945
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/liveQuery.js",
+            "bytes": 5941
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/content__compiler_dep.tsx",
+            "bytes": 10168
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/article-pipeline__compiler_dep.ts",
+            "bytes": 3101
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
+            "bytes": 28674
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/core.js",
+            "bytes": 849
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js",
+            "bytes": 58586
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/typescript.js",
+            "bytes": 20006
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/javascript.js",
+            "bytes": 16454
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/bash.js",
+            "bytes": 6912
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/widgets__compiler_dep.tsx",
+            "bytes": 6775
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/__compiler_NewsletterForm.tsx",
+            "bytes": 7426
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/__compiler_CommentList.tsx",
+            "bytes": 6879
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/__compiler_ImageCarousel.tsx",
+            "bytes": 5433
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/__compiler_ReadingGuide.tsx",
+            "bytes": 10957
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13/node_modules/@solidjs/web/serialization/dist/decode.js",
+            "bytes": 3982
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/seroval@1.6.8/node_modules/seroval/dist/dev/index.js",
+            "bytes": 18065
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/seroval-plugins@1.6.8_seroval@1.6.8/node_modules/seroval-plugins/dist/dev/web.js",
+            "bytes": 1814
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/seroval-plugins@1.6.8_seroval@1.6.8/node_modules/seroval-plugins/dist/dev/web-CDQeyEaf.js",
+            "bytes": 5791
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/seroval-plugins@1.6.8_seroval@1.6.8/node_modules/seroval-plugins/dist/dev/rolldown-runtime-D7D4PA-g.js",
+            "bytes": 785
           }
         ]
       }
@@ -642,7 +1950,7 @@
         "phases": [
           {
             "phase": "load",
-            "bytes": 550893
+            "bytes": 714548
           },
           {
             "phase": "load / (pending)",
@@ -662,15 +1970,15 @@
           },
           {
             "phase": "navigate to /docs/start",
-            "bytes": 224025
+            "bytes": 215085
           },
           {
             "phase": "article loads",
-            "bytes": 122428
+            "bytes": 213985
           },
           {
             "phase": "toggle theme",
-            "bytes": 70059
+            "bytes": 70124
           },
           {
             "phase": "search starts",
@@ -678,51 +1986,51 @@
           },
           {
             "phase": "search results",
-            "bytes": 116381
+            "bytes": 116446
           },
           {
             "phase": "like (optimistic)",
-            "bytes": 86222
+            "bytes": 86287
           },
           {
             "phase": "like saved",
-            "bytes": 93887
+            "bytes": 93952
           },
           {
             "phase": "second like (optimistic)",
-            "bytes": 86398
+            "bytes": 86463
           },
           {
             "phase": "like rate limited",
-            "bytes": 93955
+            "bytes": 94337
           },
           {
             "phase": "newsletter good email",
-            "bytes": 67520
+            "bytes": 67585
           },
           {
             "phase": "newsletter in flight",
-            "bytes": 84464
+            "bytes": 84529
           },
           {
             "phase": "newsletter success",
-            "bytes": 92830
+            "bytes": 92895
           },
           {
             "phase": "newsletter bad email",
-            "bytes": 70337
+            "bytes": 70402
           },
           {
             "phase": "bad newsletter in flight",
-            "bytes": 84635
+            "bytes": 84700
           },
           {
             "phase": "newsletter typed error",
-            "bytes": 94939
+            "bytes": 95321
           },
           {
             "phase": "carousel next",
-            "bytes": 69018
+            "bytes": 69083
           },
           {
             "phase": "search failure starts",
@@ -730,15 +2038,213 @@
           },
           {
             "phase": "search typed error",
-            "bytes": 109848
+            "bytes": 110230
           },
           {
             "phase": "navigate to failing slug",
-            "bytes": 164536
+            "bytes": 164387
           },
           {
             "phase": "not-found typed error",
-            "bytes": 132818
+            "bytes": 134561
+          },
+          {
+            "phase": "navigate to code-heavy article",
+            "bytes": 164438
+          },
+          {
+            "phase": "code-heavy article loads",
+            "bytes": 258127
+          },
+          {
+            "phase": "check table of contents",
+            "bytes": 129363
+          },
+          {
+            "phase": "check highlighted token",
+            "bytes": 0
+          }
+        ],
+        "loadScripts": [
+          {
+            "url": "file://<repo>/node_modules/.pnpm/@solidjs+vite-plugin@3.0.0-next.35_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid_9a9da99f652951377ec711159c15c0d8/node_modules/@solidjs/vite-plugin/dist/cjs/index.cjs",
+            "bytes": 6704
+          },
+          {
+            "url": "<repo>/examples/originals/docs/stream/client.tsx",
+            "bytes": 1399
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13/node_modules/@solidjs/web/dist/web.dev.js",
+            "bytes": 27570
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/solid-js@2.0.0-rc.13/node_modules/solid-js/dist/solid.dev.js",
+            "bytes": 21447
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+signals@2.0.0-rc.13/node_modules/@solidjs/signals/dist/dev.js",
+            "bytes": 168784
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+signals@2.0.0-rc.13/node_modules/@solidjs/signals/dist/dev-shared.js",
+            "bytes": 173328
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/solid-js@2.0.0-rc.13/node_modules/solid-js/dist/internal.js",
+            "bytes": 3545
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/app.tsx",
+            "bytes": 7159
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/index.jsx",
+            "bytes": 3313
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/index.js",
+            "bytes": 1523
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/factory.jsx",
+            "bytes": 8226
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/claims.js",
+            "bytes": 6917
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/utils.js",
+            "bytes": 4330
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/events.js",
+            "bytes": 1998
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/paths.js",
+            "bytes": 1734
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/serverRouteShared.js",
+            "bytes": 1717
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routing.js",
+            "bytes": 25097
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/components.jsx",
+            "bytes": 4537
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/history.js",
+            "bytes": 2489
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/scrollRestoration.js",
+            "bytes": 6015
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/lifecycle.js",
+            "bytes": 2223
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/serverRouteComponent.js",
+            "bytes": 4239
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/index.js",
+            "bytes": 1571
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/action.js",
+            "bytes": 7312
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13/node_modules/@solidjs/web/server-functions/dist/client.dev.js",
+            "bytes": 5302
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/query.js",
+            "bytes": 4945
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/liveQuery.js",
+            "bytes": 5941
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/content.tsx",
+            "bytes": 13903
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/article-pipeline.ts",
+            "bytes": 3091
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
+            "bytes": 28674
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/core.js",
+            "bytes": 849
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js",
+            "bytes": 58586
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/typescript.js",
+            "bytes": 20006
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/javascript.js",
+            "bytes": 16454
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/bash.js",
+            "bytes": 6912
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/api.ts",
+            "bytes": 2348
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/articles/overview.md?raw",
+            "bytes": 5335
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/articles/start.md?raw",
+            "bytes": 5351
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/articles/widgets.md?raw",
+            "bytes": 5357
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/articles/pipeline.md?raw",
+            "bytes": 5355
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/articles/routing.md?raw",
+            "bytes": 5349
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/articles/testing.md?raw",
+            "bytes": 5355
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/errors.ts",
+            "bytes": 979
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/widgets.tsx",
+            "bytes": 17897
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/shell.tsx",
+            "bytes": 3382
           }
         ]
       },
@@ -747,7 +2253,7 @@
         "phases": [
           {
             "phase": "load",
-            "bytes": 584641
+            "bytes": 747726
           },
           {
             "phase": "load / (pending)",
@@ -767,15 +2273,15 @@
           },
           {
             "phase": "navigate to /docs/start",
-            "bytes": 238733
+            "bytes": 229512
           },
           {
             "phase": "article loads",
-            "bytes": 129679
+            "bytes": 220443
           },
           {
             "phase": "toggle theme",
-            "bytes": 86684
+            "bytes": 86749
           },
           {
             "phase": "search starts",
@@ -783,35 +2289,35 @@
           },
           {
             "phase": "search results",
-            "bytes": 121873
+            "bytes": 122101
           },
           {
             "phase": "like (optimistic)",
-            "bytes": 91028
+            "bytes": 91191
           },
           {
             "phase": "like saved",
-            "bytes": 97553
+            "bytes": 97618
           },
           {
             "phase": "second like (optimistic)",
-            "bytes": 91178
+            "bytes": 91341
           },
           {
             "phase": "like rate limited",
-            "bytes": 97295
+            "bytes": 97851
           },
           {
             "phase": "newsletter good email",
-            "bytes": 80100
+            "bytes": 80165
           },
           {
             "phase": "newsletter in flight",
-            "bytes": 88623
+            "bytes": 88688
           },
           {
             "phase": "newsletter success",
-            "bytes": 96508
+            "bytes": 96573
           },
           {
             "phase": "newsletter bad email",
@@ -823,7 +2329,7 @@
           },
           {
             "phase": "newsletter typed error",
-            "bytes": 98298
+            "bytes": 98789
           },
           {
             "phase": "carousel next",
@@ -835,15 +2341,221 @@
           },
           {
             "phase": "search typed error",
-            "bytes": 113060
+            "bytes": 113919
           },
           {
             "phase": "navigate to failing slug",
-            "bytes": 167718
+            "bytes": 167602
           },
           {
             "phase": "not-found typed error",
-            "bytes": 135935
+            "bytes": 138155
+          },
+          {
+            "phase": "navigate to code-heavy article",
+            "bytes": 167653
+          },
+          {
+            "phase": "code-heavy article loads",
+            "bytes": 264769
+          },
+          {
+            "phase": "check table of contents",
+            "bytes": 129363
+          },
+          {
+            "phase": "check highlighted token",
+            "bytes": 0
+          }
+        ],
+        "loadScripts": [
+          {
+            "url": "file://<repo>/node_modules/.pnpm/@solidjs+vite-plugin@3.0.0-next.35_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid_9a9da99f652951377ec711159c15c0d8/node_modules/@solidjs/vite-plugin/dist/cjs/index.cjs",
+            "bytes": 6704
+          },
+          {
+            "url": "<repo>/examples/docs-yield/stream/client.tsx",
+            "bytes": 1454
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13/node_modules/@solidjs/web/dist/web.dev.js",
+            "bytes": 27570
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/solid-js@2.0.0-rc.13/node_modules/solid-js/dist/solid.dev.js",
+            "bytes": 21506
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+signals@2.0.0-rc.13/node_modules/@solidjs/signals/dist/dev.js",
+            "bytes": 168834
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+signals@2.0.0-rc.13/node_modules/@solidjs/signals/dist/dev-shared.js",
+            "bytes": 173515
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/solid-js@2.0.0-rc.13/node_modules/solid-js/dist/internal.js",
+            "bytes": 3545
+          },
+          {
+            "url": "<repo>/packages/yield/dist/yield.dev.js",
+            "bytes": 9109
+          },
+          {
+            "url": "<repo>/packages/yield/dist/internal.dev.js",
+            "bytes": 13822
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/app.tsx",
+            "bytes": 8866
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/index.jsx",
+            "bytes": 3313
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/index.js",
+            "bytes": 1523
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/factory.jsx",
+            "bytes": 8226
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/claims.js",
+            "bytes": 6917
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/utils.js",
+            "bytes": 4330
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/events.js",
+            "bytes": 1998
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/paths.js",
+            "bytes": 1734
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/serverRouteShared.js",
+            "bytes": 1717
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routing.js",
+            "bytes": 25097
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/components.jsx",
+            "bytes": 4537
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/history.js",
+            "bytes": 2489
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/scrollRestoration.js",
+            "bytes": 6015
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/lifecycle.js",
+            "bytes": 2223
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/serverRouteComponent.js",
+            "bytes": 4239
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/index.js",
+            "bytes": 1571
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/action.js",
+            "bytes": 7312
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13/node_modules/@solidjs/web/server-functions/dist/client.dev.js",
+            "bytes": 5302
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/query.js",
+            "bytes": 4945
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/liveQuery.js",
+            "bytes": 5941
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/content.tsx",
+            "bytes": 17779
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/article-pipeline.ts",
+            "bytes": 3087
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
+            "bytes": 28674
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/core.js",
+            "bytes": 849
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js",
+            "bytes": 58586
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/typescript.js",
+            "bytes": 20006
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/javascript.js",
+            "bytes": 16454
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/bash.js",
+            "bytes": 6912
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/api.ts",
+            "bytes": 2316
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/overview.md?raw",
+            "bytes": 5331
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/start.md?raw",
+            "bytes": 5347
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/widgets.md?raw",
+            "bytes": 5353
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/pipeline.md?raw",
+            "bytes": 5351
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/routing.md?raw",
+            "bytes": 5345
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/testing.md?raw",
+            "bytes": 5351
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/errors.ts",
+            "bytes": 1008
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/widgets.tsx",
+            "bytes": 21747
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/shell.tsx",
+            "bytes": 3876
           }
         ]
       },
@@ -852,7 +2564,7 @@
         "phases": [
           {
             "phase": "load",
-            "bytes": 642511
+            "bytes": 794843
           },
           {
             "phase": "load / (pending)",
@@ -872,15 +2584,15 @@
           },
           {
             "phase": "navigate to /docs/start",
-            "bytes": 239118
+            "bytes": 229897
           },
           {
             "phase": "article loads",
-            "bytes": 130233
+            "bytes": 221021
           },
           {
             "phase": "toggle theme",
-            "bytes": 86677
+            "bytes": 86742
           },
           {
             "phase": "search starts",
@@ -888,51 +2600,51 @@
           },
           {
             "phase": "search results",
-            "bytes": 122425
+            "bytes": 122588
           },
           {
             "phase": "like (optimistic)",
-            "bytes": 92197
+            "bytes": 92360
           },
           {
             "phase": "like saved",
-            "bytes": 98138
+            "bytes": 98203
           },
           {
             "phase": "second like (optimistic)",
-            "bytes": 92347
+            "bytes": 92510
           },
           {
             "phase": "like rate limited",
-            "bytes": 97880
+            "bytes": 98436
           },
           {
             "phase": "newsletter good email",
-            "bytes": 80091
+            "bytes": 80156
           },
           {
             "phase": "newsletter in flight",
-            "bytes": 88612
+            "bytes": 88677
           },
           {
             "phase": "newsletter success",
-            "bytes": 97311
+            "bytes": 97376
           },
           {
             "phase": "newsletter bad email",
-            "bytes": 82660
+            "bytes": 82725
           },
           {
             "phase": "bad newsletter in flight",
-            "bytes": 88650
+            "bytes": 88715
           },
           {
             "phase": "newsletter typed error",
-            "bytes": 98874
+            "bytes": 99430
           },
           {
             "phase": "carousel next",
-            "bytes": 85221
+            "bytes": 85286
           },
           {
             "phase": "search failure starts",
@@ -940,15 +2652,265 @@
           },
           {
             "phase": "search typed error",
-            "bytes": 113929
+            "bytes": 114788
           },
           {
             "phase": "navigate to failing slug",
-            "bytes": 167763
+            "bytes": 167712
           },
           {
             "phase": "not-found typed error",
-            "bytes": 136784
+            "bytes": 139004
+          },
+          {
+            "phase": "navigate to code-heavy article",
+            "bytes": 167763
+          },
+          {
+            "phase": "code-heavy article loads",
+            "bytes": 265319
+          },
+          {
+            "phase": "check table of contents",
+            "bytes": 129756
+          },
+          {
+            "phase": "check highlighted token",
+            "bytes": 0
+          }
+        ],
+        "loadScripts": [
+          {
+            "url": "file://<repo>/node_modules/.pnpm/@solidjs+vite-plugin@3.0.0-next.35_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid_9a9da99f652951377ec711159c15c0d8/node_modules/@solidjs/vite-plugin/dist/cjs/index.cjs",
+            "bytes": 6704
+          },
+          {
+            "url": "<repo>/examples/docs-yield/stream/client.tsx",
+            "bytes": 506
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/__compiler_client.tsx",
+            "bytes": 4473
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/__compiler_ThemeToggle.tsx",
+            "bytes": 4739
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13/node_modules/@solidjs/web/dist/web.dev.js",
+            "bytes": 27651
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/solid-js@2.0.0-rc.13/node_modules/solid-js/dist/solid.dev.js",
+            "bytes": 21512
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+signals@2.0.0-rc.13/node_modules/@solidjs/signals/dist/dev.js",
+            "bytes": 168952
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+signals@2.0.0-rc.13/node_modules/@solidjs/signals/dist/dev-shared.js",
+            "bytes": 174420
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/solid-js@2.0.0-rc.13/node_modules/solid-js/dist/internal.js",
+            "bytes": 3545
+          },
+          {
+            "url": "<repo>/packages/yield/dist/yield.dev.js",
+            "bytes": 9162
+          },
+          {
+            "url": "<repo>/packages/yield/dist/internal.dev.js",
+            "bytes": 13897
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/__compiler_SearchBox.tsx",
+            "bytes": 7330
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/api__compiler_dep.ts",
+            "bytes": 2200
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/overview.md?raw",
+            "bytes": 5331
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/start.md?raw",
+            "bytes": 5347
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/widgets.md?raw",
+            "bytes": 5353
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/pipeline.md?raw",
+            "bytes": 5351
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/routing.md?raw",
+            "bytes": 5345
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/articles/testing.md?raw",
+            "bytes": 5351
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/errors__compiler_dep.ts",
+            "bytes": 1019
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/__compiler_Router.tsx",
+            "bytes": 4569
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/index.jsx",
+            "bytes": 3313
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/index.js",
+            "bytes": 1523
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/factory.jsx",
+            "bytes": 8226
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/claims.js",
+            "bytes": 6917
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/utils.js",
+            "bytes": 4330
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/events.js",
+            "bytes": 1998
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/paths.js",
+            "bytes": 1734
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/serverRouteShared.js",
+            "bytes": 1717
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routing.js",
+            "bytes": 25097
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/components.jsx",
+            "bytes": 4537
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/history.js",
+            "bytes": 2489
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/routers/scrollRestoration.js",
+            "bytes": 6015
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/lifecycle.js",
+            "bytes": 2223
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/serverRouteComponent.js",
+            "bytes": 4239
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/index.js",
+            "bytes": 1571
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/action.js",
+            "bytes": 7312
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13/node_modules/@solidjs/web/server-functions/dist/client.dev.js",
+            "bytes": 5302
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/query.js",
+            "bytes": 4945
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/data/liveQuery.js",
+            "bytes": 5941
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/content__compiler_dep.tsx",
+            "bytes": 10168
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/article-pipeline__compiler_dep.ts",
+            "bytes": 3101
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
+            "bytes": 28674
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/core.js",
+            "bytes": 849
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js",
+            "bytes": 58586
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/typescript.js",
+            "bytes": 20006
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/javascript.js",
+            "bytes": 16454
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/bash.js",
+            "bytes": 6912
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/widgets__compiler_dep.tsx",
+            "bytes": 6775
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/__compiler_NewsletterForm.tsx",
+            "bytes": 7426
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/__compiler_CommentList.tsx",
+            "bytes": 6879
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/__compiler_ImageCarousel.tsx",
+            "bytes": 5433
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/__compiler_ReadingGuide.tsx",
+            "bytes": 10957
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13/node_modules/@solidjs/web/serialization/dist/decode.js",
+            "bytes": 3982
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/seroval@1.6.8/node_modules/seroval/dist/dev/index.js",
+            "bytes": 18065
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/seroval-plugins@1.6.8_seroval@1.6.8/node_modules/seroval-plugins/dist/dev/web.js",
+            "bytes": 1814
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/seroval-plugins@1.6.8_seroval@1.6.8/node_modules/seroval-plugins/dist/dev/web-CDQeyEaf.js",
+            "bytes": 5791
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/seroval-plugins@1.6.8_seroval@1.6.8/node_modules/seroval-plugins/dist/dev/rolldown-runtime-D7D4PA-g.js",
+            "bytes": 785
           }
         ]
       }
@@ -960,15 +2922,23 @@
       "phases": [
         {
           "phase": "load",
-          "observations": [550893, 550893, 550893],
-          "min": 550893,
-          "max": 550893,
+          "observations": [
+            714548,
+            714548,
+            714548
+          ],
+          "min": 714548,
+          "max": 714548,
           "drift": 0,
-          "maxBytes": 561911
+          "maxBytes": 728839
         },
         {
           "phase": "load / (pending)",
-          "observations": [1841, 1841, 1841],
+          "observations": [
+            1841,
+            1841,
+            1841
+          ],
           "min": 1841,
           "max": 1841,
           "drift": 0,
@@ -976,7 +2946,11 @@
         },
         {
           "phase": "content loads",
-          "observations": [1841, 1841, 1841],
+          "observations": [
+            1841,
+            1841,
+            1841
+          ],
           "min": 1841,
           "max": 1841,
           "drift": 0,
@@ -984,7 +2958,11 @@
         },
         {
           "phase": "comment list loads, avatars pending",
-          "observations": [1841, 1841, 1841],
+          "observations": [
+            1841,
+            1841,
+            1841
+          ],
           "min": 1841,
           "max": 1841,
           "drift": 0,
@@ -992,7 +2970,11 @@
         },
         {
           "phase": "avatars load",
-          "observations": [1841, 1841, 1841],
+          "observations": [
+            1841,
+            1841,
+            1841
+          ],
           "min": 1841,
           "max": 1841,
           "drift": 0,
@@ -1000,31 +2982,47 @@
         },
         {
           "phase": "navigate to /docs/start",
-          "observations": [224025, 224025, 224025],
-          "min": 224025,
-          "max": 224025,
+          "observations": [
+            215085,
+            215085,
+            215085
+          ],
+          "min": 215085,
+          "max": 215085,
           "drift": 0,
-          "maxBytes": 228506
+          "maxBytes": 219387
         },
         {
           "phase": "article loads",
-          "observations": [122428, 122428, 122428],
-          "min": 122428,
-          "max": 122428,
+          "observations": [
+            213985,
+            213985,
+            213985
+          ],
+          "min": 213985,
+          "max": 213985,
           "drift": 0,
-          "maxBytes": 124877
+          "maxBytes": 218265
         },
         {
           "phase": "toggle theme",
-          "observations": [70059, 70059, 70059],
-          "min": 70059,
-          "max": 70059,
+          "observations": [
+            70124,
+            70124,
+            70124
+          ],
+          "min": 70124,
+          "max": 70124,
           "drift": 0,
-          "maxBytes": 71461
+          "maxBytes": 71527
         },
         {
           "phase": "search starts",
-          "observations": [89069, 89069, 89069],
+          "observations": [
+            89069,
+            89069,
+            89069
+          ],
           "min": 89069,
           "max": 89069,
           "drift": 0,
@@ -1032,103 +3030,155 @@
         },
         {
           "phase": "search results",
-          "observations": [116381, 116381, 116381],
-          "min": 116381,
-          "max": 116381,
+          "observations": [
+            116446,
+            116446,
+            116446
+          ],
+          "min": 116446,
+          "max": 116446,
           "drift": 0,
-          "maxBytes": 118709
+          "maxBytes": 118775
         },
         {
           "phase": "like (optimistic)",
-          "observations": [86222, 86222, 86222],
-          "min": 86222,
-          "max": 86222,
+          "observations": [
+            86287,
+            86287,
+            86287
+          ],
+          "min": 86287,
+          "max": 86287,
           "drift": 0,
-          "maxBytes": 87947
+          "maxBytes": 88013
         },
         {
           "phase": "like saved",
-          "observations": [93887, 93887, 93887],
-          "min": 93887,
-          "max": 93887,
+          "observations": [
+            93952,
+            93952,
+            93952
+          ],
+          "min": 93952,
+          "max": 93952,
           "drift": 0,
-          "maxBytes": 95765
+          "maxBytes": 95832
         },
         {
           "phase": "second like (optimistic)",
-          "observations": [86398, 86398, 86398],
-          "min": 86398,
-          "max": 86398,
+          "observations": [
+            86463,
+            86463,
+            86463
+          ],
+          "min": 86463,
+          "max": 86463,
           "drift": 0,
-          "maxBytes": 88126
+          "maxBytes": 88193
         },
         {
           "phase": "like rate limited",
-          "observations": [93955, 93955, 93955],
-          "min": 93955,
-          "max": 93955,
+          "observations": [
+            94337,
+            94337,
+            94337
+          ],
+          "min": 94337,
+          "max": 94337,
           "drift": 0,
-          "maxBytes": 95835
+          "maxBytes": 96224
         },
         {
           "phase": "newsletter good email",
-          "observations": [67520, 67520, 67520],
-          "min": 67520,
-          "max": 67520,
+          "observations": [
+            67585,
+            67585,
+            67585
+          ],
+          "min": 67585,
+          "max": 67585,
           "drift": 0,
-          "maxBytes": 68871
+          "maxBytes": 68937
         },
         {
           "phase": "newsletter in flight",
-          "observations": [84464, 84464, 84464],
-          "min": 84464,
-          "max": 84464,
+          "observations": [
+            84529,
+            84529,
+            84529
+          ],
+          "min": 84529,
+          "max": 84529,
           "drift": 0,
-          "maxBytes": 86154
+          "maxBytes": 86220
         },
         {
           "phase": "newsletter success",
-          "observations": [92830, 92830, 92830],
-          "min": 92830,
-          "max": 92830,
+          "observations": [
+            92895,
+            92895,
+            92895
+          ],
+          "min": 92895,
+          "max": 92895,
           "drift": 0,
-          "maxBytes": 94687
+          "maxBytes": 94753
         },
         {
           "phase": "newsletter bad email",
-          "observations": [70337, 70337, 70337],
-          "min": 70337,
-          "max": 70337,
+          "observations": [
+            70402,
+            70402,
+            70402
+          ],
+          "min": 70402,
+          "max": 70402,
           "drift": 0,
-          "maxBytes": 71744
+          "maxBytes": 71811
         },
         {
           "phase": "bad newsletter in flight",
-          "observations": [84635, 84635, 84635],
-          "min": 84635,
-          "max": 84635,
+          "observations": [
+            84700,
+            84700,
+            84700
+          ],
+          "min": 84700,
+          "max": 84700,
           "drift": 0,
-          "maxBytes": 86328
+          "maxBytes": 86394
         },
         {
           "phase": "newsletter typed error",
-          "observations": [94939, 94939, 94939],
-          "min": 94939,
-          "max": 94939,
+          "observations": [
+            95321,
+            95321,
+            95321
+          ],
+          "min": 95321,
+          "max": 95321,
           "drift": 0,
-          "maxBytes": 96838
+          "maxBytes": 97228
         },
         {
           "phase": "carousel next",
-          "observations": [69018, 69018, 69018],
-          "min": 69018,
-          "max": 69018,
+          "observations": [
+            69083,
+            69083,
+            69083
+          ],
+          "min": 69083,
+          "max": 69083,
           "drift": 0,
-          "maxBytes": 70399
+          "maxBytes": 70465
         },
         {
           "phase": "search failure starts",
-          "observations": [89202, 89202, 89202],
+          "observations": [
+            89202,
+            89202,
+            89202
+          ],
           "min": 89202,
           "max": 89202,
           "drift": 0,
@@ -1136,27 +3186,87 @@
         },
         {
           "phase": "search typed error",
-          "observations": [109848, 109848, 109848],
-          "min": 109848,
-          "max": 109848,
+          "observations": [
+            110230,
+            110230,
+            110230
+          ],
+          "min": 110230,
+          "max": 110230,
           "drift": 0,
-          "maxBytes": 112045
+          "maxBytes": 112435
         },
         {
           "phase": "navigate to failing slug",
-          "observations": [164536, 164536, 164536],
-          "min": 164536,
-          "max": 164536,
+          "observations": [
+            164387,
+            164387,
+            164387
+          ],
+          "min": 164387,
+          "max": 164387,
           "drift": 0,
-          "maxBytes": 167827
+          "maxBytes": 167675
         },
         {
           "phase": "not-found typed error",
-          "observations": [132818, 132818, 132818],
-          "min": 132818,
-          "max": 132818,
+          "observations": [
+            134561,
+            134561,
+            134561
+          ],
+          "min": 134561,
+          "max": 134561,
           "drift": 0,
-          "maxBytes": 135475
+          "maxBytes": 137253
+        },
+        {
+          "phase": "navigate to code-heavy article",
+          "observations": [
+            164438,
+            164438,
+            164438
+          ],
+          "min": 164438,
+          "max": 164438,
+          "drift": 0,
+          "maxBytes": 167727
+        },
+        {
+          "phase": "code-heavy article loads",
+          "observations": [
+            258127,
+            258127,
+            258127
+          ],
+          "min": 258127,
+          "max": 258127,
+          "drift": 0,
+          "maxBytes": 263290
+        },
+        {
+          "phase": "check table of contents",
+          "observations": [
+            129363,
+            129363,
+            129363
+          ],
+          "min": 129363,
+          "max": 129363,
+          "drift": 0,
+          "maxBytes": 131951
+        },
+        {
+          "phase": "check highlighted token",
+          "observations": [
+            0,
+            0,
+            0
+          ],
+          "min": 0,
+          "max": 0,
+          "drift": 0,
+          "maxBytes": 1024
         }
       ]
     },
@@ -1165,15 +3275,23 @@
       "phases": [
         {
           "phase": "load",
-          "observations": [584641, 584641, 584641],
-          "min": 584641,
-          "max": 584641,
+          "observations": [
+            747726,
+            747726,
+            747726
+          ],
+          "min": 747726,
+          "max": 747726,
           "drift": 0,
-          "maxBytes": 596334
+          "maxBytes": 762681
         },
         {
           "phase": "load / (pending)",
-          "observations": [1841, 1841, 1841],
+          "observations": [
+            1841,
+            1841,
+            1841
+          ],
           "min": 1841,
           "max": 1841,
           "drift": 0,
@@ -1181,7 +3299,11 @@
         },
         {
           "phase": "content loads",
-          "observations": [1841, 1841, 1841],
+          "observations": [
+            1841,
+            1841,
+            1841
+          ],
           "min": 1841,
           "max": 1841,
           "drift": 0,
@@ -1189,7 +3311,11 @@
         },
         {
           "phase": "comment list loads, avatars pending",
-          "observations": [1841, 1841, 1841],
+          "observations": [
+            1841,
+            1841,
+            1841
+          ],
           "min": 1841,
           "max": 1841,
           "drift": 0,
@@ -1197,7 +3323,11 @@
         },
         {
           "phase": "avatars load",
-          "observations": [1841, 1841, 1841],
+          "observations": [
+            1841,
+            1841,
+            1841
+          ],
           "min": 1841,
           "max": 1841,
           "drift": 0,
@@ -1205,31 +3335,47 @@
         },
         {
           "phase": "navigate to /docs/start",
-          "observations": [238733, 238733, 238733],
-          "min": 238733,
-          "max": 238733,
+          "observations": [
+            229512,
+            229512,
+            229512
+          ],
+          "min": 229512,
+          "max": 229512,
           "drift": 0,
-          "maxBytes": 243508
+          "maxBytes": 234103
         },
         {
           "phase": "article loads",
-          "observations": [129679, 129679, 129679],
-          "min": 129679,
-          "max": 129679,
+          "observations": [
+            220443,
+            220443,
+            220443
+          ],
+          "min": 220443,
+          "max": 220443,
           "drift": 0,
-          "maxBytes": 132273
+          "maxBytes": 224852
         },
         {
           "phase": "toggle theme",
-          "observations": [86684, 86684, 86684],
-          "min": 86684,
-          "max": 86684,
+          "observations": [
+            86749,
+            86749,
+            86749
+          ],
+          "min": 86749,
+          "max": 86749,
           "drift": 0,
-          "maxBytes": 88418
+          "maxBytes": 88484
         },
         {
           "phase": "search starts",
-          "observations": [95766, 95766, 95766],
+          "observations": [
+            95766,
+            95766,
+            95766
+          ],
           "min": 95766,
           "max": 95766,
           "drift": 0,
@@ -1237,71 +3383,107 @@
         },
         {
           "phase": "search results",
-          "observations": [121873, 121873, 121873],
-          "min": 121873,
-          "max": 121873,
+          "observations": [
+            122101,
+            122101,
+            122101
+          ],
+          "min": 122101,
+          "max": 122101,
           "drift": 0,
-          "maxBytes": 124311
+          "maxBytes": 124544
         },
         {
           "phase": "like (optimistic)",
-          "observations": [91028, 91028, 91028],
-          "min": 91028,
-          "max": 91028,
+          "observations": [
+            91191,
+            91191,
+            91191
+          ],
+          "min": 91191,
+          "max": 91191,
           "drift": 0,
-          "maxBytes": 92849
+          "maxBytes": 93015
         },
         {
           "phase": "like saved",
-          "observations": [97553, 97553, 97553],
-          "min": 97553,
-          "max": 97553,
+          "observations": [
+            97618,
+            97618,
+            97618
+          ],
+          "min": 97618,
+          "max": 97618,
           "drift": 0,
-          "maxBytes": 99505
+          "maxBytes": 99571
         },
         {
           "phase": "second like (optimistic)",
-          "observations": [91178, 91178, 91178],
-          "min": 91178,
-          "max": 91178,
+          "observations": [
+            91341,
+            91341,
+            91341
+          ],
+          "min": 91341,
+          "max": 91341,
           "drift": 0,
-          "maxBytes": 93002
+          "maxBytes": 93168
         },
         {
           "phase": "like rate limited",
-          "observations": [97295, 97295, 97295],
-          "min": 97295,
-          "max": 97295,
+          "observations": [
+            97851,
+            97851,
+            97851
+          ],
+          "min": 97851,
+          "max": 97851,
           "drift": 0,
-          "maxBytes": 99241
+          "maxBytes": 99809
         },
         {
           "phase": "newsletter good email",
-          "observations": [80100, 80100, 80100],
-          "min": 80100,
-          "max": 80100,
+          "observations": [
+            80165,
+            80165,
+            80165
+          ],
+          "min": 80165,
+          "max": 80165,
           "drift": 0,
-          "maxBytes": 81702
+          "maxBytes": 81769
         },
         {
           "phase": "newsletter in flight",
-          "observations": [88623, 88623, 88623],
-          "min": 88623,
-          "max": 88623,
+          "observations": [
+            88688,
+            88688,
+            88688
+          ],
+          "min": 88688,
+          "max": 88688,
           "drift": 0,
-          "maxBytes": 90396
+          "maxBytes": 90462
         },
         {
           "phase": "newsletter success",
-          "observations": [96508, 96508, 96508],
-          "min": 96508,
-          "max": 96508,
+          "observations": [
+            96573,
+            96573,
+            96573
+          ],
+          "min": 96573,
+          "max": 96573,
           "drift": 0,
-          "maxBytes": 98439
+          "maxBytes": 98505
         },
         {
           "phase": "newsletter bad email",
-          "observations": [82669, 82669, 82669],
+          "observations": [
+            82669,
+            82669,
+            82669
+          ],
           "min": 82669,
           "max": 82669,
           "drift": 0,
@@ -1309,7 +3491,11 @@
         },
         {
           "phase": "bad newsletter in flight",
-          "observations": [88661, 88661, 88661],
+          "observations": [
+            88661,
+            88661,
+            88661
+          ],
           "min": 88661,
           "max": 88661,
           "drift": 0,
@@ -1317,15 +3503,23 @@
         },
         {
           "phase": "newsletter typed error",
-          "observations": [98298, 98298, 98298],
-          "min": 98298,
-          "max": 98298,
+          "observations": [
+            98789,
+            98789,
+            98789
+          ],
+          "min": 98789,
+          "max": 98789,
           "drift": 0,
-          "maxBytes": 100264
+          "maxBytes": 100765
         },
         {
           "phase": "carousel next",
-          "observations": [85232, 85232, 85232],
+          "observations": [
+            85232,
+            85232,
+            85232
+          ],
           "min": 85232,
           "max": 85232,
           "drift": 0,
@@ -1333,7 +3527,11 @@
         },
         {
           "phase": "search failure starts",
-          "observations": [95899, 95899, 95899],
+          "observations": [
+            95899,
+            95899,
+            95899
+          ],
           "min": 95899,
           "max": 95899,
           "drift": 0,
@@ -1341,27 +3539,87 @@
         },
         {
           "phase": "search typed error",
-          "observations": [113060, 113060, 113060],
-          "min": 113060,
-          "max": 113060,
+          "observations": [
+            113919,
+            113919,
+            113919
+          ],
+          "min": 113919,
+          "max": 113919,
           "drift": 0,
-          "maxBytes": 115322
+          "maxBytes": 116198
         },
         {
           "phase": "navigate to failing slug",
-          "observations": [167718, 167718, 167718],
-          "min": 167718,
-          "max": 167718,
+          "observations": [
+            167602,
+            167602,
+            167602
+          ],
+          "min": 167602,
+          "max": 167602,
           "drift": 0,
-          "maxBytes": 171073
+          "maxBytes": 170955
         },
         {
           "phase": "not-found typed error",
-          "observations": [135935, 135935, 135935],
-          "min": 135935,
-          "max": 135935,
+          "observations": [
+            138155,
+            138155,
+            138155
+          ],
+          "min": 138155,
+          "max": 138155,
           "drift": 0,
-          "maxBytes": 138654
+          "maxBytes": 140919
+        },
+        {
+          "phase": "navigate to code-heavy article",
+          "observations": [
+            167653,
+            167653,
+            167653
+          ],
+          "min": 167653,
+          "max": 167653,
+          "drift": 0,
+          "maxBytes": 171007
+        },
+        {
+          "phase": "code-heavy article loads",
+          "observations": [
+            264769,
+            264769,
+            264769
+          ],
+          "min": 264769,
+          "max": 264769,
+          "drift": 0,
+          "maxBytes": 270065
+        },
+        {
+          "phase": "check table of contents",
+          "observations": [
+            129363,
+            129363,
+            129363
+          ],
+          "min": 129363,
+          "max": 129363,
+          "drift": 0,
+          "maxBytes": 131951
+        },
+        {
+          "phase": "check highlighted token",
+          "observations": [
+            0,
+            0,
+            0
+          ],
+          "min": 0,
+          "max": 0,
+          "drift": 0,
+          "maxBytes": 1024
         }
       ]
     },
@@ -1370,15 +3628,23 @@
       "phases": [
         {
           "phase": "load",
-          "observations": [642511, 642511, 642511],
-          "min": 642511,
-          "max": 642511,
+          "observations": [
+            794843,
+            794843,
+            794843
+          ],
+          "min": 794843,
+          "max": 794843,
           "drift": 0,
-          "maxBytes": 655362
+          "maxBytes": 810740
         },
         {
           "phase": "load / (pending)",
-          "observations": [1841, 1841, 1841],
+          "observations": [
+            1841,
+            1841,
+            1841
+          ],
           "min": 1841,
           "max": 1841,
           "drift": 0,
@@ -1386,7 +3652,11 @@
         },
         {
           "phase": "content loads",
-          "observations": [1841, 1841, 1841],
+          "observations": [
+            1841,
+            1841,
+            1841
+          ],
           "min": 1841,
           "max": 1841,
           "drift": 0,
@@ -1394,7 +3664,11 @@
         },
         {
           "phase": "comment list loads, avatars pending",
-          "observations": [1841, 1841, 1841],
+          "observations": [
+            1841,
+            1841,
+            1841
+          ],
           "min": 1841,
           "max": 1841,
           "drift": 0,
@@ -1402,7 +3676,11 @@
         },
         {
           "phase": "avatars load",
-          "observations": [1841, 1841, 1841],
+          "observations": [
+            1841,
+            1841,
+            1841
+          ],
           "min": 1841,
           "max": 1841,
           "drift": 0,
@@ -1410,31 +3688,47 @@
         },
         {
           "phase": "navigate to /docs/start",
-          "observations": [239118, 239118, 239118],
-          "min": 239118,
-          "max": 239118,
+          "observations": [
+            229897,
+            229897,
+            229897
+          ],
+          "min": 229897,
+          "max": 229897,
           "drift": 0,
-          "maxBytes": 243901
+          "maxBytes": 234495
         },
         {
           "phase": "article loads",
-          "observations": [130233, 130233, 130233],
-          "min": 130233,
-          "max": 130233,
+          "observations": [
+            221021,
+            221021,
+            221021
+          ],
+          "min": 221021,
+          "max": 221021,
           "drift": 0,
-          "maxBytes": 132838
+          "maxBytes": 225442
         },
         {
           "phase": "toggle theme",
-          "observations": [86677, 86677, 86677],
-          "min": 86677,
-          "max": 86677,
+          "observations": [
+            86742,
+            86742,
+            86742
+          ],
+          "min": 86742,
+          "max": 86742,
           "drift": 0,
-          "maxBytes": 88411
+          "maxBytes": 88477
         },
         {
           "phase": "search starts",
-          "observations": [95759, 95759, 95759],
+          "observations": [
+            95759,
+            95759,
+            95759
+          ],
           "min": 95759,
           "max": 95759,
           "drift": 0,
@@ -1442,103 +3736,155 @@
         },
         {
           "phase": "search results",
-          "observations": [122425, 122425, 122425],
-          "min": 122425,
-          "max": 122425,
+          "observations": [
+            122588,
+            122588,
+            122588
+          ],
+          "min": 122588,
+          "max": 122588,
           "drift": 0,
-          "maxBytes": 124874
+          "maxBytes": 125040
         },
         {
           "phase": "like (optimistic)",
-          "observations": [92197, 92197, 92197],
-          "min": 92197,
-          "max": 92197,
+          "observations": [
+            92360,
+            92360,
+            92360
+          ],
+          "min": 92360,
+          "max": 92360,
           "drift": 0,
-          "maxBytes": 94041
+          "maxBytes": 94208
         },
         {
           "phase": "like saved",
-          "observations": [98138, 98138, 98138],
-          "min": 98138,
-          "max": 98138,
+          "observations": [
+            98203,
+            98203,
+            98203
+          ],
+          "min": 98203,
+          "max": 98203,
           "drift": 0,
-          "maxBytes": 100101
+          "maxBytes": 100168
         },
         {
           "phase": "second like (optimistic)",
-          "observations": [92347, 92347, 92347],
-          "min": 92347,
-          "max": 92347,
+          "observations": [
+            92510,
+            92510,
+            92510
+          ],
+          "min": 92510,
+          "max": 92510,
           "drift": 0,
-          "maxBytes": 94194
+          "maxBytes": 94361
         },
         {
           "phase": "like rate limited",
-          "observations": [97880, 97880, 97880],
-          "min": 97880,
-          "max": 97880,
+          "observations": [
+            98436,
+            98436,
+            98436
+          ],
+          "min": 98436,
+          "max": 98436,
           "drift": 0,
-          "maxBytes": 99838
+          "maxBytes": 100405
         },
         {
           "phase": "newsletter good email",
-          "observations": [80091, 80091, 80091],
-          "min": 80091,
-          "max": 80091,
+          "observations": [
+            80156,
+            80156,
+            80156
+          ],
+          "min": 80156,
+          "max": 80156,
           "drift": 0,
-          "maxBytes": 81693
+          "maxBytes": 81760
         },
         {
           "phase": "newsletter in flight",
-          "observations": [88612, 88612, 88612],
-          "min": 88612,
-          "max": 88612,
+          "observations": [
+            88677,
+            88677,
+            88677
+          ],
+          "min": 88677,
+          "max": 88677,
           "drift": 0,
-          "maxBytes": 90385
+          "maxBytes": 90451
         },
         {
           "phase": "newsletter success",
-          "observations": [97311, 97311, 97311],
-          "min": 97311,
-          "max": 97311,
+          "observations": [
+            97376,
+            97376,
+            97376
+          ],
+          "min": 97376,
+          "max": 97376,
           "drift": 0,
-          "maxBytes": 99258
+          "maxBytes": 99324
         },
         {
           "phase": "newsletter bad email",
-          "observations": [82660, 82660, 82660],
-          "min": 82660,
-          "max": 82660,
+          "observations": [
+            82725,
+            82725,
+            82725
+          ],
+          "min": 82725,
+          "max": 82725,
           "drift": 0,
-          "maxBytes": 84314
+          "maxBytes": 84380
         },
         {
           "phase": "bad newsletter in flight",
-          "observations": [88650, 88650, 88650],
-          "min": 88650,
-          "max": 88650,
+          "observations": [
+            88715,
+            88715,
+            88715
+          ],
+          "min": 88715,
+          "max": 88715,
           "drift": 0,
-          "maxBytes": 90423
+          "maxBytes": 90490
         },
         {
           "phase": "newsletter typed error",
-          "observations": [98874, 98874, 98874],
-          "min": 98874,
-          "max": 98874,
+          "observations": [
+            99430,
+            99430,
+            99430
+          ],
+          "min": 99430,
+          "max": 99430,
           "drift": 0,
-          "maxBytes": 100852
+          "maxBytes": 101419
         },
         {
           "phase": "carousel next",
-          "observations": [85221, 85221, 85221],
-          "min": 85221,
-          "max": 85221,
+          "observations": [
+            85286,
+            85286,
+            85286
+          ],
+          "min": 85286,
+          "max": 85286,
           "drift": 0,
-          "maxBytes": 86926
+          "maxBytes": 86992
         },
         {
           "phase": "search failure starts",
-          "observations": [95892, 95892, 95892],
+          "observations": [
+            95892,
+            95892,
+            95892
+          ],
           "min": 95892,
           "max": 95892,
           "drift": 0,
@@ -1546,49 +3892,90 @@
         },
         {
           "phase": "search typed error",
-          "observations": [113929, 113929, 113929],
-          "min": 113929,
-          "max": 113929,
+          "observations": [
+            114788,
+            114788,
+            114788
+          ],
+          "min": 114788,
+          "max": 114788,
           "drift": 0,
-          "maxBytes": 116208
+          "maxBytes": 117084
         },
         {
           "phase": "navigate to failing slug",
-          "observations": [167763, 167763, 167763],
+          "observations": [
+            167712,
+            167712,
+            167712
+          ],
+          "min": 167712,
+          "max": 167712,
+          "drift": 0,
+          "maxBytes": 171067
+        },
+        {
+          "phase": "not-found typed error",
+          "observations": [
+            139004,
+            139004,
+            139004
+          ],
+          "min": 139004,
+          "max": 139004,
+          "drift": 0,
+          "maxBytes": 141785
+        },
+        {
+          "phase": "navigate to code-heavy article",
+          "observations": [
+            167763,
+            167763,
+            167763
+          ],
           "min": 167763,
           "max": 167763,
           "drift": 0,
           "maxBytes": 171119
         },
         {
-          "phase": "not-found typed error",
-          "observations": [136784, 136784, 136784],
-          "min": 136784,
-          "max": 136784,
+          "phase": "code-heavy article loads",
+          "observations": [
+            265319,
+            265319,
+            265319
+          ],
+          "min": 265319,
+          "max": 265319,
           "drift": 0,
-          "maxBytes": 139520
+          "maxBytes": 270626
+        },
+        {
+          "phase": "check table of contents",
+          "observations": [
+            129756,
+            129756,
+            129756
+          ],
+          "min": 129756,
+          "max": 129756,
+          "drift": 0,
+          "maxBytes": 132352
+        },
+        {
+          "phase": "check highlighted token",
+          "observations": [
+            0,
+            0,
+            0
+          ],
+          "min": 0,
+          "max": 0,
+          "drift": 0,
+          "maxBytes": 1024
         }
       ]
     }
   ],
-  "shipped": [
-    {
-      "app": "original",
-      "js": 152339,
-      "gzip": 54285,
-      "chunks": 3
-    },
-    {
-      "app": "library",
-      "js": 166658,
-      "gzip": 58755,
-      "chunks": 3
-    },
-    {
-      "app": "compiled",
-      "js": 174148,
-      "gzip": 65281,
-      "chunks": 14
-    }
-  ]
+  "shipped": []
 }

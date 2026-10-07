@@ -22,7 +22,10 @@ it("matches the original DOM at every content and widget step", async () => {
   expect(at("comment list loads, avatars pending")).toContain("avatar-pending");
   expect(at("avatars load")).not.toContain("avatar-pending");
   expect(at("article loads")).toContain("<h1>Getting started</h1>");
-  expect(location.pathname).toBe("/docs/missing");
+  expect(location.pathname).toBe("/docs/pipeline");
+  expect(location.hash).toBe("#pipeline-model-the-article");
+  expect(at("code-heavy article loads")).toContain("<h1>A typed content pipeline</h1>");
+  expect(at("check highlighted token")).toContain('class="hljs-keyword">interface</span>');
   expect(at("toggle theme")).toContain('class="widget theme dark"');
   expect(at("search results")).toContain("Result: local");
   expect(at("like (optimistic)")).toContain("Like: 1");

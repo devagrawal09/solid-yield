@@ -55,7 +55,7 @@ export async function probe(slug) {
   try {
     const generated = await vite.ssrLoadModule(emittedId);
     const success = await generated.probe("start");
-    assert.equal(success.errors.length, 0);
+    assert.equal(success.errors.length, 0, JSON.stringify(success.errors));
     assert(success.chunks.some(c => c.html?.includes("Getting started")));
     assert(success.chunks.some(c => c.html?.includes("Related reading")));
     const failure = await generated.probe("missing");

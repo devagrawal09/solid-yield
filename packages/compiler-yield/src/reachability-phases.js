@@ -31,7 +31,11 @@ export function phasePlan(twin) {
       [e("SearchBox.edit")],
       [s("SearchBox.results")],
       [c("DocPage"), s("ArticleContent.article#2")],
-      [s("ArticleContent.article#2")]
+      [s("ArticleContent.article#2")],
+      [c("DocPage"), s("ArticleContent.article#2")],
+      [s("ArticleContent.article#2")],
+      [], // TOC hash navigation: foreign router work, no authored event
+      [] // token/table/date assertions: no application work
     ];
   if (twin.startsWith("todos-yield"))
     return [
@@ -244,7 +248,7 @@ export function selectPhase(g, spec, nameOf) {
 
 // Phases with an external interaction, not a continuation or timer advance.
 export function interactionIndices(twin) {
-  if (twin === "docs-yield") return [5, 7, 8, 10, 12, 14, 15, 17, 18, 20, 21, 23];
+  if (twin === "docs-yield") return [5, 7, 8, 10, 12, 14, 15, 17, 18, 20, 21, 23, 25, 27];
   if (twin === "effect-yield")
     return [2, 3, 5, 8, 10, 11, 14, 16, 17, 19, 20, 21, 26, 27, 30, 31, 33, 35];
   if (twin === "hackernews-spa-yield") return Array.from({ length: 14 }, (_, i) => i + 2);

@@ -23,7 +23,7 @@ export default function serverComponents({ directory }) {
   const shapes = {
     Home: "46437202127c8650421e98e8784c60d299c1f89a7ada287724cd6dc3b1336dda",
     DocPage: "9287ad2aa9507b792b7d0341f75b2de222d1a71d5c364ada70553efa001e6c3d",
-    ArticleContent: "1d78f9f4f9ffa957468ae4ff99b484cde1ac86d4741abec0bc7d756f5854b084",
+    ArticleContent: "a6f9151cdc73121662344e17ac08e55f54bbe2211855d7dcf6d3a55092a47c80",
     ReadingGuide: "83c3d9bbe68a1bf419b8f4751de8508d7d50cd1bee321e0681a8d2dccfa7a9bc"
   };
   const app = resolve(dir, "src/app.tsx"),
@@ -80,14 +80,18 @@ const __Article = component(function* __Article(props) {
   const slug = (yield* props.slug) ?? "overview";
   return yield* attempt(async () => ({value: await getArticle(slug)}), cause => ({failure: new NotFound(cause)}));
  });
+ const rendered = yield* $memo(function* () {
+  const settled = yield* outcome;
+  return settled.failure ? undefined : renderArticle(settled.value);
+ });
  return view(function* () { return <>{yield* Loading({fallback:${pending}, children:function* () {
-  return <>{yield* __Resolved(outcome)}</>;
+  return <>{yield* __Resolved(outcome, rendered)}</>;
  }})}</>; });
 });
-function* __Resolved(outcome) {
+function* __Resolved(outcome, rendered) {
  const settled = yield* outcome;
  return <>{yield* Errored({catch:[NotFound],fallback:${fallback},children:function* () {
-  return <>{yield* (settled.failure ? __raise(settled.failure) : ArticleBody({article:__constant(settled.value)}))}</>;
+  return <>{yield* (settled.failure ? __raise(settled.failure) : ArticleBody({article:__constant(settled.value),rendered}))}</>;
  }})}</>;
 }
 export async function routeRegion(slug) {

@@ -1,3 +1,4 @@
+import { highlightCoreForModuleRunner } from "../../../examples/harness/module-runner-highlight.mjs";
 import { test as nodeTest } from "node:test";
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
@@ -32,12 +33,13 @@ const regions = mode === "compiled-r";
 const single = mode === "compiled-single" || regions;
 const variants = ["original", "library", "compiled", "compiled-single"];
 if (!mode) {
-  test("tier 1 docs: original, library, seven roots and single root match all 24 hydrated steps", () => {
+  test("tier 1 docs: original, library, seven roots and single root match all 28 hydrated steps", () => {
     const results = [];
     for (const route of variants) {
       const child = spawnSync(process.execPath, [fileURLToPath(import.meta.url)], {
         encoding: "utf8",
         timeout: 60000,
+        maxBuffer: 8 * 1024 * 1024,
         env: {
           ...Object.fromEntries(
             Object.entries(process.env).filter(([k]) => k !== "NODE_TEST_CONTEXT")
@@ -51,7 +53,7 @@ if (!mode) {
       if (process.env.C2_DUMP)
         writeFileSync(resolve(tmpdir(), `c2-${route}.json`), JSON.stringify(results.at(-1)));
     }
-    assert.equal(results[0].snapshots.length, 24);
+    assert.equal(results[0].snapshots.length, 28);
     assert.deepEqual(results[1].snapshots, results[0].snapshots, "library vs original");
     for (let i = 0; i < results[1].snapshots.length; i++) {
       const a = results[2].snapshots[i],
@@ -74,6 +76,7 @@ if (!mode) {
         const child = spawnSync(process.execPath, [fileURLToPath(import.meta.url)], {
           encoding: "utf8",
           timeout: 60000,
+          maxBuffer: 8 * 1024 * 1024,
           env: {
             ...Object.fromEntries(
               Object.entries(process.env).filter(([k]) => k !== "NODE_TEST_CONTEXT")
@@ -142,6 +145,8 @@ if (!mode) {
               return "export const createHotContext=()=>({data:{},accept(){},acceptExports(){},dispose(){},prune(){},decline(){},invalidate(){},on(){},off(){},send(){}});export const updateStyle=()=>{};export const removeStyle=()=>{};export const injectQuery=x=>x;export class ErrorOverlay {}";
           },
           transform(code, id) {
+            const highlight = highlightCoreForModuleRunner(code, id);
+            if (highlight) return highlight;
             if (!compiled && id === resolve(directory, "stream/client.tsx"))
               return code.replace(/\bhydrate\(/, "export const dispose = hydrate(");
           }
@@ -322,6 +327,17 @@ if (!mode) {
               document.querySelector("main .like button"),
               "first frame reattaches the route slot"
             );
+          }
+          const settledSelector = {
+            "article loads": "main #start-plan-the-page",
+            "not-found typed error": "main .not-found",
+            "code-heavy article loads": "main #pipeline-plan-the-page"
+          }[name];
+          if (settledSelector) {
+            const deadline = Date.now() + 5000;
+            while (!document.querySelector(settledSelector) && Date.now() < deadline)
+              await new Promise(r => setTimeout(r, 1));
+            assert(document.querySelector(settledSelector), "region response settles: " + name);
           }
           if (name === "like saved") likeNode = document.querySelector("main .like");
           if (name === "not-found typed error")

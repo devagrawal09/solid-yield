@@ -59,7 +59,30 @@ export const steps: Step[] = [
   ["search failure starts", () => input(".search input", "fail")],
   ["search typed error", () => advance(100)],
   ["navigate to failing slug", () => click('nav a[href="/docs/missing"]')],
-  ["not-found typed error", () => advance(100)]
+  ["not-found typed error", () => advance(100)],
+  ["navigate to code-heavy article", () => click('nav a[href="/docs/pipeline"]')],
+  ["code-heavy article loads", () => advance(150)],
+  [
+    "check table of contents",
+    () => {
+      const link = $<HTMLAnchorElement>('main .on-this-page a[href="#pipeline-model-the-article"]');
+      if (!link || !document.getElementById(link.hash.slice(1)))
+        throw new Error("Missing TOC target");
+      document.getElementById(link.hash.slice(1))!.scrollIntoView = () => {};
+      click('main .on-this-page a[href="#pipeline-model-the-article"]');
+    }
+  ],
+  [
+    "check highlighted token",
+    () => {
+      const token = $("main .markdown .language-ts .hljs-keyword");
+      if (token?.textContent !== "interface")
+        throw new Error("Missing highlighted TypeScript token");
+      if (!$("main .markdown table")) throw new Error("Missing Markdown table");
+      if ($("main time")?.textContent !== "October 1, 2026")
+        throw new Error("Unexpected article date");
+    }
+  ]
 ];
 export async function runScript() {
   const out: string[] = [];

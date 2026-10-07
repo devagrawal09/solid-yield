@@ -6,3 +6,9 @@ a { color: #286467; } button, input { font: inherit; padding: 6px 12px; }
 .dark { background: #24313a; color: #f8f7f2; } pre { overflow: auto; background: #e8ece8; padding: 12px; }
 article section { margin: 28px 0; } .comments li { margin: 12px 0; } .carousel img { width: 120px; height: 60px; }
 @media (max-width: 700px) { .layout { grid-template-columns: 1fr; } }
+
+.markdown table { border-collapse: collapse; width: 100%; }
+.markdown th, .markdown td { border: 1px solid #b9c8c5; padding: 6px 10px; text-align: left; }
+.hljs-keyword, .hljs-built_in { color: #7242a0; }
+.hljs-string, .hljs-title { color: #246449; }
+.hljs-comment { color: #66736c; }

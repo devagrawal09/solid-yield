@@ -1,6 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { analyzeRecomputable } from "../src/recomputable.js";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 const analyze = body =>
   analyzeRecomputable(
     new Map([
@@ -64,5 +66,42 @@ test("R: typed error accessor remains with server boundary, reset stays client",
     assert.equal(r.sources[0].provenance, "R");
     if (!reset) assert.equal(r.holes.client, 0);
     else assert(r.holes.client > 0);
+  }
+});
+
+test("C3b: the audited article pipeline follows its input; changed code is refused", () => {
+  const file = resolve(import.meta.dirname, "../../../examples/docs-yield/src/article-pipeline.ts");
+  const code = readFileSync(file, "utf8");
+  for (const [input, expected] of [
+    ["article", "R"],
+    ["client", "C"],
+    ["other", "U"]
+  ]) {
+    for (const changed of [false, true]) {
+      const result = analyzeRecomputable(
+        new Map([
+          [file, code + (changed ? "\n// requires a new audit\n" : "")],
+          [
+            "/fixture.tsx",
+            `
+          import {component,view,$memo,$signal,$event,attempt,foreignSource} from "solid-yield";
+          import {renderArticle} from "./article-pipeline";
+          async function load(slug:string) {"use server";return {markdown:slug};}
+          const App=component(function* App(){
+            const slug=foreignSource(()=>"a");
+            const other=foreignSource(()=>({markdown:"unknown"}));
+            const [client,setClient]=yield* $signal({markdown:"client"});
+            const change=$event(function*(){yield* setClient({markdown:"changed"});});
+            const article=yield* $memo(function*(){const s=yield* slug;return yield* attempt(()=>load(s),e=>e);});
+            const output=yield* $memo(function*(){return renderArticle(yield* ${input});});
+            return view(function*(){return <div onClick={yield* change} innerHTML={(yield* output).html}/>;});
+          });
+        `
+          ]
+        ]),
+        { entry: "/fixture.tsx", resolve: spec => (spec === "./article-pipeline" ? file : spec) }
+      );
+      assert.equal(result.sources.at(-1).provenance, changed && expected === "R" ? "U" : expected);
+    }
   }
 });

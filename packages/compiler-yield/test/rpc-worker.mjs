@@ -1,5 +1,6 @@
 // A separate process keeps server execution out of the browser coverage sample.
 // The IPC carrier transports an unmodified HTTP Request/Response body stream.
+import { gzipSync } from "node:zlib";
 import { createRequire } from "node:module";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -50,7 +51,7 @@ process.on("disconnect", async () => {
 });
 const api = await server.ssrLoadModule(resolve(directory, "src/api.ts"));
 const jsonComparison = {};
-for (const slug of ["start", "missing"]) {
+for (const slug of ["start", "missing", "pipeline"]) {
   let value;
   try {
     value = await api.getArticle(slug);
@@ -60,6 +61,7 @@ for (const slug of ["start", "missing"]) {
   const json = JSON.stringify(value);
   jsonComparison[slug] = {
     equivalentJsonBytes: Buffer.byteLength(json),
+    equivalentJsonGzipBytes: gzipSync(json).length,
     libraryNetworkBytes: 0,
     json
   };

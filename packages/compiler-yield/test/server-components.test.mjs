@@ -43,26 +43,48 @@ function run(mode, url) {
 // remain untouched and their mismatches are recorded in the finding below.
 const withoutFrameScaffolding = html =>
   html.replace(/<\/?solid-frame\b[^>]*>/g, "").replace(/<template id="pl-[^"]*"><\/template>/g, "");
-test("C3: 24 hydrated interactions and keyed slots; record exact DOM differences", () => {
+// F-C13: frame morphs claim anchors inside innerHTML; ordinary hydration does
+// not. TOC claims also differ when mounting after a failure. Only router-owned
+// attributes on Markdown and TOC anchors are removed in
+// this separate diagnostic. Stored snapshots and the parity normalizer stay exact.
+const withoutArticleClaims = html =>
+  html.replace(
+    /(<div class="markdown">|<aside class="on-this-page">)([\s\S]*?)(<\/div>|<\/aside>)/g,
+    (_, start, body, end) =>
+      start +
+      body.replace(/<a\b[^>]*>/g, tag =>
+        tag.replace(/ (?:data-active|data-pending)=""| aria-current="page"/g, "")
+      ) +
+      end
+  );
+const authoredContent = html => withoutArticleClaims(withoutFrameScaffolding(html));
+test("C3: 28 hydrated interactions and keyed slots; record exact DOM differences", () => {
   const library = run("library"),
     compiled = run("compiled-r");
   assert.equal(compiled.roots, 1);
-  assert.equal(compiled.snapshots.length, 24);
-  assert.equal(compiled.payloads.length, 2, "one region RPC per navigation; no hydration refetch");
+  assert.equal(compiled.snapshots.length, 28);
+  assert.equal(compiled.payloads.length, 3, "one region RPC per navigation; no hydration refetch");
   const differences = [];
-  for (let i = 0; i < 24; i++) {
+  for (let i = 0; i < 28; i++) {
     const a = library.snapshots[i],
       b = compiled.snapshots[i];
-    assert.deepEqual(withoutFrameScaffolding(b), a, `authored content at step ${i}`);
+    assert.deepEqual(authoredContent(b), authoredContent(a), `authored content at step ${i}`);
     if (a !== b)
       differences.push({
         step: i,
-        reason: i === 4 ? "solid-frame wrappers and pending template" : "solid-frame wrappers",
+        reason: [
+          "solid-frame wrappers",
+          ...(i === 4 ? ["pending template"] : []),
+          ...(withoutFrameScaffolding(b) !== a ? ["F-C13 article link claim attributes"] : [])
+        ],
         librarySha256: createHash("sha256").update(a).digest("hex"),
         compiledSha256: createHash("sha256").update(b).digest("hex")
       });
   }
-  assert.equal(differences.length, 24, "do not report exact parity while frames add DOM nodes");
+  assert.equal(differences.length, 28, "do not report exact parity while frames add DOM nodes");
+  assert.match(compiled.snapshots[25], /A typed content pipeline/);
+  assert.match(compiled.snapshots[27], /class="hljs-keyword">interface<\/span>/);
+  assert(differences.some(d => d.reason.includes("F-C13 article link claim attributes")));
   assert.match(compiled.snapshots[23], /not-found: No article: missing/);
   assert.match(compiled.snapshots[23], /Like: 1/);
   assert.match(compiled.snapshots[23], /rate-limited: One like per article: start/);
@@ -77,9 +99,9 @@ test("C3: 24 hydrated interactions and keyed slots; record exact DOM differences
       JSON.stringify(
         {
           exactMatches: 0,
-          steps: 24,
-          contentMatches: 24,
-          serverRefetchedSteps: [4, 5, 22, 23],
+          steps: 28,
+          contentMatches: 28,
+          serverRefetchedSteps: [4, 5, 22, 23, 24, 25],
           differences,
           payloads: compiled.payloads
         },
@@ -92,7 +114,7 @@ for (const url of ["/docs/start", "/docs/missing"])
   test(`C3 production SSR/hydrate ${url}`, () => {
     const library = run("library", url),
       compiled = run("compiled-r", url);
-    assert.deepEqual(withoutFrameScaffolding(compiled.snapshots[0]), library.snapshots[0]);
+    assert.deepEqual(authoredContent(compiled.snapshots[0]), authoredContent(library.snapshots[0]));
     assert.equal(
       compiled.payloads.length,
       0,

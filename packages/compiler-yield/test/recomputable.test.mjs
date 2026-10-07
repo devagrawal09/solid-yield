@@ -69,7 +69,7 @@ test("R: typed error accessor remains with server boundary, reset stays client",
   }
 });
 
-test("C3b: the audited article pipeline follows its input; changed code is refused", () => {
+test("C3c: use pure follows its input; removing the directive leaves the adapter opaque", () => {
   const file = resolve(import.meta.dirname, "../../../examples/docs-yield/src/article-pipeline.ts");
   const code = readFileSync(file, "utf8");
   for (const [input, expected] of [
@@ -80,7 +80,12 @@ test("C3b: the audited article pipeline follows its input; changed code is refus
     for (const changed of [false, true]) {
       const result = analyzeRecomputable(
         new Map([
-          [file, code + (changed ? "\n// requires a new audit\n" : "")],
+          [
+            file,
+            changed
+              ? code.replace('"use pure";', "")
+              : code + "\n// edits do not invalidate the author assertion\n"
+          ],
           [
             "/fixture.tsx",
             `

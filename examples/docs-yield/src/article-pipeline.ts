@@ -1,3 +1,4 @@
+"use pure";
 import { Marked } from "marked";
 import core from "highlight.js/lib/core";
 import typescript from "highlight.js/lib/languages/typescript";

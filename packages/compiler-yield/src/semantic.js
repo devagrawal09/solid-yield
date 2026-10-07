@@ -1,4 +1,3 @@
-import { auditedArticlePipeline } from "./article-contract.js";
 import { parseProgram } from "../../vite-plugin-yield/src/transform.js";
 
 const key = n => n?.name ?? n?.value;
@@ -109,9 +108,17 @@ export class Analysis {
         program,
         env,
         exports: new Map(),
+        pure: program.node.directives.some(d => d.value.value === "use pure"),
         server: program.node.directives.some(d => d.value.value === "use server")
       };
       this.modules.set(id, record);
+      if (record.pure)
+        this.findings.push({
+          kind: "trusted-pure-module",
+          at: id,
+          reason:
+            "Author asserts exported functions depend only on arguments; implementation is not checked."
+        });
       program.traverse({
         enter: p => {
           this.paths.set(p.node, p);
@@ -585,8 +592,18 @@ export class Analysis {
   }
   call(fn, args, p, env, ctx = {}, construct = false) {
     const target = fn?.callable?.path;
-    if (!construct && target && auditedArticlePipeline(this.moduleOf.get(target.node), target))
-      return this.join(p, env, args, "audited-article-derivation");
+    const record = target && this.moduleOf.get(target.node);
+    if (
+      !construct &&
+      record?.pure &&
+      [...record.exports.values()].some(
+        value =>
+          value.node === target.node ||
+          (value.isIdentifier?.() &&
+            value.scope.getBinding(value.node.name)?.path.node === target.node)
+      )
+    )
+      return this.join(p, env, args, "trusted-pure-derivation");
     const name = fn?.external?.name;
     const library = ["solid-yield", "solid-yield/h"].includes(fn?.external?.source);
     if (library) {

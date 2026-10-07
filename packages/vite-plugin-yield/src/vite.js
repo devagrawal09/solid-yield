@@ -16,6 +16,7 @@
  * eligible `lazy` call. The source map is returned to Vite, which chains it
  * with the JSX compiler's.
  */
+import { isSugar, lowerSugarFile } from "./sugar.js";
 import { DEFAULT_YIELD_MODULE } from "./rule.js";
 import { mayTransform, transform } from "./transform.js";
 
@@ -41,13 +42,28 @@ export default function solidYield(options = {}) {
   const yieldModule = options.yieldModule ?? DEFAULT_YIELD_MODULE;
   const lazy = options.lazy ?? true;
   const filter = options.filter ?? defaultFilter;
+  const sugarCache = new Map();
   return {
+    buildStart() {
+      sugarCache.clear();
+    },
+    watchChange() {
+      sugarCache.clear();
+    },
+    handleHotUpdate() {
+      sugarCache.clear();
+    },
     name: "vite-plugin-solid-yield",
     enforce: "pre",
     transform(code, id) {
       if (id.startsWith("\0")) return null;
       const file = id.replace(/[?#].*$/, "");
       if (!filter(file)) return null;
+      if (isSugar(code)) {
+        code = lowerSugarFile(code, file, sugarCache);
+        const result = transform(code, { filename: file, yieldModule, lazy });
+        return { code: result?.code ?? code, map: null };
+      }
       if (!mayTransform(code, yieldModule, lazy)) return null;
       return transform(code, { filename: file, yieldModule, lazy });
     }

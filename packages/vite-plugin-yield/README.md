@@ -72,7 +72,7 @@ They were generated once from the fork's Rust compiler while it carried the rule
 
 ## Status
 
-In-repo package, `0.0.0`, unreleased. Its runtime dependencies are `@babel/core` and `magic-string`. Its peers are `solid-yield` (the module the rewritten code imports `perform` from) and, optionally, `vite`.
+In-repo package, `0.0.0`, unreleased. Its runtime dependencies are `@babel/core`, `magic-string`, and `typescript` (the experimental sugar front end). Its peers are `solid-yield` (the module the rewritten code imports `perform` from) and, optionally, `vite`.
 
 The tests also use, as devDependencies:
 
@@ -87,3 +87,19 @@ There is no build step: `src/` is plain ESM with JSDoc types, checked by `tsc --
 The annotated `moduleUrl` is the key the server render looks up in the **client asset manifest**. Pass that manifest to `renderToString` or `renderToStream`; without it an annotated lazy page throws on the server and a contained SSR error can leave blank content. The client and server must use the same module keys and app tree. Solid serializes the matching client entries and preloads them before hydration. Missing entries report `[LAZY_HYDRATION_PRELOAD]` in development.
 
 Use a separate server JSX config, `solid({ ssr: true, hydratable: true })`, and import `generateHydrationScript` from the server build of `@solidjs/web`. The client build returns an empty string. The [SSR and hydration recipe](https://github.com/devagrawal09/solid-yield/blob/main/documentation/getting-started.md#ssr-and-hydration) includes both configs, the manifest, an awaited stream and the non-test-mode Vitest setup. [Lazy/ChunkError retry](https://github.com/devagrawal09/solid-yield/blob/main/documentation/getting-started.md#lazy-pages-and-chunk-retry) uses an `Errored` catching the import failure.
+
+
+## Experimental sugar directive
+
+On `proto/sugar`, a file beginning with `"use yield";` opts into a project-aware
+front end. Top-level PascalCase functions returning JSX become yield components;
+plain source calls, path reads, events and known callbacks reconstruct the
+library's generator code before the existing JSX rule runs. Unmarked files keep
+the explicit behavior above. The Vite plugin requires a tsconfig for sugar.
+
+This is a prototype: it reparses project snapshots, returns no sugar source map,
+and does not supply an editor plugin. Typecheck and lint the generated library
+code, as [todos-sugar](../../examples/todos-sugar/README.md) does. The plain
+`transform()` and Babel plugin remain the explicit one-rule API; sugar is wired
+into the Vite adapter. See [the design and findings](../../documentation/sugar-design.md)
+for unsupported forms and the unresolved typing choice.

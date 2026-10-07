@@ -4,6 +4,10 @@ const counter = body =>
   `${signal} export function Counter(){const [count,set]=createSignal(0);${body}}`;
 export const fixtures = [
   {
+    id: "promise-event",
+    source: counter('return <button onClick={()=>Promise.reject("failed")}/>;')
+  },
+  {
     id: "counter",
     source: counter(
       "const twice=createMemo(()=>count()*2);return <button onClick={()=>set(count()+1)}>{twice()}</button>;"

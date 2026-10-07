@@ -14,6 +14,20 @@
   ],
   "fixtures": [
     {
+      "id": "promise-event",
+      "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; export function Counter(){const [count,set]=createSignal(0);return <button onClick={()=>Promise.reject(\"failed\")}/>;}",
+      "stage": "transform",
+      "diagnostics": [
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "An event returning a Promise has no declared rejection type; a checked rejection adapter is required.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/promise-event.tsx",
+          "line": 1,
+          "column": 190
+        }
+      ]
+    },
+    {
       "id": "counter",
       "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; export function Counter(){const [count,set]=createSignal(0);const twice=createMemo(()=>count()*2);return <button onClick={()=>set(count()+1)}>{twice()}</button>;}",
       "expected": "accepted",
@@ -552,6 +566,13 @@
           "column": 5
         },
         {
+          "code": "NATIVE_REJECTION",
+          "message": "An event returning a Promise has no declared rejection type; a checked rejection adapter is required.",
+          "file": "examples/originals/docs/src/widgets.tsx",
+          "line": 63,
+          "column": 15
+        },
+        {
           "code": "NATIVE_GENERATOR",
           "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
           "file": "examples/originals/docs/src/widgets.tsx",
@@ -564,6 +585,13 @@
           "file": "examples/originals/docs/src/widgets.tsx",
           "line": 98,
           "column": 5
+        },
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "An event returning a Promise has no declared rejection type; a checked rejection adapter is required.",
+          "file": "examples/originals/docs/src/widgets.tsx",
+          "line": 94,
+          "column": 18
         },
         {
           "code": "NATIVE_REJECTION",
@@ -709,6 +737,13 @@
           "file": "examples/originals/effect/src/checkout.tsx",
           "line": 107,
           "column": 7
+        },
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "An event returning a Promise has no declared rejection type; a checked rejection adapter is required.",
+          "file": "examples/originals/effect/src/checkout.tsx",
+          "line": 183,
+          "column": 24
         },
         {
           "code": "NATIVE_API",
@@ -1178,6 +1213,13 @@
           "column": 5
         },
         {
+          "code": "NATIVE_REJECTION",
+          "message": "An event returning a Promise has no declared rejection type; a checked rejection adapter is required.",
+          "file": "examples/originals/room/src/routes/home.tsx",
+          "line": 139,
+          "column": 16
+        },
+        {
           "code": "NATIVE_API",
           "message": "Solid API action has no verified native lowering.",
           "file": "examples/originals/room/src/routes/live.tsx",
@@ -1234,6 +1276,13 @@
           "column": 5
         },
         {
+          "code": "NATIVE_REJECTION",
+          "message": "An event returning a Promise has no declared rejection type; a checked rejection adapter is required.",
+          "file": "examples/originals/room/src/routes/live.tsx",
+          "line": 118,
+          "column": 16
+        },
+        {
           "code": "NATIVE_GENERATOR",
           "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
           "file": "examples/originals/room/src/routes/live.tsx",
@@ -1257,7 +1306,8 @@
         "NATIVE_TYPE",
         "NATIVE_FAILURE",
         "NATIVE_GENERATOR",
-        "NATIVE_CATCH"
+        "NATIVE_CATCH",
+        "NATIVE_REJECTION"
       ]
     },
     {
@@ -1311,6 +1361,34 @@
       "status": "refused",
       "diagnostics": [
         {
+          "code": "NATIVE_REJECTION",
+          "message": "An event returning a Promise has no declared rejection type; a checked rejection adapter is required.",
+          "file": "examples/originals/todos/src/app.tsx",
+          "line": 47,
+          "column": 20
+        },
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "An event returning a Promise has no declared rejection type; a checked rejection adapter is required.",
+          "file": "examples/originals/todos/src/app.tsx",
+          "line": 55,
+          "column": 24
+        },
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "An event returning a Promise has no declared rejection type; a checked rejection adapter is required.",
+          "file": "examples/originals/todos/src/app.tsx",
+          "line": 59,
+          "column": 42
+        },
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "An event returning a Promise has no declared rejection type; a checked rejection adapter is required.",
+          "file": "examples/originals/todos/src/app.tsx",
+          "line": 82,
+          "column": 21
+        },
+        {
           "code": "NATIVE_API",
           "message": "Solid API onSettled has no verified native lowering.",
           "file": "examples/originals/todos/src/filter.ts",
@@ -1421,8 +1499,8 @@
       "differingStatements": null,
       "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
       "reasons": [
-        "NATIVE_API",
         "NATIVE_REJECTION",
+        "NATIVE_API",
         "NATIVE_GENERATOR",
         "NATIVE_CATCH"
       ]
@@ -1434,6 +1512,34 @@
       "status": "refused",
       "diagnostics": [
         {
+          "code": "NATIVE_REJECTION",
+          "message": "An event returning a Promise has no declared rejection type; a checked rejection adapter is required.",
+          "file": "examples/originals/todos/src/app.tsx",
+          "line": 47,
+          "column": 20
+        },
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "An event returning a Promise has no declared rejection type; a checked rejection adapter is required.",
+          "file": "examples/originals/todos/src/app.tsx",
+          "line": 55,
+          "column": 24
+        },
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "An event returning a Promise has no declared rejection type; a checked rejection adapter is required.",
+          "file": "examples/originals/todos/src/app.tsx",
+          "line": 59,
+          "column": 42
+        },
+        {
+          "code": "NATIVE_REJECTION",
+          "message": "An event returning a Promise has no declared rejection type; a checked rejection adapter is required.",
+          "file": "examples/originals/todos/src/app.tsx",
+          "line": 82,
+          "column": 21
+        },
+        {
           "code": "NATIVE_API",
           "message": "Solid API onSettled has no verified native lowering.",
           "file": "examples/originals/todos/src/filter.ts",
@@ -1544,8 +1650,8 @@
       "differingStatements": null,
       "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
       "reasons": [
-        "NATIVE_API",
         "NATIVE_REJECTION",
+        "NATIVE_API",
         "NATIVE_GENERATOR",
         "NATIVE_CATCH"
       ]

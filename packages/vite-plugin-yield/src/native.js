@@ -204,6 +204,18 @@ export function inspectNativeProject(files) {
             if (binding?.isVariableDeclarator()) handler = binding.get("init");
             else if (binding?.isFunctionDeclaration()) handler = binding;
           }
+          const node = nodes.get(`${handler.node.start}:${handler.node.end}`);
+          const signatures = node ? checker.getTypeAtLocation(node).getCallSignatures() : [];
+          if (
+            signatures.some(signature =>
+              checker.getReturnTypeOfSignature(signature).getProperty("then")
+            )
+          )
+            report(
+              handler,
+              "NATIVE_REJECTION",
+              "An event returning a Promise has no declared rejection type; a checked rejection adapter is required."
+            );
           if (handler?.isFunction())
             handler.traverse({
               ThisExpression(site) {

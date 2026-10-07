@@ -47,6 +47,11 @@ describe("native front end", { timeout: 30_000 }, () => {
       )
     ).toThrow(/NATIVE_RECEIVER/);
   });
+  it("refuses Promise-returning events even without an async keyword", () => {
+    expect(() =>
+      lower(`export function App(){return <button onClick={()=>Promise.reject("failed")}/>;}`)
+    ).toThrow(/NATIVE_REJECTION/);
+  });
   it("reports every incompatible native failure site before emitting", () => {
     const diagnostics = inspectNativeProject(
       new Map([

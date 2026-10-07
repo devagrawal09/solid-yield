@@ -54,6 +54,18 @@ const TIMEOUT_MS =
  * string, or nothing when the page responded.
  */
 const INTERACTIONS = {
+  async "todos add"(document, settle) {
+    await new Promise(r => setTimeout(r, 500));
+    const input = document.querySelector(".new-todo");
+    if (!input) return "missing todo input";
+    input.value = "hydrated todo";
+    input.dispatchEvent(
+      new document.defaultView.KeyboardEvent("keydown", { key: "Enter", bubbles: true })
+    );
+    await settle();
+    if (!document.querySelector(".todo-list")?.textContent.includes("hydrated todo"))
+      return "hydrated event did not add an optimistic todo";
+  },
   async "docs theme and carousel"(document, settle) {
     const theme = document.querySelector(".theme button");
     const carousel = document.querySelector(".carousel button");
@@ -85,6 +97,13 @@ const INTERACTIONS = {
  * their interactions.
  */
 const TARGETS = [
+  {
+    twin: "todos-sugar",
+    entry: "string",
+    kind: "entry",
+    urls: ["/"],
+    interactions: { "/": "todos add" }
+  },
   {
     twin: "docs-yield",
     entry: "stream",

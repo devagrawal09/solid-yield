@@ -106,7 +106,7 @@ function fail(message) {
 // Steps
 
 const TWIN_SCRIPTS = ["test", "typecheck", "lint"];
-const EXPECTED_TWINS = 9;
+const EXPECTED_TWINS = 10;
 
 function readJson(path) {
   return JSON.parse(readFileSync(path, "utf8"));
@@ -116,7 +116,7 @@ function findTwins() {
   const examples = join(root, "examples");
   if (!existsSync(examples)) return [];
   return readdirSync(examples, { withFileTypes: true })
-    .filter(d => d.isDirectory() && /-yield(-h)?$/.test(d.name))
+    .filter(d => d.isDirectory() && /-(yield(-h)?|sugar)$/.test(d.name))
     .map(d => d.name)
     .filter(name => {
       const pkg = join(examples, name, "package.json");
@@ -172,6 +172,13 @@ function buildSteps(twins) {
       steps.push(step);
     }
   }
+
+  steps.push({
+    name: "twin:todos-sugar:generated-parity",
+    cwd: root,
+    cmd: process.execPath,
+    args: ["scripts/sugar-check.mjs"]
+  });
 
   steps.push({
     name: "original:docs:typecheck",

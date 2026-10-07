@@ -1,0 +1,32 @@
+{
+  "name": "todos-sugar-example",
+  "description": "TodoMVC with experimental use yield sugar",
+  "version": "0.0.0",
+  "private": true,
+  "author": "Ryan Carniato",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "start": "vite preview",
+    "test": "vitest run --maxWorkers=2",
+    "typecheck": "pnpm generate && tsc --noEmit -p tsconfig.generated.json",
+    "lint": "pnpm generate && eslint .generated/src",
+    "generate": "node ../../scripts/sugar-check.mjs"
+  },
+  "devDependencies": {
+    "solid-yield": "workspace:*",
+    "@solidjs/vite-plugin": "3.0.0-next.35",
+    "vite-plugin-solid-yield": "workspace:*",
+    "@solidjs/web": "^2.0.0-rc.11",
+    "@types/node": "^25.6.0",
+    "yield-example-harness": "workspace:*",
+    "eslint": "^9.0.0",
+    "jsdom": "^25.0.1",
+    "solid-js": "^2.0.0-rc.11",
+    "typescript": "^6.0.2",
+    "vite": "^7.0.0",
+    "vitest": "^4.1.6"
+  }
+}

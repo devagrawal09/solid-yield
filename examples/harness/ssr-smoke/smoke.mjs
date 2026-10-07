@@ -50,6 +50,7 @@ const TIMEOUT_MS =
 
 /** One entry per server entry: how to render it, and its routes. */
 const TARGETS = [
+  { twin: "todos-sugar", entry: "string", kind: "entry", urls: ["/"] },
   {
     twin: "docs-yield",
     entry: "stream",

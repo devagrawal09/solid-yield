@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "devDependencies": {
+    "@solidjs/router": "2.0.0-next.29",
     "@solidjs/vite-plugin": "3.0.0-next.35",
     "@solidjs/web": "2.0.0-rc.13",
     "@types/node": "^25.6.0",
@@ -19,7 +20,10 @@
     "solid-js": "2.0.0-rc.13",
     "typescript": "^6.0.2",
     "vite": "^7.0.0",
-    "vitest": "^4.1.6",
-    "@solidjs/router": "2.0.0-next.29"
+    "vitest": "^4.1.6"
+  },
+  "dependencies": {
+    "highlight.js": "11.12.0",
+    "marked": "18.1.0"
   }
 }

@@ -1,7 +1,7 @@
 {
-  "head": "ea5acaeac9159c068e853b3d945ce24b95c72995",
-  "startedAt": "2026-10-07T19:17:33.454Z",
-  "finishedAt": "2026-10-07T19:20:02.433Z",
+  "head": "2a230e6c81697169aba1a41e20ef9f8ca270dc69",
+  "startedAt": "2026-10-07T20:34:03.470Z",
+  "finishedAt": "2026-10-07T20:36:14.077Z",
   "options": {
     "only": [],
     "fast": false,
@@ -34,17 +34,17 @@
     "todos-yield-h"
   ],
   "summary": {
-    "pass": 52,
+    "pass": 53,
     "fail": 0,
     "skip": 0,
-    "total": 52,
-    "wallMs": 148979,
-    "line": "52 pass / 0 fail / 0 skip in 149s",
+    "total": 53,
+    "wallMs": 130607,
+    "line": "53 pass / 0 fail / 0 skip in 131s",
     "green": true
   },
   "comparison": {
     "baseline": "documentation/yield-gate-baseline.json",
-    "baselineHead": "d48d6ea9ab431ce98cf6f43d750efbead42dab56",
+    "baselineHead": "db1d102bea87b5d3ec45616cbe54876ee40f3c6a",
     "newReds": [],
     "fixed": [],
     "unchanged": [
@@ -81,6 +81,7 @@
       "twin:todos-yield-h:lint",
       "twin:todos-sugar:generated-parity",
       "native:contracts",
+      "native:failure:production-serialization",
       "native:counter:ssr-hydrate-parity",
       "original:docs:typecheck",
       "twins:ssr-smoke",
@@ -107,313 +108,319 @@
     {
       "name": "pkg:yield:dist-fresh",
       "status": "PASS",
-      "durationMs": 38,
+      "durationMs": 35,
       "command": "../../../Users/devagr/.nvm/versions/node/v24.18.0/bin/node scripts/dist-fresh.mjs"
     },
     {
       "name": "twin:docs-yield:test",
       "status": "PASS",
-      "durationMs": 2135,
+      "durationMs": 1650,
       "command": "pnpm -C examples/docs-yield run test"
     },
     {
       "name": "twin:docs-yield:typecheck",
       "status": "PASS",
-      "durationMs": 1809,
+      "durationMs": 1448,
       "command": "pnpm -C examples/docs-yield run typecheck"
     },
     {
       "name": "twin:docs-yield:lint",
       "status": "PASS",
-      "durationMs": 2338,
+      "durationMs": 1787,
       "command": "pnpm -C examples/docs-yield run lint"
     },
     {
       "name": "twin:effect-yield:test",
       "status": "PASS",
-      "durationMs": 2751,
+      "durationMs": 2168,
       "command": "pnpm -C examples/effect-yield run test"
     },
     {
       "name": "twin:effect-yield:typecheck",
       "status": "PASS",
-      "durationMs": 1917,
+      "durationMs": 1508,
       "command": "pnpm -C examples/effect-yield run typecheck"
     },
     {
       "name": "twin:effect-yield:lint",
       "status": "PASS",
-      "durationMs": 2506,
+      "durationMs": 2005,
       "command": "pnpm -C examples/effect-yield run lint"
     },
     {
       "name": "twin:hackernews-spa-yield:test",
       "status": "PASS",
-      "durationMs": 3401,
+      "durationMs": 2645,
       "command": "pnpm -C examples/hackernews-spa-yield run test"
     },
     {
       "name": "twin:hackernews-spa-yield:typecheck",
       "status": "PASS",
-      "durationMs": 2089,
+      "durationMs": 1609,
       "command": "pnpm -C examples/hackernews-spa-yield run typecheck"
     },
     {
       "name": "twin:hackernews-spa-yield:lint",
       "status": "PASS",
-      "durationMs": 2575,
+      "durationMs": 2013,
       "command": "pnpm -C examples/hackernews-spa-yield run lint"
     },
     {
       "name": "twin:rendering-yield:test",
       "status": "PASS",
-      "durationMs": 3909,
+      "durationMs": 3369,
       "command": "pnpm -C examples/rendering-yield run test"
     },
     {
       "name": "twin:rendering-yield:typecheck",
       "status": "PASS",
-      "durationMs": 1926,
+      "durationMs": 1494,
       "command": "pnpm -C examples/rendering-yield run typecheck"
     },
     {
       "name": "twin:rendering-yield:lint",
       "status": "PASS",
-      "durationMs": 2423,
+      "durationMs": 1802,
       "command": "pnpm -C examples/rendering-yield run lint"
     },
     {
       "name": "twin:room-yield:test",
       "status": "PASS",
-      "durationMs": 2431,
+      "durationMs": 1693,
       "command": "pnpm -C examples/room-yield run test"
     },
     {
       "name": "twin:room-yield:typecheck",
       "status": "PASS",
-      "durationMs": 1956,
+      "durationMs": 1352,
       "command": "pnpm -C examples/room-yield run typecheck"
     },
     {
       "name": "twin:room-yield:lint",
       "status": "PASS",
-      "durationMs": 2700,
+      "durationMs": 1904,
       "command": "pnpm -C examples/room-yield run lint"
     },
     {
       "name": "twin:sierpinski-yield:test",
       "status": "PASS",
-      "durationMs": 13093,
+      "durationMs": 11596,
       "command": "pnpm -C examples/sierpinski-yield run test"
     },
     {
       "name": "twin:sierpinski-yield:typecheck",
       "status": "PASS",
-      "durationMs": 1178,
+      "durationMs": 826,
       "command": "pnpm -C examples/sierpinski-yield run typecheck"
     },
     {
       "name": "twin:sierpinski-yield:lint",
       "status": "PASS",
-      "durationMs": 1820,
+      "durationMs": 1344,
       "command": "pnpm -C examples/sierpinski-yield run lint"
     },
     {
       "name": "twin:sierpinski-yield-h:test",
       "status": "PASS",
-      "durationMs": 12883,
+      "durationMs": 11505,
       "command": "pnpm -C examples/sierpinski-yield-h run test"
     },
     {
       "name": "twin:sierpinski-yield-h:typecheck",
       "status": "PASS",
-      "durationMs": 2662,
+      "durationMs": 2053,
       "command": "pnpm -C examples/sierpinski-yield-h run typecheck"
     },
     {
       "name": "twin:sierpinski-yield-h:lint",
       "status": "PASS",
-      "durationMs": 3149,
+      "durationMs": 2400,
       "command": "pnpm -C examples/sierpinski-yield-h run lint"
     },
     {
       "name": "twin:todos-sugar:test",
       "status": "PASS",
-      "durationMs": 5775,
+      "durationMs": 4706,
       "command": "pnpm -C examples/todos-sugar run test"
     },
     {
       "name": "twin:todos-sugar:typecheck",
       "status": "PASS",
-      "durationMs": 5622,
+      "durationMs": 4071,
       "command": "pnpm -C examples/todos-sugar run typecheck"
     },
     {
       "name": "twin:todos-sugar:lint",
       "status": "PASS",
-      "durationMs": 6293,
+      "durationMs": 4519,
       "command": "pnpm -C examples/todos-sugar run lint"
     },
     {
       "name": "twin:todos-yield:test",
       "status": "PASS",
-      "durationMs": 2305,
+      "durationMs": 1635,
       "command": "pnpm -C examples/todos-yield run test"
     },
     {
       "name": "twin:todos-yield:typecheck",
       "status": "PASS",
-      "durationMs": 1438,
+      "durationMs": 1091,
       "command": "pnpm -C examples/todos-yield run typecheck"
     },
     {
       "name": "twin:todos-yield:lint",
       "status": "PASS",
-      "durationMs": 1890,
+      "durationMs": 1472,
       "command": "pnpm -C examples/todos-yield run lint"
     },
     {
       "name": "twin:todos-yield-h:test",
       "status": "PASS",
-      "durationMs": 1973,
+      "durationMs": 1540,
       "command": "pnpm -C examples/todos-yield-h run test"
     },
     {
       "name": "twin:todos-yield-h:typecheck",
       "status": "PASS",
-      "durationMs": 3030,
+      "durationMs": 2438,
       "command": "pnpm -C examples/todos-yield-h run typecheck"
     },
     {
       "name": "twin:todos-yield-h:lint",
       "status": "PASS",
-      "durationMs": 3614,
+      "durationMs": 2786,
       "command": "pnpm -C examples/todos-yield-h run lint"
     },
     {
       "name": "twin:todos-sugar:generated-parity",
       "status": "PASS",
-      "durationMs": 4134,
+      "durationMs": 3215,
       "command": "../../../Users/devagr/.nvm/versions/node/v24.18.0/bin/node scripts/sugar-check.mjs"
     },
     {
       "name": "native:contracts",
       "status": "PASS",
-      "durationMs": 36812,
+      "durationMs": 38610,
       "command": "../../../Users/devagr/.nvm/versions/node/v24.18.0/bin/node scripts/native-check.mjs"
+    },
+    {
+      "name": "native:failure:production-serialization",
+      "status": "PASS",
+      "durationMs": 2005,
+      "command": "../../../Users/devagr/.nvm/versions/node/v24.18.0/bin/node scripts/native-serialization.mjs"
     },
     {
       "name": "native:counter:ssr-hydrate-parity",
       "status": "PASS",
-      "durationMs": 8083,
+      "durationMs": 6150,
       "command": "../../../Users/devagr/.nvm/versions/node/v24.18.0/bin/node scripts/native-runtime.mjs"
     },
     {
       "name": "original:docs:typecheck",
       "status": "PASS",
-      "durationMs": 1496,
+      "durationMs": 1160,
       "command": "pnpm -C examples/originals/docs run typecheck"
     },
     {
       "name": "twins:ssr-smoke",
       "status": "PASS",
-      "durationMs": 16002,
+      "durationMs": 13077,
       "command": "../../../Users/devagr/.nvm/versions/node/v24.18.0/bin/node examples/harness/ssr-smoke/smoke.mjs"
     },
     {
       "name": "twins:hydrate-smoke",
       "status": "PASS",
-      "durationMs": 23276,
+      "durationMs": 17714,
       "command": "../../../Users/devagr/.nvm/versions/node/v24.18.0/bin/node examples/harness/hydrate-smoke/hydrate.mjs"
     },
     {
       "name": "pkg:yield:test",
       "status": "PASS",
-      "durationMs": 39316,
+      "durationMs": 30085,
       "command": "pnpm -C packages/yield run test"
     },
     {
       "name": "pkg:eslint-plugin-yield:test",
       "status": "PASS",
-      "durationMs": 2872,
+      "durationMs": 2037,
       "command": "pnpm -C packages/eslint-plugin-yield run test"
     },
     {
       "name": "pkg:vite-plugin-yield:test",
       "status": "PASS",
-      "durationMs": 14140,
+      "durationMs": 11216,
       "command": "pnpm -C packages/vite-plugin-yield run test"
     },
     {
       "name": "pkg:vite-plugin-yield:typecheck",
       "status": "PASS",
-      "durationMs": 2082,
+      "durationMs": 1464,
       "command": "pnpm -C packages/vite-plugin-yield run typecheck"
     },
     {
       "name": "analyzer:test",
       "status": "PASS",
-      "durationMs": 1248,
+      "durationMs": 1674,
       "command": "pnpm -C packages/compiler-yield run test"
     },
     {
       "name": "analyzer:report",
       "status": "PASS",
-      "durationMs": 2633,
+      "durationMs": 1671,
       "command": "../../../Users/devagr/.nvm/versions/node/v24.18.0/bin/node packages/compiler-yield/src/report.js"
     },
     {
       "name": "proofs",
       "status": "PASS",
-      "durationMs": 1686,
+      "durationMs": 1167,
       "command": "../../../Users/devagr/.nvm/versions/node/v24.18.0/bin/node scripts/proofs.mjs"
     },
     {
       "name": "pkg:yield:conformance",
       "status": "PASS",
-      "durationMs": 8061,
+      "durationMs": 5508,
       "command": "pnpm -C packages/yield run test:conformance"
     },
     {
       "name": "twins:executed-bytes-test",
       "status": "PASS",
-      "durationMs": 124,
+      "durationMs": 84,
       "command": "../../../Users/devagr/.nvm/versions/node/v24.18.0/bin/node --test examples/harness/executed-bytes/coverage.test.mjs"
     },
     {
       "name": "twins:executed-bytes",
       "status": "PASS",
-      "durationMs": 64434,
+      "durationMs": 61077,
       "command": "../../../Users/devagr/.nvm/versions/node/v24.18.0/bin/node examples/harness/executed-bytes/measure.mjs --baseline documentation/executed-bytes.json"
     },
     {
       "name": "pkg:yield:exports",
       "status": "PASS",
-      "durationMs": 1528,
+      "durationMs": 1233,
       "command": "pnpm -C packages/yield run test:exports"
     },
     {
       "name": "pkg:vite-plugin-yield:exports",
       "status": "PASS",
-      "durationMs": 820,
+      "durationMs": 700,
       "command": "pnpm -C packages/vite-plugin-yield run test:exports"
     },
     {
       "name": "pkg:eslint-plugin-yield:exports",
       "status": "PASS",
-      "durationMs": 816,
+      "durationMs": 697,
       "command": "pnpm -C packages/eslint-plugin-yield run test:exports"
     },
     {
       "name": "repo:prettier",
       "status": "PASS",
-      "durationMs": 3145,
+      "durationMs": 2312,
       "command": "pnpm exec prettier --check 'packages/yield/**/*.[tj]s?(x)' 'packages/eslint-plugin-yield/**/*.[tj]s?(x)' 'packages/vite-plugin-yield/**/*.[tj]s?(x)' 'examples/docs-yield/**/*.[tj]s?(x)' 'examples/effect-yield/**/*.[tj]s?(x)' 'examples/hackernews-spa-yield/**/*.[tj]s?(x)' 'examples/rendering-yield/**/*.[tj]s?(x)' 'examples/room-yield/**/*.[tj]s?(x)' 'examples/sierpinski-yield/**/*.[tj]s?(x)' 'examples/sierpinski-yield-h/**/*.[tj]s?(x)' 'examples/todos-sugar/**/*.[tj]s?(x)' 'examples/todos-yield/**/*.[tj]s?(x)' 'examples/todos-yield-h/**/*.[tj]s?(x)' 'packages/compiler-yield/src/*.js' 'examples/originals/docs/src/**/*.[tj]s?(x)' 'examples/originals/docs/stream/**/*.[tj]s?(x)' 'packages/*/test/*.mjs' 'examples/harness/ssr-smoke/*.mjs' 'examples/harness/hydrate-smoke/*.mjs' 'examples/harness/executed-bytes/*.mjs' 'scripts/*.mjs'"
     },
     {
       "name": "repo:oxlint",
       "status": "PASS",
-      "durationMs": 84,
+      "durationMs": 70,
       "command": "node_modules/.bin/oxlint packages/yield packages/eslint-plugin-yield packages/vite-plugin-yield examples/docs-yield examples/effect-yield examples/hackernews-spa-yield examples/rendering-yield examples/room-yield examples/sierpinski-yield examples/sierpinski-yield-h examples/todos-sugar examples/todos-yield examples/todos-yield-h --ignore-pattern '**/dist/**' --ignore-pattern '**/node_modules/**'"
     }
   ]

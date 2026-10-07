@@ -12,20 +12,79 @@
     "R11",
     "R12"
   ],
+  "foreignEdges": [
+    {
+      "id": "class-memo",
+      "file": "packages/vite-plugin-yield/test/.native-generated/foreign-class-memo.tsx",
+      "source": "import {foreign} from \"solid-yield\"; import {App} from \"./class-memo\"; export const NativeHandoff=foreign(App);",
+      "diagnostics": [
+        {
+          "stage": "type",
+          "code": "TS2345",
+          "message": "Argument of type 'HoleCall<{}, false, NativeFailure<\"packages/vite-plugin-yield/test/.native-generated/class-memo.tsx#Failed@36\">, false, never>' is not assignable to parameter of type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<false, NativeFailure<\"packages/vite-plugin-yield/test/.native-generated/class-memo.tsx#Failed@36\">, false, HoleRequires<...>>) & { ...; } & { ...; }'.\n  Type 'HoleCall<{}, false, NativeFailure<\"packages/vite-plugin-yield/test/.native-generated/class-memo.tsx#Failed@36\">, false, never>' is not assignable to type '{ readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"packages/vite-plugin-yield/test/.native-generated/class-memo.tsx#Failed@36\"; }'."
+        }
+      ]
+    },
+    {
+      "id": "unknown-memo",
+      "file": "packages/vite-plugin-yield/test/.native-generated/foreign-unknown-memo.tsx",
+      "source": "import {foreign} from \"solid-yield\"; import {App} from \"./unknown-memo\"; export const NativeHandoff=foreign(App);",
+      "diagnostics": [
+        {
+          "stage": "type",
+          "code": "TS2345",
+          "message": "Argument of type 'HoleCall<{}, false, NativeFailure<\"unknown\">, false, never>' is not assignable to parameter of type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<false, NativeFailure<\"unknown\">, false, HoleRequires<...>>) & { ...; } & { ...; }'.\n  Type 'HoleCall<{}, false, NativeFailure<\"unknown\">, false, never>' is not assignable to type '{ readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"unknown\"; }'."
+        }
+      ]
+    }
+  ],
   "fixtures": [
+    {
+      "id": "class-memo",
+      "source": "import {createMemo} from 'solid-js'; class Failed extends Error{} function load(){throw new Failed('bad')} export function App(){const value=createMemo(()=>load());return <p>{value()}</p>}",
+      "expected": "accepted",
+      "file": "packages/vite-plugin-yield/test/.native-generated/class-memo.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "unknown-memo",
+      "source": "import {createMemo} from 'solid-js'; function load(){throw 'bad'} export function App(){const value=createMemo(()=>load());return <p>{value()}</p>}",
+      "expected": "accepted",
+      "file": "packages/vite-plugin-yield/test/.native-generated/unknown-memo.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "async-event",
+      "source": "export function App(){return <button onClick={async()=>{throw new Error('bad')}}/>}",
+      "expected": "accepted",
+      "file": "packages/vite-plugin-yield/test/.native-generated/async-event.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "named-async-event",
+      "source": "async function save(){throw new Error('bad')} export function App(){return <button onClick={save}/>}",
+      "expected": "accepted",
+      "file": "packages/vite-plugin-yield/test/.native-generated/named-async-event.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "promise-catch",
+      "source": "import {createMemo} from 'solid-js'; export function App(){const value=createMemo(()=>Promise.reject(new Error('bad')).catch(()=>1));return <p>{value()}</p>}",
+      "expected": "accepted",
+      "file": "packages/vite-plugin-yield/test/.native-generated/promise-catch.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
     {
       "id": "promise-event",
       "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; export function Counter(){const [count,set]=createSignal(0);return <button onClick={()=>Promise.reject(\"failed\")}/>;}",
-      "stage": "transform",
-      "diagnostics": [
-        {
-          "code": "NATIVE_REJECTION",
-          "message": "An event returning a Promise has no declared rejection type; a checked rejection adapter is required.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/promise-event.tsx",
-          "line": 1,
-          "column": 190
-        }
-      ]
+      "file": "packages/vite-plugin-yield/test/.native-generated/promise-event.tsx",
+      "stage": "accepted",
+      "diagnostics": []
     },
     {
       "id": "counter",
@@ -157,14 +216,14 @@
       "slots": [
         "T07"
       ],
-      "stage": "transform",
+      "file": "packages/vite-plugin-yield/test/.native-generated/pending-root.tsx",
+      "stage": "checked-error",
       "diagnostics": [
         {
-          "code": "NATIVE_REJECTION",
-          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/pending-root.tsx",
-          "line": 1,
-          "column": 176
+          "stage": "type",
+          "code": "TS2345",
+          "message": "Argument of type 'HoleCall<{}, true, never, false, never>' is not assignable to parameter of type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<true, never, false, HoleRequires<...>>) & { ...; } & { ...; }'.\n  Type 'HoleCall<{}, true, never, false, never>' is not assignable to type '{ readonly \"[PENDING_ROOT] the root may be pending (a read under it has no Loading above): wrap the root, render(() => Loading({ children: App }), el), or put a Loading around the pending part\": true; }'.",
+          "line": 25
         }
       ]
     },
@@ -174,14 +233,14 @@
       "slots": [
         "T08"
       ],
-      "stage": "transform",
+      "file": "packages/vite-plugin-yield/test/.native-generated/colored-prop.tsx",
+      "stage": "checked-error",
       "diagnostics": [
         {
-          "code": "NATIVE_REJECTION",
-          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/colored-prop.tsx",
-          "line": 1,
-          "column": 197
+          "stage": "type",
+          "code": "TS2322",
+          "message": "Type '() => Generator<Read<true, never>, number, any>' is not assignable to type 'number | Source<number, never, false> | SettledProp<\"[SETTLED_PROP] prop `n` is settled: pass a settled value, or declare it Source<T, E, true>\"> | HoleProp<...>'.\n  Type '() => Generator<Read<true, never>, number, any>' is not assignable to type 'HoleProp<number, never, false, unknown>'.\n    Call signature return types 'Generator<Read<true, never>, number, any>' and 'Generator<Raise<never> | Read<false, never> | ChildView<false, never, boolean, unknown>, number, any>' are incompatible.\n      The types returned by 'next(...)' are incompatible between these types.\n        Type 'IteratorResult<Read<true, never>, number>' is not assignable to type 'IteratorResult<Raise<never> | Read<false, never> | ChildView<false, never, boolean, unknown>, number>'.\n          Type 'IteratorYieldResult<Read<true, never>>' is not assignable to type 'IteratorResult<Raise<never> | Read<false, never> | ChildView<false, never, boolean, unknown>, number>'.\n            Type 'IteratorYieldResult<Read<true, never>>' is not assignable to type 'IteratorYieldResult<Raise<never> | Read<false, never> | ChildView<false, never, boolean, unknown>>'.\n              Type 'Read<true, never>' is not assignable to type 'Raise<never> | Read<false, never> | ChildView<false, never, boolean, unknown>'.\n                Type 'Read<true, never>' is not assignable to type 'Read<false, never>'.\n                  Type 'true' is not assignable to type 'false'.",
+          "line": 35
         }
       ]
     },
@@ -192,16 +251,9 @@
         "T09",
         "R03"
       ],
-      "stage": "transform",
-      "diagnostics": [
-        {
-          "code": "NATIVE_FAILURE",
-          "message": "A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/throw-error.tsx",
-          "line": 1,
-          "column": 195
-        }
-      ]
+      "file": "packages/vite-plugin-yield/test/.native-generated/throw-error.tsx",
+      "stage": "accepted",
+      "diagnostics": []
     },
     {
       "id": "context",
@@ -289,14 +341,11 @@
       "slots": [
         "R06"
       ],
-      "file": "packages/vite-plugin-yield/test/.native-generated/hole-create.tsx",
-      "stage": "checked-error",
+      "stage": "transform",
       "diagnostics": [
         {
-          "stage": "type",
-          "code": "TS2345",
-          "message": "Argument of type '() => Generator<Create<\"signal\", never> | Read<false, never>, Element, any>' is not assignable to parameter of type '() => Generator<ViewOp, Element, any>'.\n  Call signature return types 'Generator<Create<\"signal\", never> | Read<false, never>, Element, any>' and 'Generator<ViewOp, Element, any>' are incompatible.\n    The types returned by 'next(...)' are incompatible between these types.\n      Type 'IteratorResult<Create<\"signal\", never> | Read<false, never>, Element>' is not assignable to type 'IteratorResult<ViewOp, Element>'.\n        Type 'IteratorYieldResult<Create<\"signal\", never> | Read<false, never>>' is not assignable to type 'IteratorResult<ViewOp, Element>'.\n          Type 'IteratorYieldResult<Create<\"signal\", never> | Read<false, never>>' is not assignable to type 'IteratorYieldResult<ViewOp>'.\n            Type 'Create<\"signal\", never> | Read<false, never>' is not assignable to type 'ViewOp'.\n              Type 'Create<\"signal\", never>' is not assignable to type 'ViewOp'.\n                Property '[MAY_WAIT]' is missing in type 'Create<\"signal\", never>' but required in type 'Bind<boolean, any>'.",
-          "line": 13
+          "code": "SUGAR_CALLBACK",
+          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/packages/vite-plugin-yield/test/.native-generated/hole-create.tsx:8:38)"
         }
       ]
     },
@@ -337,16 +386,9 @@
       "slots": [
         "R09"
       ],
-      "stage": "transform",
-      "diagnostics": [
-        {
-          "code": "NATIVE_FAILURE",
-          "message": "A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/unhandled-failure.tsx",
-          "line": 1,
-          "column": 195
-        }
-      ]
+      "file": "packages/vite-plugin-yield/test/.native-generated/unhandled-failure.tsx",
+      "stage": "accepted",
+      "diagnostics": []
     },
     {
       "id": "callback-read",
@@ -355,7 +397,7 @@
       "diagnostics": [
         {
           "code": "SUGAR_CALLBACK",
-          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/packages/vite-plugin-yield/test/.native-generated/callback-read.tsx:6:26)"
+          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/packages/vite-plugin-yield/test/.native-generated/callback-read.tsx:8:55)"
         }
       ]
     },
@@ -365,11 +407,8 @@
       "stage": "transform",
       "diagnostics": [
         {
-          "code": "NATIVE_REJECTION",
-          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/async-read.tsx",
-          "line": 1,
-          "column": 185
+          "code": "SUGAR_HOST",
+          "message": "[SUGAR_HOST] Reactive operations in async functions or methods are unsupported. (<root>/packages/vite-plugin-yield/test/.native-generated/async-read.tsx:8:47)"
         }
       ]
     },
@@ -395,30 +434,16 @@
     {
       "id": "unknown-throw",
       "source": "export function fail(e:unknown){throw e;}",
-      "stage": "transform",
-      "diagnostics": [
-        {
-          "code": "NATIVE_FAILURE",
-          "message": "A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/unknown-throw.tsx",
-          "line": 1,
-          "column": 33
-        }
-      ]
+      "file": "packages/vite-plugin-yield/test/.native-generated/unknown-throw.tsx",
+      "stage": "accepted",
+      "diagnostics": []
     },
     {
       "id": "server-rejection",
       "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; async function load(){\"use server\";return 1;}export function App(){const n=createMemo(()=>load());return <p>{n()}</p>;}",
-      "stage": "transform",
-      "diagnostics": [
-        {
-          "code": "NATIVE_REJECTION",
-          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/server-rejection.tsx",
-          "line": 1,
-          "column": 192
-        }
-      ]
+      "file": "packages/vite-plugin-yield/test/.native-generated/server-rejection.tsx",
+      "stage": "accepted",
+      "diagnostics": []
     },
     {
       "id": "spread",
@@ -465,57 +490,234 @@
       "twin": "docs-yield",
       "original": "docs",
       "files": 7,
+      "inference": {
+        "status": "source call-graph estimate; generated colors unchecked until transform succeeds",
+        "iterations": 4,
+        "classes": [
+          {
+            "id": "examples/originals/docs/src/errors.ts#NotFound@375",
+            "name": "NotFound",
+            "file": "examples/originals/docs/src/errors.ts",
+            "nameStart": 389,
+            "classStart": 376
+          },
+          {
+            "id": "examples/originals/docs/src/errors.ts#SearchError@429",
+            "name": "SearchError",
+            "file": "examples/originals/docs/src/errors.ts",
+            "nameStart": 443,
+            "classStart": 430
+          },
+          {
+            "id": "examples/originals/docs/src/errors.ts#RateLimited@489",
+            "name": "RateLimited",
+            "file": "examples/originals/docs/src/errors.ts",
+            "nameStart": 503,
+            "classStart": 490
+          },
+          {
+            "id": "examples/originals/docs/src/errors.ts#BadEmail@549",
+            "name": "BadEmail",
+            "file": "examples/originals/docs/src/errors.ts",
+            "nameStart": 563,
+            "classStart": 550
+          }
+        ],
+        "components": [
+          {
+            "file": "examples/originals/docs/src/app.tsx",
+            "name": "Home",
+            "line": 12,
+            "server": false,
+            "component": true,
+            "fails": [
+              "ChunkError",
+              "examples/originals/docs/src/errors.ts#NotFound@375",
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/docs/src/app.tsx",
+            "name": "DocPage",
+            "line": 20,
+            "server": false,
+            "component": true,
+            "fails": [
+              "ChunkError",
+              "examples/originals/docs/src/errors.ts#NotFound@375",
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/docs/src/app.tsx",
+            "name": "App",
+            "line": 34,
+            "server": false,
+            "component": true,
+            "fails": [
+              "ChunkError",
+              "examples/originals/docs/src/errors.ts#NotFound@375",
+              "examples/originals/docs/src/errors.ts#SearchError@429",
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/docs/src/content.tsx",
+            "name": "SiteNav",
+            "line": 4,
+            "server": false,
+            "component": true,
+            "fails": [
+              "ChunkError",
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/docs/src/content.tsx",
+            "name": "SiteFooter",
+            "line": 33,
+            "server": false,
+            "component": true,
+            "fails": [
+              "ChunkError",
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/docs/src/content.tsx",
+            "name": "ArticleContent",
+            "line": 52,
+            "server": false,
+            "component": true,
+            "fails": [
+              "ChunkError",
+              "examples/originals/docs/src/errors.ts#NotFound@375",
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/docs/src/content.tsx",
+            "name": "ArticleBody",
+            "line": 68,
+            "server": false,
+            "component": true,
+            "fails": []
+          },
+          {
+            "file": "examples/originals/docs/src/content.tsx",
+            "name": "ReadingGuide",
+            "line": 167,
+            "server": false,
+            "component": true,
+            "fails": [
+              "ChunkError",
+              "examples/originals/docs/src/errors.ts#NotFound@375",
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/docs/src/shell.tsx",
+            "name": "Shell",
+            "line": 2,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/docs/src/widgets.tsx",
+            "name": "ThemeToggle",
+            "line": 13,
+            "server": false,
+            "component": true,
+            "fails": []
+          },
+          {
+            "file": "examples/originals/docs/src/widgets.tsx",
+            "name": "SearchBox",
+            "line": 25,
+            "server": false,
+            "component": true,
+            "fails": [
+              "examples/originals/docs/src/errors.ts#SearchError@429",
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/docs/src/widgets.tsx",
+            "name": "LikeButton",
+            "line": 58,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/docs/src/widgets.tsx",
+            "name": "NewsletterForm",
+            "line": 89,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/docs/src/widgets.tsx",
+            "name": "CommentList",
+            "line": 126,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/docs/src/widgets.tsx",
+            "name": "ImageCarousel",
+            "line": 156,
+            "server": false,
+            "component": true,
+            "fails": []
+          }
+        ],
+        "serverRejections": [
+          {
+            "file": "examples/originals/docs/src/api.ts",
+            "name": "getSite",
+            "line": 35,
+            "server": true,
+            "component": false,
+            "fails": [
+              "unknown"
+            ],
+            "rejection": [
+              "ChunkError",
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/docs/src/api.ts",
+            "name": "getArticle",
+            "line": 64,
+            "server": true,
+            "component": false,
+            "fails": [
+              "examples/originals/docs/src/errors.ts#NotFound@375",
+              "unknown"
+            ],
+            "rejection": [
+              "ChunkError",
+              "examples/originals/docs/src/errors.ts#NotFound@375",
+              "unknown"
+            ]
+          }
+        ]
+      },
       "status": "refused",
       "diagnostics": [
-        {
-          "code": "NATIVE_FAILURE",
-          "message": "A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged.",
-          "file": "examples/originals/docs/src/api.ts",
-          "line": 67,
-          "column": 57
-        },
-        {
-          "code": "NATIVE_FAILURE",
-          "message": "A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged.",
-          "file": "examples/originals/docs/src/api.ts",
-          "line": 103,
-          "column": 25
-        },
-        {
-          "code": "NATIVE_FAILURE",
-          "message": "A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged.",
-          "file": "examples/originals/docs/src/api.ts",
-          "line": 108,
-          "column": 17
-        },
-        {
-          "code": "NATIVE_FAILURE",
-          "message": "A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged.",
-          "file": "examples/originals/docs/src/api.ts",
-          "line": 113,
-          "column": 47
-        },
-        {
-          "code": "NATIVE_REJECTION",
-          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
-          "file": "examples/originals/docs/src/content.tsx",
-          "line": 5,
-          "column": 27
-        },
-        {
-          "code": "NATIVE_REJECTION",
-          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
-          "file": "examples/originals/docs/src/content.tsx",
-          "line": 34,
-          "column": 27
-        },
-        {
-          "code": "NATIVE_REJECTION",
-          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
-          "file": "examples/originals/docs/src/content.tsx",
-          "line": 53,
-          "column": 30
-        },
         {
           "code": "NATIVE_API",
           "message": "Solid API markSafeError has no verified native lowering.",
@@ -545,13 +747,6 @@
           "column": 3
         },
         {
-          "code": "NATIVE_REJECTION",
-          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
-          "file": "examples/originals/docs/src/widgets.tsx",
-          "line": 27,
-          "column": 30
-        },
-        {
           "code": "NATIVE_GENERATOR",
           "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
           "file": "examples/originals/docs/src/widgets.tsx",
@@ -566,13 +761,6 @@
           "column": 5
         },
         {
-          "code": "NATIVE_REJECTION",
-          "message": "An event returning a Promise has no declared rejection type; a checked rejection adapter is required.",
-          "file": "examples/originals/docs/src/widgets.tsx",
-          "line": 63,
-          "column": 15
-        },
-        {
           "code": "NATIVE_GENERATOR",
           "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
           "file": "examples/originals/docs/src/widgets.tsx",
@@ -585,27 +773,6 @@
           "file": "examples/originals/docs/src/widgets.tsx",
           "line": 98,
           "column": 5
-        },
-        {
-          "code": "NATIVE_REJECTION",
-          "message": "An event returning a Promise has no declared rejection type; a checked rejection adapter is required.",
-          "file": "examples/originals/docs/src/widgets.tsx",
-          "line": 94,
-          "column": 18
-        },
-        {
-          "code": "NATIVE_REJECTION",
-          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
-          "file": "examples/originals/docs/src/widgets.tsx",
-          "line": 127,
-          "column": 27
-        },
-        {
-          "code": "NATIVE_REJECTION",
-          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
-          "file": "examples/originals/docs/src/widgets.tsx",
-          "line": 135,
-          "column": 42
         }
       ],
       "parity": "not run: no checked native program",
@@ -613,8 +780,6 @@
       "differingStatements": null,
       "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
       "reasons": [
-        "NATIVE_FAILURE",
-        "NATIVE_REJECTION",
         "NATIVE_API",
         "NATIVE_GENERATOR",
         "NATIVE_CATCH"
@@ -624,6 +789,86 @@
       "twin": "effect-yield",
       "original": "effect",
       "files": 7,
+      "inference": {
+        "status": "source call-graph estimate; generated colors unchecked until transform succeeds",
+        "iterations": 3,
+        "classes": [
+          {
+            "id": "examples/originals/effect/src/api.ts#TransientNetworkError@660",
+            "name": "TransientNetworkError",
+            "file": "examples/originals/effect/src/api.ts",
+            "nameStart": 675,
+            "classStart": 662
+          },
+          {
+            "id": "examples/originals/effect/src/api.ts#CardDeclinedError@6338",
+            "name": "CardDeclinedError",
+            "file": "examples/originals/effect/src/api.ts",
+            "nameStart": 6353,
+            "classStart": 6340
+          },
+          {
+            "id": "examples/originals/effect/src/solid-effect.ts#ActionInterruptedError@5360",
+            "name": "ActionInterruptedError",
+            "file": "examples/originals/effect/src/solid-effect.ts",
+            "nameStart": 5587,
+            "classStart": 5574
+          }
+        ],
+        "components": [
+          {
+            "file": "examples/originals/effect/src/app.tsx",
+            "name": "LogPanel",
+            "line": 10,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/effect/src/app.tsx",
+            "name": "App",
+            "line": 37,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/effect/src/checkout.tsx",
+            "name": "Checkout",
+            "line": 60,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/effect/src/typeahead.tsx",
+            "name": "Results",
+            "line": 21,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/effect/src/typeahead.tsx",
+            "name": "Typeahead",
+            "line": 51,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          }
+        ],
+        "serverRejections": []
+      },
       "status": "refused",
       "diagnostics": [
         {
@@ -711,13 +956,6 @@
           "column": 3
         },
         {
-          "code": "NATIVE_REJECTION",
-          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
-          "file": "examples/originals/effect/src/checkout.tsx",
-          "line": 62,
-          "column": 51
-        },
-        {
           "code": "NATIVE_GENERATOR",
           "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
           "file": "examples/originals/effect/src/checkout.tsx",
@@ -732,20 +970,6 @@
           "column": 5
         },
         {
-          "code": "NATIVE_FAILURE",
-          "message": "A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged.",
-          "file": "examples/originals/effect/src/checkout.tsx",
-          "line": 107,
-          "column": 7
-        },
-        {
-          "code": "NATIVE_REJECTION",
-          "message": "An event returning a Promise has no declared rejection type; a checked rejection adapter is required.",
-          "file": "examples/originals/effect/src/checkout.tsx",
-          "line": 183,
-          "column": 24
-        },
-        {
           "code": "NATIVE_API",
           "message": "Solid API createStore has no verified native lowering.",
           "file": "examples/originals/effect/src/log.ts",
@@ -758,13 +982,6 @@
           "file": "examples/originals/effect/src/solid-effect.ts",
           "line": 34,
           "column": 10
-        },
-        {
-          "code": "NATIVE_FAILURE",
-          "message": "A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged.",
-          "file": "examples/originals/effect/src/solid-effect.ts",
-          "line": 88,
-          "column": 11
         },
         {
           "code": "NATIVE_GENERATOR",
@@ -795,15 +1012,176 @@
       "reasons": [
         "NATIVE_GENERATOR",
         "NATIVE_API",
-        "NATIVE_REJECTION",
-        "NATIVE_CATCH",
-        "NATIVE_FAILURE"
+        "NATIVE_CATCH"
       ]
     },
     {
       "twin": "hackernews-spa-yield",
       "original": "hackernews-spa",
       "files": 11,
+      "inference": {
+        "status": "source call-graph estimate; generated colors unchecked until transform succeeds",
+        "iterations": 3,
+        "classes": [],
+        "components": [
+          {
+            "file": "examples/originals/hackernews-spa/src/app.tsx",
+            "name": "App",
+            "line": 33,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/hackernews-spa/src/components/comment.tsx",
+            "name": "Comment",
+            "line": 5,
+            "server": false,
+            "component": true,
+            "fails": []
+          },
+          {
+            "file": "examples/originals/hackernews-spa/src/components/nav.tsx",
+            "name": "Nav",
+            "line": 1,
+            "server": false,
+            "component": true,
+            "fails": []
+          },
+          {
+            "file": "examples/originals/hackernews-spa/src/components/story.tsx",
+            "name": "Story",
+            "line": 5,
+            "server": false,
+            "component": true,
+            "fails": []
+          },
+          {
+            "file": "examples/originals/hackernews-spa/src/components/toggle.tsx",
+            "name": "Toggle",
+            "line": 3,
+            "server": false,
+            "component": true,
+            "fails": []
+          },
+          {
+            "file": "examples/originals/hackernews-spa/src/routes/stories.tsx",
+            "name": "Stories",
+            "line": 16,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/hackernews-spa/src/routes/story.tsx",
+            "name": "Story",
+            "line": 14,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/hackernews-spa/src/routes/user.tsx",
+            "name": "User",
+            "line": 11,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          }
+        ],
+        "serverRejections": [
+          {
+            "file": "examples/originals/hackernews-spa/src/lib/hn.ts",
+            "name": "story",
+            "line": 8,
+            "server": true,
+            "component": false,
+            "fails": [],
+            "rejection": [
+              "ChunkError"
+            ]
+          },
+          {
+            "file": "examples/originals/hackernews-spa/src/lib/hn.ts",
+            "name": "user",
+            "line": 9,
+            "server": true,
+            "component": false,
+            "fails": [],
+            "rejection": [
+              "ChunkError"
+            ]
+          },
+          {
+            "file": "examples/originals/hackernews-spa/src/lib/hn.ts",
+            "name": "fetchAPI",
+            "line": 29,
+            "server": true,
+            "component": false,
+            "fails": [
+              "ChunkError",
+              "unknown"
+            ],
+            "rejection": [
+              "ChunkError",
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/hackernews-spa/src/lib/hn.ts",
+            "name": "getStories",
+            "line": 41,
+            "server": true,
+            "component": false,
+            "fails": [
+              "ChunkError",
+              "unknown"
+            ],
+            "rejection": [
+              "ChunkError",
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/hackernews-spa/src/lib/hn.ts",
+            "name": "getStory",
+            "line": 47,
+            "server": true,
+            "component": false,
+            "fails": [
+              "ChunkError",
+              "unknown"
+            ],
+            "rejection": [
+              "ChunkError",
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/hackernews-spa/src/lib/hn.ts",
+            "name": "getUser",
+            "line": 52,
+            "server": true,
+            "component": false,
+            "fails": [
+              "ChunkError",
+              "unknown"
+            ],
+            "rejection": [
+              "ChunkError",
+              "unknown"
+            ]
+          }
+        ]
+      },
       "status": "refused",
       "diagnostics": [
         {
@@ -841,6 +1219,146 @@
       "twin": "rendering-yield",
       "original": "rendering",
       "files": 11,
+      "inference": {
+        "status": "source call-graph estimate; generated colors unchecked until transform succeeds",
+        "iterations": 3,
+        "classes": [
+          {
+            "id": "global:Error",
+            "name": "Error",
+            "file": null
+          }
+        ],
+        "components": [
+          {
+            "file": "examples/originals/rendering/shared/src/components/ErrorStream.tsx",
+            "name": "InnerBoundaryItem",
+            "line": 20,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/rendering/shared/src/components/ErrorStream.tsx",
+            "name": "OuterBoundaryItem",
+            "line": 47,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/rendering/shared/src/components/ErrorStream.tsx",
+            "name": "ErrorStream",
+            "line": 74,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/rendering/shared/src/components/Home.tsx",
+            "name": "Home",
+            "line": 3,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/rendering/shared/src/components/Profile/Profile.tsx",
+            "name": "Profile",
+            "line": 8,
+            "server": false,
+            "component": true,
+            "fails": []
+          },
+          {
+            "file": "examples/originals/rendering/shared/src/components/Reveal.tsx",
+            "name": "AsyncCard",
+            "line": 7,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/rendering/shared/src/components/Reveal.tsx",
+            "name": "RevealPage",
+            "line": 22,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/rendering/shared/src/components/Settings.tsx",
+            "name": "Settings",
+            "line": 4,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/rendering/shared/src/components/Shell.tsx",
+            "name": "Shell",
+            "line": 13,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/rendering/shared/src/components/Skeleton.tsx",
+            "name": "FeedCard",
+            "line": 39,
+            "server": false,
+            "component": true,
+            "fails": []
+          },
+          {
+            "file": "examples/originals/rendering/shared/src/components/Skeleton.tsx",
+            "name": "Skeleton",
+            "line": 56,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/rendering/shared/src/components/Stream.tsx",
+            "name": "Stream",
+            "line": 23,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/rendering/shared/src/router.tsx",
+            "name": "Link",
+            "line": 46,
+            "server": false,
+            "component": true,
+            "fails": [
+              "global:Error"
+            ]
+          }
+        ],
+        "serverRejections": []
+      },
       "status": "refused",
       "diagnostics": [
         {
@@ -858,20 +1376,6 @@
           "column": 21
         },
         {
-          "code": "NATIVE_REJECTION",
-          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
-          "file": "examples/originals/rendering/shared/src/components/ErrorStream.tsx",
-          "line": 22,
-          "column": 33
-        },
-        {
-          "code": "NATIVE_REJECTION",
-          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
-          "file": "examples/originals/rendering/shared/src/components/ErrorStream.tsx",
-          "line": 49,
-          "column": 33
-        },
-        {
           "code": "NATIVE_API",
           "message": "Solid API onSettled has no verified native lowering.",
           "file": "examples/originals/rendering/shared/src/components/Home.tsx",
@@ -886,32 +1390,11 @@
           "column": 22
         },
         {
-          "code": "NATIVE_REJECTION",
-          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
-          "file": "examples/originals/rendering/shared/src/components/Profile/index.tsx",
-          "line": 8,
-          "column": 33
-        },
-        {
-          "code": "NATIVE_REJECTION",
-          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
-          "file": "examples/originals/rendering/shared/src/components/Profile/index.tsx",
-          "line": 16,
-          "column": 37
-        },
-        {
           "code": "NATIVE_API",
           "message": "Solid API Reveal has no verified native lowering.",
           "file": "examples/originals/rendering/shared/src/components/Reveal.tsx",
           "line": 1,
           "column": 45
-        },
-        {
-          "code": "NATIVE_REJECTION",
-          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
-          "file": "examples/originals/rendering/shared/src/components/Reveal.tsx",
-          "line": 8,
-          "column": 28
         },
         {
           "code": "NATIVE_API",
@@ -956,13 +1439,6 @@
           "column": 54
         },
         {
-          "code": "NATIVE_REJECTION",
-          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
-          "file": "examples/originals/rendering/shared/src/components/Skeleton.tsx",
-          "line": 60,
-          "column": 5
-        },
-        {
           "code": "NATIVE_API",
           "message": "Solid API createProjection has no verified native lowering.",
           "file": "examples/originals/rendering/shared/src/components/Stream.tsx",
@@ -977,25 +1453,11 @@
           "column": 1
         },
         {
-          "code": "NATIVE_REJECTION",
-          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
-          "file": "examples/originals/rendering/shared/src/components/Stream.tsx",
-          "line": 24,
-          "column": 46
-        },
-        {
           "code": "NATIVE_GENERATOR",
           "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
           "file": "examples/originals/rendering/shared/src/components/Stream.tsx",
           "line": 24,
           "column": 46
-        },
-        {
-          "code": "NATIVE_REJECTION",
-          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
-          "file": "examples/originals/rendering/shared/src/components/Stream.tsx",
-          "line": 32,
-          "column": 52
         },
         {
           "code": "NATIVE_GENERATOR",
@@ -1024,13 +1486,6 @@
           "file": "examples/originals/rendering/shared/src/router.tsx",
           "line": 8,
           "column": 10
-        },
-        {
-          "code": "NATIVE_FAILURE",
-          "message": "A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged.",
-          "file": "examples/originals/rendering/shared/src/router.tsx",
-          "line": 41,
-          "column": 5
         }
       ],
       "parity": "not run: no checked native program",
@@ -1039,16 +1494,322 @@
       "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
       "reasons": [
         "NATIVE_API",
-        "NATIVE_REJECTION",
         "NATIVE_TYPE",
-        "NATIVE_GENERATOR",
-        "NATIVE_FAILURE"
+        "NATIVE_GENERATOR"
       ]
     },
     {
       "twin": "room-yield",
       "original": "room",
       "files": 11,
+      "inference": {
+        "status": "source call-graph estimate; generated colors unchecked until transform succeeds",
+        "iterations": 4,
+        "classes": [
+          {
+            "id": "global:Error",
+            "name": "Error",
+            "file": null
+          }
+        ],
+        "components": [
+          {
+            "file": "examples/originals/room/src/Document.tsx",
+            "name": "Document",
+            "line": 3,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/room/src/app.tsx",
+            "name": "App",
+            "line": 12,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/room/src/components/status-pill.tsx",
+            "name": "StatusPill",
+            "line": 52,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/room/src/lib/identity.tsx",
+            "name": "IdentityProvider",
+            "line": 45,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/room/src/routes/home.tsx",
+            "name": "Home",
+            "line": 29,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/room/src/routes/home.tsx",
+            "name": "Panel",
+            "line": 74,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/room/src/routes/home.tsx",
+            "name": "Composer",
+            "line": 91,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/room/src/routes/home.tsx",
+            "name": "Chaos",
+            "line": 137,
+            "server": false,
+            "component": true,
+            "fails": []
+          },
+          {
+            "file": "examples/originals/room/src/routes/live.tsx",
+            "name": "Live",
+            "line": 44,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/room/src/routes/live.tsx",
+            "name": "Header",
+            "line": 72,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/room/src/routes/live.tsx",
+            "name": "Chaos",
+            "line": 116,
+            "server": false,
+            "component": true,
+            "fails": []
+          },
+          {
+            "file": "examples/originals/room/src/routes/live.tsx",
+            "name": "Chat",
+            "line": 156,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/room/src/routes/live.tsx",
+            "name": "Transcript",
+            "line": 193,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/room/src/routes/live.tsx",
+            "name": "Composer",
+            "line": 229,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/room/src/routes/live.tsx",
+            "name": "Directory",
+            "line": 278,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/room/src/routes/live.tsx",
+            "name": "DirectoryEntry",
+            "line": 291,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/room/src/routes/live.tsx",
+            "name": "Card",
+            "line": 315,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/room/src/routes/live.tsx",
+            "name": "Summary",
+            "line": 360,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/room/src/routes/live.tsx",
+            "name": "SummaryText",
+            "line": 392,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/room/src/routes/live.tsx",
+            "name": "Archive",
+            "line": 405,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          }
+        ],
+        "serverRejections": [
+          {
+            "file": "examples/originals/room/src/lib/room-panel.tsx",
+            "name": "<callback:44:7>",
+            "line": 44,
+            "server": true,
+            "component": false,
+            "fails": [],
+            "rejection": [
+              "ChunkError"
+            ]
+          },
+          {
+            "file": "examples/originals/room/src/lib/sources.ts",
+            "name": "<callback:64:7>",
+            "line": 64,
+            "server": true,
+            "component": false,
+            "fails": [
+              "unknown"
+            ],
+            "rejection": [
+              "ChunkError",
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/room/src/lib/sources.ts",
+            "name": "<callback:81:7>",
+            "line": 81,
+            "server": true,
+            "component": false,
+            "fails": [
+              "unknown"
+            ],
+            "rejection": [
+              "ChunkError",
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/room/src/lib/sources.ts",
+            "name": "<callback:108:7>",
+            "line": 108,
+            "server": true,
+            "component": false,
+            "fails": [
+              "unknown"
+            ],
+            "rejection": [
+              "ChunkError",
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/room/src/lib/sources.ts",
+            "name": "<callback:124:28>",
+            "line": 124,
+            "server": true,
+            "component": false,
+            "fails": [
+              "unknown"
+            ],
+            "rejection": [
+              "ChunkError",
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/room/src/lib/sources.ts",
+            "name": "<callback:139:28>",
+            "line": 139,
+            "server": true,
+            "component": false,
+            "fails": [
+              "unknown"
+            ],
+            "rejection": [
+              "ChunkError",
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/room/src/lib/sources.ts",
+            "name": "send",
+            "line": 150,
+            "server": true,
+            "component": false,
+            "fails": [
+              "global:Error",
+              "unknown"
+            ],
+            "rejection": [
+              "ChunkError",
+              "global:Error",
+              "unknown"
+            ]
+          }
+        ]
+      },
       "status": "refused",
       "diagnostics": [
         {
@@ -1092,13 +1853,6 @@
           "file": "examples/originals/room/src/lib/identity.tsx",
           "line": 23,
           "column": 10
-        },
-        {
-          "code": "NATIVE_FAILURE",
-          "message": "A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged.",
-          "file": "examples/originals/room/src/lib/identity.tsx",
-          "line": 56,
-          "column": 12
         },
         {
           "code": "NATIVE_GENERATOR",
@@ -1157,20 +1911,6 @@
           "column": 28
         },
         {
-          "code": "NATIVE_FAILURE",
-          "message": "A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged.",
-          "file": "examples/originals/room/src/lib/sources.ts",
-          "line": 153,
-          "column": 17
-        },
-        {
-          "code": "NATIVE_FAILURE",
-          "message": "A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged.",
-          "file": "examples/originals/room/src/lib/sources.ts",
-          "line": 154,
-          "column": 37
-        },
-        {
           "code": "NATIVE_API",
           "message": "Solid API action has no verified native lowering.",
           "file": "examples/originals/room/src/routes/home.tsx",
@@ -1211,13 +1951,6 @@
           "file": "examples/originals/room/src/routes/home.tsx",
           "line": 140,
           "column": 5
-        },
-        {
-          "code": "NATIVE_REJECTION",
-          "message": "An event returning a Promise has no declared rejection type; a checked rejection adapter is required.",
-          "file": "examples/originals/room/src/routes/home.tsx",
-          "line": 139,
-          "column": 16
         },
         {
           "code": "NATIVE_API",
@@ -1276,13 +2009,6 @@
           "column": 5
         },
         {
-          "code": "NATIVE_REJECTION",
-          "message": "An event returning a Promise has no declared rejection type; a checked rejection adapter is required.",
-          "file": "examples/originals/room/src/routes/live.tsx",
-          "line": 118,
-          "column": 16
-        },
-        {
           "code": "NATIVE_GENERATOR",
           "message": "Solid action/stream generators need a separate suspension and rejection mapping.",
           "file": "examples/originals/room/src/routes/live.tsx",
@@ -1304,24 +2030,55 @@
       "reasons": [
         "NATIVE_API",
         "NATIVE_TYPE",
-        "NATIVE_FAILURE",
         "NATIVE_GENERATOR",
-        "NATIVE_CATCH",
-        "NATIVE_REJECTION"
+        "NATIVE_CATCH"
       ]
     },
     {
       "twin": "sierpinski-yield",
       "original": "sierpinski",
       "files": 1,
+      "inference": {
+        "status": "source call-graph estimate; generated colors unchecked until transform succeeds",
+        "iterations": 3,
+        "classes": [],
+        "components": [
+          {
+            "file": "examples/originals/sierpinski/src/main.tsx",
+            "name": "TriangleDemo",
+            "line": 13,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/sierpinski/src/main.tsx",
+            "name": "Triangle",
+            "line": 51,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/sierpinski/src/main.tsx",
+            "name": "Dot",
+            "line": 89,
+            "server": false,
+            "component": true,
+            "fails": []
+          }
+        ],
+        "serverRejections": []
+      },
       "status": "refused",
       "diagnostics": [
         {
-          "code": "NATIVE_REJECTION",
-          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
-          "file": "examples/originals/sierpinski/src/main.tsx",
-          "line": 62,
-          "column": 35
+          "code": "SUGAR_CALLBACK",
+          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/examples/originals/sierpinski/src/main.tsx:65:27)"
         }
       ],
       "parity": "not run: no checked native program",
@@ -1329,21 +2086,54 @@
       "differingStatements": null,
       "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
       "reasons": [
-        "NATIVE_REJECTION"
+        "SUGAR_CALLBACK"
       ]
     },
     {
       "twin": "sierpinski-yield-h",
       "original": "sierpinski",
       "files": 1,
+      "inference": {
+        "status": "source call-graph estimate; generated colors unchecked until transform succeeds",
+        "iterations": 3,
+        "classes": [],
+        "components": [
+          {
+            "file": "examples/originals/sierpinski/src/main.tsx",
+            "name": "TriangleDemo",
+            "line": 13,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/sierpinski/src/main.tsx",
+            "name": "Triangle",
+            "line": 51,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/sierpinski/src/main.tsx",
+            "name": "Dot",
+            "line": 89,
+            "server": false,
+            "component": true,
+            "fails": []
+          }
+        ],
+        "serverRejections": []
+      },
       "status": "refused",
       "diagnostics": [
         {
-          "code": "NATIVE_REJECTION",
-          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
-          "file": "examples/originals/sierpinski/src/main.tsx",
-          "line": 62,
-          "column": 35
+          "code": "SUGAR_CALLBACK",
+          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/examples/originals/sierpinski/src/main.tsx:65:27)"
         }
       ],
       "parity": "not run: no checked native program",
@@ -1351,43 +2141,73 @@
       "differingStatements": null,
       "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
       "reasons": [
-        "NATIVE_REJECTION"
+        "SUGAR_CALLBACK"
       ]
     },
     {
       "twin": "todos-yield",
       "original": "todos",
       "files": 5,
+      "inference": {
+        "status": "source call-graph estimate; generated colors unchecked until transform succeeds",
+        "iterations": 3,
+        "classes": [],
+        "components": [
+          {
+            "file": "examples/originals/todos/src/app.tsx",
+            "name": "Header",
+            "line": 7,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/todos/src/app.tsx",
+            "name": "TodoItem",
+            "line": 29,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/todos/src/app.tsx",
+            "name": "MainSection",
+            "line": 65,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/todos/src/app.tsx",
+            "name": "Footer",
+            "line": 93,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/todos/src/app.tsx",
+            "name": "App",
+            "line": 130,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          }
+        ],
+        "serverRejections": []
+      },
       "status": "refused",
       "diagnostics": [
-        {
-          "code": "NATIVE_REJECTION",
-          "message": "An event returning a Promise has no declared rejection type; a checked rejection adapter is required.",
-          "file": "examples/originals/todos/src/app.tsx",
-          "line": 47,
-          "column": 20
-        },
-        {
-          "code": "NATIVE_REJECTION",
-          "message": "An event returning a Promise has no declared rejection type; a checked rejection adapter is required.",
-          "file": "examples/originals/todos/src/app.tsx",
-          "line": 55,
-          "column": 24
-        },
-        {
-          "code": "NATIVE_REJECTION",
-          "message": "An event returning a Promise has no declared rejection type; a checked rejection adapter is required.",
-          "file": "examples/originals/todos/src/app.tsx",
-          "line": 59,
-          "column": 42
-        },
-        {
-          "code": "NATIVE_REJECTION",
-          "message": "An event returning a Promise has no declared rejection type; a checked rejection adapter is required.",
-          "file": "examples/originals/todos/src/app.tsx",
-          "line": 82,
-          "column": 21
-        },
         {
           "code": "NATIVE_API",
           "message": "Solid API onSettled has no verified native lowering.",
@@ -1415,13 +2235,6 @@
           "file": "examples/originals/todos/src/todos.ts",
           "line": 34,
           "column": 41
-        },
-        {
-          "code": "NATIVE_REJECTION",
-          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
-          "file": "examples/originals/todos/src/todos.ts",
-          "line": 86,
-          "column": 59
         },
         {
           "code": "NATIVE_GENERATOR",
@@ -1499,7 +2312,6 @@
       "differingStatements": null,
       "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
       "reasons": [
-        "NATIVE_REJECTION",
         "NATIVE_API",
         "NATIVE_GENERATOR",
         "NATIVE_CATCH"
@@ -1509,36 +2321,66 @@
       "twin": "todos-yield-h",
       "original": "todos",
       "files": 5,
+      "inference": {
+        "status": "source call-graph estimate; generated colors unchecked until transform succeeds",
+        "iterations": 3,
+        "classes": [],
+        "components": [
+          {
+            "file": "examples/originals/todos/src/app.tsx",
+            "name": "Header",
+            "line": 7,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/todos/src/app.tsx",
+            "name": "TodoItem",
+            "line": 29,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/todos/src/app.tsx",
+            "name": "MainSection",
+            "line": 65,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/todos/src/app.tsx",
+            "name": "Footer",
+            "line": 93,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          },
+          {
+            "file": "examples/originals/todos/src/app.tsx",
+            "name": "App",
+            "line": 130,
+            "server": false,
+            "component": true,
+            "fails": [
+              "unknown"
+            ]
+          }
+        ],
+        "serverRejections": []
+      },
       "status": "refused",
       "diagnostics": [
-        {
-          "code": "NATIVE_REJECTION",
-          "message": "An event returning a Promise has no declared rejection type; a checked rejection adapter is required.",
-          "file": "examples/originals/todos/src/app.tsx",
-          "line": 47,
-          "column": 20
-        },
-        {
-          "code": "NATIVE_REJECTION",
-          "message": "An event returning a Promise has no declared rejection type; a checked rejection adapter is required.",
-          "file": "examples/originals/todos/src/app.tsx",
-          "line": 55,
-          "column": 24
-        },
-        {
-          "code": "NATIVE_REJECTION",
-          "message": "An event returning a Promise has no declared rejection type; a checked rejection adapter is required.",
-          "file": "examples/originals/todos/src/app.tsx",
-          "line": 59,
-          "column": 42
-        },
-        {
-          "code": "NATIVE_REJECTION",
-          "message": "An event returning a Promise has no declared rejection type; a checked rejection adapter is required.",
-          "file": "examples/originals/todos/src/app.tsx",
-          "line": 82,
-          "column": 21
-        },
         {
           "code": "NATIVE_API",
           "message": "Solid API onSettled has no verified native lowering.",
@@ -1566,13 +2408,6 @@
           "file": "examples/originals/todos/src/todos.ts",
           "line": 34,
           "column": 41
-        },
-        {
-          "code": "NATIVE_REJECTION",
-          "message": "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.",
-          "file": "examples/originals/todos/src/todos.ts",
-          "line": 86,
-          "column": 59
         },
         {
           "code": "NATIVE_GENERATOR",
@@ -1650,7 +2485,6 @@
       "differingStatements": null,
       "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
       "reasons": [
-        "NATIVE_REJECTION",
         "NATIVE_API",
         "NATIVE_GENERATOR",
         "NATIVE_CATCH"

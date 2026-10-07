@@ -436,7 +436,7 @@ parity is claimed. The 34-probe evidence limit remains F-S7.
 ## Native mode
 
 **2026-10-08 result: a working, deliberately limited native front end; the requested
-native todos acceptance target is NOT achieved.** Eleven small fixtures pass
+native todos acceptance target is NOT achieved.** Twenty-one of 37 small fixtures pass
 transformed TypeScript and recommended lint. A native counter matches a plain
 Solid control in SSR and hydrated clicks, retaining the server button. All nine
 original-to-twin inputs are refused. This is a feasibility result, not nine
@@ -499,7 +499,7 @@ not silent fallbacks to native reactive state inside a library routine.
 | Native source | Library output / contract | Prototype |
 | --- | --- | --- |
 | `createSignal(v)` / getter `count()` / setter `set(v)` | `$signal(v)` / `yield* count` / `yield* set(v)` | Implemented; option/value compatibility checked on output |
-| `createMemo(() => expression)` | `$memo(function* () { return expression′; })` | Synchronous callbacks implemented; Promise results refused |
+| `createMemo(() => expression)` | `$memo(function* () { return expression′; })` | Synchronous and async producers use inferred `attempt`; async reactive reads remain refused |
 | `createEffect(compute, effect)` | `$effect(compute′, effect′)` (the actual export is `$effect`, not `effect`) | Two synchronous function phases; bundle/cleanup-return overloads incomplete |
 | `onCleanup(fn)` | `$cleanup(fn)` | Same owner position; generated host checking still required |
 | Inline `onClick={e => …}` and other `onX` props | `yield* $event(function* (e) { … })` at binding site | Implemented for intrinsic tags; event parameter receives its DOM type |
@@ -511,14 +511,97 @@ not silent fallbacks to native reactive state inside a library routine.
 | `<Child p={v}/>` | `yield* Child({ p: v′ })` | Local/direct selected imports; foreign tags need a boundary contract |
 | `For` / `Show` / `Loading` / `Errored` etc. | Same library calls with lazy children, row views and bound events | Basic forms; default For row-value mapping; nondefault keyed modes refused; complex fallback forms remain limited |
 | `render` / `hydrate` from `@solidjs/web` | Library `render` / `hydrate` | Direct named component form; generated root checking required |
-| `throw X` | Intended `raise(X)` with X's type | **Refused**: native X is not necessarily a nominal `Failure` |
-| Async/server-function memo | Intended `attempt(() => f(), rejectionAdapter)` | **Refused**: `Promise<T>` has no declared rejection parameter; `unknown` is not a `Failure` |
+| `throw X` | `raise(nativeFailure([class IDs or "unknown"], X))` | Implemented for synchronous routine hosts; see Failure inference |
+| Async/server-function memo | `attempt(() => f(), e => nativeFailure(inferredSet, e))` | Async producers and Promise-returning calls; server calls add `ChunkError` |
 | `action`, optimistic stores, projections, `onSettled`, `latest`, `isPending`, router/lazy edges | Dedicated library mappings with transaction, selector, owner and foreign-boundary checks | Not implemented; `[NATIVE_API] Solid API NAME has no verified native lowering.` |
 
-`"use server"` remains a server-function directive. It says nothing about the
-function's rejection type. It cannot by itself supply an `attempt` adapter.
-The output uses existing imports/driver/one-rule JSX lowering. No runtime or
-failure-brand changes were made.
+### Failure inference
+
+**Dev's ruling, 2026-10-08: option A is implemented as a prototype.** Source files
+still import only Solid. Failure inference supplies types to generated `raise`
+and `attempt`; it is not a second checker for component admission, pending,
+may-wait, requirements, or boundary discharge. Those remain generated TypeScript
+and the existing recommended lint. The editor/virtual-code plugin is planned.
+
+`nativeFailures` reuses the compiler analyzer's parsed modules, scopes, module
+identities and directives. TypeScript resolves selected call targets, aliases,
+re-exports and the types of throw expressions. A worklist-equivalent monotone
+iteration unions callee sets until no set changes; recursive groups have no
+arbitrary inference iteration limit. This differs from the older sugar emitter's
+24-pass guard. Calls outside the selected graph contribute `unknown`, except
+selected `"use pure"` contracts. Native primitive callbacks and memo reads carry
+their producer's set. This analysis is conservative: opaque router calls, browser
+APIs and data-method calls often produce `unknown`; it does not infer package
+purity from a familiar function name.
+
+- `throw new X(...)` or `throw value` whose TS type is a class instance adds X's
+  declaration identity. Class unions add all members. Constructors, inherited
+  constructors and instance field initializers also contribute their failures.
+- `throw e` with unknown/any, a string or an object literal adds `unknown`.
+  Unknown is accepted, not a transform refusal, and does not erase known members.
+- Direct rethrow of a catch binding retains the incoming set. A handling catch
+  removes it. Using the binding as unknown and rethrowing widens to `unknown`.
+  The analysis also covers Promise `.catch` and `try`/`await`; `finally` adds its
+  own failures. General JavaScript catches in reactive routines are **still
+  refused by `NATIVE_CATCH`** because their control-flow lowering is unfinished.
+  Inference tests do not establish that a refused catch transforms correctly.
+- A `"use server"` function's rejection set is its inferred set plus `ChunkError`
+  (D-100). An async server producer wraps its rejection before serialization;
+  its client call is generated behind `attempt` with that declared set. A
+  nonmatching transport rejection becomes the existing `ChunkError`. Opaque
+  server I/O still adds `unknown`; there is no invented Promise rejection type.
+
+External/structural class witnesses remain F-S18; the following checked adapter
+path covers registered selected classes and built-in Errors.
+
+The generated mechanism is a **wrapper**, not mutation of the author's Error.
+Each selected class is registered under `relative module#class@declaration`, so
+same-named classes in different scopes/modules are distinct. Built-in errors use
+IDs such as `global:Error`. `NativeFailure<ID>` extends the existing private-brand
+`FailureInstance<ID>` and retains the original thrown value. A literal-kind union
+is a union of these wrapper types. `raise` and `attempt` therefore keep their
+existing `KindCheck`, failure branding and driver behavior. Unexpected values
+outside the compiler witness raise `[NATIVE_FAILURE_CONTRACT] A rejection is
+outside the inferred failure set.` They are never mislabeled as a known class.
+Class IDs currently depend on source positions and must come from the same build
+on both sides; they are not a stable public wire schema.
+
+An ordinary Errored fallback receives the unwrapped value. In the **same realm**,
+`caught instanceof X` remains true, including a frozen author Error. Across the
+stream, the wrapper's kind and safe message survive; the original custom
+prototype does **not** get revived, so `caught instanceof X` is false for a custom
+class. The client reconstructs the typed wrapper from the wire's kind. It does
+not invoke user constructors or pretend to restore private fields. This is a
+remaining native equivalence limit (F-S14), not an implemented class reviver.
+A public root currently rethrows the generated wrapper; boundary unwrapping does
+not yet cover arbitrary external catches (F-S15).
+
+D-115 is preserved: the wrapper's base calls `markSafeError`. Both the server suite
+and `NODE_ENV=production node scripts/native-serialization.mjs` verify that the
+production stream contains `NativeFailure`, its class ID and public message.
+This is serialization evidence, **not** end-to-end RPC transport parity. Selective
+`Errored catch={[X]}` also needs generated class-specific matching; the single
+wrapper constructor does not implement that contract yet (F-S14).
+
+D-033 is unchanged. At a library root, a declared failure may escape and is
+re-thrown/rejected. At a foreign handoff it must be handled. The executed
+`class-memo` and `unknown-memo` bridge probes both produce TS2345 with
+`[FOREIGN_HANDOFF]`. Unknown is not an exemption. Full-original diagnostics below
+are transform blockers, not fabricated unhandled-failure errors for code that
+never reached the generated checker.
+
+The theorem “typed failures are complete” is **not newly proved for native
+source**. Its existing hypotheses apply to accepted generated code. Re-read:
+C1 (generated typechecking), C2 (distinct kinds/no erasure), C3 (generated lint),
+C4 (one runtime/route), C6 (foreign/server edges), C7 (typed/brand premise), and
+§2's class vocabulary. The affected implementation obligations include O2
+(`FailsOf` union), O6 (always-raising holes), O11–O13 (memo/wait/effect admission), O16 (attempt handlers), O17–O21 (propagation and
+memo coloring), O22–O29 (memo routing/cancellation, boundaries and fallback subtraction), O35–O40 (events
+and handling), O41–O43 (effects, roots and foreign checks), O45 (transport), and
+O52 (kind checks). In particular re-read T4's `Exclude`/`instanceof` mismatch.
+New obligations are sound call resolution and fixpoints, catch subtraction,
+unknown coverage, class-ID injectivity, constructor/producer wrapping, and
+wire encode/decode with matching identities. No proof files changed.
 
 ### Routine rule and current limits
 
@@ -534,8 +617,8 @@ The front end changes native imports, component props, context/value reads,
 event bindings and JSX contracts before reusing `lowerSugarProject`. Its
 cross-module TS fixed point inserts operations into the reconstructed files.
 The **existing** compiler analyzer consumes that explicit IR through
-`sugarFacts` for provenance/reach; no second ownership or color engine was
-introduced. Direct selected component imports are tested. Imported function
+`sugarFacts` for provenance/reach; no second ownership or color checker was
+introduced. The additional failure pass supplies generated type witnesses. Direct selected component imports are tested. Imported function
 contracts such as native `Accessor`, re-exports of context/component tags,
 recursive groups and generic return-type facades are not fully implemented.
 The 24-pass guard is not a proof of recursive inference. These are implementation
@@ -554,12 +637,12 @@ than a fundamental incompatibility.
 | --- | --- | --- |
 | `count() > 0 ? count() : 0` in JSX; event loops/early returns | Faithful lowering on tested forms | `conditional`, `loop`: generated TS/lint pass |
 | `createMemo(() => [1].map(() => count()))` | Refusal | `SUGAR_CALLBACK`: “A reactive read in an unknown callback has no routine host; use a memo, event, or hole.” |
-| `onClick={() => Promise.reject("failed")}` | Refusal | `NATIVE_REJECTION`: “An event returning a Promise has no declared rejection type; a checked rejection adapter is required.” |
-| `createMemo(async () => count())` | Refusal | `NATIVE_REJECTION`: “Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures.” |
-| `throw new Error("oops")` / `throw e` with `e: unknown` | Refusal | `NATIVE_FAILURE`: “A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged.” |
+| `onClick={() => Promise.reject("failed")}` | Transform | `promise-event` passes generated TS/lint; failure is `unknown` |
+| `createMemo(async () => count())` | Refusal | `SUGAR_HOST`: “Reactive operations in async functions or methods are unsupported.” |
+| `throw new Error("oops")` / `throw e` with `e: unknown` | Transform | `throw-error`, `unknown-throw` pass generated TS/lint; fails `Error` / `unknown` |
 | `try { set(1) } catch { set(2) }` | Refusal | `NATIVE_CATCH`: “JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.” |
 | `useContext(C)` with no provider at root | Transform, then diagnostic | TS2345 includes `[NO_PROVIDER] the root requires the contexts this property names…` |
-| Unhandled failure at a library root | **Allowed by D-033 once nominally typed** | The native `throw` fixture is currently refused before this question is reached. Do not claim that refusal proves failure completeness. Foreign handoffs are stricter. |
+| Unhandled failure at a library root | **Allowed by D-033 once nominally typed** | The native root fixture passes. The class/unknown foreign bridge probes fail `[FOREIGN_HANDOFF]`. |
 | `const n = count(); return <p>{n}</p>` | Transform, then diagnostic | TS2769; lint `[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event.` |
 | `const x = <p>{count()}</p>` in setup | Transform, then diagnostic | `jsx-only-in-view`: “JSX in a setup: elements are built by the view it returns…” |
 | `createMemo(() => { set(1); return count() })` | Transform, then diagnostic | TS2345: generated `Write` is not admitted by `MemoOp` |
@@ -567,7 +650,7 @@ than a fundamental incompatibility.
 | `createEffect(() => {})` | Refusal | `NATIVE_EFFECT_PHASES`: “createEffect needs a tracked compute and an untracked effect phase.” This is also invalid under the installed native two-phase signature. |
 | Async effect phase | Refusal | `SUGAR_ASYNC`: “Use attempt inside a synchronous routine; async functions are not routines.” |
 | `{ read() { return count() } }` | Refusal | `SUGAR_HOST`: “Reactive operations in async functions or methods are unsupported.” |
-| State creation in JSX hole | Transform, then diagnostic | TS2345: generated `Create<"signal", never>` is not admitted by `ViewOp` |
+| State creation in JSX hole | Refusal in this prototype | `SUGAR_CALLBACK` while reconstructing the nested call; no claim of reaching the host-type check |
 | `<button {...attributes}/>` / `<button ref={fn}/>` | Refusal | `NATIVE_SPREAD` / `NATIVE_REF`: hidden bindings and ref ownership need verified contracts |
 | Event handler using `this` | Refusal | `NATIVE_RECEIVER`: “An event handler using this needs a verified receiver-preserving binding.” Tested in `native.test.js`. |
 | Named synchronous local handler | Faithful lowering on tested form | `named-event`: generated TS/lint pass; counter hydration exercises it |
@@ -580,46 +663,91 @@ not just renaming the call.
 
 ### Nine original-to-twin results
 
-There are **seven original app directories**, paired with **nine yield twins**:
-`todos-yield-h` and `sierpinski-yield-h` share their JSX twins' originals. The native
-probe reads each app's source tree (`rendering/shared/src` for rendering). It
-accumulates all preflight findings; it emits no partial app once any is found.
-The actual inputs and all source positions are in the JSON report.
+**F-S9 acceptance is now parity against the original itself**, including SSR and
+hydration. The handwritten twin diff is information only. There are seven
+original directories and nine original-to-twin inputs; the `-h` targets reuse
+todos and sierpinski. The audit reruns all nine. None emits a checked complete
+app, so original parity, hydration and SSR are blocked, not failed or passed.
+The diff distance is undefined for every refused output.
 
-| Yield twin | Native transform | Preflight diagnostics | Parity vs original / SSR / hydration | Differing output statements vs twin | Main reasons |
-| --- | --- | ---: | --- | --- | --- |
-| docs-yield | Refused | 20 | Blocked, not run | Undefined: no output | Throws/rejections, generators, catches, APIs |
-| effect-yield | Refused | 23 | Blocked, not run | Undefined: no output | Actions/generators, rejections, catches, APIs |
-| hackernews-spa-yield | Refused | 3 | Blocked, not run | Undefined: no output | `lazy`/API mapping and catch |
-| rendering-yield | Refused | 27 | Blocked, not run | Undefined: no output | Rejections, streams, value-type facade, APIs |
-| room-yield | Refused | 35 | Blocked, not run | Undefined: no output | Actions/streams, failure contracts, type facade, APIs |
-| sierpinski-yield | Refused | 1 | Blocked, not run | Undefined: no output | Promise-returning memo with no rejection contract |
-| sierpinski-yield-h | Refused | 1 | Blocked, not run | Undefined: no output | Same original; target additionally uses the h dialect |
-| todos-yield | Refused | 19 | Blocked, not run | Undefined: no output | Optimistic store/actions/refresh/onSettled, rejection, generator catches |
-| todos-yield-h | Refused | 19 | Blocked, not run | Undefined: no output | Same original; target additionally uses the h dialect |
+These are **source call-graph estimates**, not checked generated component colors.
+Unknown is retained alongside named failures. `∅` means no inferred failure in
+this scan, not proof of purity for arbitrary JavaScript. All current diagnostics
+are blockers; zero complete apps reached the unhandled-failure check.
 
-A statement-distance count requires an emitted program. Reporting zero, comparing
-an empty file, or comparing the handwritten twin to itself would manufacture the
-requested evidence. Consequently this deliverable remains **incomplete**: native
-todos is not in the gate as a passing app, and none of the other originals is
-eligible. The gate adds the real native contract audit and small counter parity
-control instead. Earlier directive-sugar todos continues to run its original
-parity/type/lint/SSR/hydration checks; it is not relabeled “native todos”.
+| Original / twin target | Status | Parity / SSR / hydration | Inferred fails per component (grouped) | Diagnostics |
+| --- | --- | --- | --- | ---: |
+| docs-yield | Refused | Blocked | Home/DocPage/ArticleContent/ReadingGuide → {ChunkError, NotFound, unknown}; App → {ChunkError, NotFound, SearchError, unknown}; SiteNav/SiteFooter → {ChunkError, unknown}; ArticleBody/ThemeToggle/ImageCarousel → {∅}; Shell/LikeButton/NewsletterForm/CommentList → {unknown}; SearchBox → {SearchError, unknown} | 8 |
+| effect-yield | Refused | Blocked | LogPanel/App/Checkout/Results/Typeahead → {unknown} | 19 |
+| hackernews-spa-yield | Refused | Blocked | App/Stories/Story/User → {unknown}; Comment/Nav/Story/Toggle → {∅} | 3 |
+| rendering-yield | Refused | Blocked | InnerBoundaryItem/OuterBoundaryItem/ErrorStream/Home/AsyncCard/RevealPage/Settings/Shell/Skeleton/Stream → {unknown}; Profile/FeedCard → {∅}; Link → {Error} | 18 |
+| room-yield | Refused | Blocked | Document/App/StatusPill/IdentityProvider/Home/Panel/Composer/Live/Header/Chat/Transcript/Directory/DirectoryEntry/Card/Summary/SummaryText/Archive → {unknown}; Chaos → {∅} | 30 |
+| sierpinski-yield | Refused | Blocked | TriangleDemo/Triangle → {unknown}; Dot → {∅} | 1 |
+| sierpinski-yield-h | Refused | Blocked | TriangleDemo/Triangle → {unknown}; Dot → {∅} | 1 |
+| todos-yield | Refused | Blocked | Header/TodoItem/MainSection/Footer/App → {unknown} | 14 |
+| todos-yield-h | Refused | Blocked | Header/TodoItem/MainSection/Footer/App → {unknown} | 14 |
+
+The report lists each component's file and line, including duplicate local names.
+Route examples an author could read in a future hover:
+
+- docs `DocPage`: **fails NotFound | ChunkError | unknown**.
+- docs `App`: **fails NotFound | SearchError | ChunkError | unknown**.
+- todos `App`: **fails unknown** (opaque action/store/I/O calls).
+
+The named class IDs resolve to the original `docs/src/errors.ts` declarations;
+there are no author imports from the library. These hovers are proposed display
+text for actual inferred sets; no editor plugin was built.
+
+Actual refusal messages (every source position is in the JSON evidence):
+
+- `NATIVE_API`: Solid API markSafeError has no verified native lowering.
+- `NATIVE_API`: Solid API HydrationScript has no verified native lowering.
+- `NATIVE_API`: Solid API createOptimistic has no verified native lowering.
+- `NATIVE_API`: Solid API action has no verified native lowering.
+- `NATIVE_GENERATOR`: Solid action/stream generators need a separate suspension and rejection mapping.
+- `NATIVE_CATCH`: JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.
+- `NATIVE_API`: Solid API createOptimisticStore has no verified native lowering.
+- `NATIVE_API`: Solid API createStore has no verified native lowering.
+- `NATIVE_API`: Solid API refresh has no verified native lowering.
+- `NATIVE_API`: Solid API isPending has no verified native lowering.
+- `NATIVE_API`: Solid API latest has no verified native lowering.
+- `NATIVE_API`: Solid API Component has no verified native lowering.
+- `NATIVE_API`: Solid API lazy has no verified native lowering.
+- `NATIVE_API`: Solid API onSettled has no verified native lowering.
+- `NATIVE_API`: Solid API Reveal has no verified native lowering.
+- `NATIVE_API`: Solid API createUniqueId has no verified native lowering.
+- `NATIVE_API`: Solid API Portal has no verified native lowering.
+- `NATIVE_TYPE`: This Solid value contract needs a virtual routine/source type facade.
+- `NATIVE_API`: Solid API createProjection has no verified native lowering.
+- `NATIVE_API`: Solid API isServer has no verified native lowering.
+- `NATIVE_API`: Solid API getRequestEvent has no verified native lowering.
+- `NATIVE_API`: Solid API dynamic has no verified native lowering.
+- `NATIVE_API`: Solid API until has no verified native lowering.
+- `SUGAR_CALLBACK`: [SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/examples/originals/sierpinski/src/main.tsx:65:27)
+
+No original was added as a passing app gate. Counter parity and the new production-failure serialization check are controls, not substitutes for todos parity.
+
 
 ### Further findings
 
 | Finding | Source and reason |
 | --- | --- |
-| F-S8: native failures lack the library contract | Original todos `reject`: `setTimeout(rej, time, "Failed to Save")`; store `async () => { const todos = await api.getTodos(); … }`. The rejected value can be a string or anything else. `unknown` cannot satisfy nominal `Failure` (D-110). TS return types do not declare throws. A generated wrapper/brand would be a new adapter policy; its identity, `instanceof`, root rethrow, serialization and fallback value must be specified before claiming preservation. |
+| F-S8: superseded refusal policy | Original todos `reject`: `setTimeout(rej, time, "Failed to Save")`; store `async () => { const todos = await api.getTodos(); … }`. The rejected value can be a string or anything else. Raw `unknown` cannot satisfy nominal `Failure` (D-110); a generated wrapper now does. TS return types do not declare throws. Dev chose inference with an unknown floor. The adapter above removes NATIVE_FAILURE/NATIVE_REJECTION. Remaining identity/transport limits are F-S14/F-S15. |
 | F-S9: handwritten target is not a transliteration | Todos Header has no signal/memo in the original; the yield twin adds unused `$signal`/`$memo`. Original calls `addTodo` then clears input; twin clears before delegated waiting. The twin changes the context tuple into an object, adds `TodoApp`, moves store creation/provider relative to Errored, and changes derived accessors into memos. These are categorized as extra operations, event order, data shape, owner/boundary placement and memoization. Whitespace/import normalization cannot erase them. A general compiler must not invent this source-specific rewrite to win a diff. |
-| F-S10: unfinished native contracts | Todos `action(function*(){ try { yield request } catch { … } })`, `createOptimisticStore`, `refresh`, `onSettled`; room streams/foreign callbacks; native `Accessor`/Component annotations. Dedicated lowering, selector placement, external-call summaries and alias/re-export support remain. `[NATIVE_API]` is an implementation limit, not a claim of mathematical impossibility. Preflight currently also refuses throws/catches in selected plain I/O functions; excluding proven foreign I/O is future work. |
+| F-S10: unfinished native contracts | Todos `action(function*(){ try { yield request } catch { … } })`, `createOptimisticStore`, `refresh`, `onSettled`; room streams/foreign callbacks; native `Accessor`/Component annotations. Dedicated lowering, selector placement, external-call summaries and alias/re-export support remain. `[NATIVE_API]` is an implementation limit, not a claim of mathematical impossibility. Preflight still refuses authored catches in selected files; plain throws/rejections are no longer refused. |
 | F-S11: static feedback limit | `feedback` passes generated TS/lint. The types check which phase may write, not whether repeated effects terminate. A separate optional feedback analysis needs provenance and a clear policy; it must not be confused with the typed-failure theorem. |
-| F-S12: complete native proof not established | Only a small synchronous subset has behavioral evidence. Generated checks and counter parity do not establish lowering preservation across all native primitives. Source diagnostic mapping, stable public context IDs, package summaries and recursion remain. |
+| F-S12: complete native proof not established | Only a small synchronous subset has behavioral evidence. Generated checks and counter parity do not establish lowering preservation across all native primitives. Source diagnostic mapping, stable public context IDs, package summaries and routine recursion facades remain; failure recursion has fixpoint tests. |
+| F-S13: scheduling callbacks | Original sierpinski: `setInterval(() => setSeconds(s => (s % 10) + 1), 1000)` and `requestAnimationFrame(update)`. No checked owner/bind/disposal contract exists for these foreign callbacks. Actual refusal: `SUGAR_CALLBACK`. Supplying library type resolution for original directories exposed this earlier-hidden error; a previously emitted but untyped file was not a valid transform. |
+| F-S14: wire/custom class matching | `class X extends Error {}; throw new X()` inside a server producer. Class ID/message survive production serialization, custom prototype/private slots do not. Selective native `catch={[X]}` has no generated wrapper matcher. Full original RPC and selective-catch parity remain unproved. |
+| F-S15: external exception identity | `try { nativeRoot() } catch(e) { e instanceof X }`: the root currently rethrows NativeFailure, while native Errored fallback calls unwrap. An external root adapter is needed to preserve native exception identity without erasing typed identity inside the driver. |
+| F-S17: production sanitization changes plain-Solid behavior | `FailureView.tsx`: `class Problem extends Error {}; throw new Problem("author failure")`. Under a production SSR Errored, the original renders `wrong identity` because Solid sanitizes the unmarked error. Native mode renders `author failure` because D-115 marks its generated wrapper safe and the fallback unwraps the original. This observed difference is pinned in `native-serialization.mjs`; it is not called parity. Dev's D-115 ruling requires this behavior, but strict parity for apps that inspect an unsafe error needs an explicit exception. |
+| F-S18: class witnesses at structural/external edges | `class X { x = 1 }; const e: X = { x: 1 }; throw e`, or an instance whose class declaration is in an opaque package. TS may report a class type without a selected, registered runtime constructor. Inference lists X, but the runtime adapter can report NATIVE_FAILURE_CONTRACT. A sound native class contract needs generated witnesses for these edges; existing TypeScript structural typing alone does not prove the new nominal premise. This is a proof/coverage gap, not an unknown-throw refusal. |
+| F-S16: prototype packaging | The native front end imports the private analyzer by workspace-relative path. The repository gate covers this checkout; publishing the plugin alone requires a shared analyzer package or bundled inference/index implementation. |
 
 Under virtual-code typing, the theorem's premises apply to the **generated**
 program (C1 and C3), with the same no-erasure/nominal/foreign/runtime assumptions
-(C2, C4–C7) and an additional lowering-preservation obligation. Refusing unknown
-failure contracts protects those premises; it does not finish the native feature.
+(C2, C4–C7) and an additional lowering-preservation obligation. The generated unknown wrapper meets the failure premise; it does not finish the
+native lowering-preservation argument.
 No compiler-owned checker or new theorem is claimed.
 
 ### Reproduce and remaining questions for Dev
@@ -635,34 +763,44 @@ The 34-slot native DX ledger is appended to [sugar-dx.md](reviews/sugar-dx.md).
 It runs reconstructions for the 27 named categories and marks the seven missing
 historical identities unavailable. It does not invent seven successful tests.
 
-The typing route is settled. The remaining decisions are concrete:
+The typing route, unknown floor, throw inference, and original-parity acceptance
+are settled. Remaining questions for Dev:
 
-1. **May the compiler generate nominal Failure adapters for arbitrary native
-   throws/rejections, including `unknown`, with an explicit rule for restoring
-   original values at native fallbacks and external rethrow edges?** Recommend
-   designing and testing that adapter contract before enabling async originals.
-   Plain `raise(X)` cannot implement the requested surface for arbitrary X today.
-2. **Should native acceptance require operation/behavior parity with the original,
-   while reporting an honest nonzero diff from the manually revised yield twin?**
-   Recommend yes. Keep exact diff equality for the earlier sugar transliteration.
-3. Which native overloads/foreign router/server contracts are in v1? Recommend
-   finishing todos' action/optimistic-store/settled-effect mappings next, then
-   adding only genuinely passing apps to the gate. The editor plugin remains a
-   planned deliverable after source ranges and generated contracts are stable.
+1. Should native v1 revive registered custom prototypes after server transport,
+   or explicitly keep a value/ID contract? Private fields and arbitrary
+   constructors prevent a general transparent reviver. This also affects selective
+   catches and public-root exception identity (F-S14/F-S15).
+2. Confirm the next scope: implement todos' action/optimistic-store/onSettled and
+   catch lowering, then its genuine original parity; defer unsupported router and
+   timer callback contracts. No source edits or marker APIs should be required.
+3. Does F-S17's required D-115 sanitization difference count as an intentional
+   exception to original parity? The production fixture preserves the native
+   public message while plain Solid replaces its unmarked Error.
+4. Should opaque package calls remain conservatively `unknown` indefinitely, or
+   may packages ship trusted `"use pure"`/failure summaries with a versioned
+   contract? Class-ID stability needs the same build/version policy.
+
+The editor plugin remains planned, not built here.
 
 ### Native verification and baseline
 
-Final run, 2026-10-08: **52 PASS / 0 FAIL / 0 SKIP in 149 seconds**, GREEN against
-the updated baseline. [Full gate record](native-gate-verification.json) tests code
-commit `ea5acae` plus the documentation working tree. `pnpm build` passed; the
-final gate also confirmed that the generated distribution was fresh. The plugin
-suite includes ten native tests, and the gate runs the 32-fixture diagnostic
-snapshot, a real analyzer root, and native counter SSR/hydrated parity.
+The [full gate record](native-gate-verification.json) covers the current native
+failure implementation. `pnpm build` passed. The gate includes generated TS/lint
+for 37 native fixtures (21 accepted), two strict foreign-edge probes, all nine
+original audits, counter SSR/hydration, the production failure-serialization
+control, six inference tests, and the existing library/plugin/analyzer/proof/twin
+checks. Generated failure adapters have four runtime unit tests and a server
+stream test. Native editor diagnostics remain unmapped; no editor plugin or
+proof extension is claimed.
 
-**The baseline was regenerated solely to add six passing steps:** the four
-previously unbaselined todos-sugar checks (test, generated typecheck, generated
-lint, generated-parity), plus `native:contracts` and
-`native:counter:ssr-hydrate-parity`. All 46 prior PASS entries remain PASS. The
-subsequent final run above passed all 52 baseline entries. No executed-bytes
-threshold, runtime rule, or existing test was relaxed. Native todos and the
-other refused originals were not added as purportedly passing applications.
+**This update regenerated the baseline only to add one passing step:**
+`native:failure:production-serialization`. All 52 prior PASS entries remain.
+The earlier update's six additions are already part of those 52; they were not
+added again. No byte threshold, runtime admission rule, proof, or existing test
+was relaxed. No complete original passed native transformation, so none was added
+as a passing application. The nine-row table's parity status remains blocked.
+
+Final verification (2026-10-08), code `2a230e6` plus the documentation
+working tree: **53 pass / 0 fail / 0 skip in 131s**, GREEN against all 53
+baseline entries. The preceding run was also GREEN (53/0/0 in 132 seconds),
+with the single added step verified before regenerating the baseline.

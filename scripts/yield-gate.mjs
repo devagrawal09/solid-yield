@@ -229,6 +229,22 @@ function buildSteps(twins) {
     }
   );
 
+  // D-114: analysis is a tool, not a compiler route. Report all nine twins;
+  // no group, reach or provenance thresholds are imposed.
+  steps.push(
+    {
+      name: "analyzer:test",
+      cwd: root,
+      ...pnpmRun("packages/compiler-yield", "test")
+    },
+    {
+      name: "analyzer:report",
+      cwd: root,
+      cmd: process.execPath,
+      args: ["packages/compiler-yield/src/report.js"]
+    }
+  );
+
   // The conformance harness (D-039; packages/yield/test/conformance): each scenario's
   // handwritten Solid oracle against its library-dialect twin, client / server / hydrate,
   // the library route against the compiler route's frozen server output, and the
@@ -287,6 +303,7 @@ function buildSteps(twins) {
       "prettier",
       "--check",
       ...dirs.map(d => `${d}/**/*.[tj]s?(x)`),
+      "packages/compiler-yield/src/*.js",
       "examples/originals/docs/src/**/*.[tj]s?(x)",
       "examples/originals/docs/stream/**/*.[tj]s?(x)",
       "packages/*/test/*.mjs",

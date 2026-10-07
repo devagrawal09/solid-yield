@@ -9,7 +9,8 @@
     "test": "pnpm --filter \"./packages/*\" --if-present run test",
     "gate": "node scripts/yield-gate.mjs",
     "format": "prettier --write --cache \"packages/**/*.[tj]s?(x)\" \"packages/*/test/*.mjs\" \"examples/*-yield*/**/*.[tj]s?(x)\" \"scripts/*.mjs\"",
-    "changeset": "changeset"
+    "changeset": "changeset",
+    "analyze": "node packages/compiler-yield/src/report.js"
   },
   "devDependencies": {
     "@changesets/cli": "^2.25.2",

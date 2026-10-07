@@ -267,3 +267,16 @@ Read next: [getting-started.md](documentation/getting-started.md) (the setup, an
 ## License
 
 MIT, copyright (c) 2026 Dev Agrawal ([LICENSE](./LICENSE)). The vendored Solid originals in `examples/originals/`, the JSX types generated from `@solidjs/web`, and the compiler outputs kept as the plugin's oracle are Solid's, under its MIT notice ([NOTICE](./NOTICE)).
+
+## Analyzer
+
+Run `pnpm run analyze docs-yield` (or omit the name for all nine twins).
+The report shows which parts share state and boundaries, which effects or setup
+work make a group eager, what each event can reach, and which regions are
+server-derived (S), server-recomputable (R), or client-owned. It names captures
+that cannot cross an edge. These are diagnostics, not savings or proven roots;
+`--json` gives the full detail. See [the tool](packages/compiler-yield/README.md).
+
+The measured R break-even is about **76 KB raw / 25.6 KB gzip** of removable
+server-derived code, including the fixed frame/RPC integration cost. The compiler
+emitters remain measured experiments on `proto/compiler` (D-114).

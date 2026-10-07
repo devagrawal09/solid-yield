@@ -608,6 +608,12 @@ importers:
         specifier: workspace:*
         version: link:../harness
 
+  packages/compiler-yield:
+    dependencies:
+      vite-plugin-solid-yield:
+        specifier: workspace:*
+        version: link:../vite-plugin-yield
+
   packages/eslint-plugin-yield:
     devDependencies:
       '@typescript-eslint/parser':

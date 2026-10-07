@@ -43,3 +43,17 @@ export type NativeArguments<T> =
     : T extends (...args: infer A) => unknown
       ? A
       : never;
+
+/** The prototype has no view binding in which to register a foreign callback's
+ * failure color. Keep that missing edge visible to generated TypeScript. */
+type CallbackFails<H> = H extends Iterable<infer Y> ? FailsOf<Y> : never;
+export function nativeCallback<H>(
+  handler: H &
+    ([CallbackFails<NoInfer<H>>] extends [never]
+      ? unknown
+      : {
+          readonly "[NATIVE_CALLBACK_FAILURE] foreign callback failure registration is not implemented; handle failures inside the callback": CallbackFails<H>;
+        })
+): H {
+  return handler;
+}

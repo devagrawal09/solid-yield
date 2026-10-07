@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { nativeTry, nativeMap } from "../src/native-control.js";
+import { nativeTry, nativeMap, nativeCallback } from "../src/native-control.js";
 import { nativeFailure, nativeFailureValue } from "../src/native-failure.js";
-import { raise } from "../src/runtime.js";
+import { raise, $event } from "../src/runtime.js";
 import type { FailsOf, Raise, Read, Write, Create } from "../src/types.js";
 import type { NativeHandled } from "../src/native-control.js";
 
@@ -99,3 +99,18 @@ type Equal<A, B> =
 type _Immediate = Assert<Equal<FailsOf<NativeHandled<Raise<Error> | Read<true, Error>>>, never>>;
 type _Write = Assert<Equal<NativeHandled<Write>, Write>>;
 type _Creation = Assert<Equal<NativeHandled<Create<"memo", Error>>, Create<"memo", Error>>>;
+
+// A foreign callback must not silently drop its binding's failure color.
+function callbackColorChecks() {
+  nativeCallback(
+    $event(function* () {
+      return 1;
+    })
+  );
+  const fails = $event(function* () {
+    yield* raise(nativeFailure(["unknown"], "bad"));
+  });
+  // @ts-expect-error foreign callbacks cannot yet register this failure color
+  nativeCallback(fails);
+}
+void callbackColorChecks;

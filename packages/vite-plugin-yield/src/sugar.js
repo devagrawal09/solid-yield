@@ -309,14 +309,18 @@ function pass(code, filename, program, native = false) {
               t.variableDeclaration("const", [
                 t.variableDeclarator(
                   /** @type {import("@babel/core").types.Identifier} */ (fn.node.id),
-                  t.callExpression(t.identifier("__nativeEvent"), [expression])
+                  t.callExpression(t.identifier("__nativeCallback"), [
+                    t.callExpression(t.identifier("__nativeEvent"), [expression])
+                  ])
                 )
               ])
             );
           } else
             fn.replaceWith(
-              t.callExpression(t.identifier("__nativeEvent"), [
-                /** @type {import("@babel/core").types.FunctionExpression} */ (fn.node)
+              t.callExpression(t.identifier("__nativeCallback"), [
+                t.callExpression(t.identifier("__nativeEvent"), [
+                  /** @type {import("@babel/core").types.FunctionExpression} */ (fn.node)
+                ])
               ])
             );
           if (p && !p.scope.hasBinding("__nativeEvent")) {
@@ -324,6 +328,20 @@ function pass(code, filename, program, native = false) {
               t.importDeclaration(
                 [t.importSpecifier(t.identifier("__nativeEvent"), t.identifier("$event"))],
                 t.stringLiteral("solid-yield")
+              )
+            );
+            p.scope.crawl();
+          }
+          if (p && !p.scope.hasBinding("__nativeCallback")) {
+            p.node.body.unshift(
+              t.importDeclaration(
+                [
+                  t.importSpecifier(
+                    t.identifier("__nativeCallback"),
+                    t.identifier("nativeCallback")
+                  )
+                ],
+                t.stringLiteral("solid-yield/internal")
               )
             );
             p.scope.crawl();

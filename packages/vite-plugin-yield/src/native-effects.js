@@ -26,7 +26,17 @@ export function lowerNativeEffects(files, report) {
       CallExpression(q) {
         const c = q.get("callee");
         const b = c.isIdentifier() ? c.scope.getBinding(c.node.name)?.path : undefined;
-        if (imported(b)?.source === "solid-js" && imported(b)?.name !== "onCleanup") {
+        const init = b?.isVariableDeclarator() ? b.get("init") : null;
+        const producer = init?.isCallExpression() ? init.get("callee") : null;
+        const sourceBinding = producer?.isIdentifier()
+          ? producer.scope.getBinding(producer.node.name)?.path
+          : undefined;
+        const sourceApi = imported(sourceBinding);
+        if (
+          (imported(b)?.source === "solid-js" && imported(b)?.name !== "onCleanup") ||
+          (sourceApi?.source === "solid-js" &&
+            /^create(Signal|Memo|Optimistic|Store|Projection)/.test(sourceApi.name))
+        ) {
           const owner = q.getFunctionParent();
           if (owner && !owner.node.async) routines.add(`${file}:${owner.node.start}`);
         }

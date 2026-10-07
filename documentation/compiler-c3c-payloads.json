@@ -1,0 +1,2216 @@
+[
+  {
+    "level": "S",
+    "kind": "libraries",
+    "run": 1,
+    "raw": 84629,
+    "gzip": 26331,
+    "modules": [
+      {
+        "id": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
+        "renderedLength": 46335
+      },
+      {
+        "id": "\u0000commonjsHelpers.js",
+        "renderedLength": 140
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js",
+        "renderedLength": 78731
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js?commonjs-es-import",
+        "renderedLength": 117
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/typescript.js",
+        "renderedLength": 21465
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/javascript.js",
+        "renderedLength": 17752
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/bash.js",
+        "renderedLength": 6493
+      },
+      {
+        "id": "<repo>/examples/docs-yield/payload.ts",
+        "renderedLength": 279
+      }
+    ]
+  },
+  {
+    "level": "S",
+    "kind": "libraries",
+    "run": 2,
+    "raw": 84629,
+    "gzip": 26331,
+    "modules": [
+      {
+        "id": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
+        "renderedLength": 46335
+      },
+      {
+        "id": "\u0000commonjsHelpers.js",
+        "renderedLength": 140
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js",
+        "renderedLength": 78731
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js?commonjs-es-import",
+        "renderedLength": 117
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/typescript.js",
+        "renderedLength": 21465
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/javascript.js",
+        "renderedLength": 17752
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/bash.js",
+        "renderedLength": 6493
+      },
+      {
+        "id": "<repo>/examples/docs-yield/payload.ts",
+        "renderedLength": 279
+      }
+    ]
+  },
+  {
+    "level": "S",
+    "kind": "libraries",
+    "run": 3,
+    "raw": 84629,
+    "gzip": 26331,
+    "modules": [
+      {
+        "id": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
+        "renderedLength": 46335
+      },
+      {
+        "id": "\u0000commonjsHelpers.js",
+        "renderedLength": 140
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js",
+        "renderedLength": 78731
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js?commonjs-es-import",
+        "renderedLength": 117
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/typescript.js",
+        "renderedLength": 21465
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/javascript.js",
+        "renderedLength": 17752
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/bash.js",
+        "renderedLength": 6493
+      },
+      {
+        "id": "<repo>/examples/docs-yield/payload.ts",
+        "renderedLength": 279
+      }
+    ]
+  },
+  {
+    "level": "S",
+    "kind": "pipelines",
+    "run": 1,
+    "raw": 85365,
+    "gzip": 26741,
+    "modules": [
+      {
+        "id": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
+        "renderedLength": 46335
+      },
+      {
+        "id": "\u0000commonjsHelpers.js",
+        "renderedLength": 140
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js",
+        "renderedLength": 78731
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js?commonjs-es-import",
+        "renderedLength": 117
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/typescript.js",
+        "renderedLength": 21465
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/javascript.js",
+        "renderedLength": 17752
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/bash.js",
+        "renderedLength": 6493
+      },
+      {
+        "id": "<repo>/examples/docs-yield/src/article-pipeline.ts",
+        "renderedLength": 1585
+      },
+      {
+        "id": "<repo>/examples/docs-yield/payload.ts",
+        "renderedLength": 0
+      }
+    ]
+  },
+  {
+    "level": "S",
+    "kind": "pipelines",
+    "run": 2,
+    "raw": 85365,
+    "gzip": 26741,
+    "modules": [
+      {
+        "id": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
+        "renderedLength": 46335
+      },
+      {
+        "id": "\u0000commonjsHelpers.js",
+        "renderedLength": 140
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js",
+        "renderedLength": 78731
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js?commonjs-es-import",
+        "renderedLength": 117
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/typescript.js",
+        "renderedLength": 21465
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/javascript.js",
+        "renderedLength": 17752
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/bash.js",
+        "renderedLength": 6493
+      },
+      {
+        "id": "<repo>/examples/docs-yield/src/article-pipeline.ts",
+        "renderedLength": 1585
+      },
+      {
+        "id": "<repo>/examples/docs-yield/payload.ts",
+        "renderedLength": 0
+      }
+    ]
+  },
+  {
+    "level": "S",
+    "kind": "pipelines",
+    "run": 3,
+    "raw": 85365,
+    "gzip": 26741,
+    "modules": [
+      {
+        "id": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
+        "renderedLength": 46335
+      },
+      {
+        "id": "\u0000commonjsHelpers.js",
+        "renderedLength": 140
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js",
+        "renderedLength": 78731
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js?commonjs-es-import",
+        "renderedLength": 117
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/typescript.js",
+        "renderedLength": 21465
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/javascript.js",
+        "renderedLength": 17752
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/bash.js",
+        "renderedLength": 6493
+      },
+      {
+        "id": "<repo>/examples/docs-yield/src/article-pipeline.ts",
+        "renderedLength": 1585
+      },
+      {
+        "id": "<repo>/examples/docs-yield/payload.ts",
+        "renderedLength": 0
+      }
+    ]
+  },
+  {
+    "level": "M",
+    "kind": "libraries",
+    "run": 1,
+    "raw": 370215,
+    "gzip": 111656,
+    "modules": [
+      {
+        "id": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
+        "renderedLength": 46383
+      },
+      {
+        "id": "\u0000commonjsHelpers.js",
+        "renderedLength": 140
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js",
+        "renderedLength": 78731
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js?commonjs-es-import",
+        "renderedLength": 117
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/typescript.js",
+        "renderedLength": 21465
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/javascript.js",
+        "renderedLength": 17752
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/bash.js",
+        "renderedLength": 6493
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/json.js",
+        "renderedLength": 1605
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/css.js",
+        "renderedLength": 19174
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/xml.js",
+        "renderedLength": 6862
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/python.js",
+        "renderedLength": 9254
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/rust.js",
+        "renderedLength": 6283
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/go.js",
+        "renderedLength": 3281
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/katex@0.19.0/node_modules/katex/dist/katex.mjs",
+        "renderedLength": 597039
+      },
+      {
+        "id": "<repo>/examples/docs-yield/payload.ts",
+        "renderedLength": 491
+      }
+    ]
+  },
+  {
+    "level": "M",
+    "kind": "libraries",
+    "run": 2,
+    "raw": 370215,
+    "gzip": 111656,
+    "modules": [
+      {
+        "id": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
+        "renderedLength": 46383
+      },
+      {
+        "id": "\u0000commonjsHelpers.js",
+        "renderedLength": 140
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js",
+        "renderedLength": 78731
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js?commonjs-es-import",
+        "renderedLength": 117
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/typescript.js",
+        "renderedLength": 21465
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/javascript.js",
+        "renderedLength": 17752
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/bash.js",
+        "renderedLength": 6493
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/json.js",
+        "renderedLength": 1605
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/css.js",
+        "renderedLength": 19174
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/xml.js",
+        "renderedLength": 6862
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/python.js",
+        "renderedLength": 9254
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/rust.js",
+        "renderedLength": 6283
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/go.js",
+        "renderedLength": 3281
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/katex@0.19.0/node_modules/katex/dist/katex.mjs",
+        "renderedLength": 597039
+      },
+      {
+        "id": "<repo>/examples/docs-yield/payload.ts",
+        "renderedLength": 491
+      }
+    ]
+  },
+  {
+    "level": "M",
+    "kind": "libraries",
+    "run": 3,
+    "raw": 370215,
+    "gzip": 111656,
+    "modules": [
+      {
+        "id": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
+        "renderedLength": 46383
+      },
+      {
+        "id": "\u0000commonjsHelpers.js",
+        "renderedLength": 140
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js",
+        "renderedLength": 78731
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js?commonjs-es-import",
+        "renderedLength": 117
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/typescript.js",
+        "renderedLength": 21465
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/javascript.js",
+        "renderedLength": 17752
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/bash.js",
+        "renderedLength": 6493
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/json.js",
+        "renderedLength": 1605
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/css.js",
+        "renderedLength": 19174
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/xml.js",
+        "renderedLength": 6862
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/python.js",
+        "renderedLength": 9254
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/rust.js",
+        "renderedLength": 6283
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/go.js",
+        "renderedLength": 3281
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/katex@0.19.0/node_modules/katex/dist/katex.mjs",
+        "renderedLength": 597039
+      },
+      {
+        "id": "<repo>/examples/docs-yield/payload.ts",
+        "renderedLength": 491
+      }
+    ]
+  },
+  {
+    "level": "M",
+    "kind": "pipelines",
+    "run": 1,
+    "raw": 371803,
+    "gzip": 112868,
+    "modules": [
+      {
+        "id": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
+        "renderedLength": 46383
+      },
+      {
+        "id": "\u0000commonjsHelpers.js",
+        "renderedLength": 140
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js",
+        "renderedLength": 78731
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js?commonjs-es-import",
+        "renderedLength": 117
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/typescript.js",
+        "renderedLength": 21465
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/javascript.js",
+        "renderedLength": 17752
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/bash.js",
+        "renderedLength": 6493
+      },
+      {
+        "id": "<repo>/examples/docs-yield/src/article-pipeline.ts",
+        "renderedLength": 1585
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/katex@0.19.0/node_modules/katex/dist/katex.mjs",
+        "renderedLength": 597039
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/json.js",
+        "renderedLength": 1605
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/css.js",
+        "renderedLength": 19174
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/xml.js",
+        "renderedLength": 6862
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/python.js",
+        "renderedLength": 9254
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/rust.js",
+        "renderedLength": 6283
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/go.js",
+        "renderedLength": 3281
+      },
+      {
+        "id": "<repo>/examples/docs-yield/src/pipeline-utils.ts",
+        "renderedLength": 343
+      },
+      {
+        "id": "<repo>/examples/docs-yield/src/post-pipeline.ts",
+        "renderedLength": 1162
+      },
+      {
+        "id": "<repo>/examples/docs-yield/payload.ts",
+        "renderedLength": 0
+      }
+    ]
+  },
+  {
+    "level": "M",
+    "kind": "pipelines",
+    "run": 2,
+    "raw": 371803,
+    "gzip": 112868,
+    "modules": [
+      {
+        "id": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
+        "renderedLength": 46383
+      },
+      {
+        "id": "\u0000commonjsHelpers.js",
+        "renderedLength": 140
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js",
+        "renderedLength": 78731
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js?commonjs-es-import",
+        "renderedLength": 117
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/typescript.js",
+        "renderedLength": 21465
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/javascript.js",
+        "renderedLength": 17752
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/bash.js",
+        "renderedLength": 6493
+      },
+      {
+        "id": "<repo>/examples/docs-yield/src/article-pipeline.ts",
+        "renderedLength": 1585
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/katex@0.19.0/node_modules/katex/dist/katex.mjs",
+        "renderedLength": 597039
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/json.js",
+        "renderedLength": 1605
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/css.js",
+        "renderedLength": 19174
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/xml.js",
+        "renderedLength": 6862
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/python.js",
+        "renderedLength": 9254
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/rust.js",
+        "renderedLength": 6283
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/go.js",
+        "renderedLength": 3281
+      },
+      {
+        "id": "<repo>/examples/docs-yield/src/pipeline-utils.ts",
+        "renderedLength": 343
+      },
+      {
+        "id": "<repo>/examples/docs-yield/src/post-pipeline.ts",
+        "renderedLength": 1162
+      },
+      {
+        "id": "<repo>/examples/docs-yield/payload.ts",
+        "renderedLength": 0
+      }
+    ]
+  },
+  {
+    "level": "M",
+    "kind": "pipelines",
+    "run": 3,
+    "raw": 371803,
+    "gzip": 112868,
+    "modules": [
+      {
+        "id": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
+        "renderedLength": 46383
+      },
+      {
+        "id": "\u0000commonjsHelpers.js",
+        "renderedLength": 140
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js",
+        "renderedLength": 78731
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js?commonjs-es-import",
+        "renderedLength": 117
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/typescript.js",
+        "renderedLength": 21465
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/javascript.js",
+        "renderedLength": 17752
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/bash.js",
+        "renderedLength": 6493
+      },
+      {
+        "id": "<repo>/examples/docs-yield/src/article-pipeline.ts",
+        "renderedLength": 1585
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/katex@0.19.0/node_modules/katex/dist/katex.mjs",
+        "renderedLength": 597039
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/json.js",
+        "renderedLength": 1605
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/css.js",
+        "renderedLength": 19174
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/xml.js",
+        "renderedLength": 6862
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/python.js",
+        "renderedLength": 9254
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/rust.js",
+        "renderedLength": 6283
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/go.js",
+        "renderedLength": 3281
+      },
+      {
+        "id": "<repo>/examples/docs-yield/src/pipeline-utils.ts",
+        "renderedLength": 343
+      },
+      {
+        "id": "<repo>/examples/docs-yield/src/post-pipeline.ts",
+        "renderedLength": 1162
+      },
+      {
+        "id": "<repo>/examples/docs-yield/payload.ts",
+        "renderedLength": 0
+      }
+    ]
+  },
+  {
+    "level": "L",
+    "kind": "libraries",
+    "run": 1,
+    "raw": 424033,
+    "gzip": 127547,
+    "modules": [
+      {
+        "id": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
+        "renderedLength": 46383
+      },
+      {
+        "id": "\u0000commonjsHelpers.js",
+        "renderedLength": 140
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js",
+        "renderedLength": 78731
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js?commonjs-es-import",
+        "renderedLength": 117
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/typescript.js",
+        "renderedLength": 21465
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/javascript.js",
+        "renderedLength": 17752
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/bash.js",
+        "renderedLength": 6493
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/json.js",
+        "renderedLength": 1605
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/css.js",
+        "renderedLength": 19174
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/xml.js",
+        "renderedLength": 6862
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/python.js",
+        "renderedLength": 9254
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/rust.js",
+        "renderedLength": 6283
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/go.js",
+        "renderedLength": 3281
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/katex@0.19.0/node_modules/katex/dist/katex.mjs",
+        "renderedLength": 597057
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseAnyOf.js",
+        "renderedLength": 439
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseBoolean.js",
+        "renderedLength": 64
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseDefault.js",
+        "renderedLength": 60
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseMultipleType.js",
+        "renderedLength": 201
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNot.js",
+        "renderedLength": 249
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNull.js",
+        "renderedLength": 58
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/half.js",
+        "renderedLength": 96
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseAllOf.js",
+        "renderedLength": 1053
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/withMessage.js",
+        "renderedLength": 643
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseArray.js",
+        "renderedLength": 893
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseConst.js",
+        "renderedLength": 92
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseEnum.js",
+        "renderedLength": 563
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseIfThenElse.js",
+        "renderedLength": 626
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNumber.js",
+        "renderedLength": 1954
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseOneOf.js",
+        "renderedLength": 1598
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/jsdocs.js",
+        "renderedLength": 426
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseObject.js",
+        "renderedLength": 7609
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseString.js",
+        "renderedLength": 2261
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseSimpleDiscriminatedOneOf.js",
+        "renderedLength": 556
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/omit.js",
+        "renderedLength": 160
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNullable.js",
+        "renderedLength": 178
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseSchema.js",
+        "renderedLength": 5309
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/jsonSchemaToZod.js",
+        "renderedLength": 1353
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/types.js",
+        "renderedLength": 543
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/utils.js",
+        "renderedLength": 790
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/diff-parser.js",
+        "renderedLength": 13660
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff@8.0.4/node_modules/diff/libesm/diff/base.js",
+        "renderedLength": 11992
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff@8.0.4/node_modules/diff/libesm/diff/character.js",
+        "renderedLength": 183
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff@8.0.4/node_modules/diff/libesm/diff/word.js",
+        "renderedLength": 1670
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/rematch.js",
+        "renderedLength": 2695
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/render-utils.js",
+        "renderedLength": 7012
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/file-list-renderer.js",
+        "renderedLength": 1142
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/line-by-line-renderer.js",
+        "renderedLength": 9091
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/side-by-side-renderer.js",
+        "renderedLength": 9921
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/compiler.js?commonjs-exports",
+        "renderedLength": 18
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/compiler.js",
+        "renderedLength": 12898
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/template.js?commonjs-exports",
+        "renderedLength": 18
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/template.js",
+        "renderedLength": 9935
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/hogan.js",
+        "renderedLength": 935
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/hogan.js?commonjs-es-import",
+        "renderedLength": 34
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/diff2html-templates.js",
+        "renderedLength": 12736
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/hoganjs-utils.js",
+        "renderedLength": 1279
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/diff2html.js",
+        "renderedLength": 943
+      },
+      {
+        "id": "<repo>/examples/docs-yield/payload.ts",
+        "renderedLength": 491
+      }
+    ]
+  },
+  {
+    "level": "L",
+    "kind": "libraries",
+    "run": 2,
+    "raw": 424033,
+    "gzip": 127547,
+    "modules": [
+      {
+        "id": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
+        "renderedLength": 46383
+      },
+      {
+        "id": "\u0000commonjsHelpers.js",
+        "renderedLength": 140
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js",
+        "renderedLength": 78731
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js?commonjs-es-import",
+        "renderedLength": 117
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/typescript.js",
+        "renderedLength": 21465
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/javascript.js",
+        "renderedLength": 17752
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/bash.js",
+        "renderedLength": 6493
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/json.js",
+        "renderedLength": 1605
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/css.js",
+        "renderedLength": 19174
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/xml.js",
+        "renderedLength": 6862
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/python.js",
+        "renderedLength": 9254
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/rust.js",
+        "renderedLength": 6283
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/go.js",
+        "renderedLength": 3281
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/katex@0.19.0/node_modules/katex/dist/katex.mjs",
+        "renderedLength": 597057
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseAnyOf.js",
+        "renderedLength": 439
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseBoolean.js",
+        "renderedLength": 64
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseDefault.js",
+        "renderedLength": 60
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseMultipleType.js",
+        "renderedLength": 201
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNot.js",
+        "renderedLength": 249
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNull.js",
+        "renderedLength": 58
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/half.js",
+        "renderedLength": 96
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseAllOf.js",
+        "renderedLength": 1053
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/withMessage.js",
+        "renderedLength": 643
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseArray.js",
+        "renderedLength": 893
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseConst.js",
+        "renderedLength": 92
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseEnum.js",
+        "renderedLength": 563
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseIfThenElse.js",
+        "renderedLength": 626
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNumber.js",
+        "renderedLength": 1954
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseOneOf.js",
+        "renderedLength": 1598
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/jsdocs.js",
+        "renderedLength": 426
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseObject.js",
+        "renderedLength": 7609
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseString.js",
+        "renderedLength": 2261
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseSimpleDiscriminatedOneOf.js",
+        "renderedLength": 556
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/omit.js",
+        "renderedLength": 160
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNullable.js",
+        "renderedLength": 178
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseSchema.js",
+        "renderedLength": 5309
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/jsonSchemaToZod.js",
+        "renderedLength": 1353
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/types.js",
+        "renderedLength": 543
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/utils.js",
+        "renderedLength": 790
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/diff-parser.js",
+        "renderedLength": 13660
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff@8.0.4/node_modules/diff/libesm/diff/base.js",
+        "renderedLength": 11992
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff@8.0.4/node_modules/diff/libesm/diff/character.js",
+        "renderedLength": 183
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff@8.0.4/node_modules/diff/libesm/diff/word.js",
+        "renderedLength": 1670
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/rematch.js",
+        "renderedLength": 2695
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/render-utils.js",
+        "renderedLength": 7012
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/file-list-renderer.js",
+        "renderedLength": 1142
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/line-by-line-renderer.js",
+        "renderedLength": 9091
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/side-by-side-renderer.js",
+        "renderedLength": 9921
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/compiler.js?commonjs-exports",
+        "renderedLength": 18
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/compiler.js",
+        "renderedLength": 12898
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/template.js?commonjs-exports",
+        "renderedLength": 18
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/template.js",
+        "renderedLength": 9935
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/hogan.js",
+        "renderedLength": 935
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/hogan.js?commonjs-es-import",
+        "renderedLength": 34
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/diff2html-templates.js",
+        "renderedLength": 12736
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/hoganjs-utils.js",
+        "renderedLength": 1279
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/diff2html.js",
+        "renderedLength": 943
+      },
+      {
+        "id": "<repo>/examples/docs-yield/payload.ts",
+        "renderedLength": 491
+      }
+    ]
+  },
+  {
+    "level": "L",
+    "kind": "libraries",
+    "run": 3,
+    "raw": 424033,
+    "gzip": 127547,
+    "modules": [
+      {
+        "id": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
+        "renderedLength": 46383
+      },
+      {
+        "id": "\u0000commonjsHelpers.js",
+        "renderedLength": 140
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js",
+        "renderedLength": 78731
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js?commonjs-es-import",
+        "renderedLength": 117
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/typescript.js",
+        "renderedLength": 21465
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/javascript.js",
+        "renderedLength": 17752
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/bash.js",
+        "renderedLength": 6493
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/json.js",
+        "renderedLength": 1605
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/css.js",
+        "renderedLength": 19174
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/xml.js",
+        "renderedLength": 6862
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/python.js",
+        "renderedLength": 9254
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/rust.js",
+        "renderedLength": 6283
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/go.js",
+        "renderedLength": 3281
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/katex@0.19.0/node_modules/katex/dist/katex.mjs",
+        "renderedLength": 597057
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseAnyOf.js",
+        "renderedLength": 439
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseBoolean.js",
+        "renderedLength": 64
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseDefault.js",
+        "renderedLength": 60
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseMultipleType.js",
+        "renderedLength": 201
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNot.js",
+        "renderedLength": 249
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNull.js",
+        "renderedLength": 58
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/half.js",
+        "renderedLength": 96
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseAllOf.js",
+        "renderedLength": 1053
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/withMessage.js",
+        "renderedLength": 643
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseArray.js",
+        "renderedLength": 893
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseConst.js",
+        "renderedLength": 92
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseEnum.js",
+        "renderedLength": 563
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseIfThenElse.js",
+        "renderedLength": 626
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNumber.js",
+        "renderedLength": 1954
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseOneOf.js",
+        "renderedLength": 1598
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/jsdocs.js",
+        "renderedLength": 426
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseObject.js",
+        "renderedLength": 7609
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseString.js",
+        "renderedLength": 2261
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseSimpleDiscriminatedOneOf.js",
+        "renderedLength": 556
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/omit.js",
+        "renderedLength": 160
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNullable.js",
+        "renderedLength": 178
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseSchema.js",
+        "renderedLength": 5309
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/jsonSchemaToZod.js",
+        "renderedLength": 1353
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/types.js",
+        "renderedLength": 543
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/utils.js",
+        "renderedLength": 790
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/diff-parser.js",
+        "renderedLength": 13660
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff@8.0.4/node_modules/diff/libesm/diff/base.js",
+        "renderedLength": 11992
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff@8.0.4/node_modules/diff/libesm/diff/character.js",
+        "renderedLength": 183
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff@8.0.4/node_modules/diff/libesm/diff/word.js",
+        "renderedLength": 1670
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/rematch.js",
+        "renderedLength": 2695
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/render-utils.js",
+        "renderedLength": 7012
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/file-list-renderer.js",
+        "renderedLength": 1142
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/line-by-line-renderer.js",
+        "renderedLength": 9091
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/side-by-side-renderer.js",
+        "renderedLength": 9921
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/compiler.js?commonjs-exports",
+        "renderedLength": 18
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/compiler.js",
+        "renderedLength": 12898
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/template.js?commonjs-exports",
+        "renderedLength": 18
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/template.js",
+        "renderedLength": 9935
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/hogan.js",
+        "renderedLength": 935
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/hogan.js?commonjs-es-import",
+        "renderedLength": 34
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/diff2html-templates.js",
+        "renderedLength": 12736
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/hoganjs-utils.js",
+        "renderedLength": 1279
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/diff2html.js",
+        "renderedLength": 943
+      },
+      {
+        "id": "<repo>/examples/docs-yield/payload.ts",
+        "renderedLength": 491
+      }
+    ]
+  },
+  {
+    "level": "L",
+    "kind": "pipelines",
+    "run": 1,
+    "raw": 429006,
+    "gzip": 130049,
+    "modules": [
+      {
+        "id": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
+        "renderedLength": 46383
+      },
+      {
+        "id": "\u0000commonjsHelpers.js",
+        "renderedLength": 140
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js",
+        "renderedLength": 78731
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js?commonjs-es-import",
+        "renderedLength": 117
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/typescript.js",
+        "renderedLength": 21465
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/javascript.js",
+        "renderedLength": 17752
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/bash.js",
+        "renderedLength": 6493
+      },
+      {
+        "id": "<repo>/examples/docs-yield/src/article-pipeline.ts",
+        "renderedLength": 1585
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/katex@0.19.0/node_modules/katex/dist/katex.mjs",
+        "renderedLength": 597057
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/json.js",
+        "renderedLength": 1605
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/css.js",
+        "renderedLength": 19174
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/xml.js",
+        "renderedLength": 6862
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/python.js",
+        "renderedLength": 9254
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/rust.js",
+        "renderedLength": 6283
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/go.js",
+        "renderedLength": 3281
+      },
+      {
+        "id": "<repo>/examples/docs-yield/src/pipeline-utils.ts",
+        "renderedLength": 343
+      },
+      {
+        "id": "<repo>/examples/docs-yield/src/post-pipeline.ts",
+        "renderedLength": 1162
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseAnyOf.js",
+        "renderedLength": 439
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseBoolean.js",
+        "renderedLength": 64
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseDefault.js",
+        "renderedLength": 60
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseMultipleType.js",
+        "renderedLength": 201
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNot.js",
+        "renderedLength": 249
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNull.js",
+        "renderedLength": 58
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/half.js",
+        "renderedLength": 96
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseAllOf.js",
+        "renderedLength": 1053
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/withMessage.js",
+        "renderedLength": 643
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseArray.js",
+        "renderedLength": 893
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseConst.js",
+        "renderedLength": 92
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseEnum.js",
+        "renderedLength": 563
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseIfThenElse.js",
+        "renderedLength": 626
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNumber.js",
+        "renderedLength": 1954
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseOneOf.js",
+        "renderedLength": 1598
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/jsdocs.js",
+        "renderedLength": 426
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseObject.js",
+        "renderedLength": 7609
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseString.js",
+        "renderedLength": 2261
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseSimpleDiscriminatedOneOf.js",
+        "renderedLength": 556
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/omit.js",
+        "renderedLength": 160
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNullable.js",
+        "renderedLength": 178
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseSchema.js",
+        "renderedLength": 5309
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/jsonSchemaToZod.js",
+        "renderedLength": 1353
+      },
+      {
+        "id": "<repo>/examples/docs-yield/src/api-pipeline.ts",
+        "renderedLength": 4706
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/types.js",
+        "renderedLength": 543
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/utils.js",
+        "renderedLength": 790
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/diff-parser.js",
+        "renderedLength": 13660
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff@8.0.4/node_modules/diff/libesm/diff/base.js",
+        "renderedLength": 11992
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff@8.0.4/node_modules/diff/libesm/diff/character.js",
+        "renderedLength": 183
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff@8.0.4/node_modules/diff/libesm/diff/word.js",
+        "renderedLength": 1670
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/rematch.js",
+        "renderedLength": 2695
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/render-utils.js",
+        "renderedLength": 7012
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/file-list-renderer.js",
+        "renderedLength": 1142
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/line-by-line-renderer.js",
+        "renderedLength": 9091
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/side-by-side-renderer.js",
+        "renderedLength": 9921
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/compiler.js?commonjs-exports",
+        "renderedLength": 18
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/compiler.js",
+        "renderedLength": 12898
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/template.js?commonjs-exports",
+        "renderedLength": 18
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/template.js",
+        "renderedLength": 9935
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/hogan.js",
+        "renderedLength": 935
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/hogan.js?commonjs-es-import",
+        "renderedLength": 34
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/diff2html-templates.js",
+        "renderedLength": 12736
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/hoganjs-utils.js",
+        "renderedLength": 1279
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/diff2html.js",
+        "renderedLength": 943
+      },
+      {
+        "id": "<repo>/examples/docs-yield/src/changelog-pipeline.ts",
+        "renderedLength": 631
+      },
+      {
+        "id": "<repo>/examples/docs-yield/payload.ts",
+        "renderedLength": 0
+      }
+    ]
+  },
+  {
+    "level": "L",
+    "kind": "pipelines",
+    "run": 2,
+    "raw": 429006,
+    "gzip": 130049,
+    "modules": [
+      {
+        "id": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
+        "renderedLength": 46383
+      },
+      {
+        "id": "\u0000commonjsHelpers.js",
+        "renderedLength": 140
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js",
+        "renderedLength": 78731
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js?commonjs-es-import",
+        "renderedLength": 117
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/typescript.js",
+        "renderedLength": 21465
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/javascript.js",
+        "renderedLength": 17752
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/bash.js",
+        "renderedLength": 6493
+      },
+      {
+        "id": "<repo>/examples/docs-yield/src/article-pipeline.ts",
+        "renderedLength": 1585
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/katex@0.19.0/node_modules/katex/dist/katex.mjs",
+        "renderedLength": 597057
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/json.js",
+        "renderedLength": 1605
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/css.js",
+        "renderedLength": 19174
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/xml.js",
+        "renderedLength": 6862
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/python.js",
+        "renderedLength": 9254
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/rust.js",
+        "renderedLength": 6283
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/go.js",
+        "renderedLength": 3281
+      },
+      {
+        "id": "<repo>/examples/docs-yield/src/pipeline-utils.ts",
+        "renderedLength": 343
+      },
+      {
+        "id": "<repo>/examples/docs-yield/src/post-pipeline.ts",
+        "renderedLength": 1162
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseAnyOf.js",
+        "renderedLength": 439
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseBoolean.js",
+        "renderedLength": 64
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseDefault.js",
+        "renderedLength": 60
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseMultipleType.js",
+        "renderedLength": 201
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNot.js",
+        "renderedLength": 249
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNull.js",
+        "renderedLength": 58
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/half.js",
+        "renderedLength": 96
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseAllOf.js",
+        "renderedLength": 1053
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/withMessage.js",
+        "renderedLength": 643
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseArray.js",
+        "renderedLength": 893
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseConst.js",
+        "renderedLength": 92
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseEnum.js",
+        "renderedLength": 563
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseIfThenElse.js",
+        "renderedLength": 626
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNumber.js",
+        "renderedLength": 1954
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseOneOf.js",
+        "renderedLength": 1598
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/jsdocs.js",
+        "renderedLength": 426
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseObject.js",
+        "renderedLength": 7609
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseString.js",
+        "renderedLength": 2261
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseSimpleDiscriminatedOneOf.js",
+        "renderedLength": 556
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/omit.js",
+        "renderedLength": 160
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNullable.js",
+        "renderedLength": 178
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseSchema.js",
+        "renderedLength": 5309
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/jsonSchemaToZod.js",
+        "renderedLength": 1353
+      },
+      {
+        "id": "<repo>/examples/docs-yield/src/api-pipeline.ts",
+        "renderedLength": 4706
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/types.js",
+        "renderedLength": 543
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/utils.js",
+        "renderedLength": 790
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/diff-parser.js",
+        "renderedLength": 13660
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff@8.0.4/node_modules/diff/libesm/diff/base.js",
+        "renderedLength": 11992
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff@8.0.4/node_modules/diff/libesm/diff/character.js",
+        "renderedLength": 183
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff@8.0.4/node_modules/diff/libesm/diff/word.js",
+        "renderedLength": 1670
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/rematch.js",
+        "renderedLength": 2695
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/render-utils.js",
+        "renderedLength": 7012
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/file-list-renderer.js",
+        "renderedLength": 1142
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/line-by-line-renderer.js",
+        "renderedLength": 9091
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/side-by-side-renderer.js",
+        "renderedLength": 9921
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/compiler.js?commonjs-exports",
+        "renderedLength": 18
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/compiler.js",
+        "renderedLength": 12898
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/template.js?commonjs-exports",
+        "renderedLength": 18
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/template.js",
+        "renderedLength": 9935
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/hogan.js",
+        "renderedLength": 935
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/hogan.js?commonjs-es-import",
+        "renderedLength": 34
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/diff2html-templates.js",
+        "renderedLength": 12736
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/hoganjs-utils.js",
+        "renderedLength": 1279
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/diff2html.js",
+        "renderedLength": 943
+      },
+      {
+        "id": "<repo>/examples/docs-yield/src/changelog-pipeline.ts",
+        "renderedLength": 631
+      },
+      {
+        "id": "<repo>/examples/docs-yield/payload.ts",
+        "renderedLength": 0
+      }
+    ]
+  },
+  {
+    "level": "L",
+    "kind": "pipelines",
+    "run": 3,
+    "raw": 429006,
+    "gzip": 130049,
+    "modules": [
+      {
+        "id": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
+        "renderedLength": 46383
+      },
+      {
+        "id": "\u0000commonjsHelpers.js",
+        "renderedLength": 140
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js",
+        "renderedLength": 78731
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/lib/core.js?commonjs-es-import",
+        "renderedLength": 117
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/typescript.js",
+        "renderedLength": 21465
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/javascript.js",
+        "renderedLength": 17752
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/bash.js",
+        "renderedLength": 6493
+      },
+      {
+        "id": "<repo>/examples/docs-yield/src/article-pipeline.ts",
+        "renderedLength": 1585
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/katex@0.19.0/node_modules/katex/dist/katex.mjs",
+        "renderedLength": 597057
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/json.js",
+        "renderedLength": 1605
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/css.js",
+        "renderedLength": 19174
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/xml.js",
+        "renderedLength": 6862
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/python.js",
+        "renderedLength": 9254
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/rust.js",
+        "renderedLength": 6283
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/go.js",
+        "renderedLength": 3281
+      },
+      {
+        "id": "<repo>/examples/docs-yield/src/pipeline-utils.ts",
+        "renderedLength": 343
+      },
+      {
+        "id": "<repo>/examples/docs-yield/src/post-pipeline.ts",
+        "renderedLength": 1162
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseAnyOf.js",
+        "renderedLength": 439
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseBoolean.js",
+        "renderedLength": 64
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseDefault.js",
+        "renderedLength": 60
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseMultipleType.js",
+        "renderedLength": 201
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNot.js",
+        "renderedLength": 249
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNull.js",
+        "renderedLength": 58
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/half.js",
+        "renderedLength": 96
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseAllOf.js",
+        "renderedLength": 1053
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/withMessage.js",
+        "renderedLength": 643
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseArray.js",
+        "renderedLength": 893
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseConst.js",
+        "renderedLength": 92
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseEnum.js",
+        "renderedLength": 563
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseIfThenElse.js",
+        "renderedLength": 626
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNumber.js",
+        "renderedLength": 1954
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseOneOf.js",
+        "renderedLength": 1598
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/jsdocs.js",
+        "renderedLength": 426
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseObject.js",
+        "renderedLength": 7609
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseString.js",
+        "renderedLength": 2261
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseSimpleDiscriminatedOneOf.js",
+        "renderedLength": 556
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/omit.js",
+        "renderedLength": 160
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNullable.js",
+        "renderedLength": 178
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseSchema.js",
+        "renderedLength": 5309
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/jsonSchemaToZod.js",
+        "renderedLength": 1353
+      },
+      {
+        "id": "<repo>/examples/docs-yield/src/api-pipeline.ts",
+        "renderedLength": 4706
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/types.js",
+        "renderedLength": 543
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/utils.js",
+        "renderedLength": 790
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/diff-parser.js",
+        "renderedLength": 13660
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff@8.0.4/node_modules/diff/libesm/diff/base.js",
+        "renderedLength": 11992
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff@8.0.4/node_modules/diff/libesm/diff/character.js",
+        "renderedLength": 183
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff@8.0.4/node_modules/diff/libesm/diff/word.js",
+        "renderedLength": 1670
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/rematch.js",
+        "renderedLength": 2695
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/render-utils.js",
+        "renderedLength": 7012
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/file-list-renderer.js",
+        "renderedLength": 1142
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/line-by-line-renderer.js",
+        "renderedLength": 9091
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/side-by-side-renderer.js",
+        "renderedLength": 9921
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/compiler.js?commonjs-exports",
+        "renderedLength": 18
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/compiler.js",
+        "renderedLength": 12898
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/template.js?commonjs-exports",
+        "renderedLength": 18
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/template.js",
+        "renderedLength": 9935
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/hogan.js",
+        "renderedLength": 935
+      },
+      {
+        "id": "\u0000<repo>/node_modules/.pnpm/@profoundlogic+hogan@3.0.4/node_modules/@profoundlogic/hogan/lib/hogan.js?commonjs-es-import",
+        "renderedLength": 34
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/diff2html-templates.js",
+        "renderedLength": 12736
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/hoganjs-utils.js",
+        "renderedLength": 1279
+      },
+      {
+        "id": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/diff2html.js",
+        "renderedLength": 943
+      },
+      {
+        "id": "<repo>/examples/docs-yield/src/changelog-pipeline.ts",
+        "renderedLength": 631
+      },
+      {
+        "id": "<repo>/examples/docs-yield/payload.ts",
+        "renderedLength": 0
+      }
+    ]
+  }
+]

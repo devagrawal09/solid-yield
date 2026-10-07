@@ -451,6 +451,65 @@ only native preflight diagnostics currently use authored positions. A later
 SUGAR_* diagnostic can also refer to an intermediate position. We do not call
 these diagnostics “mapped back” yet.
 
+
+### Native mode: the core surface
+
+**Dev's decision, 2026-10-08, option C ("definitely C").** Native mode is bounded.
+The following is the required line, not a claim that every lowering below already
+passes. The evidence table and findings distinguish implemented cases from gaps.
+The earlier import-mapping table is historical; an import rename is not proof.
+
+Inside the line:
+
+- Signals and memos; both tracked compute and untracked effect phases.
+- Context creation, provision and reads, retaining the provider's position.
+- Props and JSX holes; destructuring only when its one-time snapshot is preserved.
+  `splitProps` and `mergeProps` belong here when used by an original (neither is
+  imported in the current original corpus).
+- JSX events; `For`, `Show`, `Switch`, `Match`, `Index`; `Loading` and `Errored`,
+  including their fallbacks.
+- Actions, including generator actions; basic stores, optimistic signals and
+  optimistic stores; server functions with their transport failure contribution.
+- Throw/catch inference follows the existing ruling: known class identities plus
+  an unknown floor, with catches subtracting only failures they actually handle.
+- A ref callback is an event invoked by Solid when it supplies the DOM element.
+  Its reads are untracked, its writes run in the event, and its failures must be
+  registered at the binding edge. A ref assignment retains assignment order.
+- A JSX spread of a reactive object is a hole. Evaluate it at the spread's
+  position; preserve property order, getter reads and event/ref binding contracts.
+- Timer/listener callbacks whose returned value is ignored are events, including
+  reads. A callback supplying a rendered/memo value is a hole or part of that
+  memo. Naming a callback does not change its host. Do not hand an iterator to
+  the scheduler. The seven reported Sierpinski callback sites are implementation
+  gaps, not grounds to exclude timers from the core.
+- An async helper called from an event belongs to that event; one called from a
+  memo belongs to that memo's attempt. Reads before and after each await retain
+  that host and its cancellation/failure rules. A setup-time async reactive read
+  is refused with its source location. Shared helpers must satisfy every host.
+
+Outside the line, kept as plain Solid at a declared foreign boundary:
+
+- `Portal`, `Reveal`, `lazy`, `until`, projections, custom directives and class
+  components; remaining runtime APIs not listed above.
+- Any rendered result from a package module without a `"use pure"` contract,
+  including calls whose result reaches JSX through a local binding.
+- Entry `render`, `hydrate`, `renderToStream` and `HydrationScript` remain foreign
+  handoffs. They retain D-099 pending-root checks and D-033 failure rules.
+
+The compiler must choose the smallest enclosing JSX/value boundary, retain
+provenance C and unknown foreign failures, and apply the existing capture rule.
+It must check every yield component handed back to Solid with `foreign()`;
+`foreign` is an identity checker, not an error handler. No failure union may be
+cast away and no fallback may be invented. Each boundary reports the foreign
+operation, source location, and how to bring it inside (use a core operation,
+select its source, or supply a checked pure package contract). Unhandled failures
+at a handoff report what the author must handle there. An outside API is never
+itself a transform refusal. Refusals are for inside-core model violations or
+unresolved reactive hosts, including setup-time async reads.
+
+This section supersedes the previous request to decide native scope. Scope is
+settled; incomplete lowering and missing parity remain implementation findings.
+
 ### Selection and native syntax
 
 No directive, marker or library import appears in a selected source file:

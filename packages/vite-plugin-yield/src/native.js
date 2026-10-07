@@ -4,9 +4,12 @@
 import babel from "@babel/core";
 import ts from "typescript";
 import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { dirname, resolve } from "node:path";
 import { parseProgram } from "./transform.js";
 import { lowerSugarProject } from "./sugar.js";
+import { inferFailures } from "../../compiler-yield/src/failure-inference.js";
+import { lowerNativeEffects } from "./native-effects.js";
 const t = babel.types;
 /** @typedef {import('@babel/core').NodePath<any>} Path */
 /** @typedef {{code:string,message:string,file:string,line:number,column:number}} Diagnostic */
@@ -46,14 +49,16 @@ function imported(p) {
       : b.path.node.imported.value
   };
 }
-/** Inspect all selected files, accumulating refusals instead of stopping at the first one.
- * @param {Map<string,string>} files */
-export function inspectNativeProject(files) {
-  /** @type {Diagnostic[]} */
-  const diagnostics = [];
+/** @param {Map<string,string>} files */
+function nativeProgram(files) {
   const host = ts.createCompilerHost({});
   const read = host.readFile.bind(host);
   host.readFile = f => files.get(f) ?? read(f);
+  const exists = host.fileExists.bind(host);
+  host.fileExists = f => files.has(f) || exists(f);
+  const directoryExists = host.directoryExists?.bind(host);
+  host.directoryExists = dir =>
+    [...files.keys()].some(f => f.startsWith(dir + "/")) || !!directoryExists?.(dir);
   const program = ts.createProgram(
     [...files.keys()],
     {
@@ -67,18 +72,20 @@ export function inspectNativeProject(files) {
     },
     host
   );
-  const checker = program.getTypeChecker();
+  return program;
+}
+/** @param {Map<string,string>} files */
+export function nativeFailures(files) {
+  return inferFailures(files, { program: nativeProgram(files), ts });
+}
+/** Inspect all selected files, accumulating refusals instead of stopping at the first one.
+ * @param {Map<string,string>} files */
+export function inspectNativeProject(files) {
+  /** @type {Diagnostic[]} */
+  const diagnostics = [];
   for (const [file, code] of files) {
     const p = parseProgram(code, file);
     if (!p) continue;
-    const source = program.getSourceFile(file);
-    const nodes = new Map();
-    /** @param {ts.Node} n */
-    function walk(n) {
-      nodes.set(`${n.getStart(source)}:${n.end}`, n);
-      ts.forEachChild(n, walk);
-    }
-    if (source) walk(source);
     /** @param {Path} q @param {string} code @param {string} message */
     const report = (q, code, message) =>
       diagnostics.push({
@@ -133,13 +140,6 @@ export function inspectNativeProject(files) {
             report(s, "NATIVE_API", `Solid API ${name} has no verified native lowering.`);
         }
       },
-      ThrowStatement(q) {
-        report(
-          q,
-          "NATIVE_FAILURE",
-          "A JavaScript throw has no nominal Failure contract. Its value cannot be passed to raise unchanged."
-        );
-      },
       TryStatement(q) {
         report(
           q,
@@ -164,25 +164,6 @@ export function inspectNativeProject(files) {
             "NATIVE_EFFECT_PHASES",
             "createEffect needs a tracked compute and an untracked effect phase."
           );
-        if (
-          !["createMemo", "createEffect", "createProjection", "createOptimisticStore"].includes(
-            api.name
-          )
-        )
-          return;
-        const arg = q.get("arguments.0");
-        if (!arg?.node) return;
-        const n = nodes.get(`${arg.node.start}:${arg.node.end}`);
-        const signatures = n ? checker.getTypeAtLocation(n).getCallSignatures() : [];
-        const promise = signatures?.some(s =>
-          checker.getReturnTypeOfSignature(s).getProperty("then")
-        );
-        if ((arg.isFunction() && arg.node.async) || promise)
-          report(
-            arg,
-            "NATIVE_REJECTION",
-            "Promise<T> has no rejection type. Native async computations need a checked rejection adapter before attempt can preserve failures."
-          );
       },
       JSXSpreadAttribute(q) {
         report(
@@ -204,18 +185,6 @@ export function inspectNativeProject(files) {
             if (binding?.isVariableDeclarator()) handler = binding.get("init");
             else if (binding?.isFunctionDeclaration()) handler = binding;
           }
-          const node = nodes.get(`${handler.node.start}:${handler.node.end}`);
-          const signatures = node ? checker.getTypeAtLocation(node).getCallSignatures() : [];
-          if (
-            signatures.some(signature =>
-              checker.getReturnTypeOfSignature(signature).getProperty("then")
-            )
-          )
-            report(
-              handler,
-              "NATIVE_REJECTION",
-              "An event returning a Promise has no declared rejection type; a checked rejection adapter is required."
-            );
           if (handler?.isFunction())
             handler.traverse({
               ThisExpression(site) {
@@ -383,7 +352,7 @@ function surface(code, filename, modules) {
               const target = declaration?.isVariableDeclarator()
                 ? declaration.get("init")
                 : declaration;
-              if (!target?.isFunction() || target.node.async || !binding?.constant)
+              if (!target?.isFunction() || !binding?.constant)
                 fail(
                   fn,
                   "NATIVE_HANDLER",
@@ -412,12 +381,6 @@ function surface(code, filename, modules) {
                 fn,
                 "NATIVE_HANDLER",
                 "A property event handler needs a checked shared event-call contract."
-              );
-            if (fn.node.async)
-              fail(
-                fn,
-                "NATIVE_REJECTION",
-                "An async event has no declared rejection type; a checked rejection adapter is required."
               );
             for (const param of fn.node.params)
               if (t.isIdentifier(param) && !param.typeAnnotation) {
@@ -590,9 +553,31 @@ export function lowerNativeProject(input, options = {}) {
   const files = new Map([...input].map(([id, code]) => [resolve(id), code]));
   const diagnostics = inspectNativeProject(files);
   if (diagnostics.length) throw new NativeDiagnosticError(diagnostics);
+  const failures = nativeFailures(files);
+  const effects = lowerNativeEffects(files, failures);
   return lowerSugarProject(
-    new Map([...files].map(([id, code]) => [id, surface(code, id, files)])),
-    options
+    new Map([...effects].map(([id, code]) => [id, surface(code, id, effects)])),
+    {
+      compilerOptions: {
+        ...options.compilerOptions,
+        jsxImportSource: "solid-yield",
+        paths: {
+          ...options.compilerOptions?.paths,
+          "solid-yield": [
+            resolve(
+              dirname(createRequire(import.meta.url).resolve("solid-yield/package.json")),
+              "dist/types/index.d.ts"
+            )
+          ],
+          "solid-yield/internal": [
+            resolve(
+              dirname(createRequire(import.meta.url).resolve("solid-yield/package.json")),
+              "dist/types/internal.d.ts"
+            )
+          ]
+        }
+      }
+    }
   );
 }
 /** @param {string} code @param {string} filename @param {(file:string)=>boolean} include @param {Map<string,any>} cache */

@@ -1,6 +1,6 @@
 /** Compiler-only adapters. Authors keep native class/value throws. */
 import { FailureInstance } from "./failure.js";
-import { ChunkError } from "./lazy.js";
+import type { ChunkError } from "./lazy.js";
 const identities = new WeakMap<Function, string>();
 export function registerNativeFailure<T extends Function>(id: string, constructor: T): T {
   identities.set(constructor, id);
@@ -22,9 +22,10 @@ export type NativeCaught<K extends string> = K extends "ChunkError" ? ChunkError
 /** The literal kinds are a compiler witness, checked against throw/call inference. */
 export function nativeFailure<const K extends string>(
   kinds: readonly K[],
-  value: unknown
+  value: unknown,
+  transport?: new (cause: unknown) => ChunkError
 ): NativeCaught<K> {
-  if (value instanceof ChunkError && kinds.includes("ChunkError" as K))
+  if (transport && value instanceof transport && kinds.includes("ChunkError" as K))
     return value as NativeCaught<K>;
   const wire = value as { name?: string; kind?: string; value?: unknown } | null;
   if (wire?.name === "NativeFailure" && kinds.includes(wire.kind as K))
@@ -61,7 +62,8 @@ export function nativeFailure<const K extends string>(
   if (identity && kinds.includes(identity as K))
     return new NativeFailure(identity, value) as NativeCaught<K>;
   if (kinds.includes("unknown" as K)) return new NativeFailure("unknown", value) as NativeCaught<K>;
-  if (kinds.includes("ChunkError" as K)) return new ChunkError(value) as NativeCaught<K>;
+  if (transport && kinds.includes("ChunkError" as K))
+    return new transport(value) as NativeCaught<K>;
   // A broken compiler/external contract is never relabeled as a known class.
   throw new Error("[NATIVE_FAILURE_CONTRACT] A rejection is outside the inferred failure set.", {
     cause: value

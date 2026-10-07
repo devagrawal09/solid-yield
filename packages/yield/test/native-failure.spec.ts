@@ -28,8 +28,10 @@ describe("native failure adapters", () => {
   });
   it("keeps the transport class and reconstructs serialized declared failures", () => {
     const transport = new ChunkError("offline");
-    expect(nativeFailure(["ChunkError"], transport)).toBe(transport);
-    expect(nativeFailure(["ChunkError"], new Error("offline"))).toBeInstanceOf(ChunkError);
+    expect(nativeFailure(["ChunkError"], transport, ChunkError)).toBe(transport);
+    expect(nativeFailure(["ChunkError"], new Error("offline"), ChunkError)).toBeInstanceOf(
+      ChunkError
+    );
     const wire = JSON.parse(JSON.stringify(nativeFailure(["global:Error"], new Error("safe"))));
     const restored = nativeFailure(["global:Error", "ChunkError"], wire);
     expect(restored.kind).toBe("global:Error");

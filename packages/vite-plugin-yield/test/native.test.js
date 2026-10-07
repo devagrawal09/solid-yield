@@ -47,27 +47,24 @@ describe("native front end", { timeout: 30_000 }, () => {
       )
     ).toThrow(/NATIVE_RECEIVER/);
   });
-  it("refuses Promise-returning events even without an async keyword", () => {
-    expect(() =>
+  it("types unknown Promise rejections and native Error throws", () => {
+    expect(
       lower(`export function App(){return <button onClick={()=>Promise.reject("failed")}/>;}`)
-    ).toThrow(/NATIVE_REJECTION/);
+    ).toContain('__nativeFailure(["unknown"]');
+    expect(
+      lower(`export function App(){return <button onClick={()=>{throw new Error("failed")}}/>;}`)
+    ).toContain('__nativeFailure(["global:Error"]');
   });
-  it("reports every incompatible native failure site before emitting", () => {
+  it("keeps catch lowering as a separate checked-contract refusal", () => {
     const diagnostics = inspectNativeProject(
       new Map([
         [
           id,
-          `import {createMemo} from 'solid-js'; function App(){const n=createMemo(async()=>1);
-       try{throw new Error('x');}catch{} return <p>{n()}</p>;}`
+          `import {createMemo} from 'solid-js'; function App(){const n=createMemo(async()=>1);try{throw new Error('x')}catch{}return <p>{n()}</p>}`
         ]
       ])
     );
-    expect(diagnostics.map(d => d.code)).toEqual([
-      "NATIVE_REJECTION",
-      "NATIVE_CATCH",
-      "NATIVE_FAILURE"
-    ]);
-    expect(diagnostics.every(d => d.line > 0 && d.column > 0)).toBe(true);
+    expect(diagnostics.map(d => d.code)).toEqual(["NATIVE_CATCH"]);
   });
   it("keeps unselected files on the explicit route", async () => {
     const plugin = solidYield({ mode: "native", include: () => false });

@@ -1,8 +1,9 @@
+import docsLevelPlugin from "../harness/docs-level.mjs";
 import { defineConfig } from "vite";
 import solid from "@solidjs/vite-plugin";
 import solidYield from "vite-plugin-solid-yield";
 export default defineConfig({
-  plugins: [solidYield(), solid()],
+  plugins: [docsLevelPlugin(),solidYield(), solid()],
   test: { environment: "jsdom", globals: true, include: ["tests/**/*.test.tsx"] },
   resolve: process.env.VITEST
     ? { conditions: process.env.YIELD_COST_PROD ? ["browser"] : ["development", "browser"] }

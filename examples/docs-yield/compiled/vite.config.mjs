@@ -1,3 +1,4 @@
+import docsLevelPlugin from "../../harness/docs-level.mjs";
 import { defineConfig } from "vite";
 import solid from "@solidjs/vite-plugin";
 import solidYield from "vite-plugin-solid-yield";
@@ -8,7 +9,7 @@ const r = process.env.C3_REGIONS === "1";
 const directory = resolve(import.meta.dirname, "..");
 export default defineConfig({
   root: resolve(directory, "stream"),
-  plugins: [
+  plugins: [docsLevelPlugin(),
     eagerIslands({ directory, roots: r ? "single" : (process.env.C2_ROOTS ?? "per-group") }),
     ...(r ? [serverComponents({ directory })] : []),
     solidYield(),

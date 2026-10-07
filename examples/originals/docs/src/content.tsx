@@ -1,4 +1,4 @@
-import { renderArticle } from "./article-pipeline";
+import { renderPage as renderArticle } from "./page-pipeline";
 import { createMemo, For, Loading, Errored } from "solid-js";
 import { getSite, getArticle, type Article } from "./api";
 import { NotFound } from "./errors";

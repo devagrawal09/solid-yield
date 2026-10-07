@@ -1,4 +1,4 @@
-import { renderArticle } from "./article-pipeline";
+import { renderPage as renderArticle } from "./page-pipeline";
 import {
   component,
   $memo,

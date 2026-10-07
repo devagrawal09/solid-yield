@@ -1,3 +1,4 @@
+import { extraArticles, extraNavigation } from "./level-data";
 import overviewMarkdown from "./articles/overview.md?raw";
 import startMarkdown from "./articles/start.md?raw";
 import widgetsMarkdown from "./articles/widgets.md?raw";
@@ -10,6 +11,7 @@ export interface Link {
   href: string;
 }
 export interface Article {
+  kind?: "post" | "api" | "changelog";
   slug: string;
   title: string;
   summary: string;
@@ -39,6 +41,7 @@ export async function getSite(): Promise<Site> {
     title: "Field Notes",
     intro: "Practical notes for building small, readable applications.",
     navigation: [
+      ...extraNavigation,
       {
         title: "Learn",
         links: [
@@ -51,7 +54,10 @@ export async function getSite(): Promise<Site> {
         links: [
           { title: "Independent widgets", href: "/docs/widgets" },
           { title: "Missing page", href: "/docs/missing" },
-          { title: "A typed content pipeline", href: "/docs/pipeline" }
+          { title: "A typed content pipeline", href: "/docs/pipeline" },
+          { title: "Routes and links", href: "/docs/routing" },
+          { title: "Testing content pages", href: "/docs/testing" },
+          { title: "Overview article", href: "/docs/overview" }
         ]
       }
     ],
@@ -65,7 +71,8 @@ export async function getSite(): Promise<Site> {
 export async function getArticle(slug: string): Promise<Article> {
   "use server";
   await delay(60);
-  const articles: Record<string, { title: string; markdown: string }> = {
+  const articles: Record<string, Pick<Article, "title" | "markdown" | "kind">> = {
+    ...extraArticles,
     overview: { title: "Welcome to Field Notes", markdown: overviewMarkdown },
     start: { title: "Getting started", markdown: startMarkdown },
     widgets: { title: "Independent widgets", markdown: widgetsMarkdown },

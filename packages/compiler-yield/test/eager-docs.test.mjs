@@ -1,3 +1,4 @@
+import docsLevelPlugin from "../../../examples/harness/docs-level.mjs";
 import { highlightCoreForModuleRunner } from "../../../examples/harness/module-runner-highlight.mjs";
 import { test as nodeTest } from "node:test";
 import assert from "node:assert/strict";
@@ -33,7 +34,7 @@ const regions = mode === "compiled-r";
 const single = mode === "compiled-single" || regions;
 const variants = ["original", "library", "compiled", "compiled-single"];
 if (!mode) {
-  test("tier 1 docs: original, library, seven roots and single root match all 28 hydrated steps", () => {
+  test("tier 1 docs: original, library, seven roots and single root match all 40 hydrated steps", () => {
     const results = [];
     for (const route of variants) {
       const child = spawnSync(process.execPath, [fileURLToPath(import.meta.url)], {
@@ -53,7 +54,7 @@ if (!mode) {
       if (process.env.C2_DUMP)
         writeFileSync(resolve(tmpdir(), `c2-${route}.json`), JSON.stringify(results.at(-1)));
     }
-    assert.equal(results[0].snapshots.length, 28);
+    assert.equal(results[0].snapshots.length, 40);
     assert.deepEqual(results[1].snapshots, results[0].snapshots, "library vs original");
     for (let i = 0; i < results[1].snapshots.length; i++) {
       const a = results[2].snapshots[i],
@@ -127,6 +128,7 @@ if (!mode) {
       appType: "custom",
       logLevel: "silent",
       plugins: [
+        docsLevelPlugin(),
         ...(compiled
           ? [
               eagerIslands({
@@ -331,7 +333,18 @@ if (!mode) {
           const settledSelector = {
             "article loads": "main #start-plan-the-page",
             "not-found typed error": "main .not-found",
-            "code-heavy article loads": "main #pipeline-plan-the-page"
+            "code-heavy article loads": "main #pipeline-plan-the-page",
+            "session: blog settles":
+              process.env.DOCS_LEVEL === "S" ? "main #routing-plan-the-page" : "main .katex",
+            "session: api settles":
+              (process.env.DOCS_LEVEL ?? "L") === "L"
+                ? "main .api-reference"
+                : "main #testing-plan-the-page",
+            "session: changelog settles":
+              (process.env.DOCS_LEVEL ?? "L") === "L"
+                ? "main .release"
+                : "main #overview-plan-the-page",
+            "session: docs settles": "main #pipeline-plan-the-page"
           }[name];
           if (settledSelector) {
             const deadline = Date.now() + 5000;

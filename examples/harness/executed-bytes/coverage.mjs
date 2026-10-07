@@ -54,7 +54,9 @@ export function beginCoverage({ file, app, twin, select }) {
       normalized.includes(
         `/examples/${app === "original" ? "originals/" + twin.replace(/-yield(-h)?$/, "") : twin}/`
       ) ||
-      /\/(marked|highlight\.js)\/(lib|es)\//.test(normalized) ||
+      /\/(marked|highlight\.js|katex|json-schema-to-zod|diff2html|diff)\/(lib(?:-esm)?|es|dist)\/|\/@profoundlogic\/hogan\//.test(
+        normalized
+      ) ||
       (app !== "original" && /\/packages\/yield\/(src|dist)\//.test(normalized)) ||
       /\/(solid-js|@solidjs\/[^/]+|effect|seroval|seroval-plugins)\/(?:[a-z-]+\/)?(dist|storage|serialization)\//.test(
         normalized

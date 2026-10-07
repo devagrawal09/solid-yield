@@ -1,6 +1,38 @@
 [
   {
     "twin": "docs-yield",
+    "trustedPureModules": [
+      {
+        "kind": "trusted-pure-module",
+        "at": "examples/docs-yield/src/page-pipeline.ts",
+        "reason": "Author asserts exported functions depend only on arguments; implementation is not checked."
+      },
+      {
+        "kind": "trusted-pure-module",
+        "at": "examples/docs-yield/src/article-pipeline.ts",
+        "reason": "Author asserts exported functions depend only on arguments; implementation is not checked."
+      },
+      {
+        "kind": "trusted-pure-module",
+        "at": "examples/docs-yield/src/post-pipeline.ts",
+        "reason": "Author asserts exported functions depend only on arguments; implementation is not checked."
+      },
+      {
+        "kind": "trusted-pure-module",
+        "at": "examples/docs-yield/src/pipeline-utils.ts",
+        "reason": "Author asserts exported functions depend only on arguments; implementation is not checked."
+      },
+      {
+        "kind": "trusted-pure-module",
+        "at": "examples/docs-yield/src/api-pipeline.ts",
+        "reason": "Author asserts exported functions depend only on arguments; implementation is not checked."
+      },
+      {
+        "kind": "trusted-pure-module",
+        "at": "examples/docs-yield/src/changelog-pipeline.ts",
+        "reason": "Author asserts exported functions depend only on arguments; implementation is not checked."
+      }
+    ],
     "holes": {
       "S": 59,
       "R": 19,
@@ -93,7 +125,7 @@
       },
       {
         "at": "examples/docs-yield/src/content.tsx:134:13",
-        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1692>1692:view>component:6477",
+        "instance": "examples/docs-yield/src/main.tsx>70:call>component:76>76:view>component:1692>1692:view>component:6488",
         "target": "getArticle",
         "provenance": "S",
         "captureEligible": true

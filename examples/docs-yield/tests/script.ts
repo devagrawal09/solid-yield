@@ -93,3 +93,56 @@ export async function runScript() {
   }
   return out;
 }
+
+// Keep the first 28 checkpoints intact. The same 12 further checkpoints browse
+// all enabled content types; smaller levels substitute a docs page.
+const blogSlug = __DOCS_LEVEL__ === "S" ? "routing" : "post-latency";
+const apiSlug = __DOCS_LEVEL__ === "L" ? "api" : "testing";
+const changelogSlug = __DOCS_LEVEL__ === "L" ? "changelog" : "overview";
+const navigate = (slug: string) => {
+  // Follow a real authored link; related docs are also available in the nav.
+  click(`nav a[href="/docs/${slug}"]`);
+};
+steps.push(
+  ["session: docs to blog", () => navigate(blogSlug)],
+  ["session: blog settles", () => advance(200)],
+  [
+    "session: check math",
+    () => {
+      if (__DOCS_LEVEL__ !== "S" && !$("main .katex")) throw new Error("Missing rendered math");
+      if (!$("main .hljs-keyword")) throw new Error("Missing highlighted example");
+    }
+  ],
+  ["session: blog to api", () => navigate(apiSlug)],
+  ["session: api settles", () => advance(200)],
+  [
+    "session: check api link",
+    () => {
+      if (__DOCS_LEVEL__ !== "L") return;
+      const link = $<HTMLAnchorElement>("main .api-entry-link");
+      if (!link || !$(link.hash) || root().querySelectorAll("main .api-entry").length !== 20)
+        throw new Error("Missing API reference or cross-link target");
+      if (!$("main .api-reference table") || !$("main .api-reference .hljs-keyword"))
+        throw new Error("Missing API table or generated validation example");
+    }
+  ],
+  ["session: api to changelog", () => navigate(changelogSlug)],
+  ["session: changelog settles", () => advance(200)],
+  [
+    "session: check diff",
+    () => {
+      if (__DOCS_LEVEL__ !== "L") return;
+      if (root().querySelectorAll("main .release").length !== 8 || !$("main .d2h-ins"))
+        throw new Error("Missing release or inserted diff line");
+    }
+  ],
+  ["session: return to docs", () => navigate("pipeline")],
+  ["session: docs settles", () => advance(200)],
+  [
+    "session: check docs token",
+    () => {
+      if ($("main .language-ts .hljs-keyword")?.textContent !== "interface")
+        throw new Error("Missing highlighted token after session");
+    }
+  ]
+);

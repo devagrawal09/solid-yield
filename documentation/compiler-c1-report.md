@@ -397,7 +397,7 @@ Dev's option A accepts the content-heavy premise. The corrected docs twin retain
 
 ## C3: server-recomputable provenance (2026-10-07)
 
-All nine entry graphs rerun. Before is the option-A S-only analysis; both passes include the narrow F-C12 article-pipeline purity contract. After uses the R cut. S and R columns are disjoint. Counts include structural holes and call-site instances, not runtime nodes or bytes. A server-owned parent with client slots is still counted client by the subtree metric; its server children are counted separately. These are placement candidates, not proof of frame transport or serialization.
+All nine entry graphs rerun. Before is the option-A S-only analysis; both passes include the F-C12 module-level `"use pure"` author contract. After uses the R cut. S and R columns are disjoint. Counts include structural holes and call-site instances, not runtime nodes or bytes. A server-owned parent with client slots is still counted client by the subtree metric; its server children are counted separately. These are placement candidates, not proof of frame transport or serialization.
 
 | Twin | Before S holes | After S holes | R holes | Client holes | Before S JSX | After S JSX | R JSX | Client JSX |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -423,6 +423,14 @@ The h twins have no JSX sites. Their S/R/client h-element counts are sierpinski-
 - ReadingGuide at examples/docs-yield/src/app.tsx:57:17: **S**, arguments [], slots [].
 - SiteFooter at examples/docs-yield/src/app.tsx:58:17: **S**, arguments [], slots [].
 
+Trusted pure modules (author assertions):
+- examples/docs-yield/src/page-pipeline.ts: Author asserts exported functions depend only on arguments; implementation is not checked.
+- examples/docs-yield/src/article-pipeline.ts: Author asserts exported functions depend only on arguments; implementation is not checked.
+- examples/docs-yield/src/post-pipeline.ts: Author asserts exported functions depend only on arguments; implementation is not checked.
+- examples/docs-yield/src/pipeline-utils.ts: Author asserts exported functions depend only on arguments; implementation is not checked.
+- examples/docs-yield/src/api-pipeline.ts: Author asserts exported functions depend only on arguments; implementation is not checked.
+- examples/docs-yield/src/changelog-pipeline.ts: Author asserts exported functions depend only on arguments; implementation is not checked.
+
 **effect-yield.** No S/R loader region. No directly targeted declared server-function memo was found; async adapters/query/live wrappers stay U and event-written cells stay C.
 
 **hackernews-spa-yield.** No S/R loader region. No directly targeted declared server-function memo was found; async adapters/query/live wrappers stay U and event-written cells stay C.
@@ -442,7 +450,7 @@ The h twins have no JSX sites. Their S/R/client h-element counts are sierpinski-
 
 **todos-yield-h.** No S/R loader region. No directly targeted declared server-function memo was found; async adapters/query/live wrappers stay U and event-written cells stay C.
 
-Home's ArticleContent("overview") and ReadingGuide's ArticleContent("widgets") become entirely S, including their internal error fallback holes. DocPage's ArticleContent becomes R with the external argument vector [props.params.slug]; its default-to-overview expression stays on the server. Loaders, ArticleBody, the memo calling renderArticle (marked, three highlight.js grammars, heading-derived table of contents and fixed-locale date), and related links follow that placement. The pipeline memos beside the article loaders are S/R/S for Home/DocPage/ReadingGuide. F-C12 pins the audited adapter source and package versions; changed adapters remain unproved. There is no article-list component in this version of Home. SiteNav and SiteFooter were already S.
+Home's ArticleContent("overview") and ReadingGuide's ArticleContent("widgets") become entirely S, including their internal error fallback holes. DocPage's ArticleContent becomes R with the external argument vector [props.params.slug]; its default-to-overview expression stays on the server. Loaders, ArticleBody, the memo calling renderPage (aliased as renderArticle), selecting docs, blog, API or changelog pipelines, and related links follow that placement. The pipeline memos beside the article loaders are S/R/S for Home/DocPage/ReadingGuide. F-C12 now trusts module-level `"use pure"` directives (C0 section 1.2); the author asserts purity and the compiler does not prove the body. There is no article-list component in this version of Home. SiteNav and SiteFooter were already S.
 
 The C3 Home/DocPage server wrapper places their sibling LikeButton in a slot keyed by route ownership plus the fixed LikeButton site (like#route-like), with serialized {slug}. No LikeButton is nested inside ArticleContent in this source. This report lists the narrower slot-free ArticleContent regions: wrapper/slot transport is established separately by the C3 integration tests, not by this analysis. See compiler-c3b-payload.md for its F-C11/F-C13 DOM differences and measured payload tradeoff. ThemeToggle, SearchBox, NewsletterForm, CommentList (including avatars), ImageCarousel, both LikeButton instances and the router shell remain client. C1's eleven dependency groups are preserved as the before grouping, not relabelled as eleven independently emitted R groups.
 

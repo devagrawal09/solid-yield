@@ -1,3 +1,4 @@
+import docsLevelPlugin from "../../../examples/harness/docs-level.mjs";
 // A separate process keeps server execution out of the browser coverage sample.
 // The IPC carrier transports an unmodified HTTP Request/Response body stream.
 import { gzipSync } from "node:zlib";
@@ -19,6 +20,7 @@ const server = await createServer({
   mode: process.env.C2_PRODUCTION ? "production" : "development",
   server: { middlewareMode: true, hmr: false, ws: false },
   plugins: [
+    docsLevelPlugin(),
     serverComponents({ directory }),
     solidYield(),
     solid({
@@ -51,7 +53,17 @@ process.on("disconnect", async () => {
 });
 const api = await server.ssrLoadModule(resolve(directory, "src/api.ts"));
 const jsonComparison = {};
-for (const slug of ["start", "missing", "pipeline"]) {
+for (const slug of [
+  "start",
+  "missing",
+  "pipeline",
+  "routing",
+  "testing",
+  "overview",
+  "post-latency",
+  "api",
+  "changelog"
+]) {
   let value;
   try {
     value = await api.getArticle(slug);

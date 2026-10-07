@@ -6,3 +6,5 @@ declare module "virtual:solid-manifest" {
   const manifest: ViteManifest;
   export default manifest;
 }
+
+declare const __DOCS_LEVEL__: "S" | "M" | "L";

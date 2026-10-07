@@ -58,14 +58,14 @@ const withoutArticleClaims = html =>
       end
   );
 const authoredContent = html => withoutArticleClaims(withoutFrameScaffolding(html));
-test("C3: 28 hydrated interactions and keyed slots; record exact DOM differences", () => {
+test("C3: 40 hydrated interactions and keyed slots; record exact DOM differences", () => {
   const library = run("library"),
     compiled = run("compiled-r");
   assert.equal(compiled.roots, 1);
-  assert.equal(compiled.snapshots.length, 28);
-  assert.equal(compiled.payloads.length, 3, "one region RPC per navigation; no hydration refetch");
+  assert.equal(compiled.snapshots.length, 40);
+  assert.equal(compiled.payloads.length, 7, "one region RPC per navigation; no hydration refetch");
   const differences = [];
-  for (let i = 0; i < 28; i++) {
+  for (let i = 0; i < 40; i++) {
     const a = library.snapshots[i],
       b = compiled.snapshots[i];
     assert.deepEqual(authoredContent(b), authoredContent(a), `authored content at step ${i}`);
@@ -81,7 +81,7 @@ test("C3: 28 hydrated interactions and keyed slots; record exact DOM differences
         compiledSha256: createHash("sha256").update(b).digest("hex")
       });
   }
-  assert.equal(differences.length, 28, "do not report exact parity while frames add DOM nodes");
+  assert.equal(differences.length, 40, "do not report exact parity while frames add DOM nodes");
   assert.match(compiled.snapshots[25], /A typed content pipeline/);
   assert.match(compiled.snapshots[27], /class="hljs-keyword">interface<\/span>/);
   assert(differences.some(d => d.reason.includes("F-C13 article link claim attributes")));
@@ -99,9 +99,9 @@ test("C3: 28 hydrated interactions and keyed slots; record exact DOM differences
       JSON.stringify(
         {
           exactMatches: 0,
-          steps: 28,
-          contentMatches: 28,
-          serverRefetchedSteps: [4, 5, 22, 23, 24, 25],
+          steps: 40,
+          contentMatches: 40,
+          serverRefetchedSteps: [4, 5, 22, 23, 24, 25, 28, 29, 31, 32, 34, 35, 37, 38],
           differences,
           payloads: compiled.payloads
         },
@@ -110,7 +110,12 @@ test("C3: 28 hydrated interactions and keyed slots; record exact DOM differences
       ) + "\n"
     );
 });
-for (const url of ["/docs/start", "/docs/missing"])
+for (const url of [
+  "/docs/start",
+  "/docs/missing",
+  ...(process.env.DOCS_LEVEL === "S" ? [] : ["/docs/post-latency"]),
+  ...((process.env.DOCS_LEVEL ?? "L") === "L" ? ["/docs/api", "/docs/changelog"] : [])
+])
   test(`C3 production SSR/hydrate ${url}`, () => {
     const library = run("library", url),
       compiled = run("compiled-r", url);

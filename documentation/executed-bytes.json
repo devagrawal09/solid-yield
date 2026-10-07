@@ -9,8 +9,8 @@
       "phases": [
         {
           "phase": "load",
-          "bytes": 598184,
-          "maxBytes": 610148
+          "bytes": 958857,
+          "maxBytes": 978035
         },
         {
           "phase": "load / (pending)",
@@ -19,13 +19,13 @@
         },
         {
           "phase": "content loads",
-          "bytes": 220970,
-          "maxBytes": 225390
+          "bytes": 221684,
+          "maxBytes": 226118
         },
         {
           "phase": "comment list loads, avatars pending",
-          "bytes": 135398,
-          "maxBytes": 138106
+          "bytes": 135262,
+          "maxBytes": 137968
         },
         {
           "phase": "avatars load",
@@ -34,13 +34,13 @@
         },
         {
           "phase": "navigate to /docs/start",
-          "bytes": 202490,
-          "maxBytes": 206540
+          "bytes": 202422,
+          "maxBytes": 206471
         },
         {
           "phase": "article loads",
-          "bytes": 208203,
-          "maxBytes": 212368
+          "bytes": 208589,
+          "maxBytes": 212761
         },
         {
           "phase": "toggle theme",
@@ -74,38 +74,38 @@
         },
         {
           "phase": "like rate limited",
-          "bytes": 90989,
-          "maxBytes": 92809
+          "bytes": 90924,
+          "maxBytes": 92743
         },
         {
           "phase": "newsletter good email",
-          "bytes": 65734,
-          "maxBytes": 67049
+          "bytes": 65669,
+          "maxBytes": 66983
         },
         {
           "phase": "newsletter in flight",
-          "bytes": 80652,
-          "maxBytes": 82266
+          "bytes": 80587,
+          "maxBytes": 82199
         },
         {
           "phase": "newsletter success",
-          "bytes": 88895,
-          "maxBytes": 90673
+          "bytes": 88830,
+          "maxBytes": 90607
         },
         {
           "phase": "newsletter bad email",
-          "bytes": 68418,
-          "maxBytes": 69787
+          "bytes": 68353,
+          "maxBytes": 69721
         },
         {
           "phase": "bad newsletter in flight",
-          "bytes": 80823,
-          "maxBytes": 82440
+          "bytes": 80758,
+          "maxBytes": 82374
         },
         {
           "phase": "newsletter typed error",
-          "bytes": 91270,
-          "maxBytes": 93096
+          "bytes": 91205,
+          "maxBytes": 93030
         },
         {
           "phase": "carousel next",
@@ -129,8 +129,8 @@
         },
         {
           "phase": "not-found typed error",
-          "bytes": 128611,
-          "maxBytes": 131184
+          "bytes": 128694,
+          "maxBytes": 131268
         },
         {
           "phase": "navigate to code-heavy article",
@@ -139,16 +139,76 @@
         },
         {
           "phase": "code-heavy article loads",
-          "bytes": 250250,
-          "maxBytes": 255255
+          "bytes": 250677,
+          "maxBytes": 255691
         },
         {
           "phase": "check table of contents",
-          "bytes": 124158,
-          "maxBytes": 126642
+          "bytes": 124089,
+          "maxBytes": 126571
         },
         {
           "phase": "check highlighted token",
+          "bytes": 0,
+          "maxBytes": 1024
+        },
+        {
+          "phase": "session: docs to blog",
+          "bytes": 158339,
+          "maxBytes": 161506
+        },
+        {
+          "phase": "session: blog settles",
+          "bytes": 323670,
+          "maxBytes": 330144
+        },
+        {
+          "phase": "session: check math",
+          "bytes": 0,
+          "maxBytes": 1024
+        },
+        {
+          "phase": "session: blog to api",
+          "bytes": 158216,
+          "maxBytes": 161381
+        },
+        {
+          "phase": "session: api settles",
+          "bytes": 226686,
+          "maxBytes": 231220
+        },
+        {
+          "phase": "session: check api link",
+          "bytes": 0,
+          "maxBytes": 1024
+        },
+        {
+          "phase": "session: api to changelog",
+          "bytes": 157974,
+          "maxBytes": 161134
+        },
+        {
+          "phase": "session: changelog settles",
+          "bytes": 188590,
+          "maxBytes": 192362
+        },
+        {
+          "phase": "session: check diff",
+          "bytes": 0,
+          "maxBytes": 1024
+        },
+        {
+          "phase": "session: return to docs",
+          "bytes": 156975,
+          "maxBytes": 160115
+        },
+        {
+          "phase": "session: docs settles",
+          "bytes": 245726,
+          "maxBytes": 250641
+        },
+        {
+          "phase": "session: check docs token",
           "bytes": 0,
           "maxBytes": 1024
         }
@@ -160,8 +220,8 @@
       "phases": [
         {
           "phase": "load",
-          "bytes": 621328,
-          "maxBytes": 633755
+          "bytes": 981520,
+          "maxBytes": 1001151
         },
         {
           "phase": "load / (pending)",
@@ -170,13 +230,13 @@
         },
         {
           "phase": "content loads",
-          "bytes": 228425,
-          "maxBytes": 232994
+          "bytes": 229139,
+          "maxBytes": 233722
         },
         {
           "phase": "comment list loads, avatars pending",
-          "bytes": 143565,
-          "maxBytes": 146437
+          "bytes": 143518,
+          "maxBytes": 146389
         },
         {
           "phase": "avatars load",
@@ -185,48 +245,48 @@
         },
         {
           "phase": "navigate to /docs/start",
-          "bytes": 215313,
-          "maxBytes": 219620
+          "bytes": 215244,
+          "maxBytes": 219549
         },
         {
           "phase": "article loads",
-          "bytes": 214269,
-          "maxBytes": 218555
+          "bytes": 214696,
+          "maxBytes": 218990
         },
         {
           "phase": "toggle theme",
-          "bytes": 83991,
-          "maxBytes": 85671
+          "bytes": 83885,
+          "maxBytes": 85563
         },
         {
           "phase": "search starts",
-          "bytes": 93816,
-          "maxBytes": 95693
+          "bytes": 93775,
+          "maxBytes": 95651
         },
         {
           "phase": "search results",
-          "bytes": 116986,
-          "maxBytes": 119326
+          "bytes": 116880,
+          "maxBytes": 119218
         },
         {
           "phase": "like (optimistic)",
-          "bytes": 87615,
-          "maxBytes": 89368
+          "bytes": 87509,
+          "maxBytes": 89260
         },
         {
           "phase": "like saved",
-          "bytes": 94164,
-          "maxBytes": 96048
+          "bytes": 94058,
+          "maxBytes": 95940
         },
         {
           "phase": "second like (optimistic)",
-          "bytes": 87791,
-          "maxBytes": 89547
+          "bytes": 87685,
+          "maxBytes": 89439
         },
         {
           "phase": "like rate limited",
-          "bytes": 94414,
-          "maxBytes": 96303
+          "bytes": 94308,
+          "maxBytes": 96195
         },
         {
           "phase": "newsletter good email",
@@ -245,8 +305,8 @@
         },
         {
           "phase": "newsletter bad email",
-          "bytes": 79932,
-          "maxBytes": 81531
+          "bytes": 80023,
+          "maxBytes": 81624
         },
         {
           "phase": "bad newsletter in flight",
@@ -280,8 +340,8 @@
         },
         {
           "phase": "not-found typed error",
-          "bytes": 131555,
-          "maxBytes": 134187
+          "bytes": 131638,
+          "maxBytes": 134271
         },
         {
           "phase": "navigate to code-heavy article",
@@ -290,16 +350,76 @@
         },
         {
           "phase": "code-heavy article loads",
-          "bytes": 256428,
-          "maxBytes": 261557
+          "bytes": 256855,
+          "maxBytes": 261993
         },
         {
           "phase": "check table of contents",
-          "bytes": 124158,
-          "maxBytes": 126642
+          "bytes": 124089,
+          "maxBytes": 126571
         },
         {
           "phase": "check highlighted token",
+          "bytes": 0,
+          "maxBytes": 1024
+        },
+        {
+          "phase": "session: docs to blog",
+          "bytes": 161462,
+          "maxBytes": 164692
+        },
+        {
+          "phase": "session: blog settles",
+          "bytes": 329961,
+          "maxBytes": 336561
+        },
+        {
+          "phase": "session: check math",
+          "bytes": 0,
+          "maxBytes": 1024
+        },
+        {
+          "phase": "session: blog to api",
+          "bytes": 161339,
+          "maxBytes": 164566
+        },
+        {
+          "phase": "session: api settles",
+          "bytes": 232977,
+          "maxBytes": 237637
+        },
+        {
+          "phase": "session: check api link",
+          "bytes": 0,
+          "maxBytes": 1024
+        },
+        {
+          "phase": "session: api to changelog",
+          "bytes": 161097,
+          "maxBytes": 164319
+        },
+        {
+          "phase": "session: changelog settles",
+          "bytes": 194881,
+          "maxBytes": 198779
+        },
+        {
+          "phase": "session: check diff",
+          "bytes": 0,
+          "maxBytes": 1024
+        },
+        {
+          "phase": "session: return to docs",
+          "bytes": 159907,
+          "maxBytes": 163106
+        },
+        {
+          "phase": "session: docs settles",
+          "bytes": 251826,
+          "maxBytes": 256863
+        },
+        {
+          "phase": "session: check docs token",
           "bytes": 0,
           "maxBytes": 1024
         }

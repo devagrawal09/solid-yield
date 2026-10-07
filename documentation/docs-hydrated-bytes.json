@@ -1,6 +1,7 @@
 {
   "node": "v24.18.0",
-  "metric": "Hydrated docs; V8 executed UTF-8 ranges reset each phase; production Vite module runner; completed SSR in a separate process; same 28 authored steps; all roots synchronous",
+  "level": "L",
+  "metric": "Hydrated docs; V8 executed UTF-8 ranges reset each phase; production Vite module runner; completed SSR in a separate process; same 40 authored steps; all roots synchronous",
   "runs": [
     [
       {
@@ -8,7 +9,7 @@
         "phases": [
           {
             "phase": "load",
-            "bytes": 714548
+            "bytes": 1096058
           },
           {
             "phase": "load / (pending)",
@@ -28,11 +29,11 @@
           },
           {
             "phase": "navigate to /docs/start",
-            "bytes": 215085
+            "bytes": 215080
           },
           {
             "phase": "article loads",
-            "bytes": 213985
+            "bytes": 214412
           },
           {
             "phase": "toggle theme",
@@ -104,7 +105,7 @@
           },
           {
             "phase": "not-found typed error",
-            "bytes": 134561
+            "bytes": 134644
           },
           {
             "phase": "navigate to code-heavy article",
@@ -112,14 +113,62 @@
           },
           {
             "phase": "code-heavy article loads",
-            "bytes": 258127
+            "bytes": 258554
           },
           {
             "phase": "check table of contents",
-            "bytes": 129363
+            "bytes": 129428
           },
           {
             "phase": "check highlighted token",
+            "bytes": 0
+          },
+          {
+            "phase": "session: docs to blog",
+            "bytes": 164158
+          },
+          {
+            "phase": "session: blog settles",
+            "bytes": 332114
+          },
+          {
+            "phase": "session: check math",
+            "bytes": 0
+          },
+          {
+            "phase": "session: blog to api",
+            "bytes": 164263
+          },
+          {
+            "phase": "session: api settles",
+            "bytes": 236041
+          },
+          {
+            "phase": "session: check api link",
+            "bytes": 0
+          },
+          {
+            "phase": "session: api to changelog",
+            "bytes": 164137
+          },
+          {
+            "phase": "session: changelog settles",
+            "bytes": 199575
+          },
+          {
+            "phase": "session: check diff",
+            "bytes": 0
+          },
+          {
+            "phase": "session: return to docs",
+            "bytes": 163769
+          },
+          {
+            "phase": "session: docs settles",
+            "bytes": 253745
+          },
+          {
+            "phase": "session: check docs token",
             "bytes": 0
           }
         ],
@@ -154,7 +203,7 @@
           },
           {
             "url": "<repo>/examples/originals/docs/src/app.tsx",
-            "bytes": 7159
+            "bytes": 7510
           },
           {
             "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/index.jsx",
@@ -234,11 +283,15 @@
           },
           {
             "url": "<repo>/examples/originals/docs/src/content.tsx",
-            "bytes": 13903
+            "bytes": 13894
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/page-pipeline.ts",
+            "bytes": 888
           },
           {
             "url": "<repo>/examples/originals/docs/src/article-pipeline.ts",
-            "bytes": 3091
+            "bytes": 3103
           },
           {
             "url": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
@@ -265,8 +318,164 @@
             "bytes": 6912
           },
           {
+            "url": "<repo>/examples/originals/docs/src/level-pipelines.ts",
+            "bytes": 1041
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/post-pipeline.ts",
+            "bytes": 3026
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/katex@0.19.0/node_modules/katex/dist/katex.mjs",
+            "bytes": 296908
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/json.js",
+            "bytes": 839
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/css.js",
+            "bytes": 14840
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/xml.js",
+            "bytes": 506
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/python.js",
+            "bytes": 576
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/rust.js",
+            "bytes": 655
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/go.js",
+            "bytes": 633
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/pipeline-utils.ts",
+            "bytes": 406
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/api-pipeline.ts",
+            "bytes": 1182
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/index.js",
+            "bytes": 6613
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/Types.js",
+            "bytes": 358
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/jsonSchemaToZod.js",
+            "bytes": 942
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseSchema.js",
+            "bytes": 4895
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseAnyOf.js",
+            "bytes": 666
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseBoolean.js",
+            "bytes": 438
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseDefault.js",
+            "bytes": 438
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseMultipleType.js",
+            "bytes": 687
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNot.js",
+            "bytes": 660
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNull.js",
+            "bytes": 429
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseAllOf.js",
+            "bytes": 942
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/half.js",
+            "bytes": 412
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseArray.js",
+            "bytes": 898
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/withMessage.js",
+            "bytes": 412
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseConst.js",
+            "bytes": 432
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseEnum.js",
+            "bytes": 429
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseIfThenElse.js",
+            "bytes": 681
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNumber.js",
+            "bytes": 667
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseObject.js",
+            "bytes": 1719
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseOneOf.js",
+            "bytes": 666
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/jsdocs.js",
+            "bytes": 490
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseString.js",
+            "bytes": 901
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseSimpleDiscriminatedOneOf.js",
+            "bytes": 723
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNullable.js",
+            "bytes": 949
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/omit.js",
+            "bytes": 412
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/changelog-pipeline.ts",
+            "bytes": 755
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/diff2html.js",
+            "bytes": 12320
+          },
+          {
             "url": "<repo>/examples/originals/docs/src/api.ts",
-            "bytes": 2348
+            "bytes": 2536
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/level-data.ts",
+            "bytes": 19534
           },
           {
             "url": "<repo>/examples/originals/docs/src/articles/overview.md?raw",
@@ -311,7 +520,7 @@
         "phases": [
           {
             "phase": "load",
-            "bytes": 747726
+            "bytes": 1129164
           },
           {
             "phase": "load / (pending)",
@@ -331,11 +540,11 @@
           },
           {
             "phase": "navigate to /docs/start",
-            "bytes": 229512
+            "bytes": 229370
           },
           {
             "phase": "article loads",
-            "bytes": 220443
+            "bytes": 220870
           },
           {
             "phase": "toggle theme",
@@ -379,19 +588,19 @@
           },
           {
             "phase": "newsletter bad email",
-            "bytes": 82669
+            "bytes": 82734
           },
           {
             "phase": "bad newsletter in flight",
-            "bytes": 88661
+            "bytes": 88726
           },
           {
             "phase": "newsletter typed error",
-            "bytes": 98789
+            "bytes": 98854
           },
           {
             "phase": "carousel next",
-            "bytes": 85232
+            "bytes": 85297
           },
           {
             "phase": "search failure starts",
@@ -399,23 +608,23 @@
           },
           {
             "phase": "search typed error",
-            "bytes": 113919
+            "bytes": 113984
           },
           {
             "phase": "navigate to failing slug",
-            "bytes": 167602
+            "bytes": 167667
           },
           {
             "phase": "not-found typed error",
-            "bytes": 138155
+            "bytes": 138303
           },
           {
             "phase": "navigate to code-heavy article",
-            "bytes": 167653
+            "bytes": 167718
           },
           {
             "phase": "code-heavy article loads",
-            "bytes": 264769
+            "bytes": 265261
           },
           {
             "phase": "check table of contents",
@@ -423,6 +632,54 @@
           },
           {
             "phase": "check highlighted token",
+            "bytes": 0
+          },
+          {
+            "phase": "session: docs to blog",
+            "bytes": 167438
+          },
+          {
+            "phase": "session: blog settles",
+            "bytes": 338636
+          },
+          {
+            "phase": "session: check math",
+            "bytes": 0
+          },
+          {
+            "phase": "session: blog to api",
+            "bytes": 167543
+          },
+          {
+            "phase": "session: api settles",
+            "bytes": 242563
+          },
+          {
+            "phase": "session: check api link",
+            "bytes": 0
+          },
+          {
+            "phase": "session: api to changelog",
+            "bytes": 167417
+          },
+          {
+            "phase": "session: changelog settles",
+            "bytes": 206097
+          },
+          {
+            "phase": "session: check diff",
+            "bytes": 0
+          },
+          {
+            "phase": "session: return to docs",
+            "bytes": 166951
+          },
+          {
+            "phase": "session: docs settles",
+            "bytes": 260169
+          },
+          {
+            "phase": "session: check docs token",
             "bytes": 0
           }
         ],
@@ -465,7 +722,7 @@
           },
           {
             "url": "<repo>/examples/docs-yield/src/app.tsx",
-            "bytes": 8866
+            "bytes": 9209
           },
           {
             "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/index.jsx",
@@ -545,11 +802,15 @@
           },
           {
             "url": "<repo>/examples/docs-yield/src/content.tsx",
-            "bytes": 17779
+            "bytes": 17770
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/page-pipeline.ts",
+            "bytes": 876
           },
           {
             "url": "<repo>/examples/docs-yield/src/article-pipeline.ts",
-            "bytes": 3087
+            "bytes": 3099
           },
           {
             "url": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
@@ -576,8 +837,164 @@
             "bytes": 6912
           },
           {
+            "url": "<repo>/examples/docs-yield/src/level-pipelines.ts",
+            "bytes": 1025
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/post-pipeline.ts",
+            "bytes": 3018
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/katex@0.19.0/node_modules/katex/dist/katex.mjs",
+            "bytes": 296908
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/json.js",
+            "bytes": 839
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/css.js",
+            "bytes": 14840
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/xml.js",
+            "bytes": 506
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/python.js",
+            "bytes": 576
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/rust.js",
+            "bytes": 655
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/go.js",
+            "bytes": 633
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/pipeline-utils.ts",
+            "bytes": 402
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/api-pipeline.ts",
+            "bytes": 1174
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/index.js",
+            "bytes": 6613
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/Types.js",
+            "bytes": 358
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/jsonSchemaToZod.js",
+            "bytes": 942
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseSchema.js",
+            "bytes": 4895
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseAnyOf.js",
+            "bytes": 666
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseBoolean.js",
+            "bytes": 438
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseDefault.js",
+            "bytes": 438
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseMultipleType.js",
+            "bytes": 687
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNot.js",
+            "bytes": 660
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNull.js",
+            "bytes": 429
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseAllOf.js",
+            "bytes": 942
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/half.js",
+            "bytes": 412
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseArray.js",
+            "bytes": 898
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/withMessage.js",
+            "bytes": 412
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseConst.js",
+            "bytes": 432
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseEnum.js",
+            "bytes": 429
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseIfThenElse.js",
+            "bytes": 681
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNumber.js",
+            "bytes": 667
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseObject.js",
+            "bytes": 1719
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseOneOf.js",
+            "bytes": 666
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/jsdocs.js",
+            "bytes": 490
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseString.js",
+            "bytes": 901
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseSimpleDiscriminatedOneOf.js",
+            "bytes": 723
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNullable.js",
+            "bytes": 949
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/omit.js",
+            "bytes": 412
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/changelog-pipeline.ts",
+            "bytes": 747
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/diff2html.js",
+            "bytes": 12320
+          },
+          {
             "url": "<repo>/examples/docs-yield/src/api.ts",
-            "bytes": 2316
+            "bytes": 2500
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/level-data.ts",
+            "bytes": 19530
           },
           {
             "url": "<repo>/examples/docs-yield/src/articles/overview.md?raw",
@@ -622,7 +1039,7 @@
         "phases": [
           {
             "phase": "load",
-            "bytes": 794843
+            "bytes": 1175378
           },
           {
             "phase": "load / (pending)",
@@ -642,11 +1059,11 @@
           },
           {
             "phase": "navigate to /docs/start",
-            "bytes": 229897
+            "bytes": 229891
           },
           {
             "phase": "article loads",
-            "bytes": 221021
+            "bytes": 221448
           },
           {
             "phase": "toggle theme",
@@ -718,7 +1135,7 @@
           },
           {
             "phase": "not-found typed error",
-            "bytes": 139004
+            "bytes": 139087
           },
           {
             "phase": "navigate to code-heavy article",
@@ -726,7 +1143,7 @@
           },
           {
             "phase": "code-heavy article loads",
-            "bytes": 265319
+            "bytes": 265746
           },
           {
             "phase": "check table of contents",
@@ -734,6 +1151,54 @@
           },
           {
             "phase": "check highlighted token",
+            "bytes": 0
+          },
+          {
+            "phase": "session: docs to blog",
+            "bytes": 167483
+          },
+          {
+            "phase": "session: blog settles",
+            "bytes": 339121
+          },
+          {
+            "phase": "session: check math",
+            "bytes": 0
+          },
+          {
+            "phase": "session: blog to api",
+            "bytes": 167588
+          },
+          {
+            "phase": "session: api settles",
+            "bytes": 243092
+          },
+          {
+            "phase": "session: check api link",
+            "bytes": 0
+          },
+          {
+            "phase": "session: api to changelog",
+            "bytes": 167462
+          },
+          {
+            "phase": "session: changelog settles",
+            "bytes": 206647
+          },
+          {
+            "phase": "session: check diff",
+            "bytes": 0
+          },
+          {
+            "phase": "session: return to docs",
+            "bytes": 167094
+          },
+          {
+            "phase": "session: docs settles",
+            "bytes": 260817
+          },
+          {
+            "phase": "session: check docs token",
             "bytes": 0
           }
         ],
@@ -788,7 +1253,11 @@
           },
           {
             "url": "<repo>/examples/docs-yield/src/api__compiler_dep.ts",
-            "bytes": 2200
+            "bytes": 2376
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/level-data__compiler_dep.ts",
+            "bytes": 18824
           },
           {
             "url": "<repo>/examples/docs-yield/src/articles/overview.md?raw",
@@ -900,11 +1369,15 @@
           },
           {
             "url": "<repo>/examples/docs-yield/src/content__compiler_dep.tsx",
-            "bytes": 10168
+            "bytes": 10159
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/page-pipeline__compiler_dep.ts",
+            "bytes": 910
           },
           {
             "url": "<repo>/examples/docs-yield/src/article-pipeline__compiler_dep.ts",
-            "bytes": 3101
+            "bytes": 3113
           },
           {
             "url": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
@@ -931,6 +1404,158 @@
             "bytes": 6912
           },
           {
+            "url": "<repo>/examples/docs-yield/src/level-pipelines__compiler_dep.ts",
+            "bytes": 1069
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/post-pipeline__compiler_dep.ts",
+            "bytes": 3042
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/katex@0.19.0/node_modules/katex/dist/katex.mjs",
+            "bytes": 296908
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/json.js",
+            "bytes": 839
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/css.js",
+            "bytes": 14840
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/xml.js",
+            "bytes": 506
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/python.js",
+            "bytes": 576
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/rust.js",
+            "bytes": 655
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/go.js",
+            "bytes": 633
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/pipeline-utils__compiler_dep.ts",
+            "bytes": 415
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/api-pipeline__compiler_dep.ts",
+            "bytes": 1198
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/index.js",
+            "bytes": 6613
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/Types.js",
+            "bytes": 358
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/jsonSchemaToZod.js",
+            "bytes": 942
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseSchema.js",
+            "bytes": 4895
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseAnyOf.js",
+            "bytes": 666
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseBoolean.js",
+            "bytes": 438
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseDefault.js",
+            "bytes": 438
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseMultipleType.js",
+            "bytes": 687
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNot.js",
+            "bytes": 660
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNull.js",
+            "bytes": 429
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseAllOf.js",
+            "bytes": 942
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/half.js",
+            "bytes": 412
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseArray.js",
+            "bytes": 898
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/withMessage.js",
+            "bytes": 412
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseConst.js",
+            "bytes": 432
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseEnum.js",
+            "bytes": 429
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseIfThenElse.js",
+            "bytes": 681
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNumber.js",
+            "bytes": 667
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseObject.js",
+            "bytes": 1719
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseOneOf.js",
+            "bytes": 666
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/jsdocs.js",
+            "bytes": 490
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseString.js",
+            "bytes": 901
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseSimpleDiscriminatedOneOf.js",
+            "bytes": 723
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNullable.js",
+            "bytes": 949
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/omit.js",
+            "bytes": 412
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/changelog-pipeline__compiler_dep.ts",
+            "bytes": 771
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/diff2html.js",
+            "bytes": 12320
+          },
+          {
             "url": "<repo>/examples/docs-yield/src/widgets__compiler_dep.tsx",
             "bytes": 6775
           },
@@ -948,7 +1573,7 @@
           },
           {
             "url": "<repo>/examples/docs-yield/src/__compiler_ReadingGuide.tsx",
-            "bytes": 10957
+            "bytes": 10948
           },
           {
             "url": "<repo>/node_modules/.pnpm/@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13/node_modules/@solidjs/web/serialization/dist/decode.js",
@@ -979,7 +1604,7 @@
         "phases": [
           {
             "phase": "load",
-            "bytes": 714548
+            "bytes": 1096058
           },
           {
             "phase": "load / (pending)",
@@ -999,11 +1624,11 @@
           },
           {
             "phase": "navigate to /docs/start",
-            "bytes": 215085
+            "bytes": 215080
           },
           {
             "phase": "article loads",
-            "bytes": 213985
+            "bytes": 214412
           },
           {
             "phase": "toggle theme",
@@ -1075,7 +1700,7 @@
           },
           {
             "phase": "not-found typed error",
-            "bytes": 134561
+            "bytes": 134644
           },
           {
             "phase": "navigate to code-heavy article",
@@ -1083,14 +1708,62 @@
           },
           {
             "phase": "code-heavy article loads",
-            "bytes": 258127
+            "bytes": 258554
           },
           {
             "phase": "check table of contents",
-            "bytes": 129363
+            "bytes": 129428
           },
           {
             "phase": "check highlighted token",
+            "bytes": 0
+          },
+          {
+            "phase": "session: docs to blog",
+            "bytes": 164158
+          },
+          {
+            "phase": "session: blog settles",
+            "bytes": 332114
+          },
+          {
+            "phase": "session: check math",
+            "bytes": 0
+          },
+          {
+            "phase": "session: blog to api",
+            "bytes": 164263
+          },
+          {
+            "phase": "session: api settles",
+            "bytes": 236041
+          },
+          {
+            "phase": "session: check api link",
+            "bytes": 0
+          },
+          {
+            "phase": "session: api to changelog",
+            "bytes": 164137
+          },
+          {
+            "phase": "session: changelog settles",
+            "bytes": 199575
+          },
+          {
+            "phase": "session: check diff",
+            "bytes": 0
+          },
+          {
+            "phase": "session: return to docs",
+            "bytes": 163769
+          },
+          {
+            "phase": "session: docs settles",
+            "bytes": 253745
+          },
+          {
+            "phase": "session: check docs token",
             "bytes": 0
           }
         ],
@@ -1125,7 +1798,7 @@
           },
           {
             "url": "<repo>/examples/originals/docs/src/app.tsx",
-            "bytes": 7159
+            "bytes": 7510
           },
           {
             "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/index.jsx",
@@ -1205,11 +1878,15 @@
           },
           {
             "url": "<repo>/examples/originals/docs/src/content.tsx",
-            "bytes": 13903
+            "bytes": 13894
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/page-pipeline.ts",
+            "bytes": 888
           },
           {
             "url": "<repo>/examples/originals/docs/src/article-pipeline.ts",
-            "bytes": 3091
+            "bytes": 3103
           },
           {
             "url": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
@@ -1236,8 +1913,164 @@
             "bytes": 6912
           },
           {
+            "url": "<repo>/examples/originals/docs/src/level-pipelines.ts",
+            "bytes": 1041
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/post-pipeline.ts",
+            "bytes": 3026
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/katex@0.19.0/node_modules/katex/dist/katex.mjs",
+            "bytes": 296908
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/json.js",
+            "bytes": 839
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/css.js",
+            "bytes": 14840
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/xml.js",
+            "bytes": 506
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/python.js",
+            "bytes": 576
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/rust.js",
+            "bytes": 655
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/go.js",
+            "bytes": 633
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/pipeline-utils.ts",
+            "bytes": 406
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/api-pipeline.ts",
+            "bytes": 1182
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/index.js",
+            "bytes": 6613
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/Types.js",
+            "bytes": 358
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/jsonSchemaToZod.js",
+            "bytes": 942
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseSchema.js",
+            "bytes": 4895
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseAnyOf.js",
+            "bytes": 666
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseBoolean.js",
+            "bytes": 438
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseDefault.js",
+            "bytes": 438
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseMultipleType.js",
+            "bytes": 687
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNot.js",
+            "bytes": 660
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNull.js",
+            "bytes": 429
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseAllOf.js",
+            "bytes": 942
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/half.js",
+            "bytes": 412
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseArray.js",
+            "bytes": 898
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/withMessage.js",
+            "bytes": 412
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseConst.js",
+            "bytes": 432
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseEnum.js",
+            "bytes": 429
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseIfThenElse.js",
+            "bytes": 681
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNumber.js",
+            "bytes": 667
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseObject.js",
+            "bytes": 1719
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseOneOf.js",
+            "bytes": 666
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/jsdocs.js",
+            "bytes": 490
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseString.js",
+            "bytes": 901
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseSimpleDiscriminatedOneOf.js",
+            "bytes": 723
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNullable.js",
+            "bytes": 949
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/omit.js",
+            "bytes": 412
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/changelog-pipeline.ts",
+            "bytes": 755
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/diff2html.js",
+            "bytes": 12320
+          },
+          {
             "url": "<repo>/examples/originals/docs/src/api.ts",
-            "bytes": 2348
+            "bytes": 2536
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/level-data.ts",
+            "bytes": 19534
           },
           {
             "url": "<repo>/examples/originals/docs/src/articles/overview.md?raw",
@@ -1282,7 +2115,7 @@
         "phases": [
           {
             "phase": "load",
-            "bytes": 747726
+            "bytes": 1129164
           },
           {
             "phase": "load / (pending)",
@@ -1302,11 +2135,11 @@
           },
           {
             "phase": "navigate to /docs/start",
-            "bytes": 229512
+            "bytes": 229370
           },
           {
             "phase": "article loads",
-            "bytes": 220443
+            "bytes": 220870
           },
           {
             "phase": "toggle theme",
@@ -1350,19 +2183,19 @@
           },
           {
             "phase": "newsletter bad email",
-            "bytes": 82669
+            "bytes": 82734
           },
           {
             "phase": "bad newsletter in flight",
-            "bytes": 88661
+            "bytes": 88726
           },
           {
             "phase": "newsletter typed error",
-            "bytes": 98789
+            "bytes": 98854
           },
           {
             "phase": "carousel next",
-            "bytes": 85232
+            "bytes": 85297
           },
           {
             "phase": "search failure starts",
@@ -1370,23 +2203,23 @@
           },
           {
             "phase": "search typed error",
-            "bytes": 113919
+            "bytes": 113984
           },
           {
             "phase": "navigate to failing slug",
-            "bytes": 167602
+            "bytes": 167667
           },
           {
             "phase": "not-found typed error",
-            "bytes": 138155
+            "bytes": 138303
           },
           {
             "phase": "navigate to code-heavy article",
-            "bytes": 167653
+            "bytes": 167718
           },
           {
             "phase": "code-heavy article loads",
-            "bytes": 264769
+            "bytes": 265261
           },
           {
             "phase": "check table of contents",
@@ -1394,6 +2227,54 @@
           },
           {
             "phase": "check highlighted token",
+            "bytes": 0
+          },
+          {
+            "phase": "session: docs to blog",
+            "bytes": 167438
+          },
+          {
+            "phase": "session: blog settles",
+            "bytes": 338636
+          },
+          {
+            "phase": "session: check math",
+            "bytes": 0
+          },
+          {
+            "phase": "session: blog to api",
+            "bytes": 167543
+          },
+          {
+            "phase": "session: api settles",
+            "bytes": 242563
+          },
+          {
+            "phase": "session: check api link",
+            "bytes": 0
+          },
+          {
+            "phase": "session: api to changelog",
+            "bytes": 167417
+          },
+          {
+            "phase": "session: changelog settles",
+            "bytes": 206097
+          },
+          {
+            "phase": "session: check diff",
+            "bytes": 0
+          },
+          {
+            "phase": "session: return to docs",
+            "bytes": 166951
+          },
+          {
+            "phase": "session: docs settles",
+            "bytes": 260169
+          },
+          {
+            "phase": "session: check docs token",
             "bytes": 0
           }
         ],
@@ -1436,7 +2317,7 @@
           },
           {
             "url": "<repo>/examples/docs-yield/src/app.tsx",
-            "bytes": 8866
+            "bytes": 9209
           },
           {
             "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/index.jsx",
@@ -1516,11 +2397,15 @@
           },
           {
             "url": "<repo>/examples/docs-yield/src/content.tsx",
-            "bytes": 17779
+            "bytes": 17770
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/page-pipeline.ts",
+            "bytes": 876
           },
           {
             "url": "<repo>/examples/docs-yield/src/article-pipeline.ts",
-            "bytes": 3087
+            "bytes": 3099
           },
           {
             "url": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
@@ -1547,8 +2432,164 @@
             "bytes": 6912
           },
           {
+            "url": "<repo>/examples/docs-yield/src/level-pipelines.ts",
+            "bytes": 1025
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/post-pipeline.ts",
+            "bytes": 3018
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/katex@0.19.0/node_modules/katex/dist/katex.mjs",
+            "bytes": 296908
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/json.js",
+            "bytes": 839
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/css.js",
+            "bytes": 14840
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/xml.js",
+            "bytes": 506
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/python.js",
+            "bytes": 576
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/rust.js",
+            "bytes": 655
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/go.js",
+            "bytes": 633
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/pipeline-utils.ts",
+            "bytes": 402
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/api-pipeline.ts",
+            "bytes": 1174
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/index.js",
+            "bytes": 6613
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/Types.js",
+            "bytes": 358
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/jsonSchemaToZod.js",
+            "bytes": 942
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseSchema.js",
+            "bytes": 4895
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseAnyOf.js",
+            "bytes": 666
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseBoolean.js",
+            "bytes": 438
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseDefault.js",
+            "bytes": 438
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseMultipleType.js",
+            "bytes": 687
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNot.js",
+            "bytes": 660
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNull.js",
+            "bytes": 429
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseAllOf.js",
+            "bytes": 942
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/half.js",
+            "bytes": 412
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseArray.js",
+            "bytes": 898
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/withMessage.js",
+            "bytes": 412
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseConst.js",
+            "bytes": 432
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseEnum.js",
+            "bytes": 429
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseIfThenElse.js",
+            "bytes": 681
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNumber.js",
+            "bytes": 667
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseObject.js",
+            "bytes": 1719
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseOneOf.js",
+            "bytes": 666
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/jsdocs.js",
+            "bytes": 490
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseString.js",
+            "bytes": 901
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseSimpleDiscriminatedOneOf.js",
+            "bytes": 723
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNullable.js",
+            "bytes": 949
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/omit.js",
+            "bytes": 412
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/changelog-pipeline.ts",
+            "bytes": 747
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/diff2html.js",
+            "bytes": 12320
+          },
+          {
             "url": "<repo>/examples/docs-yield/src/api.ts",
-            "bytes": 2316
+            "bytes": 2500
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/level-data.ts",
+            "bytes": 19530
           },
           {
             "url": "<repo>/examples/docs-yield/src/articles/overview.md?raw",
@@ -1593,7 +2634,7 @@
         "phases": [
           {
             "phase": "load",
-            "bytes": 794843
+            "bytes": 1175378
           },
           {
             "phase": "load / (pending)",
@@ -1613,11 +2654,11 @@
           },
           {
             "phase": "navigate to /docs/start",
-            "bytes": 229897
+            "bytes": 229891
           },
           {
             "phase": "article loads",
-            "bytes": 221021
+            "bytes": 221448
           },
           {
             "phase": "toggle theme",
@@ -1689,7 +2730,7 @@
           },
           {
             "phase": "not-found typed error",
-            "bytes": 139004
+            "bytes": 139087
           },
           {
             "phase": "navigate to code-heavy article",
@@ -1697,7 +2738,7 @@
           },
           {
             "phase": "code-heavy article loads",
-            "bytes": 265319
+            "bytes": 265746
           },
           {
             "phase": "check table of contents",
@@ -1705,6 +2746,54 @@
           },
           {
             "phase": "check highlighted token",
+            "bytes": 0
+          },
+          {
+            "phase": "session: docs to blog",
+            "bytes": 167483
+          },
+          {
+            "phase": "session: blog settles",
+            "bytes": 339121
+          },
+          {
+            "phase": "session: check math",
+            "bytes": 0
+          },
+          {
+            "phase": "session: blog to api",
+            "bytes": 167588
+          },
+          {
+            "phase": "session: api settles",
+            "bytes": 243092
+          },
+          {
+            "phase": "session: check api link",
+            "bytes": 0
+          },
+          {
+            "phase": "session: api to changelog",
+            "bytes": 167462
+          },
+          {
+            "phase": "session: changelog settles",
+            "bytes": 206647
+          },
+          {
+            "phase": "session: check diff",
+            "bytes": 0
+          },
+          {
+            "phase": "session: return to docs",
+            "bytes": 167094
+          },
+          {
+            "phase": "session: docs settles",
+            "bytes": 260817
+          },
+          {
+            "phase": "session: check docs token",
             "bytes": 0
           }
         ],
@@ -1759,7 +2848,11 @@
           },
           {
             "url": "<repo>/examples/docs-yield/src/api__compiler_dep.ts",
-            "bytes": 2200
+            "bytes": 2376
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/level-data__compiler_dep.ts",
+            "bytes": 18824
           },
           {
             "url": "<repo>/examples/docs-yield/src/articles/overview.md?raw",
@@ -1871,11 +2964,15 @@
           },
           {
             "url": "<repo>/examples/docs-yield/src/content__compiler_dep.tsx",
-            "bytes": 10168
+            "bytes": 10159
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/page-pipeline__compiler_dep.ts",
+            "bytes": 910
           },
           {
             "url": "<repo>/examples/docs-yield/src/article-pipeline__compiler_dep.ts",
-            "bytes": 3101
+            "bytes": 3113
           },
           {
             "url": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
@@ -1902,6 +2999,158 @@
             "bytes": 6912
           },
           {
+            "url": "<repo>/examples/docs-yield/src/level-pipelines__compiler_dep.ts",
+            "bytes": 1069
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/post-pipeline__compiler_dep.ts",
+            "bytes": 3042
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/katex@0.19.0/node_modules/katex/dist/katex.mjs",
+            "bytes": 296908
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/json.js",
+            "bytes": 839
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/css.js",
+            "bytes": 14840
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/xml.js",
+            "bytes": 506
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/python.js",
+            "bytes": 576
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/rust.js",
+            "bytes": 655
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/go.js",
+            "bytes": 633
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/pipeline-utils__compiler_dep.ts",
+            "bytes": 415
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/api-pipeline__compiler_dep.ts",
+            "bytes": 1198
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/index.js",
+            "bytes": 6613
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/Types.js",
+            "bytes": 358
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/jsonSchemaToZod.js",
+            "bytes": 942
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseSchema.js",
+            "bytes": 4895
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseAnyOf.js",
+            "bytes": 666
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseBoolean.js",
+            "bytes": 438
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseDefault.js",
+            "bytes": 438
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseMultipleType.js",
+            "bytes": 687
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNot.js",
+            "bytes": 660
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNull.js",
+            "bytes": 429
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseAllOf.js",
+            "bytes": 942
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/half.js",
+            "bytes": 412
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseArray.js",
+            "bytes": 898
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/withMessage.js",
+            "bytes": 412
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseConst.js",
+            "bytes": 432
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseEnum.js",
+            "bytes": 429
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseIfThenElse.js",
+            "bytes": 681
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNumber.js",
+            "bytes": 667
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseObject.js",
+            "bytes": 1719
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseOneOf.js",
+            "bytes": 666
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/jsdocs.js",
+            "bytes": 490
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseString.js",
+            "bytes": 901
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseSimpleDiscriminatedOneOf.js",
+            "bytes": 723
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNullable.js",
+            "bytes": 949
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/omit.js",
+            "bytes": 412
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/changelog-pipeline__compiler_dep.ts",
+            "bytes": 771
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/diff2html.js",
+            "bytes": 12320
+          },
+          {
             "url": "<repo>/examples/docs-yield/src/widgets__compiler_dep.tsx",
             "bytes": 6775
           },
@@ -1919,7 +3168,7 @@
           },
           {
             "url": "<repo>/examples/docs-yield/src/__compiler_ReadingGuide.tsx",
-            "bytes": 10957
+            "bytes": 10948
           },
           {
             "url": "<repo>/node_modules/.pnpm/@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13/node_modules/@solidjs/web/serialization/dist/decode.js",
@@ -1950,7 +3199,7 @@
         "phases": [
           {
             "phase": "load",
-            "bytes": 714548
+            "bytes": 1096058
           },
           {
             "phase": "load / (pending)",
@@ -1970,11 +3219,11 @@
           },
           {
             "phase": "navigate to /docs/start",
-            "bytes": 215085
+            "bytes": 215080
           },
           {
             "phase": "article loads",
-            "bytes": 213985
+            "bytes": 214412
           },
           {
             "phase": "toggle theme",
@@ -2046,7 +3295,7 @@
           },
           {
             "phase": "not-found typed error",
-            "bytes": 134561
+            "bytes": 134644
           },
           {
             "phase": "navigate to code-heavy article",
@@ -2054,14 +3303,62 @@
           },
           {
             "phase": "code-heavy article loads",
-            "bytes": 258127
+            "bytes": 258554
           },
           {
             "phase": "check table of contents",
-            "bytes": 129363
+            "bytes": 129428
           },
           {
             "phase": "check highlighted token",
+            "bytes": 0
+          },
+          {
+            "phase": "session: docs to blog",
+            "bytes": 164158
+          },
+          {
+            "phase": "session: blog settles",
+            "bytes": 332114
+          },
+          {
+            "phase": "session: check math",
+            "bytes": 0
+          },
+          {
+            "phase": "session: blog to api",
+            "bytes": 164263
+          },
+          {
+            "phase": "session: api settles",
+            "bytes": 236041
+          },
+          {
+            "phase": "session: check api link",
+            "bytes": 0
+          },
+          {
+            "phase": "session: api to changelog",
+            "bytes": 164137
+          },
+          {
+            "phase": "session: changelog settles",
+            "bytes": 199575
+          },
+          {
+            "phase": "session: check diff",
+            "bytes": 0
+          },
+          {
+            "phase": "session: return to docs",
+            "bytes": 163769
+          },
+          {
+            "phase": "session: docs settles",
+            "bytes": 253745
+          },
+          {
+            "phase": "session: check docs token",
             "bytes": 0
           }
         ],
@@ -2096,7 +3393,7 @@
           },
           {
             "url": "<repo>/examples/originals/docs/src/app.tsx",
-            "bytes": 7159
+            "bytes": 7510
           },
           {
             "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/index.jsx",
@@ -2176,11 +3473,15 @@
           },
           {
             "url": "<repo>/examples/originals/docs/src/content.tsx",
-            "bytes": 13903
+            "bytes": 13894
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/page-pipeline.ts",
+            "bytes": 888
           },
           {
             "url": "<repo>/examples/originals/docs/src/article-pipeline.ts",
-            "bytes": 3091
+            "bytes": 3103
           },
           {
             "url": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
@@ -2207,8 +3508,164 @@
             "bytes": 6912
           },
           {
+            "url": "<repo>/examples/originals/docs/src/level-pipelines.ts",
+            "bytes": 1041
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/post-pipeline.ts",
+            "bytes": 3026
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/katex@0.19.0/node_modules/katex/dist/katex.mjs",
+            "bytes": 296908
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/json.js",
+            "bytes": 839
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/css.js",
+            "bytes": 14840
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/xml.js",
+            "bytes": 506
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/python.js",
+            "bytes": 576
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/rust.js",
+            "bytes": 655
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/go.js",
+            "bytes": 633
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/pipeline-utils.ts",
+            "bytes": 406
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/api-pipeline.ts",
+            "bytes": 1182
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/index.js",
+            "bytes": 6613
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/Types.js",
+            "bytes": 358
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/jsonSchemaToZod.js",
+            "bytes": 942
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseSchema.js",
+            "bytes": 4895
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseAnyOf.js",
+            "bytes": 666
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseBoolean.js",
+            "bytes": 438
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseDefault.js",
+            "bytes": 438
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseMultipleType.js",
+            "bytes": 687
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNot.js",
+            "bytes": 660
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNull.js",
+            "bytes": 429
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseAllOf.js",
+            "bytes": 942
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/half.js",
+            "bytes": 412
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseArray.js",
+            "bytes": 898
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/withMessage.js",
+            "bytes": 412
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseConst.js",
+            "bytes": 432
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseEnum.js",
+            "bytes": 429
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseIfThenElse.js",
+            "bytes": 681
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNumber.js",
+            "bytes": 667
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseObject.js",
+            "bytes": 1719
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseOneOf.js",
+            "bytes": 666
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/jsdocs.js",
+            "bytes": 490
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseString.js",
+            "bytes": 901
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseSimpleDiscriminatedOneOf.js",
+            "bytes": 723
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNullable.js",
+            "bytes": 949
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/omit.js",
+            "bytes": 412
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/changelog-pipeline.ts",
+            "bytes": 755
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/diff2html.js",
+            "bytes": 12320
+          },
+          {
             "url": "<repo>/examples/originals/docs/src/api.ts",
-            "bytes": 2348
+            "bytes": 2536
+          },
+          {
+            "url": "<repo>/examples/originals/docs/src/level-data.ts",
+            "bytes": 19534
           },
           {
             "url": "<repo>/examples/originals/docs/src/articles/overview.md?raw",
@@ -2253,7 +3710,7 @@
         "phases": [
           {
             "phase": "load",
-            "bytes": 747726
+            "bytes": 1129164
           },
           {
             "phase": "load / (pending)",
@@ -2273,11 +3730,11 @@
           },
           {
             "phase": "navigate to /docs/start",
-            "bytes": 229512
+            "bytes": 229370
           },
           {
             "phase": "article loads",
-            "bytes": 220443
+            "bytes": 220870
           },
           {
             "phase": "toggle theme",
@@ -2321,19 +3778,19 @@
           },
           {
             "phase": "newsletter bad email",
-            "bytes": 82669
+            "bytes": 82734
           },
           {
             "phase": "bad newsletter in flight",
-            "bytes": 88661
+            "bytes": 88726
           },
           {
             "phase": "newsletter typed error",
-            "bytes": 98789
+            "bytes": 98854
           },
           {
             "phase": "carousel next",
-            "bytes": 85232
+            "bytes": 85297
           },
           {
             "phase": "search failure starts",
@@ -2341,23 +3798,23 @@
           },
           {
             "phase": "search typed error",
-            "bytes": 113919
+            "bytes": 113984
           },
           {
             "phase": "navigate to failing slug",
-            "bytes": 167602
+            "bytes": 167667
           },
           {
             "phase": "not-found typed error",
-            "bytes": 138155
+            "bytes": 138303
           },
           {
             "phase": "navigate to code-heavy article",
-            "bytes": 167653
+            "bytes": 167718
           },
           {
             "phase": "code-heavy article loads",
-            "bytes": 264769
+            "bytes": 265261
           },
           {
             "phase": "check table of contents",
@@ -2365,6 +3822,54 @@
           },
           {
             "phase": "check highlighted token",
+            "bytes": 0
+          },
+          {
+            "phase": "session: docs to blog",
+            "bytes": 167438
+          },
+          {
+            "phase": "session: blog settles",
+            "bytes": 338636
+          },
+          {
+            "phase": "session: check math",
+            "bytes": 0
+          },
+          {
+            "phase": "session: blog to api",
+            "bytes": 167543
+          },
+          {
+            "phase": "session: api settles",
+            "bytes": 242563
+          },
+          {
+            "phase": "session: check api link",
+            "bytes": 0
+          },
+          {
+            "phase": "session: api to changelog",
+            "bytes": 167417
+          },
+          {
+            "phase": "session: changelog settles",
+            "bytes": 206097
+          },
+          {
+            "phase": "session: check diff",
+            "bytes": 0
+          },
+          {
+            "phase": "session: return to docs",
+            "bytes": 166951
+          },
+          {
+            "phase": "session: docs settles",
+            "bytes": 260169
+          },
+          {
+            "phase": "session: check docs token",
             "bytes": 0
           }
         ],
@@ -2407,7 +3912,7 @@
           },
           {
             "url": "<repo>/examples/docs-yield/src/app.tsx",
-            "bytes": 8866
+            "bytes": 9209
           },
           {
             "url": "<repo>/node_modules/.pnpm/@solidjs+router@2.0.0-next.29_@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13__solid-js@2.0.0-rc.13/node_modules/@solidjs/router/dist/index.jsx",
@@ -2487,11 +3992,15 @@
           },
           {
             "url": "<repo>/examples/docs-yield/src/content.tsx",
-            "bytes": 17779
+            "bytes": 17770
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/page-pipeline.ts",
+            "bytes": 876
           },
           {
             "url": "<repo>/examples/docs-yield/src/article-pipeline.ts",
-            "bytes": 3087
+            "bytes": 3099
           },
           {
             "url": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
@@ -2518,8 +4027,164 @@
             "bytes": 6912
           },
           {
+            "url": "<repo>/examples/docs-yield/src/level-pipelines.ts",
+            "bytes": 1025
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/post-pipeline.ts",
+            "bytes": 3018
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/katex@0.19.0/node_modules/katex/dist/katex.mjs",
+            "bytes": 296908
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/json.js",
+            "bytes": 839
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/css.js",
+            "bytes": 14840
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/xml.js",
+            "bytes": 506
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/python.js",
+            "bytes": 576
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/rust.js",
+            "bytes": 655
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/go.js",
+            "bytes": 633
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/pipeline-utils.ts",
+            "bytes": 402
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/api-pipeline.ts",
+            "bytes": 1174
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/index.js",
+            "bytes": 6613
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/Types.js",
+            "bytes": 358
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/jsonSchemaToZod.js",
+            "bytes": 942
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseSchema.js",
+            "bytes": 4895
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseAnyOf.js",
+            "bytes": 666
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseBoolean.js",
+            "bytes": 438
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseDefault.js",
+            "bytes": 438
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseMultipleType.js",
+            "bytes": 687
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNot.js",
+            "bytes": 660
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNull.js",
+            "bytes": 429
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseAllOf.js",
+            "bytes": 942
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/half.js",
+            "bytes": 412
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseArray.js",
+            "bytes": 898
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/withMessage.js",
+            "bytes": 412
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseConst.js",
+            "bytes": 432
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseEnum.js",
+            "bytes": 429
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseIfThenElse.js",
+            "bytes": 681
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNumber.js",
+            "bytes": 667
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseObject.js",
+            "bytes": 1719
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseOneOf.js",
+            "bytes": 666
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/jsdocs.js",
+            "bytes": 490
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseString.js",
+            "bytes": 901
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseSimpleDiscriminatedOneOf.js",
+            "bytes": 723
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNullable.js",
+            "bytes": 949
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/omit.js",
+            "bytes": 412
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/changelog-pipeline.ts",
+            "bytes": 747
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/diff2html.js",
+            "bytes": 12320
+          },
+          {
             "url": "<repo>/examples/docs-yield/src/api.ts",
-            "bytes": 2316
+            "bytes": 2500
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/level-data.ts",
+            "bytes": 19530
           },
           {
             "url": "<repo>/examples/docs-yield/src/articles/overview.md?raw",
@@ -2564,7 +4229,7 @@
         "phases": [
           {
             "phase": "load",
-            "bytes": 794843
+            "bytes": 1175378
           },
           {
             "phase": "load / (pending)",
@@ -2584,11 +4249,11 @@
           },
           {
             "phase": "navigate to /docs/start",
-            "bytes": 229897
+            "bytes": 229891
           },
           {
             "phase": "article loads",
-            "bytes": 221021
+            "bytes": 221448
           },
           {
             "phase": "toggle theme",
@@ -2660,7 +4325,7 @@
           },
           {
             "phase": "not-found typed error",
-            "bytes": 139004
+            "bytes": 139087
           },
           {
             "phase": "navigate to code-heavy article",
@@ -2668,7 +4333,7 @@
           },
           {
             "phase": "code-heavy article loads",
-            "bytes": 265319
+            "bytes": 265746
           },
           {
             "phase": "check table of contents",
@@ -2676,6 +4341,54 @@
           },
           {
             "phase": "check highlighted token",
+            "bytes": 0
+          },
+          {
+            "phase": "session: docs to blog",
+            "bytes": 167483
+          },
+          {
+            "phase": "session: blog settles",
+            "bytes": 339121
+          },
+          {
+            "phase": "session: check math",
+            "bytes": 0
+          },
+          {
+            "phase": "session: blog to api",
+            "bytes": 167588
+          },
+          {
+            "phase": "session: api settles",
+            "bytes": 243092
+          },
+          {
+            "phase": "session: check api link",
+            "bytes": 0
+          },
+          {
+            "phase": "session: api to changelog",
+            "bytes": 167462
+          },
+          {
+            "phase": "session: changelog settles",
+            "bytes": 206647
+          },
+          {
+            "phase": "session: check diff",
+            "bytes": 0
+          },
+          {
+            "phase": "session: return to docs",
+            "bytes": 167094
+          },
+          {
+            "phase": "session: docs settles",
+            "bytes": 260817
+          },
+          {
+            "phase": "session: check docs token",
             "bytes": 0
           }
         ],
@@ -2730,7 +4443,11 @@
           },
           {
             "url": "<repo>/examples/docs-yield/src/api__compiler_dep.ts",
-            "bytes": 2200
+            "bytes": 2376
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/level-data__compiler_dep.ts",
+            "bytes": 18824
           },
           {
             "url": "<repo>/examples/docs-yield/src/articles/overview.md?raw",
@@ -2842,11 +4559,15 @@
           },
           {
             "url": "<repo>/examples/docs-yield/src/content__compiler_dep.tsx",
-            "bytes": 10168
+            "bytes": 10159
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/page-pipeline__compiler_dep.ts",
+            "bytes": 910
           },
           {
             "url": "<repo>/examples/docs-yield/src/article-pipeline__compiler_dep.ts",
-            "bytes": 3101
+            "bytes": 3113
           },
           {
             "url": "<repo>/node_modules/.pnpm/marked@18.1.0/node_modules/marked/lib/marked.esm.js",
@@ -2873,6 +4594,158 @@
             "bytes": 6912
           },
           {
+            "url": "<repo>/examples/docs-yield/src/level-pipelines__compiler_dep.ts",
+            "bytes": 1069
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/post-pipeline__compiler_dep.ts",
+            "bytes": 3042
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/katex@0.19.0/node_modules/katex/dist/katex.mjs",
+            "bytes": 296908
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/json.js",
+            "bytes": 839
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/css.js",
+            "bytes": 14840
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/xml.js",
+            "bytes": 506
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/python.js",
+            "bytes": 576
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/rust.js",
+            "bytes": 655
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/highlight.js@11.12.0/node_modules/highlight.js/es/languages/go.js",
+            "bytes": 633
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/pipeline-utils__compiler_dep.ts",
+            "bytes": 415
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/api-pipeline__compiler_dep.ts",
+            "bytes": 1198
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/index.js",
+            "bytes": 6613
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/Types.js",
+            "bytes": 358
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/jsonSchemaToZod.js",
+            "bytes": 942
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseSchema.js",
+            "bytes": 4895
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseAnyOf.js",
+            "bytes": 666
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseBoolean.js",
+            "bytes": 438
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseDefault.js",
+            "bytes": 438
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseMultipleType.js",
+            "bytes": 687
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNot.js",
+            "bytes": 660
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNull.js",
+            "bytes": 429
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseAllOf.js",
+            "bytes": 942
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/half.js",
+            "bytes": 412
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseArray.js",
+            "bytes": 898
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/withMessage.js",
+            "bytes": 412
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseConst.js",
+            "bytes": 432
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseEnum.js",
+            "bytes": 429
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseIfThenElse.js",
+            "bytes": 681
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNumber.js",
+            "bytes": 667
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseObject.js",
+            "bytes": 1719
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseOneOf.js",
+            "bytes": 666
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/jsdocs.js",
+            "bytes": 490
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseString.js",
+            "bytes": 901
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseSimpleDiscriminatedOneOf.js",
+            "bytes": 723
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/parsers/parseNullable.js",
+            "bytes": 949
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/json-schema-to-zod@2.8.1/node_modules/json-schema-to-zod/dist/esm/utils/omit.js",
+            "bytes": 412
+          },
+          {
+            "url": "<repo>/examples/docs-yield/src/changelog-pipeline__compiler_dep.ts",
+            "bytes": 771
+          },
+          {
+            "url": "<repo>/node_modules/.pnpm/diff2html@3.4.56/node_modules/diff2html/lib-esm/diff2html.js",
+            "bytes": 12320
+          },
+          {
             "url": "<repo>/examples/docs-yield/src/widgets__compiler_dep.tsx",
             "bytes": 6775
           },
@@ -2890,7 +4763,7 @@
           },
           {
             "url": "<repo>/examples/docs-yield/src/__compiler_ReadingGuide.tsx",
-            "bytes": 10957
+            "bytes": 10948
           },
           {
             "url": "<repo>/node_modules/.pnpm/@solidjs+web@2.0.0-rc.13_solid-js@2.0.0-rc.13/node_modules/@solidjs/web/serialization/dist/decode.js",
@@ -2923,14 +4796,14 @@
         {
           "phase": "load",
           "observations": [
-            714548,
-            714548,
-            714548
+            1096058,
+            1096058,
+            1096058
           ],
-          "min": 714548,
-          "max": 714548,
+          "min": 1096058,
+          "max": 1096058,
           "drift": 0,
-          "maxBytes": 728839
+          "maxBytes": 1117980
         },
         {
           "phase": "load / (pending)",
@@ -2983,26 +4856,26 @@
         {
           "phase": "navigate to /docs/start",
           "observations": [
-            215085,
-            215085,
-            215085
+            215080,
+            215080,
+            215080
           ],
-          "min": 215085,
-          "max": 215085,
+          "min": 215080,
+          "max": 215080,
           "drift": 0,
-          "maxBytes": 219387
+          "maxBytes": 219382
         },
         {
           "phase": "article loads",
           "observations": [
-            213985,
-            213985,
-            213985
+            214412,
+            214412,
+            214412
           ],
-          "min": 213985,
-          "max": 213985,
+          "min": 214412,
+          "max": 214412,
           "drift": 0,
-          "maxBytes": 218265
+          "maxBytes": 218701
         },
         {
           "phase": "toggle theme",
@@ -3211,14 +5084,14 @@
         {
           "phase": "not-found typed error",
           "observations": [
-            134561,
-            134561,
-            134561
+            134644,
+            134644,
+            134644
           ],
-          "min": 134561,
-          "max": 134561,
+          "min": 134644,
+          "max": 134644,
           "drift": 0,
-          "maxBytes": 137253
+          "maxBytes": 137337
         },
         {
           "phase": "navigate to code-heavy article",
@@ -3235,29 +5108,173 @@
         {
           "phase": "code-heavy article loads",
           "observations": [
-            258127,
-            258127,
-            258127
+            258554,
+            258554,
+            258554
           ],
-          "min": 258127,
-          "max": 258127,
+          "min": 258554,
+          "max": 258554,
           "drift": 0,
-          "maxBytes": 263290
+          "maxBytes": 263726
         },
         {
           "phase": "check table of contents",
           "observations": [
-            129363,
-            129363,
-            129363
+            129428,
+            129428,
+            129428
           ],
-          "min": 129363,
-          "max": 129363,
+          "min": 129428,
+          "max": 129428,
           "drift": 0,
-          "maxBytes": 131951
+          "maxBytes": 132017
         },
         {
           "phase": "check highlighted token",
+          "observations": [
+            0,
+            0,
+            0
+          ],
+          "min": 0,
+          "max": 0,
+          "drift": 0,
+          "maxBytes": 1024
+        },
+        {
+          "phase": "session: docs to blog",
+          "observations": [
+            164158,
+            164158,
+            164158
+          ],
+          "min": 164158,
+          "max": 164158,
+          "drift": 0,
+          "maxBytes": 167442
+        },
+        {
+          "phase": "session: blog settles",
+          "observations": [
+            332114,
+            332114,
+            332114
+          ],
+          "min": 332114,
+          "max": 332114,
+          "drift": 0,
+          "maxBytes": 338757
+        },
+        {
+          "phase": "session: check math",
+          "observations": [
+            0,
+            0,
+            0
+          ],
+          "min": 0,
+          "max": 0,
+          "drift": 0,
+          "maxBytes": 1024
+        },
+        {
+          "phase": "session: blog to api",
+          "observations": [
+            164263,
+            164263,
+            164263
+          ],
+          "min": 164263,
+          "max": 164263,
+          "drift": 0,
+          "maxBytes": 167549
+        },
+        {
+          "phase": "session: api settles",
+          "observations": [
+            236041,
+            236041,
+            236041
+          ],
+          "min": 236041,
+          "max": 236041,
+          "drift": 0,
+          "maxBytes": 240762
+        },
+        {
+          "phase": "session: check api link",
+          "observations": [
+            0,
+            0,
+            0
+          ],
+          "min": 0,
+          "max": 0,
+          "drift": 0,
+          "maxBytes": 1024
+        },
+        {
+          "phase": "session: api to changelog",
+          "observations": [
+            164137,
+            164137,
+            164137
+          ],
+          "min": 164137,
+          "max": 164137,
+          "drift": 0,
+          "maxBytes": 167420
+        },
+        {
+          "phase": "session: changelog settles",
+          "observations": [
+            199575,
+            199575,
+            199575
+          ],
+          "min": 199575,
+          "max": 199575,
+          "drift": 0,
+          "maxBytes": 203567
+        },
+        {
+          "phase": "session: check diff",
+          "observations": [
+            0,
+            0,
+            0
+          ],
+          "min": 0,
+          "max": 0,
+          "drift": 0,
+          "maxBytes": 1024
+        },
+        {
+          "phase": "session: return to docs",
+          "observations": [
+            163769,
+            163769,
+            163769
+          ],
+          "min": 163769,
+          "max": 163769,
+          "drift": 0,
+          "maxBytes": 167045
+        },
+        {
+          "phase": "session: docs settles",
+          "observations": [
+            253745,
+            253745,
+            253745
+          ],
+          "min": 253745,
+          "max": 253745,
+          "drift": 0,
+          "maxBytes": 258820
+        },
+        {
+          "phase": "session: check docs token",
           "observations": [
             0,
             0,
@@ -3276,14 +5293,14 @@
         {
           "phase": "load",
           "observations": [
-            747726,
-            747726,
-            747726
+            1129164,
+            1129164,
+            1129164
           ],
-          "min": 747726,
-          "max": 747726,
+          "min": 1129164,
+          "max": 1129164,
           "drift": 0,
-          "maxBytes": 762681
+          "maxBytes": 1151748
         },
         {
           "phase": "load / (pending)",
@@ -3336,26 +5353,26 @@
         {
           "phase": "navigate to /docs/start",
           "observations": [
-            229512,
-            229512,
-            229512
+            229370,
+            229370,
+            229370
           ],
-          "min": 229512,
-          "max": 229512,
+          "min": 229370,
+          "max": 229370,
           "drift": 0,
-          "maxBytes": 234103
+          "maxBytes": 233958
         },
         {
           "phase": "article loads",
           "observations": [
-            220443,
-            220443,
-            220443
+            220870,
+            220870,
+            220870
           ],
-          "min": 220443,
-          "max": 220443,
+          "min": 220870,
+          "max": 220870,
           "drift": 0,
-          "maxBytes": 224852
+          "maxBytes": 225288
         },
         {
           "phase": "toggle theme",
@@ -3480,50 +5497,50 @@
         {
           "phase": "newsletter bad email",
           "observations": [
-            82669,
-            82669,
-            82669
+            82734,
+            82734,
+            82734
           ],
-          "min": 82669,
-          "max": 82669,
+          "min": 82734,
+          "max": 82734,
           "drift": 0,
-          "maxBytes": 84323
+          "maxBytes": 84389
         },
         {
           "phase": "bad newsletter in flight",
           "observations": [
-            88661,
-            88661,
-            88661
+            88726,
+            88726,
+            88726
           ],
-          "min": 88661,
-          "max": 88661,
+          "min": 88726,
+          "max": 88726,
           "drift": 0,
-          "maxBytes": 90435
+          "maxBytes": 90501
         },
         {
           "phase": "newsletter typed error",
           "observations": [
-            98789,
-            98789,
-            98789
+            98854,
+            98854,
+            98854
           ],
-          "min": 98789,
-          "max": 98789,
+          "min": 98854,
+          "max": 98854,
           "drift": 0,
-          "maxBytes": 100765
+          "maxBytes": 100832
         },
         {
           "phase": "carousel next",
           "observations": [
-            85232,
-            85232,
-            85232
+            85297,
+            85297,
+            85297
           ],
-          "min": 85232,
-          "max": 85232,
+          "min": 85297,
+          "max": 85297,
           "drift": 0,
-          "maxBytes": 86937
+          "maxBytes": 87003
         },
         {
           "phase": "search failure starts",
@@ -3540,62 +5557,62 @@
         {
           "phase": "search typed error",
           "observations": [
-            113919,
-            113919,
-            113919
+            113984,
+            113984,
+            113984
           ],
-          "min": 113919,
-          "max": 113919,
+          "min": 113984,
+          "max": 113984,
           "drift": 0,
-          "maxBytes": 116198
+          "maxBytes": 116264
         },
         {
           "phase": "navigate to failing slug",
           "observations": [
-            167602,
-            167602,
-            167602
+            167667,
+            167667,
+            167667
           ],
-          "min": 167602,
-          "max": 167602,
+          "min": 167667,
+          "max": 167667,
           "drift": 0,
-          "maxBytes": 170955
+          "maxBytes": 171021
         },
         {
           "phase": "not-found typed error",
           "observations": [
-            138155,
-            138155,
-            138155
+            138303,
+            138303,
+            138303
           ],
-          "min": 138155,
-          "max": 138155,
+          "min": 138303,
+          "max": 138303,
           "drift": 0,
-          "maxBytes": 140919
+          "maxBytes": 141070
         },
         {
           "phase": "navigate to code-heavy article",
           "observations": [
-            167653,
-            167653,
-            167653
+            167718,
+            167718,
+            167718
           ],
-          "min": 167653,
-          "max": 167653,
+          "min": 167718,
+          "max": 167718,
           "drift": 0,
-          "maxBytes": 171007
+          "maxBytes": 171073
         },
         {
           "phase": "code-heavy article loads",
           "observations": [
-            264769,
-            264769,
-            264769
+            265261,
+            265261,
+            265261
           ],
-          "min": 264769,
-          "max": 264769,
+          "min": 265261,
+          "max": 265261,
           "drift": 0,
-          "maxBytes": 270065
+          "maxBytes": 270567
         },
         {
           "phase": "check table of contents",
@@ -3620,6 +5637,150 @@
           "max": 0,
           "drift": 0,
           "maxBytes": 1024
+        },
+        {
+          "phase": "session: docs to blog",
+          "observations": [
+            167438,
+            167438,
+            167438
+          ],
+          "min": 167438,
+          "max": 167438,
+          "drift": 0,
+          "maxBytes": 170787
+        },
+        {
+          "phase": "session: blog settles",
+          "observations": [
+            338636,
+            338636,
+            338636
+          ],
+          "min": 338636,
+          "max": 338636,
+          "drift": 0,
+          "maxBytes": 345409
+        },
+        {
+          "phase": "session: check math",
+          "observations": [
+            0,
+            0,
+            0
+          ],
+          "min": 0,
+          "max": 0,
+          "drift": 0,
+          "maxBytes": 1024
+        },
+        {
+          "phase": "session: blog to api",
+          "observations": [
+            167543,
+            167543,
+            167543
+          ],
+          "min": 167543,
+          "max": 167543,
+          "drift": 0,
+          "maxBytes": 170894
+        },
+        {
+          "phase": "session: api settles",
+          "observations": [
+            242563,
+            242563,
+            242563
+          ],
+          "min": 242563,
+          "max": 242563,
+          "drift": 0,
+          "maxBytes": 247415
+        },
+        {
+          "phase": "session: check api link",
+          "observations": [
+            0,
+            0,
+            0
+          ],
+          "min": 0,
+          "max": 0,
+          "drift": 0,
+          "maxBytes": 1024
+        },
+        {
+          "phase": "session: api to changelog",
+          "observations": [
+            167417,
+            167417,
+            167417
+          ],
+          "min": 167417,
+          "max": 167417,
+          "drift": 0,
+          "maxBytes": 170766
+        },
+        {
+          "phase": "session: changelog settles",
+          "observations": [
+            206097,
+            206097,
+            206097
+          ],
+          "min": 206097,
+          "max": 206097,
+          "drift": 0,
+          "maxBytes": 210219
+        },
+        {
+          "phase": "session: check diff",
+          "observations": [
+            0,
+            0,
+            0
+          ],
+          "min": 0,
+          "max": 0,
+          "drift": 0,
+          "maxBytes": 1024
+        },
+        {
+          "phase": "session: return to docs",
+          "observations": [
+            166951,
+            166951,
+            166951
+          ],
+          "min": 166951,
+          "max": 166951,
+          "drift": 0,
+          "maxBytes": 170291
+        },
+        {
+          "phase": "session: docs settles",
+          "observations": [
+            260169,
+            260169,
+            260169
+          ],
+          "min": 260169,
+          "max": 260169,
+          "drift": 0,
+          "maxBytes": 265373
+        },
+        {
+          "phase": "session: check docs token",
+          "observations": [
+            0,
+            0,
+            0
+          ],
+          "min": 0,
+          "max": 0,
+          "drift": 0,
+          "maxBytes": 1024
         }
       ]
     },
@@ -3629,14 +5790,14 @@
         {
           "phase": "load",
           "observations": [
-            794843,
-            794843,
-            794843
+            1175378,
+            1175378,
+            1175378
           ],
-          "min": 794843,
-          "max": 794843,
+          "min": 1175378,
+          "max": 1175378,
           "drift": 0,
-          "maxBytes": 810740
+          "maxBytes": 1198886
         },
         {
           "phase": "load / (pending)",
@@ -3689,26 +5850,26 @@
         {
           "phase": "navigate to /docs/start",
           "observations": [
-            229897,
-            229897,
-            229897
+            229891,
+            229891,
+            229891
           ],
-          "min": 229897,
-          "max": 229897,
+          "min": 229891,
+          "max": 229891,
           "drift": 0,
-          "maxBytes": 234495
+          "maxBytes": 234489
         },
         {
           "phase": "article loads",
           "observations": [
-            221021,
-            221021,
-            221021
+            221448,
+            221448,
+            221448
           ],
-          "min": 221021,
-          "max": 221021,
+          "min": 221448,
+          "max": 221448,
           "drift": 0,
-          "maxBytes": 225442
+          "maxBytes": 225877
         },
         {
           "phase": "toggle theme",
@@ -3917,14 +6078,14 @@
         {
           "phase": "not-found typed error",
           "observations": [
-            139004,
-            139004,
-            139004
+            139087,
+            139087,
+            139087
           ],
-          "min": 139004,
-          "max": 139004,
+          "min": 139087,
+          "max": 139087,
           "drift": 0,
-          "maxBytes": 141785
+          "maxBytes": 141869
         },
         {
           "phase": "navigate to code-heavy article",
@@ -3941,14 +6102,14 @@
         {
           "phase": "code-heavy article loads",
           "observations": [
-            265319,
-            265319,
-            265319
+            265746,
+            265746,
+            265746
           ],
-          "min": 265319,
-          "max": 265319,
+          "min": 265746,
+          "max": 265746,
           "drift": 0,
-          "maxBytes": 270626
+          "maxBytes": 271061
         },
         {
           "phase": "check table of contents",
@@ -3964,6 +6125,150 @@
         },
         {
           "phase": "check highlighted token",
+          "observations": [
+            0,
+            0,
+            0
+          ],
+          "min": 0,
+          "max": 0,
+          "drift": 0,
+          "maxBytes": 1024
+        },
+        {
+          "phase": "session: docs to blog",
+          "observations": [
+            167483,
+            167483,
+            167483
+          ],
+          "min": 167483,
+          "max": 167483,
+          "drift": 0,
+          "maxBytes": 170833
+        },
+        {
+          "phase": "session: blog settles",
+          "observations": [
+            339121,
+            339121,
+            339121
+          ],
+          "min": 339121,
+          "max": 339121,
+          "drift": 0,
+          "maxBytes": 345904
+        },
+        {
+          "phase": "session: check math",
+          "observations": [
+            0,
+            0,
+            0
+          ],
+          "min": 0,
+          "max": 0,
+          "drift": 0,
+          "maxBytes": 1024
+        },
+        {
+          "phase": "session: blog to api",
+          "observations": [
+            167588,
+            167588,
+            167588
+          ],
+          "min": 167588,
+          "max": 167588,
+          "drift": 0,
+          "maxBytes": 170940
+        },
+        {
+          "phase": "session: api settles",
+          "observations": [
+            243092,
+            243092,
+            243092
+          ],
+          "min": 243092,
+          "max": 243092,
+          "drift": 0,
+          "maxBytes": 247954
+        },
+        {
+          "phase": "session: check api link",
+          "observations": [
+            0,
+            0,
+            0
+          ],
+          "min": 0,
+          "max": 0,
+          "drift": 0,
+          "maxBytes": 1024
+        },
+        {
+          "phase": "session: api to changelog",
+          "observations": [
+            167462,
+            167462,
+            167462
+          ],
+          "min": 167462,
+          "max": 167462,
+          "drift": 0,
+          "maxBytes": 170812
+        },
+        {
+          "phase": "session: changelog settles",
+          "observations": [
+            206647,
+            206647,
+            206647
+          ],
+          "min": 206647,
+          "max": 206647,
+          "drift": 0,
+          "maxBytes": 210780
+        },
+        {
+          "phase": "session: check diff",
+          "observations": [
+            0,
+            0,
+            0
+          ],
+          "min": 0,
+          "max": 0,
+          "drift": 0,
+          "maxBytes": 1024
+        },
+        {
+          "phase": "session: return to docs",
+          "observations": [
+            167094,
+            167094,
+            167094
+          ],
+          "min": 167094,
+          "max": 167094,
+          "drift": 0,
+          "maxBytes": 170436
+        },
+        {
+          "phase": "session: docs settles",
+          "observations": [
+            260817,
+            260817,
+            260817
+          ],
+          "min": 260817,
+          "max": 260817,
+          "drift": 0,
+          "maxBytes": 266034
+        },
+        {
+          "phase": "session: check docs token",
           "observations": [
             0,
             0,

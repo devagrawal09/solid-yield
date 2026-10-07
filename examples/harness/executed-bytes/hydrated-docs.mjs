@@ -55,7 +55,7 @@ try {
         .split("\n")
         .map(line => JSON.parse(line));
       const phases = observations.map(({ phase, bytes }) => ({ phase, bytes }));
-      if (phases.length !== 29 || phases[0].phase !== "load" || !phases[0].bytes)
+      if (phases.length !== 41 || phases[0].phase !== "load" || !phases[0].bytes)
         throw new Error("Missing coverage");
       results.push({
         app,
@@ -68,96 +68,101 @@ try {
           bytes
         }))
       });
-      console.error(`run ${n + 1} ${app}: ${phases[0].bytes} load bytes, 28 steps`);
+      console.error(`run ${n + 1} ${app}: ${phases[0].bytes} load bytes, 40 steps`);
     }
     runs.push(results);
   }
   if (!args.includes("--no-shipped"))
-    for (const app of variants) {
-      const directory = join(
-        repo,
-        "examples",
-        app === "original" ? "originals/docs" : "docs-yield"
-      );
-      const require = createRequire(join(directory, "package.json"));
-      const { build } = await import(pathToFileURL(require.resolve("vite")));
-      let js = 0,
-        gzip = 0,
-        chunks = 0;
-      const chunkDetails = [];
-      const previousRoots = process.env.C2_ROOTS;
-      const previousRegions = process.env.C3_REGIONS;
-      process.env.C3_REGIONS = app === "compiled-r" ? "1" : "0";
-      process.env.C2_ROOTS = app === "compiled-single" ? "single" : "per-group";
-      try {
-        await build({
-          root: join(directory, "stream"),
-          configFile: join(
-            directory,
-            app.startsWith("compiled") ? "compiled/vite.config.mjs" : "stream/vite.config.mjs"
-          ),
-          logLevel: "silent",
-          build: { write: false, emptyOutDir: false, sourcemap: true },
-          plugins: [
-            {
-              name: "hydrated-docs:shipped",
-              generateBundle(_options, bundle) {
-                for (const output of Object.values(bundle))
-                  if (output.type === "chunk") {
-                    js += Buffer.byteLength(output.code);
-                    gzip += gzipSync(output.code).length;
-                    chunks++;
-                    chunkDetails.push({
-                      file: output.fileName,
-                      js: Buffer.byteLength(output.code),
-                      gzip: gzipSync(output.code).length,
-                      attribution: chunkAttribution(output.code, output.map),
-                      sha256: createHash("sha256").update(output.code).digest("hex"),
-                      modules: Object.entries(output.modules).map(([id, mod]) => ({
-                        id: id.replace(repo, "<repo>"),
-                        renderedLength: mod.renderedLength
-                      }))
-                    });
-                    if (chunkDirectory) {
-                      const target = resolve(chunkDirectory, app, output.fileName);
-                      mkdirSync(resolve(target, ".."), { recursive: true });
-                      writeFileSync(target, output.code);
-                      if (output.map) writeFileSync(target + ".map", output.map.toString());
-                    }
-                    if (
-                      app.startsWith("compiled") &&
-                      /Loading navigation|Loading footer|Written for readers/.test(output.code)
-                    )
-                      throw new Error("Inert authored code shipped");
-                    if (
-                      app === "compiled-r" &&
-                      /on-this-page|Related reading|No article:|Read the page/.test(output.code)
-                    )
-                      throw new Error("R article code/data shipped");
-                    if (
-                      app === "compiled-r" &&
-                      Object.keys(output.modules).some(
-                        id =>
-                          /(?:marked|highlight\.js)\/(?:lib|es)\//.test(id) ||
-                          id.includes("article-pipeline") ||
-                          /\/articles\/.*\.md/.test(id)
+    for (let shippingRun = 1; shippingRun <= count; shippingRun++)
+      for (const app of variants) {
+        const directory = join(
+          repo,
+          "examples",
+          app === "original" ? "originals/docs" : "docs-yield"
+        );
+        const require = createRequire(join(directory, "package.json"));
+        const { build } = await import(pathToFileURL(require.resolve("vite")));
+        let js = 0,
+          gzip = 0,
+          chunks = 0;
+        const chunkDetails = [];
+        const previousRoots = process.env.C2_ROOTS;
+        const previousRegions = process.env.C3_REGIONS;
+        process.env.C3_REGIONS = app === "compiled-r" ? "1" : "0";
+        process.env.C2_ROOTS = app === "compiled-single" ? "single" : "per-group";
+        try {
+          await build({
+            root: join(directory, "stream"),
+            configFile: join(
+              directory,
+              app.startsWith("compiled") ? "compiled/vite.config.mjs" : "stream/vite.config.mjs"
+            ),
+            logLevel: "silent",
+            build: { write: false, emptyOutDir: false, sourcemap: true },
+            plugins: [
+              {
+                name: "hydrated-docs:shipped",
+                generateBundle(_options, bundle) {
+                  for (const output of Object.values(bundle))
+                    if (output.type === "chunk") {
+                      js += Buffer.byteLength(output.code);
+                      gzip += gzipSync(output.code).length;
+                      chunks++;
+                      chunkDetails.push({
+                        file: output.fileName,
+                        js: Buffer.byteLength(output.code),
+                        gzip: gzipSync(output.code).length,
+                        attribution: chunkAttribution(output.code, output.map),
+                        sha256: createHash("sha256").update(output.code).digest("hex"),
+                        modules: Object.entries(output.modules).map(([id, mod]) => ({
+                          id: id.replace(repo, "<repo>"),
+                          renderedLength: mod.renderedLength
+                        }))
+                      });
+                      if (chunkDirectory) {
+                        const target = resolve(chunkDirectory, app, output.fileName);
+                        mkdirSync(resolve(target, ".."), { recursive: true });
+                        writeFileSync(target, output.code);
+                        if (output.map) writeFileSync(target + ".map", output.map.toString());
+                      }
+                      if (
+                        app.startsWith("compiled") &&
+                        /Loading navigation|Loading footer|Written for readers/.test(output.code)
                       )
-                    )
-                      throw new Error("R Markdown/highlighter module shipped");
-                  }
+                        throw new Error("Inert authored code shipped");
+                      if (
+                        app === "compiled-r" &&
+                        /on-this-page|Related reading|No article:|Read the page/.test(output.code)
+                      )
+                        throw new Error("R article code/data shipped");
+                      if (
+                        app === "compiled-r" &&
+                        Object.keys(output.modules).some(
+                          id =>
+                            !/\.css(?:\?|$)/.test(id) &&
+                            (/(?:marked|highlight\.js|katex|diff2html|json-schema-to-zod)\/|@profoundlogic\/hogan/.test(
+                              id
+                            ) ||
+                              /\/(?:article|page|post|api|changelog)-pipeline/.test(id) ||
+                              /\/articles\/.*\.md/.test(id) ||
+                              /\/(?:level-data|data-[SM])(?:__compiler_dep)?\.ts$/.test(id))
+                        )
+                      )
+                        throw new Error("R content pipeline or corpus module shipped");
+                    }
+                }
               }
-            }
-          ]
-        });
-      } finally {
-        if (previousRegions === undefined) delete process.env.C3_REGIONS;
-        else process.env.C3_REGIONS = previousRegions;
-        if (previousRoots === undefined) delete process.env.C2_ROOTS;
-        else process.env.C2_ROOTS = previousRoots;
+            ]
+          });
+        } finally {
+          if (previousRegions === undefined) delete process.env.C3_REGIONS;
+          else process.env.C3_REGIONS = previousRegions;
+          if (previousRoots === undefined) delete process.env.C2_ROOTS;
+          else process.env.C2_ROOTS = previousRoots;
+        }
+        shipped.push({ app, run: shippingRun, js, gzip, chunks, chunkDetails });
+        console.error(`${app}: shipped ${js} JS bytes (${gzip} gzip), ${chunks} chunks`);
       }
-      shipped.push({ app, js, gzip, chunks, chunkDetails });
-      console.error(`${app}: shipped ${js} JS bytes (${gzip} gzip), ${chunks} chunks`);
-    }
   const summary = runs[0].map(({ app, phases }, a) => ({
     app,
     phases: phases.map(({ phase }, p) => {
@@ -176,8 +181,9 @@ try {
   }));
   const output = {
     node: process.version,
+    level: process.env.DOCS_LEVEL ?? "L",
     metric:
-      "Hydrated docs; V8 executed UTF-8 ranges reset each phase; production Vite module runner; completed SSR in a separate process; same 28 authored steps; all roots synchronous",
+      "Hydrated docs; V8 executed UTF-8 ranges reset each phase; production Vite module runner; completed SSR in a separate process; same 40 authored steps; all roots synchronous",
     runs,
     summary,
     shipped,
@@ -190,7 +196,7 @@ try {
     if (baseline.summary.length !== summary.length) throw new Error("Baseline inventory changed");
     for (let a = 0; a < summary.length; a++) {
       const old = baseline.summary[a];
-      if (old.app !== summary[a].app || old.phases.length !== 29)
+      if (old.app !== summary[a].app || old.phases.length !== 41)
         throw new Error("Baseline inventory changed");
       for (let p = 0; p < summary[a].phases.length; p++)
         if (

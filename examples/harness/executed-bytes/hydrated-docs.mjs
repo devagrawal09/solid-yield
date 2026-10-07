@@ -11,9 +11,11 @@ const repo = resolve(import.meta.dirname, "../../..");
 const args = process.argv.slice(2);
 const value = flag => (args.includes(flag) ? args[args.indexOf(flag) + 1] : undefined);
 const count = Number(value("--runs") ?? 1);
-const variants = args.includes("--single")
-  ? ["original", "library", "compiled-single", "compiled"]
-  : ["original", "library", "compiled"];
+const variants = args.includes("--regions")
+  ? ["original", "library", "compiled-single", "compiled-r"]
+  : args.includes("--single")
+    ? ["original", "library", "compiled-single", "compiled"]
+    : ["original", "library", "compiled"];
 const chunkDirectory = value("--chunks");
 const temp = mkdtempSync(join(tmpdir(), "docs-hydrated-bytes-"));
 const runs = [],
@@ -22,6 +24,7 @@ try {
   for (let n = 0; n < count; n++) {
     const results = [];
     for (const app of variants) {
+      let outcome;
       const html = join(temp, `${app}.html`),
         file = join(temp, `${app}-${n}.jsonl`);
       for (const server of [true, false]) {
@@ -44,6 +47,7 @@ try {
           }
         );
         if (child.status !== 0) throw new Error(`${app}: ${child.stdout}\n${child.stderr}`);
+        if (!server) outcome = JSON.parse(child.stdout.split("C2_RESULT ")[1]);
       }
       const observations = readFileSync(file, "utf8")
         .trim()
@@ -55,6 +59,9 @@ try {
       results.push({
         app,
         phases,
+        ...(outcome.payloads
+          ? { payloads: outcome.payloads, jsonComparison: outcome.jsonComparison }
+          : {}),
         loadScripts: observations[0].scripts.map(({ url, bytes }) => ({
           url: url.replace(repo, "<repo>"),
           bytes
@@ -78,6 +85,8 @@ try {
         chunks = 0;
       const chunkDetails = [];
       const previousRoots = process.env.C2_ROOTS;
+      const previousRegions = process.env.C3_REGIONS;
+      process.env.C3_REGIONS = app === "compiled-r" ? "1" : "0";
       process.env.C2_ROOTS = app === "compiled-single" ? "single" : "per-group";
       try {
         await build({
@@ -119,12 +128,19 @@ try {
                       /Loading navigation|Loading footer|Written for readers/.test(output.code)
                     )
                       throw new Error("Inert authored code shipped");
+                    if (
+                      app === "compiled-r" &&
+                      /on-this-page|Related reading|No article:|Read the page/.test(output.code)
+                    )
+                      throw new Error("R article code/data shipped");
                   }
               }
             }
           ]
         });
       } finally {
+        if (previousRegions === undefined) delete process.env.C3_REGIONS;
+        else process.env.C3_REGIONS = previousRegions;
         if (previousRoots === undefined) delete process.env.C2_ROOTS;
         else process.env.C2_ROOTS = previousRoots;
       }
@@ -154,7 +170,7 @@ try {
     runs,
     summary,
     shipped,
-    decomposition: compiledDecomposition(runs, shipped)
+    decomposition: args.includes("--regions") ? null : compiledDecomposition(runs, shipped)
   };
   if (value("--record"))
     writeFileSync(resolve(value("--record")), JSON.stringify(output, null, 2) + "\n");

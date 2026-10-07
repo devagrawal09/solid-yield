@@ -55,7 +55,7 @@ export function beginCoverage({ file, app, twin, select }) {
         `/examples/${app === "original" ? "originals/" + twin.replace(/-yield(-h)?$/, "") : twin}/`
       ) ||
       (app !== "original" && /\/packages\/yield\/(src|dist)\//.test(normalized)) ||
-      /\/(solid-js|@solidjs\/[^/]+|effect|seroval|seroval-plugins)\/(dist|storage|serialization)\//.test(
+      /\/(solid-js|@solidjs\/[^/]+|effect|seroval|seroval-plugins)\/(?:[a-z-]+\/)?(dist|storage|serialization)\//.test(
         normalized
       )
     );

@@ -134,6 +134,52 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
     const callee = p.get("callee"),
       api = imported(callee);
     if (api?.source === "solid-js") return api.name;
+    const call = nodeFor(p);
+    const declaration = call && checker.getResolvedSignature(call)?.declaration;
+    const builtin = declaration && program.isSourceFileDefaultLibrary(declaration.getSourceFile());
+    if (
+      builtin &&
+      callee.isIdentifier() &&
+      !callee.scope.getBinding(callee.node.name) &&
+      /^(setTimeout|setInterval|clearTimeout|clearInterval|requestAnimationFrame|cancelAnimationFrame|requestIdleCallback|cancelIdleCallback)$/.test(
+        callee.node.name
+      )
+    )
+      return "scheduler";
+    if (builtin && callee.isMemberExpression()) {
+      const object = callee.get("object"),
+        method = name(callee.node.property);
+      if (
+        object.isIdentifier() &&
+        !object.scope.getBinding(object.node.name) &&
+        ((object.node.name === "Math" && method === "random") ||
+          (["Date", "performance"].includes(object.node.name) && method === "now")) &&
+        p.node.arguments.length === 0
+      )
+        return "clock";
+      const objectNode = nodeFor(object),
+        type = objectNode && checker.getTypeAtLocation(objectNode);
+      if (type && (checker.isArrayType(type) || checker.isTupleType(type))) {
+        if (["map", "filter", "find", "findIndex", "some", "every", "forEach"].includes(method))
+          return "array-callback";
+        const element = checker.getIndexTypeOfType(type, ts.IndexKind.Number);
+        const parts = element?.isUnion() ? element.types : element ? [element] : [];
+        if (
+          method === "join" &&
+          parts.length &&
+          parts.every(
+            t =>
+              t.flags &
+              (ts.TypeFlags.StringLike |
+                ts.TypeFlags.NumberLike |
+                ts.TypeFlags.BooleanLike |
+                ts.TypeFlags.Null |
+                ts.TypeFlags.Undefined)
+          )
+        )
+          return "primitive-array-join";
+      }
+    }
     if (callee.isIdentifier()) {
       const binding = callee.scope.getBinding(callee.node.name)?.path;
       if (binding?.isVariableDeclarator()) {
@@ -144,6 +190,7 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
             source?.source === "solid-js" &&
             [
               "createSignal",
+              "createOptimistic",
               "createMemo",
               "createStore",
               "createOptimisticStore",
@@ -278,7 +325,9 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
           .filter(a => a.isFunction())
           .map(a => invoke(byBody.get(`${owner.file}:${a.node.body.start}`), owner));
         // Getter aliases inherit their memo callback's failures.
-        const binding = callee.isIdentifier() && callee.scope.getBinding(callee.node.name)?.path;
+        const binding = callee.isIdentifier()
+          ? callee.scope.getBinding(callee.node.name)?.path
+          : undefined;
         if (binding?.isVariableDeclarator()) {
           const init = binding.get("init");
           if (init?.isCallExpression())
@@ -289,7 +338,7 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
                 .map(a => invoke(byBody.get(`${owner.file}:${a.node.body.start}`), owner))
             );
         }
-        return union(argEffects, ...callbacks);
+        return union(argEffects, receiver ? evaluate(receiver, owner, caught) : [], ...callbacks);
       }
       // Intrinsics are explicit contracts, not a claim that arbitrary packages are pure.
       if (p.isNewExpression() && [...classSet(p)].some(k => k.startsWith("global:")))

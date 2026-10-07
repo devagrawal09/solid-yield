@@ -24,7 +24,10 @@ export interface FailureReport {
     start: number,
     end: number
   ): { fails: string[]; native: boolean; target?: string; promise: boolean; async: boolean } | null;
-  at(file: string, start: number): { fails: Set<string>; server: boolean } | undefined;
+  at(
+    file: string,
+    start: number
+  ): { fails: Set<string>; server: boolean; component: boolean } | undefined;
   throws(file: string, start: number, end: number): string[];
 }
 export function inferFailures(

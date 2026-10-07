@@ -85,3 +85,21 @@ test("shadowed intrinsic names are not treated as pure builtins", () => {
   assert.deepEqual(summary(report, "fail"), [kind]);
   assert.deepEqual(summary(report, "reject"), ["unknown"]);
 });
+
+test("native clocks and array callbacks keep callback failures and reject shadows", () => {
+  const report = infer({
+    "intrinsics.ts": `class E extends Error{}
+ function clock(){return Date.now()+Math.random()}
+ function timer(){setTimeout(()=>{throw new E()},10)}
+ function map(){return [1,2].map(()=>{throw new E()})}
+ function shadow(){const Date={now(){throw 'bad'}};return Date.now()}
+ function opaque(){const collection={map(fn:()=>number){throw 'bad'}};return collection.map(()=>1)}
+ `
+  });
+  const kind = report.classes.find(c => c.name === "E").id;
+  assert.deepEqual(summary(report, "clock"), []);
+  assert.deepEqual(summary(report, "timer"), [kind]);
+  assert.deepEqual(summary(report, "map"), [kind]);
+  assert.deepEqual(summary(report, "shadow"), ["unknown"]);
+  assert.deepEqual(summary(report, "opaque"), ["unknown"]);
+});

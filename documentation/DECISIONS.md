@@ -1443,6 +1443,64 @@ The code-only shipping ablation gives a break-even of **76,033 raw / 25,625 gzip
 _Alternatives:_ **B**, production R emission as v0.2 — rejected for now: fixed cost, limited payload win and F-C11/F-C13 parity limits. **C**, raise the fixed-cost finding upstream now — deferred at the ruling; the plain-Solid check now resolves F-C14 without a new report. The “what does v0.2 even do” exchange concluded that v0.2 names the next useful library release, including D-115, rather than promising a compiler release.
 _Reasoning:_ keep the useful diagnostics, preserve the measured experiments, and let a smaller runtime or a real user's payload justify reopening emission. D-114 supersedes D-113's instruction to proceed to eager-islands v0.2; its earlier evidence remains historical.
 
+#### C3c scaling (2026-10-07)
+
+**Amended (Dev, “y”, after C3c).** The return condition is now a measured threshold, rather than merely parking the compiler. [The full C3c report](https://github.com/devagrawal09/solid-yield/blob/ada81a8d3af2c1e3a783468ac820875fff1fb99d/documentation/compiler-c3c-scaling.md) measures three docs fixture levels:
+
+| Level | Server-derivable fixture | Libraries raw | Libraries gzip |
+| --- | --- | ---: | ---: |
+| S | marked + highlight.js, 3 grammars; six docs articles | 84,629 | 26,331 |
+| M | S + KaTeX and four blog posts; 10 grammars in the ruling, nine in the report (difference recorded below) | 370,215 | 111,656 |
+| L | M + schema-generated API reference and diff-rendered changelog | 424,033 | 127,547 |
+
+The following three-run tables are copied exactly from the report. Load and session count executed source ranges; the 40-step session excludes load and is neither unique code nor CPU time. Shipping is production JavaScript; HTML, CSS/fonts and responses are excluded. All sizes are bytes.
+
+**Level S**
+
+| Variant | Executed at load | Executed over 40 steps | Shipped raw | Shipped gzip |
+| --- | ---: | ---: | ---: | ---: |
+| Original | 716,517 | 4,364,028 | 265,247 | 83,137 |
+| Library | 749,671 | 4,553,244 | 280,231 | 87,740 |
+| Single-root islands | 772,259 | 4,563,945 | 279,209 | 87,627 |
+| Single-root + R | 628,086 | 4,174,181 | 239,978 | 83,744 |
+
+**Level M**
+
+| Variant | Executed at load | Executed over 40 steps | Shipped raw | Shipped gzip |
+| --- | ---: | ---: | ---: | ---: |
+| Original | 1,039,883 | 4,441,658 | 556,411 | 170,157 |
+| Library | 1,073,017 | 4,631,127 | 571,415 | 174,438 |
+| Single-root islands | 1,095,443 | 4,641,156 | 570,108 | 174,364 |
+| Single-root + R | 628,086 | 4,174,076 | 239,978 | 83,744 |
+
+**Level L**
+
+| Variant | Executed at load | Executed over 40 steps | Shipped raw | Shipped gzip |
+| --- | ---: | ---: | ---: | ---: |
+| Original | 1,096,058 | 4,366,734 | 627,380 | 189,329 |
+| Library | 1,129,164 | 4,556,267 | 642,400 | 193,576 |
+| Single-root islands | 1,150,804 | 4,566,492 | 640,952 | 193,435 |
+| Single-root + R | 628,086 | 4,193,059 | 239,978 | 83,744 |
+
+**Invariant.** Single-root + R is byte-identical in its load and shipping columns at all three levels: **628,086 executed at load; 239,978 shipped raw; 83,744 shipped gzip**. The client bundle does not grow with server-side rendering work. Its session column varies (difference recorded below).
+
+**Curve versus the library.** S saves **4.55% gzip / 16.22% load execution**; M saves **51.99% / 41.47%**; L saves **56.74% / 44.38%**. These are eager SPA comparisons including the fake API's embedded corpus. C3b's **76,033 raw / 25,625 gzip** code-only threshold has a different control and compression context; it is not a universal threshold or a fourth C3c point. A route-split SPA was not measured.
+
+**Session trade at L.** Frames add **8,500 gzip bytes** over seven navigations in the 40 steps versus equivalent JSON, leaving **101,332 bytes (~101 KB)** of the **109,832-byte** initial JS gzip saving. Session execution is **7.97% lower** (363,208 bytes); load plus session is **15.20% lower**. Gzip responses are offline compression comparisons. The actual library fake API makes zero HTTP requests; subtracting all **18,836** compressed frame bytes leaves **90,996 bytes** against that control. S's initial saving is consumed by navigation. The failed navigation executes **59,990 more bytes** with R.
+
+**F-C15.** The fixed client cost is amortized as server-derivable payload grows; response expansion remains the standing server-components trade. Repeated uncached navigation continues to accumulate that premium. Required CSS/fonts remain, and the bounded prototype still uses shape guards and slots.
+
+**Verdict:** server components for yield apps are a wash near 25 KB gzip of server-derivable code, a clear win from ~110 KB, and the gap widens with payload.
+
+**Amended decision.** R emit stays on **proto/compiler at ada81a8**, unmerged, but **“server components (R emit) productized” is now a ROADMAP CANDIDATE after v0.3**, gated on **F-C11/F-C13 DOM-parity work** and on the **purity directive's trust model**. Main's analyzer gains module-level **`"use pure"` recognition**: the author asserts purity, implementations are not checked, and every marked module supplied to analysis is reported. This port is analysis-only; no emitter, transport, runtime or branch fixture is merged. Main's nine twins have no marked modules, so their analysis and gate byte numbers stay unchanged. No gate step is added and no baseline changes.
+
+**Differences recorded (not reconciled).**
+
+- The ruling says **10 grammars** at M; the report and bcfb0c2's registry list **nine** (ts, js, bash, json, css, html/XML, python, rust, go). The measured sizes above are copied unchanged.
+- “The single-root + R row is byte-identical at all levels” holds for load and shipping, not the entire row: session execution is **4,174,181 / 4,174,076 / 4,193,059** at S/M/L. All four columns are preserved exactly.
+
+_Alternatives considered:_ **merge the emit now** — rejected: exact R DOM parity is **0/40** at L (40/40 authored-content diagnostics only), F-C11/F-C13 remain, and slots/lowering are prototypes. **Keep parked** — rejected by the measurement: M/L show the fixed cost is amortized. v0.2 remains the next library release; v0.3 remains the library lazy builder.
+
 ### D-115 — Typed failures are serialization-safe
 
 **Decided (Dev, 2026-10-07); implemented.** `Failure(kind)` instances are marked safe in their constructor with the public `markSafeError` from `@solidjs/web`, before an instance can be frozen. Runtime branding for `raise`, `attempt` and lazy failures also marks extensible errors safe (and avoids re-marking already safe errors). Their kind, message and own properties are public failure data and survive Solid production serialization. Untyped crashes retain Solid's default sanitization. Frozen nominal failures stay safe and D-087's WeakSet branding remains intact.

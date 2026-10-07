@@ -1,6 +1,6 @@
 # The solid-yield compiler, C0: definitions, analysis, codegen, correctness claim, open decisions
 
-Status: **D-114 (Dev, 2026-10-07): the compiler line is measured and parked.** Main has the analysis tool; eager-islands, single-root and R emission remain experiments on proto/compiler at 778a0d5 (single-root report at 43bb41b). v0.2 is the next library release, including D-115; v0.3 is the library's lazy builder. §§2–6 preserve the compiler design and earlier rulings, not a release commitment.
+Status: **D-114 (Dev, 2026-10-07): the compiler is measured; R emit is a roadmap candidate after v0.3.** Main has the analysis tool; eager-islands, single-root and R emission remain experiments on proto/compiler at ada81a8 (single-root report at 43bb41b). v0.2 is the next library release, including D-115; v0.3 is the library's lazy builder. §§2–6 preserve the compiler design and earlier rulings, not a release commitment.
 
 Read the evidence on the pinned branch: [compiler-c1-report.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-c1-report.md), [compiler-reachability.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-reachability.md), [compiler-c2-finding.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-c2-finding.md), [compiler-single-root.md](https://github.com/devagrawal09/solid-yield/blob/43bb41b77af461df199315485b8cdec259efd51a/documentation/compiler-single-root.md), [compiler-c3-server-components.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-c3-server-components.md), [compiler-c3b-payload.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-c3b-payload.md) and [compiler-findings.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-findings.md). D-114 in DECISIONS.md records the chain and its differing measurement scopes.
 
@@ -12,7 +12,7 @@ Vocabulary is the project's (D-096): a **routine**, its **host**, a **hole**, a 
 
 ## 0. The plan
 
-D-114 amends D-103–D-108 and D-113: **measured and parked**. The four tiers retain their distinct attachment models:
+D-114 amends D-103–D-108 and D-113: **compiler measured; R emit a roadmap candidate after v0.3** (C3c amendment). The four tiers retain their distinct attachment models:
 
 | Tier | Result / route | Status |
 | --- | --- | --- |
@@ -24,12 +24,9 @@ D-114 amends D-103–D-108 and D-113: **measured and parked**. The four tiers re
 C1 groups, eager causes, C1b directed per-event reach and S/R/client provenance
 join main as an analyzer tool, with capture checks and a report-only gate step
 for all nine twins. Their graph counts do not prove hydration roots or savings.
-The R experiment removes server-derived code but needs about **76 KB raw /
-25.6 KB gzip** to pay the fixed frame/RPC and shell/slot integration cost;
-successful markup refetches add about **0.94 KB gzip** per navigation versus
-Markdown JSON ([compiler-c3b-payload.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-c3b-payload.md)). Return when that runtime
-shrinks or a user has the payload. v0.2 is the next library release, not the
-compiler. The remaining plan below describes the parked experiment.
+C3c measures the scaling threshold: **server components for yield apps are a wash near 25 KB gzip of server-derivable code, a clear win from ~110 KB, and the gap widens with payload** ([compiler-c3c-scaling.md](https://github.com/devagrawal09/solid-yield/blob/ada81a8d3af2c1e3a783468ac820875fff1fb99d/documentation/compiler-c3c-scaling.md)). S/M/L save 4.55%/51.99%/56.74% shipped gzip and 16.22%/41.47%/44.38% load execution versus the eager library SPA. R's client load/shipping stays constant; response expansion remains. At L, seven navigations add 8,500 gzip bytes versus equivalent JSON, leaving 101,332 bytes of initial JS savings; session execution excluding load is 7.97% lower. C3b's 25.6 KB code-only break-even has a different control; this is a measured candidate threshold, not a universal package-size rule.
+
+**Server components (R emit) productized** is a roadmap candidate **after v0.3**, gated on F-C11/F-C13 exact DOM parity and the purity directive's trust model. R emit remains on proto/compiler; v0.2 is the next library release and v0.3 is the library lazy builder. The remaining plan preserves the experiment's design.
 
 - **Where.** The compiler lives in this repository. It changes nothing in Solid: D-004 (Solid's public API only) holds for the compiler route as it does for the runtime. Its input is the yield dialect as it is today: any program that is admissible by calculus §4.1 (C1–C7). It has no dialect of its own until C4, and Q6 asks whether it ever should.
 - **What it does.**
@@ -98,6 +95,7 @@ How provenance flows through each construct:
 
 - **Through `Source`.** A path over a source has the source's π: `yield* story.title` has π(story).
 - **Through pure derivations.** Memos, holes, settled values, paths and flow sources derived only from S/R are S/R. Any C read, event/effect write, browser operation or unproved impure operation keeps the affected computation client. A U value is not made R just because another operand is R.
+- **Trusted pipeline modules (F-C12, C3c).** A module-level `"use pure"` directive asserts that its exported functions are deterministic functions of their arguments, with no observable side effects or reads of mutable external state. Calls join argument provenance: S stays S, R stays R, U stays U, C stays C. This includes transitive package calls; the compiler does not inspect or prove the implementation. It is an author trust contract, not a package whitelist or source hash. Every marked module is listed as a `trusted-pure-module` diagnostic, including unused marked modules supplied to analysis. Removing the directive leaves opaque package work client-owned under the normal conservative analysis. Local helpers still use ordinary inference. The theorem assumes the assertion is true; a false assertion is outside the admitted program contract. Capture checks still apply to every server argument and slot edge.
 - **Through `$memo` bodies.** A memo's π is the transfer described above. A memo is atomic: C2 does not split a memo whose branches mix S and C (R3). The whole memo is C.
 - **Through props (call form, D-065).** At a call site `C({ x: v })`, the prop `x` has π(v): a source's π, a hole prop's join over its reads, or a settled value's π. Inside C, `yield* props.x` has the π of the call site's argument. A component therefore has a **summary** parameterised by its props' provenance, which each call site instantiates (§2.3).
 - **Through context (D-098).** `yield* Ctx` has the join of the π of every `value` given by a `Ctx.provide` that can be above the reader, plus the default if the context has one. Statically, "can be above" is over-approximated as every `provide` of Ctx in the module graph. Across a `foreign(C, { provided: [Ctx] })` edge (D-102) the analysis cannot see the tree, so it uses all of Ctx's providers.
@@ -112,7 +110,7 @@ A template literal with interpolations is an expression, not a literal constant.
 Both the receiver and the computed key contribute provenance; a dynamic key
 must not change the stored equation of a statically selected field.
 
-**R execution (parked C3 experiment).** Pure derivation on the server data runs
+**R execution (branch-only C3 experiment).** Pure derivation on the server data runs
 inside a generated "use server" function; client navigation refetches its markup,
 with slots for client children. Only settled serializable inputs cross; their
 producers stay client. Event-written C inputs remain client under the branch's
@@ -441,7 +439,7 @@ Q3 was the compiler's savings question; D-114 records its measured answer.
 
 ## 5. Earlier decisions (Dev, 2026-10-07; release plan superseded by D-114)
 
-These Q1–Q6 rulings describe the parked experiment. D-114 keeps analysis as a tool and makes v0.2 the next library release.
+These Q1–Q6 rulings describe the branch experiment. D-114 keeps analysis as a tool and makes v0.2 the next library release.
 
 Q1–Q6 are ruled by D-103–D-108: C, B (also report each eager island's effect reach), B (with a measured tolerance), A, B (implemented on proto/compiler), B after C3. The alternatives below remain the design record. D-111 overrides delayed hydration: **v0.2 emits eager islands only**. Lazy/visible describe analysis report classes, not v0.2 attachment schedules. v0.3 will attach by key without Solid's hydrate, with its own delegated event queue and payload, validated claims and render fallback. No reset of Solid's private hydration completion flag is permitted.
 
@@ -603,4 +601,6 @@ the original while load execution is 12% lower. The fake embedded corpus,
 byte-budget scopes, purity contract and F-C11/F-C13/F-C14 limits are explicit in
 [compiler-c3b-payload.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-c3b-payload.md). That fixture and all emitters remain on
 the branch; no main twin, authored script or executed-byte baseline is replaced.
-D-114 parks the compiler and keeps the analyzer as a report-only tool.
+C3c extends the branch docs fixture to three levels and a **40-step session**: S is marked + highlight.js with three grammars (84,629 raw / 26,331 gzip); M adds KaTeX, four blog posts and the report's nine grammars (370,215 / 111,656); L adds a 20-entry schema-generated API reference and an eight-release diff-rendered changelog (424,033 / 127,547). The ruling's “10 grammars” differs from the report's nine; D-114 records the difference. Six pipeline modules assert `"use pure"`; their adjacent pipeline memos remain S/R/S. All levels use seven region navigations. See [compiler-c3c-scaling.md](https://github.com/devagrawal09/solid-yield/blob/ada81a8d3af2c1e3a783468ac820875fff1fb99d/documentation/compiler-c3c-scaling.md) for the four-row tables, F-C15 and response trade; exact R parity remains 0/40 at L, with 40/40 authored-content diagnostics.
+
+The three-level fixture stays on proto/compiler. Main's nine twins retain the earlier 24-step docs script, with no marked modules, new gate steps or baseline changes. D-114's amendment makes productized R emission a measured roadmap candidate after v0.3 and keeps the analyzer report-only.

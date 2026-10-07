@@ -9,12 +9,12 @@ This repository was extracted from the Solid fork `devagrawal09/solid`, branch `
 - **v0.1: done in code.** The library runtime, transform and lint are feature-complete; npm publication still awaits credentials.
 - **v0.2: the next library release**, including D-115's serialization-safe typed failures. It is no longer “the compiler”.
 - **v0.3: the lazy builder on the library route.** resume(root), descriptors, keyed attachment and materialization on first interaction, with its own event queue/payload, validated claims and render fallback; keyed failure re-delivery remains a related target (D-109).
-- **Compiler: measured and parked (D-114, option A).** Eager-islands and R emission stay on the experimental branch. R needs about **76 KB raw / 25.6 KB gzip** of removable server-derived code to pay its fixed frame/RPC plus shell/slot integration cost; successful markup refetches add about **0.94 KB gzip per navigation** against equivalent Markdown JSON. Return when **the frames runtime shrinks** or **a user has the payload**. See [compiler-c3b-payload.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-c3b-payload.md) and D-114 for the full chain and scope differences.
+- **Compiler: measured; R emit a roadmap candidate (D-114, C3c amendment).** **Server components (R emit) productized** is a candidate **after v0.3**, gated on **F-C11/F-C13 exact DOM parity** and the **purity directive's trust model**. It stays unmerged on proto/compiler. The measured eager-SPA threshold is a wash near **25 KB gzip** of server-derivable code and a clear win from **~110 KB**, with a widening payload gap: S/M/L save **4.55%/51.99%/56.74% gzip** and **16.22%/41.47%/44.38% load execution** versus the library. R's load and shipping stay constant; response expansion remains (L: +8,500 gzip versus equivalent JSON over seven navigations, leaving 101,332 bytes saved; session execution excluding load −7.97%). See [compiler-c3c-scaling.md](https://github.com/devagrawal09/solid-yield/blob/ada81a8d3af2c1e3a783468ac820875fff1fb99d/documentation/compiler-c3c-scaling.md) and D-114 for controls, limits and recorded differences.
 - **Full resumability with the library's own runtime:** horizon, preserving the same semantics.
 
 | Read-only branch | Head | Role |
 | --- | --- | --- |
-| proto/compiler | **778a0d5** | C1/C1b/R analysis and eager/single-root/R experiments; pinned reports linked from compiler-c0.md |
+| proto/compiler | **ada81a8** | C1/C1b/R analysis and eager/single-root/R experiments; [C3c scaling](https://github.com/devagrawal09/solid-yield/blob/ada81a8d3af2c1e3a783468ac820875fff1fb99d/documentation/compiler-c3c-scaling.md), directive 213e48a, fixtures bcfb0c2, measurements ada81a8 |
 | proto/compiler-single-root | **43bb41b** | Single-root cost decomposition; historical F-C9 stop predates D-115 |
 | proto/calculus-proofs | **950a71b** | Merged into main at **5d50680**; Lean proofs, paper proofs and probes; branch retained as history |
 
@@ -22,17 +22,21 @@ This repository was extracted from the Solid fork `devagrawal09/solid`, branch `
 emitters. Run `pnpm run analyze docs-yield` or omit the example for all nine;
 `--json` prints full groups, eager causes, directed event reach, S/R/client
 provenance and refused captures. The report imposes no thresholds. The branch's
-Markdown purity contract and historical byte-budget/phase reports remain there;
-opaque module calls stay U on main. Graph reach is not measured savings and
+historical byte-budget/phase reports remain there. Main now recognizes module-level
+`"use pure"` author assertions and lists every marked module supplied to analysis;
+implementations are not checked, and unmarked opaque calls stay U.
+Graph reach is not measured savings and
 groups are not physical-root claims. The EAGER type marker and foreignSource
 runtime remain unmerged, rather than scheduled requirements of v0.2.
 
 **Main corpus:** nine twins, docs' existing 24 parity steps, and the existing
-library/original byte thresholds. C3b's marked/highlight.js fixture and 28-step
-script remain on proto/compiler. Build and the full gate are **46/46 GREEN**, including `proofs`;
-the gate baseline was regenerated only for that added step. No executed-byte
-baseline was changed. This session starts at pushed main **9478fe5** and makes
-local commits only; no push.
+library/original byte thresholds. C3c's S/M/L docs fixture and 40-step
+script remain on proto/compiler. The nine main twins have no marked modules;
+all nine analyzer reports and the gate's byte numbers remain unchanged.
+Build and the full gate are **46/46 GREEN**, including `proofs`;
+the baseline previously changed only for the proofs step. This C3c amendment adds
+no gate steps and changes no gate or executed-byte baseline. This session starts
+at pushed main **10c633c** and makes local commits only; no push.
 
 ### Candidates, not scheduled (Dev's “come up with ideas” exchange)
 
@@ -46,6 +50,7 @@ local commits only; no push.
 8. Static-markup skip in the resumer.
 9. Retire the proofs branch into main — done at **5d50680**; branch retained as history.
 10. Public roadmap issue.
+11. Server components (R emit) productized after v0.3 — measured threshold and F-C11/F-C13 DOM parity/purity trust prerequisites above.
 
 ## v0.1 (2026-10-06): state, and what is left
 
@@ -125,8 +130,10 @@ D-103–D-112 are recorded with alternatives and reasoning in documentation/DECI
 
 **Compiler scope.** D-114 supersedes the old eager-islands v0.2 plan. Main
 contains the analyzer tool; emitters, foreignSource and the unimplemented EAGER
-marker remain on proto/compiler. The compiler design and sugar proposals are
-parked. Earlier proof/ruling commits were pushed through c797bb3; this session
+marker remain on proto/compiler. The compiler is measured; R emit is a roadmap candidate after v0.3,
+subject to F-C11/F-C13 exact DOM parity and the directive's trust model. Other
+compiler design and sugar proposals remain branch experiments. Earlier proof/ruling
+commits were pushed through c797bb3; this session
 builds and runs the full GREEN gate before each local main commit and never pushes.
 
 ## Calculus proofs
@@ -149,7 +156,7 @@ branch. See the [verification record](documentation/calculus-proofs/verification
 ## Upstream
 
 - [solidjs/solid#3815](https://github.com/solidjs/solid/issues/3815): rc.13 SSR memo/serialization-slot loop, **fixed upstream** by [#3816](https://github.com/solidjs/solid/pull/3816), merged into `next` on 2026-10-06 (`759a9b6`): a re-created memo that joins a pending slot adopts that slot's answer. Re-test and remove the `/profile` workaround (`046387b`) at the next Solid RC bump (D-082); rc.13 remains installed here.
-- [solidjs/solid#3845](https://github.com/solidjs/solid/issues/3845): delayed second hydrate root replaces server nodes, **closed as by-design** (API checked 2026-10-07: closed/not_planned at 2026-10-06T21:49:30Z; closing comment confirms the deliberate completion guard for event replay, serialized-data lifetime and DOM drift). Tier 2 is rejected and the private reset was withdrawn (D-111). D-114 parks eager emission; v0.2 is the next library release. v0.3 owns keyed attachment, its event queue and payload, with validated claims and render fallback.
+- [solidjs/solid#3845](https://github.com/solidjs/solid/issues/3845): delayed second hydrate root replaces server nodes, **closed as by-design** (API checked 2026-10-07: closed/not_planned at 2026-10-06T21:49:30Z; closing comment confirms the deliberate completion guard for event replay, serialized-data lifetime and DOM drift). Tier 2 is rejected and the private reset was withdrawn (D-111). D-114 keeps eager emission on the branch and makes productized R emission a measured candidate after v0.3; v0.2 is the next library release. v0.3 owns keyed attachment, its event queue and payload, with validated claims and render fallback.
 - **F-C9 — withdrawn; nothing filed.** Streams carry the typed failure and the hydrated client renders its fallback; renderToString is synchronous by contract (D-099), so the string-render draft is withdrawn. D-115 fixes production sanitization on our side with public markSafeError. Historical compiler-C2/single-root reports still describe the earlier stop; the merged branch's README and C3 reports supersede it.
 - **F-C14 — resolved; nothing to file.** The [plain-Solid rc.13 check](documentation/upstream/solid-frames-f-c14-check-rc13.md) recreates an async memo inside a `Loading` child on every SSR pass and fails under ordinary `renderToStream` too: it is [#3815](https://github.com/solidjs/solid/issues/3815)'s class, fixed by [#3816](https://github.com/solidjs/solid/pull/3816) on `next`. The actual F-C14 shape (hoisted loader, synchronous derived memo beneath `Loading`) converges. This is not frames-specific. Re-test at the next Solid RC bump together with the `/profile` workaround (D-082).
 

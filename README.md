@@ -251,9 +251,9 @@ const id = yield* props.id;                                                  // 
 [compiler-c0.md](documentation/compiler-c0.md) has the plan.
 
 - **v0.1, the library** (now): the runtime, the transform and the lint described here. It is waiting to be published to npm.
-- **v0.2, the compiler** (in prototype): an analysis of the app, independently hydratable islands (client roots), and a gate that measures executed bytes against the original Solid apps. Code it cannot analyse falls back to the library.
+- **v0.2:** the next library release, including serialization-safe typed failures (D-115).
 - **v0.3, the lazy builder**: islands as descriptors that become live on first interaction, a step toward resumability without a new runtime.
-- **Later**: server components built from inert regions, and an ergonomic sugar that desugars to this dialect.
+- **Candidate after v0.3:** server components (R emit) productized, subject to DOM parity and the purity trust model (D-114). Ergonomic sugar remains a later design item.
 
 ## Status
 
@@ -293,6 +293,4 @@ server-derived (S), server-recomputable (R), or client-owned. It names captures
 that cannot cross an edge. These are diagnostics, not savings or proven roots;
 `--json` gives the full detail. See [the tool](packages/compiler-yield/README.md).
 
-The measured R break-even is about **76 KB raw / 25.6 KB gzip** of removable
-server-derived code, including the fixed frame/RPC integration cost. The compiler
-emitters remain measured experiments on `proto/compiler` (D-114).
+The analyzer recognizes module-level `"use pure"` as an author assertion and lists marked modules without checking their implementations; [C3c](https://github.com/devagrawal09/solid-yield/blob/ada81a8d3af2c1e3a783468ac820875fff1fb99d/documentation/compiler-c3c-scaling.md) measures server components as a wash near **25 KB gzip** of server-derivable code and a clear win from **~110 KB** (D-114; emitters stay on `proto/compiler`).

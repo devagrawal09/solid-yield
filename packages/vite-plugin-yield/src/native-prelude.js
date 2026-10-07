@@ -229,9 +229,24 @@ export function nativePrelude(files) {
       $cleanup: "__nativeCleanup"
     };
     for (const module of ["solid-yield", "solid-yield/internal"]) {
-      const group = [...used].filter(x =>
-        module === "solid-yield" ? x === "raise" || x.startsWith("$") : x.startsWith("native")
-      );
+      const group = [...used]
+        .filter(x =>
+          module === "solid-yield" ? x === "raise" || x.startsWith("$") : x.startsWith("native")
+        )
+        .filter(x => {
+          const binding = p.scope.getBinding(names[x]);
+          if (!binding) return true;
+          if (
+            binding.path.isImportSpecifier() &&
+            binding.path.parentPath.isImportDeclaration() &&
+            binding.path.parentPath.node.source.value === module &&
+            t.isIdentifier(binding.path.node.imported, { name: x })
+          )
+            return false;
+          throw new Error(
+            `[NATIVE_NAME] Reserve ${names[x]} for the generated native import. (${file})`
+          );
+        });
       if (group.length)
         p.node.body.unshift(
           t.importDeclaration(

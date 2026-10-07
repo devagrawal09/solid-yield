@@ -4,6 +4,70 @@ const counter = body =>
   `${signal} export function Counter(){const [count,set]=createSignal(0);${body}}`;
 export const fixtures = [
   {
+    id: "native-optimistic-store-basic",
+    expected: "accepted",
+    source: `import {createOptimisticStore} from 'solid-js';export function App(){const [state,set]=createOptimisticStore({n:1});return <button onClick={()=>set(s=>{s.n++})}>{state.n}</button>}`
+  },
+  {
+    id: "native-for-indexed",
+    expected: "accepted",
+    source: `import {For,createSignal} from 'solid-js';export function App(){const [items]=createSignal([1,2]);return <For each={items()} keyed={false}>{(item,index)=><p>{index}:{item()}</p>}</For>}`
+  },
+  {
+    id: "native-switch-match",
+    expected: "accepted",
+    source: `import {Switch,Match,createSignal} from 'solid-js';export function App(){const [n]=createSignal(1);return <Switch fallback={<p>none</p>}><Match when={n()===1}><p>one</p></Match><Match when={n()===2}><p>two</p></Match></Switch>}`
+  },
+  {
+    id: "foreign-route-failure",
+    expectedDiagnostic: "FOREIGN_HANDOFF",
+    source: `import {createMemo} from 'solid-js';export function Page(){const n=createMemo(()=>{throw new Error('route failed')});return <p>{n()}</p>}export const route={component:Page};`
+  },
+  {
+    id: "foreign-render-callback",
+    expected: "accepted",
+    source: `import type {JSX} from '@solidjs/web';declare function Pane(p:{children:(n:number)=>JSX.Element}):JSX.Element;export function App(){return <Pane>{n=><span>{n}</span>}</Pane>}`
+  },
+  {
+    id: "async-event-reads",
+    expected: "accepted",
+    source: `import {createSignal} from 'solid-js';export function App(){const [n,set]=createSignal(0);async function load(){const before=n();await Promise.resolve();return before+n()+1}return <button onClick={async()=>set(await load())}>{n()}</button>}`
+  },
+  {
+    id: "async-memo-reads",
+    expected: "accepted",
+    source: `import {createSignal,createMemo,Loading} from 'solid-js';export function App(){const [n]=createSignal(1);const value=createMemo(async()=>{await Promise.resolve();return n()});return <Loading fallback="wait"><p>{value()}</p></Loading>}`
+  },
+  {
+    id: "async-setup-reads",
+    source: `import {createSignal} from 'solid-js';export function App(){const [n]=createSignal(1);async function load(){await Promise.resolve();return n()}load();return <p/>}`
+  },
+  {
+    id: "ref-event-reads",
+    expected: "accepted",
+    source: `import {createSignal} from 'solid-js';export function App(){const [n,set]=createSignal(1);return <div ref={el=>{set(n()+el.childElementCount)}}>{n()}</div>}`
+  },
+  {
+    id: "foreign-portal",
+    expected: "accepted",
+    source: `import {Portal} from '@solidjs/web';import {createSignal} from 'solid-js';export function App(){const [n,set]=createSignal(1);return <Portal><button onClick={()=>set(n()+1)}>{n()}</button></Portal>}`
+  },
+  {
+    id: "foreign-reveal",
+    expected: "accepted",
+    source: `import {Reveal,Loading} from 'solid-js';export function App(){return <Reveal><Loading fallback="wait"><p>ok</p></Loading></Reveal>}`
+  },
+  {
+    id: "opaque-reactive-argument",
+    expected: "accepted",
+    source: `import {createSignal,createMemo} from 'solid-js';declare function load(n:number):number;export function App(){const [n]=createSignal(1);const value=createMemo(()=>load(n()));return <p>{value()}</p>}`
+  },
+  {
+    id: "receiver-reactive-argument",
+    expected: "accepted",
+    source: `import {createSignal,createMemo} from 'solid-js';declare const api:{load(n:number):number};export function App(){const [n]=createSignal(1);const value=createMemo(()=>api.load(n()));return <p>{value()}</p>}`
+  },
+  {
     id: "timer-callback-failure",
     expectedDiagnostic: "NATIVE_CALLBACK_FAILURE",
     source: `import {createSignal,createMemo} from 'solid-js';declare function risk():void;export function App(){const [n]=createSignal(2);const timer=createMemo(()=>setTimeout(()=>{n();risk()},10));return <p>{timer()}</p>}`

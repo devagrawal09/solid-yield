@@ -9,3 +9,8 @@ import { CatchAction } from "./CatchAction";
 import { CatchAction as OriginalCatchAction } from "./OriginalCatchAction";
 export const nativeAction = () => nativeRender(CatchAction);
 export const originalAction = () => renderToString(OriginalCatchAction);
+
+import { AsyncReads } from "./AsyncReads";
+import { AsyncReads as OriginalAsyncReads } from "./OriginalAsyncReads";
+export const nativeAsync = () => nativeRender(AsyncReads);
+export const originalAsync = () => renderToString(OriginalAsyncReads);

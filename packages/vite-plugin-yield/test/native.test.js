@@ -129,3 +129,13 @@ it("retains entry markers and emits a single type-only import modifier", () => {
   expect(out).toContain("<HydrationScript />");
   expect(out).not.toContain("import type { type");
 });
+
+it("evaluates reactive arguments in their host before an opaque call", () => {
+  const out = lower(`import {createSignal,createMemo} from 'solid-js';
+    declare const api:{load(n:number):number};
+    export function App(){const [n]=createSignal(1);const value=createMemo(()=>api.load(n()));return <p>{value()}</p>}`);
+  expect(out).toMatch(/const _receiver = api/);
+  expect(out).toMatch(/const _method = yield\* __nativeAttempt\(\(\) => _receiver.load/);
+  expect(out).toMatch(/const _argument = yield\* n/);
+  expect(out).toContain("__nativeInvoke(_method, _receiver, [_argument])");
+});

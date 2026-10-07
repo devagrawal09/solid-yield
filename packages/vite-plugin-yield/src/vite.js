@@ -65,7 +65,13 @@ export default function solidYield(options = {}) {
       const file = id.replace(/[?#].*$/, "");
       if (!filter(file)) return null;
       if (options.mode === "native" && options.include?.(file)) {
-        code = lowerNativeFile(code, file, options.include, sugarCache);
+        code = lowerNativeFile(code, file, options.include, sugarCache, diagnostic =>
+          this.warn({
+            message: `[${diagnostic.code}] ${diagnostic.message}`,
+            id: diagnostic.file,
+            loc: { file: diagnostic.file, line: diagnostic.line, column: diagnostic.column - 1 }
+          })
+        );
         const result = transform(code, { filename: file, yieldModule, lazy });
         return { code: result?.code ?? code, map: null };
       }

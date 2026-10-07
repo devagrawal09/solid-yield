@@ -38,7 +38,7 @@ export function lowerNativeEffects(files, report) {
             /^create(Signal|Memo|Optimistic|Store|Projection)/.test(sourceApi.name))
         ) {
           const owner = q.getFunctionParent();
-          if (owner && !owner.node.async) routines.add(`${file}:${owner.node.start}`);
+          if (owner) routines.add(`${file}:${owner.node.start}`);
         }
       }
     });
@@ -56,6 +56,20 @@ export function lowerNativeEffects(files, report) {
       }
     }
   }
+  const asyncRoutines = new Set();
+  for (const [file, code] of files)
+    parseProgram(code, file)?.traverse({
+      Function(q) {
+        const id = `${file}:${q.node.start}`;
+        if (
+          q.node.async &&
+          !q.node.generator &&
+          routines.has(id) &&
+          !report.at(file, q.node.start ?? 0)?.server
+        )
+          asyncRoutines.add(id);
+      }
+    });
   const result = new Map();
   for (const [file, code] of files) {
     const p = parseProgram(code, file);
@@ -115,8 +129,47 @@ export function lowerNativeEffects(files, report) {
       );
     };
 
+    // Async reactive helpers run on their caller's host. Await becomes an
+    // attempt at its original position; setup cannot admit that read/wait.
+    p.traverse({
+      CallExpression(q) {
+        const info = report.call(file, q.node.start ?? 0, q.node.end ?? 0);
+        const owner = q.getFunctionParent();
+        if (
+          info?.target &&
+          asyncRoutines.has(info.target) &&
+          owner &&
+          report.at(file, owner.node.start ?? 0)?.component
+        )
+          throw new Error(
+            `[NATIVE_ASYNC_SETUP] An async reactive read has setup as its host; call it from an event or memo. (${file}:${q.node.loc?.start.line}:${(q.node.loc?.start.column ?? 0) + 1})`
+          );
+      },
+      Function(q) {
+        if (!asyncRoutines.has(`${file}:${q.node.start}`)) return;
+        q.node.async = false;
+        if (q.isArrowFunctionExpression()) q.arrowFunctionToExpression();
+        q.node.generator = true;
+        q.node.returnType = null;
+      }
+    });
     // Synchronous native throw sites are ordinary library raise operations.
     p.traverse({
+      AwaitExpression: {
+        exit(q) {
+          const fn = q.getFunctionParent();
+          if (!fn || !asyncRoutines.has(`${file}:${fn.node.start}`)) return;
+          const value = q.node.argument;
+          const info = report.call(file, value.start ?? 0, value.end ?? 0);
+          q.replaceWith(
+            (info?.target && asyncRoutines.has(info.target)) ||
+              (t.isCallExpression(value) &&
+                t.isIdentifier(value.callee, { name: "__nativeAttempt" }))
+              ? value
+              : attempt(value, info?.fails ?? ["unknown"])
+          );
+        }
+      },
       Function(q) {
         if (!q.node.async && !q.node.returnType && t.isBlockStatement(q.node.body)) {
           const completions = q.get("body").getCompletionRecords();
@@ -200,6 +253,7 @@ export function lowerNativeEffects(files, report) {
             !info ||
             info.native ||
             (!info.fails.length && !info.promise) ||
+            (info.target && asyncRoutines.has(info.target)) ||
             (info.target &&
               routines.has(info.target) &&
               !info.async &&
@@ -207,7 +261,67 @@ export function lowerNativeEffects(files, report) {
               !q.isNewExpression())
           )
             return;
-          q.replaceWith(attempt(q.node, info.fails));
+          // Evaluate the call target and arguments in the current routine. A
+          // plain attempt producer must not capture delegated reactive reads.
+          // Retain receiver lookup before arguments, and invoke with that receiver.
+          const call =
+            /** @type {import("@babel/core").types.CallExpression | import("@babel/core").types.NewExpression} */ (
+              q.node
+            );
+          let readsArgument = false;
+          for (const arg of q.get("arguments")) {
+            if (arg.isFunction()) continue;
+            if (arg.isCallExpression() || arg.isMemberExpression()) readsArgument = true;
+            arg.traverse({
+              Function(f) {
+                f.skip();
+              },
+              CallExpression() {
+                readsArgument = true;
+              },
+              MemberExpression() {
+                readsArgument = true;
+              }
+            });
+          }
+          if (readsArgument && !call.arguments.some(a => t.isSpreadElement(a))) {
+            /** @type {import('@babel/core').types.Statement[]} */
+            const statements = [];
+            /** @param {any} value @param {string} hint */
+            const save = (value, hint) => {
+              const id = q.scope.generateUidIdentifier(hint);
+              statements.push(t.variableDeclaration("const", [t.variableDeclarator(id, value)]));
+              return id;
+            };
+            let callee = /** @type {import("@babel/core").types.Expression} */ (call.callee);
+            let receiver;
+            if (t.isMemberExpression(callee) && !t.isSuper(callee.object)) {
+              receiver = save(callee.object, "receiver");
+              callee = save(
+                attempt(t.memberExpression(receiver, callee.property, callee.computed), info.fails),
+                "method"
+              );
+            }
+            if (!receiver) callee = save(callee, "callee");
+            const args = call.arguments.map(arg => save(arg, "argument"));
+            if (receiver) used.add("nativeInvoke");
+            const invoke = t.isNewExpression(call)
+              ? t.newExpression(callee, args)
+              : receiver
+                ? t.callExpression(t.identifier("__nativeInvoke"), [
+                    callee,
+                    receiver,
+                    t.arrayExpression(args)
+                  ])
+                : t.callExpression(callee, args);
+            statements.push(t.returnStatement(attempt(invoke, info.fails)));
+            q.replaceWith(
+              t.callExpression(
+                t.functionExpression(null, [], t.blockStatement(statements), true),
+                []
+              )
+            );
+          } else q.replaceWith(attempt(call, info.fails));
           q.skip();
         }
       }
@@ -342,7 +456,8 @@ export function lowerNativeEffects(files, report) {
       raise: "__nativeRaise",
       nativeFailure: "__nativeFailure",
       registerNativeFailure: "__nativeRegister",
-      nativeFailureValue: "__nativeValue"
+      nativeFailureValue: "__nativeValue",
+      nativeInvoke: "__nativeInvoke"
     };
     for (const module of ["solid-yield", "solid-yield/internal"]) {
       const names = [...used].filter(n =>

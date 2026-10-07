@@ -1,7 +1,14 @@
 #!/usr/bin/env node
 // Real diagnostics from reconstructed probes and all nine twin inputs.
 import "./native-inventory.mjs";
-import { readFileSync, readdirSync, mkdirSync, writeFileSync } from "node:fs";
+import {
+  readFileSync,
+  readdirSync,
+  mkdirSync,
+  writeFileSync,
+  existsSync,
+  symlinkSync
+} from "node:fs";
 import { resolve, relative, join } from "node:path";
 import { createRequire } from "node:module";
 import { format, resolveConfig } from "prettier";
@@ -9,6 +16,7 @@ import assert from "node:assert/strict";
 import {
   inspectNativeProject,
   nativeFailures,
+  nativeForeignDiagnostics,
   lowerNativeProject
 } from "../packages/vite-plugin-yield/src/native.js";
 import { sugarFacts } from "../packages/compiler-yield/src/sugar-facts.js";
@@ -55,24 +63,32 @@ writeFileSync(
         types: [],
         lib: ["ESNext", "DOM"]
       },
-      include: ["**/*.tsx", "**/*.ts"]
+      include: ["*.tsx", "*.ts"]
     },
     null,
     2
   ) + "\n"
 );
-const eslint = new ESLint({
-  cwd: root,
-  overrideConfigFile: true,
-  overrideConfig: [
-    {
-      files: ["**/*.tsx", "**/*.ts"],
-      languageOptions: { parser, parserOptions: { project: tsconfig, tsconfigRootDir: root } },
-      plugins: { "solid-yield": plugin },
-      rules: plugin.configs.recommended.rules
-    }
-  ]
-});
+const makeESLint = project =>
+  new ESLint({
+    cwd: root,
+    overrideConfigFile: true,
+    overrideConfig: [
+      {
+        files: ["**/*.tsx", "**/*.ts"],
+        languageOptions: {
+          parser,
+          parserOptions: {
+            project,
+            tsconfigRootDir: root
+          }
+        },
+        plugins: { "solid-yield": plugin },
+        rules: plugin.configs.recommended.rules
+      }
+    ]
+  });
+const eslint = makeESLint(tsconfig);
 const results = [];
 const outputs = new Map();
 for (const fixture of fixtures) {
@@ -156,26 +172,26 @@ for (const result of results.filter(r => r.stage === "generated")) {
       `${result.id}: missing ${result.expectedDiagnostic}`
     );
 }
-const filesUnder = dir =>
+const filesUnder = (dir, assets = false) =>
   readdirSync(dir, { withFileTypes: true }).flatMap(d => {
     if (["node_modules", ".generated", ".native-generated", "dist"].includes(d.name)) return [];
     const file = join(dir, d.name);
     return d.isDirectory()
-      ? filesUnder(file)
-      : /\.[jt]sx?$/.test(file) && !file.endsWith(".d.ts")
+      ? filesUnder(file, assets)
+      : (assets && file.endsWith(".json")) || (/\.[jt]sx?$/.test(file) && !file.endsWith(".d.ts"))
         ? [file]
         : [];
   });
 const twins = [
-  "docs",
-  "effect",
-  "hackernews-spa",
-  "rendering",
-  "room",
   "sierpinski",
   "sierpinski-h",
   "todos",
-  "todos-h"
+  "todos-h",
+  "hackernews-spa",
+  "effect",
+  "rendering",
+  "room",
+  "docs"
 ];
 const originals = [];
 for (const twin of twins) {
@@ -187,12 +203,27 @@ for (const twin of twins) {
     original === "rendering" ? "shared/src" : "src"
   );
   const input = new Map(filesUnder(dir).map(file => [file, readFileSync(file, "utf8")]));
-  const failureReport = nativeFailures(input);
+  const sourceConfigPath = ts.findConfigFile(dir, ts.sys.fileExists);
+  const sourceConfig = sourceConfigPath
+    ? ts.readConfigFile(sourceConfigPath, ts.sys.readFile)
+    : null;
+  const sourceOptions = sourceConfig
+    ? ts.parseJsonConfigFileContent(sourceConfig.config, ts.sys, resolve(sourceConfigPath, ".."))
+        .options
+    : {};
+  if (sourceOptions.paths)
+    sourceOptions.paths = Object.fromEntries(
+      Object.entries(sourceOptions.paths).map(([key, paths]) => [
+        key,
+        paths.map(p => resolve(sourceConfigPath, "..", p))
+      ])
+    );
+  const failureReport = nativeFailures(input, sourceOptions);
   let errors = inspectNativeProject(input);
   let output;
   if (!errors.length)
     try {
-      output = lowerNativeProject(input);
+      output = lowerNativeProject(input, { compilerOptions: sourceOptions });
     } catch (error) {
       errors = error.diagnostics ?? [
         { code: error.message.match(/\[(\w+)\]/)?.[1] ?? "TRANSFORM", message: error.message }
@@ -206,7 +237,38 @@ for (const twin of twins) {
       writeFileSync(dest, code);
       emitted.push(dest);
     }
-    const checked = ts.createProgram(emitted, compilerOptions);
+    const emittedRoot = join(generated, "originals", twin);
+    const dependencies = join(root, "examples/originals", original, "node_modules");
+    if (!existsSync(join(emittedRoot, "node_modules")))
+      symlinkSync(dependencies, join(emittedRoot, "node_modules"), "dir");
+    writeFileSync(
+      join(emittedRoot, "tsconfig.json"),
+      JSON.stringify(
+        {
+          extends: "../../tsconfig.json",
+          compilerOptions: { paths: { "~/*": [emittedRoot + "/*"] } },
+          include: ["**/*.tsx", "**/*.ts"],
+          exclude: ["node_modules"]
+        },
+        null,
+        2
+      ) + "\n"
+    );
+    for (const asset of filesUnder(dir, true).filter(f => f.endsWith(".json"))) {
+      const dest = join(emittedRoot, relative(dir, asset));
+      mkdirSync(resolve(dest, ".."), { recursive: true });
+      if (!existsSync(dest)) symlinkSync(asset, dest);
+    }
+    const originalLint = makeESLint(join(emittedRoot, "tsconfig.json"));
+    const ambient = join(emittedRoot, "native-env.d.ts");
+    writeFileSync(ambient, '/// <reference types="vite/client" />\n');
+    emitted.push(ambient);
+    const checked = ts.createProgram(emitted, {
+      ...compilerOptions,
+      resolveJsonModule: true,
+      allowSyntheticDefaultImports: true,
+      paths: { "~/*": [emittedRoot + "/*"] }
+    });
     errors.push(
       ...ts.getPreEmitDiagnostics(checked).map(d => ({
         stage: "type",
@@ -219,8 +281,12 @@ for (const twin of twins) {
             : undefined
       }))
     );
-    for (const file of emitted) {
-      const [lint] = await eslint.lintText(readFileSync(file, "utf8"), { filePath: file });
+    for (const file of emitted.filter(f => !f.endsWith(".d.ts"))) {
+      const [lint] = await originalLint.lintText(readFileSync(file, "utf8"), { filePath: file });
+      assert.ok(
+        !lint.messages.some(m => /TSConfig does not include|Cannot read file/.test(m.message)),
+        `Invalid generated lint project for ${file}`
+      );
       errors.push(
         ...lint.messages.map(m => ({
           stage: "lint",
@@ -253,6 +319,7 @@ for (const twin of twins) {
         ? "generated-with-diagnostics"
         : "generated-unverified"
       : "refused",
+    foreignBoundaries: nativeForeignDiagnostics(input, sourceOptions),
     diagnostics: errors,
     parity: "not run: no checked native program",
     ssr: "not run: no checked native program",

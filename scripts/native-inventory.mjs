@@ -26,7 +26,24 @@ const entries = new Set([
   "renderToStream",
   "HydrationScript"
 ]);
-const unsupported = new Set(["Portal", "Reveal", "dynamic"]);
+const foreignTags = new Set(["Portal", "Reveal"]);
+const outside = new Set([
+  "Portal",
+  "Reveal",
+  "dynamic",
+  "lazy",
+  "until",
+  "createProjection",
+  "latest",
+  "isPending",
+  "Repeat",
+  "createUniqueId",
+  "onSettled",
+  "onCleanup",
+  "markSafeError",
+  "getRequestEvent",
+  "isServer"
+]);
 const rows = new Map();
 for (const name of [
   "docs",
@@ -53,10 +70,11 @@ for (const name of [
           if (entries.has(api)) {
             status = "excluded-as-entry";
             form = "Solid entry API + foreign(component) at direct handoffs";
-          } else if (unsupported.has(api)) {
-            status = "refused-with-reason";
-            form = null;
-            reason = "NATIVE_FOREIGN: child colors need a checked foreign component adapter.";
+          } else if (foreignTags.has(api)) {
+            status = "foreign-jsx";
+            form = "foreign(Tag); retain JSX props and children";
+            reason =
+              "Plain Solid tag; NATIVE_FOREIGN_BOUNDARY reports unknown foreign failures. Complete-original capture/parity remains unverified.";
           } else if (nativeTypes.has(api)) {
             form = ["Component", "ParentComponent"].includes(api)
               ? "component variable annotation erased; props copied into Props<T>"
@@ -83,7 +101,22 @@ for (const name of [
           )
             reason =
               "Primitive import is mapped; not every overload, selector, or callback contract is implemented. See application diagnostics.";
-          if (!rows.has(key)) rows.set(key, { module, api, status, form, reason, files: [] });
+          if (!rows.has(key))
+            rows.set(key, {
+              module,
+              api,
+              status,
+              form,
+              reason,
+              intendedScope: entries.has(api)
+                ? "entry"
+                : nativeTypes.has(api)
+                  ? "type"
+                  : outside.has(api)
+                    ? "foreign"
+                    : "core",
+              files: []
+            });
           rows.get(key).files.push(relative(root, file));
         }
       }

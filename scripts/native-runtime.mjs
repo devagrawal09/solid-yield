@@ -19,6 +19,12 @@ if (!process.argv.includes("--child")) {
   assert.deepEqual(native, original);
   assert.deepEqual(native.values, ["2", "4", "6"]);
   assert.equal(native.retained, true);
+  const originalAsync = run("original", "Async"),
+    nativeAsync = run("native", "Async");
+  assert.deepEqual(nativeAsync, originalAsync);
+  assert.deepEqual(nativeAsync.values, ["0", "1", "3"]);
+  assert.equal(nativeAsync.retained, true);
+  console.log("native async helper: SSR and hydrated reads across await match original");
   const originalAction = run("original", "Action"),
     nativeAction = run("native", "Action");
   assert.deepEqual(nativeAction, originalAction);
@@ -48,7 +54,9 @@ if (!process.argv.includes("--child")) {
       solidYield({
         mode: "native",
         include: file =>
-          ["Counter.tsx", "CatchAction.tsx"].some(name => file === join(fixture, name))
+          ["Counter.tsx", "CatchAction.tsx", "AsyncReads.tsx"].some(
+            name => file === join(fixture, name)
+          )
       }),
       solid({ ssr: true }),
       {
@@ -88,13 +96,17 @@ if (!process.argv.includes("--child")) {
     for (const match of scripts.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/g)) (0, eval)(match[1]);
     const before = document.querySelector("button");
     await server.environments.hydrate.runner.import(
-      family
+      family === "Async"
         ? mode === "native"
-          ? "/action-client.tsx"
-          : "/original-action-client.tsx"
-        : mode === "native"
-          ? "/client.tsx"
-          : "/original-client.tsx"
+          ? "/async-client.tsx"
+          : "/original-async-client.tsx"
+        : family
+          ? mode === "native"
+            ? "/action-client.tsx"
+            : "/original-action-client.tsx"
+          : mode === "native"
+            ? "/client.tsx"
+            : "/original-client.tsx"
     );
     const values = [before.textContent];
     for (let i = 0; i < 2; i++) {

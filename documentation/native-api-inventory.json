@@ -4,9 +4,10 @@
     {
       "module": "@solidjs/web",
       "api": "dynamic",
-      "status": "refused-with-reason",
-      "form": null,
-      "reason": "NATIVE_FOREIGN: child colors need a checked foreign component adapter.",
+      "status": "mapped",
+      "form": "pass-through",
+      "reason": "",
+      "intendedScope": "foreign",
       "files": [
         "examples/originals/room/src/routes/home.tsx"
       ]
@@ -17,6 +18,7 @@
       "status": "mapped",
       "form": "pass-through",
       "reason": "",
+      "intendedScope": "foreign",
       "files": [
         "examples/originals/room/src/lib/sources.ts"
       ]
@@ -27,6 +29,7 @@
       "status": "excluded-as-entry",
       "form": "Solid entry API + foreign(component) at direct handoffs",
       "reason": "",
+      "intendedScope": "entry",
       "files": [
         "examples/originals/docs/src/shell.tsx",
         "examples/originals/rendering/shared/src/components/Shell.tsx",
@@ -39,6 +42,7 @@
       "status": "mapped",
       "form": "pass-through",
       "reason": "",
+      "intendedScope": "foreign",
       "files": [
         "examples/originals/rendering/shared/src/router.tsx",
         "examples/originals/room/src/components/status-pill.tsx",
@@ -51,6 +55,7 @@
       "status": "mapped",
       "form": "retained type-only",
       "reason": "Higher-order component contracts and accessor/store color facades remain incomplete.",
+      "intendedScope": "type",
       "files": [
         "examples/originals/docs/src/shell.tsx",
         "examples/originals/room/src/Document.tsx"
@@ -62,6 +67,7 @@
       "status": "mapped",
       "form": "pass-through",
       "reason": "",
+      "intendedScope": "foreign",
       "files": [
         "examples/originals/docs/src/errors.ts"
       ]
@@ -69,9 +75,10 @@
     {
       "module": "@solidjs/web",
       "api": "Portal",
-      "status": "refused-with-reason",
-      "form": null,
-      "reason": "NATIVE_FOREIGN: child colors need a checked foreign component adapter.",
+      "status": "foreign-jsx",
+      "form": "foreign(Tag); retain JSX props and children",
+      "reason": "Plain Solid tag; NATIVE_FOREIGN_BOUNDARY reports unknown foreign failures. Complete-original capture/parity remains unverified.",
+      "intendedScope": "foreign",
       "files": [
         "examples/originals/rendering/shared/src/components/Settings.tsx"
       ]
@@ -82,6 +89,7 @@
       "status": "excluded-as-entry",
       "form": "Solid entry API + foreign(component) at direct handoffs",
       "reason": "",
+      "intendedScope": "entry",
       "files": [
         "examples/originals/docs/src/main.tsx",
         "examples/originals/effect/src/main.tsx",
@@ -95,6 +103,7 @@
       "status": "mapped",
       "form": "retained type-only",
       "reason": "Higher-order component contracts and accessor/store color facades remain incomplete.",
+      "intendedScope": "type",
       "files": [
         "examples/originals/room/src/components/status-pill.tsx",
         "examples/originals/room/src/lib/identity.tsx",
@@ -107,6 +116,7 @@
       "status": "mapped",
       "form": "$event",
       "reason": "",
+      "intendedScope": "core",
       "files": [
         "examples/originals/docs/src/widgets.tsx",
         "examples/originals/effect/src/solid-effect.ts",
@@ -121,6 +131,7 @@
       "status": "mapped",
       "form": "component variable annotation erased; props copied into Props<T>",
       "reason": "Higher-order component contracts and accessor/store color facades remain incomplete.",
+      "intendedScope": "type",
       "files": [
         "examples/originals/hackernews-spa/src/components/comment.tsx",
         "examples/originals/hackernews-spa/src/components/story.tsx",
@@ -133,6 +144,7 @@
       "status": "mapped",
       "form": "createContext",
       "reason": "",
+      "intendedScope": "core",
       "files": [
         "examples/originals/effect/src/solid-effect.ts",
         "examples/originals/rendering/shared/src/router.tsx",
@@ -146,6 +158,7 @@
       "status": "mapped",
       "form": "$effect",
       "reason": "",
+      "intendedScope": "core",
       "files": [
         "examples/originals/docs/src/widgets.tsx"
       ]
@@ -156,6 +169,7 @@
       "status": "mapped",
       "form": "$memo",
       "reason": "",
+      "intendedScope": "core",
       "files": [
         "examples/originals/docs/src/content.tsx",
         "examples/originals/docs/src/widgets.tsx",
@@ -179,6 +193,7 @@
       "status": "mapped",
       "form": "$optimistic",
       "reason": "",
+      "intendedScope": "core",
       "files": [
         "examples/originals/docs/src/widgets.tsx",
         "examples/originals/effect/src/checkout.tsx",
@@ -191,6 +206,7 @@
       "status": "mapped",
       "form": "$optimisticStore",
       "reason": "Primitive import is mapped; not every overload, selector, or callback contract is implemented. See application diagnostics.",
+      "intendedScope": "core",
       "files": [
         "examples/originals/effect/src/checkout.tsx",
         "examples/originals/room/src/routes/live.tsx",
@@ -203,6 +219,7 @@
       "status": "mapped",
       "form": "$projection",
       "reason": "Primitive import is mapped; not every overload, selector, or callback contract is implemented. See application diagnostics.",
+      "intendedScope": "foreign",
       "files": [
         "examples/originals/rendering/shared/src/components/Stream.tsx"
       ]
@@ -213,6 +230,7 @@
       "status": "mapped",
       "form": "$signal",
       "reason": "",
+      "intendedScope": "core",
       "files": [
         "examples/originals/docs/src/widgets.tsx",
         "examples/originals/effect/src/app.tsx",
@@ -239,6 +257,7 @@
       "status": "mapped",
       "form": "$store",
       "reason": "Primitive import is mapped; not every overload, selector, or callback contract is implemented. See application diagnostics.",
+      "intendedScope": "core",
       "files": [
         "examples/originals/effect/src/checkout.tsx",
         "examples/originals/effect/src/log.ts",
@@ -251,6 +270,7 @@
       "status": "mapped",
       "form": "pass-through",
       "reason": "",
+      "intendedScope": "foreign",
       "files": [
         "examples/originals/rendering/shared/src/components/Settings.tsx"
       ]
@@ -261,6 +281,7 @@
       "status": "mapped",
       "form": "Errored",
       "reason": "",
+      "intendedScope": "core",
       "files": [
         "examples/originals/docs/src/content.tsx",
         "examples/originals/docs/src/widgets.tsx",
@@ -277,6 +298,7 @@
       "status": "mapped",
       "form": "For",
       "reason": "",
+      "intendedScope": "core",
       "files": [
         "examples/originals/docs/src/content.tsx",
         "examples/originals/docs/src/widgets.tsx",
@@ -300,6 +322,7 @@
       "status": "mapped",
       "form": "isPendingOf",
       "reason": "Primitive import is mapped; not every overload, selector, or callback contract is implemented. See application diagnostics.",
+      "intendedScope": "foreign",
       "files": [
         "examples/originals/effect/src/typeahead.tsx",
         "examples/originals/rendering/shared/src/components/App.tsx",
@@ -312,6 +335,7 @@
       "status": "mapped",
       "form": "latestOf",
       "reason": "Primitive import is mapped; not every overload, selector, or callback contract is implemented. See application diagnostics.",
+      "intendedScope": "foreign",
       "files": [
         "examples/originals/effect/src/typeahead.tsx",
         "examples/originals/room/src/routes/home.tsx",
@@ -324,6 +348,7 @@
       "status": "mapped",
       "form": "lazy",
       "reason": "Primitive import is mapped; not every overload, selector, or callback contract is implemented. See application diagnostics.",
+      "intendedScope": "foreign",
       "files": [
         "examples/originals/rendering/shared/src/components/App.tsx",
         "examples/originals/rendering/shared/src/components/Profile/index.tsx"
@@ -335,6 +360,7 @@
       "status": "mapped",
       "form": "Loading",
       "reason": "",
+      "intendedScope": "core",
       "files": [
         "examples/originals/docs/src/content.tsx",
         "examples/originals/docs/src/widgets.tsx",
@@ -358,6 +384,7 @@
       "status": "mapped",
       "form": "Match",
       "reason": "",
+      "intendedScope": "core",
       "files": [
         "examples/originals/rendering/shared/src/components/App.tsx"
       ]
@@ -368,6 +395,7 @@
       "status": "mapped",
       "form": "$cleanup",
       "reason": "",
+      "intendedScope": "foreign",
       "files": [
         "examples/originals/effect/src/solid-effect.ts",
         "examples/originals/room/src/lib/room-panel.tsx",
@@ -380,6 +408,7 @@
       "status": "mapped",
       "form": "$effect + $cleanup",
       "reason": "",
+      "intendedScope": "foreign",
       "files": [
         "examples/originals/rendering/shared/src/components/Home.tsx",
         "examples/originals/room/src/lib/identity.tsx",
@@ -392,6 +421,7 @@
       "status": "mapped",
       "form": "component variable annotation erased; props copied into Props<T>",
       "reason": "Higher-order component contracts and accessor/store color facades remain incomplete.",
+      "intendedScope": "type",
       "files": [
         "examples/originals/room/src/lib/identity.tsx"
       ]
@@ -402,6 +432,7 @@
       "status": "mapped",
       "form": "retained type-only",
       "reason": "Higher-order component contracts and accessor/store color facades remain incomplete.",
+      "intendedScope": "type",
       "files": [
         "examples/originals/rendering/shared/src/components/Shell.tsx",
         "examples/originals/rendering/shared/src/router.tsx"
@@ -413,6 +444,7 @@
       "status": "mapped",
       "form": "refresh",
       "reason": "",
+      "intendedScope": "core",
       "files": [
         "examples/originals/effect/src/checkout.tsx",
         "examples/originals/todos/src/todos.ts"
@@ -424,6 +456,7 @@
       "status": "mapped",
       "form": "Repeat",
       "reason": "",
+      "intendedScope": "foreign",
       "files": [
         "examples/originals/rendering/shared/src/components/Stream.tsx"
       ]
@@ -431,9 +464,10 @@
     {
       "module": "solid-js",
       "api": "Reveal",
-      "status": "refused-with-reason",
-      "form": null,
-      "reason": "NATIVE_FOREIGN: child colors need a checked foreign component adapter.",
+      "status": "foreign-jsx",
+      "form": "foreign(Tag); retain JSX props and children",
+      "reason": "Plain Solid tag; NATIVE_FOREIGN_BOUNDARY reports unknown foreign failures. Complete-original capture/parity remains unverified.",
+      "intendedScope": "foreign",
       "files": [
         "examples/originals/rendering/shared/src/components/Reveal.tsx"
       ]
@@ -444,6 +478,7 @@
       "status": "mapped",
       "form": "retained type-only",
       "reason": "Higher-order component contracts and accessor/store color facades remain incomplete.",
+      "intendedScope": "type",
       "files": [
         "examples/originals/rendering/shared/src/components/Reveal.tsx"
       ]
@@ -454,6 +489,7 @@
       "status": "mapped",
       "form": "Show",
       "reason": "",
+      "intendedScope": "core",
       "files": [
         "examples/originals/effect/src/app.tsx",
         "examples/originals/effect/src/checkout.tsx",
@@ -475,6 +511,7 @@
       "status": "mapped",
       "form": "retained type-only",
       "reason": "Higher-order component contracts and accessor/store color facades remain incomplete.",
+      "intendedScope": "type",
       "files": [
         "examples/originals/room/src/routes/live.tsx"
       ]
@@ -485,6 +522,7 @@
       "status": "mapped",
       "form": "Switch",
       "reason": "",
+      "intendedScope": "core",
       "files": [
         "examples/originals/rendering/shared/src/components/App.tsx"
       ]
@@ -495,6 +533,7 @@
       "status": "mapped",
       "form": "until",
       "reason": "Primitive import is mapped; not every overload, selector, or callback contract is implemented. See application diagnostics.",
+      "intendedScope": "foreign",
       "files": [
         "examples/originals/room/src/routes/live.tsx"
       ]
@@ -505,6 +544,7 @@
       "status": "mapped",
       "form": "context source read",
       "reason": "",
+      "intendedScope": "core",
       "files": [
         "examples/originals/effect/src/solid-effect.ts",
         "examples/originals/rendering/shared/src/router.tsx",

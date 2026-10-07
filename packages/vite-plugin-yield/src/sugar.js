@@ -203,14 +203,20 @@ function seed(code, filename, native = false) {
   if (needsView || needsComponent) {
     // Reserve these names rather than silently shadowing user declarations.
     for (const name of [...(needsComponent ? ["component"] : []), ...(needsView ? ["view"] : [])]) {
-      if (p.scope.hasBinding(name))
+      const binding = p.scope.getBinding(name)?.path;
+      const generatedImport =
+        native &&
+        binding?.isImportSpecifier() &&
+        binding.parentPath.isImportDeclaration() &&
+        binding.parentPath.node.source.value === "solid-yield";
+      if (p.scope.hasBinding(name) && !generatedImport)
         fail(p, "SUGAR_NAME", `Reserve ${name} for the generated library import.`, filename);
     }
     p.node.body.unshift(
       t.importDeclaration(
-        [...(needsComponent ? ["component"] : []), ...(needsView ? ["view"] : [])].map(n =>
-          t.importSpecifier(t.identifier(n), t.identifier(n))
-        ),
+        [...(needsComponent ? ["component"] : []), ...(needsView ? ["view"] : [])]
+          .filter(n => !p.scope.hasBinding(n))
+          .map(n => t.importSpecifier(t.identifier(n), t.identifier(n))),
         t.stringLiteral("solid-yield")
       )
     );
@@ -264,6 +270,31 @@ function pass(code, filename, program, native = false) {
       ["Generator", "Yieldable", "Receipt", "View"].includes(
         v.aliasSymbol?.name ?? v.symbol?.name
       ));
+  /** @param {Path} value */
+  const handoff = value => {
+    if (value.isCallExpression() && lib(value.get("callee")) === "foreign") return;
+    if (
+      !native ||
+      !type(value)
+        ?.getCallSignatures()
+        .some(
+          /** @param {ts.Signature} sig */ sig =>
+            brand(checker.getReturnTypeOfSignature(sig), "COMPONENT")
+        )
+    )
+      return;
+    value.replaceWith(t.callExpression(t.identifier("__nativeForeign"), [value.node]));
+    if (!p.scope.hasBinding("__nativeForeign")) {
+      p.node.body.unshift(
+        t.importDeclaration(
+          [t.importSpecifier(t.identifier("__nativeForeign"), t.identifier("foreign"))],
+          t.stringLiteral("solid-yield")
+        )
+      );
+      p.scope.crawl();
+    }
+    changed = true;
+  };
   /** @param {Path} path @param {any} [operand] */
   function delegate(path, operand = path.node) {
     const fn = path.getFunctionParent();
@@ -394,10 +425,42 @@ function pass(code, filename, program, native = false) {
   }
   p.traverse({
     CallExpression: {
+      enter(path) {
+        if (!native || lib(path.get("callee")) !== "attempt") return;
+        const producer = path.get("arguments.0");
+        if (!producer?.isArrowFunctionExpression()) return;
+        const body = producer.get("body");
+        if (!body.isCallExpression()) return;
+        // Native inference runs before context/prop accessors acquire their
+        // library types. Once resolved as a source or routine, its own failure
+        // color is authoritative; do not drive it inside a plain producer.
+        if (sourceType(type(body.get("callee"))) || isOperation(type(body))) {
+          path.replaceWith(body.node);
+          changed = true;
+        }
+      },
       exit(path) {
         if (path.parentPath.isYieldExpression()) return;
+        if (
+          native &&
+          path.get("callee").isCallExpression() &&
+          lib(path.get("callee.callee")) === "foreign"
+        )
+          return;
         const callee = path.get("callee"),
           ct = type(callee);
+        const fallback = path.getFunctionParent();
+        if (
+          native &&
+          fallback &&
+          !fallback.node.generator &&
+          fallback.parentPath.isObjectProperty() &&
+          key(fallback.parentPath.node.key) === "fallback" &&
+          lib(ownerCall(fallback)?.get("callee")) === "Errored" &&
+          callee.isIdentifier() &&
+          t.isIdentifier(fallback.node.params[0], { name: callee.node.name })
+        )
+          return;
         if (sourceType(ct)) {
           const sourceBrand = checker
             .getPropertiesOfType(ct)
@@ -448,6 +511,7 @@ function pass(code, filename, program, native = false) {
     },
     ObjectProperty: {
       exit(path) {
+        if (key(path.node.key) === "component") handoff(path.get("value"));
         const call = path.parentPath.parentPath;
         if (!call?.isCallExpression() || !(control(call) || brand(type(call), "COMPONENT"))) return;
         const value = path.get("value");
@@ -480,6 +544,8 @@ function pass(code, filename, program, native = false) {
     },
     JSXExpressionContainer(path) {
       const e = path.get("expression");
+      if (path.parentPath.isJSXAttribute() && key(path.parentPath.node.name) === "component")
+        handoff(e);
       const owner = path.getFunctionParent();
       if (
         native &&

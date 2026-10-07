@@ -77,17 +77,19 @@ const print = /** @param {any} p */ p =>
 function imported(p) {
   if (!p.isIdentifier() && !p.isJSXIdentifier()) return null;
   const b = p.scope.getBinding(p.node.name);
-  if (!b?.path.isImportSpecifier()) return null;
+  if (!b?.path.isImportSpecifier() && !b?.path.isImportDefaultSpecifier()) return null;
   if (!b.path.parentPath.isImportDeclaration()) return null;
   return {
     module: b.path.parentPath.node.source.value,
-    name: t.isIdentifier(b.path.node.imported)
-      ? b.path.node.imported.name
-      : b.path.node.imported.value
+    name: b.path.isImportDefaultSpecifier()
+      ? "default"
+      : t.isIdentifier(b.path.node.imported)
+        ? b.path.node.imported.name
+        : b.path.node.imported.value
   };
 }
-/** @param {Map<string,string>} files */
-function nativeProgram(files) {
+/** @param {Map<string,string>} files @param {ts.CompilerOptions} [options] */
+function nativeProgram(files, options = {}) {
   const host = ts.createCompilerHost({});
   const read = host.readFile.bind(host);
   host.readFile = f => files.get(f) ?? read(f);
@@ -105,15 +107,16 @@ function nativeProgram(files) {
       jsx: ts.JsxEmit.Preserve,
       strict: true,
       skipLibCheck: true,
-      allowJs: true
+      allowJs: true,
+      ...options
     },
     host
   );
   return program;
 }
-/** @param {Map<string,string>} files */
-export function nativeFailures(files) {
-  return inferFailures(files, { program: nativeProgram(files), ts });
+/** @param {Map<string,string>} files @param {ts.CompilerOptions} [options] */
+export function nativeFailures(files, options = {}) {
+  return inferFailures(files, { program: nativeProgram(files, options), ts });
 }
 /** Inspect all selected files, accumulating refusals instead of stopping at the first one.
  * @param {Map<string,string>} files */
@@ -211,12 +214,6 @@ export function inspectNativeProject(files) {
               }
             });
         }
-        if (q.node.name.name === "ref")
-          report(
-            q,
-            "NATIVE_REF",
-            "Native ref callbacks need an explicit owner and invocation contract."
-          );
       }
     });
   }
@@ -233,8 +230,8 @@ export class NativeDiagnosticError extends Error {
   }
 }
 /** Translate only known surface contracts, then use the existing routine inference.
- * @param {string} code @param {string} filename @param {Map<string,string>} modules */
-function surface(code, filename, modules) {
+ * @param {string} code @param {string} filename @param {Map<string,string>} modules @param {ts.CompilerOptions} [options] */
+function surface(code, filename, modules, options = {}) {
   const p = parseProgram(code, filename);
   if (!p) throw new Error(`Cannot parse ${filename}`);
   const needed = new Set();
@@ -261,6 +258,66 @@ function surface(code, filename, modules) {
         column: (q.node.loc?.start.column ?? 0) + 1
       }
     ]);
+  };
+  /** Preserve the foreign tag and JSX capture positions. @param {Path} q @param {any} target */
+  const wrapForeign = (q, target) => {
+    needed.add("foreign");
+    for (const child of /** @type {Path[]} */ (q.get("children"))) {
+      if (!child.isJSXExpressionContainer()) continue;
+      const callback = child.get("expression");
+      if (!callback.isFunction() || callback.node.generator) continue;
+      // A foreign render callback returns a checked view, never an iterator.
+      /** @param {any} body */
+      const wrap = body =>
+        t.callExpression(
+          t.callExpression(t.identifier("foreign"), [
+            t.callExpression(t.identifier("component"), [
+              t.functionExpression(
+                null,
+                [],
+                t.blockStatement([
+                  t.returnStatement(
+                    t.callExpression(t.identifier("view"), [
+                      t.functionExpression(
+                        null,
+                        [],
+                        t.blockStatement([t.returnStatement(body)]),
+                        true
+                      )
+                    ])
+                  )
+                ]),
+                true
+              )
+            ])
+          ]),
+          []
+        );
+      needed.add("component");
+      needed.add("view");
+      if (t.isExpression(callback.node.body)) callback.node.body = wrap(callback.node.body);
+      else
+        callback.traverse({
+          /** @param {Path} inner */
+          Function(inner) {
+            inner.skip();
+          },
+          /** @param {Path} ret */
+          ReturnStatement(ret) {
+            if (ret.node.argument) ret.node.argument = wrap(ret.node.argument);
+          }
+        });
+    }
+    const alias = q.scope.generateUidIdentifier("NativeForeign");
+    const statement = q.getStatementParent();
+    if (!statement) fail(q, "NATIVE_HOST", "Cannot determine the host of this foreign JSX value.");
+    statement.insertBefore(
+      t.variableDeclaration("const", [
+        t.variableDeclarator(alias, t.callExpression(t.identifier("foreign"), [target]))
+      ])
+    );
+    q.node.openingElement.name = t.jsxIdentifier(alias.name);
+    if (q.node.closingElement) q.node.closingElement.name = t.jsxIdentifier(alias.name);
   };
   // Annotate component props before source signatures are queried.
   p.traverse({
@@ -403,12 +460,11 @@ function surface(code, filename, modules) {
       exit(q) {
         const opening = q.get("openingElement"),
           tag = opening.get("name");
-        if (!tag.isJSXIdentifier())
-          fail(
-            tag,
-            "NATIVE_TAG",
-            "Member and namespaced JSX tags need a resolved component contract."
-          );
+        // A member tag can have a getter. Preserve its lookup at the JSX
+        // position; hoisting an alias would run it before a conditional arm.
+        // The existing JSX tag contract is the foreign check at this edge.
+        if (tag.isJSXMemberExpression()) return;
+        if (!tag.isJSXIdentifier()) return;
         const name = tag.node.name;
         const nativeTag = imported(tag);
         if (nativeTag?.module === "@solidjs/web" && nativeTag.name === "HydrationScript") return;
@@ -417,12 +473,31 @@ function surface(code, filename, modules) {
             if (
               !attr.isJSXAttribute() ||
               !t.isJSXIdentifier(attr.node.name) ||
-              !/^on[A-Z]/.test(attr.node.name.name)
+              (!/^on[A-Z]/.test(attr.node.name.name) && attr.node.name.name !== "ref")
             )
               continue;
             const value = attr.get("value");
             if (!value.isJSXExpressionContainer()) continue;
             const fn = value.get("expression");
+            const isRef = attr.node.name.name === "ref";
+            if (isRef && fn.isIdentifier()) {
+              const binding = fn.scope.getBinding(fn.node.name);
+              if (!binding?.constant) {
+                const element = t.identifier("element");
+                element.typeAnnotation = t.tsTypeAnnotation(
+                  t.tsIndexedAccessType(
+                    t.tsTypeReference(t.identifier("HTMLElementTagNameMap")),
+                    t.tsLiteralType(t.stringLiteral(name))
+                  )
+                );
+                fn.replaceWith(
+                  t.arrowFunctionExpression(
+                    [element],
+                    t.assignmentExpression("=", fn.node, t.identifier("element"))
+                  )
+                );
+              }
+            }
             if (fn.isCallExpression() && t.isIdentifier(fn.node.callee, { name: "$event" }))
               continue;
             if (fn.isIdentifier()) {
@@ -437,7 +512,8 @@ function surface(code, filename, modules) {
               if (
                 fallback?.isFunction() &&
                 binding?.path.isIdentifier() &&
-                fallback.node.params[1] === binding.path.node
+                t.isIdentifier(fallback.node.params[1], { name: binding.path.node.name }) &&
+                binding.kind === "param"
               )
                 continue;
               const declaration = binding?.path;
@@ -473,6 +549,15 @@ function surface(code, filename, modules) {
               );
             for (const param of fn.node.params)
               if (t.isIdentifier(param) && !param.typeAnnotation) {
+                if (isRef) {
+                  param.typeAnnotation = t.tsTypeAnnotation(
+                    t.tsIndexedAccessType(
+                      t.tsTypeReference(t.identifier("HTMLElementTagNameMap")),
+                      t.tsLiteralType(t.stringLiteral(name))
+                    )
+                  );
+                  continue;
+                }
                 const event = /Key/.test(attr.node.name.name)
                   ? "KeyboardEvent"
                   : /Input/.test(attr.node.name.name)
@@ -498,22 +583,44 @@ function surface(code, filename, modules) {
                 );
               }
             needed.add("$event");
-            fn.replaceWith(t.callExpression(t.identifier("$event"), [fn.node]));
+            const event = t.callExpression(t.identifier("$event"), [fn.node]);
+            if (isRef) {
+              needed.add("__nativeCallback");
+              fn.replaceWith(t.callExpression(t.identifier("__nativeCallback"), [event]));
+            } else fn.replaceWith(event);
           }
           return;
         }
         const api = imported(tag);
         let importedContext = false;
-        if (api && !(api.module === "solid-js" && controls.has(api.name))) {
+        if (
+          api &&
+          !(api.module === "solid-js" && (controls.has(api.name) || api.name === "createContext"))
+        ) {
           const base = resolve(dirname(filename), api.module);
+          const resolved = ts.resolveModuleName(
+            api.module,
+            filename,
+            { moduleResolution: ts.ModuleResolutionKind.Bundler, ...options },
+            ts.sys
+          ).resolvedModule?.resolvedFileName;
           const target =
-            api.module.startsWith(".") &&
-            [base, base + ".tsx", base + ".ts", base + "/index.tsx", base + "/index.ts"].find(f =>
-              modules.has(f)
-            );
+            (resolved && modules.has(resolved) ? resolved : undefined) ??
+            (api.module.startsWith(".") &&
+              [base, base + ".tsx", base + ".ts", base + "/index.tsx", base + "/index.ts"].find(f =>
+                modules.has(f)
+              ));
           const program = target ? parseProgram(modules.get(target) ?? "", target) : null;
-          const binding = program?.scope.getBinding(api.name);
-          const declaration = binding?.path;
+          let declaration = program?.scope.getBinding(api.name)?.path;
+          if (program && api.name === "default") {
+            const exported = program.get("body").find(s => s.isExportDefaultDeclaration());
+            if (exported?.isExportDefaultDeclaration()) {
+              const value = exported.get("declaration");
+              declaration = value.isIdentifier()
+                ? program.scope.getBinding(value.node.name)?.path
+                : value;
+            }
+          }
           const init = declaration?.isVariableDeclarator() ? declaration.get("init") : declaration;
           importedContext = !!(
             init?.isCallExpression() && imported(init.get("callee"))?.name === "createContext"
@@ -531,29 +638,43 @@ function surface(code, filename, modules) {
                 jsx = true;
               }
             });
-          if (!importedContext && !jsx)
-            fail(
-              tag,
-              "NATIVE_FOREIGN",
-              "A foreign JSX component needs a checked boundary contract before library colors can cross it."
-            );
+          if (!importedContext && !jsx) {
+            wrapForeign(q, t.identifier(name));
+            return;
+          }
+        }
+        if (!api && !contexts.has(name)) {
+          const binding = tag.scope.getBinding(name)?.path;
+          const init = binding?.isVariableDeclarator() ? binding.get("init") : binding;
+          if (!init?.isFunction()) {
+            wrapForeign(q, t.identifier(name));
+            return;
+          }
         }
         if (api?.name === "For") {
           const keyed = opening.node.attributes.find(
             a => t.isJSXAttribute(a) && t.isJSXIdentifier(a.name) && a.name.name === "keyed"
           );
-          if (keyed)
-            fail(
-              opening,
-              "NATIVE_KEYED",
-              "Native keyed row modes need separate value/accessor mappings; only default For is verified."
-            );
           const child = q
             .get("children")
             .find(c => c.isJSXExpressionContainer() && t.isFunction(c.node.expression));
           const fn = child?.get("expression");
-          if (fn?.isFunction() && t.isIdentifier(fn.node.params[0]))
-            valueReads(fn, fn.node.params[0].name);
+          const keyedValue =
+            keyed && t.isJSXAttribute(keyed) && t.isJSXExpressionContainer(keyed.value)
+              ? keyed.value.expression
+              : undefined;
+          if (fn?.isFunction()) {
+            if (
+              (!keyedValue || t.isBooleanLiteral(keyedValue, { value: true })) &&
+              t.isIdentifier(fn.node.params[0])
+            )
+              valueReads(fn, fn.node.params[0].name);
+            if (
+              t.isBooleanLiteral(keyedValue, { value: false }) &&
+              t.isIdentifier(fn.node.params[1])
+            )
+              valueReads(fn, fn.node.params[1].name);
+          }
         }
         const props = [];
         for (const attr of opening.node.attributes) {
@@ -576,7 +697,18 @@ function surface(code, filename, modules) {
               ? children[0]
               : t.jsxFragment(t.jsxOpeningFragment(), t.jsxClosingFragment(), q.node.children);
           if (!t.isExpression(child)) fail(q, "NATIVE_CHILD", "Unsupported native JSX child.");
-          if (!t.isFunction(child)) child = t.arrowFunctionExpression([], child);
+          if (!t.isFunction(child)) {
+            if (
+              t.isCallExpression(child) &&
+              ((t.isIdentifier(child.callee) && /^[A-Z]/.test(child.callee.name)) ||
+                (t.isMemberExpression(child.callee) &&
+                  t.isIdentifier(child.callee.property, { name: "provide" })))
+            )
+              child = t.jsxFragment(t.jsxOpeningFragment(), t.jsxClosingFragment(), [
+                t.jsxExpressionContainer(child)
+              ]);
+            child = t.arrowFunctionExpression([], child);
+          }
           props.push(t.objectProperty(t.identifier("children"), child));
         }
         const callee =
@@ -648,6 +780,13 @@ function surface(code, filename, modules) {
         t.stringLiteral("solid-js")
       )
     );
+  if (needed.delete("__nativeCallback"))
+    p.node.body.unshift(
+      t.importDeclaration(
+        [t.importSpecifier(t.identifier("__nativeCallback"), t.identifier("nativeCallback"))],
+        t.stringLiteral("solid-yield/internal")
+      )
+    );
   if (needed.delete("__NativeArguments"))
     p.node.body.unshift(
       t.importDeclaration(
@@ -684,11 +823,13 @@ export function lowerNativeProject(input, options = {}) {
   const diagnostics = inspectNativeProject(selected);
   if (diagnostics.length) throw new NativeDiagnosticError(diagnostics);
   const prepared = nativePrelude(selected);
-  const failures = nativeFailures(prepared);
-  const effects = lowerNativeEffects(prepared, failures);
-  return lowerSugarProject(
+  const failures = nativeFailures(prepared, options.compilerOptions);
+  const effects = nativePrelude(lowerNativeEffects(prepared, failures));
+  const lowered = lowerSugarProject(
     new Map([
-      ...new Map([...effects].map(([id, code]) => [id, surface(code, id, effects)])),
+      ...new Map(
+        [...effects].map(([id, code]) => [id, surface(code, id, effects, options.compilerOptions)])
+      ),
       ...entries
     ]),
     {
@@ -714,9 +855,57 @@ export function lowerNativeProject(input, options = {}) {
       }
     }
   );
+  return { ...lowered, diagnostics: nativeForeignDiagnostics(files, options.compilerOptions) };
 }
-/** @param {string} code @param {string} filename @param {(file:string)=>boolean} include @param {Map<string,any>} cache */
-export function lowerNativeFile(code, filename, include, cache) {
+/** Foreign tags are recorded against authored positions, before intermediate
+ * passes change their line numbers. @param {Map<string,string>} files @param {ts.CompilerOptions} [options] */
+export function nativeForeignDiagnostics(files, options = {}) {
+  /** @type {Diagnostic[]} */ const diagnostics = [];
+  for (const [file, code] of files) {
+    const p = parseProgram(code, file);
+    p?.traverse({
+      JSXOpeningElement(q) {
+        const tag = q.get("name");
+        let api = imported(tag);
+        if (!api && tag.isJSXIdentifier()) {
+          const declaration = tag.scope.getBinding(tag.node.name)?.path;
+          const init = declaration?.isVariableDeclarator() ? declaration.get("init") : null;
+          if (init?.isCallExpression()) api = imported(init.get("callee"));
+        }
+        if (!api && tag.isJSXMemberExpression()) {
+          let base = tag.get("object");
+          while (base.isJSXMemberExpression()) base = base.get("object");
+          api = imported(base);
+        }
+        if (
+          !api ||
+          api.module.startsWith(".") ||
+          files.has(
+            ts.resolveModuleName(
+              api.module,
+              file,
+              { moduleResolution: ts.ModuleResolutionKind.Bundler, ...options },
+              ts.sys
+            ).resolvedModule?.resolvedFileName ?? ""
+          ) ||
+          (api.module === "solid-js" && (controls.has(api.name) || api.name === "createContext")) ||
+          (api.module === "@solidjs/web" && api.name === "HydrationScript")
+        )
+          return;
+        diagnostics.push({
+          code: "NATIVE_FOREIGN_BOUNDARY",
+          message: `${tag.toString()} (${api.name} from ${api.module}) stays Solid at this JSX boundary (provenance C; foreign failures unknown). Handle failures at the boundary. To bring it inside, use a core API or select its source with a checked contract.`,
+          file,
+          line: q.node.loc?.start.line ?? 1,
+          column: (q.node.loc?.start.column ?? 0) + 1
+        });
+      }
+    });
+  }
+  return diagnostics;
+}
+/** @param {string} code @param {string} filename @param {(file:string)=>boolean} include @param {Map<string,any>} cache @param {(diagnostic: Diagnostic)=>void} [report] */
+export function lowerNativeFile(code, filename, include, cache, report) {
   const configPath = ts.findConfigFile(dirname(filename), ts.sys.fileExists);
   if (!configPath) throw new Error("[NATIVE_PROJECT] Native mode requires a tsconfig.json.");
   const config = ts.readConfigFile(configPath, ts.sys.readFile);
@@ -730,10 +919,9 @@ export function lowerNativeFile(code, filename, include, cache) {
   const signature = JSON.stringify([parsed.options, [...files]]);
   let entry = cache.get(configPath);
   if (entry?.signature !== signature) {
-    entry = {
-      signature,
-      files: lowerNativeProject(files, { compilerOptions: parsed.options }).files
-    };
+    const lowered = lowerNativeProject(files, { compilerOptions: parsed.options });
+    entry = { signature, files: lowered.files };
+    for (const diagnostic of lowered.diagnostics) report?.(diagnostic);
     cache.set(configPath, entry);
   }
   return entry.files.get(filename) ?? code;

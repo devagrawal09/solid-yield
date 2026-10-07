@@ -503,17 +503,18 @@ not silent fallbacks to native reactive state inside a library routine.
 | `createEffect(compute, effect)` | `$effect(compute′, effect′)` (the actual export is `$effect`, not `effect`) | Two synchronous function phases; bundle/cleanup-return overloads incomplete |
 | `onCleanup(fn)` | `$cleanup(fn)` | Same owner position; generated host checking still required |
 | Inline `onClick={e => …}` and other `onX` props | `yield* $event(function* (e) { … })` at binding site | Implemented for intrinsic tags; event parameter receives its DOM type |
-| Local synchronous `onClick={fn}` | `yield* $event(function* (...args: Parameters<typeof fn>) { return fn′(...args); })` | Implemented; calls to a reactive helper delegate; unresolved/property handlers refused |
+| Local synchronous `onClick={fn}` | `yield* $event(function* (...args: NativeArguments<typeof fn>) { return fn′(...args); })` | Implemented; calls to a reactive helper delegate; unresolved/property handlers refused |
 | `createContext<T>()` | `createContext<T, ID>(undefined, { name: ID })` | Compiler-generated module-and-binding identity; no author name marker |
 | `<Ctx value={v}>children</Ctx>` | `Ctx.provide({ value: v′, children: function* () { … } })` | Local and directly imported selected contexts; same provider location |
 | `useContext(Ctx)` | `yield* Ctx`, followed by source reads where its value is used | Implemented; requirement checked at root; no provider insertion |
 | Plain typed `props.x` | Generated `Props<T>` plus path reads | Simple identifier parameter; destructured parameters refused |
 | `<Child p={v}/>` | `yield* Child({ p: v′ })` | Local/direct selected imports; foreign tags need a boundary contract |
 | `For` / `Show` / `Loading` / `Errored` etc. | Same library calls with lazy children, row views and bound events | Basic forms; default For row-value mapping; nondefault keyed modes refused; complex fallback forms remain limited |
-| `render` / `hydrate` from `@solidjs/web` | Library `render` / `hydrate` | Direct named component form; generated root checking required |
+| `render` / `hydrate` from `@solidjs/web` | Keep the Solid entry API; insert `foreign(Component)` for direct root handoffs | Entry code stays foreign; failures and requirements are checked at the generated handoff |
 | `throw X` | `raise(nativeFailure([class IDs or "unknown"], X))` | Implemented for synchronous routine hosts; see Failure inference |
 | Async/server-function memo | `attempt(() => f(), e => nativeFailure(inferredSet, e))` | Async producers and Promise-returning calls; server calls add `ChunkError` |
-| `action`, optimistic stores, projections, `onSettled`, `latest`, `isPending`, router/lazy edges | Dedicated library mappings with transaction, selector, owner and foreign-boundary checks | Not implemented; `[NATIVE_API] Solid API NAME has no verified native lowering.` |
+| `action` (including generators), `createStore`, `createOptimistic`, `onSettled`, `latest`, `isPending` | `$event`, `$store`, `$optimistic`, `$effect`/`$cleanup`, `latestOf`/`isPendingOf` + read | Focused generated checks pass; see the API inventory for overload limits |
+| `createOptimisticStore`, `createProjection`, `refresh`, `until`, `lazy` | Corresponding library primitive imports | Import mapping implemented; producer, selector, generic and foreign-edge contracts remain incomplete |
 
 ### Failure inference
 
@@ -529,7 +530,10 @@ re-exports and the types of throw expressions. A worklist-equivalent monotone
 iteration unions callee sets until no set changes; recursive groups have no
 arbitrary inference iteration limit. This differs from the older sugar emitter's
 24-pass guard. Calls outside the selected graph contribute `unknown`, except
-selected `"use pure"` contracts. Native primitive callbacks and memo reads carry
+selected `"use pure"` contracts and explicit native/platform contracts. The
+platform list now covers unshadowed standard clock/scheduler calls and typed
+array callbacks; callback failures still flow. Primitive-array `join` is checked
+separately. Opaque packages and shadowed globals retain `unknown`. Native primitive callbacks and memo reads carry
 their producer's set. This analysis is conservative: opaque router calls, browser
 APIs and data-method calls often produce `unknown`; it does not infer package
 purity from a familiar function name.
@@ -542,9 +546,10 @@ purity from a familiar function name.
 - Direct rethrow of a catch binding retains the incoming set. A handling catch
   removes it. Using the binding as unknown and rethrowing widens to `unknown`.
   The analysis also covers Promise `.catch` and `try`/`await`; `finally` adds its
-  own failures. General JavaScript catches in reactive routines are **still
-  refused by `NATIVE_CATCH`** because their control-flow lowering is unfinished.
-  Inference tests do not establish that a refused catch transforms correctly.
+  own failures. Synchronous catches now lower through `nativeTry`; handling,
+  direct rethrow and unknown rethrow pass generated TypeScript/lint. Ordinary
+  async I/O keeps JavaScript catch/await. Cross-loop control transfers and
+  returns from finally still need completion lowering (F-S21).
 - A `"use server"` function's rejection set is its inferred set plus `ChunkError`
   (D-100). An async server producer wraps its rejection before serialization;
   its client call is generated behind `attempt` with that declared set. A
@@ -640,7 +645,7 @@ than a fundamental incompatibility.
 | `onClick={() => Promise.reject("failed")}` | Transform | `promise-event` passes generated TS/lint; failure is `unknown` |
 | `createMemo(async () => count())` | Refusal | `SUGAR_HOST`: “Reactive operations in async functions or methods are unsupported.” |
 | `throw new Error("oops")` / `throw e` with `e: unknown` | Transform | `throw-error`, `unknown-throw` pass generated TS/lint; fails `Error` / `unknown` |
-| `try { set(1) } catch { set(2) }` | Refusal | `NATIVE_CATCH`: “JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.” |
+| `try { set(1) } catch { set(2) }` | Transform | `nativeTry` delegates in the same host/transaction. The `catch` fixture passes generated TS/lint; rejection/write behavior has hydrated parity evidence. |
 | `useContext(C)` with no provider at root | Transform, then diagnostic | TS2345 includes `[NO_PROVIDER] the root requires the contexts this property names…` |
 | Unhandled failure at a library root | **Allowed by D-033 once nominally typed** | The native root fixture passes. The class/unknown foreign bridge probes fail `[FOREIGN_HANDOFF]`. |
 | `const n = count(); return <p>{n}</p>` | Transform, then diagnostic | TS2769; lint `[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event.` |
@@ -663,70 +668,42 @@ not just renaming the call.
 
 ### Nine original-to-twin results
 
-**F-S9 acceptance is now parity against the original itself**, including SSR and
-hydration. The handwritten twin diff is information only. There are seven
-original directories and nine original-to-twin inputs; the `-h` targets reuse
-todos and sierpinski. The audit reruns all nine. None emits a checked complete
-app, so original parity, hydration and SSR are blocked, not failed or passed.
-The diff distance is undefined for every refused output.
+**The follow-up remains incomplete: zero complete originals pass.** Seven source
+trees supply nine twin targets (the two `-h` targets reuse source). Sierpinski
+now emits code, but its generated checks fail. No complete original is counted
+as accepted, and no application parity or SSR success is claimed. Acceptance
+remains parity against the original, not the handwritten twin.
 
-These are **source call-graph estimates**, not checked generated component colors.
-Unknown is retained alongside named failures. `∅` means no inferred failure in
-this scan, not proof of purity for arbitrary JavaScript. All current diagnostics
-are blockers; zero complete apps reached the unhandled-failure check.
+The fails-sets below are the analyzer's **source call-graph estimates**, not
+checked colors of a complete generated app. File/line identities and full,
+actual diagnostics are in [native-verification.json](native-verification.json).
+Refused rows count the first lowering blocker, not all latent errors.
+A refused file has no diff distance. Emitted code with failed checks is not a
+basis for a semantic twin comparison; those distances remain unmeasured.
 
-| Original / twin target | Status | Parity / SSR / hydration | Inferred fails per component (grouped) | Diagnostics |
+| Original / twin target | Status | Original parity / SSR | Inferred fails per component (grouped) | Diagnostics |
 | --- | --- | --- | --- | ---: |
-| docs-yield | Refused | Blocked | Home/DocPage/ArticleContent/ReadingGuide → {ChunkError, NotFound, unknown}; App → {ChunkError, NotFound, SearchError, unknown}; SiteNav/SiteFooter → {ChunkError, unknown}; ArticleBody/ThemeToggle/ImageCarousel → {∅}; Shell/LikeButton/NewsletterForm/CommentList → {unknown}; SearchBox → {SearchError, unknown} | 8 |
-| effect-yield | Refused | Blocked | LogPanel/App/Checkout/Results/Typeahead → {unknown} | 19 |
-| hackernews-spa-yield | Refused | Blocked | App/Stories/Story/User → {unknown}; Comment/Nav/Story/Toggle → {∅} | 3 |
-| rendering-yield | Refused | Blocked | InnerBoundaryItem/OuterBoundaryItem/ErrorStream/Home/AsyncCard/RevealPage/Settings/Shell/Skeleton/Stream → {unknown}; Profile/FeedCard → {∅}; Link → {Error} | 18 |
-| room-yield | Refused | Blocked | Document/App/StatusPill/IdentityProvider/Home/Panel/Composer/Live/Header/Chat/Transcript/Directory/DirectoryEntry/Card/Summary/SummaryText/Archive → {unknown}; Chaos → {∅} | 30 |
-| sierpinski-yield | Refused | Blocked | TriangleDemo/Triangle → {unknown}; Dot → {∅} | 1 |
-| sierpinski-yield-h | Refused | Blocked | TriangleDemo/Triangle → {unknown}; Dot → {∅} | 1 |
-| todos-yield | Refused | Blocked | Header/TodoItem/MainSection/Footer/App → {unknown} | 14 |
-| todos-yield-h | Refused | Blocked | Header/TodoItem/MainSection/Footer/App → {unknown} | 14 |
+| docs-yield | Refused | Not run | Home/DocPage/ArticleContent/ReadingGuide → {ChunkError, NotFound, unknown}; App → {ChunkError, NotFound, SearchError, unknown}; SiteNav/SiteFooter → {ChunkError, unknown}; ArticleBody/ThemeToggle/ImageCarousel → {∅}; Shell/LikeButton/NewsletterForm/CommentList → {unknown}; SearchBox → {SearchError, unknown} | 1 |
+| effect-yield | Refused | Not run | LogPanel/App/Checkout/Results/Typeahead → {unknown} | 1 |
+| hackernews-spa-yield | Refused | Not run | App/Stories/Story/User → {unknown}; Comment/Nav/Story/Toggle → {∅} | 1 |
+| rendering-yield | Refused | Not run | InnerBoundaryItem/OuterBoundaryItem/ErrorStream/AsyncCard/RevealPage/Settings/Shell/Skeleton/Stream → {unknown}; Home/Profile/FeedCard → {∅}; Link → {Error} | 1 |
+| room-yield | Refused | Not run | Document/App/StatusPill/IdentityProvider/Home/Panel/Composer/Live/Header/Chat/Transcript/Composer/Directory/DirectoryEntry/Card/Summary/SummaryText/Archive → {unknown}; Chaos/Chaos → {∅} | 1 |
+| sierpinski-yield | Generated, checks fail | Not run | TriangleDemo/Triangle → {unknown}; Dot → {∅} | 22 |
+| sierpinski-yield-h | Generated, checks fail | Not run | TriangleDemo/Triangle → {unknown}; Dot → {∅} | 22 |
+| todos-yield | Refused | Not run | Header/TodoItem/MainSection/Footer/App → {unknown} | 1 |
+| todos-yield-h | Refused | Not run | Header/TodoItem/MainSection/Footer/App → {unknown} | 1 |
 
-The report lists each component's file and line, including duplicate local names.
-Route examples an author could read in a future hover:
+Remaining first blockers are implementation gaps: `NATIVE_FOREIGN` for
+rendering and room; `SUGAR_CALLBACK` at still-unlowered value/foreign call
+combinations for docs, effect, hackernews and todos; generated prop/recursion/owner
+checks for Sierpinski. The API-name, catch and generator preflight refusals no
+longer hide these later failures. Full messages are recorded rather than
+replaced with a claim that plain Solid disagrees with the model.
 
-- docs `DocPage`: **fails NotFound | ChunkError | unknown**.
-- docs `App`: **fails NotFound | SearchError | ChunkError | unknown**.
-- todos `App`: **fails unknown** (opaque action/store/I/O calls).
-
-The named class IDs resolve to the original `docs/src/errors.ts` declarations;
-there are no author imports from the library. These hovers are proposed display
-text for actual inferred sets; no editor plugin was built.
-
-Actual refusal messages (every source position is in the JSON evidence):
-
-- `NATIVE_API`: Solid API markSafeError has no verified native lowering.
-- `NATIVE_API`: Solid API HydrationScript has no verified native lowering.
-- `NATIVE_API`: Solid API createOptimistic has no verified native lowering.
-- `NATIVE_API`: Solid API action has no verified native lowering.
-- `NATIVE_GENERATOR`: Solid action/stream generators need a separate suspension and rejection mapping.
-- `NATIVE_CATCH`: JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract.
-- `NATIVE_API`: Solid API createOptimisticStore has no verified native lowering.
-- `NATIVE_API`: Solid API createStore has no verified native lowering.
-- `NATIVE_API`: Solid API refresh has no verified native lowering.
-- `NATIVE_API`: Solid API isPending has no verified native lowering.
-- `NATIVE_API`: Solid API latest has no verified native lowering.
-- `NATIVE_API`: Solid API Component has no verified native lowering.
-- `NATIVE_API`: Solid API lazy has no verified native lowering.
-- `NATIVE_API`: Solid API onSettled has no verified native lowering.
-- `NATIVE_API`: Solid API Reveal has no verified native lowering.
-- `NATIVE_API`: Solid API createUniqueId has no verified native lowering.
-- `NATIVE_API`: Solid API Portal has no verified native lowering.
-- `NATIVE_TYPE`: This Solid value contract needs a virtual routine/source type facade.
-- `NATIVE_API`: Solid API createProjection has no verified native lowering.
-- `NATIVE_API`: Solid API isServer has no verified native lowering.
-- `NATIVE_API`: Solid API getRequestEvent has no verified native lowering.
-- `NATIVE_API`: Solid API dynamic has no verified native lowering.
-- `NATIVE_API`: Solid API until has no verified native lowering.
-- `SUGAR_CALLBACK`: [SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/examples/originals/sierpinski/src/main.tsx:65:27)
-
-No original was added as a passing app gate. Counter parity and the new production-failure serialization check are controls, not substitutes for todos parity.
-
+No original was added to the gate. The existing native controls now include
+SSR and hydrated parity for a generator action whose promise rejects and whose
+catch writes state. This is focused evidence, not todos parity. **The gate
+baseline is unchanged in this follow-up.**
 
 ### Further findings
 
@@ -734,10 +711,10 @@ No original was added as a passing app gate. Counter parity and the new producti
 | --- | --- |
 | F-S8: superseded refusal policy | Original todos `reject`: `setTimeout(rej, time, "Failed to Save")`; store `async () => { const todos = await api.getTodos(); … }`. The rejected value can be a string or anything else. Raw `unknown` cannot satisfy nominal `Failure` (D-110); a generated wrapper now does. TS return types do not declare throws. Dev chose inference with an unknown floor. The adapter above removes NATIVE_FAILURE/NATIVE_REJECTION. Remaining identity/transport limits are F-S14/F-S15. |
 | F-S9: handwritten target is not a transliteration | Todos Header has no signal/memo in the original; the yield twin adds unused `$signal`/`$memo`. Original calls `addTodo` then clears input; twin clears before delegated waiting. The twin changes the context tuple into an object, adds `TodoApp`, moves store creation/provider relative to Errored, and changes derived accessors into memos. These are categorized as extra operations, event order, data shape, owner/boundary placement and memoization. Whitespace/import normalization cannot erase them. A general compiler must not invent this source-specific rewrite to win a diff. |
-| F-S10: unfinished native contracts | Todos `action(function*(){ try { yield request } catch { … } })`, `createOptimisticStore`, `refresh`, `onSettled`; room streams/foreign callbacks; native `Accessor`/Component annotations. Dedicated lowering, selector placement, external-call summaries and alias/re-export support remain. `[NATIVE_API]` is an implementation limit, not a claim of mathematical impossibility. Preflight still refuses authored catches in selected files; plain throws/rejections are no longer refused. |
+| F-S10: unfinished native contracts | Primitive import mapping is broader, and catch/generator-action fixtures pass. Full optimistic-store selectors, generic inference, accessor/context facades and higher-order components remain implementation gaps; no blanket NATIVE_CATCH or NATIVE_GENERATOR refusal remains. |
 | F-S11: static feedback limit | `feedback` passes generated TS/lint. The types check which phase may write, not whether repeated effects terminate. A separate optional feedback analysis needs provenance and a clear policy; it must not be confused with the typed-failure theorem. |
 | F-S12: complete native proof not established | Only a small synchronous subset has behavioral evidence. Generated checks and counter parity do not establish lowering preservation across all native primitives. Source diagnostic mapping, stable public context IDs, package summaries and routine recursion facades remain; failure recursion has fixpoint tests. |
-| F-S13: scheduling callbacks | Original sierpinski: `setInterval(() => setSeconds(s => (s % 10) + 1), 1000)` and `requestAnimationFrame(update)`. No checked owner/bind/disposal contract exists for these foreign callbacks. Actual refusal: `SUGAR_CALLBACK`. Supplying library type resolution for original directories exposed this earlier-hidden error; a previously emitted but untyped file was not a valid transform. |
+| F-S13: scheduling callbacks — original blocker removed | `setInterval(() => setSeconds(s => (s % 10) + 1), 1000)` and `requestAnimationFrame(update)` now lower their reactive callbacks to `$event`. Sierpinski emits code; remaining prop/recursive component errors are F-S20. |
 | F-S14: wire/custom class matching | `class X extends Error {}; throw new X()` inside a server producer. Class ID/message survive production serialization, custom prototype/private slots do not. Selective native `catch={[X]}` has no generated wrapper matcher. Full original RPC and selective-catch parity remain unproved. |
 | F-S15: external exception identity | `try { nativeRoot() } catch(e) { e instanceof X }`: the root currently rethrows NativeFailure, while native Errored fallback calls unwrap. An external root adapter is needed to preserve native exception identity without erasing typed identity inside the driver. |
 | F-S17: production sanitization changes plain-Solid behavior | `FailureView.tsx`: `class Problem extends Error {}; throw new Problem("author failure")`. Under a production SSR Errored, the original renders `wrong identity` because Solid sanitizes the unmarked error. Native mode renders `author failure` because D-115 marks its generated wrapper safe and the fallback unwraps the original. This observed difference is pinned in `native-serialization.mjs`; it is not called parity. Dev's D-115 ruling requires this behavior, but strict parity for apps that inspect an unsafe error needs an explicit exception. |
@@ -784,8 +761,8 @@ The editor plugin remains planned, not built here.
 
 ### Native verification and baseline
 
-The [full gate record](native-gate-verification.json) covers the current native
-failure implementation. `pnpm build` passed. The gate includes generated TS/lint
+The previous failure-inference update passed the gate described here; the
+[full gate record](native-gate-verification.json) now records the latest follow-up. `pnpm build` passed. The gate includes generated TS/lint
 for 37 native fixtures (21 accepted), two strict foreign-edge probes, all nine
 original audits, counter SSR/hydration, the production failure-serialization
 control, six inference tests, and the existing library/plugin/analyzer/proof/twin
@@ -804,3 +781,123 @@ Final verification (2026-10-08), code `2a230e6` plus the documentation
 working tree: **53 pass / 0 fail / 0 skip in 131s**, GREEN against all 53
 baseline entries. The preceding run was also GREEN (53/0/0 in 132 seconds),
 with the single added step verified before regenerating the baseline.
+
+
+### Native follow-up: catches, callback hosts and API inventory
+
+The requested host rule is: callbacks whose result is ignored by a non-reactive
+host become events; callbacks supplying rendered or memo values stay reactive.
+The implementation recognizes timer/frame/idle/listener hosts and ignored
+expression-statement calls, including named callbacks shared by such hosts.
+It wraps them in `$event`. A typed array `map` callback delegates through
+`nativeMap`, preserving order, array length and holes. JSX child callbacks become
+holes. A callback returning reactive values through an unresolved opaque call is
+still refused. General callback escape/use inference is unfinished; the remaining
+`SUGAR_CALLBACK` sites are not all genuine model disagreements.
+
+`nativeTry` delegates its body, handler and finalizer without opening another
+host or transaction. It masks immediate read/raise/event-call failures handled
+by the catch, retains other operation colors, and never swallows pending or
+unbranded driver errors. Creation/binding failures that can arrive later remain
+in the color. Direct rethrows keep the branded value; an authored catch binding
+is unwrapped for ordinary use, and a subsequent unknown throw is branded as
+unknown. Returns from the body/catch use completion records. Plain I/O helpers
+stay plain; only routine callers use `attempt`. Promise handlers/ordinary async
+try-await keep their JavaScript behavior and inferred rejection sets.
+
+These compiler-only helpers add preservation and failure-discharge obligations.
+The existing calculus proofs have not been changed and do not establish these
+new rules. Runtime tests check failure identity, handler/finalizer order, operation
+delegation and sparse map behavior. Generated fixtures check the resulting
+colors. An actual SSR catch and hydrated rejecting generator action match their
+plain Solid controls.
+
+Entry-only files are excluded from routine reconstruction. Direct renderer
+handoffs receive `foreign(Component satisfies RootCheck<typeof Component>)`
+while retaining the `@solidjs/web` import;
+combined component/entry files also retain the Solid renderer. Type/lint checks
+on the generated root/foreign edge report pending roots, unhandled failures or requirements rather
+than refusing an entry API name. Complex renderer callbacks still need more
+complete edge rewriting.
+
+[The complete import inventory](native-api-inventory.json) is reproduced below.
+There are 40 module/API pairs across the original source trees. No `produce`
+import occurs. “Mapped” is a lowering status, **not** full overload coverage or
+application acceptance.
+
+| Module | API | Status | Lowering / remaining limit |
+| --- | --- | --- | --- |
+| @solidjs/web | `dynamic` | refused-with-reason |  — NATIVE_FOREIGN: child colors need a checked foreign component adapter. |
+| @solidjs/web | `getRequestEvent` | mapped | pass-through |
+| @solidjs/web | `HydrationScript` | excluded-as-entry | Solid entry API + foreign(component) at direct handoffs |
+| @solidjs/web | `isServer` | mapped | pass-through |
+| @solidjs/web | `JSX` | mapped | retained type-only — Higher-order component contracts and accessor/store color facades remain incomplete. |
+| @solidjs/web | `markSafeError` | mapped | pass-through |
+| @solidjs/web | `Portal` | refused-with-reason |  — NATIVE_FOREIGN: child colors need a checked foreign component adapter. |
+| @solidjs/web | `render` | excluded-as-entry | Solid entry API + foreign(component) at direct handoffs |
+| solid-js | `Accessor` | mapped | retained type-only — Higher-order component contracts and accessor/store color facades remain incomplete. |
+| solid-js | `action` | mapped | $event |
+| solid-js | `Component` | mapped | component variable annotation erased; props copied into Props<T> — Higher-order component contracts and accessor/store color facades remain incomplete. |
+| solid-js | `createContext` | mapped | createContext |
+| solid-js | `createEffect` | mapped | $effect |
+| solid-js | `createMemo` | mapped | $memo |
+| solid-js | `createOptimistic` | mapped | $optimistic |
+| solid-js | `createOptimisticStore` | mapped | $optimisticStore — Primitive import is mapped; not every overload, selector, or callback contract is implemented. See application diagnostics. |
+| solid-js | `createProjection` | mapped | $projection — Primitive import is mapped; not every overload, selector, or callback contract is implemented. See application diagnostics. |
+| solid-js | `createSignal` | mapped | $signal |
+| solid-js | `createStore` | mapped | $store — Primitive import is mapped; not every overload, selector, or callback contract is implemented. See application diagnostics. |
+| solid-js | `createUniqueId` | mapped | pass-through |
+| solid-js | `Errored` | mapped | Errored |
+| solid-js | `For` | mapped | For |
+| solid-js | `isPending` | mapped | isPendingOf — Primitive import is mapped; not every overload, selector, or callback contract is implemented. See application diagnostics. |
+| solid-js | `latest` | mapped | latestOf — Primitive import is mapped; not every overload, selector, or callback contract is implemented. See application diagnostics. |
+| solid-js | `lazy` | mapped | lazy — Primitive import is mapped; not every overload, selector, or callback contract is implemented. See application diagnostics. |
+| solid-js | `Loading` | mapped | Loading |
+| solid-js | `Match` | mapped | Match |
+| solid-js | `onCleanup` | mapped | $cleanup |
+| solid-js | `onSettled` | mapped | $effect + $cleanup |
+| solid-js | `ParentComponent` | mapped | component variable annotation erased; props copied into Props<T> — Higher-order component contracts and accessor/store color facades remain incomplete. |
+| solid-js | `ParentProps` | mapped | retained type-only — Higher-order component contracts and accessor/store color facades remain incomplete. |
+| solid-js | `refresh` | mapped | refresh |
+| solid-js | `Repeat` | mapped | Repeat |
+| solid-js | `Reveal` | refused-with-reason |  — NATIVE_FOREIGN: child colors need a checked foreign component adapter. |
+| solid-js | `RevealOrder` | mapped | retained type-only — Higher-order component contracts and accessor/store color facades remain incomplete. |
+| solid-js | `Show` | mapped | Show |
+| solid-js | `Store` | mapped | retained type-only — Higher-order component contracts and accessor/store color facades remain incomplete. |
+| solid-js | `Switch` | mapped | Switch |
+| solid-js | `until` | mapped | until — Primitive import is mapped; not every overload, selector, or callback contract is implemented. See application diagnostics. |
+| solid-js | `useContext` | mapped | context source read |
+
+| Finding | Source and reason |
+| --- | --- |
+| F-S19: reactive arguments inside opaque calls | Todos `toggleTodo(props.todo.id, e.currentTarget.checked)` and hackernews `getStories(type(), page())`. The generated attempt's plain producer cannot contain delegated reads. Argument evaluation must be lowered in order, preserving receivers, short-circuiting and failure handling. Making that producer a generator would return an iterator as a value: it is not a valid fix. |
+| F-S20: prop snapshots and recursive component facades | Sierpinski `let {x,y,s}=props; if(s<=TARGET) return <Dot …/>; s=s/2; … <Triangle …/>`. Emitted paths still need snapshot/control placement and a recursive signature carrying pending/failure colors from children. The generated checks report TS7023, invalid source arithmetic and related host/prop errors. A broad cast or suppressing those checks is not acceptance. |
+| F-S21: abrupt completion across catch helpers | `for(;;){try{break}catch{}}` and `try{return 1}catch{}finally{return 2}` need loop/finalizer completion records. Current diagnostic: `[NATIVE_CONTROL_TRANSFER] A catch crossing a loop/label needs completion lowering.` or `A return from finally needs completion lowering.` Catches without these transfers are accepted. |
+| F-S22: foreign component adapters | Rendering `<Portal>…</Portal>` / `<Reveal>…</Reveal>`, room router components. The native child/prop colors must cross a checked adapter. Current diagnostic: `[NATIVE_FOREIGN] A foreign JSX component needs a checked boundary contract before library colors can cross it.` This is a missing adapter, not a model rejection of routers or portals. |
+
+Current focused evidence: 48 source fixtures, 33 accepted by generated TS and
+recommended lint; two additional strict foreign-handoff probes; seven inference
+tests; five native-control runtime tests; SSR catch parity; hydrated generator
+action rejection/write parity. No editor plugin was built. The requested complete
+original app lowering and parity remain open work, not questions of permission.
+
+A foreign callback's failure cannot disappear because its owner has no JSX bind.
+The generated `nativeCallback` handoff checks the event's iterable binding color.
+A failing callback gets a TypeScript error containing `[NATIVE_CALLBACK_FAILURE]
+foreign callback failure registration is not implemented; handle failures inside
+the callback`. `timer-callback-failure` verifies that exact diagnostic; an ambient
+opaque function contributes unknown, without relying on a missing-module error.
+
+**F-S23 — foreign callback failure registration:**
+`setTimeout(() => { count(); opaque() }, 10)` becomes a checked event, but this
+prototype has not placed its failure registration into a view/boundary. It emits
+the diagnostic above rather than losing the failure. Reading a failing source
+has the same limitation. Handled callbacks and callbacks with no failure color
+pass. Completing the generated registration remains implementation work; this is
+not a new rule that timer callbacks cannot fail.
+
+Final follow-up verification (2026-10-08): `pnpm build` passed; the gate at code
+`e5942d0` plus the checked evidence working tree finished **53 pass / 0 fail /
+0 skip in 106s**, GREEN. The baseline was not regenerated: no complete original
+passed native acceptance, so no original app step was added. No existing gate
+check or baseline threshold was relaxed. All commits are local on `proto/sugar`.

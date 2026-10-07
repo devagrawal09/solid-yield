@@ -128,40 +128,40 @@ positions. Thus the “mapped back” part of the requested DX result is unfinis
 
 | Slot | Executed native fixture | Caught where / actual message excerpt | Interpretation |
 | --- | --- | --- | --- |
-| T01 | `tag` | Generated TypeScript and lint: no diagnostics | Repaired by native lowering |
-| T02 | `setup-read` | type: `TS2769` — No overload matches this call.<br>lint: `solid-yield/no-read-in-setup` — [READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event. | Generated location; mapping planned |
-| T03 | `named-event` | Generated TypeScript and lint: no diagnostics | Repaired by native lowering |
-| T04 | `inline-event` | Generated TypeScript and lint: no diagnostics | Repaired by native lowering |
+| T01 | `tag` | Generated TypeScript and lint: no diagnostics | Accepted generated form; no editor plugin |
+| T02 | `setup-read` | type: `TS2769` — No overload matches this call.<br>lint: `solid-yield/no-read-in-setup` — [READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event. | Generated location; source mapping planned |
+| T03 | `named-event` | Generated TypeScript and lint: no diagnostics | Accepted generated form; no editor plugin |
+| T04 | `inline-event` | Generated TypeScript and lint: no diagnostics | Accepted generated form; no editor plugin |
 | T05 | `effect-arity` | transform: `NATIVE_EFFECT_PHASES` — createEffect needs a tracked compute and an untracked effect phase. | Refused before output |
-| T06 | `row` | Generated TypeScript and lint: no diagnostics | Repaired by native lowering |
-| T07 | `pending-root` | type: `TS2345` — [PENDING_ROOT] the root may be pending (a read under it has no Loading above): wrap the root, render(() => Loading({ children: App }), el), or put a Loading around the pending part": true; }'. | Generated location; mapping planned |
-| T08 | `colored-prop` | type: `TS2322` — [SETTLED_PROP] prop n is settled: pass a settled value, or declare it Source<T, E, true>"> \| HoleProp<...>'. | Generated location; mapping planned |
-| T09 | `throw-error` | Generated TypeScript and lint: no diagnostics | Native Error is inferred and wrapped; unhandled failure at root is allowed by D-033 |
-| T10 | `context` | Generated TypeScript and lint: no diagnostics | Repaired by native lowering |
-| T11 | `lazy-child` | Generated TypeScript and lint: no diagnostics | Repaired by native lowering |
-| T12 | Unavailable | Not run; original identity/source missing | Cannot claim caught or missed |
-| T13 | Unavailable | Not run; original identity/source missing | Cannot claim caught or missed |
-| T14 | Unavailable | Not run; original identity/source missing | Cannot claim caught or missed |
-| T15 | Unavailable | Not run; original identity/source missing | Cannot claim caught or missed |
-| L01 | `tag` | Generated TypeScript and lint: no diagnostics | Repaired by native lowering |
-| L02 | `setup-read` | type: `TS2769` — No overload matches this call.<br>lint: `solid-yield/no-read-in-setup` — [READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event. | Generated location; mapping planned |
-| L03 | `inline-event` | Generated TypeScript and lint: no diagnostics | Repaired by native lowering |
-| L04 | `named-event` | Generated TypeScript and lint: no diagnostics | Repaired by native lowering |
-| L05 | `eager-jsx` | type: `TS2769` — No overload matches this call.<br>lint: `solid-yield/jsx-only-in-view` — JSX in a setup: elements are built by the view it returns (return view(function* () { return <…/>; })). | Generated location; mapping planned |
-| L06 | `catch` | transform: `NATIVE_CATCH` — JavaScript catch handles arbitrary throws; attempt handles declared failures. This catch needs a checked failure contract. | Refused before output |
-| L07 | `row` | Generated TypeScript and lint: no diagnostics | Repaired by native lowering |
-| R01 | `setup-read` | type: `TS2769` — No overload matches this call.<br>lint: `solid-yield/no-read-in-setup` — [READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event. | Generated location; mapping planned |
-| R02 | `inline-event` | Generated TypeScript and lint: no diagnostics | Repaired by native lowering |
-| R03 | `throw-error` | Generated TypeScript and lint: no diagnostics | Native Error is inferred and wrapped; unhandled failure at root is allowed by D-033 |
-| R04 | `setup-read` | type: `TS2769` — No overload matches this call.<br>lint: `solid-yield/no-read-in-setup` — [READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event. | Generated location; mapping planned |
-| R05 | `memo-write` | type: `TS2345` — [KIND]' are incompatible. | Generated location; mapping planned |
+| T06 | `row` | Generated TypeScript and lint: no diagnostics | Accepted generated form; no editor plugin |
+| T07 | `pending-root` | type: `TS1360` — Type 'HoleCall<{}, true, never, false, never>' does not satisfy the expected type '{ readonly "[PENDING_ROOT] the root may be pending (a read under it has no Loading above): wrap the root, render(() => Loading({ children: App }), el), or put a Loading around the pending part": true; }'. | PENDING_ROOT retained at the generated RootCheck handoff |
+| T08 | `colored-prop` | type: `TS2322` — Type '() => Generator<Read<true, never>, number, any>' is not assignable to type 'number \| Source<number, never, false> \| SettledProp<"[SETTLED_PROP] prop `n` is settled: pass a settled value, or declare it Source<T, E, true>"> \| HoleProp<...>'. | Generated location; source mapping planned |
+| T09 | `throw-error` | Generated TypeScript and lint: no diagnostics | Accepted generated form; no editor plugin |
+| T10 | `context` | Generated TypeScript and lint: no diagnostics | Accepted generated form; no editor plugin |
+| T11 | `lazy-child` | Generated TypeScript and lint: no diagnostics | Accepted generated form; no editor plugin |
+| T12 | Unavailable | Not run; historical source missing | Cannot claim caught or missed |
+| T13 | Unavailable | Not run; historical source missing | Cannot claim caught or missed |
+| T14 | Unavailable | Not run; historical source missing | Cannot claim caught or missed |
+| T15 | Unavailable | Not run; historical source missing | Cannot claim caught or missed |
+| L01 | `tag` | Generated TypeScript and lint: no diagnostics | Accepted generated form; no editor plugin |
+| L02 | `setup-read` | type: `TS2769` — No overload matches this call.<br>lint: `solid-yield/no-read-in-setup` — [READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event. | Generated location; source mapping planned |
+| L03 | `inline-event` | Generated TypeScript and lint: no diagnostics | Accepted generated form; no editor plugin |
+| L04 | `named-event` | Generated TypeScript and lint: no diagnostics | Accepted generated form; no editor plugin |
+| L05 | `eager-jsx` | type: `TS2769` — No overload matches this call.<br>lint: `solid-yield/jsx-only-in-view` — JSX in a setup: elements are built by the view it returns (`return view(function* () { return <…/>; })`). | Generated location; source mapping planned |
+| L06 | `catch` | Generated TypeScript and lint: no diagnostics | Accepted generated form; no editor plugin |
+| L07 | `row` | Generated TypeScript and lint: no diagnostics | Accepted generated form; no editor plugin |
+| R01 | `setup-read` | type: `TS2769` — No overload matches this call.<br>lint: `solid-yield/no-read-in-setup` — [READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event. | Generated location; source mapping planned |
+| R02 | `inline-event` | Generated TypeScript and lint: no diagnostics | Accepted generated form; no editor plugin |
+| R03 | `throw-error` | Generated TypeScript and lint: no diagnostics | Accepted generated form; no editor plugin |
+| R04 | `setup-read` | type: `TS2769` — No overload matches this call.<br>lint: `solid-yield/no-read-in-setup` — [READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event. | Generated location; source mapping planned |
+| R05 | `memo-write` | type: `TS2345` — Argument of type '() => Generator<Read<false, never> \| Write, number, any>' is not assignable to parameter of type '() => Generator<MemoOp, number, any>'. | Generated location; source mapping planned |
 | R06 | `hole-create` | transform: `SUGAR_CALLBACK` — [SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/packages/vite-plugin-yield/test/.native-generated/hole-create.tsx:8:38) | Refused before output |
 | R07 | `async-effect` | transform: `SUGAR_ASYNC` — [SUGAR_ASYNC] Use attempt inside a synchronous routine; async functions are not routines. (<root>/packages/vite-plugin-yield/test/.native-generated/async-effect.tsx:6:31) | Refused before output |
-| R08 | `missing-context` | type: `TS2345` — [NO_PROVIDER] the root requires the contexts this property names: provide each above the components that read it (Ctx.provide({ value, children }) around their calls)": "<root>/packages/vite-plugin-yield/test/. | Generated location; mapping planned |
-| R09 | `unhandled-failure` | Generated TypeScript and lint: no diagnostics | Native Error is inferred and wrapped; unhandled failure at root is allowed by D-033 |
-| R10 | Unavailable | Not run; original identity/source missing | Cannot claim caught or missed |
-| R11 | Unavailable | Not run; original identity/source missing | Cannot claim caught or missed |
-| R12 | Unavailable | Not run; original identity/source missing | Cannot claim caught or missed |
+| R08 | `missing-context` | type: `TS2345` — Argument of type 'HoleCall<{}, false, never, false, RequiredContext<number, "<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C">>' is not assignable to parameter of type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) \| undefined) => ComponentView<false, never, false, RequiredContext<...> \| HoleRequires<...>>) & { ...; } & { ...; }'.<br>type: `TS1360` — Type 'HoleCall<{}, false, never, false, RequiredContext<number, "<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C">>' does not satisfy the expected type '{ readonly "[NO_PROVIDER] the root requires the contexts this property names: provide each above the components that read it (Ctx.provide({ value, children }) around their calls)": "<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C"; }'. | Generated location; source mapping planned |
+| R09 | `unhandled-failure` | Generated TypeScript and lint: no diagnostics | Accepted generated form; no editor plugin |
+| R10 | Unavailable | Not run; historical source missing | Cannot claim caught or missed |
+| R11 | Unavailable | Not run; historical source missing | Cannot claim caught or missed |
+| R12 | Unavailable | Not run; historical source missing | Cannot claim caught or missed |
 
 The live run has **37 reconstructed fixtures, 21 accepted by generated
 TS/lint**, plus two generated foreign-edge checks. It covers the **27 named
@@ -185,3 +185,14 @@ SSR/hydrated parity; failure serialization has a production stream control.
 Neither substitutes for the blocked complete-original parity runs. See the
 Failure inference section of [sugar-design.md](../sugar-design.md) for F-S14/F-S15
 on custom prototypes, selective catches and root exception identity.
+
+
+Native follow-up: catches, rethrows, generator actions, stores, optimistic signals,
+timer callbacks, array-map callbacks, latest/pending reads and onSettled now have
+checked fixtures in `native-verification.json`. A rejecting generator action also
+passes SSR and hydrated parity against its plain Solid control. Complete-original
+parity is still unverified; no claim here turns those focused checks into app acceptance.
+
+The additional `timer-callback-failure` probe reports TS2345 containing
+`NATIVE_CALLBACK_FAILURE`. It prevents a generated foreign callback from dropping
+its inferred unknown failure while callback-to-boundary registration is unfinished.

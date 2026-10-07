@@ -120,3 +120,12 @@ it("preserves native catches through the SSR runtime", async () => {
     await server.close();
   }
 }, 30000);
+
+it("retains entry markers and emits a single type-only import modifier", () => {
+  const out = lower(
+    `import {HydrationScript,type JSX} from '@solidjs/web';export function Shell(p:{children:JSX.Element}){return <html><HydrationScript/>{p.children}</html>}`
+  );
+  expect(out).toContain("import type { JSX }");
+  expect(out).toContain("<HydrationScript />");
+  expect(out).not.toContain("import type { type");
+});

@@ -623,6 +623,8 @@ function surface(code, filename, modules) {
       if (types.length) {
         const declaration = t.importDeclaration(types, t.stringLiteral(module));
         declaration.importKind = "type";
+        for (const spec of declaration.specifiers)
+          if (t.isImportSpecifier(spec)) spec.importKind = "value";
         rewrittenImports.add(declaration);
         q.insertBefore(declaration);
       }

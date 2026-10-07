@@ -204,6 +204,9 @@ export function analyzeRecomputable(modules, options = {}) {
           instance: c.frame.id
         }));
       result = {
+        ...(a.findings.some(f => f.kind === "trusted-pure-module")
+          ? { trustedPureModules: a.findings.filter(f => f.kind === "trusted-pure-module") }
+          : {}),
         holes: count(a.parts.filter(p => ["hole", "bind"].includes(p.kind))),
         jsx: count(
           a.dom.filter(n => n.kind === "element" && n.path.isJSXElement()).map(n => n.value)

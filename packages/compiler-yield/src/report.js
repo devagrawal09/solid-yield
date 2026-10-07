@@ -97,7 +97,7 @@ export function markdown(reports) {
   const out = [
     "# solid-yield analyzer",
     "",
-    "Report only: groups are dependencies, not proven hydration roots. Reach is a static may-reach graph, not executed bytes or savings. S is server-derived; R is server-recomputable; U/C remain client. Captures require a runtime codec check before emission. Opaque modules have no purity contract on main.",
+    'Report only: groups are dependencies, not proven hydration roots. Reach is a static may-reach graph, not executed bytes or savings. S is server-derived; R is server-recomputable; U/C remain client. Captures require a runtime codec check before emission. Module-level "use pure" is an author assertion; implementations are not checked.',
     ""
   ];
   const names = parts => parts.map(p => `${p.id} ${p.name}`).join(", ") || "none";
@@ -121,7 +121,8 @@ export function markdown(reports) {
       out.push(`Capture refused: ${c.at} ${c.variable}: ${c.reason}.`);
     for (const leak of p.leaks)
       out.push(`Unknown: ${leak.at} ${leak.expression}: ${leak.classification ?? leak.construct}.`);
-    for (const finding of p.findings) out.push(`Finding: ${finding.at}: ${finding.message}.`);
+    for (const finding of p.findings)
+      out.push(`Finding: ${finding.at}: ${finding.message ?? finding.reason}.`);
     out.push(
       "",
       `C1b: ${reach.parts} graph parts. Every event includes transitive calls, writes, reads, effects, boundaries and recreated children. DOM-bound events are marked bound.`,
@@ -135,6 +136,8 @@ export function markdown(reports) {
     for (const kind of ["holes", "jsx", "h"])
       out.push(`| ${kind} | ${r[kind].S} | ${r[kind].R} | ${r[kind].client} | ${r[kind].total} |`);
     out.push("");
+    for (const module of r.trustedPureModules ?? [])
+      out.push(`Trusted pure module (author assertion) ${module.at}: ${module.reason}`);
     for (const region of r.regions)
       out.push(
         `Region ${region.component} at ${region.at}: ${region.provenance}; inputs [${region.arguments.map(x => x.expression).join(", ")}]; slots [${region.slots.join(", ")}].`

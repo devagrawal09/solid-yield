@@ -1,5 +1,7 @@
 # C3: server-recomputable docs regions
 
+**Terminology (2026-10-08).** Dev corrected the earlier use of “islands”: C2 (seven-root and single-root modes) is **static extraction + eager root split**. Every root remains a full client component, and the article still renders in the browser. Islands in the Astro/Marko sense are server-rendered content with small interactive leaves: **C3–C3c are islands, i.e. server components with client slots** such as LikeButton and copy-code. Dev’s measured summary: “static extraction and root splitting never pay; islands (server components with client slots) pay above ~25 KB gzip of server-derivable code and scale.” The `eagerIslands` pass name predates this correction and is unchanged; read older branch reports with this distinction.
+
 2026-10-07, `proto/compiler`, after merging main at `c797bb3` (merge
 `85931f6`). **R emission, refetch, slots and measurement are implemented for
 the docs fixture. Exact DOM parity is not achieved:** the public frame API adds

@@ -1,5 +1,7 @@
 # C3b: a realistic server-derived article pipeline
 
+**Terminology (2026-10-08).** Dev corrected the earlier use of “islands”: C2 (seven-root and single-root modes) is **static extraction + eager root split**. Every root remains a full client component, and the article still renders in the browser. Islands in the Astro/Marko sense are server-rendered content with small interactive leaves: **C3–C3c are islands, i.e. server components with client slots** such as LikeButton and copy-code. Dev’s measured summary: “static extraction and root splitting never pay; islands (server components with client slots) pay above ~25 KB gzip of server-derivable code and scale.” The `eagerIslands` pass name predates this correction and is unchanged; read older branch reports with this distinction.
+
 2026-10-07, `proto/compiler`. This follows option B and the small-template
 [C3 control](compiler-c3-server-components.md). No production code or baseline
 from another twin was changed. The original 24 docs steps remain in order;

@@ -10,6 +10,8 @@ Vocabulary is the project's (D-096): a **routine**, its **host**, a **hole**, a 
 
 ## 0. The plan
 
+**Terminology (2026-10-08).** Dev corrected the earlier use of “islands”: C2 (seven-root and single-root modes) is **static extraction + eager root split**. Every root remains a full client component, and the article still renders in the browser. Islands in the Astro/Marko sense are server-rendered content with small interactive leaves: **C3–C3c are islands, i.e. server components with client slots** such as LikeButton and copy-code. Dev’s measured summary: “static extraction and root splitting never pay; islands (server components with client slots) pay above ~25 KB gzip of server-derivable code and scale.” The `eagerIslands` pass name predates this correction and is unchanged; read older branch reports with this distinction.
+
 The plan (Dev, 2026-10-06), amended by D-103–D-108 and D-113 (2026-10-07), so that each part can be tested:
 
 **Four tiers of partial hydration** (Dev with the Solid maintainer, Discord, 2026-10-07):

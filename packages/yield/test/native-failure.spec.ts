@@ -26,6 +26,19 @@ describe("native failure adapters", () => {
     expect(nativeFailure(["unknown"], "bad").value).toBe("bad");
     expect(() => nativeFailure(["a#E"], new B())).toThrow("NATIVE_FAILURE_CONTRACT");
   });
+  it("accepts unknown object throws without invoking their conversion hooks", () => {
+    const nullPrototype = Object.create(null);
+    const hostile = {
+      toString() {
+        throw new Error("must not run");
+      }
+    };
+    expect(nativeFailure(["unknown"], nullPrototype).value).toBe(nullPrototype);
+    expect(nativeFailure(["unknown"], hostile).value).toBe(hostile);
+    const { proxy, revoke } = Proxy.revocable({}, {});
+    revoke();
+    expect(nativeFailure(["unknown"], proxy).value).toBe(proxy);
+  });
   it("keeps the transport class and reconstructs serialized declared failures", () => {
     const transport = new ChunkError("offline");
     expect(nativeFailure(["ChunkError"], transport, ChunkError)).toBe(transport);

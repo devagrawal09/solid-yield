@@ -6,12 +6,20 @@ export function registerNativeFailure<T extends Function>(id: string, constructo
   identities.set(constructor, id);
   return constructor;
 }
+function nativeMessage(value: unknown): string {
+  try {
+    if (value instanceof Error && typeof value.message === "string") return value.message;
+  } catch {
+    /* Unknown values can include revoked proxies or throwing getters. */
+  }
+  return typeof value === "string" ? value : "Native failure";
+}
 export class NativeFailure<K extends string> extends FailureInstance<K> {
   constructor(
     kind: K,
     readonly value: unknown
   ) {
-    super(kind, value instanceof Error ? value.message : String(value));
+    super(kind, nativeMessage(value));
     this.name = "NativeFailure";
   }
   override toJSON() {
@@ -25,6 +33,8 @@ export function nativeFailure<const K extends string>(
   value: unknown,
   transport?: new (cause: unknown) => ChunkError
 ): NativeCaught<K> {
+  if (kinds.length === 1 && kinds[0] === "unknown")
+    return new NativeFailure("unknown", value) as NativeCaught<K>;
   if (transport && value instanceof transport && kinds.includes("ChunkError" as K))
     return value as NativeCaught<K>;
   const wire = value as { name?: string; kind?: string; value?: unknown } | null;

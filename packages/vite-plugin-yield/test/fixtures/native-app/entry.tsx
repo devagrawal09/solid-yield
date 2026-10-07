@@ -5,3 +5,7 @@ import { Counter as Original } from "./Original";
 export const native = () => nativeRender(Counter);
 export const original = () => renderToString(Original);
 export { generateHydrationScript } from "@solidjs/web";
+import { CatchAction } from "./CatchAction";
+import { CatchAction as OriginalCatchAction } from "./OriginalCatchAction";
+export const nativeAction = () => nativeRender(CatchAction);
+export const originalAction = () => renderToString(OriginalCatchAction);

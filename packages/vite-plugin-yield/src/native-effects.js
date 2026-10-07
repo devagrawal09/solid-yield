@@ -13,6 +13,39 @@ const imported = binding =>
     : null;
 /** @param {Map<string,string>} files @param {import('../../compiler-yield/src/failure-inference.js').FailureReport} report */
 export function lowerNativeEffects(files, report) {
+  // Seed routine ownership from native primitive calls and propagate to callers
+  // through the analyzer's resolved graph. Ordinary I/O helpers stay JavaScript.
+  const routines = new Set();
+  for (const [file, code] of files) {
+    const program = parseProgram(code, file);
+    program?.traverse({
+      Function(q) {
+        if (report.at(file, q.node.start ?? 0)?.component || q.node.generator)
+          routines.add(`${file}:${q.node.start}`);
+      },
+      CallExpression(q) {
+        const c = q.get("callee");
+        const b = c.isIdentifier() ? c.scope.getBinding(c.node.name)?.path : undefined;
+        if (imported(b)?.source === "solid-js" && imported(b)?.name !== "onCleanup") {
+          const owner = q.getFunctionParent();
+          if (owner && !owner.node.async) routines.add(`${file}:${owner.node.start}`);
+        }
+      }
+    });
+  }
+  let growing = true;
+  while (growing) {
+    growing = false;
+    for (const f of report.functions) {
+      if (f.calls.some(id => routines.has(id.replace("<root>", process.cwd())))) {
+        const id = f.id.replace("<root>", process.cwd());
+        if (!routines.has(id)) {
+          routines.add(id);
+          growing = true;
+        }
+      }
+    }
+  }
   const result = new Map();
   for (const [file, code] of files) {
     const p = parseProgram(code, file);
@@ -46,7 +79,7 @@ export function lowerNativeEffects(files, report) {
     /** Known routine hosts; foreign callbacks remain plain and are caught at their call. @param {Path | null} fn */
     const host = fn => {
       if (!fn || fn.node.async || fn.isClassMethod() || fn.isObjectMethod()) return false;
-      if (fn.node.id || fn.parentPath?.isVariableDeclarator()) return true;
+      if (routines.has(`${file}:${fn.node.start}`)) return true;
       const call = fn.parentPath;
       if (call?.isCallExpression()) {
         const callee = call.get("callee");
@@ -55,7 +88,15 @@ export function lowerNativeEffects(files, report) {
           ? callee.scope.getBinding(callee.node.name)?.path
           : undefined;
         const api = imported(binding);
-        if (api?.source === "solid-js") return ["createMemo", "createEffect"].includes(api.name);
+        if (api?.source === "solid-yield/internal" && api.name === "nativeTry") return true;
+        if (api?.source === "solid-js")
+          return [
+            "createMemo",
+            "createEffect",
+            "createProjection",
+            "createOptimisticStore",
+            "action"
+          ].includes(api.name);
       }
       return (
         call?.isJSXExpressionContainer() &&
@@ -66,6 +107,25 @@ export function lowerNativeEffects(files, report) {
 
     // Synchronous native throw sites are ordinary library raise operations.
     p.traverse({
+      Function(q) {
+        if (!q.node.async && !q.node.returnType && t.isBlockStatement(q.node.body)) {
+          const completions = q.get("body").getCompletionRecords();
+          if (completions.length && completions.every(end => end.isThrowStatement()))
+            q.node.returnType = t.tsTypeAnnotation(t.tsNeverKeyword());
+        }
+      },
+      YieldExpression: {
+        exit(q) {
+          const fn = q.getFunctionParent();
+          if (!fn || fn.node.async || q.node.delegate || !q.node.argument) return;
+          const value = q.node.argument;
+          q.replaceWith(
+            t.isCallExpression(value) && t.isIdentifier(value.callee, { name: "__nativeAttempt" })
+              ? value
+              : attempt(value, ["unknown"])
+          );
+        }
+      },
       ThrowStatement(q) {
         const fn = q.getFunctionParent();
         if (!host(fn)) return;
@@ -111,16 +171,17 @@ export function lowerNativeEffects(files, report) {
         exit(q) {
           const fn = q.getFunctionParent();
           if (!host(fn) || !q.node.start) return;
-          // Catch/then/finally must retain their original Promise receiver. Wrap
-          // the completed chain, not an inner call that would become an iterator.
+          const c = q.get("callee");
+          if (
+            c.isIdentifier() &&
+            imported(c.scope.getBinding(c.node.name)?.path)?.source.startsWith("solid-yield")
+          )
+            return;
+          // Preserve a method chain's receiver and evaluation order. Wrap the
+          // completed call, not an inner call that would become an iterator.
           let chain = q.parentPath;
           while (chain?.isMemberExpression()) {
-            if (
-              chain.parentPath?.isCallExpression() &&
-              ["catch", "then", "finally"].includes(
-                String(t.isIdentifier(chain.node.property) ? chain.node.property.name : "")
-              )
-            )
+            if (chain.parentPath?.isCallExpression() && chain.parentPath.node.callee === chain.node)
               return;
             chain = chain.parentPath;
           }
@@ -129,7 +190,11 @@ export function lowerNativeEffects(files, report) {
             !info ||
             info.native ||
             (!info.fails.length && !info.promise) ||
-            (info.target && !info.async && !info.promise && !q.isNewExpression())
+            (info.target &&
+              routines.has(info.target) &&
+              !info.async &&
+              !info.promise &&
+              !q.isNewExpression())
           )
             return;
           q.replaceWith(attempt(q.node, info.fails));
@@ -213,7 +278,11 @@ export function lowerNativeEffects(files, report) {
           ? callee.scope.getBinding(callee.node.name)?.path
           : undefined;
         const api = imported(binding);
-        if (api?.source !== "solid-js" || api.name !== "createMemo") return;
+        if (
+          api?.source !== "solid-js" ||
+          !["createMemo", "createProjection", "createOptimisticStore"].includes(api.name)
+        )
+          return;
         const callback = q.get("arguments.0");
         if (!callback?.isFunction() || !callback.node.async) return;
         const summary = report.at(file, callback.node.start ?? 0);
@@ -271,11 +340,16 @@ export function lowerNativeEffects(files, report) {
           ? ["attempt", "raise", "ChunkError"].includes(n)
           : !["attempt", "raise", "ChunkError"].includes(n)
       );
-      for (const name of names)
-        if (p.scope.hasBinding(aliases[name]))
+      for (const name of [...names]) {
+        const binding = p.scope.getBinding(aliases[name]);
+        if (!binding) continue;
+        const api = imported(binding.path);
+        if (api?.source === module && api.name === name) names.splice(names.indexOf(name), 1);
+        else
           throw new Error(
             `[NATIVE_NAME] Reserve ${aliases[name]} for the generated native import. (${file})`
           );
+      }
       if (names.length)
         p.node.body.unshift(
           t.importDeclaration(

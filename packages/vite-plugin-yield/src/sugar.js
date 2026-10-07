@@ -63,12 +63,12 @@ export function isSugar(code) {
   return /^\s*(?:(?:\/\/[^\n]*\n|\/\*[\s\S]*?\*\/)\s*)*["']use yield["']\s*;/.test(code);
 }
 /** @param {string} code @param {string} filename */
-function seed(code, filename) {
+function seed(code, filename, native = false) {
   const p = parseProgram(code, filename);
   if (!p) throw new Error(`Cannot parse ${filename}`);
   p.traverse({
     Function(path) {
-      if (path.node.generator)
+      if (path.node.generator && !native)
         fail(path, "SUGAR_EXPLICIT", "A sugar file cannot contain authored generators.", filename);
     }
   });
@@ -89,7 +89,16 @@ function seed(code, filename) {
         const prop = path.parentPath.isObjectProperty() ? key(path.parentPath.node.key) : null;
         const isControl = propCall && control(propCall);
         const isCallback =
+          (native &&
+            call &&
+            t.isIdentifier(call.node.callee) &&
+            ["__nativeTry", "__nativeMap"].includes(call.node.callee.name)) ||
           constructors.has(name) ||
+          (native &&
+            propCall &&
+            t.isIdentifier(propCall.node.callee) &&
+            /^[A-Z]/.test(propCall.node.callee.name) &&
+            prop === "children") ||
           (isControl && ["children", "when", "each", "fallback", "on"].includes(prop));
         // Errored's plain accessor fallback stays a Solid callback, not a row.
         const plainFallback = prop === "fallback" && lib(propCall?.get("callee")) === "Errored";
@@ -172,13 +181,17 @@ function seed(code, filename) {
           wrapped.add(expr);
           expr.typeParameters = n.typeParameters;
           expr.returnType = n.returnType;
-          if (path.isFunctionDeclaration())
-            path.replaceWith(
-              t.variableDeclaration("const", [
-                t.variableDeclarator(n.id, t.callExpression(t.identifier("component"), [expr]))
-              ])
-            );
-          else {
+          if (path.isFunctionDeclaration()) {
+            const declaration = t.variableDeclaration("const", [
+              t.variableDeclarator(n.id, t.callExpression(t.identifier("component"), [expr]))
+            ]);
+            if (path.parentPath.isExportDefaultDeclaration())
+              path.parentPath.replaceWithMultiple([
+                declaration,
+                t.exportDefaultDeclaration(t.identifier(n.id.name))
+              ]);
+            else path.replaceWith(declaration);
+          } else {
             wrapped.add(expr);
             path.replaceWith(t.callExpression(t.identifier("component"), [expr]));
             path.skip();
@@ -219,7 +232,7 @@ function programFor(files, options) {
   return ts.createProgram([...files.keys()], options, host);
 }
 /** @param {string} code @param {string} filename @param {ts.Program} program */
-function pass(code, filename, program) {
+function pass(code, filename, program, native = false) {
   const source = program.getSourceFile(filename),
     checker = program.getTypeChecker();
   if (!source) throw new Error(`Missing source ${filename}`);
@@ -266,15 +279,96 @@ function pass(code, filename, program) {
       const hostCall = fn.parentPath?.isCallExpression() ? fn.parentPath : null;
       const attemptHandler =
         lib(hostCall?.get("callee")) === "attempt" && hostCall?.node.arguments[1] === fn.node;
-      if (!fnName(fn) && !attemptHandler)
+      let nativeHost = false;
+      if (native) {
+        const scheduler =
+          /^(setTimeout|setInterval|requestAnimationFrame|requestIdleCallback|addEventListener|removeEventListener)$/;
+        /** @param {Path | null} call */
+        const isScheduler = call =>
+          call?.isCallExpression() &&
+          scheduler.test(
+            key(
+              t.isMemberExpression(call.node.callee) ? call.node.callee.property : call.node.callee
+            )
+          );
+        const binding = fnName(fn) ? fn.scope.parent?.getBinding(fnName(fn)) : undefined;
+        const eventHost =
+          isScheduler(hostCall) ||
+          (hostCall?.parentPath.isExpressionStatement() &&
+            lib(hostCall.get("callee")) !== "attempt") ||
+          (binding?.referencePaths.length &&
+            binding.referencePaths.every(
+              ref => ref.findParent(p => p.isTSType()) || isScheduler(ref.parentPath)
+            ));
+        if (eventHost) {
+          if (fn.isArrowFunctionExpression()) fn.arrowFunctionToExpression();
+          fn.node.generator = true;
+          if (fn.isFunctionDeclaration()) {
+            const expression = t.functionExpression(null, fn.node.params, fn.node.body, true);
+            fn.replaceWith(
+              t.variableDeclaration("const", [
+                t.variableDeclarator(
+                  /** @type {import("@babel/core").types.Identifier} */ (fn.node.id),
+                  t.callExpression(t.identifier("__nativeEvent"), [expression])
+                )
+              ])
+            );
+          } else
+            fn.replaceWith(
+              t.callExpression(t.identifier("__nativeEvent"), [
+                /** @type {import("@babel/core").types.FunctionExpression} */ (fn.node)
+              ])
+            );
+          if (p && !p.scope.hasBinding("__nativeEvent")) {
+            p.node.body.unshift(
+              t.importDeclaration(
+                [t.importSpecifier(t.identifier("__nativeEvent"), t.identifier("$event"))],
+                t.stringLiteral("solid-yield")
+              )
+            );
+            p.scope.crawl();
+          }
+          nativeHost = true;
+        } else if (
+          hostCall?.isCallExpression() &&
+          t.isMemberExpression(hostCall.node.callee) &&
+          key(hostCall.node.callee.property) === "map" &&
+          (() => {
+            const receiver = type(hostCall.get("callee.object"));
+            return !!receiver && (checker.isArrayType(receiver) || checker.isTupleType(receiver));
+          })()
+        ) {
+          if (fn.isArrowFunctionExpression()) fn.arrowFunctionToExpression();
+          fn.node.generator = true;
+          hostCall.replaceWith(
+            t.callExpression(t.identifier("__nativeMap"), [
+              hostCall.node.callee.object,
+              ...hostCall.node.arguments
+            ])
+          );
+          if (p && !p.scope.hasBinding("__nativeMap")) {
+            p.node.body.unshift(
+              t.importDeclaration(
+                [t.importSpecifier(t.identifier("__nativeMap"), t.identifier("nativeMap"))],
+                t.stringLiteral("solid-yield/internal")
+              )
+            );
+            p.scope.crawl();
+          }
+          nativeHost = true;
+        }
+      }
+      if (!fnName(fn) && !attemptHandler && !nativeHost)
         fail(
           path,
           "SUGAR_CALLBACK",
           "A reactive read in an unknown callback has no routine host; use a memo, event, or hole.",
           filename
         );
-      if (fn.isArrowFunctionExpression()) fn.arrowFunctionToExpression();
-      fn.node.generator = true;
+      if (!nativeHost) {
+        if (fn.isArrowFunctionExpression()) fn.arrowFunctionToExpression();
+        fn.node.generator = true;
+      }
     }
     path.replaceWith(t.yieldExpression(operand, true));
     path.skip();
@@ -308,7 +402,12 @@ function pass(code, filename, program) {
               fail(path, "SUGAR_READ_ARGS", "A source read takes no arguments.", filename);
             delegate(path, callee.node);
           }
-        } else if (isOperation(type(path)) || lib(callee) === "readStore") delegate(path);
+        } else if (
+          isOperation(type(path)) ||
+          lib(callee) === "readStore" ||
+          (native && ["latestOf", "isPendingOf"].includes(lib(callee)))
+        )
+          delegate(path);
       }
     },
     MemberExpression: {
@@ -363,6 +462,18 @@ function pass(code, filename, program) {
     },
     JSXExpressionContainer(path) {
       const e = path.get("expression");
+      const owner = path.getFunctionParent();
+      if (
+        native &&
+        owner &&
+        !owner.node.generator &&
+        owner.parentPath.isObjectProperty() &&
+        key(owner.parentPath.node.key) === "fallback" &&
+        lib(ownerCall(owner)?.get("callee")) === "Errored" &&
+        t.isIdentifier(owner.node.params[1]) &&
+        e.isIdentifier({ name: owner.node.params[1].name })
+      )
+        return;
       if (
         path.parentPath.isJSXAttribute() &&
         /^on/.test(key(path.parentPath.node.name) ?? "") &&
@@ -421,8 +532,8 @@ function checkEscapes(files, active, options) {
 }
 /** Lower a closed set of sugar modules together. Import aliases/re-exports are
  * resolved by TypeScript; the existing analyzer consumes this same explicit IR. */
-/** @param {Map<string,string>} input @param {{compilerOptions?: ts.CompilerOptions}} [options] */
-export function lowerSugarProject(input, { compilerOptions = {} } = {}) {
+/** @param {Map<string,string>} input @param {{compilerOptions?: ts.CompilerOptions, native?:boolean}} [options] */
+export function lowerSugarProject(input, { compilerOptions = {}, native = false } = {}) {
   const options = {
     target: ts.ScriptTarget.ESNext,
     module: ts.ModuleKind.ESNext,
@@ -434,7 +545,7 @@ export function lowerSugarProject(input, { compilerOptions = {} } = {}) {
     ...compilerOptions
   };
   let files = new Map(
-    [...input].map(([id, code]) => [resolve(id), isSugar(code) ? seed(code, id) : code])
+    [...input].map(([id, code]) => [resolve(id), isSugar(code) ? seed(code, id, native) : code])
   );
   const active = new Set([...input].filter(([, c]) => isSugar(c)).map(([id]) => resolve(id)));
   for (let i = 0; i < 24; i++) {
@@ -442,7 +553,7 @@ export function lowerSugarProject(input, { compilerOptions = {} } = {}) {
     const next = new Map(files);
     let changed = false;
     for (const id of active) {
-      const code = pass(files.get(id) ?? "", id, program);
+      const code = pass(files.get(id) ?? "", id, program, native);
       next.set(id, code);
       changed ||= code !== files.get(id);
     }

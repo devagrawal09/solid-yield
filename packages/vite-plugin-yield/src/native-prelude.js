@@ -1,0 +1,253 @@
+// @ts-check
+import babel from "@babel/core";
+import { parseProgram } from "./transform.js";
+const t = babel.types;
+/** @typedef {import('@babel/core').NodePath<any>} Path */
+/** @param {Path} p */
+const api = p => {
+  const b = p.isIdentifier() ? p.scope.getBinding(p.node.name)?.path : null;
+  return b?.isImportSpecifier() && b.parentPath.isImportDeclaration()
+    ? {
+        module: b.parentPath.node.source.value,
+        name: t.isIdentifier(b.node.imported) ? b.node.imported.name : b.node.imported.value
+      }
+    : null;
+};
+/** Normalize native control contracts before routine reconstruction.
+ * @param {Map<string,string>} files */
+export function nativePrelude(files) {
+  const out = new Map();
+  for (const [file, code] of files) {
+    const p = parseProgram(code, file);
+    if (!p) continue;
+    const used = new Set();
+    p.traverse({
+      VariableDeclarator(q) {
+        const init = q.get("init");
+        if (
+          !init.isCallExpression() ||
+          api(init.get("callee"))?.name !== "useContext" ||
+          t.isIdentifier(q.node.id)
+        )
+          return;
+        const binding = q.scope.generateUidIdentifier("context");
+        const declarations = [t.variableDeclarator(binding, q.node.init)];
+        /** @param {any} pattern @param {any} value */ const unpack = (pattern, value) => {
+          if (t.isIdentifier(pattern)) declarations.push(t.variableDeclarator(pattern, value));
+          else if (t.isArrayPattern(pattern))
+            pattern.elements.forEach((element, index) => {
+              if (element)
+                unpack(element, t.memberExpression(value, t.numericLiteral(index), true));
+            });
+          else if (t.isObjectPattern(pattern))
+            for (const prop of pattern.properties) {
+              if (t.isObjectProperty(prop))
+                unpack(
+                  prop.value,
+                  t.memberExpression(value, prop.key, prop.computed || !t.isIdentifier(prop.key))
+                );
+            }
+          else
+            throw new Error(
+              `[NATIVE_PATTERN] Context rest/default destructuring needs explicit value order. (${file})`
+            );
+        };
+        unpack(q.node.id, binding);
+        q.replaceWithMultiple(declarations);
+      }
+    });
+    p.traverse({
+      TryStatement: {
+        exit(q) {
+          const owner = q.getFunctionParent();
+          if (!owner || owner.node.async) return; // ordinary async I/O retains its JS catch
+          const handler = q.node.handler;
+          if (!handler) return;
+          if (q.node.finalizer)
+            q.get("finalizer").traverse({
+              Function(f) {
+                f.skip();
+              },
+              ReturnStatement() {
+                throw new Error(
+                  `[NATIVE_CONTROL_TRANSFER] A return from finally needs completion lowering. (${file})`
+                );
+              }
+            });
+          const throwsThrough = [q.get("block"), q.get("handler.body")].every(block => {
+            const ends = block.getCompletionRecords();
+            return ends.length && ends.every(end => end.isThrowStatement());
+          });
+          const result = q.scope.generateUidIdentifier("completion");
+          const caught = q.scope.generateUidIdentifier("caught");
+          const body = q.node.block;
+          const handle = handler.body;
+          let returns = false;
+          // Encode an outer return, which cannot become a return from the helper only.
+          for (const scope of [q.get("block"), q.get("handler.body")])
+            scope.traverse({
+              Function(f) {
+                f.skip();
+              },
+              ReturnStatement(r) {
+                returns = true;
+                r.node.argument = t.objectExpression([
+                  t.objectProperty(
+                    t.identifier("returned"),
+                    t.tsAsExpression(
+                      t.booleanLiteral(true),
+                      t.tsTypeReference(t.identifier("const"))
+                    )
+                  ),
+                  t.objectProperty(
+                    t.identifier("value"),
+                    r.node.argument ?? t.identifier("undefined")
+                  )
+                ]);
+              },
+              BreakStatement(r) {
+                if (
+                  r.node.label ||
+                  r.findParent(a => a === scope || a.isLoop() || a.isSwitchStatement()) === scope
+                )
+                  throw new Error(
+                    `[NATIVE_CONTROL_TRANSFER] A catch crossing a loop/label needs completion lowering. (${file})`
+                  );
+              },
+              ContinueStatement(r) {
+                if (r.node.label || r.findParent(a => a === scope || a.isLoop()) === scope)
+                  throw new Error(
+                    `[NATIVE_CONTROL_TRANSFER] A labeled continue crossing a catch needs completion lowering. (${file})`
+                  );
+              }
+            });
+          const rethrows = new Set();
+          if (t.isIdentifier(handler.param)) {
+            const binding = q.get("handler").scope.getBinding(handler.param.name);
+            if (binding?.referencePaths.every(r => r.parentPath?.isThrowStatement()))
+              for (const ref of binding.referencePaths) rethrows.add(ref.parentPath?.node);
+          }
+          q.get("handler.body").traverse({
+            ThrowStatement(r) {
+              if (rethrows.has(r.node)) {
+                used.add("raise");
+                r.replaceWith(
+                  t.returnStatement(t.callExpression(t.identifier("__nativeRethrow"), [caught]))
+                );
+              }
+            }
+          });
+          const params = [];
+          if (handler.param) {
+            used.add("nativeFailureValue");
+            handle.body.unshift(
+              t.variableDeclaration("const", [
+                t.variableDeclarator(
+                  handler.param,
+                  t.callExpression(t.identifier("__nativeValue"), [caught])
+                )
+              ])
+            );
+          }
+          params.push(caught);
+          if (returns)
+            for (const block of [body, handle])
+              block.body.push(
+                t.returnStatement(
+                  t.objectExpression([
+                    t.objectProperty(
+                      t.identifier("returned"),
+                      t.tsAsExpression(
+                        t.booleanLiteral(false),
+                        t.tsTypeReference(t.identifier("const"))
+                      )
+                    )
+                  ])
+                )
+              );
+          used.add("nativeTry");
+          const args = [
+            t.functionExpression(null, [], body, true),
+            t.functionExpression(null, params, handle, true)
+          ];
+          if (q.node.finalizer) args.push(t.functionExpression(null, [], q.node.finalizer, true));
+          const call = t.callExpression(t.identifier("__nativeTry"), args);
+          q.replaceWithMultiple(
+            returns
+              ? [
+                  t.variableDeclaration("const", [t.variableDeclarator(result, call)]),
+                  t.ifStatement(
+                    t.memberExpression(result, t.identifier("returned")),
+                    t.returnStatement(t.memberExpression(result, t.identifier("value")))
+                  )
+                ]
+              : [throwsThrough ? t.returnStatement(call) : t.expressionStatement(call)]
+          );
+        }
+      },
+      CallExpression(q) {
+        const a = api(q.get("callee"));
+        if (a?.module !== "solid-js") return;
+        if (a.name === "onSettled") {
+          const callback = q.get("arguments.0");
+          if (!callback?.isFunction()) return;
+          used.add("$effect");
+          used.add("$cleanup");
+          if (t.isExpression(callback.node.body))
+            callback.node.body = t.blockStatement([t.returnStatement(callback.node.body)]);
+          callback.traverse({
+            Function(n) {
+              n.skip();
+            },
+            ReturnStatement(r) {
+              if (r.node.argument) {
+                r.replaceWithMultiple([
+                  t.expressionStatement(
+                    t.callExpression(t.identifier("__nativeCleanup"), [r.node.argument])
+                  ),
+                  t.returnStatement()
+                ]);
+                r.skip();
+              }
+            }
+          });
+          q.replaceWith(
+            t.callExpression(t.identifier("__nativeEffect"), [
+              t.arrowFunctionExpression([], t.blockStatement([])),
+              callback.node
+            ])
+          );
+          q.skip();
+        }
+      }
+    });
+    /** @type {Record<string,string>} */ const names = {
+      nativeTry: "__nativeTry",
+      nativeFailureValue: "__nativeValue",
+      raise: "__nativeRethrow",
+      $effect: "__nativeEffect",
+      $cleanup: "__nativeCleanup"
+    };
+    for (const module of ["solid-yield", "solid-yield/internal"]) {
+      const group = [...used].filter(x =>
+        module === "solid-yield" ? x === "raise" || x.startsWith("$") : x.startsWith("native")
+      );
+      if (group.length)
+        p.node.body.unshift(
+          t.importDeclaration(
+            group.map(n => t.importSpecifier(t.identifier(names[n]), t.identifier(n))),
+            t.stringLiteral(module)
+          )
+        );
+    }
+    out.set(
+      file,
+      babel.transformFromAstSync(t.file(p.node), undefined, {
+        babelrc: false,
+        configFile: false,
+        comments: false
+      })?.code ?? code
+    );
+  }
+  return out;
+}

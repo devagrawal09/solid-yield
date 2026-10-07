@@ -55,7 +55,7 @@ describe("native front end", { timeout: 30_000 }, () => {
       lower(`export function App(){return <button onClick={()=>{throw new Error("failed")}}/>;}`)
     ).toContain('__nativeFailure(["global:Error"]');
   });
-  it("keeps catch lowering as a separate checked-contract refusal", () => {
+  it("accepts catch control flow for checked lowering", () => {
     const diagnostics = inspectNativeProject(
       new Map([
         [
@@ -64,7 +64,7 @@ describe("native front end", { timeout: 30_000 }, () => {
         ]
       ])
     );
-    expect(diagnostics.map(d => d.code)).toEqual(["NATIVE_CATCH"]);
+    expect(diagnostics.map(d => d.code)).toEqual([]);
   });
   it("keeps unselected files on the explicit route", async () => {
     const plugin = solidYield({ mode: "native", include: () => false });
@@ -88,3 +88,35 @@ it("renders native Solid source through the actual Vite/SSR pipeline", async () 
     await server.close();
   }
 }, 30_000);
+
+it("keeps foreign entry rendering checked and out of routine inference", () => {
+  const main = resolve(import.meta.dirname, "fixtures/main.tsx");
+  const out = lowerNativeProject(
+    new Map([
+      [id, "export function App(){return <p/>}"],
+      [
+        main,
+        `import {render} from '@solidjs/web';import {App} from './native';render(()=> <App/>,document.body);`
+      ]
+    ])
+  ).files.get(main);
+  expect(out).toMatch(/from ['"]@solidjs\/web['"]/);
+  expect(out).toContain("render(__nativeForeign(App), document.body)");
+  expect(out).not.toContain("function*");
+});
+it("preserves native catches through the SSR runtime", async () => {
+  const { devServer } = await import("./server.js");
+  const root = resolve(import.meta.dirname, "fixtures/native-app");
+  const server = await devServer(root, {
+    mode: "native",
+    include: file => file === resolve(root, "Catch.tsx")
+  });
+  try {
+    const entry = await server.ssrLoadModule("/catch-entry.tsx");
+    const plain = html => html.replace(/<!--.*?-->/g, "").replace(/ data-hk="[^"]*"/g, "");
+    expect(plain(entry.native())).toBe(plain(entry.original()));
+    expect(plain(entry.native())).toMatch(/<p[^>]*>7<\/p>/);
+  } finally {
+    await server.close();
+  }
+}, 30000);

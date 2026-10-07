@@ -196,3 +196,17 @@ parity is still unverified; no claim here turns those focused checks into app ac
 The additional `timer-callback-failure` probe reports TS2345 containing
 `NATIVE_CALLBACK_FAILURE`. It prevents a generated foreign callback from dropping
 its inferred unknown failure while callback-to-boundary registration is unfinished.
+
+
+### Bounded-mode audit follow-up
+
+[The current report](../native-bounded-report.md) replaces the historical fixture
+counts above. Native foreign warnings have authored locations and identify the
+foreign tag or factory. Route handoffs now emit the existing `foreign()` check;
+the full TypeScript messages for hackernews and docs are recorded verbatim.
+Those type/lint positions are still generated positions, not source maps.
+
+No complete original passes. The report distinguishes incomplete lowering from
+unhandled-failure errors and from passing focused fixtures. The C wording in a
+boundary warning denotes client ownership; native capture acceptance has not
+been independently established (F-S28). No editor integration or new proof is claimed.

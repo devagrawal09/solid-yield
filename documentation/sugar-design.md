@@ -435,6 +435,10 @@ parity is claimed. The 34-probe evidence limit remains F-S7.
 
 ## Native mode
 
+**Latest bounded-mode follow-up:** see [the native audit](native-bounded-report.md).
+The option-C line is settled below; implementation and complete-original
+acceptance remain incomplete. The following result counts are historical.
+
 **2026-10-08 result: a working, deliberately limited native front end; the requested
 native todos acceptance target is NOT achieved.** Twenty-one of 37 small fixtures pass
 transformed TypeScript and recommended lint. A native counter matches a plain
@@ -960,3 +964,37 @@ Final follow-up verification (2026-10-08): `pnpm build` passed; the gate at code
 0 skip in 106s**, GREEN. The baseline was not regenerated: no complete original
 passed native acceptance, so no original app step was added. No existing gate
 check or baseline threshold was relaxed. All commits are local on `proto/sugar`.
+
+
+### Bounded native follow-up (2026-10-08)
+
+The required core line above is now recorded, with focused implementations for
+async reactive helpers in events/memos, ref events, indexed For, method/argument
+evaluation, checked foreign JSX tags/render callbacks and route handoffs.
+`nativeInvoke` preserves method receivers even when a method overrides `.call`;
+the generated method lookup remains inside an attempt. Async setup reads get
+`NATIVE_ASYNC_SETUP`. Async iterable I/O producers remain ordinary JavaScript.
+The callback registration failure check remains strict (F-S23).
+
+The native audit now uses each original's dependency tree and source path aliases,
+then checks its generated tree with its own TypeScript/ESLint project. JSON assets
+remain the original files. A lint project configuration error is an audit failure,
+not an application diagnostic. The originals were not edited; docs matches main.
+
+**This does not complete bounded native mode.** F-S24 (spreads), F-S25 (native prop
+color facades), F-S26 (general foreign value extraction and legacy outside-core
+mappings), F-S27 (higher-order and remaining callback hosts), and F-S28 (native
+provenance/capture acceptance) remain in [the full findings](native-bounded-report.md#remaining-findings).
+F-S20's snapshot/recursive component problem still blocks Sierpinski. The report
+contains the nine-row audit, every detected foreign JSX boundary, failure estimates,
+the core evidence map, and verbatim hackernews/docs diagnostics. No full original
+has passed generated checks plus hydrated parity and SSR; none was added to the
+gate. The baseline was not regenerated or relaxed.
+
+Final bounded follow-up verification: `pnpm build` passed and the full gate
+finished **53 pass / 0 fail / 0 skip in 176s**, GREEN. The run tested the working
+tree subsequently committed as `1080e0c`; its recorded HEAD is the preceding
+`979e7a4`. [The saved gate result](native-gate-verification.json) includes all
+53 steps. Directive-sugar todos remains green. No native original passed, no
+native app step was added, and the baseline was not regenerated. All commits
+remain local on `proto/sugar`.

@@ -1,4 +1,6 @@
-/** Type-checked witnesses. No assertion, any, or diagnostic suppression. */
+/** Historical witnesses, adapted to main's runtime context names.
+ * Repaired holes are now refused by TypeScript; see verification.md.
+ * No assertion, any, or diagnostic suppression. */
 import {
   $event,
   $memo,
@@ -29,7 +31,7 @@ export const frozenAbsorbed = $event(function* () {
   );
 });
 
-const Ctx = createContext<string, "ProofCtx">();
+const Ctx = createContext<string, "ProofCtx">(undefined, { name: "ProofCtx" });
 export const Reader = component(function* () {
   const c = yield* Ctx;
   return view(function* () {
@@ -49,7 +51,9 @@ export const ForeignRoot = component(function* () {
 });
 
 // A possibly undefined default is typed defaulted even when actually absent.
-const UndefinedDefault = createContext<string | undefined>(undefined);
+const UndefinedDefault = createContext<string | undefined, "ProofDefaultCtx">(undefined, {
+  name: "ProofDefaultCtx"
+});
 export const DefaultReader = component(function* () {
   const c = yield* UndefinedDefault;
   return view(function* () {
@@ -168,7 +172,9 @@ export const EagerEffect = component(function* () {
 export const eagerSettled: () => View<false, never, false, never> = EagerEffect;
 
 // Exclude<unknown, undefined> is still unknown, so the F-3 guard has a hole.
-const UnknownCtx = createContext<unknown, "ProofUnknownCtx">();
+const UnknownCtx = createContext<unknown, "ProofUnknownCtx">(undefined, {
+  name: "ProofUnknownCtx"
+});
 const UnknownReader = component(function* () {
   const c = yield* UnknownCtx;
   return view(function* () {

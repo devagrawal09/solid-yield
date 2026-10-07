@@ -5,6 +5,16 @@ reference run used as the baseline; the machine-readable copy is
 [`yield-gate-baseline.json`](./yield-gate-baseline.json). CI runs the same gate
 against this file (`.github/workflows/gate.yml`).
 
+**Calculus proofs addition on main (2026-10-07).** Baseline regenerated only
+for the new report-only `proofs` step, from the full GREEN run after merge
+`5d50680`: **46 PASS / 0 FAIL / 0 SKIP in 115 s**. All 45 existing steps remain
+PASS; the new step builds Lean 4.24.0 and runs the 11 runtime probes (PASS in
+1.2 s on this cached build). Lake lookup is `$LAKE`, PATH, then
+`/private/tmp/elan/bin/lake` with `ELAN_HOME=/private/tmp/elan`. Missing Lake is
+SKIP with an elan install hint and the pinned toolchain, without failing the
+gate. There are no proof-coverage thresholds. No executed-byte baseline or
+threshold changed. The older reference runs below are historical.
+
 **Docs content-site addition on main (2026-10-07).** Baseline regenerated
 from the full GREEN run on the working tree after ba2d604: **43 PASS / 0 FAIL /
 0 SKIP in 90 s**, nine twins. The docs pair adds four steps over

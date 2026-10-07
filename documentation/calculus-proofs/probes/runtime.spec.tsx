@@ -41,8 +41,8 @@ for (const [name, App, message] of [
   });
 }
 
-it("a frozen raised error bypasses an absorbing attempt over a call", async () => {
-  await expect(frozenAbsorbed()).rejects.toMatchObject({ kind: "proof-boom" });
+it("a frozen raised error is absorbed by an attempt over a call on main", async () => {
+  await expect(frozenAbsorbed()).resolves.toBeUndefined();
 });
 
 it("foreign pending may cross an unchecked plain-Solid tag with no Loading", () => {

@@ -10,7 +10,8 @@
     "gate": "node scripts/yield-gate.mjs",
     "format": "prettier --write --cache \"packages/**/*.[tj]s?(x)\" \"packages/*/test/*.mjs\" \"examples/*-yield*/**/*.[tj]s?(x)\" \"scripts/*.mjs\"",
     "changeset": "changeset",
-    "analyze": "node packages/compiler-yield/src/report.js"
+    "analyze": "node packages/compiler-yield/src/report.js",
+    "proofs": "node scripts/proofs.mjs"
   },
   "devDependencies": {
     "@changesets/cli": "^2.25.2",

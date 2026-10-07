@@ -4,9 +4,10 @@
 // then the captured output of each failure and a summary line. CI runs exactly
 // this (.github/workflows/gate.yml): CI = the gate.
 //
-// It never builds anything: build first (`pnpm build`, which builds
+// It never builds the library: build first (`pnpm build`, which builds
 // packages/yield; the twins resolve it through its dist/). Step
 // pkg:yield:dist-fresh fails when that dist/ is older than its src/.
+// The optional proofs step builds the separate Lean project, not the library.
 //
 // Every step runs with TZ=UTC in its environment, whatever the machine's
 // timezone, so results depend on the commit and not on the clock's locale
@@ -32,6 +33,7 @@
 // Exit code: 0 when green, 1 otherwise (2 on bad arguments).
 
 import { spawn, execFileSync } from "node:child_process";
+import { LAKE_INSTALL_HINT, resolveLake } from "./proofs.mjs";
 import { existsSync, readFileSync, readdirSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -244,6 +246,16 @@ function buildSteps(twins) {
       args: ["packages/compiler-yield/src/report.js"]
     }
   );
+
+  // Like analyzer:report, this reports evidence without coverage thresholds.
+  // Lean is optional: a missing Lake skips this step without failing the gate.
+  steps.push({
+    name: "proofs",
+    cwd: root,
+    cmd: process.execPath,
+    args: ["scripts/proofs.mjs"],
+    skip: resolveLake() ? null : LAKE_INSTALL_HINT
+  });
 
   // The conformance harness (D-039; packages/yield/test/conformance): each scenario's
   // handwritten Solid oracle against its library-dialect twin, client / server / hydrate,

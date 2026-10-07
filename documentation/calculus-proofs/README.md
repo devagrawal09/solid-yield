@@ -4,6 +4,14 @@ Audited source: `1da4d8218e5cebadba3387a43542b61c310607fb`, including D-102.
 The status line and some rules in [the calculus](../calculus.md) describe older revisions.
 No library code is changed here.
 
+**Merged into main (2026-10-07).** This is the historical audit of the revision
+above: **12 mechanized obligations / 26 paper proofs / 14 unprovable as worded**.
+Main's later repairs supersede some findings. The runtime probes now supply the
+required context names and expect frozen failures to be absorbed; their old
+static witnesses are refused by main's repaired types. The Lean proofs and
+historical classifications are unchanged. See [verification.md](verification.md)
+for the integration results and the original branch record.
+
 **Result:** the abstract effect/owner calculus has checked preservation, discharge,
 and root-safety proofs. The theorem about **every TypeScript-accepted admissible
 program** in calculus §4 is false as written. [Findings](findings.md) give small
@@ -162,21 +170,25 @@ PATH. The toolchain became usable within the 20-minute tooling budget.
 From the worktree root:
 
 ```sh
-node node_modules/typescript/bin/tsc -p documentation/calculus-proofs/probes/tsconfig.json
-node documentation/calculus-proofs/probes/lint.mjs
+pnpm proofs # optional Lean build plus runtime probes; skips without Lake
 node node_modules/vitest/vitest.mjs run --config documentation/calculus-proofs/probes/vite.config.mjs
 PROOF_PRODUCTION=1 node node_modules/vitest/vitest.mjs run --config documentation/calculus-proofs/probes/vite.config.mjs
 pnpm build
 node scripts/yield-gate.mjs --baseline documentation/yield-gate-baseline.json
 ```
 
-The probes deliberately assert the bad behavior; passing means the finding
-reproduces. They are outside `packages/` and outside the repository gate's test
-patterns. The production probe switches the library's `__DEV__` flag off, while
+The historical probes deliberately asserted bad behavior; main now expects the
+repaired frozen-failure absorption. The report-only `proofs` gate step runs the
+Lean build and runtime probes without coverage thresholds. Lake lookup is `$LAKE`,
+then PATH, then `/private/tmp/elan/bin/lake` with `ELAN_HOME=/private/tmp/elan`. If
+none is available, the optional step reports SKIP and an elan install hint without
+failing the gate. The toolchain file pins `leanprover/lean4:v4.24.0`. The production probe switches the library's `__DEV__` flag off, while
 using Solid's development client build in both runs, as specified by its config;
 it is not an SSR test or a minified distribution test. No probe changes the
 library. The optional generated-program/fast-check suite was not added: random
 examples cannot establish the missing TypeScript refinement, and deterministic
 counterexamples already refute it.
 
-See [verification.md](verification.md) for results on this branch.
+To reproduce the original successful TypeScript and lint checks, use branch
+commit `950a71b`; they are historical evidence, not current main checks.
+See [verification.md](verification.md) for both records.

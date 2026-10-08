@@ -1,7 +1,14 @@
 import { describe, it, expect } from "vitest";
-import { nativeTry, nativeMap, nativeCallback, nativeInvoke } from "../src/native-control.js";
+import {
+  nativeTry,
+  nativeMap,
+  nativeCallback,
+  nativeInvoke,
+  nativeLexicalCallback
+} from "../src/native-control.js";
 import { nativeFailure, nativeFailureValue } from "../src/native-failure.js";
-import { raise, $event } from "../src/runtime.js";
+import { createRoot, createSignal, createMemo, flush } from "solid-js";
+import { raise, $event, getterSource, memoCompute, attempt } from "../src/runtime.js";
 import type { FailsOf, Raise, Read, Write, Create } from "../src/types.js";
 import type { NativeHandled } from "../src/native-control.js";
 
@@ -125,4 +132,48 @@ it("invokes a captured method with its receiver even when .call is overridden", 
     }
   });
   expect(nativeInvoke(add, { n: 3 }, [4])).toBe(7);
+});
+
+it("keeps array callbacks in the same tracked memo", () => {
+  const { memo, set, dispose } = createRoot(dispose => {
+    const [value, set] = createSignal(2);
+    const source = getterSource(value);
+    const memo = createMemo(
+      memoCompute(function* () {
+        return [1, 2].map(
+          nativeLexicalCallback("memo", function* (item: number) {
+            return item * (yield* source);
+          })
+        );
+      })
+    );
+    return { memo, set, dispose };
+  });
+  expect(memo()).toEqual([2, 4]);
+  set(3);
+  flush();
+  expect(memo()).toEqual([3, 6]);
+  dispose();
+});
+it("restores an event for a deferred callback and its async continuation", async () => {
+  const value = getterSource(() => 7);
+  const run = $event(function* () {
+    const callback = nativeLexicalCallback(
+      "event",
+      function* () {
+        const before = yield* value;
+        yield* attempt(
+          () => Promise.resolve(),
+          () => {}
+        );
+        return before + (yield* value);
+      },
+      true
+    );
+    return yield* attempt(
+      () => Promise.resolve().then(callback),
+      () => {}
+    );
+  });
+  expect(await run()).toBe(14);
 });

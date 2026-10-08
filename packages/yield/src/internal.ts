@@ -17,6 +17,7 @@ export {
   nativeTry,
   nativeMap,
   nativeCallback,
+  nativeLexicalCallback,
   nativeInvoke,
   nativeDispatch
 } from "./native-control.js";

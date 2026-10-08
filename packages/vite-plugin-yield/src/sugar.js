@@ -46,6 +46,114 @@ const ownerCall = p =>
 const control = p =>
   controls.has(lib(/** @type {Path | undefined} */ (p?.get("callee")))) ||
   p?.node.callee?.property?.name === "provide";
+/** Resolve the enclosing phase through any number of plain callbacks.
+ * @param {Path} fn @returns {string | null} */
+const lexicalPhase = fn => {
+  for (let outer = fn.parentPath; outer; outer = outer.parentPath) {
+    if (outer.isJSXExpressionContainer()) return "hole";
+    if (!outer.isFunction()) continue;
+    const call = outer.parentPath?.isCallExpression() ? outer.parentPath : null;
+    const api = lib(call?.get("callee"));
+    if (api === "$event") return "event";
+    if (api === "$memo") return "memo";
+    if (api === "$effect") return call?.node.arguments[0] === outer.node ? "compute" : "effect";
+    if (["$projection", "$optimisticStore"].includes(api ?? "")) return "memo";
+    if (call?.get("callee").isIdentifier({ name: "__nativeLexicalCallback" }))
+      return t.isStringLiteral(call.node.arguments[0]) ? call.node.arguments[0].value : null;
+    if (api === "component" || api === "view") return null;
+  }
+  return null;
+};
+/** Leave ordinary value/IO callbacks unchanged. A later typed read can still
+ * resolve its lexical host in delegate(). @param {Path} fn */
+function reactiveCallback(fn) {
+  let reads = false;
+  /** @param {Path} value */
+  const sourceBinding = value => {
+    const binding = value.isIdentifier() ? value.scope.getBinding(value.node.name)?.path : null;
+    const init = binding?.isVariableDeclarator() ? binding.get("init") : null;
+    const call = init?.isYieldExpression() ? init.get("argument") : init;
+    return (
+      call?.isCallExpression() &&
+      ["$signal", "$store", "$memo", "$optimistic", "$optimisticStore", "$projection"].includes(
+        lib(call.get("callee")) ?? ""
+      )
+    );
+  };
+  traverseOwned(fn, {
+    Function(inner) {
+      inner.skip();
+    },
+    CallExpression(call) {
+      const callee = call.get("callee");
+      const api = lib(callee);
+      reads ||=
+        constructors.has(api) ||
+        ["attempt", "raise", "readStore", "latestOf", "isPendingOf", "refresh", "until"].includes(
+          api ?? ""
+        ) ||
+        sourceBinding(callee) ||
+        (callee.isIdentifier() &&
+          /^__native(Attempt|ReadStore|Raise|Try|Map|LexicalCallback)$/.test(callee.node.name));
+    },
+    MemberExpression(member) {
+      let root = member.get("object");
+      while (root.isMemberExpression()) root = root.get("object");
+      reads ||= !!sourceBinding(root);
+    }
+  });
+  return reads;
+}
+/** @param {Path} fn @param {string} phase @param {Path} program */
+function wrapLexical(fn, phase, program) {
+  const call = fn.parentPath?.isCallExpression() ? fn.parentPath : null;
+  const callee = call?.get("callee");
+  const deferred =
+    callee?.isMemberExpression() &&
+    ["then", "catch", "finally"].includes(key(callee.node.property));
+  if (fn.isArrowFunctionExpression()) fn.arrowFunctionToExpression();
+  fn.node.generator = true;
+  const name = fn.isFunctionDeclaration() ? fn.node.id : null;
+  const expression = fn.isFunctionDeclaration()
+    ? t.functionExpression(null, fn.node.params, fn.node.body, true)
+    : /** @type {import("@babel/core").types.FunctionExpression} */ (fn.node);
+  let callback = t.callExpression(t.identifier("__nativeLexicalCallback"), [
+    t.stringLiteral(phase),
+    expression,
+    ...(deferred ? [t.booleanLiteral(true)] : [])
+  ]);
+  const target = callee?.isMemberExpression() ? key(callee.node.property) : key(callee?.node);
+  const scheduled =
+    /^(setTimeout|setInterval|requestAnimationFrame|requestIdleCallback|addEventListener|removeEventListener)$/.test(
+      target ?? ""
+    );
+  if (scheduled) {
+    callback = t.callExpression(t.identifier("__nativeCallback"), [callback]);
+    if (!program.scope.hasBinding("__nativeCallback"))
+      program.node.body.unshift(
+        t.importDeclaration(
+          [t.importSpecifier(t.identifier("__nativeCallback"), t.identifier("nativeCallback"))],
+          t.stringLiteral("solid-yield/internal")
+        )
+      );
+  }
+  if (name) fn.replaceWith(t.variableDeclaration("const", [t.variableDeclarator(name, callback)]));
+  else fn.replaceWith(callback);
+  if (!program.scope.hasBinding("__nativeLexicalCallback")) {
+    program.node.body.unshift(
+      t.importDeclaration(
+        [
+          t.importSpecifier(
+            t.identifier("__nativeLexicalCallback"),
+            t.identifier("nativeLexicalCallback")
+          )
+        ],
+        t.stringLiteral("solid-yield/internal")
+      )
+    );
+    program.scope.crawl();
+  }
+}
 /** @param {Path} p @param {string} code @param {string} message @param {string} filename @returns {never} */
 function fail(p, code, message, filename) {
   const at = p.node.loc?.start;
@@ -228,6 +336,40 @@ function seed(code, filename, native = false) {
       )
     );
   }
+  p.scope.crawl();
+  traverseOwned(p, {
+    Function: {
+      exit(fn) {
+        if (fn.node.async || fn.isObjectMethod() || fn.isClassMethod()) return;
+        // Errored's accessor fallback is a contextual Solid callback, not a
+        // generated routine. Its JSX holes and nested events own their reads.
+        if (
+          fn.parentPath?.isObjectProperty() &&
+          key(fn.parentPath.node.key) === "fallback" &&
+          lib(ownerCall(fn)?.get("callee")) === "Errored"
+        )
+          return;
+        const call = fn.parentPath?.isCallExpression() ? fn.parentPath : null;
+        const api = lib(call?.get("callee"));
+        const callee = call?.get("callee");
+        const continuation =
+          callee?.isMemberExpression() &&
+          ["then", "catch", "finally"].includes(key(callee.node.property));
+        if (fn.node.generator && !continuation) return;
+        if (
+          api === "attempt" ||
+          constructors.has(api) ||
+          call?.node.callee === fn.node ||
+          call?.get("callee").isIdentifier({ name: "__nativeLexicalCallback" }) ||
+          call?.get("callee").isIdentifier({ name: "__nativeTry" }) ||
+          call?.get("callee").isIdentifier({ name: "__nativeMap" })
+        )
+          return;
+        const phase = lexicalPhase(fn);
+        if (phase && reactiveCallback(fn)) wrapLexical(fn, phase, p);
+      }
+    }
+  });
   p.node.directives = p.node.directives.filter(d => d.value.value !== "use yield");
   return printer(t.file(p.node));
 }
@@ -338,7 +480,17 @@ function pass(code, filename, program, native = false) {
       const attemptHandler =
         lib(hostCall?.get("callee")) === "attempt" && hostCall?.node.arguments[1] === fn.node;
       let nativeHost = false;
-      if (native) {
+      const phase = lexicalPhase(fn);
+      // Attempt producers must stay plain: their arguments are handled by the
+      // native call lowering, not by turning a producer into a routine.
+      if (
+        phase &&
+        !(lib(hostCall?.get("callee")) === "attempt" && hostCall?.node.arguments[0] === fn.node)
+      ) {
+        if (p) wrapLexical(fn, phase, p);
+        nativeHost = true;
+      }
+      if (native && !nativeHost) {
         const scheduler =
           /^(setTimeout|setInterval|requestAnimationFrame|requestIdleCallback|addEventListener|removeEventListener)$/;
         /** @param {Path | null} call */
@@ -505,6 +657,29 @@ function pass(code, filename, program, native = false) {
       }
     });
   traverseOwned(p, {
+    YieldExpression(path) {
+      const value = path.get("argument");
+      if (!path.node.delegate || !value.isCallExpression()) return;
+      const bridged = value
+        .get("arguments")
+        .some(
+          arg =>
+            arg.isCallExpression() &&
+            arg.get("callee").isIdentifier({ name: "__nativeLexicalCallback" })
+        );
+      // A callback's return changes from a routine result to its driven value
+      // once its reads are lowered. Remove only that provisional delegation.
+      const result = type(value);
+      if (
+        bridged &&
+        result &&
+        !(result.flags & (ts.TypeFlags.Any | ts.TypeFlags.Unknown)) &&
+        !isOperation(result)
+      ) {
+        path.replaceWith(value.node);
+        changed = true;
+      }
+    },
     ReturnStatement(path) {
       if (!native) return;
       const value = path.get("argument");

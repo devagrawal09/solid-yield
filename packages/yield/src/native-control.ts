@@ -1,6 +1,17 @@
 /** Compiler-only control flow. Delegation keeps the current host and transaction. */
-import { isFailure } from "./runtime.js";
-import type { Read, Raise, EventCallOp, FailsOf, Source } from "./types.js";
+import { isFailure, nativeHostCallback } from "./runtime.js";
+import type {
+  Read,
+  Raise,
+  EventCallOp,
+  FailsOf,
+  Source,
+  EventOp,
+  MemoOp,
+  ComputeOp,
+  EffectPhaseOp,
+  HoleOp
+} from "./types.js";
 // Creation, binding and child-view failures may arrive after this lexical scope.
 // Only failures delivered by immediate operations are discharged here.
 export type NativeHandled<Y> =
@@ -74,4 +85,47 @@ export function nativeDispatch<F extends (...args: never[]) => unknown>(
   args: readonly unknown[]
 ): ReturnType<F> {
   return Reflect.apply(fn, undefined, args) as ReturnType<F>;
+}
+
+type LexicalCallback<A extends unknown[], Y, R> = ((...args: A) => R) & Iterable<Y>;
+
+type LexicalPhase = "event" | "memo" | "compute" | "effect" | "hole";
+type PhaseOps<M extends LexicalPhase> = M extends "event"
+  ? EventOp
+  : M extends "memo"
+    ? MemoOp
+    : M extends "compute"
+      ? ComputeOp
+      : M extends "effect"
+        ? EffectPhaseOp
+        : HoleOp;
+/** The phase argument keeps host admission visible in generated TypeScript. */
+export function nativeLexicalCallback<
+  M extends LexicalPhase,
+  A extends unknown[],
+  Y extends PhaseOps<NoInfer<M>>,
+  R
+>(phase: M, body: (...args: A) => Generator<Y, R, unknown>): LexicalCallback<A, Y, R>;
+export function nativeLexicalCallback<
+  M extends LexicalPhase,
+  A extends unknown[],
+  Y extends PhaseOps<NoInfer<M>>,
+  R
+>(
+  phase: M,
+  body: (...args: A) => Generator<Y, R, unknown>,
+  deferred: true
+): LexicalCallback<A, Y, R | Promise<R>>;
+export function nativeLexicalCallback(
+  _phase: LexicalPhase,
+  body: (...args: any[]) => Generator<unknown, unknown, unknown>,
+  deferred = false
+): any {
+  const callback = nativeHostCallback(body, deferred);
+  Object.defineProperty(callback, Symbol.iterator, {
+    value: function* () {
+      return callback;
+    }
+  });
+  return callback;
 }

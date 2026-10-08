@@ -1627,6 +1627,42 @@ function* eventSteps(
   }
 }
 
+/** Compiler-only callback bridge. Capture the lexical phase, never create a
+ * binding or a new event. Synchronous callbacks run in the caller's transaction;
+ * Promise callbacks can resume the captured event across waits. */
+export function nativeHostCallback(
+  body: (...args: any[]) => Generator<unknown, unknown, unknown>,
+  deferred = false
+): (...args: any[]) => any {
+  const captured = state;
+  return (...args) => {
+    const iterator = body(...args);
+    const run = () =>
+      runAs(
+        captured.host,
+        () => drive(iterator, SYNC_RUN),
+        captured.sink,
+        captured.view,
+        captured.jsx,
+        captured.resumed || (deferred && captured.host === COMPUTE),
+        captured.name,
+        captured.receipts
+      );
+    if (!deferred || captured.host !== EVENT) return run();
+    const steps = eventSteps(iterator, captured.name, captured.receipts);
+    const resume = (value?: unknown, failed = false): unknown => {
+      const result = failed ? steps.throw(value) : steps.next(value);
+      return result.done
+        ? result.value
+        : Promise.resolve(result.value).then(
+            value => resume(value),
+            error => resume(error, true)
+          );
+    };
+    return resume();
+  };
+}
+
 /**
  * `$event(function* (e) {…})`: an event handler that is a Solid `action`.
  * Every call is one transaction: writes are held until it settles (an

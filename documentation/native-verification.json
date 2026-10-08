@@ -163,7 +163,7 @@
         {
           "stage": "type",
           "code": "TS2345",
-          "message": "Argument of type 'EventHandler<[], NativeFailure<\"unknown\">, void, false, false>' is not assignable to parameter of type 'EventHandler<[], NativeFailure<\"unknown\">, void, false, false> & { readonly \"[NATIVE_CALLBACK_FAILURE] foreign callback failure registration is not implemented; handle failures inside the callback\": NativeFailure<...>; }'.\n  Property '\"[NATIVE_CALLBACK_FAILURE] foreign callback failure registration is not implemented; handle failures inside the callback\"' is missing in type 'EventHandler<[], NativeFailure<\"unknown\">, void, false, false>' but required in type '{ readonly \"[NATIVE_CALLBACK_FAILURE] foreign callback failure registration is not implemented; handle failures inside the callback\": NativeFailure<\"unknown\">; }'.",
+          "message": "Argument of type 'LexicalCallback<[], Read<false, never> | Raise<NativeFailure<\"unknown\">>, void>' is not assignable to parameter of type '(() => void) & Iterable<Read<false, never> | Raise<NativeFailure<\"unknown\">>> & { readonly \"[NATIVE_CALLBACK_FAILURE] foreign callback failure registration is not implemented; handle failures inside the callback\": NativeFailure<...>; }'.\n  Type 'LexicalCallback<[], Read<false, never> | Raise<NativeFailure<\"unknown\">>, void>' is not assignable to type '{ readonly \"[NATIVE_CALLBACK_FAILURE] foreign callback failure registration is not implemented; handle failures inside the callback\": NativeFailure<\"unknown\">; }'.",
           "line": 13
         }
       ]
@@ -209,6 +209,62 @@
       "diagnostics": []
     },
     {
+      "id": "event-updater",
+      "expected": "accepted",
+      "source": "import {createSignal,createEffect,createMemo,createStore} from 'solid-js';declare function consume<T>(callback:()=>T):T;export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});return <button onClick={()=>write(c=>{c.n=n()})}/>;}",
+      "file": "packages/vite-plugin-yield/test/.native-generated/event-updater.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "event-array-nesting",
+      "expected": "accepted",
+      "source": "import {createSignal,createEffect,createMemo,createStore} from 'solid-js';declare function consume<T>(callback:()=>T):T;export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});return <button onClick={()=>[1].filter(()=>n()).forEach(()=>set(n()+1))}/>;}",
+      "file": "packages/vite-plugin-yield/test/.native-generated/event-array-nesting.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "event-promise-nesting",
+      "expected": "accepted",
+      "source": "import {createSignal,createEffect,createMemo,createStore} from 'solid-js';declare function consume<T>(callback:()=>T):T;export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});return <button onClick={()=>Promise.resolve().then(()=>set(n()+1))}/>;}",
+      "file": "packages/vite-plugin-yield/test/.native-generated/event-promise-nesting.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "event-deep-nesting",
+      "expected": "accepted",
+      "source": "import {createSignal,createEffect,createMemo,createStore} from 'solid-js';declare function consume<T>(callback:()=>T):T;export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});return <button onClick={()=>consume(()=>consume(()=>n()))}/>;}",
+      "file": "packages/vite-plugin-yield/test/.native-generated/event-deep-nesting.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "effect-compute-nesting",
+      "expected": "accepted",
+      "source": "import {createSignal,createEffect,createMemo,createStore} from 'solid-js';declare function consume<T>(callback:()=>T):T;export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});createEffect(()=>consume(()=>n()),value=>{});return <p/>;}",
+      "file": "packages/vite-plugin-yield/test/.native-generated/effect-compute-nesting.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "effect-phase-nesting",
+      "expected": "accepted",
+      "source": "import {createSignal,createEffect,createMemo,createStore} from 'solid-js';declare function consume<T>(callback:()=>T):T;export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});createEffect(()=>n(),value=>{consume(()=>set(n()+value))});return <p/>;}",
+      "file": "packages/vite-plugin-yield/test/.native-generated/effect-phase-nesting.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "memo-opaque-nesting",
+      "expected": "accepted",
+      "source": "import {createSignal,createEffect,createMemo,createStore} from 'solid-js';declare function consume<T>(callback:()=>T):T;export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});const value=createMemo(()=>consume(()=>n()));return <p>{value()}</p>;}",
+      "file": "packages/vite-plugin-yield/test/.native-generated/memo-opaque-nesting.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
       "id": "native-store",
       "expected": "accepted",
       "source": "import {createStore} from 'solid-js';export function App(){const [state,set]=createStore({n:1});return <button onClick={()=>set(s=>{s.n++})}>{state.n}</button>}",
@@ -226,11 +282,24 @@
     },
     {
       "id": "timer-callback",
-      "expected": "accepted",
+      "expectedDiagnostic": "MemoOp",
       "source": "import {createSignal,createMemo} from 'solid-js';export function App(){const [n,set]=createSignal(0);const timer=createMemo(()=>setTimeout(()=>set(n()+1),10));return <p>{timer()}{n()}</p>}",
       "file": "packages/vite-plugin-yield/test/.native-generated/timer-callback.tsx",
-      "stage": "accepted",
-      "diagnostics": []
+      "stage": "checked-error",
+      "diagnostics": [
+        {
+          "stage": "type",
+          "code": "TS2345",
+          "message": "Argument of type 'LexicalCallback<[], MemoOp, number | Promise<number>>' is not assignable to parameter of type '(() => number | Promise<number>) & Iterable<MemoOp> & { readonly \"[NATIVE_CALLBACK_FAILURE] foreign callback failure registration is not implemented; handle failures inside the callback\": any; }'.\n  Type 'LexicalCallback<[], MemoOp, number | Promise<number>>' is not assignable to type '{ readonly \"[NATIVE_CALLBACK_FAILURE] foreign callback failure registration is not implemented; handle failures inside the callback\": any; }'.",
+          "line": 10
+        },
+        {
+          "stage": "type",
+          "code": "TS2345",
+          "message": "Argument of type '() => Generator<Write | Read<false, never>, number, any>' is not assignable to parameter of type '() => Generator<MemoOp, number, unknown>'.\n  Call signature return types 'Generator<Write | Read<false, never>, number, any>' and 'Generator<MemoOp, number, unknown>' are incompatible.\n    The types returned by 'next(...)' are incompatible between these types.\n      Type 'IteratorResult<Write | Read<false, never>, number>' is not assignable to type 'IteratorResult<MemoOp, number>'.\n        Type 'IteratorYieldResult<Write | Read<false, never>>' is not assignable to type 'IteratorResult<MemoOp, number>'.\n          Type 'IteratorYieldResult<Write | Read<false, never>>' is not assignable to type 'IteratorYieldResult<MemoOp>'.\n            Type 'Write | Read<false, never>' is not assignable to type 'MemoOp'.\n              Type 'Write' is not assignable to type 'MemoOp'.\n                Type 'Write' is not assignable to type 'StreamAttempt'.\n                  Types of property '[KIND]' are incompatible.\n                    Type '\"write\"' is not assignable to type '\"stream\"'.",
+          "line": 10
+        }
+      ]
     },
     {
       "id": "native-settled",
@@ -1243,7 +1312,7 @@
       "diagnostics": [
         {
           "code": "SUGAR_CALLBACK",
-          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/examples/originals/effect/src/checkout.tsx:141:25)"
+          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/examples/originals/effect/src/checkout.tsx:185:19)"
         },
         {
           "code": "MODULE_STATE",

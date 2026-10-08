@@ -97,6 +97,28 @@ export const fixtures = [
     expected: "accepted",
     source: `import {action,createSignal} from 'solid-js';export function App(){const [n,set]=createSignal(0);const save=action(function*(){try{yield Promise.resolve(2);set(n()+1)}catch{set(-1)}});return <button onClick={save}>{n()}</button>}`
   },
+  ...[
+    ["event-updater", "return <button onClick={()=>write(c=>{c.n=n()})}/>;"],
+    [
+      "event-array-nesting",
+      "return <button onClick={()=>[1].filter(()=>n()).forEach(()=>set(n()+1))}/>;"
+    ],
+    [
+      "event-promise-nesting",
+      "return <button onClick={()=>Promise.resolve().then(()=>set(n()+1))}/>;"
+    ],
+    ["event-deep-nesting", "return <button onClick={()=>consume(()=>consume(()=>n()))}/>;"],
+    ["effect-compute-nesting", "createEffect(()=>consume(()=>n()),value=>{});return <p/>;"],
+    [
+      "effect-phase-nesting",
+      "createEffect(()=>n(),value=>{consume(()=>set(n()+value))});return <p/>;"
+    ],
+    ["memo-opaque-nesting", "const value=createMemo(()=>consume(()=>n()));return <p>{value()}</p>;"]
+  ].map(([id, body]) => ({
+    id,
+    expected: "accepted",
+    source: `import {createSignal,createEffect,createMemo,createStore} from 'solid-js';declare function consume<T>(callback:()=>T):T;export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});${body}}`
+  })),
   {
     id: "native-store",
     expected: "accepted",
@@ -109,7 +131,7 @@ export const fixtures = [
   },
   {
     id: "timer-callback",
-    expected: "accepted",
+    expectedDiagnostic: "MemoOp",
     source: `import {createSignal,createMemo} from 'solid-js';export function App(){const [n,set]=createSignal(0);const timer=createMemo(()=>setTimeout(()=>set(n()+1),10));return <p>{timer()}{n()}</p>}`
   },
   {

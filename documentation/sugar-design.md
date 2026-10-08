@@ -157,7 +157,7 @@ but does not yet implement that full recursive analysis (F-S3).
 | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `return <p>{enabled() ? count() : 0}</p>`                              | Allowed. The conditional stays inside the same JSX computation; only its chosen arm runs. No read is hoisted. The static color is a conservative union of both arms (D-112).                        |
 | `const n = count(); return <p>{n}</p>` in component setup              | Refused by generated `no-read-in-setup` / SetupOp check. Sugar is not a promise to rerun a component body. Write a memo or read in the JSX hole.                                                    |
-| `items.map(() => count())`                                             | `[SUGAR_CALLBACK] … no routine host; use a memo, event, or hole`. A plain selector over already-read values remains plain.                                                                          |
+| `items.map(() => count())`                                             | Callbacks inside a known routine keep its lexical host. An opaque callback from setup reports `SUGAR_CALLBACK` at its read.                                                                          |
 | `for`, `while`, `if`, `return` inside memo/event/helper                | Preserve order and early returns. All operations still need the host's admission. Event loops/early returns have transform tests. Do not turn a component-body reactive `if` into a dynamic branch. |
 | Static setup branch returning JSX                                      | Wrap each JSX return with a view. Returning a non-JSX value on another branch is `[SUGAR_RETURN]` in the prototype.                                                                                 |
 | `async () => …` as a routine                                           | `[SUGAR_ASYNC]` or `[SUGAR_HOST]`; use synchronous routine code plus `attempt`. A plain async I/O function passed to `attempt` stays plain.                                                         |
@@ -464,6 +464,8 @@ passes. The evidence table and findings distinguish implemented cases from gaps.
 The earlier import-mapping table is historical; an import rename is not proof.
 
 A generator passed directly as the first argument to a core API is core and is lowered. In Solid 2 rc.13 these APIs are `action` (sync/async generators), and the async-iterable producers of `createSignal`, `createMemo`, `createOptimistic`, `createEffect`, `createRenderEffect`, `createStore`, `createProjection`, and `createOptimisticStore`. Other author generators, including Effect programs and custom iterators, are opaque and keep their own protocol. The compiler inserts no delegated operations into its body and rewrites none of its reads. Calls to it are foreign values (provenance C, failures unknown). A reactive read inside it reports `READ_IN_OPAQUE_GENERATOR` at the read: read the signal outside and pass the value in, or make the read a memo.
+
+Callback hosts are lexical. A callback at any depth inside an event, either effect phase, a memo, or a hole belongs to that host, including store updaters, array callbacks, Promise continuations, and nested arrows. Reads keep that host and its admission rules. A timer callback declared in a memo therefore cannot write; its generated host check reports the write rather than treating it as a fresh event. `SUGAR_CALLBACK` is reserved for a callback passed to an opaque API from setup whose host cannot be determined.
 
 Module-level reactive state is outside the core. A `createSignal`, `createStore` or `createMemo` declaration at module level has no component owner, so the compiler keeps it Solid and treats it as foreign (provenance C, failures unknown). `MODULE_STATE` points at the declaration: create the state inside a component and provide it via context, or keep it foreign and handle failures at its uses. The compiler does not move state or change its lifetime.
 
@@ -784,7 +786,7 @@ than a fundamental incompatibility.
 | Native case (tiny fixture) | Outcome | Actual diagnostic / observation |
 | --- | --- | --- |
 | `count() > 0 ? count() : 0` in JSX; event loops/early returns | Faithful lowering on tested forms | `conditional`, `loop`: generated TS/lint pass |
-| `createMemo(() => [1].map(() => count()))` | Refusal | `SUGAR_CALLBACK`: “A reactive read in an unknown callback has no routine host; use a memo, event, or hole.” |
+| `createMemo(() => [1].map(() => count()))` | Transform | The array callback keeps its enclosing memo host. |
 | `onClick={() => Promise.reject("failed")}` | Transform | `promise-event` passes generated TS/lint; failure is `unknown` |
 | `createMemo(async () => count())` | Refusal | `SUGAR_HOST`: “Reactive operations in async functions or methods are unsupported.” |
 | `throw new Error("oops")` / `throw e` with `e: unknown` | Transform | `throw-error`, `unknown-throw` pass generated TS/lint; fails `Error` / `unknown` |

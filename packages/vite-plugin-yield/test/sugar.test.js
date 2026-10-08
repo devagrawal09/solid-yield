@@ -74,7 +74,7 @@ describe("sugar: existing library semantics", { timeout: 30_000 }, () => {
   it("refuses reads in unknown callbacks", () => {
     expect(() =>
       lower(`${start} function Counter() { const [n] = $signal(0);
-      const x = $memo(() => [1].map(() => n())); return <p>{x()}</p>; }`)
+      unknownConsumer(() => n()); return <p/>; }`)
     ).toThrow(/SUGAR_CALLBACK/);
   });
   it("refuses a named routine escaping into a plain callback consumer", () => {

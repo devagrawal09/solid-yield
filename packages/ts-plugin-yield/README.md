@@ -2,13 +2,12 @@
 
 This workspace package implements TypeScript's standard tsserver plugin API.
 It checks the **generated library code** from the same native/sugar transforms
-as Vite. Diagnostics and component hovers use source positions where available;
-synthetic spans keep a marked fallback, and unsupported forms can stop lowering. It does not add
+as Vite. Tests cover mapped native diagnostics and component hovers;
+some synthetic spans still use a marked fallback, and unsupported forms can stop lowering. It does not add
 another color checker or change the library's admission rules.
 
 Requires Node 24+ and TypeScript 6.0 (the tested versions). This package and the
-native transform are experimental and unreleased. Tarball and `file:` installs
-are tested outside the workspace.
+native transform are experimental and unreleased. The tarball path below is tested outside the workspace.
 Build the library before checking its generated consumers.
 
 ## Install and select files
@@ -18,6 +17,7 @@ Build and pack in the clone (Node 24, pnpm 11):
 ```sh
 pnpm install
 pnpm build
+mkdir -p /tmp/solid-yield-packs
 for pkg in yield compiler-yield vite-plugin-yield ts-plugin-yield eslint-plugin-yield; do
   pnpm -C packages/$pkg pack --pack-destination /tmp/solid-yield-packs
 done
@@ -25,8 +25,7 @@ done
 
 In a fresh app, write this `pnpm-workspace.yaml` **before installing**. The
 local `0.0.0` packages have real version ranges; these overrides pick your local
-copies until they are released to npm. You can replace each tarball path with
-`file:/absolute/path/to/solid-yield/packages/<directory>` for a file install.
+copies until they are released to npm.
 
 ```yaml
 allowBuilds:
@@ -97,7 +96,7 @@ export default [{
 ```
 
 The native setting permits plain Solid imports and skips the explicit dialect's
-JSX factory requirement. ESLint's `files` selects the native files; keep it in
+JSX factory requirement. These rules mainly cover explicit/generated code; they did not catch the second reviewer's twelve native cases. Use the TS plugin or CLI for native failure and structural diagnostics. ESLint's `files` selects the native files; keep it in
 step with the Vite/TS `include`. Leave this setting off in explicit or directive
 sugar config blocks, where `$signal` / `$memo` and the JSX factory still apply.
 

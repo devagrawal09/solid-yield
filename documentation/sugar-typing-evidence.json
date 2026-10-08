@@ -1,0 +1,148 @@
+{
+  "locality": [
+    {
+      "slot": "T02",
+      "file": "packages/ts-plugin-yield/test/fixtures/mistakes/setup-read.tsx",
+      "source": "import { createSignal } from \"solid-js\";\nexport function Counter() {\n  const [count] = createSignal(0);\n  const value = count();\n  return <p>{value}</p>;\n}\n",
+      "diagnostics": [
+        {
+          "line": 4,
+          "column": 17,
+          "tsCode": 2769,
+          "message": "[READ_IN_SETUP] A setup creates; read this value in JSX, a memo, an effect, or an event."
+        }
+      ]
+    },
+    {
+      "slot": "L02",
+      "file": "packages/ts-plugin-yield/test/fixtures/mistakes/setup-label.tsx",
+      "source": "import { createSignal } from \"solid-js\";\nexport function TodoLabel() {\n  const [title] = createSignal(\"buy milk\");\n  const prefix = \"Todo: \";\n  const text = prefix + title();\n  return <label>{text}</label>;\n}\n",
+      "diagnostics": [
+        {
+          "line": 5,
+          "column": 25,
+          "tsCode": 2769,
+          "message": "[READ_IN_SETUP] A setup creates; read this value in JSX, a memo, an effect, or an event."
+        }
+      ]
+    },
+    {
+      "slot": "R04",
+      "file": "packages/ts-plugin-yield/test/fixtures/mistakes/setup-branch.tsx",
+      "source": "import { createSignal } from \"solid-js\";\nexport function TodoStatus() {\n  const [done] = createSignal(false);\n  const label = done() ? \"done\" : \"open\";\n  return <span>{label}</span>;\n}\n",
+      "diagnostics": [
+        {
+          "line": 4,
+          "column": 17,
+          "tsCode": 2769,
+          "message": "[READ_IN_SETUP] A setup creates; read this value in JSX, a memo, an effect, or an event."
+        }
+      ]
+    },
+    {
+      "slot": "T05",
+      "file": "packages/ts-plugin-yield/test/fixtures/mistakes/effect-arity.tsx",
+      "source": "import { createSignal, createEffect } from \"solid-js\";\nexport function Counter() {\n  const [count] = createSignal(0);\n  createEffect(() => count());\n  return <p>{count()}</p>;\n}\n",
+      "diagnostics": [
+        {
+          "line": 4,
+          "column": 3,
+          "tsCode": 95000,
+          "message": "[NATIVE_EFFECT_PHASES] createEffect needs a tracked compute and an untracked effect phase."
+        }
+      ]
+    },
+    {
+      "slot": "T07",
+      "file": "packages/ts-plugin-yield/test/fixtures/mistakes/pending-root.tsx",
+      "source": "import { createMemo } from \"solid-js\";\nimport { render } from \"@solidjs/web\";\nfunction App() {\n  const count = createMemo(async () => 1);\n  return <p>{count()}</p>;\n}\nrender(App, document.body);\n",
+      "diagnostics": [
+        {
+          "line": 7,
+          "column": 8,
+          "tsCode": 1360,
+          "message": "[PENDING_ROOT] Component App: pending true; fails none; may-wait false; requires none; The root may be pending; wrap the pending part in Loading."
+        }
+      ]
+    },
+    {
+      "slot": "T08",
+      "file": "packages/ts-plugin-yield/test/fixtures/mistakes/colored-prop.tsx",
+      "source": "import { createMemo } from \"solid-js\";\nfunction TodoCount(props: { count: number }) {\n  return <p>{props.count}</p>;\n}\nexport function App() {\n  const count = createMemo(async () => 1);\n  return <TodoCount count={count()} />;\n}\n",
+      "diagnostics": [
+        {
+          "line": 7,
+          "column": 21,
+          "tsCode": 2322,
+          "message": "[SETTLED_PROP] This prop is settled; pass a settled value or declare a pending source contract."
+        }
+      ]
+    },
+    {
+      "slot": "L05",
+      "file": "packages/ts-plugin-yield/test/fixtures/mistakes/eager-jsx.tsx",
+      "source": "import { createSignal } from \"solid-js\";\nexport function Counter() {\n  const [count] = createSignal(0);\n  const label = <p>{count()}</p>;\n  return <div>{label}</div>;\n}\n",
+      "diagnostics": [
+        {
+          "line": 4,
+          "column": 21,
+          "tsCode": 2769,
+          "message": "[READ_IN_SETUP] A setup creates; read this value in JSX, a memo, an effect, or an event."
+        }
+      ]
+    },
+    {
+      "slot": "R05",
+      "file": "packages/ts-plugin-yield/test/fixtures/mistakes/memo-write.tsx",
+      "source": "import { createSignal, createMemo } from \"solid-js\";\nexport function Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => {\n    setCount(1);\n    return count() * 2;\n  });\n  return <p>{twice()}</p>;\n}\n",
+      "diagnostics": [
+        {
+          "line": 5,
+          "column": 5,
+          "tsCode": 2345,
+          "message": "[WRITE_IN_REACTIVE] A reactive computation cannot write; move this write to an event or effect phase."
+        }
+      ]
+    },
+    {
+      "slot": "R06",
+      "file": "packages/ts-plugin-yield/test/fixtures/mistakes/hole-create.tsx",
+      "source": "import { createSignal } from \"solid-js\";\nexport function Counter() {\n  return <p>{createSignal(1)[0]()}</p>;\n}\n",
+      "diagnostics": [
+        {
+          "line": 3,
+          "column": 14,
+          "tsCode": 95000,
+          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole."
+        }
+      ]
+    },
+    {
+      "slot": "R08",
+      "file": "packages/ts-plugin-yield/test/fixtures/mistakes/missing-context.tsx",
+      "source": "import { createContext, useContext } from \"solid-js\";\nimport { render } from \"@solidjs/web\";\nconst Identity = createContext<string>();\nfunction App() {\n  const name = useContext(Identity);\n  return <p>{name}</p>;\n}\nrender(App, document.body);\n",
+      "diagnostics": [
+        {
+          "line": 8,
+          "column": 8,
+          "tsCode": 1360,
+          "message": "[NO_PROVIDER] Component App: pending false; fails none; may-wait false; requires Identity; The root requires a context; provide it above the component that reads it."
+        }
+      ]
+    }
+  ],
+  "hover": [
+    {
+      "component": "DocPage",
+      "text": "DocPage: pending false; fails NotFound; may-wait false; requires none"
+    },
+    {
+      "component": "PendingCount",
+      "text": "PendingCount: pending true; fails none; may-wait false; requires none"
+    },
+    {
+      "component": "SaveButton",
+      "text": "SaveButton: pending false; fails none; may-wait true; requires Identity"
+    }
+  ]
+}

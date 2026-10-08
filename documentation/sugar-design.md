@@ -15,6 +15,21 @@ normalization described below. This is a working transform experiment, **not a
 finished TypeScript/editor integration**. Room is a second, harder source design,
 with remaining transform gaps recorded below; it is not a verified second twin.
 
+## Typing: implemented
+
+The `proto/sugar-ls` follow-up implements D-116's virtual-code route in
+[ts-plugin-solid-yield](../packages/ts-plugin-yield/README.md): the standard
+TypeScript language-service plugin and `pnpm solid-yield check <dir>` share the
+Vite native/sugar lowering and its composed generated-to-source position tables.
+The library's generated types remain the authority for pending, failures,
+may-wait and required contexts; the adapter maps and explains those errors.
+[The typing report](sugar-typing.md) records ten recoverable review slots at their
+offending authored lines, three component hovers, a real tsserver protocol test,
+and remaining limits. The two native original gate typechecks now use the CLI.
+Earlier “no editor plugin” and F-S2 statements below are historical checkpoints;
+editor UI behavior, full mapped editing features and Vite runtime sourcemap
+composition remain unverified or unimplemented as recorded in that report.
+
 ## 1. Surface
 
 A file opts in with `"use yield";` as its first directive, after optional comments.

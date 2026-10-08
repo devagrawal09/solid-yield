@@ -204,7 +204,16 @@ function buildSteps(twins) {
       name: `native:sierpinski:${stage}`,
       cwd: root,
       cmd: process.execPath,
-      args: ["scripts/native-sierpinski-check.mjs", stage]
+      args:
+        stage === "typecheck"
+          ? [
+              "packages/ts-plugin-yield/src/cli.cjs",
+              "check",
+              "examples/originals/sierpinski",
+              "--native",
+              "src/**"
+            ]
+          : ["scripts/native-sierpinski-check.mjs", stage]
     });
   }
   for (const stage of ["parity", "ssr"]) {
@@ -220,7 +229,16 @@ function buildSteps(twins) {
       name: `native:todos:${stage}`,
       cwd: root,
       cmd: process.execPath,
-      args: ["scripts/native-todos-check.mjs", stage]
+      args:
+        stage === "typecheck"
+          ? [
+              "packages/ts-plugin-yield/src/cli.cjs",
+              "check",
+              "examples/originals/todos",
+              "--native",
+              "src/**"
+            ]
+          : ["scripts/native-todos-check.mjs", stage]
     });
   }
   for (const stage of ["parity", "ssr"]) {
@@ -281,6 +299,11 @@ function buildSteps(twins) {
       name: "pkg:vite-plugin-yield:test",
       cwd: root,
       ...pnpmRun("packages/vite-plugin-yield", "test")
+    },
+    {
+      name: "pkg:ts-plugin-yield:test",
+      cwd: root,
+      ...pnpmRun("packages/ts-plugin-yield", "test")
     },
     {
       name: "pkg:vite-plugin-yield:typecheck",

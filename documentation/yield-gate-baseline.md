@@ -210,3 +210,17 @@ so results depend on the commit, not on the machine's clock locale (D-027).
 | `pkg:eslint-plugin-yield:exports` | PASS | 0.9 s |
 | `repo:prettier` | PASS | 1.7 s |
 | `repo:oxlint` | PASS | 0.1 s |
+
+**Program-mutation addition (2026-10-08, `proto/sugar-mutation`).** Only the new
+`mutation` step and its score/site-count fields were added to the JSON baseline;
+all 64 existing step entries and thresholds were retained. Initial score:
+**35.65%**, 128 killed / 231 survived / 57 diagnostic-equivalents, across 19
+operators and 416 mutants. Three kills match an error already present in a base
+program, as permitted by the requested literal exact-line/code rule. The raw
+pipelines were verified before rescoring that rule; no checker was changed.
+
+The required build passed. The full gate passed **65 / 0 / 0** with `--jobs 1`.
+An earlier concurrent run had one existing Sierpinski animation-frame test hit
+its unchanged 5-second timeout; it passed in the full rerun. No test timeout or
+existing gate threshold was relaxed. Reports and commands are in
+[`mutation-report.md`](./mutation-report.md).

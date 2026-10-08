@@ -5,6 +5,13 @@ reference run used as the baseline; the machine-readable copy is
 [`yield-gate-baseline.json`](./yield-gate-baseline.json). CI runs the same gate
 against this file (`.github/workflows/gate.yml`).
 
+**Newcomer install addition (2026-10-08).** Baseline regenerated only for the
+new `fresh-install` step: **65 PASS / 0 FAIL / 0 SKIP in 153 s**, GREEN, on
+`d88e31c` plus the reviewed working tree. All 64 earlier steps remain PASS.
+The added step tests tarballs and `file:` copies outside the monorepo, using
+the unchanged reviewer app: Vite build, CLI check and native ESLint all pass.
+No existing step, threshold, or accepted failure was changed.
+
 **Calculus proofs addition on main (2026-10-07).** Baseline regenerated only
 for the new report-only `proofs` step, from the full GREEN run after merge
 `5d50680`: **46 PASS / 0 FAIL / 0 SKIP in 115 s**. All 45 existing steps remain

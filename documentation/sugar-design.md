@@ -463,8 +463,9 @@ working native apps or a replacement for the passing directive-sugar todos.
 
 The 2026-10-08 direction supersedes §1's authored library API and §3's open typing
 choice. **Virtual-code typing is decided. There is no compiler-owned color checker.**
-The editor plugin, value-facing hovers, source maps and related-location messages
-remain planned. This prototype runs ordinary TypeScript and the existing lint on
+At this historical checkpoint the editor plugin, hovers and related-location
+messages were planned. The TS plugin now implements these (see sugar-typing.md);
+composed runtime source maps remain incomplete. This prototype runs ordinary TypeScript and the existing lint on
 emitted library code. Those type/lint locations are still generated locations;
 only native preflight diagnostics currently use authored positions. A later
 SUGAR_* diagnostic can also refer to an intermediate position. We do not call
@@ -837,7 +838,8 @@ are settled. Remaining questions for Dev:
    may packages ship trusted `"use pure"`/failure summaries with a versioned
    contract? Class-ID stability needs the same build/version policy.
 
-The editor plugin remains planned, not built here.
+At this historical checkpoint the editor plugin was not built; sugar-typing.md
+records the later TS plugin implementation.
 
 ### Native verification and baseline
 
@@ -847,7 +849,7 @@ for 37 native fixtures (21 accepted), two strict foreign-edge probes, all nine
 original audits, counter SSR/hydration, the production failure-serialization
 control, six inference tests, and the existing library/plugin/analyzer/proof/twin
 checks. Generated failure adapters have four runtime unit tests and a server
-stream test. Native editor diagnostics remain unmapped; no editor plugin or
+stream test. At this historical checkpoint native editor diagnostics remained unmapped; no editor plugin or
 proof extension is claimed.
 
 **This update regenerated the baseline only to add one passing step:**

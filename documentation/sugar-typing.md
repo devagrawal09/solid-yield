@@ -19,29 +19,28 @@ counted as caught mistakes.
 
 Each source link is a complete native `.tsx` file. Lines below refer to authored
 source, not generated code. Every row is asserted by the package tests. R06 is
-still a transform refusal, now at its authored expression. R08 reports the
-unprovided root handoff, where the requirement must be satisfied; it does not
-blame the valid context declaration/read. L05's reactive eager JSX is rejected
+still a transform refusal, now at its authored expression. R08 reports the context read whose provider is missing, with the root handoff
+as a related location. L05's reactive eager JSX is rejected
 for its setup read at the bad expression.
 
 | Review slot | Native source | Line:column | Actual diagnostic |
 | --- | --- | --- | --- |
-| T02 | [setup-read.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/setup-read.tsx) | 4:17 | TS2769 `[READ_IN_SETUP] A setup creates; read this value in JSX, a memo, an effect, or an event.` |
-| L02 | [setup-label.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/setup-label.tsx) | 5:25 | TS2769 `[READ_IN_SETUP] A setup creates; read this value in JSX, a memo, an effect, or an event.` |
-| R04 | [setup-branch.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/setup-branch.tsx) | 4:17 | TS2769 `[READ_IN_SETUP] A setup creates; read this value in JSX, a memo, an effect, or an event.` |
-| T05 | [effect-arity.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/effect-arity.tsx) | 4:3 | TS95000 `[NATIVE_EFFECT_PHASES] createEffect needs a tracked compute and an untracked effect phase.` |
-| T07 | [pending-root.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/pending-root.tsx) | 7:8 | TS1360 `[PENDING_ROOT] Component App: pending true; fails none; may-wait false; requires none; The root may be pending; wrap the pending part in Loading.` |
-| T08 | [colored-prop.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/colored-prop.tsx) | 7:21 | TS2322 `[SETTLED_PROP] This prop is settled; pass a settled value or declare a pending source contract.` |
-| L05 | [eager-jsx.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/eager-jsx.tsx) | 4:21 | TS2769 `[READ_IN_SETUP] A setup creates; read this value in JSX, a memo, an effect, or an event.` |
-| R05 | [memo-write.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/memo-write.tsx) | 5:5 | TS2345 `[WRITE_IN_REACTIVE] A reactive computation cannot write; move this write to an event or effect phase.` |
-| R06 | [hole-create.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/hole-create.tsx) | 3:14 | TS95000 `[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole.` |
-| R08 | [missing-context.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/missing-context.tsx) | 8:8 | TS1360 `[NO_PROVIDER] Component App: pending false; fails none; may-wait false; requires Identity; The root requires a context; provide it above the component that reads it.` |
+| T02 | [setup-read.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/setup-read.tsx) | 4:17 | TS2769 `[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive.` |
+| L02 | [setup-label.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/setup-label.tsx) | 5:25 | TS2769 `[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive.` |
+| R04 | [setup-branch.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/setup-branch.tsx) | 4:17 | TS2769 `[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive.` |
+| T05 | [effect-arity.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/effect-arity.tsx) | 4:3 | TS95000 `[NATIVE_EFFECT_PHASES] Pass a tracked compute function and an untracked effect function to createEffect.` |
+| T07 | [pending-root.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/pending-root.tsx) | 5:14 | TS2345 `[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.` |
+| T08 | [colored-prop.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/colored-prop.tsx) | 7:21 | TS2322 `[SETTLED_PROP] Pass a ready value, or allow a pending source in this prop's type.` |
+| L05 | [eager-jsx.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/eager-jsx.tsx) | 4:21 | TS2769 `[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive.` |
+| R05 | [memo-write.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/memo-write.tsx) | 5:5 | TS2345 `[WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state.` |
+| R06 | [hole-create.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/hole-create.tsx) | 3:14 | TS95000 `[SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.` |
+| R08 | [missing-context.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/missing-context.tsx) | 5:27 | TS2345 `[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: Identity.` |
 
 The [machine-readable evidence](sugar-typing-evidence.json) contains the full
 sources, every reported diagnostic and all three hovers. Reproduce it with
 `node scripts/sugar-typing-evidence.mjs`; use `--write` only after reviewing an
 intentional change. The table shows the offending read/write/prop or handoff,
-not the generated `component(` / `view(` wrapper that caused the reviews'
+rather than the generated `component(` / `view(` wrapper that caused the reviews'
 error-locality complaint.
 
 ## Hover evidence
@@ -49,9 +48,9 @@ error-locality complaint.
 These components are in [colors.tsx](../packages/ts-plugin-yield/test/fixtures/colors.tsx):
 
 ```text
-DocPage: pending false; fails NotFound; may-wait false; requires none
-PendingCount: pending true; fails none; may-wait false; requires none
-SaveButton: pending false; fails none; may-wait true; requires Identity
+DocPage — does not suspend; can fail with NotFound; does not wait; needs no context
+PendingCount — can suspend (pending); never fails; does not wait; needs no context
+SaveButton — does not suspend; never fails; can wait; needs Identity
 ```
 
 `SaveButton` covers both event may-wait and a required context. These summaries
@@ -61,8 +60,9 @@ in-scope type queries of the library's `PendingOf`, `FailsOf`, `WaitsOf` and
 `RequiresOf`; the queries do not affect diagnostics or emitted runtime code.
 Native failure class IDs are displayed as class names, including the inferred
 `unknown` floor when present. A tested failing foreign handoff reports
-`Component DocPage: ... fails NotFound | unknown ...; not handled — wrap in
-Errored or handle with attempt/catch`. D-033 is retained: a failure color alone
+`[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure
+with attempt.` Event and effect failures instead ask for a catch inside the
+handler or a declared failure contract. D-033 is retained: a failure color alone
 is not a rejection at a library root.
 
 ## Implementation and verification
@@ -96,8 +96,7 @@ editor screenshot or a claim that a particular editor loaded the plugin.
 The existing `native:sierpinski:typecheck` and `native:todos:typecheck` gate steps
 now invoke the CLI against the actual originals. Their baseline outcome remains
 PASS. Runtime parity, SSR, generated lint, the library types and all existing
-gate thresholds are unchanged. The only new gate step is
-`pkg:ts-plugin-yield:test`.
+gate thresholds are unchanged. The review fixes add a `fresh-install` gate step for tarball and file consumers.
 
 ## Remaining findings
 
@@ -107,13 +106,13 @@ gate thresholds are unchanged. The only new gate step is
 | F-T2 — other editing features | Completion, navigation, rename, refactoring and code actions still use the original source service. They do not expose all generated contracts or provide mapped fixes. |
 | F-T3 — fallback messages and locations | The catalog covers observed host/boundary errors, not every TypeScript diagnostic shape. Unrecognized machinery gets `GENERATED_TYPE`; genuinely synthetic spans retain `[generated]` at the routine name. No general proof establishes all lowering positions. |
 | F-T4 — recovery and latency | A transform refusal blocks that selected transform group until fixed. There is no partial recovery tree. Lowering is synchronous and cached by project/content versions; large-project latency, project references and cancellation during lowering are not benchmarked. |
-| F-T5 — distribution and maps | This is a Node 24 / TypeScript 6 workspace package. Standalone publishing still inherits the native transform's private analyzer dependency (F-S16). The position table is for pre-JSX typing; Vite runtime sourcemap composition is still absent. |
-| F-T6 — hover forms and identity display | Component and resolvable named routine/source calls are covered. Anonymous, computed and unresolved higher-order calls can retain the ordinary generated TS signature. Display names can coincide for distinct nominal classes; the underlying library types keep their distinct IDs. |
+| F-T5 — distribution and maps | Node 24 / TypeScript 6 tarball and file consumers are tested. Published dependencies use real version ranges and native mode loads the compiler by package name. The position table is for pre-JSX typing; Vite runtime sourcemap composition is still absent. |
+| F-T6 — hover forms and identity display | Component and resolvable named routine/source calls are covered. Anonymous, computed and unresolved higher-order calls use ordinary source hover information where available. Display names can coincide for distinct nominal classes; the underlying library types keep their distinct IDs. |
 
 Typing does not close the native transform's existing behavior/proof findings.
 It makes its generated type checks and refusals visible at authored positions.
 
-## Final verification
+## Earlier verification
 
 `pnpm build` passed. The full gate on the implementation at `3af477b` plus the
 gate/docs working tree finished **64 pass / 0 fail / 0 skip in 223 seconds**, GREEN.
@@ -129,3 +128,15 @@ step was removed, no threshold changed, and no failure was accepted into the
 baseline. The earlier full run also passed 64/0/0 in 154 seconds before the final
 routine-hover, declaration-edit and node-coverage additions. Commits are local
 on `proto/sugar-ls`; nothing was pushed.
+
+## Newcomer review fixes
+
+The original [review](reviews/sugar-review-1.md) is preserved verbatim. Its app
+and all variants are in `packages/ts-plugin-yield/test/fixtures/review-app`;
+`expectations.json` records the expected codes, files and lines. The
+[before/after report](reviews/sugar-review-1-fixes.md) records the new results,
+including silent legal cases, the retained catch/swallow limitation and the
+review's inconsistent scoring denominator. Every generated TypeScript error
+is retained, including genuinely synthetic errors with `[generated]`. Root
+errors are routed to their origin file because tsserver's primary diagnostic
+spans always belong to the file it requests; the handoff remains related.

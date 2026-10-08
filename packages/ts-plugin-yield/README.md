@@ -2,29 +2,66 @@
 
 This workspace package implements TypeScript's standard tsserver plugin API.
 It checks the **generated library code** from the same native/sugar transforms
-as Vite, then maps diagnostics and hovers to the author's file. It does not add
+as Vite. Diagnostics and component hovers use source positions where available;
+synthetic spans keep a marked fallback, and unsupported forms can stop lowering. It does not add
 another color checker or change the library's admission rules.
 
 Requires Node 24+ and TypeScript 6.0 (the tested versions). This package and the
-native transform are workspace prototypes, not published standalone packages.
+native transform are experimental and unreleased. Tarball and `file:` installs
+are tested outside the workspace.
 Build the library before checking its generated consumers.
 
 ## Install and select files
 
-In this workspace:
+Build and pack in the clone (Node 24, pnpm 11):
 
 ```sh
 pnpm install
 pnpm build
-# In another workspace consumer, add the local package:
-pnpm add -D ts-plugin-solid-yield@workspace:* typescript
+for pkg in yield compiler-yield vite-plugin-yield ts-plugin-yield eslint-plugin-yield; do
+  pnpm -C packages/$pkg pack --pack-destination /tmp/solid-yield-packs
+done
 ```
+
+In a fresh app, write this `pnpm-workspace.yaml` **before installing**. The
+local `0.0.0` packages have real version ranges; these overrides pick your local
+copies until they are released to npm. You can replace each tarball path with
+`file:/absolute/path/to/solid-yield/packages/<directory>` for a file install.
+
+```yaml
+allowBuilds:
+  esbuild: true
+overrides:
+  solid-yield: file:/tmp/solid-yield-packs/solid-yield-0.0.0.tgz
+  compiler-yield: file:/tmp/solid-yield-packs/compiler-yield-0.0.0.tgz
+  vite-plugin-solid-yield: file:/tmp/solid-yield-packs/vite-plugin-solid-yield-0.0.0.tgz
+  ts-plugin-solid-yield: file:/tmp/solid-yield-packs/ts-plugin-solid-yield-0.0.0.tgz
+```
+
+```sh
+pnpm add /tmp/solid-yield-packs/solid-yield-0.0.0.tgz solid-js@2.0.0-rc.13 @solidjs/web@2.0.0-rc.13
+pnpm add -D /tmp/solid-yield-packs/ts-plugin-solid-yield-0.0.0.tgz /tmp/solid-yield-packs/vite-plugin-solid-yield-0.0.0.tgz /tmp/solid-yield-packs/eslint-plugin-solid-yield-0.0.0.tgz typescript@6.0.3 vite@^8 @solidjs/vite-plugin@3.0.0-next.47 eslint@^9 @typescript-eslint/parser@^8
+```
+
+`node scripts/fresh-install.mjs` repeats the tarball install in a temporary app,
+using the newcomer's app, then runs Vite, ESLint and the CLI. It needs registry
+access for ordinary dependencies and installs in the foreground.
 
 Add this to the application's `tsconfig.json`:
 
 ```json
 {
   "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ESNext", "DOM"],
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "jsx": "preserve",
+    "jsxImportSource": "@solidjs/web",
+    "types": ["vite/client"],
     "plugins": [
       {
         "name": "ts-plugin-solid-yield",
@@ -32,7 +69,8 @@ Add this to the application's `tsconfig.json`:
         "include": ["src/**"]
       }
     ]
-  }
+  },
+  "include": ["src"]
 }
 ```
 
@@ -43,6 +81,25 @@ its project root:
 ```js
 solidYield({ mode: "native", include: ["src/**"] })
 ```
+
+Apply ESLint to the same source files:
+
+```js
+import parser from "@typescript-eslint/parser";
+import yieldLint from "eslint-plugin-solid-yield";
+export default [{
+  files: ["src/**/*.{ts,tsx}"],
+  languageOptions: { parser, parserOptions: { ecmaFeatures: { jsx: true } } },
+  plugins: { "solid-yield": yieldLint },
+  settings: { "solid-yield": { mode: "native" } },
+  rules: yieldLint.configs.recommended.rules
+}];
+```
+
+The native setting permits plain Solid imports and skips the explicit dialect's
+JSX factory requirement. ESLint's `files` selects the native files; keep it in
+step with the Vite/TS `include`. Leave this setting off in explicit or directive
+sugar config blocks, where `$signal` / `$memo` and the JSX factory still apply.
 
 Keep those roots and selections equal. Vite's existing function predicate is
 also supported; a tsconfig cannot serialize a JavaScript predicate, so express
@@ -89,7 +146,10 @@ and renderer handoffs preserve their authored origins explicitly.
 The private TypeScript service keeps the original filenames for import
 resolution and substitutes transformed snapshots. A per-file JSX pragma selects
 the library's declarations. It never writes those snapshots into the editor's
-source buffer. Related diagnostic locations are mapped too. Synthetic spans
+source buffer. Root errors follow the surviving operation types back to a read, context read,
+or failure site. They appear on that file, with the render/hydrate call as
+related information; the CLI prints both locations. Related diagnostic
+locations are mapped too. Synthetic spans
 without an authored origin report at the enclosing routine's name with
 `[generated]`; file-level machinery without a routine reports at the file start.
 These tables are for the pre-JSX typing program; Vite's emitted-JavaScript
@@ -115,7 +175,7 @@ Failure wrapper IDs display their class names and contexts display their names.
 For example:
 
 ```text
-DocPage: pending false; fails NotFound; may-wait false; requires none
+DocPage — does not suspend; can fail with NotFound; does not wait; needs no context
 ```
 
 ## Verified scope

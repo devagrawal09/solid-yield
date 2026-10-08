@@ -2,7 +2,7 @@
 
 The JSX transform's one rule for [`solid-yield`](https://github.com/devagrawal09/solid-yield/tree/main/packages/yield) (D-003): inside a JSX expression or attribute value, `yield* e` becomes `perform(e)`, imported from `solid-yield`. Each read is then its own hole, and the view generator runs once. Nothing else is lowered. Published as `vite-plugin-solid-yield` (D-011; `@solidjs/vite-plugin-yield` in the Solid fork).
 
-**This is the strict dialect; the compiler route is the ergonomic one** (D-002): this plugin is the strict dialect's transform, and Solid's `experiment/iterable-signals` branch bakes the model into its compiler and core. Its four refusal codes are listed with the matching lint rule and development errors in [`documentation/refusals.md`](https://github.com/devagrawal09/solid-yield/blob/main/documentation/refusals.md).
+**The default is the explicit dialect** (D-002): this plugin also has experimental sugar/native modes. By default it is the strict dialect's transform, and Solid's `experiment/iterable-signals` branch bakes the model into its compiler and core. Its four refusal codes are listed with the matching lint rule and development errors in [`documentation/refusals.md`](https://github.com/devagrawal09/solid-yield/blob/main/documentation/refusals.md).
 
 Codes such as D-074 here and in the messages cite the design's decision log, [`DECISIONS.md`](https://github.com/devagrawal09/solid-yield/blob/main/documentation/DECISIONS.md) (each rule, its alternatives and its reasoning).
 
@@ -15,6 +15,19 @@ import solid from "@solidjs/vite-plugin";
 
 export default { plugins: [solidYield(), solid()] };
 ```
+
+For selected plain Solid 2 source:
+
+```js
+export default {
+  plugins: [solidYield({ mode: "native", include: ["src/**"] }), solid()]
+};
+```
+
+Use the same selection in the TS plugin, and the native ESLint setting on those
+files. [Complete installation and native tsconfig](../ts-plugin-yield/README.md).
+Tarball and file installs are tested without workspace links. Native lowering
+has no composed runtime source map yet; unsupported forms can be refused.
 
 `solidYield()` runs `enforce: "pre"`, before the JSX compiler. It skips a module whose source has no `yield` (and no `lazy` from the yield module) without parsing it (every spelling of a generator, `function *f`, `*method()`, `async *gen`, is a candidate; the parse decides), and returns `null` (no change) for a module with no hole. Its source map is chained by Vite with the compiler's, so a runtime error maps back to the authored line and column. Options: `yieldModule`, `lazy`, and `filter(file)` (by default `.js`/`.jsx`/`.ts`/`.tsx` and their `m`/`c` forms, outside `node_modules`).
 
@@ -72,7 +85,7 @@ They were generated once from the fork's Rust compiler while it carried the rule
 
 ## Status
 
-In-repo package, `0.0.0`, unreleased. Its runtime dependencies are `@babel/core`, `magic-string`, and `typescript` (the experimental sugar front end). Its peers are `solid-yield` (the module the rewritten code imports `perform` from) and, optionally, `vite`.
+In-repo package, `0.0.0`, unreleased. Its runtime dependencies are `compiler-yield`, `@babel/core`, `magic-string`, and `typescript` (the experimental sugar front end). Its peers are `solid-yield` (the module the rewritten code imports `perform` from) and, optionally, `vite`.
 
 The tests also use, as devDependencies:
 
@@ -97,9 +110,10 @@ plain source calls, path reads, events and known callbacks reconstruct the
 library's generator code before the existing JSX rule runs. Unmarked files keep
 the explicit behavior above. The Vite plugin requires a tsconfig for sugar.
 
-This is a prototype: it reparses project snapshots, returns no sugar source map,
-and does not supply an editor plugin. Typecheck and lint the generated library
-code, as [todos-sugar](../../examples/todos-sugar/README.md) does. The plain
+This is a prototype: it reparses project snapshots and has no composed runtime
+source map. The [TS plugin and CLI](../ts-plugin-yield/README.md) check generated
+code and map diagnostics to source; genuinely synthetic locations retain a
+marked fallback. The plain
 `transform()` and Babel plugin remain the explicit one-rule API; sugar is wired
 into the Vite adapter. See [the design and findings](../../documentation/sugar-design.md)
 for unsupported forms and the unresolved typing choice.

@@ -1,0 +1,303 @@
+[
+  {
+    "variant": "m01_setup_read.tsx",
+    "diagnostics": [
+      {
+        "file": "App.tsx",
+        "line": 8,
+        "column": 20,
+        "tsCode": 2769,
+        "category": 1,
+        "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive.",
+        "related": [
+          {
+            "file": "types.d.ts",
+            "line": 109,
+            "column": 14,
+            "message": "'kind' is declared here."
+          },
+          {
+            "file": "types.d.ts",
+            "line": 109,
+            "column": 14,
+            "message": "'kind' is declared here."
+          }
+        ]
+      },
+      {
+        "file": "index.tsx",
+        "line": 3,
+        "column": 15,
+        "tsCode": 2345,
+        "category": 1,
+        "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call."
+      }
+    ]
+  },
+  {
+    "variant": "m02_noprovider2.tsx",
+    "diagnostics": [
+      {
+        "file": "App.tsx",
+        "line": 15,
+        "column": 27,
+        "tsCode": 2345,
+        "category": 1,
+        "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: UserCtx.",
+        "related": [
+          {
+            "file": "index.tsx",
+            "line": 3,
+            "column": 15,
+            "message": "Component App reaches Solid here. does not suspend; never fails; does not wait; needs UserCtx"
+          }
+        ]
+      },
+      {
+        "file": "App.tsx",
+        "line": 15,
+        "column": 27,
+        "tsCode": 1360,
+        "category": 1,
+        "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: UserCtx.",
+        "related": [
+          {
+            "file": "index.tsx",
+            "line": 3,
+            "column": 15,
+            "message": "Component App reaches Solid here. does not suspend; never fails; does not wait; needs UserCtx"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "variant": "m03_throw_string.tsx",
+    "diagnostics": [
+      {
+        "file": "App.tsx",
+        "line": 8,
+        "column": 22,
+        "tsCode": 95000,
+        "category": 1,
+        "message": "[NATIVE_THROW] Throw an Error object so callers can identify and handle this failure."
+      }
+    ]
+  },
+  {
+    "variant": "m03b_throw_in_memo.tsx",
+    "diagnostics": [
+      {
+        "file": "App.tsx",
+        "line": 8,
+        "column": 55,
+        "tsCode": 95000,
+        "category": 1,
+        "message": "[NATIVE_THROW] Throw an Error object so callers can identify and handle this failure."
+      }
+    ]
+  },
+  {
+    "variant": "m03c_throw_in_handler.tsx",
+    "diagnostics": [
+      {
+        "file": "App.tsx",
+        "line": 9,
+        "column": 60,
+        "tsCode": 2345,
+        "category": 1,
+        "message": "[FOREIGN_HANDOFF] Catch the failure inside this handler, or declare it in the handler's fails contract.",
+        "related": [
+          {
+            "file": "index.tsx",
+            "line": 3,
+            "column": 15,
+            "message": "Component App reaches Solid here. does not suspend; can fail with Error; does not wait; needs no context"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "variant": "m04_async_handler.tsx",
+    "diagnostics": [
+      {
+        "file": "api.ts",
+        "line": 4,
+        "column": 34,
+        "tsCode": 2345,
+        "category": 1,
+        "message": "[FOREIGN_HANDOFF] Catch the failure inside this handler, or declare it in the handler's fails contract.",
+        "related": [
+          {
+            "file": "App.tsx",
+            "line": 9,
+            "column": 9,
+            "message": "Catch or declare the failure in this handler."
+          },
+          {
+            "file": "index.tsx",
+            "line": 3,
+            "column": 15,
+            "message": "Component App reaches Solid here. does not suspend; can fail with Error | an unknown error; does not wait; needs no context"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "variant": "m05_swallow.tsx",
+    "diagnostics": []
+  },
+  {
+    "variant": "m06_memo_writes.tsx",
+    "diagnostics": [
+      {
+        "file": "App.tsx",
+        "line": 8,
+        "column": 36,
+        "tsCode": 2345,
+        "category": 1,
+        "message": "[WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state."
+      },
+      {
+        "file": "index.tsx",
+        "line": 3,
+        "column": 15,
+        "tsCode": 2345,
+        "category": 1,
+        "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call."
+      }
+    ]
+  },
+  {
+    "variant": "m07_timeout_read.tsx",
+    "diagnostics": []
+  },
+  {
+    "variant": "m08_portal.tsx",
+    "diagnostics": [
+      {
+        "file": "App.tsx",
+        "line": 26,
+        "column": 7,
+        "tsCode": 95001,
+        "category": 0,
+        "message": "[NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check."
+      }
+    ]
+  },
+  {
+    "variant": "m09_destructure.tsx",
+    "diagnostics": [
+      {
+        "file": "App.tsx",
+        "line": 11,
+        "column": 1,
+        "tsCode": 95000,
+        "category": 1,
+        "message": "[NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates."
+      }
+    ]
+  },
+  {
+    "variant": "m10_conditional.tsx",
+    "diagnostics": []
+  },
+  {
+    "variant": "m11_nested_comp.tsx",
+    "diagnostics": []
+  },
+  {
+    "variant": "m12_effect_arity.tsx",
+    "diagnostics": [
+      {
+        "file": "App.tsx",
+        "line": 8,
+        "column": 3,
+        "tsCode": 95000,
+        "category": 1,
+        "message": "[NATIVE_EFFECT_PHASES] Pass a tracked compute function and an untracked effect function to createEffect."
+      }
+    ]
+  },
+  {
+    "variant": "s2a_noloading.tsx",
+    "diagnostics": [
+      {
+        "file": "App.tsx",
+        "line": 17,
+        "column": 18,
+        "tsCode": 1360,
+        "category": 1,
+        "message": "[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.",
+        "related": [
+          {
+            "file": "index.tsx",
+            "line": 3,
+            "column": 15,
+            "message": "Component App reaches Solid here. can suspend (pending); never fails; does not wait; needs no context"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "variant": "s2b_noprovider.tsx",
+    "diagnostics": [
+      {
+        "file": "App.tsx",
+        "line": 13,
+        "column": 28,
+        "tsCode": 2345,
+        "category": 1,
+        "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: ThemeCtx.",
+        "related": [
+          {
+            "file": "index.tsx",
+            "line": 3,
+            "column": 15,
+            "message": "Component App reaches Solid here. does not suspend; never fails; does not wait; needs ThemeCtx"
+          }
+        ]
+      },
+      {
+        "file": "App.tsx",
+        "line": 13,
+        "column": 28,
+        "tsCode": 1360,
+        "category": 1,
+        "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: ThemeCtx.",
+        "related": [
+          {
+            "file": "index.tsx",
+            "line": 3,
+            "column": 15,
+            "message": "Component App reaches Solid here. does not suspend; never fails; does not wait; needs ThemeCtx"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "variant": "s2c_noerrored.tsx",
+    "diagnostics": [
+      {
+        "file": "api.ts",
+        "line": 4,
+        "column": 34,
+        "tsCode": 2345,
+        "category": 1,
+        "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt.",
+        "related": [
+          {
+            "file": "index.tsx",
+            "line": 3,
+            "column": 15,
+            "message": "Component App reaches Solid here. does not suspend; can fail with an unknown error | Error; does not wait; needs no context"
+          }
+        ]
+      }
+    ]
+  }
+]

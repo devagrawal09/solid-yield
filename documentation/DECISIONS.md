@@ -1610,3 +1610,63 @@ The second review’s ten-line summary, verbatim:
 
 3. **STANDING RULE — PROCESS (Dev, 2026-10-08): “plenty of mutation testing”.** This is a continuing process requirement, not a one-off test task. Add a **mutation gate step**: program mutants over the native corpus, with **per-operator expected diagnostic codes at the mutated line**; surviving mutants fail the gate when the score falls below its baseline. Add **Stryker over the checker’s own source** as well. Both are **in progress on proto/sugar-mutation** (new branch, starting at `d88e31c`); no passing mutation gate or Stryker result is claimed here. The standing process rules are also recorded in HANDOFF.
 4. **Effect original — F-S30–F-S33; session in progress with a stop rule.** The [structural blocker report at `8f432b5`](https://github.com/devagrawal09/solid-yield/blob/8f432b5/documentation/native-effect-blocker.md) records **F-S30**: authored `function*` bodies, including `Effect.gen`, were lowered into the wrong protocol. Rule: generators passed to **core APIs are core**; **all other authored generators stay opaque**, and reactive reads inside are reported **at the read**. **F-S31**: module-level `createStore` was lowered without an owner. Rule: **module-level reactive state is foreign**, retaining its sharing/lifetime, with **`MODULE_STATE` at the declaration**. **F-S32**: a generated line was reported instead of the source; the **shared position map fixes locality** (`7ddd803`, cherry-picked from `b2f75f1`). [The newer findings at `8337506`](https://github.com/devagrawal09/solid-yield/blob/8337506/documentation/sugar-design.md) record these bounded repairs and **F-S33**: lowering moved an event’s reactive arguments into a **Promise-chain wrapper**, losing the event host. That is a compiler bug, not an author mistake. Both Effect acceptance halves still fail; hydrated parity and SSR have not run. **Stop on structural compiler failures**: record the blocker and repair lowering before resuming acceptance; do not invent an author patch, relax the rules, or count the existing GREEN gate as Effect acceptance. No native Effect gate step or baseline change is claimed. **Resolved (Dev, 2026-10-08: "fine"):** production fallbacks show the real failure message (D-115) — an allowed, recorded difference from plain Solid; transported failure classes regain their prototype on the client.
+
+**Amendment (2026-10-08, later): Effect pinned, checker contract implemented and mutation baseline.** Read-only heads after fetch: **origin/proto/sugar `7387a35`**, **origin/proto/sugar-ls `ed90200`**, **origin/proto/sugar-mutation `035893f`**. This updates the earlier checkpoints; no prototype or mutation gate is merged into main by this documentation amendment.
+
+1. **Effect original is pinned at F-S34 under the stop rule.** [The stop report](https://github.com/devagrawal09/solid-yield/blob/7387a35/documentation/native-effect-blocker.md) and [F-S30–F-S34](https://github.com/devagrawal09/solid-yield/blob/7387a35/documentation/sugar-design.md) record the bounded fixes: generator ownership (F-S30), module state (F-S31), source positions (F-S32), lexical callbacks and chained event arguments (F-S33). The app's hand-written Effect-TS↔Solid bridge still produces a plain helper `() => ManagedRuntime.make(layer, parent()?.memoMap)` whose signal/context accessor read has no host. The author value use is at `solid-effect.ts:52`, but the refusal points at the generated helper name at `50:17`: a compiler host/mapping gap, not an author restriction. Both Effect acceptance halves fail; hydrated parity and SSR have not run, and the author patch is empty. Effect is pinned, not chased. **Todos stays green**; the sugar branch records **69/69 GREEN**, including client/hydrated parity and SSR. The three resulting rule paragraphs, verbatim:
+
+> A generator passed directly as the first argument to a core API is core and is lowered. In Solid 2 rc.13 these APIs are `action` (sync/async generators), and the async-iterable producers of `createSignal`, `createMemo`, `createOptimistic`, `createEffect`, `createRenderEffect`, `createStore`, `createProjection`, and `createOptimisticStore`. Other author generators, including Effect programs and custom iterators, are opaque and keep their own protocol. The compiler inserts no delegated operations into its body and rewrites none of its reads. Calls to it are foreign values (provenance C, failures unknown). A reactive read inside it reports `READ_IN_OPAQUE_GENERATOR` at the read: read the signal outside and pass the value in, or make the read a memo.
+>
+> Callback hosts are lexical. A callback at any depth inside an event, either effect phase, a memo, or a hole belongs to that host, including store updaters, array callbacks, Promise continuations, and nested arrows. Reads keep that host and its admission rules. A timer callback declared in a memo therefore cannot write; its generated host check reports the write rather than treating it as a fresh event. `SUGAR_CALLBACK` is reserved for a callback passed to an opaque API from setup whose host cannot be determined. An event keeps its body and async continuations as its host: reactive arguments, including arguments in a chained Promise receiver, are evaluated in that event and in source order before a plain producer uses their captured values.
+>
+> Module-level reactive state is outside the core. A `createSignal`, `createStore` or `createMemo` declaration at module level has no component owner, so the compiler keeps it Solid and treats it as foreign (provenance C, failures unknown). `MODULE_STATE` points at the declaration: create the state inside a component and provide it via context, or keep it foreign and handle failures at its uses. The compiler does not move state or change its lifetime.
+
+2. **Checker contract implemented on proto/sugar-ls.** [The fixes/rerun report at `ed90200`](https://github.com/devagrawal09/solid-yield/blob/ed90200/documentation/reviews/sugar-review-2-fixes.md) records comparable **review 1: 9/20 → 19/20**, **review 2: 11/16 → 15/16**. Valid handling and timer/generator controls are excluded on both sides; Portal remains advisory. The catch and handoff rules, verbatim:
+
+> Catch output follows **E_out ⊇ (E \ G) ∪ H ∪ F**. Only paths that definitely
+> consume the incoming value contribute to G. Base classes cover subclasses by
+> nominal inheritance. Conditional rethrow retains the other classes; partial
+> handling retains the whole class. Unknown remains top after selective tests;
+> a genuine consuming catch-all may remove it while retaining H/F.
+>
+> A returned fallback or a fallback state write is handling. An empty, bare-return
+> or logging-only catch gets CATCH_SWALLOWS unless an actual comment inside it says
+> `/* @yield-absorb: reason */`. Logging alone does not widen an unchanged binding.
+> JSX event failures are checked from the generated Bind failure types at their
+> handler; rendered boundaries cannot absorb a later event rejection. Native
+> render/hydrate is a foreign handoff even when the component is local. D-033's
+> explicit library-root allowance does not apply to that entry.
+
+Native render/hydrate failures report at the **originating read**, with render as a related location; event failures report at the **handler**. Remaining gaps: runtime selective Errored matching and transported custom prototype restoration (F-S14/F-S15), external throw types/witnesses and dynamic aliases (F16/F19), precise synchronous catch subtraction (currently a safe overestimate), and object/unknown-yield generators. Native escaping-failure declarations are unsupported; catch failures inside the handler. Primitive throws are refused with `NATIVE_THROW`. **Prototype restoration and selective runtime matching move to the library as runtime/transport changes**: the session is dispatched on **runtime/failure-wire**, to be recorded as **D-117**. Class inference alone cannot repair these runtime gaps. A third newcomer review is in progress.
+
+3. **Mutation testing baseline.** [The report at `035893f`](https://github.com/devagrawal09/solid-yield/blob/035893f/documentation/mutation-report.md) records **35.65%: 128 killed / 231 survived / 57 equivalent**, across 416 program mutants. The per-operator table is retained below as baseline evidence, under that run's exact-line kill rule:
+
+| Operator | Mutants | Killed | Survived | Equivalent | Score | Expected codes |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| delete-catch | 9 | 0 | 9 | 0 | 0.00% | FOREIGN_HANDOFF, NATIVE_CALLBACK_FAILURE |
+| swallow-catch | 2 | 0 | 0 | 2 | n/a | equivalent |
+| delete-errored | 19 | 0 | 19 | 0 | 0.00% | FOREIGN_HANDOFF |
+| delete-loading | 21 | 0 | 21 | 0 | 0.00% | PENDING_ROOT |
+| setup-read | 110 | 88 | 22 | 0 | 80.00% | READ_IN_SETUP, solid-yield/no-read-in-setup |
+| delete-provider | 20 | 0 | 20 | 0 | 0.00% | NO_PROVIDER |
+| never-provided-context | 26 | 0 | 26 | 0 | 0.00% | NO_PROVIDER |
+| throw-string | 24 | 0 | 0 | 24 | n/a | equivalent |
+| throw-object | 24 | 0 | 0 | 24 | n/a | equivalent |
+| async-reject | 3 | 0 | 3 | 0 | 0.00% | FOREIGN_HANDOFF, NATIVE_CALLBACK_FAILURE |
+| remove-await | 27 | 0 | 27 | 0 | 0.00% | TS2322, TS2345, GENERATED_TYPE, SETTLED_PROP |
+| memo-write | 23 | 20 | 3 | 0 | 86.96% | WRITE_IN_REACTIVE, solid-yield/no-unyielded-write |
+| timer-read | 6 | 0 | 0 | 6 | n/a | equivalent |
+| non-core-cache | 43 | 15 | 28 | 0 | 34.88% | SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP |
+| destructure-props | 7 | 0 | 7 | 0 | 0.00% | NATIVE_PROPS |
+| inline-component | 46 | 1 | 45 | 0 | 2.17% | NATIVE_COMPONENT, SUGAR_CALLBACK, SUGAR_RETURN, FOREIGN_HANDOFF |
+| effect-arity | 4 | 4 | 0 | 0 | 100.00% | NATIVE_EFFECT_PHASES, TS2554 |
+| remove-use-server | 1 | 0 | 0 | 1 | n/a | equivalent |
+| server-new-class | 1 | 0 | 1 | 0 | 0.00% | FOREIGN_HANDOFF |
+
+The orchestrator's caveat, verbatim:
+
+> the kill rule 'expected code at the mutated line ±0' undercounts: a deleted Errored/Loading/provider is correctly reported at the origin read or the handoff with the deletion as related location; the next run counts a kill when the expected code's primary or related location falls in the mutated routine; this run predates the review fixes and the checker contract (d88e31c), so it is a baseline, not the checker's state
+
+Real gaps confirmed by both the reviews and the mutants: **delete catch, async rejection, remove await, destructure props, inline component, non-core cache**. These baseline findings do not establish which gaps remain after the checker-contract fixes. **Stryker: ESLint plugin 66.04%; TS plugin 48.07%.** The larger Vite native/sugar/transform/position and compiler-inference runs were deferred in this report and are now running; no scores are claimed for them. Stryker counts timeouts as detected, and subprocess coverage limits remain recorded.
+
+4. **The standing mutation rule now has its artifact.** On proto/sugar-mutation the **`mutation` gate step** runs the native-corpus program pipeline and checks the score baseline, which **may not drop**, plus per-operator site floors. The cache hashes corpus, harness, checker, library output/declarations and lockfile; changes require a fresh run. Stryker over checker source remains part of the continuing process. This documentation commit changes neither main's gate steps nor its baseline.

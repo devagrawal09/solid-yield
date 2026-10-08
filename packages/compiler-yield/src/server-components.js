@@ -8,11 +8,51 @@ import { createHash } from "node:crypto";
 const require = createRequire(new URL("../../vite-plugin-yield/package.json", import.meta.url));
 const MagicString = require("magic-string");
 
+// Read the actual resolved installation, including packages without a manifest
+// export. This runs only in the Vite plugin; no filesystem code ships to clients.
+export function solidAdapterVersions(directory) {
+  const from = createRequire(resolve(directory, "package.json"));
+  return Object.fromEntries(
+    ["solid-js", "@solidjs/web"].map(name => {
+      let dir = dirname(from.resolve(name));
+      for (;;) {
+        try {
+          const manifest = JSON.parse(readFileSync(resolve(dir, "package.json"), "utf8"));
+          if (manifest.name === name) return [name, manifest.version];
+        } catch (error) {
+          if (error.code !== "ENOENT") throw error;
+        }
+        const parent = dirname(dir);
+        if (parent === dir) throw new Error(`Cannot read installed ${name} version`);
+        dir = parent;
+      }
+    })
+  );
+}
+
+export function solidAdapterVersionPlugin(directory) {
+  const id = "virtual:compiler-yield-solid-versions";
+  const versions = {
+    adapter: solidAdapterVersions(import.meta.dirname),
+    application: solidAdapterVersions(directory)
+  };
+  return {
+    name: "compiler-yield:solid-versions",
+    resolveId(source) {
+      if (source === id) return "\0" + id;
+    },
+    load(source) {
+      if (source === "\0" + id) return `export default ${JSON.stringify(versions)};`;
+    }
+  };
+}
+
 /** Docs C3 lowering. Called after eagerIslands({roots:"single"}), before the
  * yield/Solid transforms. Uses Solid's public server functions and frame slots.
  */
 export default function serverComponents({ directory }) {
   const dir = resolve(directory);
+  const versions = solidAdapterVersionPlugin(dir);
   const content = resolve(dir, "src/content.tsx");
   const remote = resolve(dir, "src/__compiler_regions.tsx");
   const stub = resolve(dir, "src/__compiler_refetch.tsx");
@@ -128,9 +168,13 @@ export function GuideRegion() {
     name: "compiler-yield:server-components",
     enforce: "pre",
     resolveId(id) {
+      const versionId = versions.resolveId(id);
+      if (versionId) return versionId;
       if (id === remote || id === stub) return id;
     },
     load(id) {
+      const versionCode = versions.load(id);
+      if (versionCode) return versionCode;
       if (id === remote) return serverCode;
       if (id === stub) return { code: stubCode, map: null };
     },

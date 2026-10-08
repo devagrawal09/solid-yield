@@ -273,6 +273,12 @@ function buildSteps(twins) {
 
   steps.push(
     {
+      name: "compiler:solid-adapter-contract",
+      cwd: root,
+      cmd: process.execPath,
+      args: ["--test", "packages/compiler-yield/test/solid-adapter.test.mjs"]
+    },
+    {
       name: "compiler:emission-test",
       cwd: root,
       cmd: process.execPath,
@@ -479,12 +485,22 @@ console.log(
     (opts.only.length ? `, --only ${opts.only.join(" --only ")}` : "")
 );
 const width = Math.max(...steps.map(s => s.name.length));
-await runAll(steps, opts.jobs, s => {
+const reportStep = s => {
   const note = s.status === "SKIP" ? `  (${s.reason})` : "";
   console.log(
     `${s.status.padEnd(4)}  ${s.name.padEnd(width)}  ${fmtSecs(s.durationMs).padStart(7)}${note}`
   );
-});
+};
+// Check the version/slot contract before the much larger R parity suite. A
+// Solid bump should name the adapter contract as the cause, not a DOM symptom.
+const adapterContract = steps.find(s => s.name === "compiler:solid-adapter-contract");
+if (adapterContract) await runAll([adapterContract], 1, reportStep);
+const remaining = steps.filter(s => s !== adapterContract);
+if (adapterContract?.status === "FAIL") {
+  const parity = remaining.find(s => s.name === "compiler:emission-test");
+  if (parity) parity.skip = "frame adapter contract failed";
+}
+await runAll(remaining, opts.jobs, reportStep);
 const finishedAt = new Date();
 // Report in definition order, not completion order.
 const failed = steps.filter(s => s.status === "FAIL");

@@ -1,5 +1,9 @@
 # C4: docs frame DOM parity
 
+**Adapter update (2026-10-08):** public hydration readers replace two private
+reads. Remaining rc.13 dependencies are isolated behind a load-time version
+check and a separate gate contract. See [the inventory and bump procedure](compiler-adapter.md).
+
 **C4c update (2026-10-08): plain Solid confirms frames over-claim raw link
 state. The authored-host binding now waits for root HTML before settling
 fresh refetches. Exact DOM remains 6/40 at L. See C4c below for independent

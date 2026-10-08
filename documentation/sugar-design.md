@@ -511,6 +511,60 @@ at a handoff report what the author must handle there. An outside API is never
 itself a transform refusal. Refusals are for inside-core model violations or
 unresolved reactive hosts, including setup-time async reads.
 
+A selected component handed to an opaque package's `component` slot receives
+plain Solid props with provenance C. The generated `NativeProps` facade makes
+those values settled paths, retaining unknown value types and the original plain
+call signature through the `nativeC` identity adapter. Its return type keeps the
+component's pending, failure and context types unchanged; `foreign()` still
+checks every handoff. Unknown route data is neither changed to `void` nor allowed
+to hide a colored library source at a core call.
+
+**F-S29 — native mode finds an unhandled failure in originals/hackernews-spa.**
+In `examples/originals/hackernews-spa/src/lib/hn.ts:31–38`, the fetch and body read
+precede the catch; only JSON parsing is handled:
+
+```ts
+  const response = await fetch(url, { headers: { "User-Agent": "chrome" } });
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    console.error(`Received from API: ${text}`);
+    return { error: e };
+  }
+```
+
+The unchanged routes `stories.tsx:19`, `story.tsx:15`, and `user.tsx:12` read
+those requests in memos without an `Errored`. Their foreign handoffs are at
+`app.tsx:25`, `app.tsx:28`, and `app.tsx:29`. The Router boundary at
+`app.tsx:35:5` reports, verbatim:
+
+```text
+[NATIVE_FOREIGN_BOUNDARY] Router (createRouter from @solidjs/router) stays Solid at this JSX boundary (provenance C; foreign failures unknown). Handle failures at the boundary. To bring it inside, use a core API or select its source with a checked contract.
+```
+
+Each route retains `NativeFailure<"unknown">`; all three handoffs reject with
+this TypeScript diagnostic property, verbatim:
+
+```text
+readonly "[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first": "unknown";
+```
+
+[The exact snapshot](../examples/harness/native-hackernews/expected-diagnostics.json)
+records the complete three TypeScript errors at generated `app.tsx:14:32`,
+`app.tsx:18:32`, and `app.tsx:22:32`. The expected-diagnostics gate requires exactly
+that boundary and those three failures; any extra error, missing rejection, or
+changed failure set fails. This is the model finding an unhandled failure in the
+original, not a native lowering blocker. The separate
+[author patch](../examples/harness/native-hackernews/author-fix.patch) adds only an
+`Errored` import and wrapper to each route, with a fallback reading an Error's
+message (Solid's accessor is unknown, so the fallback checks `instanceof Error`).
+The original stays byte-identical. Fixed native output must separately pass
+transform, typecheck, lint, happy-path client/hydrated parity against the original,
+a rejected-fetch state against the patched Solid version, and SSR smoke of the
+cached 1,406-comment story. The oracle's handlers also work, but their structure
+and `ApiError` mapping are not copied into this patch.
+
 This section supersedes the previous request to decide native scope. Scope is
 settled; incomplete lowering and missing parity remain implementation findings.
 

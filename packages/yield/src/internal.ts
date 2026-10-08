@@ -22,3 +22,5 @@ export {
 } from "./native-control.js";
 
 export type { NativeArguments } from "./native-control.js";
+export { nativeC } from "./native-props.js";
+export type { NativeProps } from "./native-props.js";

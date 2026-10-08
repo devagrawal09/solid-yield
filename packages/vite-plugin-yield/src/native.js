@@ -231,8 +231,8 @@ export class NativeDiagnosticError extends Error {
   }
 }
 /** Translate only known surface contracts, then use the existing routine inference.
- * @param {string} code @param {string} filename @param {Map<string,string>} modules @param {ts.CompilerOptions} [options] */
-function surface(code, filename, modules, options = {}) {
+ * @param {string} code @param {string} filename @param {Map<string,string>} modules @param {ts.CompilerOptions} [options] @param {Set<string>} [foreignComponents] */
+function surface(code, filename, modules, options = {}, foreignComponents = new Set()) {
   const p = parseProgram(code, filename);
   if (!p) throw new Error(`Cannot parse ${filename}`);
   const needed = new Set();
@@ -384,9 +384,23 @@ function surface(code, filename, modules, options = {}) {
           "Destructured component parameters need a checked snapshot-versus-path mapping."
         );
       if (param?.typeAnnotation?.type === "TSTypeAnnotation") {
-        needed.add("Props");
+        const propsType = foreignComponents.has(name) ? "__NativeProps" : "Props";
+        needed.add(propsType);
+        // An untyped rendered child has the JSX element contract, not an
+        // arbitrary unknown value that could conceal a colored source.
+        if (t.isTSTypeLiteral(param.typeAnnotation.typeAnnotation))
+          for (const prop of param.typeAnnotation.typeAnnotation.members)
+            if (
+              t.isTSPropertySignature(prop) &&
+              t.isIdentifier(prop.key, { name: "children" }) &&
+              (t.isTSAnyKeyword(prop.typeAnnotation?.typeAnnotation) ||
+                t.isTSUnknownKeyword(prop.typeAnnotation?.typeAnnotation))
+            ) {
+              needed.add("Element");
+              prop.typeAnnotation = t.tsTypeAnnotation(t.tsTypeReference(t.identifier("Element")));
+            }
         param.typeAnnotation.typeAnnotation = t.tsTypeReference(
-          t.identifier("Props"),
+          t.identifier(propsType),
           t.tsTypeParameterInstantiation([param.typeAnnotation.typeAnnotation])
         );
       }
@@ -834,6 +848,58 @@ function surface(code, filename, modules, options = {}) {
         t.stringLiteral("solid-yield/internal")
       )
     );
+  if (foreignComponents.size) {
+    p.traverse({
+      Function(q) {
+        if (
+          q.getFunctionParent() ||
+          (q.parentPath.isCallExpression() &&
+            t.isIdentifier(q.parentPath.node.callee, { name: "__nativeC" }))
+        )
+          return;
+        const name =
+          ("id" in q.node ? q.node.id?.name : "") ||
+          (q.parentPath.isVariableDeclarator() && t.isIdentifier(q.parentPath.node.id)
+            ? q.parentPath.node.id.name
+            : "");
+        if (!foreignComponents.has(name) || !q.node.params[0]) return;
+        needed.add("__nativeC");
+        if (q.isFunctionDeclaration()) {
+          const fn = t.functionExpression(q.node.id, q.node.params, q.node.body);
+          const declaration = t.variableDeclaration("const", [
+            t.variableDeclarator(
+              t.identifier(name),
+              t.callExpression(t.identifier("__nativeC"), [fn])
+            )
+          ]);
+          if (q.parentPath.isExportDefaultDeclaration())
+            q.parentPath.replaceWithMultiple([
+              declaration,
+              t.exportDefaultDeclaration(t.identifier(name))
+            ]);
+          else q.replaceWith(declaration);
+        } else if (q.isFunctionExpression() || q.isArrowFunctionExpression()) {
+          q.replaceWith(t.callExpression(t.identifier("__nativeC"), [q.node]));
+        }
+        q.skip();
+      }
+    });
+  }
+  const nativePropsImports = ["__nativeC", "__NativeProps"].filter(name => needed.delete(name));
+  if (nativePropsImports.length)
+    p.node.body.unshift(
+      t.importDeclaration(
+        nativePropsImports.map(name => {
+          const spec = t.importSpecifier(
+            t.identifier(name),
+            t.identifier(name === "__nativeC" ? "nativeC" : "NativeProps")
+          );
+          if (name === "__NativeProps") spec.importKind = "type";
+          return spec;
+        }),
+        t.stringLiteral("solid-yield/internal")
+      )
+    );
   for (const name of needed)
     if (p.scope.hasBinding(name))
       fail(p, "NATIVE_NAME", `Reserve ${name} for the generated native import.`);
@@ -845,7 +911,8 @@ function surface(code, filename, modules, options = {}) {
             t.identifier(name),
             t.identifier(name.replace(/^__native(?=render$|hydrate$)/, ""))
           );
-          if (name === "Props" || name === "RootCheck") spec.importKind = "type";
+          if (name === "Props" || name === "RootCheck" || name === "Element")
+            spec.importKind = "type";
           return spec;
         }),
         t.stringLiteral("solid-yield")
@@ -865,6 +932,68 @@ export function lowerNativeProject(input, options = {}) {
   const selected = new Map([...files].filter(([id]) => !entries.has(id)));
   const diagnostics = inspectNativeProject(selected);
   if (diagnostics.length) throw new NativeDiagnosticError(diagnostics);
+  // Resolve selected components handed as values to a foreign component slot.
+  // Their source parameter remains the plain Solid call signature at that edge.
+  const sourceProgram = [...selected.values()].some(code => /\bcomponent\s*:/.test(code))
+    ? nativeProgram(selected, options.compilerOptions)
+    : null;
+  const checker = sourceProgram?.getTypeChecker();
+  /** @type {Map<string, Set<string>>} */ const foreignComponents = new Map();
+  for (const file of selected.keys()) {
+    const source = sourceProgram?.getSourceFile(file);
+    /** @param {ts.Node} node */
+    const visit = node => {
+      if (
+        checker &&
+        ts.isPropertyAssignment(node) &&
+        node.name.getText(source) === "component" &&
+        ts.isIdentifier(node.initializer)
+      ) {
+        const call =
+          ts.isObjectLiteralExpression(node.parent) && ts.isCallExpression(node.parent.parent)
+            ? node.parent.parent
+            : null;
+        const callee =
+          call && ts.isIdentifier(call.expression)
+            ? checker.getSymbolAtLocation(call.expression)
+            : null;
+        const foreignSlot = callee?.declarations?.some(declaration => {
+          let parent = /** @type {ts.Node | undefined} */ (declaration);
+          while (parent && !ts.isImportDeclaration(parent)) parent = parent.parent;
+          return (
+            parent &&
+            ts.isImportDeclaration(parent) &&
+            ts.isStringLiteral(parent.moduleSpecifier) &&
+            !/^(\.|~|solid-js$|@solidjs\/web$|solid-yield(?:\/|$))/.test(
+              parent.moduleSpecifier.text
+            )
+          );
+        });
+        if (!foreignSlot) {
+          ts.forEachChild(node, visit);
+          return;
+        }
+        let symbol = checker.getSymbolAtLocation(node.initializer);
+        if (symbol && symbol.flags & ts.SymbolFlags.Alias)
+          symbol = checker.getAliasedSymbol(symbol);
+        for (const declaration of symbol?.declarations ?? []) {
+          const target = declaration.getSourceFile().fileName;
+          if (!selected.has(target)) continue;
+          const name =
+            (ts.isFunctionDeclaration(declaration) || ts.isVariableDeclaration(declaration)) &&
+            declaration.name &&
+            ts.isIdentifier(declaration.name)
+              ? declaration.name.text
+              : null;
+          if (!name) continue;
+          if (!foreignComponents.has(target)) foreignComponents.set(target, new Set());
+          foreignComponents.get(target)?.add(name);
+        }
+      }
+      ts.forEachChild(node, visit);
+    };
+    if (source) visit(source);
+  }
   const prepared = nativePrelude(selected);
   const failures = nativeFailures(prepared, options.compilerOptions);
   const effects = new Map(
@@ -876,7 +1005,10 @@ export function lowerNativeProject(input, options = {}) {
   const lowered = lowerSugarProject(
     new Map([
       ...new Map(
-        [...effects].map(([id, code]) => [id, surface(code, id, effects, options.compilerOptions)])
+        [...effects].map(([id, code]) => [
+          id,
+          surface(code, id, effects, options.compilerOptions, foreignComponents.get(id))
+        ])
       ),
       ...entries
     ]),

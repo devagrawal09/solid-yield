@@ -1141,86 +1141,23 @@
         {
           "stage": "type",
           "code": "TS2345",
-          "message": "Argument of type 'HoleCall<RouteSectionProps<unknown, Params>, true, NativeFailure<\"unknown\">, false, never>' is not assignable to parameter of type '(<A extends PropsInput<RouteSectionProps<unknown, Params>, unknown> = PropsInput<RouteSectionProps<unknown, Params>, never>>(props: A & NoInfer<Undeclared<...>>) => ComponentView<...>) & { ...; } & { ...; }'.\n  Type 'HoleCall<RouteSectionProps<unknown, Params>, true, NativeFailure<\"unknown\">, false, never>' is not assignable to type '{ readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"unknown\"; }'.",
+          "message": "Argument of type '(props: RouteSectionProps<unknown, Params>) => ComponentView<true, NativeFailure<\"unknown\">, false, never>' is not assignable to parameter of type '((props: RouteSectionProps<unknown, Params>) => ComponentView<true, NativeFailure<\"unknown\">, false, never>) & { readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"unknown\"; }'.\n  Type '(props: RouteSectionProps<unknown, Params>) => ComponentView<true, NativeFailure<\"unknown\">, false, never>' is not assignable to type '{ readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"unknown\"; }'.",
           "file": "packages/vite-plugin-yield/test/.native-generated/originals/hackernews-spa/app.tsx",
           "line": 14
         },
         {
           "stage": "type",
-          "code": "TS2769",
-          "message": "No overload matches this call.\n  Overload 1 of 2, '(route: { path: readonly [\"/\", \"/top\", \"/new\", \"/show\", \"/ask\", \"/job\"]; matchFilters?: (({ [x: string]: MatchFilter | undefined; } | Record<string, MatchFilter>) & (ValidFilters<...> | ValidFilters<...>)) | undefined; ... 4 more ...; info?: RouteInfo | undefined; }): DefinedRoute<...>', gave the following error.\n    Type '({ location }: RoutePreloadFuncArgs) => void' is not assignable to type '(args: RoutePreloadFuncArgs<RouteParams<readonly [\"/\", \"/top\", \"/new\", \"/show\", \"/ask\", \"/job\"]>>) => DeclareProp<\"data\">'.\n      Type 'void' is not assignable to type 'DeclareProp<\"data\">'.\n  Overload 2 of 2, '(route: { preload?: ((args: RoutePreloadFuncArgs<Params>) => DeclareProp<\"data\">) | undefined; component?: DefinedRouteComponent<DeclareProp<\"data\">, Params> | undefined; children?: LazyRouteChildren | ... 2 more ... | undefined; search?: StandardSchemaV1<...> | undefined; info?: RouteInfo | undefined; }): DefinedRoute<...>', gave the following error.\n    Type '({ location }: RoutePreloadFuncArgs) => void' is not assignable to type '(args: RoutePreloadFuncArgs<Params>) => DeclareProp<\"data\">'.\n      Type 'void' is not assignable to type 'DeclareProp<\"data\">'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/hackernews-spa/app.tsx",
-          "line": 15
-        },
-        {
-          "stage": "type",
           "code": "TS2345",
-          "message": "Argument of type 'HoleCall<RouteProps<\"/stories/:id\">, true, unknown, false, never>' is not assignable to parameter of type '(<A extends PropsInput<RouteProps<\"/stories/:id\">, unknown> = PropsInput<RouteProps<\"/stories/:id\">, never>>(props: A & NoInfer<Undeclared<A, RouteProps<\"/stories/:id\">>>) => ComponentView<...>) & { ...; } & { ...; }'.\n  Type 'HoleCall<RouteProps<\"/stories/:id\">, true, unknown, false, never>' is not assignable to type '{ readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": unknown; }'.",
+          "message": "Argument of type '(props: RouteProps<\"/stories/:id\">) => ComponentView<true, NativeFailure<\"unknown\">, false, never>' is not assignable to parameter of type '((props: RouteProps<\"/stories/:id\">) => ComponentView<true, NativeFailure<\"unknown\">, false, never>) & { readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"unknown\"; }'.\n  Type '(props: RouteProps<\"/stories/:id\">) => ComponentView<true, NativeFailure<\"unknown\">, false, never>' is not assignable to type '{ readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"unknown\"; }'.",
           "file": "packages/vite-plugin-yield/test/.native-generated/originals/hackernews-spa/app.tsx",
           "line": 18
         },
         {
           "stage": "type",
-          "code": "TS2769",
-          "message": "No overload matches this call.\n  Overload 1 of 2, '(route: { path: \"/stories/:id\"; matchFilters?: (({ [x: string]: MatchFilter | undefined; } | Record<string, MatchFilter>) & (ValidFilters<{ [x: string]: MatchFilter | undefined; }, \"/stories/:id\"> | ValidFilters<...>)) | undefined; ... 4 more ...; info?: RouteInfo | undefined; }): DefinedRoute<...>', gave the following error.\n    Type '({ params }: RoutePreloadFuncArgs<RouteParams<Path>>) => void' is not assignable to type '(args: RoutePreloadFuncArgs<RouteParams<\"/stories/:id\">>) => DeclareProp<\"data\">'.\n      Type 'void' is not assignable to type 'DeclareProp<\"data\">'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/hackernews-spa/app.tsx",
-          "line": 19
-        },
-        {
-          "stage": "type",
           "code": "TS2345",
-          "message": "Argument of type 'HoleCall<RouteProps<\"/users/:id\">, true, NativeFailure<\"unknown\">, false, never>' is not assignable to parameter of type '(<A extends PropsInput<RouteProps<\"/users/:id\">, unknown> = PropsInput<RouteProps<\"/users/:id\">, never>>(props: A & NoInfer<Undeclared<A, RouteProps<\"/users/:id\">>>) => ComponentView<...>) & { ...; } & { ...; }'.\n  Type 'HoleCall<RouteProps<\"/users/:id\">, true, NativeFailure<\"unknown\">, false, never>' is not assignable to type '{ readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"unknown\"; }'.",
+          "message": "Argument of type '(props: RouteProps<\"/users/:id\">) => ComponentView<true, NativeFailure<\"unknown\">, false, never>' is not assignable to parameter of type '((props: RouteProps<\"/users/:id\">) => ComponentView<true, NativeFailure<\"unknown\">, false, never>) & { readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"unknown\"; }'.\n  Type '(props: RouteProps<\"/users/:id\">) => ComponentView<true, NativeFailure<\"unknown\">, false, never>' is not assignable to type '{ readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"unknown\"; }'.",
           "file": "packages/vite-plugin-yield/test/.native-generated/originals/hackernews-spa/app.tsx",
           "line": 22
-        },
-        {
-          "stage": "type",
-          "code": "TS2769",
-          "message": "No overload matches this call.\n  Overload 1 of 2, '(route: { path: \"/users/:id\"; matchFilters?: (({ [x: string]: MatchFilter | undefined; } | Record<string, MatchFilter>) & (ValidFilters<{ [x: string]: MatchFilter | undefined; }, \"/users/:id\"> | ValidFilters<...>)) | undefined; ... 4 more ...; info?: RouteInfo | undefined; }): DefinedRoute<...>', gave the following error.\n    Type '({ params }: RoutePreloadFuncArgs<RouteParams<Path>>) => void' is not assignable to type '(args: RoutePreloadFuncArgs<RouteParams<\"/users/:id\">>) => DeclareProp<\"data\">'.\n      Type 'void' is not assignable to type 'DeclareProp<\"data\">'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/hackernews-spa/app.tsx",
-          "line": 23
-        },
-        {
-          "stage": "type",
-          "code": "TS2322",
-          "message": "Type '() => Generator<ChildView<false, never, false, never>, Element, any>' is not assignable to type 'DeclareProp<\"children\">'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/hackernews-spa/components/comment.tsx",
-          "line": 23
-        },
-        {
-          "stage": "type",
-          "code": "TS2322",
-          "message": "Type '{ children: ViewFn<Read<false, never> | ChildView<true, unknown, false, never>, Element>; }' is not assignable to type 'IntrinsicAttributes & { children?: Element; }'.\n  Type '{ children: ViewFn<Read<false, never> | ChildView<true, unknown, false, never>, Element>; }' is not assignable to type '{ children?: Element; }'.\n    Types of property 'children' are incompatible.\n      Type 'ViewFn<Read<false, never> | ChildView<true, unknown, false, never>, Element>' is not assignable to type 'Element'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/hackernews-spa/components/comment.tsx",
-          "line": 30
-        },
-        {
-          "stage": "type",
-          "code": "TS2322",
-          "message": "Type 'unknown' is not assignable to type 'Element'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/hackernews-spa/components/toggle.tsx",
-          "line": 20
-        },
-        {
-          "stage": "type",
-          "code": "TS2344",
-          "message": "Type 'RouteSectionProps<unknown, Params>' does not satisfy the constraint 'PropsCheck<RouteSectionProps<unknown, Params>>'.\n  Types of property 'data' are incompatible.\n    Type 'unknown' is not assignable to type 'DeclareProp<\"data\">'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/hackernews-spa/routes/stories.tsx",
-          "line": 16
-        },
-        {
-          "stage": "type",
-          "code": "TS2344",
-          "message": "Type 'RouteProps<\"/stories/:id\">' does not satisfy the constraint 'PropsCheck<RouteProps<\"/stories/:id\">>'.\n  Types of property 'data' are incompatible.\n    Type 'unknown' is not assignable to type 'DeclareProp<\"data\">'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/hackernews-spa/routes/story.tsx",
-          "line": 15
-        },
-        {
-          "stage": "type",
-          "code": "TS2344",
-          "message": "Type 'RouteProps<\"/users/:id\">' does not satisfy the constraint 'PropsCheck<RouteProps<\"/users/:id\">>'.\n  Types of property 'data' are incompatible.\n    Type 'unknown' is not assignable to type 'DeclareProp<\"data\">'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/hackernews-spa/routes/user.tsx",
-          "line": 14
         }
       ],
       "parity": "not run: no checked native program",
@@ -1228,10 +1165,7 @@
       "differingStatements": null,
       "diffReason": "Generated output still requires a checked app harness.",
       "reasons": [
-        "TS2345",
-        "TS2769",
-        "TS2322",
-        "TS2344"
+        "TS2345"
       ]
     },
     {
@@ -2166,31 +2100,24 @@
       "diagnostics": [
         {
           "stage": "type",
-          "code": "TS2344",
-          "message": "Type 'RouteSectionProps<unknown, Params>' does not satisfy the constraint 'PropsCheck<RouteSectionProps<unknown, Params>>'.\n  Types of property 'data' are incompatible.\n    Type 'unknown' is not assignable to type 'DeclareProp<\"data\">'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/docs/app.tsx",
-          "line": 20
-        },
-        {
-          "stage": "type",
           "code": "TS2769",
           "message": "No overload matches this call.\n  Overload 1 of 2, '(route: { path: \"/\"; matchFilters?: (({ [x: string]: MatchFilter | undefined; } | Record<string, MatchFilter>) & (ValidFilters<{ [x: string]: MatchFilter | undefined; }, \"/\"> | ValidFilters<...>)) | undefined; ... 4 more ...; info?: RouteInfo | undefined; }): DefinedRoute<...>', gave the following error.\n    Type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<false, NativeFailure<\"unknown\">, false, HoleRequires<...>>) & { ...; }' is not assignable to type 'DefinedRouteComponent<any, RouteParams<\"/\">> | undefined'.\n      Type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<false, NativeFailure<\"unknown\">, false, HoleRequires<...>>) & { ...; }' is not assignable to type 'DefinedRouteComponent<any, RouteParams<\"/\">>'.\n        Types of parameters 'props' and 'props' are incompatible.\n          Type 'RouteSectionProps<any, RouteParams<\"/\">> & { children?: any; }' is not assignable to type '(RouteSectionProps<any, RouteParams<\"/\">> & { children?: any; } & NoInfer<Undeclared<RouteSectionProps<any, RouteParams<\"/\">> & { ...; }, {}>>) | undefined'.\n            Type 'RouteSectionProps<any, RouteParams<\"/\">> & { children?: any; }' is not assignable to type 'RouteSectionProps<any, RouteParams<\"/\">> & { children?: any; } & NoInfer<Undeclared<RouteSectionProps<any, RouteParams<\"/\">> & { ...; }, {}>>'.\n              Type 'RouteSectionProps<any, RouteParams<\"/\">> & { children?: any; }' is not assignable to type 'Undeclared<RouteSectionProps<any, RouteParams<\"/\">> & { children?: any; }, {}>'.\n                Property 'children' is optional in type 'RouteSectionProps<any, RouteParams<\"/\">> & { children?: any; }' but required in type 'Undeclared<RouteSectionProps<any, RouteParams<\"/\">> & { children?: any; }, {}>'.\n  Overload 2 of 2, '(route: { preload?: ((args: RoutePreloadFuncArgs<Params>) => any) | undefined; component?: DefinedRouteComponent<any, Params> | undefined; children?: LazyRouteChildren | ... 2 more ... | undefined; search?: StandardSchemaV1<...> | undefined; info?: RouteInfo | undefined; }): DefinedRoute<...>', gave the following error.\n    Type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<false, NativeFailure<\"unknown\">, false, HoleRequires<...>>) & { ...; }' is not assignable to type 'DefinedRouteComponent<any, Params> | undefined'.\n      Type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<false, NativeFailure<\"unknown\">, false, HoleRequires<...>>) & { ...; }' is not assignable to type 'DefinedRouteComponent<any, Params>'.\n        Types of parameters 'props' and 'props' are incompatible.\n          Type 'RouteSectionProps<any, Params> & { children?: any; }' is not assignable to type '(RouteSectionProps<any, Params> & { children?: any; } & NoInfer<Undeclared<RouteSectionProps<any, Params> & { children?: any; }, {}>>) | undefined'.\n            Type 'RouteSectionProps<any, Params> & { children?: any; }' is not assignable to type 'RouteSectionProps<any, Params> & { children?: any; } & NoInfer<Undeclared<RouteSectionProps<any, Params> & { children?: any; }, {}>>'.\n              Type 'RouteSectionProps<any, Params> & { children?: any; }' is not assignable to type 'Undeclared<RouteSectionProps<any, Params> & { children?: any; }, {}>'.\n                Property 'children' is optional in type 'RouteSectionProps<any, Params> & { children?: any; }' but required in type 'Undeclared<RouteSectionProps<any, Params> & { children?: any; }, {}>'.",
           "file": "packages/vite-plugin-yield/test/.native-generated/originals/docs/app.tsx",
-          "line": 35
+          "line": 36
         },
         {
           "stage": "type",
           "code": "TS2345",
           "message": "Argument of type 'HoleCall<{}, false, NativeFailure<\"unknown\">, false, never>' is not assignable to parameter of type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<false, NativeFailure<\"unknown\">, false, HoleRequires<...>>) & { ...; } & { ...; }'.\n  Type 'HoleCall<{}, false, NativeFailure<\"unknown\">, false, never>' is not assignable to type '{ readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"unknown\"; }'.",
           "file": "packages/vite-plugin-yield/test/.native-generated/originals/docs/app.tsx",
-          "line": 35
+          "line": 36
         },
         {
           "stage": "type",
           "code": "TS2345",
-          "message": "Argument of type 'HoleCall<RouteSectionProps<unknown, Params>, false, NativeFailure<\"unknown\">, false, never>' is not assignable to parameter of type '(<A extends PropsInput<RouteSectionProps<unknown, Params>, unknown> = PropsInput<RouteSectionProps<unknown, Params>, never>>(props: A & NoInfer<Undeclared<...>>) => ComponentView<...>) & { ...; } & { ...; }'.\n  Type 'HoleCall<RouteSectionProps<unknown, Params>, false, NativeFailure<\"unknown\">, false, never>' is not assignable to type '{ readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"unknown\"; }'.",
+          "message": "Argument of type '(props: RouteSectionProps<unknown, Params>) => ComponentView<false, NativeFailure<\"unknown\">, false, never>' is not assignable to parameter of type '((props: RouteSectionProps<unknown, Params>) => ComponentView<false, NativeFailure<\"unknown\">, false, never>) & { readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"unknown\"; }'.\n  Type '(props: RouteSectionProps<unknown, Params>) => ComponentView<false, NativeFailure<\"unknown\">, false, never>' is not assignable to type '{ readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"unknown\"; }'.",
           "file": "packages/vite-plugin-yield/test/.native-generated/originals/docs/app.tsx",
-          "line": 38
+          "line": 39
         },
         {
           "stage": "type",
@@ -2212,7 +2139,6 @@
       "differingStatements": null,
       "diffReason": "Generated output still requires a checked app harness.",
       "reasons": [
-        "TS2344",
         "TS2769",
         "TS2345",
         "TS2322"

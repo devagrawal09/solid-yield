@@ -1,0 +1,43 @@
+{
+  "boundaries": [
+    {
+      "code": "NATIVE_FOREIGN_BOUNDARY",
+      "message": "Router (createRouter from @solidjs/router) stays Solid at this JSX boundary (provenance C; foreign failures unknown). Handle failures at the boundary. To bring it inside, use a core API or select its source with a checked contract.",
+      "file": "examples/originals/hackernews-spa/src/app.tsx",
+      "line": 35,
+      "column": 5
+    }
+  ],
+  "errors": [
+    {
+      "code": "FOREIGN_HANDOFF",
+      "tsCode": 2345,
+      "details": "Argument of type '(props: RouteSectionProps<unknown, Params>) => ComponentView<true, NativeFailure<\"unknown\">, false, never>' is not assignable to parameter of type '((props: RouteSectionProps<unknown, Params>) => ComponentView<true, NativeFailure<\"unknown\">, false, never>) & { readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"unknown\"; }'.\n  Type '(props: RouteSectionProps<unknown, Params>) => ComponentView<true, NativeFailure<\"unknown\">, false, never>' is not assignable to type '{ readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"unknown\"; }'.",
+      "message": "[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first",
+      "fails": "\"unknown\"",
+      "file": "app.tsx",
+      "line": 14,
+      "column": 32
+    },
+    {
+      "code": "FOREIGN_HANDOFF",
+      "tsCode": 2345,
+      "details": "Argument of type '(props: RouteProps<\"/stories/:id\">) => ComponentView<true, NativeFailure<\"unknown\">, false, never>' is not assignable to parameter of type '((props: RouteProps<\"/stories/:id\">) => ComponentView<true, NativeFailure<\"unknown\">, false, never>) & { readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"unknown\"; }'.\n  Type '(props: RouteProps<\"/stories/:id\">) => ComponentView<true, NativeFailure<\"unknown\">, false, never>' is not assignable to type '{ readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"unknown\"; }'.",
+      "message": "[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first",
+      "fails": "\"unknown\"",
+      "file": "app.tsx",
+      "line": 18,
+      "column": 32
+    },
+    {
+      "code": "FOREIGN_HANDOFF",
+      "tsCode": 2345,
+      "details": "Argument of type '(props: RouteProps<\"/users/:id\">) => ComponentView<true, NativeFailure<\"unknown\">, false, never>' is not assignable to parameter of type '((props: RouteProps<\"/users/:id\">) => ComponentView<true, NativeFailure<\"unknown\">, false, never>) & { readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"unknown\"; }'.\n  Type '(props: RouteProps<\"/users/:id\">) => ComponentView<true, NativeFailure<\"unknown\">, false, never>' is not assignable to type '{ readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"unknown\"; }'.",
+      "message": "[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first",
+      "fails": "\"unknown\"",
+      "file": "app.tsx",
+      "line": 22,
+      "column": 32
+    }
+  ]
+}

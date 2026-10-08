@@ -45,6 +45,27 @@ export function lowerNativeRecursion(code, file) {
       });
       if (!jsx) return;
       const param = q.node.params[0];
+      if (
+        t.isIdentifier(param) &&
+        !param.typeAnnotation &&
+        q.parentPath.isVariableDeclarator() &&
+        t.isIdentifier(q.parentPath.node.id)
+      ) {
+        const declared = q.parentPath.node.id.typeAnnotation;
+        const annotation = t.isTSTypeAnnotation(declared) ? declared.typeAnnotation : undefined;
+        if (t.isTSTypeReference(annotation) && t.isIdentifier(annotation.typeName)) {
+          const binding = q.scope.getBinding(annotation.typeName.name)?.path;
+          if (
+            binding?.isImportSpecifier() &&
+            binding.parentPath.isImportDeclaration() &&
+            binding.parentPath.node.source.value === "solid-js" &&
+            t.isIdentifier(binding.node.imported, { name: "Component" })
+          )
+            param.typeAnnotation = t.tsTypeAnnotation(
+              annotation.typeParameters?.params[0] ?? t.tsTypeLiteral([])
+            );
+        }
+      }
       const info = {
         path: q,
         param: t.isIdentifier(param) ? param.name : "",

@@ -1,0 +1,27 @@
+--- a/src/routes/stories.tsx
++++ b/src/routes/stories.tsx
+@@ -2 +2 @@
+-import { For, Show, createMemo } from "solid-js";
++import { Errored, For, Show, createMemo } from "solid-js";
+@@ -21,0 +22 @@
++    <Errored fallback={err => { const error = err(); return <p class="route-error">Failed to load: {error instanceof Error ? error.message : String(error)}</p>; }}>
+@@ -53,0 +55 @@
++    </Errored>
+--- a/src/routes/story.tsx
++++ b/src/routes/story.tsx
+@@ -2 +2 @@
+-import { For, Show, createMemo } from "solid-js";
++import { Errored, For, Show, createMemo } from "solid-js";
+@@ -16,0 +17 @@
++    <Errored fallback={err => { const error = err(); return <p class="route-error">Failed to load: {error instanceof Error ? error.message : String(error)}</p>; }}>
+@@ -38,0 +40 @@
++    </Errored>
+--- a/src/routes/user.tsx
++++ b/src/routes/user.tsx
+@@ -2 +2 @@
+-import { Show, createMemo } from "solid-js";
++import { Errored, Show, createMemo } from "solid-js";
+@@ -13,0 +14 @@
++    <Errored fallback={err => { const error = err(); return <p class="route-error">Failed to load: {error instanceof Error ? error.message : String(error)}</p>; }}>
+@@ -31,0 +33 @@
++    </Errored>

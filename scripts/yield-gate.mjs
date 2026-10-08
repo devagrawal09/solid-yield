@@ -232,6 +232,15 @@ function buildSteps(twins) {
     });
   }
 
+  for (const stage of ["diagnostics", "transform", "typecheck", "lint"]) {
+    steps.push({
+      name: `native:hackernews:${stage}`,
+      cwd: root,
+      cmd: process.execPath,
+      args: ["scripts/native-hackernews-check.mjs", stage]
+    });
+  }
+
   steps.push({
     name: "original:docs:typecheck",
     cwd: root,

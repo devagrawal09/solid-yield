@@ -3,6 +3,11 @@
 This map audits the wording in [calculus §5](../calculus.md#5-proof-obligations-traceability-matrix),
 not just whether its examples pass. The source revision is `1da4d82`.
 
+The separate [D-116 inference audit](inference.md#o1o52-re-read-against-inference)
+re-reads every row against native class-based failure inference and main's
+later repairs. Its held/restated/failed statuses do not replace these historical
+M/P/U classifications.
+
 - **M — mechanized model lemma.** Lean proves the stated algebra or routing rule
   in [YieldProofs.lean](lean/YieldProofs.lean). This is **not** a proof that all
   TypeScript values implement that model. P-STATE's interface/owner invariant

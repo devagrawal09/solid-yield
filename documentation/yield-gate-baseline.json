@@ -34,12 +34,12 @@
     "todos-yield-h"
   ],
   "summary": {
-    "pass": 69,
+    "pass": 73,
     "fail": 0,
     "skip": 0,
-    "total": 69,
+    "total": 73,
     "wallMs": 203552,
-    "line": "69 pass / 0 fail / 0 skip in 204s",
+    "line": "73 pass / 0 fail / 0 skip (merged baseline union)",
     "green": true
   },
   "comparison": {
@@ -535,6 +535,30 @@
       "status": "PASS",
       "durationMs": 68,
       "command": "node_modules/.bin/oxlint packages/yield packages/eslint-plugin-yield packages/vite-plugin-yield examples/docs-yield examples/effect-yield examples/hackernews-spa-yield examples/rendering-yield examples/room-yield examples/sierpinski-yield examples/sierpinski-yield-h examples/todos-sugar examples/todos-yield examples/todos-yield-h --ignore-pattern '**/dist/**' --ignore-pattern '**/node_modules/**'"
+    },
+    {
+      "name": "original:dashboard:test",
+      "status": "PASS",
+      "durationMs": 3312,
+      "command": "pnpm -C examples/originals/dashboard run test"
+    },
+    {
+      "name": "original:dashboard:typecheck",
+      "status": "PASS",
+      "durationMs": 2903,
+      "command": "pnpm -C examples/originals/dashboard run typecheck"
+    },
+    {
+      "name": "original:dashboard:ssr-smoke",
+      "status": "PASS",
+      "durationMs": 1695,
+      "command": "pnpm -C examples/originals/dashboard run ssr-smoke"
+    },
+    {
+      "name": "original:dashboard:hydrate-smoke",
+      "status": "PASS",
+      "durationMs": 4921,
+      "command": "pnpm -C examples/originals/dashboard run hydrate-smoke"
     }
   ]
 }

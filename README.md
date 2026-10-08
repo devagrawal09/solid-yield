@@ -2,6 +2,14 @@
 
 `solid-yield` is a library for writing Solid 2 components as **yield components**: generator functions in which every read is a `yield*`, so that a component's type says whether it may be pending, which errors it may fail with, and which contexts it requires.
 
+## Sugar mode (in progress on proto/sugar)
+
+Write plain Solid, add the plugin, and get typed failures without writing
+generators or importing the library in your app code. The plugin converts the
+reactive core to yield routines; everything outside that core stays plain Solid
+at a named foreign boundary, where unknown failures must be handled. The editor
+plugin and matching CLI check are planned. See [the branch design](https://github.com/devagrawal09/solid-yield/blob/5e03328ec2fcd872f87228d4dac4f21bae9fb4c1/documentation/sugar-design.md).
+
 ## The problem
 
 In Solid 2 a component's signature hides what its reads do. The two components below render the same list:
@@ -248,12 +256,13 @@ const id = yield* props.id;                                                  // 
 
 ## Roadmap
 
-[compiler-c0.md](documentation/compiler-c0.md) has the plan.
+[HANDOFF.md](HANDOFF.md#roadmap-and-compiler-checkpoint-2026-10-08-d-116) has the current order (D-116).
 
 - **v0.1, the library** (now): the runtime, the transform and the lint described here. It is waiting to be published to npm.
-- **v0.2:** the next library release, including serialization-safe typed failures (D-115).
-- **v0.3, the lazy builder**: islands as descriptors that become live on first interaction, a step toward resumability without a new runtime.
-- **Candidate after v0.3:** server components (R emit) productized, subject to DOM parity and the purity trust model (D-114). Ergonomic sugar remains a later design item.
+- **v0.2:** bounded native sugar, the editor plugin and matching CLI check, including serialization-safe typed failures (D-115).
+- **Then:** a dashboard twin written as plain Solid.
+- **Then:** islands (server components with client slots) productized, subject to DOM parity and the purity trust model (D-114).
+- **Then:** the lazy builder, with descriptors that become live on first interaction, a step toward resumability without a new runtime.
 
 ## Status
 
@@ -284,6 +293,10 @@ the historical audit from the adapted checks on main.
 
 MIT, copyright (c) 2026 Dev Agrawal ([LICENSE](./LICENSE)). The vendored Solid originals in `examples/originals/`, the JSX types generated from `@solidjs/web`, and the compiler outputs kept as the plugin's oracle are Solid's, under its MIT notice ([NOTICE](./NOTICE)).
 
+## Examples
+
+- [dashboard — original only; for sugar/native mode](examples/originals/dashboard/README.md)
+
 ## Analyzer
 
 Run `pnpm run analyze docs-yield` (or omit the name for all nine twins).
@@ -293,4 +306,4 @@ server-derived (S), server-recomputable (R), or client-owned. It names captures
 that cannot cross an edge. These are diagnostics, not savings or proven roots;
 `--json` gives the full detail. See [the tool](packages/compiler-yield/README.md).
 
-The analyzer recognizes module-level `"use pure"` as an author assertion and lists marked modules without checking their implementations; [C3c](https://github.com/devagrawal09/solid-yield/blob/ada81a8d3af2c1e3a783468ac820875fff1fb99d/documentation/compiler-c3c-scaling.md) measures server components as a wash near **25 KB gzip** of server-derivable code and a clear win from **~110 KB** (D-114; emitters stay on `proto/compiler`).
+The analyzer recognizes module-level `"use pure"` as an author assertion and lists marked modules without checking their implementations; [C3c](https://github.com/devagrawal09/solid-yield/blob/ada81a8d3af2c1e3a783468ac820875fff1fb99d/documentation/compiler-c3c-scaling.md) measures islands (server components with client slots) as a wash near **25 KB gzip** of server-derivable code and a clear win from **~110 KB** (D-114; emitters stay on `proto/compiler`). C2 measured static extraction + eager root split (seven-root and single-root modes), where every root remains a full client component and the article still renders in the browser; those measurements show no load gain. C3–C3c instead render the content on the server and keep small interactive leaves as client slots.

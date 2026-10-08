@@ -1,20 +1,25 @@
-# HANDOFF — solid-yield (checkpoint 2026-10-07: through D-115)
+# HANDOFF — solid-yield (checkpoint 2026-10-08: through D-116)
 
 This repository was extracted from the Solid fork `devagrawal09/solid`, branch `blocks-lib`, at commit **`6978eb83`** (D-015). Git history was not carried; the fork keeps it. The fork's own handoff at that commit (Phases 1A, 1B and 2, and its environment notes) is `git show 6978eb83:HANDOFF.md` in the fork.
 
 > **Names (D-096, 2026-10-06).** The product is `solid-yield` (was `solid-blocks`), with `vite-plugin-solid-yield` and `eslint-plugin-solid-yield`; the unit is a **routine** (was "block"), the model is **yield components**. Package directories are `packages/yield`, `packages/vite-plugin-yield`, `packages/eslint-plugin-yield`; twins are `examples/*-yield(-h)`; the gate is `scripts/yield-gate.mjs`. Text below written before D-096 was updated to the new names, except quoted fork paths and the extraction's own history.
 
-## Roadmap and compiler checkpoint (2026-10-07, D-114)
+## Roadmap and compiler checkpoint (2026-10-08, D-116)
 
 - **v0.1: done in code.** The library runtime, transform and lint are feature-complete; npm publication still awaits credentials.
-- **v0.2: the next library release**, including D-115's serialization-safe typed failures. It is no longer “the compiler”.
-- **v0.3: the lazy builder on the library route.** resume(root), descriptors, keyed attachment and materialization on first interaction, with its own event queue/payload, validated claims and render fallback; keyed failure re-delivery remains a related target (D-109).
-- **Compiler: measured; R emit a roadmap candidate (D-114, C3c amendment).** **Server components (R emit) productized** is a candidate **after v0.3**, gated on **F-C11/F-C13 exact DOM parity** and the **purity directive's trust model**. It stays unmerged on proto/compiler. The measured eager-SPA threshold is a wash near **25 KB gzip** of server-derivable code and a clear win from **~110 KB**, with a widening payload gap: S/M/L save **4.55%/51.99%/56.74% gzip** and **16.22%/41.47%/44.38% load execution** versus the library. R's load and shipping stay constant; response expansion remains (L: +8,500 gzip versus equivalent JSON over seven navigations, leaving 101,332 bytes saved; session execution excluding load −7.97%). See [compiler-c3c-scaling.md](https://github.com/devagrawal09/solid-yield/blob/ada81a8d3af2c1e3a783468ac820875fff1fb99d/documentation/compiler-c3c-scaling.md) and D-114 for controls, limits and recorded differences.
+- **v0.2: sugar mode (native, bounded), plus the editor plugin and matching CLI check.** Write plain Solid; the plugin reconstructs yield routines and checks their types. D-115’s serialization-safe typed failures remain included. **Three originals accepted:** Sierpinski (11 states), todos (27), hackernews-spa (15 happy states + 1 failure with the minimal author patch), with hydrated parity and SSR; recorded sugar gate **69/69 GREEN**. **Effect is blocked at F-S33**; rendering/room/docs remain queued. Local **proto/sugar `8337506`** records generator/module-state/locality repairs (F-S30–F-S32); fetched origin remains `10e1743`. **proto/sugar-ls `fd0aed2`** has the editor plugin/CLI and review-1 fixes: comparable **9/22 → 19/22**, fresh-install gate, origin diagnostics, CLI false-negative fix, host-aware advice and native docs/ESLint selection. The **second review scores 12/24**: advisory CI for structural Solid mistakes, not typed failures. **The proof-based checker contract is first in the queue**, dispatched on proto/sugar-ls 2026-10-08; **standing mutation testing is in progress on proto/sugar-mutation**. See D-116’s later-still amendment and [sugar-design.md](https://github.com/devagrawal09/solid-yield/blob/8337506/documentation/sugar-design.md).
+- **Then: dashboard twin, written as plain Solid.** It exercises native sugar rather than starting with a hand-written yield twin.
+- **Then: islands (server components with client slots) productized**, subject to the parity and purity prerequisites below.
+- **Then: the lazy builder on the library route.** resume(root), descriptors, keyed attachment and materialization on first interaction, with its own event queue/payload, validated claims and render fallback; keyed failure re-delivery remains a related target (D-109). D-116 supersedes the earlier v0.3 order.
+- **Compiler: measured (D-114, C3c amendment); productized islands follow the dashboard (D-116).** **Islands: server components with client slots (R emit)** remain gated on **F-C11/F-C13 exact DOM parity** and the **purity directive's trust model**. It stays unmerged on proto/compiler. C2 is static extraction + eager root split: every root remains a full client component, and the article still renders in the browser. C3–C3c are islands with server-rendered content and small interactive client slots. The measured eager-SPA threshold is a wash near **25 KB gzip** of server-derivable code and a clear win from **~110 KB**, with a widening payload gap: S/M/L save **4.55%/51.99%/56.74% gzip** and **16.22%/41.47%/44.38% load execution** versus the library. R's load and shipping stay constant; response expansion remains (L: +8,500 gzip versus equivalent JSON over seven navigations, leaving 101,332 bytes saved; session execution excluding load −7.97%). See [compiler-c3c-scaling.md](https://github.com/devagrawal09/solid-yield/blob/ada81a8d3af2c1e3a783468ac820875fff1fb99d/documentation/compiler-c3c-scaling.md) and D-114 for controls, limits and recorded differences.
 - **Full resumability with the library's own runtime:** horizon, preserving the same semantics.
 
 | Read-only branch | Head | Role |
 | --- | --- | --- |
-| proto/compiler | **ada81a8** | C1/C1b/R analysis and eager/single-root/R experiments; [C3c scaling](https://github.com/devagrawal09/solid-yield/blob/ada81a8d3af2c1e3a783468ac820875fff1fb99d/documentation/compiler-c3c-scaling.md), directive 213e48a, fixtures bcfb0c2, measurements ada81a8 |
+| proto/sugar | **8337506** local; origin **10e1743** | Three originals accepted; recorded 69/69 GREEN. F-S30–F-S32 repaired; Effect stops at compiler host bug F-S33, both acceptance halves fail; rendering/room/docs queued |
+| proto/sugar-ls | **fd0aed2** | Review-1 fixes landed, comparable 9/22 → 19/22; fresh-install gate, recorded 65/65 GREEN. Review-2: 12/24, failure checks still missed; proof contract fixes dispatched 2026-10-08; editor UI/runtime source maps remain |
+| proto/sugar-mutation | **d88e31c** (new branch) | Standing process: native-corpus mutation gate with expected codes/lines and score baseline, plus Stryker over checker source; in progress |
+| proto/compiler | **ada81a8** | C1/C1b/R analysis, static extraction + eager root split (seven-root/single-root), and R islands experiments; [C3c scaling](https://github.com/devagrawal09/solid-yield/blob/ada81a8d3af2c1e3a783468ac820875fff1fb99d/documentation/compiler-c3c-scaling.md), directive 213e48a, fixtures bcfb0c2, measurements ada81a8 |
 | proto/compiler-single-root | **43bb41b** | Single-root cost decomposition; historical F-C9 stop predates D-115 |
 | proto/calculus-proofs | **950a71b** | Merged into main at **5d50680**; Lean proofs, paper proofs and probes; branch retained as history |
 
@@ -34,23 +39,23 @@ library/original byte thresholds. C3c's S/M/L docs fixture and 40-step
 script remain on proto/compiler. The nine main twins have no marked modules;
 all nine analyzer reports and the gate's byte numbers remain unchanged.
 Build and the full gate are **46/46 GREEN**, including `proofs`;
-the baseline previously changed only for the proofs step. This C3c amendment adds
-no gate steps and changes no gate or executed-byte baseline. This session starts
-at pushed main **10c633c** and makes local commits only; no push.
+the baseline previously changed only for the proofs step. D-116 adds no gate steps and changes no gate or executed-byte baseline. This
+session starts at pushed main **3fc6bef** and makes one local documentation commit only; no push.
 
-### Candidates, not scheduled (Dev's “come up with ideas” exchange)
+**Native checker contract — first in the queue (D-116 later-still amendment).** Review-2’s failure misses triggered a session on proto/sugar-ls, dispatched 2026-10-08. Implement the proof audit’s path-safe O27 catch rule, base/subclass coverage, selective rethrow and unknown-as-top handling; check event rejections and the native root handoff. That handoff is foreign: D-033’s library-root allowance does not apply. O52 author-facing KindCheck and WIRE matching remain open. Transported classes must regain their client prototype (orchestrator ruling; Dev may overrule). D-115’s production-message parity question remains pending Dev; the concrete hackernews fallback displays `err.message`.
 
-1. Dashboard twin.
-2. Soak test.
-3. Mutation-tested lints.
-4. Serializable color.
-5. Keyed re-delivery for rollback UI.
-6. TypeScript plugin for error locality.
-7. Analyzer as a product — the repo tool is now done; a public product is not scheduled.
-8. Static-markup skip in the resumer.
-9. Retire the proofs branch into main — done at **5d50680**; branch retained as history.
-10. Public roadmap issue.
-11. Server components (R emit) productized after v0.3 — measured threshold and F-C11/F-C13 DOM parity/purity trust prerequisites above.
+### Candidates and progress
+
+Sugar is **in progress** on proto/sugar: three originals accepted; Effect stops
+at F-S33 after F-S30–F-S32 repairs. The editor plugin/CLI and review-1 fixes landed
+on proto/sugar-ls; review-2 leaves the typed-failure contract first in the queue.
+Mutation testing is a standing process requirement, in progress on proto/sugar-mutation.
+The plain-Solid dashboard, productized islands and lazy builder follow the order above. The **analyzer tool is done on main**; a public analyzer product is not scheduled.
+Retiring the proofs branch into main is done at **5d50680**; it remains as history.
+
+Unscheduled candidates: soak test; serializable color;
+keyed re-delivery for rollback UI; static-markup skip in the resumer; public
+roadmap issue.
 
 ## v0.1 (2026-10-06): state, and what is left
 
@@ -128,11 +133,12 @@ D-103–D-112 are recorded with alternatives and reasoning in documentation/DECI
 - F06 pins NO_PROVIDER at foreign child's creation and the accepted pending-without-Loading case's empty output. No new API was designed. F11/F12/F14/F15 correct the theorem's lint premises, fallback/provider equations and terminology, and state once-effect, seeded-memo and disposed-owner contracts with test evidence. D-112 removes the route-existence converse: colors are sound upper bounds, with no over-statement of discharge.
 - D-105 adds V8 executed-range byte checks at load and each authored parity step for all eight twins and originals. The baseline allows 2% or 1024 bytes per phase, whichever is larger. Wall time stays manual. The full gate now has **39 steps**, still checked against the unchanged 37-step yield-gate baseline; both new steps must pass.
 
-**Compiler scope.** D-114 supersedes the old eager-islands v0.2 plan. Main
+**Compiler scope.** D-114 supersedes the old static extraction + eager root split v0.2 plan. Main
 contains the analyzer tool; emitters, foreignSource and the unimplemented EAGER
-marker remain on proto/compiler. The compiler is measured; R emit is a roadmap candidate after v0.3,
-subject to F-C11/F-C13 exact DOM parity and the directive's trust model. Other
-compiler design and sugar proposals remain branch experiments. Earlier proof/ruling
+marker remain on proto/compiler. The compiler is measured; D-116 schedules productized R islands (server components with client slots)
+after native sugar and the plain-Solid dashboard, subject to F-C11/F-C13 exact DOM
+parity and the directive's trust model. Bounded native sugar is in progress on
+proto/sugar; other compiler designs remain branch experiments. Earlier proof/ruling
 commits were pushed through c797bb3; this session
 builds and runs the full GREEN gate before each local main commit and never pushes.
 
@@ -156,7 +162,7 @@ branch. See the [verification record](documentation/calculus-proofs/verification
 ## Upstream
 
 - [solidjs/solid#3815](https://github.com/solidjs/solid/issues/3815): rc.13 SSR memo/serialization-slot loop, **fixed upstream** by [#3816](https://github.com/solidjs/solid/pull/3816), merged into `next` on 2026-10-06 (`759a9b6`): a re-created memo that joins a pending slot adopts that slot's answer. Re-test and remove the `/profile` workaround (`046387b`) at the next Solid RC bump (D-082); rc.13 remains installed here.
-- [solidjs/solid#3845](https://github.com/solidjs/solid/issues/3845): delayed second hydrate root replaces server nodes, **closed as by-design** (API checked 2026-10-07: closed/not_planned at 2026-10-06T21:49:30Z; closing comment confirms the deliberate completion guard for event replay, serialized-data lifetime and DOM drift). Tier 2 is rejected and the private reset was withdrawn (D-111). D-114 keeps eager emission on the branch and makes productized R emission a measured candidate after v0.3; v0.2 is the next library release. v0.3 owns keyed attachment, its event queue and payload, with validated claims and render fallback.
+- [solidjs/solid#3845](https://github.com/solidjs/solid/issues/3845): delayed second hydrate root replaces server nodes, **closed as by-design** (API checked 2026-10-07: closed/not_planned at 2026-10-06T21:49:30Z; closing comment confirms the deliberate completion guard for event replay, serialized-data lifetime and DOM drift). Tier 2 is rejected and the private reset was withdrawn (D-111). D-114 keeps eager emission on the branch; D-116 schedules productized islands after native sugar and the plain-Solid dashboard. The later lazy builder owns keyed attachment, its event queue and payload, with validated claims and render fallback.
 - **F-C9 — withdrawn; nothing filed.** Streams carry the typed failure and the hydrated client renders its fallback; renderToString is synchronous by contract (D-099), so the string-render draft is withdrawn. D-115 fixes production sanitization on our side with public markSafeError. Historical compiler-C2/single-root reports still describe the earlier stop; the merged branch's README and C3 reports supersede it.
 - **F-C14 — resolved; nothing to file.** The [plain-Solid rc.13 check](documentation/upstream/solid-frames-f-c14-check-rc13.md) recreates an async memo inside a `Loading` child on every SSR pass and fails under ordinary `renderToStream` too: it is [#3815](https://github.com/solidjs/solid/issues/3815)'s class, fixed by [#3816](https://github.com/solidjs/solid/pull/3816) on `next`. The actual F-C14 shape (hoisted loader, synchronous derived memo beneath `Loading`) converges. This is not frames-specific. Re-test at the next Solid RC bump together with the `/profile` workaround (D-082).
 
@@ -213,6 +219,9 @@ node scripts/yield-gate.mjs --baseline documentation/yield-gate-baseline.json   
 - When the step list changes, re-record the baseline in the same commit (`--json documentation/yield-gate-baseline.json`) and update `yield-gate-baseline.md`.
 - There is no pre-commit hook. `repo:prettier` in the gate covers formatting; prettier is pinned to the fork's 3.8.1.
 - Patch docs with function-form replacements (`s.replace(a, () => b)`). A string replacement expands `` $` `` and once pasted DECISIONS.md into itself (fork incident).
+- **Never block on CI.** Run the required checks locally; CI does not replace the local gate.
+- **Push only after local GREEN.** Run `pnpm build`, then the full gate against `documentation/yield-gate-baseline.json` before each commit. This documentation session commits locally and never pushes.
+- **STANDING RULE — PROCESS (Dev, 2026-10-08): “plenty of mutation testing”.** Keep a mutation gate over the native corpus: each operator specifies expected diagnostic codes at the mutated line; surviving mutants fail below the score baseline. Also run Stryker over the checker’s own source. Both are in progress on **proto/sugar-mutation**; this is a continuing process requirement, not a one-off task (D-116’s later-still amendment).
 
 ## Known, recorded, not fixed
 
@@ -300,6 +309,11 @@ Two independent, read-only design reviews of `main` at `f608fa7`, kept verbatim:
 
 - `documentation/reviews/2026-10-05-claude.md` (Claude; its file:line citations are at `df06d89`);
 - `documentation/reviews/2026-10-05-codex.md` (Codex).
+
+Native sugar first-time-user reviews (Claude Sonnet, 2026-10-08):
+
+- [Review 1](https://github.com/devagrawal09/solid-yield/blob/fd0aed2/documentation/reviews/sugar-review-1.md), against **d88e31c**, unchanged copy on proto/sugar-ls; verdict “not today”. [Fixes/rerun](https://github.com/devagrawal09/solid-yield/blob/fd0aed2/documentation/reviews/sugar-review-1-fixes.md) landed at **fd0aed2**: comparable **9/22 → 19/22**. The original 9/26 denominator is corrected there; the legal timer read is excluded on both sides. Remaining: no accidental-swallow warning (intentional absorption is valid), Portal internals unchecked, runtime source maps.
+- [Review 2](documentation/reviews/sugar-review-2.md), against **fd0aed2**, copied unchanged from `/private/tmp/sy-review2-out/REVIEW.md`: install worked first time; README jsxImportSource/ESLint contradictions remain; **12/24**. Structural checks work well; swallowed/base-class/selective catches, onClick rejections and root failures were missed. Root diagnostics duplicate and some related locations enter library `.d.ts` files. Verdict: advisory CI for structural mistakes, not typed failures. Exact ten-line summary and the proof-contract priority/session are recorded in D-116’s later-still amendment.
 
 The Solid rc.13 SSR loop found under rendering's `/profile` (D-082) is drafted as an upstream issue in `documentation/upstream/solid-ssr-memo-loop-rc13.md` (status: draft, not yet filed).
 

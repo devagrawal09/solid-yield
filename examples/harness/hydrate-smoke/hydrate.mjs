@@ -1,4 +1,11 @@
 #!/usr/bin/env node
+import {
+  dashboardTarget,
+  isDashboard,
+  expectsDashboardRejection,
+  serializedDashboardError,
+  dashboardContentError
+} from "../dashboard/contract.mjs";
 // The gate's twin-hydration smoke step. Each case renders a twin's route on
 // the server as the server-render smoke does (Vite's SSR loader, development
 // builds), then hydrates that document in jsdom with the twin's own client
@@ -65,6 +72,19 @@ const INTERACTIONS = {
     await settle();
     if (!document.querySelector(".todo-list")?.textContent.includes("hydrated todo"))
       return "hydrated event did not add an optimistic todo";
+  },
+  async "dashboard notes"(document, settle) {
+    const notes = document.querySelector("textarea");
+    if (!notes) return "missing notes widget";
+    notes.value = "Hydrated shift note";
+    notes.dispatchEvent(new document.defaultView.Event("input", { bubbles: true }));
+    await settle();
+    if (
+      document.defaultView.localStorage.getItem("operations-desk-notes") !== "Hydrated shift note"
+    )
+      return "hydrated notes did not save";
+    if (!document.querySelector(".note-count").textContent.includes("19 characters"))
+      return "hydrated note count did not update";
   },
   async "docs theme and carousel"(document, settle) {
     const theme = document.querySelector(".theme button");
@@ -178,7 +198,8 @@ const noHmrClient = {
 };
 
 async function hydrateOne(twin, entry, kind, url, interaction, build) {
-  const expectedRejection = expectsDocsRejection(twin, entry, url);
+  const dashboardRejection = expectsDashboardRejection(twin, url);
+  const expectedRejection = expectsDocsRejection(twin, entry, url) || dashboardRejection;
   let production;
   const dir = join(examples, twin);
   const require = createRequire(join(dir, "package.json"));
@@ -278,7 +299,10 @@ async function hydrateOne(twin, entry, kind, url, interaction, build) {
   );
   if (renderError) return report({ failed: `development error: ${renderError.split("\n")[0]}` });
   if (!html.trim()) return report({ failed: "empty document" });
-  if (expectedRejection && !serializedDocsError(html))
+  if (
+    expectedRejection &&
+    !(dashboardRejection ? serializedDashboardError(html) : serializedDocsError(html))
+  )
     return report({ failed: "stream lacks the typed not-found error" });
 
   // 2. the document in jsdom, its inline scripts run as a browser runs them
@@ -368,8 +392,16 @@ async function hydrateOne(twin, entry, kind, url, interaction, build) {
 
   if (expectedRejection) {
     const fallback = document.querySelector(".not-found");
-    if (fallback?.textContent.trim() !== "not-found: No article: missing")
+    if (
+      fallback?.textContent.trim() !==
+      (dashboardRejection ? "not-found: No incident: missing" : "not-found: No article: missing")
+    )
       return report({ failed: "hydrated client lacks the typed not-found fallback" });
+  }
+
+  if (isDashboard(twin)) {
+    const problem = dashboardContentError(document.body.innerHTML, url);
+    if (problem) return report({ failed: problem });
   }
 
   // 4. one interaction
@@ -442,9 +474,10 @@ if (process.argv[2] === "--one") {
   // not gated): a failure both share is not the library's
   const originals = args.includes("--originals");
   const jobs = args.includes("--jobs") ? Number(args[args.indexOf("--jobs") + 1]) : 4;
-  const cases = TARGETS.map(t =>
-    originals ? { ...t, twin: join("originals", t.twin.replace(/-yield(-h)?$/, "")) } : t
-  )
+  const cases = (args.includes("--dashboard") ? [dashboardTarget] : TARGETS)
+    .map(t =>
+      originals ? { ...t, twin: join("originals", t.twin.replace(/-yield(-h)?$/, "")) } : t
+    )
     .flatMap(t => t.urls.map(url => ({ t, url })))
     .map(c => ({
       ...c,

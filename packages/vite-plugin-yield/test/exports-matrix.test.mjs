@@ -4,5 +4,6 @@ import { exportsMatrix } from "../../../scripts/exports-matrix.mjs";
 
 exportsMatrix(new URL("..", import.meta.url), {
   ".": { runtime: "./src/index.js", types: "./src/index.d.ts" },
+  "./virtual": { runtime: "./src/virtual.js", types: "./src/virtual.d.ts" },
   "./package.json": { runtime: "./package.json", types: null }
 });

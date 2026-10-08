@@ -1,3 +1,4 @@
+import { printMapped, withPositions, copyPosition } from "./positions.js";
 /** Native Solid front end. Refuse unsupported contracts before emitting any file.
  * The existing sugar engine and library checker remain the only color machinery. */
 // @ts-check
@@ -68,12 +69,7 @@ export const nativeTypes = new Set([
   "RevealOrder"
 ]);
 const controls = new Set(["Loading", "Errored", "For", "Show", "Match", "Switch", "Repeat"]);
-const print = /** @param {any} p */ p =>
-  babel.transformFromAstSync(t.file(p.node), undefined, {
-    configFile: false,
-    babelrc: false,
-    comments: false
-  })?.code ?? "";
+const print = /** @param {any} p */ p => printMapped(t.file(p.node));
 /** @param {Path} p */
 function imported(p) {
   if (!p.isIdentifier() && !p.isJSXIdentifier()) return null;
@@ -422,19 +418,27 @@ function surface(code, filename, modules, options = {}, foreignComponents = new 
             !element.openingElement.attributes.length &&
             !element.children.length
           )
-            callback.replaceWith(t.identifier(element.openingElement.name.name));
+            callback.replaceWith(
+              copyPosition(
+                t.identifier(element.openingElement.name.name),
+                element.openingElement.name
+              )
+            );
         }
         const target = q.node.arguments[0];
         if (t.isIdentifier(target)) {
           needed.add("RootCheck");
           const binding = q.scope.getBinding(target.name)?.path;
           const local = binding?.isVariableDeclarator() ? binding.get("init") : binding;
-          const check = t.tsSatisfiesExpression(
-            target,
-            t.tsTypeReference(
-              t.identifier("RootCheck"),
-              t.tsTypeParameterInstantiation([t.tsTypeQuery(t.identifier(target.name))])
-            )
+          const check = copyPosition(
+            t.tsSatisfiesExpression(
+              target,
+              t.tsTypeReference(
+                t.identifier("RootCheck"),
+                t.tsTypeParameterInstantiation([t.tsTypeQuery(t.identifier(target.name))])
+              )
+            ),
+            target
           );
           if (local?.isFunction()) {
             // A selected local component is a library root, where failures
@@ -742,7 +746,12 @@ function surface(code, filename, modules, options = {}, foreignComponents = new 
           if (t.isJSXEmptyExpression(value)) continue;
           if (api && ["when", "each", "fallback"].includes(attr.name.name) && !t.isFunction(value))
             value = t.arrowFunctionExpression([], value);
-          props.push(t.objectProperty(t.identifier(attr.name.name), value));
+          props.push(
+            copyPosition(
+              t.objectProperty(copyPosition(t.identifier(attr.name.name), attr.name), value),
+              attr
+            )
+          );
         }
         const children = t.react.buildChildren(q.node);
         if (children.length) {
@@ -768,7 +777,7 @@ function surface(code, filename, modules, options = {}, foreignComponents = new 
         const callee =
           contexts.has(name) || importedContext
             ? t.memberExpression(t.identifier(name), t.identifier("provide"))
-            : t.identifier(name);
+            : copyPosition(t.identifier(name), tag.node);
         const call = t.callExpression(callee, [t.objectExpression(props)]);
         if (q.parentPath.isJSXElement() || q.parentPath.isJSXFragment())
           q.replaceWith(t.jsxExpressionContainer(call));
@@ -922,7 +931,7 @@ function surface(code, filename, modules, options = {}, foreignComponents = new 
   return print(p);
 }
 /** @param {Map<string,string>} input @param {{compilerOptions?: ts.CompilerOptions}} [options] */
-export function lowerNativeProject(input, options = {}) {
+function lowerNativeProjectImpl(input, options = {}) {
   const files = new Map([...input].map(([id, code]) => [resolve(id), code]));
   /** @type {Map<string,string>} */ const entries = new Map();
   for (const [id, code] of files) {
@@ -1105,4 +1114,10 @@ export function lowerNativeFile(code, filename, include, cache, report) {
     cache.set(configPath, entry);
   }
   return entry.files.get(filename) ?? code;
+}
+
+/** Shared lowering, including generated-to-author position tables.
+ * @param {Map<string,string>} input @param {{compilerOptions?: ts.CompilerOptions, native?:boolean}} [options] */
+export function lowerNativeProject(input, options = {}) {
+  return withPositions(input, () => lowerNativeProjectImpl(input, options));
 }

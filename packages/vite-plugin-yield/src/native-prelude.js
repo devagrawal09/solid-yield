@@ -1,3 +1,4 @@
+import { printMapped } from "./positions.js";
 // @ts-check
 import babel from "@babel/core";
 import { parseProgram } from "./transform.js";
@@ -353,14 +354,7 @@ export function nativePrelude(files) {
           )
         );
     }
-    out.set(
-      file,
-      babel.transformFromAstSync(t.file(p.node), undefined, {
-        babelrc: false,
-        configFile: false,
-        comments: false
-      })?.code ?? code
-    );
+    out.set(file, printMapped(t.file(p.node)));
   }
   return out;
 }

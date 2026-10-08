@@ -18,7 +18,11 @@
       "types": "./src/index.d.ts",
       "default": "./src/index.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./virtual": {
+      "types": "./src/virtual.d.ts",
+      "default": "./src/virtual.js"
+    }
   },
   "files": [
     "src"

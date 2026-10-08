@@ -24,7 +24,7 @@ import {
   renderToString as webRenderToString,
   renderToStream as webRenderToStream
 } from "@solidjs/web";
-import { devError, ELEMENT_MARK } from "./runtime.js";
+import { devError, ELEMENT_MARK, restoreFailure } from "./runtime.js";
 import type { Element } from "./element.js";
 import type { View } from "./types.js";
 import type { ContextNames } from "./context.js";
@@ -98,9 +98,14 @@ function isElementThunk(value: unknown): value is () => unknown {
  */
 function rootOf(code: () => unknown): () => unknown {
   return () => {
-    let tree = code();
-    while (isElementThunk(tree)) tree = tree();
-    return tree;
+    try {
+      let tree = code();
+      while (isElementThunk(tree)) tree = tree();
+      return tree;
+    } catch (error) {
+      // Also restore failures that escape a synchronous root/hydration read.
+      throw restoreFailure(error);
+    }
   };
 }
 

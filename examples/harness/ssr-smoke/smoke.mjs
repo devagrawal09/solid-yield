@@ -61,14 +61,14 @@ const TARGETS = [
     twin: "docs-yield",
     entry: "stream",
     kind: "entry",
-    urls: ["/", "/docs/start", "/docs/missing"]
+    urls: ["/", "/docs/start", "/docs/missing", "/docs/sibling"]
   },
   {
     twin: "docs-yield",
     entry: "stream",
     kind: "entry",
     build: "production",
-    urls: ["/docs/missing"]
+    urls: ["/docs/missing", "/docs/sibling"]
   },
   ...["development", "production"].map(build => ({
     twin: "docs-yield",
@@ -170,7 +170,7 @@ async function renderOne(twin, entry, kind, url, build) {
     else if (!html.trim()) failed = "empty document";
     else if (
       expectedRejection &&
-      !(dashboardRejection ? serializedDashboardError(html) : serializedDocsError(html))
+      !(dashboardRejection ? serializedDashboardError(html) : serializedDocsError(html, twin, url))
     )
       failed = "stream lacks the typed not-found error";
   }

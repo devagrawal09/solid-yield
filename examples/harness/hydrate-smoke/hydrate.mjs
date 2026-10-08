@@ -109,7 +109,7 @@ const TARGETS = [
     twin: "docs-yield",
     entry: "stream",
     kind: "entry",
-    urls: ["/", "/docs/start", "/docs/missing"],
+    urls: ["/", "/docs/start", "/docs/missing", "/docs/sibling"],
     interactions: { "/": "docs theme and carousel", "/docs/start": "docs theme and carousel" }
   },
   {
@@ -117,7 +117,7 @@ const TARGETS = [
     entry: "stream",
     kind: "entry",
     build: "production",
-    urls: ["/docs/missing"]
+    urls: ["/docs/missing", "/docs/sibling"]
   },
   ...["string", "stream"].map(entry => ({
     twin: "rendering-yield",
@@ -282,7 +282,7 @@ async function hydrateOne(twin, entry, kind, url, interaction, build) {
   if (!html.trim()) return report({ failed: "empty document" });
   if (
     expectedRejection &&
-    !(dashboardRejection ? serializedDashboardError(html) : serializedDocsError(html))
+    !(dashboardRejection ? serializedDashboardError(html) : serializedDocsError(html, twin, url))
   )
     return report({ failed: "stream lacks the typed not-found error" });
 
@@ -372,12 +372,21 @@ async function hydrateOne(twin, entry, kind, url, interaction, build) {
     });
 
   if (expectedRejection) {
-    const fallback = document.querySelector(".not-found");
+    const sibling = url === "/docs/sibling";
+    const fallback = document.querySelector(sibling ? ".article-unavailable" : ".not-found");
     if (
       fallback?.textContent.trim() !==
-      (dashboardRejection ? "not-found: No incident: missing" : "not-found: No article: missing")
+      (dashboardRejection
+        ? "not-found: No incident: missing"
+        : sibling
+          ? "article-unavailable: Article unavailable: sibling"
+          : "not-found: No article: missing")
     )
-      return report({ failed: "hydrated client lacks the typed not-found fallback" });
+      return report({ failed: "hydrated client lacks the typed failure fallback" });
+    // The docs fallback prints the expected text only after its instanceof
+    // and own-resource checks pass; no test-only attributes change twin parity.
+    if (sibling && document.querySelector(".not-found"))
+      return report({ failed: "the sibling chose the NotFound fallback" });
   }
 
   if (isDashboard(twin)) {

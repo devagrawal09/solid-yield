@@ -371,6 +371,18 @@ documents this limit (F-S14/F-S15), and selective wrapper matching is unfinished
 I6 requires a consistent generated matcher/wire contract or retention/refusal;
 it does not quietly decide D-116's pending prototype-restoration question.
 
+**Runtime follow-up (2026-10-08, D-117).** The library on `runtime/failure-wire` now has a shared
+constructor registry with explicit wire IDs and prototype restoration before
+`Errored` selection and `attempt` rejection handling. Selective attempts retain
+unmatched classes, and runtime matching includes subclasses. Production streamed
+docs and real RPC after hydration pin `instanceof` and same-kind sibling escape.
+This supplies the wire/class mechanism under consistent registration and
+serialization-safe own-data premises; native emit must call `registerFailure`
+and `prepareFailure`, preserve the represented instance, and pass runtime class
+lists. The sugar branch at `ed90200` has not adopted it here. I1/I2/I5 and O27's
+structural membership gap remain separate obligations; this is not a proof of
+the unrestricted inference theorem. JavaScript private slots are not wire data.
+
 ### F21 — native catch completion differs from attempt return classification
 
 ```ts

@@ -492,6 +492,7 @@ const noForeignReactive = {
     schema: []
   },
   create(context) {
+    if (context.settings["solid-yield"]?.mode === "native") return {};
     return {
       ImportDeclaration(node) {
         const banned = FOREIGN_REACTIVE[node.source.value];
@@ -1730,6 +1731,7 @@ const requireJsxFactory = {
     schema: []
   },
   create(context) {
+    if (context.settings["solid-yield"]?.mode === "native") return {};
     const filename = context.filename || "";
     if (!/\.[jt]sx$/.test(filename)) return {};
     return {

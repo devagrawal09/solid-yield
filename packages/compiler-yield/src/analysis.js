@@ -1,4 +1,4 @@
-import { parseProgram } from "../../vite-plugin-yield/src/transform.js";
+import { parseProgram } from "./parse.js";
 import { CONSTRUCTORS } from "../../eslint-plugin-yield/src/routines.js";
 
 export const provenance = ["S", "U", "C"];

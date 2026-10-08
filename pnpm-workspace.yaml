@@ -8,3 +8,6 @@ allowBuilds:
 
 minimumReleaseAgeExclude:
   - "@solidjs/vite-plugin"
+
+# Published dependencies use real ranges; link those ranges inside this workspace.
+linkWorkspacePackages: true

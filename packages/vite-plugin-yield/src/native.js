@@ -9,7 +9,7 @@ import { createRequire } from "node:module";
 import { dirname, resolve } from "node:path";
 import { parseProgram } from "./transform.js";
 import { lowerSugarProject } from "./sugar.js";
-import { inferFailures } from "../../compiler-yield/src/failure-inference.js";
+import { inferFailures } from "compiler-yield/failure-inference";
 import { nativeEntry } from "./native-entry.js";
 import { nativePrelude } from "./native-prelude.js";
 import { lowerNativeEffects } from "./native-effects.js";

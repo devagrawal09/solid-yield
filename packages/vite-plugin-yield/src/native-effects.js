@@ -12,7 +12,7 @@ const imported = binding =>
   t.isIdentifier(binding.node.imported)
     ? { source: binding.parentPath.node.source.value, name: binding.node.imported.name }
     : null;
-/** @param {Map<string,string>} files @param {import('../../compiler-yield/src/failure-inference.js').FailureReport} report */
+/** @param {Map<string,string>} files @param {import('compiler-yield/failure-inference').FailureReport} report */
 export function lowerNativeEffects(files, report) {
   // Seed routine ownership from native primitive calls and propagate to callers
   // through the analyzer's resolved graph. Ordinary I/O helpers stay JavaScript.

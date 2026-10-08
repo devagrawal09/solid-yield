@@ -162,6 +162,13 @@ function buildSteps(twins) {
     args: ["scripts/dist-fresh.mjs"]
   });
 
+  steps.push({
+    name: "fresh-install",
+    cwd: root,
+    cmd: process.execPath,
+    args: ["scripts/fresh-install.mjs"]
+  });
+
   for (const twin of twins) {
     const dir = `examples/${twin}`;
     const scripts = readJson(join(root, dir, "package.json")).scripts;

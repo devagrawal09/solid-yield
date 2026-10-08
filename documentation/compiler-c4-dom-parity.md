@@ -1,5 +1,9 @@
 # C4: docs frame DOM parity
 
+**C4b update (2026-10-08): existing-element hosts remove F-C16. Exact DOM
+matches rise from 0/40 to 6/40 at L. See the C4b section below; the original
+C4 measurements and history remain here for comparison.**
+
 2026-10-08, `proto/compiler`, starting at `a4ca329`. **Exact DOM parity remains
 0/40 at level L; all 40 authored-content checks pass.** The first-navigation
 empty route is fixed, including a LikeButton click before the first frame
@@ -70,8 +74,9 @@ and `dynamic` binding. Using it in R would require replacing that integration
 on both server and client, not changing a host option. The current payload
 also includes its own main or section; an existing-root adapter must emit
 only that root's children to avoid nesting a second main or section. That
-adapter has not been implemented or proven here; removing wrappers from live DOM would break
-the current frame's parent and lifecycle contract.
+adapter was not implemented in C4. C4b below implements it with an explicit
+server adapter and a lower-level client binding. Removing wrappers from live
+DOM without replacing that binding would break its parent and lifecycle contract.
 
 [Chrome measurements](compiler-c4-layout.json), using checkpoint 5 and the
 fixture's real CSS at a 1520 × 892 CSS-pixel viewport: both wrappers compute to
@@ -161,7 +166,49 @@ update: that would also remove valid state from authored links.
 
 No fixture-wide extra claiming or attribute stripping was added to disguise
 this difference. Aligning frames needs that ownership information in the
-runtime/transport; the current high-level API exposes no filter for it.
+runtime/transport; neither the integrated binding nor `createFrame` exposes a claim filter.
+C4b retains this difference with existing-element hosts.
+
+### Minimal plain-Solid repro for F-C18
+
+Render this component at `/b` inside a normal Solid router. Both links come
+from `innerHTML`. Before clicking Attach neither link has router state
+attributes. After clicking, the second link gains `data-active` and
+`aria-current="page"`; the first does not. No solid-yield code is involved.
+
+```tsx
+import { getOwner, onCleanup, runWithOwner } from "solid-js";
+import { createFrame } from "@solidjs/web/frames";
+
+function RawLinks() {
+  const owner = getOwner();
+  const ordinary = <div innerHTML={'<a href="/b">B</a>'} />;
+  const hosted = <div innerHTML={'<a href="/b">B</a>'} />;
+  let frame;
+  onCleanup(() => frame?.dispose());
+  return (
+    <>
+      <button
+        onClick={() => {
+          frame ??= createFrame(hosted, {
+            adopt: true,
+            ownerScope: fn => runWithOwner(owner, fn)
+          });
+        }}
+      >
+        Attach
+      </button>
+      {ordinary}
+      {hosted}
+    </>
+  );
+}
+```
+
+The requested Solid change is to carry which links the compiler owns along
+with the HTML, then claim only those links. Raw HTML should stay opaque by
+default. Removing every active attribute in application code would also
+remove correct state from authored links.
 
 ## F-C19: TOC state reads the previous browser URL
 
@@ -189,6 +236,39 @@ the router's tests. The wrong side here is the installed router's ordinary
 claim timing, also seen in plain Solid; removing correct attributes from
 frames would encode that bug. No router dependency patch or upgrade was made,
 so this correction remains upstream work, not a claimed local fix.
+
+### Minimal plain-Solid repro for F-C19
+
+Use this router, start at `/a`, and click B. Inspect Part immediately after
+navigation settles, then click Part. In the affected path the first claim
+resolves `#part` against `/a`, so it does not mark the link active for `/b`.
+The hash navigation refreshes it. The C4/C4b trace records the same ordering
+with the docs routes; it is the router's browser-URL timing, not a generator
+or frame-wrapper problem.
+
+```tsx
+import { createRouter, defineRoute, defineRoutes } from "@solidjs/router";
+
+export const Router = createRouter({
+  routes: defineRoutes([
+    defineRoute({ path: "/a", component: () => <a href="/b">B</a> }),
+    defineRoute({
+      path: "/b",
+      component: () => (
+        <>
+          <a href="#part">Part</a>
+          <h2 id="part">Part</h2>
+        </>
+      )
+    })
+  ])
+});
+```
+
+The requested router change is to refresh owned links after committing the
+browser URL. Resolve fragment links against that committed page, preserve
+authored `aria-current`, and test both ordinary navigation and returned
+frames. C4b does not patch the router or remove correct frame link state.
 
 ## Three-run level-L bytes
 
@@ -248,3 +328,131 @@ that saved the immediate first route before the old wait. Its per-step hashes
 and counts are retained in the combined report; `/tmp/c4-before.json` is a
 local reproduction input, not a required gate fixture. Optional claim tracing
 and intermediate-frame observation were disabled for byte measurements.
+
+## C4b: existing-element hosts
+
+2026-10-08, starting at `495ce55`. **F-C16 is removed in the bounded docs R
+emitter. Exact matches improve from 0/40 to 6/40 at L.** All 40 authored-content
+checks still pass; the original plain-Solid app and the library still match
+40/40. [Before/after hashes and per-step findings](compiler-c4b-parity.json)
+use the unchanged exact normalizer. No wrappers, pending templates, or router
+attributes are removed from the exact snapshots.
+
+### Hosts, attachment, and slots
+
+| R occurrence                   | Authored host                     | Synthesized wrapper finding |
+| ------------------------------ | --------------------------------- | --------------------------- |
+| Home article and LikeButton    | Home's `<main>`                   | None                        |
+| DocPage article and LikeButton | DocPage's `<main>`                | None                        |
+| Reading guide                  | `<section class="reading-guide">` | None                        |
+
+The region cut includes each existing root; ArticleContent's possible loading,
+success, and error children remain inside that root. No extra root is needed
+in these three occurrences. The emitter still rejects changed authored shapes;
+this is not a general multiple-root lowering. A future multiple-root region
+needs its own smallest-wrapper finding rather than a silent wrapper.
+
+`hosted-region-server.js` emits the chosen root with `data-fid` for document
+attachment. Its children retain Solid's keyed slot comments and document slot
+records (`sc:slot:<id>:<occurrence>`). The RPC template emits only those
+children, so applying it cannot nest another main or guide section. The
+article is created once per region render; recreating it inside the emitted
+fragment caused an endless Loading retry in an early probe and was fixed.
+
+`hosted-region-client.js` replaces `installServerComponents` for R. It indexes
+the server's hosts, seeds primitive slot records, and calls
+`createFrame(element, {host, id, adopt, slots})`. New route mounts create the
+same authored root. Refetches rebind that frame and update its children; tests
+assert the main and guide retain their node identity. The adapter removes the
+attach-only `data-fid` after attachment **and rebind** (rc.13's `rebind` writes
+it again). No live wrapper is stripped or reparented.
+
+This is **not an entirely public-API-only integration**. Solid exports
+`createFrame`, `createFrameHost`, and `createServerComponentHandler` on the
+client, and `renderServerComponent`/`renderToFrameStream` on the server. Its
+public document-slot serializer is still bundled into
+`frameTransformDirectResult`. The server adapter reuses that helper's slot
+encoding and replaces its fixed outer template, rejecting a changed output
+shape. The client uses the pinned document registry and hydration context to
+claim the existing slot nodes. It does not call the integrated client binding
+or `createFrameElement`. This removes the wrapper while keeping the server
+slot protocol; it is a tested rc.13 adapter, not a new supported Solid option.
+Completed document SSR, the fixture's primitive slot arguments, and ordinary
+RPC streams are covered. Incremental document attachment, nested server-JSX
+slot inputs, and async slot inputs are outside this bounded emitter's proof.
+
+The route-owned LikeButton memo still supplies both the immediate Loading
+fallback and `like#route-like`. It keeps its node and saved state through the
+first arrival, a click before that arrival, and later success/error refetches.
+All five direct-route SSR/hydration tests retain every claimed server node and
+perform zero hydration RPCs. The 40-step session performs seven region RPCs;
+the TOC hash click performs none.
+
+The docs fixture has **no copy-code widget**. A separate regression test places
+Like and copy-code buttons in two keyed slots and compares `createFrame` on an
+existing article with `createFrameElement`'s wrapper path. After a content
+swap, reordered slots, and changed slot inputs, both retain the same buttons,
+click counts, and handlers. That proves lower-level slot support; it does not
+claim copy-code coverage in the 40-step docs session. There is no slot-support
+blocker.
+
+### Remaining differences by checkpoint
+
+Checkpoint numbers are zero-based, as in the retained C4 record.
+
+| Class                        | C4b checkpoints                                                                      |
+| ---------------------------- | ------------------------------------------------------------------------------------ |
+| Exact match                  | 0, 1, 2, 3, 23, 31                                                                   |
+| F-C16 wrapper/host artifacts | None; zero wrappers and zero `data-fid` attributes at all 40 checkpoints             |
+| F-C17 pending template       | None at checkpoints; one `pl-020` marker observed between 4 and 5, zero after settle |
+| F-C18 raw-HTML link claims   | 4–22, 24–28, 32–34, 37–39 (30 checkpoints)                                           |
+| F-C19 TOC URL timing         | 25, 29, 30, 32, 33, 35, 36 (7 checkpoints)                                           |
+
+F-C18 and F-C19 overlap at 25, 32, and 33, leaving 34 differing checkpoints.
+Both minimal plain-Solid repros above were run against the installed packages;
+[their recorded DOM and URL trace](compiler-c4b-router-repros.json) show the
+raw-HTML over-claim and the old `/a` base URL independently of solid-yield.
+Neither dependency is patched. F-C17 already removes its template when the
+segment settles. No private cleanup or unsafe deletion while pending is added.
+
+### Three-run level-L bytes
+
+[All runs and chunk attribution](compiler-c4b-L-bytes.json). There is zero drift
+in all 164 executed phases and all shipping results. The measurement and
+exclusions are the same as C4.
+
+| Variant               | Load executed | 40 steps executed | Shipped raw | Shipped gzip |
+| --------------------- | ------------: | ----------------: | ----------: | -----------: |
+| Original              |     1,096,058 |         4,366,734 |     627,380 |      189,329 |
+| Library               |     1,129,164 |         4,556,267 |     642,400 |      193,576 |
+| Single root without R |     1,150,804 |         4,566,492 |     640,952 |      193,435 |
+| Single root + R, C4b  |       621,864 |         3,927,152 |     231,539 |       80,698 |
+
+Against C4, R drops **7,658 load-executed bytes** and **3,094 gzip bytes**.
+Against the requested C3c reference (628,086 load / 83,744 gzip), it is now
+**6,222 load bytes smaller and 3,046 gzip bytes smaller**. C4's +1,436 load /
++48 gzip cost is therefore more than recovered. Session execution falls
+319,201 bytes from C4. No baseline was raised.
+
+### Validation
+
+Implementation commit: `e9a26d1` (`fix(compiler): host docs regions on authored elements`).
+The seven route tests pass, including the early-click probe and five direct
+SSR/hydration routes. The side-by-side two-slot swap test passes. Before the
+implementation commit, `pnpm build` passed and the full gate was **GREEN:
+53 pass / 0 fail / 0 skip in 208 seconds**. The before column retains C4's
+recorded snapshots; the after column is a fresh C4b session. Before the
+evidence commit, `pnpm build` passed again and the full gate was **GREEN:
+53 pass / 0 fail / 0 skip in 307 seconds**. No dependencies,
+baselines, main branch, or remote refs were changed. Both commits are local.
+
+```sh
+DOCS_LEVEL=L C4_CAPTURE_CLAIMS=1 C4_OBSERVE_FIRST_FRAME=1 \
+  C4_SNAPSHOTS=/tmp/c4b-after.json \
+  node --test packages/compiler-yield/test/server-components.test.mjs
+node --test --test-name-pattern='C4b:' packages/compiler-yield/test/server-region.test.mjs
+DOCS_LEVEL=L node examples/harness/executed-bytes/hydrated-docs.mjs \
+  --regions --runs 3 --record documentation/compiler-c4b-L-bytes.json
+pnpm build
+node scripts/yield-gate.mjs --baseline documentation/yield-gate-baseline.json
+```

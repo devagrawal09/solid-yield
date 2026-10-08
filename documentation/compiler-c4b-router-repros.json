@@ -1,0 +1,20 @@
+{
+  "before": {
+    "part": "<a href=\"#part\">Part</a>",
+    "raw": [
+      "<a href=\"/b\">B</a>",
+      "<a href=\"/b\">B</a>"
+    ]
+  },
+  "afterAttach": [
+    "<a href=\"/b\">B</a>",
+    "<a href=\"/b\" data-active=\"\" aria-current=\"page\">B</a>"
+  ],
+  "afterHash": "<a href=\"#part\" data-active=\"\" aria-current=\"page\">Part</a>",
+  "claims": [
+    {
+      "base": "http://localhost/a",
+      "html": "<a href=\"#part\">Part</a>"
+    }
+  ]
+}

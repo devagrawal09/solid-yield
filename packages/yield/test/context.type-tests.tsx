@@ -63,6 +63,13 @@ type _readDefault = Expect<Equal<ReadOf<typeof ThemeCtx>, ContextRead<never>>>;
 // the value is read like a prop (D-042): a path, never the value
 type _value = Expect<Equal<ContextValue<User>, Path<User>>>;
 type _valueSource = Expect<Equal<ContextValue<Source<User, never, true>>, Path<User, never, true>>>;
+// Native TodoMVC provides a tuple: each numbered path keeps its own type.
+type _tupleFirst = Expect<Equal<ContextValue<readonly [User, string]>[0], Path<User>>>;
+type _tupleSecond = Expect<Equal<ContextValue<[User, string]>[1], Path<string>>>;
+// Tuple support must not expose array writes as readable function paths.
+type _arrayNoMutators = Expect<
+  Equal<Extract<"push" | "pop" | "splice", keyof Path<User[]>>, never>
+>;
 
 // --- requirement in ------------------------------------------------------------------------
 

@@ -358,7 +358,7 @@ type PathKeys<T, N, E, P extends boolean> = [T] extends [Opaque]
   ? unknown
   : T extends readonly (infer U)[]
     ? { readonly [n: number]: Path<U | N, E, P>; readonly length: Source<number | N, E, P> } & {
-        readonly [K in Exclude<keyof T, keyof (readonly unknown[])>]: PathThrough<T[K], N, E, P>;
+        readonly [K in Extract<keyof T, `${number}`>]: PathThrough<T[K], N, E, P>;
       }
     : T extends object
       ? { readonly [K in keyof T]-?: PathThrough<T[K], N, E, P> }

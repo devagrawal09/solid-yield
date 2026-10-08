@@ -215,6 +215,22 @@ function buildSteps(twins) {
       args: ["examples/harness/native-sierpinski/check.mjs", stage]
     });
   }
+  for (const stage of ["transform", "typecheck", "lint"]) {
+    steps.push({
+      name: `native:todos:${stage}`,
+      cwd: root,
+      cmd: process.execPath,
+      args: ["scripts/native-todos-check.mjs", stage]
+    });
+  }
+  for (const stage of ["parity", "ssr"]) {
+    steps.push({
+      name: `native:todos:${stage}`,
+      cwd: root,
+      cmd: process.execPath,
+      args: ["examples/harness/native-todos/check.mjs", stage]
+    });
+  }
 
   steps.push({
     name: "original:docs:typecheck",
@@ -366,6 +382,7 @@ function buildSteps(twins) {
       "examples/harness/hydrate-smoke/*.mjs",
       "examples/harness/executed-bytes/*.mjs",
       "examples/harness/native-sierpinski/*.mjs",
+      "examples/harness/native-todos/*.mjs",
       "scripts/*.mjs"
     ]
   });

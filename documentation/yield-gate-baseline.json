@@ -628,5 +628,24 @@
     },
     "recordedAt": "2026-10-08T13:52:08.150Z",
     "digest": "846fd8ee2465e6bdb6cd309c908d7b6097c29b2e1bf23870fca5f045fad7a4ad"
+  },
+  "strykerReportOnly": {
+    "mode": "REPORT-ONLY",
+    "packages": {
+      "compiler-yield": {
+        "scope": [
+          "packages/compiler-yield/src/failure-inference.js"
+        ],
+        "score": 59.57142857142857,
+        "mutants": 700,
+        "killed": 413,
+        "survived": 225,
+        "timeout": 4,
+        "noCoverage": 58,
+        "errors": 0,
+        "report": "documentation/mutation-stryker-compiler.json",
+        "wallSeconds": 932.17
+      }
+    }
   }
 }

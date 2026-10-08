@@ -1,0 +1,19 @@
+[
+  {
+    "package": "compiler-yield",
+    "head": "035893fedb91ed82c4f80963f408a848051c7f51",
+    "startedAt": "2026-10-08T15:19:53.696Z",
+    "finishedAt": "2026-10-08T15:24:24.735Z",
+    "summary": {
+      "pass": 65,
+      "fail": 0,
+      "skip": 0,
+      "total": 65,
+      "wallMs": 271039,
+      "line": "65 pass / 0 fail / 0 skip in 271s",
+      "green": true
+    },
+    "mutationStatus": "PASS",
+    "command": "node scripts/yield-gate.mjs --jobs 2 --baseline documentation/yield-gate-baseline.json --json /tmp/sy-deferred-gate-compiler.json"
+  }
+]

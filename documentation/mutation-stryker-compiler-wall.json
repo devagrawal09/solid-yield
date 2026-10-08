@@ -1,0 +1,11 @@
+{
+  "command": "/usr/bin/time -p node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js run scripts/mutation/stryker-compiler.config.mjs --concurrency 4 --incremental > /tmp/sy-stryker-compiler.log 2>&1",
+  "wallSeconds": 932.17,
+  "reporterSeconds": 930,
+  "exitCode": 0,
+  "scope": [
+    "packages/compiler-yield/src/failure-inference.js"
+  ],
+  "reporterStartedAt": "2026-10-08T15:03:19.305Z",
+  "reporterFinishedAt": "2026-10-08T15:18:49.348Z"
+}

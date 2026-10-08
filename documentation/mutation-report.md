@@ -7496,10 +7496,11 @@ solid-yield check: 2 files, 1 errors
 
 ## Findings list
 
-- F-M1–F-M231: 231 exact-line survivors, each with its full diff and actual diagnostics above.
+- F-M1–F-M231: 231 exact-line program survivors, each with its full diff and actual diagnostics above.
+- F-M232–F-M251: ranked compiler-inference checker survivors in the deferred-package section below.
 - F-C1–F-C20: the top checker survivors above; remaining survivors stay in the raw Stryker reports.
 - F-MAP: 17 mutant CLI crashes; the current position/error mapping can throw instead of returning diagnostics. IDs: M0031, M0034, M0052, M0069, M0086, M0104, M0122, M0142, M0162, M0179, M0199, M0234, M0268, M0286, M0321, M0337, M0353.
-- F-SCOPE: Vite native/sugar/transform/positions and compiler inference still need full checker-mutant runs. The full command-runner configuration is checked in.
+- F-SCOPE (original bounded run): Vite native/sugar/transform/positions and compiler inference were deferred. Their follow-up is recorded in “Stryker: deferred packages” below. The original full command-runner configuration remains checked in.
 - F-COVERAGE: The Vitest adapter does not collect CLI/tsserver subprocess coverage. NoCoverage there may be a runner limit, not an absent test. The full command runner avoids coverage-based selection.
 - F-TIMEOUT: Stryker includes timeouts as detected. They need follow-up to distinguish loops from slow runs under contention.
 - F-HISTORY: Seven historical review identities remain unavailable; 27/34 reconstructed slots are covered.
@@ -7513,3 +7514,55 @@ Each local commit was preceded by pnpm build and a full gate against documentati
 - 65 pass / 0 fail / 0 skip in 520s; --jobs 2; head 09c800a.
 
 The first concurrent gate attempt had one unchanged Sierpinski animation-frame test exceed its 5-second timeout; the complete reruns passed. No test timeout, existing gate entry, or checker source was changed. Only the mutation step and initial score/site floors were added to the baseline. Literal unified diffs retain blank context-line prefixes; those intentional spaces can trigger the default Git whitespace check.
+
+
+## Stryker: deferred packages
+
+Measured on the unchanged checker sources at `035893f`. The deferred scope is the complete `failure-inference.js` file and Vite’s `native*.js`, `sugar.js`, `transform.js`, and `positions.js`; these are scope scores, not scores for every file in each package. No program mutants or checker assertions were added. The program mutation baseline, including its 35.65% score and operator site floors, is unchanged. New per-package fields in `yield-gate-baseline.json` are **REPORT-ONLY**, with no gate threshold.
+
+The existing compiler ESM node:test suites register with Vitest through an import alias; the existing Vite suites run directly. Together they contain 209 tests. The TS plugin’s CommonJS adapter is excluded from this host; the full gate still checks its unchanged suite. Stryker 10.0.0 and Vitest 4.1.11 use four process workers with per-test coverage and incremental results. The pinned Stryker runner normally forces threads; `vitest-forks.mjs` changes only that host choice. Initial thread-based attempts aborted in native macOS fsevents cleanup. Polling did not fix those aborts; process workers did. Failed dry runs produce no score and are excluded from the successful-run wall times below.
+
+Scores follow `(Killed + Timeout) / (Killed + Timeout + Survived + NoCoverage)`. Error mutants are separate. Timeouts need follow-up for loops versus slow execution. NoCoverage means no coverage recorded in this host; external CLI/tsserver runs and separately loaded SSR modules can evade collection, so it is not proof that no repository test executes the code.
+
+| Package / deferred scope | Mutants | Killed | Survived | Timeout | No coverage | Errors | Score | Wall time |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| compiler-yield / failure-inference.js | 700 | 413 | 225 | 4 | 58 | 0 | 59.57% | 932.17 s (15m 32s) |
+
+Vite’s run is next; its score will be added after completion.
+
+### Commands and time budget
+
+```sh
+/usr/bin/time -p node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js run scripts/mutation/stryker-compiler.config.mjs --concurrency 4 --incremental > /tmp/sy-stryker-compiler.log 2>&1
+```
+
+Compiler reporter interval: `2026-10-08T15:03:19.305Z` → `2026-10-08T15:18:49.348Z` (930 s); the external wall timer includes startup and reports 932.17 s. This completed all 700 inference mutants within 40 minutes. Vite uses `stryker-bounded.mjs` with a 40-minute limit; SIGINT preserves a partial incremental report for a narrower retry if needed.
+
+### Top 20 compiler survivors
+
+These are ranked findings, not the first twenty in source order. Every row below is an observed **Survived** mutant, with the exact original and replacement source spans encoded as JSON strings. P1 flags a missing distinction on Dev’s ruled semantics; P2 flags secondary report data. Neither rank proves a product defect or rules out an equivalent mutant. “No test exercises this branch” identifies a missing distinguishing input in the authored fixtures, even when a guard has covering tests. “Test asserts too little” means covering tests passed without distinguishing the changed result; another missing input or equivalent behavior may also explain survival. Exact covered-test IDs and full spans are in [compiler findings](mutation-stryker-compiler-findings.json); all mutants and test definitions remain in [the raw report](mutation-stryker-compiler.json).
+
+| Finding | Priority / ruled area | File:line / mutant | Exact original → replacement | Why no test killed it |
+| --- | --- | --- | --- | --- |
+| F-M232 | P1: failure inference / callback host | packages/compiler-yield/src/failure-inference.js:462; 686 BlockStatement | `"{\n      return functions.find(f => f.file === file && f.path.node.start === start);\n    }"` → `"{}"` | test asserts too little: 12 covering tests pass when the function-summary lookup returns nothing; they do not require its inferred annotations. |
+| F-M233 | P1: failure inference / foreign boundary | packages/compiler-yield/src/failure-inference.js:439; 652 ArrayDeclaration | `"[...union(fn.fails, [\"ChunkError\"])]"` → `"[]"` | test asserts too little: the server test checks client failure sets, but never asserts the server function’s exported rejection set. |
+| F-M234 | P1: catch semantics | packages/compiler-yield/src/failure-inference.js:241; 335 StringLiteral | `"\"finalizer\""` → `"\"\""` | no test exercises this branch: the authored inference fixtures have no throwing finalizer. |
+| F-M235 | P1: catch semantics | packages/compiler-yield/src/failure-inference.js:237; 332 ArrayDeclaration | `"[\"unknown\"]"` → `"[]"` | test asserts too little: the widened-catch fixture calls console.log, which independently contributes unknown and masks the removed unknown floor. |
+| F-M236 | P1: catch semantics | packages/compiler-yield/src/failure-inference.js:289; 436 MethodExpression | `"binding?.referencePaths.some(\n              r =>\n                !(\n                  r.parentPath.isThrowStatement() \|\|\n                  (r.parentPath.isBinaryExpression() && r.parentPath.node.operator === \"instanceof\")\n                )\n            )"` → `"binding?.referencePaths.every(r => !(r.parentPath.isThrowStatement() \|\| r.parentPath.isBinaryExpression() && r.parentPath.node.operator === \"instanceof\"))"` | no test exercises this branch: Promise catch fixtures do not combine an ordinary use of the binding with a rethrow. |
+| F-M237 | P1: catch semantics | packages/compiler-yield/src/failure-inference.js:234; 327 LogicalOperator | `"r.parentPath.isBinaryExpression() && r.parentPath.node.operator === \"instanceof\""` → `"r.parentPath.isBinaryExpression() \|\| r.parentPath.node.operator === \"instanceof\""` | no test exercises this branch: no authored catch fixture tests an instanceof use of the caught value. |
+| F-M238 | P1: catch semantics | packages/compiler-yield/src/failure-inference.js:225; 312 ConditionalExpression | `"!handler.node"` → `"false"` | no test exercises this branch: no authored inference fixture uses try/finally without a catch. |
+| F-M239 | P1: callback host / failure inference | packages/compiler-yield/src/failure-inference.js:317; 485 ConditionalExpression | `"callback?.node && !callback.isIdentifier({ name: \"undefined\" })"` → `"false"` | no test exercises this branch: named then/finally callbacks with failures are absent. |
+| F-M240 | P1: catch semantics | packages/compiler-yield/src/failure-inference.js:284; 427 ConditionalExpression | `"method !== \"finally\""` → `"true"` | no test exercises this branch: authored Promise.finally failure cases are absent. |
+| F-M241 | P1: catch semantics | packages/compiler-yield/src/failure-inference.js:282; 420 ConditionalExpression | `"method === \"then\""` → `"false"` | no test exercises this branch: authored Promise.then rejection handlers are absent. |
+| F-M242 | P1: callback host / failure inference | packages/compiler-yield/src/failure-inference.js:331; 501 ConditionalExpression | `"binding?.isVariableDeclarator()"` → `"false"` | no test exercises this branch: no fixture requires a memo getter alias to carry its callback’s thrown class. |
+| F-M243 | P1: callback host / failure inference | packages/compiler-yield/src/failure-inference.js:337; 510 ArrowFunction | `"a => a.isFunction()"` → `"() => undefined"` | no test exercises this branch: removing memo initializer callbacks changes no asserted failure set. |
+| F-M244 | P1: foreign boundary / failure inference | packages/compiler-yield/src/failure-inference.js:248; 342 ConditionalExpression | `"api?.source === \"solid-js\" && api.name === \"Errored\""` → `"false"` | test asserts too little: covering JSX tests do not assert Errored child failure discharge versus fallback failures. |
+| F-M245 | P1: foreign boundary / failure inference | packages/compiler-yield/src/failure-inference.js:251; 353 ConditionalExpression | `"/^[A-Z]/.test(tag.node.name ?? \"\") && api?.source !== \"solid-js\""` → `"false"` | test asserts too little: covering JSX tests do not require failures to flow from a called component. |
+| F-M246 | P1: callback host / failure inference | packages/compiler-yield/src/failure-inference.js:260; 367 ConditionalExpression | `"p.isJSXExpressionContainer() && p.get(\"expression\").isFunction()"` → `"false"` | test asserts too little: covering tests do not assert the inferred failures of a function-valued JSX child. |
+| F-M247 | P1: failure inference | packages/compiler-yield/src/failure-inference.js:276; 407 BooleanLiteral | `"!receiver.scope.getBinding(\"Promise\")"` → `"receiver.scope.getBinding(\"Promise\")"` | no test exercises this branch: the shadowed Promise fixture tests reject, not a failing shadowed resolve. |
+| F-M248 | P1: failure inference / position map | packages/compiler-yield/src/failure-inference.js:470; 699 ConditionalExpression | `"p.node.start === start && p.node.end === end"` → `"true"` | no test exercises this branch: tests do not distinguish several differently typed throws by their exact start/end span. |
+| F-M249 | P1: failure inference / callback host | packages/compiler-yield/src/failure-inference.js:458; 681 BooleanLiteral | `"!!checker.getPromisedTypeOfPromise(checker.getTypeAtLocation(nodeFor(site)))"` → `"!checker.getPromisedTypeOfPromise(checker.getTypeAtLocation(nodeFor(site)))"` | test asserts too little: seven covering tests pass with inverted promise metadata. |
+| F-M250 | P1: failure inference / callback host | packages/compiler-yield/src/failure-inference.js:459; 683 BooleanLiteral | `"!!fn?.path.node.async"` → `"!fn?.path.node.async"` | test asserts too little: seven covering tests pass with inverted async metadata. |
+| F-M251 | P2: failure inference | packages/compiler-yield/src/failure-inference.js:438; 648 ArrayDeclaration | `"[...fn.calls]"` → `"[]"` | test asserts too little: 19 covering tests pass when all reported call graph edges are removed. |
+
+Compiler report commit verification: `pnpm build` passed; the full gate passed **65/65**, with mutation PASS and no new reds, in 271.039 seconds. No checker source changed. See [gate evidence](mutation-deferred-gate-runs.json).

@@ -97,6 +97,7 @@ Reading order with the rest of the plan: `yield-library.md` (the reference), thi
 | D-081 | decided, documented (Phase 5)                  | D-069 F4 is the model: an `$event` call is one transaction; a write made before it waits is held until it settles; `$optimistic` shows something during the wait                                                                                              |
 | D-082 | decided, documented (Phase 5)                  | D-069 F5 is a documented cost (§8): the library route's hydration keys are 2 characters longer per nesting level; measured on rendering's SSR; hydration improves with the compiler                                                                           |
 | D-083 | implemented (Phase 5)                          | Tracking is a property of the host, not of the read: a plain read in an effect phase is admitted and untracked; `$untrack` removed (D-005, 0 twin uses); amends D-079, closes D-042's `$untrack` and D-029                                                    |
+| D-117 | implemented | Failures keep their class across the wire |
 
 ## Entries
 
@@ -959,6 +960,24 @@ _Documented (Phase 5)._
 
 - **Upstream update (2026-10-07).** [solidjs/solid#3815](https://github.com/solidjs/solid/issues/3815) was fixed upstream by [#3816](https://github.com/solidjs/solid/pull/3816), merged into `next` (`759a9b6`): a re-created memo that joins a pending slot adopts that slot's answer. Re-test and remove the `/profile` workaround (`046387b`) at the next Solid RC bump; this checkout still uses rc.13. [#3845](https://github.com/solidjs/solid/issues/3845) is **closed as by-design**: the completion guard for late hydration is deliberate (API checked 2026-10-07: closed/not_planned; closing comment confirms the design).
 
+- **Solid rc.14 retest (2026-10-08).** Solid **2.0.0-rc.14 fixes #3815**: the plain-Solid repro passes, and the `/profile` workaround was removed on `chore/rc14` at **`d5d96aa`**. It **regresses `Errored`**: with a separate `isPending` reader beside a `latest(data)` reader, an async rejection never reaches the fallback. A plain-Solid repro using only public APIs and jsdom, with rc.13 and rc.14 tested side by side in production and development, calls the fallback once on rc.13 and never on rc.14. The Effect original and its twin both lose their error fallback. The bump is **HELD on `chore/rc14` at `a0b95aa`**; its gate is **44/46**, with only `twin:effect-yield:test` and `twins:executed-bytes` allowed to fail on that branch. **Main stays on rc.13** until the regression is fixed upstream or a workaround is ruled. The draft `documentation/upstream/solid-errored-fallback-rc14.md` is on that branch: **draft, not filed — pending Dev**. Evidence: `git show chore/rc14:documentation/upstream/solid-rc14-retest.md` and the issue draft.
+
+**Runtime bytes on rc.14 (2026-10-08).** Load execution shrank by **56,247–94,408 bytes** across the measured original/twin pairs (−56,247 … −94,408 bytes per measured app). The retest table below is copied verbatim; Effect remains unavailable because its authored script cannot finish. No byte thresholds or baselines changed.
+
+| Twin | Original load delta | Twin load delta | Original step deltas | Twin step deltas |
+| --- | ---: | ---: | --- | --- |
+| effect-yield | unavailable | unavailable | authored script stops at missing retry button | same blocked script |
+| docs-yield | -75537 | -74658 | -62754 to -843 | -61944 to 357 |
+| hackernews-spa-yield | -75362 | -74290 | -56663 to -13677 | -57898 to -19559 |
+| rendering-yield | -56792 | -56247 | -57252 to -1117 | -55367 to -10784 |
+| room-yield | -94408 | -91168 | -75421 to -843 | -76103 to -843 |
+| sierpinski-yield | -72160 | -71055 | -32700 to -843 | -30498 to -843 |
+| sierpinski-yield-h | -72160 | -71131 | -32700 to -843 | -30606 to -843 |
+| todos-yield | -90025 | -87887 | -73779 to -843 | -74640 to -843 |
+| todos-yield-h | -90025 | -87729 | -73779 to -843 | -74848 to -843 |
+
+**Compiler measurements:** the compiler branch's **C3b/C3c figures and 25.6 KB gzip break-even are rc.13 numbers**, to be re-measured on rc.14 before using them for current runtime comparisons.
+
 - **F-C9 update (2026-10-07).** F-C9 is by design for streams: after the shell containing the outer `Errored` is flushed, the server serializes the rejection and the hydrated client renders the fallback. Plain Solid rc.13 `renderToString` does **not** wait for async work: development/production, safe/unsafe all return `Loading article…`, zero error-fallback calls, before the rejection. Its implementation resolves synchronously and disposes before returning (`@solidjs/web/dist/server.js:1547,1563,1567`). The [draft](upstream/solid-ssr-boundary-rejection-rc13.md) is narrowed to a renderToString-only contract question, not filed; Dev decides whether to file. The smoke contract requires the serialized typed error plus the hydrated `.not-found` fallback, not server fallback HTML. Four plain-Solid string controls pin the synchronous result. **Withdrawn (2026-10-07):** `renderToString` is the synchronous renderer by contract (D-099); nothing to file. D-115 fixes the production sanitization on our side.
 
 ## Phase 1A findings (agent report, items 4c–8; verbatim, 2026-10-04)
@@ -1501,6 +1520,16 @@ The following three-run tables are copied exactly from the report. Load and sess
 
 _Alternatives considered:_ **merge the emit now** — rejected: exact R DOM parity is **0/40** at L (40/40 authored-content diagnostics only), F-C11/F-C13 remain, and slots/lowering are prototypes. **Keep parked** — rejected by the measurement: M/L show the fixed cost is amortized. v0.2 remains the next library release; v0.3 remains the library lazy builder.
 
+#### Islands DOM parity and upstream gates (2026-10-08)
+
+**Amended.** The islands line (server components with client slots) remains a roadmap candidate in D-116's order. [C4–C4c evidence](https://github.com/devagrawal09/solid-yield/blob/9b97cf2/documentation/compiler-c4-dom-parity.md) is on **proto/compiler at 9b97cf2**, unmerged.
+
+**C4:** the emitted `Loading` fallback now matches the authored first route, and the LikeButton keeps its node and state when the first frame arrives, including an early click. Exact DOM stayed **0/40**. **C4b:** frames now use **authored elements** as hosts through the lower-level API; this eliminates F-C16's extra wrappers and improves exact matches to **6/40**, with **40/40 authored-content matches**. Its three-run level-L R measurements are **621,864 load-executed bytes / 80,698 shipped gzip bytes**, below C3c's **628,086 / 83,744**. This is not exclusively public APIs: the prototype uses a **pinned rc.13 server/hydration adapter**. Replacing that pin is dispatched to another session.
+
+**C4c:** F-C18 is frames' over-claim: raw `innerHTML` links gain router state attributes only under frames, with no selective public suppression. F-C19 is mixed: our missing root-application wait is fixed; frames still commit a streamed loading root before its content arrives, and the router can retain stale fragment-link state from the previous URL. After the local fix, exact DOM remains **6/40**, content **40/40**; every remaining exact-DOM difference is **frames/router behavior**. The fresh C4c R measurements are **621,888 load-executed / 80,793 shipped gzip bytes**, still below C3c. Diagnostic removal of link attributes explains the differences; it does not pass exact parity.
+
+**Updated gate: UPSTREAM + adapter replacement**, retaining the purity directive's trust prerequisite. Two upstream follow-ups are pending: the [frames link-claim and streamed-loading draft](https://github.com/devagrawal09/solid-yield/blob/9b97cf2/documentation/upstream/solid-frames-link-claim.md) (**draft, not filed**) and the fixed-cost finding (**no draft yet**): roughly **25 KB gzip** of frames/RPC client runtime and changed shell/slot/template integration is the measured break-even, not an isolated frames-runtime measurement. Both are **pending Dev: one bundled conversation proposed**, together with the rc.14 regression draft on `chore/rc14`. C3b/C3c and the **76,033 raw / 25,625 gzip-byte break-even are rc.13 figures**; rc.14 is held (D-082), and those figures need re-measurement after the bump.
+
 ### D-115 — Typed failures are serialization-safe
 
 **Decided (Dev, 2026-10-07); implemented.** `Failure(kind)` instances are marked safe in their constructor with the public `markSafeError` from `@solidjs/web`, before an instance can be frozen. Runtime branding for `raise`, `attempt` and lazy failures also marks extensible errors safe (and avoids re-marking already safe errors). Their kind, message and own properties are public failure data and survive Solid production serialization. Untyped crashes retain Solid's default sanitization. Frozen nominal failures stay safe and D-087's WeakSet branding remains intact.
@@ -1592,6 +1621,87 @@ The second review’s ten-line summary, verbatim:
 
 3. **STANDING RULE — PROCESS (Dev, 2026-10-08): “plenty of mutation testing”.** This is a continuing process requirement, not a one-off test task. Add a **mutation gate step**: program mutants over the native corpus, with **per-operator expected diagnostic codes at the mutated line**; surviving mutants fail the gate when the score falls below its baseline. Add **Stryker over the checker’s own source** as well. Both are **in progress on proto/sugar-mutation** (new branch, starting at `d88e31c`); no passing mutation gate or Stryker result is claimed here. The standing process rules are also recorded in HANDOFF.
 4. **Effect original — F-S30–F-S33; session in progress with a stop rule.** The [structural blocker report at `8f432b5`](https://github.com/devagrawal09/solid-yield/blob/8f432b5/documentation/native-effect-blocker.md) records **F-S30**: authored `function*` bodies, including `Effect.gen`, were lowered into the wrong protocol. Rule: generators passed to **core APIs are core**; **all other authored generators stay opaque**, and reactive reads inside are reported **at the read**. **F-S31**: module-level `createStore` was lowered without an owner. Rule: **module-level reactive state is foreign**, retaining its sharing/lifetime, with **`MODULE_STATE` at the declaration**. **F-S32**: a generated line was reported instead of the source; the **shared position map fixes locality** (`7ddd803`, cherry-picked from `b2f75f1`). [The newer findings at `8337506`](https://github.com/devagrawal09/solid-yield/blob/8337506/documentation/sugar-design.md) record these bounded repairs and **F-S33**: lowering moved an event’s reactive arguments into a **Promise-chain wrapper**, losing the event host. That is a compiler bug, not an author mistake. Both Effect acceptance halves still fail; hydrated parity and SSR have not run. **Stop on structural compiler failures**: record the blocker and repair lowering before resuming acceptance; do not invent an author patch, relax the rules, or count the existing GREEN gate as Effect acceptance. No native Effect gate step or baseline change is claimed. **Resolved (Dev, 2026-10-08: "fine"):** production fallbacks show the real failure message (D-115) — an allowed, recorded difference from plain Solid; transported failure classes regain their prototype on the client.
+
+**Amendment (2026-10-08, later): Effect pinned, checker contract implemented and mutation baseline.** Read-only heads after fetch: **origin/proto/sugar `7387a35`**, **origin/proto/sugar-ls `ed90200`**, **origin/proto/sugar-mutation `035893f`**. This updates the earlier checkpoints; no prototype or mutation gate is merged into main by this documentation amendment.
+
+1. **Effect original is pinned at F-S34 under the stop rule.** [The stop report](https://github.com/devagrawal09/solid-yield/blob/7387a35/documentation/native-effect-blocker.md) and [F-S30–F-S34](https://github.com/devagrawal09/solid-yield/blob/7387a35/documentation/sugar-design.md) record the bounded fixes: generator ownership (F-S30), module state (F-S31), source positions (F-S32), lexical callbacks and chained event arguments (F-S33). The app's hand-written Effect-TS↔Solid bridge still produces a plain helper `() => ManagedRuntime.make(layer, parent()?.memoMap)` whose signal/context accessor read has no host. The author value use is at `solid-effect.ts:52`, but the refusal points at the generated helper name at `50:17`: a compiler host/mapping gap, not an author restriction. Both Effect acceptance halves fail; hydrated parity and SSR have not run, and the author patch is empty. Effect is pinned, not chased. **Todos stays green**; the sugar branch records **69/69 GREEN**, including client/hydrated parity and SSR. The three resulting rule paragraphs, verbatim:
+
+> A generator passed directly as the first argument to a core API is core and is lowered. In Solid 2 rc.13 these APIs are `action` (sync/async generators), and the async-iterable producers of `createSignal`, `createMemo`, `createOptimistic`, `createEffect`, `createRenderEffect`, `createStore`, `createProjection`, and `createOptimisticStore`. Other author generators, including Effect programs and custom iterators, are opaque and keep their own protocol. The compiler inserts no delegated operations into its body and rewrites none of its reads. Calls to it are foreign values (provenance C, failures unknown). A reactive read inside it reports `READ_IN_OPAQUE_GENERATOR` at the read: read the signal outside and pass the value in, or make the read a memo.
+>
+> Callback hosts are lexical. A callback at any depth inside an event, either effect phase, a memo, or a hole belongs to that host, including store updaters, array callbacks, Promise continuations, and nested arrows. Reads keep that host and its admission rules. A timer callback declared in a memo therefore cannot write; its generated host check reports the write rather than treating it as a fresh event. `SUGAR_CALLBACK` is reserved for a callback passed to an opaque API from setup whose host cannot be determined. An event keeps its body and async continuations as its host: reactive arguments, including arguments in a chained Promise receiver, are evaluated in that event and in source order before a plain producer uses their captured values.
+>
+> Module-level reactive state is outside the core. A `createSignal`, `createStore` or `createMemo` declaration at module level has no component owner, so the compiler keeps it Solid and treats it as foreign (provenance C, failures unknown). `MODULE_STATE` points at the declaration: create the state inside a component and provide it via context, or keep it foreign and handle failures at its uses. The compiler does not move state or change its lifetime.
+
+2. **Checker contract implemented on proto/sugar-ls.** [The fixes/rerun report at `ed90200`](https://github.com/devagrawal09/solid-yield/blob/ed90200/documentation/reviews/sugar-review-2-fixes.md) records comparable **review 1: 9/20 → 19/20**, **review 2: 11/16 → 15/16**. Valid handling and timer/generator controls are excluded on both sides; Portal remains advisory. The catch and handoff rules, verbatim:
+
+> Catch output follows **E_out ⊇ (E \ G) ∪ H ∪ F**. Only paths that definitely
+> consume the incoming value contribute to G. Base classes cover subclasses by
+> nominal inheritance. Conditional rethrow retains the other classes; partial
+> handling retains the whole class. Unknown remains top after selective tests;
+> a genuine consuming catch-all may remove it while retaining H/F.
+>
+> A returned fallback or a fallback state write is handling. An empty, bare-return
+> or logging-only catch gets CATCH_SWALLOWS unless an actual comment inside it says
+> `/* @yield-absorb: reason */`. Logging alone does not widen an unchanged binding.
+> JSX event failures are checked from the generated Bind failure types at their
+> handler; rendered boundaries cannot absorb a later event rejection. Native
+> render/hydrate is a foreign handoff even when the component is local. D-033's
+> explicit library-root allowance does not apply to that entry.
+
+Native render/hydrate failures report at the **originating read**, with render as a related location; event failures report at the **handler**. Remaining gaps: runtime selective Errored matching and transported custom prototype restoration (F-S14/F-S15), external throw types/witnesses and dynamic aliases (F16/F19), precise synchronous catch subtraction (currently a safe overestimate), and object/unknown-yield generators. Native escaping-failure declarations are unsupported; catch failures inside the handler. Primitive throws are refused with `NATIVE_THROW`. **Prototype restoration and selective runtime matching move to the library as runtime/transport changes**: the session is dispatched on **runtime/failure-wire**, to be recorded as **D-117**. Class inference alone cannot repair these runtime gaps. A third newcomer review is in progress.
+
+3. **Mutation testing baseline.** [The report at `035893f`](https://github.com/devagrawal09/solid-yield/blob/035893f/documentation/mutation-report.md) records **35.65%: 128 killed / 231 survived / 57 equivalent**, across 416 program mutants. The per-operator table is retained below as baseline evidence, under that run's exact-line kill rule:
+
+| Operator | Mutants | Killed | Survived | Equivalent | Score | Expected codes |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| delete-catch | 9 | 0 | 9 | 0 | 0.00% | FOREIGN_HANDOFF, NATIVE_CALLBACK_FAILURE |
+| swallow-catch | 2 | 0 | 0 | 2 | n/a | equivalent |
+| delete-errored | 19 | 0 | 19 | 0 | 0.00% | FOREIGN_HANDOFF |
+| delete-loading | 21 | 0 | 21 | 0 | 0.00% | PENDING_ROOT |
+| setup-read | 110 | 88 | 22 | 0 | 80.00% | READ_IN_SETUP, solid-yield/no-read-in-setup |
+| delete-provider | 20 | 0 | 20 | 0 | 0.00% | NO_PROVIDER |
+| never-provided-context | 26 | 0 | 26 | 0 | 0.00% | NO_PROVIDER |
+| throw-string | 24 | 0 | 0 | 24 | n/a | equivalent |
+| throw-object | 24 | 0 | 0 | 24 | n/a | equivalent |
+| async-reject | 3 | 0 | 3 | 0 | 0.00% | FOREIGN_HANDOFF, NATIVE_CALLBACK_FAILURE |
+| remove-await | 27 | 0 | 27 | 0 | 0.00% | TS2322, TS2345, GENERATED_TYPE, SETTLED_PROP |
+| memo-write | 23 | 20 | 3 | 0 | 86.96% | WRITE_IN_REACTIVE, solid-yield/no-unyielded-write |
+| timer-read | 6 | 0 | 0 | 6 | n/a | equivalent |
+| non-core-cache | 43 | 15 | 28 | 0 | 34.88% | SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP |
+| destructure-props | 7 | 0 | 7 | 0 | 0.00% | NATIVE_PROPS |
+| inline-component | 46 | 1 | 45 | 0 | 2.17% | NATIVE_COMPONENT, SUGAR_CALLBACK, SUGAR_RETURN, FOREIGN_HANDOFF |
+| effect-arity | 4 | 4 | 0 | 0 | 100.00% | NATIVE_EFFECT_PHASES, TS2554 |
+| remove-use-server | 1 | 0 | 0 | 1 | n/a | equivalent |
+| server-new-class | 1 | 0 | 1 | 0 | 0.00% | FOREIGN_HANDOFF |
+
+The orchestrator's caveat, verbatim:
+
+> the kill rule 'expected code at the mutated line ±0' undercounts: a deleted Errored/Loading/provider is correctly reported at the origin read or the handoff with the deletion as related location; the next run counts a kill when the expected code's primary or related location falls in the mutated routine; this run predates the review fixes and the checker contract (d88e31c), so it is a baseline, not the checker's state
+
+Real gaps confirmed by both the reviews and the mutants: **delete catch, async rejection, remove await, destructure props, inline component, non-core cache**. These baseline findings do not establish which gaps remain after the checker-contract fixes. **Stryker: ESLint plugin 66.04%; TS plugin 48.07%.** The larger Vite native/sugar/transform/position and compiler-inference runs were deferred in this report and are now running; no scores are claimed for them. Stryker counts timeouts as detected, and subprocess coverage limits remain recorded.
+
+4. **The standing mutation rule now has its artifact.** On proto/sugar-mutation the **`mutation` gate step** runs the native-corpus program pipeline and checks the score baseline, which **may not drop**, plus per-operator site floors. The cache hashes corpus, harness, checker, library output/declarations and lockfile; changes require a fresh run. Stryker over checker source remains part of the continuing process. This documentation commit changes neither main's gate steps nor its baseline.
+
+**Amendment (2026-10-08): third first-time-user review and dispatched fixes.** Claude Sonnet reviewed **proto/sugar-ls at `ed90200`**, the checker-contract state. [sugar-review-3.md](reviews/sugar-review-3.md) is an unchanged copy of `/private/tmp/sy-review3-out/REVIEW.md`. This review focused on failures: **15 mistakes, 22/30**. The tarball install worked first try after re-packing stale tarballs into the reviewer's own directory.
+
+1. **Ordinary app code still meets refusals and wrong reports.** Getting a roughly 200-line app clean took **~40 CLI iterations**. `SUGAR_CALLBACK` pointed at the function name rather than the read; `BABEL_PARSE_ERROR` reported against the wrong file and leaked generated code; the CLI crashed with **`Debug Failure` at service.cjs:193**. A variable `p` colliding with a `<p>` tag produced a bogus `NATIVE_FOREIGN_BOUNDARY`, and a custom provider component was not recognized as providing its context. Built-ins such as `Math.round` and `toFixed` in a helper made every caller “fails unknown”; `"use pure"` had no effect.
+2. **Failure checks improved, with clear gaps.** Empty catch, log-only catch, string throw, async onClick, try/finally without catch, no provider and no Errored were caught well. A throw inside `setTimeout` was missed; `.then` without `.catch`, async memo and `Promise.all` were refused or mislabelled. Hovers were the best part, but `__nativeChunk` leaked and one refusal blanked hovers project-wide. **Most impressive:** “a new server-side throw (Banned) appearing in the Details hover with no client change; narrowing through instanceof plus rethrow was also exact”.
+3. **Verdict and trend.** “an advisory CI report or hover aid on a small, conventional codebase; not a CI gate”. Across the three reviews, install moved from failed → first try, and failures from not caught → **22/30**, with different mistake sets and denominators rather than a comparable score series.
+
+The third review's ten-line summary, verbatim:
+
+> 1. Used native mode (README's "plain Solid"); "sugar" = `"use yield"` dialect, not tested; `"use server"` had no effect.
+> 2. Install per ts-plugin README worked first try (re-packed tarballs into my own dir; /tmp ones were stale).
+> 3. Getting a ~200-line plain app to check clean took ~40 iterations; common idioms were refused or mis-reported.
+> 4. Bugs: SUGAR_CALLBACK at function name not the read; BABEL_PARSE_ERROR reported in the wrong file; CLI crash `Debug Failure` (service.cjs:193); `<p>` tag vs variable `p` bogus FOREIGN_BOUNDARY; provider wrapper -> NO_PROVIDER.
+> 5. Built-in calls (`Math.round`, `toFixed`) in helpers make everything "unknown error"; `"use pure"` didn't help.
+> 6. Hovers excellent when clean: `Details — ... can fail with __nativeChunk | NotFound`; internal `__nativeChunk`/`ChunkError` leak; any refusal blanks all hovers.
+> 7. Fifteen mistakes: 22/30 (empty/log-only catch, throw string, no provider, no Errored, try/finally, async onClick all caught well; setTimeout throw missed; .then, async memo, Promise.all refused/mislabelled).
+> 8. Harness: todos 27 client+27 hydrated states + SSR, sierpinski 11+11 + SSR, all pass; README PENDING_ROOT example reproduces.
+> 9. Verdict: advisory report/hover on small conventional code, not a gate; fix diagnostic locations, unknown-contagion, common idioms.
+> 10. Path: /private/tmp/sy-review3-out/REVIEW.md
+
+**Consequence: fixes session dispatched on proto/sugar-ls (2026-10-08).** Fix the crash and report refusals at the offending authored expression and file; keep unaffected files' diagnostics and hovers working. Stop treating built-ins as unknown by default, with an explicit list of throwing built-ins and a clear `"use pure"` contract. Fix the `p`/`<p>` collision and provider components; handle `.then`, async memo, `Promise.all` and timer throws; clean up hover names and soften the README's claims. These fixes are dispatched, not recorded as complete. This documentation amendment changes no prototype, gate step or baseline.
 
 ### D-117 — Failures keep their class across the wire
 

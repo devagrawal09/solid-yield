@@ -172,9 +172,14 @@ export function lowerNativeEffects(files, report) {
       },
       Function(q) {
         if (!q.node.async && !q.node.returnType && t.isBlockStatement(q.node.body)) {
-          const completions = q.get("body").getCompletionRecords();
-          if (completions.length && completions.every(end => end.isThrowStatement()))
-            q.node.returnType = t.tsTypeAnnotation(t.tsNeverKeyword());
+          // Babel's completion query removes switch breaks. This check must
+          // only inspect control flow: ordinary helpers retain their JS body.
+          /** @param {any} node @returns {boolean} */
+          const throws = node =>
+            t.isThrowStatement(node) ||
+            (t.isBlockStatement(node) && throws(node.body.at(-1))) ||
+            (t.isIfStatement(node) && throws(node.consequent) && throws(node.alternate));
+          if (throws(q.node.body)) q.node.returnType = t.tsTypeAnnotation(t.tsNeverKeyword());
         }
       },
       YieldExpression: {

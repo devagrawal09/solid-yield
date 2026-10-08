@@ -83,10 +83,12 @@ sequences; the full JSONL series stays beside the input.
 
 Reduced diagnostic loops are available for `--only effect-yield` with
 `--scenario search`, `retry`, `supersede`, or `checkout`. They preserve the
-required authored order but exclude other blocks. Set `SOAK_CLEAR_MOCKS=1` for
-a control that clears Vitest call history before each sample while keeping mock
-implementations, fake clocks and application state intact. Default runs keep
-the authored spies unchanged. `--build no` is only for a diagnostic run reusing
+required authored order but exclude other blocks. Each sample clears Vitest call and settled-result records and trims old jsdom
+navigation entries, preserving the current URL and state. The schedule never
+travels back across rounds. This releases driver records without changing mock
+implementations, fake clocks or application state. Set `SOAK_CLEAR_MOCKS=0` and
+`SOAK_KEEP_HISTORY=1` only to reproduce the earlier report. The cleanup uses
+jsdom's private session-history layout and fails if that layout changes. `--build no` is only for a diagnostic run reusing
 an already instrumented dist; the ready check rejects missing counters.
 The report generator also writes a compressed sample archive for both apps.
 
@@ -98,3 +100,27 @@ control; it changes history behavior and is not used in the primary report.
 Run `node examples/harness/soak/diagnostics.mjs` for the optional foreground
 controls, or pass one diagnostic name to run only that case.
 Pass its combined JSON as the fourth argument to report.mjs to include controls.
+
+Pass `--control yes` to run a third worker with the same fixture setup, command
+traffic, checkpoints and GC, but a no-op mounted app. It receives the schedule
+without performing app actions; its slope measures idle driver noise, not the
+cost of navigation or network spies created by active apps. Fits after the first
+five rounds can include Vite cache reclamation; compare the final 100 rounds as
+well before calling a trend an app leak.
+
+Set `SOAK_SNAPSHOT_ROUNDS=50,100,150` to save V8 snapshots beside each worker's
+samples. Compare them with
+`node examples/harness/soak/heap-diff.mjs BEFORE AFTER object:FiberRuntime OUT.json`.
+The helper reports constructor counts, self bytes, immediate dominator chains
+and named strong retaining paths. Counts alone are not retained-size estimates;
+weak edges and WeakMap table shortcuts are excluded from paths. Snapshots are
+large local diagnostics; the checked-in classification evidence stores their
+counts and paths, plus compressed per-round samples.
+
+Room's fake server-function transport supplies a request context through its
+Vitest setup file. Each streamed request has an abort signal; disconnect,
+reconnect and iterator return abort it before closing the source. This matches
+the source's real request lifetime and lets parked `watchMembers` /
+`watchMessages` generators finish. The 200-request test checks finalizers, pending
+reads and an empty connection set; the long room run checks retained requests
+after the bounded message data has plateaued.

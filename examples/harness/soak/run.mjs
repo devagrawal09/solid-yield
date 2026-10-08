@@ -33,7 +33,7 @@ const opts = {
 for (let i = 0; i < args.length; i++) {
   if (args[i] === "--help") {
     console.log(
-      "pnpm soak [--minutes 10|60] [--seed 109] [--checkpoint 5] [--only twin] [--rounds N] [--out path]\nManual REPORT-ONLY run: findings never fail the gate. Infrastructure errors exit 1."
+      "pnpm soak [--minutes 10|60] [--seed 109] [--checkpoint 5] [--only twin] [--rounds N] [--control yes|no] [--out path]\nManual REPORT-ONLY run: findings never fail the gate. Infrastructure errors exit 1."
     );
     process.exit(0);
   }

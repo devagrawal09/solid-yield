@@ -7,7 +7,7 @@ This repository was extracted from the Solid fork `devagrawal09/solid`, branch `
 ## Roadmap and compiler checkpoint (2026-10-08, D-116)
 
 - **v0.1: done in code.** The library runtime, transform and lint are feature-complete; npm publication still awaits credentials.
-- **v0.2: sugar mode (native, bounded), plus the editor plugin and matching CLI check.** Write plain Solid; the plugin reconstructs yield routines and checks their types. D-115's serialization-safe typed failures remain included. **proto/sugar at 10e1743** records **69/69 GREEN**: Sierpinski (11 states) and todos (27) pass unchanged-original client/hydrated parity and SSR; hackernews-spa passes both the unchanged-original diagnostic snapshot and the nine-line author-fix check (15 happy states, one fetch-failure state matching patched Solid, and matching SSR). **effect/rendering/room/docs are queued.** Virtual-code typing is **implemented on proto/sugar-ls at d88e31c**, with mapped diagnostics, color hovers, the matching CLI and 19 tests including real tsserver protocol. The first-time Claude Sonnet review says **“not today”**, roughly **9/26 on 12 mistakes**: fixes for diagnostic locations, native docs/packaging, and false positives/negatives or misleading advice are **in progress on proto/sugar-ls** (session dispatched 2026-10-08); a second review follows. See D-116's later 2026-10-08 amendment and [sugar-design.md](https://github.com/devagrawal09/solid-yield/blob/10e174350efa0eab75feb42505cc40681c92b1f2/documentation/sugar-design.md).
+- **v0.2: sugar mode (native, bounded), plus the editor plugin and matching CLI check.** Write plain Solid; the plugin reconstructs yield routines and checks their types. D-115’s serialization-safe typed failures remain included. **Three originals accepted:** Sierpinski (11 states), todos (27), hackernews-spa (15 happy states + 1 failure with the minimal author patch), with hydrated parity and SSR; recorded sugar gate **69/69 GREEN**. **Effect is blocked at F-S33**; rendering/room/docs remain queued. Local **proto/sugar `8337506`** records generator/module-state/locality repairs (F-S30–F-S32); fetched origin remains `10e1743`. **proto/sugar-ls `fd0aed2`** has the editor plugin/CLI and review-1 fixes: comparable **9/22 → 19/22**, fresh-install gate, origin diagnostics, CLI false-negative fix, host-aware advice and native docs/ESLint selection. The **second review scores 12/24**: advisory CI for structural Solid mistakes, not typed failures. **The proof-based checker contract is first in the queue**, dispatched on proto/sugar-ls 2026-10-08; **standing mutation testing is in progress on proto/sugar-mutation**. See D-116’s later-still amendment and [sugar-design.md](https://github.com/devagrawal09/solid-yield/blob/8337506/documentation/sugar-design.md).
 - **Then: dashboard twin, written as plain Solid.** It exercises native sugar rather than starting with a hand-written yield twin.
 - **Then: islands (server components with client slots) productized**, subject to the parity and purity prerequisites below.
 - **Then: the lazy builder on the library route.** resume(root), descriptors, keyed attachment and materialization on first interaction, with its own event queue/payload, validated claims and render fallback; keyed failure re-delivery remains a related target (D-109). D-116 supersedes the earlier v0.3 order.
@@ -16,8 +16,9 @@ This repository was extracted from the Solid fork `devagrawal09/solid`, branch `
 
 | Read-only branch | Head | Role |
 | --- | --- | --- |
-| proto/sugar | **10e1743** | Bounded native Solid → yield; three originals accepted (Sierpinski 11 states, todos 27, hackernews-spa 15 + 1 with minimal author patch); both Hacker News acceptance halves pass; recorded 69/69 GREEN. effect/rendering/room/docs queued |
-| proto/sugar-ls | **d88e31c** | Virtual-code tsserver plugin, mapped diagnostics/color hovers and CLI implemented; 19 tests including real tsserver. First-time-review fixes in progress; editor UI and F-T1–F-T6 limits remain |
+| proto/sugar | **8337506** local; origin **10e1743** | Three originals accepted; recorded 69/69 GREEN. F-S30–F-S32 repaired; Effect stops at compiler host bug F-S33, both acceptance halves fail; rendering/room/docs queued |
+| proto/sugar-ls | **fd0aed2** | Review-1 fixes landed, comparable 9/22 → 19/22; fresh-install gate, recorded 65/65 GREEN. Review-2: 12/24, failure checks still missed; proof contract fixes dispatched 2026-10-08; editor UI/runtime source maps remain |
+| proto/sugar-mutation | **d88e31c** (new branch) | Standing process: native-corpus mutation gate with expected codes/lines and score baseline, plus Stryker over checker source; in progress |
 | proto/compiler | **ada81a8** | C1/C1b/R analysis, static extraction + eager root split (seven-root/single-root), and R islands experiments; [C3c scaling](https://github.com/devagrawal09/solid-yield/blob/ada81a8d3af2c1e3a783468ac820875fff1fb99d/documentation/compiler-c3c-scaling.md), directive 213e48a, fixtures bcfb0c2, measurements ada81a8 |
 | proto/compiler-single-root | **43bb41b** | Single-root cost decomposition; historical F-C9 stop predates D-115 |
 | proto/calculus-proofs | **950a71b** | Merged into main at **5d50680**; Lean proofs, paper proofs and probes; branch retained as history |
@@ -39,19 +40,20 @@ script remain on proto/compiler. The nine main twins have no marked modules;
 all nine analyzer reports and the gate's byte numbers remain unchanged.
 Build and the full gate are **46/46 GREEN**, including `proofs`;
 the baseline previously changed only for the proofs step. D-116 adds no gate steps and changes no gate or executed-byte baseline. This
-session starts at pushed main **231e706** and makes one local documentation commit only; no push.
+session starts at pushed main **3fc6bef** and makes one local documentation commit only; no push.
 
-**Native checker contract to implement (D-116 amendment).** Apply the proof audit's path-safe catch rule, base/subclass coverage and unknown-as-top handling. O27 structural subtraction and O52 author-facing KindCheck remain open against the prototype; selective and WIRE matching are the named gaps. Transported classes must regain their client prototype (orchestrator ruling; Dev may overrule). D-115's production-message parity question remains pending Dev; the concrete hackernews fallback displays `err.message`.
+**Native checker contract — first in the queue (D-116 later-still amendment).** Review-2’s failure misses triggered a session on proto/sugar-ls, dispatched 2026-10-08. Implement the proof audit’s path-safe O27 catch rule, base/subclass coverage, selective rethrow and unknown-as-top handling; check event rejections and the native root handoff. That handoff is foreign: D-033’s library-root allowance does not apply. O52 author-facing KindCheck and WIRE matching remain open. Transported classes must regain their client prototype (orchestrator ruling; Dev may overrule). D-115’s production-message parity question remains pending Dev; the concrete hackernews fallback displays `err.message`.
 
 ### Candidates and progress
 
-Sugar is **in progress** on proto/sugar, with three originals accepted and the
-editor plugin/CLI implemented on proto/sugar-ls. First-time-review fixes are in
-progress; the plain-Solid dashboard, productized islands and lazy builder follow
-the order above. The **analyzer tool is done on main**; a public analyzer product is not scheduled.
+Sugar is **in progress** on proto/sugar: three originals accepted; Effect stops
+at F-S33 after F-S30–F-S32 repairs. The editor plugin/CLI and review-1 fixes landed
+on proto/sugar-ls; review-2 leaves the typed-failure contract first in the queue.
+Mutation testing is a standing process requirement, in progress on proto/sugar-mutation.
+The plain-Solid dashboard, productized islands and lazy builder follow the order above. The **analyzer tool is done on main**; a public analyzer product is not scheduled.
 Retiring the proofs branch into main is done at **5d50680**; it remains as history.
 
-Unscheduled candidates: soak test; mutation-tested lints; serializable color;
+Unscheduled candidates: soak test; serializable color;
 keyed re-delivery for rollback UI; static-markup skip in the resumer; public
 roadmap issue.
 
@@ -217,6 +219,9 @@ node scripts/yield-gate.mjs --baseline documentation/yield-gate-baseline.json   
 - When the step list changes, re-record the baseline in the same commit (`--json documentation/yield-gate-baseline.json`) and update `yield-gate-baseline.md`.
 - There is no pre-commit hook. `repo:prettier` in the gate covers formatting; prettier is pinned to the fork's 3.8.1.
 - Patch docs with function-form replacements (`s.replace(a, () => b)`). A string replacement expands `` $` `` and once pasted DECISIONS.md into itself (fork incident).
+- **Never block on CI.** Run the required checks locally; CI does not replace the local gate.
+- **Push only after local GREEN.** Run `pnpm build`, then the full gate against `documentation/yield-gate-baseline.json` before each commit. This documentation session commits locally and never pushes.
+- **STANDING RULE — PROCESS (Dev, 2026-10-08): “plenty of mutation testing”.** Keep a mutation gate over the native corpus: each operator specifies expected diagnostic codes at the mutated line; surviving mutants fail below the score baseline. Also run Stryker over the checker’s own source. Both are in progress on **proto/sugar-mutation**; this is a continuing process requirement, not a one-off task (D-116’s later-still amendment).
 
 ## Known, recorded, not fixed
 
@@ -305,11 +310,10 @@ Two independent, read-only design reviews of `main` at `f608fa7`, kept verbatim:
 - `documentation/reviews/2026-10-05-claude.md` (Claude; its file:line citations are at `df06d89`);
 - `documentation/reviews/2026-10-05-codex.md` (Codex).
 
-First-time native sugar review: `documentation/reviews/sugar-review-1.md`
-(Claude Sonnet, 2026-10-08, proto/sugar-ls at **d88e31c**; copy by the fixes
-session pending, source `/private/tmp/sy-review-out/REVIEW.md`). Verdict **“not
-today”**, roughly **9/26 on 12 mistakes**; exact ten-line summary in D-116's later
-amendment. Fixes are in progress on proto/sugar-ls; a second review follows.
+Native sugar first-time-user reviews (Claude Sonnet, 2026-10-08):
+
+- [Review 1](https://github.com/devagrawal09/solid-yield/blob/fd0aed2/documentation/reviews/sugar-review-1.md), against **d88e31c**, unchanged copy on proto/sugar-ls; verdict “not today”. [Fixes/rerun](https://github.com/devagrawal09/solid-yield/blob/fd0aed2/documentation/reviews/sugar-review-1-fixes.md) landed at **fd0aed2**: comparable **9/22 → 19/22**. The original 9/26 denominator is corrected there; the legal timer read is excluded on both sides. Remaining: no accidental-swallow warning (intentional absorption is valid), Portal internals unchecked, runtime source maps.
+- [Review 2](documentation/reviews/sugar-review-2.md), against **fd0aed2**, copied unchanged from `/private/tmp/sy-review2-out/REVIEW.md`: install worked first time; README jsxImportSource/ESLint contradictions remain; **12/24**. Structural checks work well; swallowed/base-class/selective catches, onClick rejections and root failures were missed. Root diagnostics duplicate and some related locations enter library `.d.ts` files. Verdict: advisory CI for structural mistakes, not typed failures. Exact ten-line summary and the proof-contract priority/session are recorded in D-116’s later-still amendment.
 
 The Solid rc.13 SSR loop found under rendering's `/profile` (D-082) is drafted as an upstream issue in `documentation/upstream/solid-ssr-memo-loop-rc13.md` (status: draft, not yet filed).
 

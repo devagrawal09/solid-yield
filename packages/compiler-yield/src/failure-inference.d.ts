@@ -32,7 +32,14 @@ export interface FailureReport {
     file: string,
     start: number,
     end: number
-  ): { fails: string[]; native: boolean; target?: string; promise: boolean; async: boolean } | null;
+  ): {
+    callable: boolean;
+    fails: string[];
+    native: boolean;
+    target?: string;
+    promise: boolean;
+    async: boolean;
+  } | null;
   foreignState(file: string, start: number, end: number): boolean;
   at(
     file: string,

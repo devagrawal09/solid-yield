@@ -124,11 +124,29 @@ export function lowerNativeEffects(files, report) {
             "action"
           ].includes(api.name);
       }
-      return (
-        call?.isJSXExpressionContainer() &&
-        call.parentPath.isJSXAttribute() &&
-        /^on/.test(String(call.parentPath.node.name.name ?? ""))
-      );
+      // Function-valued JSX children and attributes are called by the renderer.
+      // Parentheses, conditionals and functions returned from a hole keep that host.
+      for (let outer = fn.parentPath; outer; outer = outer.parentPath) {
+        if (!outer.isJSXExpressionContainer()) continue;
+        const attr = outer.parentPath;
+        // These already have explicit callback bridges in the native surface.
+        // Their nested JSX expressions still provide holes of their own.
+        if (attr.isJSXAttribute()) {
+          if (attr.node.name.name === "ref") return false;
+          const tag = attr.parentPath.get("name");
+          const binding = tag.isJSXIdentifier()
+            ? tag.scope.getBinding(tag.node.name)?.path
+            : undefined;
+          if (
+            attr.node.name.name === "fallback" &&
+            imported(binding)?.source === "solid-js" &&
+            imported(binding)?.name === "Errored"
+          )
+            return false;
+        }
+        return true;
+      }
+      return false;
     };
 
     // Async reactive helpers run on their caller's host. Await becomes an
@@ -279,6 +297,7 @@ export function lowerNativeEffects(files, report) {
           const info = report.call(file, q.node.start, q.node.end ?? 0);
           if (
             !info ||
+            !info.callable ||
             info.native ||
             (!info.fails.length && !info.promise) ||
             (info.target && asyncRoutines.has(info.target)) ||
@@ -300,6 +319,59 @@ export function lowerNativeEffects(files, report) {
           // A chained receiver can contain the event's reactive arguments too.
           // Evaluate it in the routine before building the plain producer.
           const evaluated = [...q.get("arguments")];
+          if (c.isMemberExpression()) {
+            const receiver = c.get("object");
+            // Only lift a reactive receiver. Splitting a plain Promise method
+            // erases its generic return type even though it has no routine read.
+            /** @param {Path} value */
+            const reactiveValue = value => {
+              if (!value.isIdentifier()) return false;
+              const binding = value.scope.getBinding(value.node.name)?.path;
+              const direct = imported(binding);
+              // Construction is not a receiver read. Keep invalid creation in
+              // a hole at its authored call, rather than lifting it into setup.
+              if (
+                (direct?.source === "solid-js" && !/^create/.test(direct.name)) ||
+                direct?.source.startsWith("solid-yield")
+              )
+                return true;
+              const init = binding?.isVariableDeclarator() ? binding.get("init") : null;
+              const api = init?.isCallExpression() ? init.get("callee") : null;
+              const source = api?.isIdentifier()
+                ? imported(api.scope.getBinding(api.node.name)?.path)
+                : null;
+              return (
+                source?.source === "solid-js" &&
+                /^create(Signal|Memo|Optimistic|Store|Projection)/.test(source.name)
+              );
+            };
+            /** @param {Path} value */
+            const readsReceiver = value => {
+              if (report.foreignState(file, value.node.start ?? 0, value.node.end ?? 0))
+                readsArgument = true;
+              if (value.isCallExpression()) {
+                const site = report.call(file, value.node.start ?? 0, value.node.end ?? 0);
+                if (
+                  reactiveValue(value.get("callee")) ||
+                  (site?.target && routines.has(site.target))
+                )
+                  readsArgument = true;
+              } else if (value.isMemberExpression()) {
+                let base = value.get("object");
+                while (base.isMemberExpression()) base = base.get("object");
+                if (reactiveValue(base)) readsArgument = true;
+              }
+            };
+            readsReceiver(receiver);
+            traverseOwned(receiver, {
+              Function(inner) {
+                inner.skip();
+              },
+              CallExpression: readsReceiver,
+              MemberExpression: readsReceiver,
+              ReferencedIdentifier: readsReceiver
+            });
+          }
           let receiverCall = c.isMemberExpression() ? c.get("object") : null;
           while (receiverCall?.isCallExpression()) {
             evaluated.push(...receiverCall.get("arguments"));

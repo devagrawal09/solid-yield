@@ -109,6 +109,7 @@ function nativeProgram(files, options = {}) {
       module: ts.ModuleKind.ESNext,
       moduleResolution: ts.ModuleResolutionKind.Bundler,
       jsx: ts.JsxEmit.Preserve,
+      jsxImportSource: "@solidjs/web",
       strict: true,
       skipLibCheck: true,
       allowJs: true,

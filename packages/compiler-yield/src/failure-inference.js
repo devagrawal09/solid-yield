@@ -769,7 +769,19 @@ export function inferFailures(
         file
       };
       const fn = target(site);
+      const callee = nodeFor(site.get("callee"));
+      const calleeType = callee && checker.getTypeAtLocation(callee);
+      // Invalid authored calls must stay visible as ordinary TypeScript errors.
+      // An any/unknown callee keeps the conservative foreign failure contract.
+      const callable =
+        !calleeType ||
+        !!(calleeType.flags & (ts.TypeFlags.Any | ts.TypeFlags.Unknown)) ||
+        (site.isNewExpression()
+          ? calleeType.getConstructSignatures()
+          : calleeType.getCallSignatures()
+        ).length > 0;
       return {
+        callable,
         fails: [...evaluate(site, owner)],
         native: !!nativeCall(site) && nativeCall(site) !== "promise-constructor",
         target: fn?.id,

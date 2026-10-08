@@ -1,8 +1,7 @@
 {
-  "finding": "F-S35: a JSX method receiver loses its hole host inside a plain failure producer",
-  "halfA": "FAIL: the source position is correct, but SUGAR_CALLBACK is a compiler false positive",
-  "halfB": "FAIL: not run; the stop rule applies before author edits, hydrated parity or SSR",
-  "scopeDiagnostics": [],
+  "finding": "F-S36: the shared FilterContext keeps Solid Accessor types but its generated provider supplies yield Sources",
+  "halfA": "FAIL: F-S35 is fixed and lowering returns only the Router boundary, but the generated context facade does not typecheck; both field errors map to the authored provider",
+  "halfB": "FAIL / not run: first new structural reason; no author patch, native hydrated parity, SSR, AckFailed or NotFound comparison",
   "boundaries": [
     {
       "code": "NATIVE_FOREIGN_BOUNDARY",
@@ -12,162 +11,127 @@
       "column": 9
     }
   ],
-  "original": {
-    "diagnostic": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (examples/originals/dashboard/src/panels.tsx:47:35)",
-    "file": "examples/originals/dashboard/src/panels.tsx",
-    "line": 47,
-    "column": 35,
-    "sourceSpan": {
-      "start": 3877,
-      "end": 3883,
-      "sourceStart": 1733,
-      "sourceEnd": 1739,
-      "generated": false
-    },
-    "sourceSpanText": "totals",
-    "authorSource": "          <dd data-kpi=\"success\">{totals().success.toFixed(2)}%</dd>",
-    "intermediateRead": "totals()",
-    "intermediateHost": "() => totals().success.toFixed(2)"
-  },
-  "patch": "",
-  "sourceFailureSets": [
+  "structuralDiagnostics": [
     {
-      "name": "Overview",
-      "file": "examples/originals/dashboard/src/app.tsx",
-      "line": 11,
-      "fails": [
-        "ChunkError",
-        "examples/originals/dashboard/src/errors.ts#AckFailed@45",
-        "examples/originals/dashboard/src/errors.ts#NotFound@201",
-        "global:Error",
-        "unknown"
-      ]
+      "code": "TS2322",
+      "message": "Type 'Source<Range, never, false>' is not assignable to type 'Accessor<Range>'.\n  Type 'Source<Range, never, false>' provides no match for the signature '(): Range'.",
+      "property": "range",
+      "author": {
+        "file": "examples/originals/dashboard/src/filters.tsx",
+        "line": 23,
+        "column": 34,
+        "text": "return <FilterContext value={{ range, team, setRange, setTeam }}>{props.children}</FilterContext>;"
+      },
+      "generated": {
+        "file": "examples/originals/dashboard/src/filters.tsx",
+        "line": 37,
+        "column": 11,
+        "text": "range"
+      },
+      "mapped": {
+        "line": 23,
+        "column": 34,
+        "generated": false,
+        "text": "range"
+      }
     },
     {
-      "name": "IncidentBody",
-      "file": "examples/originals/dashboard/src/app.tsx",
-      "line": 23,
-      "fails": [
-        "global:Error",
-        "unknown"
-      ]
-    },
-    {
-      "name": "IncidentDetail",
-      "file": "examples/originals/dashboard/src/app.tsx",
-      "line": 48,
-      "fails": [
-        "ChunkError",
-        "examples/originals/dashboard/src/errors.ts#NotFound@201",
-        "unknown"
-      ]
-    },
-    {
-      "name": "App",
-      "file": "examples/originals/dashboard/src/app.tsx",
-      "line": 83,
-      "fails": [
-        "global:Error",
-        "unknown"
-      ]
-    },
-    {
-      "name": "SeriesPanel",
-      "file": "examples/originals/dashboard/src/chart.tsx",
-      "line": 50,
-      "fails": [
-        "ChunkError",
-        "global:Error",
-        "unknown"
-      ]
-    },
-    {
-      "name": "FilterProvider",
-      "file": "examples/originals/dashboard/src/filters.tsx",
-      "line": 20,
-      "fails": [
-        "unknown"
-      ]
-    },
-    {
-      "name": "FilterBar",
-      "file": "examples/originals/dashboard/src/filters.tsx",
-      "line": 32,
-      "fails": [
-        "global:Error",
-        "unknown"
-      ]
-    },
-    {
-      "name": "IncidentRow",
-      "file": "examples/originals/dashboard/src/incidents.tsx",
-      "line": 8,
-      "fails": [
-        "ChunkError",
-        "examples/originals/dashboard/src/errors.ts#AckFailed@45",
-        "examples/originals/dashboard/src/errors.ts#NotFound@201",
-        "unknown"
-      ]
-    },
-    {
-      "name": "IncidentsPanel",
-      "file": "examples/originals/dashboard/src/incidents.tsx",
-      "line": 50,
-      "fails": [
-        "ChunkError",
-        "examples/originals/dashboard/src/errors.ts#AckFailed@45",
-        "examples/originals/dashboard/src/errors.ts#NotFound@201",
-        "global:Error",
-        "unknown"
-      ]
-    },
-    {
-      "name": "Panel",
-      "file": "examples/originals/dashboard/src/panel.tsx",
-      "line": 4,
-      "fails": [
-        "unknown"
-      ]
-    },
-    {
-      "name": "SummaryPanel",
-      "file": "examples/originals/dashboard/src/panels.tsx",
-      "line": 10,
-      "fails": [
-        "ChunkError",
-        "global:Error",
-        "unknown"
-      ]
-    },
-    {
-      "name": "TeamPanel",
-      "file": "examples/originals/dashboard/src/panels.tsx",
-      "line": 69,
-      "fails": [
-        "ChunkError",
-        "global:Error",
-        "unknown"
-      ]
-    },
-    {
-      "name": "NotesPanel",
-      "file": "examples/originals/dashboard/src/panels.tsx",
-      "line": 97,
-      "fails": [
-        "global:Error",
-        "unknown"
-      ]
-    },
-    {
-      "name": "Shell",
-      "file": "examples/originals/dashboard/src/shell.tsx",
-      "line": 2,
-      "fails": [
-        "unknown"
-      ]
+      "code": "TS2322",
+      "message": "Type 'Source<TeamFilter, never, false>' is not assignable to type 'Accessor<TeamFilter>'.\n  Type 'Source<TeamFilter, never, false>' provides no match for the signature '(): TeamFilter'.",
+      "property": "team",
+      "author": {
+        "file": "examples/originals/dashboard/src/filters.tsx",
+        "line": 23,
+        "column": 41,
+        "text": "return <FilterContext value={{ range, team, setRange, setTeam }}>{props.children}</FilterContext>;"
+      },
+      "generated": {
+        "file": "examples/originals/dashboard/src/filters.tsx",
+        "line": 38,
+        "column": 11,
+        "text": "team"
+      },
+      "mapped": {
+        "line": 23,
+        "column": 41,
+        "generated": false,
+        "text": "team"
+      }
     }
   ],
-  "colorStatus": "Source failure inference only, before JSX handler discharge. No generated component colors or foreign handoff checks exist because lowering stopped.",
+  "sideBySide": {
+    "author": "interface Filters {\n  range: Accessor<Range>;\n  team: Accessor<TeamFilter>;\n  setRange: (range: Range) => void;\n  setTeam: (team: TeamFilter) => void;\n}\nconst FilterContext = createContext<Filters>();\n\nexport function FilterProvider(props: { children: JSX.Element }) {\n  const [range, setRange] = createSignal<Range>(\"24h\");\n  const [team, setTeam] = createSignal<TeamFilter>(\"all\");\n  return <FilterContext value={{ range, team, setRange, setTeam }}>{props.children}</FilterContext>;\n}",
+    "generated": "interface Filters {\n  range: Accessor<Range>;\n  team: Accessor<TeamFilter>;\n  setRange: (range: Range) => void;\n  setTeam: (team: TeamFilter) => void;\n}\nconst FilterContext = createContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\">(undefined, {\n  name: \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\"\n});\nexport const FilterProvider = component(function* FilterProvider(props: Props<{\n  children: JSX.Element;\n}>) {\n  const [range, setRange] = yield* createSignal<Range>(\"24h\");\n  const [team, setTeam] = yield* createSignal<TeamFilter>(\"all\");\n  return view(function* () {\n    return <>{yield* FilterContext.provide({\n        value: {\n          range,\n          team,\n          setRange,\n          setTeam\n        },\n        children: function* () {\n          return yield* props.children;\n        }\n      })}</>;\n  });\n});\n"
+  },
+  "patch": "",
+  "finalCheckedColors": {
+    "status": "unavailable: the generated project fails its shared context contract; inferred any or unknown colors in rejected output are not checked colors",
+    "panels": [
+      {
+        "name": "SummaryPanel",
+        "pending": "unavailable",
+        "fails": "unavailable",
+        "requires": "unavailable",
+        "sharedFilter": "FilterContext"
+      },
+      {
+        "name": "SeriesPanel",
+        "pending": "unavailable",
+        "fails": "unavailable",
+        "requires": "unavailable",
+        "sharedFilter": "FilterContext"
+      },
+      {
+        "name": "IncidentsPanel",
+        "pending": "unavailable",
+        "fails": "unavailable",
+        "requires": "unavailable",
+        "sharedFilter": "FilterContext"
+      },
+      {
+        "name": "TeamPanel",
+        "pending": "unavailable",
+        "fails": "unavailable",
+        "requires": "unavailable",
+        "sharedFilter": "FilterContext"
+      },
+      {
+        "name": "NotesPanel",
+        "pending": "unavailable",
+        "fails": "unavailable",
+        "requires": "unavailable",
+        "sharedFilter": "FilterContext"
+      }
+    ],
+    "routes": [
+      {
+        "name": "Overview",
+        "paths": [
+          "/",
+          "/overview"
+        ],
+        "pending": "unavailable",
+        "fails": "unavailable",
+        "requires": "unavailable",
+        "sharedFilter": "FilterContext"
+      },
+      {
+        "name": "IncidentDetail",
+        "paths": [
+          "/incidents/inc-101",
+          "/incidents/missing"
+        ],
+        "pending": "unavailable",
+        "fails": "unavailable",
+        "requires": "unavailable",
+        "sharedFilter": "FilterContext"
+      }
+    ]
+  },
+  "failurePaths": {
+    "AckFailed": "original catches this class and writes the row failure; native comparison not run",
+    "NotFound": "original route has Errored around Loading and IncidentBody; native comparison not run"
+  },
   "originalHashes": {
     "examples/originals/dashboard/src/api.ts": "bef20441971b979d82c69519c83991c55fe8425031bbb80266c359eee439d298",
     "examples/originals/dashboard/src/app.tsx": "11242103e6e0bf35cbc3e27adc0768929f26a3311a4fbb0a23be960cc2b851f9",

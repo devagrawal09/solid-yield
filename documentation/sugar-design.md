@@ -1163,21 +1163,20 @@ halves and the empty author patch. The module-state note remains correctly at
 `log.ts:20:7`. Native Effect is not added to the gate; the baseline is unchanged.
 
 
-### Native dashboard: F-S35 structural stop (2026-10-08)
+### Native dashboard: JSX hole fix and F-S36 stop (2026-10-08)
 
-The unchanged dashboard reaches a new compiler false positive at
-`panels.tsx:47:35`: the JSX hole's `totals().success.toFixed(2)` becomes the
-plain failure producer `() => totals().success.toFixed(2)`, which loses the
-hole host and reports `SUGAR_CALLBACK` at `totals()`. The position is correctly
-mapped; the callback rule is wrong. The receiver must be evaluated inside its
-hole before the ordinary method call, preserving its receiver and source order.
-This is F-S35, distinct from F-S34's setup context helper. The first-new-structure
-stop rule applies: no author workaround or compiler iteration is attempted.
-[The side-by-side report](native-dashboard-blocker.md) records both failed
-acceptance halves, the empty author patch, the foreign Router boundary at
-`app.tsx:92:9`, and every panel's source failure sets. Final component colors,
-route handoff checks, native hydrated parity, AckFailed/NotFound comparisons and
-SSR are unavailable because lowering stopped. The added
-`native:dashboard:structural-stop` gate pins this evidence, not native acceptance;
-only its baseline entry is regenerated. Originals and byte thresholds stay
-unchanged.
+F-S35 is fixed: arrows and functions in JSX children or attributes keep their
+hole host through parentheses, conditionals and returned functions. Native
+failure lowering evaluates a method receiver in that host before creating its
+plain failure producer, preserving receiver lookup, arguments and invocation
+order; `totals().success.toFixed(2)` no longer captures `totals()` inside an
+unhosted callback. The seven JSX-hole fixtures pin these forms. Dashboard lowering
+now returns only the Router boundary at `app.tsx:92:9`, but its generated context
+fails checking: `Filters` retains Solid's callable `Accessor` fields while
+`FilterProvider` supplies yield `Source` values. This is F-S36, a compiler context
+facade gap, correctly located at the provider in `filters.tsx:23`. The first-new-structure stop rule applies. Both native acceptance halves
+fail, the author patch is empty, and final panel/route colors and native hydrated,
+SSR, AckFailed and NotFound comparisons are unavailable. The existing
+`native:dashboard:structural-stop` step now pins F-S36 with
+[side-by-side evidence](native-dashboard-blocker.md); no new gate step or baseline
+entry is added.

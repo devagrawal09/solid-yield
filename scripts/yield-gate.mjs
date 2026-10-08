@@ -275,7 +275,7 @@ function buildSteps(twins) {
     });
   }
 
-  // F-S35 pins a structural compiler stop; this is not native dashboard acceptance.
+  // F-S36 pins the context facade stop after the JSX hole fix; not dashboard acceptance.
   steps.push({
     name: "native:dashboard:structural-stop",
     cwd: root,

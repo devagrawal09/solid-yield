@@ -2,6 +2,14 @@
 
 `solid-yield` is a library for writing Solid 2 components as **yield components**: generator functions in which every read is a `yield*`, so that a component's type says whether it may be pending, which errors it may fail with, and which contexts it requires.
 
+## Sugar mode (in progress on proto/sugar)
+
+Write plain Solid, add the plugin, and get typed failures without writing
+generators or importing the library in your app code. The plugin converts the
+reactive core to yield routines; everything outside that core stays plain Solid
+at a named foreign boundary, where unknown failures must be handled. The editor
+plugin and matching CLI check are planned. See [the branch design](https://github.com/devagrawal09/solid-yield/blob/5e03328ec2fcd872f87228d4dac4f21bae9fb4c1/documentation/sugar-design.md).
+
 ## The problem
 
 In Solid 2 a component's signature hides what its reads do. The two components below render the same list:

@@ -1,0 +1,807 @@
+{
+  "level": "L",
+  "baselineCommit": "9b97cf2",
+  "baselineRecord": "compiler-c4c-parity.json (after)",
+  "note": "Unchanged exact normalizer. All 40 compiled checkpoint hashes equal the retained C4c record. Diagnostic ablations remain separate from exact parity.",
+  "publicReplacements": {
+    "hydrating": {
+      "exact": 6,
+      "content": 40,
+      "plainSolidExact": 40
+    },
+    "values": {
+      "exact": 6,
+      "content": 40,
+      "plainSolidExact": 40
+    }
+  },
+  "authoredContentChecks": 40,
+  "after": {
+    "steps": 40,
+    "counts": {
+      "exact": 6,
+      "withoutWrappers": 6,
+      "withoutWrappersAndMarkers": 6,
+      "alsoWithoutMarkdownClaims": 33,
+      "alsoWithoutTocClaims": 40
+    },
+    "plainSolidExactMatches": 40,
+    "claimDifferenceSteps": {
+      "markdown": [
+        4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 27, 28,
+        32, 33, 34, 37, 38, 39
+      ],
+      "on-this-page": [25, 29, 30, 32, 33, 35, 36]
+    },
+    "firstNavigation": {
+      "libraryRoute": "<main>Loading article…<section class=\"widget like\"><button>Like: 0</button><span></span><p class=\"like-error\"></p></section></main>",
+      "compiledRoute": "<main>Loading article…<section class=\"widget like\"><button>Like: 0</button><span></span><p class=\"like-error\"></p></section></main>",
+      "exactRouteMatch": true,
+      "likeNodeRetained": true,
+      "intermediateFrameMarkers": [],
+      "settledMarkers": []
+    },
+    "checkpoints": [
+      {
+        "step": 0,
+        "librarySha256": "5e88392ebd634311a828280894bfd97323e1106753221d2843c94edd7590ca51",
+        "compiledSha256": "5e88392ebd634311a828280894bfd97323e1106753221d2843c94edd7590ca51",
+        "comparisons": {
+          "exact": true,
+          "withoutWrappers": true,
+          "withoutWrappersAndMarkers": true,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": false,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 1,
+        "librarySha256": "5e88392ebd634311a828280894bfd97323e1106753221d2843c94edd7590ca51",
+        "compiledSha256": "5e88392ebd634311a828280894bfd97323e1106753221d2843c94edd7590ca51",
+        "comparisons": {
+          "exact": true,
+          "withoutWrappers": true,
+          "withoutWrappersAndMarkers": true,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": false,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 2,
+        "librarySha256": "5e88392ebd634311a828280894bfd97323e1106753221d2843c94edd7590ca51",
+        "compiledSha256": "5e88392ebd634311a828280894bfd97323e1106753221d2843c94edd7590ca51",
+        "comparisons": {
+          "exact": true,
+          "withoutWrappers": true,
+          "withoutWrappersAndMarkers": true,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": false,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 3,
+        "librarySha256": "5e88392ebd634311a828280894bfd97323e1106753221d2843c94edd7590ca51",
+        "compiledSha256": "5e88392ebd634311a828280894bfd97323e1106753221d2843c94edd7590ca51",
+        "comparisons": {
+          "exact": true,
+          "withoutWrappers": true,
+          "withoutWrappersAndMarkers": true,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": false,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 4,
+        "librarySha256": "e229e2befdeca84436fba0f7ecbe2d7229c970d7da29834758f1e716f8005142",
+        "compiledSha256": "06fe62258d083f5e2092f9c0a375facc904f771b99733c60978208c14e445a31",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": true,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 5,
+        "librarySha256": "98ac3b7afcadf47378a38130a02f9b6ed4c88037e702e0299c4b3e9a91d202bc",
+        "compiledSha256": "6487443f02a85fb79d88c4c77efdac37f9379f0a6c7fd443b717a234bb0069b3",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": true,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 6,
+        "librarySha256": "051412c89b8b55f855637bdf3becad257bd54c625af69400764ba959c4b2963c",
+        "compiledSha256": "46137fb8087e58912ecdc7ee7a9bf76a5cffe99b732584a5faa168a4b8798c72",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": true,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 7,
+        "librarySha256": "051412c89b8b55f855637bdf3becad257bd54c625af69400764ba959c4b2963c",
+        "compiledSha256": "46137fb8087e58912ecdc7ee7a9bf76a5cffe99b732584a5faa168a4b8798c72",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": true,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 8,
+        "librarySha256": "9cf6363d739c6b6abd4546ba29661d74a2c973a120c53266871b0717c9bc04de",
+        "compiledSha256": "ec063b9235720b980de27a9d7d95df16259aaf552ca5f9fc1da187c2b8a44329",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": true,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 9,
+        "librarySha256": "030f559ffa87c3eef63a186f9c1f950c066a0ca8020597c4e59b55b6a4c591f1",
+        "compiledSha256": "e04ae5e78ed380af8c6be322d2fa65cecb8f3f0fb9cc89d31163f63818a7b95e",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": true,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 10,
+        "librarySha256": "9386eb0ed0b5cbc04ea6d64774e20014920f10b673556ae925f596179b0705f4",
+        "compiledSha256": "a43e7b31758e4762bc9e85d79817bce59e4870dd851d109ce26282a3a129bc4c",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": true,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 11,
+        "librarySha256": "542a8000aaaaf843675c0b9f28f0defdf64446f908dff99207e567bda2afbe7f",
+        "compiledSha256": "1702591cc4dd81580b11ab0a7b28c45bc41634e113060b7677e4b282b859fbad",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": true,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 12,
+        "librarySha256": "4bf9dce9e5b42e427abbbb17aa9b0c40f7ec73d8c3bfbce74e05c05a8e8b688d",
+        "compiledSha256": "2385160d504eb19455cf26fae00a5437d6f4738585f7c45d2a8a312b01360d3b",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": true,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 13,
+        "librarySha256": "4bf9dce9e5b42e427abbbb17aa9b0c40f7ec73d8c3bfbce74e05c05a8e8b688d",
+        "compiledSha256": "2385160d504eb19455cf26fae00a5437d6f4738585f7c45d2a8a312b01360d3b",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": true,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 14,
+        "librarySha256": "82ff061bccea97ee7e58b083fed5440e002448fe09b73c95595746cda3551f2c",
+        "compiledSha256": "aab2d72f468e1fc7dc6557e8b8d9d104b3e9fd6a7300dca08da4814766e7bd51",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": true,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 15,
+        "librarySha256": "dfb071f89b045cbbebebbab8764d5857d34ebb13290c040b94fec7c963be2df5",
+        "compiledSha256": "4f82625b92e95f5dc5a41eb25d66509a23908ecbf2f195c47d4f59e1ec368a8b",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": true,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 16,
+        "librarySha256": "dfb071f89b045cbbebebbab8764d5857d34ebb13290c040b94fec7c963be2df5",
+        "compiledSha256": "4f82625b92e95f5dc5a41eb25d66509a23908ecbf2f195c47d4f59e1ec368a8b",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": true,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 17,
+        "librarySha256": "716f16f3a8517f2a40e046beb922ca18dc756b834f95e46e445c5e6dcb1fc5bd",
+        "compiledSha256": "65169b3b609d058b4026541cff083e3e786e6db80382d878234eb981daadade1",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": true,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 18,
+        "librarySha256": "5b9e7a42c34429585b9febbd595e0500ecde8991df48064b9123f524b5f13628",
+        "compiledSha256": "5c6fdc474576baf19c6db4e21c0b96a4c72d32b3bfe23237161692d61757ae85",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": true,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 19,
+        "librarySha256": "298839b0ce96c5fddd04983ed7c7552c25cc6c06429f1ab07cf63a1483561742",
+        "compiledSha256": "d6c6c25534a26718c2e5035b97a76642e018da64166aaee5148aaa7969b5831a",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": true,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 20,
+        "librarySha256": "298839b0ce96c5fddd04983ed7c7552c25cc6c06429f1ab07cf63a1483561742",
+        "compiledSha256": "d6c6c25534a26718c2e5035b97a76642e018da64166aaee5148aaa7969b5831a",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": true,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 21,
+        "librarySha256": "f55df3b273a2d5068082c875183f15c83d3e501cdfa2213809bf80c212819263",
+        "compiledSha256": "02baf60b6a01cd261bba5ed734502a007f1accb1a277b4385a02a7e44c63b54a",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": true,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 22,
+        "librarySha256": "062e0ee5e5775c49aaa2f55ea6e23a6b6877feaca68336cbdfa61a41f58a162e",
+        "compiledSha256": "457ba2a1bb1073897b405cb917f90398d495ee72daedb178753e6791e0b7ba75",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": true,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 23,
+        "librarySha256": "89e7017d67ccad63999b9446236620c04490313b4f15d6de16ca52524f5c5b36",
+        "compiledSha256": "89e7017d67ccad63999b9446236620c04490313b4f15d6de16ca52524f5c5b36",
+        "comparisons": {
+          "exact": true,
+          "withoutWrappers": true,
+          "withoutWrappersAndMarkers": true,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": false,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 24,
+        "librarySha256": "53074d372709c1c9cb8fff9c385e827092224da22988bb2bf1503f4c85123e75",
+        "compiledSha256": "49eb9e8a4c3128cbd315b3e6df58fd7f94ecb0f74f226f5d6194c156dcdbc492",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": true,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 25,
+        "librarySha256": "1df72929b4e20323078784f3dc1e833f1628b0b9c92cb6ae3a3dac528223dd12",
+        "compiledSha256": "80f2f1a419d0dbe970e2a2f70a78f8a26786f103a54b35545b18c3fad6eac1cc",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": false,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": true,
+          "on-this-page": true
+        }
+      },
+      {
+        "step": 26,
+        "librarySha256": "b250a71bbcd6d1fdc9be42bf2c1667d4786315fe4547558f002985a027ac645b",
+        "compiledSha256": "1b213c3db88676bb1b089e49e77526203c8c539384c6878c8cc0bdef4d5b834e",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": true,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 27,
+        "librarySha256": "b250a71bbcd6d1fdc9be42bf2c1667d4786315fe4547558f002985a027ac645b",
+        "compiledSha256": "1b213c3db88676bb1b089e49e77526203c8c539384c6878c8cc0bdef4d5b834e",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": true,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 28,
+        "librarySha256": "b250a71bbcd6d1fdc9be42bf2c1667d4786315fe4547558f002985a027ac645b",
+        "compiledSha256": "1b213c3db88676bb1b089e49e77526203c8c539384c6878c8cc0bdef4d5b834e",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": true,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 29,
+        "librarySha256": "3812c6609c61d85d6578c0b34dc1f131917707fd828e7a8a556a527126cdaeeb",
+        "compiledSha256": "746f35c172284987fc4895d67b5ba5f118f63fa58888cf0ab887c980e2e920bb",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": false,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": false,
+          "on-this-page": true
+        }
+      },
+      {
+        "step": 30,
+        "librarySha256": "3812c6609c61d85d6578c0b34dc1f131917707fd828e7a8a556a527126cdaeeb",
+        "compiledSha256": "746f35c172284987fc4895d67b5ba5f118f63fa58888cf0ab887c980e2e920bb",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": false,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": false,
+          "on-this-page": true
+        }
+      },
+      {
+        "step": 31,
+        "librarySha256": "d684c05a080ee13f429d81386a1863422c5aadd6385c3405f1da8524bb86a531",
+        "compiledSha256": "d684c05a080ee13f429d81386a1863422c5aadd6385c3405f1da8524bb86a531",
+        "comparisons": {
+          "exact": true,
+          "withoutWrappers": true,
+          "withoutWrappersAndMarkers": true,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": false,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 32,
+        "librarySha256": "55eaad7c49026827468fc757eaf2792b7bc29bacd0122bce9d99200c6c774fe5",
+        "compiledSha256": "56f82d643aba741d4412f7c759eb026d3faede2830f6ff59430b638010a23e21",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": false,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": true,
+          "on-this-page": true
+        }
+      },
+      {
+        "step": 33,
+        "librarySha256": "55eaad7c49026827468fc757eaf2792b7bc29bacd0122bce9d99200c6c774fe5",
+        "compiledSha256": "56f82d643aba741d4412f7c759eb026d3faede2830f6ff59430b638010a23e21",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": false,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": true,
+          "on-this-page": true
+        }
+      },
+      {
+        "step": 34,
+        "librarySha256": "ebb1d4410218fef54c284e26ad13fc81df26c0ff2fa9700230326a7651ced13c",
+        "compiledSha256": "da21e72db97177e87e61c99e5e1f22f769c61a5a9c4a57a64135cf4c90d69a31",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": true,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 35,
+        "librarySha256": "e2b70609b0057cb42fe5511815362bf0d3d7a3846dae912e31143e5a642d9f3e",
+        "compiledSha256": "e9742d9bee98d16abd3ed4476a6b4501876c055dda23944969dc6b0bf704d52e",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": false,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": false,
+          "on-this-page": true
+        }
+      },
+      {
+        "step": 36,
+        "librarySha256": "e2b70609b0057cb42fe5511815362bf0d3d7a3846dae912e31143e5a642d9f3e",
+        "compiledSha256": "e9742d9bee98d16abd3ed4476a6b4501876c055dda23944969dc6b0bf704d52e",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": false,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": false,
+          "on-this-page": true
+        }
+      },
+      {
+        "step": 37,
+        "librarySha256": "36dd076f20f27ae39440139ffe7653ec621cde62bf6fc42c1490b1ed64fee3db",
+        "compiledSha256": "797a2dccb65bd36785fa4c5d00a52cd3932d50955ec69d801a54b0b76de84b62",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": true,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 38,
+        "librarySha256": "1df72929b4e20323078784f3dc1e833f1628b0b9c92cb6ae3a3dac528223dd12",
+        "compiledSha256": "e0ebaee8c8b64c8f1d7e997bcafa457fc23bd2d930913bea71c38443a5bac836",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": true,
+          "on-this-page": false
+        }
+      },
+      {
+        "step": 39,
+        "librarySha256": "1df72929b4e20323078784f3dc1e833f1628b0b9c92cb6ae3a3dac528223dd12",
+        "compiledSha256": "e0ebaee8c8b64c8f1d7e997bcafa457fc23bd2d930913bea71c38443a5bac836",
+        "comparisons": {
+          "exact": false,
+          "withoutWrappers": false,
+          "withoutWrappersAndMarkers": false,
+          "alsoWithoutMarkdownClaims": true,
+          "alsoWithoutTocClaims": true
+        },
+        "wrappers": 0,
+        "pendingMarkers": [],
+        "libraryPendingMarkers": [],
+        "claimDifferences": {
+          "markdown": true,
+          "on-this-page": false
+        }
+      }
+    ]
+  }
+}

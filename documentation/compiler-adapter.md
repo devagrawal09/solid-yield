@@ -149,3 +149,36 @@ library equality at 40/40.
 Before the implementation commit, `pnpm build` passed and the full gate was
 **GREEN: 54 pass / 0 fail / 0 skip in 357 seconds**, including the new adapter
 contract. No baseline or dependency was changed.
+
+## Final DOM and bytes
+
+Implementation: `822c8d4` (`fix(compiler): guard the Solid frame adapter contract`).
+[The final parity record](compiler-adapter-parity.json) keeps the exact comparison
+separate from diagnostic removals. Exact matches remain **6/40** (checkpoints
+0, 1, 2, 3, 23, 31); authored content is **40/40**; plain Solid and the library
+match **40/40**. All 40 compiled checkpoint hashes equal the retained C4c record.
+No wrappers or permanent frame attributes appear, and the seven region RPCs
+and direct-route hydration checks remain intact.
+
+[Three fresh level-L byte runs](compiler-adapter-L-bytes.json), using the same
+production module-runner method and 40 steps as C4c:
+
+| Variant               | Load executed | 40 steps executed | Shipped raw JS | Shipped gzip |
+| --------------------- | ------------: | ----------------: | -------------: | -----------: |
+| Original              |     1,096,058 |         4,366,734 |        627,380 |      189,329 |
+| Library               |     1,129,164 |         4,556,267 |        642,400 |      193,576 |
+| Single root without R |     1,150,804 |         4,566,492 |        640,952 |      193,435 |
+| Single root + R       |       622,435 |         4,069,761 |        232,882 |       81,152 |
+
+There is **zero drift** in all 164 executed phases and each variant's raw/gzip
+shipping totals. Against C4c, R adds **547 load-executed bytes**, **1,161 raw
+shipping bytes**, and **359 gzip bytes**; 40-step execution is unchanged.
+The version checks and public readers have a small byte cost. R still saves
+506,729 load-executed bytes and 112,424 gzip bytes against the library.
+Shipping excludes HTML, CSS, and RPC bodies; executed bytes are UTF-8 source
+ranges, not CPU time. No measurement baseline was raised.
+
+Before the evidence commit, the build passed again and the full gate was
+**GREEN: 54 pass / 0 fail / 0 skip in 393 seconds**. Both local commits were
+made on `proto/compiler` after a green full gate. No push, main change,
+dependency change, or baseline regeneration was made.

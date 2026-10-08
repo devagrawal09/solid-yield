@@ -1,0 +1,49 @@
+{
+  "diagnostic": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (examples/originals/effect/src/api.ts:177:68)",
+  "probes": [
+    {
+      "name": "module-log-store",
+      "original": "// In-page fiber event log — the demo's \"network tab\". Writes happen from\n// inside Effect programs (Effect.sync / finalizers), which run on Effect's\n// scheduler outside any Solid transaction, so entries commit immediately\n// even while an action's transition is in flight.\n\nimport { createStore } from \"solid-js\";\n\nexport type LogKind = \"start\" | \"success\" | \"retry\" | \"interrupt\" | \"compensate\" | \"error\";\n\nexport interface LogEntry {\n  id: number;\n  time: string;\n  kind: LogKind;\n  message: string;\n}\n\nlet nextId = 0;\nconst start = performance.now();\n\nconst [entries, setEntries] = createStore<LogEntry[]>([]);\n\nexport { entries as logEntries };\n\nexport function log(kind: LogKind, message: string) {\n  const time = ((performance.now() - start) / 1000).toFixed(2) + \"s\";\n  setEntries(list => {\n    list.push({ id: nextId++, time, kind, message });\n    if (list.length > 100) list.splice(0, list.length - 100);\n  });\n}\n\nexport function clearLog() {\n  setEntries(list => {\n    list.length = 0;\n  });\n}\n",
+      "generated": "import { nativeFailure as __nativeFailure } from \"solid-yield/internal\";\nimport { attempt as __nativeAttempt } from \"solid-yield\";\nimport { $store as createStore } from \"solid-yield\";\nexport type LogKind = \"start\" | \"success\" | \"retry\" | \"interrupt\" | \"compensate\" | \"error\";\nexport interface LogEntry {\n  id: number;\n  time: string;\n  kind: LogKind;\n  message: string;\n}\nlet nextId = 0;\nconst start = performance.now();\nconst [entries, setEntries] = createStore<LogEntry[]>([]);\nexport { entries as logEntries };\nexport function* log(kind: LogKind, message: string) {\n  const time = (yield* __nativeAttempt(() => ((performance.now() - start) / 1000).toFixed(2), (error: unknown) => __nativeFailure([\"unknown\"], error))) + \"s\";\n  setEntries(list => {\n    list.push({\n      id: nextId++,\n      time,\n      kind,\n      message\n    });\n    if (list.length > 100) list.splice(0, list.length - 100);\n  });\n}\nexport function clearLog() {\n  setEntries(list => {\n    list.length = 0;\n  });\n}",
+      "diagnostics": [
+        {
+          "code": "TS2349",
+          "line": 17,
+          "column": 3,
+          "message": "This expression is not callable.\n  Type 'Create<\"store\", never>' has no call signatures."
+        },
+        {
+          "code": "TS7006",
+          "line": 17,
+          "column": 14,
+          "message": "Parameter 'list' implicitly has an 'any' type."
+        },
+        {
+          "code": "TS2349",
+          "line": 28,
+          "column": 3,
+          "message": "This expression is not callable.\n  Type 'Create<\"store\", never>' has no call signatures."
+        },
+        {
+          "code": "TS7006",
+          "line": 28,
+          "column": 14,
+          "message": "Parameter 'list' implicitly has an 'any' type."
+        }
+      ]
+    },
+    {
+      "name": "foreign-effect-generator",
+      "original": "import { Effect } from \"effect\";\nexport const program = Effect.gen(function* () { yield* Effect.sleep(1); return 1; });\n",
+      "generated": "import { nativeFailure as __nativeFailure } from \"solid-yield/internal\";\nimport { attempt as __nativeAttempt } from \"solid-yield\";\nimport { Effect } from \"effect\";\nexport const program = Effect.gen(function* () {\n  yield* __nativeAttempt(() => Effect.sleep(1), (error: unknown) => __nativeFailure([\"unknown\"], error));\n  return 1;\n});",
+      "diagnostics": [
+        {
+          "code": "TS2345",
+          "line": 4,
+          "column": 35,
+          "message": "Argument of type '() => Generator<Raise<NativeFailure<\"unknown\">>, number, any>' is not assignable to parameter of type '(resume: Adapter) => Generator<YieldWrap<Effect<any, any, any>>, number, never>'.\n  Call signature return types 'Generator<Raise<NativeFailure<\"unknown\">>, number, any>' and 'Generator<YieldWrap<Effect<any, any, any>>, number, never>' are incompatible.\n    The types returned by 'next(...)' are incompatible between these types.\n      Type 'IteratorResult<Raise<NativeFailure<\"unknown\">>, number>' is not assignable to type 'IteratorResult<YieldWrap<Effect<any, any, any>>, number>'.\n        Type 'IteratorYieldResult<Raise<NativeFailure<\"unknown\">>>' is not assignable to type 'IteratorResult<YieldWrap<Effect<any, any, any>>, number>'.\n          Type 'IteratorYieldResult<Raise<NativeFailure<\"unknown\">>>' is not assignable to type 'IteratorYieldResult<YieldWrap<Effect<any, any, any>>>'.\n            Type 'Raise<NativeFailure<\"unknown\">>' is missing the following properties from type 'YieldWrap<Effect<any, any, any>>': #private, [YieldWrapTypeId]"
+        }
+      ]
+    }
+  ]
+}

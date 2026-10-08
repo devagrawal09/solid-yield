@@ -568,6 +568,20 @@ and `ApiError` mapping are not copied into this patch.
 This section supersedes the previous request to decide native scope. Scope is
 settled; incomplete lowering and missing parity remain implementation findings.
 
+**F-S30–F-S32 — native effect stops at structural lowering failures.** The
+unchanged `examples/originals/effect` still throws `SUGAR_CALLBACK`; its reported
+`api.ts:177:68` is an intermediate search-success callback, not original line
+177 (F-S32). An isolated plain `Effect.gen` passes TypeScript before lowering,
+but native failure attempts introduce solid-yield operations into Effect's
+different generator protocol (F-S30). The module log's `createStore` is renamed
+to `$store` without a setup to execute it; its writers become uncallable
+`Create<"store", never>` values (F-S31). The twin's owner-scoped log/event sink
+and saga adapter show the needed contracts, but copying them is not a minimal
+author error handler. Both acceptance halves fail, so the requested structural
+stop applies. No author patch, rule change, native effect gate step or baseline
+regeneration is claimed. [The side-by-side report](native-effect-blocker.md) and
+[reproducible probe](../scripts/native-effect-blocker.mjs) record the evidence.
+
 ### Selection and native syntax
 
 No directive, marker or library import appears in a selected source file:

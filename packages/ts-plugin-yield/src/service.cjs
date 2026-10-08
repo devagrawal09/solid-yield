@@ -26,13 +26,17 @@ function diagnosticSpan(ts, file, diagnostic, sourceSpan) {
   const starts = file.getLineStarts();
   const line = diagnostic.line - 1,
     column = diagnostic.column - 1;
+  const lineEnd =
+    Number.isInteger(line) && line >= 0 && line < starts.length
+      ? (starts[line + 1] ?? file.text.length)
+      : 0;
   const valid =
     Number.isInteger(line) &&
     Number.isInteger(column) &&
     line >= 0 &&
     line < starts.length &&
     column >= 0 &&
-    column <= (starts[line + 1] ?? file.text.length) - starts[line];
+    column < lineEnd - starts[line];
   const validSpan =
     sourceSpan &&
     Number.isInteger(sourceSpan.sourceStart) &&
@@ -43,7 +47,10 @@ function diagnosticSpan(ts, file, diagnostic, sourceSpan) {
   if (validSpan)
     return {
       start: sourceSpan.sourceStart,
-      length: Math.max(1, sourceSpan.sourceEnd - sourceSpan.sourceStart),
+      length: Math.min(
+        file.text.length - sourceSpan.sourceStart,
+        Math.max(1, sourceSpan.sourceEnd - sourceSpan.sourceStart)
+      ),
       generated: sourceSpan.generated
     };
   if (valid) return { start: starts[line] + column, length: 1, generated: false };
@@ -54,9 +61,15 @@ function diagnosticSpan(ts, file, diagnostic, sourceSpan) {
   });
   return {
     start: routine?.getStart(file) ?? 0,
-    length: Math.max(1, routine?.getWidth(file) ?? file.text.length),
+    length: routine?.getWidth(file) ?? file.text.length,
     generated: true
   };
+}
+function publicNames(text) {
+  return text.replace(
+    /import\("solid-yield"\)\.ChunkError|__nativeChunk|\bChunkError\b(?!\))/g,
+    "a transport failure (ChunkError)"
+  );
 }
 function symbolKey(symbol) {
   return symbol.declarations?.[0]?.name?.expression?.text;
@@ -119,7 +132,7 @@ function colorsText(c) {
       : ["false", "none"].includes(c.pending)
         ? "does not suspend"
         : "may suspend (pending)";
-  const failures = c.fails.replace(/\b(any|unknown)\b/g, "an unknown error");
+  const failures = publicNames(c.fails).replace(/\b(any|unknown)\b/g, "an unknown error");
   const contexts = c.requires
     .replace(/\b(any|unknown)\b/g, "an unknown context")
     .replace("an an unknown context context", "an unknown context");
@@ -214,7 +227,7 @@ function createVirtualService(ts, host, config = {}) {
                   : ts.DiagnosticCategory.Warning,
               code: d.severity === "error" ? 95000 : 95001,
               source: "solid-yield",
-              messageText: `[${d.code}] ${d.message}`
+              messageText: `[${d.code}] ${publicNames(d.message)}`
             });
           }
           break;
@@ -240,7 +253,13 @@ function createVirtualService(ts, host, config = {}) {
               code: 95000,
               source: "solid-yield",
               category: ts.DiagnosticCategory.Error,
-              messageText: `${span.generated ? "[generated] " : ""}[${d.code}] ${catalog[d.code] ?? d.message.replace(/^\[[A-Z_]+\]\s*/, "").replace(/\s*\([^\n]*:\d+:\d+\)\.?$/, "")}`
+              messageText: `${span.generated ? "[generated] " : ""}[${d.code}] ${
+                catalog[d.code] ??
+                String(d.message)
+                  .split("\n")[0]
+                  .replace(/^\[[A-Z_]+\]\s*/, "")
+                  .replace(/\s*\([^\n]*:\d+:\d+\)\.?$/, "")
+              }`
             });
           }
         }
@@ -407,7 +426,7 @@ function createVirtualService(ts, host, config = {}) {
             : code === "FOREIGN_HANDOFF"
               ? catalog.failureAdvice(origin?.host ?? "view")
               : catalog[code];
-        message = `[${code}] ${action}${code === "FOREIGN_HANDOFF" && colors ? " Remaining: " + colors.fails + "." : ""}${colors?.requires !== "none" && code === "NO_PROVIDER" ? " Missing: " + colors.requires + "." : ""}`;
+        message = `[${code}] ${action}${code === "FOREIGN_HANDOFF" && colors ? " Remaining: " + publicNames(colors.fails) + "." : ""}${colors?.requires !== "none" && code === "NO_PROVIDER" ? " Missing: " + colors.requires + "." : ""}`;
         let eventOwner;
         if (code === "FOREIGN_HANDOFF" && origin?.file) {
           const originalNode = leafAt(ts, origin.file, origin.sourceStart);
@@ -535,7 +554,7 @@ function createVirtualService(ts, host, config = {}) {
             code: 95000,
             category: ts.DiagnosticCategory.Error,
             source: "solid-yield",
-            messageText: `[EVENT_REJECTS] This handler can fail with ${colors.fails} and nothing catches it; wrap the body in try/catch, or declare the failure.`
+            messageText: `[EVENT_REJECTS] This handler can fail with ${publicNames(colors.fails)} and nothing catches it; wrap the body in try/catch, or declare the failure.`
           });
         }
       });
@@ -619,7 +638,16 @@ function createVirtualService(ts, host, config = {}) {
           const fn = report.functions.find(
             fn => fn.name === node.getText(sf) && f.endsWith(fn.file)
           );
-          if (!fn || !/unknown|any/.test(c.fails)) continue;
+          if (!fn) continue;
+          if (fn.timerFails?.length) {
+            const failures = fn.timerFails.map(
+              id => report.classes.find(k => k.id === id)?.name ?? id
+            );
+            c.fails = [
+              ...new Set([...(c.fails === "none" ? [] : c.fails.split(" | ")), ...failures])
+            ].join(" | ");
+          }
+          if (!/unknown|any/.test(c.fails)) continue;
           const reachable = new Set();
           const visit = fn => {
             if (!fn || reachable.has(fn.id)) return;

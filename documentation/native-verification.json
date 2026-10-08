@@ -433,13 +433,13 @@
           "stage": "type",
           "code": "TS2345",
           "message": "Argument of type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<true, never, false, HoleRequires<...>>) & { ...; }' is not assignable to parameter of type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<true, never, false, HoleRequires<...>>) & { ...; } & { ...; }'.\n  Type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<true, never, false, HoleRequires<...>>) & { ...; }' is not assignable to type '{ readonly \"[PENDING_ROOT] the root may be pending (a read under it has no Loading above): wrap the root, render(() => Loading({ children: App }), el), or put a Loading around the pending part\": true; }'.",
-          "line": 26
+          "line": 29
         },
         {
           "stage": "type",
           "code": "TS1360",
           "message": "Type 'HoleCall<{}, true, never, false, never>' does not satisfy the expected type '{ readonly \"[PENDING_ROOT] the root may be pending (a read under it has no Loading above): wrap the root, render(() => Loading({ children: App }), el), or put a Loading around the pending part\": true; }'.",
-          "line": 26
+          "line": 29
         }
       ]
     },
@@ -456,7 +456,7 @@
           "stage": "type",
           "code": "TS2322",
           "message": "Type '() => Generator<Read<true, never>, number, any>' is not assignable to type 'number | Source<number, never, false> | SettledProp<\"[SETTLED_PROP] prop `n` is settled: pass a settled value, or declare it Source<T, E, true>\"> | HoleProp<...>'.\n  Type '() => Generator<Read<true, never>, number, any>' is not assignable to type 'HoleProp<number, never, false, unknown>'.\n    Call signature return types 'Generator<Read<true, never>, number, any>' and 'Generator<Read<false, never> | Raise<never> | ChildView<false, never, boolean, unknown>, number, any>' are incompatible.\n      The types returned by 'next(...)' are incompatible between these types.\n        Type 'IteratorResult<Read<true, never>, number>' is not assignable to type 'IteratorResult<Read<false, never> | Raise<never> | ChildView<false, never, boolean, unknown>, number>'.\n          Type 'IteratorYieldResult<Read<true, never>>' is not assignable to type 'IteratorResult<Read<false, never> | Raise<never> | ChildView<false, never, boolean, unknown>, number>'.\n            Type 'IteratorYieldResult<Read<true, never>>' is not assignable to type 'IteratorYieldResult<Read<false, never> | Raise<never> | ChildView<false, never, boolean, unknown>>'.\n              Type 'Read<true, never>' is not assignable to type 'Read<false, never> | Raise<never> | ChildView<false, never, boolean, unknown>'.\n                Type 'Read<true, never>' is not assignable to type 'Read<false, never>'.\n                  Type 'true' is not assignable to type 'false'.",
-          "line": 35
+          "line": 38
         }
       ]
     },
@@ -550,11 +550,14 @@
       "slots": [
         "R06"
       ],
-      "stage": "transform",
+      "file": "packages/vite-plugin-yield/test/.native-generated/hole-create.tsx",
+      "stage": "checked-error",
       "diagnostics": [
         {
-          "code": "SUGAR_CALLBACK",
-          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/packages/vite-plugin-yield/test/.native-generated/hole-create.tsx:8:38)"
+          "stage": "type",
+          "code": "TS2345",
+          "message": "Argument of type '() => Generator<Read<false, never> | Create<\"signal\", never>, Element, any>' is not assignable to parameter of type '() => Generator<ViewOp, Element, any>'.\n  Call signature return types 'Generator<Read<false, never> | Create<\"signal\", never>, Element, any>' and 'Generator<ViewOp, Element, any>' are incompatible.\n    The types returned by 'next(...)' are incompatible between these types.\n      Type 'IteratorResult<Read<false, never> | Create<\"signal\", never>, Element>' is not assignable to type 'IteratorResult<ViewOp, Element>'.\n        Type 'IteratorYieldResult<Read<false, never> | Create<\"signal\", never>>' is not assignable to type 'IteratorResult<ViewOp, Element>'.\n          Type 'IteratorYieldResult<Read<false, never> | Create<\"signal\", never>>' is not assignable to type 'IteratorYieldResult<ViewOp>'.\n            Type 'Read<false, never> | Create<\"signal\", never>' is not assignable to type 'ViewOp'.\n              Type 'Create<\"signal\", never>' is not assignable to type 'ViewOp'.\n                Property '[MAY_WAIT]' is missing in type 'Create<\"signal\", never>' but required in type 'Bind<boolean, any>'.",
+          "line": 13
         }
       ]
     },
@@ -703,7 +706,9 @@
             "line": 13,
             "server": false,
             "component": true,
-            "fails": []
+            "fails": [],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/sierpinski/src/main.tsx",
@@ -711,7 +716,9 @@
             "line": 51,
             "server": false,
             "component": true,
-            "fails": []
+            "fails": [],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/sierpinski/src/main.tsx",
@@ -719,7 +726,9 @@
             "line": 89,
             "server": false,
             "component": true,
-            "fails": []
+            "fails": [],
+            "provides": [],
+            "timerFails": []
           }
         ],
         "serverRejections": []
@@ -748,7 +757,9 @@
             "line": 13,
             "server": false,
             "component": true,
-            "fails": []
+            "fails": [],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/sierpinski/src/main.tsx",
@@ -756,7 +767,9 @@
             "line": 51,
             "server": false,
             "component": true,
-            "fails": []
+            "fails": [],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/sierpinski/src/main.tsx",
@@ -764,7 +777,9 @@
             "line": 89,
             "server": false,
             "component": true,
-            "fails": []
+            "fails": [],
+            "provides": [],
+            "timerFails": []
           }
         ],
         "serverRejections": []
@@ -784,8 +799,19 @@
       "files": 5,
       "inference": {
         "status": "source call-graph estimate; generated colors unchecked until transform succeeds",
-        "iterations": 3,
-        "classes": [],
+        "iterations": 5,
+        "classes": [
+          {
+            "id": "global:SyntaxError",
+            "name": "SyntaxError",
+            "file": null
+          },
+          {
+            "id": "global:TypeError",
+            "name": "TypeError",
+            "file": null
+          }
+        ],
         "components": [
           {
             "file": "examples/originals/todos/src/app.tsx",
@@ -795,7 +821,9 @@
             "component": true,
             "fails": [
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/todos/src/app.tsx",
@@ -805,7 +833,9 @@
             "component": true,
             "fails": [
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/todos/src/app.tsx",
@@ -815,7 +845,9 @@
             "component": true,
             "fails": [
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/todos/src/app.tsx",
@@ -823,9 +855,9 @@
             "line": 93,
             "server": false,
             "component": true,
-            "fails": [
-              "unknown"
-            ]
+            "fails": [],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/todos/src/app.tsx",
@@ -833,9 +865,9 @@
             "line": 130,
             "server": false,
             "component": true,
-            "fails": [
-              "unknown"
-            ]
+            "fails": [],
+            "provides": [],
+            "timerFails": []
           }
         ],
         "serverRejections": []
@@ -874,8 +906,19 @@
       "files": 5,
       "inference": {
         "status": "source call-graph estimate; generated colors unchecked until transform succeeds",
-        "iterations": 3,
-        "classes": [],
+        "iterations": 5,
+        "classes": [
+          {
+            "id": "global:SyntaxError",
+            "name": "SyntaxError",
+            "file": null
+          },
+          {
+            "id": "global:TypeError",
+            "name": "TypeError",
+            "file": null
+          }
+        ],
         "components": [
           {
             "file": "examples/originals/todos/src/app.tsx",
@@ -885,7 +928,9 @@
             "component": true,
             "fails": [
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/todos/src/app.tsx",
@@ -895,7 +940,9 @@
             "component": true,
             "fails": [
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/todos/src/app.tsx",
@@ -905,7 +952,9 @@
             "component": true,
             "fails": [
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/todos/src/app.tsx",
@@ -913,9 +962,9 @@
             "line": 93,
             "server": false,
             "component": true,
-            "fails": [
-              "unknown"
-            ]
+            "fails": [],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/todos/src/app.tsx",
@@ -923,9 +972,9 @@
             "line": 130,
             "server": false,
             "component": true,
-            "fails": [
-              "unknown"
-            ]
+            "fails": [],
+            "provides": [],
+            "timerFails": []
           }
         ],
         "serverRejections": []
@@ -965,7 +1014,23 @@
       "inference": {
         "status": "source call-graph estimate; generated colors unchecked until transform succeeds",
         "iterations": 3,
-        "classes": [],
+        "classes": [
+          {
+            "id": "global:TypeError",
+            "name": "TypeError",
+            "file": null
+          },
+          {
+            "id": "global:DOMException",
+            "name": "DOMException",
+            "file": null
+          },
+          {
+            "id": "global:SyntaxError",
+            "name": "SyntaxError",
+            "file": null
+          }
+        ],
         "components": [
           {
             "file": "examples/originals/hackernews-spa/src/app.tsx",
@@ -975,7 +1040,9 @@
             "component": true,
             "fails": [
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/hackernews-spa/src/components/comment.tsx",
@@ -983,7 +1050,9 @@
             "line": 5,
             "server": false,
             "component": true,
-            "fails": []
+            "fails": [],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/hackernews-spa/src/components/nav.tsx",
@@ -991,7 +1060,9 @@
             "line": 1,
             "server": false,
             "component": true,
-            "fails": []
+            "fails": [],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/hackernews-spa/src/components/story.tsx",
@@ -999,7 +1070,9 @@
             "line": 5,
             "server": false,
             "component": true,
-            "fails": []
+            "fails": [],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/hackernews-spa/src/components/toggle.tsx",
@@ -1007,7 +1080,9 @@
             "line": 3,
             "server": false,
             "component": true,
-            "fails": []
+            "fails": [],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/hackernews-spa/src/routes/stories.tsx",
@@ -1017,7 +1092,9 @@
             "component": true,
             "fails": [
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/hackernews-spa/src/routes/story.tsx",
@@ -1027,7 +1104,9 @@
             "component": true,
             "fails": [
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/hackernews-spa/src/routes/user.tsx",
@@ -1037,32 +1116,12 @@
             "component": true,
             "fails": [
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           }
         ],
         "serverRejections": [
-          {
-            "file": "examples/originals/hackernews-spa/src/lib/hn.ts",
-            "name": "story",
-            "line": 8,
-            "server": true,
-            "component": false,
-            "fails": [],
-            "rejection": [
-              "ChunkError"
-            ]
-          },
-          {
-            "file": "examples/originals/hackernews-spa/src/lib/hn.ts",
-            "name": "user",
-            "line": 9,
-            "server": true,
-            "component": false,
-            "fails": [],
-            "rejection": [
-              "ChunkError"
-            ]
-          },
           {
             "file": "examples/originals/hackernews-spa/src/lib/hn.ts",
             "name": "fetchAPI",
@@ -1070,12 +1129,15 @@
             "server": true,
             "component": false,
             "fails": [
-              "ChunkError",
-              "unknown"
+              "global:DOMException",
+              "global:TypeError"
             ],
+            "provides": [],
+            "timerFails": [],
             "rejection": [
               "ChunkError",
-              "unknown"
+              "global:DOMException",
+              "global:TypeError"
             ]
           },
           {
@@ -1086,11 +1148,15 @@
             "component": false,
             "fails": [
               "ChunkError",
-              "unknown"
+              "global:DOMException",
+              "global:TypeError"
             ],
+            "provides": [],
+            "timerFails": [],
             "rejection": [
               "ChunkError",
-              "unknown"
+              "global:DOMException",
+              "global:TypeError"
             ]
           },
           {
@@ -1101,11 +1167,15 @@
             "component": false,
             "fails": [
               "ChunkError",
-              "unknown"
+              "global:DOMException",
+              "global:TypeError"
             ],
+            "provides": [],
+            "timerFails": [],
             "rejection": [
               "ChunkError",
-              "unknown"
+              "global:DOMException",
+              "global:TypeError"
             ]
           },
           {
@@ -1116,11 +1186,15 @@
             "component": false,
             "fails": [
               "ChunkError",
-              "unknown"
+              "global:DOMException",
+              "global:TypeError"
             ],
+            "provides": [],
+            "timerFails": [],
             "rejection": [
               "ChunkError",
-              "unknown"
+              "global:DOMException",
+              "global:TypeError"
             ]
           }
         ]
@@ -1269,9 +1343,9 @@
             "line": 10,
             "server": false,
             "component": true,
-            "fails": [
-              "unknown"
-            ]
+            "fails": [],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/effect/src/app.tsx",
@@ -1279,9 +1353,9 @@
             "line": 37,
             "server": false,
             "component": true,
-            "fails": [
-              "unknown"
-            ]
+            "fails": [],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/effect/src/checkout.tsx",
@@ -1291,7 +1365,9 @@
             "component": true,
             "fails": [
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/effect/src/typeahead.tsx",
@@ -1299,9 +1375,9 @@
             "line": 21,
             "server": false,
             "component": true,
-            "fails": [
-              "unknown"
-            ]
+            "fails": [],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/effect/src/typeahead.tsx",
@@ -1311,7 +1387,9 @@
             "component": true,
             "fails": [
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           }
         ],
         "serverRejections": []
@@ -1359,7 +1437,9 @@
             "fails": [
               "global:Error",
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/rendering/shared/src/components/ErrorStream.tsx",
@@ -1370,7 +1450,9 @@
             "fails": [
               "global:Error",
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/rendering/shared/src/components/ErrorStream.tsx",
@@ -1381,7 +1463,9 @@
             "fails": [
               "global:Error",
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/rendering/shared/src/components/Home.tsx",
@@ -1391,7 +1475,9 @@
             "component": true,
             "fails": [
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/rendering/shared/src/components/Profile/Profile.tsx",
@@ -1399,7 +1485,9 @@
             "line": 8,
             "server": false,
             "component": true,
-            "fails": []
+            "fails": [],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/rendering/shared/src/components/Reveal.tsx",
@@ -1409,7 +1497,9 @@
             "component": true,
             "fails": [
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/rendering/shared/src/components/Reveal.tsx",
@@ -1419,7 +1509,9 @@
             "component": true,
             "fails": [
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/rendering/shared/src/components/Settings.tsx",
@@ -1429,7 +1521,9 @@
             "component": true,
             "fails": [
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/rendering/shared/src/components/Shell.tsx",
@@ -1439,7 +1533,9 @@
             "component": true,
             "fails": [
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/rendering/shared/src/components/Skeleton.tsx",
@@ -1447,7 +1543,9 @@
             "line": 39,
             "server": false,
             "component": true,
-            "fails": []
+            "fails": [],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/rendering/shared/src/components/Skeleton.tsx",
@@ -1457,7 +1555,9 @@
             "component": true,
             "fails": [
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/rendering/shared/src/components/Stream.tsx",
@@ -1467,7 +1567,9 @@
             "component": true,
             "fails": [
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/rendering/shared/src/router.tsx",
@@ -1477,7 +1579,9 @@
             "component": true,
             "fails": [
               "global:Error"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           }
         ],
         "serverRejections": []
@@ -1585,8 +1689,23 @@
         "iterations": 6,
         "classes": [
           {
+            "id": "global:SyntaxError",
+            "name": "SyntaxError",
+            "file": null
+          },
+          {
+            "id": "global:TypeError",
+            "name": "TypeError",
+            "file": null
+          },
+          {
             "id": "global:Error",
             "name": "Error",
+            "file": null
+          },
+          {
+            "id": "global:DOMException",
+            "name": "DOMException",
             "file": null
           }
         ],
@@ -1599,7 +1718,9 @@
             "component": true,
             "fails": [
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/room/src/app.tsx",
@@ -1608,8 +1729,14 @@
             "server": false,
             "component": true,
             "fails": [
+              "global:SyntaxError",
+              "global:TypeError",
               "unknown"
-            ]
+            ],
+            "provides": [
+              "<root>/examples/originals/room/src/lib/identity.tsx#IdentityContext"
+            ],
+            "timerFails": []
           },
           {
             "file": "examples/originals/room/src/components/status-pill.tsx",
@@ -1617,9 +1744,9 @@
             "line": 52,
             "server": false,
             "component": true,
-            "fails": [
-              "unknown"
-            ]
+            "fails": [],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/room/src/lib/identity.tsx",
@@ -1628,8 +1755,14 @@
             "server": false,
             "component": true,
             "fails": [
+              "global:SyntaxError",
+              "global:TypeError",
               "unknown"
-            ]
+            ],
+            "provides": [
+              "<root>/examples/originals/room/src/lib/identity.tsx#IdentityContext"
+            ],
+            "timerFails": []
           },
           {
             "file": "examples/originals/room/src/routes/home.tsx",
@@ -1641,7 +1774,9 @@
               "ChunkError",
               "global:Error",
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/room/src/routes/home.tsx",
@@ -1653,7 +1788,9 @@
               "ChunkError",
               "global:Error",
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/room/src/routes/home.tsx",
@@ -1665,7 +1802,9 @@
               "ChunkError",
               "global:Error",
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/room/src/routes/home.tsx",
@@ -1673,7 +1812,9 @@
             "line": 137,
             "server": false,
             "component": true,
-            "fails": []
+            "fails": [],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/room/src/routes/live.tsx",
@@ -1685,7 +1826,9 @@
               "ChunkError",
               "global:Error",
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/room/src/routes/live.tsx",
@@ -1696,7 +1839,9 @@
             "fails": [
               "global:Error",
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/room/src/routes/live.tsx",
@@ -1704,7 +1849,9 @@
             "line": 116,
             "server": false,
             "component": true,
-            "fails": []
+            "fails": [],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/room/src/routes/live.tsx",
@@ -1716,7 +1863,9 @@
               "ChunkError",
               "global:Error",
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/room/src/routes/live.tsx",
@@ -1725,9 +1874,10 @@
             "server": false,
             "component": true,
             "fails": [
-              "global:Error",
-              "unknown"
-            ]
+              "global:Error"
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/room/src/routes/live.tsx",
@@ -1736,9 +1886,10 @@
             "server": false,
             "component": true,
             "fails": [
-              "global:Error",
-              "unknown"
-            ]
+              "global:Error"
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/room/src/routes/live.tsx",
@@ -1748,7 +1899,9 @@
             "component": true,
             "fails": [
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/room/src/routes/live.tsx",
@@ -1758,7 +1911,9 @@
             "component": true,
             "fails": [
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/room/src/routes/live.tsx",
@@ -1768,7 +1923,9 @@
             "component": true,
             "fails": [
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/room/src/routes/live.tsx",
@@ -1778,7 +1935,9 @@
             "component": true,
             "fails": [
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/room/src/routes/live.tsx",
@@ -1788,7 +1947,9 @@
             "component": true,
             "fails": [
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/room/src/routes/live.tsx",
@@ -1798,7 +1959,9 @@
             "component": true,
             "fails": [
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           }
         ],
         "serverRejections": [
@@ -1809,6 +1972,8 @@
             "server": true,
             "component": false,
             "fails": [],
+            "provides": [],
+            "timerFails": [],
             "rejection": [
               "ChunkError"
             ]
@@ -1822,6 +1987,8 @@
             "fails": [
               "unknown"
             ],
+            "provides": [],
+            "timerFails": [],
             "rejection": [
               "ChunkError",
               "unknown"
@@ -1836,6 +2003,8 @@
             "fails": [
               "unknown"
             ],
+            "provides": [],
+            "timerFails": [],
             "rejection": [
               "ChunkError",
               "unknown"
@@ -1847,12 +2016,11 @@
             "line": 108,
             "server": true,
             "component": false,
-            "fails": [
-              "unknown"
-            ],
+            "fails": [],
+            "provides": [],
+            "timerFails": [],
             "rejection": [
-              "ChunkError",
-              "unknown"
+              "ChunkError"
             ]
           },
           {
@@ -1861,12 +2029,11 @@
             "line": 124,
             "server": true,
             "component": false,
-            "fails": [
-              "unknown"
-            ],
+            "fails": [],
+            "provides": [],
+            "timerFails": [],
             "rejection": [
-              "ChunkError",
-              "unknown"
+              "ChunkError"
             ]
           },
           {
@@ -1875,12 +2042,11 @@
             "line": 139,
             "server": true,
             "component": false,
-            "fails": [
-              "unknown"
-            ],
+            "fails": [],
+            "provides": [],
+            "timerFails": [],
             "rejection": [
-              "ChunkError",
-              "unknown"
+              "ChunkError"
             ]
           },
           {
@@ -1893,6 +2059,8 @@
               "global:Error",
               "unknown"
             ],
+            "provides": [],
+            "timerFails": [],
             "rejection": [
               "ChunkError",
               "global:Error",
@@ -1921,7 +2089,7 @@
       "diagnostics": [
         {
           "code": "SUGAR_CALLBACK",
-          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/examples/originals/room/src/lib/room-panel.tsx:21:20)"
+          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/examples/originals/room/src/lib/room-panel.tsx:22:7)"
         }
       ],
       "parity": "not run: no checked native program",
@@ -1938,7 +2106,7 @@
       "files": 7,
       "inference": {
         "status": "source call-graph estimate; generated colors unchecked until transform succeeds",
-        "iterations": 4,
+        "iterations": 5,
         "classes": [
           {
             "id": "examples/originals/docs/src/errors.ts#NotFound@375",
@@ -1967,6 +2135,11 @@
             "file": "examples/originals/docs/src/errors.ts",
             "nameStart": 563,
             "classStart": 550
+          },
+          {
+            "id": "global:URIError",
+            "name": "URIError",
+            "file": null
           }
         ],
         "components": [
@@ -1981,7 +2154,9 @@
               "examples/originals/docs/src/errors.ts#NotFound@375",
               "examples/originals/docs/src/errors.ts#RateLimited@489",
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/docs/src/app.tsx",
@@ -1994,7 +2169,9 @@
               "examples/originals/docs/src/errors.ts#NotFound@375",
               "examples/originals/docs/src/errors.ts#RateLimited@489",
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/docs/src/app.tsx",
@@ -2007,8 +2184,11 @@
               "examples/originals/docs/src/errors.ts#BadEmail@549",
               "examples/originals/docs/src/errors.ts#NotFound@375",
               "examples/originals/docs/src/errors.ts#SearchError@429",
+              "global:URIError",
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/docs/src/content.tsx",
@@ -2019,7 +2199,9 @@
             "fails": [
               "ChunkError",
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/docs/src/content.tsx",
@@ -2030,7 +2212,9 @@
             "fails": [
               "ChunkError",
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/docs/src/content.tsx",
@@ -2042,7 +2226,9 @@
               "ChunkError",
               "examples/originals/docs/src/errors.ts#NotFound@375",
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/docs/src/content.tsx",
@@ -2050,7 +2236,9 @@
             "line": 68,
             "server": false,
             "component": true,
-            "fails": []
+            "fails": [],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/docs/src/content.tsx",
@@ -2062,7 +2250,9 @@
               "ChunkError",
               "examples/originals/docs/src/errors.ts#NotFound@375",
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/docs/src/shell.tsx",
@@ -2072,7 +2262,9 @@
             "component": true,
             "fails": [
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/docs/src/widgets.tsx",
@@ -2080,7 +2272,9 @@
             "line": 13,
             "server": false,
             "component": true,
-            "fails": []
+            "fails": [],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/docs/src/widgets.tsx",
@@ -2091,7 +2285,9 @@
             "fails": [
               "examples/originals/docs/src/errors.ts#SearchError@429",
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/docs/src/widgets.tsx",
@@ -2102,7 +2298,9 @@
             "fails": [
               "examples/originals/docs/src/errors.ts#RateLimited@489",
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/docs/src/widgets.tsx",
@@ -2113,7 +2311,9 @@
             "fails": [
               "examples/originals/docs/src/errors.ts#BadEmail@549",
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/docs/src/widgets.tsx",
@@ -2122,8 +2322,11 @@
             "server": false,
             "component": true,
             "fails": [
+              "global:URIError",
               "unknown"
-            ]
+            ],
+            "provides": [],
+            "timerFails": []
           },
           {
             "file": "examples/originals/docs/src/widgets.tsx",
@@ -2131,7 +2334,9 @@
             "line": 156,
             "server": false,
             "component": true,
-            "fails": []
+            "fails": [],
+            "provides": [],
+            "timerFails": []
           }
         ],
         "serverRejections": [
@@ -2144,6 +2349,8 @@
             "fails": [
               "unknown"
             ],
+            "provides": [],
+            "timerFails": [],
             "rejection": [
               "ChunkError",
               "unknown"
@@ -2159,6 +2366,8 @@
               "examples/originals/docs/src/errors.ts#NotFound@375",
               "unknown"
             ],
+            "provides": [],
+            "timerFails": [],
             "rejection": [
               "ChunkError",
               "examples/originals/docs/src/errors.ts#NotFound@375",
@@ -2216,7 +2425,7 @@
         {
           "stage": "type",
           "code": "TS2345",
-          "message": "Argument of type 'HoleCall<{ url?: string | undefined; }, false, ViewFails<Read<false, never> | ChildView<false, ViewFails<ChildView<false, FailsOf<Read<true, NativeFailure<\"unknown\"> | ChunkError> | ChildView<...>>, false, never>, Element>, false, never>, Element>, false, never>' is not assignable to parameter of type '(<A extends PropsInput<{ url?: string | undefined; }, unknown> = PropsInput<{ url?: string | undefined; }, never>>(props?: (A & NoInfer<Undeclared<A, { url?: string | undefined; }>>) | undefined) => ComponentView<...>) & { ...; } & { ...; }'.\n  Type 'HoleCall<{ url?: string | undefined; }, false, ViewFails<Read<false, never> | ChildView<false, ViewFails<ChildView<false, FailsOf<Read<true, NativeFailure<\"unknown\"> | ChunkError> | ChildView<...>>, false, never>, Element>, false, never>, Element>, false, never>' is not assignable to type '{ readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"unknown\" | \"chunk\"; }'.",
+          "message": "Argument of type 'HoleCall<{ url?: string | undefined; }, false, ViewFails<Read<false, never> | ChildView<false, ViewFails<ChildView<false, FailsOf<Read<true, NativeFailure<\"unknown\"> | ChunkError> | ChildView<...>>, false, never>, Element>, false, never> | ChildView<...>, Element>, false, never>' is not assignable to parameter of type '(<A extends PropsInput<{ url?: string | undefined; }, unknown> = PropsInput<{ url?: string | undefined; }, never>>(props?: (A & NoInfer<Undeclared<A, { url?: string | undefined; }>>) | undefined) => ComponentView<...>) & { ...; } & { ...; }'.\n  Type 'HoleCall<{ url?: string | undefined; }, false, ViewFails<Read<false, never> | ChildView<false, ViewFails<ChildView<false, FailsOf<Read<true, NativeFailure<\"unknown\"> | ChunkError> | ChildView<...>>, false, never>, Element>, false, never> | ChildView<...>, Element>, false, never>' is not assignable to type '{ readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"unknown\" | ... 1 more ... | \"global:URIError\"; }'.",
           "file": "packages/vite-plugin-yield/test/.native-generated/originals/docs/main.tsx",
           "line": 4
         }

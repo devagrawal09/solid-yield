@@ -1,0 +1,3 @@
+{
+  "ProductList.tsx": "import { createMemo, For, useContext } from \"solid-js\";\nimport { listProducts } from \"./api\";\nimport { RateLimited } from \"./errors\";\nimport { money } from \"./format\";\nimport { CartCtx } from \"./cart\";\nexport function ProductList() {\n  const [items, setItems] = useContext(CartCtx);\n  const products = createMemo(async () => { try { return await listProducts(); } catch (e) { if (e instanceof RateLimited) return []; } });\n  return (\n    <ul>\n      <For each={products()}>{p => <li>{p.name} {money(p.price)} <button onClick={() => setItems([...items(), p])}>add</button></li>}</For>\n    </ul>\n  );\n}\n"
+}

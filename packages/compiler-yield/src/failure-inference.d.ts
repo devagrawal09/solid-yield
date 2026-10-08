@@ -7,11 +7,20 @@ export interface FailureFunction {
   component: boolean;
   fails: string[];
   calls: string[];
+  provides: string[];
+  timerFails: string[];
   rejection?: string[];
 }
 export interface FailureReport {
   iterations: number;
-  diagnostics: { file: string; code: string; message: string; line: number; column: number }[];
+  diagnostics: {
+    file: string;
+    code: string;
+    message: string;
+    line: number;
+    column: number;
+    timer?: boolean;
+  }[];
   unknownOrigins: {
     file: string;
     start: number;
@@ -32,7 +41,15 @@ export interface FailureReport {
     file: string,
     start: number,
     end: number
-  ): { fails: string[]; native: boolean; target?: string; promise: boolean; async: boolean } | null;
+  ): {
+    fails: string[];
+    ownFails: string[];
+    native: boolean;
+    target?: string;
+    promise: boolean;
+    async: boolean;
+    resultType: string;
+  } | null;
   at(
     file: string,
     start: number

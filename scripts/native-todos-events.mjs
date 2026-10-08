@@ -65,7 +65,7 @@ if (step === "snapshot")
       line,
       code: 95000,
       message:
-        "[EVENT_REJECTS] This handler can fail with unknown and nothing catches it; wrap the body in try/catch, or declare the failure."
+        "[EVENT_REJECTS] This handler can fail with SyntaxError and nothing catches it; wrap the body in try/catch, or declare the failure."
     }))
   );
 else {

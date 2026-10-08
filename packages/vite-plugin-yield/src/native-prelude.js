@@ -172,10 +172,16 @@ export function nativePrelude(files) {
                 );
               }
             });
-          const throwsThrough = [q.get("block"), q.get("handler.body")].every(block => {
-            const ends = block.getCompletionRecords();
-            return ends.length && ends.every(end => end.isThrowStatement());
-          });
+          const endings = [q.get("block"), q.get("handler.body")].map(block =>
+            block.getCompletionRecords()
+          );
+          const throwsThrough = endings.every(
+            ends => ends.length && ends.every(end => end.isThrowStatement())
+          );
+          const exitsThrough = endings.every(
+            ends =>
+              ends.length && ends.every(end => end.isReturnStatement() || end.isThrowStatement())
+          );
           const result = q.scope.generateUidIdentifier("completion");
           const caught = q.scope.generateUidIdentifier("caught");
           const body = q.node.block;
@@ -248,7 +254,7 @@ export function nativePrelude(files) {
             );
           }
           params.push(caught);
-          if (returns)
+          if (returns && !exitsThrough)
             for (const block of [body, handle])
               block.body.push(
                 t.returnStatement(
@@ -274,10 +280,12 @@ export function nativePrelude(files) {
             returns
               ? [
                   t.variableDeclaration("const", [t.variableDeclarator(result, call)]),
-                  t.ifStatement(
-                    t.memberExpression(result, t.identifier("returned")),
-                    t.returnStatement(t.memberExpression(result, t.identifier("value")))
-                  )
+                  exitsThrough
+                    ? t.returnStatement(t.memberExpression(result, t.identifier("value")))
+                    : t.ifStatement(
+                        t.memberExpression(result, t.identifier("returned")),
+                        t.returnStatement(t.memberExpression(result, t.identifier("value")))
+                      )
                 ]
               : [throwsThrough ? t.returnStatement(call) : t.expressionStatement(call)]
           );

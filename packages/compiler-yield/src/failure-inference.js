@@ -18,7 +18,10 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
     byBody = new Map(),
     tsNodes = new Map(),
     classes = new Map(),
-    classTypes = new Map();
+    classTypes = new Map(),
+    callSites = new Map(),
+    throwSites = new Map(),
+    swallowed = new Map();
   for (const [file, record] of analysis.modules) {
     const source = program.getSourceFile(file);
     if (source) {
@@ -29,6 +32,9 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
       walk(source);
     }
     record.program.traverse({
+      "CallExpression|NewExpression"(path) {
+        callSites.set(`${file}:${path.node.start}:${path.node.end}`, path);
+      },
       Function(path) {
         const parent = path.parentPath;
         const label =
@@ -36,7 +42,8 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
           (parent.isVariableDeclarator() ? name(parent.node.id) : name(path.node.key)) ??
           `<callback:${path.node.loc.start.line}:${path.node.loc.start.column + 1}>`;
         const server =
-          record.server || path.node.body?.directives?.some(d => d.value.value === "use server");
+          path.node.async &&
+          (record.server || path.node.body?.directives?.some(d => d.value.value === "use server"));
         let component = false;
         path.traverse({
           Function(q) {
@@ -59,7 +66,9 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
           pure: record.pure,
           component: component && /^[A-Z]/.test(label),
           fails: new Set(),
-          calls: new Set()
+          calls: new Set(),
+          provides: new Set(),
+          timerFails: new Set()
         };
         functions.push(fn);
         byBody.set(`${file}:${path.node.body.start}`, fn);
@@ -88,6 +97,104 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
     if (symbol?.flags & ts.SymbolFlags.Alias) symbol = checker.getAliasedSymbol(symbol);
     return symbol?.declarations?.map(functionFor).find(Boolean) ?? null;
   };
+  const contextId = path => {
+    const node = nodeFor(path);
+    let symbol = node && checker.getSymbolAtLocation(node);
+    if (symbol?.flags & ts.SymbolFlags.Alias) symbol = checker.getAliasedSymbol(symbol);
+    const declaration = symbol?.declarations?.find(ts.isVariableDeclaration);
+    const init = declaration?.initializer;
+    if (!init || !ts.isCallExpression(init)) return null;
+    const signature = checker.getResolvedSignature(init)?.declaration;
+    const fn = signature?.name?.getText();
+    if (
+      fn !== "createContext" ||
+      !/(solid-js|@solidjs)[/\\]/.test(signature.getSourceFile().fileName)
+    )
+      return null;
+    return `${declaration.getSourceFile().fileName}#${declaration.name.getText()}`;
+  };
+  function provided(value) {
+    if (!value?.node) return new Set();
+    let tag;
+    if (value.isJSXElement()) tag = value.get("openingElement.name");
+    else if (value.isCallExpression()) tag = value.get("callee");
+    if (!tag) return new Set();
+    if (
+      (tag.isJSXMemberExpression() || tag.isMemberExpression()) &&
+      ["Provider", "provide"].includes(name(tag.node.property))
+    )
+      tag = tag.get("object");
+    const ctx = contextId(tag);
+    if (ctx) return new Set([ctx]);
+    return target(tag)?.provides ?? new Set();
+  }
+  // A wrapper provides only what every returned subtree provides. An optional
+  // provider in one branch cannot erase requirements in another branch.
+  let provisionChanged = true;
+  while (provisionChanged) {
+    provisionChanged = false;
+    for (const fn of functions) {
+      const returns = [];
+      const body = fn.path.get("body");
+      if (body.isExpression()) returns.push(body);
+      else
+        body.traverse({
+          Function(q) {
+            q.skip();
+          },
+          ReturnStatement(q) {
+            if (q.node.argument) returns.push(q.get("argument"));
+          }
+        });
+      const parameter = fn.path.node.params[0];
+      const propBinding = parameter?.name && fn.path.scope.getBinding(parameter.name);
+      const contexts = [];
+      for (const value of returns) {
+        const references = [];
+        const visit = ref => {
+          if (
+            !ref.isMemberExpression() ||
+            name(ref.node.property) !== "children" ||
+            !ref.get("object").isIdentifier({ name: parameter?.name }) ||
+            ref.scope.getBinding(parameter.name) !== propBinding
+          )
+            return;
+          const scope = new Set();
+          let child = ref;
+          for (let parent = ref.parentPath; parent; child = parent, parent = parent.parentPath) {
+            if (parent.isJSXElement() && !child.isJSXOpeningElement())
+              for (const id of provided(parent)) scope.add(id);
+            if (parent.isCallExpression()) {
+              let edge = ref;
+              while (
+                edge &&
+                edge !== parent &&
+                !(edge.isObjectProperty() && name(edge.node.key) === "children")
+              )
+                edge = edge.parentPath;
+              if (edge !== parent) for (const id of provided(parent)) scope.add(id);
+            }
+            if (parent === value) break;
+          }
+          references.push(scope);
+        };
+        if (propBinding) {
+          visit(value);
+          value.traverse({ MemberExpression: visit });
+        }
+        contexts.push(...(references.length ? references : [provided(value)]));
+      }
+      const common = contexts.length
+        ? [...contexts[0]].filter(id => contexts.every(s => s.has(id)))
+        : [];
+      for (const id of common)
+        if (!fn.provides.has(id)) {
+          fn.provides.add(id);
+          provisionChanged = true;
+          if (/^[A-Z]/.test(fn.name)) fn.component = true;
+        }
+    }
+  }
   const classSet = p => {
     const node = nodeFor(p),
       result = new Set();
@@ -136,6 +243,7 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
     const callee = p.get("callee"),
       api = imported(callee);
     if (api?.source === "solid-js") return api.name;
+    if (contextId(callee)) return "context";
     if (
       p.isNewExpression() &&
       callee.isIdentifier({ name: "Promise" }) &&
@@ -184,9 +292,8 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
         valueType = value && checker.getTypeAtLocation(value);
       if (
         valueType &&
-        ((valueType.flags & ts.TypeFlags.StringLike &&
-          ["trim", "slice", "substring", "toLowerCase", "toUpperCase"].includes(method)) ||
-          (valueType.flags & ts.TypeFlags.NumberLike && method === "toString"))
+        valueType.flags & ts.TypeFlags.StringLike &&
+        ["trim", "slice", "substring", "toLowerCase", "toUpperCase"].includes(method)
       )
         return "primitive-method";
       if (
@@ -241,11 +348,110 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
         }
       }
     }
+    // Context-held accessors and setters have the same Solid contract as
+    // locally destructured signals, even when there is no local producer call.
+    if (declaration && /(?:solid-js|@solidjs)[/\\]/.test(declaration.getSourceFile().fileName)) {
+      let parent = declaration;
+      while (parent && !ts.isInterfaceDeclaration(parent) && !ts.isTypeAliasDeclaration(parent))
+        parent = parent.parent;
+      if (["Accessor", "Setter", "Source", "Action"].includes(parent?.name?.text))
+        return "signal-contract";
+    }
+    if (builtin) return "builtin";
     return null;
   };
+  // Only declarations from the platform libraries are built-ins. A shadowed
+  // Math/JSON or a package method must never inherit these contracts.
+  const throwingBuiltins = {
+    "JSON.parse": ["SyntaxError"],
+    "JSON.stringify": ["TypeError"],
+    URL: ["TypeError"],
+    decodeURI: ["URIError"],
+    decodeURIComponent: ["URIError"],
+    encodeURI: ["URIError"],
+    encodeURIComponent: ["URIError"],
+    fetch: ["TypeError", "DOMException"],
+    "Number.toFixed": ["RangeError"],
+    "Number.toPrecision": ["RangeError"],
+    "Number.toExponential": ["RangeError"],
+    "Number.toString": ["RangeError"],
+    "String.repeat": ["RangeError"],
+    "String.normalize": ["RangeError"],
+    RegExp: ["SyntaxError"],
+    BigInt: ["SyntaxError", "RangeError", "TypeError"],
+    "Date.toISOString": ["RangeError"],
+    "Array.reduce": ["TypeError"],
+    "Array.reduceRight": ["TypeError"],
+    Array: ["RangeError"],
+    Intl: ["RangeError", "TypeError"]
+  };
+  function platformFailures(p) {
+    const callee = p.get("callee");
+    let key = callee.isIdentifier() ? callee.node.name : "";
+    if (callee.isMemberExpression()) {
+      const object = callee.get("object"),
+        method = name(callee.node.property);
+      const node = nodeFor(object),
+        type = node && checker.getTypeAtLocation(node);
+      const text = object.toString();
+      key =
+        text === "JSON"
+          ? `JSON.${method}`
+          : text.startsWith("Intl") || text === "Intl"
+            ? "Intl"
+            : type?.flags & ts.TypeFlags.NumberLike || type?.symbol?.name === "Number"
+              ? `Number.${method}`
+              : type?.flags & ts.TypeFlags.StringLike || type?.symbol?.name === "String"
+                ? `String.${method}`
+                : type && (checker.isArrayType(type) || checker.isTupleType(type))
+                  ? `Array.${method}`
+                  : type?.symbol?.name === "Date"
+                    ? `Date.${method}`
+                    : "";
+    }
+    // Default numeric formatting is valid. Known valid literal options do not
+    // add a possible RangeError; dynamic/out-of-range options retain it.
+    const args = p.get("arguments");
+    if (/^Number\.to(Fixed|Precision|Exponential)$/.test(key)) {
+      if (!args.length || args[0].isIdentifier({ name: "undefined" })) return [];
+      const minimum = key === "Number.toPrecision" ? 1 : 0;
+      if (args[0].isNumericLiteral() && args[0].node.value >= minimum && args[0].node.value <= 100)
+        return [];
+    }
+    if (
+      key === "Number.toString" &&
+      (!args.length ||
+        (args[0].isNumericLiteral() && args[0].node.value >= 2 && args[0].node.value <= 36))
+    )
+      return [];
+    if (key === "BigInt" && args[0]?.isNumericLiteral() && Number.isInteger(args[0].node.value))
+      return [];
+    if (/^Array\.reduce(Right)?$/.test(key) && args.length >= 2) return [];
+    if (key === "Array") {
+      if (args.length !== 1) return [];
+      if (
+        args[0].isNumericLiteral() &&
+        Number.isInteger(args[0].node.value) &&
+        args[0].node.value >= 0 &&
+        args[0].node.value < 4294967296
+      )
+        return [];
+      const node = nodeFor(args[0]),
+        type = node && checker.getTypeAtLocation(node);
+      if (type && !(type.flags & ts.TypeFlags.NumberLike)) return [];
+    }
+    return (throwingBuiltins[key] ?? []).map(error => {
+      const id = `global:${error}`;
+      const symbol = checker.resolveName(error, nodeFor(p), ts.SymbolFlags.Type, false);
+      if (symbol) classTypes.set(id, checker.getDeclaredTypeOfSymbol(symbol));
+      classes.set(id, { id, name: error, file: null });
+      return id;
+    });
+  }
   const invoke = (fn, owner) => {
     if (!fn) return new Set(["unknown"]);
     owner.calls.add(fn.id);
+    if (owner.timerFails) owner.timerFails = union(owner.timerFails, fn.timerFails);
     return union(fn.fails, fn.server ? new Set(["ChunkError"]) : []);
   };
   // Match nominal inheritance, never TypeScript structural assignability (I3/I4).
@@ -315,7 +521,12 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
         paths: p.isReturnStatement() || p.isThrowStatement() ? [] : [env]
       };
     }
-    return flow(body, next).effects;
+    const result = flow(body, next);
+    if (body.parentPath.isCatchClause() && binding) {
+      const remaining = union(...result.paths.map(env => env.get(binding) ?? []));
+      swallowed.set(`${owner.file}:${body.parentPath.node.start}`, remaining);
+    }
+    return result.effects;
   }
   function evaluate(p, owner, caught = new Map()) {
     if (!p?.node) return new Set();
@@ -326,7 +537,10 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
       const forwarded = arg.isIdentifier()
         ? caught.get(arg.scope.getBinding(arg.node.name))
         : undefined;
-      return union(forwarded ?? classSet(arg), evaluate(arg, owner, caught));
+      const kinds = forwarded ?? classSet(arg);
+      const key = `${owner.file}:${p.node.start}:${p.node.end}`;
+      throwSites.set(key, union(throwSites.get(key) ?? [], kinds));
+      return union(kinds, evaluate(arg, owner, caught));
     }
     if (p.isTryStatement()) {
       const body = evaluate(p.get("block"), owner, caught),
@@ -387,9 +601,9 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
       if (
         receiver?.isIdentifier({ name: "Promise" }) &&
         !receiver.scope.getBinding("Promise") &&
-        method === "resolve"
+        ["resolve", "all", "allSettled", "race", "any"].includes(method)
       )
-        return argEffects;
+        return method === "allSettled" ? new Set() : argEffects;
       if (["catch", "then", "finally"].includes(method)) {
         const input = evaluate(receiver, owner, caught);
         const handler = args[method === "then" ? 1 : 0];
@@ -421,6 +635,15 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
       }
       const primitive = nativeCall(p);
       if (primitive) {
+        if (primitive === "builtin")
+          return union(
+            argEffects,
+            platformFailures(p),
+            receiver ? evaluate(receiver, owner, caught) : [],
+            ...args
+              .filter(a => a.isFunction())
+              .map(a => invoke(byBody.get(`${owner.file}:${a.node.body.start}`), owner))
+          );
         if (primitive === "promise-resolve") {
           const value = args[0]?.node && nodeFor(args[0]);
           const type = value && checker.getTypeAtLocation(value);
@@ -445,6 +668,29 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
         let callbacks = args
           .filter(a => a.isFunction())
           .map(a => invoke(byBody.get(`${owner.file}:${a.node.body.start}`), owner));
+        if (
+          primitive === "scheduler" &&
+          /^(setTimeout|setInterval|requestAnimationFrame|requestIdleCallback)$/.test(
+            callee.node.name
+          ) &&
+          args[0]?.isIdentifier()
+        ) {
+          const callback = args[0];
+          const binding = callback.scope.getBinding(callback.node.name);
+          const executor = binding?.path.getFunctionParent();
+          const producer = executor?.parentPath;
+          const promiseCallback =
+            binding?.kind === "param" &&
+            producer?.isNewExpression() &&
+            producer.get("callee").isIdentifier({ name: "Promise" }) &&
+            !producer.scope.getBinding("Promise");
+          if (promiseCallback) {
+            // The Promise owns this delayed rejection. It is not a detached
+            // timer failure, and its payload may be a non-Error value.
+            if (executor.node.params[1] === binding.path.node)
+              return union(argEffects, args[2] ? classSet(args[2]) : ["unknown"]);
+          } else callbacks.push(invoke(target(callback), owner));
+        }
         // Getter aliases inherit their memo callback's failures.
         const binding = callee.isIdentifier()
           ? callee.scope.getBinding(callee.node.name)?.path
@@ -459,6 +705,8 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
                 .map(a => invoke(byBody.get(`${owner.file}:${a.node.body.start}`), owner))
             );
         }
+        if (primitive === "scheduler" && owner.timerFails)
+          owner.timerFails = union(owner.timerFails, ...callbacks);
         return union(argEffects, receiver ? evaluate(receiver, owner, caught) : [], ...callbacks);
       }
       // Intrinsics are explicit contracts, not a claim that arbitrary packages are pure.
@@ -541,7 +789,7 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
     changed = false;
     iterations++;
     for (const fn of functions) {
-      const next = fn.pure ? new Set() : evaluate(fn.path.get("body"), fn);
+      const next = fn.pure ? new Set() : union(evaluate(fn.path.get("body"), fn), fn.timerFails);
       if ([...next].some(k => !fn.fails.has(k))) {
         fn.fails = union(fn.fails, next);
         changed = true;
@@ -641,7 +889,7 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
           emit(
             p,
             "CATCH_SWALLOWS",
-            `This catch discards ${display(input)} without handling; return a fallback value, rethrow, or mark the absorption intentional with @yield-absorb.`
+            `This catch discards ${display(swallowed.get(`${file}:${p.node.start}`)?.size ? swallowed.get(`${file}:${p.node.start}`) : input)} without handling; return a fallback value, rethrow, or mark the absorption intentional with @yield-absorb.`
           );
       },
       JSXAttribute(p) {
@@ -659,12 +907,16 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
               nativeCall(binding.get("init"))
             ? evaluate(binding.get("init"), ownerOf(p))
             : new Set(["unknown"]);
-        if (fails.size)
+        if (fails.size) {
           emit(
             value,
             "EVENT_REJECTS",
-            `This handler can fail with ${display(fails)} and nothing catches it; wrap the body in try/catch, or declare the failure.`
+            fn?.timerFails.size
+              ? `This handler starts a timer that can fail with ${display(fn.timerFails)}; catch the failure inside the timer callback.`
+              : `This handler can fail with ${display(fails)} and nothing catches it; wrap the body in try/catch, or declare the failure.`
           );
+          diagnostics.at(-1).timer = !!fn?.timerFails.size;
+        }
       },
       ThrowStatement(p) {
         if (classSet(p.get("argument")).has("unknown"))
@@ -700,42 +952,52 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
       file: relative(root, fn.file),
       id: fn.id.replace(root, "<root>"),
       fails: [...fn.fails].sort(),
+      provides: [...fn.provides],
+      timerFails: [...fn.timerFails],
       calls: [...fn.calls].map(id => id.replace(root, "<root>")),
       rejection: fn.server ? [...union(fn.fails, ["ChunkError"])].sort() : undefined
     })),
     call(file, start, end) {
-      let site;
-      analysis.modules.get(file)?.program.traverse({
-        "CallExpression|NewExpression"(p) {
-          if (p.node.start === start && p.node.end === end) site = p;
-        }
-      });
+      const site = callSites.get(`${file}:${start}:${end}`);
       if (!site) return null;
       const owner = functions.find(f => f.path.node === site.getFunctionParent()?.node) ?? {
         calls: new Set(),
         file
       };
       const fn = target(site);
+      const total = evaluate(site, owner);
+      const primitive = nativeCall(site);
+      const callee = site.get("callee");
+      const promiseMethod =
+        callee.isMemberExpression() &&
+        ["then", "catch", "finally", "all", "race", "any", "allSettled", "reject"].includes(
+          name(callee.node.property)
+        );
+      const own = fn
+        ? invoke(fn, owner)
+        : primitive === "builtin" && !promiseMethod
+          ? new Set(platformFailures(site))
+          : total;
       return {
-        fails: [...evaluate(site, owner)],
-        native: !!nativeCall(site) && nativeCall(site) !== "promise-constructor",
+        fails: [...total],
+        ownFails: [...own],
+        native:
+          !!nativeCall(site) && !["promise-constructor", "builtin"].includes(nativeCall(site)),
         target: fn?.id,
         promise: !!checker.getPromisedTypeOfPromise(checker.getTypeAtLocation(nodeFor(site))),
-        async: !!fn?.path.node.async
+        async: !!fn?.path.node.async,
+        resultType: checker.typeToString(
+          checker.getTypeAtLocation(nodeFor(site)),
+          nodeFor(site),
+          ts.TypeFormatFlags.NoTruncation | ts.TypeFormatFlags.UseFullyQualifiedType
+        )
       };
     },
     at(file, start) {
       return functions.find(f => f.file === file && f.path.node.start === start);
     },
     throws(file, start, end) {
-      const record = analysis.modules.get(file);
-      let found;
-      record?.program.traverse({
-        ThrowStatement(p) {
-          if (p.node.start === start && p.node.end === end) found = classSet(p.get("argument"));
-        }
-      });
-      return [...(found ?? new Set(["unknown"]))];
+      return [...(throwSites.get(`${file}:${start}:${end}`) ?? new Set(["unknown"]))];
     }
   };
 }

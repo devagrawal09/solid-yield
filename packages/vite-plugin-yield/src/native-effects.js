@@ -1,4 +1,4 @@
-import { printMapped } from "./positions.js";
+import { printMapped, copyPosition } from "./positions.js";
 // @ts-check
 import babel from "@babel/core";
 import { relative } from "node:path";
@@ -25,6 +25,18 @@ export function lowerNativeEffects(files, report) {
       },
       CallExpression(q) {
         const c = q.get("callee");
+        if (
+          c.isIdentifier() &&
+          !c.scope.getBinding(c.node.name) &&
+          /^(setTimeout|setInterval|requestAnimationFrame|requestIdleCallback)$/.test(c.node.name)
+        ) {
+          /** @type {Path | undefined} */ let callback = q.get("arguments.0");
+          if (callback?.isIdentifier()) {
+            const declaration = callback.scope.getBinding(callback.node.name)?.path;
+            callback = declaration?.isVariableDeclarator() ? declaration.get("init") : declaration;
+          }
+          if (callback?.isFunction()) routines.add(`${file}:${callback.node.start}`);
+        }
         const b = c.isIdentifier() ? c.scope.getBinding(c.node.name)?.path : undefined;
         const init = b?.isVariableDeclarator() ? b.get("init") : null;
         const producer = init?.isCallExpression() ? init.get("callee") : null;
@@ -39,6 +51,11 @@ export function lowerNativeEffects(files, report) {
         ) {
           const owner = q.getFunctionParent();
           if (owner) routines.add(`${file}:${owner.node.start}`);
+          if (sourceApi?.name === "createMemo" || imported(b)?.name === "createMemo") {
+            const callback = q.get("arguments.0");
+            if (callback?.isFunction() && callback.node.async)
+              routines.add(`${file}:${callback.node.start}`);
+          }
         }
       }
     });
@@ -75,10 +92,17 @@ export function lowerNativeEffects(files, report) {
     const p = parseProgram(code, file);
     if (!p) continue;
     const used = new Set();
+    let domException = false;
+    /** @type {Map<any, {id: import("@babel/core").types.Identifier, kinds: Set<string>}>} */
+    const detached = new Map();
 
     /** @param {string[]} kinds @param {any} value */
     const adapt = (kinds, value) => {
       used.add("nativeFailure");
+      if (kinds.includes("global:DOMException")) {
+        used.add("registerNativeFailure");
+        domException = true;
+      }
       if (kinds.includes("ChunkError")) used.add("ChunkError");
       return t.callExpression(t.identifier("__nativeFailure"), [
         t.arrayExpression(kinds.map(k => t.stringLiteral(k))),
@@ -147,10 +171,66 @@ export function lowerNativeEffects(files, report) {
       },
       Function(q) {
         if (!asyncRoutines.has(`${file}:${q.node.start}`)) return;
+        const call = q.parentPath;
+        const callee = call.isCallExpression() ? call.get("callee") : null;
+        const api = callee?.isIdentifier()
+          ? imported(callee.scope.getBinding(callee.node.name)?.path)
+          : null;
+        const producer =
+          api?.source === "solid-js" &&
+          ["createMemo", "createProjection", "createOptimisticStore"].includes(api.name);
+        const kinds = [...(report.at(file, q.node.start ?? 0)?.fails ?? [])];
         q.node.async = false;
         if (q.isArrowFunctionExpression()) q.arrowFunctionToExpression();
         q.node.generator = true;
         q.node.returnType = null;
+        // An async producer still returns a promise when it has no await.
+        // Resolve the value after its authored reads, preserving that pending
+        // boundary without putting a delegated read inside a plain thunk.
+        if (producer && t.isBlockStatement(q.node.body)) {
+          const endings = q.get("body").getCompletionRecords();
+          const exitsThrough =
+            endings.length &&
+            endings.every(end => end.isReturnStatement() || end.isThrowStatement());
+          /** @param {import("@babel/core").types.Expression} value */
+          const completion = value =>
+            attempt(
+              t.callExpression(
+                t.memberExpression(t.identifier("Promise"), t.identifier("resolve")),
+                [value]
+              ),
+              kinds
+            );
+          q.traverse({
+            Function(inner) {
+              inner.skip();
+            },
+            ReturnStatement(returned) {
+              const result = returned.scope.generateUidIdentifier("asyncResult");
+              if (
+                t.isArrayExpression(returned.node.argument) &&
+                !returned.node.argument.elements.length
+              )
+                result.typeAnnotation = t.tsTypeAnnotation(t.tsArrayType(t.tsNeverKeyword()));
+              returned.replaceWith(
+                t.blockStatement([
+                  t.variableDeclaration("const", [
+                    t.variableDeclarator(
+                      result,
+                      returned.node.argument ?? t.unaryExpression("void", t.numericLiteral(0))
+                    )
+                  ]),
+                  t.returnStatement(completion(t.identifier(result.name)))
+                ])
+              );
+              returned.skip();
+            }
+          });
+          if (!exitsThrough)
+            q.node.body.body.push(
+              t.returnStatement(completion(t.unaryExpression("void", t.numericLiteral(0))))
+            );
+        }
       }
     });
     // Synchronous native throw sites are ordinary library raise operations.
@@ -215,9 +295,12 @@ export function lowerNativeEffects(files, report) {
         }
         used.add("raise");
         if (fn) fn.node.returnType = null;
-        const raised = t.callExpression(t.identifier("__nativeRaise"), [
-          adapt(report.throws(file, q.node.start ?? 0, q.node.end ?? 0), q.node.argument)
-        ]);
+        const raised = copyPosition(
+          t.callExpression(t.identifier("__nativeRaise"), [
+            adapt(report.throws(file, q.node.start ?? 0, q.node.end ?? 0), q.node.argument)
+          ]),
+          q.node
+        );
         // raise always throws at runtime; preserve that non-returning path in a
         // component whose successful return must be a view.
         q.replaceWith(
@@ -259,8 +342,24 @@ export function lowerNativeEffects(files, report) {
       "CallExpression|NewExpression": {
         exit(q) {
           const fn = q.getFunctionParent();
-          if (!host(fn) || !q.node.start) return;
+          if (
+            !host(fn) ||
+            !q.node.start ||
+            p.node.directives.some(d => d.value.value === "use pure")
+          )
+            return;
           const c = q.get("callee");
+          // Promise combinators own their member promises. Awaiting members one
+          // by one here would lose concurrency and the tuple result type.
+          const combinator = q.findParent(
+            a =>
+              a.isCallExpression() &&
+              t.isMemberExpression(a.node.callee) &&
+              t.isIdentifier(a.node.callee.object, { name: "Promise" }) &&
+              t.isIdentifier(a.node.callee.property) &&
+              ["all", "allSettled", "race", "any"].includes(a.node.callee.property.name)
+          );
+          if (combinator) return;
           if (
             c.isIdentifier() &&
             imported(c.scope.getBinding(c.node.name)?.path)?.source.startsWith("solid-yield")
@@ -275,10 +374,29 @@ export function lowerNativeEffects(files, report) {
             chain = chain.parentPath;
           }
           const info = report.call(file, q.node.start, q.node.end ?? 0);
+          const kinds = info?.ownFails ?? info?.fails ?? [];
+          if (
+            c.isMemberExpression() &&
+            t.isIdentifier(c.node.property) &&
+            ["then", "catch", "finally"].includes(c.node.property.name)
+          ) {
+            for (const callback of q.get("arguments")) {
+              if (
+                callback.isFunction() &&
+                !callback.node.async &&
+                routines.has(`${file}:${callback.node.start}`)
+              ) {
+                used.add("$event");
+                callback.replaceWith(
+                  t.callExpression(t.identifier("__nativePromiseEvent"), [callback.node])
+                );
+              }
+            }
+          }
           if (
             !info ||
             info.native ||
-            (!info.fails.length && !info.promise) ||
+            (!kinds.length && !info.promise) ||
             (info.target && asyncRoutines.has(info.target)) ||
             (info.target &&
               routines.has(info.target) &&
@@ -287,6 +405,22 @@ export function lowerNativeEffects(files, report) {
               !q.isNewExpression())
           )
             return;
+          const unawaited =
+            info.promise &&
+            c.isMemberExpression() &&
+            t.isIdentifier(c.node.property) &&
+            ["then", "catch", "finally"].includes(c.node.property.name) &&
+            q.parentPath?.isExpressionStatement();
+          /** @type {{id: import("@babel/core").types.Identifier, kinds: Set<string>} | undefined} */
+          let pending;
+          if (unawaited && fn) {
+            pending = detached.get(fn.node);
+            if (!pending) {
+              pending = { id: fn.scope.generateUidIdentifier("pendingChains"), kinds: new Set() };
+              detached.set(fn.node, pending);
+            }
+            for (const kind of kinds) pending.kinds.add(kind);
+          }
           // Evaluate the call target and arguments in the current routine. A
           // plain attempt producer must not capture delegated reactive reads.
           // Retain receiver lookup before arguments, and invoke with that receiver.
@@ -294,7 +428,9 @@ export function lowerNativeEffects(files, report) {
             /** @type {import("@babel/core").types.CallExpression | import("@babel/core").types.NewExpression} */ (
               q.node
             );
-          let readsArgument = false;
+          let readsArgument =
+            t.isMemberExpression(call.callee) &&
+            (t.isCallExpression(call.callee.object) || t.isMemberExpression(call.callee.object));
           for (const arg of q.get("arguments")) {
             if (arg.isFunction()) continue;
             if (arg.isCallExpression() || arg.isMemberExpression()) readsArgument = true;
@@ -321,14 +457,19 @@ export function lowerNativeEffects(files, report) {
             };
             let callee = /** @type {import("@babel/core").types.Expression} */ (call.callee);
             let receiver;
-            if (t.isMemberExpression(callee) && !t.isSuper(callee.object)) {
+            const platformPromise =
+              t.isMemberExpression(callee) &&
+              t.isIdentifier(callee.object, { name: "Promise" }) &&
+              t.isIdentifier(callee.property) &&
+              ["all", "allSettled", "race", "any"].includes(callee.property.name);
+            if (t.isMemberExpression(callee) && !t.isSuper(callee.object) && !platformPromise) {
               receiver = save(callee.object, "receiver");
               callee = save(
-                attempt(t.memberExpression(receiver, callee.property, callee.computed), info.fails),
+                attempt(t.memberExpression(receiver, callee.property, callee.computed), kinds),
                 "method"
               );
             }
-            if (!receiver) callee = save(callee, "callee");
+            if (!receiver && !platformPromise) callee = save(callee, "callee");
             const args = call.arguments.map(arg => save(arg, "argument"));
             if (receiver) used.add("nativeInvoke");
             const invoke = t.isNewExpression(call)
@@ -340,18 +481,64 @@ export function lowerNativeEffects(files, report) {
                     t.arrayExpression(args)
                   ])
                 : t.callExpression(callee, args);
-            statements.push(t.returnStatement(attempt(invoke, info.fails)));
+            /** @type {any} */ let value = invoke;
+            if (
+              info.promise &&
+              (platformPromise ||
+                (receiver &&
+                  t.isMemberExpression(call.callee) &&
+                  t.isIdentifier(call.callee.property) &&
+                  ["then", "catch", "finally"].includes(call.callee.property.name)))
+            ) {
+              const annotation = parseProgram(`const result = null as ${info.resultType};`, file);
+              const cast = annotation?.node.body[0];
+              if (t.isVariableDeclaration(cast) && t.isTSAsExpression(cast.declarations[0].init))
+                value = t.tsAsExpression(invoke, cast.declarations[0].init.typeAnnotation);
+            }
+            statements.push(t.returnStatement(unawaited ? value : attempt(value, kinds)));
             q.replaceWith(
               t.callExpression(
                 t.functionExpression(null, [], t.blockStatement(statements), true),
                 []
               )
             );
-          } else q.replaceWith(attempt(call, info.fails));
+          } else if (!unawaited) q.replaceWith(attempt(call, kinds));
+          if (pending)
+            q.replaceWith(
+              t.callExpression(t.memberExpression(pending.id, t.identifier("push")), [
+                /** @type {import("@babel/core").types.Expression} */ (q.node)
+              ])
+            );
           q.skip();
         }
       }
     });
+    // Drain ignored chains on the enclosing host after the authored body. A
+    // catch around creating a promise cannot catch its later rejection.
+    for (const [body, pending] of detached) {
+      const declaration = t.variableDeclaration("const", [
+        t.variableDeclarator(pending.id, t.arrayExpression([]))
+      ]);
+      pending.id.typeAnnotation = t.tsTypeAnnotation(
+        t.tsArrayType(
+          t.tsTypeReference(
+            t.identifier("Promise"),
+            t.tsTypeParameterInstantiation([t.tsUnknownKeyword()])
+          )
+        )
+      );
+      const finish = t.blockStatement([
+        t.expressionStatement(
+          attempt(
+            t.callExpression(t.memberExpression(t.identifier("Promise"), t.identifier("all")), [
+              t.identifier(pending.id.name)
+            ]),
+            [...pending.kinds]
+          )
+        )
+      ]);
+      body.body = t.blockStatement([declaration, t.tryStatement(body.body, null, finish)]);
+    }
     // Server producers brand at the rejection boundary before serialization.
     // Their bodies stay plain async JavaScript; only client calls use attempt.
     p.traverse({
@@ -477,6 +664,7 @@ export function lowerNativeEffects(files, report) {
     });
     /** @type {Record<string,string>} */
     const aliases = {
+      $event: "__nativePromiseEvent",
       ChunkError: "__nativeChunk",
       attempt: "__nativeAttempt",
       raise: "__nativeRaise",
@@ -488,8 +676,8 @@ export function lowerNativeEffects(files, report) {
     for (const module of ["solid-yield", "solid-yield/internal"]) {
       const names = [...used].filter(n =>
         module === "solid-yield"
-          ? ["attempt", "raise", "ChunkError"].includes(n)
-          : !["attempt", "raise", "ChunkError"].includes(n)
+          ? ["$event", "attempt", "raise", "ChunkError"].includes(n)
+          : !["$event", "attempt", "raise", "ChunkError"].includes(n)
       );
       for (const name of [...names]) {
         const binding = p.scope.getBinding(aliases[name]);
@@ -509,6 +697,22 @@ export function lowerNativeEffects(files, report) {
           )
         );
     }
+    if (domException)
+      p.node.body.push(
+        t.ifStatement(
+          t.binaryExpression(
+            "!==",
+            t.unaryExpression("typeof", t.identifier("DOMException")),
+            t.stringLiteral("undefined")
+          ),
+          t.expressionStatement(
+            t.callExpression(t.identifier("__nativeRegister"), [
+              t.stringLiteral("global:DOMException"),
+              t.identifier("DOMException")
+            ])
+          )
+        )
+      );
     result.set(file, printMapped(t.file(p.node)));
   }
   return result;

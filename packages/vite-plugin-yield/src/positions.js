@@ -196,7 +196,7 @@ export function withPositions(input, run) {
         const offset =
           lines.slice(0, error.loc.line - 1).reduce((n, s) => n + s.length + 1, 0) +
           (error.loc.column ?? 0);
-        const at = locate(table, offset);
+        const at = locate(table, offset, error.length ?? 0);
         if (at) error.sourceSpan = at;
       }
     }

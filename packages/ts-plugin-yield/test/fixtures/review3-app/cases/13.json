@@ -1,0 +1,3 @@
+{
+  "Details.tsx": "import { createMemo } from \"solid-js\";\nimport { getProduct } from \"./api\";\nimport { money } from \"./format\";\nexport function Details(props: { id: string }) {\n  const prod = createMemo(async () => { const x = await getProduct(props.id); return x; });\n  return <div><h2>{prod().name}</h2><p>{prod().price}</p></div>;\n}\n"
+}

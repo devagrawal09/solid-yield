@@ -1,0 +1,3 @@
+{
+  "Details.tsx": "import { createMemo } from \"solid-js\";\nimport { getProduct } from \"./api\";\nimport { money } from \"./format\";\nexport function Details(props: { id: string }) {\n  const prod = createMemo(() => Promise.all([getProduct(props.id), getProduct(\"9\")]));\n  return <div><h2>{prod()[0].name}</h2><p>{prod()[1].price}</p></div>;\n}\n"
+}

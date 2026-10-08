@@ -53,7 +53,8 @@ module.exports = [
   {
     slot: "R06",
     file: "hole-create",
-    code: "SUGAR_CALLBACK",
+    // The native state contract now reaches the authored creation in JSX.
+    code: "CREATE_OUTSIDE_SETUP",
     line: 3
   },
   {

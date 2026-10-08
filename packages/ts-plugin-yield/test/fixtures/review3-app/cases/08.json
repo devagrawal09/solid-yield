@@ -1,0 +1,3 @@
+{
+  "api.ts": "\"use server\";\nimport { NotFound, RateLimited } from \"./errors\";\nexport type Product = { id: string; name: string; price: number };\nconst DB: Product[] = [\n  { id: \"1\", name: \"Mug\", price: 8 },\n  { id: \"2\", name: \"Shirt\", price: 20 }\n];\nlet calls = 0;\nexport async function listProducts(): Promise<Product[]> {\n  if (++calls % 5 === 0) throw \"slow down\";\n  return DB;\n}\nexport async function getProduct(id: string): Promise<Product> {\n  const p = DB.find(p => p.id === id);\n  if (!p) throw new NotFound(id);\n  return p;\n}\nexport async function placeOrder(ids: string[], email: string): Promise<{ ok: true }> {\n  if (!email.includes(\"@\")) throw new RateLimited(1);\n  return { ok: true };\n}\n"
+}

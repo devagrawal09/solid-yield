@@ -435,11 +435,7 @@ function createVirtualService(ts, host, config = {}) {
       source: "solid-yield",
       messageText: (!origin && (!at || at.generated) ? "[generated] " : "") + message,
       relatedInformation: related.length
-        ? [
-            ...new Map(
-              related.map(r => [`${r.file.fileName}:${r.start}:${r.messageText}`, r])
-            ).values()
-          ]
+        ? [...new Map(related.map(r => [`${r.file.fileName}:${r.start}`, r])).values()]
         : undefined
     };
   }

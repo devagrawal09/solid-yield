@@ -47,13 +47,12 @@ function check(dir, overrides = {}) {
       console.log(
         `${where} ${ts.DiagnosticCategory[d.category].toLowerCase()} TS${d.code}: ${ts.flattenDiagnosticMessageText(d.messageText, "\n")}`
       );
-    }
-    for (const d of unique)
       for (const r of d.relatedInformation ?? []) {
         const at = r.file?.getLineAndCharacterOfPosition(r.start ?? 0);
         const where = at ? `${r.file.fileName}:${at.line + 1}:${at.character + 1}` : "config";
         console.log(`  related: ${where}: ${ts.flattenDiagnosticMessageText(r.messageText, "\n")}`);
       }
+    }
     const errors = unique.filter(d => d.category === ts.DiagnosticCategory.Error).length;
     console.log(`solid-yield check: ${parsed.fileNames.length} files, ${errors} errors`);
     return errors ? 1 : 0;

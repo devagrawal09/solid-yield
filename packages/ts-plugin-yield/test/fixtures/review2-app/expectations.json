@@ -1,0 +1,172 @@
+[
+  {
+    "case": "m01_swallow.tsx",
+    "code": null,
+    "line": null
+  },
+  {
+    "case": "m02_throwstring.tsx",
+    "code": "NATIVE_THROW",
+    "line": 5
+  },
+  {
+    "case": "m03_base.tsx",
+    "code": null,
+    "line": null
+  },
+  {
+    "case": "m04_instanceof.tsx",
+    "code": null,
+    "line": null
+  },
+  {
+    "case": "m05_unhandled.tsx",
+    "code": "EVENT_REJECTS",
+    "line": 6
+  },
+  {
+    "case": "c0c_noprovider.tsx",
+    "code": "NO_PROVIDER",
+    "line": 14
+  },
+  {
+    "case": "m07_setup.tsx",
+    "code": "READ_IN_SETUP",
+    "line": 7
+  },
+  {
+    "case": "m08_portal.tsx",
+    "code": "NATIVE_FOREIGN_BOUNDARY",
+    "line": 6
+  },
+  {
+    "case": "m09_module.tsx",
+    "code": "MODULE_STATE",
+    "line": 5
+  },
+  {
+    "case": "m10_generator.tsx",
+    "code": null,
+    "line": null
+  },
+  {
+    "case": "m11_destructure.tsx",
+    "code": "NATIVE_PROPS",
+    "line": 6
+  },
+  {
+    "case": "m12_arity.tsx",
+    "code": "NATIVE_EFFECT_PHASES",
+    "line": 7
+  },
+  {
+    "case": "catch-empty.tsx",
+    "code": "CATCH_SWALLOWS",
+    "line": 6
+  },
+  {
+    "case": "catch-logged.tsx",
+    "code": "CATCH_SWALLOWS",
+    "line": 6
+  },
+  {
+    "case": "catch-intentional.tsx",
+    "code": null,
+    "line": null
+  },
+  {
+    "case": "base-subclass.tsx",
+    "code": null,
+    "line": null
+  },
+  {
+    "case": "base-sibling.tsx",
+    "code": "FOREIGN_HANDOFF",
+    "line": 10
+  },
+  {
+    "case": "selective-upstream.tsx",
+    "code": null,
+    "line": null
+  },
+  {
+    "case": "selective-unhandled.tsx",
+    "code": "FOREIGN_HANDOFF",
+    "line": 8
+  },
+  {
+    "case": "selective-unknown.tsx",
+    "code": "FOREIGN_HANDOFF",
+    "line": 8
+  },
+  {
+    "case": "helper-string.tsx",
+    "code": "NATIVE_THROW",
+    "line": 5
+  },
+  {
+    "case": "handler-promise.tsx",
+    "code": "EVENT_REJECTS",
+    "line": 6
+  },
+  {
+    "case": "p1_sync_throw.tsx",
+    "code": "EVENT_REJECTS",
+    "line": 5
+  },
+  {
+    "case": "p3_named_async.tsx",
+    "code": "EVENT_REJECTS",
+    "line": 6
+  },
+  {
+    "case": "q2_click_calls_boom.tsx",
+    "code": "EVENT_REJECTS",
+    "line": 6
+  },
+  {
+    "case": "q3_click_await.tsx",
+    "code": "EVENT_REJECTS",
+    "line": 5
+  },
+  {
+    "case": "c0b_noerrored.tsx",
+    "code": "FOREIGN_HANDOFF",
+    "line": 18
+  },
+  {
+    "case": "readme.tsx",
+    "code": "PENDING_ROOT",
+    "line": 11
+  },
+  {
+    "case": "base.tsx",
+    "code": "EVENT_REJECTS",
+    "line": 30
+  },
+  {
+    "case": "q1_timer_throw.tsx",
+    "code": "NATIVE_CALLBACK_FAILURE",
+    "line": 5
+  },
+  {
+    "case": "p4_memo_sync_throw.tsx",
+    "code": "FOREIGN_HANDOFF",
+    "line": 5
+  },
+  {
+    "case": "p5_effect_throw.tsx",
+    "code": "FOREIGN_HANDOFF",
+    "line": 5
+  },
+  {
+    "case": "c0_noloading.tsx",
+    "code": "PENDING_ROOT",
+    "line": 18
+  },
+  {
+    "case": "p2_sync_string.tsx",
+    "code": "NATIVE_THROW",
+    "line": 5
+  }
+]

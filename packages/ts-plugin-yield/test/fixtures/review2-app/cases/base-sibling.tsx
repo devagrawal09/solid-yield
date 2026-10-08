@@ -1,0 +1,15 @@
+import { createContext, createEffect, createMemo, createSignal, useContext, Loading, Errored, For } from "solid-js";
+import { render, Portal } from "@solidjs/web";
+import { fetchTodos, FetchError } from "./errors";
+
+class Base extends Error {}
+class NotFound extends Error {}
+async function load(): Promise<number> { throw new NotFound("x"); }
+function Page() {
+  const n = createMemo(async () => { try { return await load(); } catch (e) { if (e instanceof Base) return -1; throw e; } });
+  return <p>{n()}</p>;
+}
+function App() {
+  return <Loading fallback="l"><Page /></Loading>;
+}
+render(() => <App />, document.getElementById("root")!);

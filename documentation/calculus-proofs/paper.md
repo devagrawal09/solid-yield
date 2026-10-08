@@ -5,6 +5,12 @@ translation. They do not assume that TypeScript is sound. Failures of the
 translation are listed in [findings.md](findings.md). Names beginning `P-` are
 paper lemmas; Lean identifiers link through [the source](lean/YieldProofs.lean).
 
+For native mode, [inference.md](inference.md#every-paper-lemma) re-reads every
+lemma below. It replaces nominal author failures with class coverage and
+unknown top, states I1–I6 and the exact safe-catch rule, and proves the call
+closure argument relative to sound local/edge contracts. The historical
+TypeScript/brand premises below are not sufficient for D-116 input by themselves.
+
 ## Judgments and invariant (P-STATE)
 
 Let a source store Σ map source identities to `(κ, state)`, where state is

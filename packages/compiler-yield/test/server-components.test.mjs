@@ -78,18 +78,29 @@ test("C3/C4: 40 hydrated interactions and keyed slots; record exact DOM differen
       differences.push({
         step: i,
         reason: [
-          "solid-frame wrappers",
+          ...(/<solid-frame\b/.test(b) ? ["F-C16 wrappers"] : []),
           ...(/<template id="pl-/.test(b) ? ["pending template"] : []),
-          ...(withoutFrameScaffolding(b) !== a ? ["F-C13 article link claim attributes"] : [])
+          ...(withoutFrameScaffolding(b) !== a ? ["F-C18/F-C19 link claim attributes"] : [])
         ],
         librarySha256: createHash("sha256").update(a).digest("hex"),
         compiledSha256: createHash("sha256").update(b).digest("hex")
       });
   }
-  assert.equal(differences.length, 40, "do not report exact parity while frames add DOM nodes");
+  assert.equal(
+    differences.length,
+    34,
+    "six exact matches; remaining link differences stay visible"
+  );
+  assert(
+    compiled.snapshots.every(s => !/<solid-frame\b|data-fid=/.test(s)),
+    "authored hosts leave no wrapper or frame attributes"
+  );
+  assert.doesNotMatch(compiled.html, /<solid-frame\b/);
+  assert.match(compiled.html, /<main data-fid=/);
+  assert.match(compiled.html, /<section data-fid="[^"]*" class="reading-guide">/);
   assert.match(compiled.snapshots[25], /A typed content pipeline/);
   assert.match(compiled.snapshots[27], /class="hljs-keyword">interface<\/span>/);
-  assert(differences.some(d => d.reason.includes("F-C13 article link claim attributes")));
+  assert(differences.some(d => d.reason.includes("F-C18/F-C19 link claim attributes")));
   assert.match(compiled.snapshots[23], /not-found: No article: missing/);
   assert.match(compiled.snapshots[23], /Like: 1/);
   assert.match(compiled.snapshots[23], /rate-limited: One like per article: start/);
@@ -103,7 +114,7 @@ test("C3/C4: 40 hydrated interactions and keyed slots; record exact DOM differen
       process.env.C3_PARITY_RECORD,
       JSON.stringify(
         {
-          exactMatches: 0,
+          exactMatches: 40 - differences.length,
           steps: 40,
           contentMatches: 40,
           serverRefetchedSteps: [5, 22, 23, 24, 25, 28, 29, 31, 32, 34, 35, 37, 38],

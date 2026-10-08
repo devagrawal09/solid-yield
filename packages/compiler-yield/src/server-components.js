@@ -97,11 +97,11 @@ function* __Resolved(outcome, rendered) {
 export async function routeRegion(slug) {
  "use server";
  if (slug !== undefined && typeof slug !== "string") throw new TypeError("ArticleContent.slug must be serializable string/undefined");
- return props => <main>{__foreign(__Article)({slug})}<props.like $key="route-like" slug={slug ?? "overview"}/></main>;
+ return Object.assign(props => { const article = __foreign(__Article)({slug}); return <>{article}<props.like $key="route-like" slug={slug ?? "overview"}/></>; }, {regionRoot:"main"});
 }
 export async function guideRegion() {
  "use server";
- return () => <section class="reading-guide"><h2>Reading guide</h2>{__foreign(__Article)({slug:"widgets"})}</section>;
+ return Object.assign(() => { const article = __foreign(__Article)({slug:"widgets"}); return <><h2>Reading guide</h2>{article}</>; }, {regionRoot:"section"});
 }
 `,
     content,
@@ -117,11 +117,11 @@ export function RouteRegion(props) {
  const like=createMemo(()=><props.like slug={props.slug ?? "overview"}/>);
  const Like=()=> <>{like()}</>;
  const Region=dynamic(()=>routeRegion(props.slug));
- return <Loading fallback={<main>{${pending}}<Like/></main>}><Region like={Like}/></Loading>;
+ return <Loading fallback={<main>{${pending}}<Like/></main>}><Region like={Like} regionRoot="main"/></Loading>;
 }
 export function GuideRegion() {
  const Region=dynamic(()=>guideRegion());
- return <Loading fallback=""><Region/></Loading>;
+ return <Loading fallback=""><Region regionRoot="section"/></Loading>;
 }
 `;
   return {
@@ -219,9 +219,10 @@ export function GuideRegion() {
               .replace("export function render(url: string)", "function __render(url: string)")
               .replace("{ manifest }", "{ manifest, plugins:[ServerComponentPlugin] }") +
             `
-import {ServerComponentPlugin,frameTransformDirectResult} from "@solidjs/web/frames";
+import {ServerComponentPlugin} from "@solidjs/web/frames";
+import {hostedRegionResult} from ${JSON.stringify(resolve(import.meta.dirname, "hosted-region-server.js"))};
 import {configureServerFunctionsServer} from "@solidjs/web/server-functions";
-configureServerFunctionsServer({transformDirectResult:frameTransformDirectResult});
+configureServerFunctionsServer({transformDirectResult:hostedRegionResult});
 import {provideRequestEvent} from "@solidjs/web/storage";
 export function render(url){return provideRequestEvent({request:new Request("http://localhost"+url),locals:{}},()=>__render(url));}
 `,
@@ -231,7 +232,7 @@ export function render(url){return provideRequestEvent({request:new Request("htt
       if (id === resolve(dir, "src/__compiler_client.tsx")) {
         return {
           code:
-            'import {installServerComponents} from "@solidjs/web/frames";\ninstallServerComponents();\n' +
+            `import {installHostedRegions} from ${JSON.stringify(resolve(import.meta.dirname, "hosted-region-client.js"))};\ninstallHostedRegions();\n` +
             source,
           map: null
         };

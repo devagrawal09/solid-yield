@@ -9,6 +9,59 @@ import solidYield from "../../vite-plugin-yield/src/index.js";
 import { emitServerRegion } from "../src/server-region.js";
 
 const require = createRequire(new URL("../package.json", import.meta.url));
+test("C4b: existing hosts and wrapper hosts preserve like and copy-code slots across swaps", () => {
+  const child = spawnSync(
+    process.execPath,
+    [
+      "--conditions=browser",
+      "--input-type=module",
+      "-e",
+      `
+    import assert from "node:assert/strict";
+    import {JSDOM} from "jsdom";
+    import {createFrame,createFrameHost,createFrameElement} from "@solidjs/web/frames";
+    const dom=new JSDOM("<body></body>");
+    globalThis.document=dom.window.document;
+    for (const hosted of [false,true]) {
+      const host=createFrameHost(), fills={}, calls={like:0,copy:0};
+      const slots=Object.fromEntries(["like","copy"].map(name=>[name,(args,ctx)=>{
+        calls[name]++;
+        const button=document.createElement("button");
+        let clicks=0;
+        button.textContent=name+":0:"+args.text;
+        button.onclick=()=>button.textContent=name+":"+(++clicks)+":"+args.text;
+        ctx.onUpdate(next=>{args=next;button.textContent=name+":"+clicks+":"+args.text;});
+        fills[name]=button;
+        return button;
+      }]));
+      const element=hosted?document.createElement("article"):undefined;
+      const pair=hosted?{element,frame:createFrame(element,{id:"r",host,slots})}:createFrameElement({id:"r",host,slots});
+      document.body.append(pair.element);
+      for (const version of [1,2]) {
+        for (const key of ["like","copy"]) host.apply({type:"slot",id:"r",version,key:key+"#stable",args:{text:"v"+version}});
+        const keys=version===1?["like","copy"]:["copy","like"];
+        host.apply({type:"html",id:"r",version,html:"<h2>v"+version+"</h2>"+keys.map(key=>"<!--slot:"+key+"#stable:start--><!--slot:"+key+"#stable:end-->").join("")});
+        if(version===1) for(const key of keys) fills[key].click();
+      }
+      assert.equal(pair.element.parentNode,document.body);
+      assert.equal(pair.element.firstElementChild.textContent,"v2");
+      assert.deepEqual(calls,{like:1,copy:1});
+      for(const key of ["like","copy"]){
+        assert(pair.element.contains(fills[key]));
+        assert.equal(fills[key].textContent,key+":1:v2");
+        fills[key].click();
+        assert.equal(fills[key].textContent,key+":2:v2");
+      }
+      assert.equal(pair.element.tagName,hosted?"ARTICLE":"SOLID-FRAME");
+      pair.frame.dispose();pair.element.remove();
+    }
+    dom.window.close();
+  `
+    ],
+    { cwd: resolve(import.meta.dirname, ".."), encoding: "utf8", timeout: 10000 }
+  );
+  assert.equal(child.status, 0, child.stdout + child.stderr);
+});
 test("C4: the low-level public frame API can reuse an authored element", () => {
   const child = spawnSync(
     process.execPath,

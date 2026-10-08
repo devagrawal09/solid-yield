@@ -334,7 +334,8 @@ if (!mode) {
           resolve(import.meta.dirname, "../../../examples/harness/src/index.ts")
         );
         snapshots = [];
-        let likeNode, firstLike;
+        let likeNode, firstLike, routeHost;
+        const guideHost = document.querySelector(".reading-guide");
         for (const [name, run] of script.steps) {
           currentStep = name;
           await run();
@@ -370,7 +371,22 @@ if (!mode) {
               await new Promise(r => setTimeout(r, 1));
             assert(document.querySelector(settledSelector), "region response settles: " + name);
           }
-          if (name === "like saved") likeNode = document.querySelector("main .like");
+          if (name === "like saved") {
+            likeNode = document.querySelector("main .like");
+            routeHost = document.querySelector("main");
+          }
+          if (regions && routeHost)
+            assert.equal(
+              document.querySelector("main"),
+              routeHost,
+              "R refetch keeps its authored host"
+            );
+          if (regions)
+            assert.equal(
+              document.querySelector(".reading-guide"),
+              guideHost,
+              "guide keeps its authored host"
+            );
           if (name === "article loads") {
             firstLikeRetained = firstLike === document.querySelector("main .like");
             assert(firstLikeRetained, "LikeButton survives the initial fallback-to-frame handoff");
@@ -401,11 +417,11 @@ if (!mode) {
           if (regions && name === "navigate to /docs/start" && process.env.C4_OBSERVE_FIRST_FRAME) {
             const deadline = Date.now() + 3000;
             while (
-              !document.querySelector("solid-frame main .like button") &&
+              !document.querySelector("main template[id^=pl-], main #start-plan-the-page") &&
               Date.now() < deadline
             )
               await new Promise(r => setTimeout(r, 1));
-            assert(document.querySelector("solid-frame main .like button"));
+            assert(document.querySelector("main .like button"));
             firstFrame = normalize(document.getElementById("root").innerHTML);
           }
         }

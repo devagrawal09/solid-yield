@@ -1,0 +1,38 @@
+{
+  "date": "2026-10-08",
+  "browser": "Chrome, browser extension session",
+  "input": "C4 before snapshots, checkpoint 5, library and compiled-r; authored app.css; separate equal-width containers in one document",
+  "viewportCssPixels": [1520, 892],
+  "selectors": {
+    ".layout > div > main": { "library": 1, "compiled": 0 },
+    ".site > .reading-guide": { "library": 1, "compiled": 0 },
+    ".reading-guide:nth-child(6)": { "library": 1, "compiled": 0 },
+    ".reading-guide:first-child": { "library": 0, "compiled": 1 }
+  },
+  "frameElements": [
+    { "display": "contents", "clientRects": 0, "width": 0, "height": 0 },
+    { "display": "contents", "clientRects": 0, "width": 0, "height": 0 }
+  ],
+  "boundsRelativeToContainer": {
+    "library": {
+      ".site": [196.0014190673828, 0, 1127.9970703125, 7743.50830078125],
+      "main": [451.9957275390625, 359.3110809326172, 848.0042114257812, 3310.01416015625],
+      "main article": [451.9957275390625, 359.3110809326172, 848.0042114257812, 2820.17041015625],
+      ".reading-guide": [219.99998474121097, 4481.498275756836, 1080, 3113.238525390625],
+      "footer": [219.99998474121097, 7610.731185913086, 1080, 92.78408813476562]
+    },
+    "compiled": {
+      ".site": [196.0014190673828, 0, 1127.9970703125, 7743.50830078125],
+      "main": [451.9957275390625, 359.31103515625, 848.0042114257812, 3310.01416015625],
+      "main article": [451.9957275390625, 359.31103515625, 848.0042114257812, 2820.17041015625],
+      ".reading-guide": [219.99998474121097, 4481.49853515625, 1080, 3113.238525390625],
+      "footer": [219.99998474121097, 7610.73193359375, 1080, 92.78408813476562]
+    }
+  },
+  "lowLevelCreateFrameProbe": {
+    "api": "createFrame(main, {host: createFrameHost(), id: 'probe', adopt: true}); host.apply(htmlChunk)",
+    "html": "<main><p>new</p></main>",
+    "sameMain": true,
+    "wrappers": 0
+  }
+}

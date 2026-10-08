@@ -1,6 +1,6 @@
 import { gzipSync } from "node:zlib";
 import { fork } from "node:child_process";
-export async function rpcTransport() {
+export async function rpcTransport({ beforeBody } = {}) {
   const child = fork(new URL("./rpc-worker.mjs", import.meta.url), [], {
     stdio: ["ignore", "ignore", "pipe", "ipc"]
   });
@@ -15,7 +15,7 @@ export async function rpcTransport() {
     );
     child.once("exit", code => reject(new Error(`RPC worker exited ${code}: ${errors}`)));
   });
-  child.on("message", message => {
+  child.on("message", async message => {
     const entry = pending.get(message.id);
     if (!entry) return;
     if (message.error) {
@@ -24,10 +24,19 @@ export async function rpcTransport() {
       pending.delete(message.id);
       return;
     }
-    if (message.status)
+    if (message.status) {
+      if (beforeBody)
+        entry.bodyGate = new Promise(resolve => {
+          setTimeout(() => {
+            beforeBody();
+            resolve();
+          }, 30);
+        });
       entry.resolve(
         new Response(entry.stream, { status: message.status, headers: message.headers })
       );
+    }
+    if (entry.bodyGate) await entry.bodyGate;
     if (message.chunk) {
       const bytes = Buffer.from(message.chunk, "base64");
       entry.parts.push(bytes);

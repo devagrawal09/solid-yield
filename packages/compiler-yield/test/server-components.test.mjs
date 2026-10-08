@@ -43,7 +43,7 @@ function run(mode, url, probe = {}) {
 }
 test("C3/C4: 40 hydrated interactions and keyed slots; record exact DOM differences", () => {
   const library = run("library"),
-    compiled = run("compiled-r");
+    compiled = run("compiled-r", undefined, { C4_HOLD_FRAME_BODY: "1" });
   const original = process.env.C4_SNAPSHOTS ? run("original") : undefined;
   if (original)
     assert.deepEqual(original.snapshots, library.snapshots, "plain Solid router control");
@@ -52,6 +52,19 @@ test("C3/C4: 40 hydrated interactions and keyed slots; record exact DOM differen
   assert.equal(compiled.roots, 1);
   assert.equal(compiled.snapshots.length, 40);
   assert.equal(compiled.payloads.length, 7, "one region RPC per navigation; no hydration refetch");
+  assert.deepEqual(
+    compiled.headerLocations,
+    [
+      "/docs/start",
+      "/docs/start",
+      "/docs/missing",
+      "/docs/pipeline",
+      process.env.DOCS_LEVEL === "S" ? "/docs/routing" : "/docs/post-latency",
+      (process.env.DOCS_LEVEL ?? "L") === "L" ? "/docs/api" : "/docs/testing",
+      "/docs/pipeline"
+    ],
+    "fresh refetches wait for root HTML; initial Loading and a retained frame may settle immediately"
+  );
   assert.equal(
     compiled.firstNavigation,
     compiled.snapshots[4],

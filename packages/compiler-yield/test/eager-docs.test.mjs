@@ -265,7 +265,13 @@ if (!mode) {
         })
       };
       window.scrollTo = () => {};
-      if (regions) rpc = await rpcTransport();
+      const headerLocations = [];
+      if (regions)
+        rpc = await rpcTransport(
+          process.env.C4_HOLD_FRAME_BODY
+            ? { beforeBody: () => headerLocations.push(window.location.pathname) }
+            : undefined
+        );
       if (process.env.C2_COVERAGE)
         endCoverage = beginCoverage({
           file: process.env.C2_COVERAGE,
@@ -444,6 +450,7 @@ if (!mode) {
             snapshots,
             ...(firstNavigation ? { firstNavigation, firstLikeRetained } : {}),
             ...(firstFrame ? { firstFrame } : {}),
+            ...(process.env.C4_HOLD_FRAME_BODY ? { headerLocations } : {}),
             ...(process.env.C4_CAPTURE_CLAIMS ? { linkClaims } : {}),
             roots: plan?.roots.length ?? 1,
             ...(rpc ? { payloads: rpc.payloads, jsonComparison: rpc.jsonComparison } : {})

@@ -4,7 +4,8 @@ import {
   getOwner,
   onCleanup,
   runWithOwner,
-  createOwner
+  createOwner,
+  createSignal
 } from "solid-js";
 import { sharedConfig } from "solid-js/internal";
 import { insert } from "@solidjs/web";
@@ -49,6 +50,12 @@ export function installHostedRegions() {
     const adopted = elements.delete(id);
     if (!adopted && props.regionRoot === "section") el.className = "reading-guide";
     const address = binding ? binding() : id;
+    // Match the public server-component binding: resolving the component from
+    // response headers is not enough to settle a navigation. Wait until its
+    // root HTML has applied, including when a retained host is rebound.
+    let release, setGate;
+    const arm = () => new Promise(resolve => (release = resolve));
+    const initialGate = adopted ? undefined : arm();
     if (adopted) {
       const prefix = `sc:slot:${id}:`;
       for (const [key, args] of Object.entries(globalThis._$HY?.r ?? {}))
@@ -84,18 +91,27 @@ export function installHostedRegions() {
       host,
       adopt: adopted,
       slots,
-      ownerScope: fn => runWithOwner(owner, fn)
+      ownerScope: fn => runWithOwner(owner, fn),
+      onApply() {
+        release?.();
+        release = undefined;
+        setGate?.(undefined);
+      }
     });
+    const [gatePromise, writeGate] = createSignal(release ? initialGate : undefined);
+    setGate = writeGate;
     // The key is needed only at attach. It must not become a permanent
     // authored-DOM difference, and frame routing does not read it again.
     el.removeAttribute("data-fid");
     if (binding)
-      createRenderEffect(binding, address => {
+      createRenderEffect(binding, (address, previous) => {
+        if (previous !== undefined && address !== previous) writeGate(arm());
         frame.rebind(address);
         el.removeAttribute("data-fid");
       });
     onCleanup(() => frame.dispose());
-    return el;
+    const gate = createMemo(() => gatePromise());
+    return createMemo(() => (gate(), el));
   };
   const handler = createServerComponentHandler({
     host,

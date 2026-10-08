@@ -465,7 +465,7 @@ The earlier import-mapping table is historical; an import rename is not proof.
 
 A generator passed directly as the first argument to a core API is core and is lowered. In Solid 2 rc.13 these APIs are `action` (sync/async generators), and the async-iterable producers of `createSignal`, `createMemo`, `createOptimistic`, `createEffect`, `createRenderEffect`, `createStore`, `createProjection`, and `createOptimisticStore`. Other author generators, including Effect programs and custom iterators, are opaque and keep their own protocol. The compiler inserts no delegated operations into its body and rewrites none of its reads. Calls to it are foreign values (provenance C, failures unknown). A reactive read inside it reports `READ_IN_OPAQUE_GENERATOR` at the read: read the signal outside and pass the value in, or make the read a memo.
 
-Callback hosts are lexical. A callback at any depth inside an event, either effect phase, a memo, or a hole belongs to that host, including store updaters, array callbacks, Promise continuations, and nested arrows. Reads keep that host and its admission rules. A timer callback declared in a memo therefore cannot write; its generated host check reports the write rather than treating it as a fresh event. `SUGAR_CALLBACK` is reserved for a callback passed to an opaque API from setup whose host cannot be determined.
+Callback hosts are lexical. A callback at any depth inside an event, either effect phase, a memo, or a hole belongs to that host, including store updaters, array callbacks, Promise continuations, and nested arrows. Reads keep that host and its admission rules. A timer callback declared in a memo therefore cannot write; its generated host check reports the write rather than treating it as a fresh event. `SUGAR_CALLBACK` is reserved for a callback passed to an opaque API from setup whose host cannot be determined. An event keeps its body and async continuations as its host: reactive arguments, including arguments in a chained Promise receiver, are evaluated in that event and in source order before a plain producer uses their captured values.
 
 Module-level reactive state is outside the core. A `createSignal`, `createStore` or `createMemo` declaration at module level has no component owner, so the compiler keeps it Solid and treats it as foreign (provenance C, failures unknown). `MODULE_STATE` points at the declaration: create the state inside a component and provide it via context, or keep it foreign and handle failures at its uses. The compiler does not move state or change its lifetime.
 
@@ -487,9 +487,9 @@ Inside the line:
   registered at the binding edge. A ref assignment retains assignment order.
 - A JSX spread of a reactive object is a hole. Evaluate it at the spread's
   position; preserve property order, getter reads and event/ref binding contracts.
-- Timer/listener callbacks whose returned value is ignored are events, including
-  reads. A callback supplying a rendered/memo value is a hole or part of that
-  memo. Naming a callback does not change its host. Do not hand an iterator to
+- Timer/listener callbacks created from setup whose returned value is ignored
+  are events. Callbacks lexically inside an event, effect, memo or hole keep
+  that host, including timer/listener callbacks. Naming a callback does not change its host. Do not hand an iterator to
   the scheduler. The seven reported Sierpinski callback sites are implementation
   gaps, not grounds to exclude timers from the core.
 - An async helper called from an event belongs to that event; one called from a
@@ -1080,3 +1080,23 @@ tree subsequently committed as `1080e0c`; its recorded HEAD is the preceding
 53 steps. Directive-sugar todos remains green. No native original passed, no
 native app step was added, and the baseline was not regenerated. All commits
 remain local on `proto/sugar`.
+
+
+### Native effect after the three rule fixes (2026-10-08)
+
+Core API generators remain core; other author generators stay opaque. Callback
+hosts are lexical, and Promise-chain arguments stay in the event that reads them.
+The checkout index reads (lines 141 and 152) and chained order arguments (line
+185) now lower without an author edit. Native Todos again passes unchanged.
+
+The unchanged Effect project then reaches **F-S34**: `createRuntime`'s setup
+context read is captured inside `() => ManagedRuntime.make(layer, parent()?.memoMap)`.
+The compiler refuses `parent()` at a generated span reported as the helper name
+(`solid-effect.ts:50:17`), while the author reads `parent?.memoMap` at line 52.
+This is a new compiler gap, not a correct author disagreement. The requested stop
+rule applies: no extra lowering change or author workaround is attempted.
+
+[The side-by-side stop report](native-effect-blocker.md) and
+[reproducible evidence](native-effect-blocker.json) record both failed acceptance
+halves and the empty author patch. The module-state note remains correctly at
+`log.ts:20:7`. Native Effect is not added to the gate; the baseline is unchanged.

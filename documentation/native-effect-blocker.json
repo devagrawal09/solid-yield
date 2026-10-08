@@ -1,49 +1,82 @@
 {
-  "diagnostic": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (examples/originals/effect/src/api.ts:177:68)",
+  "finding": "F-S34: a setup helper's context read is captured by a plain failure producer",
+  "halfA": "FAIL: MODULE_STATE is correct; the new compiler refusal is not an author disagreement and reports a generated span at the helper name",
+  "halfB": "FAIL: not run; no checked native program exists, stop rule applied before an author patch",
+  "scopeDiagnostics": [
+    {
+      "code": "MODULE_STATE",
+      "message": "reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses",
+      "file": "examples/originals/effect/src/log.ts",
+      "line": 20,
+      "column": 7
+    }
+  ],
+  "original": {
+    "diagnostic": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (examples/originals/effect/src/solid-effect.ts:50:17)",
+    "file": "examples/originals/effect/src/solid-effect.ts",
+    "reportedLine": 50,
+    "reportedColumn": 17,
+    "sourceSpan": {
+      "sourceStart": 3031,
+      "sourceEnd": 3044,
+      "generated": true,
+      "start": 698,
+      "end": 704
+    },
+    "sourceSpanText": "createRuntime",
+    "authorReadLine": 52,
+    "authorSource": "export function createRuntime<R>(layer: Layer.Layer<R>): ManagedRuntime.ManagedRuntime<R, never> {\n  const parent = useContext(RuntimeContext);\n  const runtime = ManagedRuntime.make(layer, parent?.memoMap);\n  onCleanup(() => void runtime.dispose());\n  return runtime;\n}",
+    "intermediateRead": "parent()",
+    "intermediateHost": "() => ManagedRuntime.make(layer, parent()?.memoMap)"
+  },
+  "patch": "",
   "probes": [
     {
-      "name": "module-log-store",
-      "original": "// In-page fiber event log — the demo's \"network tab\". Writes happen from\n// inside Effect programs (Effect.sync / finalizers), which run on Effect's\n// scheduler outside any Solid transaction, so entries commit immediately\n// even while an action's transition is in flight.\n\nimport { createStore } from \"solid-js\";\n\nexport type LogKind = \"start\" | \"success\" | \"retry\" | \"interrupt\" | \"compensate\" | \"error\";\n\nexport interface LogEntry {\n  id: number;\n  time: string;\n  kind: LogKind;\n  message: string;\n}\n\nlet nextId = 0;\nconst start = performance.now();\n\nconst [entries, setEntries] = createStore<LogEntry[]>([]);\n\nexport { entries as logEntries };\n\nexport function log(kind: LogKind, message: string) {\n  const time = ((performance.now() - start) / 1000).toFixed(2) + \"s\";\n  setEntries(list => {\n    list.push({ id: nextId++, time, kind, message });\n    if (list.length > 100) list.splice(0, list.length - 100);\n  });\n}\n\nexport function clearLog() {\n  setEntries(list => {\n    list.length = 0;\n  });\n}\n",
-      "generated": "import { nativeFailure as __nativeFailure } from \"solid-yield/internal\";\nimport { attempt as __nativeAttempt } from \"solid-yield\";\nimport { $store as createStore } from \"solid-yield\";\nexport type LogKind = \"start\" | \"success\" | \"retry\" | \"interrupt\" | \"compensate\" | \"error\";\nexport interface LogEntry {\n  id: number;\n  time: string;\n  kind: LogKind;\n  message: string;\n}\nlet nextId = 0;\nconst start = performance.now();\nconst [entries, setEntries] = createStore<LogEntry[]>([]);\nexport { entries as logEntries };\nexport function* log(kind: LogKind, message: string) {\n  const time = (yield* __nativeAttempt(() => ((performance.now() - start) / 1000).toFixed(2), (error: unknown) => __nativeFailure([\"unknown\"], error))) + \"s\";\n  setEntries(list => {\n    list.push({\n      id: nextId++,\n      time,\n      kind,\n      message\n    });\n    if (list.length > 100) list.splice(0, list.length - 100);\n  });\n}\nexport function clearLog() {\n  setEntries(list => {\n    list.length = 0;\n  });\n}",
-      "diagnostics": [
-        {
-          "code": "TS2349",
-          "line": 17,
-          "column": 3,
-          "message": "This expression is not callable.\n  Type 'Create<\"store\", never>' has no call signatures."
-        },
-        {
-          "code": "TS7006",
-          "line": 17,
-          "column": 14,
-          "message": "Parameter 'list' implicitly has an 'any' type."
-        },
-        {
-          "code": "TS2349",
-          "line": 28,
-          "column": 3,
-          "message": "This expression is not callable.\n  Type 'Create<\"store\", never>' has no call signatures."
-        },
-        {
-          "code": "TS7006",
-          "line": 28,
-          "column": 14,
-          "message": "Parameter 'list' implicitly has an 'any' type."
-        }
-      ]
+      "name": "foreign-effect-generator",
+      "original": "import {Effect} from \"effect\";\nexport const program = Effect.gen(function* () { yield* Effect.sleep(1); return 1; });\n",
+      "generated": "import { Effect } from \"effect\";\nexport const program = Effect.gen(function* () {\n  yield* Effect.sleep(1);\n  return 1;\n});",
+      "diagnostics": [],
+      "typecheck": "PASS before and after"
     },
     {
-      "name": "foreign-effect-generator",
-      "original": "import { Effect } from \"effect\";\nexport const program = Effect.gen(function* () { yield* Effect.sleep(1); return 1; });\n",
-      "generated": "import { nativeFailure as __nativeFailure } from \"solid-yield/internal\";\nimport { attempt as __nativeAttempt } from \"solid-yield\";\nimport { Effect } from \"effect\";\nexport const program = Effect.gen(function* () {\n  yield* __nativeAttempt(() => Effect.sleep(1), (error: unknown) => __nativeFailure([\"unknown\"], error));\n  return 1;\n});",
+      "name": "module-log-store",
+      "original": "// In-page fiber event log \u2014 the demo's \"network tab\". Writes happen from\n// inside Effect programs (Effect.sync / finalizers), which run on Effect's\n// scheduler outside any Solid transaction, so entries commit immediately\n// even while an action's transition is in flight.\n\nimport { createStore } from \"solid-js\";\n\nexport type LogKind = \"start\" | \"success\" | \"retry\" | \"interrupt\" | \"compensate\" | \"error\";\n\nexport interface LogEntry {\n  id: number;\n  time: string;\n  kind: LogKind;\n  message: string;\n}\n\nlet nextId = 0;\nconst start = performance.now();\n\nconst [entries, setEntries] = createStore<LogEntry[]>([]);\n\nexport { entries as logEntries };\n\nexport function log(kind: LogKind, message: string) {\n  const time = ((performance.now() - start) / 1000).toFixed(2) + \"s\";\n  setEntries(list => {\n    list.push({ id: nextId++, time, kind, message });\n    if (list.length > 100) list.splice(0, list.length - 100);\n  });\n}\n\nexport function clearLog() {\n  setEntries(list => {\n    list.length = 0;\n  });\n}\n",
+      "generated": "import { createStore } from \"solid-js\";\nexport type LogKind = \"start\" | \"success\" | \"retry\" | \"interrupt\" | \"compensate\" | \"error\";\nexport interface LogEntry {\n  id: number;\n  time: string;\n  kind: LogKind;\n  message: string;\n}\nlet nextId = 0;\nconst start = performance.now();\nconst [entries, setEntries] = createStore<LogEntry[]>([]);\nexport { entries as logEntries };\nexport function log(kind: LogKind, message: string) {\n  const time = ((performance.now() - start) / 1000).toFixed(2) + \"s\";\n  setEntries(list => {\n    list.push({\n      id: nextId++,\n      time,\n      kind,\n      message\n    });\n    if (list.length > 100) list.splice(0, list.length - 100);\n  });\n}\nexport function clearLog() {\n  setEntries(list => {\n    list.length = 0;\n  });\n}",
       "diagnostics": [
         {
-          "code": "TS2345",
-          "line": 4,
-          "column": 35,
-          "message": "Argument of type '() => Generator<Raise<NativeFailure<\"unknown\">>, number, any>' is not assignable to parameter of type '(resume: Adapter) => Generator<YieldWrap<Effect<any, any, any>>, number, never>'.\n  Call signature return types 'Generator<Raise<NativeFailure<\"unknown\">>, number, any>' and 'Generator<YieldWrap<Effect<any, any, any>>, number, never>' are incompatible.\n    The types returned by 'next(...)' are incompatible between these types.\n      Type 'IteratorResult<Raise<NativeFailure<\"unknown\">>, number>' is not assignable to type 'IteratorResult<YieldWrap<Effect<any, any, any>>, number>'.\n        Type 'IteratorYieldResult<Raise<NativeFailure<\"unknown\">>>' is not assignable to type 'IteratorResult<YieldWrap<Effect<any, any, any>>, number>'.\n          Type 'IteratorYieldResult<Raise<NativeFailure<\"unknown\">>>' is not assignable to type 'IteratorYieldResult<YieldWrap<Effect<any, any, any>>>'.\n            Type 'Raise<NativeFailure<\"unknown\">>' is missing the following properties from type 'YieldWrap<Effect<any, any, any>>': #private, [YieldWrapTypeId]"
+          "code": "MODULE_STATE",
+          "message": "reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses",
+          "file": "examples/originals/effect/src/module-log-store.ts",
+          "line": 20,
+          "column": 7
         }
-      ]
+      ],
+      "typecheck": "PASS before and after"
     }
-  ]
+  ],
+  "originalHashes": {
+    "examples/originals/effect/src/api.ts": "a1263d07b259ae20de2cbd3443f1e0ba3a68fc990245b106ff76c5eaa3619c28",
+    "examples/originals/effect/src/app.tsx": "ce96c599b52365e2ef77cdf34fc7f3be80525b7c165b4553630a619d1a31db1f",
+    "examples/originals/effect/src/checkout.tsx": "38d17e1d97ddde901e2f8c5b303b49033ce4ebc00f2aff400934b471831c3628",
+    "examples/originals/effect/src/log.ts": "3b4ffd673b82653560f90736eb210f4898098c207bbaa828c734b0b2f9a1cf1b",
+    "examples/originals/effect/src/main.tsx": "b59ad4b8cbaaf3ea6da58edf83f55fd6ad4a3f23a3255623b635af80f875d7a5",
+    "examples/originals/effect/src/solid-effect.ts": "1272e48befd4289ce89a02265311231b2f9242b6abd11fb4ee110fb9fecf3356",
+    "examples/originals/effect/src/typeahead.tsx": "be3af467d2b664f9a2825e1597c586268996611e97f228fbf89d2fcff8f1343f"
+  },
+  "validation": {
+    "build": "PASS",
+    "gate": {
+      "pass": 69,
+      "fail": 0,
+      "skip": 0,
+      "total": 69,
+      "wallMs": 271228,
+      "line": "69 pass / 0 fail / 0 skip in 271s",
+      "green": true
+    },
+    "acceptedFixtures": 55,
+    "nativeTodos": "transform, typecheck, lint, client/hydrated parity and SSR PASS",
+    "baselineRegenerated": false,
+    "scope": "working tree subsequently committed; all commits local on proto/sugar"
+  }
 }

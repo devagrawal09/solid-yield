@@ -1,94 +1,89 @@
-# Native effect: structural blocker (2026-10-08)
+# Native Effect: F-S34 stop after three compiler fixes (2026-10-08)
 
-Starting code: `10e1743`, branch `proto/sugar`. The unchanged original does not
-reach the two-half acceptance. Both halves **FAIL**: the first cannot establish
-a correct model diagnostic snapshot; the second has no checked native program
-to run. Hydrated parity and SSR were not run. This is a structural lowering
-failure, not an accepted author-error diagnostic.
+The three requested fixes are implemented. Effect still reaches a new compiler
+blocker, **F-S34**, so the requested stop rule applies. Both acceptance halves
+fail; this is not native Effect acceptance. No author patch is applied.
 
-Reproduce with `node scripts/native-effect-blocker.mjs`. The script selects all
-seven original TypeScript files, records the first transform refusal, and checks
-two isolated probes. Each probe passes ordinary TypeScript before lowering and
-fails after lowering. [The evidence](native-effect-blocker.json) contains the
-complete original/generated probe text and verbatim TypeScript diagnostics.
-Neither probe edits the original. Generated probe files are ignored scratch files.
+Reproduce with `node scripts/native-effect-blocker.mjs`. It verifies the current
+refusal, the module-state location, isolated Effect-generator and log-store
+checks before and after lowering, and unchanged hashes of all seven original
+TypeScript files. [Full evidence](native-effect-blocker.json) records the exact
+read, host, positions, probes and original hashes.
 
-## F-S30: foreign generators use a different protocol
-
-| Plain Effect source (typecheck PASS) | Native output (TS2345) |
+| Fix | Result |
 | --- | --- |
-| `Effect.gen(function* () { yield* Effect.sleep(1); return 1; })` | `Effect.gen(function* () { yield* __nativeAttempt(() => Effect.sleep(1), error => __nativeFailure(["unknown"], error)); return 1; })` |
+| Generator ownership / F-S30 | Direct generator callbacks to core APIs lower; other author generators keep their protocol. Native Todos passes without an exception list. |
+| Module state / F-S31 | `log.ts:20:7` reports `MODULE_STATE`; the store retains its Solid import and lifetime. |
+| Lexical callback host | The index reads inside checkout's store updaters at lines 141 and 152 no longer refuse. Updater, array, Promise, nested-arrow, memo and both effect-phase fixtures pass. |
+| Event chain arguments / F-S33 | Checkout's cart/decline arguments at line 185 stay inside the event. Sync and async chained-call fixtures pass generated checks. |
 
-`lowerNativeEffects` seeds **every authored generator** as a routine. `Effect.gen`
-expects yielded `YieldWrap<Effect<...>>` values; the inserted attempt yields
-solid-yield `Raise<NativeFailure<"unknown">>` operations. Effect's driver cannot
-run those operations. This happens even in a generator with no Solid API,
-reactive read or write. It is a compiler bug, not an unhandled author failure.
-Opaque generators must retain their protocol, with checked adapters at actual
-crossings. Treating every generator as an action or catching its failure does
-not supply that adapter.
+The core generator APIs in installed Solid 2 rc.13 are `action`, `createSignal`,
+`createMemo`, `createOptimistic`, `createEffect`, `createRenderEffect`,
+`createStore`, `createProjection`, and `createOptimisticStore`. `action` supports
+sync/async generators; the others accept async-iterable producers in argument 0.
 
-The twin keeps `api.ts`'s Effect programs plain. Its `solid-effect.ts` explicitly
-adapts the saga driver: `attempt` surrounds `it.next()` / `it.throw()` and the
-awaited fiber exit, while Effect steps remain Effect steps. Copying that whole
-driver into an author patch would change the integration, rather than handle a
-diagnostic in plain Solid.
+## F-S34: a setup helper's context read loses its host
 
-## F-S31: the module log has no generated owner/event bridge
+| Author source, `solid-effect.ts:51–52` | Generated read inside a plain producer |
+| --- | --- |
+| `const parent = useContext(RuntimeContext);` then `ManagedRuntime.make(layer, parent?.memoMap)` | `() => ManagedRuntime.make(layer, parent()?.memoMap)` |
 
-| Unchanged original `src/log.ts:22,28` | Isolated native output `:13,17` | Twin oracle |
-| --- | --- | --- |
-| `const [entries, setEntries] = createStore<LogEntry[]>([]);` at module scope | Import renamed to `$store`, but the same destructuring remains at module scope | `createLog()` delegates `$store` in App's setup |
-| `setEntries(list => { ... })` from `Effect.sync` and finalizers | `setEntries` has inferred type `Create<"store", never>` and is not callable (TS2349) | An `$event` writer is registered as `sink`; `log()` calls that event |
-
-The original store lives for the module. The twin's store lives for App's owner
-and removes its writer on cleanup. That is an oracle lowering pattern, **not**
-permission to move module state into App in an author patch. Native mode needs
-to preserve the module's sharing/lifetime and correctly bridge Effect's scheduler
-to the writer, or retain the smallest checked plain-Solid boundary. Renaming the
-import cannot preserve either contract. No new lifetime or boundary rule is
-introduced here.
-
-## F-S32: the first refusal points into intermediate code
-
-The unchanged transform throws this verbatim message (absolute workspace prefix
-removed):
-
-```text
-[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (examples/originals/effect/src/api.ts:177:68)
-```
-
-Original `api.ts:177` logs an inventory interruption. The refused intermediate
-line instead contains the search-success `Effect.tap` callback from original
-`api.ts:113–114`:
+Author, verbatim (`solid-effect.ts:50–55`):
 
 ```ts
-Effect.tap(results =>
-  Effect.sync(() => log("success", `search "${query}" → ${results.length} results`))
-)
+export function createRuntime<R>(layer: Layer.Layer<R>): ManagedRuntime.ManagedRuntime<R, never> {
+  const parent = useContext(RuntimeContext);
+  const runtime = ManagedRuntime.make(layer, parent?.memoMap);
+  onCleanup(() => void runtime.dispose());
+  return runtime;
+}
 ```
 
-This callback supplies an Effect program to Effect's scheduler, not a rendered
-value. The transform has introduced attempts/routine calls across the foreign
-protocol without a host adapter. It cannot be recorded as a correct diagnostic
-at original line 177. Adding an `Errored` at that line would neither repair the
-foreign generator protocol nor execute the module store correctly.
+Refused generated host, verbatim:
 
-## Acceptance and repository state
+```ts
+() => ManagedRuntime.make(layer, parent()?.memoMap)
+```
 
-- Half A (unchanged diagnostic correctness): **FAIL**, structural refusal and
-  incorrect original location; no acceptance snapshot.
-- Half B (minimal author fix + hydrated parity + SSR): **FAIL**, no justified
-  author edit and no checked output. No patch exists.
-- Rule change: **none**. No callback exception, failure erasure, new fallback,
-  moved store lifetime, or relaxation of the bounded native contract.
-- All `examples/originals/effect` files remain byte-identical to `HEAD`.
-- No native effect steps were added. The gate baseline was not regenerated.
-- Verification before the local evidence commit: `pnpm build` passed;
-  `node scripts/yield-gate.mjs --baseline documentation/yield-gate-baseline.json`
-  finished **69 pass / 0 fail / 0 skip in 170s**, **GREEN**, with no regressions.
-  This checks the existing gate; it does not establish native effect acceptance.
+The emitted accessor read is `parent()`. Its author has a setup helper under an
+owner. Lowering puts the read inside a plain failure producer and then refuses
+it as an unknown callback. The position record is marked generated and points
+at the helper name `createRuntime` at line 50, column 17, rather than the context
+value use at line 52. This is a compiler host/mapping gap, not a valid author
+restriction. No attempt is made to fix it or work around it in the source.
 
-The requested structural stop applies. A full native-effect acceptance harness
-must follow repairs to the generator, lifetime and host boundaries; this evidence
-script is deliberately outside the gate and does not count as native acceptance.
+## Diagnostics, verbatim
+
+```text
+[MODULE_STATE] reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses (examples/originals/effect/src/log.ts:20:7)
+[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (examples/originals/effect/src/solid-effect.ts:50:17)
+```
+
+The first diagnostic has the correct source location. The second is the
+observed F-S34 compiler failure, with the incorrect source location described
+above. This pair is evidence, not an accepted diagnostic snapshot.
+
+## Patch, verbatim
+
+The patch is the empty string (`""`). No author lines are changed. The old
+checkout index-hoisting candidate is removed because the compiler now handles
+those callbacks. A module-state restructuring is not attempted after the new
+blocker: it would not produce a checked native program.
+
+## Acceptance and validation
+
+- Half A, unchanged source → exact correct diagnostics: **FAIL**. The module
+  note is correct, but F-S34 is a compiler failure with a generated position.
+- Half B, minimal patch → hydrated parity, SSR, matching failure behavior:
+  **FAIL / not run**. No checked native Effect program exists; stop rule applies.
+- Isolated foreign Effect generator and module log store: **PASS** before and
+  after lowering. All seven original source files remain byte-identical.
+- Native Effect is not added to the gate, and the baseline is not regenerated.
+  No existing check or threshold is removed or relaxed.
+- Final validation: `pnpm build` **PASS**; the full gate **GREEN: 69 pass /
+  0 fail / 0 skip in 271s**. All five native Todos steps pass, including client
+  and hydrated parity plus SSR. The refreshed audit accepts 55 fixtures.
+- Earlier local commits `8337506` (generator/module rules) and `7d3f20f`
+  (lexical callbacks) each followed a green 69-step gate: 164s and 506s.
+  The final chained-call fix and this F-S34 report also follow the green gate.
+  All commits stay local on `proto/sugar`; no push or main change occurred.

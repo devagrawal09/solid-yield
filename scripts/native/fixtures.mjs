@@ -119,6 +119,11 @@ export const fixtures = [
     expected: "accepted",
     source: `import {createSignal,createEffect,createMemo,createStore} from 'solid-js';declare function consume<T>(callback:()=>T):T;export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});${body}}`
   })),
+  ...[false, true].map(asyncEvent => ({
+    id: asyncEvent ? "async-event-chain-arguments" : "event-chain-arguments",
+    expected: "accepted",
+    source: `import {createSignal,createStore} from 'solid-js';declare function place(items:{n:number}[],decline:boolean):Promise<void>;export function App(){const [cart]=createStore([{n:1}]);const [decline]=createSignal(false);return <button onClick={${asyncEvent ? "async()=>{await Promise.resolve();return " : "()=>"}place(cart.map(item=>({...item})),decline()).catch(()=>{})${asyncEvent ? "}" : ""}}/>;}`
+  })),
   {
     id: "native-store",
     expected: "accepted",

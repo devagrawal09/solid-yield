@@ -265,6 +265,22 @@
       "diagnostics": []
     },
     {
+      "id": "event-chain-arguments",
+      "expected": "accepted",
+      "source": "import {createSignal,createStore} from 'solid-js';declare function place(items:{n:number}[],decline:boolean):Promise<void>;export function App(){const [cart]=createStore([{n:1}]);const [decline]=createSignal(false);return <button onClick={()=>place(cart.map(item=>({...item})),decline()).catch(()=>{})}/>;}",
+      "file": "packages/vite-plugin-yield/test/.native-generated/event-chain-arguments.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
+      "id": "async-event-chain-arguments",
+      "expected": "accepted",
+      "source": "import {createSignal,createStore} from 'solid-js';declare function place(items:{n:number}[],decline:boolean):Promise<void>;export function App(){const [cart]=createStore([{n:1}]);const [decline]=createSignal(false);return <button onClick={async()=>{await Promise.resolve();return place(cart.map(item=>({...item})),decline()).catch(()=>{})}}/>;}",
+      "file": "packages/vite-plugin-yield/test/.native-generated/async-event-chain-arguments.tsx",
+      "stage": "accepted",
+      "diagnostics": []
+    },
+    {
       "id": "native-store",
       "expected": "accepted",
       "source": "import {createStore} from 'solid-js';export function App(){const [state,set]=createStore({n:1});return <button onClick={()=>set(s=>{s.n++})}>{state.n}</button>}",
@@ -1312,7 +1328,7 @@
       "diagnostics": [
         {
           "code": "SUGAR_CALLBACK",
-          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/examples/originals/effect/src/checkout.tsx:185:19)"
+          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/examples/originals/effect/src/solid-effect.ts:50:17)"
         },
         {
           "code": "MODULE_STATE",

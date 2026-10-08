@@ -446,6 +446,114 @@ theorem execution_root {t xs} (ok : RootOK t) (run : Execution t xs) :
     fun q h => ok.2 q (execution_preservation run _ h),
     fun k h => execution_preservation run _ h⟩
 
+/- D-116: a separate, value-based failure model. The older Nat model above is
+   unchanged. These lemmas supply its failure-interface premises; they do not
+   formalize the native compiler, JavaScript instanceof, or wire transport. -/
+namespace Inference
+
+/-- Semantic classes have a preorder, and real membership respects it.
+    `inst` is a runtime contract, not TypeScript structural assignability. -/
+structure Classes (C V : Type) where
+  sub : C → C → Prop
+  refl : ∀ c, sub c c
+  trans : ∀ {a b c}, sub a b → sub b c → sub a c
+  inst : V → C → Prop
+  up : ∀ {v a b}, inst v a → sub a b → inst v b
+
+abbrev Failures (V : Type) := V → Prop
+def le {V} (a b : Failures V) := ∀ v, a v → b v
+def union {V} (a b : Failures V) : Failures V := fun v => a v ∨ b v
+def unknown {V} : Failures V := fun _ => True
+def empty {V} : Failures V := fun _ => False
+def residual {V} (a handled : Failures V) : Failures V := fun v => a v ∧ ¬ handled v
+def denotes {C V} (m : Classes C V) (ids : C → Prop) : Failures V :=
+  fun v => ∃ c, ids c ∧ m.inst v c
+
+theorem below_unknown {V} (a : Failures V) : le a unknown := fun _ _ => True.intro
+theorem union_unknown {V} (a : Failures V) : union a unknown = unknown := by
+  funext v; exact propext ⟨fun _ => True.intro, fun h => .inr h⟩
+theorem denotes_union {C V} (m : Classes C V) (a b : C → Prop) :
+    denotes m (fun c => a c ∨ b c) = union (denotes m a) (denotes m b) := by
+  funext v; apply propext
+  constructor
+  · rintro ⟨c, ha | hb, hi⟩
+    · exact .inl ⟨c, ha, hi⟩
+    · exact .inr ⟨c, hb, hi⟩
+  · rintro (⟨c, ha, hi⟩ | ⟨c, hb, hi⟩)
+    · exact ⟨c, .inl ha, hi⟩
+    · exact ⟨c, .inr hb, hi⟩
+
+theorem subclass_below {C V} (m : Classes C V) {a b} (h : m.sub a b) :
+    le (fun v => m.inst v a) (fun v => m.inst v b) := fun _ hv => m.up hv h
+
+theorem base_catch_subclass {C V} (m : Classes C V) {a b} (h : m.sub a b) :
+    residual (fun v => m.inst v a) (fun v => m.inst v b) = empty := by
+  funext v; apply propext
+  exact ⟨fun hv => hv.2 (m.up hv.1 h), fun hf => hf.elim⟩
+
+theorem catch_all_unknown {V} : residual (@unknown V) unknown = empty := by
+  funext v; apply propext
+  exact ⟨fun hv => hv.2 True.intro, fun hf => hf.elim⟩
+
+/-- A selective catch cannot erase a value outside its matching predicate. -/
+theorem unknown_keeps_unmatched {V} {handled : Failures V} {v}
+    (miss : ¬ handled v) : residual unknown handled v := ⟨True.intro, miss⟩
+
+/-- Safe removal uses a *lower bound* on handling. Inference uses an upper
+    bound on input failures. Confusing these directions is unsound. -/
+theorem catch_removal_sound {V} {actual inferred guaranteed runtime : Failures V}
+    (input : le actual inferred) (handles : le guaranteed runtime) :
+    le (residual actual runtime) (residual inferred guaranteed) := by
+  intro v h
+  exact ⟨input v h.1, fun hg => h.2 (handles v hg)⟩
+
+/-- Handler/finalizer failures escape the catch. `runtime` means the original
+    failure is consumed on every path, not merely intercepted by catch. -/
+theorem catch_output_sound {V}
+    {actual inferred guaranteed runtime produced handler : Failures V}
+    (input : le actual inferred) (handles : le guaranteed runtime)
+    (output : le produced handler) :
+    le (union (residual actual runtime) produced)
+      (union (residual inferred guaranteed) handler) := by
+  intro v h
+  exact h.elim (fun hv => .inl (catch_removal_sound input handles v hv))
+    (fun hv => .inr (output v hv))
+
+/-- Union-only call regions. Catch sites use catch_output_sound separately;
+    an unfiltered call edge must not be used to claim exact catch subtraction. -/
+inductive Reaches {F V : Type} (localFailure : F → V → Prop) (calls : F → F → Prop) :
+    F → V → Prop where
+  | here : localFailure f v → Reaches localFailure calls f v
+  | call : calls f g → Reaches localFailure calls g v → Reaches localFailure calls f v
+
+/-- Any closed upper-bound solution covers every finite call derivation,
+    including recursive calls. No termination of the source program is needed. -/
+theorem call_postfix_sound {F V} {localFailure : F → V → Prop} {calls : F → F → Prop}
+    {summary : F → V → Prop}
+    (locals : ∀ f v, localFailure f v → summary f v)
+    (closed : ∀ f g v, calls f g → summary g v → summary f v)
+    {f v} (run : Reaches localFailure calls f v) : summary f v := by
+  induction run with
+  | here h => exact locals _ _ h
+  | call edge _ ih => exact closed _ _ _ edge ih
+
+theorem server_sound {V} {actual inferred transport chunk : Failures V}
+    (body : le actual inferred) (wire : le transport chunk) :
+    le (union actual transport) (union inferred chunk) := by
+  intro v h
+  exact h.elim (fun hv => .inl (body v hv)) (fun hv => .inr (wire v hv))
+
+theorem empty_no_failure {V} {actual : Failures V} (sound : le actual empty) :
+    ∀ v, ¬ actual v := fun v hv => sound v hv
+
+#print axioms base_catch_subclass
+#print axioms catch_all_unknown
+#print axioms catch_output_sound
+#print axioms call_postfix_sound
+#print axioms server_sound
+#print axioms empty_no_failure
+end Inference
+
 -- Kernel trust audit. There are no project axioms, sorrys, or native_decide proofs.
 #print axioms preservation
 #print axioms owner_preservation

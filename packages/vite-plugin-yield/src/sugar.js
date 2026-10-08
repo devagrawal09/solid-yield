@@ -422,13 +422,74 @@ function pass(code, filename, program, native = false) {
       if (!nativeHost) {
         if (fn.isArrowFunctionExpression()) fn.arrowFunctionToExpression();
         fn.node.generator = true;
+        if (native) fn.node.returnType = null;
       }
     }
     path.replaceWith(t.yieldExpression(operand, true));
     path.skip();
     changed = true;
   }
+  // Select structural array operations on the store's value, never on its
+  // reactive row paths. Keep the entire method chain in one tracked read.
+  if (native)
+    p.traverse({
+      CallExpression(path) {
+        const callee = path.get("callee");
+        if (!callee.isMemberExpression()) return;
+        const object = callee.get("object"),
+          ct = type(object);
+        if (!sourceType(ct)) return;
+        const symbol = checker.getPropertiesOfType(ct).find(s => s.name.startsWith("__@SOURCE@"));
+        const value = symbol && checker.getTypeOfSymbolAtLocation(symbol, source);
+        if (!value || (!checker.isArrayType(value) && !checker.isTupleType(value))) return;
+        if (
+          !["filter", "map", "every", "some", "find", "findIndex", "slice"].includes(
+            key(callee.node.property)
+          )
+        )
+          return;
+        /** @type {Path} */ let chain = path;
+        while (
+          chain.parentPath?.isMemberExpression() &&
+          chain.parentPath.node.object === chain.node
+        ) {
+          chain = chain.parentPath;
+          if (chain.parentPath?.isCallExpression() && chain.parentPath.node.callee === chain.node)
+            chain = chain.parentPath;
+        }
+        const store = object.node,
+          state = path.scope.generateUidIdentifier("state");
+        object.replaceWith(state);
+        chain.replaceWith(
+          t.callExpression(t.identifier("__nativeReadStore"), [
+            store,
+            t.arrowFunctionExpression([state], chain.node)
+          ])
+        );
+        if (!p.scope.hasBinding("__nativeReadStore")) {
+          p.node.body.unshift(
+            t.importDeclaration(
+              [t.importSpecifier(t.identifier("__nativeReadStore"), t.identifier("readStore"))],
+              t.stringLiteral("solid-yield")
+            )
+          );
+          p.scope.crawl();
+        }
+        chain.skip();
+        changed = true;
+      }
+    });
   p.traverse({
+    ReturnStatement(path) {
+      if (!native) return;
+      const value = path.get("argument");
+      if (!value.isIdentifier() || !sourceType(type(value))) return;
+      const binding = value.scope.getBinding(value.node.name)?.path;
+      const init = binding?.isVariableDeclarator() ? binding.get("init") : null;
+      // Context destructuring forwards paths at declaration; returning that
+      // native store from a value getter reads it at the getter's call site.
+      if (init?.isMemberExpression()) delegate(value);
+    },
     CallExpression: {
       enter(path) {
         if (!native || lib(path.get("callee")) !== "attempt") return;
@@ -445,7 +506,6 @@ function pass(code, filename, program, native = false) {
         }
       },
       exit(path) {
-        if (path.parentPath.isYieldExpression()) return;
         if (
           native &&
           path.get("callee").isCallExpression() &&
@@ -454,6 +514,7 @@ function pass(code, filename, program, native = false) {
           return;
         const callee = path.get("callee"),
           ct = type(callee);
+        const delegated = path.parentPath.isYieldExpression();
         const fallback = path.getFunctionParent();
         if (
           native &&
@@ -486,12 +547,16 @@ function pass(code, filename, program, native = false) {
           } else {
             if (path.node.arguments.length)
               fail(path, "SUGAR_READ_ARGS", "A source read takes no arguments.", filename);
-            delegate(path, callee.node);
+            if (delegated) {
+              path.replaceWith(callee.node);
+              changed = true;
+            } else delegate(path, callee.node);
           }
         } else if (
-          isOperation(type(path)) ||
-          lib(callee) === "readStore" ||
-          (native && ["latestOf", "isPendingOf"].includes(lib(callee)))
+          !delegated &&
+          (isOperation(type(path)) ||
+            lib(callee) === "readStore" ||
+            (native && ["latestOf", "isPendingOf"].includes(lib(callee))))
         )
           delegate(path);
       }
@@ -505,6 +570,18 @@ function pass(code, filename, program, native = false) {
         )
           return;
         if (!sourceType(type(path))) return;
+        if (native && path.parentPath.isVariableDeclarator() && path.key === "init") {
+          let root = path.get("object");
+          while (root.isMemberExpression()) root = root.get("object");
+          const binding = root.isIdentifier() ? root.scope.getBinding(root.node.name)?.path : null;
+          const init = binding?.isVariableDeclarator() ? binding.get("init") : null;
+          const context = init?.isYieldExpression()
+            ? init.get("argument")
+            : init?.isCallExpression()
+              ? init.get("callee")
+              : null;
+          if (context && brand(type(context), "CONTEXT")) return;
+        }
         // D-065: direct fields in a component/control props literal forward sources.
         const prop = path.parentPath;
         if (prop.isObjectProperty() && prop.key !== "key") {
@@ -521,6 +598,56 @@ function pass(code, filename, program, native = false) {
         if (!call?.isCallExpression() || !(control(call) || brand(type(call), "COMPONENT"))) return;
         const value = path.get("value");
         if (value.isFunction()) return;
+        if (
+          native &&
+          key(path.node.key) === "value" &&
+          t.isMemberExpression(call.node.callee) &&
+          key(call.node.callee.property) === "provide" &&
+          value.isYieldExpression()
+        ) {
+          const result = type(value.get("argument"));
+          const operations =
+            result?.symbol?.name === "Generator"
+              ? checker.getTypeArguments(/** @type {ts.TypeReference} */ (result))[0]
+              : undefined;
+          const creates =
+            operations &&
+            (operations.isUnion() ? operations.types : [operations]).every(
+              operation => operation.symbol?.name === "Create"
+            );
+          if (!creates) return;
+          if (
+            path.findParent(
+              site =>
+                site.isConditionalExpression() ||
+                site.isLogicalExpression() ||
+                site.isIfStatement() ||
+                site.isLoop()
+            )
+          )
+            fail(
+              path,
+              "NATIVE_PROVIDE_SETUP",
+              "A conditional context factory needs a setup at its original position.",
+              filename
+            );
+          let setup = path.getFunctionParent();
+          while (setup && lib(setup.parentPath?.get("callee")) !== "component")
+            setup = setup.getFunctionParent();
+          if (setup?.get("body").isBlockStatement()) {
+            const id = path.scope.generateUidIdentifier("provided");
+            const statements = setup.get("body.body");
+            const ret = statements.find(s => s.isReturnStatement());
+            if (ret) {
+              ret.insertBefore(
+                t.variableDeclaration("const", [t.variableDeclarator(id, value.node)])
+              );
+              value.replaceWith(id);
+              changed = true;
+              return;
+            }
+          }
+        }
         let reads = value.isYieldExpression();
         value.traverse({
           Function(q) {

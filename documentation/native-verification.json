@@ -842,20 +842,32 @@
         ],
         "serverRejections": []
       },
-      "status": "refused",
+      "status": "generated-with-diagnostics",
       "foreignBoundaries": [],
       "diagnostics": [
         {
-          "code": "SUGAR_CALLBACK",
-          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/examples/originals/todos/src/app.tsx:198:28)"
+          "stage": "lint",
+          "code": "solid-yield/no-unshown-wait",
+          "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* () {\n              r...`, D-075).",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/todos/app.tsx",
+          "line": 111,
+          "severity": 1
+        },
+        {
+          "stage": "lint",
+          "code": "solid-yield/no-unshown-wait",
+          "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* (...args: __NativeAr...`, D-075).",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/todos/app.tsx",
+          "line": 188,
+          "severity": 1
         }
       ],
       "parity": "not run: no checked native program",
       "ssr": "not run: no checked native program",
       "differingStatements": null,
-      "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
+      "diffReason": "Generated output still requires a checked app harness.",
       "reasons": [
-        "SUGAR_CALLBACK"
+        "solid-yield/no-unshown-wait"
       ]
     },
     {
@@ -920,20 +932,32 @@
         ],
         "serverRejections": []
       },
-      "status": "refused",
+      "status": "generated-with-diagnostics",
       "foreignBoundaries": [],
       "diagnostics": [
         {
-          "code": "SUGAR_CALLBACK",
-          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/examples/originals/todos/src/app.tsx:198:28)"
+          "stage": "lint",
+          "code": "solid-yield/no-unshown-wait",
+          "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* () {\n              r...`, D-075).",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/todos-h/app.tsx",
+          "line": 111,
+          "severity": 1
+        },
+        {
+          "stage": "lint",
+          "code": "solid-yield/no-unshown-wait",
+          "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* (...args: __NativeAr...`, D-075).",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/todos-h/app.tsx",
+          "line": 188,
+          "severity": 1
         }
       ],
       "parity": "not run: no checked native program",
       "ssr": "not run: no checked native program",
       "differingStatements": null,
-      "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
+      "diffReason": "Generated output still requires a checked app harness.",
       "reasons": [
-        "SUGAR_CALLBACK"
+        "solid-yield/no-unshown-wait"
       ]
     },
     {

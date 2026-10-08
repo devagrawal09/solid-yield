@@ -66,3 +66,12 @@ export function nativeInvoke<F extends (...args: any[]) => any>(
 ): ReturnType<F> {
   return Reflect.apply(fn, receiver, args);
 }
+
+/** A source-authored dynamic action call has unchecked arguments, but its
+ * selected event still carries its inferred operations and failure colors. */
+export function nativeDispatch<F extends (...args: never[]) => unknown>(
+  fn: F,
+  args: readonly unknown[]
+): ReturnType<F> {
+  return Reflect.apply(fn, undefined, args) as ReturnType<F>;
+}

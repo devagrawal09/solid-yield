@@ -24,6 +24,103 @@ export function nativePrelude(files) {
     p.traverse({
       VariableDeclarator(q) {
         const init = q.get("init");
+        if (!t.isIdentifier(q.node.id) || !init.isObjectExpression()) return;
+        const action = init
+          .get("properties")
+          .find(
+            prop =>
+              prop.isObjectProperty() &&
+              prop.get("value").isCallExpression() &&
+              api(prop.get("value.callee"))?.module === "solid-js" &&
+              api(prop.get("value.callee"))?.name === "action"
+          );
+        if (!action) return;
+        if (!t.isObjectProperty(action.node) || !t.isCallExpression(action.node.value)) return;
+        const actionCallee = action.node.value.callee,
+          bagName = q.node.id.name;
+        if (!t.isExpression(actionCallee)) return;
+        const methods = init.get("properties").filter(prop => prop.isObjectMethod());
+        const forwarders = [];
+        for (const method of methods) {
+          let forwards = false;
+          method.traverse({
+            CallExpression(site) {
+              const callee = site.get("callee");
+              if (!callee.isTSAsExpression() || !t.isTSAnyKeyword(callee.node.typeAnnotation))
+                return;
+              const target = callee.get("expression");
+              if (
+                !target.isMemberExpression() ||
+                !t.isIdentifier(target.node.object, { name: bagName })
+              )
+                return;
+              forwards = true;
+              used.add("nativeDispatch");
+              site.replaceWith(
+                t.callExpression(t.identifier("__nativeDispatch"), [
+                  target.node,
+                  t.arrayExpression(
+                    site.node.arguments.map(arg => {
+                      if (!t.isExpression(arg) && !t.isSpreadElement(arg))
+                        throw new Error(`[NATIVE_ACTION] Unsupported action argument. (${file})`);
+                      return arg;
+                    })
+                  )
+                ])
+              );
+            }
+          });
+          if (!forwards) continue;
+          method.traverse({
+            ReturnStatement(ret) {
+              const value = ret.get("argument");
+              if (
+                value.isCallExpression() &&
+                t.isMemberExpression(value.node.callee) &&
+                t.isIdentifier(value.node.callee.object, { name: "Promise" }) &&
+                t.isIdentifier(value.node.callee.property, { name: "resolve" }) &&
+                !value.node.arguments.length
+              )
+                ret.node.argument = null;
+            }
+          });
+          const id = q.scope.generateUidIdentifier(
+            t.isIdentifier(method.node.key) ? method.node.key.name : "forward"
+          );
+          const fn = t.functionExpression(null, method.node.params, method.node.body, true);
+          forwarders.push({
+            key: method.node.key,
+            id,
+            declaration: t.variableDeclaration("const", [
+              t.variableDeclarator(id, t.callExpression(t.cloneNode(actionCallee), [fn]))
+            ])
+          });
+          method.remove();
+        }
+        if (!forwarders.length) return;
+        const binding = q.scope.getBinding(q.node.id.name);
+        // The original object methods close over the action bag. Keep that
+        // bag acyclic, then expose its forwarding events in the returned bag.
+        for (const ref of binding?.referencePaths ?? []) {
+          if (
+            !ref.isIdentifier() ||
+            ref.findParent(site => site.isTSType()) ||
+            ref.parentPath?.isMemberExpression()
+          )
+            continue;
+          ref.replaceWith(
+            t.objectExpression([
+              t.spreadElement(ref.node),
+              ...forwarders.map(({ key, id }) => t.objectProperty(key, id))
+            ])
+          );
+        }
+        q.parentPath.insertAfter(forwarders.map(f => f.declaration));
+      }
+    });
+    p.traverse({
+      VariableDeclarator(q) {
+        const init = q.get("init");
         if (
           !init.isCallExpression() ||
           api(init.get("callee"))?.name !== "useContext" ||
@@ -223,6 +320,7 @@ export function nativePrelude(files) {
     });
     /** @type {Record<string,string>} */ const names = {
       nativeTry: "__nativeTry",
+      nativeDispatch: "__nativeDispatch",
       nativeFailureValue: "__nativeValue",
       raise: "__nativeRethrow",
       $effect: "__nativeEffect",

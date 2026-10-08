@@ -13,6 +13,12 @@ export {
 } from "./native-failure.js";
 export type { NativeCaught } from "./native-failure.js";
 
-export { nativeTry, nativeMap, nativeCallback, nativeInvoke } from "./native-control.js";
+export {
+  nativeTry,
+  nativeMap,
+  nativeCallback,
+  nativeInvoke,
+  nativeDispatch
+} from "./native-control.js";
 
 export type { NativeArguments } from "./native-control.js";

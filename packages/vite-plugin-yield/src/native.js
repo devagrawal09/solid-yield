@@ -237,6 +237,21 @@ function surface(code, filename, modules, options = {}) {
   if (!p) throw new Error(`Cannot parse ${filename}`);
   const needed = new Set();
   const contexts = new Set();
+  let needsReturned = false;
+  p.traverse({
+    TSTypeReference(q) {
+      if (!t.isIdentifier(q.node.typeName, { name: "ReturnType" })) return;
+      q.node.typeName = t.identifier("__NativeReturned");
+      needsReturned = true;
+    }
+  });
+  if (needsReturned) {
+    const helper = parseProgram(
+      "type __NativeReturned<F extends (...args: never[]) => unknown> = ReturnType<F> extends Generator<unknown, infer R, unknown> ? R : ReturnType<F>;",
+      filename
+    );
+    if (helper) p.node.body.unshift(...helper.node.body);
+  }
   /** Native scalar values from context/rows are sources in library IR.
    * @param {Path} bindingPath @param {string} name */
   const valueReads = (bindingPath, name) => {
@@ -421,6 +436,20 @@ function surface(code, filename, modules, options = {}) {
         return;
       }
       if (api?.module !== "solid-js") return;
+      if (
+        ["createOptimisticStore", "createProjection"].includes(api.name) &&
+        q.node.typeParameters?.params.length === 1 &&
+        q.node.arguments.length >= 2 &&
+        t.isExpression(q.node.arguments[1])
+      ) {
+        // Preserve the declared value type on the seed while inferring the
+        // generator's operations, including its pending and failure colors.
+        q.node.arguments[1] = t.tsAsExpression(
+          q.node.arguments[1],
+          q.node.typeParameters.params[0]
+        );
+        q.node.typeParameters = null;
+      }
       if (api.name === "onCleanup") {
         const owner = q.getFunctionParent();
         // A Promise producer owns ordinary Solid cleanup; it is not a routine.
@@ -515,15 +544,16 @@ function surface(code, filename, modules, options = {}) {
               const fallback = fn.findParent(
                 q =>
                   q.isFunction() &&
-                  q.parentPath.isJSXExpressionContainer() &&
-                  q.parentPath.parentPath.isJSXAttribute() &&
-                  t.isJSXIdentifier(q.parentPath.parentPath.node.name, { name: "fallback" })
+                  ((q.parentPath.isJSXExpressionContainer() &&
+                    q.parentPath.parentPath.isJSXAttribute() &&
+                    t.isJSXIdentifier(q.parentPath.parentPath.node.name, { name: "fallback" })) ||
+                    (q.parentPath.isObjectProperty() &&
+                      t.isIdentifier(q.parentPath.node.key, { name: "fallback" })))
               );
               if (
                 fallback?.isFunction() &&
-                binding?.path.isIdentifier() &&
-                t.isIdentifier(fallback.node.params[1], { name: binding.path.node.name }) &&
-                binding.kind === "param"
+                t.isIdentifier(fallback.node.params[1], { name: fn.node.name }) &&
+                binding?.kind === "param"
               )
                 continue;
               const declaration = binding?.path;

@@ -1,8 +1,19 @@
-# HANDOFF — solid-yield (checkpoint 2026-10-08: through D-116)
+# HANDOFF — solid-yield (checkpoint 2026-10-08: through D-116; rc.14 candidate)
 
 This repository was extracted from the Solid fork `devagrawal09/solid`, branch `blocks-lib`, at commit **`6978eb83`** (D-015). Git history was not carried; the fork keeps it. The fork's own handoff at that commit (Phases 1A, 1B and 2, and its environment notes) is `git show 6978eb83:HANDOFF.md` in the fork.
 
 > **Names (D-096, 2026-10-06).** The product is `solid-yield` (was `solid-blocks`), with `vite-plugin-solid-yield` and `eslint-plugin-solid-yield`; the unit is a **routine** (was "block"), the model is **yield components**. Package directories are `packages/yield`, `packages/vite-plugin-yield`, `packages/eslint-plugin-yield`; twins are `examples/*-yield(-h)`; the gate is `scripts/yield-gate.mjs`. Text below written before D-096 was updated to the new names, except quoted fork paths and the extraction's own history.
+
+## Solid rc.14 candidate — commit blocked (2026-10-08)
+
+Installed `solid-js` / `@solidjs/web` are exactly **2.0.0-rc.14** everywhere.
+Build passes; the final full gate is **44/46 RED** (Effect test and executed bytes). #3815 is fixed; the `/profile` workaround is removed in the
+working tree and its retained test plus 14 rendering SSR cases pass. F-C14's
+content-function check still fails; its hoisted-loader control converges.
+F-C9 remains withdrawn and D-115 production smoke checks pass. The full gate
+is blocked by the unchanged Effect original losing its error fallback on rc.14,
+which also stops byte measurement. No commit or push; existing thresholds are
+unchanged. [Retest, gate changes and byte deltas](documentation/upstream/solid-rc14-retest.md).
 
 ## Roadmap and compiler checkpoint (2026-10-08, D-116)
 
@@ -38,9 +49,8 @@ runtime remain unmerged, rather than scheduled requirements of v0.2.
 library/original byte thresholds. C3c's S/M/L docs fixture and 40-step
 script remain on proto/compiler. The nine main twins have no marked modules;
 all nine analyzer reports and the gate's byte numbers remain unchanged.
-Build and the full gate are **46/46 GREEN**, including `proofs`;
-the baseline previously changed only for the proofs step. D-116 adds no gate steps and changes no gate or executed-byte baseline. This
-session starts at pushed main **3fc6bef** and makes one local documentation commit only; no push.
+The last committed build and full gate were **46/46 GREEN**, including `proofs`;
+the baseline previously changed only for the proofs step. D-116 adds no gate steps and changes no gate or executed-byte baseline. The rc.14 retest starts at pushed main **4de2d47**; its candidate remains uncommitted because the gate is red. No push.
 
 **Native checker contract — first in the queue (D-116 later-still amendment).** Review-2’s failure misses triggered a session on proto/sugar-ls, dispatched 2026-10-08. Implement the proof audit’s path-safe O27 catch rule, base/subclass coverage, selective rethrow and unknown-as-top handling; check event rejections and the native root handoff. That handoff is foreign: D-033’s library-root allowance does not apply. O52 author-facing KindCheck and WIRE matching remain open. Transported classes must regain their client prototype (orchestrator ruling; Dev may overrule). D-115’s production-message parity question remains pending Dev; the concrete hackernews fallback displays `err.message`.
 
@@ -161,10 +171,10 @@ branch. See the [verification record](documentation/calculus-proofs/verification
 
 ## Upstream
 
-- [solidjs/solid#3815](https://github.com/solidjs/solid/issues/3815): rc.13 SSR memo/serialization-slot loop, **fixed upstream** by [#3816](https://github.com/solidjs/solid/pull/3816), merged into `next` on 2026-10-06 (`759a9b6`): a re-created memo that joins a pending slot adopts that slot's answer. Re-test and remove the `/profile` workaround (`046387b`) at the next Solid RC bump (D-082); rc.13 remains installed here.
+- [solidjs/solid#3815](https://github.com/solidjs/solid/issues/3815): rc.13 SSR memo/serialization-slot loop, **fixed upstream** by [#3816](https://github.com/solidjs/solid/pull/3816), merged into `next` on 2026-10-06 (`759a9b6`): a re-created memo that joins a pending slot adopts that slot's answer. **Verified fixed on installed rc.14 (2026-10-08):** the plain repro ends with one setup; the `/profile` workaround (`046387b`) is removed in the working tree, its test and rendering SSR pass. Removal commit is blocked by the separate Effect regression (D-082).
 - [solidjs/solid#3845](https://github.com/solidjs/solid/issues/3845): delayed second hydrate root replaces server nodes, **closed as by-design** (API checked 2026-10-07: closed/not_planned at 2026-10-06T21:49:30Z; closing comment confirms the deliberate completion guard for event replay, serialized-data lifetime and DOM drift). Tier 2 is rejected and the private reset was withdrawn (D-111). D-114 keeps eager emission on the branch; D-116 schedules productized islands after native sugar and the plain-Solid dashboard. The later lazy builder owns keyed attachment, its event queue and payload, with validated claims and render fallback.
 - **F-C9 — withdrawn; nothing filed.** Streams carry the typed failure and the hydrated client renders its fallback; renderToString is synchronous by contract (D-099), so the string-render draft is withdrawn. D-115 fixes production sanitization on our side with public markSafeError. Historical compiler-C2/single-root reports still describe the earlier stop; the merged branch's README and C3 reports supersede it.
-- **F-C14 — resolved; nothing to file.** The [plain-Solid rc.13 check](documentation/upstream/solid-frames-f-c14-check-rc13.md) recreates an async memo inside a `Loading` child on every SSR pass and fails under ordinary `renderToStream` too: it is [#3815](https://github.com/solidjs/solid/issues/3815)'s class, fixed by [#3816](https://github.com/solidjs/solid/pull/3816) on `next`. The actual F-C14 shape (hoisted loader, synchronous derived memo beneath `Loading`) converges. This is not frames-specific. Re-test at the next Solid RC bump together with the `/profile` workaround (D-082).
+- **F-C14 — actual shape converges; rc.14 content-function check still fails; nothing filed.** The [check](documentation/upstream/solid-frames-f-c14-check-rc13.md) still reaches 10,001 passes through frames/ordinary streaming; the timer frame instead ends at its 30 s time bound with fallback only. The actual hoisted loader with a synchronous derived memo beneath `Loading` converges. #3815 itself is fixed in rc.14; that fix does not cover this separate check.
 
 
 ## Where things are
@@ -195,9 +205,9 @@ for c in $(git rev-list --reverse main); do git push origin "$c:refs/heads/main"
 
 ## Solid under test (D-016)
 
-`solid-js`, `@solidjs/web` and `@solidjs/h` are declared `^2.0.0-rc.11`, the fork's declaration. On the registry this resolves to **`2.0.0-rc.13`** (`next`), two RCs ahead of the fork's local rc.11. Through `@solidjs/vite-plugin@3.0.0-next.35` (pinned exact, as in the fork) the twins compile with `@solidjs/compiler` / `@solidjs/babel-plugin` rc.13. `@solidjs/router` is `2.0.0-next.29`. There are no workspace links to Solid.
+`solid-js` and `@solidjs/web` are pinned to **`2.0.0-rc.14`** in every package, twin and original; the lockfile resolves them and `@solidjs/signals` to rc.14. `@solidjs/h` keeps its `^2.0.0-rc.11` range and resolves to rc.13. Through `@solidjs/vite-plugin@3.0.0-next.35`, the unchanged compiler and babel-plugin remain rc.13. Router resolutions are next.29 / next.35. There are no workspace links to Solid. This is an uncommitted candidate until the full gate is green.
 
-**Canary result: quiet.** All 30 of the fork's gate steps pass on rc.13. All 8 parity tests pass, along with every package test and every twin's typecheck and lint, and the plugin's compiled fixtures, regenerated through rc.13's compiler, are byte-identical. The only visible RC drift is in the vendored JSX types: rc.13 adds an optional `$key?: string | number` attribute to every element.
+**rc.14 canary: blocked by Effect; see the retest above.** Historical rc.13 canary: all 30 of the fork's gate steps pass. All 8 parity tests pass, along with every package test and every twin's typecheck and lint, and the plugin's compiled fixtures, regenerated through rc.13's compiler, are byte-identical. The only visible RC drift is in the vendored JSX types: rc.13 adds an optional `$key?: string | number` attribute to every element.
 
 ## Vendored files to regenerate per Solid RC
 
@@ -301,7 +311,7 @@ Five commits on `main` after `c6da576`, then ten more for Dev's amending rulings
 - **Plain functions in event attributes are refused.** "Any non-handler there is a type error" was read to cover `onClick={() => …}` too: a plain function can call an event whose colors would then reach no type. One twin site changed (room's `() => regenerate(reset)`). `Errored`'s `reset` is the one plain function kept, typed as already bound because it has no colors.
 - **A row `Errored` fallback has its parameters annotated.** TypeScript does not infer them, even with `For`'s own row signature in a `declare function`. §7 records it.
 - ~~**D-069 F8: a nested row's server read order**~~ Ruled by D-084: the model (a view's holes are read before its children on the server). Was: (yield-row-recursive, server). The oracle reads `open a` for the toggle, renders the nested rows, then reads `open a` again for the `<ul>`'s `style`; the library reads both of `a`'s holes first. Same reads, values and markup; server only. Declared with F5; not judged. Rule on it.
-- ~~**rendering-yield's streamed SSR, found while measuring D-082.**~~ Fixed (A12, A13); the gate now renders every twin page on the server (A14). Left: the Solid rc.13 slot loop under `/profile` (D-082) is Solid's; its issue is drafted in `documentation/upstream/solid-ssr-memo-loop-rc13.md` (not yet filed); the twins' hydration of their server output is still checked by nothing here. Was: Through `vite dev`'s SSR loader (development builds), `renderToStream` of `/profile` never ends (the process blocks; the original's ends) and of `/stream` fails with a server `READ_IN_VIEW` in `MemoList` (a `For` over a streamed memo under a `Loading` in a hole). No gate step renders the twins' pages on the server, so nothing caught it. Details in D-082.
+- ~~**rendering-yield's streamed SSR, found while measuring D-082.**~~ Fixed (A12, A13); the gate now renders every twin page on the server (A14). Update: the Solid slot loop under `/profile` is fixed in rc.14; its draft is resolved, and workaround removal is pending a green commit; the twins' hydration of their server output is still checked by nothing here. Was: Through `vite dev`'s SSR loader (development builds), `renderToStream` of `/profile` never ends (the process blocks; the original's ends) and of `/stream` fails with a server `READ_IN_VIEW` in `MemoList` (a `For` over a streamed memo under a `Loading` in a hole). No gate step renders the twins' pages on the server, so nothing caught it. Details in D-082.
 
 ## Review 2026-10-05
 
@@ -315,7 +325,7 @@ Native sugar first-time-user reviews (Claude Sonnet, 2026-10-08):
 - [Review 1](https://github.com/devagrawal09/solid-yield/blob/fd0aed2/documentation/reviews/sugar-review-1.md), against **d88e31c**, unchanged copy on proto/sugar-ls; verdict “not today”. [Fixes/rerun](https://github.com/devagrawal09/solid-yield/blob/fd0aed2/documentation/reviews/sugar-review-1-fixes.md) landed at **fd0aed2**: comparable **9/22 → 19/22**. The original 9/26 denominator is corrected there; the legal timer read is excluded on both sides. Remaining: no accidental-swallow warning (intentional absorption is valid), Portal internals unchecked, runtime source maps.
 - [Review 2](documentation/reviews/sugar-review-2.md), against **fd0aed2**, copied unchanged from `/private/tmp/sy-review2-out/REVIEW.md`: install worked first time; README jsxImportSource/ESLint contradictions remain; **12/24**. Structural checks work well; swallowed/base-class/selective catches, onClick rejections and root failures were missed. Root diagnostics duplicate and some related locations enter library `.d.ts` files. Verdict: advisory CI for structural mistakes, not typed failures. Exact ten-line summary and the proof-contract priority/session are recorded in D-116’s later-still amendment.
 
-The Solid rc.13 SSR loop found under rendering's `/profile` (D-082) is drafted as an upstream issue in `documentation/upstream/solid-ssr-memo-loop-rc13.md` (status: draft, not yet filed).
+The Solid SSR loop under rendering's `/profile` (D-082) is **resolved in rc.14**; the [retained rc.13 draft](documentation/upstream/solid-ssr-memo-loop-rc13.md) is a passing check now. Workaround removal is uncommitted until the rc.14 gate passes.
 
 ### Rulings (Dev, 2026-10-05)
 
@@ -335,7 +345,7 @@ The Solid rc.13 SSR loop found under rendering's `/profile` (D-082) is drafted a
 - ~~**R3, stream error handlers**~~ Ruled by D-091 (implemented): an `$event` does not attempt a stream; a stream's handler is a plain function.
 - **D-086's fragment refusal needs two tsconfig options.** TypeScript checks a fragment's children only when `jsxFragmentFactory` (and so `jsxFactory`) is set; `jsx-runtime.d.ts`'s `Fragment` is typed `Element` and the package's and twins' tsconfigs set both, but a user's project without them gets only the lint. Confirm the requirement, or rule fragments lint-only.
 - **A provider-rooted `Errored` keeps its fallback out of the DOM** (found implementing D-085, not fixed). A call-form `Errored` held by a context provider tag at a view's root, rendered under another `Errored`, takes a failure but never shows its fallback; handwritten Solid does. Pre-existing (a memo's failure too). D-085's "Found, not fixed" has the shape.
-- **The upstream issue** (`documentation/upstream/solid-ssr-memo-loop-rc13.md`) awaits "file it".
+- **The upstream SSR issue #3815 is resolved in rc.14.** Its draft is retained as a passing repro; nothing to file. The F-C14 content-function check still fails; see the rc.14 retest above.
 - **D-088 added boundaries to two twins the ruling did not name.** hackernews-spa's routes may fail (`ApiError`) and rendering's `App` may fail (`profile` / `feed` / `stream`); both originals let such a failure reach the root. `foreign()` refuses them, so hackernews has an `Errored` at each route's root (3) and rendering one around its pages (1), with fallbacks the originals do not have. Parity and the SSR smoke are green (no failure path is scripted). Confirm, or rule a different shape for twins whose original lets a failure reach the root (D-023's corrected validation counts them: room 1, hackernews-spa 3, rendering 1).
 - **`foreign`'s message cannot name the component** (a type has no access to it); it lists the failures' `kind`s. The lint names the component.
 

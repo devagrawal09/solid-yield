@@ -1,5 +1,5 @@
-> Status: **draft, not yet filed** (for solidjs/solid; awaiting Dev's "file it"). Copied verbatim from `/private/tmp/solid-ssr-memo-loop-issue.md`.
-> Found by D-082 (rendering-yield's streamed `/profile`); the library side is fixed in `046387b`.
+> Status: **resolved in rc.14** (2026-10-08). Reproduces [#3815](https://github.com/solidjs/solid/issues/3815), fixed by [#3816](https://github.com/solidjs/solid/pull/3816); nothing to file.
+> The exact repro completes in production/development with one setup (111/108 ms). The `046387b` workaround is removed in the working tree and its unchanged test plus `/profile` SSR pass; commit is blocked by the separate rc.14 Effect regression. See [retest](solid-rc14-retest.md). The rc.13 diagnosis below is retained as history.
 
 # [2.0.0-rc.13] SSR stream never ends: after a hole retry re-creates a component, a cascading memo spins in microtasks on a shared serialization slot
 

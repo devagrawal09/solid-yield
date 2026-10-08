@@ -1,4 +1,4 @@
-Status: not filed — reproduces #3815 (fixed upstream); kept as the check
+Status: **rc.14 check still fails; not filed** (2026-10-08). The actual hoisted-loader F-C14 shape converges; the content-function repro below still hits 10,001 passes. The separate #3815 repro is fixed in rc.14. See [retest](solid-rc14-retest.md).
 
 # Loading retries recreate a nested async memo until the 10,001-pass limit
 
@@ -139,3 +139,15 @@ by [#3816](https://github.com/solidjs/solid/pull/3816), not a frames-specific
 finding. No issue was filed. Re-test this check at the next Solid RC bump,
 together with the `/profile` workaround (D-082). The `next` fix was verified
 upstream; this local report checks the installed rc.13 packages.
+
+## rc.14 retest — 2026-10-08
+
+Both exact repros were rerun. The minimal promise repro still hits the
+10,001-pass limit in production/development; ordinary streaming fails too.
+The timer-based frame returns after 30.13 s with fallback-only HTML and
+`bound: "time"`, no paragraph and no onError call. Ordinary streaming fails
+after 113.58 s at the pass limit and returns an empty string. A hoisted-loader
+control with a synchronous derived memo renders HELLO without errors through
+both public renderers (2 ms each). The earlier classification as #3815's
+class does not mean its fix covers this content-function shape: #3815's exact
+repro now passes while this one still fails. No issue was filed.

@@ -13,10 +13,10 @@
   },
   "devDependencies": {
     "@solidjs/vite-plugin": "3.0.0-next.35",
-    "@solidjs/web": "2.0.0-rc.13",
+    "@solidjs/web": "2.0.0-rc.14",
     "@types/node": "^25.6.0",
     "jsdom": "^25.0.1",
-    "solid-js": "2.0.0-rc.13",
+    "solid-js": "2.0.0-rc.14",
     "typescript": "^6.0.2",
     "vite": "^7.0.0",
     "vitest": "^4.1.6",

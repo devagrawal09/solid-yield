@@ -88,3 +88,10 @@ when the renderer returns.
 `solid-js` and `@solidjs/web`: **2.0.0-rc.13**; Node **v24.18.0**;
 macOS arm64. Both production (default Node exports) and development
 (`--conditions=development`) tested on 2026-10-07. No newer version tested.
+
+## rc.14 retest — 2026-10-08
+
+All four exact runs still return a string containing `Loading article…`,
+`rejected: false`, `calls: 0`, `fallback: false`. D-115's production
+serialization and hydrated typed-failure smoke checks pass on rc.14.
+Status remains **withdrawn**; see [the retest](solid-rc14-retest.md).

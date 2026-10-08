@@ -20,7 +20,6 @@ read mode = "typed"
 run value(typed)
 read mode = "ok"
 run value(ok)
-caught boundary = NotFound(typed)
 html = <p>ok</p><div class="panel"><button class="save">save</button></div>
 ## synchronous throw routes to boundary
 write mode = "sync"

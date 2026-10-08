@@ -573,11 +573,13 @@ not silent fallbacks to native reactive state inside a library routine.
 | Plain typed `props.x` | Generated `Props<T>` plus path reads | Simple identifier parameter; destructured parameters refused |
 | `<Child p={v}/>` | `yield* Child({ p: v′ })` | Local/direct selected imports; foreign tags need a boundary contract |
 | `For` / `Show` / `Loading` / `Errored` etc. | Same library calls with lazy children, row views and bound events | Basic forms; default For row-value mapping; nondefault keyed modes refused; complex fallback forms remain limited |
-| `render` / `hydrate` from `@solidjs/web` | Keep the Solid entry API; insert `foreign(Component)` for direct root handoffs | Entry code stays foreign; failures and requirements are checked at the generated handoff |
+| `render` / `hydrate` from `@solidjs/web` | Local selected component roots use the library renderer with `RootCheck`; imported entry roots use `foreign(Component)` | Pending and requirements are checked at the root; foreign handoffs also check failures |
 | `throw X` | `raise(nativeFailure([class IDs or "unknown"], X))` | Implemented for synchronous routine hosts; see Failure inference |
 | Async/server-function memo | `attempt(() => f(), e => nativeFailure(inferredSet, e))` | Async producers and Promise-returning calls; server calls add `ChunkError` |
 | `action` (including generators), `createStore`, `createOptimistic`, `onSettled`, `latest`, `isPending` | `$event`, `$store`, `$optimistic`, `$effect`/`$cleanup`, `latestOf`/`isPendingOf` + read | Focused generated checks pass; see the API inventory for overload limits |
 | `createOptimisticStore`, `createProjection`, `refresh`, `until`, `lazy` | Corresponding library primitive imports | Import mapping implemented; producer, selector, generic and foreign-edge contracts remain incomplete |
+
+A selected local component passed to `render` or `hydrate` is a library root and uses the library renderer with `RootCheck`. Its unhandled failures may propagate at that root under D-033; `foreign` remains the checked adapter for imported entry handoffs. In a self-recursive component, fixed numeric prop snapshots may become path reads in holes when every local JSX caller supplies fixed numeric expressions; pure numeric assignments are substituted in source order, and an early JSX return selects `Match` rows that own their branch setup. Recursive component types carry the pending and failure types inferred from memo reads and prop edges, and generated TypeScript checks the full body against that type. Timer and frame callbacks retain the existing rule: reads and writes run as component-owned events, with their result ignored by the scheduler.
 
 ### Failure inference
 

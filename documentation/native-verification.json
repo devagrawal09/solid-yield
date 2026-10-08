@@ -431,6 +431,12 @@
       "diagnostics": [
         {
           "stage": "type",
+          "code": "TS2345",
+          "message": "Argument of type 'HoleCall<{}, true, never, false, never>' is not assignable to parameter of type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<true, never, false, HoleRequires<...>>) & { ...; } & { ...; }'.\n  Type 'HoleCall<{}, true, never, false, never>' is not assignable to type '{ readonly \"[PENDING_ROOT] the root may be pending (a read under it has no Loading above): wrap the root, render(() => Loading({ children: App }), el), or put a Loading around the pending part\": true; }'.",
+          "line": 26
+        },
+        {
+          "stage": "type",
           "code": "TS1360",
           "message": "Type 'HoleCall<{}, true, never, false, never>' does not satisfy the expected type '{ readonly \"[PENDING_ROOT] the root may be pending (a read under it has no Loading above): wrap the root, render(() => Loading({ children: App }), el), or put a Loading around the pending part\": true; }'.",
           "line": 26
@@ -574,7 +580,7 @@
         {
           "stage": "type",
           "code": "TS2345",
-          "message": "Argument of type 'HoleCall<{}, false, never, false, RequiredContext<number, \"<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C\">>' is not assignable to parameter of type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<false, never, false, RequiredContext<...> | HoleRequires<...>>) & { ...; } & { ...; }'.\n  Type 'HoleCall<{}, false, never, false, RequiredContext<number, \"<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C\">>' is not assignable to type '{ readonly \"[NO_PROVIDER] a yield component handed to plain Solid requires the contexts this property names: provide them inside it (Ctx.provide around the calls that read them), or list the ones provided above the foreign edge: foreign(Comp, { provided: [Ctx] })\": \"<root>/packages/vite-plugin-yield/t...'.",
+          "message": "Argument of type 'HoleCall<{}, false, never, false, RequiredContext<number, \"<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C\">>' is not assignable to parameter of type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<false, never, false, RequiredContext<...> | HoleRequires<...>>) & { ...; } & { ...; }'.\n  Type 'HoleCall<{}, false, never, false, RequiredContext<number, \"<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C\">>' is not assignable to type '{ readonly \"[NO_PROVIDER] the root requires the contexts this property names: provide each above the components that read it (Ctx.provide({ value, children }) around their calls)\": \"<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C\"; }'.",
           "line": 25
         },
         {
@@ -716,176 +722,14 @@
         ],
         "serverRejections": []
       },
-      "status": "generated-with-diagnostics",
+      "status": "generated-unverified",
       "foreignBoundaries": [],
-      "diagnostics": [
-        {
-          "stage": "type",
-          "code": "TS7023",
-          "message": "'Triangle' implicitly has return type 'any' because it does not have a return type annotation and is referenced directly or indirectly in one of its return expressions.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
-          "line": 61
-        },
-        {
-          "stage": "type",
-          "code": "TS2365",
-          "message": "Operator '<=' cannot be applied to types 'Source<number, never, false>' and 'number'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
-          "line": 67
-        },
-        {
-          "stage": "type",
-          "code": "TS2362",
-          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
-          "line": 70
-        },
-        {
-          "stage": "type",
-          "code": "TS2362",
-          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
-          "line": 71
-        },
-        {
-          "stage": "type",
-          "code": "TS2322",
-          "message": "Type 'number' is not assignable to type 'Source<number, never, false>'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
-          "line": 79
-        },
-        {
-          "stage": "type",
-          "code": "TS2362",
-          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
-          "line": 79
-        },
-        {
-          "stage": "type",
-          "code": "TS7024",
-          "message": "Function implicitly has return type 'any' because it does not have a return type annotation and is referenced directly or indirectly in one of its return expressions.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
-          "line": 91
-        },
-        {
-          "stage": "type",
-          "code": "TS2322",
-          "message": "Type 'number' is not assignable to type 'Source<number, never, false>'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
-          "line": 95
-        },
-        {
-          "stage": "type",
-          "code": "TS2362",
-          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
-          "line": 95
-        },
-        {
-          "stage": "type",
-          "code": "TS2362",
-          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
-          "line": 95
-        },
-        {
-          "stage": "type",
-          "code": "TS2322",
-          "message": "Type '() => Generator<Read<true, NativeFailure<\"unknown\">>, number, any>' is not assignable to type 'Source<number, never, false>'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
-          "line": 97
-        },
-        {
-          "stage": "type",
-          "code": "TS2322",
-          "message": "Type 'number' is not assignable to type 'Source<number, never, false>'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
-          "line": 102
-        },
-        {
-          "stage": "type",
-          "code": "TS2362",
-          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
-          "line": 102
-        },
-        {
-          "stage": "type",
-          "code": "TS2363",
-          "message": "The right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
-          "line": 102
-        },
-        {
-          "stage": "type",
-          "code": "TS2365",
-          "message": "Operator '+' cannot be applied to types 'Source<number, never, false>' and 'number'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
-          "line": 103
-        },
-        {
-          "stage": "type",
-          "code": "TS2362",
-          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
-          "line": 103
-        },
-        {
-          "stage": "type",
-          "code": "TS2322",
-          "message": "Type '() => Generator<Read<true, NativeFailure<\"unknown\">>, number, any>' is not assignable to type 'Source<number, never, false>'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
-          "line": 105
-        },
-        {
-          "stage": "type",
-          "code": "TS2365",
-          "message": "Operator '+' cannot be applied to types 'import(\"<root>/packages/yield/dist/types/types\").Source<number, never, false>' and 'import(\"<root>/packages/yield/dist/types/types\").Source<number, never, false>'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
-          "line": 110
-        },
-        {
-          "stage": "type",
-          "code": "TS2365",
-          "message": "Operator '+' cannot be applied to types 'Source<number, never, false>' and 'number'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
-          "line": 111
-        },
-        {
-          "stage": "type",
-          "code": "TS2362",
-          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
-          "line": 111
-        },
-        {
-          "stage": "type",
-          "code": "TS2322",
-          "message": "Type '() => Generator<Read<true, NativeFailure<\"unknown\">>, number, any>' is not assignable to type 'Source<number, never, false>'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
-          "line": 113
-        },
-        {
-          "stage": "type",
-          "code": "TS2362",
-          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski/main.tsx",
-          "line": 139
-        }
-      ],
+      "diagnostics": [],
       "parity": "not run: no checked native program",
       "ssr": "not run: no checked native program",
       "differingStatements": null,
       "diffReason": "Generated output still requires a checked app harness.",
-      "reasons": [
-        "TS7023",
-        "TS2365",
-        "TS2362",
-        "TS2322",
-        "TS7024",
-        "TS2363"
-      ]
+      "reasons": []
     },
     {
       "twin": "sierpinski-yield-h",
@@ -927,176 +771,14 @@
         ],
         "serverRejections": []
       },
-      "status": "generated-with-diagnostics",
+      "status": "generated-unverified",
       "foreignBoundaries": [],
-      "diagnostics": [
-        {
-          "stage": "type",
-          "code": "TS7023",
-          "message": "'Triangle' implicitly has return type 'any' because it does not have a return type annotation and is referenced directly or indirectly in one of its return expressions.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
-          "line": 61
-        },
-        {
-          "stage": "type",
-          "code": "TS2365",
-          "message": "Operator '<=' cannot be applied to types 'Source<number, never, false>' and 'number'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
-          "line": 67
-        },
-        {
-          "stage": "type",
-          "code": "TS2362",
-          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
-          "line": 70
-        },
-        {
-          "stage": "type",
-          "code": "TS2362",
-          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
-          "line": 71
-        },
-        {
-          "stage": "type",
-          "code": "TS2322",
-          "message": "Type 'number' is not assignable to type 'Source<number, never, false>'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
-          "line": 79
-        },
-        {
-          "stage": "type",
-          "code": "TS2362",
-          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
-          "line": 79
-        },
-        {
-          "stage": "type",
-          "code": "TS7024",
-          "message": "Function implicitly has return type 'any' because it does not have a return type annotation and is referenced directly or indirectly in one of its return expressions.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
-          "line": 91
-        },
-        {
-          "stage": "type",
-          "code": "TS2322",
-          "message": "Type 'number' is not assignable to type 'Source<number, never, false>'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
-          "line": 95
-        },
-        {
-          "stage": "type",
-          "code": "TS2362",
-          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
-          "line": 95
-        },
-        {
-          "stage": "type",
-          "code": "TS2362",
-          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
-          "line": 95
-        },
-        {
-          "stage": "type",
-          "code": "TS2322",
-          "message": "Type '() => Generator<Read<true, NativeFailure<\"unknown\">>, number, any>' is not assignable to type 'Source<number, never, false>'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
-          "line": 97
-        },
-        {
-          "stage": "type",
-          "code": "TS2322",
-          "message": "Type 'number' is not assignable to type 'Source<number, never, false>'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
-          "line": 102
-        },
-        {
-          "stage": "type",
-          "code": "TS2362",
-          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
-          "line": 102
-        },
-        {
-          "stage": "type",
-          "code": "TS2363",
-          "message": "The right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
-          "line": 102
-        },
-        {
-          "stage": "type",
-          "code": "TS2365",
-          "message": "Operator '+' cannot be applied to types 'Source<number, never, false>' and 'number'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
-          "line": 103
-        },
-        {
-          "stage": "type",
-          "code": "TS2362",
-          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
-          "line": 103
-        },
-        {
-          "stage": "type",
-          "code": "TS2322",
-          "message": "Type '() => Generator<Read<true, NativeFailure<\"unknown\">>, number, any>' is not assignable to type 'Source<number, never, false>'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
-          "line": 105
-        },
-        {
-          "stage": "type",
-          "code": "TS2365",
-          "message": "Operator '+' cannot be applied to types 'import(\"<root>/packages/yield/dist/types/types\").Source<number, never, false>' and 'import(\"<root>/packages/yield/dist/types/types\").Source<number, never, false>'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
-          "line": 110
-        },
-        {
-          "stage": "type",
-          "code": "TS2365",
-          "message": "Operator '+' cannot be applied to types 'Source<number, never, false>' and 'number'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
-          "line": 111
-        },
-        {
-          "stage": "type",
-          "code": "TS2362",
-          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
-          "line": 111
-        },
-        {
-          "stage": "type",
-          "code": "TS2322",
-          "message": "Type '() => Generator<Read<true, NativeFailure<\"unknown\">>, number, any>' is not assignable to type 'Source<number, never, false>'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
-          "line": 113
-        },
-        {
-          "stage": "type",
-          "code": "TS2362",
-          "message": "The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/sierpinski-h/main.tsx",
-          "line": 139
-        }
-      ],
+      "diagnostics": [],
       "parity": "not run: no checked native program",
       "ssr": "not run: no checked native program",
       "differingStatements": null,
       "diffReason": "Generated output still requires a checked app harness.",
-      "reasons": [
-        "TS7023",
-        "TS2365",
-        "TS2362",
-        "TS2322",
-        "TS7024",
-        "TS2363"
-      ]
+      "reasons": []
     },
     {
       "twin": "todos-yield",

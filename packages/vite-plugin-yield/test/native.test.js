@@ -1,9 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { resolve } from "node:path";
+import { readFileSync } from "node:fs";
 import { lowerNativeProject, inspectNativeProject } from "../src/native.js";
 import solidYield from "../src/vite.js";
 const id = resolve(import.meta.dirname, "fixtures/native.tsx");
 const lower = source => lowerNativeProject(new Map([[id, source]])).files.get(id);
+it("refuses changing numeric props when reconstructing recursive snapshots", () => {
+  const file = resolve(import.meta.dirname, "../../../examples/originals/sierpinski/src/main.tsx");
+  const source = readFileSync(file, "utf8").replace("<Triangle x={0}", "<Triangle x={elapsed()}");
+  expect(() => lowerNativeProject(new Map([[file, source]]))).toThrow(
+    /Snapshot Triangle.x is not a fixed numeric prop/
+  );
+});
 describe("native front end", { timeout: 30_000 }, () => {
   it("requires explicit file selection", () => {
     expect(() => solidYield({ mode: "native" })).toThrow(/NATIVE_INCLUDE/);

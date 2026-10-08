@@ -12,6 +12,7 @@ import { inferFailures } from "../../compiler-yield/src/failure-inference.js";
 import { nativeEntry } from "./native-entry.js";
 import { nativePrelude } from "./native-prelude.js";
 import { lowerNativeEffects } from "./native-effects.js";
+import { lowerNativeRecursion } from "./native-recursion.js";
 const t = babel.types;
 /** @typedef {import('@babel/core').NodePath<any>} Path */
 /** @typedef {{code:string,message:string,file:string,line:number,column:number}} Diagnostic */
@@ -396,17 +397,26 @@ function surface(code, filename, modules, options = {}) {
         }
         const target = q.node.arguments[0];
         if (t.isIdentifier(target)) {
-          needed.add("foreign");
           needed.add("RootCheck");
-          q.node.arguments[0] = t.callExpression(t.identifier("foreign"), [
-            t.tsSatisfiesExpression(
-              target,
-              t.tsTypeReference(
-                t.identifier("RootCheck"),
-                t.tsTypeParameterInstantiation([t.tsTypeQuery(t.identifier(target.name))])
-              )
+          const binding = q.scope.getBinding(target.name)?.path;
+          const local = binding?.isVariableDeclarator() ? binding.get("init") : binding;
+          const check = t.tsSatisfiesExpression(
+            target,
+            t.tsTypeReference(
+              t.identifier("RootCheck"),
+              t.tsTypeParameterInstantiation([t.tsTypeQuery(t.identifier(target.name))])
             )
-          ]);
+          );
+          if (local?.isFunction()) {
+            // A selected local component is a library root, where failures
+            // may propagate (D-033), rather than a foreign component handoff.
+            q.node.callee = t.identifier(`__native${api.name}`);
+            needed.add(`__native${api.name}`);
+            q.node.arguments[0] = check;
+          } else {
+            needed.add("foreign");
+            q.node.arguments[0] = t.callExpression(t.identifier("foreign"), [check]);
+          }
         }
         return;
       }
@@ -801,7 +811,10 @@ function surface(code, filename, modules, options = {}) {
     p.node.body.unshift(
       t.importDeclaration(
         [...needed].map(name => {
-          const spec = t.importSpecifier(t.identifier(name), t.identifier(name));
+          const spec = t.importSpecifier(
+            t.identifier(name),
+            t.identifier(name.replace(/^__native(?=render$|hydrate$)/, ""))
+          );
           if (name === "Props" || name === "RootCheck") spec.importKind = "type";
           return spec;
         }),
@@ -824,7 +837,12 @@ export function lowerNativeProject(input, options = {}) {
   if (diagnostics.length) throw new NativeDiagnosticError(diagnostics);
   const prepared = nativePrelude(selected);
   const failures = nativeFailures(prepared, options.compilerOptions);
-  const effects = nativePrelude(lowerNativeEffects(prepared, failures));
+  const effects = new Map(
+    [...nativePrelude(lowerNativeEffects(prepared, failures))].map(([id, code]) => [
+      id,
+      lowerNativeRecursion(code, id)
+    ])
+  );
   const lowered = lowerSugarProject(
     new Map([
       ...new Map(

@@ -173,7 +173,12 @@ function seed(code, filename, native = false) {
         if (isComponent) {
           needsComponent = true;
           const expr = t.functionExpression(
-            n.id ?? t.identifier(fnName(path)),
+            native &&
+              path.parentPath.isVariableDeclarator() &&
+              t.isIdentifier(path.parentPath.node.id) &&
+              path.parentPath.node.id.typeAnnotation
+              ? null
+              : (n.id ?? t.identifier(fnName(path))),
             n.params,
             n.body,
             true

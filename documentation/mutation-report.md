@@ -138,7 +138,7 @@ These are observed surviving changes; the reason states what the run can prove. 
 #### F-C1: packages/eslint-plugin-yield/src/calls.js:23 (Survived, ConditionalExpression)
 
 ```diff
-- type || seen.has(type))
+- !type || seen.has(type)
 + false
 ```
 
@@ -149,7 +149,7 @@ Covered test IDs: 152, 154, 155, 157, 158, 159, 212, 215, 216, 217, 218.
 #### F-C2: packages/eslint-plugin-yield/src/calls.js:23 (Survived, LogicalOperator)
 
 ```diff
-- type || seen.has(type))
+- !type || seen.has(type)
 + !type && seen.has(type)
 ```
 
@@ -160,7 +160,7 @@ Covered test IDs: 152, 154, 155, 157, 158, 159, 212, 215, 216, 217, 218.
 #### F-C3: packages/eslint-plugin-yield/src/calls.js:25 (Survived, ConditionalExpression)
 
 ```diff
-- ype.isUnionOrIntersection && type.isUnionOrIntersection())
+- type.isUnionOrIntersection && type.isUnionOrIntersection()
 + false
 ```
 
@@ -171,7 +171,7 @@ Covered test IDs: 152, 154, 155, 157, 158, 159, 212, 215, 216, 217, 218.
 #### F-C4: packages/eslint-plugin-yield/src/calls.js:37 (Survived, ConditionalExpression)
 
 ```diff
-- type || seen.has(type))
+- !type || seen.has(type)
 + false
 ```
 
@@ -182,7 +182,7 @@ Covered test IDs: 152, 154, 155, 157, 158, 159, 212, 215, 216, 217, 218.
 #### F-C5: packages/eslint-plugin-yield/src/calls.js:37 (Survived, LogicalOperator)
 
 ```diff
-- type || seen.has(type))
+- !type || seen.has(type)
 + !type && seen.has(type)
 ```
 
@@ -193,7 +193,7 @@ Covered test IDs: 152, 154, 155, 157, 158, 159, 212, 215, 216, 217, 218.
 #### F-C6: packages/eslint-plugin-yield/src/calls.js:39 (Survived, ConditionalExpression)
 
 ```diff
-- ype.isUnionOrIntersection && type.isUnionOrIntersection())
+- type.isUnionOrIntersection && type.isUnionOrIntersection()
 + false
 ```
 
@@ -204,7 +204,7 @@ Covered test IDs: 152, 154, 155, 157, 158, 159, 212, 215, 216, 217, 218.
 #### F-C7: packages/eslint-plugin-yield/src/calls.js:56 (Survived, ConditionalExpression)
 
 ```diff
-- sNode)
+- tsNode
 + true
 ```
 
@@ -215,7 +215,7 @@ Covered test IDs: 152, 154, 155, 157, 158, 159, 212, 215, 216, 217, 218.
 #### F-C8: packages/eslint-plugin-yield/src/calls.js:61 (Survived, ConditionalExpression)
 
 ```diff
-- ode.type === "JSXIdentifier" || node.type === "Identifier" 
+- node.type === "JSXIdentifier" || node.type === "Identifier"
 + true
 ```
 
@@ -226,7 +226,7 @@ Covered test IDs: 53, 54, 56, 57, 58, 59, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71
 #### F-C9: packages/eslint-plugin-yield/src/calls.js:62 (Survived, ConditionalExpression)
 
 ```diff
-- name)
+- !name
 + false
 ```
 
@@ -237,7 +237,7 @@ Covered test IDs: 53, 54, 56, 57, 58, 59, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71
 #### F-C10: packages/eslint-plugin-yield/src/calls.js:67 (Survived, ConditionalExpression)
 
 ```diff
-- ef.parent.importKind !== "type";
+- def.parent.importKind !== "type"
 + true
 ```
 
@@ -248,7 +248,7 @@ Covered test IDs: 57, 59, 64, 65, 66, 67, 69, 70, 71, 72, 81, 83.
 #### F-C11: packages/eslint-plugin-yield/src/calls.js:72 (Survived, ConditionalExpression)
 
 ```diff
-- nit.callee.type === "Identifier" 
+- init.callee.type === "Identifier"
 + true
 ```
 
@@ -259,7 +259,7 @@ Covered test IDs: 56, 58, 63, 68, 80, 81, 82, 206, 207, 208, 209, 210.
 #### F-C12: packages/eslint-plugin-yield/src/calls.js:73 (Survived, ConditionalExpression)
 
 ```diff
-- nit.callee.name === "component" || init.callee.name === "lazy")
+- init.callee.name === "component" || init.callee.name === "lazy"
 + true
 ```
 
@@ -270,8 +270,7 @@ Covered test IDs: 56, 58, 63, 68, 80, 81, 82, 206, 207, 208, 209, 210.
 #### F-C13: packages/eslint-plugin-yield/src/calls.js:84 (Survived, ConditionalExpression)
 
 ```diff
-- .type !== "ArrowFunctionExpression"
-- 
+- p.type !== "ArrowFunctionExpression"
 + true
 ```
 
@@ -282,7 +281,7 @@ Covered test IDs: 56, 57, 58, 59, 77, 78, 80, 81, 82, 83, 109, 154, 155, 157, 15
 #### F-C14: packages/eslint-plugin-yield/src/calls.js:94 (Survived, ConditionalExpression)
 
 ```diff
-- ound || !n || typeof n.type !== "string")
+- found || !n || typeof n.type !== "string"
 + false
 ```
 
@@ -293,7 +292,7 @@ Covered test IDs: 56, 57, 58, 59, 63, 155.
 #### F-C15: packages/eslint-plugin-yield/src/calls.js:94 (Survived, LogicalOperator)
 
 ```diff
-- ound || !n || typeof n.type !== "string")
+- found || !n || typeof n.type !== "string"
 + (found || !n) && typeof n.type !== "string"
 ```
 
@@ -304,7 +303,7 @@ Covered test IDs: 56, 57, 58, 59, 63, 155.
 #### F-C16: packages/eslint-plugin-yield/src/calls.js:94 (Survived, ConditionalExpression)
 
 ```diff
-- ound || !n 
+- found || !n
 + false
 ```
 
@@ -315,7 +314,7 @@ Covered test IDs: 56, 57, 58, 59, 63, 155.
 #### F-C17: packages/eslint-plugin-yield/src/calls.js:94 (Survived, LogicalOperator)
 
 ```diff
-- ound || !n 
+- found || !n
 + found && !n
 ```
 
@@ -326,7 +325,7 @@ Covered test IDs: 56, 57, 58, 59, 63, 155.
 #### F-C18: packages/eslint-plugin-yield/src/calls.js:94 (Survived, ConditionalExpression)
 
 ```diff
-- ypeof n.type !== "string")
+- typeof n.type !== "string"
 + false
 ```
 
@@ -337,7 +336,7 @@ Covered test IDs: 56, 57, 58, 59, 63, 155.
 #### F-C19: packages/eslint-plugin-yield/src/calls.js:95 (Survived, ConditionalExpression)
 
 ```diff
--  !== node && /Function/.test(n.type))
+- n !== node && /Function/.test(n.type)
 + false
 ```
 
@@ -348,7 +347,7 @@ Covered test IDs: 56, 57, 58, 59, 63, 155.
 #### F-C20: packages/eslint-plugin-yield/src/calls.js:95 (Survived, ConditionalExpression)
 
 ```diff
--  !== node 
+- n !== node
 + true
 ```
 
@@ -7508,4 +7507,9 @@ solid-yield check: 2 files, 1 errors
 
 ## Build and gate verification
 
-Both local commits were preceded by `pnpm build` and a complete gate against `documentation/yield-gate-baseline.json`. The successful runs had **65 pass / 0 fail / 0 skip**: 699s with `--jobs 1`, and 521s with `--jobs 2`. The first concurrent attempt had one unchanged Sierpinski animation-frame test exceed its 5-second timeout. It passed in both full reruns. No test timeout, existing gate entry, or checker source was changed. Only the new mutation step and initial score/site floors were added to the baseline. Full step evidence is in `mutation-gate-runs.json`.
+Each local commit was preceded by pnpm build and a full gate against documentation/yield-gate-baseline.json. Successful full runs:
+- 65 pass / 0 fail / 0 skip in 699s; --jobs 1; head d88e31c.
+- 65 pass / 0 fail / 0 skip in 521s; --jobs 2; head 67dd7d7.
+- 65 pass / 0 fail / 0 skip in 520s; --jobs 2; head 09c800a.
+
+The first concurrent gate attempt had one unchanged Sierpinski animation-frame test exceed its 5-second timeout; the complete reruns passed. No test timeout, existing gate entry, or checker source was changed. Only the mutation step and initial score/site floors were added to the baseline. Literal unified diffs retain blank context-line prefixes; those intentional spaces can trigger the default Git whitespace check.

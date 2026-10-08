@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { resolve, join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { catalog } from "./catalog.mjs";
@@ -138,7 +138,7 @@ const checkerSurvivors = checker
   .slice(0, 20);
 function offset(source, loc) {
   const rows = source.split("\n");
-  return rows.slice(0, loc.line - 1).reduce((n, s) => n + s.length + 1, 0) + loc.column;
+  return rows.slice(0, loc.line - 1).reduce((n, s) => n + s.length + 1, 0) + loc.column - 1;
 }
 for (const [i, m] of checkerSurvivors.entries()) {
   const old = m.source.slice(offset(m.source, m.location.start), offset(m.source, m.location.end));
@@ -213,6 +213,30 @@ out.push(
   "- F-HISTORY: Seven historical review identities remain unavailable; 27/34 reconstructed slots are covered.",
   "- F-BOUNDARY-LOCALITY: Removing wrappers/providers can report valid boundary errors at the root rather than at the edit. Those are survivors under the requested strict locality rule."
 );
+const gatePath = join(root, "documentation/mutation-gate-runs.json");
+if (existsSync(gatePath)) {
+  const gates = JSON.parse(readFileSync(gatePath, "utf8"));
+  out.push(
+    "",
+    "## Build and gate verification",
+    "",
+    "Each local commit was preceded by pnpm build and a full gate against documentation/yield-gate-baseline.json. Successful full runs:"
+  );
+  for (const gate of gates.filter(g => g.summary.green && !g.summary.fail))
+    out.push(
+      "- " +
+        gate.summary.line +
+        "; --jobs " +
+        gate.options.jobs +
+        "; head " +
+        gate.head.slice(0, 7) +
+        "."
+    );
+  out.push(
+    "",
+    "The first concurrent gate attempt had one unchanged Sierpinski animation-frame test exceed its 5-second timeout; the complete reruns passed. No test timeout, existing gate entry, or checker source was changed. Only the mutation step and initial score/site floors were added to the baseline. Literal unified diffs retain blank context-line prefixes; those intentional spaces can trigger the default Git whitespace check."
+  );
+}
 writeFileSync(join(root, "documentation/mutation-report.md"), out.join("\n") + "\n");
 writeFileSync(
   join(root, "documentation/mutation-summary.json"),

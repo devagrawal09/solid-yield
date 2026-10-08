@@ -53,7 +53,9 @@ Mutation testing is a standing process requirement, in progress on proto/sugar-m
 The plain-Solid dashboard, productized islands and lazy builder follow the order above. The **analyzer tool is done on main**; a public analyzer product is not scheduled.
 Retiring the proofs branch into main is done at **5d50680**; it remains as history.
 
-Unscheduled candidates: soak test; serializable color;
+Soak candidate delivered on `harness/soak`: [five-minute report](documentation/soak-report.md), all nine twins, manual report only (gate SKIP). Six growth findings F-K1–F-K6; parity and uncaught-error checks stayed clean; no runtime fixes.
+
+Unscheduled candidates: serializable color;
 keyed re-delivery for rollback UI; static-markup skip in the resumer; public
 roadmap issue.
 

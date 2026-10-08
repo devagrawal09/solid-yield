@@ -1,0 +1,4186 @@
+{
+  "date": "2026-10-08T14:55:48.905Z",
+  "node": "v24.18.0",
+  "options": {
+    "minutes": 5,
+    "seed": 109,
+    "checkpoint": 5,
+    "only": null,
+    "rounds": null,
+    "out": "/tmp/sy-soak-long.json"
+  },
+  "mode": "development/jsdom; exposed GC; report only",
+  "results": [
+    {
+      "twin": "docs-yield",
+      "rounds": 5577,
+      "elapsedSeconds": 300.00839041600005,
+      "parityCheckpoints": 1116,
+      "parityStepChecks": 27900,
+      "mismatches": [],
+      "errors": [],
+      "stepFailures": [],
+      "seed": 109,
+      "errorCount": 0,
+      "originalErrorCount": 0,
+      "originalErrors": [],
+      "counterViolations": [],
+      "trends": {
+        "heap": {
+          "slope": 2051.1249318475902,
+          "threshold": 4096,
+          "growth": 11426816.995322926,
+          "flagged": false
+        },
+        "roots": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "boundaries": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "routines": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "domNodes": {
+          "slope": -0.00000901091284700234,
+          "threshold": 0.1,
+          "growth": -0.05019979547065004,
+          "flagged": false
+        },
+        "pendingPromises": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventsInFlight": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventQueueDepth": {
+          "slope": 0,
+          "threshold": 0,
+          "growth": 0,
+          "flagged": false
+        }
+      },
+      "originalTrends": {
+        "heap": {
+          "slope": 2038.0102847431585,
+          "threshold": 4096,
+          "growth": 11353755.296304137,
+          "flagged": false
+        },
+        "roots": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "boundaries": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "routines": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "domNodes": {
+          "slope": -0.00000901091284700234,
+          "threshold": 0.1,
+          "growth": -0.05019979547065004,
+          "flagged": false
+        },
+        "pendingPromises": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventsInFlight": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventQueueDepth": {
+          "slope": 0,
+          "threshold": 0,
+          "growth": 0,
+          "flagged": false
+        }
+      },
+      "afterDispose": {
+        "roots": 0,
+        "boundaries": 0,
+        "routines": 0,
+        "pendingPromises": 0,
+        "eventsInFlight": 0,
+        "eventQueueDepth": 0
+      },
+      "sampleCount": 5577,
+      "firstSample": {
+        "round": 1,
+        "timeMs": 778.554042,
+        "heap": 42232064,
+        "domNodes": 255,
+        "roots": 1,
+        "boundaries": 11,
+        "routines": 63,
+        "pendingPromises": 0,
+        "eventsInFlight": 0,
+        "eventQueueDepth": 0
+      },
+      "lastSample": {
+        "round": 5577,
+        "timeMs": 300702.817625,
+        "heap": 57271752,
+        "domNodes": 256,
+        "roots": 1,
+        "boundaries": 11,
+        "routines": 63,
+        "pendingPromises": 0,
+        "eventsInFlight": 0,
+        "eventQueueDepth": 0
+      }
+    },
+    {
+      "twin": "effect-yield",
+      "rounds": 1099,
+      "elapsedSeconds": 300.84175183300005,
+      "parityCheckpoints": 220,
+      "parityStepChecks": 8140,
+      "mismatches": [],
+      "errors": [],
+      "stepFailures": [],
+      "seed": 109,
+      "errorCount": 0,
+      "originalErrorCount": 0,
+      "originalErrors": [],
+      "counterViolations": [],
+      "trends": {
+        "heap": {
+          "slope": 339245.2276887236,
+          "threshold": 4096,
+          "growth": 370795033.8637749,
+          "flagged": true
+        },
+        "roots": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "boundaries": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "routines": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "domNodes": {
+          "slope": 0,
+          "threshold": 0.1,
+          "growth": 0,
+          "flagged": false
+        },
+        "pendingPromises": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventsInFlight": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventQueueDepth": {
+          "slope": 0,
+          "threshold": 0,
+          "growth": 0,
+          "flagged": false
+        }
+      },
+      "originalTrends": {
+        "heap": {
+          "slope": 320737.49811493454,
+          "threshold": 4096,
+          "growth": 350566085.4396235,
+          "flagged": true
+        },
+        "roots": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "boundaries": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "routines": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "domNodes": {
+          "slope": 0,
+          "threshold": 0.1,
+          "growth": 0,
+          "flagged": false
+        },
+        "pendingPromises": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventsInFlight": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventQueueDepth": {
+          "slope": 0,
+          "threshold": 0,
+          "growth": 0,
+          "flagged": false
+        }
+      },
+      "afterDispose": {
+        "roots": 0,
+        "boundaries": 0,
+        "routines": 0,
+        "pendingPromises": 0,
+        "eventsInFlight": 0,
+        "eventQueueDepth": 0
+      },
+      "sampleCount": 1099,
+      "firstSample": {
+        "round": 1,
+        "timeMs": 1767.867917,
+        "heap": 53281976,
+        "domNodes": 162,
+        "roots": 1,
+        "boundaries": 1,
+        "routines": 27,
+        "pendingPromises": 0,
+        "eventsInFlight": 0,
+        "eventQueueDepth": 0
+      },
+      "lastSample": {
+        "round": 1099,
+        "timeMs": 302354.729125,
+        "heap": 429364056,
+        "domNodes": 162,
+        "roots": 1,
+        "boundaries": 1,
+        "routines": 27,
+        "pendingPromises": 0,
+        "eventsInFlight": 0,
+        "eventQueueDepth": 0
+      }
+    },
+    {
+      "twin": "hackernews-spa-yield",
+      "rounds": 536,
+      "elapsedSeconds": 300.391509083,
+      "parityCheckpoints": 108,
+      "parityStepChecks": 2052,
+      "mismatches": [],
+      "errors": [],
+      "stepFailures": [],
+      "seed": 109,
+      "errorCount": 0,
+      "originalErrorCount": 0,
+      "originalErrors": [],
+      "counterViolations": [],
+      "trends": {
+        "heap": {
+          "slope": 15483.446563963475,
+          "threshold": 4096,
+          "growth": 8206226.678900641,
+          "flagged": true
+        },
+        "roots": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "boundaries": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "routines": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "domNodes": {
+          "slope": 0,
+          "threshold": 0.1,
+          "growth": 0,
+          "flagged": false
+        },
+        "pendingPromises": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventsInFlight": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventQueueDepth": {
+          "slope": 0,
+          "threshold": 0,
+          "growth": 0,
+          "flagged": false
+        }
+      },
+      "originalTrends": {
+        "heap": {
+          "slope": 15235.596769345817,
+          "threshold": 4096,
+          "growth": 8074866.287753283,
+          "flagged": true
+        },
+        "roots": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "boundaries": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "routines": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "domNodes": {
+          "slope": 0,
+          "threshold": 0.1,
+          "growth": 0,
+          "flagged": false
+        },
+        "pendingPromises": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventsInFlight": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventQueueDepth": {
+          "slope": 0,
+          "threshold": 0,
+          "growth": 0,
+          "flagged": false
+        }
+      },
+      "afterDispose": {
+        "roots": 0,
+        "boundaries": 0,
+        "routines": 0,
+        "pendingPromises": 0,
+        "eventsInFlight": 0,
+        "eventQueueDepth": 0
+      },
+      "sampleCount": 536,
+      "firstSample": {
+        "round": 1,
+        "timeMs": 2639.955084,
+        "heap": 62740368,
+        "domNodes": 690,
+        "roots": 1,
+        "boundaries": 2,
+        "routines": 66,
+        "pendingPromises": 0,
+        "eventsInFlight": 0,
+        "eventQueueDepth": 0
+      },
+      "lastSample": {
+        "round": 536,
+        "timeMs": 302233.935834,
+        "heap": 75769104,
+        "domNodes": 690,
+        "roots": 1,
+        "boundaries": 2,
+        "routines": 66,
+        "pendingPromises": 0,
+        "eventsInFlight": 0,
+        "eventQueueDepth": 0
+      }
+    },
+    {
+      "twin": "rendering-yield",
+      "rounds": 248,
+      "elapsedSeconds": 300.22138191700003,
+      "parityCheckpoints": 50,
+      "parityStepChecks": 1350,
+      "mismatches": [],
+      "errors": [],
+      "stepFailures": [],
+      "seed": 109,
+      "errorCount": 0,
+      "originalErrorCount": 0,
+      "originalErrors": [],
+      "counterViolations": [],
+      "trends": {
+        "heap": {
+          "slope": 9911.023298057578,
+          "threshold": 4096,
+          "growth": 2398467.6381299337,
+          "flagged": true
+        },
+        "roots": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "boundaries": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "routines": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "domNodes": {
+          "slope": 0,
+          "threshold": 0.1,
+          "growth": 0,
+          "flagged": false
+        },
+        "pendingPromises": {
+          "slope": -0.0009952146067396936,
+          "threshold": 0.05,
+          "growth": -0.24084193483100583,
+          "flagged": false
+        },
+        "eventsInFlight": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventQueueDepth": {
+          "slope": 0,
+          "threshold": 0,
+          "growth": 0,
+          "flagged": false
+        }
+      },
+      "originalTrends": {
+        "heap": {
+          "slope": 9135.924865478775,
+          "threshold": 4096,
+          "growth": 2210893.8174458635,
+          "flagged": true
+        },
+        "roots": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "boundaries": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "routines": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "domNodes": {
+          "slope": 0,
+          "threshold": 0.1,
+          "growth": 0,
+          "flagged": false
+        },
+        "pendingPromises": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventsInFlight": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventQueueDepth": {
+          "slope": 0,
+          "threshold": 0,
+          "growth": 0,
+          "flagged": false
+        }
+      },
+      "afterDispose": {
+        "roots": 0,
+        "boundaries": 0,
+        "routines": 0,
+        "pendingPromises": 0,
+        "eventsInFlight": 0,
+        "eventQueueDepth": 0,
+        "heap": 41937704,
+        "domNodes": 4
+      },
+      "originalAfterDispose": {
+        "heap": 39976584,
+        "domNodes": 4
+      },
+      "sampleCount": 248,
+      "firstSample": {
+        "round": 1,
+        "timeMs": 1961.171583,
+        "heap": 37637480,
+        "domNodes": 54,
+        "mockRandomCalls": 0,
+        "roots": 1,
+        "boundaries": 0,
+        "routines": 23,
+        "pendingPromises": 0,
+        "eventsInFlight": 0,
+        "eventQueueDepth": 0
+      },
+      "lastSample": {
+        "round": 248,
+        "timeMs": 300873.744791,
+        "heap": 42164328,
+        "domNodes": 54,
+        "mockRandomCalls": 0,
+        "roots": 1,
+        "boundaries": 0,
+        "routines": 23,
+        "pendingPromises": 0,
+        "eventsInFlight": 0,
+        "eventQueueDepth": 0
+      }
+    },
+    {
+      "twin": "room-yield",
+      "rounds": 1797,
+      "elapsedSeconds": 300.077922792,
+      "parityCheckpoints": 360,
+      "parityStepChecks": 6120,
+      "mismatches": [],
+      "errors": [],
+      "stepFailures": [],
+      "seed": 109,
+      "errorCount": 0,
+      "originalErrorCount": 0,
+      "originalErrors": [],
+      "counterViolations": [],
+      "trends": {
+        "heap": {
+          "slope": 7852.8479631662285,
+          "threshold": 4096,
+          "growth": 14064450.702030715,
+          "flagged": true
+        },
+        "roots": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "boundaries": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "routines": {
+          "slope": 0.06146629248478603,
+          "threshold": 0.05,
+          "growth": 110.08612984025177,
+          "flagged": true
+        },
+        "domNodes": {
+          "slope": 0.43026404739350216,
+          "threshold": 0.1,
+          "growth": 770.6029088817623,
+          "flagged": true
+        },
+        "pendingPromises": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventsInFlight": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventQueueDepth": {
+          "slope": 0,
+          "threshold": 0,
+          "growth": 0,
+          "flagged": false
+        }
+      },
+      "originalTrends": {
+        "heap": {
+          "slope": 7742.270625788156,
+          "threshold": 4096,
+          "growth": 13866406.690786589,
+          "flagged": true
+        },
+        "roots": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "boundaries": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "routines": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "domNodes": {
+          "slope": 0.43026404739350216,
+          "threshold": 0.1,
+          "growth": 770.6029088817623,
+          "flagged": true
+        },
+        "pendingPromises": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventsInFlight": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventQueueDepth": {
+          "slope": 0,
+          "threshold": 0,
+          "growth": 0,
+          "flagged": false
+        }
+      },
+      "afterDispose": {
+        "roots": 0,
+        "boundaries": 0,
+        "routines": 0,
+        "pendingPromises": 0,
+        "eventsInFlight": 0,
+        "eventQueueDepth": 0,
+        "heap": 60233640,
+        "domNodes": 4
+      },
+      "originalAfterDispose": {
+        "heap": 58517392,
+        "domNodes": 4
+      },
+      "final100Trends": {
+        "heap": {
+          "slope": 5771.010526315786,
+          "threshold": 4096,
+          "growth": 542474.9894736839,
+          "flagged": false
+        },
+        "roots": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "boundaries": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "routines": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "domNodes": {
+          "slope": 0,
+          "threshold": 0.1,
+          "growth": 0,
+          "flagged": false
+        },
+        "pendingPromises": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventsInFlight": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventQueueDepth": {
+          "slope": 0,
+          "threshold": 0,
+          "growth": 0,
+          "flagged": false
+        }
+      },
+      "sampleCount": 1797,
+      "firstSample": {
+        "round": 1,
+        "timeMs": 2301.072541,
+        "heap": 42189248,
+        "domNodes": 173,
+        "mockRandomCalls": 4,
+        "roots": 1,
+        "boundaries": 15,
+        "routines": 73,
+        "pendingPromises": 0,
+        "eventsInFlight": 0,
+        "eventQueueDepth": 0
+      },
+      "lastSample": {
+        "round": 1797,
+        "timeMs": 302063.773375,
+        "heap": 62019848,
+        "domNodes": 1566,
+        "mockRandomCalls": 1800,
+        "roots": 1,
+        "boundaries": 15,
+        "routines": 272,
+        "pendingPromises": 0,
+        "eventsInFlight": 0,
+        "eventQueueDepth": 0
+      }
+    },
+    {
+      "twin": "sierpinski-yield",
+      "rounds": 54,
+      "elapsedSeconds": 307.329007708,
+      "parityCheckpoints": 11,
+      "parityStepChecks": 121,
+      "mismatches": [],
+      "errors": [],
+      "stepFailures": [],
+      "seed": 109,
+      "errorCount": 0,
+      "originalErrorCount": 0,
+      "originalErrors": [],
+      "counterViolations": [],
+      "trends": {
+        "heap": {
+          "slope": 4632.4971428571425,
+          "threshold": 4096,
+          "growth": 222359.86285714284,
+          "flagged": false
+        },
+        "roots": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "boundaries": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "routines": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "domNodes": {
+          "slope": 0,
+          "threshold": 0.1,
+          "growth": 0,
+          "flagged": false
+        },
+        "pendingPromises": {
+          "slope": 0.0020408163265306124,
+          "threshold": 0.05,
+          "growth": 0.0979591836734694,
+          "flagged": false
+        },
+        "eventsInFlight": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventQueueDepth": {
+          "slope": 0,
+          "threshold": 0,
+          "growth": 0,
+          "flagged": false
+        }
+      },
+      "originalTrends": {
+        "heap": {
+          "slope": -28897.990204081645,
+          "threshold": 4096,
+          "growth": -1387103.529795919,
+          "flagged": false
+        },
+        "roots": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "boundaries": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "routines": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "domNodes": {
+          "slope": 0,
+          "threshold": 0.1,
+          "growth": 0,
+          "flagged": false
+        },
+        "pendingPromises": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventsInFlight": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventQueueDepth": {
+          "slope": 0,
+          "threshold": 0,
+          "growth": 0,
+          "flagged": false
+        }
+      },
+      "afterDispose": {
+        "roots": 0,
+        "boundaries": 0,
+        "routines": 0,
+        "pendingPromises": 0,
+        "eventsInFlight": 0,
+        "eventQueueDepth": 0,
+        "heap": 52972712,
+        "domNodes": 4
+      },
+      "originalAfterDispose": {
+        "heap": 39253704,
+        "domNodes": 4
+      },
+      "sampleCount": 54,
+      "firstSample": {
+        "round": 1,
+        "timeMs": 7566.823709,
+        "heap": 62041656,
+        "domNodes": 1463,
+        "mockRandomCalls": 0,
+        "roots": 1,
+        "boundaries": 2,
+        "routines": 4378,
+        "pendingPromises": 0,
+        "eventsInFlight": 0,
+        "eventQueueDepth": 0
+      },
+      "lastSample": {
+        "round": 54,
+        "timeMs": 308175.240667,
+        "heap": 57103576,
+        "domNodes": 1463,
+        "mockRandomCalls": 0,
+        "roots": 1,
+        "boundaries": 2,
+        "routines": 4378,
+        "pendingPromises": 0,
+        "eventsInFlight": 0,
+        "eventQueueDepth": 0
+      }
+    },
+    {
+      "twin": "sierpinski-yield-h",
+      "rounds": 26,
+      "elapsedSeconds": 314.0726252499998,
+      "parityCheckpoints": 6,
+      "parityStepChecks": 66,
+      "mismatches": [],
+      "errors": [],
+      "stepFailures": [],
+      "seed": 109,
+      "errorCount": 0,
+      "originalErrorCount": 0,
+      "originalErrors": [],
+      "counterViolations": [],
+      "trends": {
+        "heap": {
+          "slope": 7872.810389610389,
+          "threshold": 4096,
+          "growth": 157456.20779220777,
+          "flagged": false
+        },
+        "roots": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "boundaries": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "routines": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "domNodes": {
+          "slope": 0,
+          "threshold": 0.1,
+          "growth": 0,
+          "flagged": false
+        },
+        "pendingPromises": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventsInFlight": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventQueueDepth": {
+          "slope": 0,
+          "threshold": 0,
+          "growth": 0,
+          "flagged": false
+        }
+      },
+      "originalTrends": {
+        "heap": {
+          "slope": -148812.55064935065,
+          "threshold": 4096,
+          "growth": -2976251.012987013,
+          "flagged": false
+        },
+        "roots": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "boundaries": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "routines": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "domNodes": {
+          "slope": 0,
+          "threshold": 0.1,
+          "growth": 0,
+          "flagged": false
+        },
+        "pendingPromises": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventsInFlight": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventQueueDepth": {
+          "slope": 0,
+          "threshold": 0,
+          "growth": 0,
+          "flagged": false
+        }
+      },
+      "afterDispose": {
+        "roots": 0,
+        "boundaries": 0,
+        "routines": 0,
+        "pendingPromises": 0,
+        "eventsInFlight": 0,
+        "eventQueueDepth": 0,
+        "heap": 52746448,
+        "domNodes": 4
+      },
+      "originalAfterDispose": {
+        "heap": 39256600,
+        "domNodes": 4
+      },
+      "sampleCount": 26,
+      "firstSample": {
+        "round": 1,
+        "timeMs": 10381.370167,
+        "heap": 64929144,
+        "domNodes": 1463,
+        "mockRandomCalls": 0,
+        "roots": 1,
+        "boundaries": 2,
+        "routines": 12029,
+        "pendingPromises": 0,
+        "eventsInFlight": 0,
+        "eventQueueDepth": 0
+      },
+      "lastSample": {
+        "round": 26,
+        "timeMs": 315006.760959,
+        "heap": 60014176,
+        "domNodes": 1463,
+        "mockRandomCalls": 0,
+        "roots": 1,
+        "boundaries": 2,
+        "routines": 12029,
+        "pendingPromises": 0,
+        "eventsInFlight": 0,
+        "eventQueueDepth": 0
+      }
+    },
+    {
+      "twin": "todos-yield",
+      "rounds": 1375,
+      "elapsedSeconds": 300.08505979199987,
+      "parityCheckpoints": 276,
+      "parityStepChecks": 5244,
+      "mismatches": [],
+      "errors": [],
+      "stepFailures": [],
+      "seed": 109,
+      "errorCount": 0,
+      "originalErrorCount": 0,
+      "originalErrors": [],
+      "counterViolations": [],
+      "trends": {
+        "heap": {
+          "slope": 12812.336015738148,
+          "threshold": 4096,
+          "growth": 17540088.005545527,
+          "flagged": true
+        },
+        "roots": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "boundaries": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "routines": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "domNodes": {
+          "slope": 0,
+          "threshold": 0.1,
+          "growth": 0,
+          "flagged": false
+        },
+        "pendingPromises": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventsInFlight": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventQueueDepth": {
+          "slope": 0,
+          "threshold": 0,
+          "growth": 0,
+          "flagged": false
+        }
+      },
+      "originalTrends": {
+        "heap": {
+          "slope": 12798.219141356403,
+          "threshold": 4096,
+          "growth": 17520762.004516914,
+          "flagged": true
+        },
+        "roots": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "boundaries": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "routines": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "domNodes": {
+          "slope": 0,
+          "threshold": 0.1,
+          "growth": 0,
+          "flagged": false
+        },
+        "pendingPromises": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventsInFlight": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventQueueDepth": {
+          "slope": 0,
+          "threshold": 0,
+          "growth": 0,
+          "flagged": false
+        }
+      },
+      "afterDispose": {
+        "roots": 0,
+        "boundaries": 0,
+        "routines": 0,
+        "pendingPromises": 0,
+        "eventsInFlight": 0,
+        "eventQueueDepth": 0,
+        "heap": 55784960,
+        "domNodes": 4
+      },
+      "originalAfterDispose": {
+        "heap": 54399424,
+        "domNodes": 4
+      },
+      "sampleCount": 1375,
+      "firstSample": {
+        "round": 1,
+        "timeMs": 2457.798792,
+        "heap": 35545864,
+        "domNodes": 12,
+        "mockRandomCalls": 15,
+        "roots": 1,
+        "boundaries": 2,
+        "routines": 22,
+        "pendingPromises": 0,
+        "eventsInFlight": 0,
+        "eventQueueDepth": 0
+      },
+      "lastSample": {
+        "round": 1375,
+        "timeMs": 302241.58025,
+        "heap": 55920104,
+        "domNodes": 12,
+        "mockRandomCalls": 25887,
+        "roots": 1,
+        "boundaries": 2,
+        "routines": 22,
+        "pendingPromises": 0,
+        "eventsInFlight": 0,
+        "eventQueueDepth": 0
+      }
+    },
+    {
+      "twin": "todos-yield-h",
+      "rounds": 1648,
+      "elapsedSeconds": 300.2807724580001,
+      "parityCheckpoints": 330,
+      "parityStepChecks": 6270,
+      "mismatches": [],
+      "errors": [],
+      "stepFailures": [],
+      "seed": 109,
+      "errorCount": 0,
+      "originalErrorCount": 0,
+      "originalErrors": [],
+      "counterViolations": [],
+      "trends": {
+        "heap": {
+          "slope": 12997.725209364642,
+          "threshold": 4096,
+          "growth": 21342264.793776743,
+          "flagged": true
+        },
+        "roots": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "boundaries": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "routines": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "domNodes": {
+          "slope": 0,
+          "threshold": 0.1,
+          "growth": 0,
+          "flagged": false
+        },
+        "pendingPromises": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventsInFlight": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventQueueDepth": {
+          "slope": 0,
+          "threshold": 0,
+          "growth": 0,
+          "flagged": false
+        }
+      },
+      "originalTrends": {
+        "heap": {
+          "slope": 12524.421259576537,
+          "threshold": 4096,
+          "growth": 20565099.708224673,
+          "flagged": true
+        },
+        "roots": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "boundaries": {
+          "slope": 0,
+          "threshold": 0.01,
+          "growth": 0,
+          "flagged": false
+        },
+        "routines": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "domNodes": {
+          "slope": 0,
+          "threshold": 0.1,
+          "growth": 0,
+          "flagged": false
+        },
+        "pendingPromises": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventsInFlight": {
+          "slope": 0,
+          "threshold": 0.05,
+          "growth": 0,
+          "flagged": false
+        },
+        "eventQueueDepth": {
+          "slope": 0,
+          "threshold": 0,
+          "growth": 0,
+          "flagged": false
+        }
+      },
+      "afterDispose": {
+        "roots": 0,
+        "boundaries": 0,
+        "routines": 0,
+        "pendingPromises": 0,
+        "eventsInFlight": 0,
+        "eventQueueDepth": 0,
+        "heap": 60333912,
+        "domNodes": 4
+      },
+      "originalAfterDispose": {
+        "heap": 57388936,
+        "domNodes": 4
+      },
+      "sampleCount": 1648,
+      "firstSample": {
+        "round": 1,
+        "timeMs": 1214.076416,
+        "heap": 35909896,
+        "domNodes": 10,
+        "mockRandomCalls": 15,
+        "roots": 1,
+        "boundaries": 2,
+        "routines": 22,
+        "pendingPromises": 0,
+        "eventsInFlight": 0,
+        "eventQueueDepth": 0
+      },
+      "lastSample": {
+        "round": 1648,
+        "timeMs": 301233.386625,
+        "heap": 60470640,
+        "domNodes": 10,
+        "mockRandomCalls": 31021,
+        "roots": 1,
+        "boundaries": 2,
+        "routines": 22,
+        "pendingPromises": 0,
+        "eventsInFlight": 0,
+        "eventQueueDepth": 0
+      }
+    }
+  ],
+  "findings": [
+    {
+      "id": "F-K1",
+      "twin": "effect-yield",
+      "flagged": [
+        "heap"
+      ],
+      "smallestObservedPrefix": 12,
+      "sequence": [
+        34,
+        35,
+        10,
+        11,
+        12,
+        13,
+        14,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35
+      ],
+      "liveAfter": [],
+      "errors": [],
+      "mismatches": [],
+      "stepFailures": []
+    },
+    {
+      "id": "F-K2",
+      "twin": "hackernews-spa-yield",
+      "flagged": [
+        "heap"
+      ],
+      "smallestObservedPrefix": 160,
+      "sequence": [
+        14,
+        4,
+        14,
+        1,
+        2,
+        14,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        14,
+        11,
+        12,
+        13,
+        14,
+        3,
+        14
+      ],
+      "liveAfter": [],
+      "errors": [],
+      "mismatches": [],
+      "stepFailures": []
+    },
+    {
+      "id": "F-K3",
+      "twin": "rendering-yield",
+      "flagged": [
+        "heap"
+      ],
+      "smallestObservedPrefix": 126,
+      "sequence": [
+        23,
+        24,
+        25,
+        26,
+        11,
+        12,
+        13,
+        18,
+        19,
+        20,
+        21,
+        22,
+        14,
+        15,
+        16,
+        17,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        27,
+        28
+      ],
+      "liveAfter": [],
+      "errors": [],
+      "mismatches": [],
+      "stepFailures": []
+    },
+    {
+      "id": "F-K4",
+      "twin": "room-yield",
+      "flagged": [
+        "heap",
+        "routines",
+        "domNodes"
+      ],
+      "smallestObservedPrefix": 12,
+      "sequence": [
+        "room-switch",
+        1,
+        2,
+        3,
+        7,
+        8,
+        9,
+        10,
+        "room-switch",
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        "room-switch",
+        12
+      ],
+      "liveAfter": [],
+      "errors": [],
+      "mismatches": [],
+      "stepFailures": []
+    },
+    {
+      "id": "F-K5",
+      "twin": "todos-yield",
+      "flagged": [
+        "heap"
+      ],
+      "smallestObservedPrefix": 40,
+      "sequence": [
+        "todos-start",
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        6,
+        7,
+        8,
+        4,
+        5,
+        "todos-end"
+      ],
+      "liveAfter": [],
+      "errors": [],
+      "mismatches": [],
+      "stepFailures": []
+    },
+    {
+      "id": "F-K6",
+      "twin": "todos-yield-h",
+      "flagged": [
+        "heap"
+      ],
+      "smallestObservedPrefix": 49,
+      "sequence": [
+        "todos-start",
+        17,
+        18,
+        19,
+        20,
+        4,
+        5,
+        13,
+        14,
+        15,
+        16,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        "todos-end"
+      ],
+      "liveAfter": [],
+      "errors": [],
+      "mismatches": [],
+      "stepFailures": []
+    }
+  ],
+  "diagnostics": [
+    {
+      "name": "effect-search",
+      "env": {},
+      "date": "2026-10-08T15:51:15.882Z",
+      "node": "v24.18.0",
+      "options": {
+        "minutes": 3,
+        "seed": 109,
+        "checkpoint": 5,
+        "only": "effect-yield",
+        "rounds": 100,
+        "scenario": "search",
+        "build": "yes",
+        "out": "/tmp/sy-soak-effect-search.json"
+      },
+      "mode": "development/jsdom; exposed GC; report only",
+      "clearMockHistory": false,
+      "replaceHistory": false,
+      "results": [
+        {
+          "twin": "effect-yield",
+          "rounds": 100,
+          "elapsedSeconds": 12.322622542000001,
+          "parityCheckpoints": 21,
+          "parityStepChecks": 336,
+          "mismatches": [],
+          "errors": [],
+          "stepFailures": [],
+          "seed": 109,
+          "errorCount": 0,
+          "originalErrorCount": 0,
+          "originalErrors": [],
+          "counterViolations": [],
+          "trends": {
+            "heap": {
+              "slope": 87409.95419932797,
+              "threshold": 4096,
+              "growth": 8216535.694736829,
+              "flagged": true
+            },
+            "roots": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "boundaries": {
+              "slope": 0.0015677491601343784,
+              "threshold": 0.01,
+              "growth": 0.14736842105263157,
+              "flagged": false
+            },
+            "routines": {
+              "slope": 0.003919372900335945,
+              "threshold": 0.05,
+              "growth": 0.3684210526315788,
+              "flagged": false
+            },
+            "domNodes": {
+              "slope": 0.021948488241881305,
+              "threshold": 0.1,
+              "growth": 2.0631578947368427,
+              "flagged": false
+            },
+            "pendingPromises": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventsInFlight": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventQueueDepth": {
+              "slope": 0,
+              "threshold": 0,
+              "growth": 0,
+              "flagged": false
+            }
+          },
+          "originalTrends": {
+            "heap": {
+              "slope": 74220.43437849944,
+              "threshold": 4096,
+              "growth": 6976720.831578948,
+              "flagged": true
+            },
+            "roots": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "boundaries": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "routines": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "domNodes": {
+              "slope": 0.021948488241881305,
+              "threshold": 0.1,
+              "growth": 2.0631578947368427,
+              "flagged": false
+            },
+            "pendingPromises": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventsInFlight": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventQueueDepth": {
+              "slope": 0,
+              "threshold": 0,
+              "growth": 0,
+              "flagged": false
+            }
+          },
+          "afterDispose": {
+            "roots": 0,
+            "boundaries": 0,
+            "routines": 0,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0,
+            "heap": 61586232,
+            "domNodes": 4
+          },
+          "originalAfterDispose": {
+            "heap": 58923784,
+            "domNodes": 4
+          },
+          "sampleCount": 100,
+          "firstSample": {
+            "round": 1,
+            "timeMs": 2093.188416,
+            "heap": 51759712,
+            "domNodes": 51,
+            "mockRandomCalls": 33,
+            "roots": 1,
+            "boundaries": 1,
+            "routines": 11,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0
+          },
+          "lastSample": {
+            "round": 100,
+            "timeMs": 14219.446583,
+            "heap": 61688464,
+            "domNodes": 79,
+            "mockRandomCalls": 2904,
+            "roots": 1,
+            "boundaries": 3,
+            "routines": 16,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "effect-retry",
+      "env": {},
+      "date": "2026-10-08T15:42:49.421Z",
+      "node": "v24.18.0",
+      "options": {
+        "minutes": 3,
+        "seed": 109,
+        "checkpoint": 5,
+        "only": "effect-yield",
+        "rounds": 100,
+        "scenario": "retry",
+        "build": "yes",
+        "out": "/tmp/sy-soak-effect-retry.json"
+      },
+      "mode": "development/jsdom; exposed GC; report only",
+      "clearMockHistory": false,
+      "replaceHistory": false,
+      "results": [
+        {
+          "twin": "effect-yield",
+          "rounds": 100,
+          "elapsedSeconds": 14.741224667000003,
+          "parityCheckpoints": 21,
+          "parityStepChecks": 147,
+          "mismatches": [],
+          "errors": [],
+          "stepFailures": [],
+          "seed": 109,
+          "errorCount": 0,
+          "originalErrorCount": 0,
+          "originalErrors": [],
+          "counterViolations": [],
+          "trends": {
+            "heap": {
+              "slope": 111868.5004479284,
+              "threshold": 4096,
+              "growth": 10515639.042105269,
+              "flagged": true
+            },
+            "roots": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "boundaries": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "routines": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "domNodes": {
+              "slope": 0,
+              "threshold": 0.1,
+              "growth": 0,
+              "flagged": false
+            },
+            "pendingPromises": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventsInFlight": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventQueueDepth": {
+              "slope": 0,
+              "threshold": 0,
+              "growth": 0,
+              "flagged": false
+            }
+          },
+          "originalTrends": {
+            "heap": {
+              "slope": 99709.66147816351,
+              "threshold": 4096,
+              "growth": 9372708.17894737,
+              "flagged": true
+            },
+            "roots": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "boundaries": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "routines": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "domNodes": {
+              "slope": 0,
+              "threshold": 0.1,
+              "growth": 0,
+              "flagged": false
+            },
+            "pendingPromises": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventsInFlight": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventQueueDepth": {
+              "slope": 0,
+              "threshold": 0,
+              "growth": 0,
+              "flagged": false
+            }
+          },
+          "afterDispose": {
+            "roots": 0,
+            "boundaries": 0,
+            "routines": 0,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0,
+            "heap": 63616024,
+            "domNodes": 4
+          },
+          "originalAfterDispose": {
+            "heap": 61054376,
+            "domNodes": 4
+          },
+          "sampleCount": 100,
+          "firstSample": {
+            "round": 1,
+            "timeMs": 2210.678125,
+            "heap": 51268944,
+            "domNodes": 79,
+            "mockRandomCalls": 26,
+            "roots": 1,
+            "boundaries": 3,
+            "routines": 16,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0
+          },
+          "lastSample": {
+            "round": 100,
+            "timeMs": 16785.936959,
+            "heap": 63709216,
+            "domNodes": 79,
+            "mockRandomCalls": 2204,
+            "roots": 1,
+            "boundaries": 3,
+            "routines": 16,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "effect-supersede",
+      "env": {},
+      "date": "2026-10-08T15:43:14.060Z",
+      "node": "v24.18.0",
+      "options": {
+        "minutes": 3,
+        "seed": 109,
+        "checkpoint": 5,
+        "only": "effect-yield",
+        "rounds": 100,
+        "scenario": "supersede",
+        "build": "yes",
+        "out": "/tmp/sy-soak-effect-supersede.json"
+      },
+      "mode": "development/jsdom; exposed GC; report only",
+      "clearMockHistory": false,
+      "replaceHistory": false,
+      "results": [
+        {
+          "twin": "effect-yield",
+          "rounds": 100,
+          "elapsedSeconds": 9.429292792,
+          "parityCheckpoints": 21,
+          "parityStepChecks": 210,
+          "mismatches": [],
+          "errors": [],
+          "stepFailures": [],
+          "seed": 109,
+          "errorCount": 0,
+          "originalErrorCount": 0,
+          "originalErrors": [],
+          "counterViolations": [],
+          "trends": {
+            "heap": {
+              "slope": 18987.34412094066,
+              "threshold": 4096,
+              "growth": 1784810.347368422,
+              "flagged": false
+            },
+            "roots": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "boundaries": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "routines": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "domNodes": {
+              "slope": 0,
+              "threshold": 0.1,
+              "growth": 0,
+              "flagged": false
+            },
+            "pendingPromises": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventsInFlight": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventQueueDepth": {
+              "slope": 0,
+              "threshold": 0,
+              "growth": 0,
+              "flagged": false
+            }
+          },
+          "originalTrends": {
+            "heap": {
+              "slope": 18247.109182530792,
+              "threshold": 4096,
+              "growth": 1715228.2631578944,
+              "flagged": false
+            },
+            "roots": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "boundaries": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "routines": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "domNodes": {
+              "slope": 0,
+              "threshold": 0.1,
+              "growth": 0,
+              "flagged": false
+            },
+            "pendingPromises": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventsInFlight": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventQueueDepth": {
+              "slope": 0,
+              "threshold": 0,
+              "growth": 0,
+              "flagged": false
+            }
+          },
+          "afterDispose": {
+            "roots": 0,
+            "boundaries": 0,
+            "routines": 0,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0,
+            "heap": 54078000,
+            "domNodes": 4
+          },
+          "originalAfterDispose": {
+            "heap": 52707800,
+            "domNodes": 4
+          },
+          "sampleCount": 100,
+          "firstSample": {
+            "round": 1,
+            "timeMs": 2324.070958,
+            "heap": 51086632,
+            "domNodes": 51,
+            "mockRandomCalls": 11,
+            "roots": 1,
+            "boundaries": 1,
+            "routines": 11,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0
+          },
+          "lastSample": {
+            "round": 100,
+            "timeMs": 11549.244958,
+            "heap": 54141280,
+            "domNodes": 51,
+            "mockRandomCalls": 704,
+            "roots": 1,
+            "boundaries": 1,
+            "routines": 11,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "effect-checkout",
+      "env": {},
+      "date": "2026-10-08T15:43:34.302Z",
+      "node": "v24.18.0",
+      "options": {
+        "minutes": 3,
+        "seed": 109,
+        "checkpoint": 5,
+        "only": "effect-yield",
+        "rounds": 100,
+        "scenario": "checkout",
+        "build": "yes",
+        "out": "/tmp/sy-soak-effect-checkout.json"
+      },
+      "mode": "development/jsdom; exposed GC; report only",
+      "clearMockHistory": false,
+      "replaceHistory": false,
+      "results": [
+        {
+          "twin": "effect-yield",
+          "rounds": 100,
+          "elapsedSeconds": 19.838183417,
+          "parityCheckpoints": 21,
+          "parityStepChecks": 420,
+          "mismatches": [],
+          "errors": [],
+          "stepFailures": [],
+          "seed": 109,
+          "errorCount": 0,
+          "originalErrorCount": 0,
+          "originalErrors": [],
+          "counterViolations": [],
+          "trends": {
+            "heap": {
+              "slope": 48717.939305711094,
+              "threshold": 4096,
+              "growth": 4579486.294736843,
+              "flagged": true
+            },
+            "roots": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "boundaries": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "routines": {
+              "slope": 0.0026315789473684305,
+              "threshold": 0.05,
+              "growth": 0.24736842105263246,
+              "flagged": false
+            },
+            "domNodes": {
+              "slope": 0.018421052631578946,
+              "threshold": 0.1,
+              "growth": 1.7315789473684209,
+              "flagged": false
+            },
+            "pendingPromises": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventsInFlight": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventQueueDepth": {
+              "slope": 0,
+              "threshold": 0,
+              "growth": 0,
+              "flagged": false
+            }
+          },
+          "originalTrends": {
+            "heap": {
+              "slope": 47305.152183650614,
+              "threshold": 4096,
+              "growth": 4446684.305263158,
+              "flagged": true
+            },
+            "roots": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "boundaries": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "routines": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "domNodes": {
+              "slope": 0.018421052631578946,
+              "threshold": 0.1,
+              "growth": 1.7315789473684209,
+              "flagged": false
+            },
+            "pendingPromises": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventsInFlight": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventQueueDepth": {
+              "slope": 0,
+              "threshold": 0,
+              "growth": 0,
+              "flagged": false
+            }
+          },
+          "afterDispose": {
+            "roots": 0,
+            "boundaries": 0,
+            "routines": 0,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0,
+            "heap": 60009440,
+            "domNodes": 4
+          },
+          "originalAfterDispose": {
+            "heap": 58329504,
+            "domNodes": 4
+          },
+          "sampleCount": 100,
+          "firstSample": {
+            "round": 1,
+            "timeMs": 2780.369541,
+            "heap": 52031536,
+            "domNodes": 162,
+            "mockRandomCalls": 4,
+            "roots": 1,
+            "boundaries": 1,
+            "routines": 27,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0
+          },
+          "lastSample": {
+            "round": 100,
+            "timeMs": 22333.909583,
+            "heap": 60693856,
+            "domNodes": 750,
+            "mockRandomCalls": 4,
+            "roots": 1,
+            "boundaries": 1,
+            "routines": 111,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "effect-cleared",
+      "env": {
+        "SOAK_CLEAR_MOCKS": "1"
+      },
+      "date": "2026-10-08T15:44:04.888Z",
+      "node": "v24.18.0",
+      "options": {
+        "minutes": 3,
+        "seed": 109,
+        "checkpoint": 5,
+        "only": "effect-yield",
+        "rounds": 100,
+        "scenario": "all",
+        "build": "yes",
+        "out": "/tmp/sy-soak-effect-cleared.json"
+      },
+      "mode": "development/jsdom; exposed GC; report only",
+      "clearMockHistory": true,
+      "replaceHistory": false,
+      "results": [
+        {
+          "twin": "effect-yield",
+          "rounds": 100,
+          "elapsedSeconds": 30.2392645,
+          "parityCheckpoints": 21,
+          "parityStepChecks": 777,
+          "mismatches": [],
+          "errors": [],
+          "stepFailures": [],
+          "seed": 109,
+          "errorCount": 0,
+          "originalErrorCount": 0,
+          "originalErrors": [],
+          "counterViolations": [],
+          "trends": {
+            "heap": {
+              "slope": 352101.9933930571,
+              "threshold": 4096,
+              "growth": 33097587.378947366,
+              "flagged": true
+            },
+            "roots": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "boundaries": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "routines": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "domNodes": {
+              "slope": 0,
+              "threshold": 0.1,
+              "growth": 0,
+              "flagged": false
+            },
+            "pendingPromises": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventsInFlight": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventQueueDepth": {
+              "slope": 0,
+              "threshold": 0,
+              "growth": 0,
+              "flagged": false
+            }
+          },
+          "originalTrends": {
+            "heap": {
+              "slope": 333176.51679731236,
+              "threshold": 4096,
+              "growth": 31318592.57894736,
+              "flagged": true
+            },
+            "roots": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "boundaries": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "routines": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "domNodes": {
+              "slope": 0,
+              "threshold": 0.1,
+              "growth": 0,
+              "flagged": false
+            },
+            "pendingPromises": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventsInFlight": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventQueueDepth": {
+              "slope": 0,
+              "threshold": 0,
+              "growth": 0,
+              "flagged": false
+            }
+          },
+          "afterDispose": {
+            "roots": 0,
+            "boundaries": 0,
+            "routines": 0,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0,
+            "heap": 90626304,
+            "domNodes": 4
+          },
+          "originalAfterDispose": {
+            "heap": 87233152,
+            "domNodes": 4
+          },
+          "sampleCount": 100,
+          "firstSample": {
+            "round": 1,
+            "timeMs": 2370.464875,
+            "heap": 53289680,
+            "domNodes": 162,
+            "mockRandomCalls": 0,
+            "roots": 1,
+            "boundaries": 1,
+            "routines": 27,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0
+          },
+          "lastSample": {
+            "round": 100,
+            "timeMs": 32142.238125,
+            "heap": 90869736,
+            "domNodes": 162,
+            "mockRandomCalls": 0,
+            "roots": 1,
+            "boundaries": 1,
+            "routines": 27,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "hn-control",
+      "env": {
+        "SOAK_CLEAR_MOCKS": "1",
+        "SOAK_REPLACE_HISTORY": "1"
+      },
+      "date": "2026-10-08T15:44:45.291Z",
+      "node": "v24.18.0",
+      "options": {
+        "minutes": 3,
+        "seed": 109,
+        "checkpoint": 5,
+        "only": "hackernews-spa-yield",
+        "rounds": 100,
+        "scenario": "all",
+        "build": "yes",
+        "out": "/tmp/sy-soak-hn-control.json"
+      },
+      "mode": "development/jsdom; exposed GC; report only",
+      "clearMockHistory": true,
+      "replaceHistory": true,
+      "results": [
+        {
+          "twin": "hackernews-spa-yield",
+          "rounds": 100,
+          "elapsedSeconds": 72.14253645800001,
+          "parityCheckpoints": 21,
+          "parityStepChecks": 399,
+          "mismatches": [],
+          "errors": [],
+          "stepFailures": [],
+          "seed": 109,
+          "errorCount": 0,
+          "originalErrorCount": 0,
+          "originalErrors": [],
+          "counterViolations": [],
+          "trends": {
+            "heap": {
+              "slope": 13218.275251959696,
+              "threshold": 4096,
+              "growth": 1242517.8736842114,
+              "flagged": false
+            },
+            "roots": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "boundaries": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "routines": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "domNodes": {
+              "slope": 0,
+              "threshold": 0.1,
+              "growth": 0,
+              "flagged": false
+            },
+            "pendingPromises": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventsInFlight": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventQueueDepth": {
+              "slope": 0,
+              "threshold": 0,
+              "growth": 0,
+              "flagged": false
+            }
+          },
+          "originalTrends": {
+            "heap": {
+              "slope": 11944.645800671902,
+              "threshold": 4096,
+              "growth": 1122796.7052631588,
+              "flagged": false
+            },
+            "roots": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "boundaries": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "routines": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "domNodes": {
+              "slope": 0,
+              "threshold": 0.1,
+              "growth": 0,
+              "flagged": false
+            },
+            "pendingPromises": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventsInFlight": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventQueueDepth": {
+              "slope": 0,
+              "threshold": 0,
+              "growth": 0,
+              "flagged": false
+            }
+          },
+          "afterDispose": {
+            "roots": 0,
+            "boundaries": 0,
+            "routines": 0,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0,
+            "heap": 66971848,
+            "domNodes": 4
+          },
+          "originalAfterDispose": {
+            "heap": 65429648,
+            "domNodes": 4
+          },
+          "sampleCount": 100,
+          "firstSample": {
+            "round": 1,
+            "timeMs": 3328.779792,
+            "heap": 62672800,
+            "domNodes": 690,
+            "mockRandomCalls": 0,
+            "roots": 1,
+            "boundaries": 2,
+            "routines": 66,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0
+          },
+          "lastSample": {
+            "round": 100,
+            "timeMs": 74474.173917,
+            "heap": 67991816,
+            "domNodes": 690,
+            "mockRandomCalls": 0,
+            "roots": 1,
+            "boundaries": 2,
+            "routines": 66,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "rendering-control",
+      "env": {
+        "SOAK_CLEAR_MOCKS": "1",
+        "SOAK_REPLACE_HISTORY": "1"
+      },
+      "date": "2026-10-08T15:46:09.422Z",
+      "node": "v24.18.0",
+      "options": {
+        "minutes": 3,
+        "seed": 109,
+        "checkpoint": 5,
+        "only": "rendering-yield",
+        "rounds": 40,
+        "scenario": "all",
+        "build": "yes",
+        "out": "/tmp/sy-soak-rendering-control.json"
+      },
+      "mode": "development/jsdom; exposed GC; report only",
+      "clearMockHistory": true,
+      "replaceHistory": true,
+      "results": [
+        {
+          "twin": "rendering-yield",
+          "rounds": 40,
+          "elapsedSeconds": 52.219044875,
+          "parityCheckpoints": 9,
+          "parityStepChecks": 243,
+          "mismatches": [],
+          "errors": [],
+          "stepFailures": [],
+          "seed": 109,
+          "errorCount": 0,
+          "originalErrorCount": 0,
+          "originalErrors": [],
+          "counterViolations": [],
+          "trends": {
+            "heap": {
+              "slope": 32202.868347338936,
+              "threshold": 4096,
+              "growth": 1094897.5238095238,
+              "flagged": false
+            },
+            "roots": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "boundaries": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "routines": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "domNodes": {
+              "slope": 0,
+              "threshold": 0.1,
+              "growth": 0,
+              "flagged": false
+            },
+            "pendingPromises": {
+              "slope": 0.046218487394957986,
+              "threshold": 0.05,
+              "growth": 1.5714285714285716,
+              "flagged": false
+            },
+            "eventsInFlight": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventQueueDepth": {
+              "slope": 0,
+              "threshold": 0,
+              "growth": 0,
+              "flagged": false
+            }
+          },
+          "originalTrends": {
+            "heap": {
+              "slope": 27192.01344537816,
+              "threshold": 4096,
+              "growth": 924528.4571428575,
+              "flagged": false
+            },
+            "roots": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "boundaries": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "routines": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "domNodes": {
+              "slope": 0,
+              "threshold": 0.1,
+              "growth": 0,
+              "flagged": false
+            },
+            "pendingPromises": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventsInFlight": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventQueueDepth": {
+              "slope": 0,
+              "threshold": 0,
+              "growth": 0,
+              "flagged": false
+            }
+          },
+          "afterDispose": {
+            "roots": 0,
+            "boundaries": 0,
+            "routines": 0,
+            "pendingPromises": 5,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0,
+            "heap": 40141904,
+            "domNodes": 4
+          },
+          "originalAfterDispose": {
+            "heap": 38349176,
+            "domNodes": 4
+          },
+          "sampleCount": 40,
+          "firstSample": {
+            "round": 1,
+            "timeMs": 3133.328833,
+            "heap": 37648152,
+            "domNodes": 54,
+            "mockRandomCalls": 0,
+            "roots": 1,
+            "boundaries": 0,
+            "routines": 23,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0
+          },
+          "lastSample": {
+            "round": 40,
+            "timeMs": 53815.526791,
+            "heap": 40327984,
+            "domNodes": 54,
+            "mockRandomCalls": 0,
+            "roots": 1,
+            "boundaries": 0,
+            "routines": 23,
+            "pendingPromises": 5,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "room-control",
+      "env": {
+        "SOAK_CLEAR_MOCKS": "1",
+        "SOAK_REPLACE_HISTORY": "1"
+      },
+      "date": "2026-10-08T15:47:12.191Z",
+      "node": "v24.18.0",
+      "options": {
+        "minutes": 3,
+        "seed": 109,
+        "checkpoint": 5,
+        "only": "room-yield",
+        "rounds": 500,
+        "scenario": "all",
+        "build": "yes",
+        "out": "/tmp/sy-soak-room-control.json"
+      },
+      "mode": "development/jsdom; exposed GC; report only",
+      "clearMockHistory": true,
+      "replaceHistory": true,
+      "results": [
+        {
+          "twin": "room-yield",
+          "rounds": 500,
+          "elapsedSeconds": 132.163337834,
+          "parityCheckpoints": 101,
+          "parityStepChecks": 1717,
+          "mismatches": [],
+          "errors": [],
+          "stepFailures": [],
+          "seed": 109,
+          "errorCount": 0,
+          "originalErrorCount": 0,
+          "originalErrors": [],
+          "counterViolations": [],
+          "trends": {
+            "heap": {
+              "slope": 19264.16065948766,
+              "threshold": 4096,
+              "growth": 9516495.365786904,
+              "flagged": true
+            },
+            "roots": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "boundaries": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "routines": {
+              "slope": 0.4444303291501934,
+              "threshold": 0.05,
+              "growth": 219.54858260019554,
+              "flagged": true
+            },
+            "domNodes": {
+              "slope": 3.111012304051353,
+              "threshold": 0.1,
+              "growth": 1536.8400782013684,
+              "flagged": true
+            },
+            "pendingPromises": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventsInFlight": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventQueueDepth": {
+              "slope": 0,
+              "threshold": 0,
+              "growth": 0,
+              "flagged": false
+            }
+          },
+          "originalTrends": {
+            "heap": {
+              "slope": 18201.34623655914,
+              "threshold": 4096,
+              "growth": 8991465.040860215,
+              "flagged": true
+            },
+            "roots": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "boundaries": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "routines": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "domNodes": {
+              "slope": 3.111012304051353,
+              "threshold": 0.1,
+              "growth": 1536.8400782013684,
+              "flagged": true
+            },
+            "pendingPromises": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventsInFlight": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventQueueDepth": {
+              "slope": 0,
+              "threshold": 0,
+              "growth": 0,
+              "flagged": false
+            }
+          },
+          "afterDispose": {
+            "roots": 0,
+            "boundaries": 0,
+            "routines": 0,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0,
+            "heap": 52014648,
+            "domNodes": 4
+          },
+          "originalAfterDispose": {
+            "heap": 50258920,
+            "domNodes": 4
+          },
+          "sampleCount": 500,
+          "firstSample": {
+            "round": 1,
+            "timeMs": 2135.549375,
+            "heap": 42190616,
+            "domNodes": 173,
+            "mockRandomCalls": 0,
+            "roots": 1,
+            "boundaries": 15,
+            "routines": 73,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0
+          },
+          "lastSample": {
+            "round": 500,
+            "timeMs": 134073.615417,
+            "heap": 53715672,
+            "domNodes": 1566,
+            "mockRandomCalls": 0,
+            "roots": 1,
+            "boundaries": 15,
+            "routines": 272,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "todos-control",
+      "env": {
+        "SOAK_CLEAR_MOCKS": "1"
+      },
+      "date": "2026-10-08T15:49:34.987Z",
+      "node": "v24.18.0",
+      "options": {
+        "minutes": 3,
+        "seed": 109,
+        "checkpoint": 5,
+        "only": "todos-yield",
+        "rounds": 150,
+        "scenario": "all",
+        "build": "yes",
+        "out": "/tmp/sy-soak-todos-control.json"
+      },
+      "mode": "development/jsdom; exposed GC; report only",
+      "clearMockHistory": true,
+      "replaceHistory": false,
+      "results": [
+        {
+          "twin": "todos-yield",
+          "rounds": 150,
+          "elapsedSeconds": 11.346795375000001,
+          "parityCheckpoints": 31,
+          "parityStepChecks": 589,
+          "mismatches": [],
+          "errors": [],
+          "stepFailures": [],
+          "seed": 109,
+          "errorCount": 0,
+          "originalErrorCount": 0,
+          "originalErrors": [],
+          "counterViolations": [],
+          "trends": {
+            "heap": {
+              "slope": 17946.410045662094,
+              "threshold": 4096,
+              "growth": 2584283.0465753414,
+              "flagged": true
+            },
+            "roots": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "boundaries": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "routines": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "domNodes": {
+              "slope": 0,
+              "threshold": 0.1,
+              "growth": 0,
+              "flagged": false
+            },
+            "pendingPromises": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventsInFlight": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventQueueDepth": {
+              "slope": 0,
+              "threshold": 0,
+              "growth": 0,
+              "flagged": false
+            }
+          },
+          "originalTrends": {
+            "heap": {
+              "slope": 17246.300362147693,
+              "threshold": 4096,
+              "growth": 2483467.2521492676,
+              "flagged": true
+            },
+            "roots": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "boundaries": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "routines": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "domNodes": {
+              "slope": 0,
+              "threshold": 0.1,
+              "growth": 0,
+              "flagged": false
+            },
+            "pendingPromises": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventsInFlight": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventQueueDepth": {
+              "slope": 0,
+              "threshold": 0,
+              "growth": 0,
+              "flagged": false
+            }
+          },
+          "afterDispose": {
+            "roots": 0,
+            "boundaries": 0,
+            "routines": 0,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0,
+            "heap": 39788072,
+            "domNodes": 4
+          },
+          "originalAfterDispose": {
+            "heap": 38392224,
+            "domNodes": 4
+          },
+          "sampleCount": 150,
+          "firstSample": {
+            "round": 1,
+            "timeMs": 1391.540292,
+            "heap": 35543904,
+            "domNodes": 12,
+            "mockRandomCalls": 0,
+            "roots": 1,
+            "boundaries": 2,
+            "routines": 22,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0
+          },
+          "lastSample": {
+            "round": 150,
+            "timeMs": 12620.229208,
+            "heap": 39935440,
+            "domNodes": 12,
+            "mockRandomCalls": 0,
+            "roots": 1,
+            "boundaries": 2,
+            "routines": 22,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "todos-h-control",
+      "env": {
+        "SOAK_CLEAR_MOCKS": "1"
+      },
+      "date": "2026-10-08T15:49:54.832Z",
+      "node": "v24.18.0",
+      "options": {
+        "minutes": 3,
+        "seed": 109,
+        "checkpoint": 5,
+        "only": "todos-yield-h",
+        "rounds": 150,
+        "scenario": "all",
+        "build": "yes",
+        "out": "/tmp/sy-soak-todos-h-control.json"
+      },
+      "mode": "development/jsdom; exposed GC; report only",
+      "clearMockHistory": true,
+      "replaceHistory": false,
+      "results": [
+        {
+          "twin": "todos-yield-h",
+          "rounds": 150,
+          "elapsedSeconds": 10.68591725,
+          "parityCheckpoints": 31,
+          "parityStepChecks": 589,
+          "mismatches": [],
+          "errors": [],
+          "stepFailures": [],
+          "seed": 109,
+          "errorCount": 0,
+          "originalErrorCount": 0,
+          "originalErrors": [],
+          "counterViolations": [],
+          "trends": {
+            "heap": {
+              "slope": 17862.60519603212,
+              "threshold": 4096,
+              "growth": 2572215.1482286253,
+              "flagged": true
+            },
+            "roots": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "boundaries": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "routines": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "domNodes": {
+              "slope": 0,
+              "threshold": 0.1,
+              "growth": 0,
+              "flagged": false
+            },
+            "pendingPromises": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventsInFlight": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventQueueDepth": {
+              "slope": 0,
+              "threshold": 0,
+              "growth": 0,
+              "flagged": false
+            }
+          },
+          "originalTrends": {
+            "heap": {
+              "slope": 17256.710061407655,
+              "threshold": 4096,
+              "growth": 2484966.2488427022,
+              "flagged": true
+            },
+            "roots": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "boundaries": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "routines": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "domNodes": {
+              "slope": 0,
+              "threshold": 0.1,
+              "growth": 0,
+              "flagged": false
+            },
+            "pendingPromises": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventsInFlight": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventQueueDepth": {
+              "slope": 0,
+              "threshold": 0,
+              "growth": 0,
+              "flagged": false
+            }
+          },
+          "afterDispose": {
+            "roots": 0,
+            "boundaries": 0,
+            "routines": 0,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0,
+            "heap": 40848888,
+            "domNodes": 4
+          },
+          "originalAfterDispose": {
+            "heap": 38444616,
+            "domNodes": 4
+          },
+          "sampleCount": 150,
+          "firstSample": {
+            "round": 1,
+            "timeMs": 769.980375,
+            "heap": 35913456,
+            "domNodes": 10,
+            "mockRandomCalls": 0,
+            "roots": 1,
+            "boundaries": 2,
+            "routines": 22,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0
+          },
+          "lastSample": {
+            "round": 150,
+            "timeMs": 11350.423709,
+            "heap": 40932072,
+            "domNodes": 10,
+            "mockRandomCalls": 0,
+            "roots": 1,
+            "boundaries": 2,
+            "routines": 22,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "effect-idle",
+      "env": {},
+      "date": "2026-10-08T15:51:38.209Z",
+      "node": "v24.18.0",
+      "options": {
+        "minutes": 3,
+        "seed": 109,
+        "checkpoint": 5,
+        "only": "effect-yield",
+        "rounds": 100,
+        "scenario": "idle",
+        "build": "yes",
+        "out": "/tmp/sy-soak-effect-idle.json"
+      },
+      "mode": "development/jsdom; exposed GC; report only",
+      "clearMockHistory": false,
+      "replaceHistory": false,
+      "results": [
+        {
+          "twin": "effect-yield",
+          "rounds": 100,
+          "elapsedSeconds": 4.663329458,
+          "parityCheckpoints": 21,
+          "parityStepChecks": 21,
+          "mismatches": [],
+          "errors": [],
+          "stepFailures": [],
+          "seed": 109,
+          "errorCount": 0,
+          "originalErrorCount": 0,
+          "originalErrors": [],
+          "counterViolations": [],
+          "trends": {
+            "heap": {
+              "slope": 1005.6883538633818,
+              "threshold": 4096,
+              "growth": 94534.7052631579,
+              "flagged": false
+            },
+            "roots": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "boundaries": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "routines": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "domNodes": {
+              "slope": 0,
+              "threshold": 0.1,
+              "growth": 0,
+              "flagged": false
+            },
+            "pendingPromises": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventsInFlight": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventQueueDepth": {
+              "slope": 0,
+              "threshold": 0,
+              "growth": 0,
+              "flagged": false
+            }
+          },
+          "originalTrends": {
+            "heap": {
+              "slope": 1002.9454647256439,
+              "threshold": 4096,
+              "growth": 94276.87368421053,
+              "flagged": false
+            },
+            "roots": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "boundaries": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "routines": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "domNodes": {
+              "slope": 0,
+              "threshold": 0.1,
+              "growth": 0,
+              "flagged": false
+            },
+            "pendingPromises": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventsInFlight": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventQueueDepth": {
+              "slope": 0,
+              "threshold": 0,
+              "growth": 0,
+              "flagged": false
+            }
+          },
+          "afterDispose": {
+            "roots": 0,
+            "boundaries": 0,
+            "routines": 0,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0,
+            "heap": 48827448,
+            "domNodes": 4
+          },
+          "originalAfterDispose": {
+            "heap": 47822944,
+            "domNodes": 4
+          },
+          "sampleCount": 100,
+          "firstSample": {
+            "round": 1,
+            "timeMs": 2418.900958,
+            "heap": 48870368,
+            "domNodes": 51,
+            "mockRandomCalls": 4,
+            "roots": 1,
+            "boundaries": 1,
+            "routines": 11,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0
+          },
+          "lastSample": {
+            "round": 100,
+            "timeMs": 7025.5955,
+            "heap": 48958600,
+            "domNodes": 51,
+            "mockRandomCalls": 4,
+            "roots": 1,
+            "boundaries": 1,
+            "routines": 11,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "effect-switch",
+      "env": {},
+      "date": "2026-10-08T15:51:54.252Z",
+      "node": "v24.18.0",
+      "options": {
+        "minutes": 3,
+        "seed": 109,
+        "checkpoint": 5,
+        "only": "effect-yield",
+        "rounds": 100,
+        "scenario": "switch",
+        "build": "yes",
+        "out": "/tmp/sy-soak-effect-switch.json"
+      },
+      "mode": "development/jsdom; exposed GC; report only",
+      "clearMockHistory": false,
+      "replaceHistory": false,
+      "results": [
+        {
+          "twin": "effect-yield",
+          "rounds": 100,
+          "elapsedSeconds": 9.433632166999999,
+          "parityCheckpoints": 21,
+          "parityStepChecks": 63,
+          "mismatches": [],
+          "errors": [],
+          "stepFailures": [],
+          "seed": 109,
+          "errorCount": 0,
+          "originalErrorCount": 0,
+          "originalErrors": [],
+          "counterViolations": [],
+          "trends": {
+            "heap": {
+              "slope": 73552.54288913772,
+              "threshold": 4096,
+              "growth": 6913939.031578946,
+              "flagged": true
+            },
+            "roots": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "boundaries": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "routines": {
+              "slope": 0.047900335946248616,
+              "threshold": 0.05,
+              "growth": 4.50263157894737,
+              "flagged": false
+            },
+            "domNodes": {
+              "slope": 0.3353023516237401,
+              "threshold": 0.1,
+              "growth": 31.51842105263157,
+              "flagged": true
+            },
+            "pendingPromises": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventsInFlight": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventQueueDepth": {
+              "slope": 0,
+              "threshold": 0,
+              "growth": 0,
+              "flagged": false
+            }
+          },
+          "originalTrends": {
+            "heap": {
+              "slope": 63060.23370660696,
+              "threshold": 4096,
+              "growth": 5927661.968421054,
+              "flagged": true
+            },
+            "roots": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "boundaries": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "routines": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "domNodes": {
+              "slope": 0.3353023516237401,
+              "threshold": 0.1,
+              "growth": 31.51842105263157,
+              "flagged": true
+            },
+            "pendingPromises": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventsInFlight": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventQueueDepth": {
+              "slope": 0,
+              "threshold": 0,
+              "growth": 0,
+              "flagged": false
+            }
+          },
+          "afterDispose": {
+            "roots": 0,
+            "boundaries": 0,
+            "routines": 0,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0,
+            "heap": 60866016,
+            "domNodes": 4
+          },
+          "originalAfterDispose": {
+            "heap": 58646880,
+            "domNodes": 4
+          },
+          "sampleCount": 100,
+          "firstSample": {
+            "round": 1,
+            "timeMs": 2263.780208,
+            "heap": 50900424,
+            "domNodes": 125,
+            "mockRandomCalls": 18,
+            "roots": 1,
+            "boundaries": 3,
+            "routines": 23,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0
+          },
+          "lastSample": {
+            "round": 100,
+            "timeMs": 11525.167083,
+            "heap": 61671128,
+            "domNodes": 755,
+            "mockRandomCalls": 1404,
+            "roots": 1,
+            "boundaries": 3,
+            "routines": 113,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "effect-retry-fail",
+      "env": {},
+      "date": "2026-10-08T15:52:14.325Z",
+      "node": "v24.18.0",
+      "options": {
+        "minutes": 3,
+        "seed": 109,
+        "checkpoint": 5,
+        "only": "effect-yield",
+        "rounds": 100,
+        "scenario": "retry-fail",
+        "build": "yes",
+        "out": "/tmp/sy-soak-effect-retry-fail.json"
+      },
+      "mode": "development/jsdom; exposed GC; report only",
+      "clearMockHistory": false,
+      "replaceHistory": false,
+      "results": [
+        {
+          "twin": "effect-yield",
+          "rounds": 100,
+          "elapsedSeconds": 8.583364709000001,
+          "parityCheckpoints": 21,
+          "parityStepChecks": 105,
+          "mismatches": [],
+          "errors": [],
+          "stepFailures": [],
+          "seed": 109,
+          "errorCount": 0,
+          "originalErrorCount": 0,
+          "originalErrors": [],
+          "counterViolations": [],
+          "trends": {
+            "heap": {
+              "slope": 71823.80884658454,
+              "threshold": 4096,
+              "growth": 6751438.031578946,
+              "flagged": true
+            },
+            "roots": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "boundaries": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "routines": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "domNodes": {
+              "slope": 0,
+              "threshold": 0.1,
+              "growth": 0,
+              "flagged": false
+            },
+            "pendingPromises": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventsInFlight": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventQueueDepth": {
+              "slope": 0,
+              "threshold": 0,
+              "growth": 0,
+              "flagged": false
+            }
+          },
+          "originalTrends": {
+            "heap": {
+              "slope": 61438.494848824084,
+              "threshold": 4096,
+              "growth": 5775218.515789464,
+              "flagged": true
+            },
+            "roots": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "boundaries": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "routines": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "domNodes": {
+              "slope": 0,
+              "threshold": 0.1,
+              "growth": 0,
+              "flagged": false
+            },
+            "pendingPromises": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventsInFlight": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventQueueDepth": {
+              "slope": 0,
+              "threshold": 0,
+              "growth": 0,
+              "flagged": false
+            }
+          },
+          "afterDispose": {
+            "roots": 0,
+            "boundaries": 0,
+            "routines": 0,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0,
+            "heap": 59440152,
+            "domNodes": 4
+          },
+          "originalAfterDispose": {
+            "heap": 57134848,
+            "domNodes": 4
+          },
+          "sampleCount": 100,
+          "firstSample": {
+            "round": 1,
+            "timeMs": 1940.526083,
+            "heap": 50948328,
+            "domNodes": 56,
+            "mockRandomCalls": 24,
+            "roots": 1,
+            "boundaries": 3,
+            "routines": 13,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0
+          },
+          "lastSample": {
+            "round": 100,
+            "timeMs": 10364.10075,
+            "heap": 59615496,
+            "domNodes": 56,
+            "mockRandomCalls": 2004,
+            "roots": 1,
+            "boundaries": 3,
+            "routines": 13,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "effect-switch-cleared",
+      "env": {
+        "SOAK_CLEAR_MOCKS": "1"
+      },
+      "date": "2026-10-08T15:53:40.664Z",
+      "node": "v24.18.0",
+      "options": {
+        "minutes": 3,
+        "seed": 109,
+        "checkpoint": 5,
+        "only": "effect-yield",
+        "rounds": 100,
+        "scenario": "switch",
+        "build": "yes",
+        "out": "/tmp/sy-soak-effect-switch-cleared.json"
+      },
+      "mode": "development/jsdom; exposed GC; report only",
+      "clearMockHistory": true,
+      "replaceHistory": false,
+      "results": [
+        {
+          "twin": "effect-yield",
+          "rounds": 100,
+          "elapsedSeconds": 9.041088042,
+          "parityCheckpoints": 21,
+          "parityStepChecks": 63,
+          "mismatches": [],
+          "errors": [],
+          "stepFailures": [],
+          "seed": 109,
+          "errorCount": 0,
+          "originalErrorCount": 0,
+          "originalErrors": [],
+          "counterViolations": [],
+          "trends": {
+            "heap": {
+              "slope": 70924.89630459127,
+              "threshold": 4096,
+              "growth": 6666940.2526315795,
+              "flagged": true
+            },
+            "roots": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "boundaries": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "routines": {
+              "slope": 0.047900335946248616,
+              "threshold": 0.05,
+              "growth": 4.50263157894737,
+              "flagged": false
+            },
+            "domNodes": {
+              "slope": 0.3353023516237401,
+              "threshold": 0.1,
+              "growth": 31.51842105263157,
+              "flagged": true
+            },
+            "pendingPromises": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventsInFlight": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventQueueDepth": {
+              "slope": 0,
+              "threshold": 0,
+              "growth": 0,
+              "flagged": false
+            }
+          },
+          "originalTrends": {
+            "heap": {
+              "slope": 60332.054983202754,
+              "threshold": 4096,
+              "growth": 5671213.168421059,
+              "flagged": true
+            },
+            "roots": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "boundaries": {
+              "slope": 0,
+              "threshold": 0.01,
+              "growth": 0,
+              "flagged": false
+            },
+            "routines": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "domNodes": {
+              "slope": 0.3353023516237401,
+              "threshold": 0.1,
+              "growth": 31.51842105263157,
+              "flagged": true
+            },
+            "pendingPromises": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventsInFlight": {
+              "slope": 0,
+              "threshold": 0.05,
+              "growth": 0,
+              "flagged": false
+            },
+            "eventQueueDepth": {
+              "slope": 0,
+              "threshold": 0,
+              "growth": 0,
+              "flagged": false
+            }
+          },
+          "afterDispose": {
+            "roots": 0,
+            "boundaries": 0,
+            "routines": 0,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0,
+            "heap": 60572552,
+            "domNodes": 4
+          },
+          "originalAfterDispose": {
+            "heap": 58337952,
+            "domNodes": 4
+          },
+          "sampleCount": 100,
+          "firstSample": {
+            "round": 1,
+            "timeMs": 1920.616666,
+            "heap": 50904000,
+            "domNodes": 125,
+            "mockRandomCalls": 0,
+            "roots": 1,
+            "boundaries": 3,
+            "routines": 23,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0
+          },
+          "lastSample": {
+            "round": 100,
+            "timeMs": 10828.233958,
+            "heap": 61414024,
+            "domNodes": 755,
+            "mockRandomCalls": 0,
+            "roots": 1,
+            "boundaries": 3,
+            "routines": 113,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0
+          }
+        }
+      ]
+    }
+  ],
+  "provenance": {
+    "baseCommit": "de12097",
+    "runtimeCounterCommit": "0c2c713",
+    "finalHarnessCommit": "199e19e",
+    "branch": "harness/soak"
+  },
+  "validation": {
+    "build": "PASS",
+    "gate": {
+      "pass": 46,
+      "fail": 0,
+      "skip": 1,
+      "green": true,
+      "seconds": 331
+    },
+    "unitTests": 3,
+    "sampleArchiveVerified": true
+  }
+}

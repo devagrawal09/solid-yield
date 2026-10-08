@@ -10,7 +10,10 @@
     "dev": "vite",
     "start": "vite preview",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "build:ssr": "vite build --config stream/vite.config.mjs && vite build --config stream/vite.config.mjs --ssr entry-server.tsx"
+    "build:ssr": "vite build --config stream/vite.config.mjs && vite build --config stream/vite.config.mjs --ssr entry-server.tsx",
+    "test": "vitest run --config vite.config.mjs",
+    "ssr-smoke": "node ../../harness/ssr-smoke/smoke.mjs --dashboard",
+    "hydrate-smoke": "node ../../harness/hydrate-smoke/hydrate.mjs --dashboard"
   },
   "devDependencies": {
     "@solidjs/vite-plugin": "3.0.0-next.35",

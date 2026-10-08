@@ -1,4 +1,11 @@
 #!/usr/bin/env node
+import {
+  dashboardTarget,
+  isDashboard,
+  expectsDashboardRejection,
+  serializedDashboardError,
+  dashboardContentError
+} from "../dashboard/contract.mjs";
 // The gate's server-render smoke step: every twin with a server entry renders
 // each of its routes on the server, through Vite's SSR loader (development
 // builds, as `vite dev` serves them). Docs also has a production stream case
@@ -96,7 +103,8 @@ async function renderOne(twin, entry, kind, url, build) {
     process.stdout.write(JSON.stringify(checkStringRejection(url === "/safe")) + "\n");
     process.exit(0);
   }
-  const expectedRejection = expectsDocsRejection(twin, entry, url);
+  const dashboardRejection = expectsDashboardRejection(twin, url);
+  const expectedRejection = expectsDocsRejection(twin, entry, url) || dashboardRejection;
   const dir = join(examples, twin);
   const require = createRequire(join(dir, "package.json"));
   const vite = await import(require.resolve("vite"));
@@ -160,9 +168,13 @@ async function renderOne(twin, entry, kind, url, build) {
     else if (DEV_ERROR.test(html))
       failed = `development error in the document: ${html.match(DEV_ERROR)[0]}`;
     else if (!html.trim()) failed = "empty document";
-    else if (expectedRejection && !serializedDocsError(html))
+    else if (
+      expectedRejection &&
+      !(dashboardRejection ? serializedDashboardError(html) : serializedDocsError(html))
+    )
       failed = "stream lacks the typed not-found error";
   }
+  if (!failed && isDashboard(twin)) failed = dashboardContentError(html, url);
   production?.cleanup();
   process.stdout.write(
     "\n" +
@@ -221,9 +233,10 @@ if (process.argv[2] === "--one") {
   const only = args.includes("--only") ? args[args.indexOf("--only") + 1] : null;
   const originals = args.includes("--originals");
   const jobs = args.includes("--jobs") ? Number(args[args.indexOf("--jobs") + 1]) : 4;
-  const renders = TARGETS.map(t =>
-    originals ? { ...t, twin: join("originals", t.twin.replace(/-yield(-h)?$/, "")) } : t
-  )
+  const renders = (args.includes("--dashboard") ? [dashboardTarget] : TARGETS)
+    .map(t =>
+      originals ? { ...t, twin: join("originals", t.twin.replace(/-yield(-h)?$/, "")) } : t
+    )
     .flatMap(t => t.urls.map(url => ({ t, url })))
     .map(r => ({
       ...r,

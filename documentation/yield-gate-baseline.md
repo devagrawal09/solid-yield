@@ -5,6 +5,13 @@ reference run used as the baseline; the machine-readable copy is
 [`yield-gate-baseline.json`](./yield-gate-baseline.json). CI runs the same gate
 against this file (`.github/workflows/gate.yml`).
 
+**Dashboard original addition (2026-10-08).** The plain-Solid dashboard adds
+four steps: `original:dashboard:test`, `:typecheck`, `:ssr-smoke`, and
+`:hydrate-smoke`. Its self-check covers 30 interaction states, and each smoke
+checks three routes. The dashboard is an original only, for sugar/native mode;
+the nine hand-written twins and their executed-byte thresholds are unchanged.
+The JSON baseline was regenerated from the full GREEN run at `cb5a80d`: **50 PASS / 0 FAIL / 0 SKIP in 229 s**. All 46 existing steps remain PASS. The baseline is committed with the added steps.
+
 **Calculus proofs addition on main (2026-10-07).** Baseline regenerated only
 for the new report-only `proofs` step, from the full GREEN run after merge
 `5d50680`: **46 PASS / 0 FAIL / 0 SKIP in 115 s**. All 45 existing steps remain

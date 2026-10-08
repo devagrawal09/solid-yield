@@ -24,6 +24,7 @@ export interface FailureReport {
     start: number,
     end: number
   ): { fails: string[]; native: boolean; target?: string; promise: boolean; async: boolean } | null;
+  foreignState(file: string, start: number, end: number): boolean;
   at(
     file: string,
     start: number
@@ -32,5 +33,10 @@ export interface FailureReport {
 }
 export function inferFailures(
   modules: Map<string, string>,
-  options: { program: import("typescript").Program; ts: typeof import("typescript"); root?: string }
+  options: {
+    program: import("typescript").Program;
+    ts: typeof import("typescript");
+    root?: string;
+    opaqueGenerators?: boolean | "marked";
+  }
 ): FailureReport;

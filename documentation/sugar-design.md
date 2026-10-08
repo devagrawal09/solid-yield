@@ -463,6 +463,10 @@ The following is the required line, not a claim that every lowering below alread
 passes. The evidence table and findings distinguish implemented cases from gaps.
 The earlier import-mapping table is historical; an import rename is not proof.
 
+A generator passed directly as the first argument to a core API is core and is lowered. In Solid 2 rc.13 these APIs are `action` (sync/async generators), and the async-iterable producers of `createSignal`, `createMemo`, `createOptimistic`, `createEffect`, `createRenderEffect`, `createStore`, `createProjection`, and `createOptimisticStore`. Other author generators, including Effect programs and custom iterators, are opaque and keep their own protocol. The compiler inserts no delegated operations into its body and rewrites none of its reads. Calls to it are foreign values (provenance C, failures unknown). A reactive read inside it reports `READ_IN_OPAQUE_GENERATOR` at the read: read the signal outside and pass the value in, or make the read a memo.
+
+Module-level reactive state is outside the core. A `createSignal`, `createStore` or `createMemo` declaration at module level has no component owner, so the compiler keeps it Solid and treats it as foreign (provenance C, failures unknown). `MODULE_STATE` points at the declaration: create the state inside a component and provide it via context, or keep it foreign and handle failures at its uses. The compiler does not move state or change its lifetime.
+
 Inside the line:
 
 - Signals and memos; both tracked compute and untracked effect phases.
@@ -472,7 +476,7 @@ Inside the line:
   imported in the current original corpus).
 - JSX events; `For`, `Show`, `Switch`, `Match`, `Index`; `Loading` and `Errored`,
   including their fallbacks.
-- Actions, including generator actions; basic stores, optimistic signals and
+- Actions with compiler-owned callbacks; basic stores, optimistic signals and
   optimistic stores; server functions with their transport failure contribution.
 - Throw/catch inference follows the existing ruling: known class identities plus
   an unknown floor, with catches subtracting only failures they actually handle.
@@ -568,19 +572,25 @@ and `ApiError` mapping are not copied into this patch.
 This section supersedes the previous request to decide native scope. Scope is
 settled; incomplete lowering and missing parity remain implementation findings.
 
-**F-S30–F-S32 — native effect stops at structural lowering failures.** The
-unchanged `examples/originals/effect` still throws `SUGAR_CALLBACK`; its reported
-`api.ts:177:68` is an intermediate search-success callback, not original line
-177 (F-S32). An isolated plain `Effect.gen` passes TypeScript before lowering,
-but native failure attempts introduce solid-yield operations into Effect's
-different generator protocol (F-S30). The module log's `createStore` is renamed
-to `$store` without a setup to execute it; its writers become uncallable
-`Create<"store", never>` values (F-S31). The twin's owner-scoped log/event sink
-and saga adapter show the needed contracts, but copying them is not a minimal
-author error handler. Both acceptance halves fail, so the requested structural
-stop applies. No author patch, rule change, native effect gate step or baseline
-regeneration is claimed. [The side-by-side report](native-effect-blocker.md) and
-[reproducible probe](../scripts/native-effect-blocker.mjs) record the evidence.
+**F-S30–F-S32 — bounded scope fixes applied; effect still stops.** Authored
+Effect/custom generators now stay opaque, with unknown foreign failures; both
+plain and generated isolated Effect programs typecheck (F-S30). Module signals,
+stores and memos retain their Solid declarations and lifetimes, with
+`MODULE_STATE` at the declaration and unknown failures at owned reads (F-S31).
+The shared position-map fix `b2f75f1` was cherry-picked as `7ddd803`; later refusals
+now use authored positions, including the original checkout index read at
+`checkout.tsx:141:25` (F-S32). The old `api.ts:177` refusal no longer occurs.
+
+**F-S33 — Promise-chain arguments lose their event host.** After only moving the
+two checkout index reads out of store updaters into their click events, the
+compiler puts the order's reactive arguments inside a plain attempt producer.
+The original `cart.map(...)` is inside an event; the generated read is inside
+`() => placeOrder(...).catch(...)`, which cannot drive it. The mapped refusal is
+at patched `checkout.tsx:187:19` (original line 185). It is a compiler host failure,
+not a justified new author diagnostic. Both effect acceptance halves fail;
+hydrated effect parity and SSR have not run. No native effect gate step or gate
+baseline regeneration is claimed. [The side-by-side report](native-effect-blocker.md)
+and [reproducible probe](../scripts/native-effect-blocker.mjs) record the stop.
 
 ### Selection and native syntax
 

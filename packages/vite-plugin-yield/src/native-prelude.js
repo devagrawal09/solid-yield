@@ -1,3 +1,4 @@
+import { traverseOwned } from "./native-owned.js";
 import { printMapped } from "./positions.js";
 // @ts-check
 import babel from "@babel/core";
@@ -22,7 +23,7 @@ export function nativePrelude(files) {
     const p = parseProgram(code, file);
     if (!p) continue;
     const used = new Set();
-    p.traverse({
+    traverseOwned(p, {
       VariableDeclarator(q) {
         const init = q.get("init");
         if (!t.isIdentifier(q.node.id) || !init.isObjectExpression()) return;
@@ -44,7 +45,7 @@ export function nativePrelude(files) {
         const forwarders = [];
         for (const method of methods) {
           let forwards = false;
-          method.traverse({
+          traverseOwned(method, {
             CallExpression(site) {
               const callee = site.get("callee");
               if (!callee.isTSAsExpression() || !t.isTSAnyKeyword(callee.node.typeAnnotation))
@@ -72,7 +73,7 @@ export function nativePrelude(files) {
             }
           });
           if (!forwards) continue;
-          method.traverse({
+          traverseOwned(method, {
             ReturnStatement(ret) {
               const value = ret.get("argument");
               if (
@@ -119,7 +120,7 @@ export function nativePrelude(files) {
         q.parentPath.insertAfter(forwarders.map(f => f.declaration));
       }
     });
-    p.traverse({
+    traverseOwned(p, {
       VariableDeclarator(q) {
         const init = q.get("init");
         if (
@@ -154,7 +155,7 @@ export function nativePrelude(files) {
         q.replaceWithMultiple(declarations);
       }
     });
-    p.traverse({
+    traverseOwned(p, {
       TryStatement: {
         exit(q) {
           const owner = q.getFunctionParent();
@@ -183,7 +184,7 @@ export function nativePrelude(files) {
           let returns = false;
           // Encode an outer return, which cannot become a return from the helper only.
           for (const scope of [q.get("block"), q.get("handler.body")])
-            scope.traverse({
+            traverseOwned(scope, {
               Function(f) {
                 f.skip();
               },
@@ -293,7 +294,7 @@ export function nativePrelude(files) {
           used.add("$cleanup");
           if (t.isExpression(callback.node.body))
             callback.node.body = t.blockStatement([t.returnStatement(callback.node.body)]);
-          callback.traverse({
+          traverseOwned(callback, {
             Function(n) {
               n.skip();
             },

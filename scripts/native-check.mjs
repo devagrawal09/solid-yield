@@ -114,7 +114,17 @@ for (const fixture of fixtures) {
       ]
     });
   }
-  console.log(`native fixture ${fixture.id}: ${results.at(-1).stage}`);
+  const result = results.at(-1);
+  if (fixture.expected === "accepted")
+    assert.notEqual(result.stage, "transform", `${fixture.id}: unexpected refusal`);
+  if (fixture.expectedDiagnostic && result.stage === "transform")
+    assert.ok(
+      result.diagnostics.some(
+        d => d.code === fixture.expectedDiagnostic || d.message.includes(fixture.expectedDiagnostic)
+      ),
+      `${fixture.id}: wrong refusal`
+    );
+  console.log(`native fixture ${fixture.id}: ${result.stage}`);
 }
 const foreignEdges = ["class-memo", "unknown-memo"].map(id => {
   const file = join(generated, `foreign-${id}.tsx`);
@@ -219,7 +229,8 @@ for (const twin of twins) {
       ])
     );
   const failureReport = nativeFailures(input, sourceOptions);
-  let errors = inspectNativeProject(input);
+  const scopeNotes = inspectNativeProject(input).filter(d => d.code === "MODULE_STATE");
+  let errors = inspectNativeProject(input).filter(d => d.code !== "MODULE_STATE");
   let output;
   if (!errors.length)
     try {
@@ -299,6 +310,7 @@ for (const twin of twins) {
       );
     }
   }
+  errors.push(...scopeNotes);
   originals.push({
     twin: original + "-yield" + (twin.endsWith("-h") ? "-h" : ""),
     original,

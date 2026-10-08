@@ -1,3 +1,4 @@
+import { traverseOwned } from "./native-owned.js";
 import { printMapped } from "./positions.js";
 // @ts-check
 import babel from "@babel/core";
@@ -22,7 +23,7 @@ export function lowerNativeRecursion(code, file) {
   /** @type {Map<string, {path:Path, param:string, props:any, incoming:Map<string,Color>, memos:Map<string,any>, output:Color}>} */
   const components = new Map();
   let recursive = false;
-  p.traverse({
+  traverseOwned(p, {
     Function(q) {
       if (q.getFunctionParent()) return;
       const name =
@@ -33,7 +34,7 @@ export function lowerNativeRecursion(code, file) {
             : "";
       if (!name || !/^[A-Z]/.test(name)) return;
       let jsx = false;
-      q.traverse({
+      traverseOwned(q, {
         Function(r) {
           r.skip();
         },
@@ -79,7 +80,7 @@ export function lowerNativeRecursion(code, file) {
         output: empty()
       };
       components.set(name, info);
-      q.traverse({
+      traverseOwned(q, {
         JSXOpeningElement(r) {
           if (t.isJSXIdentifier(r.node.name, { name })) recursive = true;
         },
@@ -110,7 +111,7 @@ export function lowerNativeRecursion(code, file) {
   /** @type {Map<string, Set<string>>} */ const fixed = new Map();
   for (const [name, info] of components) {
     const aliases = new Map();
-    info.path.traverse({
+    traverseOwned(info.path, {
       VariableDeclarator(q) {
         if (
           q.getFunctionParent() !== info.path ||
@@ -159,7 +160,7 @@ export function lowerNativeRecursion(code, file) {
   while (changed) {
     changed = false;
     for (const [name, info] of components)
-      info.path.traverse({
+      traverseOwned(info.path, {
         JSXOpeningElement(q) {
           if (!t.isJSXIdentifier(q.node.name)) return;
           const fields = fixed.get(q.node.name.name);
@@ -247,7 +248,7 @@ export function lowerNativeRecursion(code, file) {
       ])
     );
     for (const owner of components.values())
-      owner.path.traverse({
+      traverseOwned(owner.path, {
         JSXElement(q) {
           if (!t.isJSXIdentifier(q.node.openingElement.name)) return;
           const target = components.get(q.node.openingElement.name.name);
@@ -336,7 +337,7 @@ export function lowerNativeRecursion(code, file) {
       }
       q.node.params[0].typeAnnotation = t.tsTypeAnnotation(props);
       let self = false;
-      q.traverse({
+      traverseOwned(q, {
         JSXOpeningElement(r) {
           self ||= t.isJSXIdentifier(r.node.name, { name });
         }
@@ -385,7 +386,7 @@ export function lowerNativeRecursion(code, file) {
           continue;
         }
       }
-      statement.traverse({
+      traverseOwned(statement, {
         /** @param {Path} r */
         ReferencedIdentifier(r) {
           const value = aliases.get(r.node.name);

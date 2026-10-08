@@ -183,7 +183,17 @@ export function withPositions(input, run) {
           lines.slice(0, error.loc.line - 1).reduce((n, s) => n + s.length + 1, 0) +
           (error.loc.column ?? 0);
         const at = locate(table, offset);
-        if (at) error.sourceSpan = at;
+        if (at) {
+          error.sourceSpan = at;
+          const authored = session?.input.get(resolve(file));
+          if (authored) {
+            const prefix = authored.slice(0, at.sourceStart).split("\n");
+            const line = prefix.length,
+              column = (prefix.at(-1) ?? "").length;
+            error.loc = { ...error.loc, line, column };
+            error.message = error.message.replace(/:\d+:\d+\)$/, `:${line}:${column + 1})`);
+          }
+        }
       }
     }
     throw error;

@@ -1,10 +1,14 @@
 // Native failure inference extends the analyzer's indexed project. The existing
 // Analysis owns parsing/module identities; TypeScript resolves calls and classes.
+import { authoredOpaqueGenerator } from "../../vite-plugin-yield/src/native-owned.js";
 import { Analysis } from "./semantic.js";
 import { relative } from "node:path";
 const union = (...sets) => new Set(sets.flatMap(s => [...s]));
 const name = n => n?.name ?? n?.value;
-export function inferFailures(modules, { program, ts, root = process.cwd() }) {
+export function inferFailures(
+  modules,
+  { program, ts, root = process.cwd(), opaqueGenerators = false }
+) {
   const resolve = (specifier, from) => {
     if (!specifier.startsWith(".")) return null;
     const base = new URL(specifier, `file://${from}`).pathname;
@@ -13,6 +17,11 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
     );
   };
   const analysis = new Analysis(modules, resolve);
+  const opaque = path =>
+    path.node.generator &&
+    ((opaqueGenerators === true && authoredOpaqueGenerator(path)) ||
+      (opaqueGenerators === "marked" &&
+        path.node.body?.directives?.some(d => d.value.value === "use native opaque")));
   const checker = program.getTypeChecker();
   const functions = [],
     byBody = new Map(),
@@ -67,6 +76,36 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
   }
   const nodeFor = p =>
     tsNodes.get(`${analysis.moduleOf.get(p.node)?.id}:${p.node.start}:${p.node.end}`);
+  const moduleState = node => {
+    if (!opaqueGenerators || !node || !ts.isIdentifier(node)) return false;
+    let symbol = checker.getSymbolAtLocation(node);
+    if (symbol?.flags & ts.SymbolFlags.Alias) symbol = checker.getAliasedSymbol(symbol);
+    return (
+      symbol?.declarations?.some(declaration => {
+        while (
+          ts.isBindingElement(declaration) ||
+          ts.isArrayBindingPattern(declaration) ||
+          ts.isObjectBindingPattern(declaration)
+        )
+          declaration = declaration.parent;
+        if (
+          !ts.isVariableDeclaration(declaration) ||
+          !declaration.initializer ||
+          !ts.isCallExpression(declaration.initializer)
+        )
+          return false;
+        for (let parent = declaration.parent; parent; parent = parent.parent)
+          if (ts.isFunctionLike(parent)) return false;
+        const callee = declaration.initializer.expression;
+        let api = checker.getSymbolAtLocation(callee);
+        if (api?.flags & ts.SymbolFlags.Alias) api = checker.getAliasedSymbol(api);
+        return (
+          ["createSignal", "createStore", "createMemo"].includes(api?.name) &&
+          api?.declarations?.some(d => /solid/.test(d.getSourceFile().fileName))
+        );
+      }) ?? false
+    );
+  };
   const functionFor = declaration => {
     if (!declaration) return null;
     if (ts.isVariableDeclaration(declaration)) declaration = declaration.initializer;
@@ -133,7 +172,15 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
   const nativeCall = p => {
     const callee = p.get("callee"),
       api = imported(callee);
-    if (api?.source === "solid-js") return api.name;
+    if (api?.source === "solid-js") {
+      if (
+        opaqueGenerators &&
+        ["createSignal", "createStore", "createMemo"].includes(api.name) &&
+        !p.getFunctionParent()
+      )
+        return null;
+      return api.name;
+    }
     const call = nodeFor(p);
     const declaration = call && checker.getResolvedSignature(call)?.declaration;
     const builtin = declaration && program.isSourceFileDefaultLibrary(declaration.getSourceFile());
@@ -188,6 +235,7 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
           const source = imported(init.get("callee"));
           if (
             source?.source === "solid-js" &&
+            (!opaqueGenerators || !!init.getFunctionParent()) &&
             [
               "createSignal",
               "createOptimistic",
@@ -204,13 +252,14 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
     return null;
   };
   const invoke = (fn, owner) => {
-    if (!fn) return new Set(["unknown"]);
+    if (!fn || opaque(fn.path)) return new Set(["unknown"]);
     owner.calls.add(fn.id);
     return union(fn.fails, fn.server ? new Set(["ChunkError"]) : []);
   };
   function evaluate(p, owner, caught = new Map()) {
     if (!p?.node) return new Set();
     if (Array.isArray(p)) return union(...p.map(q => evaluate(q, owner, caught)));
+    if (p.isIdentifier() && moduleState(nodeFor(p))) return new Set(["unknown"]);
     if (p.isFunction() || p.isClass() || p.isImportDeclaration() || p.isTSType()) return new Set();
     if (p.isThrowStatement()) {
       const arg = p.get("argument");
@@ -420,7 +469,11 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
     changed = false;
     iterations++;
     for (const fn of functions) {
-      const next = fn.pure ? new Set() : evaluate(fn.path.get("body"), fn);
+      const next = opaque(fn.path)
+        ? new Set(["unknown"])
+        : fn.pure
+          ? new Set()
+          : evaluate(fn.path.get("body"), fn);
       if ([...next].some(k => !fn.fails.has(k))) {
         fn.fails = union(fn.fails, next);
         changed = true;
@@ -458,6 +511,9 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
         promise: !!checker.getPromisedTypeOfPromise(checker.getTypeAtLocation(nodeFor(site))),
         async: !!fn?.path.node.async
       };
+    },
+    foreignState(file, start, end) {
+      return moduleState(tsNodes.get(`${file}:${start}:${end}`));
     },
     at(file, start) {
       return functions.find(f => f.file === file && f.path.node.start === start);

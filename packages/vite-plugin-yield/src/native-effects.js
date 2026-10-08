@@ -1,3 +1,4 @@
+import { traverseOwned } from "./native-owned.js";
 import { printMapped } from "./positions.js";
 // @ts-check
 import babel from "@babel/core";
@@ -19,10 +20,9 @@ export function lowerNativeEffects(files, report) {
   const routines = new Set();
   for (const [file, code] of files) {
     const program = parseProgram(code, file);
-    program?.traverse({
+    traverseOwned(program, {
       Function(q) {
-        if (report.at(file, q.node.start ?? 0)?.component || q.node.generator)
-          routines.add(`${file}:${q.node.start}`);
+        if (report.at(file, q.node.start ?? 0)?.component) routines.add(`${file}:${q.node.start}`);
       },
       CallExpression(q) {
         const c = q.get("callee");
@@ -35,7 +35,8 @@ export function lowerNativeEffects(files, report) {
         const sourceApi = imported(sourceBinding);
         if (
           (imported(b)?.source === "solid-js" && imported(b)?.name !== "onCleanup") ||
-          (sourceApi?.source === "solid-js" &&
+          (!!init?.getFunctionParent() &&
+            sourceApi?.source === "solid-js" &&
             /^create(Signal|Memo|Optimistic|Store|Projection)/.test(sourceApi.name))
         ) {
           const owner = q.getFunctionParent();
@@ -132,7 +133,7 @@ export function lowerNativeEffects(files, report) {
 
     // Async reactive helpers run on their caller's host. Await becomes an
     // attempt at its original position; setup cannot admit that read/wait.
-    p.traverse({
+    traverseOwned(p, {
       CallExpression(q) {
         const info = report.call(file, q.node.start ?? 0, q.node.end ?? 0);
         const owner = q.getFunctionParent();
@@ -155,7 +156,7 @@ export function lowerNativeEffects(files, report) {
       }
     });
     // Synchronous native throw sites are ordinary library raise operations.
-    p.traverse({
+    traverseOwned(p, {
       AwaitExpression: {
         exit(q) {
           const fn = q.getFunctionParent();
@@ -278,7 +279,7 @@ export function lowerNativeEffects(files, report) {
           for (const arg of q.get("arguments")) {
             if (arg.isFunction()) continue;
             if (arg.isCallExpression() || arg.isMemberExpression()) readsArgument = true;
-            arg.traverse({
+            traverseOwned(arg, {
               Function(f) {
                 f.skip();
               },
@@ -332,9 +333,34 @@ export function lowerNativeEffects(files, report) {
         }
       }
     });
+    traverseOwned(p, {
+      MemberExpression: {
+        exit(q) {
+          const object = q.get("object");
+          if (
+            !host(q.getFunctionParent()) ||
+            !report.foreignState(file, object.node.start ?? 0, object.node.end ?? 0)
+          )
+            return;
+          if (q.parentPath.isCallExpression() && q.parentPath.node.callee === q.node) return;
+          q.replaceWith(attempt(q.node, ["unknown"]));
+          q.skip();
+        }
+      },
+      SpreadElement(q) {
+        const value = q.get("argument");
+        if (
+          !host(q.getFunctionParent()) ||
+          !report.foreignState(file, value.node.start ?? 0, value.node.end ?? 0)
+        )
+          return;
+        value.replaceWith(attempt(value.node, ["unknown"]));
+        q.skip();
+      }
+    });
     // Server producers brand at the rejection boundary before serialization.
     // Their bodies stay plain async JavaScript; only client calls use attempt.
-    p.traverse({
+    traverseOwned(p, {
       Function(q) {
         const summary = report.at(file, q.node.start ?? 0);
         if (!summary?.server || !q.node.async || !t.isBlockStatement(q.node.body)) return;
@@ -356,7 +382,7 @@ export function lowerNativeEffects(files, report) {
       }
     });
     // An async event remains an ordinary producer behind one generated attempt.
-    p.traverse({
+    traverseOwned(p, {
       JSXAttribute(q) {
         if (!/^on[A-Z]/.test(String(q.node.name.name)) || !t.isJSXExpressionContainer(q.node.value))
           return;
@@ -400,7 +426,7 @@ export function lowerNativeEffects(files, report) {
       }
     });
     // An async memo remains an ordinary async producer, behind a typed attempt.
-    p.traverse({
+    traverseOwned(p, {
       CallExpression(q) {
         const callee = q.get("callee");
         /** @type {Path | undefined} */
@@ -428,7 +454,7 @@ export function lowerNativeEffects(files, report) {
       }
     });
     // A plain Errored fallback sees the author's original value in this realm.
-    p.traverse({
+    traverseOwned(p, {
       JSXAttribute(q) {
         if (
           q.node.name.name !== "fallback" ||
@@ -444,7 +470,7 @@ export function lowerNativeEffects(files, report) {
         const fn = value.get("expression");
         if (!fn.isFunction() || !t.isIdentifier(fn.node.params[0])) return;
         const param = fn.node.params[0].name;
-        fn.traverse({
+        traverseOwned(fn, {
           CallExpression(site) {
             if (site.get("callee").isIdentifier({ name: param })) {
               used.add("nativeFailureValue");

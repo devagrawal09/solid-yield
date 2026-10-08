@@ -1,3 +1,10 @@
+import {
+  traverseOwned,
+  authoredOpaqueGenerator,
+  foreignStateReference,
+  markOpaqueGenerators,
+  unmarkOpaqueGenerators
+} from "./native-owned.js";
 import { printMapped, withPositions, copyPosition } from "./positions.js";
 /** Native Solid front end. Refuse unsupported contracts before emitting any file.
  * The existing sugar engine and library checker remain the only color machinery. */
@@ -111,13 +118,58 @@ function nativeProgram(files, options = {}) {
   );
   return program;
 }
-/** @param {Map<string,string>} files @param {ts.CompilerOptions} [options] */
-export function nativeFailures(files, options = {}) {
-  return inferFailures(files, { program: nativeProgram(files, options), ts });
+/** @param {Map<string,string>} files @param {ts.CompilerOptions} [options] @param {boolean | "marked"} [opaqueGenerators] */
+export function nativeFailures(files, options = {}, opaqueGenerators = true) {
+  return inferFailures(files, {
+    program: nativeProgram(files, options),
+    ts,
+    opaqueGenerators
+  });
 }
 /** Inspect all selected files, accumulating refusals instead of stopping at the first one.
  * @param {Map<string,string>} files */
 export function inspectNativeProject(files) {
+  const program = [...files.values()].some(code => /function\s*\*/.test(code))
+    ? nativeProgram(files)
+    : null;
+  const checker = program?.getTypeChecker();
+  /** @type {Map<string,ts.Node>} */ const typed = new Map();
+  for (const file of files.keys()) {
+    const source = program?.getSourceFile(file);
+    /** @param {ts.Node} node */ const visit = node => {
+      typed.set(`${file}:${node.getStart(source)}:${node.end}`, node);
+      ts.forEachChild(node, visit);
+    };
+    if (source) visit(source);
+  }
+  /** @param {string} file @param {Path} q */ const reactiveCallee = (file, q) => {
+    const node = typed.get(`${file}:${q.node.start}:${q.node.end}`);
+    if (!node || !checker) return false;
+    let symbol = checker.getSymbolAtLocation(node);
+    if (symbol && symbol.flags & ts.SymbolFlags.Alias) symbol = checker.getAliasedSymbol(symbol);
+    return (
+      symbol?.declarations?.some(declaration => {
+        /** @type {ts.Node} */ let value = declaration;
+        while (ts.isBindingElement(value) || ts.isArrayBindingPattern(value)) value = value.parent;
+        if (
+          !ts.isVariableDeclaration(value) ||
+          !value.initializer ||
+          !ts.isCallExpression(value.initializer)
+        )
+          return false;
+        const callee = value.initializer.expression;
+        let api = checker.getSymbolAtLocation(callee);
+        if (api && api.flags & ts.SymbolFlags.Alias) api = checker.getAliasedSymbol(api);
+        if (api?.name === "createMemo") return true;
+        return (
+          ["createSignal", "createOptimistic"].includes(api?.name ?? "") &&
+          ts.isBindingElement(declaration) &&
+          ts.isArrayBindingPattern(declaration.parent) &&
+          declaration.parent.elements[0] === declaration
+        );
+      }) ?? false
+    );
+  };
   /** @type {Diagnostic[]} */
   const diagnostics = [];
   for (const [file, code] of files) {
@@ -170,9 +222,68 @@ export function inspectNativeProject(files) {
             report(s, "NATIVE_API", `Solid API ${name} has no verified native lowering.`);
         }
       },
+      Identifier(q) {
+        if (
+          !q.isReferencedIdentifier() ||
+          !q.findParent(f => f.isFunction() && authoredOpaqueGenerator(f))
+        )
+          return;
+        if (
+          !q.parentPath.isMemberExpression() &&
+          !q.parentPath.isOptionalMemberExpression() &&
+          !q.parentPath.isSpreadElement()
+        )
+          return;
+        const binding = q.scope.getBinding(q.node.name)?.path;
+        const init = binding?.isVariableDeclarator() ? binding.get("init") : null;
+        const source = init?.isCallExpression() ? imported(init.get("callee")) : null;
+        const id = binding?.isVariableDeclarator() ? binding.node.id : null;
+        if (
+          source?.module === "solid-js" &&
+          ["createStore", "createOptimisticStore"].includes(source.name) &&
+          t.isArrayPattern(id) &&
+          t.isIdentifier(id.elements[0], { name: q.node.name })
+        )
+          report(
+            q.parentPath,
+            "READ_IN_OPAQUE_GENERATOR",
+            "this signal is read inside a generator the compiler does not own; read it outside and pass the value in, or make the read a memo"
+          );
+      },
       CallExpression(q) {
-        const api = imported(q.get("callee"));
+        const callee = q.get("callee");
+        if (
+          q.findParent(f => f.isFunction() && authoredOpaqueGenerator(f)) &&
+          callee.isIdentifier()
+        ) {
+          const binding = callee.scope.getBinding(callee.node.name)?.path;
+          const init = binding?.isVariableDeclarator() ? binding.get("init") : null;
+          const source = init?.isCallExpression() ? imported(init.get("callee")) : null;
+          const id = binding?.isVariableDeclarator() ? binding.node.id : null;
+          const read =
+            source?.module === "solid-js" &&
+            ((["createSignal", "createOptimistic"].includes(source.name) &&
+              t.isArrayPattern(id) &&
+              t.isIdentifier(id.elements[0], { name: callee.node.name })) ||
+              source.name === "createMemo");
+          if (read || reactiveCallee(file, callee))
+            report(
+              q,
+              "READ_IN_OPAQUE_GENERATOR",
+              "this signal is read inside a generator the compiler does not own; read it outside and pass the value in, or make the read a memo"
+            );
+        }
+        const api = imported(callee);
         if (api?.module !== "solid-js") return;
+        if (
+          ["createSignal", "createStore", "createMemo"].includes(api.name) &&
+          !q.getFunctionParent()
+        )
+          report(
+            q.parentPath.isVariableDeclarator() ? q.parentPath : q,
+            "MODULE_STATE",
+            "reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses"
+          );
         if (api.name === "createEffect" && q.node.arguments.length < 2)
           report(
             q,
@@ -201,7 +312,7 @@ export function inspectNativeProject(files) {
             else if (binding?.isFunctionDeclaration()) handler = binding;
           }
           if (handler?.isFunction())
-            handler.traverse({
+            traverseOwned(handler, {
               ThisExpression(site) {
                 report(
                   site,
@@ -234,7 +345,7 @@ function surface(code, filename, modules, options = {}, foreignComponents = new 
   const needed = new Set();
   const contexts = new Set();
   let needsReturned = false;
-  p.traverse({
+  traverseOwned(p, {
     TSTypeReference(q) {
       if (!t.isIdentifier(q.node.typeName, { name: "ReturnType" })) return;
       q.node.typeName = t.identifier("__NativeReturned");
@@ -309,7 +420,7 @@ function surface(code, filename, modules, options = {}, foreignComponents = new 
       needed.add("view");
       if (t.isExpression(callback.node.body)) callback.node.body = wrap(callback.node.body);
       else
-        callback.traverse({
+        traverseOwned(callback, {
           /** @param {Path} inner */
           Function(inner) {
             inner.skip();
@@ -332,7 +443,7 @@ function surface(code, filename, modules, options = {}, foreignComponents = new 
     if (q.node.closingElement) q.node.closingElement.name = t.jsxIdentifier(alias.name);
   };
   // Annotate component props before source signatures are queried.
-  p.traverse({
+  traverseOwned(p, {
     Function(q) {
       const name =
         ("id" in q.node ? q.node.id?.name : "") ||
@@ -341,7 +452,7 @@ function surface(code, filename, modules, options = {}, foreignComponents = new 
           : "");
       if (q.getFunctionParent() || !/^[A-Z]/.test(name ?? "")) return;
       let jsx = t.isJSXElement(q.node.body) || t.isJSXFragment(q.node.body);
-      q.traverse({
+      traverseOwned(q, {
         Function(inner) {
           inner.skip();
         },
@@ -454,6 +565,7 @@ function surface(code, filename, modules, options = {}, foreignComponents = new 
         return;
       }
       if (api?.module !== "solid-js") return;
+      if (foreignStateReference(q.get("callee"))) return;
       if (
         ["createOptimisticStore", "createProjection"].includes(api.name) &&
         q.node.typeParameters?.params.length === 1 &&
@@ -512,7 +624,7 @@ function surface(code, filename, modules, options = {}, foreignComponents = new 
       }
     }
   });
-  p.traverse({
+  traverseOwned(p, {
     JSXElement: {
       exit(q) {
         const opening = q.get("openingElement"),
@@ -685,7 +797,7 @@ function surface(code, filename, modules, options = {}, foreignComponents = new 
           );
           let jsx = false;
           if (init?.isFunction())
-            init.traverse({
+            traverseOwned(init, {
               Function(q) {
                 q.skip();
               },
@@ -791,13 +903,14 @@ function surface(code, filename, modules, options = {}, foreignComponents = new 
     }
   });
   const rewrittenImports = new WeakSet();
-  p.traverse({
+  traverseOwned(p, {
     ImportDeclaration(q) {
       if (rewrittenImports.has(q.node)) return;
       rewrittenImports.add(q.node);
       const module = q.node.source.value;
       if (!["solid-js", "@solidjs/web"].includes(module)) return;
       const specs = [];
+      const foreignSpecs = [];
       for (const spec of q.node.specifiers) {
         if (!t.isImportSpecifier(spec)) continue;
         if (q.node.importKind === "type" || spec.importKind === "type") continue;
@@ -805,7 +918,17 @@ function surface(code, filename, modules, options = {}, foreignComponents = new 
         if (nativePassthrough.has(name) || nativeTypes.has(name)) continue;
         const mapped = module === "solid-js" ? nativeMapping[name] : name;
         if (!mapped) continue;
-        specs.push(t.importSpecifier(spec.local, t.identifier(mapped)));
+        const binding = q.scope.getBinding(spec.local.name);
+        const refs = binding?.referencePaths ?? [];
+        const foreign = refs.filter(foreignStateReference);
+        if (foreign.length) {
+          foreignSpecs.push(spec);
+          const owned = refs.filter(ref => !foreignStateReference(ref));
+          if (!owned.length) continue;
+          const alias = q.scope.generateUidIdentifier(mapped);
+          for (const ref of owned) ref.replaceWith(t.cloneNode(alias));
+          specs.push(t.importSpecifier(alias, t.identifier(mapped)));
+        } else specs.push(t.importSpecifier(spec.local, t.identifier(mapped)));
       }
       const types = q.node.specifiers.filter(
         s =>
@@ -814,11 +937,14 @@ function surface(code, filename, modules, options = {}, foreignComponents = new 
             (s.importKind === "type" ||
               nativeTypes.has(t.isIdentifier(s.imported) ? s.imported.name : s.imported.value)))
       );
-      const retained = q.node.specifiers.filter(
-        s =>
-          t.isImportSpecifier(s) &&
-          nativePassthrough.has(t.isIdentifier(s.imported) ? s.imported.name : s.imported.value)
-      );
+      const retained = [
+        ...foreignSpecs,
+        ...q.node.specifiers.filter(
+          s =>
+            t.isImportSpecifier(s) &&
+            nativePassthrough.has(t.isIdentifier(s.imported) ? s.imported.name : s.imported.value)
+        )
+      ];
       if (retained.length) {
         const declaration = t.importDeclaration(retained, t.stringLiteral(module));
         rewrittenImports.add(declaration);
@@ -858,7 +984,7 @@ function surface(code, filename, modules, options = {}, foreignComponents = new 
       )
     );
   if (foreignComponents.size) {
-    p.traverse({
+    traverseOwned(p, {
       Function(q) {
         if (
           q.getFunctionParent() ||
@@ -940,7 +1066,8 @@ function lowerNativeProjectImpl(input, options = {}) {
   }
   const selected = new Map([...files].filter(([id]) => !entries.has(id)));
   const diagnostics = inspectNativeProject(selected);
-  if (diagnostics.length) throw new NativeDiagnosticError(diagnostics);
+  const refusals = diagnostics.filter(d => d.code !== "MODULE_STATE");
+  if (refusals.length) throw new NativeDiagnosticError(refusals);
   // Resolve selected components handed as values to a foreign component slot.
   // Their source parameter remains the plain Solid call signature at that edge.
   const sourceProgram = [...selected.values()].some(code => /\bcomponent\s*:/.test(code))
@@ -951,7 +1078,7 @@ function lowerNativeProjectImpl(input, options = {}) {
   for (const file of selected.keys()) {
     const source = sourceProgram?.getSourceFile(file);
     /** @param {ts.Node} node */
-    const visit = node => {
+    /** @param {ts.Node} node */ const visit = node => {
       if (
         checker &&
         ts.isPropertyAssignment(node) &&
@@ -1003,8 +1130,8 @@ function lowerNativeProjectImpl(input, options = {}) {
     };
     if (source) visit(source);
   }
-  const prepared = nativePrelude(selected);
-  const failures = nativeFailures(prepared, options.compilerOptions);
+  const prepared = nativePrelude(markOpaqueGenerators(selected));
+  const failures = nativeFailures(prepared, options.compilerOptions, "marked");
   const effects = new Map(
     [...nativePrelude(lowerNativeEffects(prepared, failures))].map(([id, code]) => [
       id,
@@ -1044,7 +1171,11 @@ function lowerNativeProjectImpl(input, options = {}) {
       }
     }
   );
-  return { ...lowered, diagnostics: nativeForeignDiagnostics(files, options.compilerOptions) };
+  return {
+    ...lowered,
+    files: unmarkOpaqueGenerators(lowered.files),
+    diagnostics: [...diagnostics, ...nativeForeignDiagnostics(files, options.compilerOptions)]
+  };
 }
 /** Foreign tags are recorded against authored positions, before intermediate
  * passes change their line numbers. @param {Map<string,string>} files @param {ts.CompilerOptions} [options] */
@@ -1052,7 +1183,7 @@ export function nativeForeignDiagnostics(files, options = {}) {
   /** @type {Diagnostic[]} */ const diagnostics = [];
   for (const [file, code] of files) {
     const p = parseProgram(code, file);
-    p?.traverse({
+    traverseOwned(p, {
       JSXOpeningElement(q) {
         const tag = q.get("name");
         let api = imported(tag);

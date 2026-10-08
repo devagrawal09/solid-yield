@@ -554,7 +554,7 @@
       "diagnostics": [
         {
           "code": "SUGAR_CALLBACK",
-          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/packages/vite-plugin-yield/test/.native-generated/hole-create.tsx:8:38)"
+          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/packages/vite-plugin-yield/test/.native-generated/hole-create.tsx:1:177)"
         }
       ]
     },
@@ -622,7 +622,7 @@
       "diagnostics": [
         {
           "code": "SUGAR_HOST",
-          "message": "[SUGAR_HOST] Reactive operations in async functions or methods are unsupported. (<root>/packages/vite-plugin-yield/test/.native-generated/method-read.tsx:7:14)"
+          "message": "[SUGAR_HOST] Reactive operations in async functions or methods are unsupported. (<root>/packages/vite-plugin-yield/test/.native-generated/method-read.tsx:1:191)"
         }
       ]
     },
@@ -676,7 +676,7 @@
       "diagnostics": [
         {
           "code": "SUGAR_CALLBACK",
-          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/packages/vite-plugin-yield/test/.native-generated/effect-bundle.tsx:8:18)"
+          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/packages/vite-plugin-yield/test/.native-generated/effect-bundle.tsx:1:202)"
         }
       ]
     }
@@ -1177,20 +1177,6 @@
         "iterations": 3,
         "classes": [
           {
-            "id": "examples/originals/effect/src/api.ts#TransientNetworkError@660",
-            "name": "TransientNetworkError",
-            "file": "examples/originals/effect/src/api.ts",
-            "nameStart": 675,
-            "classStart": 662
-          },
-          {
-            "id": "examples/originals/effect/src/api.ts#CardDeclinedError@6338",
-            "name": "CardDeclinedError",
-            "file": "examples/originals/effect/src/api.ts",
-            "nameStart": 6353,
-            "classStart": 6340
-          },
-          {
             "id": "examples/originals/effect/src/solid-effect.ts#ActionInterruptedError@5360",
             "name": "ActionInterruptedError",
             "file": "examples/originals/effect/src/solid-effect.ts",
@@ -1257,7 +1243,14 @@
       "diagnostics": [
         {
           "code": "SUGAR_CALLBACK",
-          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/examples/originals/effect/src/api.ts:177:68)"
+          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/examples/originals/effect/src/checkout.tsx:141:25)"
+        },
+        {
+          "code": "MODULE_STATE",
+          "message": "reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses",
+          "file": "examples/originals/effect/src/log.ts",
+          "line": 20,
+          "column": 7
         }
       ],
       "parity": "not run: no checked native program",
@@ -1265,7 +1258,8 @@
       "differingStatements": null,
       "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
       "reasons": [
-        "SUGAR_CALLBACK"
+        "SUGAR_CALLBACK",
+        "MODULE_STATE"
       ]
     },
     {
@@ -1495,7 +1489,7 @@
       "diagnostics": [
         {
           "code": "SUGAR_COMPONENT",
-          "message": "[SUGAR_COMPONENT] A sugar component needs a top-level PascalCase name. (<root>/examples/originals/rendering/shared/src/components/App.tsx:15:22)"
+          "message": "[SUGAR_COMPONENT] A sugar component needs a top-level PascalCase name. (<root>/examples/originals/rendering/shared/src/components/App.tsx:14:22)"
         }
       ],
       "parity": "not run: no checked native program",
@@ -1846,7 +1840,7 @@
       "diagnostics": [
         {
           "code": "SUGAR_CALLBACK",
-          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/examples/originals/room/src/lib/room-panel.tsx:21:20)"
+          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/examples/originals/room/src/lib/room-panel.tsx:1:1)"
         }
       ],
       "parity": "not run: no checked native program",

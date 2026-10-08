@@ -1,4 +1,5 @@
-import { printMapped, withPositions } from "./positions.js";
+import { traverseOwned, opaqueDirective } from "./native-owned.js";
+import { printMapped, withPositions, copyPosition } from "./positions.js";
 /** Experimental project transform. Types are queried on generated virtual files,
  * never asserted onto authored calls. See documentation/sugar-design.md. */
 // @ts-check
@@ -49,7 +50,13 @@ const control = p =>
 function fail(p, code, message, filename) {
   const at = p.node.loc?.start;
   const e = new Error(`[${code}] ${message} (${filename}:${at?.line}:${(at?.column ?? 0) + 1})`);
-  Object.assign(e, { code, id: filename, loc: { file: filename, ...at } });
+  Object.assign(e, {
+    code,
+    id: filename,
+    loc: { file: filename, ...at },
+    intermediateRead: p.toString(),
+    intermediateHost: p.getFunctionParent()?.toString()
+  });
   throw e;
 }
 /** @param {string} code */
@@ -61,7 +68,7 @@ export function isSugar(code) {
 function seed(code, filename, native = false) {
   const p = parseProgram(code, filename);
   if (!p) throw new Error(`Cannot parse ${filename}`);
-  p.traverse({
+  traverseOwned(p, {
     Function(path) {
       if (path.node.generator && !native)
         fail(path, "SUGAR_EXPLICIT", "A sugar file cannot contain authored generators.", filename);
@@ -70,7 +77,7 @@ function seed(code, filename, native = false) {
   let needsView = false,
     needsComponent = false;
   const wrapped = new WeakSet();
-  p.traverse({
+  traverseOwned(p, {
     Function: {
       exit(path) {
         const n = /** @type {any} */ (path.node);
@@ -98,7 +105,7 @@ function seed(code, filename, native = false) {
         // Errored's plain accessor fallback stays a Solid callback, not a row.
         const plainFallback = prop === "fallback" && lib(propCall?.get("callee")) === "Errored";
         let returnsJSX = t.isJSXElement(n.body) || t.isJSXFragment(n.body);
-        path.traverse({
+        traverseOwned(path, {
           Function(q) {
             q.skip();
           },
@@ -126,7 +133,7 @@ function seed(code, filename, native = false) {
           );
         if (path.isArrowFunctionExpression()) {
           // Reject lexical captures whose meaning would change in a generator.
-          path.traverse({
+          traverseOwned(path, {
             ThisExpression(q) {
               fail(q, "SUGAR_LEXICAL", "A routine arrow cannot capture this.", filename);
             },
@@ -142,7 +149,7 @@ function seed(code, filename, native = false) {
         path.node.generator = true;
         if (isComponent || row) {
           needsView = true;
-          path.traverse({
+          traverseOwned(path, {
             Function(q) {
               q.skip();
             },
@@ -256,6 +263,26 @@ function pass(code, filename, program, native = false) {
   const type = p => {
     const n = nodes.get(`${p.node.start}:${p.node.end}`);
     return n && checker.getTypeAtLocation(n);
+  };
+  /** An authored iterator is a foreign return value, never a delegated routine.
+   * @param {Path} path */
+  const opaqueCall = path => {
+    const node = nodes.get(`${path.node.start}:${path.node.end}`);
+    if (!node || !ts.isCallExpression(node)) return false;
+    const declaration = /** @type {ts.FunctionLikeDeclaration | undefined} */ (
+      checker.getResolvedSignature(node)?.declaration
+    );
+    const body = declaration?.body;
+    return (
+      !!body &&
+      ts.isBlock(body) &&
+      body.statements.some(
+        statement =>
+          ts.isExpressionStatement(statement) &&
+          ts.isStringLiteral(statement.expression) &&
+          statement.expression.text === opaqueDirective
+      )
+    );
   };
   /** @param {ts.Type | undefined} v @param {string} b */
   const brand = (v, b) =>
@@ -427,7 +454,7 @@ function pass(code, filename, program, native = false) {
   // Select structural array operations on the store's value, never on its
   // reactive row paths. Keep the entire method chain in one tracked read.
   if (native)
-    p.traverse({
+    traverseOwned(p, {
       CallExpression(path) {
         const callee = path.get("callee");
         if (!callee.isMemberExpression()) return;
@@ -456,10 +483,13 @@ function pass(code, filename, program, native = false) {
           state = path.scope.generateUidIdentifier("state");
         object.replaceWith(state);
         chain.replaceWith(
-          t.callExpression(t.identifier("__nativeReadStore"), [
-            store,
-            t.arrowFunctionExpression([state], chain.node)
-          ])
+          copyPosition(
+            t.callExpression(t.identifier("__nativeReadStore"), [
+              store,
+              t.arrowFunctionExpression([state], chain.node)
+            ]),
+            chain.node
+          )
         );
         if (!p.scope.hasBinding("__nativeReadStore")) {
           p.node.body.unshift(
@@ -474,7 +504,7 @@ function pass(code, filename, program, native = false) {
         changed = true;
       }
     });
-  p.traverse({
+  traverseOwned(p, {
     ReturnStatement(path) {
       if (!native) return;
       const value = path.get("argument");
@@ -495,7 +525,10 @@ function pass(code, filename, program, native = false) {
         // Native inference runs before context/prop accessors acquire their
         // library types. Once resolved as a source or routine, its own failure
         // color is authoritative; do not drive it inside a plain producer.
-        if (sourceType(type(body.get("callee"))) || isOperation(type(body))) {
+        if (
+          !opaqueCall(body) &&
+          (sourceType(type(body.get("callee"))) || isOperation(type(body)))
+        ) {
           path.replaceWith(body.node);
           changed = true;
         }
@@ -507,6 +540,7 @@ function pass(code, filename, program, native = false) {
           lib(path.get("callee.callee")) === "foreign"
         )
           return;
+        if (opaqueCall(path)) return;
         const callee = path.get("callee"),
           ct = type(callee);
         const delegated = path.parentPath.isYieldExpression();
@@ -644,7 +678,7 @@ function pass(code, filename, program, native = false) {
           }
         }
         let reads = value.isYieldExpression();
-        value.traverse({
+        traverseOwned(value, {
           Function(q) {
             q.skip();
           },
@@ -723,7 +757,22 @@ function checkEscapes(files, active, options) {
         const generator = checker
           .getTypeAtLocation(n)
           .getCallSignatures()
-          .some(sig => checker.getReturnTypeOfSignature(sig).symbol?.name === "Generator");
+          .some(sig => {
+            const declaration = /** @type {ts.FunctionLikeDeclaration | undefined} */ (
+              sig.declaration
+            );
+            const body = declaration?.body;
+            const opaque =
+              body &&
+              ts.isBlock(body) &&
+              body.statements.some(
+                statement =>
+                  ts.isExpressionStatement(statement) &&
+                  ts.isStringLiteral(statement.expression) &&
+                  statement.expression.text === opaqueDirective
+              );
+            return !opaque && checker.getReturnTypeOfSignature(sig).symbol?.name === "Generator";
+          });
         if (generator && !declarationName && !importExport && !propertyName) {
           const direct = ts.isCallExpression(parent) && parent.expression === n;
           const callback =

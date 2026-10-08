@@ -44,7 +44,7 @@ test("cross-file colors come from the generated imported component", () => {
       'import {Child} from "./child";export function Parent(){return <Child/>}'.lastIndexOf("Child")
     );
     const text = qi?.displayParts.map(p => p.text).join("");
-    assert.match(text, /pending true/);
+    assert.match(text, /can suspend \(pending\)/);
     assert.equal(service.diagnostics(file).length, 0);
   } finally {
     service.dispose();
@@ -65,9 +65,15 @@ test("foreign handoffs explain inferred failure classes; library roots may fail"
     const ds = service.diagnostics(join(root, "failure.tsx"));
     const d = ds.find(d => d.messageText.includes("[FOREIGN_HANDOFF]"));
     assert.ok(d, JSON.stringify(ds.map(d => d.messageText)));
-    assert.match(d.messageText, /Component DocPage: .*fails .*NotFound.*unknown/);
-    assert.match(d.messageText, /wrap in Errored or handle with attempt\/catch/);
-    assert.equal(d.file.getLineAndCharacterOfPosition(d.start).line + 1, 8);
+    assert.match(
+      d.relatedInformation[0].messageText,
+      /Component DocPage.*can fail with .*NotFound.*unknown/
+    );
+    assert.match(
+      d.messageText,
+      /Wrap this rendered work in Errored, or handle the failure with attempt/
+    );
+    assert.equal(d.file.getLineAndCharacterOfPosition(d.start).line + 1, 5);
   } finally {
     service.dispose();
   }

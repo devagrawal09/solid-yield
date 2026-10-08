@@ -255,7 +255,6 @@ function surface(code, filename, modules, options = {}) {
     for (const ref of binding?.referencePaths ?? []) {
       if (ref.findParent(q => q.isTSType())) continue;
       if (ref.parentPath?.isMemberExpression() && ref.key === "object") continue;
-      if (ref.parentPath?.isCallExpression() && ref.key === "callee") continue;
       ref.replaceWith(t.callExpression(t.identifier(name), []));
     }
   };
@@ -377,7 +376,7 @@ function surface(code, filename, modules, options = {}) {
         fail(
           q,
           "NATIVE_PROPS",
-          "Destructured component parameters need a checked snapshot-versus-path mapping."
+          "Use a props parameter and read props.name where needed; destructuring loses reactive updates."
         );
       if (param?.typeAnnotation?.type === "TSTypeAnnotation") {
         needed.add("Props");
@@ -951,7 +950,7 @@ export function nativeForeignDiagnostics(files, options = {}) {
           return;
         diagnostics.push({
           code: "NATIVE_FOREIGN_BOUNDARY",
-          message: `${tag.toString()} (${api.name} from ${api.module}) stays Solid at this JSX boundary (provenance C; foreign failures unknown). Handle failures at the boundary. To bring it inside, use a core API or select its source with a checked contract.`,
+          message: `Handle failures inside ${tag.toString()} or its callbacks; this imported component (${api.name} from ${api.module}) is outside the native check.`,
           file,
           line: q.node.loc?.start.line ?? 1,
           column: (q.node.loc?.start.column ?? 0) + 1

@@ -1,0 +1,121 @@
+[
+  {
+    "variant": "m01_setup_read.tsx",
+    "code": "READ_IN_SETUP",
+    "tsCode": 2769,
+    "line": 8,
+    "file": "App.tsx"
+  },
+  {
+    "variant": "m02_noprovider2.tsx",
+    "code": "NO_PROVIDER",
+    "tsCode": 1360,
+    "line": 15,
+    "file": "App.tsx"
+  },
+  {
+    "variant": "m03_throw_string.tsx",
+    "code": "NATIVE_THROW",
+    "tsCode": 95000,
+    "line": 8,
+    "file": "App.tsx"
+  },
+  {
+    "variant": "m03b_throw_in_memo.tsx",
+    "code": "NATIVE_THROW",
+    "tsCode": 95000,
+    "line": 8,
+    "file": "App.tsx"
+  },
+  {
+    "variant": "m03c_throw_in_handler.tsx",
+    "code": "FOREIGN_HANDOFF",
+    "tsCode": 2345,
+    "line": 9,
+    "file": "App.tsx"
+  },
+  {
+    "variant": "m04_async_handler.tsx",
+    "code": "FOREIGN_HANDOFF",
+    "tsCode": 2345,
+    "line": 4,
+    "file": "api.ts"
+  },
+  {
+    "variant": "m05_swallow.tsx",
+    "code": null,
+    "tsCode": null,
+    "line": null,
+    "file": null
+  },
+  {
+    "variant": "m06_memo_writes.tsx",
+    "code": "WRITE_IN_REACTIVE",
+    "tsCode": 2345,
+    "line": 8,
+    "file": "App.tsx"
+  },
+  {
+    "variant": "m07_timeout_read.tsx",
+    "code": null,
+    "tsCode": null,
+    "line": null,
+    "file": null
+  },
+  {
+    "variant": "m08_portal.tsx",
+    "code": "NATIVE_FOREIGN_BOUNDARY",
+    "tsCode": 95001,
+    "line": 26,
+    "file": "App.tsx"
+  },
+  {
+    "variant": "m09_destructure.tsx",
+    "code": "NATIVE_PROPS",
+    "tsCode": 95000,
+    "line": 11,
+    "file": "App.tsx"
+  },
+  {
+    "variant": "m10_conditional.tsx",
+    "code": null,
+    "tsCode": null,
+    "line": null,
+    "file": null
+  },
+  {
+    "variant": "m11_nested_comp.tsx",
+    "code": null,
+    "tsCode": null,
+    "line": null,
+    "file": null
+  },
+  {
+    "variant": "m12_effect_arity.tsx",
+    "code": "NATIVE_EFFECT_PHASES",
+    "tsCode": 95000,
+    "line": 8,
+    "file": "App.tsx"
+  },
+  {
+    "variant": "s2a_noloading.tsx",
+    "code": "PENDING_ROOT",
+    "tsCode": 1360,
+    "line": 17,
+    "file": "App.tsx"
+  },
+  {
+    "variant": "s2b_noprovider.tsx",
+    "code": "NO_PROVIDER",
+    "tsCode": 1360,
+    "line": 13,
+    "file": "App.tsx"
+  },
+  {
+    "variant": "s2c_noerrored.tsx",
+    "code": "FOREIGN_HANDOFF",
+    "tsCode": 2345,
+    "line": 4,
+    "file": "api.ts"
+  }
+]

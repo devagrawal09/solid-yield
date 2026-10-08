@@ -7,6 +7,7 @@ const {
   nativeInclude
 } = require("vite-plugin-solid-yield/virtual");
 const catalog = require("./catalog.cjs");
+const findOrigin = require("./origins.cjs");
 const routineColors = require("./hover.cjs");
 const walk = (ts, n, fn) => {
   fn(n);
@@ -39,7 +40,12 @@ function colorSummary(ts, checker, node, tuple) {
   if (!fields.has("PENDING") || !fields.has("FAILS")) return;
   function failureName(t) {
     if (t.isUnion()) return t.types.map(failureName).join(" | ");
-    if (typeof t.value === "string") return t.value.split("#").at(-1).replace(/@\d+$/, "");
+    if (typeof t.value === "string")
+      return t.value
+        .split("#")
+        .at(-1)
+        .replace(/@\d+$/, "")
+        .replace(/^global:/, "");
     return show(t);
   }
   function show(t) {
@@ -58,6 +64,7 @@ function colorSummary(ts, checker, node, tuple) {
       const id = args?.[1]?.value;
       if (typeof id === "string") return id.split("#").at(-1);
     }
+    if (["HoleRequires", "RequiresOf"].includes(t.aliasSymbol?.name)) return "an unknown context";
     return checker.typeToString(t, node, ts.TypeFormatFlags.NoTruncation);
   }
   return {
@@ -68,7 +75,23 @@ function colorSummary(ts, checker, node, tuple) {
   };
 }
 function colorsText(c) {
-  return `pending ${c.pending}; fails ${c.fails}; may-wait ${c.wait}; requires ${c.requires}`;
+  const pending =
+    c.pending === "true"
+      ? "can suspend (pending)"
+      : ["false", "none"].includes(c.pending)
+        ? "does not suspend"
+        : "may suspend (pending)";
+  const failures = c.fails.replace(/\b(any|unknown)\b/g, "an unknown error");
+  const contexts = c.requires
+    .replace(/\b(any|unknown)\b/g, "an unknown context")
+    .replace("an an unknown context context", "an unknown context");
+  const wait =
+    c.wait === "true"
+      ? "can wait"
+      : ["false", "none"].includes(c.wait)
+        ? "does not wait"
+        : "may wait";
+  return `${pending}; ${c.fails === "none" ? "never fails" : "can fail with " + failures}; ${wait}; ${c.requires === "none" ? "needs no context" : "needs " + contexts}`;
 }
 function createVirtualService(ts, host, config = {}) {
   let state, signature;
@@ -95,6 +118,7 @@ function createVirtualService(ts, host, config = {}) {
     ]);
     if (next === signature) return state;
     state?.ls?.dispose();
+    state?.originalLs?.dispose();
     signature = next;
     const originals = new Map(
       [...input].map(([f, c]) => [f, ts.createSourceFile(f, c, ts.ScriptTarget.Latest, true)])
@@ -174,7 +198,7 @@ function createVirtualService(ts, host, config = {}) {
             code: 95000,
             source: "solid-yield",
             category: ts.DiagnosticCategory.Error,
-            messageText: `[${d.code}] ${d.message.replace(/^\[[A-Z_]+\]\s*/, "").replace(/\s*\([^\n]*:\d+:\d+\)\.?$/, "")}`
+            messageText: `[${d.code}] ${catalog[d.code] ?? d.message.replace(/^\[[A-Z_]+\]\s*/, "").replace(/\s*\([^\n]*:\d+:\d+\)\.?$/, "")}`
           });
         }
       }
@@ -261,6 +285,8 @@ function createVirtualService(ts, host, config = {}) {
     if (message.includes("SetupOp")) {
       culprit = yields.find(y => /\b(Read|Source|Path)\b/.test(y.type));
       if (culprit) code = "READ_IN_SETUP";
+      else if ((culprit = yields.find(y => /\bRaise\b/.test(y.type))))
+        code = "NATIVE_SETUP_FAILURE";
       else if (message.includes("Element")) {
         walk(ts, scope, n => {
           if (!culprit && (ts.isJsxElement(n) || ts.isJsxSelfClosingElement(n)))
@@ -294,43 +320,88 @@ function createVirtualService(ts, host, config = {}) {
         ? `[${branded[1]}] ${branded[2]}`
         : `[GENERATED_TYPE] ${catalog.GENERATED_TYPE} Check the operation and its enclosing host.`;
     }
-    // Expand foreign handoff diagnostics from the actual generated component type.
-    if (code === "FOREIGN_HANDOFF" || code === "PENDING_ROOT" || code === "NO_PROVIDER") {
+    let origin;
+    const related = d.relatedInformation?.map(r => mapped(r, s)) ?? [];
+    if (
+      ["NATIVE_CALLBACK_FAILURE", "NATIVE_SETUP_FAILURE"].includes(code) &&
+      ts.isFunctionLike(scope)
+    ) {
+      origin = findOrigin(ts, s, scope, code, locate);
+    }
+    if (["FOREIGN_HANDOFF", "PENDING_ROOT", "NO_PROVIDER"].includes(code)) {
       const target = ts.isSatisfiesExpression(node) ? node.expression : node;
       if (ts.isIdentifier(target)) {
         const colors = colorSummary(ts, checker, target);
-        if (colors) {
-          const action =
-            code === "FOREIGN_HANDOFF"
-              ? "not handled — wrap in Errored or handle with attempt/catch"
+        origin = findOrigin(ts, s, target, code, locate);
+        const action =
+          colors && [colors.fails, colors.requires].includes("any")
+            ? "Fix the earlier errors in this component before checking its render call."
+            : code === "FOREIGN_HANDOFF"
+              ? catalog.failureAdvice(origin?.host ?? "view")
               : catalog[code];
-          message = `[${code}] Component ${target.text}: ${colorsText(colors)}; ${action}`;
-        }
+        message = `[${code}] ${action}${colors?.requires !== "none" && code === "NO_PROVIDER" ? " Missing: " + colors.requires + "." : ""}`;
+        if (origin?.handler)
+          related.push({
+            file: origin.handler.file,
+            start: origin.handler.sourceStart,
+            length: Math.max(1, origin.handler.sourceEnd - origin.handler.sourceStart),
+            category: ts.DiagnosticCategory.Message,
+            code: d.code,
+            messageText: "Catch or declare the failure in this handler."
+          });
+        if (origin)
+          related.push({
+            file: s.originals.get(sf.fileName),
+            start: at?.sourceStart ?? 0,
+            length: Math.max(1, (at?.sourceEnd ?? 1) - (at?.sourceStart ?? 0)),
+            category: ts.DiagnosticCategory.Message,
+            code: d.code,
+            messageText: `Component ${target.text} reaches Solid here. ${colors ? colorsText(colors) : ""}`
+          });
       }
     }
     return {
       ...d,
-      file: s.originals.get(sf.fileName),
-      start: at?.sourceStart ?? 0,
-      length: Math.max(1, (at?.sourceEnd ?? 1) - (at?.sourceStart ?? 0)),
+      file: origin?.file ?? s.originals.get(sf.fileName),
+      start: origin?.sourceStart ?? at?.sourceStart ?? 0,
+      length: Math.max(
+        1,
+        origin
+          ? origin.sourceEnd - origin.sourceStart
+          : (at?.sourceEnd ?? 1) - (at?.sourceStart ?? 0)
+      ),
       source: "solid-yield",
-      messageText: (at?.generated ? "[generated] " : "") + message,
-      relatedInformation: d.relatedInformation?.map(r => mapped(r, s))
+      messageText: (!origin && (!at || at.generated) ? "[generated] " : "") + message,
+      relatedInformation: related.length ? related : undefined
     };
   }
   function diagnostics(file, kind = "semantic") {
     const s = refresh(),
       f = resolve(file);
-    const failures = s.failures.filter(d => d.file.fileName === f);
-    if (s.selected.has(f) && !s.positions.has(f)) return failures;
-    const ds =
-      kind === "suggestion"
-        ? s.ls.getSuggestionDiagnostics(f)
-        : kind === "syntactic"
-          ? s.ls.getSyntacticDiagnostics(f)
-          : s.ls.getSemanticDiagnostics(f);
-    const result = [...failures, ...ds.map(d => mapped(d, s))];
-    return [...new Map(result.map(d => [`${d.start}:${d.messageText}`, d])).values()];
+    s.diagnosticCache ??= new Map();
+    if (!s.diagnosticCache.has(kind)) {
+      const all = [...s.failures];
+      for (const name of host.getScriptFileNames()) {
+        const source = resolve(name);
+        if (s.selected.has(source) && !s.positions.has(source)) continue;
+        const ds =
+          kind === "suggestion"
+            ? s.ls.getSuggestionDiagnostics(source)
+            : kind === "syntactic"
+              ? s.ls.getSyntacticDiagnostics(source)
+              : s.ls.getSemanticDiagnostics(source);
+        all.push(...ds.map(d => mapped(d, s)));
+      }
+      s.diagnosticCache.set(kind, all);
+    }
+    // tsserver assumes every primary span belongs to the requested file. Route
+    // relocated root errors to the origin file, retaining the handoff as related.
+    const result = s.diagnosticCache.get(kind).filter(d => resolve(d.file.fileName) === f);
+    return [
+      ...new Map(
+        result.map(d => [`${d.start}:${d.code}:${d.category}:${d.messageText}`, d])
+      ).values()
+    ];
   }
   function quickInfo(file, pos) {
     const s = refresh(),
@@ -356,17 +427,44 @@ function createVirtualService(ts, host, config = {}) {
         return {
           ...qi,
           textSpan: { start: at.sourceStart, length: at.sourceEnd - at.sourceStart },
-          displayParts: [{ kind: "text", text: `${node.getText(sf)}: ${colorsText(c)}` }],
+          displayParts: [{ kind: "text", text: `${node.getText(sf)} — ${colorsText(c)}` }],
           documentation: []
         };
     }
     const at = candidates[0];
     if (!at) return;
-    const qi = s.ls.getQuickInfoAtPosition(f, at.start);
+    let qi = s.ls.getQuickInfoAtPosition(f, at.start);
+    if (
+      qi &&
+      /Generator|NativeFailure|Source<|Path<|HoleCall|ComponentView|__@/.test(
+        qi.displayParts.map(p => p.text).join("")
+      )
+    ) {
+      s.originalLs ??= ts.createLanguageService({
+        ...s.virtualHost,
+        getCompilationSettings: () => host.getCompilationSettings(),
+        getScriptSnapshot: name => host.getScriptSnapshot(name),
+        getScriptVersion: name => host.getScriptVersion(name)
+      });
+      const original = s.originalLs.getQuickInfoAtPosition(f, pos);
+      if (original) return original;
+      qi = {
+        ...qi,
+        displayParts: [{ kind: "text", text: "See the component hover for its checks." }]
+      };
+    }
     return (
       qi && { ...qi, textSpan: { start: at.sourceStart, length: at.sourceEnd - at.sourceStart } }
     );
   }
-  return { diagnostics, quickInfo, refresh, dispose: () => state?.ls.dispose() };
+  return {
+    diagnostics,
+    quickInfo,
+    refresh,
+    dispose: () => {
+      state?.ls.dispose();
+      state?.originalLs?.dispose();
+    }
+  };
 }
 module.exports = { createVirtualService, colorSummary, colorsText };

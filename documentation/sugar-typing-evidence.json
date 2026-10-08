@@ -9,7 +9,7 @@
           "line": 4,
           "column": 17,
           "tsCode": 2769,
-          "message": "[READ_IN_SETUP] A setup creates; read this value in JSX, a memo, an effect, or an event."
+          "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
         }
       ]
     },
@@ -22,7 +22,7 @@
           "line": 5,
           "column": 25,
           "tsCode": 2769,
-          "message": "[READ_IN_SETUP] A setup creates; read this value in JSX, a memo, an effect, or an event."
+          "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
         }
       ]
     },
@@ -35,7 +35,7 @@
           "line": 4,
           "column": 17,
           "tsCode": 2769,
-          "message": "[READ_IN_SETUP] A setup creates; read this value in JSX, a memo, an effect, or an event."
+          "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
         }
       ]
     },
@@ -48,7 +48,7 @@
           "line": 4,
           "column": 3,
           "tsCode": 95000,
-          "message": "[NATIVE_EFFECT_PHASES] createEffect needs a tracked compute and an untracked effect phase."
+          "message": "[NATIVE_EFFECT_PHASES] Pass a tracked compute function and an untracked effect function to createEffect."
         }
       ]
     },
@@ -58,10 +58,16 @@
       "source": "import { createMemo } from \"solid-js\";\nimport { render } from \"@solidjs/web\";\nfunction App() {\n  const count = createMemo(async () => 1);\n  return <p>{count()}</p>;\n}\nrender(App, document.body);\n",
       "diagnostics": [
         {
-          "line": 7,
-          "column": 8,
+          "line": 5,
+          "column": 14,
+          "tsCode": 2345,
+          "message": "[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data."
+        },
+        {
+          "line": 5,
+          "column": 14,
           "tsCode": 1360,
-          "message": "[PENDING_ROOT] Component App: pending true; fails none; may-wait false; requires none; The root may be pending; wrap the pending part in Loading."
+          "message": "[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data."
         }
       ]
     },
@@ -74,7 +80,7 @@
           "line": 7,
           "column": 21,
           "tsCode": 2322,
-          "message": "[SETTLED_PROP] This prop is settled; pass a settled value or declare a pending source contract."
+          "message": "[SETTLED_PROP] Pass a ready value, or allow a pending source in this prop's type."
         }
       ]
     },
@@ -87,7 +93,7 @@
           "line": 4,
           "column": 21,
           "tsCode": 2769,
-          "message": "[READ_IN_SETUP] A setup creates; read this value in JSX, a memo, an effect, or an event."
+          "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
         }
       ]
     },
@@ -100,7 +106,7 @@
           "line": 5,
           "column": 5,
           "tsCode": 2345,
-          "message": "[WRITE_IN_REACTIVE] A reactive computation cannot write; move this write to an event or effect phase."
+          "message": "[WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state."
         }
       ]
     },
@@ -113,7 +119,7 @@
           "line": 3,
           "column": 14,
           "tsCode": 95000,
-          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole."
+          "message": "[SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event."
         }
       ]
     },
@@ -123,10 +129,16 @@
       "source": "import { createContext, useContext } from \"solid-js\";\nimport { render } from \"@solidjs/web\";\nconst Identity = createContext<string>();\nfunction App() {\n  const name = useContext(Identity);\n  return <p>{name}</p>;\n}\nrender(App, document.body);\n",
       "diagnostics": [
         {
-          "line": 8,
-          "column": 8,
+          "line": 5,
+          "column": 27,
+          "tsCode": 2345,
+          "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: Identity."
+        },
+        {
+          "line": 5,
+          "column": 27,
           "tsCode": 1360,
-          "message": "[NO_PROVIDER] Component App: pending false; fails none; may-wait false; requires Identity; The root requires a context; provide it above the component that reads it."
+          "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: Identity."
         }
       ]
     }
@@ -134,15 +146,15 @@
   "hover": [
     {
       "component": "DocPage",
-      "text": "DocPage: pending false; fails NotFound; may-wait false; requires none"
+      "text": "DocPage — does not suspend; can fail with NotFound; does not wait; needs no context"
     },
     {
       "component": "PendingCount",
-      "text": "PendingCount: pending true; fails none; may-wait false; requires none"
+      "text": "PendingCount — can suspend (pending); never fails; does not wait; needs no context"
     },
     {
       "component": "SaveButton",
-      "text": "SaveButton: pending false; fails none; may-wait true; requires Identity"
+      "text": "SaveButton — does not suspend; never fails; can wait; needs Identity"
     }
   ]
 }

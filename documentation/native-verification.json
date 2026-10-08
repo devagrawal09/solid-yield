@@ -1131,7 +1131,7 @@
       "foreignBoundaries": [
         {
           "code": "NATIVE_FOREIGN_BOUNDARY",
-          "message": "Router (createRouter from @solidjs/router) stays Solid at this JSX boundary (provenance C; foreign failures unknown). Handle failures at the boundary. To bring it inside, use a core API or select its source with a checked contract.",
+          "message": "Handle failures inside Router or its callbacks; this imported component (createRouter from @solidjs/router) is outside the native check.",
           "file": "<root>/examples/originals/hackernews-spa/src/app.tsx",
           "line": 35,
           "column": 5
@@ -1482,77 +1482,77 @@
       "foreignBoundaries": [
         {
           "code": "NATIVE_FOREIGN_BOUNDARY",
-          "message": "Home (lazy from solid-js) stays Solid at this JSX boundary (provenance C; foreign failures unknown). Handle failures at the boundary. To bring it inside, use a core API or select its source with a checked contract.",
+          "message": "Handle failures inside Home or its callbacks; this imported component (lazy from solid-js) is outside the native check.",
           "file": "<root>/examples/originals/rendering/shared/src/components/App.tsx",
           "line": 45,
           "column": 13
         },
         {
           "code": "NATIVE_FOREIGN_BOUNDARY",
-          "message": "Settings (lazy from solid-js) stays Solid at this JSX boundary (provenance C; foreign failures unknown). Handle failures at the boundary. To bring it inside, use a core API or select its source with a checked contract.",
+          "message": "Handle failures inside Settings or its callbacks; this imported component (lazy from solid-js) is outside the native check.",
           "file": "<root>/examples/originals/rendering/shared/src/components/App.tsx",
           "line": 51,
           "column": 13
         },
         {
           "code": "NATIVE_FOREIGN_BOUNDARY",
-          "message": "Stream (lazy from solid-js) stays Solid at this JSX boundary (provenance C; foreign failures unknown). Handle failures at the boundary. To bring it inside, use a core API or select its source with a checked contract.",
+          "message": "Handle failures inside Stream or its callbacks; this imported component (lazy from solid-js) is outside the native check.",
           "file": "<root>/examples/originals/rendering/shared/src/components/App.tsx",
           "line": 54,
           "column": 13
         },
         {
           "code": "NATIVE_FOREIGN_BOUNDARY",
-          "message": "ErrorStream (lazy from solid-js) stays Solid at this JSX boundary (provenance C; foreign failures unknown). Handle failures at the boundary. To bring it inside, use a core API or select its source with a checked contract.",
+          "message": "Handle failures inside ErrorStream or its callbacks; this imported component (lazy from solid-js) is outside the native check.",
           "file": "<root>/examples/originals/rendering/shared/src/components/App.tsx",
           "line": 57,
           "column": 13
         },
         {
           "code": "NATIVE_FOREIGN_BOUNDARY",
-          "message": "RevealPage (lazy from solid-js) stays Solid at this JSX boundary (provenance C; foreign failures unknown). Handle failures at the boundary. To bring it inside, use a core API or select its source with a checked contract.",
+          "message": "Handle failures inside RevealPage or its callbacks; this imported component (lazy from solid-js) is outside the native check.",
           "file": "<root>/examples/originals/rendering/shared/src/components/App.tsx",
           "line": 60,
           "column": 13
         },
         {
           "code": "NATIVE_FOREIGN_BOUNDARY",
-          "message": "Skeleton (lazy from solid-js) stays Solid at this JSX boundary (provenance C; foreign failures unknown). Handle failures at the boundary. To bring it inside, use a core API or select its source with a checked contract.",
+          "message": "Handle failures inside Skeleton or its callbacks; this imported component (lazy from solid-js) is outside the native check.",
           "file": "<root>/examples/originals/rendering/shared/src/components/App.tsx",
           "line": 63,
           "column": 13
         },
         {
           "code": "NATIVE_FOREIGN_BOUNDARY",
-          "message": "Profile (lazy from solid-js) stays Solid at this JSX boundary (provenance C; foreign failures unknown). Handle failures at the boundary. To bring it inside, use a core API or select its source with a checked contract.",
+          "message": "Handle failures inside Profile or its callbacks; this imported component (lazy from solid-js) is outside the native check.",
           "file": "<root>/examples/originals/rendering/shared/src/components/Profile/index.tsx",
           "line": 29,
           "column": 10
         },
         {
           "code": "NATIVE_FOREIGN_BOUNDARY",
-          "message": "Reveal (Reveal from solid-js) stays Solid at this JSX boundary (provenance C; foreign failures unknown). Handle failures at the boundary. To bring it inside, use a core API or select its source with a checked contract.",
+          "message": "Handle failures inside Reveal or its callbacks; this imported component (Reveal from solid-js) is outside the native check.",
           "file": "<root>/examples/originals/rendering/shared/src/components/Reveal.tsx",
           "line": 98,
           "column": 9
         },
         {
           "code": "NATIVE_FOREIGN_BOUNDARY",
-          "message": "Reveal (Reveal from solid-js) stays Solid at this JSX boundary (provenance C; foreign failures unknown). Handle failures at the boundary. To bring it inside, use a core API or select its source with a checked contract.",
+          "message": "Handle failures inside Reveal or its callbacks; this imported component (Reveal from solid-js) is outside the native check.",
           "file": "<root>/examples/originals/rendering/shared/src/components/Reveal.tsx",
           "line": 112,
           "column": 9
         },
         {
           "code": "NATIVE_FOREIGN_BOUNDARY",
-          "message": "Reveal (Reveal from solid-js) stays Solid at this JSX boundary (provenance C; foreign failures unknown). Handle failures at the boundary. To bring it inside, use a core API or select its source with a checked contract.",
+          "message": "Handle failures inside Reveal or its callbacks; this imported component (Reveal from solid-js) is outside the native check.",
           "file": "<root>/examples/originals/rendering/shared/src/components/Reveal.tsx",
           "line": 115,
           "column": 13
         },
         {
           "code": "NATIVE_FOREIGN_BOUNDARY",
-          "message": "Portal (Portal from @solidjs/web) stays Solid at this JSX boundary (provenance C; foreign failures unknown). Handle failures at the boundary. To bring it inside, use a core API or select its source with a checked contract.",
+          "message": "Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check.",
           "file": "<root>/examples/originals/rendering/shared/src/components/Settings.tsx",
           "line": 22,
           "column": 9
@@ -1896,14 +1896,14 @@
       "foreignBoundaries": [
         {
           "code": "NATIVE_FOREIGN_BOUNDARY",
-          "message": "Router (createRouter from @solidjs/router) stays Solid at this JSX boundary (provenance C; foreign failures unknown). Handle failures at the boundary. To bring it inside, use a core API or select its source with a checked contract.",
+          "message": "Handle failures inside Router or its callbacks; this imported component (createRouter from @solidjs/router) is outside the native check.",
           "file": "<root>/examples/originals/room/src/app.tsx",
           "line": 15,
           "column": 7
         },
         {
           "code": "NATIVE_FOREIGN_BOUNDARY",
-          "message": "Room (dynamic from @solidjs/web) stays Solid at this JSX boundary (provenance C; foreign failures unknown). Handle failures at the boundary. To bring it inside, use a core API or select its source with a checked contract.",
+          "message": "Handle failures inside Room or its callbacks; this imported component (dynamic from @solidjs/web) is outside the native check.",
           "file": "<root>/examples/originals/room/src/routes/home.tsx",
           "line": 78,
           "column": 7
@@ -2157,7 +2157,7 @@
       "foreignBoundaries": [
         {
           "code": "NATIVE_FOREIGN_BOUNDARY",
-          "message": "Router (createRouter from @solidjs/router) stays Solid at this JSX boundary (provenance C; foreign failures unknown). Handle failures at the boundary. To bring it inside, use a core API or select its source with a checked contract.",
+          "message": "Handle failures inside Router or its callbacks; this imported component (createRouter from @solidjs/router) is outside the native check.",
           "file": "<root>/examples/originals/docs/src/app.tsx",
           "line": 47,
           "column": 11

@@ -147,6 +147,17 @@ function seed(code, filename, native = false) {
               q.skip();
             },
             ReturnStatement(q) {
+              // Native throw lowering returns raise(), which never completes.
+              // It is a failure path, not a component return needing JSX.
+              const failureReturn = q.get("argument").isTSAsExpression()
+                ? q.get("argument.expression")
+                : q.get("argument");
+              if (
+                native &&
+                failureReturn.isCallExpression() &&
+                lib(failureReturn.get("callee")) === "raise"
+              )
+                return;
               if (!t.isJSXElement(q.node.argument) && !t.isJSXFragment(q.node.argument))
                 fail(
                   q,

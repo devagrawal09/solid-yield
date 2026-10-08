@@ -8,9 +8,9 @@ test("component and call hovers show colors from generated library types", () =>
   const { service } = makeService({ "colors.tsx": source });
   try {
     for (const [name, expected] of [
-      ["DocPage", "fails NotFound"],
-      ["PendingCount", "pending true"],
-      ["SaveButton", "may-wait true; requires Identity"]
+      ["DocPage", "can fail with NotFound"],
+      ["PendingCount", "can suspend (pending)"],
+      ["SaveButton", "can wait; needs Identity"]
     ]) {
       const qi = service.quickInfo(
         join(root, "colors.tsx"),
@@ -37,7 +37,7 @@ export function Counter(){
     const qi = service.quickInfo(join(root, "routine.tsx"), source.lastIndexOf("read()"));
     assert.equal(
       qi.displayParts.map(p => p.text).join(""),
-      "read: pending true; fails none; may-wait false; requires none"
+      "read — can suspend (pending); never fails; does not wait; needs no context"
     );
     assert.equal(service.diagnostics(join(root, "routine.tsx")).length, 0);
   } finally {

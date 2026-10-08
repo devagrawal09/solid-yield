@@ -1,14 +1,28 @@
-// Codes match the existing lint/runtime catalog where the meanings overlap.
+// Public codes stay stable; messages explain the next action in plain language.
+const failureAdvice = host =>
+  ["event", "effect"].includes(host)
+    ? "Catch the failure inside this handler, or declare it in the handler's fails contract."
+    : "Wrap this rendered work in Errored, or handle the failure with attempt.";
 module.exports = Object.freeze({
-  READ_IN_SETUP: "A setup creates; read this value in JSX, a memo, an effect, or an event.",
+  READ_IN_SETUP: "Move this read into JSX, a memo, an effect, or an event so it stays reactive.",
   WRITE_IN_REACTIVE:
-    "A reactive computation cannot write; move this write to an event or effect phase.",
-  JSX_IN_SETUP: "Build this JSX in the returned view, not in setup.",
-  CREATE_OUTSIDE_SETUP: "Create reactive state in component setup, not in a JSX hole.",
-  PENDING_ROOT: "The root may be pending; wrap the pending part in Loading.",
-  NO_PROVIDER: "The root requires a context; provide it above the component that reads it.",
-  SETTLED_PROP: "This prop is settled; pass a settled value or declare a pending source contract.",
-  NATIVE_CALLBACK_FAILURE: "This foreign callback can fail; handle failures inside the callback.",
-  FOREIGN_HANDOFF: "This component has unhandled colors at a Solid handoff.",
-  GENERATED_TYPE: "Generated code does not satisfy the library contract."
+    "Move this write into an event or effect; a memo or JSX read cannot write state.",
+  JSX_IN_SETUP: "Return this JSX from the component's view.",
+  CREATE_OUTSIDE_SETUP: "Create this state in the component body, before returning JSX.",
+  PENDING_ROOT: "Wrap this read in Loading; it can suspend while waiting for data.",
+  NO_PROVIDER: "Add a context provider above this component; this context has no default value.",
+  SETTLED_PROP: "Pass a ready value, or allow a pending source in this prop's type.",
+  NATIVE_CALLBACK_FAILURE: "Catch the failure inside this callback.",
+  NATIVE_SETUP_FAILURE:
+    "Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.",
+  SUGAR_CALLBACK: "Move this reactive read into JSX, a memo, an effect, or an event.",
+  SUGAR_RETURN: "Return JSX on every component or row path.",
+  SUGAR_ASYNC: "Keep this function synchronous and use attempt for async work.",
+  NATIVE_EFFECT_PHASES:
+    "Pass a tracked compute function and an untracked effect function to createEffect.",
+  NATIVE_ASYNC_SETUP: "Move this async read into an event or memo.",
+  FOREIGN_HANDOFF: failureAdvice("view"),
+  GENERATED_TYPE:
+    "Check this operation and the function containing it; the generated code cannot accept it.",
+  failureAdvice
 });

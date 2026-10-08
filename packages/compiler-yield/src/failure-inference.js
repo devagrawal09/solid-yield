@@ -147,6 +147,14 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
     )
       return "scheduler";
     if (builtin && callee.isMemberExpression()) {
+      const receiver = callee.get("object");
+      if (
+        receiver.isIdentifier({ name: "console" }) &&
+        !receiver.scope.getBinding("console") &&
+        /^(log|info|warn|error|debug|trace)$/.test(name(callee.node.property))
+      )
+        return "console";
+
       const object = callee.get("object"),
         method = name(callee.node.property);
       if (

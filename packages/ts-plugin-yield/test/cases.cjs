@@ -30,7 +30,7 @@ module.exports = [
     slot: "T07",
     file: "pending-root",
     code: "PENDING_ROOT",
-    line: 7
+    line: 5
   },
   {
     slot: "T08",
@@ -60,7 +60,7 @@ module.exports = [
     slot: "R08",
     file: "missing-context",
     code: "NO_PROVIDER",
-    line: 8
+    line: 5
   }
 ].map(c => ({
   ...c,

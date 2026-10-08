@@ -198,13 +198,34 @@ export function lowerNativeEffects(files, report) {
       ThrowStatement(q) {
         const fn = q.getFunctionParent();
         if (!host(fn)) return;
+        if (
+          t.isStringLiteral(q.node.argument) ||
+          t.isNumericLiteral(q.node.argument) ||
+          t.isBooleanLiteral(q.node.argument) ||
+          t.isNullLiteral(q.node.argument)
+        ) {
+          const error = new Error(
+            "Throw an Error object so callers can identify and handle this failure."
+          );
+          Object.assign(error, {
+            code: "NATIVE_THROW",
+            id: file,
+            loc: { file, ...q.node.loc?.start }
+          });
+          throw error;
+        }
         used.add("raise");
         if (fn) fn.node.returnType = null;
+        const raised = t.callExpression(t.identifier("__nativeRaise"), [
+          adapt(report.throws(file, q.node.start ?? 0, q.node.end ?? 0), q.node.argument)
+        ]);
+        // raise always throws at runtime; preserve that non-returning path in a
+        // component whose successful return must be a view.
         q.replaceWith(
           t.returnStatement(
-            t.callExpression(t.identifier("__nativeRaise"), [
-              adapt(report.throws(file, q.node.start ?? 0, q.node.end ?? 0), q.node.argument)
-            ])
+            report.at(file, fn?.node.start ?? 0)?.component
+              ? t.tsAsExpression(raised, t.tsNeverKeyword())
+              : raised
           )
         );
       },

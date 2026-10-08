@@ -27,7 +27,7 @@ test(
           moduleResolution: "Bundler",
           jsx: "preserve",
           types: [],
-          plugins: [{ name: "ts-plugin-solid-yield", mode: "native", include: ["*.tsx"] }]
+          plugins: [{ name: "ts-plugin-solid-yield", mode: "native", include: ["*.tsx", "*.ts"] }]
         },
         include: ["*.tsx"]
       })
@@ -90,7 +90,7 @@ test(
       const qi = await request("quickinfo", { file: colorFile, line: 3, offset: 18 });
       assert.match(
         qi.displayString,
-        /DocPage: pending false; fails NotFound; may-wait false; requires none/
+        /DocPage — does not suspend; can fail with NotFound; does not wait; needs no context/
       );
       assert.equal(qi.start.line, 3);
       assert.equal(qi.start.offset, 17);
@@ -104,6 +104,24 @@ test(
       });
       const fixed = await request("semanticDiagnosticsSync", { file });
       assert.equal(fixed.length, 0, JSON.stringify(fixed));
+      const review = path.join(__dirname, "fixtures/review-app");
+      const appFile = path.join(dir, "App.tsx");
+      const entryFile = path.join(dir, "index.tsx");
+      fs.writeFileSync(
+        appFile,
+        fs.readFileSync(path.join(review, "variants/s2a_noloading.tsx"), "utf8")
+      );
+      fs.copyFileSync(path.join(review, "src/api.ts"), path.join(dir, "api.ts"));
+      fs.copyFileSync(path.join(review, "src/index.tsx"), entryFile);
+      await request("open", { file: appFile, projectRootPath: dir });
+      await request("open", { file: entryFile, projectRootPath: dir });
+      const rootDiagnostics = await request("semanticDiagnosticsSync", { file: appFile });
+      const pendingRoot = rootDiagnostics.find(d => d.text.includes("[PENDING_ROOT]"));
+      assert.ok(pendingRoot, JSON.stringify(rootDiagnostics));
+      assert.equal(pendingRoot.start.line, 17);
+      const related = pendingRoot.relatedInformation.find(d => d.span.file.endsWith("index.tsx"));
+      assert.equal(related.span.start.line, 3);
+      assert.equal(related.span.start.offset, 15);
     } finally {
       for (const { timer } of pending.values()) clearTimeout(timer);
       child.kill();

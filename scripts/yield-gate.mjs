@@ -250,6 +250,14 @@ function buildSteps(twins) {
     });
   }
 
+  // F-S35 pins a structural compiler stop; this is not native dashboard acceptance.
+  steps.push({
+    name: "native:dashboard:structural-stop",
+    cwd: root,
+    cmd: process.execPath,
+    args: ["scripts/native-dashboard-blocker.mjs"]
+  });
+
   steps.push({
     name: "original:docs:typecheck",
     cwd: root,

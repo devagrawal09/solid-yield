@@ -1,0 +1,176 @@
+{
+  "finding": "F-S35: a JSX method receiver loses its hole host inside a plain failure producer",
+  "halfA": "FAIL: the source position is correct, but SUGAR_CALLBACK is a compiler false positive",
+  "halfB": "FAIL: not run; the stop rule applies before author edits, hydrated parity or SSR",
+  "scopeDiagnostics": [],
+  "boundaries": [
+    {
+      "code": "NATIVE_FOREIGN_BOUNDARY",
+      "message": "Router (createRouter from @solidjs/router) stays Solid at this JSX boundary (provenance C; foreign failures unknown). Handle failures at the boundary. To bring it inside, use a core API or select its source with a checked contract.",
+      "file": "examples/originals/dashboard/src/app.tsx",
+      "line": 92,
+      "column": 9
+    }
+  ],
+  "original": {
+    "diagnostic": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (examples/originals/dashboard/src/panels.tsx:47:35)",
+    "file": "examples/originals/dashboard/src/panels.tsx",
+    "line": 47,
+    "column": 35,
+    "sourceSpan": {
+      "start": 3877,
+      "end": 3883,
+      "sourceStart": 1733,
+      "sourceEnd": 1739,
+      "generated": false
+    },
+    "sourceSpanText": "totals",
+    "authorSource": "          <dd data-kpi=\"success\">{totals().success.toFixed(2)}%</dd>",
+    "intermediateRead": "totals()",
+    "intermediateHost": "() => totals().success.toFixed(2)"
+  },
+  "patch": "",
+  "sourceFailureSets": [
+    {
+      "name": "Overview",
+      "file": "examples/originals/dashboard/src/app.tsx",
+      "line": 11,
+      "fails": [
+        "ChunkError",
+        "global:Error",
+        "unknown"
+      ]
+    },
+    {
+      "name": "IncidentBody",
+      "file": "examples/originals/dashboard/src/app.tsx",
+      "line": 23,
+      "fails": [
+        "global:Error",
+        "unknown"
+      ]
+    },
+    {
+      "name": "IncidentDetail",
+      "file": "examples/originals/dashboard/src/app.tsx",
+      "line": 48,
+      "fails": [
+        "ChunkError",
+        "examples/originals/dashboard/src/errors.ts#NotFound@201",
+        "unknown"
+      ]
+    },
+    {
+      "name": "App",
+      "file": "examples/originals/dashboard/src/app.tsx",
+      "line": 83,
+      "fails": [
+        "global:Error",
+        "unknown"
+      ]
+    },
+    {
+      "name": "SeriesPanel",
+      "file": "examples/originals/dashboard/src/chart.tsx",
+      "line": 50,
+      "fails": [
+        "ChunkError",
+        "global:Error",
+        "unknown"
+      ]
+    },
+    {
+      "name": "FilterProvider",
+      "file": "examples/originals/dashboard/src/filters.tsx",
+      "line": 20,
+      "fails": [
+        "unknown"
+      ]
+    },
+    {
+      "name": "FilterBar",
+      "file": "examples/originals/dashboard/src/filters.tsx",
+      "line": 32,
+      "fails": [
+        "global:Error",
+        "unknown"
+      ]
+    },
+    {
+      "name": "IncidentRow",
+      "file": "examples/originals/dashboard/src/incidents.tsx",
+      "line": 8,
+      "fails": [
+        "unknown"
+      ]
+    },
+    {
+      "name": "IncidentsPanel",
+      "file": "examples/originals/dashboard/src/incidents.tsx",
+      "line": 50,
+      "fails": [
+        "ChunkError",
+        "global:Error",
+        "unknown"
+      ]
+    },
+    {
+      "name": "Panel",
+      "file": "examples/originals/dashboard/src/panel.tsx",
+      "line": 4,
+      "fails": [
+        "unknown"
+      ]
+    },
+    {
+      "name": "SummaryPanel",
+      "file": "examples/originals/dashboard/src/panels.tsx",
+      "line": 10,
+      "fails": [
+        "ChunkError",
+        "global:Error",
+        "unknown"
+      ]
+    },
+    {
+      "name": "TeamPanel",
+      "file": "examples/originals/dashboard/src/panels.tsx",
+      "line": 69,
+      "fails": [
+        "ChunkError",
+        "global:Error",
+        "unknown"
+      ]
+    },
+    {
+      "name": "NotesPanel",
+      "file": "examples/originals/dashboard/src/panels.tsx",
+      "line": 97,
+      "fails": [
+        "global:Error",
+        "unknown"
+      ]
+    },
+    {
+      "name": "Shell",
+      "file": "examples/originals/dashboard/src/shell.tsx",
+      "line": 2,
+      "fails": [
+        "unknown"
+      ]
+    }
+  ],
+  "colorStatus": "Source failure inference only, before JSX handler discharge. No generated component colors or foreign handoff checks exist because lowering stopped.",
+  "originalHashes": {
+    "examples/originals/dashboard/src/api.ts": "bef20441971b979d82c69519c83991c55fe8425031bbb80266c359eee439d298",
+    "examples/originals/dashboard/src/app.tsx": "11242103e6e0bf35cbc3e27adc0768929f26a3311a4fbb0a23be960cc2b851f9",
+    "examples/originals/dashboard/src/chart.tsx": "e348a7ae9960d0582d3fd7048e11d9be871d16ab72a0008529e74efd15fe42b3",
+    "examples/originals/dashboard/src/errors.ts": "5277f76e8d7d1b9a7d281a1f5dc5c85a3d13c46b57e61d7e67f7c98bfc2b94dd",
+    "examples/originals/dashboard/src/filters.tsx": "a5665a88a44ea3a9cf60dee6311dc210677f0ec54a3ef1d780e1a3d5ce87f1a0",
+    "examples/originals/dashboard/src/incidents.tsx": "b2f355b2cf90c848d91af81fa6b156a0839fa32938ea39078434364fffda8ebe",
+    "examples/originals/dashboard/src/main.tsx": "311c418cbb19acd92136a75ea1b149d6a941b5964867e88f639af833eef04c1e",
+    "examples/originals/dashboard/src/panel.tsx": "7d160f12e397d000d90b49f7ce0c35ff36a50d2d36db3ee9cbf9eca26500c56f",
+    "examples/originals/dashboard/src/panels.tsx": "004dbb2c6a16e1f8d7d55bfbb607d4a5c33a495edbba2e8e1b93f5f2593b6d24",
+    "examples/originals/dashboard/src/shell.tsx": "ce22a50104b1fa5528baee22d4f99c413e4a9089452cc12862e51ab94d50e64c"
+  }
+}

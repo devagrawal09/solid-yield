@@ -1100,3 +1100,23 @@ rule applies: no extra lowering change or author workaround is attempted.
 [reproducible evidence](native-effect-blocker.json) record both failed acceptance
 halves and the empty author patch. The module-state note remains correctly at
 `log.ts:20:7`. Native Effect is not added to the gate; the baseline is unchanged.
+
+
+### Native dashboard: F-S35 structural stop (2026-10-08)
+
+The unchanged dashboard reaches a new compiler false positive at
+`panels.tsx:47:35`: the JSX hole's `totals().success.toFixed(2)` becomes the
+plain failure producer `() => totals().success.toFixed(2)`, which loses the
+hole host and reports `SUGAR_CALLBACK` at `totals()`. The position is correctly
+mapped; the callback rule is wrong. The receiver must be evaluated inside its
+hole before the ordinary method call, preserving its receiver and source order.
+This is F-S35, distinct from F-S34's setup context helper. The first-new-structure
+stop rule applies: no author workaround or compiler iteration is attempted.
+[The side-by-side report](native-dashboard-blocker.md) records both failed
+acceptance halves, the empty author patch, the foreign Router boundary at
+`app.tsx:92:9`, and every panel's source failure sets. Final component colors,
+route handoff checks, native hydrated parity, AckFailed/NotFound comparisons and
+SSR are unavailable because lowering stopped. The added
+`native:dashboard:structural-stop` gate pins this evidence, not native acceptance;
+only its baseline entry is regenerated. Originals and byte thresholds stay
+unchanged.

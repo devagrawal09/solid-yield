@@ -5,6 +5,13 @@ reference run used as the baseline; the machine-readable copy is
 [`yield-gate-baseline.json`](./yield-gate-baseline.json). CI runs the same gate
 against this file (`.github/workflows/gate.yml`).
 
+**Sugar merge and native dashboard stop (2026-10-08).** The merge baseline is
+the union of the branch's 69 steps and main's four dashboard steps; the merge
+passed all 73 steps. The F-S35 follow-up adds only
+`native:dashboard:structural-stop`, with only that new baseline entry regenerated.
+It pins a compiler failure and does not claim either native dashboard acceptance
+half. All earlier baseline entries and executed-byte thresholds are unchanged.
+
 **Dashboard original addition (2026-10-08).** The plain-Solid dashboard adds
 four steps: `original:dashboard:test`, `:typecheck`, `:ssr-smoke`, and
 `:hydrate-smoke`. Its self-check covers 30 interaction states, and each smoke

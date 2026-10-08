@@ -34,12 +34,12 @@
     "todos-yield-h"
   ],
   "summary": {
-    "pass": 73,
+    "pass": 74,
     "fail": 0,
     "skip": 0,
-    "total": 73,
+    "total": 74,
     "wallMs": 203552,
-    "line": "73 pass / 0 fail / 0 skip (merged baseline union)",
+    "line": "74 pass / 0 fail / 0 skip (baseline union plus F-S35 regression pin)",
     "green": true
   },
   "comparison": {
@@ -559,6 +559,12 @@
       "status": "PASS",
       "durationMs": 4921,
       "command": "pnpm -C examples/originals/dashboard run hydrate-smoke"
+    },
+    {
+      "name": "native:dashboard:structural-stop",
+      "status": "PASS",
+      "durationMs": 4049,
+      "command": "../../../Users/devagr/.nvm/versions/node/v24.18.0/bin/node scripts/native-dashboard-blocker.mjs"
     }
   ]
 }

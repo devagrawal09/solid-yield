@@ -47,6 +47,7 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     globals: true,
+    setupFiles: [fileURLToPath(new URL("./tests/request-context.setup.ts", import.meta.url))],
     include: ["tests/**/*.test.tsx"]
   }
 });

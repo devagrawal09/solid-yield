@@ -113,6 +113,33 @@ import type {
 
 declare const __DEV__: boolean;
 declare const __SERVER__: boolean;
+declare const __YIELD_SOAK__: boolean;
+
+/** @internal Opt-in soak instrumentation. Normal builds erase guarded calls. */
+export function soakOwned(kind: "roots" | "boundaries" | "routines"): void {
+  if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__) {
+    soakDelta(kind, 1);
+    onCleanup(() => soakDelta(kind, -1));
+  }
+}
+/** @internal Counts definitions with owners and suspended runtime attempts, not Solid internals. */
+export function soakDelta(
+  kind: "roots" | "boundaries" | "routines" | "pendingPromises" | "eventsInFlight",
+  delta: number
+): void {
+  if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__) {
+    const host = globalThis as any;
+    const counts = (host.__yieldSoakCounts ??= {
+      roots: 0,
+      boundaries: 0,
+      routines: 0,
+      pendingPromises: 0,
+      eventsInFlight: 0,
+      eventQueueDepth: 0
+    });
+    counts[kind] += delta;
+  }
+}
 
 // --- runtime marks -----------------------------------------------------------------
 
@@ -1085,6 +1112,12 @@ export class CreateOp<T> {
   ) {}
   *[Symbol.iterator](): Generator<never, T, unknown> {
     if (__DEV__) checkCreate(this.kind);
+    if (
+      typeof __YIELD_SOAK__ !== "undefined" &&
+      __YIELD_SOAK__ &&
+      ["memo", "effect", "projection", "optimisticStore"].includes(this.kind)
+    )
+      soakOwned("routines");
     return this.make();
   }
 }
@@ -1357,6 +1390,7 @@ function resume(
   as: Host,
   name: string | null
 ): Promise<unknown> {
+  if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__) soakDelta("pendingPromises", 1);
   return new Promise((resolve, reject) => {
     const step = (value: unknown, failed: boolean) => {
       let r: IteratorResult<unknown, unknown>;
@@ -1371,11 +1405,16 @@ function resume(
           name
         );
       } catch (e) {
+        if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__)
+          soakDelta("pendingPromises", -1);
         reject(e);
         return;
       }
-      if (r.done) resolve(r.value);
-      else wait(r.value);
+      if (r.done) {
+        if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__)
+          soakDelta("pendingPromises", -1);
+        resolve(r.value);
+      } else wait(r.value);
     };
     const wait = (next: unknown) => {
       if (!isWait(next)) {
@@ -1390,6 +1429,8 @@ function resume(
             name
           );
         } catch (e) {
+          if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__)
+            soakDelta("pendingPromises", -1);
           reject(e);
         }
         return;
@@ -1665,12 +1706,15 @@ function* eventSteps(
         receipts
       );
     }
+    if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__) soakDelta("pendingPromises", 1);
     try {
       value = yield op.promise;
       failed = false;
     } catch (e) {
       value = e;
       failed = true;
+    } finally {
+      if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__) soakDelta("pendingPromises", -1);
     }
   }
 }
@@ -1695,8 +1739,10 @@ function* eventSteps(
 export function $event<Args extends unknown[] = [], Y extends EventOp = never, R = void>(
   body: (...args: Args) => Generator<Y, R, any>
 ): EventHandler<Args, FailsOf<Y>, R, ReadsPendingOf<Y>, WaitsOf<Y>> {
+  if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__) soakOwned("routines");
   const name = state.name;
   const run = action(function* (rec: CallRecord, ...args: Args) {
+    if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__) soakDelta("eventsInFlight", 1);
     try {
       // one list for the whole call: a receipt minted before an async
       // attempt and delegated to after it is not unyielded
@@ -1712,6 +1758,8 @@ export function $event<Args extends unknown[] = [], Y extends EventOp = never, R
     } catch (error) {
       rec.done = { ok: false, value: error };
       throw error;
+    } finally {
+      if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__) soakDelta("eventsInFlight", -1);
     }
   });
   const call = (route: Route, args: Args) => {
@@ -1833,6 +1881,7 @@ function runSetup(
   args: unknown[],
   name: string
 ): unknown {
+  if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__) soakOwned("routines");
   // a child's setup is not its parent view's top level, nor a JSX read
   return runAs(SETUP, () => drive(body(...args), SYNC_RUN), null, null, false, false, name);
 }

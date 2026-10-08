@@ -241,6 +241,15 @@ function buildSteps(twins) {
     });
   }
 
+  for (const stage of ["parity", "ssr"]) {
+    steps.push({
+      name: `native:hackernews:${stage}`,
+      cwd: root,
+      cmd: process.execPath,
+      args: ["examples/harness/native-hackernews/check.mjs", stage]
+    });
+  }
+
   steps.push({
     name: "original:docs:typecheck",
     cwd: root,
@@ -392,6 +401,7 @@ function buildSteps(twins) {
       "examples/harness/executed-bytes/*.mjs",
       "examples/harness/native-sierpinski/*.mjs",
       "examples/harness/native-todos/*.mjs",
+      "examples/harness/native-hackernews/*.mjs",
       "scripts/*.mjs"
     ]
   });

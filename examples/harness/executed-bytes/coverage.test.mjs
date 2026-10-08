@@ -1,6 +1,26 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { executedBytes } from "./coverage.mjs";
+import { executedBytes, phaseLimit } from "./coverage.mjs";
+
+test("measured tolerance applies only to its own phase and preserves the threshold", () => {
+  const deterministic = { maxBytes: 137926 };
+  const variable = { maxBytes: 81624, tolerance: 801 };
+  assert.equal(phaseLimit(deterministic), 137926);
+  assert.equal(phaseLimit(variable), 82425);
+  assert.equal(82425 > phaseLimit(variable), false);
+  assert.equal(82426 > phaseLimit(variable), true);
+  assert.deepEqual(variable, { maxBytes: 81624, tolerance: 801 });
+});
+
+test("invalid tolerance cannot disable the byte gate", () => {
+  for (const tolerance of [-1, 0.5, "801", null, NaN, Infinity])
+    assert.throws(() => phaseLimit({ maxBytes: 81624, tolerance }), /tolerance/);
+  assert.throws(() => phaseLimit({ maxBytes: NaN }), /maxBytes/);
+  assert.throws(
+    () => phaseLimit({ maxBytes: Number.MAX_SAFE_INTEGER, tolerance: 1 }),
+    /safe integer/
+  );
+});
 test("coverage unions ranges and subtracts unexecuted nested blocks", () => {
   assert.equal(
     executedBytes("abcdefghij", [

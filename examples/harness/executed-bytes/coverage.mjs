@@ -1,6 +1,17 @@
 import { Session } from "node:inspector";
 import { appendFileSync } from "node:fs";
 
+/** Extra measured drift belongs to one phase; omitted tolerance is exactly zero. */
+export function phaseLimit({ maxBytes, tolerance = 0 }) {
+  if (!Number.isSafeInteger(maxBytes) || maxBytes < 0)
+    throw new Error("executed bytes: maxBytes must be a nonnegative safe integer");
+  if (!Number.isSafeInteger(tolerance) || tolerance < 0)
+    throw new Error("executed bytes: tolerance must be a nonnegative safe integer");
+  if (!Number.isSafeInteger(maxBytes + tolerance))
+    throw new Error("executed bytes: phase limit exceeds a safe integer");
+  return maxBytes + tolerance;
+}
+
 /** V8 offsets are UTF-16. Count UTF-8 bytes of disjoint executed ranges. */
 export function executedBytes(source, functions) {
   // Vite's module runner appends inline source maps. They are debugger

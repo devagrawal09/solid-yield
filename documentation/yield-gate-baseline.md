@@ -5,6 +5,82 @@ reference run used as the baseline; the machine-readable copy is
 [`yield-gate-baseline.json`](./yield-gate-baseline.json). CI runs the same gate
 against this file (`.github/workflows/gate.yml`).
 
+**Docs byte drift rule (2026-10-09).** Five fresh-process CSR runs of both
+`docs-yield` variants on the `2c577d4` working tree with the hold/drain fix,
+Node v24.18.0 / Solid rc.13, measured `max - min` at load and all 24 named
+checkpoints. The reported pending-step failure (138,514 against 137,926) did
+not recur. Only the library's `newsletter bad email` varied, by 91 bytes.
+Every phase's min/max is recorded below; these are same-machine observations,
+not a claim of cross-machine stability.
+
+The byte gate reads [executed-bytes.json](./executed-bytes.json), rather than
+the pass/fail gate reference JSON. Its rule is now
+`bytes <= maxBytes + (tolerance ?? 0)`. The existing `maxBytes` thresholds
+are unchanged, decreases still pass, and phase names/counts and twin inventory
+must still match. An optional integer `tolerance` belongs only to a phase
+that showed spread. Set it to
+`max(2 * observed spread, ceil(observed maximum * 0.01))`; absent means
+**zero added tolerance**. This gives the library newsletter-input phase
+801 bytes (`max(2 * 91, ceil(80023 * 0.01))`). No other phase gets extra
+allowance; the original newsletter-input phase retains zero added tolerance.
+Invalid or negative tolerance fails rather than weakening the comparison.
+Remeasure after a Node/Solid change or a change to the snapshot boundary;
+`--record` does not invent or retain measured tolerances automatically.
+
+Pending snapshots also have a defined boundary: in executed-byte mode only,
+the shared docs driver holds the fake API's 180 ms avatar callbacks until
+`avatars load`. Before each checkpoint it drains queued continuations and
+flushes the view at **zero additional fake time**, so the Loading fallback is
+painted while later API promises remain unresolved. The comments checkpoint
+asserts that an avatar fallback is present. A regression test runs both variants,
+advances another 1,000 ms, verifies their avatars remain pending, then releases
+them at the named step and verifies they settle. Ordinary parity/runtime-cost
+runs keep their existing timer behavior; neither app's source changed.
+
+The recovered WIP was retained after review. Its original-side newsletter
+tolerance was removed because that phase was stable in the five fresh runs.
+The remaining library input variation gets its own measured tolerance; holding
+async promises keeps pending phases stable without widening their limits.
+
+| CSR phase | Original min | Original max | Spread | Library min | Library max | Spread |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| load | 519609 | 519609 | 0 | 547256 | 547256 | 0 |
+| load / (pending) | 1703 | 1703 | 0 | 1703 | 1703 | 0 |
+| content loads | 129406 | 129406 | 0 | 137808 | 137808 | 0 |
+| comment list loads, avatars pending | 135221 | 135221 | 0 | 143998 | 143998 | 0 |
+| avatars load | 99131 | 99131 | 0 | 101122 | 101122 | 0 |
+| navigate to /docs/start | 208770 | 208770 | 0 | 223520 | 223520 | 0 |
+| article loads | 117147 | 117147 | 0 | 124103 | 124103 | 0 |
+| toggle theme | 67964 | 67964 | 0 | 83885 | 83885 | 0 |
+| search starts | 87830 | 87830 | 0 | 93797 | 93797 | 0 |
+| search results | 111390 | 111390 | 0 | 116782 | 116782 | 0 |
+| like (optimistic) | 82761 | 82761 | 0 | 87433 | 87433 | 0 |
+| like saved | 90522 | 90522 | 0 | 94058 | 94058 | 0 |
+| second like (optimistic) | 82937 | 82937 | 0 | 87609 | 87609 | 0 |
+| like rate limited | 90924 | 90924 | 0 | 95288 | 95288 | 0 |
+| newsletter good email | 65525 | 65525 | 0 | 77587 | 77587 | 0 |
+| newsletter in flight | 80587 | 80587 | 0 | 84638 | 84638 | 0 |
+| newsletter success | 88830 | 88830 | 0 | 92411 | 92411 | 0 |
+| newsletter bad email | 68209 | 68209 | 0 | 79932 | 80023 | 91 |
+| bad newsletter in flight | 80758 | 80758 | 0 | 84676 | 84676 | 0 |
+| newsletter typed error | 91205 | 91205 | 0 | 95621 | 95621 | 0 |
+| carousel next | 67241 | 67241 | 0 | 82753 | 82753 | 0 |
+| search failure starts | 87963 | 87963 | 0 | 93930 | 93930 | 0 |
+| search typed error | 105660 | 105660 | 0 | 109715 | 109715 | 0 |
+| navigate to failing slug | 158843 | 158843 | 0 | 161890 | 161890 | 0 |
+| not-found typed error | 127251 | 127251 | 0 | 131268 | 131268 | 0 |
+
+Reproduce the measurement with five separate invocations of
+`node examples/harness/executed-bytes/measure.mjs --only docs-yield --record /tmp/docs-run-N.json`.
+The gate requires `pnpm build` first, followed by three consecutive full
+`node scripts/yield-gate.mjs --baseline documentation/yield-gate-baseline.json`
+runs. The pass/fail reference JSON is unchanged because the gate inventory is unchanged.
+
+Validation: `pnpm build` passed, then three consecutive full baseline-gate
+runs were GREEN: **51 pass / 0 fail / 0 skip** each, in **110s, 106s, and
+193s**. The focused docs parity/promise-hold tests and byte-coverage tests
+also passed.
+
 **Failure wire addition (2026-10-08, D-117).** Added one step, `pkg:yield:failure-wire-smoke`: real production server/client bundles stream and hydrate the page, retain its server button, then send an RPC whose restored failure selects the matching class fallback. Same-kind siblings bypass the NotFound boundary. The existing docs smokes now check missing and sibling class identity in development and production. The JSON baseline was regenerated only for this added step, from the full GREEN working-tree run after `f66ab80`: **51 pass / 0 fail / 0 skip in 319s**. All 50 previous steps remain PASS. Executed-byte thresholds are unchanged; the docs not-found phase measures 131,268 bytes against its existing 132,067-byte limit.
 
 **Dashboard original addition (2026-10-08).** The plain-Solid dashboard adds

@@ -289,6 +289,7 @@ function buildSteps(twins) {
 
   // D-105: source bytes in V8 executed ranges at load and each authored parity step.
   // The committed baseline permits 2% or 1024 bytes per phase (whichever is larger).
+  // A phase's optional measured tolerance adds only to that phase's limit.
   steps.push(
     {
       name: "twins:executed-bytes-test",

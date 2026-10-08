@@ -226,7 +226,8 @@
         {
           "phase": "newsletter bad email",
           "bytes": 80023,
-          "maxBytes": 81624
+          "maxBytes": 81624,
+          "tolerance": 801
         },
         {
           "phase": "bad newsletter in flight",

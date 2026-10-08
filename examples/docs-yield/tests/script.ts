@@ -2,16 +2,32 @@ import { flush } from "solid-js";
 import { normalize, executedBytesCheckpoint, type Step } from "yield-example-harness";
 export const root = () => document.getElementById("root")!;
 const $ = <T extends Element = HTMLElement>(selector: string) => root().querySelector<T>(selector)!;
+const measuringBytes = () =>
+  typeof (globalThis as { __yieldExecutedBytes?: unknown }).__yieldExecutedBytes === "function";
+let heldAvatars: (() => void)[] = [];
 export function install() {
   vi.useFakeTimers();
+  if (measuringBytes()) {
+    // Keep the fake API's avatar promises pending until their named settled step.
+    // No elapsed time or queued work can resolve them during the fallback snapshot.
+    const timeout = globalThis.setTimeout;
+    vi.spyOn(globalThis, "setTimeout").mockImplementation(((
+      ...[callback, ms, ...args]: Parameters<typeof setTimeout>
+    ) => {
+      if (ms !== 180) return timeout(callback, ms, ...args);
+      heldAvatars.push(() => callback(...args));
+      return 0;
+    }) as typeof setTimeout);
+  }
   vi.spyOn(window, "scrollTo").mockImplementation(() => {});
   history.replaceState(null, "", "/");
   document.body.innerHTML = '<div id="root"></div>';
 }
 export function uninstall() {
+  heldAvatars = [];
   vi.clearAllTimers();
-  vi.useRealTimers();
   vi.restoreAllMocks();
+  vi.useRealTimers();
   document.body.innerHTML = "";
   history.replaceState(null, "", "/");
 }
@@ -39,7 +55,13 @@ export const steps: Step[] = [
   ["load / (pending)", () => flush()],
   ["content loads", () => advance(70)],
   ["comment list loads, avatars pending", () => advance(60)],
-  ["avatars load", () => advance(200)],
+  [
+    "avatars load",
+    () => {
+      for (const resolve of heldAvatars.splice(0)) resolve();
+      return advance(200);
+    }
+  ],
   ["navigate to /docs/start", () => click('nav a[href="/docs/start"]')],
   ["article loads", () => advance(100)],
   ["toggle theme", () => click(".theme button")],
@@ -65,6 +87,12 @@ export async function runScript() {
   const out: string[] = [];
   for (const [name, run] of steps) {
     await run();
+    if (measuringBytes()) {
+      // Finish the first paint and queued continuations without advancing API time.
+      await advance(0);
+      if (name === "comment list loads, avatars pending" && !$(".avatar-pending"))
+        throw new Error("executed bytes: avatar fallback must paint before resolution");
+    }
     executedBytesCheckpoint(name);
     out.push(normalize(root().innerHTML));
   }

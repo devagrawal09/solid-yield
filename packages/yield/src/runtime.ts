@@ -43,6 +43,27 @@ import {
   type Store
 } from "solid-js";
 import { isSafeError, markSafeError } from "@solidjs/web";
+import { FailureInstance, rehydrateFailure } from "./failure.js";
+export {
+  Failure,
+  registerFailure,
+  failureClass,
+  rehydrateFailure,
+  prepareFailure
+} from "./failure.js";
+export type { FailureClass } from "./failure.js";
+
+/** The library's stream-read and RPC rejection edge, before branding/matching. */
+export function restoreFailure(value: unknown): unknown {
+  if (value instanceof FailureInstance) return value;
+  const error = rehydrateFailure(value);
+  return isFailure(error) ? brand(error) : error;
+}
+
+/** Runtime class coverage includes subclasses and never compares kind strings. */
+export function matchesFailure(error: unknown, classes: readonly ErrorClass[]): boolean {
+  return classes.some(Class => error instanceof Class);
+}
 import type {
   Handled,
   StreamAttempt,
@@ -312,6 +333,7 @@ function runAs<T>(
     if (own !== null && own.length) checkReceipts(own, host, name);
     return result;
   } catch (e) {
+    e = restoreFailure(e);
     if (__DEV__) throw untyped(e, host, name);
     throw e;
   } finally {
@@ -692,15 +714,21 @@ function isThenable(v: any): v is PromiseLike<unknown> {
 class Attempt {
   constructor(
     readonly run: () => unknown,
-    readonly onError: (error: unknown) => unknown
+    readonly onError: (error: unknown) => unknown,
+    readonly catches?: readonly ErrorClass[]
   ) {}
+  handler(error: unknown): unknown {
+    error = restoreFailure(error);
+    if (this.catches && !matchesFailure(error, this.catches)) throw error;
+    return this.onError(error);
+  }
   *[Symbol.iterator](): Generator<unknown, unknown, unknown> {
     let v: unknown;
     try {
       v = this.run();
     } catch (e) {
       if (e instanceof NotReadyError) throw e;
-      return yield* handle(this.onError, e);
+      return yield* handle(e => this.handler(e), e);
     }
     // an event call (D-077): delegated to as `yield* call` is — at once when
     // its body already finished (so an `$effect` may attempt a synchronous
@@ -714,11 +742,12 @@ class Attempt {
       try {
         return yield* (v as any)[Symbol.iterator]();
       } catch (e) {
+        e = restoreFailure(e);
         if (e instanceof NotReadyError || !isFailure(e)) throw e;
         failed = true;
         error = e;
       }
-      if (failed) return yield* handle(this.onError, error);
+      if (failed) return yield* handle(e => this.handler(e), error);
     }
     if (isThenable(v)) {
       let failed = false;
@@ -731,7 +760,7 @@ class Attempt {
       }
       // on rejection: inside the event's transaction, or as the memo's
       // resumption — the attempt's own host runs the handler (D-078)
-      if (failed) return yield* handle(this.onError, error);
+      if (failed) return yield* handle(e => this.handler(e), error);
     }
     // a stream (or a promise's stream) is not waited for. An event does not
     // attempt one (D-091): it does one thing and finishes; a $memo holds what
@@ -748,7 +777,7 @@ class Attempt {
       runAs(
         host,
         () => {
-          const r = this.onError(e);
+          const r = this.handler(e);
           if (isGeneratorObject(r)) {
             r.return(undefined);
             throw devError(
@@ -940,12 +969,25 @@ type Attempted<T> =
  * (D-087). This is how a routine handles a failure — `try` /
  * `catch` is not a routine form (`no-try-catch`).
  */
+/** Selective handling: unmatched classes propagate, including unknown wire IDs. */
+export function attempt<T, K extends readonly ErrorClass<import("./failure.js").Failure>[], H>(
+  fn: () => T,
+  onError: (error: InstanceType<K[number]>) => H & HandlerCheck<H> & StreamHandlerCheck<T, H>,
+  options: { catch: K & KindCheck<InstanceType<K[number]>> }
+): Yieldable<
+  AttemptOps<T, H> | Raise<Exclude<Caught<T>, InstanceType<K[number]>>>,
+  AttemptResult<T, H>
+>;
 export function attempt<T, H>(
   fn: () => T,
   onError: (error: Caught<T>) => H & HandlerCheck<H> & StreamHandlerCheck<T, H>
 ): Yieldable<AttemptOps<T, H>, AttemptResult<T, H>>;
-export function attempt(fn: () => unknown, onError: (error: unknown) => unknown): unknown {
-  return new Attempt(fn, onError);
+export function attempt(
+  fn: () => unknown,
+  onError: (error: any) => unknown,
+  options?: { catch: readonly ErrorClass[] }
+): unknown {
+  return new Attempt(fn, onError, options?.catch);
 }
 
 class RaiseOp {
@@ -1506,8 +1548,9 @@ export function boundaryAbove(): Boundary | null {
 
 /** Whether some `Errored` in the chain will take `error`: the first whose `catch` covers it. */
 export function takes(boundary: Boundary | null, error: unknown): boolean {
+  error = restoreFailure(error);
   for (let b = boundary; b; b = b.parent)
-    if (!b.catch || b.catch.some(C => error instanceof C)) return true;
+    if (!b.catch || matchesFailure(error, b.catch)) return true;
   return false;
 }
 
@@ -1531,8 +1574,9 @@ export function bindEvent<H>(handler: H): H {
   const boundary = boundaryAbove();
   const route: Route = boundary
     ? error => {
+        error = restoreFailure(error);
         let accepting: Boundary | null = boundary;
-        while (accepting && accepting.catch && !accepting.catch.some(C => error instanceof C))
+        while (accepting && accepting.catch && !matchesFailure(error, accepting.catch))
           accepting = accepting.parent;
         if (!accepting) return false;
         if (boundary.disposed || accepting.disposed) {

@@ -1,4 +1,4 @@
-import { Failure } from "./failure.js";
+import { Failure } from "./runtime.js";
 /*
  * `lazy`: Solid's `lazy()` as a yield component (D-047). The same signature
  * (`fn`, `options`, `moduleUrl`; `preload` / `moduleUrl` kept on the result);

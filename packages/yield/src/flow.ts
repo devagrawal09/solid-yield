@@ -28,6 +28,8 @@ import {
 import {
   BOUNDARY,
   boundaryAbove,
+  restoreFailure,
+  matchesFailure,
   type Boundary,
   isGeneratorFunction,
   renderView,
@@ -579,12 +581,13 @@ function ErroredYield(props: any): any {
   return SolidErrored({
     get fallback() {
       const render = adapted || props.fallback;
-      if (!handles) return render;
-      // only the listed error types: any other goes to the boundary above
+      // Solid has no hydrate decode callback. Restore at our boundary's
+      // incoming error accessor, before selective matching or user fallback.
       return (err: Accessor<unknown>, reset: () => void) => {
-        const error = err();
-        if (!handles.some(C => error instanceof (C as any))) throw error;
-        return typeof render === "function" ? render(err, reset) : render;
+        const restored = () => restoreFailure(err());
+        const error = restored();
+        if (handles && !matchesFailure(error, handles)) throw error;
+        return typeof render === "function" ? render(restored, reset) : render;
       };
     },
     get children() {

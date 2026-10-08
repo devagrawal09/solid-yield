@@ -1703,7 +1703,11 @@ The third review's ten-line summary, verbatim:
 
 **Consequence: fixes session dispatched on proto/sugar-ls (2026-10-08).** Fix the crash and report refusals at the offending authored expression and file; keep unaffected files' diagnostics and hovers working. Stop treating built-ins as unknown by default, with an explicit list of throwing built-ins and a clear `"use pure"` contract. Fix the `p`/`<p>` collision and provider components; handle `.then`, async memo, `Promise.all` and timer throws; clean up hover names and soften the README's claims. These fixes are dispatched, not recorded as complete. This documentation amendment changes no prototype, gate step or baseline.
 
+**Process amendment (2026-10-09).** A server restart produced two concurrent workers in one worktree (`proto/sugar-ls`); the rule is one worker per worktree, verified by transcript before re-dispatch.
+
 ### D-117 — Failures keep their class across the wire
+
+**Landed on main at 2c577d4** (runtime/failure-wire: f66ab80/de09fa9); public APIs: `registerFailure`, `prepareFailure`, `rehydrateFailure`.
 
 **Decided (Dev's D-116 ruling, implemented 2026-10-08).** A registered failure keeps its runtime class across streamed SSR/hydration and server-function RPC. Register each constructor at module scope with `registerFailure(Class, "stable/module/Class")` in both builds, before creating/transporting instances. IDs identify exact constructors, not kind strings or minified names; duplicate IDs or registering one constructor under two IDs is refused. `failureClass(id)` looks up that exact registration. All library entries share the runtime registry, including `ChunkError`.
 

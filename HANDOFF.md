@@ -7,7 +7,7 @@ This repository was extracted from the Solid fork `devagrawal09/solid`, branch `
 ## Roadmap and compiler checkpoint (2026-10-08, D-116)
 
 - **v0.1: done in code.** The library runtime, transform and lint are feature-complete; npm publication still awaits credentials.
-- **v0.2: sugar mode (native, bounded), plus the editor plugin and matching CLI check.** Write plain Solid; the plugin reconstructs yield routines and checks their types. D-115's serialization-safe typed failures remain included. Work is on **proto/sugar at 5e03328**; native Sierpinski passes original parity across 11 hydrated states and SSR, in its **58/58 GREEN** branch gate. The other eight targets are in progress, one session each. See D-116 and [sugar-design.md](https://github.com/devagrawal09/solid-yield/blob/5e03328ec2fcd872f87228d4dac4f21bae9fb4c1/documentation/sugar-design.md).
+- **v0.2: sugar mode (native, bounded), plus the editor plugin and matching CLI check.** Write plain Solid; the plugin reconstructs yield routines and checks their types. D-115's serialization-safe typed failures remain included. Work is on **proto/sugar at 7117dd7**, with a recorded **63/63 GREEN** branch gate: native Sierpinski passes original parity across 11 hydrated states and SSR; native todos passes across 27 states including hydration, plus matching SSR, with no rule changes. Native hackernews-spa is correctly refused for unhandled fetch/text rejection at its foreign Router; its two-half diagnostic-snapshot and minimally patched parity/failure check is **in progress**. **effect/rendering/room/docs are queued.** The editor plugin and matching CLI are **in progress on proto/sugar-ls**. See D-116's 2026-10-08 amendment and [sugar-design.md](https://github.com/devagrawal09/solid-yield/blob/7117dd78d56b43363f2e514439493426c500111c/documentation/sugar-design.md).
 - **Then: dashboard twin, written as plain Solid.** It exercises native sugar rather than starting with a hand-written yield twin.
 - **Then: islands (server components with client slots) productized**, subject to the parity and purity prerequisites below.
 - **Then: the lazy builder on the library route.** resume(root), descriptors, keyed attachment and materialization on first interaction, with its own event queue/payload, validated claims and render fallback; keyed failure re-delivery remains a related target (D-109). D-116 supersedes the earlier v0.3 order.
@@ -16,7 +16,8 @@ This repository was extracted from the Solid fork `devagrawal09/solid`, branch `
 
 | Read-only branch | Head | Role |
 | --- | --- | --- |
-| proto/sugar | **5e03328** | Bounded native Solid → yield; [design](https://github.com/devagrawal09/solid-yield/blob/5e03328ec2fcd872f87228d4dac4f21bae9fb4c1/documentation/sugar-design.md), [audit](https://github.com/devagrawal09/solid-yield/blob/5e03328ec2fcd872f87228d4dac4f21bae9fb4c1/documentation/native-bounded-report.md), [DX evidence](https://github.com/devagrawal09/solid-yield/blob/5e03328ec2fcd872f87228d4dac4f21bae9fb4c1/documentation/reviews/sugar-dx.md). Native Sierpinski in the 58/58 branch gate; audit prose still has earlier blockers (D-116 records the differences) |
+| proto/sugar | **7117dd7** | Bounded native Solid → yield; Sierpinski and todos pass original parity/hydration and SSR in the recorded 63/63 branch gate. Hackernews-spa two-half acceptance in progress; effect/rendering/room/docs queued. D-116 records the earlier branch-doc differences |
+| proto/sugar-ls | In progress | Editor plugin and matching CLI check |
 | proto/compiler | **ada81a8** | C1/C1b/R analysis, static extraction + eager root split (seven-root/single-root), and R islands experiments; [C3c scaling](https://github.com/devagrawal09/solid-yield/blob/ada81a8d3af2c1e3a783468ac820875fff1fb99d/documentation/compiler-c3c-scaling.md), directive 213e48a, fixtures bcfb0c2, measurements ada81a8 |
 | proto/compiler-single-root | **43bb41b** | Single-root cost decomposition; historical F-C9 stop predates D-115 |
 | proto/calculus-proofs | **950a71b** | Merged into main at **5d50680**; Lean proofs, paper proofs and probes; branch retained as history |
@@ -38,7 +39,9 @@ script remain on proto/compiler. The nine main twins have no marked modules;
 all nine analyzer reports and the gate's byte numbers remain unchanged.
 Build and the full gate are **46/46 GREEN**, including `proofs`;
 the baseline previously changed only for the proofs step. D-116 adds no gate steps and changes no gate or executed-byte baseline. This
-session starts at pushed main **7f063c0** and makes local commits only; no push.
+session starts at pushed main **ac64604** and makes one local documentation commit only; no push.
+
+**Native checker contract to implement (D-116 amendment).** Apply the proof audit's path-safe catch rule, base/subclass coverage and unknown-as-top handling. O27 structural subtraction and O52 author-facing KindCheck remain open against the prototype; selective and WIRE matching are the named gaps. Transported classes must regain their client prototype (orchestrator ruling; Dev may overrule). D-115's production-message parity question remains pending Dev; the concrete hackernews fallback displays `err.message`.
 
 ### Candidates and progress
 

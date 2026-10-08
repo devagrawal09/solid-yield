@@ -2,8 +2,8 @@
 import { spawn } from "node:child_process";
 import { writeFileSync } from "node:fs";
 const [pkg, ...flags] = process.argv.slice(2);
-if (!["compiler", "vite", "vite-heart"].includes(pkg))
-  throw new Error("Expected compiler, vite or vite-heart");
+if (!["compiler", "vite", "vite-heart", "vite-ruled"].includes(pkg))
+  throw new Error("Expected compiler, vite, vite-heart or vite-ruled");
 const minutesAt = flags.indexOf("--minutes");
 const minutes = minutesAt < 0 ? 40 : Number(flags.splice(minutesAt, 2)[1]);
 if (!Number.isFinite(minutes) || minutes <= 0) throw new Error("Invalid time budget");

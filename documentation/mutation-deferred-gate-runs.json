@@ -57,5 +57,24 @@
     "mutationStatus": "PASS",
     "failures": [],
     "command": "PATH=\"$PWD/scripts/mutation/tools/node_modules/.bin:$PATH\" node scripts/yield-gate.mjs --jobs 1 --baseline documentation/yield-gate-baseline.json --json /tmp/sy-wip-gate-retry.json"
+  },
+  {
+    "phase": "recovered-vite-wip",
+    "head": "44a16f45c6179860331c82f636c286ad71ebb376",
+    "startedAt": "2026-10-08T22:45:26.108Z",
+    "finishedAt": "2026-10-08T22:50:54.008Z",
+    "summary": {
+      "pass": 65,
+      "fail": 0,
+      "skip": 0,
+      "total": 65,
+      "wallMs": 327900,
+      "line": "65 pass / 0 fail / 0 skip in 328s",
+      "green": true
+    },
+    "mutationStatus": "PASS",
+    "failures": [],
+    "buildStatus": "PASS",
+    "command": "PATH=\"$PWD/scripts/mutation/tools/node_modules/.bin:$PATH\" node scripts/yield-gate.mjs --jobs 1 --baseline documentation/yield-gate-baseline.json --json /tmp/sy-mut-final-gate.json"
   }
 ]

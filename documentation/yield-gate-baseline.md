@@ -228,3 +228,5 @@ existing gate threshold was relaxed. Reports and commands are in
 ## Deferred Stryker scores (report only)
 
 The JSON baseline now stores `strykerReportOnly`, with **no threshold**. Compiler failure inference: **59.57%**, 700 mutants (413 killed, 225 survived, 4 timeout, 58 no coverage), 1017.853 seconds including the 228-test incremental refresh. The program-mutation score and operator floors are unchanged. See [the deferred mutation report](mutation-report.md#stryker-deferred-packages) for scope, commands and findings.
+
+Vite’s bounded callback/catch and position-map scope is **47.00%**, 966 mutants (407 killed, 311 survived, 47 timeout, 201 no coverage). It covers complete native-effects.js, positions.js and transform.js files; sugar and other native files are excluded. Recorded wall time is 3912.541 seconds across attempts; the bounded follow-up took 1464.916 seconds. This is also **REPORT-ONLY**, with no threshold.

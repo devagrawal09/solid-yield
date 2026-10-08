@@ -1,11 +1,72 @@
 {
-  "command": "node scripts/mutation/stryker-bounded.mjs vite --minutes 27 --concurrency 4 --incremental",
-  "strykerCommand": "node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js run scripts/mutation/stryker-vite.config.mjs --concurrency 4 --incremental",
-  "startedAt": "2026-10-08T15:41:01.212Z",
-  "finishedAt": "2026-10-08T16:08:01.288Z",
-  "wallSeconds": 1620.076,
-  "budgetMinutes": 27,
-  "budgetExceeded": true,
-  "exitCode": 130,
-  "signal": null
+  "scope": [
+    "packages/vite-plugin-yield/src/native-effects.js",
+    "packages/vite-plugin-yield/src/positions.js",
+    "packages/vite-plugin-yield/src/transform.js"
+  ],
+  "finalTestCount": 228,
+  "wallSeconds": 3912.541,
+  "fullScopeAttemptSeconds": 2447.625,
+  "boundedFollowupSeconds": 1464.916,
+  "finalRunSeconds": 798.63,
+  "earlierRestartInterruptedFallbackWallSeconds": null,
+  "note": "Recorded wall times only. The earlier restart-interrupted four-file fallback has no final wall record. No partial score is claimed.",
+  "runs": [
+    {
+      "command": "node scripts/mutation/stryker-bounded.mjs vite --minutes 40 --concurrency 4 --incremental",
+      "strykerCommand": "node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js run scripts/mutation/stryker-vite.config.mjs --concurrency 4 --incremental",
+      "startedAt": "2026-10-08T15:24:52.576Z",
+      "finishedAt": "2026-10-08T15:38:40.125Z",
+      "wallSeconds": 827.549,
+      "budgetMinutes": 40,
+      "budgetExceeded": false,
+      "exitCode": 130,
+      "signal": null
+    },
+    {
+      "command": "node scripts/mutation/stryker-bounded.mjs vite --minutes 27 --concurrency 4 --incremental",
+      "strykerCommand": "node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js run scripts/mutation/stryker-vite.config.mjs --concurrency 4 --incremental",
+      "startedAt": "2026-10-08T15:41:01.212Z",
+      "finishedAt": "2026-10-08T16:08:01.288Z",
+      "wallSeconds": 1620.076,
+      "budgetMinutes": 27,
+      "budgetExceeded": true,
+      "exitCode": 130,
+      "signal": null
+    },
+    {
+      "command": "node scripts/mutation/stryker-bounded.mjs vite-heart --minutes 40 --concurrency 2 --incremental",
+      "strykerCommand": "node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js run scripts/mutation/stryker-vite-heart.config.mjs --concurrency 2 --incremental",
+      "startedAt": "2026-10-08T20:59:52.714Z",
+      "finishedAt": "2026-10-08T21:10:59.000Z",
+      "wallSeconds": 666.286,
+      "budgetMinutes": 40,
+      "budgetExceeded": false,
+      "exitCode": 130,
+      "signal": null,
+      "scope": [
+        "packages/vite-plugin-yield/src/native-effects.js",
+        "packages/vite-plugin-yield/src/sugar.js",
+        "packages/vite-plugin-yield/src/positions.js",
+        "packages/vite-plugin-yield/src/transform.js"
+      ],
+      "stopReason": "Projected to exceed the remaining budget; narrowed to callback/catch and position-map files."
+    },
+    {
+      "command": "node scripts/mutation/stryker-bounded.mjs vite-ruled --minutes 28 --concurrency 2 --incremental",
+      "strykerCommand": "node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js run scripts/mutation/stryker-vite-ruled.config.mjs --concurrency 2 --incremental",
+      "startedAt": "2026-10-08T21:11:27.106Z",
+      "finishedAt": "2026-10-08T21:24:45.736Z",
+      "wallSeconds": 798.63,
+      "budgetMinutes": 28,
+      "budgetExceeded": false,
+      "exitCode": 0,
+      "signal": null,
+      "scope": [
+        "packages/vite-plugin-yield/src/native-effects.js",
+        "packages/vite-plugin-yield/src/positions.js",
+        "packages/vite-plugin-yield/src/transform.js"
+      ]
+    }
+  ]
 }

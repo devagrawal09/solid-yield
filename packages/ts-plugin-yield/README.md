@@ -23,6 +23,11 @@ for pkg in yield compiler-yield vite-plugin-yield ts-plugin-yield eslint-plugin-
 done
 ```
 
+Rebuild and re-pack all five packages after changing the checkout, even when
+these tarballs already exist. Their `0.0.0` filenames do not identify a commit.
+For separate checkouts, choose a fresh directory containing the commit ID and
+replace every pack, install and override path below with that directory.
+
 In a fresh app, write this `pnpm-workspace.yaml` **before installing**. The
 local `0.0.0` packages have real version ranges; these overrides pick your local
 copies until they are released to npm.
@@ -96,7 +101,7 @@ export default [{
 ```
 
 The native setting permits plain Solid imports and skips the explicit dialect's
-JSX factory requirement. These rules mainly cover explicit/generated code; they did not catch the second reviewer's twelve native cases. Use the TS plugin or CLI for native failure and structural diagnostics. ESLint's `files` selects the native files; keep it in
+JSX factory requirement. These rules mainly cover explicit/generated code; they did not catch the second reviewer's twelve native cases. The TS plugin or CLI reports failure and structural diagnostics for the tested native forms. Unsupported constructs can produce a refusal, and imports through them can retain incomplete summaries. ESLint's `files` selects the native files; keep it in
 step with the Vite/TS `include`. Leave this setting off in explicit or directive
 sugar config blocks, where `$signal` / `$memo` and the JSX factory still apply.
 
@@ -187,7 +192,8 @@ node scripts/sugar-typing-evidence.mjs
 Tests spawn a real tsserver, load the plugin through a tsconfig, open native
 source, assert semantic diagnostic positions and quickinfo text, and apply an
 unsaved edit. Other tests cover directive sugar, imported component colors,
-source-map fallbacks, CLI exit codes and ten recoverable review slots.
+source-map fallbacks, CLI exit codes and all three saved newcomer review sets,
+including valid controls and additional probes.
 [The evidence and remaining findings](../../documentation/sugar-typing.md)
 distinguish those checks from editor UI verification.
 
@@ -196,6 +202,7 @@ refactoring and code actions still use the editor's original source service;
 they do not promise generated contracts or mapped fixes. The plugin has not been
 visually tested in an editor. Hover on unresolved, anonymous or unsupported
 higher-order call forms can retain TypeScript's ordinary inferred signature.
-A transform refusal blocks that selected transform group until fixed; no
-recovery tree is invented. Whole-project lowering after edits is synchronous
+A refused file keeps its original TypeScript view. Other selected files are
+retried and keep their checked hovers; summaries through a refused import can
+still be incomplete. Whole-project lowering after edits is synchronous
 and has not been benchmarked on large applications.

@@ -4,11 +4,13 @@
 
 ## Sugar mode / native mode
 
-Native mode checks selected plain Solid 2 files and transforms them into the library's generator form before Vite compiles JSX. Sugar mode opts files in with `"use yield"` and uses the library's APIs with ordinary calls. Both are experimental: the supported forms have tests, but unsupported forms, generated-location fallbacks and missing runtime source maps remain.
+Native mode checks and transforms a tested subset of selected plain Solid 2 code before Vite compiles JSX. Ordinary patterns outside that subset can still be refused. Sugar mode opts files in with `"use yield"` and uses the library's APIs with ordinary calls. Both are experimental: unsupported forms, generated-location fallbacks and missing runtime source maps remain.
 
 Build this clone with `pnpm install && pnpm build`, create `/tmp/solid-yield-packs`, then pack `yield`, `compiler-yield`, `vite-plugin-yield`, `ts-plugin-yield` and `eslint-plugin-yield` from their `packages/` directories with `pnpm pack --pack-destination /tmp/solid-yield-packs`. Install the runtime and both plugins from those tarballs; the [TS plugin README](packages/ts-plugin-yield/README.md#install-and-select-files) gives the complete local install, overrides and tsconfig. There is no npm release yet; the overrides select the local `0.0.0` dependencies instead of searching npm.
 
-Use `solidYield({ mode: "native", include: ["src/**"] })` before `solid()` in Vite, and the same `mode` and `include` in `tsconfig.compilerOptions.plugins`. Native tsconfig uses `"jsx": "preserve"` and `"jsxImportSource": "@solidjs/web"`. For the optional ESLint step, apply the recommended rules to `files: ["src/**/*.{ts,tsx}"]` with `settings: { "solid-yield": { mode: "native" } }`; this permits plain Solid imports. These lint rules mainly check generated or explicit code; the TS plugin and CLI enforce the native checks described here.
+Rebuild and re-pack all five packages whenever the checkout changes. Existing `0.0.0` tarball names do not identify the commit that produced them. For separate checkouts, use a fresh pack directory containing the commit ID and update every install and override path to it.
+
+Use `solidYield({ mode: "native", include: ["src/**"] })` before `solid()` in Vite, and the same `mode` and `include` in `tsconfig.compilerOptions.plugins`. Native tsconfig uses `"jsx": "preserve"` and `"jsxImportSource": "@solidjs/web"`. For the optional ESLint step, apply the recommended rules to `files: ["src/**/*.{ts,tsx}"]` with `settings: { "solid-yield": { mode: "native" } }`; this permits plain Solid imports. These lint rules mainly check generated or explicit code; the TS plugin and CLI provide diagnostics for the tested native forms.
 
 This 15-line plain Solid example deliberately leaves out `Loading`:
 
@@ -30,7 +32,7 @@ function App() {
 render(() => <App />, document.body);
 ```
 
-`pnpm exec solid-yield check .` reports `[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.` at `remote()` on line 11, with the render on line 15 as a related location. Checked event handlers report `EVENT_REJECTS` at the handler when their inferred failures escape. Catch inside the handler; a rendered `Errored` cannot catch its rejected promise. The [native Todos harness](examples/harness/native-todos/check.mjs) checks 27 client/hydrated states and SSR after the minimal bulk-handler catch patch; the unchanged original has a pinned event-failure snapshot; the [native Sierpinski harness](examples/harness/native-sierpinski/check.mjs) checks 11 states and SSR. Run each with `parity` or `ssr` from this repository. These two examples bound the tested scope; they do not establish that every Solid app works.
+`pnpm exec solid-yield check .` reports `[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.` at `remote()` on line 11 in this example, with the render on line 15 as a related location. For supported event forms, the TS plugin or CLI reports `EVENT_REJECTS` at the handler binding when inferred failures escape. The inferred set follows the explicit platform and project-call contracts; it can be incomplete through refused imports or unsupported callbacks. Catch inside the handler; a rendered `Errored` cannot catch its rejected promise. The [native Todos harness](examples/harness/native-todos/check.mjs) checks 27 client/hydrated states and SSR after the minimal bulk-handler catch patch; the unchanged original has a pinned event-failure snapshot; the [native Sierpinski harness](examples/harness/native-sierpinski/check.mjs) checks 11 states and SSR. Run each with `parity` or `ssr` from this repository. These two examples bound the tested scope; they do not establish that every Solid app works.
 
 The rest of this README introduces the explicit generator dialect.
 

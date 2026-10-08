@@ -1061,3 +1061,16 @@ tree subsequently committed as `1080e0c`; its recorded HEAD is the preceding
 53 steps. Directive-sugar todos remains green. No native original passed, no
 native app step was added, and the baseline was not regenerated. All commits
 remain local on `proto/sugar`.
+
+
+### Native failure rules after review 3
+
+ECMAScript and DOM calls are recognized from TypeScript's platform declarations, so local names such as `Math` cannot borrow a built-in contract. Calls add no failure unless they appear in the explicit throwing list in `failure-inference.js`: examples include `JSON.parse` (SyntaxError), `new URL` (TypeError), URI decoding (URIError), and Intl construction (RangeError or TypeError). Valid literal numeric formatting options do not add RangeError. Callback bodies and arguments keep their own failures. Functions with visible bodies in this project are inferred across imports; opaque calls retain `unknown`. A module beginning with `"use pure"` is a trusted no-failure contract, including its helpers; it is an author assertion, not a proof.
+
+Only async producers under `"use server"` add a transport failure (ChunkError) at their client call. Removing the directive removes that transport failure while retaining inferred application errors. Diagnostics and hover summaries use the public transport description rather than generated aliases.
+
+Unhandled `.then` rejections belong to their lexical host: an event reports EVENT_REJECTS, a memo carries the failure set, and setup reports a setup failure. A synchronous catch around starting a promise cannot catch its later rejection. Async memos keep a pending boundary even without `await`; their attempts retain inferred rejection classes. `Promise.all` retains concurrency and tuple types and unions its member failures. A timer callback's throw contributes to the host's failure summary; catch inside the callback. The existing NATIVE_CALLBACK_FAILURE check still reports missing timer registration rather than promising that a surrounding Errored catches the timer.
+
+A provider wrapper discharges a context only when the component summary proves it surrounds the children on every returned path. Other contexts and child failures remain. Lowercase JSX names are intrinsic tags, regardless of local variables with the same name.
+
+Refusals use validated authored spans. Invalid or generated coordinates fall back to a routine span marked `[generated]`; they never reach TypeScript's unchecked line-position conversion. A refused file retains its original TypeScript view, while other selected files are retried and keep their checked hovers. Imports through the refused file can still lack complete summaries. Runtime source maps and general callback support remain incomplete.

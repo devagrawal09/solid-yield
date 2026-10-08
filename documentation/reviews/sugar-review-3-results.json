@@ -1,0 +1,1255 @@
+{
+  "sourceCommit": "4ed867685a03b33b9373618b946838a55d6a6e2b",
+  "date": "2026-10-09",
+  "fixtureCounts": {
+    "review1": 17,
+    "review2": 34,
+    "review3": 15
+  },
+  "reports": [
+    {
+      "review": 1,
+      "results": [
+        {
+          "case": "m01_setup_read.tsx",
+          "expected": {
+            "code": "READ_IN_SETUP",
+            "file": "App.tsx",
+            "line": 8
+          },
+          "diagnostics": [
+            {
+              "file": "App.tsx",
+              "line": 8,
+              "column": 20,
+              "category": "Error",
+              "tsCode": 2769,
+              "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
+            },
+            {
+              "file": "index.tsx",
+              "line": 3,
+              "column": 15,
+              "category": "Error",
+              "tsCode": 2345,
+              "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
+            }
+          ]
+        },
+        {
+          "case": "m02_noprovider2.tsx",
+          "expected": {
+            "code": "NO_PROVIDER",
+            "file": "App.tsx",
+            "line": 15
+          },
+          "diagnostics": [
+            {
+              "file": "App.tsx",
+              "line": 15,
+              "column": 27,
+              "category": "Error",
+              "tsCode": 1360,
+              "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: UserCtx."
+            }
+          ]
+        },
+        {
+          "case": "m03_throw_string.tsx",
+          "expected": {
+            "code": "NATIVE_THROW",
+            "file": "App.tsx",
+            "line": 8
+          },
+          "diagnostics": [
+            {
+              "file": "App.tsx",
+              "line": 8,
+              "column": 22,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[NATIVE_THROW] Throw an Error object so callers can identify and handle this failure."
+            }
+          ]
+        },
+        {
+          "case": "m03b_throw_in_memo.tsx",
+          "expected": {
+            "code": "NATIVE_THROW",
+            "file": "App.tsx",
+            "line": 8
+          },
+          "diagnostics": [
+            {
+              "file": "App.tsx",
+              "line": 8,
+              "column": 55,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[NATIVE_THROW] Throw an Error object so callers can identify and handle this failure."
+            }
+          ]
+        },
+        {
+          "case": "m03c_throw_in_handler.tsx",
+          "expected": {
+            "code": "EVENT_REJECTS",
+            "file": "App.tsx",
+            "line": 9
+          },
+          "diagnostics": [
+            {
+              "file": "App.tsx",
+              "line": 9,
+              "column": 27,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[EVENT_REJECTS] This handler can fail with Error and nothing catches it; wrap the body in try/catch, or declare the failure."
+            }
+          ]
+        },
+        {
+          "case": "m04_async_handler.tsx",
+          "expected": {
+            "code": "EVENT_REJECTS",
+            "file": "App.tsx",
+            "line": 10
+          },
+          "diagnostics": [
+            {
+              "file": "App.tsx",
+              "line": 10,
+              "column": 27,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[EVENT_REJECTS] This handler can fail with Error and nothing catches it; wrap the body in try/catch, or declare the failure."
+            }
+          ]
+        },
+        {
+          "case": "m05_swallow.tsx",
+          "expected": {
+            "code": null,
+            "file": null,
+            "line": null
+          },
+          "diagnostics": []
+        },
+        {
+          "case": "m06_memo_writes.tsx",
+          "expected": {
+            "code": "WRITE_IN_REACTIVE",
+            "file": "App.tsx",
+            "line": 8
+          },
+          "diagnostics": [
+            {
+              "file": "App.tsx",
+              "line": 8,
+              "column": 36,
+              "category": "Error",
+              "tsCode": 2345,
+              "message": "[WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state."
+            },
+            {
+              "file": "index.tsx",
+              "line": 3,
+              "column": 15,
+              "category": "Error",
+              "tsCode": 2345,
+              "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
+            }
+          ]
+        },
+        {
+          "case": "m07_timeout_read.tsx",
+          "expected": {
+            "code": null,
+            "file": null,
+            "line": null
+          },
+          "diagnostics": []
+        },
+        {
+          "case": "m08_portal.tsx",
+          "expected": {
+            "code": "NATIVE_FOREIGN_BOUNDARY",
+            "file": "App.tsx",
+            "line": 26
+          },
+          "diagnostics": [
+            {
+              "file": "App.tsx",
+              "line": 26,
+              "column": 7,
+              "category": "Warning",
+              "tsCode": 95001,
+              "message": "[NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check."
+            }
+          ]
+        },
+        {
+          "case": "m09_destructure.tsx",
+          "expected": {
+            "code": "NATIVE_PROPS",
+            "file": "App.tsx",
+            "line": 11
+          },
+          "diagnostics": [
+            {
+              "file": "App.tsx",
+              "line": 11,
+              "column": 1,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates."
+            }
+          ]
+        },
+        {
+          "case": "m10_conditional.tsx",
+          "expected": {
+            "code": null,
+            "file": null,
+            "line": null
+          },
+          "diagnostics": []
+        },
+        {
+          "case": "m11_nested_comp.tsx",
+          "expected": {
+            "code": null,
+            "file": null,
+            "line": null
+          },
+          "diagnostics": []
+        },
+        {
+          "case": "m12_effect_arity.tsx",
+          "expected": {
+            "code": "NATIVE_EFFECT_PHASES",
+            "file": "App.tsx",
+            "line": 8
+          },
+          "diagnostics": [
+            {
+              "file": "App.tsx",
+              "line": 8,
+              "column": 3,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[NATIVE_EFFECT_PHASES] Pass a tracked compute function and an untracked effect function to createEffect."
+            }
+          ]
+        },
+        {
+          "case": "s2a_noloading.tsx",
+          "expected": {
+            "code": "PENDING_ROOT",
+            "file": "App.tsx",
+            "line": 17
+          },
+          "diagnostics": [
+            {
+              "file": "App.tsx",
+              "line": 17,
+              "column": 18,
+              "category": "Error",
+              "tsCode": 1360,
+              "message": "[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data."
+            }
+          ]
+        },
+        {
+          "case": "s2b_noprovider.tsx",
+          "expected": {
+            "code": "NO_PROVIDER",
+            "file": "App.tsx",
+            "line": 13
+          },
+          "diagnostics": [
+            {
+              "file": "App.tsx",
+              "line": 13,
+              "column": 28,
+              "category": "Error",
+              "tsCode": 1360,
+              "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: ThemeCtx."
+            }
+          ]
+        },
+        {
+          "case": "s2c_noerrored.tsx",
+          "expected": {
+            "code": "FOREIGN_HANDOFF",
+            "file": "App.tsx",
+            "line": 17
+          },
+          "diagnostics": [
+            {
+              "file": "App.tsx",
+              "line": 17,
+              "column": 18,
+              "category": "Error",
+              "tsCode": 2345,
+              "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: Error."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "review": 2,
+      "results": [
+        {
+          "case": "m01_swallow.tsx",
+          "expected": {
+            "code": null,
+            "file": null,
+            "line": null
+          },
+          "diagnostics": []
+        },
+        {
+          "case": "m02_throwstring.tsx",
+          "expected": {
+            "code": "NATIVE_THROW",
+            "file": "index.tsx",
+            "line": 5
+          },
+          "diagnostics": [
+            {
+              "file": "index.tsx",
+              "line": 5,
+              "column": 42,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[NATIVE_THROW] Throw an Error object so callers can identify and handle this failure."
+            }
+          ]
+        },
+        {
+          "case": "m03_base.tsx",
+          "expected": {
+            "code": null,
+            "file": null,
+            "line": null
+          },
+          "diagnostics": []
+        },
+        {
+          "case": "m04_instanceof.tsx",
+          "expected": {
+            "code": null,
+            "file": null,
+            "line": null
+          },
+          "diagnostics": []
+        },
+        {
+          "case": "m05_unhandled.tsx",
+          "expected": {
+            "code": "EVENT_REJECTS",
+            "file": "index.tsx",
+            "line": 6
+          },
+          "diagnostics": [
+            {
+              "file": "index.tsx",
+              "line": 6,
+              "column": 27,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[EVENT_REJECTS] This handler can fail with FetchError and nothing catches it; wrap the body in try/catch, or declare the failure."
+            }
+          ]
+        },
+        {
+          "case": "c0c_noprovider.tsx",
+          "expected": {
+            "code": "NO_PROVIDER",
+            "file": "index.tsx",
+            "line": 14
+          },
+          "diagnostics": [
+            {
+              "file": "index.tsx",
+              "line": 14,
+              "column": 28,
+              "category": "Error",
+              "tsCode": 1360,
+              "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: ThemeCtx."
+            },
+            {
+              "file": "index.tsx",
+              "line": 30,
+              "column": 26,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[EVENT_REJECTS] This handler can fail with FetchError and nothing catches it; wrap the body in try/catch, or declare the failure."
+            }
+          ]
+        },
+        {
+          "case": "m07_setup.tsx",
+          "expected": {
+            "code": "READ_IN_SETUP",
+            "file": "index.tsx",
+            "line": 7
+          },
+          "diagnostics": [
+            {
+              "file": "index.tsx",
+              "line": 7,
+              "column": 19,
+              "category": "Error",
+              "tsCode": 2769,
+              "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
+            }
+          ]
+        },
+        {
+          "case": "m08_portal.tsx",
+          "expected": {
+            "code": "NATIVE_FOREIGN_BOUNDARY",
+            "file": "index.tsx",
+            "line": 6
+          },
+          "diagnostics": [
+            {
+              "file": "index.tsx",
+              "line": 6,
+              "column": 10,
+              "category": "Warning",
+              "tsCode": 95001,
+              "message": "[NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check."
+            }
+          ]
+        },
+        {
+          "case": "m09_module.tsx",
+          "expected": {
+            "code": "MODULE_STATE",
+            "file": "index.tsx",
+            "line": 5
+          },
+          "diagnostics": [
+            {
+              "file": "index.tsx",
+              "line": 5,
+              "column": 7,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[MODULE_STATE] Create this state inside a component or a state factory; module state is shared by every render."
+            }
+          ]
+        },
+        {
+          "case": "m10_generator.tsx",
+          "expected": {
+            "code": null,
+            "file": null,
+            "line": null
+          },
+          "diagnostics": []
+        },
+        {
+          "case": "m11_destructure.tsx",
+          "expected": {
+            "code": "NATIVE_PROPS",
+            "file": "index.tsx",
+            "line": 6
+          },
+          "diagnostics": [
+            {
+              "file": "index.tsx",
+              "line": 6,
+              "column": 1,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates."
+            }
+          ]
+        },
+        {
+          "case": "m12_arity.tsx",
+          "expected": {
+            "code": "NATIVE_EFFECT_PHASES",
+            "file": "index.tsx",
+            "line": 7
+          },
+          "diagnostics": [
+            {
+              "file": "index.tsx",
+              "line": 7,
+              "column": 3,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[NATIVE_EFFECT_PHASES] Pass a tracked compute function and an untracked effect function to createEffect."
+            }
+          ]
+        },
+        {
+          "case": "catch-empty.tsx",
+          "expected": {
+            "code": "CATCH_SWALLOWS",
+            "file": "index.tsx",
+            "line": 6
+          },
+          "diagnostics": [
+            {
+              "file": "index.tsx",
+              "line": 6,
+              "column": 81,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[CATCH_SWALLOWS] This catch discards FetchError without handling; return a fallback value, rethrow, or mark the absorption intentional with @yield-absorb."
+            }
+          ]
+        },
+        {
+          "case": "catch-logged.tsx",
+          "expected": {
+            "code": "CATCH_SWALLOWS",
+            "file": "index.tsx",
+            "line": 6
+          },
+          "diagnostics": [
+            {
+              "file": "index.tsx",
+              "line": 6,
+              "column": 81,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[CATCH_SWALLOWS] This catch discards FetchError without handling; return a fallback value, rethrow, or mark the absorption intentional with @yield-absorb."
+            }
+          ]
+        },
+        {
+          "case": "catch-intentional.tsx",
+          "expected": {
+            "code": null,
+            "file": null,
+            "line": null
+          },
+          "diagnostics": []
+        },
+        {
+          "case": "base-subclass.tsx",
+          "expected": {
+            "code": null,
+            "file": null,
+            "line": null
+          },
+          "diagnostics": []
+        },
+        {
+          "case": "base-sibling.tsx",
+          "expected": {
+            "code": "FOREIGN_HANDOFF",
+            "file": "index.tsx",
+            "line": 10
+          },
+          "diagnostics": [
+            {
+              "file": "index.tsx",
+              "line": 10,
+              "column": 14,
+              "category": "Error",
+              "tsCode": 2345,
+              "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: NotFound."
+            }
+          ]
+        },
+        {
+          "case": "selective-upstream.tsx",
+          "expected": {
+            "code": null,
+            "file": null,
+            "line": null
+          },
+          "diagnostics": []
+        },
+        {
+          "case": "selective-unhandled.tsx",
+          "expected": {
+            "code": "FOREIGN_HANDOFF",
+            "file": "index.tsx",
+            "line": 8
+          },
+          "diagnostics": [
+            {
+              "file": "index.tsx",
+              "line": 8,
+              "column": 14,
+              "category": "Error",
+              "tsCode": 2345,
+              "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: TypeError."
+            }
+          ]
+        },
+        {
+          "case": "selective-unknown.tsx",
+          "expected": {
+            "code": "FOREIGN_HANDOFF",
+            "file": "index.tsx",
+            "line": 8
+          },
+          "diagnostics": [
+            {
+              "file": "index.tsx",
+              "line": 8,
+              "column": 14,
+              "category": "Error",
+              "tsCode": 2345,
+              "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: TypeError | DOMException."
+            }
+          ]
+        },
+        {
+          "case": "helper-string.tsx",
+          "expected": {
+            "code": "NATIVE_THROW",
+            "file": "index.tsx",
+            "line": 5
+          },
+          "diagnostics": [
+            {
+              "file": "index.tsx",
+              "line": 5,
+              "column": 42,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[NATIVE_THROW] Throw an Error object so callers can identify and handle this failure."
+            }
+          ]
+        },
+        {
+          "case": "handler-promise.tsx",
+          "expected": {
+            "code": "EVENT_REJECTS",
+            "file": "index.tsx",
+            "line": 6
+          },
+          "diagnostics": [
+            {
+              "file": "index.tsx",
+              "line": 6,
+              "column": 27,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[EVENT_REJECTS] This handler can fail with FetchError and nothing catches it; wrap the body in try/catch, or declare the failure."
+            }
+          ]
+        },
+        {
+          "case": "p1_sync_throw.tsx",
+          "expected": {
+            "code": "EVENT_REJECTS",
+            "file": "index.tsx",
+            "line": 5
+          },
+          "diagnostics": [
+            {
+              "file": "index.tsx",
+              "line": 5,
+              "column": 43,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[EVENT_REJECTS] This handler can fail with FetchError and nothing catches it; wrap the body in try/catch, or declare the failure."
+            }
+          ]
+        },
+        {
+          "case": "p3_named_async.tsx",
+          "expected": {
+            "code": "EVENT_REJECTS",
+            "file": "index.tsx",
+            "line": 6
+          },
+          "diagnostics": [
+            {
+              "file": "index.tsx",
+              "line": 6,
+              "column": 43,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[EVENT_REJECTS] This handler can fail with FetchError and nothing catches it; wrap the body in try/catch, or declare the failure."
+            }
+          ]
+        },
+        {
+          "case": "q2_click_calls_boom.tsx",
+          "expected": {
+            "code": "EVENT_REJECTS",
+            "file": "index.tsx",
+            "line": 6
+          },
+          "diagnostics": [
+            {
+              "file": "index.tsx",
+              "line": 6,
+              "column": 43,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[EVENT_REJECTS] This handler can fail with FetchError and nothing catches it; wrap the body in try/catch, or declare the failure."
+            }
+          ]
+        },
+        {
+          "case": "q3_click_await.tsx",
+          "expected": {
+            "code": "EVENT_REJECTS",
+            "file": "index.tsx",
+            "line": 5
+          },
+          "diagnostics": [
+            {
+              "file": "index.tsx",
+              "line": 5,
+              "column": 78,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[EVENT_REJECTS] This handler can fail with FetchError and nothing catches it; wrap the body in try/catch, or declare the failure."
+            },
+            {
+              "file": "errors.ts",
+              "line": 4,
+              "column": 27,
+              "category": "Error",
+              "tsCode": 2345,
+              "message": "[FOREIGN_HANDOFF] Catch the failure inside this handler, or declare it in the handler's fails contract. Remaining: FetchError."
+            }
+          ]
+        },
+        {
+          "case": "c0b_noerrored.tsx",
+          "expected": {
+            "code": "FOREIGN_HANDOFF",
+            "file": "index.tsx",
+            "line": 18
+          },
+          "diagnostics": [
+            {
+              "file": "index.tsx",
+              "line": 18,
+              "column": 18,
+              "category": "Error",
+              "tsCode": 2345,
+              "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: FetchError."
+            },
+            {
+              "file": "index.tsx",
+              "line": 30,
+              "column": 26,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[EVENT_REJECTS] This handler can fail with FetchError and nothing catches it; wrap the body in try/catch, or declare the failure."
+            }
+          ]
+        },
+        {
+          "case": "readme.tsx",
+          "expected": {
+            "code": "PENDING_ROOT",
+            "file": "index.tsx",
+            "line": 11
+          },
+          "diagnostics": [
+            {
+              "file": "index.tsx",
+              "line": 11,
+              "column": 20,
+              "category": "Error",
+              "tsCode": 1360,
+              "message": "[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data."
+            }
+          ]
+        },
+        {
+          "case": "base.tsx",
+          "expected": {
+            "code": "EVENT_REJECTS",
+            "file": "index.tsx",
+            "line": 30
+          },
+          "diagnostics": [
+            {
+              "file": "index.tsx",
+              "line": 30,
+              "column": 26,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[EVENT_REJECTS] This handler can fail with FetchError and nothing catches it; wrap the body in try/catch, or declare the failure."
+            }
+          ]
+        },
+        {
+          "case": "q1_timer_throw.tsx",
+          "expected": {
+            "code": "NATIVE_CALLBACK_FAILURE",
+            "file": "index.tsx",
+            "line": 5
+          },
+          "diagnostics": [
+            {
+              "file": "index.tsx",
+              "line": 5,
+              "column": 31,
+              "category": "Error",
+              "tsCode": 2345,
+              "message": "[NATIVE_CALLBACK_FAILURE] Catch the failure inside this callback."
+            }
+          ]
+        },
+        {
+          "case": "p4_memo_sync_throw.tsx",
+          "expected": {
+            "code": "FOREIGN_HANDOFF",
+            "file": "index.tsx",
+            "line": 5
+          },
+          "diagnostics": [
+            {
+              "file": "index.tsx",
+              "line": 5,
+              "column": 90,
+              "category": "Error",
+              "tsCode": 2345,
+              "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: FetchError."
+            }
+          ]
+        },
+        {
+          "case": "p5_effect_throw.tsx",
+          "expected": {
+            "code": "FOREIGN_HANDOFF",
+            "file": "index.tsx",
+            "line": 5
+          },
+          "diagnostics": [
+            {
+              "file": "index.tsx",
+              "line": 5,
+              "column": 79,
+              "category": "Error",
+              "tsCode": 2345,
+              "message": "[FOREIGN_HANDOFF] Catch the failure inside this handler, or declare it in the handler's fails contract. Remaining: FetchError."
+            }
+          ]
+        },
+        {
+          "case": "c0_noloading.tsx",
+          "expected": {
+            "code": "PENDING_ROOT",
+            "file": "index.tsx",
+            "line": 18
+          },
+          "diagnostics": [
+            {
+              "file": "index.tsx",
+              "line": 18,
+              "column": 18,
+              "category": "Error",
+              "tsCode": 1360,
+              "message": "[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data."
+            },
+            {
+              "file": "index.tsx",
+              "line": 30,
+              "column": 26,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[EVENT_REJECTS] This handler can fail with FetchError and nothing catches it; wrap the body in try/catch, or declare the failure."
+            }
+          ]
+        },
+        {
+          "case": "p2_sync_string.tsx",
+          "expected": {
+            "code": "NATIVE_THROW",
+            "file": "index.tsx",
+            "line": 5
+          },
+          "diagnostics": [
+            {
+              "file": "index.tsx",
+              "line": 5,
+              "column": 51,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[NATIVE_THROW] Throw an Error object so callers can identify and handle this failure."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "review": 3,
+      "results": [
+        {
+          "case": "01.json",
+          "expected": {
+            "code": "CATCH_SWALLOWS",
+            "file": "Checkout.tsx",
+            "line": 15
+          },
+          "diagnostics": [
+            {
+              "file": "Checkout.tsx",
+              "line": 15,
+              "column": 7,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[CATCH_SWALLOWS] This catch discards a transport failure (ChunkError) | RateLimited without handling; return a fallback value, rethrow, or mark the absorption intentional with @yield-absorb."
+            }
+          ],
+          "hovers": {
+            "Details": "Details \u2014 can suspend (pending); can fail with a transport failure (ChunkError) | NotFound; does not wait; needs no context",
+            "ProductList": "ProductList \u2014 can suspend (pending); can fail with a transport failure (ChunkError) | RateLimited; does not wait; needs CartCtx",
+            "Clock": "Clock \u2014 does not suspend; never fails; does not wait; needs no context",
+            "Checkout": "Checkout \u2014 does not suspend; never fails; does not wait; needs CartCtx",
+            "App": "App \u2014 does not suspend; never fails; does not wait; needs no context"
+          }
+        },
+        {
+          "case": "02.json",
+          "expected": {
+            "code": "CATCH_SWALLOWS",
+            "file": "Checkout.tsx",
+            "line": 15
+          },
+          "diagnostics": [
+            {
+              "file": "Checkout.tsx",
+              "line": 15,
+              "column": 7,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[CATCH_SWALLOWS] This catch discards a transport failure (ChunkError) | RateLimited without handling; return a fallback value, rethrow, or mark the absorption intentional with @yield-absorb."
+            }
+          ],
+          "hovers": {
+            "Details": "Details \u2014 can suspend (pending); can fail with a transport failure (ChunkError) | NotFound; does not wait; needs no context",
+            "ProductList": "ProductList \u2014 can suspend (pending); can fail with a transport failure (ChunkError) | RateLimited; does not wait; needs CartCtx",
+            "Clock": "Clock \u2014 does not suspend; never fails; does not wait; needs no context",
+            "Checkout": "Checkout \u2014 does not suspend; never fails; does not wait; needs CartCtx",
+            "App": "App \u2014 does not suspend; never fails; does not wait; needs no context"
+          }
+        },
+        {
+          "case": "03.json",
+          "expected": {
+            "code": null,
+            "file": null,
+            "line": null
+          },
+          "diagnostics": [],
+          "hovers": {
+            "Details": "Details \u2014 can suspend (pending); can fail with a transport failure (ChunkError) | NotFound; does not wait; needs no context",
+            "ProductList": "ProductList \u2014 can suspend (pending); can fail with a transport failure (ChunkError); does not wait; needs CartCtx",
+            "Clock": "Clock \u2014 does not suspend; never fails; does not wait; needs no context",
+            "Checkout": "Checkout \u2014 does not suspend; never fails; does not wait; needs CartCtx",
+            "App": "App \u2014 does not suspend; never fails; does not wait; needs no context"
+          }
+        },
+        {
+          "case": "04.json",
+          "expected": {
+            "code": null,
+            "file": null,
+            "line": null
+          },
+          "diagnostics": [],
+          "hovers": {
+            "Details": "Details \u2014 can suspend (pending); can fail with a transport failure (ChunkError) | NotFound; does not wait; needs no context",
+            "ProductList": "ProductList \u2014 can suspend (pending); can fail with a transport failure (ChunkError); does not wait; needs CartCtx",
+            "Clock": "Clock \u2014 does not suspend; never fails; does not wait; needs no context",
+            "Checkout": "Checkout \u2014 does not suspend; never fails; does not wait; needs CartCtx",
+            "App": "App \u2014 does not suspend; never fails; does not wait; needs no context"
+          }
+        },
+        {
+          "case": "05.json",
+          "expected": {
+            "code": "CATCH_SWALLOWS",
+            "file": "ProductList.tsx",
+            "line": 8
+          },
+          "diagnostics": [
+            {
+              "file": "ProductList.tsx",
+              "line": 8,
+              "column": 82,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[CATCH_SWALLOWS] This catch discards a transport failure (ChunkError) without handling; return a fallback value, rethrow, or mark the absorption intentional with @yield-absorb."
+            }
+          ],
+          "hovers": {
+            "Details": "Details \u2014 can suspend (pending); can fail with a transport failure (ChunkError) | NotFound; does not wait; needs no context",
+            "ProductList": "ProductList \u2014 can suspend (pending); never fails; does not wait; needs CartCtx",
+            "Clock": "Clock \u2014 does not suspend; never fails; does not wait; needs no context",
+            "Checkout": "Checkout \u2014 does not suspend; never fails; does not wait; needs CartCtx",
+            "App": "App \u2014 does not suspend; never fails; does not wait; needs no context"
+          }
+        },
+        {
+          "case": "06.json",
+          "expected": {
+            "code": "EVENT_REJECTS",
+            "file": "Clock.tsx",
+            "line": 7
+          },
+          "diagnostics": [
+            {
+              "file": "Clock.tsx",
+              "line": 7,
+              "column": 45,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[EVENT_REJECTS] This handler can fail with a transport failure (ChunkError) | RateLimited | NotFound and nothing catches it; wrap the body in try/catch, or declare the failure."
+            }
+          ],
+          "hovers": {
+            "Details": "Details \u2014 can suspend (pending); can fail with a transport failure (ChunkError) | NotFound; does not wait; needs no context",
+            "ProductList": "ProductList \u2014 can suspend (pending); can fail with a transport failure (ChunkError) | RateLimited; does not wait; needs CartCtx",
+            "Clock": "Clock \u2014 does not suspend; can fail with a transport failure (ChunkError) | RateLimited | NotFound; does not wait; needs no context",
+            "Checkout": "Checkout \u2014 does not suspend; never fails; does not wait; needs CartCtx",
+            "App": "App \u2014 does not suspend; can fail with a transport failure (ChunkError) | RateLimited | NotFound; does not wait; needs no context"
+          }
+        },
+        {
+          "case": "07.json",
+          "expected": {
+            "code": "EVENT_REJECTS",
+            "file": "Checkout.tsx",
+            "line": 20
+          },
+          "diagnostics": [
+            {
+              "file": "Checkout.tsx",
+              "line": 20,
+              "column": 21,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[EVENT_REJECTS] This handler can fail with a transport failure (ChunkError) | RateLimited and nothing catches it; wrap the body in try/catch, or declare the failure."
+            },
+            {
+              "file": "index.tsx",
+              "line": 19,
+              "column": 43,
+              "category": "Error",
+              "tsCode": 2345,
+              "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: a transport failure (ChunkError) | RateLimited."
+            }
+          ],
+          "hovers": {
+            "Details": "Details \u2014 can suspend (pending); can fail with a transport failure (ChunkError) | NotFound; does not wait; needs no context",
+            "ProductList": "ProductList \u2014 can suspend (pending); can fail with a transport failure (ChunkError) | RateLimited; does not wait; needs CartCtx",
+            "Clock": "Clock \u2014 does not suspend; never fails; does not wait; needs no context",
+            "Checkout": "Checkout \u2014 does not suspend; can fail with a transport failure (ChunkError) | RateLimited; does not wait; needs CartCtx",
+            "App": "App \u2014 does not suspend; can fail with a transport failure (ChunkError) | RateLimited; does not wait; needs no context"
+          }
+        },
+        {
+          "case": "08.json",
+          "expected": {
+            "code": "NATIVE_THROW",
+            "file": "api.ts",
+            "line": 10
+          },
+          "diagnostics": [
+            {
+              "file": "ProductList.tsx",
+              "line": 10,
+              "column": 56,
+              "category": "Error",
+              "tsCode": 2345,
+              "message": "Argument of type 'Source<number, never, false>' is not assignable to parameter of type 'number'."
+            },
+            {
+              "file": "ProductList.tsx",
+              "line": 10,
+              "column": 40,
+              "category": "Error",
+              "tsCode": 2322,
+              "message": "[GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host."
+            },
+            {
+              "file": "api.ts",
+              "line": 10,
+              "column": 26,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[NATIVE_THROW] Throw an Error object so callers can identify and handle this failure."
+            }
+          ],
+          "hovers": {
+            "Details": "Details \u2014 can suspend (pending); can fail with an unknown error (from getProduct at Details.tsx:5); does not wait; needs no context",
+            "ProductList": "ProductList \u2014 can suspend (pending); can fail with an unknown error (from listProducts at ProductList.tsx:7); does not wait; needs CartCtx",
+            "Clock": "Clock \u2014 does not suspend; never fails; does not wait; needs no context",
+            "Checkout": "Checkout \u2014 does not suspend; never fails; does not wait; needs CartCtx",
+            "App": "App \u2014 does not suspend; never fails; does not wait; needs no context"
+          }
+        },
+        {
+          "case": "09.json",
+          "expected": {
+            "code": "NATIVE_CALLBACK_FAILURE",
+            "file": "Clock.tsx",
+            "line": 5
+          },
+          "diagnostics": [
+            {
+              "file": "Clock.tsx",
+              "line": 5,
+              "column": 22,
+              "category": "Error",
+              "tsCode": 2345,
+              "message": "[NATIVE_CALLBACK_FAILURE] Catch the failure inside this callback."
+            }
+          ],
+          "hovers": {
+            "Details": "Details \u2014 can suspend (pending); can fail with a transport failure (ChunkError) | NotFound; does not wait; needs no context",
+            "ProductList": "ProductList \u2014 can suspend (pending); can fail with a transport failure (ChunkError) | RateLimited; does not wait; needs CartCtx",
+            "Clock": "Clock \u2014 does not suspend; can fail with Error; does not wait; needs no context",
+            "Checkout": "Checkout \u2014 does not suspend; never fails; does not wait; needs CartCtx",
+            "App": "App \u2014 does not suspend; can fail with Error; does not wait; needs no context"
+          }
+        },
+        {
+          "case": "10.json",
+          "expected": {
+            "code": null,
+            "file": null,
+            "line": null
+          },
+          "diagnostics": [],
+          "hovers": {
+            "Details": "Details \u2014 can suspend (pending); can fail with a transport failure (ChunkError) | Banned | NotFound; does not wait; needs no context",
+            "ProductList": "ProductList \u2014 can suspend (pending); can fail with a transport failure (ChunkError) | RateLimited; does not wait; needs CartCtx",
+            "Clock": "Clock \u2014 does not suspend; never fails; does not wait; needs no context",
+            "Checkout": "Checkout \u2014 does not suspend; never fails; does not wait; needs CartCtx",
+            "App": "App \u2014 does not suspend; never fails; does not wait; needs no context"
+          }
+        },
+        {
+          "case": "11.json",
+          "expected": {
+            "code": null,
+            "file": null,
+            "line": null
+          },
+          "diagnostics": [],
+          "hovers": {
+            "Details": "Details \u2014 can suspend (pending); can fail with a transport failure (ChunkError) | NotFound; does not wait; needs no context",
+            "ProductList": "ProductList \u2014 can suspend (pending); can fail with a transport failure (ChunkError) | RateLimited; does not wait; needs CartCtx",
+            "Clock": "Clock \u2014 does not suspend; never fails; does not wait; needs no context",
+            "Checkout": "Checkout \u2014 does not suspend; never fails; does not wait; needs CartCtx",
+            "App": "App \u2014 does not suspend; never fails; does not wait; needs no context"
+          }
+        },
+        {
+          "case": "12.json",
+          "expected": {
+            "code": "EVENT_REJECTS",
+            "file": "Checkout.tsx",
+            "line": 20
+          },
+          "diagnostics": [
+            {
+              "file": "Checkout.tsx",
+              "line": 20,
+              "column": 21,
+              "category": "Error",
+              "tsCode": 95000,
+              "message": "[EVENT_REJECTS] This handler can fail with a transport failure (ChunkError) | RateLimited and nothing catches it; wrap the body in try/catch, or declare the failure."
+            },
+            {
+              "file": "index.tsx",
+              "line": 19,
+              "column": 43,
+              "category": "Error",
+              "tsCode": 2345,
+              "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: a transport failure (ChunkError) | RateLimited."
+            }
+          ],
+          "hovers": {
+            "Details": "Details \u2014 can suspend (pending); can fail with a transport failure (ChunkError) | NotFound; does not wait; needs no context",
+            "ProductList": "ProductList \u2014 can suspend (pending); can fail with a transport failure (ChunkError) | RateLimited; does not wait; needs CartCtx",
+            "Clock": "Clock \u2014 does not suspend; never fails; does not wait; needs no context",
+            "Checkout": "Checkout \u2014 does not suspend; can fail with a transport failure (ChunkError) | RateLimited; does not wait; needs CartCtx",
+            "App": "App \u2014 does not suspend; can fail with a transport failure (ChunkError) | RateLimited; does not wait; needs no context"
+          }
+        },
+        {
+          "case": "13.json",
+          "expected": {
+            "code": null,
+            "file": null,
+            "line": null
+          },
+          "diagnostics": [],
+          "hovers": {
+            "Details": "Details \u2014 can suspend (pending); can fail with a transport failure (ChunkError) | NotFound; does not wait; needs no context",
+            "ProductList": "ProductList \u2014 can suspend (pending); can fail with a transport failure (ChunkError) | RateLimited; does not wait; needs CartCtx",
+            "Clock": "Clock \u2014 does not suspend; never fails; does not wait; needs no context",
+            "Checkout": "Checkout \u2014 does not suspend; never fails; does not wait; needs CartCtx",
+            "App": "App \u2014 does not suspend; never fails; does not wait; needs no context"
+          }
+        },
+        {
+          "case": "14.json",
+          "expected": {
+            "code": "NO_PROVIDER",
+            "file": "ProductList.tsx",
+            "line": 6
+          },
+          "diagnostics": [
+            {
+              "file": "ProductList.tsx",
+              "line": 6,
+              "column": 40,
+              "category": "Error",
+              "tsCode": 1360,
+              "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: CartCtx."
+            }
+          ],
+          "hovers": {
+            "Details": "Details \u2014 can suspend (pending); can fail with a transport failure (ChunkError) | NotFound; does not wait; needs no context",
+            "ProductList": "ProductList \u2014 can suspend (pending); can fail with a transport failure (ChunkError) | RateLimited; does not wait; needs CartCtx",
+            "Clock": "Clock \u2014 does not suspend; never fails; does not wait; needs no context",
+            "Checkout": "Checkout \u2014 does not suspend; never fails; does not wait; needs CartCtx",
+            "App": "App \u2014 does not suspend; never fails; does not wait; needs CartCtx"
+          }
+        },
+        {
+          "case": "15.json",
+          "expected": {
+            "code": "FOREIGN_HANDOFF",
+            "file": "ProductList.tsx",
+            "line": 10
+          },
+          "diagnostics": [
+            {
+              "file": "ProductList.tsx",
+              "line": 10,
+              "column": 18,
+              "category": "Error",
+              "tsCode": 2345,
+              "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: a transport failure (ChunkError) | RateLimited | NotFound."
+            }
+          ],
+          "hovers": {
+            "Details": "Details \u2014 can suspend (pending); can fail with a transport failure (ChunkError) | NotFound; does not wait; needs no context",
+            "ProductList": "ProductList \u2014 can suspend (pending); can fail with a transport failure (ChunkError) | RateLimited; does not wait; needs CartCtx",
+            "Clock": "Clock \u2014 does not suspend; never fails; does not wait; needs no context",
+            "Checkout": "Checkout \u2014 does not suspend; never fails; does not wait; needs CartCtx",
+            "App": "App \u2014 does not suspend; can fail with a transport failure (ChunkError) | RateLimited | NotFound; does not wait; needs no context"
+          }
+        }
+      ]
+    }
+  ]
+}

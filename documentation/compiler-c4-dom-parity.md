@@ -1,8 +1,9 @@
 # C4: docs frame DOM parity
 
-**C4b update (2026-10-08): existing-element hosts remove F-C16. Exact DOM
-matches rise from 0/40 to 6/40 at L. See the C4b section below; the original
-C4 measurements and history remain here for comparison.**
+**C4c update (2026-10-08): plain Solid confirms frames over-claim raw link
+state. The authored-host binding now waits for root HTML before settling
+fresh refetches. Exact DOM remains 6/40 at L. See C4c below for independent
+probes, upstream drafts, and fresh three-run bytes; C4/C4b remain as history.**
 
 2026-10-08, `proto/compiler`, starting at `a4ca329`. **Exact DOM parity remains
 0/40 at level L; all 40 authored-content checks pass.** The first-navigation
@@ -456,3 +457,169 @@ DOCS_LEVEL=L node examples/harness/executed-bytes/hydrated-docs.mjs \
 pnpm build
 node scripts/yield-gate.mjs --baseline documentation/yield-gate-baseline.json
 ```
+
+## C4c: link claims and URL timing
+
+2026-10-08, starting at `c1cf58e`. **Exact DOM remains 6/40 before and after;
+all 40 authored-content checks pass.**
+[Fresh per-step comparisons](compiler-c4c-parity.json) retain the unchanged
+normalizer, the C4b baseline, original/library equality at 40/40, and response
+header observations. No attributes are removed from live DOM or snapshots.
+
+### Independent plain Solid check
+
+The standalone app is in `/private/tmp/frames-links-check`, with
+`node_modules` symlinked to the installed plain docs dependencies. Its
+[complete reproducible source](upstream/frames-links-check/)
+imports only Solid, its router, and test/build tools; it imports no compiler
+or solid-yield code. SSR runs in a separate process. The driver hydrates the
+saved HTML, verifies it retains the same article node, clicks a raw HTML
+route link, pauses work explicitly, and records browser URL, article,
+claims, frame applications, and `pushState` order.
+[All six assertion-checked traces](compiler-c4c-solid-probes.json) include the
+exact source hashes and installed versions. These are jsdom observations,
+not a new Chrome layout measurement. The lower host uses the C4b binding's
+protocol without slots; keyed slots remain covered by the seven actual R
+route tests and C4b's separate two-slot test.
+
+| Plain path                             | Raw SSR HTML after hydration                     | Raw B click | URL with headers but body held              | Article with body held |
+| -------------------------------------- | ------------------------------------------------ | ----------- | ------------------------------------------- | ---------------------- |
+| Ordinary SSR + hydration               | No router state attributes                       | Intercepted | `/page/a` while async data is held (no RPC) | A                      |
+| Public high-level frames               | Active raw A gets `data-active` / `aria-current` | Intercepted | `/page/a`                                   | A                      |
+| Lower authored host, C4b-style binding | Same extra raw-link state                        | Intercepted | `/page/b`                                   | A                      |
+| Lower authored host with root wait     | Same extra raw-link state                        | Intercepted | `/page/a`                                   | A                      |
+
+Every path retains its SSR article. A separate Attach click runs the minimal
+raw-link repro in the draft: the ordinary raw A remains unchanged, while the
+adopted raw A gains both attributes. The standalone source and draft contain
+that repro verbatim.
+
+### F-C18 verdict: frames' link-state over-claim
+
+Plain Solid registers authored JSX anchors through compiler element claims;
+no `<A>` wrapper or `link` marker is required with the default router.
+`innerHTML` remains opaque to those claims. Separately, the router's delegated
+click listener intercepts same-origin raw anchors, including Markdown links.
+Thus **navigable does not imply registered for active state**. Inspection of
+`examples/docs-yield/src/content.tsx` confirms its Markdown uses `innerHTML`,
+while TOC anchors are authored JSX; the library matches ordinary Solid's
+behavior, not an under-claim requiring extra registration.
+
+Frames' `claimTree` selects every `a[href]` and `form[action]` under adopted
+or materialized content. Both public high-level and lower authored-host paths
+therefore add state that ordinary hydration omits. There is no selective
+public claim filter/opaque-HTML option in rc.13. Router-wide `explicitLinks`
+would also change authored navigation/state and require new `link` attributes;
+it does not preserve this app's contract. No broad extra claiming, runtime
+attribute stripping, dependency patch, or suppression workaround is added.
+
+[Plain-Solid frames issue draft](upstream/solid-frames-link-claim.md), section 1,
+is **draft, not filed**, with expected/actual behavior and installed
+file:line causes.
+
+### F-C19 verdict: our missing root wait, plus separate upstream behavior
+
+The old statement that F-C19 contained no local emitter timing issue was too
+broad. The plain high-level binding has a readiness promise released by
+`onApply`; the C4b adapter returned its element immediately. When response
+headers resolve `dynamic` before root HTML arrives, a fresh same-route
+refetch could commit browser history while still showing the old root.
+
+**Local fix:** `16a87b4` adds the same root-readiness wait to
+`hosted-region-client.js`. New hosts and changed frame addresses wait for
+root application; adoption and retained content can settle immediately.
+The main and guide stay on their authored nodes, with the existing slot and
+cleanup behavior. The lower plain probe now has the same root-application →
+history-commit order as the public high-level binding.
+
+The actual 40-step R regression pauses every response body for 30 ms after
+headers, then checks history. Its observed paths are `/docs/start`,
+`/docs/start`, `/docs/missing`, `/docs/pipeline`, `/docs/post-latency`,
+`/docs/api`, `/docs/pipeline`. The middle five are fresh refetches and retain
+the old URL until root HTML applies. The first new route can settle into its
+authored outer Loading fallback; the final return can use retained pipeline
+HTML before the new body. Treating either as a fresh, empty frame would give
+a false failure. All seven route tests, including the early Like click and
+zero-hydration-RPC checks, pass.
+
+**Frames' separate streaming behavior:** when the server component itself
+contains a delayed inner Loading boundary, public high-level frames apply
+the loading root and commit `/page/b` before revealing article B. Article A
+has been replaced by Loading. Ordinary reused-route async rendering keeps
+`/page/a` and article A until B is ready. The fixed authored host matches the
+public frame path, including this difference. Section 2 of the same frames
+draft records it and requests a documented policy/option for ordinary-route
+parity; it is not presented as a remaining C4b header-readiness bug.
+
+**Router fragment-state defect:** ordinary Solid still refreshes `#part`
+against the previous `document.baseURI` before history commits. Root-only
+frame claims can do the same; later streamed-segment claims see the committed
+URL and correctly add attributes. A hash click refreshes the stale ordinary
+state. This independently explains the seven settled TOC differences.
+[Plain router issue draft](upstream/solid-router-fragment-link-state.md) is
+**draft, not filed**. No dependency patch or deliberate removal of correct
+frame state is made.
+
+### Remaining per-step differences
+
+Zero-based checkpoints; overlaps at 25, 32, and 33 leave 34 differing steps.
+The new root wait fixes URL order, but does not alter these settled element
+attributes. No wrapper, `data-fid`, or pending template survives at any exact
+checkpoint. The streaming placeholder between 4 and 5 still disappears.
+
+| Result / cause                                                                                         | Checkpoints                |
+| ------------------------------------------------------------------------------------------------------ | -------------------------- |
+| Exact matches, before and after                                                                        | 0, 1, 2, 3, 23, 31         |
+| F-C18: frames sweep raw Markdown/API/diff and guide HTML anchors                                       | 4–22, 24–28, 32–34, 37–39  |
+| F-C19: ordinary TOC state resolves against old URL; later frame claims generally use the committed URL | 25, 29, 30, 32, 33, 35, 36 |
+
+Diagnostic counts remain 6/40 exact, 33/40 after disregarding raw-link state,
+and 40/40 after also disregarding TOC state. These removals only explain the
+recorded differences and do not pass the exact parity test.
+
+### Three-run level-L bytes
+
+The client changed, so [three fresh runs](compiler-c4c-L-bytes.json) were
+required. All 164 executed phases and shipped results have zero drift. The
+measurement and exclusions remain those in C4/C4b; no baseline is raised.
+
+| Variant               | Load executed | 40 steps executed | Shipped raw | Shipped gzip |
+| --------------------- | ------------: | ----------------: | ----------: | -----------: |
+| Original              |     1,096,058 |         4,366,734 |     627,380 |      189,329 |
+| Library               |     1,129,164 |         4,556,267 |     642,400 |      193,576 |
+| Single root without R |     1,150,804 |         4,566,492 |     640,952 |      193,435 |
+| Single root + R, C4c  |       621,888 |         4,069,761 |     231,721 |       80,793 |
+
+Against C4b, R adds **24 load-executed bytes**, **182 shipped raw bytes**,
+**95 gzip bytes**, and **142,609 session-executed bytes**. The added readiness
+work and changed settlement order are visible in the phase/chunk record.
+Against the C3c reference, R remains 6,198 load bytes and 2,951 gzip bytes
+smaller. Original, library, and non-R values are unchanged.
+
+### Validation and reproduction
+
+Before implementation commit `16a87b4`, build passed and the full gate was
+**GREEN: 53 pass / 0 fail / 0 skip in 393 seconds**. Before the evidence
+commit, build passed again and the full gate was **GREEN: 53 pass / 0 fail /
+0 skip in 378 seconds**. The seven route tests also passed separately. The readiness regression was first written with
+incorrect expectations for initial Loading and a cached return; it failed,
+and was corrected using the public binding's measured behavior. No timeout,
+existing baseline, or exact normalizer was relaxed.
+
+```sh
+DOCS_LEVEL=L C4_CAPTURE_CLAIMS=1 C4_OBSERVE_FIRST_FRAME=1 \
+  C4_SNAPSHOTS=/private/tmp/c4c-after.json \
+  node --test packages/compiler-yield/test/server-components.test.mjs
+DOCS_LEVEL=L node examples/harness/executed-bytes/hydrated-docs.mjs \
+  --regions --runs 3 --record documentation/compiler-c4c-L-bytes.json
+pnpm build
+node scripts/yield-gate.mjs --baseline documentation/yield-gate-baseline.json
+```
+
+For the independent app, copy `upstream/frames-links-check/` into
+`/private/tmp/frames-links-check`, symlink its `node_modules` to installed
+plain Solid dependencies at the recorded versions, and run the six commands
+in the frames draft. No installation is needed for this checkout.
+
+Both C4c commits are local on `proto/compiler`; no push, main change,
+dependency install/patch, or baseline regeneration was made.

@@ -1,3 +1,4 @@
+import { printMapped, copyPosition } from "./positions.js";
 // @ts-check
 import babel from "@babel/core";
 import { parseProgram } from "./transform.js";
@@ -54,17 +55,20 @@ export function nativeEntry(code, file) {
           !body.openingElement.attributes.length &&
           !body.children.length
         )
-          arg = t.identifier(body.openingElement.name.name);
+          arg = copyPosition(t.identifier(body.openingElement.name.name), body.openingElement.name);
       }
       if (t.isIdentifier(arg) && /^[A-Z]/.test(arg.name)) {
         adapted = true;
         q.node.arguments[0] = t.callExpression(t.identifier("__nativeForeign"), [
-          t.tsSatisfiesExpression(
-            arg,
-            t.tsTypeReference(
-              t.identifier("__NativeRootCheck"),
-              t.tsTypeParameterInstantiation([t.tsTypeQuery(t.identifier(arg.name))])
-            )
+          copyPosition(
+            t.tsSatisfiesExpression(
+              arg,
+              t.tsTypeReference(
+                t.identifier("__NativeRootCheck"),
+                t.tsTypeParameterInstantiation([t.tsTypeQuery(t.identifier(arg.name))])
+              )
+            ),
+            arg
           )
         ]);
       }
@@ -88,11 +92,5 @@ export function nativeEntry(code, file) {
       )
     );
   }
-  return (
-    babel.transformFromAstSync(t.file(p.node), undefined, {
-      babelrc: false,
-      configFile: false,
-      comments: false
-    })?.code ?? code
-  );
+  return printMapped(t.file(p.node));
 }

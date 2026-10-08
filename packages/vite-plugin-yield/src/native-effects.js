@@ -1,3 +1,4 @@
+import { printMapped } from "./positions.js";
 // @ts-check
 import babel from "@babel/core";
 import { relative } from "node:path";
@@ -488,14 +489,7 @@ export function lowerNativeEffects(files, report) {
           )
         );
     }
-    result.set(
-      file,
-      babel.transformFromAstSync(t.file(p.node), undefined, {
-        babelrc: false,
-        configFile: false,
-        comments: false
-      })?.code ?? code
-    );
+    result.set(file, printMapped(t.file(p.node)));
   }
   return result;
 }

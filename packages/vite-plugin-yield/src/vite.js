@@ -16,6 +16,7 @@
  * eligible `lazy` call. The source map is returned to Vite, which chains it
  * with the JSX compiler's.
  */
+import { nativeInclude } from "./selection.js";
 import { lowerNativeFile } from "./native.js";
 import { isSugar, lowerSugarFile } from "./sugar.js";
 import { DEFAULT_YIELD_MODULE } from "./rule.js";
@@ -27,7 +28,7 @@ const SCRIPT = /\.[mc]?[jt]sx?$/i;
  * @typedef {object} YieldPluginOptions
  * @property {string} [yieldModule] the module `perform` and `lazy` come from (default `solid-yield`)
  * @property {"native" | "explicit"} [mode] native Solid front end (opt-in)
- * @property {(file: string) => boolean} [include] required native file selection
+ * @property {string[] | ((file: string) => boolean)} [include] required native file selection
  * @property {boolean} [lazy] annotate `lazy(() => import("…"))` from the yield module with its module URL (default `true`)
  * @property {(file: string) => boolean} [filter] which files to look at (default: `.js`/`.jsx`/`.ts`/`.tsx` and their `m`/`c` forms, outside `node_modules`)
  */
@@ -48,7 +49,12 @@ export default function solidYield(options = {}) {
   const lazy = options.lazy ?? true;
   const filter = options.filter ?? defaultFilter;
   const sugarCache = new Map();
+  let include = typeof options.include === "function" ? options.include : undefined;
   return {
+    configResolved(config) {
+      if (options.mode === "native" && options.include)
+        include = nativeInclude(config.root, options.include);
+    },
     buildStart() {
       sugarCache.clear();
     },
@@ -64,8 +70,8 @@ export default function solidYield(options = {}) {
       if (id.startsWith("\0")) return null;
       const file = id.replace(/[?#].*$/, "");
       if (!filter(file)) return null;
-      if (options.mode === "native" && options.include?.(file)) {
-        code = lowerNativeFile(code, file, options.include, sugarCache, diagnostic =>
+      if (options.mode === "native" && include?.(file)) {
+        code = lowerNativeFile(code, file, include, sugarCache, diagnostic =>
           this.warn({
             message: `[${diagnostic.code}] ${diagnostic.message}`,
             id: diagnostic.file,

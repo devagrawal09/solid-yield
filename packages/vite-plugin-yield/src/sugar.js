@@ -1,3 +1,4 @@
+import { printMapped, withPositions } from "./positions.js";
 /** Experimental project transform. Types are queried on generated virtual files,
  * never asserted onto authored calls. See documentation/sugar-design.md. */
 // @ts-check
@@ -10,13 +11,7 @@ import babel from "@babel/core";
 /** @typedef {import("@babel/core").NodePath<any>} Path */
 const t = babel.types;
 /** @param {import("@babel/core").types.File} ast */
-const printer = ast =>
-  babel.transformFromAstSync(ast, undefined, {
-    configFile: false,
-    babelrc: false,
-    comments: false,
-    cloneInputAst: false
-  })?.code ?? "";
+const printer = ast => printMapped(ast);
 const constructors = new Set([
   "$memo",
   "$event",
@@ -749,7 +744,7 @@ function checkEscapes(files, active, options) {
 /** Lower a closed set of sugar modules together. Import aliases/re-exports are
  * resolved by TypeScript; the existing analyzer consumes this same explicit IR. */
 /** @param {Map<string,string>} input @param {{compilerOptions?: ts.CompilerOptions, native?:boolean}} [options] */
-export function lowerSugarProject(input, { compilerOptions = {}, native = false } = {}) {
+function lowerSugarProjectImpl(input, { compilerOptions = {}, native = false } = {}) {
   const options = {
     target: ts.ScriptTarget.ESNext,
     module: ts.ModuleKind.ESNext,
@@ -807,4 +802,10 @@ export function lowerSugarFile(code, filename, cache = new Map()) {
     cache.set(configPath, entry);
   }
   return entry.files.get(filename) ?? code;
+}
+
+/** Shared lowering, including generated-to-author position tables.
+ * @param {Map<string,string>} input @param {{compilerOptions?: ts.CompilerOptions, native?:boolean}} [options] */
+export function lowerSugarProject(input, options = {}) {
+  return withPositions(input, () => lowerSugarProjectImpl(input, options));
 }

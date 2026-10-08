@@ -1,3 +1,4 @@
+import { printMapped } from "./positions.js";
 // @ts-check
 import babel from "@babel/core";
 import { parseProgram } from "./transform.js";
@@ -466,11 +467,5 @@ export function lowerNativeRecursion(code, file) {
       if (specs.length) p.node.body.unshift(t.importDeclaration(specs, t.stringLiteral(module)));
     }
   }
-  return (
-    babel.transformFromAstSync(t.file(p.node), undefined, {
-      babelrc: false,
-      configFile: false,
-      comments: false
-    })?.code ?? code
-  );
+  return printMapped(t.file(p.node));
 }

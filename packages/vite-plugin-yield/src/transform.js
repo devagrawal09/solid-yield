@@ -1,3 +1,4 @@
+import { trackParsed } from "./positions.js";
 // @ts-check
 /**
  * `transform(code, { filename, yieldModule })`: the rule, and the `lazy()`
@@ -73,6 +74,7 @@ export function parseProgram(code, filename) {
     parserOpts: { plugins: parserPlugins(filename) }
   });
   if (!ast) return null;
+  trackParsed(ast, code, filename, { plugins: parserPlugins(filename) });
   /** @type {ProgramPath | null} */
   let program = null;
   babel.traverse(ast, {

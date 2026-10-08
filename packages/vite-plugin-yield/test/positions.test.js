@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import babel from "@babel/core";
 import { resolve } from "node:path";
 import { lowerNativeProject, locate } from "../src/virtual.js";
 describe("virtual positions", () => {
@@ -15,6 +16,22 @@ export function Counter(){
     const result = lowerNativeProject(new Map([[file, source]]));
     const code = result.files.get(file),
       table = result.positions.get(file);
+    const ast = babel.parseSync(code, {
+      filename: file,
+      configFile: false,
+      babelrc: false,
+      parserOpts: { plugins: ["typescript", "jsx"] }
+    });
+    let nodeCount = 0;
+    function count(node) {
+      nodeCount++;
+      for (const key of babel.types.VISITOR_KEYS[node.type] ?? []) {
+        const value = node[key];
+        for (const child of Array.isArray(value) ? value : [value]) if (child) count(child);
+      }
+    }
+    count(ast.program);
+    expect(table.length).toBe(nodeCount);
     const reads = [...code.matchAll(/yield\* count/g)];
     expect(reads).toHaveLength(2);
     for (const [i, m] of reads.entries()) {

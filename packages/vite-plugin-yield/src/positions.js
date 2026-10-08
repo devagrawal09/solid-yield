@@ -80,22 +80,24 @@ export function printMapped(ast) {
   /** @type {Position[]} */ const table = [];
   /** @param {any} before @param {any} after @param {Span | undefined} [inherited] */
   function pair(before, after, inherited) {
-    if (!before || !after || before.type !== after.type) return;
-    const origin = before.loc && session?.origins.get(before.loc);
+    if (!after) return;
+    const compatible = before && before.type === after.type;
+    const origin = compatible && before.loc && session?.origins.get(before.loc);
     let fallback = inherited;
     if (origin && !origin.generated) fallback = routineAt(context.file, origin.sourceStart);
     if (!origin || origin.generated) {
       let found = false;
-      walk(before, n => {
-        const o = n.loc && session?.origins.get(n.loc);
-        if (!found && o && !o.generated) {
-          const routine = routineAt(context.file, o.sourceStart);
-          if (routine.end > routine.start) {
-            fallback = routine;
-            found = true;
+      if (before)
+        walk(before, n => {
+          const o = n.loc && session?.origins.get(n.loc);
+          if (!found && o && !o.generated) {
+            const routine = routineAt(context.file, o.sourceStart);
+            if (routine.end > routine.start) {
+              fallback = routine;
+              found = true;
+            }
           }
-        }
-      });
+        });
     }
     fallback ??= { start: 0, end: 0 };
     table.push({
@@ -109,9 +111,9 @@ export function printMapped(ast) {
       start: after.start,
       end: after.end
     });
-    const a = children(before),
+    const a = compatible ? children(before) : [],
       b = children(after);
-    for (let i = 0; i < a.length; i++) pair(a[i], b[i], fallback);
+    for (let i = 0; i < b.length; i++) pair(a[i], b[i], fallback);
   }
   pair(ast.program, printed?.program);
   if (!session?.stages.has(context.file)) session?.stages.set(context.file, new Map());

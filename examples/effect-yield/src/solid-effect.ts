@@ -72,14 +72,17 @@ export function runEffect<A, E, R = never>(effect: Effect.Effect<A, E, R>): Asyn
   const fork = resolveFork(); // context resolves at the *reading* computation
   return {
     [Symbol.asyncIterator]() {
-      const fiber = fork(effect);
+      let fiber: Fiber.RuntimeFiber<A, E> | null = fork(effect);
       let yielded = false; // the single value was already delivered
       let closed = false; // return() was called (supersede / dispose)
       const DONE = { done: true, value: undefined } as const;
       return {
         async next(): Promise<IteratorResult<A>> {
           if (yielded || closed) return DONE;
-          const exit = await Effect.runPromise(Fiber.await(fiber));
+          const exit = await Effect.runPromise(Fiber.await(fiber!));
+          // Error stacks can retain this iterator after it has finished.
+          // A settled fiber is no longer needed for cancellation.
+          fiber = null;
           if (closed) return DONE; // superseded while in flight
           if (Exit.isSuccess(exit)) {
             yielded = true;
@@ -93,7 +96,8 @@ export function runEffect<A, E, R = never>(effect: Effect.Effect<A, E, R>): Asyn
         // disposes — the bridge from Solid's flight identity to Effect's
         // structured interruption.
         async return(): Promise<IteratorResult<A>> {
-          if (!yielded && !closed) Effect.runFork(Fiber.interrupt(fiber));
+          if (!yielded && !closed && fiber) Effect.runFork(Fiber.interrupt(fiber));
+          fiber = null;
           closed = true;
           return DONE;
         }

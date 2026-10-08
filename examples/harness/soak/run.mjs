@@ -27,6 +27,7 @@ const opts = {
   rounds: null,
   scenario: "all",
   build: "yes",
+  control: "no",
   out: "documentation/soak-results.json"
 };
 for (let i = 0; i < args.length; i++) {
@@ -45,6 +46,7 @@ for (let i = 0; i < args.length; i++) {
 }
 if (
   !(opts.minutes > 0 && opts.minutes <= 60) ||
+  !["yes", "no"].includes(opts.control) ||
   !Number.isInteger(opts.seed) ||
   !Number.isInteger(opts.checkpoint) ||
   opts.checkpoint < 1 ||
@@ -74,7 +76,8 @@ const result = {
   node: process.version,
   options: opts,
   mode: "development/jsdom; exposed GC; report only",
-  clearMockHistory: process.env.SOAK_CLEAR_MOCKS === "1",
+  clearMockHistory: process.env.SOAK_CLEAR_MOCKS !== "0",
+  trimNavigationHistory: process.env.SOAK_KEEP_HISTORY !== "1",
   replaceHistory: process.env.SOAK_REPLACE_HISTORY === "1",
   results: []
 };
@@ -181,7 +184,7 @@ import { flush } from "solid-js";
 it("persistent seeded soak", async () => {
   await session(script, async () => {
     ${original === "sierpinski" ? 'document.body.innerHTML = ""; script.installClocks();' : original === "hackernews-spa" ? 'script.install("/");' : "script.install();"}
-    ${mount}
+    ${app === "control" ? 'const root = document.body.appendChild(document.createElement("div")); const dispose = render(() => document.createTextNode("control"), root); return { root, dispose };' : mount}
   }, () => ${original === "sierpinski" ? "script.uninstallClocks()" : "script.uninstall()"});
 }, ${Math.ceil(opts.minutes * 60000 + 240000)});
 `
@@ -203,6 +206,7 @@ it("persistent seeded soak", async () => {
       TZ: "UTC",
       FORCE_COLOR: "0",
       SOAK_TWIN: twin,
+      SOAK_APP: app,
       SOAK_REPLY: worker.reply,
       SOAK_COMMAND: worker.command,
       SOAK_SAMPLES: worker.samples,
@@ -237,7 +241,8 @@ try {
         seed: opts.seed
       };
     try {
-      for (const app of ["original", "twin"]) workers.push(startWorker(twin, app, generated));
+      for (const app of ["original", "twin", ...(opts.control === "yes" ? ["control"] : [])])
+        workers.push(startWorker(twin, app, generated));
       const ready = await Promise.all(workers.map(w => response(w, x => x.ready)));
       if (!ready[1].debug) throw new Error("Debug counters missing in twin worker");
       const random = seeded(opts.seed),
@@ -300,10 +305,20 @@ try {
         .filter(Boolean)
         .map(line => JSON.parse(line));
       row.originalTrends = trends(originalSamples);
+      if (workers[2]) {
+        row.controlTrends = trends(
+          readFileSync(workers[2].samples, "utf8")
+            .trim()
+            .split("\n")
+            .filter(Boolean)
+            .map(line => JSON.parse(line))
+        );
+      }
       for (const w of workers) atomic(w.command, { id: row.rounds + 1, stop: true });
       const stopped = await Promise.all(workers.map(w => response(w, x => x.stopped)));
       row.afterDispose = stopped[1].countsAfterDispose;
       row.originalAfterDispose = stopped[0].countsAfterDispose;
+      if (stopped[2]) row.controlAfterDispose = stopped[2].countsAfterDispose;
       console.log(
         `${twin}: ${row.rounds} rounds; ${row.parityCheckpoints} checkpoints; ${row.mismatches.length} mismatches; ${row.errors.length} errors`
       );
@@ -333,7 +348,7 @@ try {
         if (w.app === "twin") {
           row.errors = observed.slice(0, 20);
           row.errorCount = observed.length;
-        } else {
+        } else if (w.app === "original") {
           row.originalErrors = observed.slice(0, 20);
           row.originalErrorCount = observed.length;
         }

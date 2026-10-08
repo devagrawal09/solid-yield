@@ -1,5 +1,7 @@
 import { readFileSync, writeFileSync, renameSync, appendFileSync } from "node:fs";
 import { createHash } from "node:crypto";
+import { writeHeapSnapshot } from "node:v8";
+import { cleanupSample } from "./sample-cleanup.mjs";
 import { setTimeout as sleep } from "node:timers/promises";
 // This module is imported before the authored script installs fake clocks.
 const realNow = performance.now.bind(performance);
@@ -58,6 +60,7 @@ export async function session(script, mount, cleanup) {
   };
   const execute = async id => {
     currentStep = typeof id === "number" ? script.steps[id][0] : id;
+    if (env.SOAK_APP === "control") return;
     if (typeof id === "number") return script.steps[id][1](app);
     if (id === "todos-start") {
       script.setRandom(0.9);
@@ -136,9 +139,9 @@ export async function session(script, mount, cleanup) {
       // Let settled promises report rejections before the sample; use real Node timer.
       await sleep(0);
       if (typeof globalThis.gc !== "function") throw new Error("soak requires exposed GC");
-      // Optional diagnostic control: clear call records without changing mock behavior.
-      // Ordinary report runs keep the authored script untouched.
-      if (env.SOAK_CLEAR_MOCKS === "1") globalThis.vi.clearAllMocks();
+      // Call/settled-result records and old navigation entries belong to the driver,
+      // not the app. Opt out only when reproducing an older report.
+      cleanupSample(window, globalThis.vi, env);
       globalThis.gc();
       const counts = globalThis.__yieldSoakCounts ?? {
         roots: 0,
@@ -154,9 +157,12 @@ export async function session(script, mount, cleanup) {
         heap: process.memoryUsage().heapUsed,
         domNodes: nodeCount(),
         mockRandomCalls: Math.random.mock?.calls?.length ?? 0,
+        historyEntries: window.history.length,
         ...counts
       };
       appendFileSync(env.SOAK_SAMPLES, JSON.stringify(sample) + "\n");
+      if (env.SOAK_SNAPSHOT_ROUNDS?.split(",").map(Number).includes(round))
+        writeHeapSnapshot(`${env.SOAK_SAMPLES}-round-${round}.heapsnapshot`);
       write(env.SOAK_REPLY, { round, sample, hashes, stepFailures, errors, errorCount });
     }
   } catch (error) {

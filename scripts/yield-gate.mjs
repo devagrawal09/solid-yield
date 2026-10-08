@@ -250,6 +250,18 @@ function buildSteps(twins) {
   // Soak is a manual report: even one minute per twin adds nine minutes and
   // process-wide heap slopes vary by host. Keep a visible skip, never a blocker.
   steps.push({
+    name: "twins:soak-analysis-test",
+    cwd: root,
+    fast: true,
+    cmd: process.execPath,
+    args: [
+      "--test",
+      "examples/harness/soak/analysis.test.mjs",
+      "examples/harness/soak/heap-diff.test.mjs",
+      "examples/harness/soak/sample-cleanup.test.mjs"
+    ]
+  });
+  steps.push({
     name: "twins:soak-report",
     cwd: root,
     cmd: process.execPath,

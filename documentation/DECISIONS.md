@@ -959,6 +959,24 @@ _Documented (Phase 5)._
 
 - **Upstream update (2026-10-07).** [solidjs/solid#3815](https://github.com/solidjs/solid/issues/3815) was fixed upstream by [#3816](https://github.com/solidjs/solid/pull/3816), merged into `next` (`759a9b6`): a re-created memo that joins a pending slot adopts that slot's answer. Re-test and remove the `/profile` workaround (`046387b`) at the next Solid RC bump; this checkout still uses rc.13. [#3845](https://github.com/solidjs/solid/issues/3845) is **closed as by-design**: the completion guard for late hydration is deliberate (API checked 2026-10-07: closed/not_planned; closing comment confirms the design).
 
+- **Solid rc.14 retest (2026-10-08).** Solid **2.0.0-rc.14 fixes #3815**: the plain-Solid repro passes, and the `/profile` workaround was removed on `chore/rc14` at **`d5d96aa`**. It **regresses `Errored`**: with a separate `isPending` reader beside a `latest(data)` reader, an async rejection never reaches the fallback. A plain-Solid repro using only public APIs and jsdom, with rc.13 and rc.14 tested side by side in production and development, calls the fallback once on rc.13 and never on rc.14. The Effect original and its twin both lose their error fallback. The bump is **HELD on `chore/rc14` at `a0b95aa`**; its gate is **44/46**, with only `twin:effect-yield:test` and `twins:executed-bytes` allowed to fail on that branch. **Main stays on rc.13** until the regression is fixed upstream or a workaround is ruled. The draft `documentation/upstream/solid-errored-fallback-rc14.md` is on that branch: **draft, not filed — pending Dev**. Evidence: `git show chore/rc14:documentation/upstream/solid-rc14-retest.md` and the issue draft.
+
+**Runtime bytes on rc.14 (2026-10-08).** Load execution shrank by **56,247–94,408 bytes** across the measured original/twin pairs (−56,247 … −94,408 bytes per measured app). The retest table below is copied verbatim; Effect remains unavailable because its authored script cannot finish. No byte thresholds or baselines changed.
+
+| Twin | Original load delta | Twin load delta | Original step deltas | Twin step deltas |
+| --- | ---: | ---: | --- | --- |
+| effect-yield | unavailable | unavailable | authored script stops at missing retry button | same blocked script |
+| docs-yield | -75537 | -74658 | -62754 to -843 | -61944 to 357 |
+| hackernews-spa-yield | -75362 | -74290 | -56663 to -13677 | -57898 to -19559 |
+| rendering-yield | -56792 | -56247 | -57252 to -1117 | -55367 to -10784 |
+| room-yield | -94408 | -91168 | -75421 to -843 | -76103 to -843 |
+| sierpinski-yield | -72160 | -71055 | -32700 to -843 | -30498 to -843 |
+| sierpinski-yield-h | -72160 | -71131 | -32700 to -843 | -30606 to -843 |
+| todos-yield | -90025 | -87887 | -73779 to -843 | -74640 to -843 |
+| todos-yield-h | -90025 | -87729 | -73779 to -843 | -74848 to -843 |
+
+**Compiler measurements:** the compiler branch's **C3b/C3c figures and 25.6 KB gzip break-even are rc.13 numbers**, to be re-measured on rc.14 before using them for current runtime comparisons.
+
 - **F-C9 update (2026-10-07).** F-C9 is by design for streams: after the shell containing the outer `Errored` is flushed, the server serializes the rejection and the hydrated client renders the fallback. Plain Solid rc.13 `renderToString` does **not** wait for async work: development/production, safe/unsafe all return `Loading article…`, zero error-fallback calls, before the rejection. Its implementation resolves synchronously and disposes before returning (`@solidjs/web/dist/server.js:1547,1563,1567`). The [draft](upstream/solid-ssr-boundary-rejection-rc13.md) is narrowed to a renderToString-only contract question, not filed; Dev decides whether to file. The smoke contract requires the serialized typed error plus the hydrated `.not-found` fallback, not server fallback HTML. Four plain-Solid string controls pin the synchronous result. **Withdrawn (2026-10-07):** `renderToString` is the synchronous renderer by contract (D-099); nothing to file. D-115 fixes the production sanitization on our side.
 
 ## Phase 1A findings (agent report, items 4c–8; verbatim, 2026-10-04)

@@ -27,6 +27,7 @@ import {
 } from "solid-js";
 import {
   BOUNDARY,
+  soakOwned,
   boundaryAbove,
   type Boundary,
   isGeneratorFunction,
@@ -393,6 +394,7 @@ function lazyView(body: any): unknown {
 // --- boundaries ---------------------------------------------------------------------------------
 
 declare const __DEV__: boolean;
+declare const __YIELD_SOAK__: boolean;
 
 /**
  * Whether a value is `solid-yield/h` / automatic-`jsx` output, an element
@@ -461,6 +463,7 @@ function LoadingYield<C, F, O = never>(props: {
   Settle<RequiresOf<Ops<C> | Ops<F> | Ops<O>>>
 >;
 function LoadingYield(props: any): any {
+  if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__) soakOwned("boundaries");
   const children = content(props, "Loading");
   // `on` may be a source: every other prop is read through where it is read
   const out: any = {};
@@ -554,6 +557,7 @@ function ErroredYield<C, F extends ErroredFallback<FailsOf<Ops<C>>> | Element>(p
   Settle<RequiresOf<Ops<C> | Ops<F>>>
 >;
 function ErroredYield(props: any): any {
+  if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__) soakOwned("boundaries");
   const children = content(props, "Errored");
   const fallback = props.fallback as any;
   const handles = props.catch as readonly ErrorClass[] | undefined;

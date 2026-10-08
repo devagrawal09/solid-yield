@@ -24,7 +24,7 @@ import {
   renderToString as webRenderToString,
   renderToStream as webRenderToStream
 } from "@solidjs/web";
-import { devError, ELEMENT_MARK } from "./runtime.js";
+import { devError, ELEMENT_MARK, soakOwned } from "./runtime.js";
 import type { Element } from "./element.js";
 import type { View } from "./types.js";
 import type { ContextNames } from "./context.js";
@@ -79,6 +79,7 @@ export type RootCheck<C> = (RootPending<C> extends true
         >;
       });
 declare const __DEV__: boolean;
+declare const __YIELD_SOAK__: boolean;
 
 type MountableElement = Element & globalThis.Element;
 
@@ -98,6 +99,7 @@ function isElementThunk(value: unknown): value is () => unknown {
  */
 function rootOf(code: () => unknown): () => unknown {
   return () => {
+    if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__) soakOwned("roots");
     let tree = code();
     while (isElementThunk(tree)) tree = tree();
     return tree;

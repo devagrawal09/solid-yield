@@ -5,6 +5,8 @@ reference run used as the baseline; the machine-readable copy is
 [`yield-gate-baseline.json`](./yield-gate-baseline.json). CI runs the same gate
 against this file (`.github/workflows/gate.yml`).
 
+**Failure wire addition (2026-10-08, D-117).** Added one step, `pkg:yield:failure-wire-smoke`: real production server/client bundles stream and hydrate the page, retain its server button, then send an RPC whose restored failure selects the matching class fallback. Same-kind siblings bypass the NotFound boundary. The existing docs smokes now check missing and sibling class identity in development and production. The JSON baseline was regenerated only for this added step, from the full GREEN working-tree run after `f66ab80`: **51 pass / 0 fail / 0 skip in 319s**. All 50 previous steps remain PASS. Executed-byte thresholds are unchanged; the docs not-found phase measures 131,268 bytes against its existing 132,067-byte limit.
+
 **Dashboard original addition (2026-10-08).** The plain-Solid dashboard adds
 four steps: `original:dashboard:test`, `:typecheck`, `:ssr-smoke`, and
 `:hydrate-smoke`. Its self-check covers 30 interaction states, and each smoke

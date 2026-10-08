@@ -42,10 +42,11 @@ export function prepareFailure<T extends Error>(error: T): T {
   if (!current || current.value !== id || out !== error)
     Object.defineProperty(out, WIRE_CLASS, { value: id, enumerable: true, configurable: true });
   if (!isSafeError(out)) markSafeError(out);
-  Object.defineProperty(out, Symbol.for("solid.blocks.failure"), {
-    value: true,
-    configurable: true
-  });
+  if ((out as any)[Symbol.for("solid.blocks.failure")] !== true)
+    Object.defineProperty(out, Symbol.for("solid.blocks.failure"), {
+      value: true,
+      configurable: true
+    });
   return out;
 }
 
@@ -85,10 +86,11 @@ export function rehydrateFailure(value: unknown): unknown {
     Object.defineProperty(out, "kind", { value: "unknown", enumerable: true, configurable: true });
   }
   if (!isSafeError(out)) markSafeError(out);
-  Object.defineProperty(out, Symbol.for("solid.blocks.failure"), {
-    value: true,
-    configurable: true
-  });
+  if ((out as any)[Symbol.for("solid.blocks.failure")] !== true)
+    Object.defineProperty(out, Symbol.for("solid.blocks.failure"), {
+      value: true,
+      configurable: true
+    });
   return out;
 }
 export class FailureInstance<K extends string> extends Error {

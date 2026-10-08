@@ -69,6 +69,7 @@ describe("failure wire identity (D-117)", () => {
     const original = Object.freeze(new AuthorSub("native"));
     const prepared = prepareFailure(original);
     expect(prepared).not.toBe(original);
+    expect(prepareFailure(Object.freeze(prepared))).toBeInstanceOf(AuthorSub);
     expect(isSafeError(prepared)).toBe(true);
     // Solid serializes enumerable props plus message even without toJSON.
     const wire = Object.assign(new Error(prepared.message), { ...prepared });
@@ -117,6 +118,55 @@ describe("failure wire identity (D-117)", () => {
     });
     expect(await event()).toBe("handled");
     expect(seen instanceof DeepMissing).toBe(true);
+  });
+
+  it.each(["sync", "promise"])(
+    "an unmatched nominal %s failure propagates as itself",
+    async mode => {
+      const sibling = new Sibling("direct sibling");
+      let calls = 0;
+      const event = $event(function* () {
+        return yield* attempt(
+          () => {
+            if (mode === "sync") throw sibling;
+            return Promise.reject(sibling);
+          },
+          () => {
+            calls++;
+          },
+          { catch: [Missing] }
+        );
+      });
+      await expect(event()).rejects.toBe(sibling);
+      expect(calls).toBe(0);
+    }
+  );
+
+  it("a selective stream passes an unmatched sibling through and handles a subclass", async () => {
+    for (const covered of [false, true]) {
+      const error = covered ? new DeepMissing("stream sub") : new Sibling("stream sibling");
+      let calls = 0;
+      const op = attempt(
+        () => ({
+          async *[Symbol.asyncIterator]() {
+            yield "one";
+            throw error;
+          }
+        }),
+        () => {
+          calls++;
+        },
+        { catch: [Missing] }
+      );
+      const result = op[Symbol.iterator]().next();
+      expect(result.done).toBe(true);
+      const stream = result.value as AsyncIterable<string>;
+      const reader = stream[Symbol.asyncIterator]();
+      expect(await reader.next()).toMatchObject({ value: "one", done: false });
+      if (covered) expect(await reader.next()).toMatchObject({ done: true });
+      else await expect(reader.next()).rejects.toBe(error);
+      expect(calls).toBe(covered ? 1 : 0);
+    }
   });
 
   it("selective attempt passes an event call's sibling to its caller", async () => {

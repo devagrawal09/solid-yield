@@ -221,6 +221,14 @@ function buildSteps(twins) {
     args: ["examples/harness/hydrate-smoke/hydrate.mjs"]
   });
 
+  // D-117: separate production peers; streamed hydration precedes the real RPC.
+  steps.push({
+    name: "pkg:yield:failure-wire-smoke",
+    cwd: root,
+    cmd: process.execPath,
+    args: ["packages/yield/test/failure-wire-smoke.mjs"]
+  });
+
   steps.push(
     { name: "pkg:yield:test", cwd: root, fast: true, ...pnpmRun("packages/yield", "test") },
     {

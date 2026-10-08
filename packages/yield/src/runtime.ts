@@ -719,6 +719,10 @@ class Attempt {
   ) {}
   handler(error: unknown): unknown {
     error = restoreFailure(error);
+    // An attempted nominal rejection is already a declared failure. Brand it
+    // before forwarding an unmatched class; a plain throw from an event still
+    // passes the event-call crash filter above and is never relabeled here.
+    if (error instanceof FailureInstance) error = brand(error);
     if (this.catches && !matchesFailure(error, this.catches)) throw error;
     return this.onError(error);
   }

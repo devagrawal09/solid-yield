@@ -1,4 +1,4 @@
-import { NotFound, SearchError, RateLimited, BadEmail } from "./errors";
+import { NotFound, SearchError, RateLimited, BadEmail, ArticleUnavailable } from "./errors";
 export interface Link {
   title: string;
   href: string;
@@ -64,6 +64,7 @@ export async function getSite(): Promise<Site> {
 export async function getArticle(slug: string): Promise<Article> {
   "use server";
   await delay(60);
+  if (slug === "sibling") throw new ArticleUnavailable("Article unavailable: sibling");
   if (!["overview", "start", "widgets"].includes(slug)) throw new NotFound("No article: " + slug);
   return {
     slug,

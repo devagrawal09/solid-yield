@@ -227,4 +227,4 @@ existing gate threshold was relaxed. Reports and commands are in
 
 ## Deferred Stryker scores (report only)
 
-The JSON baseline now stores `strykerReportOnly`, with **no threshold**. Compiler failure inference: **59.57%**, 700 mutants (413 killed, 225 survived, 4 timeout, 58 no coverage), 932.17 seconds. The program-mutation score and operator floors are unchanged. See [the deferred mutation report](mutation-report.md#stryker-deferred-packages) for scope, commands and findings.
+The JSON baseline now stores `strykerReportOnly`, with **no threshold**. Compiler failure inference: **59.57%**, 700 mutants (413 killed, 225 survived, 4 timeout, 58 no coverage), 1017.853 seconds including the 228-test incremental refresh. The program-mutation score and operator floors are unchanged. See [the deferred mutation report](mutation-report.md#stryker-deferred-packages) for scope, commands and findings.

@@ -1,0 +1,38 @@
+{
+  "complete": false,
+  "plannedMutants": 4316,
+  "completedMutants": 2506,
+  "notCompletedMutants": 1810,
+  "counts": {
+    "Killed": 396,
+    "Survived": 437,
+    "Timeout": 50,
+    "NoCoverage": 1623
+  },
+  "wallSeconds": 2447.625,
+  "runs": [
+    {
+      "command": "node scripts/mutation/stryker-bounded.mjs vite --minutes 40 --concurrency 4 --incremental",
+      "strykerCommand": "node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js run scripts/mutation/stryker-vite.config.mjs --concurrency 4 --incremental",
+      "startedAt": "2026-10-08T15:24:52.576Z",
+      "finishedAt": "2026-10-08T15:38:40.125Z",
+      "wallSeconds": 827.549,
+      "budgetMinutes": 40,
+      "budgetExceeded": false,
+      "exitCode": 130,
+      "signal": null
+    },
+    {
+      "command": "node scripts/mutation/stryker-bounded.mjs vite --minutes 27 --concurrency 4 --incremental",
+      "strykerCommand": "node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js run scripts/mutation/stryker-vite.config.mjs --concurrency 4 --incremental",
+      "startedAt": "2026-10-08T15:41:01.212Z",
+      "finishedAt": "2026-10-08T16:08:01.288Z",
+      "wallSeconds": 1620.076,
+      "budgetMinutes": 27,
+      "budgetExceeded": true,
+      "exitCode": 130,
+      "signal": null
+    }
+  ],
+  "partialReport": "documentation/mutation-stryker-vite-partial.json"
+}

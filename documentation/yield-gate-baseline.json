@@ -644,7 +644,8 @@
         "noCoverage": 58,
         "errors": 0,
         "report": "documentation/mutation-stryker-compiler.json",
-        "wallSeconds": 932.17
+        "wallSeconds": 1017.853,
+        "testCount": 228
       }
     }
   }

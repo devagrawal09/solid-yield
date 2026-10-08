@@ -1,11 +1,31 @@
 {
-  "command": "/usr/bin/time -p node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js run scripts/mutation/stryker-compiler.config.mjs --concurrency 4 --incremental > /tmp/sy-stryker-compiler.log 2>&1",
-  "wallSeconds": 932.17,
-  "reporterSeconds": 930,
-  "exitCode": 0,
   "scope": [
     "packages/compiler-yield/src/failure-inference.js"
   ],
-  "reporterStartedAt": "2026-10-08T15:03:19.305Z",
-  "reporterFinishedAt": "2026-10-08T15:18:49.348Z"
+  "finalTestCount": 228,
+  "wallSeconds": 1017.853,
+  "runs": [
+    {
+      "command": "/usr/bin/time -p node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js run scripts/mutation/stryker-compiler.config.mjs --concurrency 4 --incremental > /tmp/sy-stryker-compiler.log 2>&1",
+      "wallSeconds": 932.17,
+      "reporterSeconds": 930,
+      "exitCode": 0,
+      "scope": [
+        "packages/compiler-yield/src/failure-inference.js"
+      ],
+      "reporterStartedAt": "2026-10-08T15:03:19.305Z",
+      "reporterFinishedAt": "2026-10-08T15:18:49.348Z"
+    },
+    {
+      "command": "node scripts/mutation/stryker-bounded.mjs compiler --minutes 24 --concurrency 4 --incremental",
+      "strykerCommand": "node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js run scripts/mutation/stryker-compiler.config.mjs --concurrency 4 --incremental",
+      "startedAt": "2026-10-08T15:38:55.519Z",
+      "finishedAt": "2026-10-08T15:40:21.202Z",
+      "wallSeconds": 85.683,
+      "budgetMinutes": 24,
+      "budgetExceeded": false,
+      "exitCode": 0,
+      "signal": null
+    }
+  ]
 }

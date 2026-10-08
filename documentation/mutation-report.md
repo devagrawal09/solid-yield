@@ -7520,23 +7520,24 @@ The first concurrent gate attempt had one unchanged Sierpinski animation-frame t
 
 Measured on the unchanged checker sources at `035893f`. The deferred scope is the complete `failure-inference.js` file and Vite’s `native*.js`, `sugar.js`, `transform.js`, and `positions.js`; these are scope scores, not scores for every file in each package. No program mutants or checker assertions were added. The program mutation baseline, including its 35.65% score and operator site floors, is unchanged. New per-package fields in `yield-gate-baseline.json` are **REPORT-ONLY**, with no gate threshold.
 
-The existing compiler ESM node:test suites register with Vitest through an import alias; the existing Vite suites run directly. Together they contain 209 tests. The TS plugin’s CommonJS adapter is excluded from this host; the full gate still checks its unchanged suite. Stryker 10.0.0 and Vitest 4.1.11 use four process workers with per-test coverage and incremental results. The pinned Stryker runner normally forces threads; `vitest-forks.mjs` changes only that host choice. Initial thread-based attempts aborted in native macOS fsevents cleanup. Polling did not fix those aborts; process workers did. Failed dry runs produce no score and are excluded from the successful-run wall times below.
+The existing compiler ESM node:test suites register with Vitest through an import alias; the existing Vite suites run directly. The TS plugin’s existing CommonJS registration adapter is also included, restoring all 228 tests from the original core scope. An initial 209-test run was refreshed with these 228 tests; the compiler score stayed unchanged. Stryker 10.0.0 and Vitest 4.1.11 use four process workers with per-test coverage and incremental results. The pinned Stryker runner normally forces threads; `vitest-forks.mjs` changes only that host choice. Initial thread-based attempts aborted in native macOS fsevents cleanup. Polling did not fix those aborts; process workers did. Failed dry runs produce no score and are excluded from the successful-run wall times below.
 
 Scores follow `(Killed + Timeout) / (Killed + Timeout + Survived + NoCoverage)`. Error mutants are separate. Timeouts need follow-up for loops versus slow execution. NoCoverage means no coverage recorded in this host; external CLI/tsserver runs and separately loaded SSR modules can evade collection, so it is not proof that no repository test executes the code.
 
 | Package / deferred scope | Mutants | Killed | Survived | Timeout | No coverage | Errors | Score | Wall time |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| compiler-yield / failure-inference.js | 700 | 413 | 225 | 4 | 58 | 0 | 59.57% | 932.17 s (15m 32s) |
+| compiler-yield / failure-inference.js | 700 | 413 | 225 | 4 | 58 | 0 | 59.57% | 1017.853 s (16m 58s total) |
 
-Vite’s run is next; its score will be added after completion.
+Vite’s full deferred run was interrupted after 2447.625 seconds across two attempts: 2506 of 4316 mutants have results, leaving 1810 unmeasured. This partial run has no reported score. Its raw results and wall times are preserved in `mutation-stryker-vite-partial.json` and `mutation-stryker-vite-full-attempt.json`. The narrower fallback targets `native-effects.js`, `sugar.js`, `positions.js`, and `transform.js` (2109 mutants); the session restart interrupted that attempt before it saved a complete report. It will be resumed with the saved incremental results.
 
 ### Commands and time budget
 
 ```sh
 /usr/bin/time -p node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js run scripts/mutation/stryker-compiler.config.mjs --concurrency 4 --incremental > /tmp/sy-stryker-compiler.log 2>&1
+node scripts/mutation/stryker-bounded.mjs compiler --minutes 24 --concurrency 4 --incremental > /tmp/sy-stryker-compiler-refresh.log 2>&1
 ```
 
-Compiler reporter interval: `2026-10-08T15:03:19.305Z` → `2026-10-08T15:18:49.348Z` (930 s); the external wall timer includes startup and reports 932.17 s. This completed all 700 inference mutants within 40 minutes. Vite uses `stryker-bounded.mjs` with a 40-minute limit; SIGINT preserves a partial incremental report for a narrower retry if needed.
+Compiler reporter interval: `2026-10-08T15:03:19.305Z` → `2026-10-08T15:18:49.348Z` (930 s); the external wall timer includes startup and reports 932.17 s. This completed all 700 inference mutants; the 228-test incremental refresh took another 85.683 s. Total compiler wall time was 1017.853 s, within 40 minutes. Vite uses `stryker-bounded.mjs` with a 40-minute limit; SIGINT preserves a partial incremental report for a narrower retry if needed.
 
 ### Top 20 compiler survivors
 

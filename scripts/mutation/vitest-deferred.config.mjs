@@ -7,7 +7,8 @@ export default defineConfig({
   test: {
     include: [
       "packages/vite-plugin-yield/test/*.test.js",
-      "packages/compiler-yield/test/*.test.mjs"
+      "packages/compiler-yield/test/*.test.mjs",
+      "scripts/mutation/ts-tests.test.mjs"
     ],
     maxWorkers: 1,
     fileParallelism: false,

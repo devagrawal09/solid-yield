@@ -301,7 +301,23 @@ if (!mode) {
         resolve(import.meta.dirname, "../../../examples/docs-yield/tests/script.ts")
       );
       globalThis.__yieldExecutedBytes?.("load");
-      let snapshots;
+      let snapshots, firstNavigation, firstFrame, firstLikeRetained;
+      const linkClaims = [];
+      let removeClaimProbe, currentStep;
+      if (process.env.C4_CAPTURE_CLAIMS) {
+        const { registerElementClaim } =
+          await server.environments.hydrate.runner.import("@solidjs/web");
+        removeClaimProbe = registerElementClaim(node => {
+          if (node.matches('a[href^="#"]'))
+            linkClaims.push({
+              step: currentStep,
+              href: node.getAttribute("href"),
+              base: document.baseURI,
+              active: node.hasAttribute("data-active"),
+              current: node.getAttribute("aria-current")
+            });
+        });
+      }
       if (process.env.C2_SMOKE) {
         const { normalize } = await server.environments.hydrate.runner.import(
           resolve(import.meta.dirname, "../../../examples/harness/src/index.ts")
@@ -313,22 +329,24 @@ if (!mode) {
             process.env.C2_URL.endsWith("missing") ? "main .not-found" : "main article h1"
           )
         );
-      } else if (regions) {
+      } else if (regions || process.env.C4_CAPTURE_CLAIMS || process.env.C4_EARLY_LIKE) {
         const { normalize } = await server.environments.hydrate.runner.import(
           resolve(import.meta.dirname, "../../../examples/harness/src/index.ts")
         );
         snapshots = [];
-        let likeNode;
+        let likeNode, firstLike;
         for (const [name, run] of script.steps) {
+          currentStep = name;
           await run();
           if (name === "navigate to /docs/start") {
-            const deadline = Date.now() + 3000;
-            while (!document.querySelector("main .like button") && Date.now() < deadline)
-              await new Promise(r => setTimeout(r, 1));
-            assert(
-              document.querySelector("main .like button"),
-              "first frame reattaches the route slot"
-            );
+            firstNavigation = normalize(document.getElementById("root").innerHTML);
+            firstLike = document.querySelector("main .like");
+            assert(firstLike, "the initial Loading fallback includes LikeButton before the RPC");
+            assert.match(document.querySelector("main").textContent, /Loading article…/);
+            if (process.env.C4_EARLY_LIKE) {
+              await script.steps.find(([step]) => step === "like (optimistic)")[1]();
+              assert.match(firstLike.textContent, /Like: 1/);
+            }
           }
           const settledSelector = {
             "article loads": "main #start-plan-the-page",
@@ -353,6 +371,10 @@ if (!mode) {
             assert(document.querySelector(settledSelector), "region response settles: " + name);
           }
           if (name === "like saved") likeNode = document.querySelector("main .like");
+          if (name === "article loads") {
+            firstLikeRetained = firstLike === document.querySelector("main .like");
+            assert(firstLikeRetained, "LikeButton survives the initial fallback-to-frame handoff");
+          }
           if (name === "not-found typed error")
             assert.equal(
               document.querySelector("main .like"),
@@ -361,8 +383,34 @@ if (!mode) {
             );
           globalThis.__yieldExecutedBytes?.(name);
           snapshots.push(normalize(document.getElementById("root").innerHTML));
+          if (name === "article loads" && process.env.C4_EARLY_LIKE) {
+            assert.match(firstLike.textContent, /Like: 1/);
+            assert.doesNotMatch(firstLike.textContent, /Saving/);
+            // Visible content can land before the transport's final end record.
+            // Finish the short probe only once that response has closed.
+            if (rpc) {
+              const deadline = Date.now() + 5000;
+              while (!rpc.payloads.length && Date.now() < deadline)
+                await new Promise(r => setTimeout(r, 1));
+              assert.equal(rpc.payloads.length, 1);
+            }
+            break;
+          }
+          // Optional observation between checkpoints. The actual step-4 snapshot
+          // and coverage checkpoint above never wait for the first frame.
+          if (regions && name === "navigate to /docs/start" && process.env.C4_OBSERVE_FIRST_FRAME) {
+            const deadline = Date.now() + 3000;
+            while (
+              !document.querySelector("solid-frame main .like button") &&
+              Date.now() < deadline
+            )
+              await new Promise(r => setTimeout(r, 1));
+            assert(document.querySelector("solid-frame main .like button"));
+            firstFrame = normalize(document.getElementById("root").innerHTML);
+          }
         }
       } else snapshots = await script.runScript();
+      removeClaimProbe?.();
       assert(
         inertNodes.every(node => node.isConnected),
         "inert nav and footer keep their server identity"
@@ -378,6 +426,9 @@ if (!mode) {
         "C2_RESULT " +
           JSON.stringify({
             snapshots,
+            ...(firstNavigation ? { firstNavigation, firstLikeRetained } : {}),
+            ...(firstFrame ? { firstFrame } : {}),
+            ...(process.env.C4_CAPTURE_CLAIMS ? { linkClaims } : {}),
             roots: plan?.roots.length ?? 1,
             ...(rpc ? { payloads: rpc.payloads, jsonComparison: rpc.jsonComparison } : {})
           })

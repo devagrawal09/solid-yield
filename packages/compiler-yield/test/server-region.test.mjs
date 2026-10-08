@@ -4,10 +4,36 @@ import { createRequire } from "node:module";
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import { spawnSync } from "node:child_process";
 import solidYield from "../../vite-plugin-yield/src/index.js";
 import { emitServerRegion } from "../src/server-region.js";
 
 const require = createRequire(new URL("../package.json", import.meta.url));
+test("C4: the low-level public frame API can reuse an authored element", () => {
+  const child = spawnSync(
+    process.execPath,
+    [
+      "--conditions=browser",
+      "--input-type=module",
+      "-e",
+      `
+    import assert from "node:assert/strict";
+    import {JSDOM} from "jsdom";
+    import {createFrame,createFrameHost} from "@solidjs/web/frames";
+    const dom=new JSDOM("<main><p>old</p></main>");
+    globalThis.document=dom.window.document;
+    const main=document.querySelector("main"), host=createFrameHost();
+    const frame=createFrame(main,{host,id:"probe",adopt:true});
+    host.apply({type:"html",id:"probe",version:1,html:"<p>new</p>"});
+    assert.equal(document.querySelector("main"),main);
+    assert.equal(document.body.innerHTML,"<main><p>new</p></main>");
+    frame.dispose();dom.window.close();
+  `
+    ],
+    { cwd: resolve(import.meta.dirname, ".."), encoding: "utf8", timeout: 10000 }
+  );
+  assert.equal(child.status, 0, child.stdout + child.stderr);
+});
 test("D-115: generated article frames preserve the public failure message", async () => {
   const { createServer } = await import(pathToFileURL(require.resolve("vite")));
   const { default: plugin } = await import(pathToFileURL(require.resolve("@solidjs/vite-plugin")));

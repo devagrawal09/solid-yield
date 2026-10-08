@@ -107,13 +107,17 @@ export async function guideRegion() {
     content,
     ["routeRegion", "guideRegion"]
   );
+  // The route owner owns LikeButton before its first frame exists. Both the
+  // fallback and the keyed slot read one memo, so the handoff keeps its state.
   const stubCode = `export {configureServerFunctionsClient} from "@solidjs/web/server-functions";
-import {Loading} from "solid-js";
+import {Loading,createMemo} from "solid-js";
 import {dynamic} from "@solidjs/web";
 import {routeRegion,guideRegion} from ${JSON.stringify(remote)};
 export function RouteRegion(props) {
+ const like=createMemo(()=><props.like slug={props.slug ?? "overview"}/>);
+ const Like=()=> <>{like()}</>;
  const Region=dynamic(()=>routeRegion(props.slug));
- return <Loading fallback=""><Region like={props.like}/></Loading>;
+ return <Loading fallback={<main>{${pending}}<Like/></main>}><Region like={Like}/></Loading>;
 }
 export function GuideRegion() {
  const Region=dynamic(()=>guideRegion());

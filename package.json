@@ -23,7 +23,8 @@
     "prettier": "3.8.1",
     "rimraf": "^3.0.2",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.6"
+    "vitest": "^4.1.6",
+    "ts-plugin-solid-yield": "workspace:*"
   },
   "engines": {
     "node": ">=24",

@@ -34,7 +34,7 @@ function generators(code) {
   });
   return bodies;
 }
-describe("bounded native ownership", () => {
+describe("bounded native ownership", { timeout: 30_000 }, () => {
   it.each([...generatorApis])("recognizes %s's direct generator producer", api => {
     const code = `import {${api} as core} from 'solid-js';core(async function*(){yield 1});`;
     expect(markOpaqueGenerators(new Map([[file, code]])).get(file)).not.toContain(
@@ -126,6 +126,7 @@ export function* program(){return count();}`;
       expect(result.diagnostics).toEqual([
         {
           code: "MODULE_STATE",
+          severity: "error",
           message:
             "reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses",
           file,

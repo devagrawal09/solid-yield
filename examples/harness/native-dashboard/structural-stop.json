@@ -6,7 +6,7 @@
   "boundaries": [
     {
       "code": "NATIVE_FOREIGN_BOUNDARY",
-      "message": "Router (createRouter from @solidjs/router) stays Solid at this JSX boundary (provenance C; foreign failures unknown). Handle failures at the boundary. To bring it inside, use a core API or select its source with a checked contract.",
+      "message": "Handle failures inside Router or its callbacks; this imported component (createRouter from @solidjs/router) is outside the native check.",
       "file": "examples/originals/dashboard/src/app.tsx",
       "line": 92,
       "column": 9
@@ -37,6 +37,8 @@
       "line": 11,
       "fails": [
         "ChunkError",
+        "examples/originals/dashboard/src/errors.ts#AckFailed@45",
+        "examples/originals/dashboard/src/errors.ts#NotFound@201",
         "global:Error",
         "unknown"
       ]
@@ -101,6 +103,9 @@
       "file": "examples/originals/dashboard/src/incidents.tsx",
       "line": 8,
       "fails": [
+        "ChunkError",
+        "examples/originals/dashboard/src/errors.ts#AckFailed@45",
+        "examples/originals/dashboard/src/errors.ts#NotFound@201",
         "unknown"
       ]
     },
@@ -110,6 +115,8 @@
       "line": 50,
       "fails": [
         "ChunkError",
+        "examples/originals/dashboard/src/errors.ts#AckFailed@45",
+        "examples/originals/dashboard/src/errors.ts#NotFound@201",
         "global:Error",
         "unknown"
       ]

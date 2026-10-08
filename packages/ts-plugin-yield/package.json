@@ -1,0 +1,25 @@
+{
+  "name": "ts-plugin-solid-yield",
+  "version": "0.0.0",
+  "description": "TypeScript virtual-code typing for solid-yield sugar and native mode",
+  "type": "commonjs",
+  "main": "./src/plugin.cjs",
+  "bin": {
+    "solid-yield": "./src/cli.cjs"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.cjs"
+  },
+  "dependencies": {
+    "vite-plugin-solid-yield": "^0.0.0",
+    "solid-yield": "^0.0.0",
+    "typescript": "^6.0.3"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "devDependencies": {
+    "@solidjs/web": "^2.0.0-rc.11",
+    "solid-js": "^2.0.0-rc.11"
+  }
+}

@@ -35,7 +35,7 @@ test("handled catches, rethrows, unknown use, Promise.catch and try-await", () =
   assert.deepEqual(summary(report, "handled"), []);
   assert.deepEqual(summary(report, "settled"), []);
   assert.deepEqual(summary(report, "rethrown"), [kind]);
-  assert.deepEqual(summary(report, "widened"), ["unknown"]);
+  assert.deepEqual(summary(report, "widened"), [kind]);
   assert.deepEqual(summary(report, "promiseHandled"), []);
   assert.deepEqual(summary(report, "promiseRethrown"), [kind]);
 });
@@ -71,7 +71,13 @@ test("named Promise handlers contribute their own failures; opaque catch methods
  function opaque(x:any){return x.catch(()=>1)}`
   });
   const kind = report.classes.find(c => c.name === "B").id;
-  assert.deepEqual(summary(report, "named"), [kind]);
+  assert.deepEqual(
+    summary(report, "named"),
+    report.classes
+      .filter(c => ["A", "B"].includes(c.name))
+      .map(c => c.id)
+      .sort()
+  );
   assert.deepEqual(summary(report, "opaque"), ["unknown"]);
 });
 
@@ -102,4 +108,47 @@ test("native clocks and array callbacks keep callback failures and reject shadow
   assert.deepEqual(summary(report, "map"), [kind]);
   assert.deepEqual(summary(report, "shadow"), ["unknown"]);
   assert.deepEqual(summary(report, "opaque"), ["unknown"]);
+});
+
+test("path-safe catches cover subclasses, keep siblings, unknown, partial rethrows and finalizers", () => {
+  const report = infer({
+    "paths.ts": `class Base extends Error{} class Sub extends Base{} class Sibling extends Error{}
+ function source(flag:boolean){if(flag)throw new Sub();throw new Sibling()}
+ function base(){try{throw new Sub()}catch(e){if(e instanceof Base)return 1;throw e}}
+ function sibling(){try{source(true)}catch(e){if(e instanceof Base)return 1;throw e}}
+ function inverted(){try{source(true)}catch(e){if(!(e instanceof Base))throw e;return 1}}
+ function partial(flag:boolean){try{throw new Sub()}catch(e){if(flag)throw e;return 1}}
+ function opaque(){try{external()}catch(e){if(e instanceof Base)return 1;throw e}}
+ function all(){try{external()}catch{return 1}}
+ function finalizer(){try{throw new Sub()}catch{return 1}finally{throw new Sibling()}}
+ async function later(){throw new Sibling()}
+ function timing(){try{return later()}catch{return 1}}
+ async function awaited(){try{return await later()}catch{return 1}}
+ function returnedError(){try{throw 0}catch{return new Sub()}}
+ function replaced(){try{throw new Sub()}catch{throw new Sibling()}}
+ `
+  });
+  const id = name => report.classes.find(c => c.name === name).id;
+  for (const name of ["base", "all", "awaited", "returnedError"])
+    assert.deepEqual(summary(report, name), [], name);
+  for (const name of ["sibling", "inverted", "finalizer", "timing", "replaced"])
+    assert.deepEqual(summary(report, name), [id("Sibling")], name);
+  assert.deepEqual(summary(report, "partial"), [id("Sub")]);
+  assert.deepEqual(summary(report, "opaque"), ["unknown"]);
+});
+
+test("Promise platform contracts retain executor throws, reject calls and opaque thenables", () => {
+  const report = infer({
+    "promise.ts": `class E extends Error{}
+ function number(){return new Promise<number>(resolve=>resolve(1))}
+ function throws(){return new Promise<number>(()=>{throw new E()})}
+ function rejects(){return new Promise<number>((_,reject)=>reject(new E()))}
+ function thenable(value:PromiseLike<number>){return new Promise<number>(resolve=>resolve(value))}
+ `
+  });
+  const kind = report.classes.find(c => c.name === "E").id;
+  assert.deepEqual(summary(report, "number"), []);
+  assert.deepEqual(summary(report, "throws"), [kind]);
+  assert.deepEqual(summary(report, "rejects"), [kind]);
+  assert.deepEqual(summary(report, "thenable"), ["unknown"]);
 });

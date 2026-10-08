@@ -1,5 +1,5 @@
 import { analyzeInstances as analyze } from "./placement.js";
-import { parseProgram } from "../../vite-plugin-yield/src/transform.js";
+import { parseProgram } from "./parse.js";
 export { analyzeInstances as analyze } from "./placement.js";
 
 export function importsOf(code, id) {

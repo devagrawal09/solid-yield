@@ -2,7 +2,7 @@
   "boundaries": [
     {
       "code": "NATIVE_FOREIGN_BOUNDARY",
-      "message": "Router (createRouter from @solidjs/router) stays Solid at this JSX boundary (provenance C; foreign failures unknown). Handle failures at the boundary. To bring it inside, use a core API or select its source with a checked contract.",
+      "message": "Handle failures inside Router or its callbacks; this imported component (createRouter from @solidjs/router) is outside the native check.",
       "file": "examples/originals/hackernews-spa/src/app.tsx",
       "line": 35,
       "column": 5

@@ -5,6 +5,13 @@ reference run used as the baseline; the machine-readable copy is
 [`yield-gate-baseline.json`](./yield-gate-baseline.json). CI runs the same gate
 against this file (`.github/workflows/gate.yml`).
 
+**Checker branch merge (2026-10-08).** The baseline now contains the union of
+74 sugar steps and three added checker steps: `fresh-install`,
+`native:todos:events:snapshot`, and `pkg:ts-plugin-yield:test`. Only those three
+entries were refreshed from the full **77 PASS / 0 FAIL / 0 SKIP in 619 s** run.
+All 74 earlier step expectations and executed-byte thresholds are unchanged.
+Hacker News typecheck now uses the matching CLI on its author-patched source.
+
 **Sugar merge and native dashboard stop (2026-10-08).** The merge baseline is
 the union of the branch's 69 steps and main's four dashboard steps; the merge
 passed all 73 steps. The F-S35 follow-up adds only
@@ -18,6 +25,13 @@ four steps: `original:dashboard:test`, `:typecheck`, `:ssr-smoke`, and
 checks three routes. The dashboard is an original only, for sugar/native mode;
 the nine hand-written twins and their executed-byte thresholds are unchanged.
 The JSON baseline was regenerated from the full GREEN run at `cb5a80d`: **50 PASS / 0 FAIL / 0 SKIP in 229 s**. All 46 existing steps remain PASS. The baseline is committed with the added steps.
+
+**Newcomer install addition (2026-10-08).** Baseline regenerated only for the
+new `fresh-install` step: **65 PASS / 0 FAIL / 0 SKIP in 153 s**, GREEN, on
+`d88e31c` plus the reviewed working tree. All 64 earlier steps remain PASS.
+The added step tests tarballs and `file:` copies outside the monorepo, using
+the unchanged reviewer app: Vite build, CLI check and native ESLint all pass.
+No existing step, threshold, or accepted failure was changed.
 
 **Calculus proofs addition on main (2026-10-07).** Baseline regenerated only
 for the new report-only `proofs` step, from the full GREEN run after merge

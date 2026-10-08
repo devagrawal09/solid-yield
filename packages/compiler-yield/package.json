@@ -1,14 +1,23 @@
 {
   "name": "compiler-yield",
   "version": "0.0.0",
-  "private": true,
   "type": "module",
-  "exports": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./failure-inference": "./src/failure-inference.js",
+    "./native-generator": "./src/native-generator.js"
+  },
   "scripts": {
     "test": "node --test test/*.test.mjs",
     "report": "node src/report.js"
   },
   "dependencies": {
-    "vite-plugin-solid-yield": "workspace:*"
+    "@babel/core": "^7.29.0"
+  },
+  "files": [
+    "src"
+  ],
+  "devDependencies": {
+    "vite-plugin-solid-yield": "^0.0.0"
   }
 }

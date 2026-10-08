@@ -4,48 +4,12 @@ import babel from "@babel/core";
 import { parseProgram } from "./transform.js";
 import { printMapped } from "./positions.js";
 const t = babel.types;
-// Solid 2 rc.13: action consumes sync/async generators; the other APIs accept
-// AsyncIterable producers in their first (compute/derived-store) argument.
-export const generatorApis = new Set([
-  "action",
-  "createSignal",
-  "createMemo",
-  "createOptimistic",
-  "createEffect",
-  "createRenderEffect",
-  "createStore",
-  "createProjection",
-  "createOptimisticStore"
-]);
-/** @param {import("@babel/core").NodePath<any>} path */
-export function coreGenerator(path) {
-  const call = path.parentPath;
-  if (!call?.isCallExpression() || call.node.arguments[0] !== path.node) return false;
-  const callee = call.get("callee");
-  const spec = callee.isIdentifier() ? callee.scope.getBinding(callee.node.name)?.path : null;
-  if (
-    spec?.isImportSpecifier() &&
-    spec.parentPath.isImportDeclaration() &&
-    spec.parentPath.node.source.value === "solid-js"
-  )
-    return generatorApis.has(
-      t.isIdentifier(spec.node.imported) ? spec.node.imported.name : spec.node.imported.value
-    );
-  if (callee.isMemberExpression() && !callee.node.computed) {
-    const object = callee.get("object");
-    const binding = object.isIdentifier() ? object.scope.getBinding(object.node.name)?.path : null;
-    return !!(
-      binding?.isImportNamespaceSpecifier() &&
-      binding.parentPath.isImportDeclaration() &&
-      binding.parentPath.node.source.value === "solid-js" &&
-      t.isIdentifier(callee.node.property) &&
-      generatorApis.has(callee.node.property.name)
-    );
-  }
-  return false;
-}
-/** @param {import("@babel/core").NodePath<any>} path */
-export const authoredOpaqueGenerator = path => !!path.node.generator && !coreGenerator(path);
+import { authoredOpaqueGenerator } from "compiler-yield/native-generator";
+export {
+  generatorApis,
+  coreGenerator,
+  authoredOpaqueGenerator
+} from "compiler-yield/native-generator";
 export const opaqueDirective = "use native opaque";
 /** @param {any} node */
 export const opaqueGenerator = node =>

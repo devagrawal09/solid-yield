@@ -13,7 +13,7 @@ const imported = binding =>
   t.isIdentifier(binding.node.imported)
     ? { source: binding.parentPath.node.source.value, name: binding.node.imported.name }
     : null;
-/** @param {Map<string,string>} files @param {import('../../compiler-yield/src/failure-inference.js').FailureReport} report */
+/** @param {Map<string,string>} files @param {import('compiler-yield/failure-inference').FailureReport} report */
 export function lowerNativeEffects(files, report) {
   // Seed routine ownership from native primitive calls and propagate to callers
   // through the analyzer's resolved graph. Ordinary I/O helpers stay JavaScript.
@@ -187,7 +187,7 @@ export function lowerNativeEffects(files, report) {
       YieldExpression: {
         exit(q) {
           const fn = q.getFunctionParent();
-          if (!fn || fn.node.async || q.node.delegate || !q.node.argument) return;
+          if (!fn || !host(fn) || fn.node.async || q.node.delegate || !q.node.argument) return;
           const value = q.node.argument;
           q.replaceWith(
             t.isCallExpression(value) && t.isIdentifier(value.callee, { name: "__nativeAttempt" })
@@ -199,13 +199,34 @@ export function lowerNativeEffects(files, report) {
       ThrowStatement(q) {
         const fn = q.getFunctionParent();
         if (!host(fn)) return;
+        if (
+          t.isStringLiteral(q.node.argument) ||
+          t.isNumericLiteral(q.node.argument) ||
+          t.isBooleanLiteral(q.node.argument) ||
+          t.isNullLiteral(q.node.argument)
+        ) {
+          const error = new Error(
+            "Throw an Error object so callers can identify and handle this failure."
+          );
+          Object.assign(error, {
+            code: "NATIVE_THROW",
+            id: file,
+            loc: { file, ...q.node.loc?.start }
+          });
+          throw error;
+        }
         used.add("raise");
         if (fn) fn.node.returnType = null;
+        const raised = t.callExpression(t.identifier("__nativeRaise"), [
+          adapt(report.throws(file, q.node.start ?? 0, q.node.end ?? 0), q.node.argument)
+        ]);
+        // raise always throws at runtime; preserve that non-returning path in a
+        // component whose successful return must be a view.
         q.replaceWith(
           t.returnStatement(
-            t.callExpression(t.identifier("__nativeRaise"), [
-              adapt(report.throws(file, q.node.start ?? 0, q.node.end ?? 0), q.node.argument)
-            ])
+            report.at(file, fn?.node.start ?? 0)?.component
+              ? t.tsAsExpression(raised, t.tsNeverKeyword())
+              : raised
           )
         );
       },

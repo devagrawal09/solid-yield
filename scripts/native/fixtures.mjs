@@ -157,7 +157,7 @@ export const fixtures = [
   },
   {
     id: "unknown-memo",
-    source: `import {createMemo} from 'solid-js'; function load(){throw 'bad'} export function App(){const value=createMemo(()=>load());return <p>{value()}</p>}`,
+    source: `import {createMemo} from 'solid-js'; declare function load():number; export function App(){const value=createMemo(()=>load());return <p>{value()}</p>}`,
     expected: "accepted"
   },
   {

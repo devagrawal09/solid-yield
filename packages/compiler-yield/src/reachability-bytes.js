@@ -2,11 +2,15 @@ import { createRequire } from "node:module";
 import { pathToFileURL } from "node:url";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import solidYield from "../../vite-plugin-yield/src/index.js";
+import solidYield from "vite-plugin-solid-yield";
 // Use the transform package's declared source-map dependency; no new install.
-const mapRequire = createRequire(new URL("../../vite-plugin-yield/package.json", import.meta.url));
+const mapRequire = createRequire(
+  createRequire(import.meta.url).resolve("vite-plugin-solid-yield/package.json")
+);
 const { TraceMap, decodedMappings } = mapRequire("@jridgewell/trace-mapping");
-const require = createRequire(new URL("../../vite-plugin-yield/package.json", import.meta.url));
+const require = createRequire(
+  createRequire(import.meta.url).resolve("vite-plugin-solid-yield/package.json")
+);
 export function unionRanges(ranges) {
   const result = [];
   for (const r of ranges

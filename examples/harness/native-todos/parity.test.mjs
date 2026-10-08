@@ -7,6 +7,7 @@ import { pathToFileURL } from "node:url";
 import { JSDOM } from "jsdom";
 import { populateGlobal } from "vitest/runtime";
 import solidYield from "../../../packages/vite-plugin-yield/src/vite.js";
+import { fixBulkActionReads, fixBulkHandlerArgument } from "./author-fix.mjs";
 const root = resolve(import.meta.dirname, "../../..");
 const require = createRequire(join(root, "packages/vite-plugin-yield/package.json"));
 const vite = await import(pathToFileURL(require.resolve("vite")).href);
@@ -47,6 +48,10 @@ async function record(mode, hydrated) {
             return join(root, "examples/todos-yield/.native-generated/todos-entry.tsx");
         },
         load(id) {
+          if (mode === "native" && id === main)
+            return fixBulkHandlerArgument(readFileSync(id, "utf8"));
+          if (mode === "native" && id === join(source, "todos.ts"))
+            return fixBulkActionReads(readFileSync(id, "utf8"));
           if (id === join(root, "examples/todos-yield/.native-generated/todos-entry.tsx"))
             return `
             import {App} from ${JSON.stringify(main)};

@@ -34,12 +34,12 @@
     "todos-yield-h"
   ],
   "summary": {
-    "pass": 74,
+    "pass": 77,
     "fail": 0,
     "skip": 0,
-    "total": 74,
-    "wallMs": 203552,
-    "line": "74 pass / 0 fail / 0 skip (baseline union plus F-S35 regression pin)",
+    "total": 77,
+    "wallMs": 618767,
+    "line": "77 pass / 0 fail / 0 skip in 619s",
     "green": true
   },
   "comparison": {
@@ -565,6 +565,24 @@
       "status": "PASS",
       "durationMs": 4049,
       "command": "../../../Users/devagr/.nvm/versions/node/v24.18.0/bin/node scripts/native-dashboard-blocker.mjs"
+    },
+    {
+      "name": "fresh-install",
+      "status": "PASS",
+      "durationMs": 69054,
+      "command": "../../../Users/devagr/.nvm/versions/node/v24.18.0/bin/node scripts/fresh-install.mjs"
+    },
+    {
+      "name": "native:todos:events:snapshot",
+      "status": "PASS",
+      "durationMs": 5940,
+      "command": "../../../Users/devagr/.nvm/versions/node/v24.18.0/bin/node scripts/native-todos-events.mjs snapshot"
+    },
+    {
+      "name": "pkg:ts-plugin-yield:test",
+      "status": "PASS",
+      "durationMs": 174050,
+      "command": "pnpm -C packages/ts-plugin-yield run test"
     }
   ]
 }

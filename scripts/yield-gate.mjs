@@ -162,6 +162,13 @@ function buildSteps(twins) {
     args: ["scripts/dist-fresh.mjs"]
   });
 
+  steps.push({
+    name: "fresh-install",
+    cwd: root,
+    cmd: process.execPath,
+    args: ["scripts/fresh-install.mjs"]
+  });
+
   for (const twin of twins) {
     const dir = `examples/${twin}`;
     const scripts = readJson(join(root, dir, "package.json")).scripts;
@@ -204,7 +211,16 @@ function buildSteps(twins) {
       name: `native:sierpinski:${stage}`,
       cwd: root,
       cmd: process.execPath,
-      args: ["scripts/native-sierpinski-check.mjs", stage]
+      args:
+        stage === "typecheck"
+          ? [
+              "packages/ts-plugin-yield/src/cli.cjs",
+              "check",
+              "examples/originals/sierpinski",
+              "--native",
+              "src/**"
+            ]
+          : ["scripts/native-sierpinski-check.mjs", stage]
     });
   }
   for (const stage of ["parity", "ssr"]) {
@@ -220,9 +236,18 @@ function buildSteps(twins) {
       name: `native:todos:${stage}`,
       cwd: root,
       cmd: process.execPath,
-      args: ["scripts/native-todos-check.mjs", stage]
+      args:
+        stage === "typecheck"
+          ? ["scripts/native-todos-events.mjs", "typecheck"]
+          : ["scripts/native-todos-check.mjs", stage]
     });
   }
+  steps.push({
+    name: "native:todos:events:snapshot",
+    cwd: root,
+    cmd: process.execPath,
+    args: ["scripts/native-todos-events.mjs", "snapshot"]
+  });
   for (const stage of ["parity", "ssr"]) {
     steps.push({
       name: `native:todos:${stage}`,
@@ -319,6 +344,11 @@ function buildSteps(twins) {
       name: "pkg:vite-plugin-yield:test",
       cwd: root,
       ...pnpmRun("packages/vite-plugin-yield", "test")
+    },
+    {
+      name: "pkg:ts-plugin-yield:test",
+      cwd: root,
+      ...pnpmRun("packages/ts-plugin-yield", "test")
     },
     {
       name: "pkg:vite-plugin-yield:typecheck",

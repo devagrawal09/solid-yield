@@ -1,4 +1,4 @@
-import { parseProgram } from "../../vite-plugin-yield/src/transform.js";
+import { parseProgram } from "./parse.js";
 
 const key = n => n?.name ?? n?.value;
 const unwrap = p => {

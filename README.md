@@ -2,13 +2,37 @@
 
 `solid-yield` is a library for writing Solid 2 components as **yield components**: generator functions in which every read is a `yield*`, so that a component's type says whether it may be pending, which errors it may fail with, and which contexts it requires.
 
-## Sugar mode (in progress on proto/sugar)
+## Sugar mode / native mode
 
-Write plain Solid, add the plugin, and get typed failures without writing
-generators or importing the library in your app code. The plugin converts the
-reactive core to yield routines; everything outside that core stays plain Solid
-at a named foreign boundary, where unknown failures must be handled. The editor
-plugin and matching CLI check are planned. See [the branch design](https://github.com/devagrawal09/solid-yield/blob/5e03328ec2fcd872f87228d4dac4f21bae9fb4c1/documentation/sugar-design.md).
+Native mode checks selected plain Solid 2 files and transforms them into the library's generator form before Vite compiles JSX. Sugar mode opts files in with `"use yield"` and uses the library's APIs with ordinary calls. Both are experimental: the supported forms have tests, but unsupported forms, generated-location fallbacks and missing runtime source maps remain.
+
+Build this clone with `pnpm install && pnpm build`, create `/tmp/solid-yield-packs`, then pack `yield`, `compiler-yield`, `vite-plugin-yield`, `ts-plugin-yield` and `eslint-plugin-yield` from their `packages/` directories with `pnpm pack --pack-destination /tmp/solid-yield-packs`. Install the runtime and both plugins from those tarballs; the [TS plugin README](packages/ts-plugin-yield/README.md#install-and-select-files) gives the complete local install, overrides and tsconfig. There is no npm release yet; the overrides select the local `0.0.0` dependencies instead of searching npm.
+
+Use `solidYield({ mode: "native", include: ["src/**"] })` before `solid()` in Vite, and the same `mode` and `include` in `tsconfig.compilerOptions.plugins`. Native tsconfig uses `"jsx": "preserve"` and `"jsxImportSource": "@solidjs/web"`. For the optional ESLint step, apply the recommended rules to `files: ["src/**/*.{ts,tsx}"]` with `settings: { "solid-yield": { mode: "native" } }`; this permits plain Solid imports. These lint rules mainly check generated or explicit code; the TS plugin and CLI enforce the native checks described here.
+
+This 15-line plain Solid example deliberately leaves out `Loading`:
+
+```tsx
+import { createMemo, createSignal } from "solid-js";
+import { render } from "@solidjs/web";
+async function loadCount() {
+  return 42;
+}
+function App() {
+  const [count, setCount] = createSignal(0);
+  const remote = createMemo(() => loadCount());
+  return (
+    <button onClick={() => setCount(count() + 1)}>
+      {count()} / {remote()}
+    </button>
+  );
+}
+render(() => <App />, document.body);
+```
+
+`pnpm exec solid-yield check .` reports `[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.` at `remote()` on line 11, with the render on line 15 as a related location. Checked event handlers report `EVENT_REJECTS` at the handler when their inferred failures escape. Catch inside the handler; a rendered `Errored` cannot catch its rejected promise. The [native Todos harness](examples/harness/native-todos/check.mjs) checks 27 client/hydrated states and SSR after the minimal bulk-handler catch patch; the unchanged original has a pinned event-failure snapshot; the [native Sierpinski harness](examples/harness/native-sierpinski/check.mjs) checks 11 states and SSR. Run each with `parity` or `ssr` from this repository. These two examples bound the tested scope; they do not establish that every Solid app works.
+
+The rest of this README introduces the explicit generator dialect.
 
 ## The problem
 
@@ -63,8 +87,8 @@ const TodoList = component(function* TodoList(props: Props<{ listId: string }>) 
 What this gets you:
 
 - **Boundaries are checked when you compile.** `Loading` removes the pending flag from the type, `Errored({ catch: [FetchError] })` removes `FetchError`, and `ThemeCtx.provide` removes the requirement.
-- **A missing `Loading` or provider is a type error at the root.** `render` refuses what is left: `[PENDING_ROOT]`, or `[NO_PROVIDER] … "ThemeCtx"`. A failure that no `Errored` handles stays in the root's type and is re-thrown when it happens.
-- **The lint covers what TypeScript can't see.** Its message names the line to write, and many of its rules autofix.
+- **A missing `Loading` or provider is a type error at the root.** `render` refuses what is left: `[PENDING_ROOT]`, or `[NO_PROVIDER] … "ThemeCtx"`. In the explicit dialect a library root may rethrow an unhandled failure. Native `render()` and `hydrate()` are foreign handoffs and report a remaining failure at its read, with the handoff as a related location.
+- **The lint adds checks for the explicit dialect.** Some rules offer fixes. Native source needs the ESLint setting above; unsupported forms and incomplete checks are listed in the plugin docs.
 
 ## The model
 
@@ -152,80 +176,16 @@ render(App, document.getElementById("root")!); // settled, requires nothing: acc
 
 Mapped onto Solid 2: `$optimisticStore` is `createOptimisticStore`, `$event` is an `action`, `refresh` and the boundaries are Solid's own. The `yield*`s are what add the types.
 
-## Using it today (from source)
+## Install the prototype
 
-There is no npm release yet. To build the packages, you need Node 24 and pnpm 11:
+Use the [local tarball install](packages/ts-plugin-yield/README.md#install-and-select-files).
+It is the single supported setup described here; no package has been published yet.
+That page includes the Vite, TypeScript and ESLint settings for native source.
+Native source uses `jsxImportSource: "@solidjs/web"`; the virtual generated code uses
+`solid-yield` internally. Use ESLint 9 with the listed parser version.
 
-```sh
-git clone https://github.com/devagrawal09/solid-yield.git
-cd solid-yield && pnpm install && pnpm build   # builds packages/yield/dist
-```
-
-In your app, next to the clone, depend on the three packages by `file:` path. The versions below are tested together with pnpm:
-
-```jsonc
-{
-  "dependencies": {
-    "solid-yield": "file:../solid-yield/packages/yield",
-    "solid-js": "^2.0.0-rc.13",
-    "@solidjs/web": "^2.0.0-rc.13"
-  },
-  "devDependencies": {
-    "vite-plugin-solid-yield": "file:../solid-yield/packages/vite-plugin-yield",
-    "eslint-plugin-solid-yield": "file:../solid-yield/packages/eslint-plugin-yield",
-    "@solidjs/vite-plugin": "3.0.0-next.47",
-    "vite": "^8",
-    "typescript": "~6.0",
-    "eslint": "^10",
-    "@typescript-eslint/parser": "^8",
-    "vitest": "^5",
-    "jsdom": "^30"
-  }
-}
-```
-
-pnpm copies a `file:` dependency when it installs it. So after `git pull && pnpm build` in the clone, run `pnpm install --force` in the app. If you want the app to point at the clone directly, use `link:` instead of `file:`, which is what `pnpm link` does.
-
-```ts
-// vite.config.ts: the yield transform runs before Solid's JSX compiler
-import { defineConfig } from "vitest/config";
-import solidYield from "vite-plugin-solid-yield";
-import solid from "@solidjs/vite-plugin";
-
-export default defineConfig({ plugins: [solidYield(), solid()], test: { environment: "jsdom" } });
-```
-
-```js
-// eslint.config.mjs
-import tsParser from "@typescript-eslint/parser";
-import solidYield from "eslint-plugin-solid-yield";
-
-export default [
-  {
-    files: ["src/**/*.{ts,tsx}"],
-    languageOptions: {
-      parser: tsParser,
-      parserOptions: { ecmaFeatures: { jsx: true }, projectService: true }
-    },
-    plugins: { "solid-yield": solidYield },
-    rules: { ...solidYield.configs.recommended.rules }
-  }
-];
-```
-
-```jsonc
-// tsconfig.json, compilerOptions
-"jsx": "preserve",
-"jsxImportSource": "solid-yield",  // only settled views are elements; only DOM elements and foreign components are tags
-"jsxFactory": "jsx",               // these two make TypeScript check a fragment's children
-"jsxFragmentFactory": "Fragment"
-```
-
-**Solid versions.** `solid-yield` declares `solid-js` and `@solidjs/web` (and, for the no-JSX flavor, `@solidjs/h`) as peers at `^2.0.0-rc.11`. Today that range resolves to `2.0.0-rc.13`, the version everything here is tested on. `@solidjs/vite-plugin@3.0.0-next.47` needs rc.13 and Vite 8, and `typescript@~6.0` is pinned because `@typescript-eslint/parser` 8 does not support TypeScript 7.
-
-**Tests.** vitest with `environment: "jsdom"` (as in the config above) picks the library's client build; call `flush()` from `solid-js` between steps.
-
-The rest of the setup is in [getting-started.md](documentation/getting-started.md): mounting, flow controls, events and transactions, forms, and an app shell with a router.
+The rest of this README shows the explicit generator dialect. Its JSX settings
+apply to authored generator code, not to native source.
 
 ## What you can't write
 
@@ -259,14 +219,14 @@ const id = yield* props.id;                                                  // 
 [HANDOFF.md](HANDOFF.md#roadmap-and-compiler-checkpoint-2026-10-08-d-116) has the current order (D-116).
 
 - **v0.1, the library** (now): the runtime, the transform and the lint described here. It is waiting to be published to npm.
-- **v0.2:** bounded native sugar, the editor plugin and matching CLI check, including serialization-safe typed failures (D-115).
+- **v0.2:** bounded native sugar, the TS plugin and matching CLI check, including serialization-safe typed failures (D-115).
 - **Then:** a dashboard twin written as plain Solid.
 - **Then:** islands (server components with client slots) productized, subject to DOM parity and the purity trust model (D-114).
 - **Then:** the lazy builder, with descriptors that become live on first interaction, a step toward resumability without a new runtime.
 
 ## Status
 
-- **This is a design lab, and this is the strict dialect.** The compiler route is the ergonomic one. Here every read and write is spelled out, so each rule of the model can be checked and every awkward spot shows up as a finding.
+- **This is a design lab.** The examples below use the explicit dialect; the sugar/native section above describes the experimental plain-code route. Explicit reads and writes help expose the model's rules and limitations.
 - **What is stated:** [calculus.md](documentation/calculus.md) is a core calculus for the dialect. It states the soundness theorem the types claim ("the types say exactly what the runtime does"), and it traces each of its 52 proof obligations to the code and the tests that support it. The whole-dialect theorem is stated and supported by tests; the abstract core has the partial formal proofs described below.
 - **What is tested:** every commit is gated. The gate runs nine example twins (docs-yield, effect-yield, hackernews-spa-yield, rendering-yield, room-yield, sierpinski-yield, sierpinski-yield-h, todos-yield and todos-yield-h), which are real Solid apps rewritten in this dialect, checked for DOM parity against the originals step by step. It also renders the twins on the server and hydrates that output, runs a conformance suite against handwritten Solid, and runs the packages' type, runtime and lint tests.
 - **Decisions:** each rule comes with its alternatives and its reasoning in [DECISIONS.md](documentation/DECISIONS.md). Where the work stands, and how to work on the repository and run the gate, is in [HANDOFF.md](HANDOFF.md).

@@ -16,14 +16,14 @@ import { createRequire } from "node:module";
 import { dirname, resolve } from "node:path";
 import { parseProgram } from "./transform.js";
 import { lowerSugarProject } from "./sugar.js";
-import { inferFailures } from "../../compiler-yield/src/failure-inference.js";
+import { inferFailures } from "compiler-yield/failure-inference";
 import { nativeEntry } from "./native-entry.js";
 import { nativePrelude } from "./native-prelude.js";
 import { lowerNativeEffects } from "./native-effects.js";
 import { lowerNativeRecursion } from "./native-recursion.js";
 const t = babel.types;
 /** @typedef {import('@babel/core').NodePath<any>} Path */
-/** @typedef {{code:string,message:string,file:string,line:number,column:number}} Diagnostic */
+/** @typedef {{code:string,message:string,file:string,line:number,column:number,severity?:"error"|"warning"}} Diagnostic */
 /** @type {Readonly<Record<string,string|null>>} */
 export const nativeMapping = Object.freeze({
   action: "$event",
@@ -276,7 +276,7 @@ export function inspectNativeProject(files) {
         const api = imported(callee);
         if (api?.module !== "solid-js") return;
         if (
-          ["createSignal", "createStore", "createMemo"].includes(api.name) &&
+          /^create(Signal|Memo|Store|Optimistic|Projection)/.test(api.name) &&
           !q.getFunctionParent()
         )
           report(
@@ -289,6 +289,19 @@ export function inspectNativeProject(files) {
             q,
             "NATIVE_EFFECT_PHASES",
             "createEffect needs a tracked compute and an untracked effect phase."
+          );
+      },
+      ThrowStatement(q) {
+        if (
+          t.isStringLiteral(q.node.argument) ||
+          t.isNumericLiteral(q.node.argument) ||
+          t.isBooleanLiteral(q.node.argument) ||
+          t.isNullLiteral(q.node.argument)
+        )
+          report(
+            q,
+            "NATIVE_THROW",
+            "Throw an Error object so callers can identify and handle this failure."
           );
       },
       JSXSpreadAttribute(q) {
@@ -366,7 +379,6 @@ function surface(code, filename, modules, options = {}, foreignComponents = new 
     for (const ref of binding?.referencePaths ?? []) {
       if (ref.findParent(q => q.isTSType())) continue;
       if (ref.parentPath?.isMemberExpression() && ref.key === "object") continue;
-      if (ref.parentPath?.isCallExpression() && ref.key === "callee") continue;
       ref.replaceWith(t.callExpression(t.identifier(name), []));
     }
   };
@@ -488,7 +500,7 @@ function surface(code, filename, modules, options = {}, foreignComponents = new 
         fail(
           q,
           "NATIVE_PROPS",
-          "Destructured component parameters need a checked snapshot-versus-path mapping."
+          "Use a props parameter and read props.name where needed; destructuring loses reactive updates."
         );
       if (param?.typeAnnotation?.type === "TSTypeAnnotation") {
         const propsType = foreignComponents.has(name) ? "__NativeProps" : "Props";
@@ -552,11 +564,12 @@ function surface(code, filename, modules, options = {}, foreignComponents = new 
             target
           );
           if (local?.isFunction()) {
-            // A selected local component is a library root, where failures
-            // may propagate (D-033), rather than a foreign component handoff.
+            // Keep the library renderer, but native render/hydrate is a foreign
+            // handoff: residual failures (including unknown) must be empty.
+            needed.add("foreign");
             q.node.callee = t.identifier(`__native${api.name}`);
             needed.add(`__native${api.name}`);
-            q.node.arguments[0] = check;
+            q.node.arguments[0] = t.callExpression(t.identifier("foreign"), [check]);
           } else {
             needed.add("foreign");
             q.node.arguments[0] = t.callExpression(t.identifier("foreign"), [check]);
@@ -1130,6 +1143,7 @@ function lowerNativeProjectImpl(input, options = {}) {
     };
     if (source) visit(source);
   }
+  const sourceFailures = nativeFailures(files, options.compilerOptions);
   const prepared = nativePrelude(markOpaqueGenerators(selected));
   const failures = nativeFailures(prepared, options.compilerOptions, "marked");
   const effects = new Map(
@@ -1174,7 +1188,16 @@ function lowerNativeProjectImpl(input, options = {}) {
   return {
     ...lowered,
     files: unmarkOpaqueGenerators(lowered.files),
-    diagnostics: [...diagnostics, ...nativeForeignDiagnostics(files, options.compilerOptions)]
+    inference: sourceFailures,
+    diagnostics: [
+      ...diagnostics.map(d =>
+        d.code === "MODULE_STATE" ? { ...d, severity: /** @type {const} */ ("error") } : d
+      ),
+      ...sourceFailures.diagnostics
+        .filter(d => d.code !== "EVENT_REJECTS")
+        .map(d => ({ ...d, severity: /** @type {const} */ ("error") })),
+      ...nativeForeignDiagnostics(files, options.compilerOptions)
+    ]
   };
 }
 /** Foreign tags are recorded against authored positions, before intermediate
@@ -1214,7 +1237,7 @@ export function nativeForeignDiagnostics(files, options = {}) {
           return;
         diagnostics.push({
           code: "NATIVE_FOREIGN_BOUNDARY",
-          message: `${tag.toString()} (${api.name} from ${api.module}) stays Solid at this JSX boundary (provenance C; foreign failures unknown). Handle failures at the boundary. To bring it inside, use a core API or select its source with a checked contract.`,
+          message: `Handle failures inside ${tag.toString()} or its callbacks; this imported component (${api.name} from ${api.module}) is outside the native check.`,
           file,
           line: q.node.loc?.start.line ?? 1,
           column: (q.node.loc?.start.column ?? 0) + 1
@@ -1241,6 +1264,8 @@ export function lowerNativeFile(code, filename, include, cache, report) {
   if (entry?.signature !== signature) {
     const lowered = lowerNativeProject(files, { compilerOptions: parsed.options });
     entry = { signature, files: lowered.files };
+    const errors = lowered.diagnostics.filter(d => d.severity === "error");
+    if (errors.length) throw new NativeDiagnosticError(errors);
     for (const diagnostic of lowered.diagnostics) report?.(diagnostic);
     cache.set(configPath, entry);
   }

@@ -1,11 +1,33 @@
 #!/usr/bin/env node
 import assert from "node:assert/strict";
 import { join } from "node:path";
-import { readFileSync } from "node:fs";
-import { root, ts, generate } from "../examples/harness/native-hackernews/project.mjs";
+import { readFileSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
+import {
+  root,
+  ts,
+  generate,
+  authored,
+  materialize,
+  options
+} from "../examples/harness/native-hackernews/project.mjs";
 const step = process.argv[2] ?? "transform";
 assert.ok(["diagnostics", "transform", "typecheck", "lint"].includes(step));
 const dir = join(root, "packages/vite-plugin-yield/test/.native-generated", `hackernews-${step}`);
+if (step === "typecheck") {
+  materialize(dir, authored(true));
+  writeFileSync(
+    join(dir, "tsconfig.json"),
+    JSON.stringify({
+      compilerOptions: { ...options(dir), jsxImportSource: "@solidjs/web" },
+      include: ["**/*.ts", "**/*.tsx"]
+    })
+  );
+  const { check } = createRequire(import.meta.url)("../packages/ts-plugin-yield/src/cli.cjs");
+  assert.equal(check(dir, { mode: "native", include: ["**/*.ts", "**/*.tsx"] }), 0);
+  console.log("native Hacker News typecheck: PASS (CLI)");
+  process.exit(0);
+}
 const { result, program, generated } = generate(dir, step !== "diagnostics");
 const errors = ts.getPreEmitDiagnostics(program);
 const format = () =>

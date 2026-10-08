@@ -262,6 +262,17 @@ function seed(code, filename, native = false) {
               q.skip();
             },
             ReturnStatement(q) {
+              // Native throw lowering returns raise(), which never completes.
+              // It is a failure path, not a component return needing JSX.
+              const failureReturn = q.get("argument").isTSAsExpression()
+                ? q.get("argument.expression")
+                : q.get("argument");
+              if (
+                native &&
+                failureReturn.isCallExpression() &&
+                lib(failureReturn.get("callee")) === "raise"
+              )
+                return;
               if (!t.isJSXElement(q.node.argument) && !t.isJSXFragment(q.node.argument))
                 fail(
                   q,
@@ -432,13 +443,29 @@ function pass(code, filename, program, native = false) {
   /** @param {ts.Type | undefined} v */
   const sourceType = v => brand(v, "SOURCE") || brand(v, "CONTEXT");
   /** @param {ts.Type | undefined} v */
-  const isOperation = v =>
-    v &&
-    (brand(v, "EVENT_CALL") ||
-      brand(v, "COMPONENT") ||
-      ["Generator", "Yieldable", "Receipt", "View"].includes(
-        v.aliasSymbol?.name ?? v.symbol?.name
-      ));
+  const isOperation = v => {
+    if (!v) return false;
+    if (brand(v, "EVENT_CALL") || brand(v, "COMPONENT")) return true;
+    const kind = v.aliasSymbol?.name ?? v.symbol?.name;
+    if (native && kind === "Generator") {
+      const yields = checker.getTypeArguments(/** @type {ts.TypeReference} */ (v))[0];
+      // During reconstruction a routine's yield type can still be unknown.
+      // Only a proven plain data yield is excluded from delegation here.
+      /** @param {ts.Type} y */
+      const data = y =>
+        !!(
+          y.flags &
+          (ts.TypeFlags.StringLike |
+            ts.TypeFlags.NumberLike |
+            ts.TypeFlags.BooleanLike |
+            ts.TypeFlags.BigIntLike |
+            ts.TypeFlags.Null |
+            ts.TypeFlags.Undefined)
+        );
+      return !yields || !(yields.isUnion() ? yields.types : [yields]).every(data);
+    }
+    return ["Generator", "Yieldable", "Receipt", "View"].includes(kind);
+  };
   /** @param {Path} value */
   const handoff = value => {
     if (value.isCallExpression() && lib(value.get("callee")) === "foreign") return;

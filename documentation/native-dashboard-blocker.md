@@ -44,7 +44,7 @@ code because lowering stops before those checks.
 ## Diagnostics, verbatim
 
 ```text
-[NATIVE_FOREIGN_BOUNDARY] Router (createRouter from @solidjs/router) stays Solid at this JSX boundary (provenance C; foreign failures unknown). Handle failures at the boundary. To bring it inside, use a core API or select its source with a checked contract. (examples/originals/dashboard/src/app.tsx:92:9)
+[NATIVE_FOREIGN_BOUNDARY] Handle failures inside Router or its callbacks; this imported component (createRouter from @solidjs/router) is outside the native check. (examples/originals/dashboard/src/app.tsx:92:9)
 [SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (examples/originals/dashboard/src/panels.tsx:47:35)
 ```
 
@@ -72,13 +72,13 @@ The exact class identity for NotFound is in the JSON evidence.
 | --- | --- |
 | SummaryPanel | ChunkError, Error, unknown |
 | SeriesPanel | ChunkError, Error, unknown |
-| IncidentsPanel | ChunkError, Error, unknown |
+| IncidentsPanel | ChunkError, AckFailed, NotFound, Error, unknown |
 | TeamPanel | ChunkError, Error, unknown |
 | NotesPanel | Error, unknown |
-| Overview (route) | ChunkError, Error, unknown |
+| Overview (route) | ChunkError, AckFailed, NotFound, Error, unknown |
 | IncidentDetail (route) | ChunkError, NotFound, unknown |
 | IncidentBody | Error, unknown |
-| IncidentRow | unknown |
+| IncidentRow | ChunkError, AckFailed, NotFound, unknown |
 | App | Error, unknown |
 | FilterBar | Error, unknown |
 | FilterProvider, Panel, Shell | unknown |

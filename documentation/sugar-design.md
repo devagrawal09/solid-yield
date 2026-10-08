@@ -15,6 +15,21 @@ normalization described below. This is a working transform experiment, **not a
 finished TypeScript/editor integration**. Room is a second, harder source design,
 with remaining transform gaps recorded below; it is not a verified second twin.
 
+## Typing: implemented
+
+The `proto/sugar-ls` follow-up implements D-116's virtual-code route in
+[ts-plugin-solid-yield](../packages/ts-plugin-yield/README.md): the standard
+TypeScript language-service plugin and `pnpm solid-yield check <dir>` share the
+Vite native/sugar lowering and its composed generated-to-source position tables.
+The library's generated types remain the authority for pending, failures,
+may-wait and required contexts; the adapter maps and explains those errors.
+[The typing report](sugar-typing.md) records ten recoverable review slots at their
+offending authored lines, three component hovers, a real tsserver protocol test,
+and remaining limits. The two native original gate typechecks now use the CLI.
+Earlier “no editor plugin” and F-S2 statements below are historical checkpoints;
+editor UI behavior, full mapped editing features and Vite runtime sourcemap
+composition remain unverified or unimplemented as recorded in that report.
+
 ## 1. Surface
 
 A file opts in with `"use yield";` as its first directive, after optional comments.
@@ -448,8 +463,9 @@ working native apps or a replacement for the passing directive-sugar todos.
 
 The 2026-10-08 direction supersedes §1's authored library API and §3's open typing
 choice. **Virtual-code typing is decided. There is no compiler-owned color checker.**
-The editor plugin, value-facing hovers, source maps and related-location messages
-remain planned. This prototype runs ordinary TypeScript and the existing lint on
+At this historical checkpoint the editor plugin, hovers and related-location
+messages were planned. The TS plugin now implements these (see sugar-typing.md);
+composed runtime source maps remain incomplete. This prototype runs ordinary TypeScript and the existing lint on
 emitted library code. Those type/lint locations are still generated locations;
 only native preflight diagnostics currently use authored positions. A later
 SUGAR_* diagnostic can also refer to an intermediate position. We do not call
@@ -659,7 +675,16 @@ not silent fallbacks to native reactive state inside a library routine.
 | `action` (including generators), `createStore`, `createOptimistic`, `onSettled`, `latest`, `isPending` | `$event`, `$store`, `$optimistic`, `$effect`/`$cleanup`, `latestOf`/`isPendingOf` + read | Focused generated checks pass; see the API inventory for overload limits |
 | `createOptimisticStore`, `createProjection`, `refresh`, `until`, `lazy` | Corresponding library primitive imports | Import mapping implemented; producer, selector, generic and foreign-edge contracts remain incomplete |
 
-A selected local component passed to `render` or `hydrate` is a library root and uses the library renderer with `RootCheck`. Its unhandled failures may propagate at that root under D-033; `foreign` remains the checked adapter for imported entry handoffs. In a self-recursive component, fixed numeric prop snapshots may become path reads in holes when every local JSX caller supplies fixed numeric expressions; pure numeric assignments are substituted in source order, and an early JSX return selects `Match` rows that own their branch setup. Recursive component types carry the pending and failure types inferred from memo reads and prop edges, and generated TypeScript checks the full body against that type. Timer and frame callbacks retain the existing rule: reads and writes run as component-owned events, with their result ignored by the scheduler.
+A selected local component passed to native `render` or `hydrate` uses the library renderer with `RootCheck` and `foreign`. This entry is a foreign handoff: residual failures, including unknown, are errors. D-033 allows failures at explicit library roots, not at native Solid entry handoffs. In a self-recursive component, fixed numeric prop snapshots may become path reads in holes when every local JSX caller supplies fixed numeric expressions; pure numeric assignments are substituted in source order, and an early JSX return selects `Match` rows that own their branch setup. Recursive component types carry the pending and failure types inferred from memo reads and prop edges, and generated TypeScript checks the full body against that type. Timer and frame callbacks retain the existing rule: reads and writes run as component-owned events, with their result ignored by the scheduler.
+
+Native Todos now needs the D-116 two-half acceptance rule too. The unchanged
+original reports `EVENT_REJECTS` at `app.tsx:82` and `:121`: the bulk actions and
+the allCompleted argument read failing state before their API catches. The test
+copy uses `author-fix.mjs` to widen the two action catches and catch the argument
+read, returning false on failure. Its checker must be clean, the fallback is
+executed against a throwing state read, and client/hydrated/SSR parity remains
+against the byte-identical original. `native:todos:events:snapshot` is the added
+gate step; the existing typecheck stage checks the minimally edited copy.
 
 ### Failure inference
 
@@ -667,7 +692,7 @@ A selected local component passed to `render` or `hydrate` is a library root and
 still import only Solid. Failure inference supplies types to generated `raise`
 and `attempt`; it is not a second checker for component admission, pending,
 may-wait, requirements, or boundary discharge. Those remain generated TypeScript
-and the existing recommended lint. The editor/virtual-code plugin is planned.
+and the existing recommended lint. The TS plugin and matching CLI check virtual code and map diagnostics to native source; real editor UI remains unverified.
 
 `nativeFailures` reuses the compiler analyzer's parsed modules, scopes, module
 identities and directives. TypeScript resolves selected call targets, aliases,
@@ -687,14 +712,49 @@ purity from a familiar function name.
   declaration identity. Class unions add all members. Constructors, inherited
   constructors and instance field initializers also contribute their failures.
 - `throw e` with unknown/any, a string or an object literal adds `unknown`.
-  Unknown is accepted, not a transform refusal, and does not erase known members.
-- Direct rethrow of a catch binding retains the incoming set. A handling catch
-  removes it. Using the binding as unknown and rethrowing widens to `unknown`.
-  The analysis also covers Promise `.catch` and `try`/`await`; `finally` adds its
-  own failures. Synchronous catches now lower through `nativeTry`; handling,
-  direct rethrow and unknown rethrow pass generated TypeScript/lint. Ordinary
-  async I/O keeps JavaScript catch/await. Cross-loop control transfers and
-  returns from finally still need completion lowering (F-S21).
+  Unknown inferred failures are retained and do not erase known members; literal primitive throws are refused below.
+- Catch transfer follows the main proof audit's I3 rule: `E_out ⊇ (E \ G) ∪ H ∪ F`.
+  G includes only values consumed on every handler path; H includes handler failures
+  and F includes finalizer failures. Branches narrow a tracked, unmodified binding
+  at `instanceof`, and an early return ends that path. A base-class guard covers
+  its subclasses by the TS class hierarchy, never by structural assignability.
+  A sibling stays in the output. Partial/unguarded rethrows retain the incoming
+  class. Mutation widens the binding to unknown; unproved paths retain a safe
+  upper bound. Named Promise handlers conservatively keep the incoming set.
+- Unknown is top. A selective class guard leaves unknown; only a genuine
+  consuming catch-all at that position removes it, while keeping H/F. A promise
+  returned without await can reject after a synchronous catch has ended; its
+  rejection remains. Ordinary async I/O keeps native JavaScript completion, so
+  returning an Error is a value, not a replacement throw (F21).
+- Silent absorption is an author rule in addition to the failure-set rule:
+  `CATCH_SWALLOWS` flags empty, bare-return and logging-only catches when the input
+  may fail. Returning a fallback value or writing a fallback to state (including a member assignment) counts
+  as handling. Rethrowing keeps the failure. A comment `/* @yield-absorb: reason */`
+  inside the catch explicitly declares intentional absorption. The reviewer’s
+  `catch { return [] }` is legitimate handling and stays clean.
+- JSX event handlers (inline, named, async or returning a Promise) are checked
+  by projecting FAILS from their generated Bind operations, independently of
+  rendered boundaries. This uses the same library types as component admission,
+  including context-provided actions; it does not trust an unresolved source alias
+  as failure-free. `EVENT_REJECTS` is placed at the handler
+  if its inferred set is nonempty, even beneath Errored. Catch in the handler;
+  rendered Errored cannot handle a later event rejection. Native declaration of
+  an escaping event failure is not yet a supported author syntax; the explicit
+  dialect's event contract remains available outside native files.
+- Generators proved to yield plain primitive data stay JavaScript. During
+  reconstruction an unresolved generator yield type is conservatively treated
+  as a routine; arbitrary object/unknown data generators remain a precision gap. Module state is refused at its declaration with
+  `MODULE_STATE`. Unshadowed Promise construction and primitive-only resolve
+  callbacks are platform contracts; executor throws/reject calls still contribute.
+- Findings retained: synchronous nativeTry reconstruction can over-approximate a
+  selective rethrow, so generated typing may retain more failures than source
+  inference. Structural/external class witnesses and arbitrary alias/mutation
+  flow still need I1/I2/I4 proof (F16/F19). Literal primitive throws are refused
+  with `NATIVE_THROW`, including async helpers: this bounded refusal differs from
+  F21's fully admitted primitive-throw lowering; it never assigns them an empty
+  failure set. Selective Errored matching and transported prototype revival
+  remain F-S14/F-S15, despite D-116's requirement that the client restore them.
+  This change does not claim the unrestricted native theorem or wire equivalence.
 - A `"use server"` function's rejection set is its inferred set plus `ChunkError`
   (D-100). An async server producer wraps its rejection before serialization;
   its client call is generated behind `attempt` with that declared set. A
@@ -902,7 +962,8 @@ are settled. Remaining questions for Dev:
    may packages ship trusted `"use pure"`/failure summaries with a versioned
    contract? Class-ID stability needs the same build/version policy.
 
-The editor plugin remains planned, not built here.
+At this historical checkpoint the editor plugin was not built; sugar-typing.md
+records the later TS plugin implementation.
 
 ### Native verification and baseline
 
@@ -912,7 +973,7 @@ for 37 native fixtures (21 accepted), two strict foreign-edge probes, all nine
 original audits, counter SSR/hydration, the production failure-serialization
 control, six inference tests, and the existing library/plugin/analyzer/proof/twin
 checks. Generated failure adapters have four runtime unit tests and a server
-stream test. Native editor diagnostics remain unmapped; no editor plugin or
+stream test. At this historical checkpoint native editor diagnostics remained unmapped; no editor plugin or
 proof extension is claimed.
 
 **This update regenerated the baseline only to add one passing step:**

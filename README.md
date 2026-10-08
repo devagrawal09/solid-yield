@@ -256,12 +256,13 @@ const id = yield* props.id;                                                  // 
 
 ## Roadmap
 
-[compiler-c0.md](documentation/compiler-c0.md) has the plan.
+[HANDOFF.md](HANDOFF.md#roadmap-and-compiler-checkpoint-2026-10-08-d-116) has the current order (D-116).
 
 - **v0.1, the library** (now): the runtime, the transform and the lint described here. It is waiting to be published to npm.
-- **v0.2:** the next library release, including serialization-safe typed failures (D-115).
-- **v0.3, the lazy builder**: islands as descriptors that become live on first interaction, a step toward resumability without a new runtime.
-- **Candidate after v0.3:** server components (R emit) productized, subject to DOM parity and the purity trust model (D-114). Ergonomic sugar remains a later design item.
+- **v0.2:** bounded native sugar, the editor plugin and matching CLI check, including serialization-safe typed failures (D-115).
+- **Then:** a dashboard twin written as plain Solid.
+- **Then:** islands (server components with client slots) productized, subject to DOM parity and the purity trust model (D-114).
+- **Then:** the lazy builder, with descriptors that become live on first interaction, a step toward resumability without a new runtime.
 
 ## Status
 

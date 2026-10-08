@@ -1,5 +1,7 @@
 # Soak report
 
+The 2026-10-09 follow-up classification and fixes are recorded at the end of this report. The original measurements below are preserved.
+
 Recorded 2026-10-08T14:55:48.905Z. Node v24.18.0; development/jsdom; exposed GC; report only. Seed 109; 5 real minutes per twin; compare every 5 rounds plus round one.
 
 This report uses the permitted five-minute duration to fit the execution budget. The script defaults to ten minutes and supports sixty. Original and twin each keep one jsdom and one mounted app alive throughout the session. Both receive every action; checkpoints compare their DOM after each step.
@@ -175,3 +177,174 @@ Runtime counter source: `0c2c713`; final harness: `199e19e`; fixture base: `de12
 Evidence: [compact results](soak-report.json), [all per-round samples](soak-report-samples.json.gz).
 
 Validation before each local commit: `pnpm build` and the full baseline gate GREEN. Final gate: 46 PASS, 0 FAIL, 1 SKIP (manual soak), 331 seconds; no baseline regressions. Fit/seed unit checks: 3 PASS. The compressed archive was decompressed and its sample counts and heap fits matched the compact report.
+
+## Follow-up classification — 2026-10-09
+
+The interrupted work was coherent and was preserved in local commit `24ad415`
+(`wip(soak): preserve heap controls and Effect bridge investigation`) after a full
+green gate. No stash was needed. The bridge change was subsequently removed: it
+released an extra fiber but did not resolve the growing owner chain, which is
+also present in the plain-Solid original. No `packages/yield` runtime change is
+justified by these findings. The iterator behavior tests remain. Harness request-lifetime fixes and the bridge
+rollback are committed locally as `4bcb05d`.
+
+Each finding now has a fresh 200-round comparison of original, twin and no-op
+control, seed 109. F-K1 uses the three-step `[9, 10, 12]` failing-search loop;
+F-K2–K6 use their full seeded schedules. Heap snapshots were taken at rounds
+50/100/150 for F-K1 and 50/150 for the others. Both active apps received the same
+actions and preserved parity. Across these six runs: 4,264 step comparisons,
+zero differences, zero step failures, zero errors in all three workers, and
+zero owned root/boundary/routine/pending/event counts after twin disposal.
+
+Heap slopes below are KiB per round over rounds 101–200. The JSON also stores
+the standard fit after round five. This common later window avoids some module
+loading and GC effects, but does not eliminate all cache reclamation. Negative
+slopes reflect reclaimed process caches. The control runs fixture installation,
+command traffic, snapshots and GC with a no-op app; it does not create the active
+apps' navigation entries, network records or data. A small control slope alone
+cannot excuse a larger slope in an active app.
+
+| Finding | Twin | Original | Library twin | No-op control | Classification and action |
+| --- | --- | ---: | ---: | ---: | --- |
+| F-K1 | effect-yield | 44.529 | 54.167 | 0.191 | Shared Solid transition retention; twin fiber amplification. Recorded; bridge mitigation removed. |
+| F-K2 | hackernews-spa-yield | -9.375 | -8.835 | 0.635 | Harness mock results and navigation history. Fixed; no remaining positive heap trend. |
+| F-K3 | rendering-yield | 3.793 | 4.404 | 0.137 | Harness history fixed; remaining growth is shared compiled-code/cache noise below the material-growth rule. |
+| F-K4 | room-yield | 21.197 | 22.927 | 1.557 | Harness history and missing request abort context; both fixed. Bounded app messages recorded. |
+| F-K5 | todos-yield | 11.527 | 11.668 | 0.526 | Harness history fixed; shared Solid store retention remains. Recorded. |
+| F-K6 | todos-yield-h | 11.474 | 12.478 | 0.533 | Harness history fixed; shared Solid store retention remains. Recorded. |
+
+### F-K1 retaining path
+
+The strong path in the twin is:
+
+```text
+Solid module's transitions Set
+  -> queue._transition._optimisticNodes[]
+  -> node._queue (CollectionQueue)
+  -> _output._queue._error._value (TransientError)
+  -> error stack / CallSiteInfo
+  -> closure context.it (bridge iterator)
+  -> iterator.return.context.fiber (FiberRuntime)
+```
+
+Another path goes through `TransientError.error -> TransientNetworkError ->
+error stack -> FiberRuntime`. The original has the same transition, queue,
+native error and detached DOM path, without the typed `TransientError` wrapper.
+Immediate dominators place the queue and error above the retained fibers, rather
+than a live bridge fiber being the root of the leak. The capped string log is
+not the retaining owner. This is shared upstream Solid retention with additional
+fiber retention in the twin, not a retaining collection in `packages/yield`.
+
+Between rounds 50 and 100, each app adds 100 `CollectionQueue` objects and 600
+`SymbolTreeNode` objects. Between 50 and 150 those deltas double to 200 and 1,200.
+Original `FiberRuntime` counts rise by 50 then 100; twin counts by 100 then 200.
+The no-op control adds none of these queues or DOM objects. The earlier WIP
+mitigation removed the iterator's extra fiber reference, but the native error
+stack still retained fibers and both apps still grew. Per the original-comparison
+rule, that mitigation was removed and the shared behavior is recorded.
+
+### Harness fixes and other retained objects
+
+Before cleanup, Hacker News retains responses through
+`global.fetch.mock.settledResults[] -> value -> Response`, including response
+bodies. Its old 50–200 snapshot comparison adds 121 response objects. The fresh
+50–150 comparison has no response-count growth. Clearing all mocks at each
+sample releases call, result and settled-result records while preserving mock
+implementations. The 200-sample test checks all three arrays and continued use.
+
+jsdom also retains old navigation records through
+`window._sessionHistory._entries[]`. Old twin snapshot entry counts at rounds
+50/200 were Hacker News 752/3,002, rendering 351/1,401, room 151/601, and both
+todos variants 153/603. Samples now keep only the current entry, URL and state;
+within-round navigation still runs as authored. Every fresh sample has one
+history entry. A 200-round test verifies URL/state preservation and subsequent
+navigation. The helper explicitly checks jsdom's private layout. These are
+harness fixes, not app changes.
+
+Rendering's fresh snapshots add no `CollectionQueue`, `TargetShape` or DOM tree
+objects in either active app. The largest increases are V8 compiled-code and
+bytecode objects in both apps; the remaining fitted growth is below the report's
+material-growth rule. F-K2 and F-K3 are closed as harness findings, with residual
+process/JIT noise recorded rather than described as a library leak.
+
+Both todos originals and twins retain Solid store objects through an owned
+computation's closure context: `fam.overlaid -> Set -> TargetShape`. From 50 to
+150, F-K5 adds 399 original versus 400 twin shapes; F-K6 adds 399 versus 401.
+The no-op control adds none. This is shared Solid store retention after the
+harness history fix; it is recorded, not fixed in the yield runtime.
+
+Room's early snapshots add the same 100 store shapes and 594 DOM tree objects
+in both apps. The shapes are reachable from the room module's live
+`Map -> room.messages[] -> message` data, through the live-key store cache.
+Both originals and twins cap each room at 200 messages. The stored 1,797-round
+run was rechecked: its final 100 rounds have zero DOM slope in both apps and
+zero twin routine slope. The shorter 200-round growth is still filling that
+bounded buffer.
+
+The 1,200-round extension exposed a second harness bug after the data plateau:
+`room module -> rooms Map -> room.waiters Set -> wake -> promise reactions ->
+watchMembers -> AsyncGeneratorRequest`. Both apps add exactly 800 queued async
+generator requests and 1,400 promises between rounds 1,050 and 1,150, despite
+zero DOM and store-shape growth. The fake wire runs server bodies in a client
+context, where `getRequestEvent()` has no request; the source's `gone()` therefore
+returns no abort signal. Calling `return()` cannot finish a generator parked on
+its change notification. This is the test transport's missing request lifetime,
+not an app-source retaining behavior.
+
+The fixture now uses an asynchronous request context and aborts each streamed
+request on disconnect, reconnect and iterator return. A Vitest setup file
+supplies that request to both originals and twins. A 200-round regression checks
+that parked reads and finalizers finish, plus a reconnect check. The fixed
+1,200-round replay preserves parity and reports zero errors. Its rounds
+1,050–1,150 add **zero** async-generator requests, promises, store shapes or DOM
+objects in both apps, versus +800/+1,400 requests/promises before the fix.
+
+| F-K4 after request-lifetime fix | Original | Library twin | No-op control |
+| --- | ---: | ---: | ---: |
+| Heap KiB/round, rounds 1,101–1,200 | 0.283 | 0.126 | 0.020 |
+| DOM-node slope | 0 | 0 | 0 |
+| Routine slope | 0 | 0 | 0 |
+
+The post-fix heap slopes are within the noise allowance and near the no-op
+control. F-K4's harness retention is closed; its earlier DOM/routine rise is
+bounded application data. The six-row table above retains the initial
+200-round comparison, before this additional request-lifetime fix. Both
+1,200-round extensions and their samples are included in the follow-up evidence.
+The fixed long comparison is reproducible with:
+
+```sh
+SOAK_SNAPSHOT_ROUNDS=50,150,1050,1150 pnpm soak --only room-yield --rounds 1200 --minutes 10 --control yes --out /tmp/room-plateau.json
+```
+
+
+### Evidence and validation
+
+[Classification results](soak-classification.json) contain both fit windows,
+constructor count/self-byte changes, strong paths, immediate dominator chains,
+snapshot hashes, disposal counters and error totals.
+[Compressed follow-up samples](soak-classification-samples.json.gz) contain every
+round for all three workers. Full V8 snapshots remain local diagnostics under
+`/tmp/soak-final-*-raw/` and `/tmp/soak-fixed-room-raw/`; they are not checked in. The helper reports self bytes,
+not retained-size estimates, and excludes weak table shortcuts from paths.
+
+Reproduce the six short comparisons with the runner's `--rounds 200 --control yes`
+options, seed 109, and `SOAK_SNAPSHOT_ROUNDS=50,100,150`; use `--scenario switch`
+for F-K1. See the harness README for snapshot diff commands and the opt-outs
+`SOAK_CLEAR_MOCKS=0 SOAK_KEEP_HISTORY=1` for reproducing the old driver.
+
+Fixed: mock record retention, old jsdom navigation entries and fake-wire request
+aborts. Recorded: shared Solid transition/error/DOM retention (F-K1), bounded
+room data (F-K4), shared Solid store retention (F-K5/F-K6), and small process/code
+cache effects. No app-source or yield runtime memory change remains. No
+retaining collection in `packages/yield` was found, so no new library heap
+regression test was added. The gate includes deterministic heap-analysis and
+200-round harness cleanup tests, bridge behavior tests, and 200 parked-request
+closures/reconnect checks.
+
+The full baseline gate was GREEN before each local commit: WIP preservation
+47 PASS / 0 FAIL / 1 SKIP (154 seconds); harness fix 47 / 0 / 1 (123 seconds);
+report commit 47 / 0 / 1 (134 seconds). The sole SKIP is the manual report-only
+soak. All three full runs had no baseline regressions. Ordinary library builds
+were restored after every soak. The 10,800-sample archive was decompressed and
+its fits, error/parity totals, one-entry history samples and disposal counters
+were checked against the classification JSON. No commits were pushed.

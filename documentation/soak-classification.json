@@ -1,0 +1,1994 @@
+{
+  "date": "2026-10-08T21:14:55.399Z",
+  "base": "344ba4a",
+  "wip": "24ad415",
+  "node": "v24.18.0",
+  "seed": 109,
+  "rounds": 200,
+  "slopeWindow": "last 100 rounds",
+  "cleanup": {
+    "mockRecords": true,
+    "oldNavigationEntries": true
+  },
+  "runs": [
+    {
+      "finding": "F-K1",
+      "twin": "effect-yield",
+      "scenario": "switch",
+      "date": "2026-10-08T21:03:29.750Z",
+      "rounds": 200,
+      "elapsedSeconds": 11.644317334,
+      "parityCheckpoints": 41,
+      "parityStepChecks": 123,
+      "mismatches": 0,
+      "stepFailures": 0,
+      "infrastructureError": null,
+      "apps": {
+        "original": {
+          "heapKiBPerRound": 44.52865825645065,
+          "defaultHeapKiBPerRound": 37.47686691300231,
+          "domNodesPerRound": 0,
+          "errors": 0,
+          "afterDispose": {
+            "heap": 60651456,
+            "domNodes": 4
+          },
+          "snapshotDiff": {
+            "rounds": [
+              50,
+              150
+            ],
+            "constructorDelta": {
+              "object:SymbolTreeNode": {
+                "count": 1200,
+                "selfBytes": 115200
+              },
+              "object:CollectionQueue": {
+                "count": 200,
+                "selfBytes": 32000
+              },
+              "object:FiberRuntime": {
+                "count": 100,
+                "selfBytes": 20000
+              },
+              "object:TransientNetworkError": {
+                "count": 100,
+                "selfBytes": 6400
+              },
+              "object:TargetShape": {
+                "count": 0,
+                "selfBytes": 0
+              }
+            },
+            "selectedConstructor": "object:FiberRuntime",
+            "strongNewObjects": 105,
+            "dominatorChain": "FiberRuntime <- (root) <- TransientNetworkError <- Object <- CollectionQueue <- Object <- Array <- Object <- Object <- (root)",
+            "retainingPath": "(root).6 -> Node / Environment / Node / Environment.principal_realm -> Node / PrincipalRealm / Node / PrincipalRealm.base_object_list -> Node / BaseObjectList / Node / BaseObjectList.92 -> Node / ModuleWrap / Node / ModuleWrap.native_to_javascript -> ModuleWrap / ModuleWrap.2 -> system / SourceTextModule / system / SourceTextModule.6 -> (anonymous) / (root).47 -> system / Cell / system / Cell.value -> Set / Set.table -> (anonymous) / (root).5 -> Object / Object._transition -> Object / Object._optimisticNodes -> Array / Array.62 -> Object / Object._queue -> CollectionQueue / CollectionQueue._output -> Object / Object._queue -> CollectionQueue / CollectionQueue._error -> Object / Object._value -> TransientNetworkError / TransientNetworkError.<symbol> -> (anonymous) / (root).9 -> system / CallSiteInfo / system / CallSiteInfo.1 -> FiberRuntime",
+            "toRound100": {
+              "object:SymbolTreeNode": 600,
+              "object:CollectionQueue": 100,
+              "object:FiberRuntime": 50,
+              "object:TransientNetworkError": 50,
+              "object:TargetShape": 0
+            }
+          },
+          "topSnapshotGrowth": [
+            {
+              "name": "object:Object",
+              "count": 8100,
+              "selfBytes": 916000
+            },
+            {
+              "name": "array:",
+              "count": 4202,
+              "selfBytes": 560272
+            },
+            {
+              "name": "array:(object properties)",
+              "count": 2198,
+              "selfBytes": 389984
+            },
+            {
+              "name": "code:",
+              "count": 225,
+              "selfBytes": 368320
+            },
+            {
+              "name": "array:(object elements)",
+              "count": 2400,
+              "selfBytes": 249160
+            },
+            {
+              "name": "object:Array",
+              "count": 6800,
+              "selfBytes": 217600
+            }
+          ],
+          "snapshotFiles": [
+            {
+              "name": "effect-yield-original-samples.jsonl-round-50.heapsnapshot",
+              "bytes": 47154655,
+              "sha256": "1da8eb0e2015acddac34768b5173d97fb09b26cd88470e0a9bb1069fb8cbf3cc"
+            },
+            {
+              "name": "effect-yield-original-samples.jsonl-round-150.heapsnapshot",
+              "bytes": 52841850,
+              "sha256": "4e9e39f8907cdd83c1b390c2996da666f5f683589a9961f86134e03d2596240e"
+            }
+          ]
+        },
+        "twin": {
+          "heapKiBPerRound": 54.16722964483947,
+          "defaultHeapKiBPerRound": 47.282618265387065,
+          "domNodesPerRound": 0,
+          "errors": 0,
+          "afterDispose": {
+            "roots": 0,
+            "boundaries": 0,
+            "routines": 0,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0,
+            "heap": 63908024,
+            "domNodes": 4
+          },
+          "snapshotDiff": {
+            "rounds": [
+              50,
+              150
+            ],
+            "constructorDelta": {
+              "object:SymbolTreeNode": {
+                "count": 1200,
+                "selfBytes": 115200
+              },
+              "object:FiberRuntime": {
+                "count": 200,
+                "selfBytes": 40000
+              },
+              "object:CollectionQueue": {
+                "count": 200,
+                "selfBytes": 32000
+              },
+              "object:TransientError": {
+                "count": 100,
+                "selfBytes": 8800
+              },
+              "object:TransientNetworkError": {
+                "count": 100,
+                "selfBytes": 6400
+              },
+              "object:TargetShape": {
+                "count": 0,
+                "selfBytes": 0
+              }
+            },
+            "selectedConstructor": "object:FiberRuntime",
+            "strongNewObjects": 204,
+            "dominatorChain": "FiberRuntime <- (root) <- TransientNetworkError <- TransientError <- Object <- CollectionQueue <- Object <- Array <- Object <- Object <- (root)",
+            "retainingPath": "(root).6 -> Node / Environment / Node / Environment.principal_realm -> Node / PrincipalRealm / Node / PrincipalRealm.base_object_list -> Node / BaseObjectList / Node / BaseObjectList.92 -> Node / ModuleWrap / Node / ModuleWrap.native_to_javascript -> ModuleWrap / ModuleWrap.2 -> system / SourceTextModule / system / SourceTextModule.6 -> (anonymous) / (root).47 -> system / Cell / system / Cell.value -> Set / Set.table -> (anonymous) / (root).5 -> Object / Object._transition -> Object / Object._optimisticNodes -> Array / Array.51 -> Object / Object._queue -> CollectionQueue / CollectionQueue._output -> Object / Object._queue -> CollectionQueue / CollectionQueue._error -> Object / Object._value -> TransientError / TransientError.error -> TransientNetworkError / TransientNetworkError.<symbol> -> (anonymous) / (root).9 -> system / CallSiteInfo / system / CallSiteInfo.1 -> FiberRuntime",
+            "toRound100": {
+              "object:SymbolTreeNode": 600,
+              "object:FiberRuntime": 100,
+              "object:CollectionQueue": 100,
+              "object:TransientError": 50,
+              "object:TransientNetworkError": 50,
+              "object:TargetShape": 0
+            }
+          },
+          "topSnapshotGrowth": [
+            {
+              "name": "object:Object",
+              "count": 9400,
+              "selfBytes": 1021600
+            },
+            {
+              "name": "array:",
+              "count": 4502,
+              "selfBytes": 599216
+            },
+            {
+              "name": "closure:",
+              "count": 7500,
+              "selfBytes": 424000
+            },
+            {
+              "name": "object:system / Context",
+              "count": 8400,
+              "selfBytes": 376800
+            },
+            {
+              "name": "code:",
+              "count": 228,
+              "selfBytes": 371168
+            },
+            {
+              "name": "array:(object properties)",
+              "count": 2198,
+              "selfBytes": 370784
+            }
+          ],
+          "snapshotFiles": [
+            {
+              "name": "effect-yield-twin-samples.jsonl-round-50.heapsnapshot",
+              "bytes": 48596728,
+              "sha256": "2d118171fdecea6c8a00a8ca22f3621c16c978a8b3d704db57c179dbc492c4a2"
+            },
+            {
+              "name": "effect-yield-twin-samples.jsonl-round-150.heapsnapshot",
+              "bytes": 56226723,
+              "sha256": "8f2c8a76e944a3d5a6c8cf0dd96eac37d66641791fbfb9689309bf44b52135a6"
+            }
+          ]
+        },
+        "control": {
+          "heapKiBPerRound": 0.19080548679867987,
+          "defaultHeapKiBPerRound": -10.727362172069464,
+          "domNodesPerRound": 0,
+          "errors": 0,
+          "afterDispose": {
+            "heap": 29062784,
+            "domNodes": 4
+          },
+          "snapshotDiff": {
+            "rounds": [
+              50,
+              150
+            ],
+            "constructorDelta": {
+              "object:SymbolTreeNode": {
+                "count": 0,
+                "selfBytes": 0
+              }
+            },
+            "selectedConstructor": "object:FiberRuntime",
+            "strongNewObjects": 0,
+            "dominatorChain": null,
+            "retainingPath": null,
+            "toRound100": {
+              "object:SymbolTreeNode": 0
+            }
+          },
+          "topSnapshotGrowth": [
+            {
+              "name": "code:",
+              "count": 30,
+              "selfBytes": 43552
+            },
+            {
+              "name": "code:system / TrustedByteArray",
+              "count": 78,
+              "selfBytes": 19328
+            },
+            {
+              "name": "code:system / ProtectedFixedArray",
+              "count": 30,
+              "selfBytes": 11736
+            },
+            {
+              "name": "hidden:system / WeakArrayList",
+              "count": 53,
+              "selfBytes": 6200
+            },
+            {
+              "name": "code:system / TrustedWeakFixedArray",
+              "count": 30,
+              "selfBytes": 2808
+            },
+            {
+              "name": "code:(code)",
+              "count": 30,
+              "selfBytes": 2640
+            }
+          ],
+          "snapshotFiles": [
+            {
+              "name": "effect-yield-control-samples.jsonl-round-50.heapsnapshot",
+              "bytes": 26301431,
+              "sha256": "63381e6796896807cbe44c1b11e6f3ae9a808b188f27b95ac3d50c5be3588c86"
+            },
+            {
+              "name": "effect-yield-control-samples.jsonl-round-150.heapsnapshot",
+              "bytes": 26329326,
+              "sha256": "96c79dd3ab997aebdff64863d76a41d85bbaa97e9a521a71df37d04435589fd0"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "finding": "F-K2",
+      "twin": "hackernews-spa-yield",
+      "scenario": "all",
+      "date": "2026-10-08T20:56:23.371Z",
+      "rounds": 200,
+      "elapsedSeconds": 98.75494466600001,
+      "parityCheckpoints": 41,
+      "parityStepChecks": 779,
+      "mismatches": 0,
+      "stepFailures": 0,
+      "infrastructureError": null,
+      "apps": {
+        "original": {
+          "heapKiBPerRound": -9.375147577257726,
+          "defaultHeapKiBPerRound": -16.321773280337133,
+          "domNodesPerRound": 0,
+          "errors": 0,
+          "afterDispose": {
+            "heap": 61606312,
+            "domNodes": 4
+          },
+          "snapshotDiff": {
+            "rounds": [
+              50,
+              150
+            ],
+            "constructorDelta": {
+              "object:CollectionQueue": {
+                "count": 0,
+                "selfBytes": 0
+              },
+              "object:SymbolTreeNode": {
+                "count": -2,
+                "selfBytes": -192
+              }
+            },
+            "selectedConstructor": "object:_Response",
+            "strongNewObjects": 0,
+            "dominatorChain": null,
+            "retainingPath": null
+          },
+          "topSnapshotGrowth": [
+            {
+              "name": "code:",
+              "count": 146,
+              "selfBytes": 211744
+            },
+            {
+              "name": "hidden:system / WeakArrayList",
+              "count": 218,
+              "selfBytes": 102656
+            },
+            {
+              "name": "code:system / ProtectedFixedArray",
+              "count": 146,
+              "selfBytes": 68816
+            },
+            {
+              "name": "code:system / UncompiledDataWithoutPreparseData",
+              "count": 1818,
+              "selfBytes": 43632
+            },
+            {
+              "name": "code:system / TrustedWeakFixedArray",
+              "count": 146,
+              "selfBytes": 13344
+            },
+            {
+              "name": "code:(code)",
+              "count": 146,
+              "selfBytes": 12848
+            }
+          ],
+          "snapshotFiles": [
+            {
+              "name": "hackernews-spa-yield-original-samples.jsonl-round-50.heapsnapshot",
+              "bytes": 38599986,
+              "sha256": "8024e573a489519e9455a7fafedcb427d4a1726dacdfb56afc83cfe15aef93c8"
+            },
+            {
+              "name": "hackernews-spa-yield-original-samples.jsonl-round-150.heapsnapshot",
+              "bytes": 38021201,
+              "sha256": "bc25a0cc9090c9381830e41cc85ec186c7449dc5637fb0f93f48da6c231ff12e"
+            }
+          ]
+        },
+        "twin": {
+          "heapKiBPerRound": -8.834948010426045,
+          "defaultHeapKiBPerRound": -15.067439289355708,
+          "domNodesPerRound": 0,
+          "errors": 0,
+          "afterDispose": {
+            "roots": 0,
+            "boundaries": 0,
+            "routines": 0,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0,
+            "heap": 63177856,
+            "domNodes": 4
+          },
+          "snapshotDiff": {
+            "rounds": [
+              50,
+              150
+            ],
+            "constructorDelta": {
+              "object:CollectionQueue": {
+                "count": 0,
+                "selfBytes": 0
+              },
+              "object:SymbolTreeNode": {
+                "count": -2,
+                "selfBytes": -192
+              }
+            },
+            "selectedConstructor": "object:_Response",
+            "strongNewObjects": 0,
+            "dominatorChain": null,
+            "retainingPath": null
+          },
+          "topSnapshotGrowth": [
+            {
+              "name": "code:",
+              "count": 183,
+              "selfBytes": 262336
+            },
+            {
+              "name": "hidden:system / WeakArrayList",
+              "count": 226,
+              "selfBytes": 120144
+            },
+            {
+              "name": "code:system / ProtectedFixedArray",
+              "count": 183,
+              "selfBytes": 81936
+            },
+            {
+              "name": "code:system / UncompiledDataWithoutPreparseData",
+              "count": 1818,
+              "selfBytes": 43632
+            },
+            {
+              "name": "code:(code)",
+              "count": 183,
+              "selfBytes": 16104
+            },
+            {
+              "name": "code:system / TrustedWeakFixedArray",
+              "count": 183,
+              "selfBytes": 15400
+            }
+          ],
+          "snapshotFiles": [
+            {
+              "name": "hackernews-spa-yield-twin-samples.jsonl-round-50.heapsnapshot",
+              "bytes": 39270975,
+              "sha256": "0883a91be08b65c33f31308ac1d63bc7a0db3b949c739f8baa807a7a76a30420"
+            },
+            {
+              "name": "hackernews-spa-yield-twin-samples.jsonl-round-150.heapsnapshot",
+              "bytes": 38739304,
+              "sha256": "0227bbb3f8a5c68b240d88e3a5435922c96ff845690f643906ecdefe2bb62c37"
+            }
+          ]
+        },
+        "control": {
+          "heapKiBPerRound": 0.6346839840234023,
+          "defaultHeapKiBPerRound": -10.682987945872243,
+          "domNodesPerRound": 0,
+          "errors": 0,
+          "afterDispose": {
+            "heap": 29338600,
+            "domNodes": 4
+          },
+          "snapshotDiff": {
+            "rounds": [
+              50,
+              150
+            ],
+            "constructorDelta": {
+              "object:SymbolTreeNode": {
+                "count": 0,
+                "selfBytes": 0
+              }
+            },
+            "selectedConstructor": "object:_Response",
+            "strongNewObjects": 0,
+            "dominatorChain": null,
+            "retainingPath": null
+          },
+          "topSnapshotGrowth": [
+            {
+              "name": "code:",
+              "count": 42,
+              "selfBytes": 42048
+            },
+            {
+              "name": "code:system / TrustedByteArray",
+              "count": 106,
+              "selfBytes": 18624
+            },
+            {
+              "name": "code:system / ProtectedFixedArray",
+              "count": 42,
+              "selfBytes": 12432
+            },
+            {
+              "name": "hidden:system / WeakArrayList",
+              "count": 66,
+              "selfBytes": 7184
+            },
+            {
+              "name": "code:(code)",
+              "count": 42,
+              "selfBytes": 3696
+            },
+            {
+              "name": "code:system / TrustedWeakFixedArray",
+              "count": 42,
+              "selfBytes": 2880
+            }
+          ],
+          "snapshotFiles": [
+            {
+              "name": "hackernews-spa-yield-control-samples.jsonl-round-50.heapsnapshot",
+              "bytes": 26376976,
+              "sha256": "4e97df358b1f2bd03d75009278706ac7a26ebdce8bccbf39cfb6e887ffb7029b"
+            },
+            {
+              "name": "hackernews-spa-yield-control-samples.jsonl-round-150.heapsnapshot",
+              "bytes": 26412012,
+              "sha256": "c13625e3e6b4ac4ec43892aee8f601bdedbe835e2a01d964f1bf59d4334d9e8b"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "finding": "F-K3",
+      "twin": "rendering-yield",
+      "scenario": "all",
+      "date": "2026-10-08T20:58:09.294Z",
+      "rounds": 200,
+      "elapsedSeconds": 220.230643625,
+      "parityCheckpoints": 41,
+      "parityStepChecks": 1107,
+      "mismatches": 0,
+      "stepFailures": 0,
+      "infrastructureError": null,
+      "apps": {
+        "original": {
+          "heapKiBPerRound": 3.7930327407740774,
+          "defaultHeapKiBPerRound": -4.207814712671349,
+          "domNodesPerRound": 0,
+          "errors": 0,
+          "afterDispose": {
+            "heap": 37073456,
+            "domNodes": 4
+          },
+          "snapshotDiff": {
+            "rounds": [
+              50,
+              150
+            ],
+            "constructorDelta": {
+              "object:SymbolTreeNode": {
+                "count": 0,
+                "selfBytes": 0
+              },
+              "object:CollectionQueue": {
+                "count": 0,
+                "selfBytes": 0
+              },
+              "object:TargetShape": {
+                "count": 0,
+                "selfBytes": 0
+              }
+            },
+            "selectedConstructor": "object:_Response",
+            "strongNewObjects": 0,
+            "dominatorChain": null,
+            "retainingPath": null
+          },
+          "topSnapshotGrowth": [
+            {
+              "name": "code:",
+              "count": 170,
+              "selfBytes": 263584
+            },
+            {
+              "name": "code:system / TrustedByteArray",
+              "count": 523,
+              "selfBytes": 165376
+            },
+            {
+              "name": "hidden:system / WeakArrayList",
+              "count": 125,
+              "selfBytes": 93104
+            },
+            {
+              "name": "code:system / ProtectedFixedArray",
+              "count": 170,
+              "selfBytes": 82040
+            },
+            {
+              "name": "code:system / TrustedWeakFixedArray",
+              "count": 170,
+              "selfBytes": 16560
+            },
+            {
+              "name": "code:(code)",
+              "count": 170,
+              "selfBytes": 14960
+            }
+          ],
+          "snapshotFiles": [
+            {
+              "name": "rendering-yield-original-samples.jsonl-round-50.heapsnapshot",
+              "bytes": 30741637,
+              "sha256": "6bf7d40dd0659338d767891fabbc79f8be8db6970b88ed200c8087eba340efb5"
+            },
+            {
+              "name": "rendering-yield-original-samples.jsonl-round-150.heapsnapshot",
+              "bytes": 30913932,
+              "sha256": "1fdfb8e78386a124f9b661d38016d02e488bbb1ef49a9418a50143f4cd9be81f"
+            }
+          ]
+        },
+        "twin": {
+          "heapKiBPerRound": 4.404162541254125,
+          "defaultHeapKiBPerRound": -3.305066410485675,
+          "domNodesPerRound": 0,
+          "errors": 0,
+          "afterDispose": {
+            "roots": 0,
+            "boundaries": 0,
+            "routines": 0,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0,
+            "heap": 38977088,
+            "domNodes": 4
+          },
+          "snapshotDiff": {
+            "rounds": [
+              50,
+              150
+            ],
+            "constructorDelta": {
+              "object:SymbolTreeNode": {
+                "count": 0,
+                "selfBytes": 0
+              },
+              "object:CollectionQueue": {
+                "count": 0,
+                "selfBytes": 0
+              },
+              "object:TargetShape": {
+                "count": 0,
+                "selfBytes": 0
+              }
+            },
+            "selectedConstructor": "object:_Response",
+            "strongNewObjects": 0,
+            "dominatorChain": null,
+            "retainingPath": null
+          },
+          "topSnapshotGrowth": [
+            {
+              "name": "code:",
+              "count": 186,
+              "selfBytes": 329216
+            },
+            {
+              "name": "code:system / TrustedByteArray",
+              "count": 572,
+              "selfBytes": 192864
+            },
+            {
+              "name": "code:system / ProtectedFixedArray",
+              "count": 186,
+              "selfBytes": 97608
+            },
+            {
+              "name": "hidden:system / WeakArrayList",
+              "count": 162,
+              "selfBytes": 96832
+            },
+            {
+              "name": "code:system / TrustedWeakFixedArray",
+              "count": 186,
+              "selfBytes": 18368
+            },
+            {
+              "name": "code:(code)",
+              "count": 186,
+              "selfBytes": 16368
+            }
+          ],
+          "snapshotFiles": [
+            {
+              "name": "rendering-yield-twin-samples.jsonl-round-50.heapsnapshot",
+              "bytes": 31314358,
+              "sha256": "49f1ad9778e07ee666c525872e32e172ad194a89d0b1379fb89a4462010b64a9"
+            },
+            {
+              "name": "rendering-yield-twin-samples.jsonl-round-150.heapsnapshot",
+              "bytes": 31535583,
+              "sha256": "a37cc3733f10cc4dfe5275bc46f2b292ce867cc9e98583fcfa4e92c3fcff8f86"
+            }
+          ]
+        },
+        "control": {
+          "heapKiBPerRound": 0.13725828832883288,
+          "defaultHeapKiBPerRound": -10.962839221483597,
+          "domNodesPerRound": 0,
+          "errors": 0,
+          "afterDispose": {
+            "heap": 29414232,
+            "domNodes": 4
+          },
+          "snapshotDiff": {
+            "rounds": [
+              50,
+              150
+            ],
+            "constructorDelta": {
+              "object:SymbolTreeNode": {
+                "count": 0,
+                "selfBytes": 0
+              }
+            },
+            "selectedConstructor": "object:_Response",
+            "strongNewObjects": 0,
+            "dominatorChain": null,
+            "retainingPath": null
+          },
+          "topSnapshotGrowth": [
+            {
+              "name": "code:",
+              "count": 21,
+              "selfBytes": 17152
+            },
+            {
+              "name": "code:system / TrustedByteArray",
+              "count": 68,
+              "selfBytes": 14232
+            },
+            {
+              "name": "code:system / ProtectedFixedArray",
+              "count": 21,
+              "selfBytes": 7152
+            },
+            {
+              "name": "hidden:system / WeakArrayList",
+              "count": 23,
+              "selfBytes": 4376
+            },
+            {
+              "name": "code:system / TrustedWeakFixedArray",
+              "count": 21,
+              "selfBytes": 1856
+            },
+            {
+              "name": "code:(code)",
+              "count": 21,
+              "selfBytes": 1848
+            }
+          ],
+          "snapshotFiles": [
+            {
+              "name": "rendering-yield-control-samples.jsonl-round-50.heapsnapshot",
+              "bytes": 26530924,
+              "sha256": "f087cd1539d818f6e64f9cd018015df700b3376afd015b36a676abbfc4764cb9"
+            },
+            {
+              "name": "rendering-yield-control-samples.jsonl-round-150.heapsnapshot",
+              "bytes": 26549360,
+              "sha256": "f573e55c85b7460d4f9ed8f4bce7e983d78759beb0ccfc3ef16ae8b71d915207"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "finding": "F-K4",
+      "twin": "room-yield",
+      "scenario": "all",
+      "date": "2026-10-08T21:01:55.720Z",
+      "rounds": 200,
+      "elapsedSeconds": 30.630929875,
+      "parityCheckpoints": 41,
+      "parityStepChecks": 697,
+      "mismatches": 0,
+      "stepFailures": 0,
+      "infrastructureError": null,
+      "apps": {
+        "original": {
+          "heapKiBPerRound": 21.196595831458147,
+          "defaultHeapKiBPerRound": 12.92100520521452,
+          "domNodesPerRound": 3.492733273327332,
+          "errors": 0,
+          "afterDispose": {
+            "heap": 44583768,
+            "domNodes": 4
+          },
+          "snapshotDiff": {
+            "rounds": [
+              50,
+              150
+            ],
+            "constructorDelta": {
+              "object:SymbolTreeNode": {
+                "count": 594,
+                "selfBytes": 57024
+              },
+              "object:TargetShape": {
+                "count": 100,
+                "selfBytes": 21600
+              },
+              "object:CollectionQueue": {
+                "count": 0,
+                "selfBytes": 0
+              }
+            },
+            "selectedConstructor": "object:TargetShape",
+            "strongNewObjects": 100,
+            "dominatorChain": "TargetShape <- (root)",
+            "retainingPath": "(root).2 -> global / global.__vitest_worker__ -> Object / Object.evaluatedModules -> VitestEvaluatedModules / VitestEvaluatedModules.urlToIdModuleMap -> Map / Map.table -> (anonymous) / (root).147 -> EvaluatedModuleNode / EvaluatedModuleNode.exports -> Module / Module.get delay -> (anonymous) / (root).context -> system / Context / system / Context.0 -> Map / Map.table -> (anonymous) / (root).6 -> Object / Object.messages -> Array / Array.24 -> Object / Object.1 / part of key (Object @719865) -> value (TargetShape @719761) pair in WeakMap (table @720789) -> TargetShape"
+          },
+          "topSnapshotGrowth": [
+            {
+              "name": "code:",
+              "count": 189,
+              "selfBytes": 279680
+            },
+            {
+              "name": "array:",
+              "count": 1860,
+              "selfBytes": 279184
+            },
+            {
+              "name": "object:Object",
+              "count": 2896,
+              "selfBytes": 255384
+            },
+            {
+              "name": "code:system / TrustedByteArray",
+              "count": 610,
+              "selfBytes": 179064
+            },
+            {
+              "name": "array:(object properties)",
+              "count": 963,
+              "selfBytes": 163392
+            },
+            {
+              "name": "closure:",
+              "count": 2851,
+              "selfBytes": 159656
+            }
+          ],
+          "snapshotFiles": [
+            {
+              "name": "room-yield-original-samples.jsonl-round-50.heapsnapshot",
+              "bytes": 32036421,
+              "sha256": "472ec23248dec4d3f0c4a455e2c08351b0c48100f52bd287204a352256bd30af"
+            },
+            {
+              "name": "room-yield-original-samples.jsonl-round-150.heapsnapshot",
+              "bytes": 34341878,
+              "sha256": "fbc1ab15972c064e6fc81a57b20d4019e2043060dff40204e2fcb219dace6a6d"
+            }
+          ]
+        },
+        "twin": {
+          "heapKiBPerRound": 22.926573704245424,
+          "defaultHeapKiBPerRound": 14.742773617674665,
+          "domNodesPerRound": 3.492733273327332,
+          "errors": 0,
+          "afterDispose": {
+            "roots": 0,
+            "boundaries": 0,
+            "routines": 0,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0,
+            "heap": 46242440,
+            "domNodes": 4
+          },
+          "snapshotDiff": {
+            "rounds": [
+              50,
+              150
+            ],
+            "constructorDelta": {
+              "object:SymbolTreeNode": {
+                "count": 594,
+                "selfBytes": 57024
+              },
+              "object:TargetShape": {
+                "count": 100,
+                "selfBytes": 21600
+              },
+              "object:CollectionQueue": {
+                "count": 0,
+                "selfBytes": 0
+              }
+            },
+            "selectedConstructor": "object:TargetShape",
+            "strongNewObjects": 101,
+            "dominatorChain": "TargetShape <- (root)",
+            "retainingPath": "(root).2 -> global / global.__vitest_worker__ -> Object / Object.evaluatedModules -> VitestEvaluatedModules / VitestEvaluatedModules.urlToIdModuleMap -> Map / Map.table -> (anonymous) / (root).156 -> EvaluatedModuleNode / EvaluatedModuleNode.exports -> Module / Module.get membersOf -> (anonymous) / (root).context -> system / Context / system / Context.0 -> Map / Map.table -> (anonymous) / (root).6 -> Object / Object.messages -> Array / Array.24 -> Object / Object.1 / part of key (Object @735363) -> value (TargetShape @735361) pair in WeakMap (table @736095) -> TargetShape"
+          },
+          "topSnapshotGrowth": [
+            {
+              "name": "code:",
+              "count": 192,
+              "selfBytes": 335008
+            },
+            {
+              "name": "object:Object",
+              "count": 3274,
+              "selfBytes": 295992
+            },
+            {
+              "name": "array:",
+              "count": 1860,
+              "selfBytes": 279184
+            },
+            {
+              "name": "code:system / TrustedByteArray",
+              "count": 631,
+              "selfBytes": 212608
+            },
+            {
+              "name": "closure:",
+              "count": 2905,
+              "selfBytes": 162680
+            },
+            {
+              "name": "array:(object properties)",
+              "count": 963,
+              "selfBytes": 158016
+            }
+          ],
+          "snapshotFiles": [
+            {
+              "name": "room-yield-twin-samples.jsonl-round-50.heapsnapshot",
+              "bytes": 32624615,
+              "sha256": "73457d7193c05fb32d324e8b2ce4a8d7f707ae68cb3fbd3a72727f33378f8592"
+            },
+            {
+              "name": "room-yield-twin-samples.jsonl-round-150.heapsnapshot",
+              "bytes": 35070689,
+              "sha256": "ead1e60216323878b8c60373b49a7c88db8defa025942dd5867a9e74ee16f22a"
+            }
+          ]
+        },
+        "control": {
+          "heapKiBPerRound": 1.5566909972247225,
+          "defaultHeapKiBPerRound": -10.051169011171066,
+          "domNodesPerRound": 0,
+          "errors": 0,
+          "afterDispose": {
+            "heap": 29547112,
+            "domNodes": 4
+          },
+          "snapshotDiff": {
+            "rounds": [
+              50,
+              150
+            ],
+            "constructorDelta": {
+              "object:SymbolTreeNode": {
+                "count": 0,
+                "selfBytes": 0
+              }
+            },
+            "selectedConstructor": "object:TargetShape",
+            "strongNewObjects": 0,
+            "dominatorChain": null,
+            "retainingPath": null
+          },
+          "topSnapshotGrowth": [
+            {
+              "name": "code:",
+              "count": 64,
+              "selfBytes": 79680
+            },
+            {
+              "name": "code:system / TrustedByteArray",
+              "count": 155,
+              "selfBytes": 35792
+            },
+            {
+              "name": "code:system / ProtectedFixedArray",
+              "count": 64,
+              "selfBytes": 22792
+            },
+            {
+              "name": "hidden:system / WeakArrayList",
+              "count": 88,
+              "selfBytes": 9440
+            },
+            {
+              "name": "code:(code)",
+              "count": 64,
+              "selfBytes": 5632
+            },
+            {
+              "name": "code:system / TrustedWeakFixedArray",
+              "count": 64,
+              "selfBytes": 4592
+            }
+          ],
+          "snapshotFiles": [
+            {
+              "name": "room-yield-control-samples.jsonl-round-50.heapsnapshot",
+              "bytes": 26512564,
+              "sha256": "9c6ef979b67cb0c9bd0708bd77cdfdf9e36150b458260ef837600c2aca96e1c5"
+            },
+            {
+              "name": "room-yield-control-samples.jsonl-round-150.heapsnapshot",
+              "bytes": 26566027,
+              "sha256": "3d8b6aa048517e00425b28ee7e6545c7b0914c4264f04726c92bde34a4f6f276"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "finding": "F-K5",
+      "twin": "todos-yield",
+      "scenario": "all",
+      "date": "2026-10-08T21:02:34.163Z",
+      "rounds": 200,
+      "elapsedSeconds": 24.575584708999997,
+      "parityCheckpoints": 41,
+      "parityStepChecks": 779,
+      "mismatches": 0,
+      "stepFailures": 0,
+      "infrastructureError": null,
+      "apps": {
+        "original": {
+          "heapKiBPerRound": 11.526683027677766,
+          "defaultHeapKiBPerRound": 2.813246201285827,
+          "domNodesPerRound": 0,
+          "errors": 0,
+          "afterDispose": {
+            "heap": 36795920,
+            "domNodes": 4
+          },
+          "snapshotDiff": {
+            "rounds": [
+              50,
+              150
+            ],
+            "constructorDelta": {
+              "object:TargetShape": {
+                "count": 399,
+                "selfBytes": 86184
+              },
+              "object:SymbolTreeNode": {
+                "count": 9,
+                "selfBytes": 864
+              },
+              "object:CollectionQueue": {
+                "count": 0,
+                "selfBytes": 0
+              }
+            },
+            "selectedConstructor": "object:TargetShape",
+            "strongNewObjects": 401,
+            "dominatorChain": "TargetShape <- (root)",
+            "retainingPath": "(root).6 -> Node / Environment / Node / Environment.principal_realm -> Node / PrincipalRealm / Node / PrincipalRealm.base_object_list -> Node / BaseObjectList / Node / BaseObjectList.92 -> Node / ModuleWrap / Node / ModuleWrap.native_to_javascript -> ModuleWrap / ModuleWrap.2 -> system / SourceTextModule / system / SourceTextModule.6 -> (anonymous) / (root).83 -> system / Cell / system / Cell.value -> GlobalQueue / GlobalQueue._children -> Array / Array.0 -> CollectionQueue / CollectionQueue._children -> Array / Array.0 -> CollectionQueue / CollectionQueue._owner -> Object / Object._context -> Object / Object.<symbol > -> Array / Array.0 -> system / JSProxy / system / JSProxy.0 -> Array / Array.fam -> Object / Object.overlaid -> Set / Set.table -> (anonymous) / (root).927 -> TargetShape"
+          },
+          "topSnapshotGrowth": [
+            {
+              "name": "object:Object",
+              "count": 2829,
+              "selfBytes": 321752
+            },
+            {
+              "name": "array:(object properties)",
+              "count": 906,
+              "selfBytes": 209856
+            },
+            {
+              "name": "code:",
+              "count": 144,
+              "selfBytes": 163328
+            },
+            {
+              "name": "code:system / TrustedByteArray",
+              "count": 460,
+              "selfBytes": 118384
+            },
+            {
+              "name": "object:TargetShape",
+              "count": 399,
+              "selfBytes": 86184
+            },
+            {
+              "name": "object:system / Context",
+              "count": 1607,
+              "selfBytes": 67520
+            }
+          ],
+          "snapshotFiles": [
+            {
+              "name": "todos-yield-original-samples.jsonl-round-50.heapsnapshot",
+              "bytes": 29712950,
+              "sha256": "f35a58314fe05128f524b0a5b668edddc4bd117a3f65c1cf8bd4b8a4f972bd78"
+            },
+            {
+              "name": "todos-yield-original-samples.jsonl-round-150.heapsnapshot",
+              "bytes": 30917847,
+              "sha256": "c0600edda41d37035a0d680ccb34d3fd51e82eeb16edecb4d156747f37d65d59"
+            }
+          ]
+        },
+        "twin": {
+          "heapKiBPerRound": 11.668496662166216,
+          "defaultHeapKiBPerRound": 3.1597031834145257,
+          "domNodesPerRound": 0,
+          "errors": 0,
+          "afterDispose": {
+            "roots": 0,
+            "boundaries": 0,
+            "routines": 0,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0,
+            "heap": 38196048,
+            "domNodes": 4
+          },
+          "snapshotDiff": {
+            "rounds": [
+              50,
+              150
+            ],
+            "constructorDelta": {
+              "object:TargetShape": {
+                "count": 400,
+                "selfBytes": 86400
+              },
+              "object:SymbolTreeNode": {
+                "count": 9,
+                "selfBytes": 864
+              },
+              "object:CollectionQueue": {
+                "count": 0,
+                "selfBytes": 0
+              }
+            },
+            "selectedConstructor": "object:TargetShape",
+            "strongNewObjects": 400,
+            "dominatorChain": "TargetShape <- (root)",
+            "retainingPath": "(root).1 -> (GC roots) / (GC roots).19 -> (Stack roots) / (Stack roots).39 -> system / Context / system / Context.app -> Object / Object.dispose -> dispose / dispose.context -> system / Context / system / Context.dispose -> (anonymous) / (root).context -> system / Context / system / Context.disposer -> (anonymous) / (root).context -> system / Context / system / Context.owner -> Object / Object._firstChild -> Object / Object._nextSibling -> Object / Object._firstChild -> Object / Object._nextSibling -> Object / Object._fn -> (anonymous) / (root).context -> system / Context / system / Context.previous -> system / Context / system / Context.fam -> Object / Object.overlaid -> Set / Set.table -> (anonymous) / (root).919 -> TargetShape"
+          },
+          "topSnapshotGrowth": [
+            {
+              "name": "object:Object",
+              "count": 2831,
+              "selfBytes": 321416
+            },
+            {
+              "name": "array:(object properties)",
+              "count": 906,
+              "selfBytes": 209856
+            },
+            {
+              "name": "code:",
+              "count": 146,
+              "selfBytes": 165312
+            },
+            {
+              "name": "code:system / TrustedByteArray",
+              "count": 458,
+              "selfBytes": 120000
+            },
+            {
+              "name": "object:TargetShape",
+              "count": 400,
+              "selfBytes": 86400
+            },
+            {
+              "name": "object:system / Context",
+              "count": 1613,
+              "selfBytes": 67888
+            }
+          ],
+          "snapshotFiles": [
+            {
+              "name": "todos-yield-twin-samples.jsonl-round-50.heapsnapshot",
+              "bytes": 30126140,
+              "sha256": "f19e7af1cb1f768a06a9b9c10c48af73619bd6433943380be18fbdeea77d70d8"
+            },
+            {
+              "name": "todos-yield-twin-samples.jsonl-round-150.heapsnapshot",
+              "bytes": 31318459,
+              "sha256": "fdc48283a5750d37dc709616ae9aeae77cdcd0bfdb88207c605b796943c4eaf8"
+            }
+          ]
+        },
+        "control": {
+          "heapKiBPerRound": 0.5257579976747675,
+          "defaultHeapKiBPerRound": -10.600218890093705,
+          "domNodesPerRound": 0,
+          "errors": 0,
+          "afterDispose": {
+            "heap": 29146600,
+            "domNodes": 4
+          },
+          "snapshotDiff": {
+            "rounds": [
+              50,
+              150
+            ],
+            "constructorDelta": {
+              "object:SymbolTreeNode": {
+                "count": 0,
+                "selfBytes": 0
+              }
+            },
+            "selectedConstructor": "object:TargetShape",
+            "strongNewObjects": 0,
+            "dominatorChain": null,
+            "retainingPath": null
+          },
+          "topSnapshotGrowth": [
+            {
+              "name": "code:",
+              "count": 47,
+              "selfBytes": 51616
+            },
+            {
+              "name": "code:system / TrustedByteArray",
+              "count": 117,
+              "selfBytes": 20352
+            },
+            {
+              "name": "code:system / ProtectedFixedArray",
+              "count": 47,
+              "selfBytes": 13688
+            },
+            {
+              "name": "hidden:system / WeakArrayList",
+              "count": 52,
+              "selfBytes": 6512
+            },
+            {
+              "name": "code:(code)",
+              "count": 47,
+              "selfBytes": 4136
+            },
+            {
+              "name": "code:system / TrustedWeakFixedArray",
+              "count": 47,
+              "selfBytes": 3512
+            }
+          ],
+          "snapshotFiles": [
+            {
+              "name": "todos-yield-control-samples.jsonl-round-50.heapsnapshot",
+              "bytes": 26344338,
+              "sha256": "8ee8e9d5a20425af08f2d6d6b5d99cd4a6d9e853c31be44f78b6972b89e02fc4"
+            },
+            {
+              "name": "todos-yield-control-samples.jsonl-round-150.heapsnapshot",
+              "bytes": 26383164,
+              "sha256": "27a6fd4e9acdca4dde4c52cd100106357840f334c9afa4d94e7e9be44edf8baa"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "finding": "F-K6",
+      "twin": "todos-yield-h",
+      "scenario": "all",
+      "date": "2026-10-08T21:03:05.537Z",
+      "rounds": 200,
+      "elapsedSeconds": 17.604539042,
+      "parityCheckpoints": 41,
+      "parityStepChecks": 779,
+      "mismatches": 0,
+      "stepFailures": 0,
+      "infrastructureError": null,
+      "apps": {
+        "original": {
+          "heapKiBPerRound": 11.474351747674767,
+          "defaultHeapKiBPerRound": 2.8205512156289947,
+          "domNodesPerRound": 0,
+          "errors": 0,
+          "afterDispose": {
+            "heap": 36856784,
+            "domNodes": 4
+          },
+          "snapshotDiff": {
+            "rounds": [
+              50,
+              150
+            ],
+            "constructorDelta": {
+              "object:TargetShape": {
+                "count": 399,
+                "selfBytes": 86184
+              },
+              "object:SymbolTreeNode": {
+                "count": 9,
+                "selfBytes": 864
+              },
+              "object:CollectionQueue": {
+                "count": 0,
+                "selfBytes": 0
+              }
+            },
+            "selectedConstructor": "object:TargetShape",
+            "strongNewObjects": 401,
+            "dominatorChain": "TargetShape <- system / JSProxy <- system / Context <- system / Context <- (root) <- system / Context <- system / Context <- (root) <- HTMLButtonElement <- Array <- Object <- Object <- system / Context <- Object <- DocumentImpl <- (root)",
+            "retainingPath": "(root).2 -> global / global.jsdom -> JSDOM / JSDOM.<symbol window> -> Window / Window._document -> Document / Document.<symbol impl> -> DocumentImpl / DocumentImpl._nwsapi -> Object / Object.selectResolvers -> Object / Object.size -> size / size.context -> system / Context / system / Context.cache -> Object / Object.\u0001button.retry -> Object / Object.value -> Object / Object.results -> Array / Array.0 -> HTMLButtonElement / HTMLButtonElement._$$click -> (anonymous) / (root).context -> system / Context / system / Context.previous -> system / Context / system / Context.error -> (anonymous) / (root).context -> system / Context / system / Context.previous -> system / Context / system / Context.c -> system / JSProxy / system / JSProxy.1 -> TargetShape"
+          },
+          "topSnapshotGrowth": [
+            {
+              "name": "object:Object",
+              "count": 2829,
+              "selfBytes": 321752
+            },
+            {
+              "name": "array:(object properties)",
+              "count": 906,
+              "selfBytes": 209856
+            },
+            {
+              "name": "code:",
+              "count": 146,
+              "selfBytes": 183840
+            },
+            {
+              "name": "code:system / TrustedByteArray",
+              "count": 464,
+              "selfBytes": 128288
+            },
+            {
+              "name": "object:TargetShape",
+              "count": 399,
+              "selfBytes": 86184
+            },
+            {
+              "name": "object:system / Context",
+              "count": 1607,
+              "selfBytes": 67520
+            }
+          ],
+          "snapshotFiles": [
+            {
+              "name": "todos-yield-h-original-samples.jsonl-round-50.heapsnapshot",
+              "bytes": 29724226,
+              "sha256": "051e7e235ade0fff3242feb02796cb387feaa9d23a77d3ff56e34074e51f71c7"
+            },
+            {
+              "name": "todos-yield-h-original-samples.jsonl-round-150.heapsnapshot",
+              "bytes": 30930980,
+              "sha256": "6f5230248f442b54fd73dd519d430e2c98261ef7aa4b81a209c9c0860db491ec"
+            }
+          ]
+        },
+        "twin": {
+          "heapKiBPerRound": 12.477510876087608,
+          "defaultHeapKiBPerRound": 3.437334201374841,
+          "domNodesPerRound": 0,
+          "errors": 0,
+          "afterDispose": {
+            "roots": 0,
+            "boundaries": 0,
+            "routines": 0,
+            "pendingPromises": 0,
+            "eventsInFlight": 0,
+            "eventQueueDepth": 0,
+            "heap": 39290936,
+            "domNodes": 4
+          },
+          "snapshotDiff": {
+            "rounds": [
+              50,
+              150
+            ],
+            "constructorDelta": {
+              "object:TargetShape": {
+                "count": 401,
+                "selfBytes": 86616
+              },
+              "object:CollectionQueue": {
+                "count": 0,
+                "selfBytes": 0
+              },
+              "object:SymbolTreeNode": {
+                "count": -24,
+                "selfBytes": -2304
+              }
+            },
+            "selectedConstructor": "object:TargetShape",
+            "strongNewObjects": 403,
+            "dominatorChain": "TargetShape <- (root)",
+            "retainingPath": "(root).2 -> global / global.<symbol @solidjs/signals/observe/records> -> Object / Object.emit -> emit / emit.context -> system / Context / system / Context.previous -> system / Context / system / Context.extension -> system / SourceTextModule / system / SourceTextModule.5 -> (anonymous) / (root).89 -> system / Cell / system / Cell.value -> GlobalQueue / GlobalQueue._children -> Array / Array.0 -> CollectionQueue / CollectionQueue._owner -> Object / Object._parent -> Object / Object._nextSibling -> Object / Object._nextSibling -> Object / Object._firstChild -> Object / Object._fn -> (anonymous) / (root).context -> system / Context / system / Context.previous -> system / Context / system / Context.fam -> Object / Object.overlaid -> Set / Set.table -> (anonymous) / (root).919 -> TargetShape"
+          },
+          "topSnapshotGrowth": [
+            {
+              "name": "object:Object",
+              "count": 2644,
+              "selfBytes": 306832
+            },
+            {
+              "name": "array:(object properties)",
+              "count": 850,
+              "selfBytes": 200416
+            },
+            {
+              "name": "code:",
+              "count": 119,
+              "selfBytes": 158144
+            },
+            {
+              "name": "code:system / TrustedByteArray",
+              "count": 434,
+              "selfBytes": 141208
+            },
+            {
+              "name": "object:TargetShape",
+              "count": 401,
+              "selfBytes": 86616
+            },
+            {
+              "name": "hidden:system / WeakArrayList",
+              "count": 112,
+              "selfBytes": 72720
+            }
+          ],
+          "snapshotFiles": [
+            {
+              "name": "todos-yield-h-twin-samples.jsonl-round-50.heapsnapshot",
+              "bytes": 31375848,
+              "sha256": "d033d68fedfd38169c0f8da2d41158dcd4c145f3912e203f1b303e397584eae7"
+            },
+            {
+              "name": "todos-yield-h-twin-samples.jsonl-round-150.heapsnapshot",
+              "bytes": 32457014,
+              "sha256": "9fdc9c677187d3c49ee033ddde50e6ab607b35ee9bda27b26b788ae737dc435a"
+            }
+          ]
+        },
+        "control": {
+          "heapKiBPerRound": 0.5332017889288929,
+          "defaultHeapKiBPerRound": -10.594869055373934,
+          "domNodesPerRound": 0,
+          "errors": 0,
+          "afterDispose": {
+            "heap": 29124600,
+            "domNodes": 4
+          },
+          "snapshotDiff": {
+            "rounds": [
+              50,
+              150
+            ],
+            "constructorDelta": {
+              "object:SymbolTreeNode": {
+                "count": 0,
+                "selfBytes": 0
+              }
+            },
+            "selectedConstructor": "object:TargetShape",
+            "strongNewObjects": 0,
+            "dominatorChain": null,
+            "retainingPath": null
+          },
+          "topSnapshotGrowth": [
+            {
+              "name": "code:",
+              "count": 47,
+              "selfBytes": 51616
+            },
+            {
+              "name": "code:system / TrustedByteArray",
+              "count": 117,
+              "selfBytes": 20352
+            },
+            {
+              "name": "code:system / ProtectedFixedArray",
+              "count": 47,
+              "selfBytes": 13688
+            },
+            {
+              "name": "hidden:system / WeakArrayList",
+              "count": 60,
+              "selfBytes": 7592
+            },
+            {
+              "name": "code:(code)",
+              "count": 47,
+              "selfBytes": 4136
+            },
+            {
+              "name": "code:system / TrustedWeakFixedArray",
+              "count": 47,
+              "selfBytes": 3512
+            }
+          ],
+          "snapshotFiles": [
+            {
+              "name": "todos-yield-h-control-samples.jsonl-round-50.heapsnapshot",
+              "bytes": 26343455,
+              "sha256": "fd585601bb554c69b48456869720b041e21d787561639a7f706d3d208bae607a"
+            },
+            {
+              "name": "todos-yield-h-control-samples.jsonl-round-150.heapsnapshot",
+              "bytes": 26382565,
+              "sha256": "18f07eaa9f48d1a22b9fdd8d2420f5f821591a4d146ccea009302b00a03d876c"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "roomPlateau": {
+    "rounds": 1200,
+    "parityStepChecks": 4097,
+    "mismatches": 0,
+    "stepFailures": 0,
+    "infrastructureError": null,
+    "apps": {
+      "original": {
+        "heapKiBPerRound": 4.126543748124812,
+        "domNodesPerRound": 0,
+        "routinesPerRound": 0,
+        "errors": 0,
+        "lastSample": {
+          "round": 1200,
+          "timeMs": 170337.409792,
+          "heap": 52849568,
+          "domNodes": 1566,
+          "mockRandomCalls": 0,
+          "historyEntries": 1,
+          "roots": 0,
+          "boundaries": 0,
+          "routines": 0,
+          "pendingPromises": 0,
+          "eventsInFlight": 0,
+          "eventQueueDepth": 0
+        },
+        "afterDispose": {
+          "heap": 51125408,
+          "domNodes": 4
+        },
+        "snapshotRounds": [
+          1050,
+          1150
+        ],
+        "constructorDelta": [
+          {
+            "name": "object:TargetShape",
+            "count": 0,
+            "bytes": 0
+          },
+          {
+            "name": "object:SymbolTreeNode",
+            "count": 0,
+            "bytes": 0
+          },
+          {
+            "name": "object:CollectionQueue",
+            "count": 0,
+            "bytes": 0
+          }
+        ],
+        "topSnapshotGrowth": [
+          {
+            "name": "closure:",
+            "count": 1600,
+            "selfBytes": 89600
+          },
+          {
+            "name": "array:",
+            "count": 400,
+            "selfBytes": 73600
+          },
+          {
+            "name": "object:Promise",
+            "count": 1400,
+            "selfBytes": 67200
+          },
+          {
+            "name": "object:system / Context",
+            "count": 1200,
+            "selfBytes": 57600
+          },
+          {
+            "name": "hidden:system / AsyncGeneratorRequest",
+            "count": 800,
+            "selfBytes": 32000
+          },
+          {
+            "name": "string:<div class=\"room\"><header class=\"header\"><div><h1>#design</h1><p class=\"m",
+            "count": 1,
+            "selfBytes": 29456
+          }
+        ],
+        "retainingPath": "(root).2 -> global / global.__vitest_worker__ -> Object / Object.evaluatedModules -> VitestEvaluatedModules / VitestEvaluatedModules.urlToIdModuleMap -> Map / Map.table -> (anonymous) / (root).147 -> EvaluatedModuleNode / EvaluatedModuleNode.exports -> Module / Module.get delay -> (anonymous) / (root).context -> system / Context / system / Context.0 -> Map / Map.table -> (anonymous) / (root).12 -> Object / Object.messages -> Array / Array.182 -> Object / Object.1 / part of key (Object @1042297) -> value (TargetShape @1042299) pair in WeakMap (table @901149) -> TargetShape",
+        "streamRetentionBeforeFix": {
+          "netRequestDelta": 800,
+          "netPromiseDelta": 1400,
+          "dominatorChain": "system / AsyncGeneratorRequest <- system / AsyncGeneratorRequest <- system / AsyncGeneratorRequest <- AsyncGenerator <- system / Context <- system / PromiseReaction <- Promise <- system / AsyncGeneratorRequest <- watchMembers <- system / Context <- system / PromiseReaction <- Promise <- system / Context <- (root) <- system / Context <- wake <- (root) <- Set <- Object <- (root)",
+          "retainingPath": "(root).2 -> global / global.__vitest_worker__ -> Object / Object.evaluatedModules -> VitestEvaluatedModules / VitestEvaluatedModules.urlToIdModuleMap -> Map / Map.table -> (anonymous) / (root).147 -> EvaluatedModuleNode / EvaluatedModuleNode.exports -> Module / Module.get delay -> (anonymous) / (root).context -> system / Context / system / Context.0 -> Map / Map.table -> (anonymous) / (root).15 -> Object / Object.waiters -> Set / Set.table -> (anonymous) / (root).3131 -> wake / wake.context -> system / Context / system / Context.resolve -> (anonymous) / (root).context -> system / Context / system / Context.extension -> Promise / Promise.reactions_or_result -> system / PromiseReaction / system / PromiseReaction.2 -> (anonymous) / (root).context -> system / Context / system / Context.extension -> watchMembers / watchMembers.3 -> system / AsyncGeneratorRequest / system / AsyncGeneratorRequest.2 -> Promise / Promise.reactions_or_result -> system / PromiseReaction / system / PromiseReaction.2 -> (anonymous) / (root).context -> system / Context / system / Context.extension -> AsyncGenerator / AsyncGenerator.3 -> system / AsyncGeneratorRequest / system / AsyncGeneratorRequest.0 -> system / AsyncGeneratorRequest / system / AsyncGeneratorRequest.0 -> system / AsyncGeneratorRequest"
+        }
+      },
+      "twin": {
+        "heapKiBPerRound": -9.545608451470146,
+        "domNodesPerRound": 0,
+        "routinesPerRound": 0,
+        "errors": 0,
+        "lastSample": {
+          "round": 1200,
+          "timeMs": 170356.128917,
+          "heap": 53752944,
+          "domNodes": 1566,
+          "mockRandomCalls": 0,
+          "historyEntries": 1,
+          "roots": 1,
+          "boundaries": 15,
+          "routines": 272,
+          "pendingPromises": 0,
+          "eventsInFlight": 0,
+          "eventQueueDepth": 0
+        },
+        "afterDispose": {
+          "roots": 0,
+          "boundaries": 0,
+          "routines": 0,
+          "pendingPromises": 0,
+          "eventsInFlight": 0,
+          "eventQueueDepth": 0,
+          "heap": 51920144,
+          "domNodes": 4
+        },
+        "snapshotRounds": [
+          1050,
+          1150
+        ],
+        "constructorDelta": [
+          {
+            "name": "object:SymbolTreeNode",
+            "count": 0,
+            "bytes": 0
+          },
+          {
+            "name": "object:TargetShape",
+            "count": 0,
+            "bytes": 0
+          },
+          {
+            "name": "object:CollectionQueue",
+            "count": 0,
+            "bytes": 0
+          }
+        ],
+        "topSnapshotGrowth": [
+          {
+            "name": "closure:",
+            "count": 1600,
+            "selfBytes": 89600
+          },
+          {
+            "name": "array:",
+            "count": 400,
+            "selfBytes": 73600
+          },
+          {
+            "name": "object:Promise",
+            "count": 1400,
+            "selfBytes": 67200
+          },
+          {
+            "name": "object:system / Context",
+            "count": 1200,
+            "selfBytes": 57600
+          },
+          {
+            "name": "hidden:system / AsyncGeneratorRequest",
+            "count": 800,
+            "selfBytes": 32000
+          },
+          {
+            "name": "string:<div class=\"room\"><header class=\"header\"><div><h1>#design</h1><p class=\"m",
+            "count": 1,
+            "selfBytes": 29456
+          }
+        ],
+        "retainingPath": "(root).2 -> global / global.__vitest_worker__ -> Object / Object.evaluatedModules -> VitestEvaluatedModules / VitestEvaluatedModules.urlToIdModuleMap -> Map / Map.table -> (anonymous) / (root).156 -> EvaluatedModuleNode / EvaluatedModuleNode.exports -> Module / Module.get post -> (anonymous) / (root).context -> system / Context / system / Context.0 -> Map / Map.table -> (anonymous) / (root).6 -> Object / Object.messages -> Array / Array.156 -> Object / Object.1 / part of key (Object @1068535) -> value (TargetShape @1070237) pair in WeakMap (table @919737) -> TargetShape",
+        "streamRetentionBeforeFix": {
+          "netRequestDelta": 800,
+          "netPromiseDelta": 1400,
+          "dominatorChain": "system / AsyncGeneratorRequest <- system / AsyncGeneratorRequest <- AsyncGenerator <- system / Context <- system / PromiseReaction <- Promise <- system / AsyncGeneratorRequest <- watchMembers <- system / Context <- system / PromiseReaction <- Promise <- system / Context <- (root) <- system / Context <- wake <- (root) <- Set <- Object <- (root)",
+          "retainingPath": "(root).2 -> global / global.__vitest_worker__ -> Object / Object.evaluatedModules -> VitestEvaluatedModules / VitestEvaluatedModules.urlToIdModuleMap -> Map / Map.table -> (anonymous) / (root).156 -> EvaluatedModuleNode / EvaluatedModuleNode.exports -> Module / Module.get post -> (anonymous) / (root).context -> system / Context / system / Context.0 -> Map / Map.table -> (anonymous) / (root).9 -> Object / Object.waiters -> Set / Set.table -> (anonymous) / (root).3325 -> wake / wake.context -> system / Context / system / Context.resolve -> (anonymous) / (root).context -> system / Context / system / Context.extension -> Promise / Promise.reactions_or_result -> system / PromiseReaction / system / PromiseReaction.2 -> (anonymous) / (root).context -> system / Context / system / Context.extension -> watchMembers / watchMembers.3 -> system / AsyncGeneratorRequest / system / AsyncGeneratorRequest.2 -> Promise / Promise.reactions_or_result -> system / PromiseReaction / system / PromiseReaction.2 -> (anonymous) / (root).context -> system / Context / system / Context.extension -> AsyncGenerator / AsyncGenerator.3 -> system / AsyncGeneratorRequest / system / AsyncGeneratorRequest.0 -> system / AsyncGeneratorRequest"
+        }
+      },
+      "control": {
+        "heapKiBPerRound": 0.020280387413741375,
+        "domNodesPerRound": 0,
+        "routinesPerRound": 0,
+        "errors": 0,
+        "lastSample": {
+          "round": 1200,
+          "timeMs": 170224.892209,
+          "heap": 29574776,
+          "domNodes": 6,
+          "mockRandomCalls": 0,
+          "historyEntries": 1,
+          "roots": 0,
+          "boundaries": 0,
+          "routines": 0,
+          "pendingPromises": 0,
+          "eventsInFlight": 0,
+          "eventQueueDepth": 0
+        },
+        "afterDispose": {
+          "heap": 29603552,
+          "domNodes": 4
+        },
+        "snapshotRounds": [
+          1050,
+          1150
+        ],
+        "constructorDelta": [
+          {
+            "name": "object:SymbolTreeNode",
+            "count": 0,
+            "bytes": 0
+          }
+        ],
+        "topSnapshotGrowth": [
+          {
+            "name": "string:/tmp/soak-final-room-plateau-raw/room-yield-control-samples.jsonl-round-1",
+            "count": 1,
+            "selfBytes": 112
+          },
+          {
+            "name": "code:system / TrustedByteArray",
+            "count": 2,
+            "selfBytes": 88
+          }
+        ],
+        "retainingPath": null
+      }
+    }
+  },
+  "roomAfterTransportFix": {
+    "rounds": 1200,
+    "parityStepChecks": 4097,
+    "mismatches": 0,
+    "stepFailures": 0,
+    "infrastructureError": null,
+    "apps": {
+      "original": {
+        "heapKiBPerRound": 0.2830540710321032,
+        "domNodesPerRound": 0,
+        "routinesPerRound": 0,
+        "errors": 0,
+        "lastSample": {
+          "round": 1200,
+          "timeMs": 169201.59425,
+          "heap": 48548800,
+          "domNodes": 1566,
+          "mockRandomCalls": 0,
+          "historyEntries": 1,
+          "roots": 0,
+          "boundaries": 0,
+          "routines": 0,
+          "pendingPromises": 0,
+          "eventsInFlight": 0,
+          "eventQueueDepth": 0
+        },
+        "afterDispose": {
+          "heap": 46807424,
+          "domNodes": 4
+        },
+        "snapshotRounds": [
+          1050,
+          1150
+        ],
+        "constructorDelta": [
+          {
+            "name": "object:Promise",
+            "count": 0,
+            "bytes": 0
+          },
+          {
+            "name": "object:SymbolTreeNode",
+            "count": 0,
+            "bytes": 0
+          },
+          {
+            "name": "object:TargetShape",
+            "count": 0,
+            "bytes": 0
+          },
+          {
+            "name": "hidden:system / AsyncGeneratorRequest",
+            "count": 0,
+            "bytes": 0
+          }
+        ],
+        "strongNewRequests": 12
+      },
+      "twin": {
+        "heapKiBPerRound": 0.12575851335133514,
+        "domNodesPerRound": 0,
+        "routinesPerRound": 0,
+        "errors": 0,
+        "lastSample": {
+          "round": 1200,
+          "timeMs": 169258.9875,
+          "heap": 50380560,
+          "domNodes": 1566,
+          "mockRandomCalls": 0,
+          "historyEntries": 1,
+          "roots": 1,
+          "boundaries": 15,
+          "routines": 272,
+          "pendingPromises": 0,
+          "eventsInFlight": 0,
+          "eventQueueDepth": 0
+        },
+        "afterDispose": {
+          "roots": 0,
+          "boundaries": 0,
+          "routines": 0,
+          "pendingPromises": 0,
+          "eventsInFlight": 0,
+          "eventQueueDepth": 0,
+          "heap": 48535536,
+          "domNodes": 4
+        },
+        "snapshotRounds": [
+          1050,
+          1150
+        ],
+        "constructorDelta": [
+          {
+            "name": "object:SymbolTreeNode",
+            "count": 0,
+            "bytes": 0
+          },
+          {
+            "name": "object:Promise",
+            "count": 0,
+            "bytes": 0
+          },
+          {
+            "name": "object:TargetShape",
+            "count": 0,
+            "bytes": 0
+          },
+          {
+            "name": "hidden:system / AsyncGeneratorRequest",
+            "count": 0,
+            "bytes": 0
+          }
+        ],
+        "strongNewRequests": 12
+      },
+      "control": {
+        "heapKiBPerRound": 0.0202442900540054,
+        "domNodesPerRound": 0,
+        "routinesPerRound": 0,
+        "errors": 0,
+        "lastSample": {
+          "round": 1200,
+          "timeMs": 169146.125542,
+          "heap": 29774104,
+          "domNodes": 6,
+          "mockRandomCalls": 0,
+          "historyEntries": 1,
+          "roots": 0,
+          "boundaries": 0,
+          "routines": 0,
+          "pendingPromises": 0,
+          "eventsInFlight": 0,
+          "eventQueueDepth": 0
+        },
+        "afterDispose": {
+          "heap": 29802872,
+          "domNodes": 4
+        },
+        "snapshotRounds": [
+          1050,
+          1150
+        ],
+        "constructorDelta": [
+          {
+            "name": "object:Promise",
+            "count": 0,
+            "bytes": 0
+          },
+          {
+            "name": "object:SymbolTreeNode",
+            "count": 0,
+            "bytes": 0
+          }
+        ],
+        "strongNewRequests": 0
+      }
+    }
+  },
+  "classification": {
+    "F-K1": {
+      "owner": "shared upstream Solid transition queues; twin fiber amplification",
+      "action": "recorded; bridge mitigation reverted"
+    },
+    "F-K2": {
+      "owner": "harness mock response history and jsdom navigation history",
+      "action": "fixed; closed"
+    },
+    "F-K3": {
+      "owner": "harness jsdom navigation history; remaining shared compiled-code noise",
+      "action": "fixed; closed within measurement limits"
+    },
+    "F-K4": {
+      "owner": "harness fake-wire missing request abort signal and jsdom navigation history; bounded app messages",
+      "action": "fixed; closed, data plateau confirmed"
+    },
+    "F-K5": {
+      "owner": "shared upstream Solid store overlaid Set; harness history",
+      "action": "history fixed; store retention recorded"
+    },
+    "F-K6": {
+      "owner": "shared upstream Solid store overlaid Set; harness history",
+      "action": "history fixed; store retention recorded"
+    }
+  },
+  "driverBeforeCleanup": {
+    "snapshotRounds": [
+      50,
+      200
+    ],
+    "historyEntries": {
+      "hackernews-spa-yield": [
+        752,
+        3002
+      ],
+      "rendering-yield": [
+        351,
+        1401
+      ],
+      "room-yield": [
+        151,
+        601
+      ],
+      "todos-yield": [
+        153,
+        603
+      ],
+      "todos-yield-h": [
+        153,
+        603
+      ]
+    },
+    "hackernewsResponseDelta": 121,
+    "responseRetainingPath": "global.fetch.mock.settledResults[].value -> Response"
+  },
+  "fixCommit": "4bcb05d",
+  "gateBeforeWip": {
+    "pass": 47,
+    "fail": 0,
+    "skip": 1,
+    "seconds": 154,
+    "green": true
+  },
+  "gateBeforeFix": {
+    "pass": 47,
+    "fail": 0,
+    "skip": 1,
+    "seconds": 123,
+    "green": true
+  },
+  "gateBeforeReport": {
+    "pass": 47,
+    "fail": 0,
+    "skip": 1,
+    "seconds": 134,
+    "green": true
+  }
+}

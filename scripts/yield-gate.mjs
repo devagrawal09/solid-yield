@@ -180,6 +180,18 @@ function buildSteps(twins) {
     ...pnpmRun("examples/originals/docs", "typecheck")
   });
 
+  // D-116: plain-Solid originals are first-class inputs for native sugar.
+  // Dashboard has a 30-step original self-check and its own SSR/hydrate cases;
+  // it does not need a hand-written yield twin to enter the gate.
+  for (const script of ["test", "typecheck", "ssr-smoke", "hydrate-smoke"]) {
+    steps.push({
+      name: `original:dashboard:${script}`,
+      cwd: root,
+      fast: script === "typecheck",
+      ...pnpmRun("examples/originals/dashboard", script)
+    });
+  }
+
   // Server-render smoke (examples/harness/ssr-smoke/smoke.mjs): every twin with a server
   // entry renders each of its routes through Vite's SSR loader, each render in its own
   // process with a 30 s timeout (120 s on GitHub Actions) — rendering-yield's string and
@@ -318,6 +330,10 @@ function buildSteps(twins) {
       "packages/compiler-yield/src/*.js",
       "examples/originals/docs/src/**/*.[tj]s?(x)",
       "examples/originals/docs/stream/**/*.[tj]s?(x)",
+      "examples/originals/dashboard/src/**/*.[tj]s?(x)",
+      "examples/originals/dashboard/stream/**/*.[tj]s?(x)",
+      "examples/originals/dashboard/tests/**/*.[tj]s?(x)",
+      "examples/harness/dashboard/*.{ts,mjs}",
       "packages/*/test/*.mjs",
       "examples/harness/ssr-smoke/*.mjs",
       "examples/harness/hydrate-smoke/*.mjs",

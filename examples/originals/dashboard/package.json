@@ -1,0 +1,29 @@
+{
+  "name": "dashboard-original-example",
+  "description": "Operations dashboard with shared filters and independent async panels",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "start": "vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "build:ssr": "vite build --config stream/vite.config.mjs && vite build --config stream/vite.config.mjs --ssr entry-server.tsx",
+    "test": "vitest run --config vite.config.mjs",
+    "ssr-smoke": "node ../../harness/ssr-smoke/smoke.mjs --dashboard",
+    "hydrate-smoke": "node ../../harness/hydrate-smoke/hydrate.mjs --dashboard"
+  },
+  "devDependencies": {
+    "@solidjs/vite-plugin": "3.0.0-next.35",
+    "@solidjs/web": "2.0.0-rc.13",
+    "@types/node": "^25.6.0",
+    "jsdom": "^25.0.1",
+    "solid-js": "2.0.0-rc.13",
+    "typescript": "^6.0.2",
+    "vite": "^7.0.0",
+    "vitest": "^4.1.6",
+    "@solidjs/router": "2.0.0-next.29"
+  }
+}

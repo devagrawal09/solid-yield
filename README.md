@@ -293,6 +293,10 @@ the historical audit from the adapted checks on main.
 
 MIT, copyright (c) 2026 Dev Agrawal ([LICENSE](./LICENSE)). The vendored Solid originals in `examples/originals/`, the JSX types generated from `@solidjs/web`, and the compiler outputs kept as the plugin's oracle are Solid's, under its MIT notice ([NOTICE](./NOTICE)).
 
+## Examples
+
+- [dashboard — original only; for sugar/native mode](examples/originals/dashboard/README.md)
+
 ## Analyzer
 
 Run `pnpm run analyze docs-yield` (or omit the name for all nine twins).

@@ -1,6 +1,6 @@
 # Solid rc.14 retest — 2026-10-08
 
-Status: **candidate blocked; no commit or push**. Installed `solid-js` and
+Status: **committed on chore/rc14; two known red steps allowed on this branch only**. Branch base: 4de2d47; this task does not advance main. Nothing was pushed. Installed `solid-js` and
 `@solidjs/web` are exactly **2.0.0-rc.14** throughout the workspace.
 `@solidjs/signals` follows Solid to rc.14; `@solidjs/compiler`,
 `@solidjs/babel-plugin` and `@solidjs/h` remain rc.13. Node v24.18.0,
@@ -14,12 +14,11 @@ development 108 ms, one Page setup, correct Jon markup and serialized user/info,
 and the 200 ms timer fires. Development also emits LAZY_ASSET_UNMAPPED because
 the repro supplies an empty manifest; the stream still completes.
 
-The server-only array wrapper from 046387b was removed from perform in the
-working tree. Its regression test is retained unchanged and passes: one setup,
+The server-only array wrapper from 046387b was removed from perform in
+d5d96aa23cc775a8d0d32beea1340b0059d11495. Its regression test is retained unchanged and passes: one setup,
 less than five info runs, Jon plus both facts. All nine tests in ssr.spec.tsx
 pass. All 14 rendering string/stream smoke cases pass, including streamed
-/profile (2.36 s, 2,780 characters). There is no removal commit SHA yet:
-the full gate must be green before a commit.
+/profile (2.36 s, 2,780 characters). Removal commit: d5d96aa23cc775a8d0d32beea1340b0059d11495. The later ruling allows the two known red gate steps on chore/rc14 only.
 
 ## F-C14
 
@@ -79,8 +78,29 @@ The final `pnpm build` passes. The full gate is **44/46 RED** in 234 s:
 **unchanged passes:** 44. The initially failing conformance step now passes
 after the reviewed runtime-only updates above. SSR/hydration smoke, package
 tests, exports, types, lint, formatting, analyzer and proofs all pass.
-The candidate stays uncommitted because a GREEN gate is required before every
-commit. No gate step is excluded or marked passing. `git diff --check` passes.
+The later ruling permits these two red steps on chore/rc14 only. The candidate
+is committed there; this task does not advance main. No gate step is excluded or marked passing. `git diff --check` passes.
+
+## Effect diagnosis — rc.14 follow-up
+
+**(a) Solid regression.** A standalone plain-Solid client repro under
+/private/tmp/rc14-effect-check needs only Errored, an async memo, latest and
+a separate isPending render reader; it needs no JSX/compiler, router, Effect,
+Show or Loading. rc.13 renders ERROR: Search failed once; rc.14 leaves 0 and
+calls the fallback zero times, in production and development. Removing the
+isPending reader restores rc.14's fallback. Instrumentation confirms a held
+source already in STATUS_ERROR returns its committed [] before verdictValue
+reaches its error check. The standalone [issue draft](solid-errored-fallback-rc14.md)
+contains the exact source, outputs, changed code and release-note check. Status:
+**draft, not filed**.
+
+**The twin also fails.** Its own app.test.tsx error-recovery test, run without
+the parity test or original, fails at line 109 because .error-box p is absent
+(one test failed; eleven unrelated tests skipped by -t). The prior 44/46 count
+includes twin:effect-yield:test among the two red steps; it is not evidence
+that the twin passed. latestOf / isPendingOf delegate directly to Solid's
+latest / isPending (runtime.ts:449,458), so the library supplies no workaround
+for this error-read ordering. Both applications remain unchanged.
 
 ## Executed bytes
 
@@ -96,6 +116,7 @@ no partial measurement is substituted into the baseline.
 
 | Twin | Original load delta | Twin load delta | Original step deltas | Twin step deltas |
 | --- | ---: | ---: | --- | --- |
+| effect-yield | unavailable | unavailable | authored script stops at missing retry button | same blocked script |
 | docs-yield | -75537 | -74658 | -62754 to -843 | -61944 to 357 |
 | hackernews-spa-yield | -75362 | -74290 | -56663 to -13677 | -57898 to -19559 |
 | rendering-yield | -56792 | -56247 | -57252 to -1117 | -55367 to -10784 |
@@ -108,3 +129,15 @@ no partial measurement is substituted into the baseline.
 The allowance stays 2 percent or 1,024 bytes per phase, whichever is larger.
 A complete baseline refresh is deferred until Effect can complete the same
 script successfully; all existing maxBytes values remain in force.
+
+**Compiler measurements:** C3b/C3c, including the 25.6 KB gzip break-even,
+are **rc.13 figures**. They need re-measurement on rc.14 before using them
+for current runtime comparisons. They were not re-measured in this task.
+
+**Concurrent main update:** during this diagnosis another worktree merged
+examples/dashboard into main at cba2bd0 (main is checked out in sy-dash).
+This task preserved that update. chore/rc14 remains based on 4de2d47.
+
+**Before the diagnosis commit:** build passed again; the full gate remained
+44/46 RED (172 s), with exactly twin:effect-yield:test and
+twins:executed-bytes failing. No other red step is allowed.

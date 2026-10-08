@@ -10,7 +10,15 @@ export interface Lowered {
   files: Map<string, string>;
   positions: Map<string, Position[]>;
   iterations: number;
-  diagnostics?: { code: string; message: string; file: string; line: number; column: number }[];
+  inference?: import("compiler-yield/failure-inference").FailureReport;
+  diagnostics?: {
+    code: string;
+    message: string;
+    file: string;
+    line: number;
+    column: number;
+    severity?: "error" | "warning";
+  }[];
 }
 export function lowerNativeProject(
   input: Map<string, string>,

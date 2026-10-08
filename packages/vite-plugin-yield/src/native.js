@@ -16,7 +16,7 @@ import { lowerNativeEffects } from "./native-effects.js";
 import { lowerNativeRecursion } from "./native-recursion.js";
 const t = babel.types;
 /** @typedef {import('@babel/core').NodePath<any>} Path */
-/** @typedef {{code:string,message:string,file:string,line:number,column:number}} Diagnostic */
+/** @typedef {{code:string,message:string,file:string,line:number,column:number,severity?:"error"|"warning"}} Diagnostic */
 /** @type {Readonly<Record<string,string|null>>} */
 export const nativeMapping = Object.freeze({
   action: "$event",
@@ -173,11 +173,33 @@ export function inspectNativeProject(files) {
       CallExpression(q) {
         const api = imported(q.get("callee"));
         if (api?.module !== "solid-js") return;
+        if (
+          /^create(Signal|Memo|Store|Optimistic|Projection)/.test(api.name) &&
+          !q.getFunctionParent()
+        )
+          report(
+            q.parentPath.isVariableDeclarator() ? q.parentPath : q,
+            "MODULE_STATE",
+            "Create this state inside a component or a state factory; module state is shared by every render."
+          );
         if (api.name === "createEffect" && q.node.arguments.length < 2)
           report(
             q,
             "NATIVE_EFFECT_PHASES",
             "createEffect needs a tracked compute and an untracked effect phase."
+          );
+      },
+      ThrowStatement(q) {
+        if (
+          t.isStringLiteral(q.node.argument) ||
+          t.isNumericLiteral(q.node.argument) ||
+          t.isBooleanLiteral(q.node.argument) ||
+          t.isNullLiteral(q.node.argument)
+        )
+          report(
+            q,
+            "NATIVE_THROW",
+            "Throw an Error object so callers can identify and handle this failure."
           );
       },
       JSXSpreadAttribute(q) {
@@ -426,11 +448,12 @@ function surface(code, filename, modules, options = {}) {
             target
           );
           if (local?.isFunction()) {
-            // A selected local component is a library root, where failures
-            // may propagate (D-033), rather than a foreign component handoff.
+            // Keep the library renderer, but native render/hydrate is a foreign
+            // handoff: residual failures (including unknown) must be empty.
+            needed.add("foreign");
             q.node.callee = t.identifier(`__native${api.name}`);
             needed.add(`__native${api.name}`);
-            q.node.arguments[0] = check;
+            q.node.arguments[0] = t.callExpression(t.identifier("foreign"), [check]);
           } else {
             needed.add("foreign");
             q.node.arguments[0] = t.callExpression(t.identifier("foreign"), [check]);
@@ -873,6 +896,7 @@ function lowerNativeProjectImpl(input, options = {}) {
   const selected = new Map([...files].filter(([id]) => !entries.has(id)));
   const diagnostics = inspectNativeProject(selected);
   if (diagnostics.length) throw new NativeDiagnosticError(diagnostics);
+  const sourceFailures = nativeFailures(files, options.compilerOptions);
   const prepared = nativePrelude(selected);
   const failures = nativeFailures(prepared, options.compilerOptions);
   const effects = new Map(
@@ -911,7 +935,16 @@ function lowerNativeProjectImpl(input, options = {}) {
       }
     }
   );
-  return { ...lowered, diagnostics: nativeForeignDiagnostics(files, options.compilerOptions) };
+  return {
+    ...lowered,
+    inference: sourceFailures,
+    diagnostics: [
+      ...sourceFailures.diagnostics
+        .filter(d => d.code !== "EVENT_REJECTS")
+        .map(d => ({ ...d, severity: /** @type {const} */ ("error") })),
+      ...nativeForeignDiagnostics(files, options.compilerOptions)
+    ]
+  };
 }
 /** Foreign tags are recorded against authored positions, before intermediate
  * passes change their line numbers. @param {Map<string,string>} files @param {ts.CompilerOptions} [options] */
@@ -977,6 +1010,8 @@ export function lowerNativeFile(code, filename, include, cache, report) {
   if (entry?.signature !== signature) {
     const lowered = lowerNativeProject(files, { compilerOptions: parsed.options });
     entry = { signature, files: lowered.files };
+    const errors = lowered.diagnostics.filter(d => d.severity === "error");
+    if (errors.length) throw new NativeDiagnosticError(errors);
     for (const diagnostic of lowered.diagnostics) report?.(diagnostic);
     cache.set(configPath, entry);
   }

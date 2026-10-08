@@ -21,8 +21,7 @@ export function lowerNativeEffects(files, report) {
     const program = parseProgram(code, file);
     program?.traverse({
       Function(q) {
-        if (report.at(file, q.node.start ?? 0)?.component || q.node.generator)
-          routines.add(`${file}:${q.node.start}`);
+        if (report.at(file, q.node.start ?? 0)?.component) routines.add(`${file}:${q.node.start}`);
       },
       CallExpression(q) {
         const c = q.get("callee");
@@ -186,7 +185,7 @@ export function lowerNativeEffects(files, report) {
       YieldExpression: {
         exit(q) {
           const fn = q.getFunctionParent();
-          if (!fn || fn.node.async || q.node.delegate || !q.node.argument) return;
+          if (!fn || !host(fn) || fn.node.async || q.node.delegate || !q.node.argument) return;
           const value = q.node.argument;
           q.replaceWith(
             t.isCallExpression(value) && t.isIdentifier(value.callee, { name: "__nativeAttempt" })

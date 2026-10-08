@@ -34,12 +34,12 @@
     "todos-yield-h"
   ],
   "summary": {
-    "pass": 65,
+    "pass": 66,
     "fail": 0,
     "skip": 0,
-    "total": 65,
+    "total": 66,
     "wallMs": 153133,
-    "line": "65 pass / 0 fail / 0 skip in 153s",
+    "line": "66 pass / 0 fail / 0 skip in 153s",
     "green": true
   },
   "comparison": {
@@ -381,6 +381,12 @@
       "status": "PASS",
       "durationMs": 2481,
       "command": "../../../Users/devagr/.nvm/versions/node/v24.18.0/bin/node scripts/native-todos-check.mjs lint"
+    },
+    {
+      "name": "native:todos:events:snapshot",
+      "status": "PASS",
+      "durationMs": 6428,
+      "command": "../../../Users/devagr/.nvm/versions/node/v24.18.0/bin/node scripts/native-todos-events.mjs snapshot"
     },
     {
       "name": "native:todos:parity",

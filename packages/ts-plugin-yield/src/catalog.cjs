@@ -4,6 +4,12 @@ const failureAdvice = host =>
     ? "Catch the failure inside this handler, or declare it in the handler's fails contract."
     : "Wrap this rendered work in Errored, or handle the failure with attempt.";
 module.exports = Object.freeze({
+  CATCH_SWALLOWS:
+    "This catch discards a failure without handling; return a fallback value, rethrow, or mark the absorption intentional with @yield-absorb.",
+  EVENT_REJECTS:
+    "This handler can fail and nothing catches it; wrap the body in try/catch, or declare the failure.",
+  MODULE_STATE:
+    "Create this state inside a component or a state factory; module state is shared by every render.",
   READ_IN_SETUP: "Move this read into JSX, a memo, an effect, or an event so it stays reactive.",
   WRITE_IN_REACTIVE:
     "Move this write into an event or effect; a memo or JSX read cannot write state.",

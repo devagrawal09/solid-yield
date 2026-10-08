@@ -29,17 +29,17 @@
   },
   {
     "variant": "m03c_throw_in_handler.tsx",
-    "code": "FOREIGN_HANDOFF",
-    "tsCode": 2345,
+    "code": "EVENT_REJECTS",
+    "tsCode": 95000,
     "line": 9,
     "file": "App.tsx"
   },
   {
     "variant": "m04_async_handler.tsx",
-    "code": "FOREIGN_HANDOFF",
-    "tsCode": 2345,
-    "line": 4,
-    "file": "api.ts"
+    "code": "EVENT_REJECTS",
+    "tsCode": 95000,
+    "line": 10,
+    "file": "App.tsx"
   },
   {
     "variant": "m05_swallow.tsx",
@@ -115,7 +115,7 @@
     "variant": "s2c_noerrored.tsx",
     "code": "FOREIGN_HANDOFF",
     "tsCode": 2345,
-    "line": 4,
-    "file": "api.ts"
+    "line": 17,
+    "file": "App.tsx"
   }
 ]

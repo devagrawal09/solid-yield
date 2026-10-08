@@ -75,7 +75,7 @@ module.exports = function origins(ts, state, target, code, locate) {
       const kinds = ops.map(type => property(type, "KIND", expr)?.value);
       if (kinds.includes("context")) return authored(expr, host);
       if (kinds.includes("read")) {
-        if (field === "FAILS" && ts.isIdentifier(expr)) {
+        if (field === "FAILS" && host !== "view" && ts.isIdentifier(expr)) {
           const found = declaration(expr, host);
           if (found) return found;
         }

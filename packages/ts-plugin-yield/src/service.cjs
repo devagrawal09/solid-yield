@@ -129,6 +129,7 @@ function createVirtualService(ts, host, config = {}) {
     const generated = new Map(input),
       positions = new Map(),
       failures = [];
+    const inference = [];
     const options = {
       ...host.getCompilationSettings(),
       noEmit: true,
@@ -150,6 +151,7 @@ function createVirtualService(ts, host, config = {}) {
       if (!files.size) continue;
       try {
         const result = lower(files, { compilerOptions: options });
+        if (result.inference) inference.push(result.inference);
         for (const [f, code] of result.files) {
           const prefix = "/** @jsxImportSource solid-yield */\n";
           generated.set(f, prefix + code);
@@ -167,8 +169,9 @@ function createVirtualService(ts, host, config = {}) {
             file,
             start: file.getPositionOfLineAndCharacter(d.line - 1, d.column - 1),
             length: 1,
-            category: ts.DiagnosticCategory.Warning,
-            code: 95001,
+            category:
+              d.severity === "error" ? ts.DiagnosticCategory.Error : ts.DiagnosticCategory.Warning,
+            code: d.severity === "error" ? 95000 : 95001,
             source: "solid-yield",
             messageText: `[${d.code}] ${d.message}`
           });
@@ -241,6 +244,7 @@ function createVirtualService(ts, host, config = {}) {
     state = {
       originals,
       generated,
+      inference,
       positions,
       selected,
       failures,
@@ -321,7 +325,10 @@ function createVirtualService(ts, host, config = {}) {
         : `[GENERATED_TYPE] ${catalog.GENERATED_TYPE} Check the operation and its enclosing host.`;
     }
     let origin;
-    const related = d.relatedInformation?.map(r => mapped(r, s)) ?? [];
+    const related = (d.relatedInformation ?? [])
+      .filter(r => r.file && !r.file.isDeclarationFile)
+      .map(r => mapped(r, s))
+      .filter(Boolean);
     if (
       ["NATIVE_CALLBACK_FAILURE", "NATIVE_SETUP_FAILURE"].includes(code) &&
       ts.isFunctionLike(scope)
@@ -329,8 +336,29 @@ function createVirtualService(ts, host, config = {}) {
       origin = findOrigin(ts, s, scope, code, locate);
     }
     if (["FOREIGN_HANDOFF", "PENDING_ROOT", "NO_PROVIDER"].includes(code)) {
-      const target = ts.isSatisfiesExpression(node) ? node.expression : node;
+      let target = node;
+      const unwrap = n =>
+        ts.isSatisfiesExpression(n)
+          ? n.expression
+          : ts.isCallExpression(n) &&
+              ts.isIdentifier(n.expression) &&
+              (n.expression.text === "foreign" ||
+                checker
+                  .getSymbolAtLocation(n.expression)
+                  ?.declarations?.some(
+                    declaration =>
+                      ts.isImportSpecifier(declaration) &&
+                      (declaration.propertyName ?? declaration.name).text === "foreign"
+                  ))
+            ? unwrap(n.arguments[0])
+            : n;
+      if (ts.isCallExpression(scope)) target = unwrap(scope);
+      if (target === scope && scope.arguments?.[0] && ts.isSatisfiesExpression(scope.arguments[0]))
+        target = unwrap(scope.arguments[0]);
+      target = unwrap(target);
+      if (ts.isSatisfiesExpression(target.parent)) target = target.parent.expression;
       if (ts.isIdentifier(target)) {
+        at = locate(s.positions.get(sf.fileName), target.getStart(), target.getWidth()) ?? at;
         const colors = colorSummary(ts, checker, target);
         origin = findOrigin(ts, s, target, code, locate);
         const action =
@@ -339,7 +367,41 @@ function createVirtualService(ts, host, config = {}) {
             : code === "FOREIGN_HANDOFF"
               ? catalog.failureAdvice(origin?.host ?? "view")
               : catalog[code];
-        message = `[${code}] ${action}${colors?.requires !== "none" && code === "NO_PROVIDER" ? " Missing: " + colors.requires + "." : ""}`;
+        message = `[${code}] ${action}${code === "FOREIGN_HANDOFF" && colors ? " Remaining: " + colors.fails + "." : ""}${colors?.requires !== "none" && code === "NO_PROVIDER" ? " Missing: " + colors.requires + "." : ""}`;
+        let eventOwner;
+        if (code === "FOREIGN_HANDOFF" && origin?.file) {
+          const originalNode = leafAt(ts, origin.file, origin.sourceStart);
+          walk(ts, origin.file, n => {
+            if (ts.isFunctionDeclaration(n) && n.name?.text === originalNode.getText(origin.file))
+              eventOwner = n;
+          });
+        }
+        if (code === "FOREIGN_HANDOFF" && (origin?.host === "event" || eventOwner)) {
+          const event = s.failures.find(
+            d =>
+              d.file.fileName === (origin.handler?.file ?? origin.file).fileName &&
+              d.messageText.startsWith("[EVENT_REJECTS]") &&
+              (!eventOwner || (d.start >= eventOwner.getStart() && d.start < eventOwner.end))
+          );
+          if (event) {
+            const handoff = {
+              file: s.originals.get(sf.fileName),
+              start: at?.sourceStart ?? 0,
+              length: Math.max(1, (at?.sourceEnd ?? 1) - (at?.sourceStart ?? 0)),
+              category: ts.DiagnosticCategory.Message,
+              code: event.code,
+              messageText: "The app is rendered here."
+            };
+            event.relatedInformation ??= [];
+            if (
+              !event.relatedInformation.some(
+                r => r.file === handoff.file && r.start === handoff.start
+              )
+            )
+              event.relatedInformation.push(handoff);
+            return;
+          }
+        }
         if (origin?.handler)
           related.push({
             file: origin.handler.file,
@@ -356,7 +418,7 @@ function createVirtualService(ts, host, config = {}) {
             length: Math.max(1, (at?.sourceEnd ?? 1) - (at?.sourceStart ?? 0)),
             category: ts.DiagnosticCategory.Message,
             code: d.code,
-            messageText: `Component ${target.text} reaches Solid here. ${colors ? colorsText(colors) : ""}`
+            messageText: `The app is rendered here. ${colors ? colorsText(colors) : ""}`
           });
       }
     }
@@ -372,12 +434,85 @@ function createVirtualService(ts, host, config = {}) {
       ),
       source: "solid-yield",
       messageText: (!origin && (!at || at.generated) ? "[generated] " : "") + message,
-      relatedInformation: related.length ? related : undefined
+      relatedInformation: related.length
+        ? [
+            ...new Map(
+              related.map(r => [`${r.file.fileName}:${r.start}:${r.messageText}`, r])
+            ).values()
+          ]
+        : undefined
     };
+  }
+  function checkedEvents(s) {
+    const result = [],
+      checker = s.ls.getProgram().getTypeChecker();
+    for (const [file, original] of s.originals) {
+      if (!s.positions.has(file)) continue;
+      const sf = s.ls.getProgram().getSourceFile(file);
+      walk(ts, sf, n => {
+        if (
+          !ts.isJsxAttribute(n) ||
+          !/^on[A-Z]/.test(n.name.getText(sf)) ||
+          !n.initializer ||
+          !ts.isJsxExpression(n.initializer) ||
+          !n.initializer.expression
+        )
+          return;
+        const value = n.initializer.expression;
+        const expr = ts.isYieldExpression(value) ? value.expression : value;
+        if (!expr) return;
+        let type = checker.getTypeAtLocation(expr);
+        const iterator = type.getProperties().find(p => p.name.startsWith("__@iterator@"));
+        const signature =
+          iterator && checker.getTypeOfSymbolAtLocation(iterator, expr).getCallSignatures()[0];
+        if (!signature) return;
+        type = checker.getReturnTypeOfSignature(signature);
+        if (type.symbol?.name !== "Generator") return;
+        const operations = checker.getTypeArguments(type)[0];
+        for (const op of operations.isUnion() ? operations.types : [operations]) {
+          const property = op.getProperties().find(p => p.name.startsWith("__@FAILS@"));
+          const fails = property && checker.getTypeOfSymbolAtLocation(property, expr);
+          if (!fails || fails.flags & (ts.TypeFlags.Never | ts.TypeFlags.Any)) continue;
+          const colors = colorSummary(ts, checker, expr, [
+            checker.getNeverType(),
+            fails,
+            checker.getNeverType(),
+            checker.getNeverType()
+          ]);
+          const at = locate(s.positions.get(file), n.getStart(), n.getWidth());
+          if (!at || at.generated) continue;
+          let authored;
+          walk(ts, original, a => {
+            if (
+              ts.isJsxAttribute(a) &&
+              a.name.getText(original) === n.name.getText(sf) &&
+              a.getStart() >= at.sourceStart &&
+              a.getStart() < at.sourceEnd
+            )
+              authored = a;
+          });
+          const handler = authored?.initializer?.expression;
+          result.push({
+            file: original,
+            start: handler?.getStart() ?? at.sourceStart,
+            length: handler?.getWidth() ?? Math.max(1, at.sourceEnd - at.sourceStart),
+            code: 95000,
+            category: ts.DiagnosticCategory.Error,
+            source: "solid-yield",
+            messageText: `[EVENT_REJECTS] This handler can fail with ${colors.fails} and nothing catches it; wrap the body in try/catch, or declare the failure.`
+          });
+        }
+      });
+    }
+    return result;
   }
   function diagnostics(file, kind = "semantic") {
     const s = refresh(),
       f = resolve(file);
+    if (!s.eventsChecked) {
+      s.eventsChecked = true;
+      s.failures.push(...checkedEvents(s));
+    }
     s.diagnosticCache ??= new Map();
     if (!s.diagnosticCache.has(kind)) {
       const all = [...s.failures];
@@ -390,16 +525,35 @@ function createVirtualService(ts, host, config = {}) {
             : kind === "syntactic"
               ? s.ls.getSyntacticDiagnostics(source)
               : s.ls.getSemanticDiagnostics(source);
-        all.push(...ds.map(d => mapped(d, s)));
+        all.push(...ds.map(d => mapped(d, s)).filter(Boolean));
       }
       s.diagnosticCache.set(kind, all);
     }
     // tsserver assumes every primary span belongs to the requested file. Route
     // relocated root errors to the origin file, retaining the handoff as related.
     const result = s.diagnosticCache.get(kind).filter(d => resolve(d.file.fileName) === f);
+    // Satisfies and the following call reject the same root. Keep one public
+    // diagnostic, while preserving ordinary TypeScript errors at that span.
+    const rootCode = d => /^\[(PENDING_ROOT|NO_PROVIDER|FOREIGN_HANDOFF)\]/.test(d.messageText);
+    const withoutCascades = result.filter(
+      d =>
+        !d.messageText.includes("Fix the earlier errors") ||
+        !result.some(
+          other => other !== d && other.category === ts.DiagnosticCategory.Error && !rootCode(other)
+        )
+    );
+    const preferred = [...withoutCascades].sort(
+      (a, b) =>
+        (rootCode(a) && a.code === 1360 ? -1 : 0) - (rootCode(b) && b.code === 1360 ? -1 : 0)
+    );
     return [
       ...new Map(
-        result.map(d => [`${d.start}:${d.code}:${d.category}:${d.messageText}`, d])
+        preferred
+          .map(d => [
+            `${d.start}:${rootCode(d) && [2345, 1360].includes(d.code) ? "root" : d.code}:${d.category}:${d.messageText}`,
+            d
+          ])
+          .reverse()
       ).values()
     ];
   }
@@ -423,13 +577,48 @@ function createVirtualService(ts, host, config = {}) {
         c = colorSummary(ts, checker, node) ?? routineColors(ts, s, f, node, colorSummary);
       const qi = s.ls.getQuickInfoAtPosition(f, at.start);
       if (!qi) continue;
-      if (c)
+      if (c) {
+        let unknown = "";
+        for (const report of s.inference ?? []) {
+          const fn = report.functions.find(
+            fn => fn.name === node.getText(sf) && f.endsWith(fn.file)
+          );
+          if (!fn || !/unknown|any/.test(c.fails)) continue;
+          const reachable = new Set();
+          const visit = fn => {
+            if (!fn || reachable.has(fn.id)) return;
+            reachable.add(fn.id);
+            fn.calls.forEach(id => visit(report.functions.find(f => f.id === id)));
+          };
+          visit(fn);
+          const sites = report.unknownOrigins.filter(site =>
+            reachable.has(site.owner?.replace(process.cwd(), "<root>"))
+          );
+          if (sites.length)
+            unknown =
+              " (from " +
+              [
+                ...new Set(
+                  sites.map(
+                    site =>
+                      `${site.name} at ${require("node:path").basename(site.file)}:${site.line}`
+                  )
+                )
+              ].join("; ") +
+              ")";
+        }
         return {
           ...qi,
           textSpan: { start: at.sourceStart, length: at.sourceEnd - at.sourceStart },
-          displayParts: [{ kind: "text", text: `${node.getText(sf)} — ${colorsText(c)}` }],
+          displayParts: [
+            {
+              kind: "text",
+              text: `${node.getText(sf)} — ${colorsText(c).replaceAll("an unknown error", "an unknown error" + unknown)}`
+            }
+          ],
           documentation: []
         };
+      }
     }
     const at = candidates[0];
     if (!at) return;

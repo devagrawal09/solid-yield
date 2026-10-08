@@ -67,13 +67,13 @@ test("foreign handoffs explain inferred failure classes; library roots may fail"
     assert.ok(d, JSON.stringify(ds.map(d => d.messageText)));
     assert.match(
       d.relatedInformation[0].messageText,
-      /Component DocPage.*can fail with .*NotFound.*unknown/
+      /The app is rendered here.*can fail with .*NotFound.*unknown/
     );
     assert.match(
       d.messageText,
       /Wrap this rendered work in Errored, or handle the failure with attempt/
     );
-    assert.equal(d.file.getLineAndCharacterOfPosition(d.start).line + 1, 5);
+    assert.equal(d.file.getLineAndCharacterOfPosition(d.start).line + 1, 6);
   } finally {
     service.dispose();
   }

@@ -11,6 +11,15 @@ export interface FailureFunction {
 }
 export interface FailureReport {
   iterations: number;
+  diagnostics: { file: string; code: string; message: string; line: number; column: number }[];
+  unknownOrigins: {
+    file: string;
+    start: number;
+    end: number;
+    line: number;
+    name: string;
+    owner?: string;
+  }[];
   classes: {
     id: string;
     name: string;

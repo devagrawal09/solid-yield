@@ -238,16 +238,16 @@ function buildSteps(twins) {
       cmd: process.execPath,
       args:
         stage === "typecheck"
-          ? [
-              "packages/ts-plugin-yield/src/cli.cjs",
-              "check",
-              "examples/originals/todos",
-              "--native",
-              "src/**"
-            ]
+          ? ["scripts/native-todos-events.mjs", "typecheck"]
           : ["scripts/native-todos-check.mjs", stage]
     });
   }
+  steps.push({
+    name: "native:todos:events:snapshot",
+    cwd: root,
+    cmd: process.execPath,
+    args: ["scripts/native-todos-events.mjs", "snapshot"]
+  });
   for (const stage of ["parity", "ssr"]) {
     steps.push({
       name: `native:todos:${stage}`,

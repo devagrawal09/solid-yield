@@ -101,11 +101,11 @@ test("catching inside the reviewer's sync and async handlers removes their failu
     input["App.tsx"] = variant.startsWith("m03c")
       ? input["App.tsx"].replace(
           "throw new Error('x')",
-          "{ try { throw new Error('x'); } catch {} }"
+          "{ try { throw new Error('x'); } catch { /* @yield-absorb: test deliberately ignores this failure */ } }"
         )
       : input["App.tsx"].replace(
           "await fetchItems(); throw new Error('nope');",
-          "try { await fetchItems(); throw new Error('nope'); } catch {}"
+          "try { await fetchItems(); throw new Error('nope'); } catch { /* @yield-absorb: test deliberately ignores this failure */ }"
         );
     const { service } = makeService(input);
     try {
@@ -133,7 +133,7 @@ for (const c of require("./fixtures/review-app/expectations.json"))
         assert.equal(r.file.getLineAndCharacterOfPosition(r.start).line + 1, 3);
       }
       if (["m03c_throw_in_handler.tsx", "m04_async_handler.tsx"].includes(c.variant)) {
-        assert.match(d.messageText, /Catch.*handler.*fails contract/);
+        assert.match(d.messageText, /handler.*try\/catch.*declare the failure/);
         assert.doesNotMatch(d.messageText, /Errored/);
       }
     } finally {

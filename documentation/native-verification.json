@@ -258,7 +258,7 @@
     },
     {
       "id": "unknown-memo",
-      "source": "import {createMemo} from 'solid-js'; function load(){throw 'bad'} export function App(){const value=createMemo(()=>load());return <p>{value()}</p>}",
+      "source": "import {createMemo} from 'solid-js'; declare function load():number; export function App(){const value=createMemo(()=>load());return <p>{value()}</p>}",
       "expected": "accepted",
       "file": "packages/vite-plugin-yield/test/.native-generated/unknown-memo.tsx",
       "stage": "accepted",
@@ -432,7 +432,7 @@
         {
           "stage": "type",
           "code": "TS2345",
-          "message": "Argument of type 'HoleCall<{}, true, never, false, never>' is not assignable to parameter of type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<true, never, false, HoleRequires<...>>) & { ...; } & { ...; }'.\n  Type 'HoleCall<{}, true, never, false, never>' is not assignable to type '{ readonly \"[PENDING_ROOT] the root may be pending (a read under it has no Loading above): wrap the root, render(() => Loading({ children: App }), el), or put a Loading around the pending part\": true; }'.",
+          "message": "Argument of type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<true, never, false, HoleRequires<...>>) & { ...; }' is not assignable to parameter of type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<true, never, false, HoleRequires<...>>) & { ...; } & { ...; }'.\n  Type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<true, never, false, HoleRequires<...>>) & { ...; }' is not assignable to type '{ readonly \"[PENDING_ROOT] the root may be pending (a read under it has no Loading above): wrap the root, render(() => Loading({ children: App }), el), or put a Loading around the pending part\": true; }'.",
           "line": 26
         },
         {
@@ -580,7 +580,13 @@
         {
           "stage": "type",
           "code": "TS2345",
-          "message": "Argument of type 'HoleCall<{}, false, never, false, RequiredContext<number, \"<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C\">>' is not assignable to parameter of type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<false, never, false, RequiredContext<...> | HoleRequires<...>>) & { ...; } & { ...; }'.\n  Type 'HoleCall<{}, false, never, false, RequiredContext<number, \"<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C\">>' is not assignable to type '{ readonly \"[NO_PROVIDER] the root requires the contexts this property names: provide each above the components that read it (Ctx.provide({ value, children }) around their calls)\": \"<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C\"; }'.",
+          "message": "Argument of type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<false, never, false, RequiredContext<...> | HoleRequires<...>>) & { ...; }' is not assignable to parameter of type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<false, never, false, RequiredContext<...> | HoleRequires<...>>) & { ...; } & { ...; }'.\n  Type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<false, never, false, RequiredContext<...> | HoleRequires<...>>) & { ...; }' is not assignable to type '{ readonly \"[NO_PROVIDER] the root requires the contexts this property names: provide each above the components that read it (Ctx.provide({ value, children }) around their calls)\": \"<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C\"; }'.",
+          "line": 25
+        },
+        {
+          "stage": "type",
+          "code": "TS2345",
+          "message": "Argument of type 'HoleCall<{}, false, never, false, RequiredContext<number, \"<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C\">>' is not assignable to parameter of type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<false, never, false, RequiredContext<...> | HoleRequires<...>>) & { ...; } & { ...; }'.\n  Type 'HoleCall<{}, false, never, false, RequiredContext<number, \"<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C\">>' is not assignable to type '{ readonly \"[NO_PROVIDER] a yield component handed to plain Solid requires the contexts this property names: provide them inside it (Ctx.provide around the calls that read them), or list the ones provided above the foreign edge: foreign(Comp, { provided: [Ctx] })\": \"<root>/packages/vite-plugin-yield/test...'.",
           "line": 25
         },
         {
@@ -688,7 +694,7 @@
       "files": 1,
       "inference": {
         "status": "source call-graph estimate; generated colors unchecked until transform succeeds",
-        "iterations": 4,
+        "iterations": 1,
         "classes": [],
         "components": [
           {
@@ -697,9 +703,7 @@
             "line": 13,
             "server": false,
             "component": true,
-            "fails": [
-              "unknown"
-            ]
+            "fails": []
           },
           {
             "file": "examples/originals/sierpinski/src/main.tsx",
@@ -707,9 +711,7 @@
             "line": 51,
             "server": false,
             "component": true,
-            "fails": [
-              "unknown"
-            ]
+            "fails": []
           },
           {
             "file": "examples/originals/sierpinski/src/main.tsx",
@@ -737,7 +739,7 @@
       "files": 1,
       "inference": {
         "status": "source call-graph estimate; generated colors unchecked until transform succeeds",
-        "iterations": 4,
+        "iterations": 1,
         "classes": [],
         "components": [
           {
@@ -746,9 +748,7 @@
             "line": 13,
             "server": false,
             "component": true,
-            "fails": [
-              "unknown"
-            ]
+            "fails": []
           },
           {
             "file": "examples/originals/sierpinski/src/main.tsx",
@@ -756,9 +756,7 @@
             "line": 51,
             "server": false,
             "component": true,
-            "fails": [
-              "unknown"
-            ]
+            "fails": []
           },
           {
             "file": "examples/originals/sierpinski/src/main.tsx",
@@ -1322,8 +1320,11 @@
       "foreignBoundaries": [],
       "diagnostics": [
         {
-          "code": "SUGAR_CALLBACK",
-          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/examples/originals/effect/src/api.ts:177:68)"
+          "code": "MODULE_STATE",
+          "message": "Create this state inside a component or a state factory; module state is shared by every render.",
+          "file": "examples/originals/effect/src/log.ts",
+          "line": 20,
+          "column": 7
         }
       ],
       "parity": "not run: no checked native program",
@@ -1331,7 +1332,7 @@
       "differingStatements": null,
       "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
       "reasons": [
-        "SUGAR_CALLBACK"
+        "MODULE_STATE"
       ]
     },
     {
@@ -1340,7 +1341,7 @@
       "files": 11,
       "inference": {
         "status": "source call-graph estimate; generated colors unchecked until transform succeeds",
-        "iterations": 3,
+        "iterations": 5,
         "classes": [
           {
             "id": "global:Error",
@@ -1356,6 +1357,7 @@
             "server": false,
             "component": true,
             "fails": [
+              "global:Error",
               "unknown"
             ]
           },
@@ -1366,6 +1368,7 @@
             "server": false,
             "component": true,
             "fails": [
+              "global:Error",
               "unknown"
             ]
           },
@@ -1376,6 +1379,7 @@
             "server": false,
             "component": true,
             "fails": [
+              "global:Error",
               "unknown"
             ]
           },
@@ -1578,7 +1582,7 @@
       "files": 11,
       "inference": {
         "status": "source call-graph estimate; generated colors unchecked until transform succeeds",
-        "iterations": 4,
+        "iterations": 6,
         "classes": [
           {
             "id": "global:Error",
@@ -1634,6 +1638,7 @@
             "server": false,
             "component": true,
             "fails": [
+              "ChunkError",
               "global:Error",
               "unknown"
             ]
@@ -1645,6 +1650,7 @@
             "server": false,
             "component": true,
             "fails": [
+              "ChunkError",
               "global:Error",
               "unknown"
             ]
@@ -1656,6 +1662,7 @@
             "server": false,
             "component": true,
             "fails": [
+              "ChunkError",
               "global:Error",
               "unknown"
             ]
@@ -1675,6 +1682,7 @@
             "server": false,
             "component": true,
             "fails": [
+              "ChunkError",
               "global:Error",
               "unknown"
             ]
@@ -1705,6 +1713,7 @@
             "server": false,
             "component": true,
             "fails": [
+              "ChunkError",
               "global:Error",
               "unknown"
             ]
@@ -1970,6 +1979,7 @@
             "fails": [
               "ChunkError",
               "examples/originals/docs/src/errors.ts#NotFound@375",
+              "examples/originals/docs/src/errors.ts#RateLimited@489",
               "unknown"
             ]
           },
@@ -1982,6 +1992,7 @@
             "fails": [
               "ChunkError",
               "examples/originals/docs/src/errors.ts#NotFound@375",
+              "examples/originals/docs/src/errors.ts#RateLimited@489",
               "unknown"
             ]
           },
@@ -1993,6 +2004,7 @@
             "component": true,
             "fails": [
               "ChunkError",
+              "examples/originals/docs/src/errors.ts#BadEmail@549",
               "examples/originals/docs/src/errors.ts#NotFound@375",
               "examples/originals/docs/src/errors.ts#SearchError@429",
               "unknown"
@@ -2088,6 +2100,7 @@
             "server": false,
             "component": true,
             "fails": [
+              "examples/originals/docs/src/errors.ts#RateLimited@489",
               "unknown"
             ]
           },
@@ -2098,6 +2111,7 @@
             "server": false,
             "component": true,
             "fails": [
+              "examples/originals/docs/src/errors.ts#BadEmail@549",
               "unknown"
             ]
           },

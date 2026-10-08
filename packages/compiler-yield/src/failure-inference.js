@@ -17,7 +17,8 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
   const functions = [],
     byBody = new Map(),
     tsNodes = new Map(),
-    classes = new Map();
+    classes = new Map(),
+    classTypes = new Map();
   for (const [file, record] of analysis.modules) {
     const source = program.getSourceFile(file);
     if (source) {
@@ -112,6 +113,7 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
       const id = builtin
         ? `global:${symbol.name}`
         : `${relative(root, declaration.getSourceFile().fileName)}#${symbol.name}@${declaration.pos}`;
+      classTypes.set(id, type);
       classes.set(id, {
         id,
         name: symbol.name,
@@ -134,9 +136,30 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
     const callee = p.get("callee"),
       api = imported(callee);
     if (api?.source === "solid-js") return api.name;
+    if (
+      p.isNewExpression() &&
+      callee.isIdentifier({ name: "Promise" }) &&
+      !callee.scope.getBinding("Promise")
+    )
+      return "promise-constructor";
+    if (callee.isIdentifier()) {
+      const binding = callee.scope.getBinding(callee.node.name);
+      const fn = binding?.path.getFunctionParent();
+      const construct = fn?.parentPath;
+      if (
+        binding?.kind === "param" &&
+        construct?.isNewExpression() &&
+        construct.get("callee").isIdentifier({ name: "Promise" }) &&
+        !construct.scope.getBinding("Promise")
+      ) {
+        if (fn.node.params[0]?.name === callee.node.name) return "promise-resolve";
+        if (fn.node.params[1]?.name === callee.node.name) return "promise-reject";
+      }
+    }
     const call = nodeFor(p);
     const declaration = call && checker.getResolvedSignature(call)?.declaration;
     const builtin = declaration && program.isSourceFileDefaultLibrary(declaration.getSourceFile());
+    if (builtin && callee.isSuper()) return "builtin-super";
     if (
       builtin &&
       callee.isIdentifier() &&
@@ -157,6 +180,15 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
 
       const object = callee.get("object"),
         method = name(callee.node.property);
+      const value = nodeFor(object),
+        valueType = value && checker.getTypeAtLocation(value);
+      if (
+        valueType &&
+        ((valueType.flags & ts.TypeFlags.StringLike &&
+          ["trim", "slice", "substring", "toLowerCase", "toUpperCase"].includes(method)) ||
+          (valueType.flags & ts.TypeFlags.NumberLike && method === "toString"))
+      )
+        return "primitive-method";
       if (
         object.isIdentifier() &&
         !object.scope.getBinding(object.node.name) &&
@@ -216,6 +248,75 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
     owner.calls.add(fn.id);
     return union(fn.fails, fn.server ? new Set(["ChunkError"]) : []);
   };
+  // Match nominal inheritance, never TypeScript structural assignability (I3/I4).
+  function covered(id, guard) {
+    if (id === "unknown") return false;
+    let symbol = checker.getSymbolAtLocation(nodeFor(guard));
+    if (symbol?.flags & ts.SymbolFlags.Alias) symbol = checker.getAliasedSymbol(symbol);
+    const seen = new Set();
+    function inherits(type) {
+      if (!type || seen.has(type)) return false;
+      seen.add(type);
+      return type.getSymbol() === symbol || (type.getBaseTypes?.() ?? []).some(inherits);
+    }
+    return inherits(classTypes.get(id));
+  }
+  function handle(body, param, input, owner, caught) {
+    const binding = param?.isIdentifier() ? param.scope.getBinding(param.node.name) : null;
+    const next = new Map(caught);
+    if (binding)
+      next.set(binding, binding.constantViolations.length ? new Set(["unknown"]) : input);
+    function branches(test, env) {
+      let positive = true;
+      if (test.isUnaryExpression({ operator: "!" })) {
+        positive = false;
+        test = test.get("argument");
+      }
+      if (
+        !binding ||
+        binding.constantViolations.length ||
+        !test.isBinaryExpression({ operator: "instanceof" }) ||
+        !test.get("left").isIdentifier({ name: param.node.name })
+      )
+        return [env, env];
+      const incoming = env.get(binding),
+        yes = new Map(env),
+        no = new Map(env);
+      yes.set(
+        binding,
+        new Set([...incoming].filter(k => k === "unknown" || covered(k, test.get("right"))))
+      );
+      no.set(binding, new Set([...incoming].filter(k => !covered(k, test.get("right")))));
+      return positive ? [yes, no] : [no, yes];
+    }
+    function flow(p, env) {
+      if (!p?.node) return { effects: new Set(), paths: [env] };
+      if (p.isBlockStatement()) {
+        let paths = [env],
+          effects = new Set();
+        for (const statement of p.get("body")) {
+          const results = paths.map(e => flow(statement, e));
+          effects = union(effects, ...results.map(r => r.effects));
+          paths = results.flatMap(r => r.paths);
+        }
+        return { effects, paths };
+      }
+      if (p.isIfStatement()) {
+        const [yes, no] = branches(p.get("test"), env);
+        const a = flow(p.get("consequent"), yes),
+          b = flow(p.get("alternate"), no);
+        return {
+          effects: union(evaluate(p.get("test"), owner, env), a.effects, b.effects),
+          paths: [...a.paths, ...b.paths]
+        };
+      }
+      return {
+        effects: evaluate(p, owner, env),
+        paths: p.isReturnStatement() || p.isThrowStatement() ? [] : [env]
+      };
+    }
+    return flow(body, next).effects;
+  }
   function evaluate(p, owner, caught = new Map()) {
     if (!p?.node) return new Set();
     if (Array.isArray(p)) return union(...p.map(q => evaluate(q, owner, caught)));
@@ -231,21 +332,25 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
       const body = evaluate(p.get("block"), owner, caught),
         handler = p.get("handler");
       if (!handler.node) return union(body, evaluate(p.get("finalizer"), owner, caught));
-      const next = new Map(caught),
-        param = handler.get("param");
-      if (param?.isIdentifier()) {
-        const binding = handler.scope.getBinding(param.node.name);
-        const escaping = binding?.referencePaths.some(
-          r =>
-            !(
-              r.parentPath.isThrowStatement() ||
-              (r.parentPath.isBinaryExpression() && r.parentPath.node.operator === "instanceof")
-            )
-        );
-        next.set(binding, escaping ? new Set(["unknown"]) : body);
-      }
+      // A promise returned without await is rejected after this catch has ended.
+      const delayed = [];
+      p.get("block").traverse({
+        Function(q) {
+          q.skip();
+        },
+        CallExpression(q) {
+          const n = nodeFor(q);
+          if (
+            n &&
+            checker.getPromisedTypeOfPromise(checker.getTypeAtLocation(n)) &&
+            !q.findParent(a => a === p || a.isAwaitExpression())?.isAwaitExpression()
+          )
+            delayed.push(evaluate(q, owner, caught));
+        }
+      });
       return union(
-        evaluate(handler.get("body"), owner, next),
+        handle(handler.get("body"), handler.get("param"), body, owner, caught),
+        ...delayed,
         evaluate(p.get("finalizer"), owner, caught)
       );
     }
@@ -290,20 +395,7 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
         const handler = args[method === "then" ? 1 : 0];
         let handled = input;
         if (handler?.isFunction() && method !== "finally") {
-          const next = new Map(caught),
-            param = handler.get("params.0");
-          if (param?.isIdentifier()) {
-            const binding = handler.scope.getBinding(param.node.name);
-            const escaping = binding?.referencePaths.some(
-              r =>
-                !(
-                  r.parentPath.isThrowStatement() ||
-                  (r.parentPath.isBinaryExpression() && r.parentPath.node.operator === "instanceof")
-                )
-            );
-            next.set(binding, escaping ? new Set(["unknown"]) : input);
-          }
-          handled = evaluate(handler.get("body"), owner, next);
+          handled = handle(handler.get("body"), handler.get("params.0"), input, owner, caught);
         }
         if (
           handler?.node &&
@@ -311,7 +403,7 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
           !handler.isIdentifier({ name: "undefined" }) &&
           method !== "finally"
         )
-          handled = invoke(target(handler), owner);
+          handled = union(input, invoke(target(handler), owner));
         const signature = checker.getResolvedSignature(nodeFor(p))?.declaration;
         const nativePromise =
           signature && program.isSourceFileDefaultLibrary(signature.getSourceFile());
@@ -329,6 +421,27 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
       }
       const primitive = nativeCall(p);
       if (primitive) {
+        if (primitive === "promise-resolve") {
+          const value = args[0]?.node && nodeFor(args[0]);
+          const type = value && checker.getTypeAtLocation(value);
+          const primitiveValue = part =>
+            !!(
+              part.flags &
+              (ts.TypeFlags.StringLike |
+                ts.TypeFlags.NumberLike |
+                ts.TypeFlags.BooleanLike |
+                ts.TypeFlags.BigIntLike |
+                ts.TypeFlags.Null |
+                ts.TypeFlags.Undefined |
+                ts.TypeFlags.Void)
+            );
+          return union(
+            argEffects,
+            !type || (type.isUnion() ? type.types : [type]).every(primitiveValue) ? [] : ["unknown"]
+          );
+        }
+        if (primitive === "promise-reject")
+          return union(argEffects, args[0] ? classSet(args[0]) : ["unknown"]);
         let callbacks = args
           .filter(a => a.isFunction())
           .map(a => invoke(byBody.get(`${owner.file}:${a.node.body.start}`), owner));
@@ -435,8 +548,152 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
       }
     }
   }
+  function intentionalAbsorption(p) {
+    const marked = node =>
+      [
+        ...(node?.leadingComments ?? []),
+        ...(node?.trailingComments ?? []),
+        ...(node?.innerComments ?? [])
+      ].some(c => /@yield-absorb\b/.test(c.value));
+    let result = marked(p.node) || marked(p.node.body);
+    p.get("body").traverse({
+      enter(q) {
+        result ||= marked(q.node);
+      }
+    });
+    return result;
+  }
+  const diagnostics = [],
+    unknownOrigins = [];
+  const display = values =>
+    [...values]
+      .map(k => classes.get(k)?.name ?? k)
+      .sort()
+      .join(" | ");
+  function completions(p) {
+    if (!p?.node) return ["silent"];
+    if (p.isReturnStatement()) return [p.node.argument ? "handled" : "discarded"];
+    if (p.isThrowStatement()) return ["forwarded"];
+    if (
+      p.isExpressionStatement() &&
+      p.get("expression").isAssignmentExpression() &&
+      p.get("expression.left").isMemberExpression()
+    )
+      return ["handled"];
+    if (
+      p.isExpressionStatement() &&
+      p.get("expression").isCallExpression() &&
+      nativeCall(p.get("expression")) === "array-callback"
+    ) {
+      const callback = p.get("expression.arguments.0");
+      if (callback?.isFunction() && completions(callback.get("body")).every(c => c === "handled"))
+        return ["handled"];
+    }
+    if (p.isExpressionStatement() && p.get("expression").isCallExpression()) {
+      const call = p.get("expression"),
+        callee = call.get("callee");
+      const binding = callee.isIdentifier()
+        ? callee.scope.getBinding(callee.node.name)?.path
+        : null;
+      // A state write supplies a visible fallback, rather than discarding the error.
+      if (
+        binding?.isVariableDeclarator() &&
+        binding.get("id").isArrayPattern() &&
+        binding.node.id.elements[1]?.name === callee.node.name &&
+        nativeCall(call)
+      )
+        return ["handled"];
+    }
+    if (p.isIfStatement())
+      return [...completions(p.get("consequent")), ...completions(p.get("alternate"))];
+    if (p.isBlockStatement()) {
+      let paths = ["open"];
+      for (const q of p.get("body"))
+        paths = paths.flatMap(v =>
+          v === "open" ? completions(q).map(c => (c === "silent" ? "open" : c)) : [v]
+        );
+      return paths.map(c => (c === "open" ? "silent" : c));
+    }
+    return ["silent"];
+  }
+  for (const [file, record] of analysis.modules) {
+    const emit = (p, code, message) =>
+      diagnostics.push({
+        file,
+        code,
+        message,
+        line: p.node.loc.start.line,
+        column: p.node.loc.start.column + 1
+      });
+    const ownerOf = p =>
+      functions.find(f => f.path.node === p.getFunctionParent()?.node) ?? {
+        file,
+        calls: new Set()
+      };
+    record.program.traverse({
+      CatchClause(p) {
+        const input = evaluate(p.parentPath.get("block"), ownerOf(p));
+        if (
+          input.size &&
+          completions(p.get("body")).some(c => c === "silent" || c === "discarded") &&
+          !intentionalAbsorption(p)
+        )
+          emit(
+            p,
+            "CATCH_SWALLOWS",
+            `This catch discards ${display(input)} without handling; return a fallback value, rethrow, or mark the absorption intentional with @yield-absorb.`
+          );
+      },
+      JSXAttribute(p) {
+        if (!/^on[A-Z]/.test(name(p.node.name)) || !p.get("value").isJSXExpressionContainer())
+          return;
+        const value = p.get("value.expression");
+        const fn = value.isFunction()
+          ? byBody.get(`${file}:${value.node.body.start}`)
+          : target(value);
+        const binding = value.isIdentifier() ? value.scope.getBinding(value.node.name)?.path : null;
+        const fails = fn
+          ? fn.fails
+          : binding?.isVariableDeclarator() &&
+              binding.get("init").isCallExpression() &&
+              nativeCall(binding.get("init"))
+            ? evaluate(binding.get("init"), ownerOf(p))
+            : new Set(["unknown"]);
+        if (fails.size)
+          emit(
+            value,
+            "EVENT_REJECTS",
+            `This handler can fail with ${display(fails)} and nothing catches it; wrap the body in try/catch, or declare the failure.`
+          );
+      },
+      ThrowStatement(p) {
+        if (classSet(p.get("argument")).has("unknown"))
+          unknownOrigins.push({
+            file,
+            start: p.node.start,
+            end: p.node.end,
+            line: p.node.loc.start.line,
+            name: "throw " + p.get("argument").toString(),
+            owner: ownerOf(p).id
+          });
+      },
+      "CallExpression|NewExpression"(p) {
+        if (!nativeCall(p) && !target(p))
+          unknownOrigins.push({
+            file,
+            start: p.node.start,
+            end: p.node.end,
+            line: p.node.loc.start.line,
+            name: p.get("callee").toString(),
+            owner: ownerOf(p).id
+          });
+      }
+    });
+  }
   return {
     iterations,
+    diagnostics,
+    unknownOrigins,
     classes: [...classes.values()],
     functions: functions.map(({ path, pure, ...fn }) => ({
       ...fn,
@@ -461,7 +718,7 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
       const fn = target(site);
       return {
         fails: [...evaluate(site, owner)],
-        native: !!nativeCall(site),
+        native: !!nativeCall(site) && nativeCall(site) !== "promise-constructor",
         target: fn?.id,
         promise: !!checker.getPromisedTypeOfPromise(checker.getTypeAtLocation(nodeFor(site))),
         async: !!fn?.path.node.async

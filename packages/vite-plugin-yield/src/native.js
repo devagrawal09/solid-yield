@@ -955,6 +955,7 @@ export function nativeForeignDiagnostics(files, options = {}) {
     p?.traverse({
       JSXOpeningElement(q) {
         const tag = q.get("name");
+        if (tag.isJSXIdentifier() && /^[a-z]/.test(tag.node.name)) return;
         let api = imported(tag);
         if (!api && tag.isJSXIdentifier()) {
           const declaration = tag.scope.getBinding(tag.node.name)?.path;

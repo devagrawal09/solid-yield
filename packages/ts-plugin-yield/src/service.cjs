@@ -20,6 +20,44 @@ function leafAt(ts, sf, pos) {
   });
   return best;
 }
+// Refusal coordinates may belong to intermediate code. Never ask TS to
+// convert an invalid coordinate; use the enclosing authored routine instead.
+function diagnosticSpan(ts, file, diagnostic, sourceSpan) {
+  const starts = file.getLineStarts();
+  const line = diagnostic.line - 1,
+    column = diagnostic.column - 1;
+  const valid =
+    Number.isInteger(line) &&
+    Number.isInteger(column) &&
+    line >= 0 &&
+    line < starts.length &&
+    column >= 0 &&
+    column <= (starts[line + 1] ?? file.text.length) - starts[line];
+  const validSpan =
+    sourceSpan &&
+    Number.isInteger(sourceSpan.sourceStart) &&
+    Number.isInteger(sourceSpan.sourceEnd) &&
+    sourceSpan.sourceStart >= 0 &&
+    sourceSpan.sourceEnd >= sourceSpan.sourceStart &&
+    sourceSpan.sourceEnd <= file.text.length;
+  if (validSpan)
+    return {
+      start: sourceSpan.sourceStart,
+      length: Math.max(1, sourceSpan.sourceEnd - sourceSpan.sourceStart),
+      generated: sourceSpan.generated
+    };
+  if (valid) return { start: starts[line] + column, length: 1, generated: false };
+  const hint = starts[Math.max(0, Math.min(starts.length - 1, Number.isFinite(line) ? line : 0))];
+  let routine;
+  walk(ts, file, n => {
+    if (ts.isFunctionLike(n) && n.getStart(file) <= hint && n.end >= hint) routine = n;
+  });
+  return {
+    start: routine?.getStart(file) ?? 0,
+    length: Math.max(1, routine?.getWidth(file) ?? file.text.length),
+    generated: true
+  };
+}
 function symbolKey(symbol) {
   return symbol.declarations?.[0]?.name?.expression?.text;
 }
@@ -149,60 +187,62 @@ function createVirtualService(ts, host, config = {}) {
       [sugar, lowerSugarProject]
     ]) {
       if (!files.size) continue;
-      try {
-        const result = lower(files, { compilerOptions: options });
-        if (result.inference) inference.push(result.inference);
-        for (const [f, code] of result.files) {
-          const prefix = "/** @jsxImportSource solid-yield */\n";
-          generated.set(f, prefix + code);
-          positions.set(
-            f,
-            result.positions
-              .get(f)
-              .map(r => ({ ...r, start: r.start + prefix.length, end: r.end + prefix.length }))
-          );
-        }
-        for (const d of result.diagnostics ?? []) {
-          const file = originals.get(d.file);
-          if (!file) continue;
-          failures.push({
-            file,
-            start: file.getPositionOfLineAndCharacter(d.line - 1, d.column - 1),
-            length: 1,
-            category:
-              d.severity === "error" ? ts.DiagnosticCategory.Error : ts.DiagnosticCategory.Warning,
-            code: d.severity === "error" ? 95000 : 95001,
-            source: "solid-yield",
-            messageText: `[${d.code}] ${d.message}`
-          });
-        }
-      } catch (e) {
-        const ds = e.diagnostics ?? [
-          {
-            file: e.id ?? e.loc?.file ?? [...files.keys()][0],
-            line: e.loc?.line ?? 1,
-            column: (e.loc?.column ?? 0) + 1,
-            code: e.code ?? "TRANSFORM",
-            message: e.message
-          }
-        ];
-        for (const d of ds) {
-          const file = originals.get(resolve(d.file)) ?? originals.get([...files.keys()][0]);
-          const start =
-            e.sourceSpan?.sourceStart ??
-            file.getPositionOfLineAndCharacter(
-              Math.min(d.line - 1, file.getLineStarts().length - 1),
-              d.column - 1
+      const pending = new Map(files);
+      while (pending.size) {
+        try {
+          const result = lower(pending, { compilerOptions: options });
+          if (result.inference) inference.push(result.inference);
+          for (const [f, code] of result.files) {
+            const prefix = "/** @jsxImportSource solid-yield */\n";
+            generated.set(f, prefix + code);
+            positions.set(
+              f,
+              result.positions
+                .get(f)
+                .map(r => ({ ...r, start: r.start + prefix.length, end: r.end + prefix.length }))
             );
-          failures.push({
-            file,
-            start,
-            length: Math.max(1, (e.sourceSpan?.sourceEnd ?? start + 1) - start),
-            code: 95000,
-            source: "solid-yield",
-            category: ts.DiagnosticCategory.Error,
-            messageText: `[${d.code}] ${catalog[d.code] ?? d.message.replace(/^\[[A-Z_]+\]\s*/, "").replace(/\s*\([^\n]*:\d+:\d+\)\.?$/, "")}`
-          });
+          }
+          for (const d of result.diagnostics ?? []) {
+            const file = originals.get(d.file);
+            if (!file) continue;
+            failures.push({
+              file,
+              ...diagnosticSpan(ts, file, d),
+              category:
+                d.severity === "error"
+                  ? ts.DiagnosticCategory.Error
+                  : ts.DiagnosticCategory.Warning,
+              code: d.severity === "error" ? 95000 : 95001,
+              source: "solid-yield",
+              messageText: `[${d.code}] ${d.message}`
+            });
+          }
+          break;
+        } catch (e) {
+          const ds = e.diagnostics ?? [
+            {
+              file: e.id ?? e.loc?.file ?? [...files.keys()][0],
+              line: e.loc?.line ?? 1,
+              column: (e.loc?.column ?? 0) + 1,
+              code: e.code ?? "TRANSFORM",
+              message: e.message
+            }
+          ];
+          for (const d of ds) {
+            const refused = resolve(d.file ?? [...pending.keys()][0]);
+            const file = originals.get(refused) ?? originals.get([...pending.keys()][0]);
+            pending.delete(file.fileName);
+            const span = diagnosticSpan(ts, file, d, e.sourceSpan);
+            failures.push({
+              file,
+              start: span.start,
+              length: span.length,
+              code: 95000,
+              source: "solid-yield",
+              category: ts.DiagnosticCategory.Error,
+              messageText: `${span.generated ? "[generated] " : ""}[${d.code}] ${catalog[d.code] ?? d.message.replace(/^\[[A-Z_]+\]\s*/, "").replace(/\s*\([^\n]*:\d+:\d+\)\.?$/, "")}`
+            });
+          }
         }
       }
     }
@@ -652,4 +692,4 @@ function createVirtualService(ts, host, config = {}) {
     }
   };
 }
-module.exports = { createVirtualService, colorSummary, colorsText };
+module.exports = { createVirtualService, colorSummary, colorsText, diagnosticSpan };

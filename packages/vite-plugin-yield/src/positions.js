@@ -70,13 +70,19 @@ export function printMapped(ast) {
     })?.code ?? "";
   const context = session?.roots.get(ast.program);
   if (!context) return output;
-  const printed = babel.parseSync(output, {
-    filename: context.file,
-    configFile: false,
-    babelrc: false,
-    parserOpts: context.parserOpts,
-    sourceType: "module"
-  });
+  let printed;
+  try {
+    printed = babel.parseSync(output, {
+      filename: context.file,
+      configFile: false,
+      babelrc: false,
+      parserOpts: context.parserOpts,
+      sourceType: "module"
+    });
+  } catch (error) {
+    Object.assign(/** @type {Error} */ (error), { id: context.file });
+    throw error;
+  }
   /** @type {Position[]} */ const table = [];
   /** @param {any} before @param {any} after @param {Span | undefined} [inherited] */
   function pair(before, after, inherited) {
@@ -132,18 +138,24 @@ export function withPositions(input, run) {
   };
   try {
     for (const [file, code] of session.input) {
-      const ast = babel.parseSync(code, {
-        filename: file,
-        configFile: false,
-        babelrc: false,
-        parserOpts: {
-          plugins: /** @type {any} */ ([
-            ...(/\.[mc]?tsx?$/.test(file) ? ["typescript"] : []),
-            ...(!/\.[mc]?ts$/.test(file) ? ["jsx"] : []),
-            "decorators"
-          ])
-        }
-      });
+      let ast;
+      try {
+        ast = babel.parseSync(code, {
+          filename: file,
+          configFile: false,
+          babelrc: false,
+          parserOpts: {
+            plugins: /** @type {any} */ ([
+              ...(/\.[mc]?tsx?$/.test(file) ? ["typescript"] : []),
+              ...(!/\.[mc]?ts$/.test(file) ? ["jsx"] : []),
+              "decorators"
+            ])
+          }
+        });
+      } catch (error) {
+        Object.assign(/** @type {Error} */ (error), { id: file });
+        throw error;
+      }
       /** @type {{start:number,end:number,name:Span}[]} */ const routines = [];
       walk(ast?.program, n => {
         const fn = babel.types.isFunction(n)

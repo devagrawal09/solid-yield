@@ -52,6 +52,8 @@ export interface FailureReport {
     resultType: string;
   } | null;
   foreignState(file: string, start: number, end: number): boolean;
+  /** F-S37: the guarded value's name when this throw is a native context guard. */
+  guard(file: string, start: number, end: number): string | null;
   at(
     file: string,
     start: number

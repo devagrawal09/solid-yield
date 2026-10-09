@@ -313,12 +313,18 @@ export function lowerNativeEffects(files, report) {
           });
           throw error;
         }
-        used.add("raise");
+        // F-S37: a context guard raises only what its value's narrowed type admits.
+        const guard = report.guard(file, q.node.start ?? 0, q.node.end ?? 0);
+        used.add(guard ? "nativeContextGuard" : "raise");
         if (fn) fn.node.returnType = null;
+        const failure = adapt(
+          report.throws(file, q.node.start ?? 0, q.node.end ?? 0),
+          q.node.argument
+        );
         const raised = copyPosition(
-          t.callExpression(t.identifier("__nativeRaise"), [
-            adapt(report.throws(file, q.node.start ?? 0, q.node.end ?? 0), q.node.argument)
-          ]),
+          guard
+            ? t.callExpression(t.identifier("__nativeContextGuard"), [t.identifier(guard), failure])
+            : t.callExpression(t.identifier("__nativeRaise"), [failure]),
           q.node
         );
         // raise always throws at runtime; preserve that non-returning path in a
@@ -780,7 +786,8 @@ export function lowerNativeEffects(files, report) {
       nativeFailure: "__nativeFailure",
       registerNativeFailure: "__nativeRegister",
       nativeFailureValue: "__nativeValue",
-      nativeInvoke: "__nativeInvoke"
+      nativeInvoke: "__nativeInvoke",
+      nativeContextGuard: "__nativeContextGuard"
     };
     for (const module of ["solid-yield", "solid-yield/internal"]) {
       const names = [...used].filter(n =>

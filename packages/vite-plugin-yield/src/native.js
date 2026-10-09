@@ -711,9 +711,34 @@ function surface(
       if (api.name === "useContext") {
         if (q.node.arguments.length !== 1 || !t.isExpression(q.node.arguments[0]))
           fail(q, "NATIVE_CONTEXT", "useContext requires one statically resolved context.");
-        if (q.parentPath.isVariableDeclarator() && t.isIdentifier(q.parentPath.node.id))
-          valueReads(q.parentPath, q.parentPath.node.id.name);
-        q.replaceWith(copyPosition(t.callExpression(q.node.arguments[0], []), q.node));
+        const declarator = q.parentPath.isVariableDeclarator() ? q.parentPath : null;
+        const name =
+          declarator && t.isIdentifier(declarator.node.id) ? declarator.node.id.name : null;
+        // F-S37: a value used whole (a guard, a return) is what Solid's useContext
+        // returns, set once by its provider, so setup may hold it; only the
+        // requirement is an op. A value read only through its members (the
+        // prelude's destructuring) stays a path, read where its members are.
+        const whole =
+          name &&
+          declarator?.scope
+            .getBinding(name)
+            ?.referencePaths.some(
+              ref =>
+                !ref.findParent(r => r.isTSType()) &&
+                !(ref.parentPath?.isMemberExpression() && ref.key === "object")
+            );
+        if (whole) {
+          needed.add("__nativeUseContext");
+          q.replaceWith(
+            copyPosition(
+              t.callExpression(t.identifier("__nativeUseContext"), [q.node.arguments[0]]),
+              q.node
+            )
+          );
+        } else {
+          if (name && declarator) valueReads(declarator, name);
+          q.replaceWith(copyPosition(t.callExpression(q.node.arguments[0], []), q.node));
+        }
       } else if (api.name === "createContext") {
         if (!q.parentPath.isVariableDeclarator() || !t.isIdentifier(q.parentPath.node.id))
           fail(
@@ -1104,6 +1129,13 @@ function surface(
       t.importDeclaration(
         [t.importSpecifier(t.identifier("__nativeOwnerCleanup"), t.identifier("onCleanup"))],
         t.stringLiteral("solid-js")
+      )
+    );
+  if (needed.delete("__nativeUseContext"))
+    p.node.body.unshift(
+      t.importDeclaration(
+        [t.importSpecifier(t.identifier("__nativeUseContext"), t.identifier("nativeUseContext"))],
+        t.stringLiteral("solid-yield/internal")
       )
     );
   if (needed.delete("__nativeCallback"))

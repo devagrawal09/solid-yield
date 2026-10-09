@@ -30,6 +30,7 @@ export function inferFailures(
     classTypes = new Map(),
     callSites = new Map(),
     throwSites = new Map(),
+    guardSites = new Map(),
     swallowed = new Map();
   for (const [file, record] of analysis.modules) {
     const source = program.getSourceFile(file);
@@ -277,6 +278,63 @@ export function inferFailures(
     return b?.isImportSpecifier()
       ? { source: b.parentPath.node.source.value, name: name(b.node.imported) }
       : null;
+  };
+  /**
+   * F-S37: `const value = useContext(Ctx); … if (!value) throw …`. Solid's
+   * useContext throws first when no provider is above, so the guard can only
+   * see a value the provider gave: it fires only for one its declared type
+   * admits (falsy for `!value`, null/undefined for `== null` and friends).
+   */
+  const contextGuard = p => {
+    let statement = p;
+    if (statement.parentPath.isBlockStatement() && statement.parentPath.node.body.length === 1)
+      statement = statement.parentPath;
+    const branch = statement.parentPath;
+    if (!branch?.isIfStatement() || statement.key !== "consequent" || branch.node.alternate)
+      return null;
+    const test = branch.get("test");
+    /** @type {any} */ let subject = null;
+    /** @type {"falsy" | "nullish" | "null" | "undefined"} */ let kind = "falsy";
+    if (test.isUnaryExpression({ operator: "!" })) subject = test.get("argument");
+    else if (test.isBinaryExpression() && ["==", "==="].includes(test.node.operator)) {
+      const absent = x => x.isNullLiteral() || x.isIdentifier({ name: "undefined" });
+      const [left, right] = [test.get("left"), test.get("right")];
+      const literal = absent(right) ? right : absent(left) ? left : null;
+      subject = literal === right ? left : literal === left ? right : null;
+      kind =
+        test.node.operator === "==" ? "nullish" : literal?.isNullLiteral() ? "null" : "undefined";
+    }
+    if (!subject?.isIdentifier()) return null;
+    const binding = subject.scope.getBinding(subject.node.name);
+    if (binding?.kind !== "const" || !binding.path.isVariableDeclarator()) return null;
+    const init = binding.path.get("init");
+    if (!init.isCallExpression()) return null;
+    const api = imported(init.get("callee"));
+    if (api?.source !== "solid-js" || api.name !== "useContext") return null;
+    return { subject, kind };
+  };
+  const guardCanFire = guard => {
+    const node = nodeFor(guard.subject);
+    if (!node) return true;
+    const type = checker.getTypeAtLocation(node);
+    const F = ts.TypeFlags;
+    const open = F.Any | F.Unknown | F.Instantiable;
+    const mask =
+      guard.kind === "falsy"
+        ? open |
+          F.Null |
+          F.Undefined |
+          F.Void |
+          F.BooleanLike |
+          F.NumberLike |
+          F.StringLike |
+          F.BigIntLike
+        : guard.kind === "null"
+          ? open | F.Null
+          : guard.kind === "undefined"
+            ? open | F.Undefined | F.Void
+            : open | F.Null | F.Undefined | F.Void;
+    return (type.isUnion() ? type.types : [type]).some(part => !!(part.flags & mask));
   };
   const nativeCall = p => {
     const callee = p.get("callee"),
@@ -589,6 +647,11 @@ export function inferFailures(
       const kinds = forwarded ?? classSet(arg);
       const key = `${owner.file}:${p.node.start}:${p.node.end}`;
       throwSites.set(key, union(throwSites.get(key) ?? [], kinds));
+      const guard = contextGuard(p);
+      if (guard) {
+        guardSites.set(key, guard.subject.node.name);
+        if (!guardCanFire(guard)) return new Set();
+      }
       return union(kinds, evaluate(arg, owner, caught));
     }
     if (p.isTryStatement()) {
@@ -1057,6 +1120,9 @@ export function inferFailures(
           ts.TypeFormatFlags.NoTruncation | ts.TypeFormatFlags.UseFullyQualifiedType
         )
       };
+    },
+    guard(file, start, end) {
+      return guardSites.get(`${file}:${start}:${end}`) ?? null;
     },
     foreignState(file, start, end) {
       return moduleState(tsNodes.get(`${file}:${start}:${end}`));

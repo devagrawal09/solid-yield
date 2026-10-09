@@ -1,25 +1,34 @@
-# Native dashboard: F-S36 fixed, F-S37 stop (2026-10-09)
+# Native dashboard: F-S37 fixed; next reasons F-S38–F-S43 (2026-10-09)
 
-F-S36 was a type-lowering gap. Solid `Accessor<T>` imports now name the
-library's `Source<T>` contract; the unchanged provider's range and team values
-both typecheck. The runtime getter stays a Source because making it callable
-would hide a read in the explicit library dialect.
+F-S36 was a type-lowering gap and is fixed: Solid `Accessor<T>` imports name the
+library's `Source<T>` contract (`native:dashboard:type-contract`).
 
-The first new structural reason is **F-S37**. The compiler turns `useFilters()`
-into a generator that reads its context value for the missing-provider guard
-and return, and can raise the author's Error. `FilterBar` delegates to that
-helper during component setup. Setup admits context acquisition, creation and
-cleanup, but rejects those ordinary reads and raises. The valid Solid helper
-therefore becomes an invalid library setup routine. This is a compiler gap;
-wrapping a foreign route in an error fallback would not repair it.
+**F-S37 is fixed.** `useFilters()` reads its context during `FilterBar`'s setup
+and guards it with `if (!value) throw …`. Setup admits context acquisition but
+not reads or raises, so the generated helper was refused at `filters.tsx:32:17`.
 
-The stop rule applies here. No further dashboard compiler changes or author
-patches were attempted. Run `node scripts/native-dashboard-blocker.mjs` to
-check the [recorded evidence](../examples/harness/native-dashboard/structural-stop.json),
-including the exact TypeScript diagnostic, mapped source/generated spans,
-side-by-side code, original hashes, empty patch and unavailable colors.
-`type-contract` checks the F-S36 repair separately. A green structural-stop
-check pins a rejection; it does not mean dashboard acceptance passed.
+Two Solid 2 facts make the read and the guard safe:
+
+- A provider sets its value once, when it is created
+  (`setContext(provider, props.value)`), and `useContext` returns that value. A
+  consumer holds the same value for its whole life, so reading it in setup cannot
+  miss an update.
+- `useContext` itself throws when no provider (and no default) is above it, before
+  the author's guard runs. That case is the context's requirement, which the
+  library already carries in the component's type and refuses at a root or
+  handoff that leaves it unprovided. The guard can only see a value a provider
+  gave.
+
+The lowering now gives a context value used whole (a guard, a return) as the
+provided value itself, through `nativeUseContext(Ctx)`, whose only operation is
+the context read (`ContextRead<Q>`, admitted in setup). The guard's throw lowers
+to `nativeContextGuard(value, failure)`: its raise is typed from TypeScript's
+narrowing of `value` in the guarded branch. `Filters` is an object type, so
+`!value` narrows to `never` and the guard raises nothing; a context typed
+`User | null` keeps the raise, and setup still refuses it. The failure inference
+applies the same rule, so `useFilters` infers no failure and `FilterBar` does not
+inherit the guard's `Error`. A context value read only through its members (the
+prelude's destructuring, as in Todos) keeps the path form unchanged.
 
 ## Side by side
 
@@ -41,92 +50,34 @@ Generated:
 
 ```tsx
 export function* useFilters() {
-  const value = yield* FilterContext;
-  if (!(yield* value)) return yield* __nativeRaise(__nativeFailure(["global:Error"], new Error("Dashboard filters need a provider")));
-  return yield* value;
+  const value = yield* __nativeUseContext(FilterContext);
+  if (!value) return yield* __nativeContextGuard(value, __nativeFailure(["global:Error"], new Error("Dashboard filters need a provider")));
+  return value;
 }
-export const FilterBar = component(function* FilterBar() {
-  const filters = yield* useFilters();
-
 ```
 
-The TypeScript error covers generated `FilterBar` at line 52 and maps to the
-authored function name at `filters.tsx:32:17`. The two provider field errors
-previously mapped to `filters.tsx:23:34` and `:23:41` are gone. The separate
-`native:dashboard:type-contract` gate step checks that no provider assignment
-error maps to line 23. `native:dashboard:structural-stop` checks F-S37, rather
-than claiming either acceptance half passed.
+## What the dashboard reports now
+
+Lowering emits exactly the Router notice at `app.tsx:92:9`. The generated program
+then has 15 TypeScript errors in 7 groups, pinned by
+`native:dashboard:structural-stop` ([evidence](../examples/harness/native-dashboard/structural-stop.json)):
+
+| Group | Authored positions | What happens |
+| --- | --- | --- |
+| T08 ruling | `app.tsx:69:25` | `incident()` (pending, may fail `NotFound`) is passed into a prop typed `Incident`, inside the caller's own `Errored`/`Loading`. `SETTLED_PROP` is review slot T08's diagnostic. Correct by the current rules, or a model change: **Dev's ruling**. |
+| F-S38 | `chart.tsx:50`, `incidents.tsx:50`, `panels.tsx:10`, `panels.tsx:69` | `Panel`'s `children: JSX.Element` lowers settled, but `Panel` wraps its children in its own `Errored`/`Loading`; callers' pending children are refused. |
+| F-S39 | `chart.tsx:108`, `panel.tsx:12`, `panel.tsx:18` | A prop or row value used as a method receiver (`props.title.toLowerCase()`, `point.value.toFixed(0)`) is not read before the call. |
+| F-S40 | `incidents.tsx:108` | `reload={() => refresh(incidents)}` is hosted by the JSX hole that creates it, not the child event that calls it, so its write is refused. |
+| F-S41 | `main.tsx:3` | `render(() => <App />)` refuses an entry component whose props are all optional. |
+| F-S42 | `panels.tsx:30` | `createEffect`'s effect function returns a cleanup; the library's effect phase returns nothing. |
+| F-S43 | `app.tsx:78`, `app.tsx:79` | Route components require `FilterContext`. `FilterProvider` surrounds the foreign `Router`, but the requirement is not discharged across it. |
+
+F-S38–F-S43 are compiler gaps, not author mistakes. No author patch or further
+lowering change was attempted for them.
 
 ## Acceptance
 
-- Half A: **FAIL**. Lowering emits exactly the Router notice at `app.tsx:92:9`.
-  The generated program fails at F-S37. It has further rejected-output errors,
-  including foreign handoff checks. Those dependent errors cannot establish a
-  real unhandled failure or an accepted diagnostic snapshot while setup fails.
-- Half B: **FAIL / not run**, under the requested first-new-reason stop. The
-  author patch is empty. Native hydrated parity, SSR, AckFailed rollback and
-  NotFound comparison against patched Solid have not run. The gate's original
-  dashboard tests and smokes remain independent checks of plain Solid.
-
-## Diagnostics, verbatim
-
-```text
-[NATIVE_FOREIGN_BOUNDARY] Handle failures inside Router or its callbacks; this imported component (createRouter from @solidjs/router) is outside the native check. (examples/originals/dashboard/src/app.tsx:92:9)
-```
-
-TypeScript message (`<root>` replaces only the checkout path), mapped to
-`examples/originals/dashboard/src/filters.tsx:32:17`:
-
-```text
-[TS2769] No overload matches this call.
-  Overload 1 of 2, '(body: (props: unknown) => Generator<SetupOp, ViewFn<Read<false, never> | Bind<false, NativeFailure<"unknown">>, Element>, any>): HoleCall<...>', gave the following error.
-    Argument of type '() => Generator<Read<false, never> | ContextRead<RequiredContext<Filters, "<root>/examples/originals/dashboard/src/filters.tsx#FilterContext">> | Raise<...>, ViewFn<...>, any>' is not assignable to parameter of type '(props: unknown) => Generator<SetupOp, ViewFn<Read<false, never> | Bind<false, NativeFailure<"unknown">>, Element>, any>'.
-      Call signature return types 'Generator<Read<false, never> | ContextRead<RequiredContext<Filters, "<root>/examples/originals/dashboard/src/filters.tsx#FilterContext">> | Raise<...>, ViewFn<...>, any>' and 'Generator<SetupOp, ViewFn<Read<false, never> | Bind<false, NativeFailure<"unknown">>, Element>, any>' are incompatible.
-        The types returned by 'next(...)' are incompatible between these types.
-          Type 'IteratorResult<Read<false, never> | ContextRead<RequiredContext<Filters, "<root>/examples/originals/dashboard/src/filters.tsx#FilterContext">> | Raise<...>, ViewFn<...>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<Read<false, never> | Bind<false, NativeFailure<"unknown">>, Element>>'.
-            Type 'IteratorYieldResult<Read<false, never> | ContextRead<RequiredContext<Filters, "<root>/examples/originals/dashboard/src/filters.tsx#FilterContext">> | Raise<...>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<Read<false, never> | Bind<false, NativeFailure<"unknown">>, Element>>'.
-              Type 'IteratorYieldResult<Read<false, never> | ContextRead<RequiredContext<Filters, "<root>/examples/originals/dashboard/src/filters.tsx#FilterContext">> | Raise<...>>' is not assignable to type 'IteratorYieldResult<SetupOp>'.
-                Type 'Read<false, never> | ContextRead<RequiredContext<Filters, "<root>/examples/originals/dashboard/src/filters.tsx#FilterContext">> | Raise<...>' is not assignable to type 'SetupOp'.
-                  Type 'Read<false, never>' is not assignable to type 'SetupOp'.
-                    Property 'kind' is missing in type 'Read<false, never>' but required in type 'Create<string, any>'.
-  Overload 2 of 2, '(body: (props: unknown) => Generator<SetupOp, ViewFn<Read<false, never> | Bind<false, NativeFailure<"unknown">>, Element>, any>): (props?: PropsInput<...> | undefined) => ComponentView<...>', gave the following error.
-    Argument of type '() => Generator<Read<false, never> | ContextRead<RequiredContext<Filters, "<root>/examples/originals/dashboard/src/filters.tsx#FilterContext">> | Raise<...>, ViewFn<...>, any>' is not assignable to parameter of type '(props: unknown) => Generator<SetupOp, ViewFn<Read<false, never> | Bind<false, NativeFailure<"unknown">>, Element>, any>'.
-      Call signature return types 'Generator<Read<false, never> | ContextRead<RequiredContext<Filters, "<root>/examples/originals/dashboard/src/filters.tsx#FilterContext">> | Raise<...>, ViewFn<...>, any>' and 'Generator<SetupOp, ViewFn<Read<false, never> | Bind<false, NativeFailure<"unknown">>, Element>, any>' are incompatible.
-        The types returned by 'next(...)' are incompatible between these types.
-          Type 'IteratorResult<Read<false, never> | ContextRead<RequiredContext<Filters, "<root>/examples/originals/dashboard/src/filters.tsx#FilterContext">> | Raise<...>, ViewFn<...>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<Read<false, never> | Bind<false, NativeFailure<"unknown">>, Element>>'.
-            Type 'IteratorYieldResult<Read<false, never> | ContextRead<RequiredContext<Filters, "<root>/examples/originals/dashboard/src/filters.tsx#FilterContext">> | Raise<...>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<Read<false, never> | Bind<false, NativeFailure<"unknown">>, Element>>'.
-              Type 'IteratorYieldResult<Read<false, never> | ContextRead<RequiredContext<Filters, "<root>/examples/originals/dashboard/src/filters.tsx#FilterContext">> | Raise<...>>' is not assignable to type 'IteratorYieldResult<SetupOp>'.
-                Type 'Read<false, never> | ContextRead<RequiredContext<Filters, "<root>/examples/originals/dashboard/src/filters.tsx#FilterContext">> | Raise<...>' is not assignable to type 'SetupOp'.
-                  Type 'Read<false, never>' is not assignable to type 'SetupOp'.
-                    Property 'kind' is missing in type 'Read<false, never>' but required in type 'Create<string, any>'.
-```
-
-## Patch, verbatim
-
-The author patch is the empty string, and every original source file remains
-byte-identical:
-
-```json
-""
-```
-
-## Final checked colors
-
-These are unavailable, rather than inferred colors from a rejected program.
-No pending/failure/context claim or foreign-handoff admission is made.
-
-| Panel or route | Pending / failures / may wait / required context | Shared filter |
-| --- | --- | --- |
-| SummaryPanel | Unavailable / unavailable / unavailable / unavailable | FilterContext |
-| SeriesPanel | Unavailable / unavailable / unavailable / unavailable | FilterContext |
-| IncidentsPanel | Unavailable / unavailable / unavailable / unavailable | FilterContext |
-| TeamPanel | Unavailable / unavailable / unavailable / unavailable | FilterContext |
-| NotesPanel | Unavailable / unavailable / unavailable / unavailable | FilterContext |
-| Overview (`/`, `/overview`) | Unavailable / unavailable / unavailable / unavailable | FilterContext |
-| IncidentDetail (`/incidents/inc-101`, `/incidents/missing`) | Unavailable / unavailable / unavailable / unavailable | FilterContext |
-
-The original action catches AckFailed and writes the row's failure message;
-it rethrows other failures. IncidentDetail places IncidentBody inside Errored
-and Loading, including NotFound. Native failure handling and runtime parity
-remain unverified under F-S37. The type-lowering table and fixtures are in
-[sugar-design.md](sugar-design.md#native-type-annotations-2026-10-09).
+- Half A: **FAIL** (compiler gaps remain).
+- Half B: **FAIL / not run.** The author patch is empty; native hydrated parity,
+  SSR, `AckFailed` rollback and `NotFound` comparisons have not run.
+- Final panel and route colors are unavailable while the program is rejected.

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// F-S36 is fixed. Pin the first new reason, F-S37; this is not runtime acceptance.
+// F-S36 and F-S37 are fixed. Pin the remaining errors by group (F-S38 onward); this is not runtime acceptance.
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { createRequire } from "node:module";
@@ -82,93 +82,112 @@ assert.match(output, /team: Accessor<TeamFilter>/);
 assert.match(output, /Element as _NativeElement/);
 if (process.argv.includes("type-contract")) {
   console.log(
-    "native dashboard type contract: PASS (both shared filter Sources accepted; F-S37 still blocks setup)"
+    "native dashboard type contract: PASS (both shared filter Sources accepted; F-S37 fixed)"
   );
   process.exit(0);
 }
-const setupErrors = errors.filter(
-  d =>
-    d.file?.fileName === file &&
-    d.code === 2769 &&
-    output.slice(d.start, d.start + d.length) === "FilterBar"
+// F-S37 is fixed: useFilters holds the provided value in setup and its guard,
+// ruled out by the Filters type, raises nothing.
+const helperStart = output.indexOf("export function* useFilters");
+const helperEnd = output.indexOf("export const FilterBar", helperStart);
+const helper = output.slice(helperStart, helperEnd);
+assert.match(helper, /yield\* __nativeUseContext\(FilterContext\)/);
+assert.match(helper, /yield\* __nativeContextGuard\(value,/);
+assert.doesNotMatch(helper, /yield\* value/);
+const summary = name =>
+  result.inference.functions.find(f => f.name === name && f.file.endsWith("filters.tsx"));
+assert.deepEqual(
+  summary("useFilters").fails,
+  [],
+  "F-S37 regressed: the context guard adds a failure"
 );
-assert.equal(
-  setupErrors.length,
-  1,
-  "F-S37 changed: review setup context reads before claiming dashboard acceptance"
+// FilterBar's own unknown comes from its onChange calls into the provided setters.
+assert.ok(
+  !summary("FilterBar").fails.includes("global:Error"),
+  "F-S37 regressed: FilterBar inherits the guard's failure"
 );
-const structuralDiagnostics = setupErrors.map(d => {
-  const message = ts.flattenDiagnosticMessageText(d.messageText, "\n").replaceAll(root, "<root>");
-  assert.match(message, /Read<false, never>/);
-  assert.match(message, /Raise</);
-  assert.match(message, /SetupOp/);
-  const at = d.file.getLineAndCharacterOfPosition(d.start);
-  const origin = locate(result.positions.get(file), d.start, d.length);
-  const prefix = authored.slice(0, origin.sourceStart).split("\n");
-  return {
-    code: "TS2769",
-    message,
-    author: {
-      file: relative(root, file),
-      line: prefix.length,
-      column: prefix.at(-1).length + 1,
-      text: authored.slice(origin.sourceStart, origin.sourceEnd)
-    },
-    generated: {
-      line: at.line + 1,
-      column: at.character + 1,
-      text: output.slice(d.start, d.start + d.length).replaceAll(root, "<root>")
-    },
-    mapped: { generated: origin.generated }
-  };
-});
+
+// Every remaining error, at its authored position, in the group it was classified into.
+const authoredAt = d => {
+  const file = d.file?.fileName;
+  const table = file && result.positions.get(file);
+  const origin = table && locate(table, d.start, d.length);
+  if (!origin || !files.has(file)) return null;
+  const prefix = files.get(file).slice(0, origin.sourceStart).split("\n");
+  return `${relative(source, file)}:${prefix.length}:${prefix.at(-1).length + 1}`;
+};
+const groups = {
+  "T08-ruling": ["app.tsx:69:25"],
+  "F-S38": ["chart.tsx:50:17", "incidents.tsx:50:17", "panels.tsx:10:17", "panels.tsx:69:17"],
+  "F-S39": ["chart.tsx:108:45", "panel.tsx:12:43", "panel.tsx:18:68"],
+  "F-S40": ["incidents.tsx:108:52"],
+  "F-S41": ["main.tsx:3:15"],
+  "F-S42": ["panels.tsx:30:5"],
+  "F-S43": ["app.tsx:78:45", "app.tsx:78:56", "app.tsx:79:54"]
+};
+const groupOf = at => Object.keys(groups).find(g => groups[g].includes(at)) ?? "unclassified";
+const remaining = errors
+  .map(d => {
+    const at = authoredAt(d);
+    return { group: groupOf(at), at, code: `TS${d.code}` };
+  })
+  .sort((a, b) => `${a.group} ${a.at} ${a.code}`.localeCompare(`${b.group} ${b.at} ${b.code}`));
+assert.ok(
+  remaining.every(r => r.group !== "unclassified"),
+  "A dashboard error outside the recorded classification: " +
+    JSON.stringify(remaining.filter(r => r.group === "unclassified"))
+);
+assert.ok(
+  !remaining.some(r => r.at?.startsWith("filters.tsx")),
+  "F-S37 regressed: an error in filters.tsx"
+);
 const panels = ["SummaryPanel", "SeriesPanel", "IncidentsPanel", "TeamPanel", "NotesPanel"];
 const routes = [
   { name: "Overview", paths: ["/", "/overview"] },
   { name: "IncidentDetail", paths: ["/incidents/inc-101", "/incidents/missing"] }
 ];
-const helperStart = output.indexOf("export function* useFilters");
-const helperEnd = output.indexOf("export const FilterBar", helperStart);
 const evidence = {
   finding:
-    "F-S37: useFilters lowers its context value guard and return to Source reads and a Raise; component setup cannot admit them",
-  fixed: "F-S36: Accessor imports now name the library Source; both provider fields typecheck",
+    "F-S37 fixed: useContext's value is the provider's (set once), held in setup; its guard raises only what the context's declared type admits",
+  fixed: [
+    "F-S36: Accessor imports name the library Source; both provider fields typecheck",
+    "F-S37: useFilters lowers to nativeUseContext + nativeContextGuard; it and FilterBar infer no failure"
+  ],
+  next: {
+    "T08-ruling":
+      "app.tsx:69 passes the pending, failing incident() into a prop typed Incident inside the caller's own Errored/Loading: SETTLED_PROP (review slot T08). Correct by the current rules or a model change: Dev's ruling",
+    "F-S38":
+      "A wrapper component's children: JSX.Element lowers settled; Panel discharges its children's colors with its own Errored/Loading",
+    "F-S39":
+      "A prop or row value used as a method receiver (props.title.toLowerCase(), point.value.toFixed(0)) is not read before the call",
+    "F-S40":
+      "A callback prop (reload={() => refresh(incidents)}) is hosted by the JSX hole that creates it, not the child event that calls it; its write is refused",
+    "F-S41": "render(() => <App />) refuses an entry component whose props are all optional",
+    "F-S42":
+      "createEffect's effect function returning a cleanup does not match the library's effect phase",
+    "F-S43":
+      "Route components require FilterContext; FilterProvider surrounds the foreign Router, but the requirement is not discharged across it"
+  },
   halfA:
-    "FAIL: unchanged lowering has exactly the Router boundary notice; generated code rejects setup context reads before foreign handoff acceptance can be established",
+    "FAIL: lowering has exactly the Router boundary notice; the generated program has the 15 errors below, at least 14 of them compiler gaps",
   halfB:
-    "FAIL / not run: first new structural reason; empty author patch; native hydrated parity, SSR, AckFailed and NotFound comparisons not run",
+    "FAIL / not run: compiler gaps remain; empty author patch; native hydrated parity, SSR, AckFailed and NotFound comparisons not run",
   boundaries: result.diagnostics.map(d => ({ ...d, file: relative(root, d.file) })),
-  structuralDiagnostics,
+  remaining,
   sideBySide: {
     author: authored.split("\n").slice(25, 34).join("\n"),
-    generated:
-      output.slice(helperStart, helperEnd).replaceAll(root, "<root>") +
-      output.slice(helperEnd, output.indexOf("return view", helperEnd)).replaceAll(root, "<root>")
+    generated: helper.replaceAll(root, "<root>")
   },
   patch,
   finalCheckedColors: {
     status:
-      "unavailable: setup context contract is rejected; inferred any or unknown from rejected output are not final checked colors",
-    panels: panels.map(name => ({
-      name,
-      pending: "unavailable",
-      fails: "unavailable",
-      mayWait: "unavailable",
-      requires: "unavailable",
-      sharedFilter: "FilterContext"
-    })),
-    routes: routes.map(route => ({
-      ...route,
-      pending: "unavailable",
-      fails: "unavailable",
-      mayWait: "unavailable",
-      requires: "unavailable",
-      sharedFilter: "FilterContext"
-    }))
+      "unavailable: the generated program is still rejected; inferred any or unknown from rejected output are not final checked colors",
+    panels: panels.map(name => ({ name, sharedFilter: "FilterContext" })),
+    routes: routes.map(route => ({ ...route, sharedFilter: "FilterContext" }))
   },
   failurePaths: {
-    AckFailed: "native comparison not run under F-S37 stop",
-    NotFound: "native comparison not run under F-S37 stop"
+    AckFailed: "native comparison not run: compiler gaps remain",
+    NotFound: "native comparison not run: compiler gaps remain"
   },
   originalHashes
 };
@@ -179,9 +198,7 @@ if (process.argv.includes("--record"))
 else assert.deepEqual(evidence, JSON.parse(readFileSync(expected, "utf8")));
 for (const d of evidence.boundaries)
   console.log(`[${d.code}] ${d.message} (${d.file}:${d.line}:${d.column})`);
+for (const r of remaining) console.log(`${r.group} [${r.code}] (${r.at})`);
 console.log(
-  `F-S37 [TS2769] No overload matches this call. (${structuralDiagnostics[0].author.file}:${structuralDiagnostics[0].author.line}:${structuralDiagnostics[0].author.column})`
-);
-console.log(
-  "native dashboard F-S37 pin: PASS; half A FAIL; half B FAIL / not run; patch empty; final colors unavailable"
+  `native dashboard: F-S37 fixed; ${remaining.length} errors pinned in ${new Set(remaining.map(r => r.group)).size} groups; half A FAIL; half B not run; patch empty`
 );

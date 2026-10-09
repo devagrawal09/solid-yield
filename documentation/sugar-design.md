@@ -706,10 +706,10 @@ actual colors instead of widening them to `Component`'s defaults. A component's
 `JSX.Element` return annotation similarly becomes an inferred view signature;
 plain function return annotations use the mapped element/value type.
 
-This repairs dashboard F-S36's provider value contract. It does not establish
-the provider relationship through `useFilters()` in component setup: that is
-the new [F-S37 stop](native-dashboard-blocker.md). No native dashboard runtime
-acceptance or final colors are claimed.
+This repairs dashboard F-S36's provider value contract. The provider
+relationship through `useFilters()` in component setup was the F-S37 stop, fixed
+below ([native context hooks](#native-context-hooks-f-s37-2026-10-09)). No native
+dashboard runtime acceptance or final colors are claimed.
 
 A selected local component passed to native `render` or `hydrate` uses the library renderer with `RootCheck` and `foreign`. This entry is a foreign handoff: residual failures, including unknown, are errors. D-033 allows failures at explicit library roots, not at native Solid entry handoffs. In a self-recursive component, fixed numeric prop snapshots may become path reads in holes when every local JSX caller supplies fixed numeric expressions; pure numeric assignments are substituted in source order, and an early JSX return selects `Match` rows that own their branch setup. Recursive component types carry the pending and failure types inferred from memo reads and prop edges, and generated TypeScript checks the full body against that type. Timer and frame callbacks retain the existing rule: reads and writes run as component-owned events, with their result ignored by the scheduler.
 
@@ -1231,3 +1231,39 @@ Unhandled `.then` rejections belong to their lexical host: an event reports EVEN
 A provider wrapper discharges a context only when the component summary proves it surrounds the children on every returned path. Other contexts and child failures remain. Lowercase JSX names are intrinsic tags, regardless of local variables with the same name.
 
 Refusals use validated authored spans. Invalid or generated coordinates fall back to a routine span marked `[generated]`; they never reach TypeScript's unchecked line-position conversion. A refused file retains its original TypeScript view, while other selected files are retried and keep their checked hovers. Imports through the refused file can still lack complete summaries. Runtime source maps and general callback support remain incomplete.
+
+### Native context hooks (F-S37, 2026-10-09)
+
+`const value = useContext(Ctx); if (!value) throw …; return value` is the
+ordinary Solid hook. Solid 2's provider sets its value once when it is created,
+and `useContext` returns that value, so a consumer's setup cannot miss an update
+by holding it. `useContext` also throws first when no provider and no default are
+above it; that case is the context's requirement (`ContextRead<Q>`), refused at a
+root or handoff that leaves it unprovided.
+
+A context value used whole (a guard, a return, an argument) lowers to
+`nativeUseContext(Ctx)`: the provided value itself, with the context read as its
+only operation, so setup admits it. A value read only through its members (the
+prelude's destructuring, as in Todos) keeps the path form.
+
+A `throw` that is the whole body of `if (!value)`, `if (value == null)`,
+`=== null` or `=== undefined` on such a value lowers to
+`nativeContextGuard(value, failure)`. Its raise is typed from TypeScript's
+narrowing of `value` in the guarded branch: a value type with no falsy (or
+nullish) member narrows to `never` and the guard raises nothing; a type that
+admits it (`User | null`) keeps the raise, and setup still refuses it. Failure
+inference applies the same rule from the value's declared type, so hovers and
+handoff summaries agree.
+
+The native dashboard now passes F-S37 and reports 15 errors in seven groups:
+one question for Dev (review slot T08: a pending value passed into a prop typed
+as a plain value, inside the caller's own boundaries) and six compiler gaps,
+F-S38–F-S43. See [the dashboard record](native-dashboard-blocker.md).
+
+The same rule removes Effect's F-S34: `createRuntime` reads its context value
+inside `() => ManagedRuntime.make(layer, parent?.memoMap)`, which is now the held
+provided value rather than a path read captured in a callback. Effect lowering
+then stops at a new, uninvestigated reason: `[SUGAR_ESCAPE] Routine placeOrder is
+handed to an unknown consumer` (the `effectAction` bridge, `checkout.tsx`). The
+evidence script `scripts/native-effect-blocker.mjs`, outside the gate, now fails
+by design with "F-S34 no longer reproduces".

@@ -276,7 +276,7 @@ function buildSteps(twins) {
     });
   }
 
-  // Check F-S36 independently; F-S37 pins the first new structural reason.
+  // Check F-S36 independently; the stop pins F-S37 fixed and the remaining groups (F-S38 on).
   steps.push({
     name: "native:dashboard:type-contract",
     cwd: root,

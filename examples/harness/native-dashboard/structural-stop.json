@@ -1,8 +1,20 @@
 {
-  "finding": "F-S37: useFilters lowers its context value guard and return to Source reads and a Raise; component setup cannot admit them",
-  "fixed": "F-S36: Accessor imports now name the library Source; both provider fields typecheck",
-  "halfA": "FAIL: unchanged lowering has exactly the Router boundary notice; generated code rejects setup context reads before foreign handoff acceptance can be established",
-  "halfB": "FAIL / not run: first new structural reason; empty author patch; native hydrated parity, SSR, AckFailed and NotFound comparisons not run",
+  "finding": "F-S37 fixed: useContext's value is the provider's (set once), held in setup; its guard raises only what the context's declared type admits",
+  "fixed": [
+    "F-S36: Accessor imports name the library Source; both provider fields typecheck",
+    "F-S37: useFilters lowers to nativeUseContext + nativeContextGuard; it and FilterBar infer no failure"
+  ],
+  "next": {
+    "T08-ruling": "app.tsx:69 passes the pending, failing incident() into a prop typed Incident inside the caller's own Errored/Loading: SETTLED_PROP (review slot T08). Correct by the current rules or a model change: Dev's ruling",
+    "F-S38": "A wrapper component's children: JSX.Element lowers settled; Panel discharges its children's colors with its own Errored/Loading",
+    "F-S39": "A prop or row value used as a method receiver (props.title.toLowerCase(), point.value.toFixed(0)) is not read before the call",
+    "F-S40": "A callback prop (reload={() => refresh(incidents)}) is hosted by the JSX hole that creates it, not the child event that calls it; its write is refused",
+    "F-S41": "render(() => <App />) refuses an entry component whose props are all optional",
+    "F-S42": "createEffect's effect function returning a cleanup does not match the library's effect phase",
+    "F-S43": "Route components require FilterContext; FilterProvider surrounds the foreign Router, but the requirement is not discharged across it"
+  },
+  "halfA": "FAIL: lowering has exactly the Router boundary notice; the generated program has the 15 errors below, at least 14 of them compiler gaps",
+  "halfB": "FAIL / not run: compiler gaps remain; empty author patch; native hydrated parity, SSR, AckFailed and NotFound comparisons not run",
   "boundaries": [
     {
       "code": "NATIVE_FOREIGN_BOUNDARY",
@@ -12,72 +24,109 @@
       "column": 9
     }
   ],
-  "structuralDiagnostics": [
+  "remaining": [
     {
-      "code": "TS2769",
-      "message": "No overload matches this call.\n  Overload 1 of 2, '(body: (props: unknown) => Generator<SetupOp, ViewFn<Read<false, never> | Bind<false, NativeFailure<\"unknown\">>, Element>, any>): HoleCall<...>', gave the following error.\n    Argument of type '() => Generator<Read<false, never> | ContextRead<RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\">> | Raise<...>, ViewFn<...>, any>' is not assignable to parameter of type '(props: unknown) => Generator<SetupOp, ViewFn<Read<false, never> | Bind<false, NativeFailure<\"unknown\">>, Element>, any>'.\n      Call signature return types 'Generator<Read<false, never> | ContextRead<RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\">> | Raise<...>, ViewFn<...>, any>' and 'Generator<SetupOp, ViewFn<Read<false, never> | Bind<false, NativeFailure<\"unknown\">>, Element>, any>' are incompatible.\n        The types returned by 'next(...)' are incompatible between these types.\n          Type 'IteratorResult<Read<false, never> | ContextRead<RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\">> | Raise<...>, ViewFn<...>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<Read<false, never> | Bind<false, NativeFailure<\"unknown\">>, Element>>'.\n            Type 'IteratorYieldResult<Read<false, never> | ContextRead<RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\">> | Raise<...>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<Read<false, never> | Bind<false, NativeFailure<\"unknown\">>, Element>>'.\n              Type 'IteratorYieldResult<Read<false, never> | ContextRead<RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\">> | Raise<...>>' is not assignable to type 'IteratorYieldResult<SetupOp>'.\n                Type 'Read<false, never> | ContextRead<RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\">> | Raise<...>' is not assignable to type 'SetupOp'.\n                  Type 'Read<false, never>' is not assignable to type 'SetupOp'.\n                    Property 'kind' is missing in type 'Read<false, never>' but required in type 'Create<string, any>'.\n  Overload 2 of 2, '(body: (props: unknown) => Generator<SetupOp, ViewFn<Read<false, never> | Bind<false, NativeFailure<\"unknown\">>, Element>, any>): (props?: PropsInput<...> | undefined) => ComponentView<...>', gave the following error.\n    Argument of type '() => Generator<Read<false, never> | ContextRead<RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\">> | Raise<...>, ViewFn<...>, any>' is not assignable to parameter of type '(props: unknown) => Generator<SetupOp, ViewFn<Read<false, never> | Bind<false, NativeFailure<\"unknown\">>, Element>, any>'.\n      Call signature return types 'Generator<Read<false, never> | ContextRead<RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\">> | Raise<...>, ViewFn<...>, any>' and 'Generator<SetupOp, ViewFn<Read<false, never> | Bind<false, NativeFailure<\"unknown\">>, Element>, any>' are incompatible.\n        The types returned by 'next(...)' are incompatible between these types.\n          Type 'IteratorResult<Read<false, never> | ContextRead<RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\">> | Raise<...>, ViewFn<...>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<Read<false, never> | Bind<false, NativeFailure<\"unknown\">>, Element>>'.\n            Type 'IteratorYieldResult<Read<false, never> | ContextRead<RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\">> | Raise<...>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<Read<false, never> | Bind<false, NativeFailure<\"unknown\">>, Element>>'.\n              Type 'IteratorYieldResult<Read<false, never> | ContextRead<RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\">> | Raise<...>>' is not assignable to type 'IteratorYieldResult<SetupOp>'.\n                Type 'Read<false, never> | ContextRead<RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\">> | Raise<...>' is not assignable to type 'SetupOp'.\n                  Type 'Read<false, never>' is not assignable to type 'SetupOp'.\n                    Property 'kind' is missing in type 'Read<false, never>' but required in type 'Create<string, any>'.",
-      "author": {
-        "file": "examples/originals/dashboard/src/filters.tsx",
-        "line": 32,
-        "column": 17,
-        "text": "FilterBar"
-      },
-      "generated": {
-        "line": 62,
-        "column": 46,
-        "text": "FilterBar"
-      },
-      "mapped": {
-        "generated": false
-      }
+      "group": "F-S38",
+      "at": "chart.tsx:50:17",
+      "code": "TS2322"
+    },
+    {
+      "group": "F-S38",
+      "at": "incidents.tsx:50:17",
+      "code": "TS2322"
+    },
+    {
+      "group": "F-S38",
+      "at": "panels.tsx:10:17",
+      "code": "TS2322"
+    },
+    {
+      "group": "F-S38",
+      "at": "panels.tsx:69:17",
+      "code": "TS2322"
+    },
+    {
+      "group": "F-S39",
+      "at": "chart.tsx:108:45",
+      "code": "TS2339"
+    },
+    {
+      "group": "F-S39",
+      "at": "panel.tsx:12:43",
+      "code": "TS2339"
+    },
+    {
+      "group": "F-S39",
+      "at": "panel.tsx:18:68",
+      "code": "TS2339"
+    },
+    {
+      "group": "F-S40",
+      "at": "incidents.tsx:108:52",
+      "code": "TS2345"
+    },
+    {
+      "group": "F-S41",
+      "at": "main.tsx:3:15",
+      "code": "TS1360"
+    },
+    {
+      "group": "F-S41",
+      "at": "main.tsx:3:15",
+      "code": "TS2345"
+    },
+    {
+      "group": "F-S42",
+      "at": "panels.tsx:30:5",
+      "code": "TS2345"
+    },
+    {
+      "group": "F-S43",
+      "at": "app.tsx:78:45",
+      "code": "TS2769"
+    },
+    {
+      "group": "F-S43",
+      "at": "app.tsx:78:56",
+      "code": "TS2345"
+    },
+    {
+      "group": "F-S43",
+      "at": "app.tsx:79:54",
+      "code": "TS2345"
+    },
+    {
+      "group": "T08-ruling",
+      "at": "app.tsx:69:25",
+      "code": "TS2322"
     }
   ],
   "sideBySide": {
     "author": "export function useFilters() {\n  const value = useContext(FilterContext);\n  if (!value) throw new Error(\"Dashboard filters need a provider\");\n  return value;\n}\n\nexport function FilterBar() {\n  const filters = useFilters();\n  return (",
-    "generated": "export function* useFilters() {\n  const value = yield* FilterContext;\n  if (!(yield* value)) return yield* __nativeRaise(__nativeFailure([\"global:Error\"], new Error(\"Dashboard filters need a provider\")));\n  return yield* value;\n}\nexport const FilterBar = component(function* FilterBar() {\n  const filters = yield* useFilters();\n  "
+    "generated": "export function* useFilters() {\n  const value = yield* __nativeUseContext(FilterContext);\n  if (!value) return yield* __nativeContextGuard(value, __nativeFailure([\"global:Error\"], new Error(\"Dashboard filters need a provider\")));\n  return value;\n}\n"
   },
   "patch": "",
   "finalCheckedColors": {
-    "status": "unavailable: setup context contract is rejected; inferred any or unknown from rejected output are not final checked colors",
+    "status": "unavailable: the generated program is still rejected; inferred any or unknown from rejected output are not final checked colors",
     "panels": [
       {
         "name": "SummaryPanel",
-        "pending": "unavailable",
-        "fails": "unavailable",
-        "mayWait": "unavailable",
-        "requires": "unavailable",
         "sharedFilter": "FilterContext"
       },
       {
         "name": "SeriesPanel",
-        "pending": "unavailable",
-        "fails": "unavailable",
-        "mayWait": "unavailable",
-        "requires": "unavailable",
         "sharedFilter": "FilterContext"
       },
       {
         "name": "IncidentsPanel",
-        "pending": "unavailable",
-        "fails": "unavailable",
-        "mayWait": "unavailable",
-        "requires": "unavailable",
         "sharedFilter": "FilterContext"
       },
       {
         "name": "TeamPanel",
-        "pending": "unavailable",
-        "fails": "unavailable",
-        "mayWait": "unavailable",
-        "requires": "unavailable",
         "sharedFilter": "FilterContext"
       },
       {
         "name": "NotesPanel",
-        "pending": "unavailable",
-        "fails": "unavailable",
-        "mayWait": "unavailable",
-        "requires": "unavailable",
         "sharedFilter": "FilterContext"
       }
     ],
@@ -88,10 +137,6 @@
           "/",
           "/overview"
         ],
-        "pending": "unavailable",
-        "fails": "unavailable",
-        "mayWait": "unavailable",
-        "requires": "unavailable",
         "sharedFilter": "FilterContext"
       },
       {
@@ -100,17 +145,13 @@
           "/incidents/inc-101",
           "/incidents/missing"
         ],
-        "pending": "unavailable",
-        "fails": "unavailable",
-        "mayWait": "unavailable",
-        "requires": "unavailable",
         "sharedFilter": "FilterContext"
       }
     ]
   },
   "failurePaths": {
-    "AckFailed": "native comparison not run under F-S37 stop",
-    "NotFound": "native comparison not run under F-S37 stop"
+    "AckFailed": "native comparison not run: compiler gaps remain",
+    "NotFound": "native comparison not run: compiler gaps remain"
   },
   "originalHashes": {
     "examples/originals/dashboard/src/api.ts": "bef20441971b979d82c69519c83991c55fe8425031bbb80266c359eee439d298",

@@ -1451,6 +1451,17 @@ export function $cleanup(fn: () => void): Yieldable<Cleanup, void> {
  * provider above gives is `NO_PROVIDER` here, at the read.
  */
 export function readContext(ctx: any): unknown {
+  return makePath(contextValue(ctx), false, []);
+}
+/**
+ * @internal Native `useContext` (F-S37): the value Solid's own `useContext`
+ * returns, which its provider set once when it was created. Same host and
+ * provider checks as `readContext`.
+ */
+export function readContextValue(ctx: any): unknown {
+  return contextValue(ctx);
+}
+function contextValue(ctx: any): unknown {
   const host = state.host;
   if (__DEV__ && host !== SETUP && host !== NONE)
     throw devError(
@@ -1468,7 +1479,7 @@ export function readContext(ctx: any): unknown {
       );
     throw e;
   }
-  return makePath(raw, false, []);
+  return raw;
 }
 
 // --- events ---------------------------------------------------------------------------------

@@ -669,19 +669,19 @@
           "stage": "type",
           "code": "TS2345",
           "message": "Argument of type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<false, never, false, RequiredContext<...> | HoleRequires<...>>) & { ...; }' is not assignable to parameter of type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<false, never, false, RequiredContext<...> | HoleRequires<...>>) & { ...; } & { ...; }'.\n  Type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<false, never, false, RequiredContext<...> | HoleRequires<...>>) & { ...; }' is not assignable to type '{ readonly \"[NO_PROVIDER] the root requires the contexts this property names: provide each above the components that read it (Ctx.provide({ value, children }) around their calls)\": \"<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C\"; }'.",
-          "line": 25
+          "line": 26
         },
         {
           "stage": "type",
           "code": "TS2345",
-          "message": "Argument of type 'HoleCall<{}, false, never, false, RequiredContext<number, \"<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C\">>' is not assignable to parameter of type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<false, never, false, RequiredContext<...> | HoleRequires<...>>) & { ...; } & { ...; }'.\n  Type 'HoleCall<{}, false, never, false, RequiredContext<number, \"<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C\">>' is not assignable to type '{ readonly \"[NO_PROVIDER] a yield component handed to plain Solid requires the contexts this property names: provide them inside it (Ctx.provide around the calls that read them), or list the ones provided above the foreign edge: foreign(Comp, { provided: [Ctx] })\": \"<root>/packages/vite-plugin-yield/tes...'.",
-          "line": 25
+          "message": "Argument of type 'HoleCall<{}, false, never, false, RequiredContext<number, \"<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C\">>' is not assignable to parameter of type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<false, never, false, RequiredContext<...> | HoleRequires<...>>) & { ...; } & { ...; }'.\n  Type 'HoleCall<{}, false, never, false, RequiredContext<number, \"<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C\">>' is not assignable to type '{ readonly \"[NO_PROVIDER] a yield component handed to plain Solid requires the contexts this property names: provide them inside it (Ctx.provide around the calls that read them), or list the ones provided above the foreign edge: foreign(Comp, { provided: [Ctx] })\": \"<root>/packages/vite-plugin-yield/test...'.",
+          "line": 26
         },
         {
           "stage": "type",
           "code": "TS1360",
           "message": "Type 'HoleCall<{}, false, never, false, RequiredContext<number, \"<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C\">>' does not satisfy the expected type '{ readonly \"[NO_PROVIDER] the root requires the contexts this property names: provide each above the components that read it (Ctx.provide({ value, children }) around their calls)\": \"<root>/packages/vite-plugin-yield/test/.native-generated/missing-context.tsx#C\"; }'.",
-          "line": 25
+          "line": 26
         }
       ]
     },
@@ -1405,8 +1405,8 @@
       "foreignBoundaries": [],
       "diagnostics": [
         {
-          "code": "SUGAR_CALLBACK",
-          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/examples/originals/effect/src/solid-effect.ts:52:46)"
+          "code": "SUGAR_ESCAPE",
+          "message": "[SUGAR_ESCAPE] Routine placeOrder is handed to an unknown consumer; a plain callback cannot drive it."
         },
         {
           "code": "MODULE_STATE",
@@ -1421,7 +1421,7 @@
       "differingStatements": null,
       "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
       "reasons": [
-        "SUGAR_CALLBACK",
+        "SUGAR_ESCAPE",
         "MODULE_STATE"
       ]
     },
@@ -1589,9 +1589,7 @@
             "line": 46,
             "server": false,
             "component": true,
-            "fails": [
-              "global:Error"
-            ],
+            "fails": [],
             "provides": [],
             "timerFails": []
           }
@@ -1849,7 +1847,6 @@
             "server": false,
             "component": true,
             "fails": [
-              "global:Error",
               "unknown"
             ],
             "provides": [],
@@ -1885,9 +1882,7 @@
             "line": 193,
             "server": false,
             "component": true,
-            "fails": [
-              "global:Error"
-            ],
+            "fails": [],
             "provides": [],
             "timerFails": []
           },
@@ -1897,9 +1892,7 @@
             "line": 229,
             "server": false,
             "component": true,
-            "fails": [
-              "global:Error"
-            ],
+            "fails": [],
             "provides": [],
             "timerFails": []
           },

@@ -1,6 +1,6 @@
 # [2.0.0-rc.14] A separate isPending reader hides an async memo rejection from Errored
 
-Status: **draft, not filed** (2026-10-08).
+Status: **filed 2026-10-09 as solidjs/solid#3957** (drafted 2026-10-08).
 
 ## Summary
 

@@ -34,19 +34,25 @@ Worktrees on the original machine (may not exist elsewhere): `/Users/devagr/soli
 4. **Native todos needs the two-half rule now too**: with the checker contract the unchanged todos original reports `EVENT_REJECTS` at `app.tsx:82` and `:121` (bulk actions) — correct behaviour; add the snapshot half + the minimal patch half (noted in sugar-design.md on `proto/sugar-types`).
 5. **Checker gaps still open** (review 3; the proofs' contract): refused imports can cause extra caller errors (incomplete checked summaries); timer registration and general callback support; runtime source maps (F-T5); editor UI unverified (F-T1). Wire matching is D-117's job — the native emit must call `registerFailure(Class, stableId)` on both peers and `prepareFailure` before transport; NOT yet wired into the sugar branch.
 6. **Fourth first-time-user review** after the merges (reviewers 1–3's apps and mistake sets: `documentation/handoff/reviews/` and fixtures under `packages/ts-plugin-yield/test/fixtures/`).
-7. **Compiler/islands line** (`proto/compiler`): gated on upstream (frames link over-claim; streamed loading root committed early; the ~25 KB gzip frames client runtime = the break-even) and on re-measuring C3b/C3c on rc.14 (runtime shrank 56–94 KB at load). No work until Dev rules on upstream.
-8. **rc.14**: held on `chore/rc14`. Re-test when Solid fixes the Errored/isPending regression, or when Dev rules a workaround.
+7. **Compiler/islands line** (`proto/compiler`): no longer gated on the ~25 KB gzip frames client runtime (Dev 2026-10-09: unavoidable, size work is ongoing upstream, not a problem for the exploration; it stays the measured break-even). F-C18 (frames claim links in `innerHTML`) is being reclassified (§4). Still open: the streamed loading root commits the URL before its content (draft §2), and re-measuring C3b/C3c on rc.14 (runtime shrank 56–94 KB at load).
+8. **rc.14**: held on `chore/rc14`. The Errored/isPending regression is **filed upstream** (Dev 2026-10-09); re-test when Solid fixes it.
 
 ## 4. Open rulings for Dev
 
-- **Upstream bundle (A/B/C), asked repeatedly, unanswered.** Four plain-Solid findings with repros: (1) rc.14 regression — a separate `isPending` reader hides an async memo rejection from `Errored` (draft `documentation/upstream/solid-errored-fallback-rc14.md` on `chore/rc14`; rc.13 passes / rc.14 fails); (2) frames claim raw-HTML links and add router state attributes; streamed loading root committed before content (draft `documentation/upstream/solid-frames-link-claim.md` on `proto/compiler`); (3) the frames client runtime's fixed cost ≈ 25 KB gzip sets the server-components break-even (no draft; table in `compiler-c3c-scaling.md`); (4) F-K1 — Solid retains `_optimisticNodes`/`CollectionQueue` across rounds in a plain-Solid app (`documentation/soak-report.md`; no draft). Recommended: A = file (1) as an issue, one Discord thread for (2)–(4). Nothing has been filed.
-- **Public roadmap issue** ("post it") — unanswered; optional.
+- **Upstream bundle — answered by Dev 2026-10-09:**
+  1. rc.14 `Errored`/`isPending` regression — **filed** (issue link to be recorded).
+  2. Frames findings (draft `documentation/upstream/solid-frames-link-claim.md` on `proto/compiler`):
+     - **§1 / F-C18, link claiming.** Dev: "link claiming is supposed to be a Solid feature". It is not a user-facing bug: links navigate either way. The only cost is our exact-DOM parity metric, whose oracle (the plain-Solid SPA) leaves `innerHTML` links unclaimed while frames claim every `a[href]` in server HTML (`data-active`, `aria-current`). **Proposed, awaiting Dev's confirmation:** record F-C18 as an allowed difference (as D-115), drop draft §1, and count those checkpoints as matching. C4b would then be 33/40 exact instead of 6/40; the 7 left are F-C19 (the router's TOC claim timing, which also happens in plain Solid).
+     - **§2, streamed loading root.** It commits the URL and shows `Loading` before the article arrives, where an ordinary async route keeps the old page until the new one is ready. Not addressed yet.
+  3. Frames client fixed cost ≈ 25 KB gzip — **accepted**: unavoidable, size reduction ongoing upstream, not a problem for the exploration.
+  4. F-K1 (Solid retains `_optimisticNodes`/`CollectionQueue`) — **parked**: not sure it is an issue right now. Nothing to file.
+- ~~Public roadmap issue~~ — **posted** (Dev 2026-10-09).
 - npm publish: parked ~1 month by Dev (credentials elsewhere); do not raise.
 - Resolved 2026-10-08: production fallbacks show the real failure message (D-115; allowed difference); transported failure classes regain their prototype (D-117).
 
 ## 5. Upstream status
 
-#3815 fixed upstream (#3816; in rc.14). #3845 closed by design. F-C9 withdrawn (both renderers by contract). F-C14 = #3815's class. rc.14 Errored/isPending regression — draft, not filed. Frames findings — draft, not filed. Fixed cost and F-K1 — no draft.
+#3815 fixed upstream (#3816; in rc.14). #3845 closed by design. F-C9 withdrawn (both renderers by contract). F-C14 = #3815's class. rc.14 Errored/isPending regression — **filed** (Dev, 2026-10-09). Frames link claiming (F-C18) — a Solid feature per Dev; reclassification proposed (§4). Streamed loading root — draft, not filed. Fixed cost — accepted, nothing to file. F-K1 — parked.
 
 ## 6. Process rules (learned the hard way; keep them)
 

@@ -1,0 +1,62 @@
+yield-gate: 9 twins: docs-yield, effect-yield, hackernews-spa-yield, rendering-yield, room-yield, sierpinski-yield, sierpinski-yield-h, todos-yield, todos-yield-h
+yield-gate: 50 steps, --jobs 3
+PASS  pkg:yield:dist-fresh                    0.1s
+PASS  twin:docs-yield:test                    4.9s
+PASS  twin:docs-yield:typecheck               5.9s
+PASS  twin:docs-yield:lint                    7.1s
+PASS  twin:effect-yield:test                  5.6s
+PASS  twin:effect-yield:typecheck             4.7s
+PASS  twin:effect-yield:lint                  5.9s
+PASS  twin:hackernews-spa-yield:typecheck     5.0s
+PASS  twin:hackernews-spa-yield:test          6.1s
+PASS  twin:hackernews-spa-yield:lint          4.6s
+PASS  twin:rendering-yield:typecheck          3.8s
+PASS  twin:rendering-yield:test               5.9s
+PASS  twin:rendering-yield:lint               4.5s
+PASS  twin:room-yield:test                    5.4s
+PASS  twin:room-yield:typecheck               4.6s
+PASS  twin:room-yield:lint                    5.3s
+PASS  twin:sierpinski-yield:typecheck         5.0s
+PASS  twin:sierpinski-yield:lint              5.2s
+PASS  twin:sierpinski-yield-h:typecheck       5.5s
+PASS  twin:sierpinski-yield-h:lint            6.3s
+PASS  twin:todos-yield:test                   4.8s
+PASS  twin:todos-yield:typecheck              3.5s
+PASS  twin:sierpinski-yield:test             30.5s
+PASS  twin:todos-yield:lint                   3.7s
+PASS  twin:sierpinski-yield-h:test           27.8s
+PASS  twin:todos-yield-h:test                 4.0s
+PASS  twin:todos-yield-h:typecheck            5.9s
+PASS  original:docs:typecheck                 3.3s
+PASS  twin:todos-yield-h:lint                 6.4s
+PASS  original:dashboard:test                 4.0s
+PASS  original:dashboard:typecheck            4.3s
+PASS  original:dashboard:ssr-smoke            2.7s
+PASS  original:dashboard:hydrate-smoke        5.6s
+PASS  twins:ssr-smoke                        14.7s
+PASS  pkg:eslint-plugin-yield:test            5.4s
+PASS  pkg:vite-plugin-yield:test              4.6s
+PASS  pkg:vite-plugin-yield:typecheck         4.6s
+PASS  twins:hydrate-smoke                    31.9s
+PASS  analyzer:test                           2.8s
+PASS  proofs                                  2.6s
+PASS  analyzer:report                         5.2s
+PASS  twins:executed-bytes-test               0.2s
+PASS  pkg:yield:conformance                  18.0s
+PASS  pkg:yield:exports                       4.0s
+PASS  pkg:vite-plugin-yield:exports           2.7s
+PASS  pkg:eslint-plugin-yield:exports         2.8s
+PASS  repo:prettier                          11.1s
+PASS  repo:oxlint                             0.7s
+PASS  pkg:yield:test                         81.1s
+PASS  twins:executed-bytes                  204.1s
+
+50 pass / 0 fail / 0 skip in 309s
+
+vs baseline documentation/yield-gate-baseline.json (cb5a80da2707):
+  new reds:  none
+  fixed:     none
+  unchanged: 50
+GREEN (no step regressed from PASS)
+
+wrote ../rc14-effect-check/main-gate.json

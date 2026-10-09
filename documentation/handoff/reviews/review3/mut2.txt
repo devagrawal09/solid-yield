@@ -1,0 +1,52 @@
+##### 6: async onClick that rejects
+Clock.tsx:7:45 error TS95000: [EVENT_REJECTS] This handler can fail with __nativeChunk | unknown | RateLimited | NotFound and nothing catches it; wrap the body in try/catch, or declare the failure.
+solid-yield check: 9 files, 1 errors
+
+ProductList.tsx:ProductList => ProductList — can suspend (pending); can fail with __nativeChunk | RateLimited; does not wait; needs CartCtx
+Details.tsx:Details => Details — can suspend (pending); can fail with __nativeChunk | NotFound; does not wait; needs no context
+Checkout.tsx:Checkout => Checkout — does not suspend; never fails; does not wait; needs CartCtx
+Clock.tsx:Clock => Clock — does not suspend; can fail with __nativeChunk | RateLimited | NotFound | an unknown error (from email.includes at api.ts:19); does not wait; needs no context
+index.tsx:App => App — does not suspend; can fail with import("solid-yield").ChunkError | RateLimited | NotFound | an unknown error (from email.includes at api.ts:19); does not wait; needs no context
+
+##### 7: .then without .catch in handler
+Checkout.tsx:12:18 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.
+solid-yield check: 9 files, 1 errors
+
+ProductList.tsx:ProductList => function ProductList(): JSX.Element
+Details.tsx:Details => function Details(props: {
+    id: string;
+}): JSX.Element
+Checkout.tsx:Checkout => function Checkout(): JSX.Element
+Clock.tsx:Clock => function Clock(): JSX.Element
+index.tsx:App => function App(): JSX.Element
+
+##### 8: throw a string (api)
+api.ts:10:26 error TS95000: [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.
+solid-yield check: 9 files, 1 errors
+
+ProductList.tsx:ProductList => function ProductList(): JSX.Element
+Details.tsx:Details => function Details(props: {
+    id: string;
+}): JSX.Element
+Checkout.tsx:Checkout => function Checkout(): JSX.Element
+Clock.tsx:Clock => function Clock(): JSX.Element
+index.tsx:App => function App(): JSX.Element
+
+##### 9: throw inside setTimeout
+solid-yield check: 9 files, 0 errors
+
+ProductList.tsx:ProductList => ProductList — can suspend (pending); can fail with __nativeChunk | RateLimited; does not wait; needs CartCtx
+Details.tsx:Details => Details — can suspend (pending); can fail with __nativeChunk | NotFound; does not wait; needs no context
+Checkout.tsx:Checkout => Checkout — does not suspend; never fails; does not wait; needs CartCtx
+Clock.tsx:Clock => Clock — does not suspend; never fails; does not wait; needs no context
+index.tsx:App => App — does not suspend; never fails; does not wait; needs no context
+
+##### 10: server fn throws NEW class Banned (no client change)
+solid-yield check: 9 files, 0 errors
+
+ProductList.tsx:ProductList => ProductList — can suspend (pending); can fail with __nativeChunk | RateLimited; does not wait; needs CartCtx
+Details.tsx:Details => Details — can suspend (pending); can fail with __nativeChunk | Banned | NotFound; does not wait; needs no context
+Checkout.tsx:Checkout => Checkout — does not suspend; never fails; does not wait; needs CartCtx
+Clock.tsx:Clock => Clock — does not suspend; never fails; does not wait; needs no context
+index.tsx:App => App — does not suspend; never fails; does not wait; needs no context
+

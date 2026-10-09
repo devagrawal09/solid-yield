@@ -1,0 +1,26 @@
+
+ RUN  v4.1.11 /private/tmp/sy-docs/examples/effect-yield
+
+ ❯ tests/app.test.tsx (12 tests | 1 failed | 11 skipped) 176ms
+     × gives up after retries into the error boundary, and recovers on reset 175ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/app.test.tsx > effect typeahead with solid-yield > gives up after retries into the error boundary, and recovers on reset
+TypeError: Cannot read properties of null (reading 'textContent')
+ ❯ tests/app.test.tsx:109:28
+    107|     expect(logLines().filter(l => l.startsWith("retry")).length).toBeG…
+    108|     await advance(4000);
+    109|     expect($(".error-box p")!.textContent).toBe("Search gave up after …
+       |                            ^
+    110|     setRandom(0.9);
+    111|     await click(button("Try again"));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 11 skipped (12)
+   Start at  14:33:54
+   Duration  2.89s (transform 633ms, setup 0ms, import 1.42s, tests 176ms, environment 1.04s)
+

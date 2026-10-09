@@ -1,0 +1,9 @@
+# running notes
+- n1: native plain `onClick={()=>cart.add(p())}` in <For> child => [SUGAR_CALLBACK] at function NAME line (ProductList.tsx:5:17), not at read. Also cart.tsx object-literal `add: p => setItems([...items(), p])` => SUGAR_CALLBACK cart.tsx:7:54.
+- n2: Row(props:{p:()=>Product}) with `const add=()=>cart.setItems([...cart.items(),props.p()])` => crash "Debug Failure. False expression" computePositionOfLineAndCharacter (service.cjs:193) (crash1.txt)
+- n3: handler in ProductList with 'const d=e.currentTarget.dataset; cart.setItems([...cart.items(), {...}])' => [BABEL_PARSE_ERROR] reported at Checkout.tsx:19:6 but message says ProductList.tsx; 'Unexpected reserved word yield' (leaked generated code)
+- n4: same root cause crashes CLI w/ 'Debug Failure' when loc column out of range (service.cjs:193). trigger: handler 'add' in ProductList next to createMemo+For
+- n5: my bug: Solid2 rc13 For default is keyed -> item not accessor; tool's TS2349 'This expression is not callable' correct (ordinary TS msg).
+- n6: variable named 'p' + JSX <p> intrinsic => bogus [NATIVE_FOREIGN_BOUNDARY] 'Handle failures inside p ... imported component (createMemo from solid-js)' at the <p> tag, plus GENERATED_TYPE Details.tsx:4:17
+- n7: helper (no directive) with Math.round/toFixed/reduce/String called in a hole with reactive arg => 'can fail with an unknown error (from Math.round at format.ts:2)'; infects Details/Checkout/App; 'use pure' did not help. ProductList (money(p.price) in For) not infected. Hover internal name leak: __nativeChunk
+- n8: custom Provider wrapper component (CartProvider w/ children: JSX.Element) not seen as providing: NO_PROVIDER at ProductList.tsx:6:40 though App wraps in <CartProvider>; with children:any => cascade of FOREIGN_HANDOFF/PENDING_ROOT/LAZY_VIEW at cart.tsx props.children

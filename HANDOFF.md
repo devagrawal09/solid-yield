@@ -1,3 +1,73 @@
+# STOP 2026-10-09 — handoff for the next agent (read this first)
+
+Orchestration stopped on Dev's instruction after four server restarts in one day. Every branch is pushed; every worktree was clean or its state was committed as a `wip:` commit (gate NOT verified for those). Nothing is running. Start from this section; the sections below it are the detailed historical record.
+
+## 1. What this project is (one paragraph)
+
+`solid-yield` is a userland library + compiler for Solid 2 that gives apps **typed failures**: every component's color (pending / fails X|Y / may-wait / requires Ctx) is known and checked. v0.1 (the explicit library, generator routines) is complete and proven (Lean, gate-checked). The current headline is **v0.2 = sugar mode**: the author writes **plain Solid 2** (no library import); a Vite plugin reconstructs the routines, infers failures from throw sites, and a TypeScript language-service plugin + CLI maps diagnostics back to the author's lines. Decisions are numbered D-001…D-117 in `documentation/DECISIONS.md`; findings are F-xx (library), F-Cxx (compiler), F-Sxx (sugar), F-Txx (typing), F-Mxx (mutation), F-Kxx (soak).
+
+## 2. Branch table (all pushed; shas verified against origin at stop)
+
+| Branch | Head | State |
+| --- | --- | --- |
+| `main` | `9fdcf82` + this handoff commit | D-113…D-117 recorded; 10 originals (incl. dashboard); analyzer tool; calculus proofs merged + gate step; soak harness merged (report-only); D-117 (failures keep their class across the wire); pnpm 11.20.0; gate GREEN at `9fdcf82` (52 pass / 1 report-only skip). |
+| `proto/sugar` | `3b3f167` | Native mode (bounded, option C). Passing originals: sierpinski, todos, hackernews (two-half acceptance). Effect pinned at F-S34. F-S35 fixed here; F-S36 pinned. `proto/sugar-ls` merged in at `f670cd9` (checker contract, ts-plugin, CLI) — but NOT its later commits (see below). Gate 77/77 at head. |
+| `proto/sugar-types` | `e92a701` | Off `proto/sugar`. F-S36 repair: author Solid type annotations (Accessor/Setter/Signal/Component/JSX.Element) lowered alongside values (`packages/vite-plugin-yield/src/native-types.js`, `packages/yield/src/native-types.ts`). Dashboard then stops at **F-S37** (§3). Two `wip` commits; gate state per their messages. Two stashes from this branch exported to `documentation/handoff/stashes/`. |
+| `proto/sugar-ls` | `451d2cd` | The TS plugin + `solid-yield check` CLI; checker contract (catch rule, subclass coverage, selective rethrow, @yield-absorb, EVENT_REJECTS, root handoff at origin); review-1/2/3 fixes. Scores: review 1 19/20, review 2 15/16, review 3 28/30. Gate 66/66. Commits after `ed90200` (`e215b7c`…`451d2cd`) are NOT yet merged into `proto/sugar`. The killed-worker patch items were audited: all covered (`documentation/reviews/sugar-review-3-fixes.md`). |
+| `proto/sugar-mutation` | `e5db2b8` | Mutation gate step (program mutants; score baseline 35.65 % — see §6 caveat) + Stryker: ESLint plugin 66.04 %, TS plugin 48.07 %, compiler-yield/failure-inference.js 59.57 % (700 mutants), vite-plugin-yield native-effects+positions+transform 47.00 % (966 mutants, bounded run). Report: `documentation/mutation-report.md`. Based on `proto/sugar-ls@d88e31c` (old). |
+| `proto/sugar-fs35-isolated` | `7381dd1` | Created by a resurrected session; one real commit (`a1c7adb` "keep native evidence independent of checkout paths") + a `wip:` preservation commit. Probably subsumed by `3b3f167`; verify by diff, then merge the one commit or delete. |
+| `proto/compiler` | `620d62a` | Compiler experiments (measured; D-114): static extraction + root split (no gain); reachability; R = islands (server components with client slots) incl. the three-level docs fixture and the scaling curve; C4/C4b/C4c DOM parity (6/40 exact; remaining diffs are Solid frames'/router's); rc.13 adapter isolated in `src/solid-adapter.js` with a version guard + contract tests. Gated on upstream. |
+| `proto/compiler-single-root` | `43bb41b` | Historical. |
+| `proto/calculus-proofs` | `950a71b` | Merged into main. |
+| `runtime/failure-wire` | `fcb74cc` | Merged into main (D-117). |
+| `harness/soak` | `18e8d62` | Merged into main. |
+| `examples/dashboard` | `432db86` | Merged into main. |
+| `chore/rc14` | `a0b95aa` | Solid 2.0.0-rc.14 bump, HELD: fixes #3815 (workaround removed there) but regresses Errored (§5). Gate 44/46 (two allowed reds). Do not merge until resolved. |
+
+Worktrees on the original machine (may not exist elsewhere): `/Users/devagr/solid-yield` (proto/compiler), `/private/tmp/sy-docs` (main), `sy-sugar`, `sy-types`, `sy-ls`, `sy-mut`, `sy-soak`, `sy-dash`, `sy-sugar-fs35-work`. Lean toolchain at `/private/tmp/elan` (the proofs gate step SKIPs without it; install hint in the step).
+
+## 3. Where each line stopped — and the exact next action
+
+1. **Sugar mode — dashboard original.** Stopped at **F-S37**: `useFilters()` reads and raises during generated component **setup** (`filters.tsx:32:17`, `FilterBar`), which the lowering only admits setup operations for. Side-by-side: `documentation/native-dashboard-blocker.md` on `proto/sugar-types`. Same class as F-S35/F-S36 — a core-line lowering gap (a context read at setup that can raise NO_PROVIDER must be admitted as a setup read carrying its `requires` color, not refused). Next: fix on `proto/sugar-types`, then the two-half acceptance (unchanged original → exact diagnostics; minimal author patch → parity + SSR; AckFailed/NotFound paths). Expected diagnostics: NATIVE_FOREIGN_BOUNDARY at `app.tsx:92` (+ real unhandled failures if any).
+2. **Merge order** (full gate at each): `proto/sugar-ls@451d2cd` → `proto/sugar-types`; finish F-S37 there; `proto/sugar-types` → `proto/sugar`; `proto/sugar-mutation` → `proto/sugar` (then re-run the mutation step with the CORRECTED kill criterion, §6); resolve `proto/sugar-fs35-isolated`.
+3. **Remaining originals through native mode** (one single-goal session each, two-half acceptance, stop rule): rendering, room, docs. Effect stays pinned at F-S34 (the hand-written Effect-TS↔Solid bridge helper reads a signal outside any host).
+4. **Native todos needs the two-half rule now too**: with the checker contract the unchanged todos original reports `EVENT_REJECTS` at `app.tsx:82` and `:121` (bulk actions) — correct behaviour; add the snapshot half + the minimal patch half (noted in sugar-design.md on `proto/sugar-types`).
+5. **Checker gaps still open** (review 3; the proofs' contract): refused imports can cause extra caller errors (incomplete checked summaries); timer registration and general callback support; runtime source maps (F-T5); editor UI unverified (F-T1). Wire matching is D-117's job — the native emit must call `registerFailure(Class, stableId)` on both peers and `prepareFailure` before transport; NOT yet wired into the sugar branch.
+6. **Fourth first-time-user review** after the merges (reviewers 1–3's apps and mistake sets: `documentation/handoff/reviews/` and fixtures under `packages/ts-plugin-yield/test/fixtures/`).
+7. **Compiler/islands line** (`proto/compiler`): gated on upstream (frames link over-claim; streamed loading root committed early; the ~25 KB gzip frames client runtime = the break-even) and on re-measuring C3b/C3c on rc.14 (runtime shrank 56–94 KB at load). No work until Dev rules on upstream.
+8. **rc.14**: held on `chore/rc14`. Re-test when Solid fixes the Errored/isPending regression, or when Dev rules a workaround.
+
+## 4. Open rulings for Dev
+
+- **Upstream bundle (A/B/C), asked repeatedly, unanswered.** Four plain-Solid findings with repros: (1) rc.14 regression — a separate `isPending` reader hides an async memo rejection from `Errored` (draft `documentation/upstream/solid-errored-fallback-rc14.md` on `chore/rc14`; rc.13 passes / rc.14 fails); (2) frames claim raw-HTML links and add router state attributes; streamed loading root committed before content (draft `documentation/upstream/solid-frames-link-claim.md` on `proto/compiler`); (3) the frames client runtime's fixed cost ≈ 25 KB gzip sets the server-components break-even (no draft; table in `compiler-c3c-scaling.md`); (4) F-K1 — Solid retains `_optimisticNodes`/`CollectionQueue` across rounds in a plain-Solid app (`documentation/soak-report.md`; no draft). Recommended: A = file (1) as an issue, one Discord thread for (2)–(4). Nothing has been filed.
+- **Public roadmap issue** ("post it") — unanswered; optional.
+- npm publish: parked ~1 month by Dev (credentials elsewhere); do not raise.
+- Resolved 2026-10-08: production fallbacks show the real failure message (D-115; allowed difference); transported failure classes regain their prototype (D-117).
+
+## 5. Upstream status
+
+#3815 fixed upstream (#3816; in rc.14). #3845 closed by design. F-C9 withdrawn (both renderers by contract). F-C14 = #3815's class. rc.14 Errored/isPending regression — draft, not filed. Frames findings — draft, not filed. Fixed cost and F-K1 — no draft.
+
+## 6. Process rules (learned the hard way; keep them)
+
+- **One worker per worktree.** Sessions presumed dead after a server restart have resumed later and worked concurrently with their replacement. Only a session whose execution reported *failed/cancelled* is dead; a "completed" transcript with zero assistant turns is NOT proof. If unsure, use a new worktree on a new branch.
+- **Commit after every green step** (build + fast gate → commit); full gate before the final commit of a deliverable. Restarts lose everything uncommitted.
+- **Keep subagent tool output short**; Codex sessions die at ~1 MB transcript. Fresh sessions briefed from repo state beat continuations. Begin briefs with "THERE IS NO EARLIER HANDOFF; run git status first" — a session once answered from stale context without running a command.
+- **Single-goal implementation sessions** (Codex `sol#high`) got originals through native mode where multi-goal prototyping sessions (`astra#high`) did not. Reviews: Claude Sonnet, read-only worktree, writes only to an out dir.
+- Gate: `pnpm build` then `node scripts/yield-gate.mjs --baseline documentation/yield-gate-baseline.json` (`--fast` acceptable for docs-only). Never block on CI; push only after local GREEN. DECISIONS.md edits via function-form string replacement (a `$`-pattern bug once corrupted it).
+- **Mutation testing is a standing rule** (Dev). The mutation step's program score (35.65 %) UNDERCOUNTS: its kill rule demanded the expected code at the mutated line ±0, but a deleted Errored/Loading/provider is correctly reported at the origin read or the handoff with the deletion as related location. Next run: count a kill when the expected code's primary OR related location falls in the mutated routine; re-baseline. It also predates the checker contract.
+- Two-half acceptance for originals (F-S9/D-116): unchanged original → exactly the recorded, correct diagnostics; minimally patched copy (patch applied at test time; original byte-identical) → parity + SSR vs the original.
+
+## 7. External artifacts now inside the repo (`documentation/handoff/`)
+
+`reviews/review1|2|3/` — the three first-time-user reviews' REVIEW.md, their apps and mistake variants (REVIEW.md copies also in `documentation/reviews/sugar-review-{1,2,3}.md`). `patches/` — the killed worker's extra patch + handoff note (all items confirmed covered by `proto/sugar-ls@451d2cd`). `stashes/` — the three repo stashes as patches with INDEX.txt (two `proto/sugar-types` restart backups — likely superseded by `cb4bcd3`/`e92a701`, verify by diff; one `proto/sugar` safety stash superseded by `3b3f167`). `repros/` — plain-Solid reproduction dirs (ssr-boundary, frames, rc14-effect, frames-links, rc13 control) without node_modules.
+
+## 8. Numbers worth remembering
+
+Compiler on the docs fixture (rc.13): static extraction + root split — seven roots +9.9 % executed, one root +3.8 % executed / −0.5 % shipped; islands (R) break-even ≈ 25.6 KB gzip of server-derivable code; at level L −44 % load executed / −57 % gzip vs the library, client bundle invariant (83,744 gzip; 80,698 after C4b). Reachability floor 348,751 B. Soak: no library leak; 57,263 + 10,800 parity checkpoints clean. Proofs: 50/52 obligations hold under inference (O27, O52 restated into the checker contract).
+
+---
+
 # HANDOFF — solid-yield (checkpoint 2026-10-09: through D-117)
 
 This repository was extracted from the Solid fork `devagrawal09/solid`, branch `blocks-lib`, at commit **`6978eb83`** (D-015). Git history was not carried; the fork keeps it. The fork's own handoff at that commit (Phases 1A, 1B and 2, and its environment notes) is `git show 6978eb83:HANDOFF.md` in the fork.

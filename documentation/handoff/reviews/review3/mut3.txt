@@ -1,0 +1,54 @@
+##### 11: Promise.all with rejectable member
+Details.tsx:6:44 error TS2571: Object is of type 'unknown'.
+Details.tsx:6:20 error TS2571: Object is of type 'unknown'.
+solid-yield check: 9 files, 2 errors
+
+ProductList.tsx:ProductList => ProductList — can suspend (pending); can fail with __nativeChunk | RateLimited; does not wait; needs CartCtx
+Details.tsx:Details => Details — can suspend (pending); can fail with __nativeChunk | NotFound | an unknown error (from Promise.all at Details.tsx:5); does not wait; needs no context
+Checkout.tsx:Checkout => Checkout — does not suspend; never fails; does not wait; needs CartCtx
+Clock.tsx:Clock => Clock — does not suspend; never fails; does not wait; needs no context
+index.tsx:App => App — does not suspend; never fails; does not wait; needs no context
+
+##### 12: try/finally with no catch
+Checkout.tsx:20:21 error TS95000: [EVENT_REJECTS] This handler can fail with __nativeChunk | unknown | RateLimited and nothing catches it; wrap the body in try/catch, or declare the failure.
+index.tsx:19:43 error TS2345: [FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: import("solid-yield").ChunkError | unknown | RateLimited.
+solid-yield check: 9 files, 2 errors
+
+ProductList.tsx:ProductList => ProductList — can suspend (pending); can fail with __nativeChunk | RateLimited; does not wait; needs CartCtx
+Details.tsx:Details => Details — can suspend (pending); can fail with __nativeChunk | NotFound; does not wait; needs no context
+Checkout.tsx:Checkout => Checkout — does not suspend; can fail with __nativeChunk | RateLimited | an unknown error; does not wait; needs CartCtx
+Clock.tsx:Clock => Clock — does not suspend; never fails; does not wait; needs no context
+index.tsx:App => App — does not suspend; can fail with import("solid-yield").ChunkError | RateLimited | an unknown error; does not wait; needs no context
+
+##### 13: await inside async memo of throwing fn
+Details.tsx:5:68 error TS95000: [SUGAR_HOST] Reactive operations in async functions or methods are unsupported.
+solid-yield check: 9 files, 1 errors
+
+ProductList.tsx:ProductList => function ProductList(): JSX.Element
+Details.tsx:Details => function Details(props: {
+    id: string;
+}): JSX.Element
+Checkout.tsx:Checkout => function Checkout(): JSX.Element
+Clock.tsx:Clock => function Clock(): JSX.Element
+index.tsx:App => function App(): JSX.Element
+
+##### 14: context read without provider
+ProductList.tsx:6:40 error TS1360: [NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: CartCtx.
+solid-yield check: 9 files, 1 errors
+
+ProductList.tsx:ProductList => ProductList — can suspend (pending); can fail with __nativeChunk | RateLimited; does not wait; needs CartCtx
+Details.tsx:Details => Details — can suspend (pending); can fail with __nativeChunk | NotFound; does not wait; needs no context
+Checkout.tsx:Checkout => Checkout — does not suspend; never fails; does not wait; needs CartCtx
+Clock.tsx:Clock => Clock — does not suspend; never fails; does not wait; needs no context
+index.tsx:App => App — does not suspend; never fails; does not wait; needs CartCtx
+
+##### 15: remove Errored
+ProductList.tsx:10:18 error TS2345: [FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: import("solid-yield").ChunkError | RateLimited | NotFound.
+solid-yield check: 9 files, 1 errors
+
+ProductList.tsx:ProductList => ProductList — can suspend (pending); can fail with __nativeChunk | RateLimited; does not wait; needs CartCtx
+Details.tsx:Details => Details — can suspend (pending); can fail with __nativeChunk | NotFound; does not wait; needs no context
+Checkout.tsx:Checkout => Checkout — does not suspend; never fails; does not wait; needs CartCtx
+Clock.tsx:Clock => Clock — does not suspend; never fails; does not wait; needs no context
+index.tsx:App => App — does not suspend; can fail with import("solid-yield").ChunkError | RateLimited | NotFound; does not wait; needs no context
+

@@ -1,0 +1,6 @@
+{
+  "errors": [
+    "<Loading> boundary discovery did not converge after 10001 passes — an async source produces a new pending answer on every retry. Ensure repeated reads settle (e.g. return a stable promise or value for the same question)."
+  ],
+  "result": ""
+}

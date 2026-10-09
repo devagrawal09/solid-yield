@@ -1,0 +1,50 @@
+{
+  "errors": [
+    "<Loading> boundary discovery did not converge after 10001 passes — an async source produces a new pending answer on every retry. Ensure repeated reads settle (e.g. return a stable promise or value for the same question)."
+  ],
+  "result": [
+    {
+      "type": "start",
+      "id": "",
+      "version": 1
+    },
+    {
+      "type": "html",
+      "id": "",
+      "version": 1,
+      "html": "<template id=\"pl-00\"></template>Loading<!--pl-00-->",
+      "digest": "b1cab57db5ad2b0f"
+    },
+    {
+      "type": "fragment",
+      "id": "",
+      "version": 1,
+      "key": "00",
+      "html": " ",
+      "digest": "250c8f7f3176ca2d"
+    },
+    {
+      "type": "error",
+      "id": "",
+      "version": 1,
+      "key": "00",
+      "error": {
+        "message": "1"
+      }
+    },
+    {
+      "type": "reveal",
+      "id": "",
+      "version": 1,
+      "keys": [
+        "00"
+      ],
+      "waitForStyles": false
+    },
+    {
+      "type": "complete",
+      "id": "",
+      "version": 1
+    }
+  ]
+}

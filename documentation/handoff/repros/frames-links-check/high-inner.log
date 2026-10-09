@@ -1,0 +1,1 @@
+{"mode":"high","intercepted":true,"innerPending":{"url":"/page/b","content":null,"raw":[],"part":null,"authored":null},"order":[["frame-applied","/page/a",null],["before-push","/page/a",null],["frame-applied","/page/b","b"]]}

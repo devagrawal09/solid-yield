@@ -1,0 +1,338 @@
+diff --git a/documentation/sugar-design.md b/documentation/sugar-design.md
+index 44ad0b3..c066892 100644
+--- a/documentation/sugar-design.md
++++ b/documentation/sugar-design.md
+@@ -675,6 +675,42 @@ not silent fallbacks to native reactive state inside a library routine.
+ | `action` (including generators), `createStore`, `createOptimistic`, `onSettled`, `latest`, `isPending` | `$event`, `$store`, `$optimistic`, `$effect`/`$cleanup`, `latestOf`/`isPendingOf` + read | Focused generated checks pass; see the API inventory for overload limits |
+ | `createOptimisticStore`, `createProjection`, `refresh`, `until`, `lazy` | Corresponding library primitive imports | Import mapping implemented; producer, selector, generic and foreign-edge contracts remain incomplete |
+ 
++### Native type annotations (2026-10-09)
++
++Solid type imports lower with their values. Local import aliases keep their
++names. The type visitor covers interface and alias members, nested generics,
++constraints/defaults, function parameters/results, tuples/unions, mapped and
++conditional types, interface extensions, call type arguments, `satisfies`, and
++`as`/angle assertions. Type namespaces and inline `import(...).Type` work too.
++The fixtures in `native-types.test.js` check the mapped contracts with TypeScript.
++
++| Solid spelling | Generated library contract |
++| --- | --- |
++| `Accessor<T>` | `Source<T>` |
++| `Setter<T>` | `Setter<T>` (returns the library's write receipt) |
++| `Signal<T>` | `[Source<T>, Setter<T>]` |
++| `Component<P>` | `Component<P>` |
++| `ParentComponent<P>` | `Component<P & { children?: Element }>` |
++| `VoidComponent<P>` | `Component<P & { children?: never }>` |
++| `ParentProps<P>` | `P & { children?: Element }` |
++| `JSX.Element` (Solid or web import) | `Element` |
++| Other Solid types | Retain the Solid import and annotation; report `NATIVE_TYPE_UNMAPPED` at each use |
++
++An accessor's contract is settled, matching the lowered signal getter. It does
++not erase a memo's pending/failure colors: assigning a colored memo to this
++settled contract is rejected. Unannotated producers retain inferred colors.
++Making a Source callable would hide a read in the explicit library dialect,
++so this change leaves the runtime unchanged. Component declaration annotations
++supply props (including parent/void children); generated bodies infer their
++actual colors instead of widening them to `Component`'s defaults. A component's
++`JSX.Element` return annotation similarly becomes an inferred view signature;
++plain function return annotations use the mapped element/value type.
++
++This repairs dashboard F-S36's provider value contract. It does not establish
++the provider relationship through `useFilters()` in component setup: that is
++the new [F-S37 stop](native-dashboard-blocker.md). No native dashboard runtime
++acceptance or final colors are claimed.
++
+ A selected local component passed to native `render` or `hydrate` uses the library renderer with `RootCheck` and `foreign`. This entry is a foreign handoff: residual failures, including unknown, are errors. D-033 allows failures at explicit library roots, not at native Solid entry handoffs. In a self-recursive component, fixed numeric prop snapshots may become path reads in holes when every local JSX caller supplies fixed numeric expressions; pure numeric assignments are substituted in source order, and an early JSX return selects `Match` rows that own their branch setup. Recursive component types carry the pending and failure types inferred from memo reads and prop edges, and generated TypeScript checks the full body against that type. Timer and frame callbacks retain the existing rule: reads and writes run as component-owned events, with their result ignored by the scheduler.
+ 
+ Native Todos now needs the D-116 two-half acceptance rule too. The unchanged
+diff --git a/packages/vite-plugin-yield/src/native.js b/packages/vite-plugin-yield/src/native.js
+index 130b918..6ff6650 100644
+--- a/packages/vite-plugin-yield/src/native.js
++++ b/packages/vite-plugin-yield/src/native.js
+@@ -11,6 +11,7 @@ import { printMapped, withPositions, copyPosition } from "./positions.js";
+ // @ts-check
+ import babel from "@babel/core";
+ import ts from "typescript";
++import { lowerNativeTypes, nativeTypeDiagnostics, solidType } from "./native-types.js";
+ import { readFileSync } from "node:fs";
+ import { createRequire } from "node:module";
+ import { dirname, resolve } from "node:path";
+@@ -72,6 +73,8 @@ export const nativeTypes = new Set([
+   "ParentComponent",
+   "Store",
+   "Setter",
++  "Signal",
++  "VoidComponent",
+   "JSX",
+   "RevealOrder"
+ ]);
+@@ -478,23 +481,22 @@ function surface(code, filename, modules, options = {}, foreignComponents = new
+       if (q.parentPath.isVariableDeclarator() && t.isIdentifier(q.parentPath.node.id)) {
+         const declared = q.parentPath.node.id.typeAnnotation;
+         const type = declared?.type === "TSTypeAnnotation" ? declared.typeAnnotation : null;
+-        if (
+-          t.isTSTypeReference(type) &&
+-          t.isIdentifier(type.typeName) &&
+-          ["Component", "ParentComponent"].includes(type.typeName.name)
+-        ) {
+-          const binding = q.scope.getBinding(type.typeName.name)?.path;
+-          if (
+-            binding?.isImportSpecifier() &&
+-            binding.parentPath.isImportDeclaration() &&
+-            binding.parentPath.node.source.value === "solid-js"
+-          ) {
+-            if (t.isIdentifier(param) && !param.typeAnnotation)
+-              param.typeAnnotation = t.tsTypeAnnotation(
+-                type.typeParameters?.params[0] ?? t.tsTypeLiteral([])
+-              );
++        const contract = type && t.isTSTypeReference(type)
++          ? solidType(q.parentPath.get("id.typeAnnotation.typeAnnotation")) : null;
++        if (t.isTSTypeReference(type) && contract && ["Component", "ParentComponent", "VoidComponent"].includes(contract.name)) {
++            if (t.isIdentifier(param) && !param.typeAnnotation) {
++              const name = contract.name;
++              const base = type.typeParameters?.params[0] ?? t.tsTypeLiteral([]);
++              if (name === "ParentComponent") needed.add("Element");
++              const children = t.tsPropertySignature(t.identifier("children"), t.tsTypeAnnotation(
++                name === "VoidComponent" ? t.tsNeverKeyword() : t.tsTypeReference(t.identifier("Element"))
++              ));
++              children.optional = true;
++              param.typeAnnotation = t.tsTypeAnnotation(name === "Component" ? base : t.tsIntersectionType([
++                base, t.tsTypeLiteral([children])
++              ]));
++            }
+             q.parentPath.node.id.typeAnnotation = null;
+-          }
+         }
+       }
+       if (param && !t.isIdentifier(param))
+@@ -524,12 +526,15 @@ function surface(code, filename, modules, options = {}, foreignComponents = new
+           t.tsTypeParameterInstantiation([param.typeAnnotation.typeAnnotation])
+         );
+       }
+-      if (q.node.returnType)
++      if (q.node.returnType && solidType(q.get("returnType.typeAnnotation"))?.name !== "JSX.Element")
+         fail(
+           q,
+           "NATIVE_RETURN_TYPE",
+           "A component return annotation needs a virtual value-to-routine type mapping."
+         );
++      // The reconstructed function returns a view generator. Infer its colors
++      // from that body rather than constraining the generator to an Element.
++      q.node.returnType = null;
+     },
+     CallExpression(q) {
+       const api = imported(q.get("callee"));
+@@ -916,6 +921,7 @@ function surface(code, filename, modules, options = {}, foreignComponents = new
+       }
+     }
+   });
++  lowerNativeTypes(p);
+   const rewrittenImports = new WeakSet();
+   traverseOwned(p, {
+     ImportDeclaration(q) {
+@@ -1082,6 +1088,10 @@ function lowerNativeProjectImpl(input, options = {}) {
+   const diagnostics = inspectNativeProject(selected);
+   const refusals = diagnostics.filter(d => d.code !== "MODULE_STATE");
+   if (refusals.length) throw new NativeDiagnosticError(refusals);
++  for (const [file, code] of selected) {
++    const p = parseProgram(code, file);
++    if (p) diagnostics.push(...nativeTypeDiagnostics(p, file));
++  }
+   // Resolve selected components handed as values to a foreign component slot.
+   // Their source parameter remains the plain Solid call signature at that edge.
+   const sourceProgram = [...selected.values()].some(code => /\bcomponent\s*:/.test(code))
+diff --git a/packages/yield/src/internal.ts b/packages/yield/src/internal.ts
+index d5dc040..7c8dd90 100644
+--- a/packages/yield/src/internal.ts
++++ b/packages/yield/src/internal.ts
+@@ -25,3 +25,4 @@ export {
+ export type { NativeArguments } from "./native-control.js";
+ export { nativeC } from "./native-props.js";
+ export type { NativeProps } from "./native-props.js";
++export type { NativeSignal, NativeParentProps, NativeParentComponent, NativeVoidComponent } from "./native-types.js";
+diff --git a/scripts/native-dashboard-blocker.mjs b/scripts/native-dashboard-blocker.mjs
+index ad716ed..9589a66 100644
+--- a/scripts/native-dashboard-blocker.mjs
++++ b/scripts/native-dashboard-blocker.mjs
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env node
+-// Pin the first structural stop after F-S35; this is not runtime acceptance.
++// F-S36 is fixed. Pin the first new reason, F-S37; this is not runtime acceptance.
+ import assert from "node:assert/strict";
+ import { createHash } from "node:crypto";
+ import { createRequire } from "node:module";
+@@ -66,113 +66,61 @@ const errors = ts
+ const file = join(source, "filters.tsx"),
+   authored = files.get(file),
+   output = result.files.get(file);
+-const contextErrors = errors.filter(
+-  d =>
+-    d.file?.fileName === file &&
+-    d.code === 2322 &&
+-    /Type 'Source<(Range|TeamFilter), never, false>' is not assignable to type 'Accessor</.test(
+-      ts.flattenDiagnosticMessageText(d.messageText, "\n")
+-    )
+-);
+-assert.equal(
+-  contextErrors.length,
+-  2,
+-  "F-S36 changed: review the context facade before claiming dashboard acceptance."
+-);
+-const providerLine = authored.split("\n").findIndex(l => l.includes("<FilterContext value=")) + 1;
+-assert.equal(providerLine, 23);
+-const structuralDiagnostics = contextErrors.map(d => {
+-  const message = ts.flattenDiagnosticMessageText(d.messageText, "\n");
+-  const kind = /Source<(Range|TeamFilter),/.exec(message)[1];
+-  const property = kind === "Range" ? "range" : "team";
++const providerErrors = errors.filter(d => d.file?.fileName === file && d.code === 2322 && /Accessor<(Range|TeamFilter)>/.test(ts.flattenDiagnosticMessageText(d.messageText, "\n")));
++assert.equal(providerErrors.length, 0, "F-S36 regressed: context values must use the lowered Source type");
++assert.match(output, /Source as Accessor/);
++assert.match(output, /range: Accessor<Range>/);
++assert.match(output, /team: Accessor<TeamFilter>/);
++assert.match(output, /Element as _NativeElement/);
++if (process.argv.includes("type-contract")) {
++  console.log("native dashboard type contract: PASS (both shared filter Sources accepted; F-S37 still blocks setup)");
++  process.exit(0);
++}
++const setupErrors = errors.filter(d => d.file?.fileName === file && d.code === 2769 && output.slice(d.start, d.start + d.length).includes("function* FilterBar"));
++assert.equal(setupErrors.length, 1, "F-S37 changed: review setup context reads before claiming dashboard acceptance");
++const structuralDiagnostics = setupErrors.map(d => {
++  const message = ts.flattenDiagnosticMessageText(d.messageText, "\n").replaceAll(root, "<root>");
++  assert.match(message, /Read<false, never>/);
++  assert.match(message, /Raise</);
++  assert.match(message, /SetupOp/);
+   const at = d.file.getLineAndCharacterOfPosition(d.start);
+   const origin = locate(result.positions.get(file), d.start, d.length);
+   const prefix = authored.slice(0, origin.sourceStart).split("\n");
+   return {
+-    code: "TS2322",
+-    message,
+-    property,
+-    author: {
+-      file: relative(root, file),
+-      line: providerLine,
+-      column: authored.split("\n")[providerLine - 1].indexOf(property) + 1,
+-      text: authored.split("\n")[providerLine - 1].trim()
+-    },
+-    generated: {
+-      file: relative(root, file),
+-      line: at.line + 1,
+-      column: at.character + 1,
+-      text: output.slice(d.start, d.start + d.length)
+-    },
+-    mapped: {
+-      line: prefix.length,
+-      column: prefix.at(-1).length + 1,
+-      generated: origin.generated,
+-      text: authored.slice(origin.sourceStart, origin.sourceEnd)
+-    }
++    code: "TS2769", message,
++    author: {file: relative(root,file), line: prefix.length, column: prefix.at(-1).length+1, text: authored.slice(origin.sourceStart, origin.sourceEnd)},
++    generated: {line: at.line+1, column: at.character+1, text: output.slice(d.start, d.start+d.length).replaceAll(root, "<root>")},
++    mapped: {generated: origin.generated}
+   };
+ });
+-assert.match(output, /import type \{ Accessor \} from "solid-js"/);
+-assert.match(output, /range: Accessor<Range>/);
+-assert.match(output, /team: Accessor<TeamFilter>/);
+-assert.match(output, /range,\s+team,\s+setRange,\s+setTeam/);
+ const panels = ["SummaryPanel", "SeriesPanel", "IncidentsPanel", "TeamPanel", "NotesPanel"];
+-const routes = [
+-  { name: "Overview", paths: ["/", "/overview"] },
+-  { name: "IncidentDetail", paths: ["/incidents/inc-101", "/incidents/missing"] }
+-];
++const routes = [{name:"Overview", paths:["/", "/overview"]}, {name:"IncidentDetail", paths:["/incidents/inc-101", "/incidents/missing"]}];
++const helperStart = output.indexOf("export function* useFilters");
++const helperEnd = output.indexOf("export const FilterBar", helperStart);
+ const evidence = {
+-  finding:
+-    "F-S36: the shared FilterContext keeps Solid Accessor types but its generated provider supplies yield Sources",
+-  halfA:
+-    "FAIL: F-S35 is fixed and lowering returns only the Router boundary, but the generated context facade does not typecheck; both field errors map to the authored provider",
+-  halfB:
+-    "FAIL / not run: first new structural reason; no author patch, native hydrated parity, SSR, AckFailed or NotFound comparison",
+-  boundaries: result.diagnostics.map(d => ({ ...d, file: relative(root, d.file) })),
++  finding: "F-S37: useFilters lowers its context value guard and return to Source reads and a Raise; component setup cannot admit them",
++  fixed: "F-S36: Accessor imports now name the library Source; both provider fields typecheck",
++  halfA: "FAIL: unchanged lowering has exactly the Router boundary notice; generated code rejects setup context reads before foreign handoff acceptance can be established",
++  halfB: "FAIL / not run: first new structural reason; empty author patch; native hydrated parity, SSR, AckFailed and NotFound comparisons not run",
++  boundaries: result.diagnostics.map(d => ({...d, file:relative(root,d.file)})),
+   structuralDiagnostics,
+   sideBySide: {
+-    author: authored.split("\n").slice(11, 24).join("\n"),
+-    generated: output
+-      .slice(output.indexOf("interface Filters"), output.indexOf("export function* useFilters"))
+-      .replaceAll(root, "<root>")
++    author: authored.split("\n").slice(25,34).join("\n"),
++    generated: output.slice(helperStart, helperEnd).replaceAll(root,"<root>") + output.slice(helperEnd, output.indexOf("return view", helperEnd)).replaceAll(root,"<root>")
+   },
+   patch,
+   finalCheckedColors: {
+-    status:
+-      "unavailable: the generated project fails its shared context contract; inferred any or unknown colors in rejected output are not checked colors",
+-    panels: panels.map(name => ({
+-      name,
+-      pending: "unavailable",
+-      fails: "unavailable",
+-      requires: "unavailable",
+-      sharedFilter: "FilterContext"
+-    })),
+-    routes: routes.map(route => ({
+-      ...route,
+-      pending: "unavailable",
+-      fails: "unavailable",
+-      requires: "unavailable",
+-      sharedFilter: "FilterContext"
+-    }))
+-  },
+-  failurePaths: {
+-    AckFailed: "original catches this class and writes the row failure; native comparison not run",
+-    NotFound:
+-      "original route has Errored around Loading and IncidentBody; native comparison not run"
++    status: "unavailable: setup context contract is rejected; inferred any or unknown from rejected output are not final checked colors",
++    panels: panels.map(name => ({name, pending:"unavailable", fails:"unavailable", mayWait:"unavailable", requires:"unavailable", sharedFilter:"FilterContext"})),
++    routes: routes.map(route => ({...route, pending:"unavailable", fails:"unavailable", mayWait:"unavailable", requires:"unavailable", sharedFilter:"FilterContext"}))
+   },
++  failurePaths: {AckFailed:"native comparison not run under F-S37 stop", NotFound:"native comparison not run under F-S37 stop"},
+   originalHashes
+ };
+-for (const [f, c] of files) assert.equal(hash(readFileSync(f, "utf8")), hash(c));
+-const expected = join(root, "examples/harness/native-dashboard/structural-stop.json");
+-if (process.argv.includes("--record"))
+-  writeFileSync(expected, JSON.stringify(evidence, null, 2) + "\n");
+-else assert.deepEqual(evidence, JSON.parse(readFileSync(expected, "utf8")));
+-for (const d of evidence.boundaries)
+-  console.log(`[${d.code}] ${d.message} (${d.file}:${d.line}:${d.column})`);
+-for (const d of structuralDiagnostics)
+-  console.log(
+-    `[${d.code}] ${d.message}\n  authored provider: ${d.author.file}:${d.author.line}:${d.author.column}; generated: ${d.generated.line}:${d.generated.column}; mapped: ${d.mapped.line}:${d.mapped.column}`
+-  );
+-console.log(
+-  "native dashboard F-S36 regression pin: PASS; half A FAIL; half B FAIL / not run; patch empty; final checked colors unavailable"
+-);
++for (const [f,c] of files) assert.equal(hash(readFileSync(f,"utf8")),hash(c));
++const expected = join(root,"examples/harness/native-dashboard/structural-stop.json");
++if (process.argv.includes("--record")) writeFileSync(expected, JSON.stringify(evidence,null,2)+"\n");
++else assert.deepEqual(evidence, JSON.parse(readFileSync(expected,"utf8")));
++for (const d of evidence.boundaries) console.log(`[${d.code}] ${d.message} (${d.file}:${d.line}:${d.column})`);
++console.log(`F-S37 [TS2769] No overload matches this call. (${structuralDiagnostics[0].author.file}:${structuralDiagnostics[0].author.line}:${structuralDiagnostics[0].author.column})`);
++console.log("native dashboard F-S37 pin: PASS; half A FAIL; half B FAIL / not run; patch empty; final colors unavailable");
+diff --git a/scripts/yield-gate.mjs b/scripts/yield-gate.mjs
+index cd0c49c..cb68b9c 100644
+--- a/scripts/yield-gate.mjs
++++ b/scripts/yield-gate.mjs
+@@ -275,7 +275,13 @@ function buildSteps(twins) {
+     });
+   }
+ 
+-  // F-S36 pins the context facade stop after the JSX hole fix; not dashboard acceptance.
++  // F-S36's type contract is fixed; F-S37 pins the next setup-context stop.
++  steps.push({
++    name: "native:dashboard:type-contract",
++    cwd: root,
++    cmd: process.execPath,
++    args: ["scripts/native-dashboard-blocker.mjs", "type-contract"]
++  });
+   steps.push({
+     name: "native:dashboard:structural-stop",
+     cwd: root,

@@ -1,0 +1,186 @@
+[
+  {
+    "name": "derived-inside",
+    "renderer": "frames",
+    "ms": 22,
+    "counts": {
+      "loaders": 1,
+      "bodies": 2,
+      "derived": 3
+    },
+    "errors": [],
+    "hasContent": true
+  },
+  {
+    "name": "derived-inside",
+    "renderer": "stream",
+    "ms": 22,
+    "counts": {
+      "loaders": 1,
+      "bodies": 2,
+      "derived": 3
+    },
+    "errors": [],
+    "hasContent": true
+  },
+  {
+    "name": "derived-inside-lazy-body-errored",
+    "renderer": "frames",
+    "ms": 22,
+    "counts": {
+      "loaders": 1,
+      "bodies": 2,
+      "derived": 3
+    },
+    "errors": [],
+    "hasContent": true
+  },
+  {
+    "name": "derived-inside-lazy-body-hole",
+    "renderer": "frames",
+    "ms": 22,
+    "counts": {
+      "loaders": 1,
+      "bodies": 1,
+      "derived": 4
+    },
+    "errors": [],
+    "hasContent": true
+  },
+  {
+    "name": "derived-inside-lazy-body-hole-wrapped",
+    "renderer": "frames",
+    "ms": 22,
+    "counts": {
+      "loaders": 1,
+      "bodies": 1,
+      "derived": 4
+    },
+    "errors": [],
+    "hasContent": true
+  },
+  {
+    "name": "derived-inside-hoisted",
+    "renderer": "frames",
+    "ms": 22,
+    "counts": {
+      "loaders": 1,
+      "bodies": 2,
+      "derived": 2
+    },
+    "errors": [],
+    "hasContent": true
+  },
+  {
+    "name": "nested-loader",
+    "renderer": "frames",
+    "ms": 23,
+    "counts": {
+      "loaders": 2,
+      "bodies": 2,
+      "derived": 3
+    },
+    "errors": [],
+    "hasContent": true
+  },
+  {
+    "name": "nested-loader-lazy-body-sync",
+    "renderer": "frames",
+    "ms": 10,
+    "counts": {
+      "loaders": 1,
+      "bodies": 1,
+      "derived": 1
+    },
+    "errors": [],
+    "hasContent": true
+  },
+  {
+    "name": "nested-loader-lazy-body-sync-no-derived",
+    "renderer": "frames",
+    "ms": 11,
+    "counts": {
+      "loaders": 1,
+      "bodies": 1,
+      "derived": 0
+    },
+    "errors": [],
+    "hasContent": true
+  },
+  {
+    "name": "nested-loader-lazy-body-hole",
+    "renderer": "frames",
+    "ms": 23,
+    "counts": {
+      "loaders": 1,
+      "bodies": 1,
+      "derived": 4
+    },
+    "errors": [],
+    "hasContent": true
+  },
+  {
+    "name": "nested-loader-lazy-body-stable-promise",
+    "renderer": "frames",
+    "ms": 23,
+    "counts": {
+      "loaders": 2,
+      "bodies": 2,
+      "derived": 3
+    },
+    "errors": [],
+    "hasContent": true
+  },
+  {
+    "name": "derived-inside-lazy-body-promise-derived",
+    "renderer": "frames",
+    "ms": 81,
+    "counts": {
+      "loaders": 1,
+      "bodies": 10001,
+      "derived": 10002
+    },
+    "errors": [
+      "<Loading> boundary discovery did not converge after 10001 passes — an async source produces a new pending answer on every retry. Ensure repeated reads settle (e.g. return a stable promise or value for the same question)."
+    ],
+    "hasContent": false
+  },
+  {
+    "name": "derived-inside-lazy-body-promise-derived",
+    "renderer": "stream",
+    "ms": 80,
+    "counts": {
+      "loaders": 1,
+      "bodies": 10001,
+      "derived": 10002
+    },
+    "errors": [
+      "<Loading> boundary discovery did not converge after 10001 passes — an async source produces a new pending answer on every retry. Ensure repeated reads settle (e.g. return a stable promise or value for the same question)."
+    ],
+    "hasContent": false
+  },
+  {
+    "name": "nested async + derived",
+    "renderer": "frames",
+    "errors": [
+      "<Loading> boundary discovery did not converge after 10001 passes — an async source produces a new pending answer on every retry. Ensure repeated reads settle (e.g. return a stable promise or value for the same question)."
+    ],
+    "hasContent": false
+  },
+  {
+    "name": "nested async + derived",
+    "renderer": "stream",
+    "errors": [
+      "<Loading> boundary discovery did not converge after 10001 passes — an async source produces a new pending answer on every retry. Ensure repeated reads settle (e.g. return a stable promise or value for the same question)."
+    ],
+    "hasContent": false
+  },
+  {
+    "name": "minimal single async memo",
+    "renderer": "frames",
+    "errors": [
+      "<Loading> boundary discovery did not converge after 10001 passes — an async source produces a new pending answer on every retry. Ensure repeated reads settle (e.g. return a stable promise or value for the same question)."
+    ],
+    "hasContent": false
+  }
+]

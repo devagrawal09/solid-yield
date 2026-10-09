@@ -1,0 +1,240 @@
+{
+  "mode": "high",
+  "ssr": {
+    "url": "/page/a",
+    "content": "a",
+    "raw": [
+      "<a href=\"/page/a\">Raw A</a>",
+      "<a href=\"/page/b\">Raw B</a>",
+      "<a href=\"#part\">Raw Part</a>"
+    ],
+    "part": "<a class=\"part\" href=\"#part\">Part</a>",
+    "authored": "<a data-lha=\"2\" class=\"authored\" href=\"/page/a\">Authored</a>"
+  },
+  "hydrated": {
+    "url": "/page/a",
+    "content": "a",
+    "raw": [
+      "<a href=\"/page/a\" data-active=\"\" aria-current=\"page\">Raw A</a>",
+      "<a href=\"/page/b\">Raw B</a>",
+      "<a href=\"#part\" data-active=\"\" aria-current=\"page\">Raw Part</a>"
+    ],
+    "part": "<a class=\"part\" href=\"#part\" data-active=\"\" aria-current=\"page\">Part</a>",
+    "authored": "<a data-lha=\"2\" class=\"authored\" href=\"/page/a\" data-active=\"\" aria-current=\"page\">Authored</a>"
+  },
+  "retainedSSR": true,
+  "intercepted": true,
+  "pending": {
+    "url": "/page/a",
+    "content": "a",
+    "raw": [
+      "<a href=\"/page/a\" data-active=\"\" aria-current=\"page\">Raw A</a>",
+      "<a href=\"/page/b\" data-pending=\"\">Raw B</a>",
+      "<a href=\"#part\" data-active=\"\" aria-current=\"page\">Raw Part</a>"
+    ],
+    "part": "<a class=\"part\" href=\"#part\" data-active=\"\" aria-current=\"page\">Part</a>",
+    "authored": "<a data-lha=\"2\" class=\"authored\" href=\"/page/a\" data-active=\"\" aria-current=\"page\">Authored</a>"
+  },
+  "headersBeforeBody": {
+    "url": "/page/a",
+    "content": "a",
+    "raw": [
+      "<a href=\"/page/a\" data-active=\"\" aria-current=\"page\">Raw A</a>",
+      "<a href=\"/page/b\" data-pending=\"\">Raw B</a>",
+      "<a href=\"#part\" data-active=\"\" aria-current=\"page\">Raw Part</a>"
+    ],
+    "part": "<a class=\"part\" href=\"#part\" data-active=\"\" aria-current=\"page\">Part</a>",
+    "authored": "<a data-lha=\"2\" class=\"authored\" href=\"/page/a\" data-active=\"\" aria-current=\"page\">Authored</a>"
+  },
+  "settled": {
+    "url": "/page/b",
+    "content": "b",
+    "raw": [
+      "<a href=\"/page/a\">Raw A</a>",
+      "<a href=\"/page/b\" data-active=\"\" aria-current=\"page\">Raw B</a>",
+      "<a href=\"#part\">Raw Part</a>"
+    ],
+    "part": "<a class=\"part\" href=\"#part\">Part</a>",
+    "authored": "<a data-lha=\"2\" class=\"authored\" href=\"/page/b\" data-active=\"\">Authored</a>"
+  },
+  "trace": [
+    {
+      "event": "request-held",
+      "url": "/page/a",
+      "content": "a",
+      "raw": [
+        "<a href=\"/page/a\" data-active=\"\" aria-current=\"page\">Raw A</a>",
+        "<a href=\"/page/b\" data-pending=\"\">Raw B</a>",
+        "<a href=\"#part\" data-active=\"\" aria-current=\"page\">Raw Part</a>"
+      ],
+      "part": "<a class=\"part\" href=\"#part\" data-active=\"\" aria-current=\"page\">Part</a>",
+      "authored": "<a data-lha=\"2\" class=\"authored\" href=\"/page/a\" data-active=\"\" aria-current=\"page\">Authored</a>"
+    },
+    {
+      "event": "headers-held",
+      "url": "/page/a",
+      "content": "a",
+      "raw": [
+        "<a href=\"/page/a\" data-active=\"\" aria-current=\"page\">Raw A</a>",
+        "<a href=\"/page/b\" data-pending=\"\">Raw B</a>",
+        "<a href=\"#part\" data-active=\"\" aria-current=\"page\">Raw Part</a>"
+      ],
+      "part": "<a class=\"part\" href=\"#part\" data-active=\"\" aria-current=\"page\">Part</a>",
+      "authored": "<a data-lha=\"2\" class=\"authored\" href=\"/page/a\" data-active=\"\" aria-current=\"page\">Authored</a>"
+    },
+    {
+      "event": "frame-chunk",
+      "url": "/page/a",
+      "content": "a",
+      "raw": [
+        "<a href=\"/page/a\" data-active=\"\" aria-current=\"page\">Raw A</a>",
+        "<a href=\"/page/b\" data-pending=\"\">Raw B</a>",
+        "<a href=\"#part\" data-active=\"\" aria-current=\"page\">Raw Part</a>"
+      ],
+      "part": "<a class=\"part\" href=\"#part\" data-active=\"\" aria-current=\"page\">Part</a>",
+      "authored": "<a data-lha=\"2\" class=\"authored\" href=\"/page/a\" data-active=\"\" aria-current=\"page\">Authored</a>"
+    },
+    {
+      "event": "frame-chunk",
+      "url": "/page/a",
+      "content": "a",
+      "raw": [
+        "<a href=\"/page/a\" data-active=\"\" aria-current=\"page\">Raw A</a>",
+        "<a href=\"/page/b\" data-pending=\"\">Raw B</a>",
+        "<a href=\"#part\" data-active=\"\" aria-current=\"page\">Raw Part</a>"
+      ],
+      "part": "<a class=\"part\" href=\"#part\" data-active=\"\" aria-current=\"page\">Part</a>",
+      "authored": "<a data-lha=\"2\" class=\"authored\" href=\"/page/a\" data-active=\"\" aria-current=\"page\">Authored</a>"
+    },
+    {
+      "event": "frame-chunk",
+      "url": "/page/a",
+      "content": "a",
+      "raw": [
+        "<a href=\"/page/a\" data-active=\"\" aria-current=\"page\">Raw A</a>",
+        "<a href=\"/page/b\" data-pending=\"\">Raw B</a>",
+        "<a href=\"#part\" data-active=\"\" aria-current=\"page\">Raw Part</a>"
+      ],
+      "part": "<a class=\"part\" href=\"#part\" data-active=\"\" aria-current=\"page\">Part</a>",
+      "authored": "<a data-lha=\"2\" class=\"authored\" href=\"/page/a\" data-active=\"\" aria-current=\"page\">Authored</a>"
+    },
+    {
+      "event": "claim",
+      "href": "/page/a",
+      "base": "http://localhost/page/a",
+      "url": "/page/a",
+      "content": "b",
+      "raw": [
+        "<a href=\"/page/a\">Raw A</a>",
+        "<a href=\"/page/b\" data-pending=\"\">Raw B</a>",
+        "<a href=\"#part\" data-active=\"\" aria-current=\"page\">Raw Part</a>"
+      ],
+      "part": "<a class=\"part\" href=\"#part\" data-active=\"\" aria-current=\"page\">Part</a>",
+      "authored": "<a data-lha=\"2\" class=\"authored\" href=\"/page/a\" data-active=\"\" aria-current=\"page\">Authored</a>"
+    },
+    {
+      "event": "claim",
+      "href": "/page/b",
+      "base": "http://localhost/page/a",
+      "url": "/page/a",
+      "content": "b",
+      "raw": [
+        "<a href=\"/page/a\">Raw A</a>",
+        "<a href=\"/page/b\">Raw B</a>",
+        "<a href=\"#part\" data-active=\"\" aria-current=\"page\">Raw Part</a>"
+      ],
+      "part": "<a class=\"part\" href=\"#part\" data-active=\"\" aria-current=\"page\">Part</a>",
+      "authored": "<a data-lha=\"2\" class=\"authored\" href=\"/page/a\" data-active=\"\" aria-current=\"page\">Authored</a>"
+    },
+    {
+      "event": "claim",
+      "href": "#part",
+      "base": "http://localhost/page/a",
+      "url": "/page/a",
+      "content": "b",
+      "raw": [
+        "<a href=\"/page/a\">Raw A</a>",
+        "<a href=\"/page/b\" data-active=\"\" aria-current=\"page\">Raw B</a>",
+        "<a href=\"#part\">Raw Part</a>"
+      ],
+      "part": "<a class=\"part\" href=\"#part\" data-active=\"\" aria-current=\"page\">Part</a>",
+      "authored": "<a data-lha=\"2\" class=\"authored\" href=\"/page/a\" data-active=\"\" aria-current=\"page\">Authored</a>"
+    },
+    {
+      "event": "claim",
+      "href": "/page/b",
+      "base": "http://localhost/page/a",
+      "url": "/page/a",
+      "content": "b",
+      "raw": [
+        "<a href=\"/page/a\">Raw A</a>",
+        "<a href=\"/page/b\" data-active=\"\" aria-current=\"page\">Raw B</a>",
+        "<a href=\"#part\">Raw Part</a>"
+      ],
+      "part": "<a class=\"part\" href=\"#part\" data-active=\"\" aria-current=\"page\">Part</a>",
+      "authored": "<a data-lha=\"2\" class=\"authored\" href=\"/page/b\">Authored</a>"
+    },
+    {
+      "event": "claim",
+      "href": "#part",
+      "base": "http://localhost/page/a",
+      "url": "/page/a",
+      "content": "b",
+      "raw": [
+        "<a href=\"/page/a\">Raw A</a>",
+        "<a href=\"/page/b\" data-active=\"\" aria-current=\"page\">Raw B</a>",
+        "<a href=\"#part\">Raw Part</a>"
+      ],
+      "part": "<a class=\"part\" href=\"#part\">Part</a>",
+      "authored": "<a data-lha=\"2\" class=\"authored\" href=\"/page/b\" data-active=\"\">Authored</a>"
+    },
+    {
+      "event": "frame-applied",
+      "url": "/page/a",
+      "content": "b",
+      "raw": [
+        "<a href=\"/page/a\">Raw A</a>",
+        "<a href=\"/page/b\" data-active=\"\" aria-current=\"page\">Raw B</a>",
+        "<a href=\"#part\">Raw Part</a>"
+      ],
+      "part": "<a class=\"part\" href=\"#part\">Part</a>",
+      "authored": "<a data-lha=\"2\" class=\"authored\" href=\"/page/b\" data-active=\"\">Authored</a>"
+    },
+    {
+      "event": "before-push",
+      "target": "/page/b",
+      "url": "/page/a",
+      "content": "b",
+      "raw": [
+        "<a href=\"/page/a\">Raw A</a>",
+        "<a href=\"/page/b\" data-active=\"\" aria-current=\"page\">Raw B</a>",
+        "<a href=\"#part\">Raw Part</a>"
+      ],
+      "part": "<a class=\"part\" href=\"#part\">Part</a>",
+      "authored": "<a data-lha=\"2\" class=\"authored\" href=\"/page/b\" data-active=\"\">Authored</a>"
+    },
+    {
+      "event": "after-push",
+      "url": "/page/b",
+      "content": "b",
+      "raw": [
+        "<a href=\"/page/a\">Raw A</a>",
+        "<a href=\"/page/b\" data-active=\"\" aria-current=\"page\">Raw B</a>",
+        "<a href=\"#part\">Raw Part</a>"
+      ],
+      "part": "<a class=\"part\" href=\"#part\">Part</a>",
+      "authored": "<a data-lha=\"2\" class=\"authored\" href=\"/page/b\" data-active=\"\">Authored</a>"
+    }
+  ],
+  "afterHash": {
+    "url": "/page/b#part",
+    "content": "b",
+    "raw": [
+      "<a href=\"/page/a\">Raw A</a>",
+      "<a href=\"/page/b\" data-active=\"\" aria-current=\"page\">Raw B</a>",
+      "<a href=\"#part\" data-active=\"\" aria-current=\"page\">Raw Part</a>"
+    ],
+    "part": "<a class=\"part\" href=\"#part\" data-active=\"\" aria-current=\"page\">Part</a>",
+    "authored": "<a data-lha=\"2\" class=\"authored\" href=\"/page/b\" data-active=\"\">Authored</a>"
+  }
+}

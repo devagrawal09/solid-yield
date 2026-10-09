@@ -1,0 +1,29 @@
+ERROR VERDICT {
+  id: undefined,
+  config: 384,
+  flags: 2,
+  held: true,
+  value: [],
+  latestActive: true,
+  probing: false
+}
+ERROR VERDICT {
+  id: undefined,
+  config: 384,
+  flags: 2,
+  held: true,
+  value: [],
+  latestActive: false,
+  probing: true
+}
+HELD BEFORE ERROR CHECK
+ERROR VERDICT {
+  id: undefined,
+  config: 0,
+  flags: 2,
+  held: false,
+  value: [],
+  latestActive: false,
+  probing: true
+}
+{"text":"ERROR: Search failed","fallbackCalls":1}

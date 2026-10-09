@@ -64,6 +64,42 @@ const lexicalPhase = fn => {
   }
   return null;
 };
+/** F-S40, before types: a function passed as a component prop (not children or a
+ * fallback) whose body writes (refresh, a setter of a signal/store/optimistic)
+ * is called from the child's event, not during render, so its host is an event.
+ * @param {Path} fn */
+const writingCallbackProp = fn => {
+  const call = ownerCall(fn);
+  const callee = call?.get("callee");
+  if (!callee?.isIdentifier() || !/^[A-Z]/.test(callee.node.name) || lib(callee)) return false;
+  if (["children", "fallback"].includes(key(fn.parentPath?.node.key))) return false;
+  let writes = false;
+  traverseOwned(fn, {
+    Function(inner) {
+      if (inner !== fn) inner.skip();
+    },
+    CallExpression(site) {
+      const target = site.get("callee");
+      if (lib(target) === "refresh") writes = true;
+      // A destructured binding's path is its declarator: `const [n, setN] = …`.
+      const name = target.isIdentifier() ? target.node.name : null;
+      const declarator = name ? target.scope.getBinding(name)?.path : null;
+      const pattern = declarator?.isVariableDeclarator() ? declarator.node.id : null;
+      const init = declarator?.isVariableDeclarator() ? declarator.get("init") : null;
+      const create = init?.isYieldExpression() ? init.get("argument") : init;
+      if (
+        t.isArrayPattern(pattern) &&
+        pattern.elements.findIndex(e => t.isIdentifier(e, { name: name ?? "" })) >= 1 &&
+        create?.isCallExpression() &&
+        ["$signal", "$store", "$optimistic", "$optimisticStore", "$projection"].includes(
+          lib(create.get("callee")) ?? ""
+        )
+      )
+        writes = true;
+    }
+  });
+  return writes;
+};
 /** Leave ordinary value/IO callbacks unchanged. A later typed read can still
  * resolve its lexical host in delegate(). @param {Path} fn */
 function reactiveCallback(fn) {
@@ -401,7 +437,8 @@ function seed(code, filename, native = false) {
           call?.get("callee").isIdentifier({ name: "__nativeMap" })
         )
           return;
-        const phase = lexicalPhase(fn);
+        const lexical = lexicalPhase(fn);
+        const phase = lexical === "hole" && writingCallbackProp(fn) ? "event" : lexical;
         if (phase && reactiveCallback(fn)) wrapLexical(fn, phase, p);
       }
     }
@@ -517,6 +554,48 @@ function pass(code, filename, program, native = false) {
     changed = true;
   };
   /** @param {Path} path @param {any} [operand] */
+  /** F-S40: does this call write (a setter's receipt, refresh) or call an event?
+   * @param {Path} call */
+  const writes = call => {
+    const v = type(call);
+    if (!v) return false;
+    if (brand(v, "EVENT_CALL") || (v.aliasSymbol?.name ?? v.symbol?.name) === "Receipt")
+      return true;
+    const iterator = checker.getPropertiesOfType(v).find(s => s.name.startsWith("__@iterator@"));
+    const method = iterator && checker.getTypeOfSymbolAtLocation(iterator, source);
+    return !!method?.getCallSignatures().some(sig => {
+      const result = checker.getReturnTypeOfSignature(sig);
+      const [yields] =
+        result.symbol?.name === "Generator"
+          ? checker.getTypeArguments(/** @type {ts.TypeReference} */ (result))
+          : [];
+      return (yields?.isUnion() ? yields.types : yields ? [yields] : []).some(part => {
+        const kind = checker.getPropertiesOfType(part).find(s => s.name.startsWith("__@KIND@"));
+        return (
+          !!kind &&
+          checker.typeToString(checker.getTypeOfSymbolAtLocation(kind, source)) === '"write"'
+        );
+      });
+    });
+  };
+  /** F-S40: a function passed as a component prop that writes is a callback the child
+   * calls from an event, not a render callback: render cannot write.
+   * @param {Path} fn */
+  const eventCallbackProp = fn => {
+    const call = ownerCall(fn);
+    if (!call || control(call) || !brand(type(call), "COMPONENT")) return false;
+    if (["children", "fallback"].includes(key(fn.parentPath?.node.key))) return false;
+    let found = false;
+    traverseOwned(fn, {
+      Function(inner) {
+        if (inner !== fn) inner.skip();
+      },
+      CallExpression(site) {
+        found ||= writes(site);
+      }
+    });
+    return found;
+  };
   function delegate(path, operand = path.node) {
     const fn = path.getFunctionParent();
     if (!fn) return; // root renderer calls and foreign edges stay plain
@@ -532,7 +611,8 @@ function pass(code, filename, program, native = false) {
       const attemptHandler =
         lib(hostCall?.get("callee")) === "attempt" && hostCall?.node.arguments[1] === fn.node;
       let nativeHost = false;
-      const phase = lexicalPhase(fn);
+      let phase = lexicalPhase(fn);
+      if (phase === "hole" && eventCallbackProp(fn)) phase = "event";
       // Attempt producers must stay plain: their arguments are handled by the
       // native call lowering, not by turning a producer into a routine.
       if (

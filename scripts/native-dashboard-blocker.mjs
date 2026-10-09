@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// F-S36, F-S37 and D-119 are in. Pin the remaining errors by group (F-S40 onward); this is not runtime acceptance.
+// F-S36, F-S37 and D-119 are in. Pin the remaining errors by group (F-S41 onward); this is not runtime acceptance.
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { createRequire } from "node:module";
@@ -117,7 +117,6 @@ const authoredAt = d => {
   return `${relative(source, file)}:${prefix.length}:${prefix.at(-1).length + 1}`;
 };
 const groups = {
-  "F-S40": ["incidents.tsx:108:52"],
   "F-S41": ["main.tsx:3:15"],
   "F-S42": ["panels.tsx:30:5"],
   "F-S43": ["app.tsx:78:45", "app.tsx:78:56", "app.tsx:79:54"]
@@ -153,8 +152,6 @@ const evidence = {
     "F-S39: a member a source lacks (props.title.toLowerCase(), point.value.toFixed(0)) reads the source first; path and index-signature keys stay paths; a wrapped Errored fallback keeps Solid's (error, reset) types"
   ],
   next: {
-    "F-S40":
-      "A callback prop (reload={() => refresh(incidents)}) is hosted by the JSX hole that creates it, not the child event that calls it; its write is refused",
     "F-S41": "render(() => <App />) refuses an entry component whose props are all optional",
     "F-S42":
       "createEffect's effect function returning a cleanup does not match the library's effect phase",
@@ -162,7 +159,7 @@ const evidence = {
       "Route components require FilterContext; FilterProvider surrounds the foreign Router, but the requirement is not discharged across it"
   },
   halfA:
-    "FAIL: lowering has exactly the Router boundary notice; the generated program has the 7 errors below, all compiler gaps",
+    "FAIL: lowering has exactly the Router boundary notice; the generated program has the 6 errors below, all compiler gaps",
   halfB:
     "FAIL / not run: compiler gaps remain; empty author patch; native hydrated parity, SSR, AckFailed and NotFound comparisons not run",
   boundaries: result.diagnostics.map(d => ({ ...d, file: relative(root, d.file) })),

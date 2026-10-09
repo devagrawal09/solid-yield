@@ -24,6 +24,8 @@ const constructors = new Set([
 const controls = new Set(["For", "Show", "Match", "Switch", "Repeat", "Loading", "Errored"]);
 /** @param {any} n */
 const key = n => n?.name ?? n?.value;
+/** The property key a function is the value of, if any. @param {Path} fn */
+const propKey = fn => (fn.parentPath?.isObjectProperty() ? key(fn.parentPath.node.key) : null);
 /** @param {Path | null | undefined} p */
 const fnName = p =>
   p?.node.id?.name ?? (p?.parentPath?.isVariableDeclarator() ? key(p.parentPath.node.id) : null);
@@ -72,7 +74,7 @@ const writingCallbackProp = fn => {
   const call = ownerCall(fn);
   const callee = call?.get("callee");
   if (!callee?.isIdentifier() || !/^[A-Z]/.test(callee.node.name) || lib(callee)) return false;
-  if (["children", "fallback"].includes(key(fn.parentPath?.node.key))) return false;
+  if (["children", "fallback"].includes(propKey(fn))) return false;
   let writes = false;
   traverseOwned(fn, {
     Function(inner) {
@@ -149,10 +151,7 @@ function wrapLexical(fn, phase, program) {
     ["then", "catch", "finally"].includes(key(callee.node.property));
   // A wrapped Errored fallback keeps Solid's own parameter types, which the
   // generic wrapper would otherwise erase: (err: Accessor<unknown>, reset).
-  if (
-    key(fn.parentPath?.node.key) === "fallback" &&
-    lib(ownerCall(fn)?.get("callee")) === "Errored"
-  ) {
+  if (propKey(fn) === "fallback" && lib(ownerCall(fn)?.get("callee")) === "Errored") {
     const [error, reset] = fn.node.params;
     if (t.isIdentifier(error) && !error.typeAnnotation)
       error.typeAnnotation = t.tsTypeAnnotation(
@@ -531,6 +530,13 @@ function pass(code, filename, program, native = false) {
   /** @param {Path} value */
   const handoff = value => {
     if (value.isCallExpression() && lib(value.get("callee")) === "foreign") return;
+    // Already handed over (F-S43: with the contexts provided above its router).
+    const callee = value.isCallExpression() ? value.get("callee") : null;
+    if (
+      callee?.isIdentifier({ name: "__nativeForeignValue" }) ||
+      callee?.isIdentifier({ name: "__nativeForeignProvided" })
+    )
+      return;
     if (
       !native ||
       !type(value)
@@ -541,19 +547,18 @@ function pass(code, filename, program, native = false) {
         )
     )
       return;
-    value.replaceWith(t.callExpression(t.identifier("__nativeForeign"), [value.node]));
-    if (!p.scope.hasBinding("__nativeForeign")) {
+    value.replaceWith(t.callExpression(t.identifier("__nativeForeignValue"), [value.node]));
+    if (!p.scope.hasBinding("__nativeForeignValue")) {
       p.node.body.unshift(
         t.importDeclaration(
-          [t.importSpecifier(t.identifier("__nativeForeign"), t.identifier("foreign"))],
-          t.stringLiteral("solid-yield")
+          [t.importSpecifier(t.identifier("__nativeForeignValue"), t.identifier("nativeForeign"))],
+          t.stringLiteral("solid-yield/internal")
         )
       );
       p.scope.crawl();
     }
     changed = true;
   };
-  /** @param {Path} path @param {any} [operand] */
   /** F-S40: does this call write (a setter's receipt, refresh) or call an event?
    * @param {Path} call */
   const writes = call => {
@@ -584,7 +589,7 @@ function pass(code, filename, program, native = false) {
   const eventCallbackProp = fn => {
     const call = ownerCall(fn);
     if (!call || control(call) || !brand(type(call), "COMPONENT")) return false;
-    if (["children", "fallback"].includes(key(fn.parentPath?.node.key))) return false;
+    if (["children", "fallback"].includes(propKey(fn))) return false;
     let found = false;
     traverseOwned(fn, {
       Function(inner) {
@@ -596,6 +601,7 @@ function pass(code, filename, program, native = false) {
     });
     return found;
   };
+  /** @param {Path} path @param {any} [operand] */
   function delegate(path, operand = path.node) {
     const fn = path.getFunctionParent();
     if (!fn) return; // root renderer calls and foreign edges stay plain

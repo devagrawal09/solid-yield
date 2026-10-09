@@ -17,7 +17,7 @@
  * when no provider is there). Listing a context `Page` does not require is
  * refused (`[NOT_REQUIRED]`), so the list stays the true one.
  */
-import type { Settle, View } from "./types.js";
+import type { PlainCall, Settle, View } from "./types.js";
 import type { CONTEXT, ContextNames } from "./context.js";
 
 /** What a component's view may fail with (`never` for a plain function's). */
@@ -115,4 +115,32 @@ export function foreign<
 ): C;
 export function foreign(component: unknown, _options?: unknown): unknown {
   return component;
+}
+
+/**
+ * @internal Native lowering: `foreign` for a component plain Solid code
+ * wrote as a value (a route's `component`). Its type is the plain call
+ * (`PlainCall`): the router passes its own props, which a component that
+ * declares none ignores, as the author's plain Solid function did (F-S43).
+ * The library dialect's `foreign` keeps the component's own type (D-088).
+ */
+export function nativeForeign<C extends (...args: any[]) => unknown>(
+  component: C & ForeignCheck<C>
+): PlainCall<C> {
+  return component as PlainCall<C>;
+}
+
+/**
+ * @internal Native lowering (F-S43): a component handed to a foreign router
+ * that is rendered under the providers of `Q` wherever it appears. Those
+ * contexts are taken off its requirements, as `foreign`'s `provided` does;
+ * the list is the compiler's, from structure, so a context the component does
+ * not read is not refused. `provided` is a type witness (`null` at run time);
+ * the runtime still checks each requirement where the component is created.
+ */
+export function nativeForeignProvided<C extends (...args: any[]) => unknown, Q>(
+  component: C & ForeignCheck<C, Q>,
+  _provided: Q
+): PlainCall<C> {
+  return component as PlainCall<C>;
 }

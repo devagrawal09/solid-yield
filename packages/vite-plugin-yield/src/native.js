@@ -391,6 +391,108 @@ function surface(
     const init = declaration?.isVariableDeclarator() ? declaration.get("init") : null;
     return !!(init?.isCallExpression() && imported(init.get("callee"))?.name === "createContext");
   };
+  // F-S43: a module-level foreign component (a router) that is rendered only
+  // under providers hands its component-valued props those contexts.
+  /** @param {Path} tag @returns {string[]} */
+  const providedBy = tag => {
+    if (!tag.isJSXIdentifier() && !tag.isIdentifier()) return [];
+    const api = imported(tag);
+    let file = filename,
+      name = tag.node.name;
+    /** @type {Path | undefined} */ let declaration = tag.scope.getBinding(name)?.path;
+    if (api) {
+      if (!api.module.startsWith(".") || api.name === "default") return [];
+      const base = resolve(dirname(filename), api.module);
+      const target = [
+        base,
+        base + ".tsx",
+        base + ".ts",
+        base + "/index.tsx",
+        base + "/index.ts"
+      ].find(m => modules.has(m));
+      if (!target) return [];
+      file = target;
+      name = api.name;
+      declaration = parseProgram(modules.get(target) ?? "", target)?.scope.getBinding(name)?.path;
+    }
+    const init = declaration?.isVariableDeclarator() ? declaration.get("init") : null;
+    if (init?.isCallExpression() && imported(init.get("callee"))?.name === "createContext")
+      return [`${file}#${name}`];
+    return summaries.find(fn => fn.name === name && file.endsWith(fn.file))?.provides ?? [];
+  };
+  /** @type {Map<string, Set<string> | null>} */ const routerContexts = new Map();
+  traverseOwned(p, {
+    JSXOpeningElement(q) {
+      const tag = q.get("name");
+      if (!tag.isJSXIdentifier()) return;
+      const declaration = tag.scope.getBinding(tag.node.name)?.path;
+      const init = declaration?.isVariableDeclarator() ? declaration.get("init") : null;
+      const source = init?.isCallExpression() ? imported(init.get("callee"))?.module : null;
+      if (
+        !declaration?.parentPath?.parentPath?.isProgram() ||
+        !source ||
+        source.startsWith(".") ||
+        ["solid-js", "@solidjs/web"].includes(source)
+      )
+        return;
+      const here = new Set();
+      for (let up = q.parentPath?.parentPath; up; up = up.parentPath)
+        if (up.isJSXElement())
+          for (const id of providedBy(up.get("openingElement.name"))) here.add(id);
+      const seen = routerContexts.get(tag.node.name);
+      routerContexts.set(
+        tag.node.name,
+        seen === undefined ? here : new Set([...(seen ?? [])].filter(id => here.has(id)))
+      );
+    }
+  });
+  for (const [router, provided] of routerContexts) {
+    if (!provided?.size) continue;
+    const declaration = p.scope.getBinding(router)?.path;
+    if (!declaration?.isVariableDeclarator()) continue;
+    const witness = t.tsUnionType(
+      [...provided].map(id =>
+        t.tsImportType(
+          t.stringLiteral("solid-yield"),
+          t.identifier("RequiredContext"),
+          t.tsTypeParameterInstantiation([t.tsAnyKeyword(), t.tsLiteralType(t.stringLiteral(id))])
+        )
+      )
+    );
+    let wrapped = false;
+    declaration.get("init").traverse({
+      ObjectProperty(q) {
+        const value = q.get("value");
+        const name = t.isIdentifier(q.node.key)
+          ? q.node.key.name
+          : t.isStringLiteral(q.node.key)
+            ? q.node.key.value
+            : null;
+        if (name !== "component" || !(value.isIdentifier() || value.isMemberExpression())) return;
+        value.replaceWith(
+          t.callExpression(t.identifier("__nativeForeignProvided"), [
+            value.node,
+            t.tsAsExpression(t.tsAsExpression(t.nullLiteral(), t.tsUnknownKeyword()), witness)
+          ])
+        );
+        wrapped = true;
+      }
+    });
+    if (wrapped && !p.scope.hasBinding("__nativeForeignProvided")) {
+      p.node.body.unshift(
+        t.importDeclaration(
+          [
+            t.importSpecifier(
+              t.identifier("__nativeForeignProvided"),
+              t.identifier("nativeForeignProvided")
+            )
+          ],
+          t.stringLiteral("solid-yield/internal")
+        )
+      );
+      p.scope.crawl();
+    }
+  }
   let needsReturned = false;
   traverseOwned(p, {
     TSTypeReference(q) {
@@ -430,8 +532,12 @@ function surface(
       }
     ]);
   };
+  /** @type {WeakSet<object>} */ const foreignWrapped = new WeakSet();
   /** Preserve the foreign tag and JSX capture positions. @param {Path} q @param {any} target */
   const wrapForeign = (q, target) => {
+    // The element is revisited under its alias, which is already the handoff.
+    if (foreignWrapped.has(q.node)) return;
+    foreignWrapped.add(q.node);
     needed.add("foreign");
     for (const child of /** @type {Path[]} */ (q.get("children"))) {
       if (!child.isJSXExpressionContainer()) continue;
@@ -727,7 +833,7 @@ function surface(
           if (!local) {
             local = program.scope.generateUid("onCleanup");
             const source = program.node.body.find(
-              d =>
+              /** @param {any} d */ d =>
                 t.isImportDeclaration(d) && d.source.value === "solid-js" && d.importKind !== "type"
             );
             const spec = t.importSpecifier(t.identifier(local), t.identifier("onCleanup"));

@@ -18,6 +18,7 @@
 import { createRouter, defineRoute, type RouteProps } from "@solidjs/router";
 import type { JSX } from "@solidjs/web";
 import { component, createContext, foreign, type Props, view } from "solid-yield";
+import { nativeForeign } from "solid-yield/internal";
 
 type Theme = "light" | "dark";
 const ThemeCtx = createContext<Theme, "ThemeCtx">(undefined, { name: "ThemeCtx" });
@@ -77,3 +78,17 @@ createRouter({
   routes: [{ path: "/notes/:mode", component: PlainNotes }]
 });
 createRouter({ routes: [defineRoute({ path: "/notes/:mode", component: PlainNotes })] });
+
+// --- a page that declares no props, handed to defineRoute (F-S43) ----------------------------
+// The router passes `RouteSectionProps`. A plain Solid page that declares
+// none ignores them; the native lowering's handoff (`nativeForeign`) is typed
+// as the plain call so the author's page is accepted. The library dialect's
+// `foreign` keeps the component's own type (D-088): an undeclared prop is
+// refused, so a library page declares the route props it is given.
+function PlainHome(): JSX.Element {
+  return "home";
+}
+createRouter({ routes: [defineRoute({ path: "/", component: PlainHome })] });
+createRouter({ routes: [defineRoute({ path: "/", component: nativeForeign(Home) })] });
+// @ts-expect-error — [UNDECLARED_PROP] the route props Home does not declare
+createRouter({ routes: [defineRoute({ path: "/", component: foreign(Home) })] });

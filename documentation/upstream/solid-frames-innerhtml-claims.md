@@ -1,6 +1,6 @@
 # Issue draft: links inside `innerHTML` are claimed through frames but not in regular rendering
 
-Status: **ready to file** on `solidjs/solid`, as a question, not a bug (Dev, 2026-10-09). Not yet filed: this session could not attach the upstream repository.
+Status: **filed** as [solidjs/solid#3958](https://github.com/solidjs/solid/issues/3958) (Dev, 2026-10-09), as a question, not a bug.
 Re-checked 2026-10-09 on `solid-js` / `@solidjs/web` 2.0.0-rc.14, `@solidjs/router` 2.0.0-next.38, `@solidjs/vite-plugin` 3.0.0-next.35, Vite 7.3.6, jsdom 25.0.1 (`documentation/handoff/repros/frames-links-check/`, same result as the rc.13 / next.29 run).
 Replaces §1 of the earlier `solid-frames-link-claim.md` draft on `proto/compiler`, which framed this as a frames bug.
 

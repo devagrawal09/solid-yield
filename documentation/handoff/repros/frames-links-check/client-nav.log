@@ -1,0 +1,28 @@
+# solid-js 2.0.0-rc.13, @solidjs/router 2.0.0-next.29
+== reused (intercepted: true)
+  initial /page/a                url=/page/a  article=a  outer=false  inner=false
+  clicked; data held             url=/page/a  article=a  outer=false  inner=false
+  all released                   url=/page/b  article=b  outer=false  inner=false
+== keyed (intercepted: true)
+  initial /page/a                url=/page/a  article=a  outer=false  inner=false
+  clicked; data held             url=/page/b  article=null  outer=false  inner=true
+  all released                   url=/page/b  article=b  outer=false  inner=false
+== dynamic (intercepted: true)
+  initial /page/a                url=/page/a  article=a  outer=false  inner=false
+  clicked; module + data held    url=/page/a  article=a  outer=false  inner=false
+  module released; data held     url=/page/b  article=null  outer=false  inner=true
+  all released                   url=/page/b  article=b  outer=false  inner=false
+# solid-js 2.0.0-rc.14, @solidjs/router 2.0.0-next.38
+== reused (intercepted: true)
+  initial /page/a                url=/page/a  article=a  outer=false  inner=false
+  clicked; data held             url=/page/a  article=a  outer=false  inner=false
+  all released                   url=/page/b  article=b  outer=false  inner=false
+== keyed (intercepted: true)
+  initial /page/a                url=/page/a  article=a  outer=false  inner=false
+  clicked; data held             url=/page/b  article=null  outer=false  inner=true
+  all released                   url=/page/b  article=b  outer=false  inner=false
+== dynamic (intercepted: true)
+  initial /page/a                url=/page/a  article=a  outer=false  inner=false
+  clicked; module + data held    url=/page/a  article=a  outer=false  inner=false
+  module released; data held     url=/page/b  article=null  outer=false  inner=true
+  all released                   url=/page/b  article=b  outer=false  inner=false

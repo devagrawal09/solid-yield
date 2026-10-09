@@ -176,7 +176,8 @@ async function record(mode, hydrated) {
     );
     let failureSnapshot;
     if (mode !== "original") {
-      vi.mocked(globalThis.fetch).mockRejectedValueOnce(new Error("fixture fetch failed"));
+      // A network failure, as fetch reports one: its platform contract is TypeError | DOMException.
+      vi.mocked(globalThis.fetch).mockRejectedValueOnce(new TypeError("fixture fetch failed"));
       const link = document.createElement("a");
       link.href = "/users/failing-fetch";
       document.getElementById("root").appendChild(link);

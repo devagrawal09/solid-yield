@@ -527,7 +527,24 @@ export function lowerNativeEffects(files, report) {
               t.isIdentifier(callee.object, { name: "Promise" }) &&
               t.isIdentifier(callee.property) &&
               ["all", "allSettled", "race", "any"].includes(callee.property.name);
-            if (t.isMemberExpression(callee) && !t.isSuper(callee.object) && !platformPromise) {
+            // Only the receiver reads, and every argument is a function literal:
+            // evaluating those has no effect, so the call keeps its own order, and
+            // a continuation stays where its lexical host wraps it (review 3 #07).
+            const inlineCallbacks =
+              t.isMemberExpression(callee) &&
+              !t.isSuper(callee.object) &&
+              !platformPromise &&
+              !t.isNewExpression(call) &&
+              call.arguments.length > 0 &&
+              call.arguments.every(a => t.isFunction(a));
+            if (inlineCallbacks && t.isMemberExpression(callee)) {
+              receiver = save(callee.object, "receiver");
+              callee = t.memberExpression(receiver, callee.property, callee.computed);
+            } else if (
+              t.isMemberExpression(callee) &&
+              !t.isSuper(callee.object) &&
+              !platformPromise
+            ) {
               receiver = save(callee.object, "receiver");
               callee = save(
                 attempt(t.memberExpression(receiver, callee.property, callee.computed), kinds),
@@ -535,11 +552,13 @@ export function lowerNativeEffects(files, report) {
               );
             }
             if (!receiver && !platformPromise) callee = save(callee, "callee");
-            const args = call.arguments.map(arg => save(arg, "argument"));
-            if (receiver) used.add("nativeInvoke");
+            const args = inlineCallbacks
+              ? /** @type {any[]} */ (call.arguments)
+              : call.arguments.map(arg => save(arg, "argument"));
+            if (receiver && !inlineCallbacks) used.add("nativeInvoke");
             const invoke = t.isNewExpression(call)
               ? t.newExpression(callee, args)
-              : receiver
+              : receiver && !inlineCallbacks
                 ? t.callExpression(t.identifier("__nativeInvoke"), [
                     callee,
                     receiver,

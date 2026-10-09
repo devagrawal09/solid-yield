@@ -72,29 +72,26 @@ describe("native JSX function holes (F-S35)", { timeout: 30_000 }, () => {
   it.each([
     ["expression", "totals().success.toFixed(n())"],
     ["arrow", "() => totals().success.toFixed(n())"]
-  ])(
-    "evaluates a %s receiver in its hole before the failure producer",
-    (_label, expression) => {
-      const result = lowerNativeProject(
-        new Map([[file, source(`return <dd>{${expression}}</dd>;`)]])
-      );
-      expect(result.diagnostics).toEqual([]);
-      const out = result.files.get(file);
-      expect(out).toContain("const _receiver = (yield* totals).success");
-      expect(out).toContain("__nativeInvoke(_method, _receiver");
-      parseProgram(out, file).traverse({
-        Function(q) {
-          if (q.node.generator) return;
-          q.traverse({
-            Function(inner) {
-              inner.skip();
-            },
-            CallExpression(call) {
-              expect(call.node.callee.name).not.toBe("totals");
-            }
-          });
-        }
-      });
-    }
-  );
+  ])("evaluates a %s receiver in its hole before the failure producer", (_label, expression) => {
+    const result = lowerNativeProject(
+      new Map([[file, source(`return <dd>{${expression}}</dd>;`)]])
+    );
+    expect(result.diagnostics).toEqual([]);
+    const out = result.files.get(file);
+    expect(out).toContain("const _receiver = (yield* totals).success");
+    expect(out).toContain("__nativeInvoke(_method, _receiver");
+    parseProgram(out, file).traverse({
+      Function(q) {
+        if (q.node.generator) return;
+        q.traverse({
+          Function(inner) {
+            inner.skip();
+          },
+          CallExpression(call) {
+            expect(call.node.callee.name).not.toBe("totals");
+          }
+        });
+      }
+    });
+  });
 });

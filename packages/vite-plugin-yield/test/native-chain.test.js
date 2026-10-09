@@ -15,7 +15,9 @@ describe("native-chain compiler fixtures", { timeout: 30_000 }, () => {
     expect(out).toContain("const _receiver = place(");
     expect(out).toContain("yield* __nativeReadStore(cart");
     expect(out).toContain("yield* decline");
-    expect(out).toContain("__nativeInvoke(_method, _receiver");
+    // Only the receiver reads; the function-literal argument keeps the call's own form.
+    expect(out).toContain("_receiver.catch(() => {})");
+    expect(out).not.toContain("__nativeInvoke");
     parseProgram(out, file).traverse({
       Function(q) {
         if (q.node.generator) return;
@@ -29,6 +31,20 @@ describe("native-chain compiler fixtures", { timeout: 30_000 }, () => {
         });
       }
     });
+  });
+
+  it("keeps a writing continuation in its lexical host when the receiver reads (review 3 #07)", () => {
+    const code = `import {createSignal} from 'solid-js';
+ declare function place(items:number[]):Promise<void>;
+ export function App(){const [items]=createSignal([1]);const [status,setStatus]=createSignal('');
+ return <button onClick={()=>{place(items().map(i=>i)).then(()=>setStatus('ok'))}}>{status()}</button>;}`;
+    const result = lowerNativeProject(new Map([[file, code]]));
+    expect(result.diagnostics).toEqual([]);
+    const out = result.files.get(file);
+    expect(out).toContain("const _receiver = place(");
+    expect(out).toContain("_receiver.then(__nativeLexicalCallback(");
+    expect(out).toContain("yield* setStatus(");
+    expect(out).not.toContain("__nativeInvoke");
   });
 
   it("preserves plain Promise chains without splitting their generic method", () => {

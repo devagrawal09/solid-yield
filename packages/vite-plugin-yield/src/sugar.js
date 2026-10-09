@@ -163,7 +163,8 @@ function fail(p, code, message, filename) {
     id: filename,
     loc: { file: filename, ...at },
     intermediateRead: p.toString(),
-    intermediateHost: p.getFunctionParent()?.toString()
+    intermediateHost: p.getFunctionParent()?.toString(),
+    length: Math.max(0, (p.node.end ?? 0) - (p.node.start ?? 0))
   });
   throw e;
 }
@@ -529,7 +530,19 @@ function pass(code, filename, program, native = false) {
             )
           );
         const binding = fnName(fn) ? fn.scope.parent?.getBinding(fnName(fn)) : undefined;
+        const promiseHost =
+          hostCall?.isCallExpression() &&
+          t.isMemberExpression(hostCall.node.callee) &&
+          ["then", "catch", "finally"].includes(key(hostCall.node.callee.property)) &&
+          (() => {
+            const receiver = type(hostCall.get("callee.object"));
+            return (
+              !!receiver &&
+              (receiver.symbol?.name === "Promise" || receiver.symbol?.name === "PromiseLike")
+            );
+          })();
         const eventHost =
+          promiseHost ||
           isScheduler(hostCall) ||
           (hostCall?.parentPath.isExpressionStatement() &&
             lib(hostCall.get("callee")) !== "attempt") ||
@@ -552,14 +565,14 @@ function pass(code, filename, program, native = false) {
                 )
               ])
             );
-          } else
+          } else {
+            const event = t.callExpression(t.identifier("__nativeEvent"), [
+              /** @type {import("@babel/core").types.FunctionExpression} */ (fn.node)
+            ]);
             fn.replaceWith(
-              t.callExpression(t.identifier("__nativeCallback"), [
-                t.callExpression(t.identifier("__nativeEvent"), [
-                  /** @type {import("@babel/core").types.FunctionExpression} */ (fn.node)
-                ])
-              ])
+              promiseHost ? event : t.callExpression(t.identifier("__nativeCallback"), [event])
             );
+          }
           if (p && !p.scope.hasBinding("__nativeEvent")) {
             p.node.body.unshift(
               t.importDeclaration(
@@ -569,7 +582,7 @@ function pass(code, filename, program, native = false) {
             );
             p.scope.crawl();
           }
-          if (p && !p.scope.hasBinding("__nativeCallback")) {
+          if (!promiseHost && p && !p.scope.hasBinding("__nativeCallback")) {
             p.node.body.unshift(
               t.importDeclaration(
                 [
@@ -981,10 +994,18 @@ function checkEscapes(files, active, options) {
             ts.isCallExpression(parent) &&
             ts.isIdentifier(parent.expression) &&
             constructors.has(parent.expression.text);
-          if (!direct && !callback)
-            throw new Error(
-              `[SUGAR_ESCAPE] Routine ${n.text} is handed to an unknown consumer; a plain callback cannot drive it (${id}:${n.getSourceFile().getLineAndCharacterOfPosition(n.getStart()).line + 1}).`
+          if (!direct && !callback) {
+            const at = n.getSourceFile().getLineAndCharacterOfPosition(n.getStart());
+            const error = new Error(
+              `[SUGAR_ESCAPE] Routine ${n.text} is handed to an unknown consumer; a plain callback cannot drive it.`
             );
+            Object.assign(error, {
+              id,
+              code: "SUGAR_ESCAPE",
+              loc: { file: id, line: at.line + 1, column: at.character }
+            });
+            throw error;
+          }
         }
       }
       ts.forEachChild(n, walk);

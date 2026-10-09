@@ -1,0 +1,3 @@
+{
+  "index.tsx": "import { Loading, Errored } from \"solid-js\";\nimport { render } from \"@solidjs/web\";\nimport { CartCtx, makeCart } from \"./cart\";\nimport { ProductList } from \"./ProductList\";\nimport { Details } from \"./Details\";\nimport { Checkout } from \"./Checkout\";\nimport { Clock } from \"./Clock\";\nfunction App() {\n  const cart = makeCart();\n  return (\n    <CartCtx value={cart}>\n      <Clock />\n      \n        <Loading fallback={<p>loading</p>}>\n          <ProductList />\n          <Details id=\"1\" />\n        </Loading>\n      \n      <Loading fallback={<p>loading</p>}><Checkout /></Loading>\n    </CartCtx>\n  );\n}\nrender(() => <App />, document.getElementById(\"root\")!);\n"
+}

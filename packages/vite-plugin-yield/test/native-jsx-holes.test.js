@@ -41,11 +41,39 @@ describe("native JSX function holes (F-S35)", { timeout: 30_000 }, () => {
       }
     });
   });
+  // The platform contract: a literal toFixed option cannot throw, so the dashboard
+  // expression needs no failure producer and its read stays in the hole.
   it.each([
     ["expression", "totals().success.toFixed(2)"],
     ["arrow", "() => totals().success.toFixed(2)"]
+  ])("keeps the dashboard %s read in its hole with no failure producer", (_label, expression) => {
+    const result = lowerNativeProject(
+      new Map([[file, source(`return <dd>{${expression}}</dd>;`)]])
+    );
+    expect(result.diagnostics).toEqual([]);
+    const out = result.files.get(file);
+    expect(out).toContain("(yield* totals).success.toFixed(2)");
+    expect(out).not.toContain("_receiver");
+    parseProgram(out, file).traverse({
+      Function(q) {
+        if (q.node.generator) return;
+        q.traverse({
+          Function(inner) {
+            inner.skip();
+          },
+          CallExpression(call) {
+            expect(call.node.callee.name).not.toBe("totals");
+          }
+        });
+      }
+    });
+  });
+  // A computed option can throw RangeError: the receiver is read in the hole first.
+  it.each([
+    ["expression", "totals().success.toFixed(n())"],
+    ["arrow", "() => totals().success.toFixed(n())"]
   ])(
-    "evaluates the dashboard %s receiver in its hole before the failure producer",
+    "evaluates a %s receiver in its hole before the failure producer",
     (_label, expression) => {
       const result = lowerNativeProject(
         new Map([[file, source(`return <dd>{${expression}}</dd>;`)]])

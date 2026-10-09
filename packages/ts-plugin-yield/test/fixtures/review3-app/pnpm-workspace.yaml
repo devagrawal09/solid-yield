@@ -1,0 +1,7 @@
+allowBuilds:
+  esbuild: true
+overrides:
+  solid-yield: file:/private/tmp/sy-review3-out/packs/solid-yield-0.0.0.tgz
+  compiler-yield: file:/private/tmp/sy-review3-out/packs/compiler-yield-0.0.0.tgz
+  vite-plugin-solid-yield: file:/private/tmp/sy-review3-out/packs/vite-plugin-solid-yield-0.0.0.tgz
+  ts-plugin-solid-yield: file:/private/tmp/sy-review3-out/packs/ts-plugin-solid-yield-0.0.0.tgz

@@ -66,13 +66,19 @@ export function mayTransform(code, yieldModule, lazy) {
  * @returns {ProgramPath | null}
  */
 export function parseProgram(code, filename) {
-  const ast = babel.parseSync(code, {
-    filename,
-    babelrc: false,
-    configFile: false,
-    sourceType: "module",
-    parserOpts: { plugins: parserPlugins(filename) }
-  });
+  let ast;
+  try {
+    ast = babel.parseSync(code, {
+      filename,
+      babelrc: false,
+      configFile: false,
+      sourceType: "module",
+      parserOpts: { plugins: parserPlugins(filename) }
+    });
+  } catch (error) {
+    Object.assign(/** @type {Error} */ (error), { id: filename });
+    throw error;
+  }
   if (!ast) return null;
   trackParsed(ast, code, filename, { plugins: parserPlugins(filename) });
   /** @type {ProgramPath | null} */

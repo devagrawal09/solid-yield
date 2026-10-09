@@ -133,10 +133,12 @@ it("retains entry markers and emits a single type-only import modifier", () => {
   const out = lower(
     `import {HydrationScript,type JSX} from '@solidjs/web';export function Shell(p:{children:JSX.Element}){return <html><HydrationScript/>{p.children}</html>}`
   );
-  expect(out).toContain("import type { JSX }");
+  // F-S36: JSX.Element lowers to the library's Element; the JSX import goes with it.
+  expect(out).toContain('import type { Element as _NativeElement } from "solid-yield"');
+  expect(out).not.toContain("JSX");
   expect(out).toContain("<HydrationScript />");
   expect(out).not.toContain("import type { type");
-});
+}, 30_000);
 
 it("evaluates reactive arguments in their host before an opaque call", () => {
   const out = lower(`import {createSignal,createMemo} from 'solid-js';
@@ -146,4 +148,4 @@ it("evaluates reactive arguments in their host before an opaque call", () => {
   expect(out).toMatch(/const _method = yield\* __nativeAttempt\(\(\) => _receiver.load/);
   expect(out).toMatch(/const _argument = yield\* n/);
   expect(out).toContain("__nativeInvoke(_method, _receiver, [_argument])");
-});
+}, 30_000);

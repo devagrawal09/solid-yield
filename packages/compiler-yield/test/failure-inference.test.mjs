@@ -8,6 +8,21 @@ const infer = files =>
     new Map(Object.entries(files).map(([file, source]) => [resolve(root, file), source]))
   );
 const summary = (report, name) => report.functions.find(f => f.name === name).fails;
+test("scheduled Promise rejection payloads and named timer callbacks retain their failures", () => {
+  const report = infer({
+    "timer.ts": `class Late extends Error {};
+      function fail(){throw new Late()}
+      function scheduled(){setTimeout(fail,10)}
+      function stringRejection(){return new Promise((resolve,reject)=>setTimeout(reject,10,'late'))}
+      function typedRejection(){return new Promise((resolve,reject)=>setTimeout(reject,10,new Late()))}
+      function resolved(){return new Promise(resolve=>setTimeout(resolve,10,'ok'))}`
+  });
+  const kind = report.classes.find(c => c.name === "Late").id;
+  assert.deepEqual(summary(report, "scheduled"), [kind]);
+  assert.deepEqual(summary(report, "typedRejection"), [kind]);
+  assert.deepEqual(summary(report, "stringRejection"), ["unknown"]);
+  assert.deepEqual(summary(report, "resolved"), []);
+});
 test("class identity, cross-module aliases and recursive call fixpoint", () => {
   const report = infer({
     "fail.ts":
@@ -49,8 +64,8 @@ test("unknown floor, pure contract, server transport and class typed parameter",
   });
   const kind = report.classes.find(c => c.name === "E").id;
   assert.deepEqual(summary(report, "instance"), [kind]);
-  for (const name of ["unknown", "value", "foreign"])
-    assert.deepEqual(summary(report, name), ["unknown"]);
+  for (const name of ["unknown", "value"]) assert.deepEqual(summary(report, name), ["unknown"]);
+  assert.deepEqual(summary(report, "foreign"), ["global:DOMException", "global:TypeError"]);
   assert.deepEqual(summary(report, "pure"), []);
   assert.deepEqual(summary(report, "client"), ["ChunkError", kind].sort());
 });
@@ -151,4 +166,28 @@ test("Promise platform contracts retain executor throws, reject calls and opaque
   assert.deepEqual(summary(report, "throws"), [kind]);
   assert.deepEqual(summary(report, "rejects"), [kind]);
   assert.deepEqual(summary(report, "thenable"), ["unknown"]);
+});
+
+test("review 3 built-ins and local helper contracts do not become opaque failures", () => {
+  const report = infer({
+    "format.ts": `export function money(n:number){return n.toFixed(2)};export function rounded(n:number){return Math.round(n)};`,
+    "builtin.ts": `import {money,rounded} from './format';
+      function safe(n:number,s:string){console.log(money(n),rounded(n),s.includes('x'));return JSON.stringify ? Object.keys({x:n}).map(k=>k.toUpperCase()).join(',') : ''}
+      function parse(s:string){return JSON.parse(s)}
+      function url(s:string){return new URL(s)}
+      function decode(s:string){return decodeURIComponent(s)}
+      function options(){return new Intl.NumberFormat('en',{minimumFractionDigits:101})}
+      function digits(n:number){return n.toFixed(101)}
+      function plain(){return new Map<string,number>().set('n',1).get('n')}
+      async function load(){throw new Error('local')}
+      function client(){return load()}`
+  });
+  for (const name of ["money", "rounded", "safe", "plain"])
+    assert.deepEqual(summary(report, name), [], name);
+  assert.deepEqual(summary(report, "parse"), ["global:SyntaxError"]);
+  assert.deepEqual(summary(report, "url"), ["global:TypeError"]);
+  assert.deepEqual(summary(report, "decode"), ["global:URIError"]);
+  assert.deepEqual(summary(report, "options"), ["global:RangeError", "global:TypeError"]);
+  assert.deepEqual(summary(report, "digits"), ["global:RangeError"]);
+  assert.deepEqual(summary(report, "client"), ["global:Error"]);
 });

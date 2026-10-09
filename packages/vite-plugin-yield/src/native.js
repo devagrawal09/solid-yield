@@ -23,6 +23,7 @@ import { dirname, resolve } from "node:path";
 import { parseProgram } from "./transform.js";
 import { lowerSugarProject } from "./sugar.js";
 import { inferFailures } from "compiler-yield/failure-inference";
+import { nativeProviders } from "./native-providers.js";
 import { nativeEntry } from "./native-entry.js";
 import { nativePrelude } from "./native-prelude.js";
 import { lowerNativeEffects } from "./native-effects.js";
@@ -357,12 +358,39 @@ export class NativeDiagnosticError extends Error {
   }
 }
 /** Translate only known surface contracts, then use the existing routine inference.
- * @param {string} code @param {string} filename @param {Map<string,string>} modules @param {ts.CompilerOptions} [options] @param {Set<string>} [foreignComponents] */
-function surface(code, filename, modules, options = {}, foreignComponents = new Set()) {
+ * @param {string} code @param {string} filename @param {Map<string,string>} modules @param {ts.CompilerOptions} [options] @param {Set<string>} [foreignComponents] @param {import("compiler-yield/failure-inference").FailureFunction[]} [summaries] */
+function surface(
+  code,
+  filename,
+  modules,
+  options = {},
+  foreignComponents = new Set(),
+  summaries = []
+) {
   const p = parseProgram(code, filename);
   if (!p) throw new Error(`Cannot parse ${filename}`);
   const needed = new Set();
   const contexts = new Set();
+  /** @param {Path} ref */
+  const contextReference = ref => {
+    if (!ref.isIdentifier() && !ref.isJSXIdentifier()) return false;
+    let declaration = ref.scope.getBinding(ref.node.name)?.path;
+    const api = imported(ref);
+    if (api?.module.startsWith(".")) {
+      const base = resolve(dirname(filename), api.module);
+      const target = [
+        base,
+        base + ".tsx",
+        base + ".ts",
+        base + "/index.tsx",
+        base + "/index.ts"
+      ].find(f => modules.has(f));
+      const module = target ? parseProgram(modules.get(target) ?? "", target) : null;
+      declaration = module?.scope.getBinding(api.name)?.path;
+    }
+    const init = declaration?.isVariableDeclarator() ? declaration.get("init") : null;
+    return !!(init?.isCallExpression() && imported(init.get("callee"))?.name === "createContext");
+  };
   let needsReturned = false;
   traverseOwned(p, {
     TSTypeReference(q) {
@@ -385,7 +413,9 @@ function surface(code, filename, modules, options = {}, foreignComponents = new 
     for (const ref of binding?.referencePaths ?? []) {
       if (ref.findParent(q => q.isTSType())) continue;
       if (ref.parentPath?.isMemberExpression() && ref.key === "object") continue;
-      ref.replaceWith(t.callExpression(t.identifier(name), []));
+      ref.replaceWith(
+        copyPosition(t.callExpression(copyPosition(t.identifier(name), ref.node), []), ref.node)
+      );
     }
   };
   /** @param {Path} q @param {string} code @param {string} message @returns {never} */
@@ -478,7 +508,9 @@ function surface(code, filename, modules, options = {}, foreignComponents = new 
           jsx ||= t.isJSXElement(inner.node.argument) || t.isJSXFragment(inner.node.argument);
         }
       });
-      if (!jsx) return;
+      const provider = summaries.find(f => f.name === name && filename.endsWith(f.file))?.provides
+        ?.length;
+      if (!jsx && !provider) return;
       const param = q.node.params[0];
       if (q.parentPath.isVariableDeclarator() && t.isIdentifier(q.parentPath.node.id)) {
         const declared = q.parentPath.node.id.typeAnnotation;
@@ -520,6 +552,24 @@ function surface(code, filename, modules, options = {}, foreignComponents = new 
           "NATIVE_PROPS",
           "Use a props parameter and read props.name where needed; destructuring loses reactive updates."
         );
+      if (provider && t.isIdentifier(param) && param.typeAnnotation?.type === "TSTypeAnnotation") {
+        needed.add("Element");
+        param.typeAnnotation.typeAnnotation = t.tsIntersectionType([
+          t.tsTypeReference(
+            t.identifier("Omit"),
+            t.tsTypeParameterInstantiation([
+              param.typeAnnotation.typeAnnotation,
+              t.tsLiteralType(t.stringLiteral("children"))
+            ])
+          ),
+          t.tsTypeLiteral([
+            t.tsPropertySignature(
+              t.identifier("children"),
+              t.tsTypeAnnotation(t.tsTypeReference(t.identifier("Element")))
+            )
+          ])
+        ]);
+      }
       if (param?.typeAnnotation?.type === "TSTypeAnnotation") {
         const propsType = foreignComponents.has(name) ? "__NativeProps" : "Props";
         needed.add(propsType);
@@ -601,6 +651,36 @@ function surface(code, filename, modules, options = {}, foreignComponents = new 
         }
         return;
       }
+      if (
+        t.isExpression(q.node.callee) &&
+        contextReference(q.get("callee")) &&
+        q.node.arguments.length === 1 &&
+        t.isObjectExpression(q.node.arguments[0])
+      ) {
+        const value = q.node.arguments[0];
+        for (const prop of value.properties)
+          if (
+            t.isObjectProperty(prop) &&
+            t.isIdentifier(prop.key, { name: "children" }) &&
+            !t.isFunction(prop.value) &&
+            t.isExpression(prop.value)
+          ) {
+            prop.value = t.arrowFunctionExpression(
+              [],
+              t.jsxFragment(t.jsxOpeningFragment(), t.jsxClosingFragment(), [
+                t.jsxExpressionContainer(prop.value)
+              ])
+            );
+          }
+        q.node.callee = t.memberExpression(q.node.callee, t.identifier("provide"));
+        if (q.parentPath.isReturnStatement())
+          q.replaceWith(
+            t.jsxFragment(t.jsxOpeningFragment(), t.jsxClosingFragment(), [
+              t.jsxExpressionContainer(q.node)
+            ])
+          );
+        return;
+      }
       if (api?.module !== "solid-js") return;
       if (foreignStateReference(q.get("callee"))) return;
       if (
@@ -633,7 +713,7 @@ function surface(code, filename, modules, options = {}, foreignComponents = new 
           fail(q, "NATIVE_CONTEXT", "useContext requires one statically resolved context.");
         if (q.parentPath.isVariableDeclarator() && t.isIdentifier(q.parentPath.node.id))
           valueReads(q.parentPath, q.parentPath.node.id.name);
-        q.replaceWith(t.callExpression(q.node.arguments[0], []));
+        q.replaceWith(copyPosition(t.callExpression(q.node.arguments[0], []), q.node));
       } else if (api.name === "createContext") {
         if (!q.parentPath.isVariableDeclarator() || !t.isIdentifier(q.parentPath.node.id))
           fail(
@@ -669,7 +749,18 @@ function surface(code, filename, modules, options = {}, foreignComponents = new 
         // A member tag can have a getter. Preserve its lookup at the JSX
         // position; hoisting an alias would run it before a conditional arm.
         // The existing JSX tag contract is the foreign check at this edge.
-        if (tag.isJSXMemberExpression()) return;
+        if (tag.isJSXMemberExpression()) {
+          if (
+            !t.isJSXIdentifier(tag.node.property, { name: "Provider" }) ||
+            !t.isJSXIdentifier(tag.node.object)
+          )
+            return;
+          const name = tag.node.object.name;
+          const api = imported(tag.get("object"));
+          if (!contextReference(tag.get("object"))) return;
+          tag.replaceWith(copyPosition(t.jsxIdentifier(name), tag.node.object));
+          if (q.node.closingElement) q.node.closingElement.name = t.jsxIdentifier(name);
+        }
         if (!tag.isJSXIdentifier()) return;
         const name = tag.node.name;
         const nativeTag = imported(tag);
@@ -845,7 +936,15 @@ function surface(code, filename, modules, options = {}, foreignComponents = new 
                 jsx = true;
               }
             });
-          if (!importedContext && !jsx) {
+          const declarationName = init?.isFunction() && "id" in init.node ? init.node.id?.name : "";
+          const provider = summaries.some(
+            f =>
+              f.provides?.length &&
+              typeof target === "string" &&
+              target.endsWith(f.file) &&
+              (f.name === api.name || f.name === declarationName)
+          );
+          if (!importedContext && !jsx && !provider) {
             wrapForeign(q, t.identifier(name));
             return;
           }
@@ -1186,7 +1285,14 @@ function lowerNativeProjectImpl(input, options = {}) {
       ...new Map(
         [...effects].map(([id, code]) => [
           id,
-          surface(code, id, effects, options.compilerOptions, foreignComponents.get(id))
+          surface(
+            code,
+            id,
+            effects,
+            options.compilerOptions,
+            foreignComponents.get(id),
+            sourceFailures.functions
+          )
         ])
       ),
       ...entries
@@ -1216,14 +1322,14 @@ function lowerNativeProjectImpl(input, options = {}) {
   );
   return {
     ...lowered,
-    files: unmarkOpaqueGenerators(lowered.files),
+    files: nativeProviders(unmarkOpaqueGenerators(lowered.files), sourceFailures.functions),
     inference: sourceFailures,
     diagnostics: [
       ...diagnostics.map(d =>
         d.code === "MODULE_STATE" ? { ...d, severity: /** @type {const} */ ("error") } : d
       ),
       ...sourceFailures.diagnostics
-        .filter(d => d.code !== "EVENT_REJECTS")
+        .filter(d => d.code !== "EVENT_REJECTS" || d.timer)
         .map(d => ({ ...d, severity: /** @type {const} */ ("error") })),
       ...nativeForeignDiagnostics(files, options.compilerOptions)
     ]
@@ -1238,6 +1344,7 @@ export function nativeForeignDiagnostics(files, options = {}) {
     traverseOwned(p, {
       JSXOpeningElement(q) {
         const tag = q.get("name");
+        if (tag.isJSXIdentifier() && /^[a-z]/.test(tag.node.name)) return;
         let api = imported(tag);
         if (!api && tag.isJSXIdentifier()) {
           const declaration = tag.scope.getBinding(tag.node.name)?.path;

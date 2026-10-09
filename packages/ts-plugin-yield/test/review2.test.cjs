@@ -49,7 +49,8 @@ for (const c of require("./fixtures/review2-app/expectations.json"))
         assert.match(d.messageText, /TypeError/);
         assert.doesNotMatch(d.messageText, /FetchError/);
       }
-      if (c.case === "selective-unknown.tsx") assert.match(d.messageText, /unknown/);
+      if (c.case === "selective-unknown.tsx")
+        assert.match(d.messageText, /DOMException.*TypeError|TypeError.*DOMException/);
       if (c.case === "readme.tsx") {
         assert.equal(ds.length, 1);
         assert.equal(d.relatedInformation.length, 1);
@@ -63,7 +64,7 @@ for (const c of require("./fixtures/review2-app/expectations.json"))
       service.dispose();
     }
   });
-test("unknown hover identifies the opaque call and its authored line", () => {
+test("platform IO hover names its explicit rejection classes", () => {
   const source = `import {createMemo, Loading, Errored} from "solid-js";
 async function load(){ return await fetch('/api'); }
 export function Page(){const value=createMemo(()=>load());return <Loading fallback='wait'>{value()}</Loading>;}`;
@@ -73,7 +74,8 @@ export function Page(){const value=createMemo(()=>load());return <Loading fallba
       .quickInfo(path.join(root, "api.tsx"), source.indexOf("function Page") + 9)
       ?.displayParts.map(p => p.text)
       .join("");
-    assert.match(text, /an unknown error \(from fetch at api.tsx:2\)/);
+    assert.match(text, /DOMException.*TypeError|TypeError.*DOMException/);
+    assert.doesNotMatch(text, /unknown|__native/);
   } finally {
     service.dispose();
   }

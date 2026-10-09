@@ -1,0 +1,107 @@
+[
+  {
+    "case": "01.json",
+    "mistake": "swallow empty catch (Checkout)",
+    "code": "CATCH_SWALLOWS",
+    "file": "Checkout.tsx",
+    "line": 15
+  },
+  {
+    "case": "02.json",
+    "mistake": "log-only catch (Checkout)",
+    "code": "CATCH_SWALLOWS",
+    "file": "Checkout.tsx",
+    "line": 15
+  },
+  {
+    "case": "03.json",
+    "mistake": "catch base ApiError in ProductList memo, siblings thrown",
+    "code": null,
+    "file": null,
+    "line": null
+  },
+  {
+    "case": "04.json",
+    "mistake": "selective instanceof WITH rethrow (RateLimited)",
+    "code": null,
+    "file": null,
+    "line": null
+  },
+  {
+    "case": "05.json",
+    "mistake": "selective instanceof WITHOUT rethrow",
+    "code": "CATCH_SWALLOWS",
+    "file": "ProductList.tsx",
+    "line": 8
+  },
+  {
+    "case": "06.json",
+    "mistake": "async onClick that rejects",
+    "code": "EVENT_REJECTS",
+    "file": "Clock.tsx",
+    "line": 7
+  },
+  {
+    "case": "07.json",
+    "mistake": ".then without .catch in handler",
+    "code": "EVENT_REJECTS",
+    "file": "Checkout.tsx",
+    "line": 20
+  },
+  {
+    "case": "08.json",
+    "mistake": "throw a string (api)",
+    "code": "NATIVE_THROW",
+    "file": "api.ts",
+    "line": 10
+  },
+  {
+    "case": "09.json",
+    "mistake": "throw inside setTimeout",
+    "code": "NATIVE_CALLBACK_FAILURE",
+    "file": "Clock.tsx",
+    "line": 5
+  },
+  {
+    "case": "10.json",
+    "mistake": "server fn throws NEW class Banned (no client change)",
+    "code": null,
+    "file": null,
+    "line": null
+  },
+  {
+    "case": "11.json",
+    "mistake": "Promise.all with rejectable member",
+    "code": null,
+    "file": null,
+    "line": null
+  },
+  {
+    "case": "12.json",
+    "mistake": "try/finally with no catch",
+    "code": "EVENT_REJECTS",
+    "file": "Checkout.tsx",
+    "line": 20
+  },
+  {
+    "case": "13.json",
+    "mistake": "await inside async memo of throwing fn",
+    "code": null,
+    "file": null,
+    "line": null
+  },
+  {
+    "case": "14.json",
+    "mistake": "context read without provider",
+    "code": "NO_PROVIDER",
+    "file": "ProductList.tsx",
+    "line": 6
+  },
+  {
+    "case": "15.json",
+    "mistake": "remove Errored",
+    "code": "FOREIGN_HANDOFF",
+    "file": "ProductList.tsx",
+    "line": 10
+  }
+]

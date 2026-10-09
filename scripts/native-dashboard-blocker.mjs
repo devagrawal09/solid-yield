@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// F-S36, F-S37 and D-119 are in. Pin the remaining errors by group (F-S42 onward); this is not runtime acceptance.
+// F-S36, F-S37 and D-119 are in. Pin the remaining errors by group (F-S43 onward); this is not runtime acceptance.
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { createRequire } from "node:module";
@@ -117,7 +117,6 @@ const authoredAt = d => {
   return `${relative(source, file)}:${prefix.length}:${prefix.at(-1).length + 1}`;
 };
 const groups = {
-  "F-S42": ["panels.tsx:30:5"],
   "F-S43": ["app.tsx:78:45", "app.tsx:78:56", "app.tsx:79:54"],
   "F-S45": ["main.tsx:3:15"]
 };
@@ -151,18 +150,17 @@ const evidence = {
     "D-119 (T08 at app.tsx:69, F-S38 at Panel's children): plain-typed props take the colors their callers pass; IncidentDetail's and Panel's own boundaries cover them",
     "F-S39: a member a source lacks (props.title.toLowerCase(), point.value.toFixed(0)) reads the source first; path and index-signature keys stay paths; a wrapped Errored fallback keeps Solid's (error, reset) types",
     "F-S40: a component callback prop whose body writes (refresh, a setter) is hosted by the event that calls it, not the hole that creates it",
-    "F-S41: a component that renders its own provider but never places props.children is not a provider wrapper; App keeps its declared props"
+    "F-S41: a component that renders its own provider but never places props.children is not a provider wrapper; App keeps its declared props",
+    "F-S42: an effect function's returned cleanup registers through onCleanup ($cleanup), which runs before the next effect run or on disposal, as Solid 2 does"
   ],
   next: {
-    "F-S42":
-      "createEffect's effect function returning a cleanup does not match the library's effect phase",
     "F-S43":
       "Route components require FilterContext; FilterProvider surrounds the foreign Router, but the requirement is not discharged across it",
     "F-S45":
       "App may fail with unknown: FilterBar's onChange calls filters.setRange/setTeam, signal setters reached through the context value's plain function type; markSafeError (@solidjs/web) is opaque too. A precision gap, not a real failure"
   },
   halfA:
-    "FAIL: lowering has exactly the Router boundary notice; the generated program has the 5 errors below, all compiler gaps",
+    "FAIL: lowering has exactly the Router boundary notice; the generated program has the 4 errors below, all compiler gaps",
   halfB:
     "FAIL / not run: compiler gaps remain; empty author patch; native hydrated parity, SSR, AckFailed and NotFound comparisons not run",
   boundaries: result.diagnostics.map(d => ({ ...d, file: relative(root, d.file) })),

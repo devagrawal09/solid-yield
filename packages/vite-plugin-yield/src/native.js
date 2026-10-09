@@ -697,6 +697,60 @@ function surface(
         );
         q.node.typeParameters = null;
       }
+      if (api.name === "createEffect" && q.get("arguments.1").isFunction()) {
+        // F-S42: Solid 2 runs an effect function's returned cleanup before the
+        // next run or on disposal, as the library's $cleanup does: register it.
+        const effect = q.get("arguments.1");
+        if (effect.isArrowFunctionExpression() && !t.isBlockStatement(effect.node.body))
+          effect.node.body = t.blockStatement([t.returnStatement(effect.node.body)]);
+        /** @type {Path[]} */ const returns = [];
+        traverseOwned(effect, {
+          Function(inner) {
+            if (inner !== effect) inner.skip();
+          },
+          ReturnStatement(ret) {
+            if (ret.node.argument) returns.push(ret);
+          }
+        });
+        if (returns.length) {
+          const program = /** @type {Path} */ (q.findParent(x => x.isProgram()));
+          let local = null;
+          for (const declaration of program.node.body)
+            if (t.isImportDeclaration(declaration) && declaration.source.value === "solid-js")
+              for (const spec of declaration.specifiers)
+                if (
+                  t.isImportSpecifier(spec) &&
+                  (t.isIdentifier(spec.imported) ? spec.imported.name : spec.imported.value) ===
+                    "onCleanup"
+                )
+                  local = spec.local.name;
+          if (!local) {
+            local = program.scope.generateUid("onCleanup");
+            const source = program.node.body.find(
+              d =>
+                t.isImportDeclaration(d) && d.source.value === "solid-js" && d.importKind !== "type"
+            );
+            const spec = t.importSpecifier(t.identifier(local), t.identifier("onCleanup"));
+            if (source && t.isImportDeclaration(source)) source.specifiers.push(spec);
+            else
+              program.node.body.unshift(t.importDeclaration([spec], t.stringLiteral("solid-js")));
+            program.scope.crawl();
+          }
+          for (const ret of returns) {
+            const cleanup = ret.scope.generateUidIdentifier("cleanup");
+            ret.replaceWithMultiple([
+              t.variableDeclaration("const", [
+                t.variableDeclarator(cleanup, /** @type {any} */ (ret.node.argument))
+              ]),
+              t.ifStatement(
+                cleanup,
+                t.expressionStatement(t.callExpression(t.identifier(local), [cleanup]))
+              ),
+              t.returnStatement()
+            ]);
+          }
+        }
+      }
       if (api.name === "onCleanup") {
         const owner = q.getFunctionParent();
         // A Promise producer owns ordinary Solid cleanup; it is not a routine.

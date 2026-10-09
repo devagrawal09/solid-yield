@@ -40,7 +40,7 @@ Worktrees on the original machine (may not exist elsewhere): `/Users/devagr/soli
 ## 4. Open rulings for Dev
 
 - **Upstream bundle (A/B/C), RULED 2026-10-09: (1) filed as solidjs/solid#3957; (2)(3) held as drafts; (4) needs a plain-Solid repro before any claim.** Four plain-Solid findings with repros: (1) rc.14 regression — a separate `isPending` reader hides an async memo rejection from `Errored` (draft `documentation/upstream/solid-errored-fallback-rc14.md` on `chore/rc14`; rc.13 passes / rc.14 fails); (2) frames claim raw-HTML links and add router state attributes; streamed loading root committed before content (draft `documentation/upstream/solid-frames-link-claim.md` on `proto/compiler`); (3) the frames client runtime's fixed cost ≈ 25 KB gzip sets the server-components break-even (no draft; table in `compiler-c3c-scaling.md`); (4) F-K1 — Solid retains `_optimisticNodes`/`CollectionQueue` across rounds in a plain-Solid app (`documentation/soak-report.md`; no draft). Recommended: A = file (1) as an issue, one Discord thread for (2)–(4). Nothing has been filed.
-- **Public roadmap issue** ("post it") — unanswered; optional.
+- **Public roadmap issue** — POSTED 2026-10-09: https://github.com/devagrawal09/solid-yield/issues/1 (keep it updated when the roadmap changes).
 - npm publish: parked ~1 month by Dev (credentials elsewhere); do not raise.
 - Resolved 2026-10-08: production fallbacks show the real failure message (D-115; allowed difference); transported failure classes regain their prototype (D-117).
 

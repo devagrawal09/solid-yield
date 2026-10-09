@@ -256,6 +256,8 @@ const id = yield* props.id;                                                  // 
 
 ## Roadmap
 
+Public roadmap: https://github.com/devagrawal09/solid-yield/issues/1
+
 [HANDOFF.md](HANDOFF.md#roadmap-and-compiler-checkpoint-2026-10-08-d-116) has the current order (D-116).
 
 - **v0.1, the library** (now): the runtime, the transform and the lint described here. It is waiting to be published to npm.

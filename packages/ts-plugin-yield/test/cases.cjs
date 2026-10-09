@@ -35,8 +35,9 @@ module.exports = [
   {
     slot: "T08",
     file: "colored-prop",
-    code: "SETTLED_PROP",
-    line: 7
+    // D-119: the pending value flows into the child; unhandled, it reports at its read
+    code: "PENDING_ROOT",
+    line: 8
   },
   {
     slot: "L05",

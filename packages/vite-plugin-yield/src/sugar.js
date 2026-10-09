@@ -944,6 +944,157 @@ function pass(code, filename, program, native = false) {
   });
   return changed ? printer(t.file(p.node)) : code;
 }
+/**
+ * D-119: a native component's plain-typed prop that a caller passes a pending or
+ * failing value. Solid reads a prop lazily, inside the child, so that value's
+ * colors are the child's: such a prop is widened to `Source<T, E, P>` with the
+ * component's own type parameters (D-029), and each call carries what it passes.
+ * Found where TypeScript refuses the call's prop; only a colored source or hole
+ * counts, so a genuine type mismatch stays an error.
+ * @param {ts.Program} program @param {Set<string>} active
+ * @returns {Map<string, Map<string, Set<string>>>} file → component → props
+ */
+function coloredPropSites(program, active) {
+  const checker = program.getTypeChecker();
+  /** @type {Map<string, Map<string, Set<string>>>} */
+  const wanted = new Map();
+  /** @param {ts.Type} type @param {string} name @param {ts.Node} at */
+  const member = (type, name, at) => {
+    const symbol = checker.getPropertiesOfType(type).find(p => p.name.startsWith(`__@${name}@`));
+    return symbol && checker.getTypeOfSymbolAtLocation(symbol, at);
+  };
+  /** @param {ts.Type} type @param {ts.Node} at */
+  const coloredOps = (type, at) =>
+    (type.isUnion() ? type.types : [type]).some(part => {
+      const pending = member(part, "PENDING", at),
+        fails = member(part, "FAILS", at);
+      return (
+        (!!pending && checker.typeToString(pending) !== "false") ||
+        (!!fails && !(fails.flags & ts.TypeFlags.Never))
+      );
+    });
+  /** @param {ts.Type} type @param {ts.Node} at */
+  const colored = (type, at) => {
+    if (member(type, "SOURCE", at)) return coloredOps(type, at);
+    return type.getCallSignatures().some(sig => {
+      if (sig.getParameters().length) return false;
+      const result = checker.getReturnTypeOfSignature(sig);
+      if (result.symbol?.name !== "Generator") return false;
+      const [yields] = checker.getTypeArguments(/** @type {ts.TypeReference} */ (result));
+      return !!yields && coloredOps(yields, at);
+    });
+  };
+  /** @param {ts.Node} node @param {number} start @returns {ts.Node} */
+  const innermost = (node, start) =>
+    ts.forEachChild(node, c =>
+      c.getStart() <= start && start < c.end ? innermost(c, start) : undefined
+    ) ?? node;
+  for (const id of active) {
+    const source = program.getSourceFile(id);
+    if (!source) continue;
+    for (const d of program.getSemanticDiagnostics(source)) {
+      if (d.start === undefined) continue;
+      let node = innermost(source, d.start);
+      while (node && !ts.isPropertyAssignment(node) && !ts.isSourceFile(node)) node = node.parent;
+      if (!node || !ts.isPropertyAssignment(node)) continue;
+      const prop = node;
+      // TypeScript reports a prop's assignability at its name, not inside its value.
+      if (!(prop.name.getStart() <= d.start && d.start < prop.name.end)) continue;
+      const literal = prop.parent,
+        call = literal.parent;
+      if (!ts.isCallExpression(call) || call.arguments[0] !== literal) continue;
+      if (!colored(checker.getTypeAtLocation(prop.initializer), prop.initializer)) continue;
+      let symbol = checker.getSymbolAtLocation(call.expression);
+      if (symbol && symbol.flags & ts.SymbolFlags.Alias) symbol = checker.getAliasedSymbol(symbol);
+      const declaration = symbol?.declarations?.find(ts.isVariableDeclaration);
+      const file = declaration?.getSourceFile().fileName;
+      if (!declaration || !file || !active.has(file) || !ts.isIdentifier(declaration.name))
+        continue;
+      const init = declaration.initializer;
+      const fn = init && ts.isCallExpression(init) ? init.arguments[0] : undefined;
+      const annotation = fn && ts.isFunctionExpression(fn) ? fn.parameters[0]?.type : undefined;
+      if (
+        !annotation ||
+        !ts.isTypeReferenceNode(annotation) ||
+        annotation.typeName.getText() !== "Props" ||
+        !annotation.typeArguments?.[0] ||
+        !ts.isTypeLiteralNode(annotation.typeArguments[0])
+      )
+        continue;
+      const name = prop.name.getText();
+      const declared = annotation.typeArguments[0].members.find(
+        m => ts.isPropertySignature(m) && m.name.getText() === name && m.type
+      );
+      if (!declared || !ts.isPropertySignature(declared) || !declared.type) continue;
+      // Only a plain declaration widens; a declared Source keeps its own contract.
+      if (member(checker.getTypeFromTypeNode(declared.type), "SOURCE", declared)) continue;
+      if (!wanted.has(file)) wanted.set(file, new Map());
+      const components = /** @type {Map<string, Set<string>>} */ (wanted.get(file));
+      const component = declaration.name.text;
+      if (!components.has(component)) components.set(component, new Set());
+      components.get(component)?.add(name);
+    }
+  }
+  return wanted;
+}
+/** D-119: widen the recorded props. @param {string} code @param {string} filename @param {Map<string, Set<string>>} components */
+function widenColoredProps(code, filename, components) {
+  const p = parseProgram(code, filename);
+  if (!p) return code;
+  let changed = false;
+  traverseOwned(p, {
+    VariableDeclarator(q) {
+      const props = components.get(key(q.node.id));
+      const init = q.node.init;
+      const fn = props && t.isCallExpression(init) ? init.arguments[0] : null;
+      if (!props || !t.isFunctionExpression(fn)) return;
+      const param = fn.params[0];
+      const annotation =
+        param && "typeAnnotation" in param && t.isTSTypeAnnotation(param.typeAnnotation)
+          ? param.typeAnnotation.typeAnnotation
+          : null;
+      const literal =
+        t.isTSTypeReference(annotation) && t.isIdentifier(annotation.typeName, { name: "Props" })
+          ? annotation.typeParameters?.params[0]
+          : null;
+      if (!t.isTSTypeLiteral(literal)) return;
+      const parameters = t.isTSTypeParameterDeclaration(fn.typeParameters)
+        ? fn.typeParameters.params
+        : [];
+      for (const declared of literal.members) {
+        if (!t.isTSPropertySignature(declared) || !declared.typeAnnotation) continue;
+        const name = key(declared.key);
+        if (!props.has(name)) continue;
+        const fails = q.scope.generateUid(`E_${name}`),
+          pending = q.scope.generateUid(`P_${name}`);
+        declared.typeAnnotation.typeAnnotation = t.tsTypeReference(
+          t.identifier("__NativeSource"),
+          t.tsTypeParameterInstantiation([
+            declared.typeAnnotation.typeAnnotation,
+            t.tsTypeReference(t.identifier(fails)),
+            t.tsTypeReference(t.identifier(pending))
+          ])
+        );
+        parameters.push(
+          t.tsTypeParameter(null, null, fails),
+          t.tsTypeParameter(t.tsBooleanKeyword(), null, pending)
+        );
+        changed = true;
+      }
+      fn.typeParameters = t.tsTypeParameterDeclaration(parameters);
+    }
+  });
+  if (!changed) return code;
+  if (!p.scope.hasBinding("__NativeSource")) {
+    const source = t.importDeclaration(
+      [t.importSpecifier(t.identifier("__NativeSource"), t.identifier("Source"))],
+      t.stringLiteral("solid-yield")
+    );
+    source.importKind = "type";
+    p.node.body.unshift(source);
+  }
+  return printer(t.file(p.node));
+}
 /** Refuse generator helpers handed to an unknown consumer. The library's
  * callback hosts are the only allowed consumers besides direct delegation.
  * @param {Map<string,string>} files @param {Set<string>} active @param {ts.CompilerOptions} options */
@@ -1041,6 +1192,12 @@ function lowerSugarProjectImpl(input, { compilerOptions = {}, native = false } =
       changed ||= code !== files.get(id);
     }
     files = next;
+    if (!changed && native)
+      for (const [id, components] of coloredPropSites(program, active)) {
+        const code = widenColoredProps(files.get(id) ?? "", id, components);
+        changed ||= code !== files.get(id);
+        files.set(id, code);
+      }
     if (!changed) {
       checkEscapes(files, active, options);
       return { files, iterations: i + 1 };

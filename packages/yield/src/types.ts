@@ -459,10 +459,12 @@ type Widen<P extends boolean> = [P] extends [true] ? boolean : P;
  * (yield* n) * 2; } })`). Its colors are what it reads (and what the
  * components it calls render), so a pending hole does not pass a settled
  * prop. `children` is always one (D-066): a lazy view, `function* () {
- * return <…/>; }`, built where the child reads it.
+ * return <…/>; }`, built where the child reads it. Like any view it may bind
+ * events (D-072), whose failures join it (D-119: pending children with a
+ * handler, such as a select inside a loading panel).
  */
 export type HoleProp<T, E = never, P extends boolean = false, Q = never> = () => Generator<
-  Read<P, E> | ChildView<P, E, boolean, Q> | Raise<E>,
+  Read<P, E> | ChildView<P, E, boolean, Q> | Bind<boolean, E> | Raise<E>,
   T,
   any
 >;

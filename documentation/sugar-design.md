@@ -1267,3 +1267,27 @@ then stops at a new, uninvestigated reason: `[SUGAR_ESCAPE] Routine placeOrder i
 handed to an unknown consumer` (the `effectAction` bridge, `checkout.tsx`). The
 evidence script `scripts/native-effect-blocker.mjs`, outside the gate, now fails
 by design with "F-S34 no longer reproduces".
+
+### Native props carry their callers' colors (D-119, 2026-10-09)
+
+A plain-typed prop (`item: Item`, `children: JSX.Element`) may receive a value that
+is pending or may fail. Solid reads a prop lazily, inside the child, so those colors
+are the child's. After the sugar pass reaches its fixed point, any call whose prop
+TypeScript refuses while the passed source or hole is pending or failing marks that
+prop; the declaration is widened to `Source<T, E, P>` with fresh component type
+parameters (D-029), and the pass runs again, so a prop forwarded to another
+component widens that one too. A prop that only receives ready values keeps its
+declaration, and its body is not checked against colors it never sees. A genuine
+type mismatch is not a colored source or hole and stays an error.
+
+Each call carries what it passes: a call inside `Loading`/`Errored` (the caller's,
+or the child's own, as the dashboard's `Panel`) is covered; an uncovered one
+reports at the originating read when rendered (`[PENDING_ROOT]`, review slot T08's
+fixture now at `colored-prop.tsx:8:28`). A hole prop may bind events, as a view may
+(D-072): `HoleProp` admits `Bind`, so pending children with a handler pass. The
+explicit library dialect keeps D-065's `[SETTLED_PROP]`: only the native lowering
+widens.
+
+Effects on the corpus: the native `colored-prop` fixture (no root) is accepted; docs
+loses its `article` settled-prop error; the dashboard drops five errors (T08 and
+F-S38) to ten in five groups (F-S39–F-S43).

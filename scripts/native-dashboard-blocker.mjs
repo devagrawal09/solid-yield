@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// F-S36 and F-S37 are fixed. Pin the remaining errors by group (F-S38 onward); this is not runtime acceptance.
+// F-S36, F-S37 and D-119 are in. Pin the remaining errors by group (F-S39 onward); this is not runtime acceptance.
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { createRequire } from "node:module";
@@ -117,8 +117,6 @@ const authoredAt = d => {
   return `${relative(source, file)}:${prefix.length}:${prefix.at(-1).length + 1}`;
 };
 const groups = {
-  "T08-ruling": ["app.tsx:69:25"],
-  "F-S38": ["chart.tsx:50:17", "incidents.tsx:50:17", "panels.tsx:10:17", "panels.tsx:69:17"],
   "F-S39": ["chart.tsx:108:45", "panel.tsx:12:43", "panel.tsx:18:68"],
   "F-S40": ["incidents.tsx:108:52"],
   "F-S41": ["main.tsx:3:15"],
@@ -151,13 +149,10 @@ const evidence = {
     "F-S37 fixed: useContext's value is the provider's (set once), held in setup; its guard raises only what the context's declared type admits",
   fixed: [
     "F-S36: Accessor imports name the library Source; both provider fields typecheck",
-    "F-S37: useFilters lowers to nativeUseContext + nativeContextGuard; it and FilterBar infer no failure"
+    "F-S37: useFilters lowers to nativeUseContext + nativeContextGuard; it and FilterBar infer no failure",
+    "D-119 (T08 at app.tsx:69, F-S38 at Panel's children): plain-typed props take the colors their callers pass; IncidentDetail's and Panel's own boundaries cover them"
   ],
   next: {
-    "T08-ruling":
-      "app.tsx:69 passes the pending, failing incident() into a prop typed Incident inside the caller's own Errored/Loading: SETTLED_PROP (review slot T08). Correct by the current rules or a model change: Dev's ruling",
-    "F-S38":
-      "A wrapper component's children: JSX.Element lowers settled; Panel discharges its children's colors with its own Errored/Loading",
     "F-S39":
       "A prop or row value used as a method receiver (props.title.toLowerCase(), point.value.toFixed(0)) is not read before the call",
     "F-S40":
@@ -169,7 +164,7 @@ const evidence = {
       "Route components require FilterContext; FilterProvider surrounds the foreign Router, but the requirement is not discharged across it"
   },
   halfA:
-    "FAIL: lowering has exactly the Router boundary notice; the generated program has the 15 errors below, at least 14 of them compiler gaps",
+    "FAIL: lowering has exactly the Router boundary notice; the generated program has the 10 errors below, all compiler gaps",
   halfB:
     "FAIL / not run: compiler gaps remain; empty author patch; native hydrated parity, SSR, AckFailed and NotFound comparisons not run",
   boundaries: result.diagnostics.map(d => ({ ...d, file: relative(root, d.file) })),

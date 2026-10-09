@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// F-S36, F-S37 and D-119 are in. Pin the remaining errors by group (F-S39 onward); this is not runtime acceptance.
+// F-S36, F-S37 and D-119 are in. Pin the remaining errors by group (F-S40 onward); this is not runtime acceptance.
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { createRequire } from "node:module";
@@ -117,7 +117,6 @@ const authoredAt = d => {
   return `${relative(source, file)}:${prefix.length}:${prefix.at(-1).length + 1}`;
 };
 const groups = {
-  "F-S39": ["chart.tsx:108:45", "panel.tsx:12:43", "panel.tsx:18:68"],
   "F-S40": ["incidents.tsx:108:52"],
   "F-S41": ["main.tsx:3:15"],
   "F-S42": ["panels.tsx:30:5"],
@@ -150,11 +149,10 @@ const evidence = {
   fixed: [
     "F-S36: Accessor imports name the library Source; both provider fields typecheck",
     "F-S37: useFilters lowers to nativeUseContext + nativeContextGuard; it and FilterBar infer no failure",
-    "D-119 (T08 at app.tsx:69, F-S38 at Panel's children): plain-typed props take the colors their callers pass; IncidentDetail's and Panel's own boundaries cover them"
+    "D-119 (T08 at app.tsx:69, F-S38 at Panel's children): plain-typed props take the colors their callers pass; IncidentDetail's and Panel's own boundaries cover them",
+    "F-S39: a member a source lacks (props.title.toLowerCase(), point.value.toFixed(0)) reads the source first; path and index-signature keys stay paths; a wrapped Errored fallback keeps Solid's (error, reset) types"
   ],
   next: {
-    "F-S39":
-      "A prop or row value used as a method receiver (props.title.toLowerCase(), point.value.toFixed(0)) is not read before the call",
     "F-S40":
       "A callback prop (reload={() => refresh(incidents)}) is hosted by the JSX hole that creates it, not the child event that calls it; its write is refused",
     "F-S41": "render(() => <App />) refuses an entry component whose props are all optional",
@@ -164,7 +162,7 @@ const evidence = {
       "Route components require FilterContext; FilterProvider surrounds the foreign Router, but the requirement is not discharged across it"
   },
   halfA:
-    "FAIL: lowering has exactly the Router boundary notice; the generated program has the 10 errors below, all compiler gaps",
+    "FAIL: lowering has exactly the Router boundary notice; the generated program has the 7 errors below, all compiler gaps",
   halfB:
     "FAIL / not run: compiler gaps remain; empty author patch; native hydrated parity, SSR, AckFailed and NotFound comparisons not run",
   boundaries: result.diagnostics.map(d => ({ ...d, file: relative(root, d.file) })),

@@ -111,6 +111,30 @@ function wrapLexical(fn, phase, program) {
   const deferred =
     callee?.isMemberExpression() &&
     ["then", "catch", "finally"].includes(key(callee.node.property));
+  // A wrapped Errored fallback keeps Solid's own parameter types, which the
+  // generic wrapper would otherwise erase: (err: Accessor<unknown>, reset).
+  if (
+    key(fn.parentPath?.node.key) === "fallback" &&
+    lib(ownerCall(fn)?.get("callee")) === "Errored"
+  ) {
+    const [error, reset] = fn.node.params;
+    if (t.isIdentifier(error) && !error.typeAnnotation)
+      error.typeAnnotation = t.tsTypeAnnotation(
+        t.tsFunctionType(null, [], t.tsTypeAnnotation(t.tsUnknownKeyword()))
+      );
+    if (t.isIdentifier(reset) && !reset.typeAnnotation) {
+      reset.typeAnnotation = t.tsTypeAnnotation(t.tsTypeReference(t.identifier("__NativeReset")));
+      if (!program.scope.hasBinding("__NativeReset")) {
+        const reset = t.importDeclaration(
+          [t.importSpecifier(t.identifier("__NativeReset"), t.identifier("Reset"))],
+          t.stringLiteral("solid-yield")
+        );
+        reset.importKind = "type";
+        program.node.body.unshift(reset);
+        program.scope.crawl();
+      }
+    }
+  }
   if (fn.isArrowFunctionExpression()) fn.arrowFunctionToExpression();
   fn.node.generator = true;
   const name = fn.isFunctionDeclaration() ? fn.node.id : null;
@@ -807,6 +831,27 @@ function pass(code, filename, program, native = false) {
     },
     MemberExpression: {
       exit(path) {
+        // F-S39: a member the source itself lacks (a string's toLowerCase, a
+        // number's toFixed) belongs to its value: read the source, then look
+        // the member up. A path key (props.item.title) stays a path.
+        if (
+          path.parentPath.isMemberExpression() &&
+          path.key === "object" &&
+          !path.parentPath.node.computed
+        ) {
+          const own = type(path);
+          const name = key(path.parentPath.node.property);
+          if (
+            own &&
+            name &&
+            sourceType(own) &&
+            !own.getProperty(name) &&
+            !checker.getIndexInfosOfType(own).length
+          ) {
+            delegate(path);
+            return;
+          }
+        }
         if (
           path.parentPath.isYieldExpression() ||
           (path.parentPath.isMemberExpression() && path.key === "object") ||

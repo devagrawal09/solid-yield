@@ -276,7 +276,7 @@ function buildSteps(twins) {
     });
   }
 
-  // Check F-S36 independently; the stop pins F-S37 fixed and the remaining groups (F-S39 on).
+  // Check F-S36 independently; the stop pins F-S37 fixed and the remaining groups (F-S40 on).
   steps.push({
     name: "native:dashboard:type-contract",
     cwd: root,

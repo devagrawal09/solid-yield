@@ -3,16 +3,16 @@
   "fixed": [
     "F-S36: Accessor imports name the library Source; both provider fields typecheck",
     "F-S37: useFilters lowers to nativeUseContext + nativeContextGuard; it and FilterBar infer no failure",
-    "D-119 (T08 at app.tsx:69, F-S38 at Panel's children): plain-typed props take the colors their callers pass; IncidentDetail's and Panel's own boundaries cover them"
+    "D-119 (T08 at app.tsx:69, F-S38 at Panel's children): plain-typed props take the colors their callers pass; IncidentDetail's and Panel's own boundaries cover them",
+    "F-S39: a member a source lacks (props.title.toLowerCase(), point.value.toFixed(0)) reads the source first; path and index-signature keys stay paths; a wrapped Errored fallback keeps Solid's (error, reset) types"
   ],
   "next": {
-    "F-S39": "A prop or row value used as a method receiver (props.title.toLowerCase(), point.value.toFixed(0)) is not read before the call",
     "F-S40": "A callback prop (reload={() => refresh(incidents)}) is hosted by the JSX hole that creates it, not the child event that calls it; its write is refused",
     "F-S41": "render(() => <App />) refuses an entry component whose props are all optional",
     "F-S42": "createEffect's effect function returning a cleanup does not match the library's effect phase",
     "F-S43": "Route components require FilterContext; FilterProvider surrounds the foreign Router, but the requirement is not discharged across it"
   },
-  "halfA": "FAIL: lowering has exactly the Router boundary notice; the generated program has the 10 errors below, all compiler gaps",
+  "halfA": "FAIL: lowering has exactly the Router boundary notice; the generated program has the 7 errors below, all compiler gaps",
   "halfB": "FAIL / not run: compiler gaps remain; empty author patch; native hydrated parity, SSR, AckFailed and NotFound comparisons not run",
   "boundaries": [
     {
@@ -24,21 +24,6 @@
     }
   ],
   "remaining": [
-    {
-      "group": "F-S39",
-      "at": "chart.tsx:108:45",
-      "code": "TS2339"
-    },
-    {
-      "group": "F-S39",
-      "at": "panel.tsx:12:43",
-      "code": "TS2339"
-    },
-    {
-      "group": "F-S39",
-      "at": "panel.tsx:18:68",
-      "code": "TS2339"
-    },
     {
       "group": "F-S40",
       "at": "incidents.tsx:108:52",

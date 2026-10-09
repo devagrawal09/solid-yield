@@ -11,6 +11,12 @@ import { printMapped, withPositions, copyPosition } from "./positions.js";
 // @ts-check
 import babel from "@babel/core";
 import ts from "typescript";
+import {
+  lowerNativeTypes,
+  nativeTypeDiagnostics,
+  nativeTypeImport,
+  solidType
+} from "./native-types.js";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, resolve } from "node:path";
@@ -72,6 +78,8 @@ export const nativeTypes = new Set([
   "ParentComponent",
   "Store",
   "Setter",
+  "Signal",
+  "VoidComponent",
   "JSX",
   "RevealOrder"
 ]);
@@ -196,10 +204,7 @@ export function inspectNativeProject(files) {
           );
         if (module !== "solid-js" && module !== "@solidjs/web") return;
         for (const s of q.get("specifiers")) {
-          if (
-            q.node.importKind === "type" ||
-            (s.isImportSpecifier() && s.node.importKind === "type")
-          ) {
+          if (nativeTypeImport(s)) {
             continue;
           }
           if (!s.isImportSpecifier()) {
@@ -478,23 +483,35 @@ function surface(code, filename, modules, options = {}, foreignComponents = new 
       if (q.parentPath.isVariableDeclarator() && t.isIdentifier(q.parentPath.node.id)) {
         const declared = q.parentPath.node.id.typeAnnotation;
         const type = declared?.type === "TSTypeAnnotation" ? declared.typeAnnotation : null;
+        const contract =
+          type && t.isTSTypeReference(type)
+            ? solidType(q.parentPath.get("id.typeAnnotation.typeAnnotation"))
+            : null;
         if (
           t.isTSTypeReference(type) &&
-          t.isIdentifier(type.typeName) &&
-          ["Component", "ParentComponent"].includes(type.typeName.name)
+          contract &&
+          ["Component", "ParentComponent", "VoidComponent"].includes(contract.name)
         ) {
-          const binding = q.scope.getBinding(type.typeName.name)?.path;
-          if (
-            binding?.isImportSpecifier() &&
-            binding.parentPath.isImportDeclaration() &&
-            binding.parentPath.node.source.value === "solid-js"
-          ) {
-            if (t.isIdentifier(param) && !param.typeAnnotation)
-              param.typeAnnotation = t.tsTypeAnnotation(
-                type.typeParameters?.params[0] ?? t.tsTypeLiteral([])
-              );
-            q.parentPath.node.id.typeAnnotation = null;
+          if (t.isIdentifier(param) && !param.typeAnnotation) {
+            const name = contract.name;
+            const base = type.typeParameters?.params[0] ?? t.tsTypeLiteral([]);
+            if (name === "ParentComponent") needed.add("Element");
+            const children = t.tsPropertySignature(
+              t.identifier("children"),
+              t.tsTypeAnnotation(
+                name === "VoidComponent"
+                  ? t.tsNeverKeyword()
+                  : t.tsTypeReference(t.identifier("Element"))
+              )
+            );
+            children.optional = true;
+            param.typeAnnotation = t.tsTypeAnnotation(
+              name === "Component"
+                ? base
+                : t.tsIntersectionType([base, t.tsTypeLiteral([children])])
+            );
           }
+          q.parentPath.node.id.typeAnnotation = null;
         }
       }
       if (param && !t.isIdentifier(param))
@@ -524,12 +541,18 @@ function surface(code, filename, modules, options = {}, foreignComponents = new 
           t.tsTypeParameterInstantiation([param.typeAnnotation.typeAnnotation])
         );
       }
-      if (q.node.returnType)
+      if (
+        q.node.returnType &&
+        solidType(q.get("returnType.typeAnnotation"))?.name !== "JSX.Element"
+      )
         fail(
           q,
           "NATIVE_RETURN_TYPE",
           "A component return annotation needs a virtual value-to-routine type mapping."
         );
+      // The reconstructed function returns a view generator. Infer its colors
+      // from that body rather than constraining the generator to an Element.
+      q.node.returnType = null;
     },
     CallExpression(q) {
       const api = imported(q.get("callee"));
@@ -916,6 +939,7 @@ function surface(code, filename, modules, options = {}, foreignComponents = new 
       }
     }
   });
+  lowerNativeTypes(p);
   const rewrittenImports = new WeakSet();
   traverseOwned(p, {
     ImportDeclaration(q) {
@@ -1082,6 +1106,10 @@ function lowerNativeProjectImpl(input, options = {}) {
   const diagnostics = inspectNativeProject(selected);
   const refusals = diagnostics.filter(d => d.code !== "MODULE_STATE");
   if (refusals.length) throw new NativeDiagnosticError(refusals);
+  for (const [file, code] of selected) {
+    const p = parseProgram(code, file);
+    if (p) diagnostics.push(...nativeTypeDiagnostics(p, file));
+  }
   // Resolve selected components handed as values to a foreign component slot.
   // Their source parameter remains the plain Solid call signature at that edge.
   const sourceProgram = [...selected.values()].some(code => /\bcomponent\s*:/.test(code))

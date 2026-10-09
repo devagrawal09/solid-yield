@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Pin the first structural stop after F-S35; this is not runtime acceptance.
+// F-S36 is fixed. Pin the first new reason, F-S37; this is not runtime acceptance.
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { createRequire } from "node:module";
@@ -66,84 +66,95 @@ const errors = ts
 const file = join(source, "filters.tsx"),
   authored = files.get(file),
   output = result.files.get(file);
-const contextErrors = errors.filter(
+const providerErrors = errors.filter(
   d =>
     d.file?.fileName === file &&
     d.code === 2322 &&
-    /Type 'Source<(Range|TeamFilter), never, false>' is not assignable to type 'Accessor</.test(
-      ts.flattenDiagnosticMessageText(d.messageText, "\n")
-    )
+    /Accessor<(Range|TeamFilter)>/.test(ts.flattenDiagnosticMessageText(d.messageText, "\n"))
 );
 assert.equal(
-  contextErrors.length,
-  2,
-  "F-S36 changed: review the context facade before claiming dashboard acceptance."
+  providerErrors.length,
+  0,
+  "F-S36 regressed: context values must use the lowered Source type"
 );
-const providerLine = authored.split("\n").findIndex(l => l.includes("<FilterContext value=")) + 1;
-assert.equal(providerLine, 23);
-const structuralDiagnostics = contextErrors.map(d => {
-  const message = ts.flattenDiagnosticMessageText(d.messageText, "\n");
-  const kind = /Source<(Range|TeamFilter),/.exec(message)[1];
-  const property = kind === "Range" ? "range" : "team";
+assert.match(output, /Source as Accessor/);
+assert.match(output, /range: Accessor<Range>/);
+assert.match(output, /team: Accessor<TeamFilter>/);
+assert.match(output, /Element as _NativeElement/);
+if (process.argv.includes("type-contract")) {
+  console.log(
+    "native dashboard type contract: PASS (both shared filter Sources accepted; F-S37 still blocks setup)"
+  );
+  process.exit(0);
+}
+const setupErrors = errors.filter(
+  d =>
+    d.file?.fileName === file &&
+    d.code === 2769 &&
+    output.slice(d.start, d.start + d.length) === "FilterBar"
+);
+assert.equal(
+  setupErrors.length,
+  1,
+  "F-S37 changed: review setup context reads before claiming dashboard acceptance"
+);
+const structuralDiagnostics = setupErrors.map(d => {
+  const message = ts.flattenDiagnosticMessageText(d.messageText, "\n").replaceAll(root, "<root>");
+  assert.match(message, /Read<false, never>/);
+  assert.match(message, /Raise</);
+  assert.match(message, /SetupOp/);
   const at = d.file.getLineAndCharacterOfPosition(d.start);
   const origin = locate(result.positions.get(file), d.start, d.length);
   const prefix = authored.slice(0, origin.sourceStart).split("\n");
   return {
-    code: "TS2322",
+    code: "TS2769",
     message,
-    property,
     author: {
       file: relative(root, file),
-      line: providerLine,
-      column: authored.split("\n")[providerLine - 1].indexOf(property) + 1,
-      text: authored.split("\n")[providerLine - 1].trim()
-    },
-    generated: {
-      file: relative(root, file),
-      line: at.line + 1,
-      column: at.character + 1,
-      text: output.slice(d.start, d.start + d.length)
-    },
-    mapped: {
       line: prefix.length,
       column: prefix.at(-1).length + 1,
-      generated: origin.generated,
       text: authored.slice(origin.sourceStart, origin.sourceEnd)
-    }
+    },
+    generated: {
+      line: at.line + 1,
+      column: at.character + 1,
+      text: output.slice(d.start, d.start + d.length).replaceAll(root, "<root>")
+    },
+    mapped: { generated: origin.generated }
   };
 });
-assert.match(output, /import type \{ Accessor \} from "solid-js"/);
-assert.match(output, /range: Accessor<Range>/);
-assert.match(output, /team: Accessor<TeamFilter>/);
-assert.match(output, /range,\s+team,\s+setRange,\s+setTeam/);
 const panels = ["SummaryPanel", "SeriesPanel", "IncidentsPanel", "TeamPanel", "NotesPanel"];
 const routes = [
   { name: "Overview", paths: ["/", "/overview"] },
   { name: "IncidentDetail", paths: ["/incidents/inc-101", "/incidents/missing"] }
 ];
+const helperStart = output.indexOf("export function* useFilters");
+const helperEnd = output.indexOf("export const FilterBar", helperStart);
 const evidence = {
   finding:
-    "F-S36: the shared FilterContext keeps Solid Accessor types but its generated provider supplies yield Sources",
+    "F-S37: useFilters lowers its context value guard and return to Source reads and a Raise; component setup cannot admit them",
+  fixed: "F-S36: Accessor imports now name the library Source; both provider fields typecheck",
   halfA:
-    "FAIL: F-S35 is fixed and lowering returns only the Router boundary, but the generated context facade does not typecheck; both field errors map to the authored provider",
+    "FAIL: unchanged lowering has exactly the Router boundary notice; generated code rejects setup context reads before foreign handoff acceptance can be established",
   halfB:
-    "FAIL / not run: first new structural reason; no author patch, native hydrated parity, SSR, AckFailed or NotFound comparison",
+    "FAIL / not run: first new structural reason; empty author patch; native hydrated parity, SSR, AckFailed and NotFound comparisons not run",
   boundaries: result.diagnostics.map(d => ({ ...d, file: relative(root, d.file) })),
   structuralDiagnostics,
   sideBySide: {
-    author: authored.split("\n").slice(11, 24).join("\n"),
-    generated: output
-      .slice(output.indexOf("interface Filters"), output.indexOf("export function* useFilters"))
-      .replaceAll(root, "<root>")
+    author: authored.split("\n").slice(25, 34).join("\n"),
+    generated:
+      output.slice(helperStart, helperEnd).replaceAll(root, "<root>") +
+      output.slice(helperEnd, output.indexOf("return view", helperEnd)).replaceAll(root, "<root>")
   },
   patch,
   finalCheckedColors: {
     status:
-      "unavailable: the generated project fails its shared context contract; inferred any or unknown colors in rejected output are not checked colors",
+      "unavailable: setup context contract is rejected; inferred any or unknown from rejected output are not final checked colors",
     panels: panels.map(name => ({
       name,
       pending: "unavailable",
       fails: "unavailable",
+      mayWait: "unavailable",
       requires: "unavailable",
       sharedFilter: "FilterContext"
     })),
@@ -151,14 +162,14 @@ const evidence = {
       ...route,
       pending: "unavailable",
       fails: "unavailable",
+      mayWait: "unavailable",
       requires: "unavailable",
       sharedFilter: "FilterContext"
     }))
   },
   failurePaths: {
-    AckFailed: "original catches this class and writes the row failure; native comparison not run",
-    NotFound:
-      "original route has Errored around Loading and IncidentBody; native comparison not run"
+    AckFailed: "native comparison not run under F-S37 stop",
+    NotFound: "native comparison not run under F-S37 stop"
   },
   originalHashes
 };
@@ -169,10 +180,9 @@ if (process.argv.includes("--record"))
 else assert.deepEqual(evidence, JSON.parse(readFileSync(expected, "utf8")));
 for (const d of evidence.boundaries)
   console.log(`[${d.code}] ${d.message} (${d.file}:${d.line}:${d.column})`);
-for (const d of structuralDiagnostics)
-  console.log(
-    `[${d.code}] ${d.message}\n  authored provider: ${d.author.file}:${d.author.line}:${d.author.column}; generated: ${d.generated.line}:${d.generated.column}; mapped: ${d.mapped.line}:${d.mapped.column}`
-  );
 console.log(
-  "native dashboard F-S36 regression pin: PASS; half A FAIL; half B FAIL / not run; patch empty; final checked colors unavailable"
+  `F-S37 [TS2769] No overload matches this call. (${structuralDiagnostics[0].author.file}:${structuralDiagnostics[0].author.line}:${structuralDiagnostics[0].author.column})`
+);
+console.log(
+  "native dashboard F-S37 pin: PASS; half A FAIL; half B FAIL / not run; patch empty; final colors unavailable"
 );

@@ -25,3 +25,9 @@ export {
 export type { NativeArguments } from "./native-control.js";
 export { nativeC } from "./native-props.js";
 export type { NativeProps } from "./native-props.js";
+export type {
+  NativeSignal,
+  NativeParentProps,
+  NativeParentComponent,
+  NativeVoidComponent
+} from "./native-types.js";

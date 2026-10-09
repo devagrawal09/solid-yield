@@ -275,7 +275,7 @@ function buildSteps(twins) {
     });
   }
 
-  // F-S36 pins the context facade stop after the JSX hole fix; not dashboard acceptance.
+  // F-S36's type contract is fixed; F-S37 pins the next setup-context stop.
   steps.push({
     name: "native:dashboard:structural-stop",
     cwd: root,

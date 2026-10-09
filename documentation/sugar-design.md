@@ -675,6 +675,42 @@ not silent fallbacks to native reactive state inside a library routine.
 | `action` (including generators), `createStore`, `createOptimistic`, `onSettled`, `latest`, `isPending` | `$event`, `$store`, `$optimistic`, `$effect`/`$cleanup`, `latestOf`/`isPendingOf` + read | Focused generated checks pass; see the API inventory for overload limits |
 | `createOptimisticStore`, `createProjection`, `refresh`, `until`, `lazy` | Corresponding library primitive imports | Import mapping implemented; producer, selector, generic and foreign-edge contracts remain incomplete |
 
+### Native type annotations (2026-10-09)
+
+Solid type imports lower with their values. Local import aliases keep their
+names. The type visitor covers interface and alias members, nested generics,
+constraints/defaults, function parameters/results, tuples/unions, mapped and
+conditional types, interface extensions, call type arguments, `satisfies`, and
+`as`/angle assertions. Type namespaces and inline `import(...).Type` work too.
+The fixtures in `native-types.test.js` check the mapped contracts with TypeScript.
+
+| Solid spelling | Generated library contract |
+| --- | --- |
+| `Accessor<T>` | `Source<T>` |
+| `Setter<T>` | `Setter<T>` (returns the library's write receipt) |
+| `Signal<T>` | `[Source<T>, Setter<T>]` |
+| `Component<P>` | `Component<P>` |
+| `ParentComponent<P>` | `Component<P & { children?: Element }>` |
+| `VoidComponent<P>` | `Component<P & { children?: never }>` |
+| `ParentProps<P>` | `P & { children?: Element }` |
+| `JSX.Element` (Solid or web import) | `Element` |
+| Other Solid types | Retain the Solid import and annotation; report `NATIVE_TYPE_UNMAPPED` at each use |
+
+An accessor's contract is settled, matching the lowered signal getter. It does
+not erase a memo's pending/failure colors: assigning a colored memo to this
+settled contract is rejected. Unannotated producers retain inferred colors.
+Making a Source callable would hide a read in the explicit library dialect,
+so this change leaves the runtime unchanged. Component declaration annotations
+supply props (including parent/void children); generated bodies infer their
+actual colors instead of widening them to `Component`'s defaults. A component's
+`JSX.Element` return annotation similarly becomes an inferred view signature;
+plain function return annotations use the mapped element/value type.
+
+This repairs dashboard F-S36's provider value contract. It does not establish
+the provider relationship through `useFilters()` in component setup: that is
+the new [F-S37 stop](native-dashboard-blocker.md). No native dashboard runtime
+acceptance or final colors are claimed.
+
 A selected local component passed to native `render` or `hydrate` uses the library renderer with `RootCheck` and `foreign`. This entry is a foreign handoff: residual failures, including unknown, are errors. D-033 allows failures at explicit library roots, not at native Solid entry handoffs. In a self-recursive component, fixed numeric prop snapshots may become path reads in holes when every local JSX caller supplies fixed numeric expressions; pure numeric assignments are substituted in source order, and an early JSX return selects `Match` rows that own their branch setup. Recursive component types carry the pending and failure types inferred from memo reads and prop edges, and generated TypeScript checks the full body against that type. Timer and frame callbacks retain the existing rule: reads and writes run as component-owned events, with their result ignored by the scheduler.
 
 Native Todos now needs the D-116 two-half acceptance rule too. The unchanged

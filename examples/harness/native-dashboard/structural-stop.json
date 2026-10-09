@@ -1,7 +1,8 @@
 {
-  "finding": "F-S36: the shared FilterContext keeps Solid Accessor types but its generated provider supplies yield Sources",
-  "halfA": "FAIL: F-S35 is fixed and lowering returns only the Router boundary, but the generated context facade does not typecheck; both field errors map to the authored provider",
-  "halfB": "FAIL / not run: first new structural reason; no author patch, native hydrated parity, SSR, AckFailed or NotFound comparison",
+  "finding": "F-S37: useFilters lowers its context value guard and return to Source reads and a Raise; component setup cannot admit them",
+  "fixed": "F-S36: Accessor imports now name the library Source; both provider fields typecheck",
+  "halfA": "FAIL: unchanged lowering has exactly the Router boundary notice; generated code rejects setup context reads before foreign handoff acceptance can be established",
+  "halfB": "FAIL / not run: first new structural reason; empty author patch; native hydrated parity, SSR, AckFailed and NotFound comparisons not run",
   "boundaries": [
     {
       "code": "NATIVE_FOREIGN_BOUNDARY",
@@ -13,64 +14,37 @@
   ],
   "structuralDiagnostics": [
     {
-      "code": "TS2322",
-      "message": "Type 'Source<Range, never, false>' is not assignable to type 'Accessor<Range>'.\n  Type 'Source<Range, never, false>' provides no match for the signature '(): Range'.",
-      "property": "range",
+      "code": "TS2769",
+      "message": "No overload matches this call.\n  Overload 1 of 2, '(body: (props: unknown) => Generator<SetupOp, ViewFn<Read<false, never> | Bind<false, NativeFailure<\"unknown\">>, Element>, any>): HoleCall<...>', gave the following error.\n    Argument of type '() => Generator<Read<false, never> | ContextRead<RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\">> | Raise<...>, ViewFn<...>, any>' is not assignable to parameter of type '(props: unknown) => Generator<SetupOp, ViewFn<Read<false, never> | Bind<false, NativeFailure<\"unknown\">>, Element>, any>'.\n      Call signature return types 'Generator<Read<false, never> | ContextRead<RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\">> | Raise<...>, ViewFn<...>, any>' and 'Generator<SetupOp, ViewFn<Read<false, never> | Bind<false, NativeFailure<\"unknown\">>, Element>, any>' are incompatible.\n        The types returned by 'next(...)' are incompatible between these types.\n          Type 'IteratorResult<Read<false, never> | ContextRead<RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\">> | Raise<...>, ViewFn<...>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<Read<false, never> | Bind<false, NativeFailure<\"unknown\">>, Element>>'.\n            Type 'IteratorYieldResult<Read<false, never> | ContextRead<RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\">> | Raise<...>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<Read<false, never> | Bind<false, NativeFailure<\"unknown\">>, Element>>'.\n              Type 'IteratorYieldResult<Read<false, never> | ContextRead<RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\">> | Raise<...>>' is not assignable to type 'IteratorYieldResult<SetupOp>'.\n                Type 'Read<false, never> | ContextRead<RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\">> | Raise<...>' is not assignable to type 'SetupOp'.\n                  Type 'Read<false, never>' is not assignable to type 'SetupOp'.\n                    Property 'kind' is missing in type 'Read<false, never>' but required in type 'Create<string, any>'.\n  Overload 2 of 2, '(body: (props: unknown) => Generator<SetupOp, ViewFn<Read<false, never> | Bind<false, NativeFailure<\"unknown\">>, Element>, any>): (props?: PropsInput<...> | undefined) => ComponentView<...>', gave the following error.\n    Argument of type '() => Generator<Read<false, never> | ContextRead<RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\">> | Raise<...>, ViewFn<...>, any>' is not assignable to parameter of type '(props: unknown) => Generator<SetupOp, ViewFn<Read<false, never> | Bind<false, NativeFailure<\"unknown\">>, Element>, any>'.\n      Call signature return types 'Generator<Read<false, never> | ContextRead<RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\">> | Raise<...>, ViewFn<...>, any>' and 'Generator<SetupOp, ViewFn<Read<false, never> | Bind<false, NativeFailure<\"unknown\">>, Element>, any>' are incompatible.\n        The types returned by 'next(...)' are incompatible between these types.\n          Type 'IteratorResult<Read<false, never> | ContextRead<RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\">> | Raise<...>, ViewFn<...>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<Read<false, never> | Bind<false, NativeFailure<\"unknown\">>, Element>>'.\n            Type 'IteratorYieldResult<Read<false, never> | ContextRead<RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\">> | Raise<...>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<Read<false, never> | Bind<false, NativeFailure<\"unknown\">>, Element>>'.\n              Type 'IteratorYieldResult<Read<false, never> | ContextRead<RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\">> | Raise<...>>' is not assignable to type 'IteratorYieldResult<SetupOp>'.\n                Type 'Read<false, never> | ContextRead<RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\">> | Raise<...>' is not assignable to type 'SetupOp'.\n                  Type 'Read<false, never>' is not assignable to type 'SetupOp'.\n                    Property 'kind' is missing in type 'Read<false, never>' but required in type 'Create<string, any>'.",
       "author": {
         "file": "examples/originals/dashboard/src/filters.tsx",
-        "line": 23,
-        "column": 34,
-        "text": "return <FilterContext value={{ range, team, setRange, setTeam }}>{props.children}</FilterContext>;"
+        "line": 32,
+        "column": 17,
+        "text": "FilterBar"
       },
       "generated": {
-        "file": "examples/originals/dashboard/src/filters.tsx",
-        "line": 37,
-        "column": 11,
-        "text": "range"
+        "line": 52,
+        "column": 46,
+        "text": "FilterBar"
       },
       "mapped": {
-        "line": 23,
-        "column": 34,
-        "generated": false,
-        "text": "range"
-      }
-    },
-    {
-      "code": "TS2322",
-      "message": "Type 'Source<TeamFilter, never, false>' is not assignable to type 'Accessor<TeamFilter>'.\n  Type 'Source<TeamFilter, never, false>' provides no match for the signature '(): TeamFilter'.",
-      "property": "team",
-      "author": {
-        "file": "examples/originals/dashboard/src/filters.tsx",
-        "line": 23,
-        "column": 41,
-        "text": "return <FilterContext value={{ range, team, setRange, setTeam }}>{props.children}</FilterContext>;"
-      },
-      "generated": {
-        "file": "examples/originals/dashboard/src/filters.tsx",
-        "line": 38,
-        "column": 11,
-        "text": "team"
-      },
-      "mapped": {
-        "line": 23,
-        "column": 41,
-        "generated": false,
-        "text": "team"
+        "generated": false
       }
     }
   ],
   "sideBySide": {
-    "author": "interface Filters {\n  range: Accessor<Range>;\n  team: Accessor<TeamFilter>;\n  setRange: (range: Range) => void;\n  setTeam: (team: TeamFilter) => void;\n}\nconst FilterContext = createContext<Filters>();\n\nexport function FilterProvider(props: { children: JSX.Element }) {\n  const [range, setRange] = createSignal<Range>(\"24h\");\n  const [team, setTeam] = createSignal<TeamFilter>(\"all\");\n  return <FilterContext value={{ range, team, setRange, setTeam }}>{props.children}</FilterContext>;\n}",
-    "generated": "interface Filters {\n  range: Accessor<Range>;\n  team: Accessor<TeamFilter>;\n  setRange: (range: Range) => void;\n  setTeam: (team: TeamFilter) => void;\n}\nconst FilterContext = createContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\">(undefined, {\n  name: \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\"\n});\nexport const FilterProvider = component(function* FilterProvider(props: Props<{\n  children: JSX.Element;\n}>) {\n  const [range, setRange] = yield* createSignal<Range>(\"24h\");\n  const [team, setTeam] = yield* createSignal<TeamFilter>(\"all\");\n  return view(function* () {\n    return <>{yield* FilterContext.provide({\n        value: {\n          range,\n          team,\n          setRange,\n          setTeam\n        },\n        children: function* () {\n          return yield* props.children;\n        }\n      })}</>;\n  });\n});\n"
+    "author": "export function useFilters() {\n  const value = useContext(FilterContext);\n  if (!value) throw new Error(\"Dashboard filters need a provider\");\n  return value;\n}\n\nexport function FilterBar() {\n  const filters = useFilters();\n  return (",
+    "generated": "export function* useFilters() {\n  const value = yield* FilterContext;\n  if (!(yield* value)) return yield* __nativeRaise(__nativeFailure([\"global:Error\"], new Error(\"Dashboard filters need a provider\")));\n  return yield* value;\n}\nexport const FilterBar = component(function* FilterBar() {\n  const filters = yield* useFilters();\n  "
   },
   "patch": "",
   "finalCheckedColors": {
-    "status": "unavailable: the generated project fails its shared context contract; inferred any or unknown colors in rejected output are not checked colors",
+    "status": "unavailable: setup context contract is rejected; inferred any or unknown from rejected output are not final checked colors",
     "panels": [
       {
         "name": "SummaryPanel",
         "pending": "unavailable",
         "fails": "unavailable",
+        "mayWait": "unavailable",
         "requires": "unavailable",
         "sharedFilter": "FilterContext"
       },
@@ -78,6 +52,7 @@
         "name": "SeriesPanel",
         "pending": "unavailable",
         "fails": "unavailable",
+        "mayWait": "unavailable",
         "requires": "unavailable",
         "sharedFilter": "FilterContext"
       },
@@ -85,6 +60,7 @@
         "name": "IncidentsPanel",
         "pending": "unavailable",
         "fails": "unavailable",
+        "mayWait": "unavailable",
         "requires": "unavailable",
         "sharedFilter": "FilterContext"
       },
@@ -92,6 +68,7 @@
         "name": "TeamPanel",
         "pending": "unavailable",
         "fails": "unavailable",
+        "mayWait": "unavailable",
         "requires": "unavailable",
         "sharedFilter": "FilterContext"
       },
@@ -99,6 +76,7 @@
         "name": "NotesPanel",
         "pending": "unavailable",
         "fails": "unavailable",
+        "mayWait": "unavailable",
         "requires": "unavailable",
         "sharedFilter": "FilterContext"
       }
@@ -112,6 +90,7 @@
         ],
         "pending": "unavailable",
         "fails": "unavailable",
+        "mayWait": "unavailable",
         "requires": "unavailable",
         "sharedFilter": "FilterContext"
       },
@@ -123,14 +102,15 @@
         ],
         "pending": "unavailable",
         "fails": "unavailable",
+        "mayWait": "unavailable",
         "requires": "unavailable",
         "sharedFilter": "FilterContext"
       }
     ]
   },
   "failurePaths": {
-    "AckFailed": "original catches this class and writes the row failure; native comparison not run",
-    "NotFound": "original route has Errored around Loading and IncidentBody; native comparison not run"
+    "AckFailed": "native comparison not run under F-S37 stop",
+    "NotFound": "native comparison not run under F-S37 stop"
   },
   "originalHashes": {
     "examples/originals/dashboard/src/api.ts": "bef20441971b979d82c69519c83991c55fe8425031bbb80266c359eee439d298",

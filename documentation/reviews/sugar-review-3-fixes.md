@@ -4,9 +4,34 @@ This is an implementation-based re-score of the three saved newcomer reviews, us
 
 ## WIP recovery
 
-The restart left 14 modified/untracked files, with 835 insertions in the tracked diff. The first build passed, but the first gate was RED: native contracts, Todos parity and the TS plugin suite failed; the restricted fresh install stalled and was stopped. The WIP was stashed before repair. A separate backup preserves concurrent pending/snapshot edits that appeared during recovery. Both backups remain in the shared stash list.
+The restart left 14 modified/untracked files, with 835 insertions in the tracked diff. The first build passed, but the first gate was RED: native contracts, Todos parity and the TS plugin suite failed; the restricted fresh install stalled and was stopped. The WIP was stashed before repair. A separate backup preserved concurrent pending/snapshot edits that appeared during recovery. The follow-up audit below confirmed the three review 3 backups were superseded before removing them.
 
 The repaired WIP preserves the review fixtures, platform failure rules, provider summaries, promise lowering and diagnostic cleanup. Repairs also preserve pending for an async memo without `await`, retain the types of empty-array returns, keep `Promise.all` tuples, and infer a delayed `setTimeout(reject, ..., value)` payload. Timer cancellation IDs are ordinary arguments. These changes restored the existing native contracts and Todos parity. The native evidence snapshot was refreshed after inspection; all nine original-app statuses and diagnostic counts remain unchanged. The gate baseline was not changed.
+
+## Follow-up recovery audit
+
+Compared `/tmp/sy-ls-resume-handoff.md` and `/tmp/sy-ls-resume-extra.patch` against `6736cf7`. Every requested fix and its regression was already present. No patch hunks needed applying.
+
+| Requested item | Result at 6736cf7 | Existing regression |
+| --- | --- | --- |
+| Async memo completion after authored return-value reads | Covered; `native-effects.js` saves the return value before `Promise.resolve`, retains empty-array types, and adds a fallthrough return only when needed | `packages/ts-plugin-yield/test/review3.test.cjs`: “an async memo without await still has a pending result” |
+| Todos event snapshot names JSON.parse's SyntaxError | Covered | `scripts/native-todos-events.mjs snapshot`: exact SyntaxError messages on app lines 82 and 121 |
+| Empty/EOF refusal spans stay within the file | Covered | `review3.test.cjs`: “refusal spans stay inside empty files and the end of a file” |
+| Ignored .then chain in memo, event and setup | Covered | `review3.test.cjs`: “an ignored then chain reports on its … host” (three cases) |
+| Timer failure belongs to its lexical event | Covered | `review3.test.cjs`: “a timer rejection belongs to its lexical event and requires an inner catch” |
+| Named and inline signal handlers | Covered | `review3.test.cjs`: “… signal read and write in a JSX event” (two cases) |
+
+The stash audit used each backup's parent-to-stash patch and compared the full stash content with HEAD. Formatting was normalized for source comparisons; archived untracked files were checked separately. The older backups' remaining source differences are improvements already in HEAD: pending completion, Promise.all result casts, scheduled rejection payloads and EOF clamping. The oldest backup's provider helper differs only in formatting; all other archived untracked files are identical to HEAD.
+
+The earlier recovery removed the superseded `proto/sugar-ls` backups by verified object identity:
+
+- `390ccfe6eb05efbf6a3a65df44d1f5f5a2ff93d2`: concurrent pending and snapshot repairs.
+- `c8c3ae800152d54a3c55ef5c91e0bc61c0b938fb`: interrupted WIP, red pending/parity gate.
+- `7cac7af7f1b7d609df5bd9a424780c811f6d5f79`: restart backup, async event regression.
+
+The earlier recovery kept `295c84fb1abd4cb337f21d116d1ed2c8ddd865a3` (`proto/sugar`, native F-S35 fix and F-S36 pin). An unrelated `proto/sugar-types` backup (`5f5afafb0cbcd191dad3f7f146a832991dd5616c`) appeared during the audit and was also kept. Stash indices changed during the audit, so removal followed hashes rather than the original indices.
+
+The current restart confirmed all six rows above in HEAD and inspected both remaining stashes with their parent-to-stash patches and differences against HEAD. No stash was dropped in this restart. The `proto/sugar-types` stash is not superseded: its native type lowering, tests and runtime type files are absent from this branch. The `proto/sugar` stash remains untouched as requested. No source patch was applied and no other branch was changed.
 
 ## Review 3: 22/30 before, 28/30 after
 

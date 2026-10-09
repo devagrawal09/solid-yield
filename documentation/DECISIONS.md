@@ -99,6 +99,7 @@ Reading order with the rest of the plan: `yield-library.md` (the reference), thi
 | D-083 | implemented (Phase 5)                          | Tracking is a property of the host, not of the read: a plain read in an effect phase is admitted and untracked; `$untrack` removed (D-005, 0 twin uses); amends D-079, closes D-042's `$untrack` and D-029                                                    |
 | D-117 | implemented | Failures keep their class across the wire |
 | D-118 | decided (allowed difference) | Frames claiming links inside `innerHTML` (F-C18) is an allowed difference until upstream decides; asked upstream as a question, not a bug |
+| D-119 | decided | Sugar mode: a pending or failing value passed into a plain-typed prop flows into the child; the caller's boundaries must cover the call (library dialect keeps D-065) |
 
 ## Entries
 
@@ -1735,3 +1736,15 @@ The third review's ten-line summary, verbatim:
 **Upstream.** Asked as a question, not a bug: [solidjs/solid#3958](https://github.com/solidjs/solid/issues/3958), filed by Dev 2026-10-09 from `documentation/upstream/solid-frames-innerhtml-claims.md` (intended? align frames with regular rendering, or the reverse with the exported `claimElementTree`, or an opt-in / opt-out marker). Re-checked on rc.14 / router next.38: unchanged. It replaces §1 of `solid-frames-link-claim.md` on `proto/compiler`; that draft's §2 (a streamed loading root commits the URL before its content) is **withdrawn**: it is Solid's ordinary rule, not a frames difference (Dev, 2026-10-09: existing `Loading` boundaries hold a navigation, new ones show their fallback). Verified client-only on rc.13 / router next.29 and rc.14 / next.38 (`documentation/handoff/repros/frames-links-check/nav-*`, `client-nav.log`): a route whose component loads asynchronously and then has its own inner `Loading` keeps `/page/a` and article A while the component loads, then commits `/page/b` with the inner fallback, then shows B. That is the frames sequence exactly. §2 had compared it with a route whose `Loading` already existed. Revisit this decision when upstream answers: if regular rendering's behavior is the intended one, F-C18 becomes a real difference again; if frames' is, it stays allowed.
 
 **Alternatives.** Count it as a mismatch until upstream fixes it (rejected: it may be intended, and it hid 27 otherwise exact checkpoints). Strip the attributes in the islands emit, or claim `innerHTML` content in the original (rejected: either changes an app to match a metric, and stripping would also remove correct state from authored links).
+
+### D-119 — Sugar mode: a colored value in a plain-typed prop flows into the child
+
+**Decided (Dev, 2026-10-09).** In sugar (native) mode a component prop whose authored type is a plain value, such as `incident: Incident` or `children: JSX.Element`, may receive a value that is pending or may fail (`incident={incident()}` from an async memo). Solid reads a prop lazily, inside the child, so that is where the pending and the failures arise. The compiler gives such a prop the library type the callers actually pass, `Source<T, E, P>` (the union across the component's call sites), and the child's view carries those colors. The callers' boundaries (`Loading`, `Errored`, or the child's own, as `Panel` has) must cover them; a call that nothing covers reports at the boundary or root (an unhandled pending or failure), not as `[SETTLED_PROP]` at the prop.
+
+**Why.** Plain Solid has no type for "this prop may still be loading", and the dashboard's code is correct as written: `IncidentDetail` wraps `<IncidentBody incident={incident()} />` in its own `Errored` and `Loading`. In the explicit dialect the author writes the same contract by hand (`props: Props<{ incident: Source<Incident, NotFound, true> }>`); sugar mode infers it. The mistake review slot T08 targets is still caught when no boundary covers the call, at the place that must handle it.
+
+**Scope.** The explicit library dialect keeps D-065's settled-prop rule: there `[SETTLED_PROP]` stays, with `Source<T, E, true>` as the declaration. The native T08 fixture (`colored-prop.tsx`, no `Loading`) moves from `[SETTLED_PROP]` at the prop to an unhandled pending at its root; `sugar-typing.md`'s T08 row changes with it.
+
+**Alternatives.** Keep `[SETTLED_PROP]` in sugar mode too (rejected: the only fixes in plain Solid are restructuring the component or importing library types, against sugar's premise of unchanged Solid).
+
+**Status.** Not implemented. On `proto/sugar-types@8cf8b33` it is the dashboard's T08 group (`app.tsx:69`) and covers F-S38 (`Panel`'s `children` receiving pending content) by the same rule.

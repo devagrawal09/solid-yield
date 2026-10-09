@@ -98,6 +98,7 @@ Reading order with the rest of the plan: `yield-library.md` (the reference), thi
 | D-082 | decided, documented (Phase 5)                  | D-069 F5 is a documented cost (§8): the library route's hydration keys are 2 characters longer per nesting level; measured on rendering's SSR; hydration improves with the compiler                                                                           |
 | D-083 | implemented (Phase 5)                          | Tracking is a property of the host, not of the read: a plain read in an effect phase is admitted and untracked; `$untrack` removed (D-005, 0 twin uses); amends D-079, closes D-042's `$untrack` and D-029                                                    |
 | D-117 | implemented | Failures keep their class across the wire |
+| D-118 | decided (allowed difference) | Frames claiming links inside `innerHTML` (F-C18) is an allowed difference until upstream decides; asked upstream as a question, not a bug |
 
 ## Entries
 
@@ -1722,3 +1723,15 @@ The third review's ten-line summary, verbatim:
 **Proofs.** This supplies the runtime subclass/selective and wire-matching mechanism required by I3/I4/I6 and F20, under consistent registration and serialization-safe own-data premises. It does not prove source inference, external membership witnesses, dynamic call/alias closure or general native lowering, and does not fix O27's unsafe structural `Exclude` interpretation. A kind union alone is still no runtime class witness. The sugar branch must adopt these calls before claiming its F-S14/F-S15 gaps closed.
 
 **Evidence.** Development/production runtime and type tests cover base/subclass discharge, same-kind sibling propagation, unknown IDs, frozen values and native author Errors. Real production server/client bundles exercise the server-function HTTP handler and client reference (no JSON imitation), class identity and selective branches. Docs streams/hydrations exercise `/docs/missing` and a sibling route in development and production, pinning client `instanceof`, kind/message/own data and fallback selection. The new RPC step joins the gate; the baseline is extended only for that added step.
+
+### D-118 — Frames' claim of `innerHTML` links is an allowed difference
+
+**Decided (Dev, 2026-10-09).** Link claiming is a Solid feature. The difference F-C18 found is upstream's to decide: content that arrives through a server component / frame has every `a[href]` and `form[action]` claimed, including links inside `innerHTML`, while regular rendering (client render or SSR + hydration) claims only the elements the compiled code sets `href` / `action` on, so `innerHTML` links stay unclaimed. The router then adds `data-active` / `aria-current` to those links on the frames path only. Navigation works on both paths.
+
+**Until upstream answers**, this is an allowed, recorded difference (as D-115's production message). Router state attributes on links inside `innerHTML` subtrees do not count against exact-DOM parity between a frames/islands emit and its plain-Solid original. Authored JSX links are still compared exactly, and any other attribute or structural difference still counts. No attribute stripping is added to either app.
+
+**Effect on the recorded numbers.** C4b's 40-checkpoint docs comparison on `proto/compiler` (`compiler-c4-dom-parity.md`) is 6/40 exact under the strict rule. With F-C18 allowed it is **33/40**: F-C18 covered 30 checkpoints, three of them shared with F-C19, so the 7 that still differ are all F-C19 (the router claims table-of-contents links against the previous URL; plain Solid does the same). The branch's report and harness still state the strict figure; reclassify them when that line resumes.
+
+**Upstream.** Asked as a question, not a bug: `documentation/upstream/solid-frames-innerhtml-claims.md` (intended? align frames with regular rendering, or the reverse with the exported `claimElementTree`, or an opt-in / opt-out marker). Re-checked on rc.14 / router next.38: unchanged. It replaces §1 of `solid-frames-link-claim.md` on `proto/compiler`; that draft's §2 (a streamed loading root commits the URL before its content) is separate and stays open. Revisit this decision when upstream answers: if regular rendering's behavior is the intended one, F-C18 becomes a real difference again; if frames' is, it stays allowed.
+
+**Alternatives.** Count it as a mismatch until upstream fixes it (rejected: it may be intended, and it hid 27 otherwise exact checkpoints). Strip the attributes in the islands emit, or claim `innerHTML` content in the original (rejected: either changes an app to match a metric, and stripping would also remove correct state from authored links).

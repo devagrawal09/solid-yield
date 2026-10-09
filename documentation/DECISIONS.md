@@ -99,7 +99,7 @@ Reading order with the rest of the plan: `yield-library.md` (the reference), thi
 | D-083 | implemented (Phase 5)                          | Tracking is a property of the host, not of the read: a plain read in an effect phase is admitted and untracked; `$untrack` removed (D-005, 0 twin uses); amends D-079, closes D-042's `$untrack` and D-029                                                    |
 | D-117 | implemented | Failures keep their class across the wire |
 | D-118 | decided (allowed difference) | Frames claiming links inside `innerHTML` (F-C18) is an allowed difference until upstream decides; asked upstream as a question, not a bug |
-| D-119 | decided | Sugar mode: a pending or failing value passed into a plain-typed prop flows into the child; the caller's boundaries must cover the call (library dialect keeps D-065) |
+| D-119 | implemented | Sugar mode: a pending or failing value passed into a plain-typed prop flows into the child; the caller's boundaries must cover the call (library dialect keeps D-065) |
 
 ## Entries
 
@@ -1747,4 +1747,4 @@ The third review's ten-line summary, verbatim:
 
 **Alternatives.** Keep `[SETTLED_PROP]` in sugar mode too (rejected: the only fixes in plain Solid are restructuring the component or importing library types, against sugar's premise of unchanged Solid).
 
-**Status.** Not implemented. On `proto/sugar-types@8cf8b33` it is the dashboard's T08 group (`app.tsx:69`) and covers F-S38 (`Panel`'s `children` receiving pending content) by the same rule.
+**Implemented on `proto/sugar-types` at `aedfbf3`.** After the sugar pass's fixed point, a call whose prop TypeScript refuses while the passed source or hole is pending or failing widens that prop to `Source<T, E, P>` with fresh component type parameters (D-029); the pass reruns, so forwarding chains widen too. Props that only receive ready values, and genuine type mismatches, are untouched. `HoleProp` admits `Bind` (a hole prop may bind events, as a view may, D-072), so pending children with a handler pass. Review slot T08's fixture gained a render root and reports `[PENDING_ROOT]` at the read (`colored-prop.tsx:8:28`). The dashboard's T08 group and F-S38 are resolved (15 → 10 errors); docs loses its `article` settled-prop error.

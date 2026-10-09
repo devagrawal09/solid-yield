@@ -1163,21 +1163,10 @@ halves and the empty author patch. The module-state note remains correctly at
 `log.ts:20:7`. Native Effect is not added to the gate; the baseline is unchanged.
 
 
-### Native dashboard: F-S35 structural stop (2026-10-08)
+### JSX function holes: F-S35 repaired (2026-10-09)
 
-The unchanged dashboard reaches a new compiler false positive at
-`panels.tsx:47:35`: the JSX hole's `totals().success.toFixed(2)` becomes the
-plain failure producer `() => totals().success.toFixed(2)`, which loses the
-hole host and reports `SUGAR_CALLBACK` at `totals()`. The position is correctly
-mapped; the callback rule is wrong. The receiver must be evaluated inside its
-hole before the ordinary method call, preserving its receiver and source order.
-This is F-S35, distinct from F-S34's setup context helper. The first-new-structure
-stop rule applies: no author workaround or compiler iteration is attempted.
-[The side-by-side report](native-dashboard-blocker.md) records both failed
-acceptance halves, the empty author patch, the foreign Router boundary at
-`app.tsx:92:9`, and every panel's source failure sets. Final component colors,
-route handoff checks, native hydrated parity, AckFailed/NotFound comparisons and
-SSR are unavailable because lowering stopped. The added
-`native:dashboard:structural-stop` gate pins this evidence, not native acceptance;
-only its baseline entry is regenerated. Originals and byte thresholds stay
-unchanged.
+Functions in a JSX child or attribute expression keep the hole host through any depth of parentheses, conditional branches and returned functions. This includes the generated failure producer around `totals().success.toFixed(2)` at dashboard `panels.tsx:47`. Its callback bridge is created by a lazy operation driven inside the hole, so creation and later invocation use the hole's runtime host; receiver lookup and the ordinary method call keep source order. Compiler fixtures cover child, attribute, conditional, returned-function and generated-producer shapes. A counter's returned function and method receiver match Solid in SSR and hydrated updates. Opaque setup callbacks retain their refusal, and hole operations still obey the hole's admission rules.
+
+### Native dashboard: F-S36 structural stop (2026-10-09)
+
+Dashboard lowering now completes, then generated TypeScript rejects its correct context provider: `filters.tsx:23:34` supplies a `Source<Range, never, false>` to an interface that still declares `Accessor<Range>`. This new context reconstruction defect is F-S36. [The side-by-side report](native-dashboard-blocker.md) and regression pin replace F-S35's stop evidence. Both dashboard acceptance halves fail; the author patch stays empty, originals stay byte-identical, and native dashboard hydrated parity, SSR, AckFailed/NotFound comparisons and final panel/route colors remain unavailable. Raw source failure sets do not prove an unhandled foreign failure while the generated context contract is invalid. The existing `native:dashboard:structural-stop` step now pins F-S36; no steps or gate baseline entries were added.

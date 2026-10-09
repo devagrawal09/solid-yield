@@ -300,6 +300,7 @@ export function lowerNativeEffects(files, report) {
           // A chained receiver can contain the event's reactive arguments too.
           // Evaluate it in the routine before building the plain producer.
           const evaluated = [...q.get("arguments")];
+          if (c.isMemberExpression()) evaluated.push(c.get("object"));
           let receiverCall = c.isMemberExpression() ? c.get("object") : null;
           while (receiverCall?.isCallExpression()) {
             evaluated.push(...receiverCall.get("arguments"));

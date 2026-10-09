@@ -1,7 +1,8 @@
 {
-  "finding": "F-S35: a JSX method receiver loses its hole host inside a plain failure producer",
-  "halfA": "FAIL: the source position is correct, but SUGAR_CALLBACK is a compiler false positive",
-  "halfB": "FAIL: not run; the stop rule applies before author edits, hydrated parity or SSR",
+  "finding": "F-S36: a native context retains Solid Accessor fields after its values become Sources",
+  "repairedFinding": "F-S35: JSX functions and returned functions keep their hole host; dashboard lowering completes",
+  "halfA": "FAIL: generated context contracts reject the correct source provider; author diagnostics are not accepted",
+  "halfB": "FAIL: not run; first-new-structure stop before author edits or native dashboard runtime acceptance",
   "scopeDiagnostics": [],
   "boundaries": [
     {
@@ -13,21 +14,21 @@
     }
   ],
   "original": {
-    "diagnostic": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (examples/originals/dashboard/src/panels.tsx:47:35)",
-    "file": "examples/originals/dashboard/src/panels.tsx",
-    "line": 47,
-    "column": 35,
+    "code": "TS2322",
+    "diagnostic": "[TS2322] Type 'Source<Range, never, false>' is not assignable to type 'Accessor<Range>'.\n  Type 'Source<Range, never, false>' provides no match for the signature '(): Range'. (examples/originals/dashboard/src/filters.tsx:23:34)",
+    "file": "examples/originals/dashboard/src/filters.tsx",
+    "line": 23,
+    "column": 34,
+    "authorSource": "  return <FilterContext value={{ range, team, setRange, setTeam }}>{props.children}</FilterContext>;",
+    "generatedLine": 37,
+    "generatedSource": "          range,",
     "sourceSpan": {
-      "start": 3877,
-      "end": 3883,
-      "sourceStart": 1733,
-      "sourceEnd": 1739,
+      "sourceStart": 841,
+      "sourceEnd": 846,
       "generated": false
     },
-    "sourceSpanText": "totals",
-    "authorSource": "          <dd data-kpi=\"success\">{totals().success.toFixed(2)}%</dd>",
-    "intermediateRead": "totals()",
-    "intermediateHost": "() => totals().success.toFixed(2)"
+    "retainedContract": "range: Accessor<Range>; team: Accessor<TeamFilter>;",
+    "providedContract": "Source<Range, never, false>; Source<TeamFilter, never, false>"
   },
   "patch": "",
   "sourceFailureSets": [
@@ -167,7 +168,7 @@
       ]
     }
   ],
-  "colorStatus": "Source failure inference only, before JSX handler discharge. No generated component colors or foreign handoff checks exist because lowering stopped.",
+  "colorStatus": "Final checked panel/route colors are unavailable: generated TypeScript fails at the context contract. Raw source failure sets are not final colors or proof of unhandled foreign failures.",
   "originalHashes": {
     "examples/originals/dashboard/src/api.ts": "bef20441971b979d82c69519c83991c55fe8425031bbb80266c359eee439d298",
     "examples/originals/dashboard/src/app.tsx": "11242103e6e0bf35cbc3e27adc0768929f26a3311a4fbb0a23be960cc2b851f9",

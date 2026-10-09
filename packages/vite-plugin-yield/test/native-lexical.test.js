@@ -32,6 +32,18 @@ describe("native-lexical compiler fixtures", { timeout: 30_000 }, () => {
     expect(result.files.get(file)).toContain("__nativeLexicalCallback");
     expect(result.files.get(file)).toContain("yield* n");
   });
+  it.each([
+    ["child", `return <p>{()=>n().toFixed(2)}</p>;`],
+    ["attribute", `return <p title={()=>n().toFixed(2)}/>;`],
+    ["conditional", `return <p>{n() ? (()=>n().toFixed(2)) : (()=>n())}</p>;`],
+    ["returned function", `return <p>{()=>()=>n().toFixed(2)}</p>;`],
+    ["generated failure producer", `return <p>{n().toFixed(2)}</p>;`]
+  ])("keeps a JSX %s function in its hole host (F-S35)", (_name, body) => {
+    const result = lowerNativeProject(new Map([[file, source(body)]]));
+    expect(result.diagnostics).toEqual([]);
+    expect(result.files.get(file)).toContain('return yield* __nativeLexicalCallback("hole"');
+    expect(result.files.get(file)).toContain("yield* n");
+  });
   it("reports an opaque setup callback at the original read", () => {
     expect(() =>
       lowerNativeProject(new Map([[file, source(`const value=consume(()=>n());return <p/>;`)]]))

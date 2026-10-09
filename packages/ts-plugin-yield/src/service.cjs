@@ -269,8 +269,40 @@ function createVirtualService(ts, host, config = {}) {
       scope = scope.parent;
     if (ts.isCallExpression(scope)) scope = scope.arguments.find(ts.isFunctionLike) ?? scope;
     const yields = [];
+    function holeBridge(n) {
+      if (
+        !ts.isCallExpression(n) ||
+        !ts.isIdentifier(n.expression) ||
+        !n.arguments[0] ||
+        !ts.isStringLiteral(n.arguments[0]) ||
+        n.arguments[0].text !== "hole"
+      )
+        return false;
+      return checker
+        .getSymbolAtLocation(n.expression)
+        ?.declarations?.some(
+          d =>
+            ts.isImportSpecifier(d) &&
+            (d.propertyName ?? d.name).text === "nativeLexicalCallback" &&
+            d.parent.parent.parent.moduleSpecifier?.text === "solid-yield/internal"
+        );
+    }
     function operations(n) {
-      if (n !== scope && ts.isFunctionLike(n)) return;
+      if (n !== scope && ts.isFunctionLike(n)) {
+        // Compiler-owned JSX factories and bridges retain the same hole host.
+        // Follow them to the actual operation; keep other callback hosts separate.
+        const factory =
+          ts.isCallExpression(n.parent) &&
+          n.parent.expression === n &&
+          n.body?.statements?.some(
+            s =>
+              ts.isReturnStatement(s) &&
+              s.expression &&
+              ts.isYieldExpression(s.expression) &&
+              holeBridge(s.expression.expression)
+          );
+        if (!factory && !holeBridge(n.parent)) return;
+      }
       if (ts.isYieldExpression(n) && n.expression) {
         let value = checker.getTypeAtLocation(n.expression);
         const iterator = value.getProperties().find(p => p.name.startsWith("__@iterator@"));

@@ -635,11 +635,20 @@
       "slots": [
         "R06"
       ],
-      "stage": "transform",
+      "file": "packages/vite-plugin-yield/test/.native-generated/hole-create.tsx",
+      "stage": "checked-error",
       "diagnostics": [
         {
-          "code": "SUGAR_CALLBACK",
-          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/packages/vite-plugin-yield/test/.native-generated/hole-create.tsx:1:177)"
+          "stage": "type",
+          "code": "TS2345",
+          "message": "Argument of type '() => Generator<HoleOp, Element, any>' is not assignable to parameter of type '() => Generator<ViewOp, Element, any>'.\n  Call signature return types 'Generator<HoleOp, Element, any>' and 'Generator<ViewOp, Element, any>' are incompatible.\n    The types returned by 'next(...)' are incompatible between these types.\n      Type 'IteratorResult<HoleOp, Element>' is not assignable to type 'IteratorResult<ViewOp, Element>'.\n        Type 'IteratorYieldResult<HoleOp>' is not assignable to type 'IteratorResult<ViewOp, Element>'.\n          Type 'IteratorYieldResult<HoleOp>' is not assignable to type 'IteratorYieldResult<ViewOp>'.\n            Type 'HoleOp' is not assignable to type 'ViewOp'.\n              Type 'Raise<any>' is not assignable to type 'ViewOp'.\n                Property '[MAY_WAIT]' is missing in type 'Raise<any>' but required in type 'Bind<boolean, any>'.",
+          "line": 16
+        },
+        {
+          "stage": "type",
+          "code": "TS2345",
+          "message": "Argument of type '() => Generator<Read<false, never> | Create<\"signal\", never>, number, any>' is not assignable to parameter of type '() => Generator<HoleOp, number, unknown>'.\n  Call signature return types 'Generator<Read<false, never> | Create<\"signal\", never>, number, any>' and 'Generator<HoleOp, number, unknown>' are incompatible.\n    The types returned by 'next(...)' are incompatible between these types.\n      Type 'IteratorResult<Read<false, never> | Create<\"signal\", never>, number>' is not assignable to type 'IteratorResult<HoleOp, number>'.\n        Type 'IteratorYieldResult<Read<false, never> | Create<\"signal\", never>>' is not assignable to type 'IteratorResult<HoleOp, number>'.\n          Type 'IteratorYieldResult<Read<false, never> | Create<\"signal\", never>>' is not assignable to type 'IteratorYieldResult<HoleOp>'.\n            Type 'Read<false, never> | Create<\"signal\", never>' is not assignable to type 'HoleOp'.\n              Type 'Create<\"signal\", never>' is not assignable to type 'HoleOp'.\n                Type 'Create<\"signal\", never>' is not assignable to type 'Raise<any>'.\n                  Types of property '[KIND]' are incompatible.\n                    Type '\"create\"' is not assignable to type '\"raise\"'.",
+          "line": 22
         }
       ]
     },

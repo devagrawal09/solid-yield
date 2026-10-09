@@ -1,93 +1,71 @@
-# Native dashboard: F-S35 stop (2026-10-08)
+# Native dashboard: F-S35 repaired, F-S36 stop (2026-10-09)
 
-Both acceptance halves fail. The unchanged original reaches a compiler false
-positive, so there is no checked native output for hydrated parity or SSR. The
-requested stop rule applies at the first new structural reason. No author edit
-or lowering workaround is attempted. The original stays byte-identical.
+F-S35 is repaired. Dashboard lowering completes; the generated producer around
+`panels.tsx:47` keeps its JSX hole host. Functions in child and attribute
+expressions, conditional branches and functions returned from a hole keep that
+host too. The callback bridge is created by an operation driven inside the hole,
+so it captures the correct runtime host. The compiler fixtures and a real
+SSR/hydrated counter with returned functions and a method receiver pin this.
+
+The next structural reason is **F-S36: context accessor contracts are retained
+when their provided values become Sources**. The original is valid Solid.
+Generated TypeScript rejects its existing provider at `filters.tsx:23:34`.
+The source span points to the authored `range` shorthand (`generated: false`).
+No author workaround or additional structural fix is attempted after this stop.
+
+| Authored Solid                                                                | Generated native program                                                                                            |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `range: Accessor<Range>; team: Accessor<TeamFilter>;`                         | The interface still has these Solid accessor fields.                                                                |
+| `const [range, setRange] = createSignal<Range>("24h");`                       | `const [range, setRange] = yield* createSignal<Range>("24h");` produces a `Source<Range, never, false>`.            |
+| `<FilterContext value={{ range, team, setRange, setTeam }}>…</FilterContext>` | `FilterContext.provide({ value: { range, team, setRange, setTeam }, … })` requires the retained accessor interface. |
 
 Reproduce with `node scripts/native-dashboard-blocker.mjs`. The
 [recorded evidence](../examples/harness/native-dashboard/structural-stop.json)
-pins the scope inspection, foreign Router boundary, refusal, source span,
-intermediate read and host, source failure sets, and original file hashes.
-The green `native:dashboard:structural-stop` gate step pins this failure;
-it is not either acceptance half and does not claim runtime parity.
+pins the new mismatch, source mapping, foreign Router boundary, raw source
+failure sets and original hashes. The existing
+`native:dashboard:structural-stop` gate step now pins F-S36. No gate steps were
+added, so the gate baseline is unchanged.
 
-| Author source (`panels.tsx:47:35`) | Generated plain failure producer |
-| --- | --- |
-| `<dd data-kpi="success">{totals().success.toFixed(2)}%</dd>` | `() => totals().success.toFixed(2)` |
-
-The reactive read is already inside a JSX hole. Lowering captures the method
-receiver inside a plain failure producer before the hole supplies its routine
-host. The read `totals()` is then refused as an unknown callback. The source
-span is correctly mapped (`generated: false`); the callback refusal is wrong.
-This differs from F-S34's setup context helper: the existing JSX hole should
-own the receiver read. The compiler must evaluate that receiver in its hole,
-then preserve the receiver and ordinary method invocation in source order.
-It must not require an author to move the read or invent an error fallback.
-No fix is attempted after this first structural stop.
-
-The original's context state is created inside `FilterProvider`, not at module
-level. Scope inspection therefore has no `MODULE_STATE` note. All five panels
-read the same `useFilters()` context. Context lifetime, provision and foreign
-Router requirement discharge have not been checked in generated dashboard
-code because lowering stops before those checks.
-
-## Acceptance
-
-- Half A: **FAIL**. The Router boundary is valid and correctly located, but the
-  extra `SUGAR_CALLBACK` is a compiler false positive.
-- Half B: **FAIL / not run**. The patch is empty. There is no checked native
-  program, so the dashboard's 30-step hydrated parity, happy-path SSR, AckFailed
-  rollback and NotFound parity against patched Solid have not run in native mode.
-  The merged gate still checks the plain-Solid original and its smokes.
+- Half A: **FAIL**. The Router warning is correct, but the generated context
+  contract rejects correct source. There is no accepted author diagnostic set.
+- Half B: **FAIL / not run**. The stop rule applies before an author patch,
+  native dashboard hydrated parity, SSR, or AckFailed/NotFound comparisons.
+  The gate still checks the plain-Solid original and its smokes.
 
 ## Diagnostics, verbatim
 
+The second diagnostic is a compiler defect, not an author error:
+
 ```text
 [NATIVE_FOREIGN_BOUNDARY] Handle failures inside Router or its callbacks; this imported component (createRouter from @solidjs/router) is outside the native check. (examples/originals/dashboard/src/app.tsx:92:9)
-[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (examples/originals/dashboard/src/panels.tsx:47:35)
+[TS2322] Type 'Source<Range, never, false>' is not assignable to type 'Accessor<Range>'.
+  Type 'Source<Range, never, false>' provides no match for the signature '(): Range'. (examples/originals/dashboard/src/filters.tsx:23:34)
 ```
 
-The boundary was inspected separately; `lowerNativeProject` throws before
-returning its full diagnostic collection. These are observed stop evidence,
-not an accepted author-diagnostic snapshot.
-
 ## Patch, verbatim
-
-The patch is the empty string:
 
 ```json
 ""
 ```
 
-## Failure sets and colors
+The original files are byte-identical. Adding a handler for a failed generated
+context contract would not be an author fix. The raw `Error` and `unknown` sets
+in the evidence do not establish unhandled failures at foreign handoffs:
+`useFilters()` throws if its provider is missing, and App already provides it.
+Final failure discharge and context checks cannot be accepted while the
+reconstructed context contract is invalid.
 
-These are the source failure analyzer's sets **before JSX handler discharge**,
-not final component `FailsOf` colors. `Error` below is the built-in Error raised
-by `useFilters()` if its provider is absent. `unknown` is the conservative
-foreign floor, and `ChunkError` is the server-call transport contribution.
-The exact class identity for NotFound is in the JSON evidence.
+## Final checked colors
 
-| Component | Source inferred failures |
-| --- | --- |
-| SummaryPanel | ChunkError, Error, unknown |
-| SeriesPanel | ChunkError, Error, unknown |
-| IncidentsPanel | ChunkError, AckFailed, NotFound, Error, unknown |
-| TeamPanel | ChunkError, Error, unknown |
-| NotesPanel | Error, unknown |
-| Overview (route) | ChunkError, AckFailed, NotFound, Error, unknown |
-| IncidentDetail (route) | ChunkError, NotFound, unknown |
-| IncidentBody | Error, unknown |
-| IncidentRow | ChunkError, AckFailed, NotFound, unknown |
-| App | Error, unknown |
-| FilterBar | Error, unknown |
-| FilterProvider, Panel, Shell | unknown |
+| Panel or route                    | Pending, failures, context requirements |
+| --------------------------------- | --------------------------------------- |
+| SummaryPanel                      | Unavailable: F-S36                      |
+| SeriesPanel                       | Unavailable: F-S36                      |
+| IncidentsPanel                    | Unavailable: F-S36                      |
+| TeamPanel                         | Unavailable: F-S36                      |
+| NotesPanel                        | Unavailable: F-S36                      |
+| Overview (`/`, `/overview`)       | Unavailable: F-S36                      |
+| IncidentDetail (`/incidents/:id`) | Unavailable: F-S36                      |
 
-Every panel's context read contributes the same possible missing-provider Error
-in this analysis. This is not a recommendation to add a handler to every panel:
-App supplies the context, Panel already has Errored/Loading, IncidentDetail
-already handles NotFound, and the action catches AckFailed. The raw analyzer
-sets do not prove how these handlers discharge generated component failures.
-Final pending, context-requirement and failure colors per panel and route are
-**unavailable**, as are foreign route-handoff admission results. Reporting the
-raw NotFound set as an unhandled route failure would be wrong.
+The source failure sets remain recorded separately, before generated handler
+and provider discharge. They are not final component colors.

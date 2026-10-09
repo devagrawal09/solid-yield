@@ -53,7 +53,7 @@ module.exports = [
   {
     slot: "R06",
     file: "hole-create",
-    code: "SUGAR_CALLBACK",
+    code: "CREATE_OUTSIDE_SETUP",
     line: 3
   },
   {

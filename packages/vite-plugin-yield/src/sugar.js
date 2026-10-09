@@ -106,6 +106,11 @@ function reactiveCallback(fn) {
 }
 /** @param {Path} fn @param {string} phase @param {Path} program */
 function wrapLexical(fn, phase, program) {
+  // Returned functions keep the same JSX hole, through every callback layer.
+  if (phase === "hole") {
+    const owner = fn.getFunctionParent();
+    if (owner && !owner.node.generator) wrapLexical(owner, phase, program);
+  }
   const call = fn.parentPath?.isCallExpression() ? fn.parentPath : null;
   const callee = call?.get("callee");
   const deferred =
@@ -138,7 +143,22 @@ function wrapLexical(fn, phase, program) {
       );
   }
   if (name) fn.replaceWith(t.variableDeclaration("const", [t.variableDeclarator(name, callback)]));
-  else fn.replaceWith(callback);
+  // Build a hole callback inside an operation: perform() evaluates function
+  // arguments before entering a hole, but drives an operation inside it.
+  else
+    fn.replaceWith(
+      phase === "hole"
+        ? t.callExpression(
+            t.functionExpression(
+              null,
+              [],
+              t.blockStatement([t.returnStatement(t.yieldExpression(callback, true))]),
+              true
+            ),
+            []
+          )
+        : callback
+    );
   if (!program.scope.hasBinding("__nativeLexicalCallback")) {
     program.node.body.unshift(
       t.importDeclaration(
@@ -508,11 +528,12 @@ function pass(code, filename, program, native = false) {
         lib(hostCall?.get("callee")) === "attempt" && hostCall?.node.arguments[1] === fn.node;
       let nativeHost = false;
       const phase = lexicalPhase(fn);
-      // Attempt producers must stay plain: their arguments are handled by the
-      // native call lowering, not by turning a producer into a routine.
+      // Outside JSX, attempt producers stay plain and use captured arguments.
+      // A producer inside JSX keeps that hole through the callback bridge.
       if (
         phase &&
-        !(lib(hostCall?.get("callee")) === "attempt" && hostCall?.node.arguments[0] === fn.node)
+        (phase === "hole" ||
+          !(lib(hostCall?.get("callee")) === "attempt" && hostCall?.node.arguments[0] === fn.node))
       ) {
         if (p) wrapLexical(fn, phase, p);
         nativeHost = true;

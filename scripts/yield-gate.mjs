@@ -275,7 +275,7 @@ function buildSteps(twins) {
     });
   }
 
-  // F-S35 pins a structural compiler stop; this is not native dashboard acceptance.
+  // F-S36 pins a context reconstruction stop after F-S35; not dashboard acceptance.
   steps.push({
     name: "native:dashboard:structural-stop",
     cwd: root,

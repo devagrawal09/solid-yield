@@ -121,7 +121,7 @@
       "45",
       "46"
     ],
-    "reason": "test asserts too little: 22 covering position tests pass when routine containment and smallest-span sorting are both removed."
+    "reason": "test asserts too little: 22 covering position tests pass when the routine containment filter is removed; sorting still selects the smallest routine, now from the whole file."
   },
   {
     "finding": "F-M257",

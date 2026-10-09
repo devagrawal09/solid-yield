@@ -222,7 +222,9 @@ export function inferFailures(
           visit(value);
           value.traverse({ MemberExpression: visit });
         }
-        contexts.push(...(references.length ? references : [provided(value)]));
+        // F-S41: a returned subtree that never places props.children provides
+        // nothing to its callers (an app that renders its own provider is not a wrapper).
+        contexts.push(...(references.length ? references : [new Set()]));
       }
       const common = contexts.length
         ? [...contexts[0]].filter(id => contexts.every(s => s.has(id)))

@@ -1073,13 +1073,13 @@ application acceptance.
 | @solidjs/web | `getRequestEvent` | mapped | pass-through |
 | @solidjs/web | `HydrationScript` | excluded-as-entry | Solid entry API + foreign(component) at direct handoffs |
 | @solidjs/web | `isServer` | mapped | pass-through |
-| @solidjs/web | `JSX` | mapped | retained type-only — Higher-order component contracts and accessor/store color facades remain incomplete. |
+| @solidjs/web | `JSX` | mapped | JSX.Element -> solid-yield Element - Other JSX contracts are retained with NATIVE_TYPE_UNMAPPED. |
 | @solidjs/web | `markSafeError` | mapped | pass-through |
 | @solidjs/web | `Portal` | refused-with-reason |  — NATIVE_FOREIGN: child colors need a checked foreign component adapter. |
 | @solidjs/web | `render` | excluded-as-entry | Solid entry API + foreign(component) at direct handoffs |
-| solid-js | `Accessor` | mapped | retained type-only — Higher-order component contracts and accessor/store color facades remain incomplete. |
+| solid-js | `Accessor` | mapped | type import -> solid-yield Source - Declaration bodies infer their colors; annotated contracts use the library defaults. |
 | solid-js | `action` | mapped | $event |
-| solid-js | `Component` | mapped | component variable annotation erased; props copied into Props<T> — Higher-order component contracts and accessor/store color facades remain incomplete. |
+| solid-js | `Component` | mapped | type import -> solid-yield Component - Declaration bodies infer their colors; annotated contracts use the library defaults. |
 | solid-js | `createContext` | mapped | createContext |
 | solid-js | `createEffect` | mapped | $effect |
 | solid-js | `createMemo` | mapped | $memo |
@@ -1098,14 +1098,14 @@ application acceptance.
 | solid-js | `Match` | mapped | Match |
 | solid-js | `onCleanup` | mapped | $cleanup |
 | solid-js | `onSettled` | mapped | $effect + $cleanup |
-| solid-js | `ParentComponent` | mapped | component variable annotation erased; props copied into Props<T> — Higher-order component contracts and accessor/store color facades remain incomplete. |
-| solid-js | `ParentProps` | mapped | retained type-only — Higher-order component contracts and accessor/store color facades remain incomplete. |
+| solid-js | `ParentComponent` | mapped | type import -> solid-yield/internal NativeParentComponent - Declaration bodies infer their colors; annotated contracts use the library defaults. |
+| solid-js | `ParentProps` | mapped | type import -> solid-yield/internal NativeParentProps - Declaration bodies infer their colors; annotated contracts use the library defaults. |
 | solid-js | `refresh` | mapped | refresh |
 | solid-js | `Repeat` | mapped | Repeat |
 | solid-js | `Reveal` | refused-with-reason |  — NATIVE_FOREIGN: child colors need a checked foreign component adapter. |
-| solid-js | `RevealOrder` | mapped | retained type-only — Higher-order component contracts and accessor/store color facades remain incomplete. |
+| solid-js | `RevealOrder` | mapped | retained type-only; NATIVE_TYPE_UNMAPPED at annotations - No native type mapping; original annotation retained. |
 | solid-js | `Show` | mapped | Show |
-| solid-js | `Store` | mapped | retained type-only — Higher-order component contracts and accessor/store color facades remain incomplete. |
+| solid-js | `Store` | mapped | retained type-only; NATIVE_TYPE_UNMAPPED at annotations - No native type mapping; original annotation retained. |
 | solid-js | `Switch` | mapped | Switch |
 | solid-js | `until` | mapped | until — Primitive import is mapped; not every overload, selector, or callback contract is implemented. See application diagnostics. |
 | solid-js | `useContext` | mapped | context source read |
@@ -1199,7 +1199,7 @@ halves and the empty author patch. The module-state note remains correctly at
 `log.ts:20:7`. Native Effect is not added to the gate; the baseline is unchanged.
 
 
-### Native dashboard: JSX hole fix and F-S36 stop (2026-10-08)
+### Native dashboard: JSX hole fix, F-S36 repair and F-S37 stop (2026-10-09)
 
 F-S35 is fixed: arrows and functions in JSX children or attributes keep their
 hole host through parentheses, conditionals and returned functions. Native
@@ -1207,12 +1207,15 @@ failure lowering evaluates a method receiver in that host before creating its
 plain failure producer, preserving receiver lookup, arguments and invocation
 order; `totals().success.toFixed(2)` no longer captures `totals()` inside an
 unhosted callback. The seven JSX-hole fixtures pin these forms. Dashboard lowering
-now returns only the Router boundary at `app.tsx:92:9`, but its generated context
-fails checking: `Filters` retains Solid's callable `Accessor` fields while
-`FilterProvider` supplies yield `Source` values. This is F-S36, a compiler context
-facade gap, correctly located at the provider in `filters.tsx:23`. The first-new-structure stop rule applies. Both native acceptance halves
-fail, the author patch is empty, and final panel/route colors and native hydrated,
-SSR, AckFailed and NotFound comparisons are unavailable. The existing
-`native:dashboard:structural-stop` step now pins F-S36 with
-[side-by-side evidence](native-dashboard-blocker.md); no new gate step or baseline
-entry is added.
+returns only the Router boundary at `app.tsx:92:9`. F-S36's type-lowering repair
+now maps `Filters`' Solid `Accessor` annotations to `Source`; both provider
+fields at `filters.tsx:23` typecheck. The separate
+`native:dashboard:type-contract` step checks that repair.
+
+The first new structural reason is F-S37: `useFilters()` reads and raises during
+generated component setup, which only admits setup operations. It maps to
+`FilterBar` at `filters.tsx:32:17`. The requested stop rule applies. Both native
+acceptance halves fail, the author patch is empty, and final panel/route colors
+and native hydrated, SSR, AckFailed and NotFound comparisons are unavailable.
+`native:dashboard:structural-stop` pins F-S37 with
+[side-by-side evidence](native-dashboard-blocker.md).

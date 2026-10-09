@@ -50,9 +50,12 @@ export const FilterBar = component(function* FilterBar() {
 
 ```
 
-The TypeScript error covers generated `FilterBar` at line 53 and maps to the
+The TypeScript error covers generated `FilterBar` at line 52 and maps to the
 authored function name at `filters.tsx:32:17`. The two provider field errors
-previously mapped to `filters.tsx:23:34` and `:23:41` are gone.
+previously mapped to `filters.tsx:23:34` and `:23:41` are gone. The separate
+`native:dashboard:type-contract` gate step checks that no provider assignment
+error maps to line 23. `native:dashboard:structural-stop` checks F-S37, rather
+than claiming either acceptance half passed.
 
 ## Acceptance
 

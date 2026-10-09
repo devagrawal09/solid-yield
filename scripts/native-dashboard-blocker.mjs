@@ -66,12 +66,11 @@ const errors = ts
 const file = join(source, "filters.tsx"),
   authored = files.get(file),
   output = result.files.get(file);
-const providerErrors = errors.filter(
-  d =>
-    d.file?.fileName === file &&
-    d.code === 2322 &&
-    /Accessor<(Range|TeamFilter)>/.test(ts.flattenDiagnosticMessageText(d.messageText, "\n"))
-);
+const providerErrors = errors.filter(d => {
+  if (d.file?.fileName !== file || d.code !== 2322) return false;
+  const origin = locate(result.positions.get(file), d.start, d.length);
+  return authored.slice(0, origin.sourceStart).split("\n").length === 23;
+});
 assert.equal(
   providerErrors.length,
   0,

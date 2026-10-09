@@ -19,7 +19,8 @@
 //   --fast              run only the quick subset: pkg:yield:dist-fresh,
 //                       twin:*:typecheck, twin:*:lint,
 //                       pkg:yield:test, pkg:vite-plugin-yield:typecheck,
-//                       pkg:*:exports and repo:prettier (skips twin tests, the
+//                       native:dashboard:type-contract, pkg:*:exports and
+//                       repo:prettier (skips twin tests, the
 //                       server-render smoke, the other package suites and oxlint)
 //   --json <path>       write machine-readable results to <path>
 //   --jobs <n>          steps run concurrently (default 3; vitest steps already
@@ -275,7 +276,14 @@ function buildSteps(twins) {
     });
   }
 
-  // F-S36's type contract is fixed; F-S37 pins the next setup-context stop.
+  // Check F-S36 independently; F-S37 pins the first new structural reason.
+  steps.push({
+    name: "native:dashboard:type-contract",
+    cwd: root,
+    fast: true,
+    cmd: process.execPath,
+    args: ["scripts/native-dashboard-blocker.mjs", "type-contract"]
+  });
   steps.push({
     name: "native:dashboard:structural-stop",
     cwd: root,

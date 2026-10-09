@@ -3,6 +3,7 @@
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve, join, relative } from "node:path";
 import { parseProgram } from "../packages/vite-plugin-yield/src/transform.js";
+import { nativeTypeMapping } from "../packages/vite-plugin-yield/src/native-types.js";
 import {
   nativeMapping,
   nativePassthrough,
@@ -76,11 +77,18 @@ for (const name of [
             reason =
               "Plain Solid tag; NATIVE_FOREIGN_BOUNDARY reports unknown foreign failures. Complete-original capture/parity remains unverified.";
           } else if (nativeTypes.has(api)) {
-            form = ["Component", "ParentComponent"].includes(api)
-              ? "component variable annotation erased; props copied into Props<T>"
-              : "retained type-only";
+            const mapped = nativeTypeMapping[api];
+            form = mapped
+              ? `type import -> ${mapped[0]} ${mapped[1]}`
+              : api === "JSX"
+                ? "JSX.Element -> solid-yield Element"
+                : "retained type-only; NATIVE_TYPE_UNMAPPED at annotations";
             reason =
-              "Higher-order component contracts and accessor/store color facades remain incomplete.";
+              api === "JSX"
+                ? "Other JSX contracts are retained with NATIVE_TYPE_UNMAPPED."
+                : mapped
+                  ? "Declaration bodies infer their colors; annotated contracts use the library defaults."
+                  : "No native type mapping; original annotation retained.";
           } else if (api === "useContext") form = "context source read";
           else if (api === "onSettled") form = "$effect + $cleanup";
           else if (nativePassthrough.has(api)) form = "pass-through";

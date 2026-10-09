@@ -53,8 +53,8 @@
       "module": "@solidjs/web",
       "api": "JSX",
       "status": "mapped",
-      "form": "retained type-only",
-      "reason": "Higher-order component contracts and accessor/store color facades remain incomplete.",
+      "form": "JSX.Element -> solid-yield Element",
+      "reason": "Other JSX contracts are retained with NATIVE_TYPE_UNMAPPED.",
       "intendedScope": "type",
       "files": [
         "examples/originals/docs/src/shell.tsx",
@@ -101,8 +101,8 @@
       "module": "solid-js",
       "api": "Accessor",
       "status": "mapped",
-      "form": "retained type-only",
-      "reason": "Higher-order component contracts and accessor/store color facades remain incomplete.",
+      "form": "type import -> solid-yield Source",
+      "reason": "Declaration bodies infer their colors; annotated contracts use the library defaults.",
       "intendedScope": "type",
       "files": [
         "examples/originals/room/src/components/status-pill.tsx",
@@ -129,8 +129,8 @@
       "module": "solid-js",
       "api": "Component",
       "status": "mapped",
-      "form": "component variable annotation erased; props copied into Props<T>",
-      "reason": "Higher-order component contracts and accessor/store color facades remain incomplete.",
+      "form": "type import -> solid-yield Component",
+      "reason": "Declaration bodies infer their colors; annotated contracts use the library defaults.",
       "intendedScope": "type",
       "files": [
         "examples/originals/hackernews-spa/src/components/comment.tsx",
@@ -419,8 +419,8 @@
       "module": "solid-js",
       "api": "ParentComponent",
       "status": "mapped",
-      "form": "component variable annotation erased; props copied into Props<T>",
-      "reason": "Higher-order component contracts and accessor/store color facades remain incomplete.",
+      "form": "type import -> solid-yield/internal NativeParentComponent",
+      "reason": "Declaration bodies infer their colors; annotated contracts use the library defaults.",
       "intendedScope": "type",
       "files": [
         "examples/originals/room/src/lib/identity.tsx"
@@ -430,8 +430,8 @@
       "module": "solid-js",
       "api": "ParentProps",
       "status": "mapped",
-      "form": "retained type-only",
-      "reason": "Higher-order component contracts and accessor/store color facades remain incomplete.",
+      "form": "type import -> solid-yield/internal NativeParentProps",
+      "reason": "Declaration bodies infer their colors; annotated contracts use the library defaults.",
       "intendedScope": "type",
       "files": [
         "examples/originals/rendering/shared/src/components/Shell.tsx",
@@ -476,8 +476,8 @@
       "module": "solid-js",
       "api": "RevealOrder",
       "status": "mapped",
-      "form": "retained type-only",
-      "reason": "Higher-order component contracts and accessor/store color facades remain incomplete.",
+      "form": "retained type-only; NATIVE_TYPE_UNMAPPED at annotations",
+      "reason": "No native type mapping; original annotation retained.",
       "intendedScope": "type",
       "files": [
         "examples/originals/rendering/shared/src/components/Reveal.tsx"
@@ -509,8 +509,8 @@
       "module": "solid-js",
       "api": "Store",
       "status": "mapped",
-      "form": "retained type-only",
-      "reason": "Higher-order component contracts and accessor/store color facades remain incomplete.",
+      "form": "retained type-only; NATIVE_TYPE_UNMAPPED at annotations",
+      "reason": "No native type mapping; original annotation retained.",
       "intendedScope": "type",
       "files": [
         "examples/originals/room/src/routes/live.tsx"

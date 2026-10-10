@@ -326,6 +326,27 @@ function buildSteps(twins) {
     });
   }
 
+  // Rendering: half A is its exact findings (three setup reads, a root that
+  // may fail with ChunkError and may be pending) and the author fix
+  // type-checking and linting clean; half B compares the original, the fix
+  // and its native lowering (client script, streamed SSR, hydration).
+  for (const stage of ["diagnostics", "typecheck"]) {
+    steps.push({
+      name: `native:rendering:${stage}`,
+      cwd: root,
+      cmd: process.execPath,
+      args: ["scripts/native-rendering-check.mjs", stage]
+    });
+  }
+  for (const stage of ["parity", "ssr", "hydrate"]) {
+    steps.push({
+      name: `native:rendering:${stage}`,
+      cwd: root,
+      cmd: process.execPath,
+      args: ["examples/harness/native-rendering/check.mjs", stage]
+    });
+  }
+
   // The native edge example: plain Solid that type-checks as itself, that the
   // native check accepts, and whose lowering matches it at every scripted state.
   steps.push({
@@ -532,6 +553,7 @@ function buildSteps(twins) {
       "examples/harness/native-hackernews/*.mjs",
       "examples/harness/native-dashboard/*.mjs",
       "examples/harness/native-docs/*.mjs",
+      "examples/harness/native-rendering/*.mjs",
       "examples/harness/native-edges/*.mjs",
       "examples/harness/native-edges/app/*.[tj]s?(x)",
       "scripts/*.mjs"

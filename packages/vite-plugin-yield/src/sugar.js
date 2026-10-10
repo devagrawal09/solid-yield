@@ -1705,7 +1705,7 @@ function contextFacades(code, filename, program) {
       .getCallSignatures()
       .some(sig => checker.getReturnTypeOfSignature(sig).symbol?.name === "Generator");
   /** @type {{start: number, end: number, text: string}[]} */ const edits = [];
-  const printer = ts.createPrinter();
+  const tsPrinter = ts.createPrinter();
   for (const [value, declared] of contextSlots(source, checker)) {
     if (!ts.isFunctionTypeNode(declared)) continue;
     const actual =
@@ -1719,7 +1719,7 @@ function contextFacades(code, filename, program) {
     if (checker.isTypeAssignableTo(actual, checker.getTypeFromTypeNode(declared))) continue;
     const node = checker.typeToTypeNode(actual, value, ts.NodeBuilderFlags.NoTruncation);
     if (!node) continue;
-    const text = printer.printNode(ts.EmitHint.Unspecified, node, source);
+    const text = tsPrinter.printNode(ts.EmitHint.Unspecified, node, source);
     // Not settled yet (a generator's own `any` next type aside): leave it.
     if (/__@|\bany\b|\bunknown\b/.test(text.replace(/,\s*any>/g, ">"))) continue;
     edits.push({ start: declared.getStart(source), end: declared.end, text: `(${text})` });
@@ -1733,10 +1733,24 @@ function contextFacades(code, filename, program) {
     slot.texts.add(edit.text);
     slots.set(edit.start, slot);
   }
-  let out = code;
-  for (const slot of [...slots.values()].sort((a, b) => b.start - a.start))
-    out = out.slice(0, slot.start) + [...slot.texts].join(" | ") + out.slice(slot.end);
-  return out;
+  // Replaced in the tree and printed mapped, so positions survive the retyping.
+  const p = parseProgram(code, filename);
+  if (!p) return code;
+  let replaced = 0;
+  p.traverse({
+    TSType(path) {
+      const slot = slots.get(path.node.start ?? -1);
+      if (!slot || path.node.end !== slot.end) return;
+      const holder = parseProgram(`let __t: ${[...slot.texts].join(" | ")};`, filename);
+      /** @type {any} */ const statement = holder?.node.body[0];
+      const annotation = statement?.declarations?.[0]?.id?.typeAnnotation?.typeAnnotation;
+      if (!annotation) return;
+      path.replaceWith(annotation);
+      path.skip();
+      replaced++;
+    }
+  });
+  return replaced ? printer(t.file(p.node)) : code;
 }
 /**
  * F-S52: each provided value's leaves paired with the context's declared type

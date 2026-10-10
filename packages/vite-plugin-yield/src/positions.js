@@ -106,14 +106,25 @@ export function printMapped(ast) {
         });
     }
     fallback ??= { start: 0, end: 0 };
+    // A delegation the lowering put around an authored expression
+    // (`yield* props.id`) is that expression's read: it maps to the expression.
+    const operand =
+      (!origin || origin.generated) &&
+      compatible &&
+      before.type === "YieldExpression" &&
+      before.delegate &&
+      before.argument?.loc &&
+      session?.origins.get(before.argument.loc);
     table.push({
       ...(origin && !origin.generated
         ? origin
-        : {
-            sourceStart: fallback.start,
-            sourceEnd: fallback.end,
-            generated: true
-          }),
+        : operand && !operand.generated
+          ? { sourceStart: operand.sourceStart, sourceEnd: operand.sourceEnd, generated: true }
+          : {
+              sourceStart: fallback.start,
+              sourceEnd: fallback.end,
+              generated: true
+            }),
       start: after.start,
       end: after.end
     });

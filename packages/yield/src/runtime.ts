@@ -1650,7 +1650,7 @@ export function nativeHostCallback(
   callerEvent = false
 ): (...args: any[]) => any {
   const created = state;
-  return (...args) => {
+  const callback = (...args: any[]) => {
     const captured = callerEvent && state.host === EVENT ? state : created;
     const iterator = body(...args);
     const run = () =>
@@ -1677,6 +1677,10 @@ export function nativeHostCallback(
     };
     return resume();
   };
+  // Solid reads an authored callback's arity (an Errored fallback that takes
+  // no parameters has its error logged): the callback keeps its body's.
+  Object.defineProperty(callback, "length", { value: body.length });
+  return callback;
 }
 
 /**

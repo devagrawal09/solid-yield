@@ -49,4 +49,45 @@ export function Counter(){
       table.every(r => r.start >= 0 && r.end <= code.length && r.sourceEnd <= source.length)
     ).toBe(true);
   });
+
+  it("maps a delegation the lowering adds to the expression it reads", () => {
+    const file = resolve(import.meta.dirname, "positions-read.tsx");
+    const source = `import {createSignal} from 'solid-js';
+export function Item(props: {id: string}){
+ const [id] = createSignal(props.id);
+ return <p>{id()}</p>;
+}`;
+    const result = lowerNativeProject(new Map([[file, source]]));
+    const code = result.files.get(file),
+      table = result.positions.get(file);
+    const read = code.indexOf("yield* props.id");
+    expect(read).toBeGreaterThan(0);
+    // The whole `yield* props.id` (where a READ_IN_SETUP is reported), not its routine.
+    const at = locate(table, read, "yield* props.id".length);
+    expect(source.slice(at.sourceStart, at.sourceEnd)).toBe("props.id");
+  });
+
+  it("keeps a context facade's file mapped", () => {
+    const file = resolve(import.meta.dirname, "positions-facade.tsx");
+    const source = `import {createContext, createSignal, useContext, type ParentProps} from 'solid-js';
+type Value = { count: () => number };
+const Ctx = createContext<Value>();
+export function Provider(props: ParentProps){
+ const [count] = createSignal(1);
+ return <Ctx value={{ count }}>{props.children}</Ctx>;
+}
+export function Show(){
+ const value = useContext(Ctx);
+ if (!value) throw new Error("no provider");
+ return <p>{value.count()}</p>;
+}`;
+    const result = lowerNativeProject(new Map([[file, source]]));
+    const code = result.files.get(file),
+      table = result.positions.get(file);
+    expect(code).toMatch(/count: \(?import\("solid-yield"\)\.Source<number/);
+    expect(table.length).toBeGreaterThan(1);
+    const at = locate(table, code.lastIndexOf("<p>"), 3);
+    expect(at.generated).toBe(false);
+    expect(at.sourceStart).toBe(source.lastIndexOf("<p>"));
+  });
 });

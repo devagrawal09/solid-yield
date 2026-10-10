@@ -1649,3 +1649,67 @@ Tests: `native-streams.test.js`, plus two tests in `failure-inference.test.mjs`
 With these, Rendering's shared app type-checks except for its three setup
 reads. The author's minimal fix for those (a local override signal and a memo
 over the prop, the twin's own pattern) type-checks and lints clean.
+
+### Rendering accepted in two halves (2026-10-10)
+
+**Half A** (`scripts/native-rendering-check.mjs`; gate steps
+`native:rendering:diagnostics` and `:typecheck`). The unchanged original
+(`shared/src` and the CSR entry) lowers with five notices: the `RevealOrder`
+type and four foreign boundaries (`Reveal` and `Portal` from Solid). It gives
+exactly these findings, each at its authored position:
+
+| Finding | At | Correct because |
+| --- | --- | --- |
+| `READ_IN_SETUP` (lint), with its `TS2769` at the component | `ErrorStream.tsx:21:36`, `:48:36` (`createSignal(props.id)`) | A setup creates; it does not read (D-042). Solid reads `props.id` once, so a later `id` prop is ignored. |
+| the same | `router.tsx:22:25` (`props.url ?? …`) | The same, in the factory's component. |
+| `PENDING_ROOT` | `csr/client.tsx:4:15` | The first route is a `lazy` page. Solid defers the mount, and says so itself (`ASYNC_OUTSIDE_LOADING_BOUNDARY`); the library asks for that root `Loading` to be written (D-099). |
+| `FOREIGN_HANDOFF` | `csr/client.tsx:4:15` | A route chunk can fail to load (`ChunkError`), and nothing handles it. While the three components do not type, the list reads `unknown`. |
+
+The author's fix (`examples/harness/native-rendering/author-fix.json`, six
+edits in three files) type-checks and lints clean:
+
+- Each setup read becomes a local override signal and a memo over the prop
+  (`const [chosen, setId] = createSignal<string>(); const id = createMemo(() => chosen() ?? props.id);`),
+  the twin's own pattern.
+- The CSR root is wrapped in an `Errored` and a fallback-less `Loading`.
+
+**Half B** (`examples/harness/native-rendering/check.mjs`; gate steps
+`native:rendering:parity`, `:ssr`, `:hydrate`). It compares the original, the
+fixed copy as plain Solid, and the fixed copy through native mode. The fixed
+copy is written once as a project of its own, so native mode lowers it whole.
+The checks:
+
+- **Client:** the twin's 29-step script (`examples/rendering-yield/tests/script.ts`),
+  identical at every step.
+- **Streamed SSR:** all 7 routes give the same markup and the same Solid
+  notices (`/error-stream`'s two contained render errors).
+- **Hydration:** 4 routes keep the server's nodes and settle to the same page.
+
+What it took, besides F-S51–F-S53:
+
+- **A root tree is the entry's component.** `render(() => <Errored …><Loading><App /></Loading></Errored>, el)`
+  wraps a yield component in Solid's own markup. An entry stays plain Solid,
+  so `App` was refused there as a tag (`COMPONENT_TAG`). Such a tree, when the
+  call is at module level and uses only module-level bindings, is now declared
+  as `Root` before the call. The file is then lowered as a module, its render
+  becomes the library's, and the root is checked (`RootCheck`). A bare
+  `<App />` keeps the entry's existing handoff check. Tests:
+  `native-entries.test.js`.
+- **A factory's result is a native tag.** An imported tag whose binding is a
+  call to a selected component factory (`App = RouteHOC(…)`) was treated as
+  foreign (`foreign(App)`). It is now a yield component.
+- **Positions.**
+  - A delegation the lowering adds around an authored expression
+    (`yield* props.id`) now maps to that expression, not its routine's name.
+    So a setup read is reported at the read.
+  - The context facade (F-S52) spliced text and lost the file's position
+    table; the router's diagnostics read `1:1`. It now replaces the type in
+    the tree and prints mapped.
+
+  Tests: `positions.test.js`.
+- **Callback arity (runtime).** `nativeHostCallback` returned
+  `(...args) => …`, whose `length` is 0. Solid's `Errored` logs what it
+  catches when its fallback takes no parameters, so native Rendering logged
+  the bad item's error that the original does not. A lexical callback now
+  keeps its body's arity. Tests: `native-write.spec.tsx` (both cases fail
+  without the fix).

@@ -25,7 +25,7 @@ import { lowerSugarProject } from "./sugar.js";
 import { inferFailures } from "compiler-yield/failure-inference";
 import { nativeProviders } from "./native-providers.js";
 import { nativeEntry } from "./native-entry.js";
-import { nativePrelude } from "./native-prelude.js";
+import { componentFactory, nativePrelude, nativeRootTrees } from "./native-prelude.js";
 import { lowerNativeEffects } from "./native-effects.js";
 import { lowerNativeRecursion } from "./native-recursion.js";
 const t = babel.types;
@@ -557,6 +557,31 @@ function surface(
     );
   };
   /** @type {WeakSet<object>} */ const foreignWrapped = new WeakSet();
+  /** F-S51: a call to a component factory a selected module declares.
+   * @param {Path} call @param {string} file */
+  const factoryCall = (call, file) => {
+    const callee = /** @type {Path} */ (call.get("callee"));
+    if (!callee.isIdentifier()) return false;
+    /** @type {Path | null | undefined} */ let binding = callee.scope.getBinding(
+      callee.node.name
+    )?.path;
+    if (binding?.isImportSpecifier() && binding.parentPath.isImportDeclaration()) {
+      const base = resolve(dirname(file), binding.parentPath.node.source.value);
+      const target = [
+        base,
+        base + ".tsx",
+        base + ".ts",
+        base + "/index.tsx",
+        base + "/index.ts"
+      ].find(f => modules.has(f));
+      const imported = binding.node.imported;
+      const name = t.isIdentifier(imported) ? imported.name : imported.value;
+      binding = target
+        ? parseProgram(modules.get(target) ?? "", target)?.scope.getBinding(name)?.path
+        : null;
+    }
+    return !!binding && componentFactory(binding);
+  };
   /** Preserve the foreign tag and JSX capture positions. @param {Path} q @param {any} target */
   const wrapForeign = (q, target) => {
     // The element is revisited under its alias, which is already the handoff.
@@ -1206,7 +1231,9 @@ function surface(
               target.endsWith(f.file) &&
               (f.name === api.name || f.name === declarationName)
           );
-          if (!importedContext && !jsx && !provider) {
+          // F-S51: a component a selected factory returns (`App = RouteHOC(…)`).
+          const factoryResult = !!target && !!init?.isCallExpression() && factoryCall(init, target);
+          if (!importedContext && !jsx && !provider && !factoryResult) {
             wrapForeign(q, t.identifier(name));
             return;
           }
@@ -1502,7 +1529,7 @@ function surface(
 }
 /** @param {Map<string,string>} input @param {{compilerOptions?: ts.CompilerOptions}} [options] */
 function lowerNativeProjectImpl(input, options = {}) {
-  const files = new Map([...input].map(([id, code]) => [resolve(id), code]));
+  const files = nativeRootTrees(new Map([...input].map(([id, code]) => [resolve(id), code])));
   /** @type {Map<string,string>} */ const entries = new Map();
   for (const [id, code] of files) {
     const entry = nativeEntry(code, id);

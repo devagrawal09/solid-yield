@@ -5,7 +5,18 @@
  * view (F-S40) runs in the event that calls it.
  */
 import { flush } from "solid-js";
-import { component, $event, $signal, render, view, type Props } from "solid-yield";
+import {
+  component,
+  $event,
+  $memo,
+  $signal,
+  Errored,
+  Failure,
+  raise,
+  render,
+  view,
+  type Props
+} from "solid-yield";
 import { nativeWrite } from "../src/native-write.js";
 import { nativeLexicalCallback } from "../src/native-control.js";
 
@@ -116,5 +127,57 @@ describe("event-phase lexical callbacks (F-S40)", () => {
     root.querySelector("button")!.click();
     flush();
     expect(root.querySelector("i")!.textContent).toBe("2");
+  });
+});
+
+describe("lexical callbacks keep their body's arity", () => {
+  it("reports the body's parameter count", () => {
+    const pair = nativeLexicalCallback("hole", function* (a: number, b: number) {
+      return a + b;
+    });
+    expect(pair.length).toBe(2);
+    expect(nativeLexicalCallback("event", function* () {}).length).toBe(0);
+  });
+
+  // Solid's Errored logs what it catches when its fallback takes no
+  // parameters; Rendering's `(error, reset) => …` fallback logs nothing.
+  devIt("an Errored fallback taking (error, reset) does not log what it handles", () => {
+    class Boom extends Failure("boom") {}
+    const logged: unknown[] = [];
+    const spy = vi.spyOn(console, "error").mockImplementation((...args) => {
+      logged.push(args);
+    });
+    const Bad = component(function* Bad() {
+      const n = yield* $memo(function* () {
+        return yield* raise(new Boom("x"));
+      });
+      return view(function* () {
+        return <p>{yield* n}</p>;
+      });
+    });
+    try {
+      dispose = render(
+        () =>
+          Errored({
+            fallback: nativeLexicalCallback(
+              "hole",
+              function* (error: () => unknown, reset: () => void) {
+                void error;
+                void reset;
+                return <p>caught</p>;
+              }
+            ),
+            children: function* () {
+              return <>{yield* Bad()}</>;
+            }
+          }),
+        root
+      );
+      flush();
+    } finally {
+      spy.mockRestore();
+    }
+    expect(root.textContent).toBe("caught");
+    expect(logged).toEqual([]);
   });
 });

@@ -1,0 +1,65 @@
+{
+  "notices": [
+    {
+      "code": "NATIVE_TYPE_UNMAPPED",
+      "at": "shared/src/components/Reveal.tsx:23:42"
+    },
+    {
+      "code": "NATIVE_FOREIGN_BOUNDARY",
+      "at": "shared/src/components/Reveal.tsx:98:9"
+    },
+    {
+      "code": "NATIVE_FOREIGN_BOUNDARY",
+      "at": "shared/src/components/Reveal.tsx:112:9"
+    },
+    {
+      "code": "NATIVE_FOREIGN_BOUNDARY",
+      "at": "shared/src/components/Reveal.tsx:115:13"
+    },
+    {
+      "code": "NATIVE_FOREIGN_BOUNDARY",
+      "at": "shared/src/components/Settings.tsx:22:9"
+    }
+  ],
+  "errors": [
+    {
+      "code": "FOREIGN_HANDOFF",
+      "fails": "unknown",
+      "at": "csr/client.tsx:4:15"
+    },
+    {
+      "code": "PENDING_ROOT",
+      "fails": "true",
+      "at": "csr/client.tsx:4:15"
+    },
+    {
+      "code": "TS2769",
+      "fails": null,
+      "at": "shared/src/components/ErrorStream.tsx:20:10"
+    },
+    {
+      "code": "TS2769",
+      "fails": null,
+      "at": "shared/src/components/ErrorStream.tsx:47:10"
+    },
+    {
+      "code": "TS2769",
+      "fails": null,
+      "at": "shared/src/router.tsx:20:10"
+    }
+  ],
+  "lint": [
+    {
+      "code": "solid-yield/no-read-in-setup",
+      "at": "shared/src/components/ErrorStream.tsx:21:36"
+    },
+    {
+      "code": "solid-yield/no-read-in-setup",
+      "at": "shared/src/components/ErrorStream.tsx:48:36"
+    },
+    {
+      "code": "solid-yield/no-read-in-setup",
+      "at": "shared/src/router.tsx:22:25"
+    }
+  ]
+}

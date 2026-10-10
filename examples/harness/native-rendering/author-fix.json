@@ -1,0 +1,43 @@
+{
+  "files": [
+    {
+      "file": "shared/src/components/ErrorStream.tsx",
+      "edits": [
+        {
+          "from": "  const [id, setId] = createSignal(props.id);",
+          "to": "  const [chosen, setId] = createSignal<string>();\n  const id = createMemo(() => chosen() ?? props.id);"
+        },
+        {
+          "from": "  const [id, setId] = createSignal(props.id);",
+          "to": "  const [chosen, setId] = createSignal<string>();\n  const id = createMemo(() => chosen() ?? props.id);"
+        }
+      ]
+    },
+    {
+      "file": "shared/src/router.tsx",
+      "edits": [
+        {
+          "from": "  createContext,\n  createSignal,",
+          "to": "  createContext,\n  createMemo,\n  createSignal,"
+        },
+        {
+          "from": "    const initialPath = props.url ?? (isServer ? \"/\" : window.location.pathname);\n    const [location, setLocation] = createSignal(initialPath.slice(1) || \"index\");",
+          "to": "    const [navigated, setLocation] = createSignal<string>();\n    const location = createMemo(\n      () => navigated() ?? ((props.url ?? (isServer ? \"/\" : window.location.pathname)).slice(1) || \"index\")\n    );"
+        }
+      ]
+    },
+    {
+      "file": "csr/client.tsx",
+      "edits": [
+        {
+          "from": "import { render } from \"@solidjs/web\";\n",
+          "to": "import { render } from \"@solidjs/web\";\nimport { Errored, Loading } from \"solid-js\";\n"
+        },
+        {
+          "from": "render(() => <App />, document.getElementById(\"app\")!);",
+          "to": "render(\n  () => (\n    <Errored fallback={error => <p>Something went wrong: {String(error())}</p>}>\n      <Loading>\n        <App />\n      </Loading>\n    </Errored>\n  ),\n  document.getElementById(\"app\")!\n);"
+        }
+      ]
+    }
+  ]
+}

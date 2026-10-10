@@ -87,6 +87,27 @@ const componentType = annotation => {
     return null;
   return { kind: name, props: annotation.node.typeParameters?.params[0] ?? null };
 };
+/** The components a factory returns: every return of its own is a function
+ * returning JSX. `null` when it is not a component factory. @param {Path} declaration */
+const factoryReturns = declaration => {
+  /** @type {Path[]} */ const returned = [];
+  let other = false;
+  traverseOwned(declaration, {
+    Function(inner) {
+      if (inner !== declaration) inner.skip();
+    },
+    ReturnStatement(ret) {
+      const value = ret.get("argument");
+      if ((value.isArrowFunctionExpression() || value.isFunctionExpression()) && returnsJsx(value))
+        returned.push(value);
+      else other = true;
+    }
+  });
+  return returned.length && !other ? returned : null;
+};
+/** F-S51: is this function declaration a component factory? @param {Path} declaration */
+export const componentFactory = declaration =>
+  declaration.isFunctionDeclaration() && !!factoryReturns(declaration);
 /**
  * F-S51: a component factory, a module-level function that returns a
  * component (Rendering's `RouteHOC(Comp)` returns `(props = {}) => …`). The
@@ -105,23 +126,8 @@ function componentFactories(p) {
       ? /** @type {Path} */ (statement.get("declaration"))
       : statement;
     if (!declaration?.isFunctionDeclaration() || !declaration.node.id) continue;
-    /** @type {Path[]} */ const returned = [];
-    let other = false;
-    traverseOwned(declaration, {
-      Function(inner) {
-        if (inner !== declaration) inner.skip();
-      },
-      ReturnStatement(ret) {
-        const value = ret.get("argument");
-        if (
-          (value.isArrowFunctionExpression() || value.isFunctionExpression()) &&
-          returnsJsx(value)
-        )
-          returned.push(value);
-        else other = true;
-      }
-    });
-    if (!returned.length || other) continue;
+    const returned = factoryReturns(declaration);
+    if (!returned) continue;
     const declared = declaration.node.returnType
       ? componentType(declaration.get("returnType.typeAnnotation"))
       : null;
@@ -269,6 +275,91 @@ function derivedStores(p) {
 }
 /** @param {any} n */
 const key = n => n?.name ?? n?.value;
+/**
+ * F-S53: a root render whose tree wraps a component in Solid's own markup
+ * (`render(() => <Errored …><Loading><App /></Loading></Errored>, el)`, the
+ * shape D-099 asks of a pending app) is a component of its entry. It is
+ * declared as `Root` before the call and rendered as `<Root />`, so its tree
+ * is lowered and the root is checked. Only a module-level call whose tree uses
+ * module-level bindings alone is lifted.
+ * @param {Path} p @returns {boolean}
+ */
+function liftRootTrees(p) {
+  let changed = false;
+  for (const statement of /** @type {Path[]} */ (p.get("body"))) {
+    const call = statement.isExpressionStatement() ? statement.get("expression") : null;
+    if (!call?.isCallExpression()) continue;
+    const from = api(call.get("callee"));
+    if (
+      from?.module !== "@solidjs/web" ||
+      !["render", "hydrate", "renderToString", "renderToStream"].includes(from.name)
+    )
+      continue;
+    const tree = call.get("arguments.0");
+    if (!tree?.isArrowFunctionExpression() || tree.node.params.length) continue;
+    const body = tree.get("body");
+    if (!body.isJSXElement() && !body.isJSXFragment()) continue;
+    // A bare `<App />` is the entry's existing checked handoff.
+    const opening = body.isJSXElement() ? body.node.openingElement : null;
+    if (opening && !opening.attributes.length && !body.node.children.length) continue;
+    let component = false,
+      local = false;
+    /** A name bound outside the tree but not at module level. @param {Path} q */
+    const closes = q => {
+      const binding = q.scope.getBinding(q.node.name);
+      return !!binding && binding.scope !== p.scope && !binding.path.isDescendant(body);
+    };
+    body.traverse({
+      JSXOpeningElement(q) {
+        if (t.isJSXIdentifier(q.node.name) && /^[A-Z]/.test(q.node.name.name)) component = true;
+      },
+      Identifier(q) {
+        if (q.isReferencedIdentifier()) local ||= closes(q);
+      },
+      JSXIdentifier(q) {
+        if (q.parentPath.isJSXOpeningElement() || q.parentPath.isJSXClosingElement())
+          local ||= closes(q);
+      }
+    });
+    if (!component || local) continue;
+    let name = "Root";
+    while (p.scope.hasBinding(name)) name += "Inline";
+    const lifted = t.functionDeclaration(
+      t.identifier(name),
+      [],
+      t.blockStatement([t.returnStatement(body.node)])
+    );
+    lifted.loc = body.node.loc;
+    lifted.start = body.node.start;
+    lifted.end = body.node.end;
+    body.replaceWith(
+      t.jsxElement(t.jsxOpeningElement(t.jsxIdentifier(name), [], true), null, [], true)
+    );
+    statement.insertBefore(lifted);
+    p.scope.crawl();
+    changed = true;
+  }
+  return changed;
+}
+/** Lift each file's root trees (above) before entries are told apart: an entry
+ * whose tree is lifted declares a component, so it is lowered as a module.
+ * @param {Map<string,string>} files */
+export function nativeRootTrees(files) {
+  const out = new Map();
+  for (const [file, code] of files) {
+    if (!/@solidjs\/web/.test(code)) {
+      out.set(file, code);
+      continue;
+    }
+    const p = parseProgram(code, file);
+    if (!p) {
+      out.set(file, code);
+      continue;
+    }
+    out.set(file, liftRootTrees(p) ? printMapped(t.file(p.node)) : code);
+  }
+  return out;
+}
 /**
  * F-S53: `isPending(() => store.items)` and `latest(() => feed())` take a
  * thunk; the library's `isPendingOf` and `latestOf` take the source itself.

@@ -1194,12 +1194,9 @@ function surface(
               : t.jsxFragment(t.jsxOpeningFragment(), t.jsxClosingFragment(), q.node.children);
           if (!t.isExpression(child)) fail(q, "NATIVE_CHILD", "Unsupported native JSX child.");
           if (!t.isFunction(child)) {
-            if (
-              t.isCallExpression(child) &&
-              ((t.isIdentifier(child.callee) && /^[A-Z]/.test(child.callee.name)) ||
-                (t.isMemberExpression(child.callee) &&
-                  t.isIdentifier(child.callee.property, { name: "provide" })))
-            )
+            // A lazy child is a view, which has no body: an expression child
+            // (a component call, a provider, `props.children`) reads in a hole.
+            if (!t.isJSXElement(child) && !t.isJSXFragment(child) && !t.isStringLiteral(child))
               child = t.jsxFragment(t.jsxOpeningFragment(), t.jsxClosingFragment(), [
                 t.jsxExpressionContainer(child)
               ]);

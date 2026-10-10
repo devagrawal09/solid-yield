@@ -1640,13 +1640,17 @@ function* eventSteps(
 
 /** Compiler-only callback bridge. Capture the lexical phase, never create a
  * binding or a new event. Synchronous callbacks run in the caller's transaction;
- * Promise callbacks can resume the captured event across waits. */
+ * Promise callbacks can resume the captured event across waits. A callback
+ * the lowering hosts in its caller's event (`callerEvent`, F-S40: a writing
+ * callback prop created in a view) runs in that event when an event calls it. */
 export function nativeHostCallback(
   body: (...args: any[]) => Generator<unknown, unknown, unknown>,
-  deferred = false
+  deferred = false,
+  callerEvent = false
 ): (...args: any[]) => any {
-  const captured = state;
+  const created = state;
   return (...args) => {
+    const captured = callerEvent && state.host === EVENT ? state : created;
     const iterator = body(...args);
     const run = () =>
       runAs(

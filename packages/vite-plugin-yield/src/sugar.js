@@ -559,6 +559,39 @@ function pass(code, filename, program, native = false) {
     }
     changed = true;
   };
+  /** @param {ts.Signature} sig */
+  const receiptSignature = sig => {
+    const result = checker.getReturnTypeOfSignature(sig);
+    return (result.aliasSymbol?.name ?? result.symbol?.name) === "Receipt";
+  };
+  /**
+   * A library setter where the author's types expect a plain function (a
+   * context value's `setRange: (range: Range) => void`): the author's Solid
+   * setter wrote when called, so it is adapted to write when called.
+   * @param {Path} value
+   */
+  const plainWriter = value => {
+    if (!native || !(value.isIdentifier() || value.isMemberExpression())) return;
+    const node = nodes.get(`${value.node.start}:${value.node.end}`);
+    if (!node) return;
+    if (!checker.getTypeAtLocation(node).getCallSignatures().some(receiptSignature)) return;
+    const expected = checker.getContextualType(node)?.getNonNullableType();
+    const signatures = expected?.getCallSignatures() ?? [];
+    if (!signatures.length || signatures.some(receiptSignature)) return;
+    if (value.parentPath.isObjectProperty() && value.parentPath.node.shorthand)
+      value.parentPath.node.shorthand = false;
+    value.replaceWith(t.callExpression(t.identifier("__nativeWrite"), [value.node]));
+    if (!p.scope.hasBinding("__nativeWrite")) {
+      p.node.body.unshift(
+        t.importDeclaration(
+          [t.importSpecifier(t.identifier("__nativeWrite"), t.identifier("nativeWrite"))],
+          t.stringLiteral("solid-yield/internal")
+        )
+      );
+      p.scope.crawl();
+    }
+    changed = true;
+  };
   /** F-S40: does this call write (a setter's receipt, refresh) or call an event?
    * @param {Path} call */
   const writes = call => {
@@ -859,6 +892,7 @@ function pass(code, filename, program, native = false) {
         }
       },
       exit(path) {
+        for (const argument of path.get("arguments")) plainWriter(argument);
         if (
           native &&
           path.get("callee").isCallExpression() &&
@@ -968,6 +1002,7 @@ function pass(code, filename, program, native = false) {
     },
     ObjectProperty: {
       exit(path) {
+        plainWriter(path.get("value"));
         if (key(path.node.key) === "component") handoff(path.get("value"));
         const call = path.parentPath.parentPath;
         if (!call?.isCallExpression() || !(control(call) || brand(type(call), "COMPONENT"))) return;

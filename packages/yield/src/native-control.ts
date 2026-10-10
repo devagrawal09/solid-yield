@@ -121,7 +121,7 @@ export function nativeLexicalCallback(
   body: (...args: any[]) => Generator<unknown, unknown, unknown>,
   deferred = false
 ): any {
-  const callback = nativeHostCallback(body, deferred);
+  const callback = nativeHostCallback(body, deferred, _phase === "event");
   Object.defineProperty(callback, Symbol.iterator, {
     value: function* () {
       return callback;

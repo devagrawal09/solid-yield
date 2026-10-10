@@ -45,8 +45,10 @@ try {
   for (const [step, present, absent] of [
     [0, 'class="loading"', "Alpha"],
     [1, "Alpha #1", 'class="loading"'],
+    [1, "2 rows", null],
     [2, "Alpha #2", "Alpha #1"],
     [3, "at least 1", "Beta"],
+    [3, "1 row<", null],
     // The week's rows load in a transition: the day's stay until they arrive.
     [4, "range: 24h", "Gamma"],
     [5, "Gamma #3", "Alpha"],

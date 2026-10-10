@@ -4,15 +4,16 @@ A small plain Solid app (`app/`) that exercises the native lowering's edges at
 run time. The mutation corpus's `sugar-edges` seed checks the same constructs
 statically.
 
-| Construct                                                                           | Where                       | What the run shows                                           |
-| ----------------------------------------------------------------------------------- | --------------------------- | ------------------------------------------------------------ |
-| Context hook with its guard (F-S37), and a guard inline in a component              | `filters.tsx`, `Status.tsx` | The provided value is held; neither guard fires              |
-| Setter in a plain function type (`setRange`, written through `nativeWrite`)         | `FilterBar`                 | Choosing a range reloads the rows                            |
-| Wrapper with its own `Errored` and `Loading` around a context reader (D-119, F-S49) | `Panel`, `Rows`             | Loading, then rows; an unknown range shows the panel's error |
-| Array callback in a memo (F-S46)                                                    | `Rows`' `shown`             | Raising the minimum filters the list                         |
-| Callback prop that writes, called from the child's event (F-S40)                    | `Row`'s `reload`            | `refresh(rows)` refetches                                    |
-| Effect with a returned cleanup (F-S42)                                              | `Clock`                     | The clock ticks; disposal leaves no timer                    |
-| Anonymous default component (F-S48)                                                 | `Badge.tsx`                 | Renders as `Badge`                                           |
+| Construct                                                                           | Where                          | What the run shows                                           |
+| ----------------------------------------------------------------------------------- | ------------------------------ | ------------------------------------------------------------ |
+| Context hook with its guard (F-S37), and a guard inline in a component              | `filters.tsx`, `Status.tsx`    | The provided value is held; neither guard fires              |
+| Setter in a plain function type (`setRange`, written through `nativeWrite`)         | `FilterBar`                    | Choosing a range reloads the rows                            |
+| Wrapper with its own `Errored` and `Loading` around a context reader (D-119, F-S49) | `Panel`, `Rows`                | Loading, then rows; an unknown range shows the panel's error |
+| Array callback in a memo (F-S46)                                                    | `Rows`' `shown`                | Raising the minimum filters the list                         |
+| Callback given to a user function (F-S47)                                           | `Rows`' `summary` (`describe`) | The count follows the filtered list                          |
+| Callback prop that writes, called from the child's event (F-S40)                    | `Row`'s `reload`               | `refresh(rows)` refetches                                    |
+| Effect with a returned cleanup (F-S42)                                              | `Clock`                        | The clock ticks; disposal leaves no timer                    |
+| Anonymous default component (F-S48)                                                 | `Badge.tsx`                    | Renders as `Badge`                                           |
 
 The gate has three steps for it:
 

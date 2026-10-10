@@ -32,14 +32,19 @@ function Row(props: { title: string; score: number; reload: () => void }) {
     </li>
   );
 }
+// F-S47: a user function given a callback; the callback's reads color its host.
+function describe(count: () => number): string {
+  return `${count()} rows`;
+}
 function Rows() {
   const filters = useFilters();
   const rows = createMemo(() => loadRows(filters.range()));
   const [minimum] = createSignal(0);
   // F-S46: array callbacks color their host.
   const shown = createMemo(() => rows().filter(row => row.score >= minimum()));
+  const summary = createMemo(() => describe(() => shown().length));
   return (
-    <ul>
+    <ul title={summary()}>
       {shown().map(row => (
         <Row title={row.title} score={row.score} reload={() => refresh(rows)} />
       ))}

@@ -187,7 +187,15 @@ export function generate(source, filename) {
         ]);
     },
     AwaitExpression(p) {
-      replace("remove-await", p.node, text(source, p.node.argument));
+      // Equivalent at the type level: a discarded value, or a returned one
+      // outside any try (the same promise type either way).
+      const inTry = p.findParent(q => q.isTryStatement() && !!q.node.handler);
+      const reason = p.parentPath.isExpressionStatement()
+        ? "The awaited value is discarded: without the await the statement leaves a floating promise, which type-checks unchanged. Whether its rejection is still handled is a no-floating-promises concern, outside the catalogue."
+        : p.parentPath.isReturnStatement() && !inTry
+          ? "An async function's `return await x` and `return x` resolve to the same type outside a try."
+          : undefined;
+      replace("remove-await", p.node, text(source, p.node.argument), reason);
       const fn = p.getFunctionParent();
       if (!fn?.node.async || !eventHandler(fn)) return;
       const statement = p.getStatementParent();
@@ -285,14 +293,20 @@ export function generate(source, filename) {
           }
         }
       }
-      // F-S46: an array callback in a hole or memo fails its host.
+      // F-S46/F-S47: a callback given to an array method or to a module's own
+      // helper function, in a hole or memo, fails its host.
+      const helper =
+        callee.isIdentifier() &&
+        /^[a-z]/.test(callee.node.name) &&
+        p.scope.getBinding(callee.node.name)?.path.isFunctionDeclaration();
       if (
-        callee.isMemberExpression() &&
-        !n.callee.computed &&
-        t.isIdentifier(n.callee.property) &&
-        ARRAY_CALLBACKS.has(n.callee.property.name)
+        (callee.isMemberExpression() &&
+          !n.callee.computed &&
+          t.isIdentifier(n.callee.property) &&
+          ARRAY_CALLBACKS.has(n.callee.property.name)) ||
+        helper
       ) {
-        const fn = p.get("arguments.0"),
+        const fn = helper ? p.get("arguments").find(a => a.isFunction()) : p.get("arguments.0"),
           owner = p.findParent(component);
         const host = p.findParent(
           q =>

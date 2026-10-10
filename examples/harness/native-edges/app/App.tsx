@@ -27,17 +27,24 @@ function Row(props: { title: string; score: number; reload: () => void }) {
     </li>
   );
 }
+// A user function given a callback: the callback's reads color its host (F-S47).
+function describe(count: () => number): string {
+  const n = count();
+  return n === 1 ? "1 row" : `${n} rows`;
+}
 function Rows() {
   const filters = useFilters();
   const rows = createMemo(() => loadRows(filters.range()));
   const [minimum, setMinimum] = createSignal(0);
   // An array callback in a memo colors the memo (F-S46).
   const shown = createMemo(() => rows().filter(row => row.score >= minimum()));
+  const summary = createMemo(() => describe(() => shown().length));
   return (
     <>
       <button class="raise" onClick={() => setMinimum(m => m + 1)}>
         at least {minimum()}
       </button>
+      <p class="count">{summary()}</p>
       <ul>
         {shown().map(row => (
           <Row title={row.title} score={row.score} reload={() => refresh(rows)} />

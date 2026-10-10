@@ -89,7 +89,7 @@ export const catalog = {
   },
   "callback-throw": {
     expected: ["FOREIGN_HANDOFF"],
-    edit: "Insert a conditional throw of a RangeError at the start of each array-method callback in a component's JSX hole or memo (F-S46: the callback's failure is its host's)."
+    edit: "Insert a conditional throw of a RangeError at the start of each callback given to an array method or to a module's own helper function, in a component's JSX hole or memo (F-S46, F-S47: the callback's failure is its host's)."
   },
   "server-new-class": {
     expected: ["FOREIGN_HANDOFF"],

@@ -589,6 +589,84 @@
       "status": "PASS",
       "durationMs": 1390,
       "command": "../../../Users/devagr/.nvm/versions/node/v24.18.0/bin/node scripts/mutation/gate.mjs documentation/yield-gate-baseline.json"
+    },
+    {
+      "name": "native:dashboard:type-contract",
+      "status": "PASS",
+      "durationMs": 17556,
+      "command": "../../../opt/nvm/versions/node/v24.21.0/bin/node scripts/native-dashboard-check.mjs type-contract"
+    },
+    {
+      "name": "native:dashboard:diagnostics",
+      "status": "PASS",
+      "durationMs": 17997,
+      "command": "../../../opt/nvm/versions/node/v24.21.0/bin/node scripts/native-dashboard-check.mjs"
+    },
+    {
+      "name": "native:dashboard:parity",
+      "status": "PASS",
+      "durationMs": 26405,
+      "command": "../../../opt/nvm/versions/node/v24.21.0/bin/node examples/harness/native-dashboard/check.mjs parity"
+    },
+    {
+      "name": "native:dashboard:ssr",
+      "status": "PASS",
+      "durationMs": 79673,
+      "command": "../../../opt/nvm/versions/node/v24.21.0/bin/node examples/harness/native-dashboard/check.mjs ssr"
+    },
+    {
+      "name": "native:dashboard:hydrate",
+      "status": "PASS",
+      "durationMs": 54152,
+      "command": "../../../opt/nvm/versions/node/v24.21.0/bin/node examples/harness/native-dashboard/check.mjs hydrate"
+    },
+    {
+      "name": "native:docs:diagnostics",
+      "status": "PASS",
+      "durationMs": 16572,
+      "command": "../../../opt/nvm/versions/node/v24.21.0/bin/node scripts/native-docs-check.mjs diagnostics"
+    },
+    {
+      "name": "native:docs:typecheck",
+      "status": "PASS",
+      "durationMs": 15659,
+      "command": "../../../opt/nvm/versions/node/v24.21.0/bin/node scripts/native-docs-check.mjs typecheck"
+    },
+    {
+      "name": "native:docs:parity",
+      "status": "PASS",
+      "durationMs": 75262,
+      "command": "../../../opt/nvm/versions/node/v24.21.0/bin/node examples/harness/native-docs/check.mjs parity"
+    },
+    {
+      "name": "native:docs:ssr",
+      "status": "PASS",
+      "durationMs": 218097,
+      "command": "../../../opt/nvm/versions/node/v24.21.0/bin/node examples/harness/native-docs/check.mjs ssr"
+    },
+    {
+      "name": "native:docs:hydrate",
+      "status": "PASS",
+      "durationMs": 146447,
+      "command": "../../../opt/nvm/versions/node/v24.21.0/bin/node examples/harness/native-docs/check.mjs hydrate"
+    },
+    {
+      "name": "native:edges:typecheck",
+      "status": "PASS",
+      "durationMs": 1437,
+      "command": "../../../opt/nvm/versions/node/v24.21.0/bin/node packages/vite-plugin-yield/node_modules/typescript/bin/tsc -p examples/harness/native-edges/app/tsconfig.json"
+    },
+    {
+      "name": "native:edges:diagnostics",
+      "status": "PASS",
+      "durationMs": 10958,
+      "command": "../../../opt/nvm/versions/node/v24.21.0/bin/node packages/ts-plugin-yield/src/cli.cjs check examples/harness/native-edges/app --native '**'"
+    },
+    {
+      "name": "native:edges:parity",
+      "status": "PASS",
+      "durationMs": 15508,
+      "command": "../../../opt/nvm/versions/node/v24.21.0/bin/node examples/harness/native-edges/check.mjs"
     }
   ],
   "mutation": {

@@ -103,6 +103,18 @@ async function record(mode) {
     await step("clock tick", () => {}, 1000);
     await step("clock tick again", () => {}, 1000);
     await step("choose nothing: the panel's Errored shows", () => choose("none"), 10);
+    const tab = name =>
+      [...document.querySelectorAll("button.tab")].find(b => b.textContent === name).click();
+    await step("open the streams tab (a factory's context setter)", () => tab("streams"), 0);
+    await step("board loaded (a derived store)", () => {}, 10);
+    await step("stream arrivals (an async iterable memo)", () => {}, 350);
+    await step(
+      "next round (the derived store refetches)",
+      () => at("button.next-round").click(),
+      0
+    );
+    await step("round loaded", () => {}, 10);
+    await step("back to the rows tab", () => tab("rows"), 0);
     dispose();
     dispose = undefined;
     const timersAfterDispose = vi.getTimerCount();

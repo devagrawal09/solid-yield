@@ -1,9 +1,11 @@
-import { createEffect, createMemo, createSignal, Errored, Loading, refresh } from "solid-js";
+import { createEffect, createMemo, createSignal, Errored, Loading, refresh, Show } from "solid-js";
 import type { JSX } from "@solidjs/web";
 import { loadRows } from "./api";
 import Badge from "./Badge";
 import { FilterBar, FilterProvider, useFilters } from "./filters";
 import { Status } from "./Status";
+import { Streams } from "./Streams";
+import { Tab, useTabs, withTabs } from "./tabs";
 // A wrapper with its own boundaries (D-119) around a child that reads a
 // context (F-S49): the child's pending, failure and requirement pass through it.
 function Panel(props: { title: string; children: JSX.Element }) {
@@ -65,9 +67,15 @@ function Clock() {
   );
   return <p class="clock">{tick()}</p>;
 }
-export function App() {
+// F-S51: the app is a factory's component, written inline.
+export const App = withTabs(() => {
+  const [tab] = useTabs();
   return (
     <FilterProvider>
+      <nav>
+        <Tab name="rows" />
+        <Tab name="streams" />
+      </nav>
       <FilterBar />
       <Status />
       <Badge label="rows" />
@@ -75,6 +83,9 @@ export function App() {
         <Rows />
       </Panel>
       <Clock />
+      <Show when={tab() === "streams"}>
+        <Streams />
+      </Show>
     </FilterProvider>
   );
-}
+});

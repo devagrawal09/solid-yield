@@ -40,8 +40,10 @@ try {
     results.push(JSON.parse(readFileSync(output, "utf8")));
   }
   const [original, native] = results;
-  assert.equal(original.snapshots.length, 9);
+  assert.equal(original.snapshots.length, 15);
   const states = original.snapshots.map(normalize);
+  if (process.env.NATIVE_EDGES_DUMP)
+    states.forEach((state, i) => console.log(i, original.steps[i]?.[0], state.slice(-700)));
   for (const [step, present, absent] of [
     [0, 'class="loading"', "Alpha"],
     [1, "Alpha #1", 'class="loading"'],
@@ -54,7 +56,19 @@ try {
     [5, "Gamma #3", "Alpha"],
     [6, 'class="clock">1<', null],
     [7, 'class="clock">2<', null],
-    [8, "no rows for none", "Gamma"]
+    [8, "no rows for none", "Gamma"],
+    // The factory's tab context: the switch is a transition, held while the
+    // streams tab's board is pending; a derived store, its isPending, an
+    // async iterable memo and a Repeat index.
+    [9, 'class="tab chosen">rows', 'class="streams'],
+    [10, "<h3>round 1</h3>", 'class="loading">board'],
+    [10, "<b>1</b> entry 1", null],
+    [10, 'class="loading">stream', null],
+    [10, "<li>0: ada</li><li>1: grace</li>", null],
+    [11, "<li>three</li>", 'class="loading">stream'],
+    [12, 'class="streams busy"><h3>round 1</h3>', null],
+    [13, "<h3>round 2</h3>", "busy"],
+    [14, 'class="tab chosen">rows', 'class="streams']
   ]) {
     assert.ok(states[step].includes(present), `original step ${step}: ${present}`);
     if (absent) assert.ok(!states[step].includes(absent), `original step ${step}: no ${absent}`);
@@ -62,7 +76,7 @@ try {
   assert.equal(firstDifference(original.steps, states, native.snapshots.map(normalize)), null);
   assert.equal(original.timersAfterDispose, 0);
   assert.equal(native.timersAfterDispose, 0);
-  console.log("native edge example parity: 9 states match original; disposal clears every timer");
+  console.log("native edge example parity: 15 states match original; disposal clears every timer");
 } finally {
   rmSync(dir, { recursive: true, force: true });
 }

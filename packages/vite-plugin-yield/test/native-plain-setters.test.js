@@ -72,6 +72,21 @@ export function Picker() {
     expect(code).not.toContain("__nativeWrite");
   });
 
+  it("leaves a callback that calls a setter: its phase hosts the write (Todos' filter)", () => {
+    const code = lower(`import {createSignal, onSettled} from 'solid-js';
+export function createHashFilter(): () => string {
+  const [filter, setFilter] = createSignal('all');
+  onSettled(() => {
+    const onChange = () => setFilter(location.hash);
+    window.addEventListener('hashchange', onChange);
+    return () => window.removeEventListener('hashchange', onChange);
+  });
+  return filter;
+}`);
+    expect(code).not.toContain("__nativeWrite");
+    expect(checked(code)).toEqual([]);
+  });
+
   it("leaves a plain function that is not a setter", () => {
     const code = lower(`function register(onPick: (value: number) => void) { void onPick; }
 export function Picker() {
@@ -95,6 +110,29 @@ export function ThemeProvider(props: {children: JSX.Element}) {
       /children: function\* \(\) \{\s*return <>\{yield\* props\.children\}<\/>;/
     );
     expect(code).not.toMatch(/return yield\* props\.children;/);
+    expect(checked(code)).toEqual([]);
+  });
+
+  it("keeps a component's own value-typed children (Sierpinski)", () => {
+    const code = lower(`import {createSignal} from 'solid-js';
+function Dot(props: {children: number}) { return <i>{props.children}</i>; }
+export function App() {
+  const [n] = createSignal(1);
+  return <Dot>{n()}</Dot>;
+}`);
+    expect(code).not.toMatch(/children: function\* \(\) \{\s*return <>/);
+    expect(checked(code)).toEqual([]);
+  });
+
+  it("reads an expression child of a control flow in a hole", () => {
+    const code = lower(`import {Show} from 'solid-js';
+import type {JSX} from '@solidjs/web';
+export function Maybe(props: {when: boolean; children: JSX.Element}) {
+  return <Show when={props.when}>{props.children}</Show>;
+}`);
+    expect(code).toMatch(
+      /children: function\* \(\) \{\s*return <>\{yield\* props\.children\}<\/>;/
+    );
     expect(checked(code)).toEqual([]);
   });
 

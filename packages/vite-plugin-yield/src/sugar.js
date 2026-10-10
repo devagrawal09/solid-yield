@@ -574,7 +574,11 @@ function pass(code, filename, program, native = false) {
     if (!native || !(value.isIdentifier() || value.isMemberExpression())) return;
     const node = nodes.get(`${value.node.start}:${value.node.end}`);
     if (!node) return;
-    if (!checker.getTypeAtLocation(node).getCallSignatures().some(receiptSignature)) return;
+    // A setter itself (not a function that returns its receipt: that is a
+    // lexical callback, hosted by its phase).
+    const setter = checker.getTypeAtLocation(node);
+    if (!["Setter", "StoreSetter"].includes(setter.aliasSymbol?.name ?? "")) return;
+    if (!setter.getCallSignatures().some(receiptSignature)) return;
     const expected = checker.getContextualType(node)?.getNonNullableType();
     const signatures = expected?.getCallSignatures() ?? [];
     if (!signatures.length || signatures.some(receiptSignature)) return;

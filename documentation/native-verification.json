@@ -1536,9 +1536,7 @@
             "line": 13,
             "server": false,
             "component": true,
-            "fails": [
-              "unknown"
-            ],
+            "fails": [],
             "provides": [],
             "timerFails": []
           },
@@ -1719,9 +1717,7 @@
             "line": 3,
             "server": false,
             "component": true,
-            "fails": [
-              "unknown"
-            ],
+            "fails": [],
             "provides": [],
             "timerFails": []
           },
@@ -1736,9 +1732,7 @@
               "global:TypeError",
               "unknown"
             ],
-            "provides": [
-              "<root>/examples/originals/room/src/lib/identity.tsx#IdentityContext"
-            ],
+            "provides": [],
             "timerFails": []
           },
           {
@@ -1759,8 +1753,7 @@
             "component": true,
             "fails": [
               "global:SyntaxError",
-              "global:TypeError",
-              "unknown"
+              "global:TypeError"
             ],
             "provides": [
               "<root>/examples/originals/room/src/lib/identity.tsx#IdentityContext"
@@ -2264,9 +2257,7 @@
             "line": 2,
             "server": false,
             "component": true,
-            "fails": [
-              "unknown"
-            ],
+            "fails": [],
             "provides": [],
             "timerFails": []
           },
@@ -2393,27 +2384,6 @@
       "diagnostics": [
         {
           "stage": "type",
-          "code": "TS2769",
-          "message": "No overload matches this call.\n  Overload 1 of 2, '(route: { path: \"/\"; matchFilters?: (({ [x: string]: MatchFilter | undefined; } | Record<string, MatchFilter>) & (ValidFilters<{ [x: string]: MatchFilter | undefined; }, \"/\"> | ValidFilters<...>)) | undefined; ... 4 more ...; info?: RouteInfo | undefined; }): DefinedRoute<...>', gave the following error.\n    Type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<false, NativeFailure<\"unknown\">, false, HoleRequires<...>>) & { ...; }' is not assignable to type 'DefinedRouteComponent<any, RouteParams<\"/\">> | undefined'.\n      Type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<false, NativeFailure<\"unknown\">, false, HoleRequires<...>>) & { ...; }' is not assignable to type 'DefinedRouteComponent<any, RouteParams<\"/\">>'.\n        Types of parameters 'props' and 'props' are incompatible.\n          Type 'RouteSectionProps<any, RouteParams<\"/\">> & { children?: any; }' is not assignable to type '(RouteSectionProps<any, RouteParams<\"/\">> & { children?: any; } & NoInfer<Undeclared<RouteSectionProps<any, RouteParams<\"/\">> & { ...; }, {}>>) | undefined'.\n            Type 'RouteSectionProps<any, RouteParams<\"/\">> & { children?: any; }' is not assignable to type 'RouteSectionProps<any, RouteParams<\"/\">> & { children?: any; } & NoInfer<Undeclared<RouteSectionProps<any, RouteParams<\"/\">> & { ...; }, {}>>'.\n              Type 'RouteSectionProps<any, RouteParams<\"/\">> & { children?: any; }' is not assignable to type 'Undeclared<RouteSectionProps<any, RouteParams<\"/\">> & { children?: any; }, {}>'.\n                Property 'children' is optional in type 'RouteSectionProps<any, RouteParams<\"/\">> & { children?: any; }' but required in type 'Undeclared<RouteSectionProps<any, RouteParams<\"/\">> & { children?: any; }, {}>'.\n  Overload 2 of 2, '(route: { preload?: ((args: RoutePreloadFuncArgs<Params>) => any) | undefined; component?: DefinedRouteComponent<any, Params> | undefined; children?: LazyRouteChildren | ... 2 more ... | undefined; search?: StandardSchemaV1<...> | undefined; info?: RouteInfo | undefined; }): DefinedRoute<...>', gave the following error.\n    Type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<false, NativeFailure<\"unknown\">, false, HoleRequires<...>>) & { ...; }' is not assignable to type 'DefinedRouteComponent<any, Params> | undefined'.\n      Type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<false, NativeFailure<\"unknown\">, false, HoleRequires<...>>) & { ...; }' is not assignable to type 'DefinedRouteComponent<any, Params>'.\n        Types of parameters 'props' and 'props' are incompatible.\n          Type 'RouteSectionProps<any, Params> & { children?: any; }' is not assignable to type '(RouteSectionProps<any, Params> & { children?: any; } & NoInfer<Undeclared<RouteSectionProps<any, Params> & { children?: any; }, {}>>) | undefined'.\n            Type 'RouteSectionProps<any, Params> & { children?: any; }' is not assignable to type 'RouteSectionProps<any, Params> & { children?: any; } & NoInfer<Undeclared<RouteSectionProps<any, Params> & { children?: any; }, {}>>'.\n              Type 'RouteSectionProps<any, Params> & { children?: any; }' is not assignable to type 'Undeclared<RouteSectionProps<any, Params> & { children?: any; }, {}>'.\n                Property 'children' is optional in type 'RouteSectionProps<any, Params> & { children?: any; }' but required in type 'Undeclared<RouteSectionProps<any, Params> & { children?: any; }, {}>'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/docs/app.tsx",
-          "line": 36
-        },
-        {
-          "stage": "type",
-          "code": "TS2345",
-          "message": "Argument of type 'HoleCall<{}, false, NativeFailure<\"unknown\">, false, never>' is not assignable to parameter of type '(<A extends PropsInput<{}, unknown> = PropsInput<{}, never>>(props?: (A & NoInfer<Undeclared<A, {}>>) | undefined) => ComponentView<false, NativeFailure<\"unknown\">, false, HoleRequires<...>>) & { ...; } & { ...; }'.\n  Type 'HoleCall<{}, false, NativeFailure<\"unknown\">, false, never>' is not assignable to type '{ readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"unknown\"; }'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/docs/app.tsx",
-          "line": 36
-        },
-        {
-          "stage": "type",
-          "code": "TS2345",
-          "message": "Argument of type '(props: RouteSectionProps<unknown, Params>) => ComponentView<false, NativeFailure<\"unknown\">, false, never>' is not assignable to parameter of type '((props: RouteSectionProps<unknown, Params>) => ComponentView<false, NativeFailure<\"unknown\">, false, never>) & { readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"unknown\"; }'.\n  Type '(props: RouteSectionProps<unknown, Params>) => ComponentView<false, NativeFailure<\"unknown\">, false, never>' is not assignable to type '{ readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"unknown\"; }'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/docs/app.tsx",
-          "line": 39
-        },
-        {
-          "stage": "type",
           "code": "TS2345",
           "message": "Argument of type 'HoleCall<{ url?: string | undefined; }, false, ViewFails<Read<false, never> | ChildView<false, ViewFails<ChildView<false, FailsOf<Read<true, NativeFailure<\"unknown\"> | ChunkError> | ChildView<...>>, false, never>, Element>, false, never> | ChildView<...>, Element>, false, never>' is not assignable to parameter of type '(<A extends PropsInput<{ url?: string | undefined; }, unknown> = PropsInput<{ url?: string | undefined; }, never>>(props?: (A & NoInfer<Undeclared<A, { url?: string | undefined; }>>) | undefined) => ComponentView<...>) & { ...; } & { ...; }'.\n  Type 'HoleCall<{ url?: string | undefined; }, false, ViewFails<Read<false, never> | ChildView<false, ViewFails<ChildView<false, FailsOf<Read<true, NativeFailure<\"unknown\"> | ChunkError> | ChildView<...>>, false, never>, Element>, false, never> | ChildView<...>, Element>, false, never>' is not assignable to type '{ readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"unknown\" | ... 1 more ... | \"global:URIError\"; }'.",
           "file": "packages/vite-plugin-yield/test/.native-generated/originals/docs/main.tsx",
@@ -2425,7 +2395,6 @@
       "differingStatements": null,
       "diffReason": "Generated output still requires a checked app harness.",
       "reasons": [
-        "TS2769",
         "TS2345"
       ]
     }

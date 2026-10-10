@@ -1339,6 +1339,15 @@ with no routine running, `WRITE_IN_REACTIVE` in a view).
 that calls it. At runtime, an event-phase lexical callback now runs in the
 calling event when an event calls it, rather than in the view that created it.
 
-**Lazy children.** A component's or provider's single expression child
-(`{props.children}`) lowers to a fragment hole, `<>{child}</>`. A lazy child is a
-view, which has no body.
+**Lazy children.** A provider's or control flow's single expression child
+(`{props.children}`) lowers to a fragment hole, `<>{child}</>`: their children
+are a lazy view, which has no body. A component's own children prop keeps its
+declared type (Sierpinski's `children: number`). The setter adapter applies
+only to a setter itself (`Setter`, `StoreSetter`), not to a callback that
+returns a setter's receipt, which its lexical phase hosts (Todos' `hashchange`
+listener).
+
+**Effect elsewhere.** Docs' route handoffs (`Home`, `DocPage`) are now
+accepted. Their `unknown` came from `markSafeError` in the failure classes'
+constructor, and F-S45 knows it fails nothing. TypeScript now types both pages
+as settled. Docs' root error at `main.tsx` remains (`native-verification.json`).

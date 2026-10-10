@@ -1194,9 +1194,25 @@ function surface(
               : t.jsxFragment(t.jsxOpeningFragment(), t.jsxClosingFragment(), q.node.children);
           if (!t.isExpression(child)) fail(q, "NATIVE_CHILD", "Unsupported native JSX child.");
           if (!t.isFunction(child)) {
-            // A lazy child is a view, which has no body: an expression child
-            // (a component call, a provider, `props.children`) reads in a hole.
-            if (!t.isJSXElement(child) && !t.isJSXFragment(child) && !t.isStringLiteral(child))
+            // A provider's and a control flow's children are a lazy view, which
+            // has no body: an expression child there (`props.children`) reads
+            // in a hole. A component's own children prop keeps its declared
+            // type (Sierpinski's `children: number`); a component or provider
+            // call is a view anywhere.
+            const lazyView =
+              contexts.has(name) ||
+              importedContext ||
+              (api?.module === "solid-js" && controls.has(api.name));
+            if (
+              (lazyView &&
+                !t.isJSXElement(child) &&
+                !t.isJSXFragment(child) &&
+                !t.isStringLiteral(child)) ||
+              (t.isCallExpression(child) &&
+                ((t.isIdentifier(child.callee) && /^[A-Z]/.test(child.callee.name)) ||
+                  (t.isMemberExpression(child.callee) &&
+                    t.isIdentifier(child.callee.property, { name: "provide" }))))
+            )
               child = t.jsxFragment(t.jsxOpeningFragment(), t.jsxClosingFragment(), [
                 t.jsxExpressionContainer(child)
               ]);

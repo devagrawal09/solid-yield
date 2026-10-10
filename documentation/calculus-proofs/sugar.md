@@ -26,6 +26,7 @@ premise: what the lowering or runtime must establish for the theorem to apply.
 | **S5 Props carry callers' colors** (D-119) | `widen_monotone`, `prop_handled_by_child`, `prop_escapes_in_color`; `settled_prop_unsound` (why widening is needed) | A prop read is the `child c` operation at the child's own site, with `c` the color the caller passes (`Source<T, E, P>` with the component's type parameters, D-029). | `native-props.test.js`, ts-plugin T08 |
 | **S6 Foreign routers** (F-S43): discharge only contexts provided around every render | `every_render_provided`, `foreign_router_sound`; `render_union_unsound` (why intersection) | The lowering finds every JSX render of the module-level router binding (a router used other than as a tag is not discharged). The runtime provider holds a non-unset value (the core's P-FOREIGN premise). | `native-foreign-provided.test.js` |
 | **S7 Context members** (F-S45): a member call fails what its providers' members fail | `context_member_sound`, `escaping_context_unknown`; `missed_provider_unsound` (why an escaping context is unknown) | The collected values are every value the context can hold: every provider tag's `value` and the default, with no other use of the context (else `unknown`). The receiver is that context's value: `useContext(Ctx)`, through constant bindings and hooks whose every return is it. | `native-context-members.test.js` (15 cases; 14 targeted mutations killed) |
+| **S9 Callback colors** (F-S46): an array callback's operations are its host's | `delegated_callback_colored`, `hole_raise_as_read`; `undelegated_callback_unsound` (why delegation) | The lowering delegates every array-method callback that runs in its own host (`yield* __nativeLexicalCallback(…)`; holes through `nativeHoleColors`). A callback given to another function is not delegated (F-S47, open). | `native-callback-colors.test.js` |
 | **S8 Effect cleanup** (F-S42): a returned cleanup runs before the next run and at disposal, once each | `clean_mem_iff`, `run_mem_iff`, `clean_before_next_run`; `ignoring_never_cleans` (the old lowering) | `onCleanup` registered in the effect phase runs before the owner's next run and at disposal (Solid 2's owner contract). | `native-effect-cleanup.test.js` |
 
 ## What each result means
@@ -64,6 +65,12 @@ actual failures whenever the held value is among them. A held value outside
 the collection can fail outside the union, which is why an escaping context,
 or a provider value that is not an object literal, makes the call `unknown`
 (top, always sound).
+
+**S9.** Folding is union, so a delegated callback's colors are in its host's
+(`fold_append`). Without delegation, a failing read inside the callback is an
+observation outside the host's color, exactly the gap F-S46 closed. In a hole
+the lowering presents a raise as a settled read failing with the same
+failures, which has the same color.
 
 **S8.** The trace of `n` runs followed by disposal contains each cleanup
 exactly when its run happened, and each cleanup comes right after its run and

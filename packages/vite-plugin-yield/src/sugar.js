@@ -22,6 +22,23 @@ const constructors = new Set([
   "$scope"
 ]);
 const controls = new Set(["For", "Show", "Match", "Switch", "Repeat", "Loading", "Errored"]);
+/** Array methods that call their callback synchronously (F-S46). */
+const ARRAY_CALLBACKS = new Set([
+  "map",
+  "flatMap",
+  "filter",
+  "find",
+  "findIndex",
+  "findLast",
+  "findLastIndex",
+  "some",
+  "every",
+  "forEach",
+  "reduce",
+  "reduceRight",
+  "sort",
+  "toSorted"
+]);
 /** @param {any} n */
 const key = n => n?.name ?? n?.value;
 /** The property key a function is the value of, if any. @param {Path} fn */
@@ -596,6 +613,109 @@ function pass(code, filename, program, native = false) {
     }
     changed = true;
   };
+  /**
+   * F-S46: an array method's lexical callback that runs in its own host (a
+   * map in a hole, a filter in a memo, a forEach in an event) delegates its
+   * operations there, so a pending or failing read inside it colors that
+   * host. A hole callback goes through `nativeHoleColors`, which presents a
+   * raise as the hole's failing read. Not delegated: a callback hosted
+   * elsewhere (F-S40's event callback props), a scheduled or foreign one
+   * (`nativeCallback`), a component's or control's prop (the child calls it),
+   * one in a `ref` (no hole to read in), and a deferred continuation (`.then`):
+   * its colors reach the host through the promise it is chained on.
+   * @param {Path} call
+   */
+  const delegateLexical = call => {
+    const callee = /** @type {Path} */ (call.get("callee"));
+    if (!native || !callee.isIdentifier({ name: "__nativeLexicalCallback" })) return;
+    const [phaseArg, , deferred] = call.node.arguments;
+    if (!t.isStringLiteral(phaseArg) || t.isBooleanLiteral(deferred, { value: true })) return;
+    // An array method's callback runs synchronously in the host, and the
+    // method types its result from the callback's. A callback given to another
+    // function keeps its host but is not delegated (F-S47): its result type
+    // can feed the call's, which an earlier pass may already have delegated.
+    const parent = call.parentPath;
+    if (!parent?.isCallExpression() || !parent.node.arguments.includes(call.node)) return;
+    const method = parent.get("callee");
+    if (!method.isMemberExpression() || !ARRAY_CALLBACKS.has(key(method.node.property) ?? ""))
+      return;
+    const receiver = type(/** @type {Path} */ (method.get("object")));
+    if (!receiver || !(checker.isArrayType(receiver) || checker.isTupleType(receiver))) return;
+    if (!call.getFunctionParent()?.node.generator) return;
+    if (lexicalPhase(call) !== phaseArg.value) return;
+    const owner = ownerCall(call);
+    if (owner && (control(owner) || /^[A-Z]/.test(key(owner.node.callee) ?? ""))) return;
+    if (
+      call
+        .findParent(
+          q =>
+            q.isFunction() ||
+            (q.isJSXAttribute() && t.isJSXIdentifier(q.node.name, { name: "ref" }))
+        )
+        ?.isJSXAttribute()
+    )
+      return;
+    // Under `yield*` the callback loses its contextual parameter types: write
+    // the ones TypeScript gave it here. A callback this pass created has no
+    // types yet; the next pass delegates it.
+    const fn = /** @type {Path} */ (call.get("arguments.1"));
+    const callNode = nodes.get(`${call.node.start}:${call.node.end}`);
+    if (!fn.isFunction() || !callNode) return;
+    // The slot the callback is passed to (the receiver method's parameter)
+    // types it, independently of how far its own body is lowered.
+    const [slot] =
+      checker.getContextualType(callNode)?.getNonNullableType().getCallSignatures() ?? [];
+    if (!slot) return;
+    const annotations = [];
+    for (const [index, param] of fn.get("params").entries()) {
+      const target = /** @type {Path} */ (param.isAssignmentPattern() ? param.get("left") : param);
+      /** @type {any} */ const node = target.node;
+      if (node.typeAnnotation || param.isRestElement()) {
+        if (param.isRestElement() && !node.typeAnnotation) return;
+        continue;
+      }
+      const symbol = slot.parameters[index];
+      const declaration = symbol?.valueDeclaration;
+      // A rest slot (`...args`) types an array, not this parameter: leave it.
+      if (!symbol || (declaration && ts.isParameter(declaration) && declaration.dotDotDotToken))
+        return;
+      const type = checker.getTypeOfSymbolAtLocation(symbol, callNode);
+      // Not typed yet (its receiver is lowered in a later pass): wait.
+      if (type.flags & (ts.TypeFlags.Any | ts.TypeFlags.Unknown)) return;
+      const printed = checker.typeToTypeNode(type, callNode, ts.NodeBuilderFlags.NoTruncation);
+      if (!printed) return;
+      const text = ts.createPrinter().printNode(ts.EmitHint.Unspecified, printed, source);
+      // Not typed yet anywhere inside (`[string, unknown]` from a receiver a
+      // later pass lowers) is not typed yet: wait; a type never settled is left.
+      if (/__@|\bthis\b|\bunknown\b|\bany\b/.test(text)) return;
+      const holder = parseProgram(`let __t: ${text};`, filename);
+      /** @type {any} */ const statement = holder?.node.body[0];
+      const annotation = statement?.declarations?.[0]?.id?.typeAnnotation;
+      if (!annotation) return;
+      annotations.push([node, annotation]);
+    }
+    for (const [node, annotation] of annotations) node.typeAnnotation = annotation;
+    let operand = call.node;
+    if (phaseArg.value === "hole") {
+      operand = t.callExpression(t.identifier("__nativeHoleColors"), [call.node]);
+      if (!p.scope.hasBinding("__nativeHoleColors")) {
+        p.node.body.unshift(
+          t.importDeclaration(
+            [
+              t.importSpecifier(
+                t.identifier("__nativeHoleColors"),
+                t.identifier("nativeHoleColors")
+              )
+            ],
+            t.stringLiteral("solid-yield/internal")
+          )
+        );
+        p.scope.crawl();
+      }
+    }
+    call.replaceWith(t.yieldExpression(operand, true));
+    changed = true;
+  };
   /** F-S40: does this call write (a setter's receipt, refresh) or call an event?
    * @param {Path} call */
   const writes = call => {
@@ -897,6 +1017,8 @@ function pass(code, filename, program, native = false) {
       },
       exit(path) {
         for (const argument of path.get("arguments")) plainWriter(argument);
+        delegateLexical(path);
+        if (!path.isCallExpression()) return;
         if (
           native &&
           path.get("callee").isCallExpression() &&

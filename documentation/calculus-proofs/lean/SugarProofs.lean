@@ -195,6 +195,29 @@ theorem escaping_context_unknown {V : Type} (actual : Inference.Failures V) :
     Inference.le actual Inference.unknown :=
   Inference.below_unknown actual
 
+/-! ## Callback colors (F-S46)
+
+An array method's callback runs in its host, so its operations are the host's.
+The lowering delegates them (`yield*`), folding them into the host's color. In
+a hole, a raise is presented as the hole's failing read (`nativeHoleColors`). -/
+
+/-- With delegation, every observation the callback makes is in the host's color. -/
+theorem delegated_callback_colored {host callback : List Op} {o : Op} {e : Effect}
+    (member : o ∈ callback) (step : Fires o e) : fold (host ++ callback) e := by
+  rw [fold_append]; exact .inr (fold_member member e (primitive_preservation step))
+
+/-- Without it, a failing read in the callback escapes the host's color. -/
+theorem undelegated_callback_unsound :
+    ∃ (host callback : List Op) (o : Op) (e : Effect),
+      o ∈ callback ∧ Fires o e ∧ ¬ fold host e := by
+  refine ⟨[], [.read false [3]], .read false [3], .failure 3, by simp, .readFailure (by simp), ?_⟩
+  rintro ⟨o, h, _⟩; simp at h
+
+/-- A raise has exactly the color of a settled read failing with the same failures. -/
+theorem hole_raise_as_read (ks : List Nat) (x : Effect) :
+    opColor (.raise ks) x ↔ opColor (.read false ks) x := by
+  cases x <;> simp [opColor, parts]
+
 /-! ## Effect cleanup (F-S42)
 
 An effect function's returned cleanup registers through `onCleanup`, which runs
@@ -245,5 +268,7 @@ theorem ignoring_never_cleans (n i : Nat) : Ev.clean i ∉ traceIgnoring n := by
 #print axioms context_member_sound
 #print axioms missed_provider_unsound
 #print axioms clean_mem_iff
+#print axioms delegated_callback_colored
+#print axioms undelegated_callback_unsound
 end Sugar
 end Yield

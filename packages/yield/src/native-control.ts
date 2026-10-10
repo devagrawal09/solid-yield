@@ -1,8 +1,12 @@
 /** Compiler-only control flow. Delegation keeps the current host and transaction. */
 import { isFailure, nativeHostCallback } from "./runtime.js";
 import type {
+  Bind,
+  ChildView,
   Read,
   Raise,
+  StreamAttempt,
+  Yieldable,
   EventCallOp,
   FailsOf,
   Source,
@@ -87,7 +91,11 @@ export function nativeDispatch<F extends (...args: never[]) => unknown>(
   return Reflect.apply(fn, undefined, args) as ReturnType<F>;
 }
 
-type LexicalCallback<A extends unknown[], Y, R> = ((...args: A) => R) & Iterable<Y>;
+/** A lexical callback: callable, and delegating to it (`yield*`, F-S46) yields
+ * its operations into the host and gives back the callback. */
+type LexicalCallback<A extends unknown[], Y, R> = ((...args: A) => R) & {
+  [Symbol.iterator](): Generator<Y, LexicalCallback<A, Y, R>, unknown>;
+};
 
 type LexicalPhase = "event" | "memo" | "compute" | "effect" | "hole";
 type PhaseOps<M extends LexicalPhase> = M extends "event"
@@ -98,7 +106,8 @@ type PhaseOps<M extends LexicalPhase> = M extends "event"
       ? ComputeOp
       : M extends "effect"
         ? EffectPhaseOp
-        : HoleOp;
+        : // A hole callback may build JSX, as a view does (F-S44: `.map(item => <Row/>)`).
+            HoleOp | ChildView<boolean, any, boolean, any> | Bind<boolean, any>;
 /** The phase argument keeps host admission visible in generated TypeScript. */
 export function nativeLexicalCallback<
   M extends LexicalPhase,
@@ -128,4 +137,24 @@ export function nativeLexicalCallback(
     }
   });
   return callback;
+}
+
+/** A hole callback's operations as its view sees them: a raise is a failure
+ * of the hole's read; a stream attempt's failures arrive through its handler. */
+export type HoleViewOp<Y> =
+  Y extends Raise<infer E> ? Read<false, E> : Y extends StreamAttempt ? never : Y;
+/**
+ * F-S46: `yield* nativeHoleColors(callback)` in a JSX hole delegates a hole
+ * callback's colors to its view, which gives back the callback. A callback
+ * that runs in its own host must color that host: a pending or failing read
+ * inside `items().map(…)` is the hole's.
+ */
+export function nativeHoleColors<C extends Iterable<unknown>>(
+  callback: C
+): Yieldable<HoleViewOp<C extends Iterable<infer Y> ? Y : never>, C> {
+  return {
+    *[Symbol.iterator]() {
+      return callback;
+    }
+  } as Yieldable<HoleViewOp<C extends Iterable<infer Y> ? Y : never>, C>;
 }

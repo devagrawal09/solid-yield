@@ -1351,3 +1351,47 @@ listener).
 accepted. Their `unknown` came from `markSafeError` in the failure classes'
 constructor, and F-S45 knows it fails nothing. TypeScript now types both pages
 as settled. Docs' root error at `main.tsx` remains (`native-verification.json`).
+
+### Callback colors (F-S46, F-S44, F-S47; 2026-10-10)
+
+**F-S46 (soundness).** A lexical callback keeps its host's admission rules
+(§ callback hosts), but its operations were never delegated to that host. A
+pending or failing read inside `items().map(item => …)` in a hole, or inside a
+memo's `.filter(…)`, was missing from the routine's type. A root or handoff
+check could then accept a program that may fail: `render(() => <List/>)` was
+accepted although a read in its `.map` could raise `RangeError`.
+
+An array method's lexical callback now delegates its operations to its host:
+`yield* __nativeLexicalCallback(phase, fn)`, whose iterator yields the
+callback's operations and gives back the callback. This covers `map`,
+`flatMap`, `filter`, `find`, `findIndex`, `findLast`, `findLastIndex`, `some`,
+`every`, `forEach`, `reduce`, `reduceRight`, `sort` and `toSorted`, on a
+receiver TypeScript types as an array or tuple. Such a method calls its
+callback synchronously in the host.
+
+A hole callback goes through `nativeHoleColors`, which presents a raise as the
+failure of the hole's read, as the view types it. Under `yield*` a callback
+loses its contextual parameter types. The lowering writes the ones the
+receiver method's slot gives (printed by TypeScript, with `import(…)` types
+where needed) and waits a pass while any is still `unknown` or `any`.
+
+Not delegated:
+
+- a callback hosted elsewhere (F-S40's event callback props);
+- a scheduled or foreign callback (`nativeCallback`);
+- a deferred continuation (`.then`), whose colors reach the host through the
+  promise it is chained on;
+- a component's or control's prop.
+
+**F-S44.** A hole callback may build JSX, as a view does. Its phase admits
+child views and bindings, so `items().map(item => <Row label={item}/>)`
+type-checks, and a `Row` that may fail carries that failure to the root.
+
+**F-S47 (open).** A callback given to a function other than an array method
+(`consume(() => n())`) keeps its host but is not delegated. Its result type
+can feed the call's, and an earlier pass may already have delegated that call
+on intermediate types. Its pending and failures are therefore still missing
+from the host's type. Failure inference covers the callback's failures in the
+function summaries, but the generated types do not.
+
+Tests: `native-callback-colors.test.js` (10 cases).

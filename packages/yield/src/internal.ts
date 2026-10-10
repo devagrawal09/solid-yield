@@ -18,6 +18,7 @@ export {
   nativeMap,
   nativeCallback,
   nativeLexicalCallback,
+  nativeHoleColors,
   nativeInvoke,
   nativeDispatch
 } from "./native-control.js";

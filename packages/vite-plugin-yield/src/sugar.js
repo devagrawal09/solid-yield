@@ -633,17 +633,39 @@ function pass(code, filename, program, native = false) {
     const [phaseArg, , deferred] = call.node.arguments;
     if (!t.isStringLiteral(phaseArg) || t.isBooleanLiteral(deferred, { value: true })) return;
     // An array method's callback runs synchronously in the host, and the
-    // method types its result from the callback's. A callback given to another
-    // function keeps its host but is not delegated (F-S47): its result type
-    // can feed the call's, which an earlier pass may already have delegated.
+    // method types its result from the callback's: it is delegated in place.
     const parent = call.parentPath;
     if (!parent?.isCallExpression() || !parent.node.arguments.includes(call.node)) return;
-    const method = parent.get("callee");
-    if (!method.isMemberExpression() || !ARRAY_CALLBACKS.has(key(method.node.property) ?? ""))
+    const method = /** @type {Path} */ (parent.get("callee"));
+    const receiver = method.isMemberExpression()
+      ? type(/** @type {Path} */ (method.get("object")))
+      : null;
+    const arrayMethod =
+      method.isMemberExpression() &&
+      ARRAY_CALLBACKS.has(key(method.node.property) ?? "") &&
+      !!receiver &&
+      (checker.isArrayType(receiver) || checker.isTupleType(receiver));
+    // F-S47: a callback given to any other function keeps its host too, but
+    // the call may sit in a plain thunk (an attempt's), where no `yield*` can
+    // go. It is hoisted into a binding just before the host's statement and
+    // delegated there; only through parameterless thunks, and only when it
+    // uses no binding they declare.
+    /** @type {Path[]} */ const thunks = [];
+    let host = /** @type {Path | null} */ (call.getFunctionParent());
+    while (host && !host.node.generator) {
+      if (arrayMethod || !host.isArrowFunctionExpression() || host.node.params.length) return;
+      thunks.push(host);
+      host = host.parentPath?.getFunctionParent() ?? null;
+    }
+    if (!host) return;
+    // The lowering's own wrappers (`__nativeHoleColors`, …) are not consumers.
+    if (
+      !arrayMethod &&
+      (lib(method) ||
+        /^[A-Z]/.test(key(method.node) ?? "") ||
+        (method.isIdentifier() && method.node.name.startsWith("__native")))
+    )
       return;
-    const receiver = type(/** @type {Path} */ (method.get("object")));
-    if (!receiver || !(checker.isArrayType(receiver) || checker.isTupleType(receiver))) return;
-    if (!call.getFunctionParent()?.node.generator) return;
     if (lexicalPhase(call) !== phaseArg.value) return;
     const owner = ownerCall(call);
     if (owner && (control(owner) || /^[A-Z]/.test(key(owner.node.callee) ?? ""))) return;
@@ -715,7 +737,32 @@ function pass(code, filename, program, native = false) {
         p.scope.crawl();
       }
     }
-    call.replaceWith(t.yieldExpression(operand, true));
+    if (!thunks.length && arrayMethod) {
+      call.replaceWith(t.yieldExpression(operand, true));
+      changed = true;
+      return;
+    }
+    let inner = false;
+    fn.traverse({
+      ReferencedIdentifier(ref) {
+        const binding = ref.scope.getBinding(ref.node.name);
+        // Its own parameters and locals move with it.
+        if (binding?.path.isDescendant(fn)) return;
+        if (binding && thunks.some(thunk => binding.path.isDescendant(thunk))) inner = true;
+      }
+    });
+    if (inner) return;
+    let statement = call.getStatementParent();
+    while (statement && statement.getFunctionParent() !== host)
+      statement = statement.parentPath?.getStatementParent() ?? null;
+    if (!statement) return;
+    const id = statement.scope.generateUidIdentifier("callback");
+    const [declaration] = statement.insertBefore(
+      t.variableDeclaration("const", [t.variableDeclarator(id, t.yieldExpression(operand, true))])
+    );
+    // Visible to this pass's later checks of the call (`bridgedCall`).
+    declaration.scope.registerDeclaration(declaration);
+    call.replaceWith(id);
     changed = true;
   };
   /** F-S40: does this call write (a setter's receipt, refresh) or call an event?
@@ -965,17 +1012,34 @@ function pass(code, filename, program, native = false) {
         changed = true;
       }
     });
+  /** A lexical callback, in place or hoisted into a binding (F-S47). @param {Path} arg */
+  const lexicalArgument = arg => {
+    if (
+      arg.isCallExpression() &&
+      arg.get("callee").isIdentifier({ name: "__nativeLexicalCallback" })
+    )
+      return true;
+    if (!arg.isIdentifier()) return false;
+    const binding = arg.scope.getBinding(arg.node.name)?.path;
+    /** @type {Path | null} */
+    let init = binding?.isVariableDeclarator() ? /** @type {Path} */ (binding.get("init")) : null;
+    if (!init?.isYieldExpression()) return false;
+    init = /** @type {Path} */ (init.get("argument"));
+    if (init.isCallExpression() && init.get("callee").isIdentifier({ name: "__nativeHoleColors" }))
+      init = init.get("arguments.0");
+    return (
+      init.isCallExpression() &&
+      init.get("callee").isIdentifier({ name: "__nativeLexicalCallback" })
+    );
+  };
+  /** A call given a lexical callback: until the callback's reads are lowered,
+   * its result type follows the callback's provisional one. @param {Path} call */
+  const bridgedCall = call => /** @type {Path[]} */ (call.get("arguments")).some(lexicalArgument);
   traverseOwned(p, {
     YieldExpression(path) {
       const value = path.get("argument");
       if (!path.node.delegate || !value.isCallExpression()) return;
-      const bridged = value
-        .get("arguments")
-        .some(
-          arg =>
-            arg.isCallExpression() &&
-            arg.get("callee").isIdentifier({ name: "__nativeLexicalCallback" })
-        );
+      const bridged = bridgedCall(value);
       // A callback's return changes from a routine result to its driven value
       // once its reads are lowered. Remove only that provisional delegation.
       const result = type(value);
@@ -1009,9 +1073,11 @@ function pass(code, filename, program, native = false) {
         // Native inference runs before context/prop accessors acquire their
         // library types. Once resolved as a source or routine, its own failure
         // color is authoritative; do not drive it inside a plain producer.
+        // A call given a lexical callback is not one: its result only looks
+        // like an operation while the callback's reads are unlowered.
         if (
           !opaqueCall(body) &&
-          (sourceType(type(body.get("callee"))) || isOperation(type(body)))
+          (sourceType(type(body.get("callee"))) || (isOperation(type(body)) && !bridgedCall(body)))
         ) {
           path.replaceWith(body.node);
           changed = true;
@@ -1070,7 +1136,7 @@ function pass(code, filename, program, native = false) {
           }
         } else if (
           !delegated &&
-          (isOperation(type(path)) ||
+          ((isOperation(type(path)) && !bridgedCall(path)) ||
             lib(callee) === "readStore" ||
             (native && ["latestOf", "isPendingOf"].includes(lib(callee))))
         )

@@ -1389,14 +1389,39 @@ Not delegated:
 child views and bindings, so `items().map(item => <Row label={item}/>)`
 type-checks, and a `Row` that may fail carries that failure to the root.
 
-**F-S47 (open).** A callback given to a function other than an array method
-(`consume(() => n())`) keeps its host but is not delegated. Its result type
-can feed the call's, and an earlier pass may already have delegated that call
-on intermediate types. Its pending and failures are therefore still missing
-from the host's type. Failure inference covers the callback's failures in the
-function summaries, but the generated types do not.
+**F-S47 (soundness, done).** A callback given to a function other than an
+array method (`consume(() => pending())`) kept its host but was not delegated.
+A pending read inside it was missing from the host's type, so a root without
+`Loading` was accepted. (A failure was covered: the call's attempt types it
+`unknown`.) The call sits in its attempt's plain thunk, where no `yield*` can
+go. The callback is therefore hoisted into a binding just before its host's
+statement, and delegated there:
 
-Tests: `native-callback-colors.test.js` (10 cases).
+```ts
+const _callback = yield* __nativeLexicalCallback("memo", function* () { … });
+return yield* __nativeAttempt(() => consume(_callback), …);
+```
+
+Hoisting crosses only parameterless thunks. It is skipped when the callback
+uses a binding such a thunk declares (that callback stays undelegated, as
+before). Parameters take the slot's types, as F-S46's do.
+
+Delegating it exposed a staleness in the passes. Before its reads are lowered,
+a callback returns its operations unevaluated (`return __nativeAttempt(…)`),
+so a call it is given to (`consume(cb)`) looked like an operation.
+
+- The first pass dropped that call's attempt, which lost the call's own
+  `unknown` failure.
+- It also delegated the call, which a later pass removed only while the
+  callback stayed in place.
+
+Neither decision is made now for a call given a lexical callback, in place or
+hoisted (`bridgedCall`). After lowering, a callback never returns a raw
+operation: its body delegates them.
+
+Tests: `native-callback-colors.test.js` (F-S47 block: nested callbacks; pending
+through a user function, with and without `Loading`; parameter types; the case
+left in place; a non-array `map`).
 
 ### Remaining originals: Rendering, Effect, Room (F-S48; 2026-10-10)
 

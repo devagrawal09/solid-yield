@@ -120,26 +120,85 @@ export function List() {
 });
 
 describe("callbacks given to other functions (F-S47)", { timeout: 60_000 }, () => {
-  it("keeps the host but does not delegate a callback another function calls", () => {
+  const consumer = (
+    body,
+    helper = "function consume<T>(callback: () => T): T { return callback(); }"
+  ) =>
+    `import {createSignal, createMemo, Errored, Loading} from 'solid-js';
+import {render} from '@solidjs/web';
+${helper}
+export function Total() {
+  const [n] = createSignal(1);
+  const pending = createMemo(async () => n());
+  ${body}
+}`;
+
+  it("delegates a nested callback through a binding before its statement", () => {
     const code = lower(`import {createSignal} from 'solid-js';
 declare function consume<T>(callback: () => T): T;
 export function App() {
   const [n] = createSignal(1);
   return <button onClick={() => consume(() => consume(() => n()))}/>;
 }`);
-    expect(code).toContain('consume(__nativeLexicalCallback("event"');
-    expect(code).not.toMatch(/yield\* __nativeLexicalCallback/);
+    expect(code).toMatch(/const _callback2 = yield\* __nativeLexicalCallback\("event"/);
+    expect(code).toMatch(/const _callback = yield\* __nativeLexicalCallback\("event"/);
+    // The call keeps its attempt: its own failures are still typed.
+    expect(code).toContain("__nativeAttempt(() => consume(_callback2)");
+    expect(code).toContain("__nativeAttempt(() => consume(_callback)");
     expect(checked(code)).toEqual([]);
   });
 
-  it("does not delegate an array method on a value that is not an array", () => {
+  it("a pending read in a callback given to a function makes its host pending", () => {
+    const code = lower(`${consumer(`const total = createMemo(() => consume(() => pending() * 2));
+  return <p>{total()}</p>;`)}
+function Root() { return <Errored fallback="!"><Total/></Errored>; }
+render(() => <Root/>, document.body);`);
+    expect(code).toMatch(/const _callback = yield\* __nativeLexicalCallback\("memo"/);
+    expect(checked(code).join("\n")).toMatch(/PENDING_ROOT/);
+  });
+
+  it("the same read under Loading is accepted", () => {
+    const code = lower(`${consumer(`const total = createMemo(() => consume(() => pending() * 2));
+  return <p>{total()}</p>;`)}
+function Root() { return <Errored fallback="!"><Loading><Total/></Loading></Errored>; }
+render(() => <Root/>, document.body);`);
+    expect(checked(code)).toEqual([]);
+  });
+
+  it("annotates a hoisted callback's parameters from the slot it was given to", () => {
+    const code = lower(
+      `${consumer(
+        `const total = createMemo(() => consume(k => pending() * k));
+  return <p>{total()}</p>;`,
+        "function consume(callback: (k: number) => number): number { return callback(2); }"
+      )}
+function Root() { return <Errored fallback="!"><Loading><Total/></Loading></Errored>; }
+render(() => <Root/>, document.body);`
+    );
+    expect(code).toContain('__nativeLexicalCallback("memo", function* (k: number)');
+    expect(checked(code)).toEqual([]);
+  });
+
+  it("leaves a callback that uses a thunk's own binding in place", () => {
+    const code = lower(`import {createSignal} from 'solid-js';
+declare function consume<T>(callback: () => T): T;
+export function App() {
+  const [n] = createSignal(1);
+  return <button onClick={() => [1].forEach(k => { const m = k; consume(() => n() + m); })}/>;
+}`);
+    expect(checked(code)).toEqual([]);
+  });
+
+  it("delegates an array-named method on a value that is not an array, like any call", () => {
     const code = lower(`import {createSignal} from 'solid-js';
 declare const tree: { map<T>(f: (n: number) => T): T[] };
 export function List() {
   const [n] = createSignal(1);
   return <ul>{tree.map(x => <li>{x + n()}</li>)}</ul>;
 }`);
-    expect(code).not.toContain("__nativeHoleColors");
+    expect(code).toMatch(
+      /const _callback = yield\* __nativeHoleColors\(__nativeLexicalCallback\("hole"/
+    );
   });
 });
 

@@ -1459,6 +1459,20 @@ now accepts a member read, though not `call`, `apply` or `bind`
   Solid's raw `action`, and the saga writes Solid state between its Effect
   steps.
 
+*Probed past the refusal (2026-10-10).* With the escape check disabled, the
+output shows three things. Solid's `action` compiles to the library's
+`$event`, so the bridge's loop runs inside a library event. The saga is an
+authored generator, left as written: its setter calls stay plain and would
+be lost, and its `yield*` belongs to Effect, so they cannot be delegated
+either. Performed on the spot (`nativeWrite`), they would run inside that
+event, which the runtime admits; this is not yet tried. And the bridge's
+`const it = genFn(...args)` was lowered to `yield* genFn(...args)`, driving
+the saga through the library: any generator yielding something other than
+plain data counted as a routine. A routine yields library operations, each
+carrying the `KIND` brand; an authored generator yields its own values. A
+generator yielding unbranded objects is now called and handed to its driver
+(`native-owned.test.js`).
+
 Supporting this needs a contract for writes made inside a transaction the
 library does not own (today a setter's receipt is admitted only in an
 `$event` or an effect's phase), and a typing for a bridge's returned

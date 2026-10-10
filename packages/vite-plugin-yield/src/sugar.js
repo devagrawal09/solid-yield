@@ -566,7 +566,16 @@ function pass(code, filename, program, native = false) {
             ts.TypeFlags.Null |
             ts.TypeFlags.Undefined)
         );
-      return !yields || !(yields.isUnion() ? yields.types : [yields]).every(data);
+      // An authored generator (an Effect saga, an iterator driven by hand)
+      // yields its own values: data, or objects without the library's
+      // operation brand. Only an operation, or a yield type still unresolved,
+      // makes a routine to delegate to.
+      /** @param {ts.Type} y */
+      const authored = y =>
+        data(y) ||
+        !!(y.flags & (ts.TypeFlags.ESSymbolLike | ts.TypeFlags.Void)) ||
+        (!!(y.flags & (ts.TypeFlags.Object | ts.TypeFlags.Intersection)) && !brand(y, "KIND"));
+      return !yields || !(yields.isUnion() ? yields.types : [yields]).every(authored);
     }
     return ["Generator", "Yieldable", "Receipt", "View"].includes(kind);
   };

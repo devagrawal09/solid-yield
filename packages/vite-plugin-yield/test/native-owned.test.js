@@ -170,6 +170,17 @@ export function App(){ return <p>{items.length}</p>; }`;
     expect(out).toMatch(/async function\* \(\) \{\s*setCount\(1\);/);
     expect(out).not.toContain("yield* setCount");
   });
+  // An authored generator yields its own values (Effect's YieldWrap): one a
+  // parameter supplies is called and driven by hand, not delegated to.
+  it.each(["{ readonly effect: string }", "number"])(
+    "calls a generator a parameter supplies (yielding %s) for its caller to drive",
+    yields => {
+      const code = `import {action} from 'solid-js';\ntype Step = ${yields};\nexport function bridge<R>(steps: () => Generator<Step, R, never>) {\n return action(function* () {\n  const it = steps();\n  return it.next();\n });\n}`;
+      const out = lower(code).files.get(file);
+      expect(out).not.toContain("yield* steps()");
+      expect(out).toContain("__nativeAttempt(() => steps()");
+    }
+  );
   it("maps a later callback refusal to the authored read", () => {
     const code = `import {createSignal,createMemo} from 'solid-js';\nexport function App(){\n const [count] = createSignal(0);\n const doubled = createMemo(()=>count()*2);\n foreignScheduler(()=>count());\n return <p>{doubled()}</p>;\n}`;
     expect(() => lower(code)).toThrow(/:5:23\)/);

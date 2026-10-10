@@ -28,6 +28,9 @@ premise: what the lowering or runtime must establish for the theorem to apply.
 | **S7 Context members** (F-S45): a member call fails what its providers' members fail | `context_member_sound`, `escaping_context_unknown`; `missed_provider_unsound` (why an escaping context is unknown) | The collected values are every value the context can hold: every provider tag's `value` and the default, with no other use of the context (else `unknown`). The receiver is that context's value: `useContext(Ctx)`, through constant bindings and hooks whose every return is it. | `native-context-members.test.js` (15 cases; 14 targeted mutations killed) |
 | **S9 Callback colors** (F-S46, F-S47): a lexical callback's operations are its host's | `delegated_callback_colored`, `hole_raise_as_read`; `undelegated_callback_unsound` (why delegation) | The lowering delegates every lexical callback that runs in its own host (`yield* __nativeLexicalCallback(…)`; holes through `nativeHoleColors`). An array method's callback is delegated in place. A callback given to any other function is hoisted into a binding just before its host's statement and delegated there (F-S47). It is left in place, undelegated, only when it uses a binding a parameterless thunk between it and its host declares. | `native-callback-colors.test.js` |
 | **S10 Requirements through generic wrappers** (F-S49): a call carries what its holes require | `wrapped_need`, `hole_requirement_carried`; `dropped_requirement_unsound` (why the parameter) | A wrapper the lowering makes generic gets `_R = never` and `& NativeRequiring<_R>`; the plain-call overload admits holes requiring `_R` and adds `_R` to the call's requirements (`HoleQ`). TypeScript infers `_R` from each call's holes. | `native-hole-requirements.test.js`, `context.type-tests.tsx` (F-S49 block) |
+| **S11 Props through `lazy`** (D-119 with F-S51): a lazy page's props take the union of its callers' colors | `lazy_union_bounds`; `missed_caller_unsound` (why every caller is collected) | Every JSX use of a lazy binding of a native page is a collected call site, and each passes the color TypeScript infers for its prop. | `native-lazy-props.test.js` |
+| **S12 Context facades** (F-S52): a retyped slot bounds what the context holds | `facade_bounds_held`; `plain_slot_unsound` (why the slot is retyped) | A declared function slot given a source or routine it does not admit is retyped to the union of the types its providers in the declaring file put there. TypeScript then checks every provider's value, in any file, against the retyped context, with `Source<T, E, P>` covariant in `E` and `P`. | `native-factories.test.js`, `native-context-facades.test.js` |
+| **S13 Loop-driven generators** (F-S53): a generator a loop drives raises what its body raises | `loop_driven_sound`, `foreign_driver_unknown`; `foreign_driver_unsound` (why other generators stay unknown) | The call is the iterable of a `for…of` or `for await…of` itself, so only that loop calls `next()` and `return()`. Its iterator is not bound, returned or passed on. | `failure-inference.test.mjs` (loop-driven generators) |
 | **S8 Effect cleanup** (F-S42): a returned cleanup runs before the next run and at disposal, once each | `clean_mem_iff`, `run_mem_iff`, `clean_before_next_run`; `ignoring_never_cleans` (the old lowering) | `onCleanup` registered in the effect phase runs before the owner's next run and at disposal (Solid 2's owner contract). | `native-effect-cleanup.test.js` |
 
 ## What each result means
@@ -82,6 +85,21 @@ color with the parameter contains it. The caller's providers then discharge it,
 or the root refuses it (`root_no_missing_context`). Without the parameter the
 call would report none while the subtree still emits it.
 
+**S11.** S5's results hold for any color above the one a call passes, and the
+union over every collected caller is above each one. A caller the collection
+misses could pass what the union lacks, so collection must be complete.
+
+**S12.** A declared plain function type carries no color, while the held
+source may be pending or failing. Retyping the slot to the provided type, with
+TypeScript checking each provider against it, makes the slot's color an upper
+bound for every value the context can hold. This is S7's argument for colors
+in place of failures.
+
+**S13.** A foreign driver can inject a failure with `throw()`, so an opaque
+generator's failures are `unknown` (top). A loop injects nothing, so there the
+body's own failures bound what iterating raises. The body's failures are
+computed in the same fixpoint, so a generator that loops over another composes.
+
 **S8.** The trace of `n` runs followed by disposal contains each cleanup
 exactly when its run happened, and each cleanup comes right after its run and
 before the next. Ignoring the returned cleanup runs none.
@@ -93,8 +111,8 @@ before the next. Ignoring the returned cleanup runs none.
   native harnesses' DOM comparisons with each original: Todos, Sierpinski,
   Hacker News, and the dashboard (30 states, streamed SSR, hydration). The
   compiler correspondence remains the core's P-ENCODING obligation.
-- **Failure inference precision.** S7 is soundness only. Every unresolved call
-  is `unknown`, which is sound and may be imprecise.
+- **Failure inference precision.** S7 and S13 are soundness only. Every
+  unresolved call is `unknown`, which is sound and may be imprecise.
 - **Solid's runtime.** "Set once" providers, owner cleanup order and
   `useContext` throwing without a provider are Solid 2 facts, used as premises
   (the core's trust boundary).

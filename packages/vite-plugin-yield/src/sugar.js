@@ -1058,6 +1058,21 @@ function pass(code, filename, program, native = false) {
         changed = true;
       }
     },
+    Identifier(path) {
+      // Solid's Repeat index is a number; the library's is a source (D-055).
+      // Each value use of it is a read (a key is the member rule's).
+      if (!native || !path.isReferencedIdentifier() || path.parentPath.isYieldExpression()) return;
+      if (path.parentPath.isMemberExpression() && path.key === "property") return;
+      const binding = path.scope.getBinding(path.node.name);
+      const fn = binding?.kind === "param" ? binding.path.parentPath : null;
+      if (!fn?.isFunction() || fn.node.params[0] !== binding?.path.node) return;
+      const prop = fn.parentPath;
+      if (!prop?.isObjectProperty() || key(prop.node.key) !== "children") return;
+      const call = prop.parentPath?.parentPath;
+      if (!call?.isCallExpression() || lib(call.get("callee")) !== "Repeat") return;
+      if (path.getFunctionParent() === fn || !sourceType(type(path))) return;
+      delegate(path);
+    },
     ReturnStatement(path) {
       if (!native) return;
       const value = path.get("argument");
@@ -1150,6 +1165,19 @@ function pass(code, filename, program, native = false) {
     },
     MemberExpression: {
       exit(path) {
+        // A source as a computed key is read: Solid's Repeat index is a
+        // number, the library's a source (D-055), and a key is a value.
+        const property = path.get("property");
+        if (path.node.computed && !property.isYieldExpression() && sourceType(type(property))) {
+          delegate(property);
+          return;
+        }
+        // A path given to isPendingOf, latestOf or refresh is that source.
+        if (
+          path.listKey === "arguments" &&
+          ["isPendingOf", "latestOf", "refresh"].includes(lib(path.parentPath.get("callee")) ?? "")
+        )
+          return;
         // F-S39: a member the source itself lacks (a string's toLowerCase, a
         // number's toFixed) belongs to its value: read the source, then look
         // the member up. A path key (props.item.title) stays a path.
@@ -1697,11 +1725,17 @@ function contextFacades(code, filename, program) {
     edits.push({ start: declared.getStart(source), end: declared.end, text: `(${text})` });
   }
   if (!edits.length) return code;
+  // Several providers of one slot: the slot holds any of their values.
+  /** @type {Map<number, {start: number, end: number, texts: Set<string>}>} */
+  const slots = new Map();
+  for (const edit of edits) {
+    const slot = slots.get(edit.start) ?? { start: edit.start, end: edit.end, texts: new Set() };
+    slot.texts.add(edit.text);
+    slots.set(edit.start, slot);
+  }
   let out = code;
-  for (const edit of [...new Map(edits.map(e => [`${e.start}`, e])).values()].sort(
-    (a, b) => b.start - a.start
-  ))
-    out = out.slice(0, edit.start) + edit.text + out.slice(edit.end);
+  for (const slot of [...slots.values()].sort((a, b) => b.start - a.start))
+    out = out.slice(0, slot.start) + [...slot.texts].join(" | ") + out.slice(slot.end);
   return out;
 }
 /**

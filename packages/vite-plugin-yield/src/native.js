@@ -830,6 +830,14 @@ function surface(
         );
         q.node.typeParameters = null;
       }
+      if (["createSignal", "createOptimistic"].includes(api.name) && !q.node.arguments.length) {
+        // F-S53: Solid's `createSignal<T>()` holds `T | undefined` and starts
+        // undefined; the library's signal always takes its first value.
+        q.node.arguments = [t.identifier("undefined")];
+        const [declared] = q.node.typeParameters?.params ?? [];
+        if (declared && q.node.typeParameters)
+          q.node.typeParameters.params[0] = t.tsUnionType([declared, t.tsUndefinedKeyword()]);
+      }
       if (api.name === "createEffect" && q.get("arguments.1").isFunction()) {
         // F-S42: Solid 2 runs an effect function's returned cleanup before the
         // next run or on disposal, as the library's $cleanup does: register it.

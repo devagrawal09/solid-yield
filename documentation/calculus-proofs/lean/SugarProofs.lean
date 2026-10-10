@@ -299,6 +299,77 @@ theorem ignoring_never_cleans (n i : Nat) : Ev.clean i ∉ traceIgnoring n := by
   | zero => simp [traceIgnoring]
   | succ n ih => simp [traceIgnoring, ih]
 
+/-! ## Props through `lazy` (D-119 with F-S51)
+
+`LazyComponent<T>` drops a page's type parameters, so a lazy page's widened
+props cannot be generic per call. They take the union of the colors every
+caller passes. -/
+
+/-- The colors every collected caller passes, joined. -/
+def callersColor (callers : List Color) : Color := fun e => ∃ c ∈ callers, c e
+
+/-- Each collected caller's color is below the union, so S5's results apply to
+    the union in place of the per-call color. -/
+theorem lazy_union_bounds {callers : List Color} {c : Color} (h : c ∈ callers) :
+    below c (callersColor callers) := fun _ he => ⟨c, h, he⟩
+
+/-- A caller the collection missed can pass what the union lacks. -/
+theorem missed_caller_unsound :
+    ∃ (callers : List Color) (c : Color) (e : Effect),
+      c ∉ callers ∧ c e ∧ ¬ callersColor callers e := by
+  refine ⟨[], fun e => e = .pending, .pending, by simp, rfl, ?_⟩
+  intro h; simp [callersColor] at h
+
+/-! ## Context facades (F-S52)
+
+A context's value declared with plain function types (`() => string`) holds,
+lowered, a source or a routine. The lowering retypes such a slot to the
+provided value's type, and TypeScript checks every provider's value against
+the retyped context. -/
+
+/-- With every provider's value checked against the slot, the slot's color
+    bounds the held value's. -/
+theorem facade_bounds_held {values : List Color} {slot held : Color}
+    (checked : ∀ c ∈ values, below c slot) (h : held ∈ values) : below held slot :=
+  checked held h
+
+/-- Left as the declared plain function type, the slot reports no color while
+    the held source may be pending. -/
+theorem plain_slot_unsound : ∃ held : Color, held .pending ∧ ¬ bottom .pending :=
+  ⟨fun e => e = .pending, rfl, fun h => h⟩
+
+/-! ## Loop-driven generators (F-S53)
+
+An authored generator is opaque to the failure inference: a foreign driver can
+`throw()` into it, so it fails `unknown`. A generator called as the iterable
+of a `for…of` (or `for await…of`) is driven by that loop alone, through
+`next()` and `return()`, and what it raises there is what its own body
+raises. -/
+
+inductive Driver where
+  | loop
+  | foreign
+
+/-- What driving a generator can raise: its body's failures, plus whatever a
+    foreign driver injects with `throw()`. A loop injects nothing. -/
+def observed {V : Type} (body inject : Inference.Failures V) : Driver → Inference.Failures V
+  | .loop => body
+  | .foreign => Inference.union body inject
+
+/-- Driven by a loop, the body's failures bound what the generator raises. -/
+theorem loop_driven_sound {V : Type} (body inject : Inference.Failures V) :
+    Inference.le (observed body inject .loop) body := fun _ h => h
+
+/-- A foreign driver can raise what the body never does: hence `unknown` there. -/
+theorem foreign_driver_unsound :
+    ∃ (body inject : Inference.Failures Nat) (v : Nat),
+      observed body inject .foreign v ∧ ¬ body v :=
+  ⟨Inference.empty, fun v => v = 0, 0, Or.inr rfl, fun h => h⟩
+
+theorem foreign_driver_unknown {V : Type} (body inject : Inference.Failures V) :
+    Inference.le (observed body inject .foreign) Inference.unknown :=
+  Inference.below_unknown _
+
 #print axioms write_admitted_iff
 #print axioms event_phase_runs_in_caller
 #print axioms hook_requirement_provided
@@ -313,5 +384,11 @@ theorem ignoring_never_cleans (n i : Nat) : Ev.clean i ∉ traceIgnoring n := by
 #print axioms undelegated_callback_unsound
 #print axioms hole_requirement_carried
 #print axioms dropped_requirement_unsound
+#print axioms lazy_union_bounds
+#print axioms missed_caller_unsound
+#print axioms facade_bounds_held
+#print axioms plain_slot_unsound
+#print axioms loop_driven_sound
+#print axioms foreign_driver_unsound
 end Sugar
 end Yield

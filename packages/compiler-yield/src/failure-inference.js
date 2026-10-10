@@ -123,10 +123,10 @@ export function inferFailures(
     if (!declaration) return null;
     if (ts.isVariableDeclaration(declaration)) declaration = declaration.initializer;
     if (!declaration) return null;
-    return (
-      declaration.body &&
-      byBody.get(`${declaration.getSourceFile().fileName}:${declaration.body.getStart()}`)
-    );
+    // Babel keys a body without its parentheses: `() => ({ … })`.
+    let body = declaration.body;
+    while (body && ts.isParenthesizedExpression(body)) body = body.expression;
+    return body && byBody.get(`${declaration.getSourceFile().fileName}:${body.getStart()}`);
   };
   const target = p => {
     const node = nodeFor(p);
@@ -801,8 +801,19 @@ export function inferFailures(
       return id;
     });
   }
-  const invoke = (fn, owner) => {
-    if (!fn || opaque(fn.path)) return new Set(["unknown"]);
+  // An opaque generator's own body's failures, for the loops that drive it.
+  const bodyFails = new Map();
+  const invoke = (fn, owner, site = null) => {
+    if (!fn) return new Set(["unknown"]);
+    if (opaque(fn.path)) {
+      // A generator iterated where it is called (`for (… of gen())`, `for
+      // await`) is driven by that loop alone, with next() and return(): no
+      // foreign driver can throw into it, so its own body's failures are exact.
+      if (!site?.parentPath?.isForOfStatement() || site.key !== "right")
+        return new Set(["unknown"]);
+      owner.calls.add(fn.id);
+      return bodyFails.get(fn) ?? new Set();
+    }
     owner.calls.add(fn.id);
     if (owner.timerFails) owner.timerFails = union(owner.timerFails, fn.timerFails);
     return union(fn.fails, fn.server ? new Set(["ChunkError"]) : []);
@@ -1129,7 +1140,9 @@ export function inferFailures(
       const resolved = target(p);
       return union(
         argEffects,
-        resolved ? invoke(resolved, owner) : (contextMember(callee, owner) ?? invoke(null, owner)),
+        resolved
+          ? invoke(resolved, owner, p)
+          : (contextMember(callee, owner) ?? invoke(null, owner)),
         ...args
           .filter(a => a.isFunction())
           .map(a => invoke(byBody.get(`${owner.file}:${a.node.body.start}`), owner))
@@ -1156,6 +1169,14 @@ export function inferFailures(
     changed = false;
     iterations++;
     for (const fn of functions) {
+      if (opaque(fn.path)) {
+        const body = union(evaluate(fn.path.get("body"), fn), fn.timerFails);
+        const known = bodyFails.get(fn) ?? new Set();
+        if ([...body].some(k => !known.has(k))) {
+          bodyFails.set(fn, union(known, body));
+          changed = true;
+        }
+      }
       const next = opaque(fn.path)
         ? new Set(["unknown"])
         : fn.pure
@@ -1360,7 +1381,7 @@ export function inferFailures(
           name(callee.node.property)
         );
       const own = fn
-        ? invoke(fn, owner)
+        ? invoke(fn, owner, site)
         : primitive === "builtin" && !promiseMethod
           ? new Set(platformFailures(site))
           : total;

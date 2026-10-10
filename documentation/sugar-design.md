@@ -1550,9 +1550,12 @@ Each provided value is walked with the declared type, through aliases and
 interfaces in the same file: tuples by position, objects by member. A declared
 function type given a source or a routine it does not admit becomes that
 value's type, so every consumer reads it or delegates to it, as D-119 widens a
-prop. The escape check accepts a routine in such a slot as given where a
-routine is expected. Tests: `native-factories.test.js` (the value is typed as
-what is provided).
+prop. Several providers of one slot give the union of their types (a settled
+signal in one, a pending memo in another). The escape check accepts a routine
+in such a slot as given where a routine is expected. Tests:
+`native-factories.test.js` (the value is typed as what is provided) and
+`native-context-facades.test.js` (two providers; a pending provider's reader is
+pending up to the root).
 
 **Context members (F-S45, extended).** A tuple value is followed by position,
 and a name destructured from a context's value
@@ -1594,3 +1597,55 @@ Rendering then lowered with 14 diagnostics (`native-verification.json`). The
 three setup reads (`createSignal(props.id)` twice in ErrorStream, and
 `props.url` in the router; D-042) are correct, each with its `TS2769` at the
 component. Stream and Skeleton still had type errors; they are F-S53.
+
+### Stream and Skeleton (F-S53; 2026-10-10)
+
+**Async iterable producers.** `createProjection<T[]>(async function* (state) {…}, [])`
+became `$projection(function* () { return yield* attempt(async function* (state) {…}) })`,
+so the draft was the attempt thunk's parameter, and the thunk was called with
+none. An async producer's parameters now stay on the compute, and the producer,
+which is the attempt's thunk, closes over them.
+
+**A source as a key is read.** Solid's `Repeat` hands its child a number; the
+library's index is a source (D-055). So `projItems[i]` became `projItems[yield* i]`.
+More generally, a source used as a computed key is read, since a source is never
+a valid key. Each other value use of a `Repeat` index inside the child's holes
+(`{i}`, `i + 1`) is also a read. A use in the child's own setup stays a setup
+read.
+
+**Derived stores are projections.** `const [store] = createStore(fn, seed, options)`
+is Solid's projection: the function computes into a draft of the seed. It
+becomes `createProjection(fn, seed, options)`, which maps to `$projection`.
+A derived store whose setter is used stays a store call, and TypeScript names
+the mismatch.
+
+**`isPending` and `latest` thunks.** `isPending(() => store.items)` and
+`latest(() => feed())` take a thunk; `isPendingOf` and `latestOf` take the
+source. A thunk that only reads one accessor or one store path becomes that
+source (`isPendingOf(store.items)`), and the path given there is not read. Any
+other thunk is left as written.
+
+**`createSignal<T>()`.** Solid's overload holds `T | undefined` and starts
+undefined; `$signal` always takes its first value. It lowers to
+`$signal<T | undefined>(undefined)`.
+
+**Failure inference: two precision fixes.**
+
+- Babel keys a function by its body without parentheses. TypeScript's body for
+  `() => ({ … })` is the parenthesized expression, so such an arrow (Skeleton's
+  `placeholderFeed`) never resolved to its own summary and every call to it
+  failed `unknown`. The lookup now unwraps parentheses. This affects any
+  module-level arrow returning an object literal.
+- Authored generators stay opaque (`unknown`): a foreign driver can `throw()`
+  into one. A generator called as the iterable of a `for…of` or
+  `for await…of` is driven by that loop alone, through `next()` and `return()`,
+  so there its own body's failures are exact. That is how Stream's `getData()`
+  fails nothing. A generator iterator that leaves its call (returned, or bound
+  first) stays `unknown`.
+
+Tests: `native-streams.test.js`, plus two tests in `failure-inference.test.mjs`
+(the parenthesized arrow; loop-driven generators).
+
+With these, Rendering's shared app type-checks except for its three setup
+reads. The author's minimal fix for those (a local override signal and a memo
+over the prop, the twin's own pattern) type-checks and lints clean.

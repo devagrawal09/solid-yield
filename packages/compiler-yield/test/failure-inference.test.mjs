@@ -219,3 +219,35 @@ test("Rendering's rules: an Errored reset, values that cannot be thenables, Node
     assert.deepEqual(summary(report, "late"), [kind]);
   }
 });
+
+test("an arrow returning a parenthesized object resolves to its own summary", () => {
+  const report = infer({
+    "seed.ts": `const seed = (): {n:number} => ({n:1});
+ function seeded(){return seed()}`
+  });
+  assert.deepEqual(summary(report, "seeded"), []);
+});
+
+test("an authored generator a loop drives fails with its body; one that escapes stays unknown", () => {
+  const report = infer({
+    "loop.ts": `class Bad extends Error {}
+ async function* failing(){ yield 1; throw new Bad(); }
+ async function* quiet(){ await new Promise(resolve => setTimeout(resolve, 1)); yield 1; }
+ function* sync(){ yield 1; }
+ async function readsFailing(){ for await (const v of failing()) console.log(v); }
+ async function readsQuiet(){ for await (const v of quiet()) console.log(v); }
+ function readsSync(){ for (const v of sync()) console.log(v); }
+ async function* relay(){ for await (const v of failing()) yield v; }
+ async function readsRelay(){ for await (const v of relay()) console.log(v); }
+ function handsOff(){ return failing(); }
+ async function iterated(){ const it = quiet(); for await (const v of it) console.log(v); }`
+  });
+  const kind = report.classes.find(c => c.name === "Bad").id;
+  assert.deepEqual(summary(report, "readsFailing"), [kind]);
+  assert.deepEqual(summary(report, "readsQuiet"), []);
+  assert.deepEqual(summary(report, "readsSync"), []);
+  assert.deepEqual(summary(report, "readsRelay"), [kind]);
+  // The generators themselves, and an iterator that leaves its call, stay opaque.
+  for (const name of ["failing", "quiet", "relay", "handsOff", "iterated"])
+    assert.deepEqual(summary(report, name), ["unknown"], name);
+});

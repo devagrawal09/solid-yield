@@ -752,9 +752,13 @@ export function lowerNativeEffects(files, report) {
         const summary = report.at(file, callback.node.start ?? 0);
         const kinds = [...(summary?.fails ?? new Set(["unknown"]))];
         used.add("attempt");
+        // A projection's draft (any parameter) is the compute's; the producer,
+        // now the attempt's thunk, closes over it.
+        const params = callback.node.params;
+        callback.node.params = [];
         callback.replaceWith(
           t.arrowFunctionExpression(
-            [],
+            params,
             t.callExpression(t.identifier("__nativeAttempt"), [callback.node, handler(kinds)])
           )
         );

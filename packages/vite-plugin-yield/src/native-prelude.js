@@ -219,6 +219,87 @@ function liftInlineComponents(p) {
     }
   }
 }
+/**
+ * F-S53: a derived store, `const [store] = createStore(fn, seed, options)`, is
+ * Solid's projection: the function computes into a draft of the seed. It
+ * becomes `const store = createProjection(fn, seed, options)`, which the rest
+ * of the lowering already maps to `$projection`. A derived store's setter
+ * writes over the projection's own draft; one that is used stays a plain
+ * store call, and TypeScript names it.
+ * @param {Path} p
+ */
+function derivedStores(p) {
+  /** @type {string | null} */ let local = null;
+  traverseOwned(p, {
+    VariableDeclarator(q) {
+      const init = q.get("init");
+      const id = q.node.id;
+      if (!init.isCallExpression() || !t.isArrayPattern(id)) return;
+      const from = api(init.get("callee"));
+      if (from?.module !== "solid-js" || from.name !== "createStore") return;
+      if (!init.get("arguments.0").isFunction()) return;
+      const [store, setter, ...rest] = id.elements;
+      if (!t.isIdentifier(store) || rest.length) return;
+      if (setter && (!t.isIdentifier(setter) || q.scope.getBinding(setter.name)?.referenced))
+        return;
+      if (!local) {
+        const declaration = /** @type {Path} */ (
+          init.get("callee").scope.getBinding(/** @type {any} */ (init.node.callee).name)?.path
+            .parentPath
+        );
+        const existing = declaration.node.specifiers.find(
+          /** @param {any} s */ s =>
+            t.isImportSpecifier(s) && key(s.imported) === "createProjection"
+        );
+        local = existing ? existing.local.name : null;
+        if (!local) {
+          local = p.scope.hasBinding("createProjection")
+            ? p.scope.generateUid("createProjection")
+            : "createProjection";
+          declaration.node.specifiers.push(
+            t.importSpecifier(t.identifier(local), t.identifier("createProjection"))
+          );
+        }
+      }
+      init.node.callee = t.identifier(/** @type {string} */ (local));
+      q.node.id = t.cloneNode(store);
+    }
+  });
+  if (local) p.scope.crawl();
+}
+/** @param {any} n */
+const key = n => n?.name ?? n?.value;
+/**
+ * F-S53: `isPending(() => store.items)` and `latest(() => feed())` take a
+ * thunk; the library's `isPendingOf` and `latestOf` take the source itself.
+ * A thunk that only reads one accessor (`feed()`) or one store path
+ * (`store.items`) becomes that source; any other thunk is left as written.
+ * @param {Path} p
+ */
+function pendingThunks(p) {
+  traverseOwned(p, {
+    CallExpression(q) {
+      const from = api(q.get("callee"));
+      if (from?.module !== "solid-js" || !["isPending", "latest"].includes(from.name)) return;
+      const thunk = q.get("arguments.0");
+      if (!thunk?.isArrowFunctionExpression() || thunk.node.params.length || thunk.node.async)
+        return;
+      /** @type {any} */ let body = thunk.node.body;
+      if (t.isBlockStatement(body))
+        body =
+          body.body.length === 1 && t.isReturnStatement(body.body[0])
+            ? body.body[0].argument
+            : null;
+      if (t.isCallExpression(body) && !body.arguments.length && t.isIdentifier(body.callee))
+        body = body.callee;
+      else if (!t.isMemberExpression(body) || body.computed) return;
+      /** @type {any} */ let root = body;
+      while (t.isMemberExpression(root) && !root.computed) root = root.object;
+      if (!t.isIdentifier(root)) return;
+      thunk.replaceWith(body);
+    }
+  });
+}
 /** Normalize native control contracts before routine reconstruction.
  * @param {Map<string,string>} files */
 export function nativePrelude(files) {
@@ -230,6 +311,8 @@ export function nativePrelude(files) {
     nameDefaultComponent(p, file);
     liftInlineComponents(p);
     componentFactories(p);
+    derivedStores(p);
+    pendingThunks(p);
     traverseOwned(p, {
       VariableDeclarator(q) {
         const init = q.get("init");

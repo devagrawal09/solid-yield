@@ -30,9 +30,20 @@ const sources = dir =>
     if (d.isDirectory()) return sources(file);
     return /\.tsx?$/.test(d.name) && !d.name.endsWith(".d.ts") ? [file] : [];
   });
+/** Each render mode's entries: CSR, and the streamed and string servers with their clients. */
+const entries = [
+  "csr/client.tsx",
+  "stream/client.tsx",
+  "stream/entry-server.tsx",
+  "string/client.tsx",
+  "string/entry-server.tsx"
+];
 const authored = () =>
   new Map(
-    [...sources(shared), join(original, "csr/client.tsx")].map(f => [f, readFileSync(f, "utf8")])
+    [...sources(shared), ...entries.map(entry => join(original, entry))].map(f => [
+      f,
+      readFileSync(f, "utf8")
+    ])
   );
 export const fix = JSON.parse(readFileSync(join(harness, "author-fix.json"), "utf8"));
 /** The author's minimal fix, applied to a copy of the authored files. */
@@ -93,7 +104,8 @@ async function check(files) {
   const ambient = join(out, "native-env.d.ts");
   writeFileSync(
     ambient,
-    `/// <reference path="${join(original, "node_modules/vite/client.d.ts")}" />\n`
+    `/// <reference path="${join(original, "node_modules/vite/client.d.ts")}" />\n` +
+      `/// <reference path="${join(original, "types.d.ts")}" />\n`
   );
   writeFileSync(
     join(out, "tsconfig.json"),
@@ -118,6 +130,12 @@ async function check(files) {
     .filter(d => d.category === ts.DiagnosticCategory.Error)
     .map(d => {
       const message = ts.flattenDiagnosticMessageText(d.messageText, "\n");
+      if (process.env.DEBUG_MESSAGES)
+        console.error(
+          d.file?.fileName,
+          d.code,
+          JSON.stringify(d.file?.text.slice(d.start ?? 0, (d.start ?? 0) + (d.length ?? 0) + 20))
+        );
       const root = /readonly "\[([A-Z_]+)\][^"]*": ([^;]+);/.exec(message);
       const refusal = /\[(PENDING_ROOT|NO_PROVIDER)\]/.exec(message);
       return {

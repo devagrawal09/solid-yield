@@ -816,6 +816,24 @@ function pass(code, filename, program, native = false) {
   function delegate(path, operand = path.node) {
     const fn = path.getFunctionParent();
     if (!fn) return; // root renderer calls and foreign edges stay plain
+    // A library renderer's root code (`renderToStream(() => Root({ url }))`)
+    // is the root, checked by the renderer itself (D-099), not a callback.
+    const renderer = fn.parentPath?.isCallExpression() ? fn.parentPath : null;
+    if (
+      renderer &&
+      renderer.node.arguments[0] === fn.node &&
+      ["render", "hydrate", "renderToString", "renderToStream"].includes(
+        lib(renderer.get("callee")) ?? ""
+      )
+    )
+      return;
+    // The same root code bound for its check (`const __nativeRoot = () => Root({ url })`).
+    if (
+      fn.parentPath?.isVariableDeclarator() &&
+      t.isIdentifier(fn.parentPath.node.id) &&
+      /^__nativeRoot\d*$/.test(fn.parentPath.node.id.name)
+    )
+      return;
     if (!fn.node.generator) {
       if (fn.node.async || fn.isObjectMethod() || fn.isClassMethod())
         fail(
@@ -1469,17 +1487,29 @@ function coloredPropSites(program, active) {
         !annotation ||
         !ts.isTypeReferenceNode(annotation) ||
         annotation.typeName.getText() !== "Props" ||
-        !annotation.typeArguments?.[0] ||
-        !ts.isTypeLiteralNode(annotation.typeArguments[0])
+        !annotation.typeArguments?.[0]
       )
         continue;
+      const [argument] = annotation.typeArguments;
+      // `ParentProps<L>` (NativeParentProps): L's members and a plain `children`.
+      let alias = ts.isTypeReferenceNode(argument)
+        ? checker.getSymbolAtLocation(argument.typeName)
+        : undefined;
+      if (alias && alias.flags & ts.SymbolFlags.Alias) alias = checker.getAliasedSymbol(alias);
+      const parent = alias?.name === "NativeParentProps";
+      const inner =
+        parent && ts.isTypeReferenceNode(argument) ? argument.typeArguments?.[0] : argument;
+      if (inner && !ts.isTypeLiteralNode(inner)) continue;
+      if (!inner && !parent) continue;
       const name = prop.name.getText();
-      const declared = annotation.typeArguments[0].members.find(
+      const declared = inner?.members.find(
         m => ts.isPropertySignature(m) && m.name.getText() === name && m.type
       );
-      if (!declared || !ts.isPropertySignature(declared) || !declared.type) continue;
-      // Only a plain declaration widens; a declared Source keeps its own contract.
-      if (member(checker.getTypeFromTypeNode(declared.type), "SOURCE", declared)) continue;
+      if (declared) {
+        if (!ts.isPropertySignature(declared) || !declared.type) continue;
+        // Only a plain declaration widens; a declared Source keeps its own contract.
+        if (member(checker.getTypeFromTypeNode(declared.type), "SOURCE", declared)) continue;
+      } else if (!(parent && name === "children")) continue;
       if (!wanted.has(file)) wanted.set(file, new Map());
       const components = /** @type {Map<string, Set<string>>} */ (wanted.get(file));
       const component = declaration.name.text;
@@ -1538,10 +1568,33 @@ function widenColoredProps(code, filename, components, concrete) {
         ? /** @type {import("@babel/core").types.TSIntersectionType} */ (typed?.typeAnnotation)
             .types[0]
         : typed?.typeAnnotation;
-      const literal =
+      let literal =
         t.isTSTypeReference(annotation) && t.isIdentifier(annotation.typeName, { name: "Props" })
           ? annotation.typeParameters?.params[0]
           : null;
+      // `ParentProps<L>` (Solid's, lowered to `NativeParentProps`) is L with an
+      // optional `children`: spelled out, so `children` widens as any prop does.
+      if (
+        t.isTSTypeReference(literal) &&
+        t.isIdentifier(literal.typeName) &&
+        lib(
+          q.scope.getBinding(literal.typeName.name)?.path.get("local") ?? null,
+          "solid-yield/internal"
+        ) === "NativeParentProps"
+      ) {
+        const [inner] = literal.typeParameters?.params ?? [];
+        if (inner && !t.isTSTypeLiteral(inner)) return;
+        const children = t.tsPropertySignature(
+          t.identifier("children"),
+          t.tsTypeAnnotation(
+            t.tsImportType(t.stringLiteral("solid-yield"), t.identifier("Element"))
+          )
+        );
+        children.optional = true;
+        literal = t.tsTypeLiteral([...(inner?.members ?? []), children]);
+        if (annotation && t.isTSTypeReference(annotation) && annotation.typeParameters)
+          annotation.typeParameters.params[0] = literal;
+      }
       if (!typed || !annotation || !t.isTSTypeLiteral(literal)) return;
       const parameters = t.isTSTypeParameterDeclaration(fn.typeParameters)
         ? fn.typeParameters.params
@@ -1925,11 +1978,17 @@ function checkEscapes(files, active, options) {
           });
         if (generator && !declarationName && !importExport && !propertyName) {
           const direct = ts.isCallExpression(parent) && parent.expression === n;
+          // Reading a member of it (`placeOrder.interrupt()`) hands nothing
+          // over; `call`, `apply` and `bind` would.
+          const member =
+            ts.isPropertyAccessExpression(parent) &&
+            parent.expression === n &&
+            !["call", "apply", "bind"].includes(parent.name.text);
           const callback =
             ts.isCallExpression(parent) &&
             ts.isIdentifier(parent.expression) &&
             constructors.has(parent.expression.text);
-          if (!direct && !callback && !capturedCallee(n) && !routineSlot(n)) {
+          if (!direct && !member && !callback && !capturedCallee(n) && !routineSlot(n)) {
             const at = n.getSourceFile().getLineAndCharacterOfPosition(n.getStart());
             const error = new Error(
               `[SUGAR_ESCAPE] Routine ${n.text} is handed to an unknown consumer; a plain callback cannot drive it.`

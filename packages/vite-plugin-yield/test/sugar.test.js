@@ -84,6 +84,17 @@ describe("sugar: existing library semantics", { timeout: 30_000 }, () => {
       return <p>{x()}</p>; }`)
     ).toThrow(/SUGAR_ESCAPE/);
   });
+  it("reads a routine's member without handing it over; bind hands it over", () => {
+    const result = lower(`${start} function Counter() { const [n] = $signal(0);
+      const read = () => n(); const arity = read.length; const x = $memo(() => read() + arity);
+      return <p>{x()}</p>; }`);
+    expect(result).toContain("const arity = read.length");
+    expect(() =>
+      lower(`${start} function Counter() { const [n] = $signal(0);
+      const read = () => n(); const bound = read.bind(null); const x = $memo(() => bound());
+      return <p>{x()}</p>; }`)
+    ).toThrow(/SUGAR_ESCAPE/);
+  });
   it("refuses authored generators and async routine bodies", () => {
     expect(() => lower(`${start} function* helper() {}`)).toThrow(/SUGAR_EXPLICIT/);
     expect(() => lower(`${start} const e = $event(async () => {});`)).toThrow(/SUGAR_ASYNC/);

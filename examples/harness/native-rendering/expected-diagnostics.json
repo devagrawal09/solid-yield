@@ -46,6 +46,46 @@
       "code": "TS2769",
       "fails": null,
       "at": "shared/src/router.tsx:20:10"
+    },
+    {
+      "code": "PENDING_ROOT",
+      "fails": "true",
+      "at": "stream/client.tsx:7:5"
+    },
+    {
+      "code": "FOREIGN_HANDOFF",
+      "fails": "unknown",
+      "at": "stream/client.tsx:7:5"
+    },
+    {
+      "code": "PENDING_ROOT",
+      "fails": "true",
+      "at": "stream/client.tsx:7:5"
+    },
+    {
+      "code": "PENDING_ROOT",
+      "fails": "true",
+      "at": "stream/entry-server.tsx:6:17"
+    },
+    {
+      "code": "FOREIGN_HANDOFF",
+      "fails": "unknown",
+      "at": "stream/entry-server.tsx:6:17"
+    },
+    {
+      "code": "PENDING_ROOT",
+      "fails": "true",
+      "at": "stream/entry-server.tsx:6:17"
+    },
+    {
+      "code": "FOREIGN_HANDOFF",
+      "fails": "unknown",
+      "at": "string/client.tsx:11:5"
+    },
+    {
+      "code": "FOREIGN_HANDOFF",
+      "fails": "unknown",
+      "at": "string/entry-server.tsx:12:17"
     }
   ],
   "lint": [

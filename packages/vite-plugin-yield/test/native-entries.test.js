@@ -10,8 +10,11 @@ import { lowerNativeProject } from "../src/native.js";
 const dir = resolve(import.meta.dirname, "fixtures/native-entries");
 const app = resolve(dir, "App.tsx"),
   page = resolve(dir, "Page.tsx"),
+  shell = resolve(dir, "Shell.tsx"),
   main = resolve(dir, "main.tsx");
-const sources = Object.fromEntries([app, page].map(file => [file, readFileSync(file, "utf8")]));
+const sources = Object.fromEntries(
+  [app, page, shell].map(file => [file, readFileSync(file, "utf8")])
+);
 const lower = entry => {
   const result = lowerNativeProject(new Map([...Object.entries(sources), [main, entry]]));
   return { result, code: result.files.get(main) };
@@ -63,11 +66,45 @@ render(() => <Plain />, document.body);`);
     expect(code).not.toContain("const Root");
   });
 
-  it("leaves a tree that closes over a local", () => {
-    const { code } =
-      lower(`import {renderToString} from '@solidjs/web'; import {Loading} from 'solid-js'; import {Plain} from './App';
-export function page(id: string) { return renderToString(() => <Loading><Plain /><i>{id}</i></Loading>); }`);
-    expect(code).not.toContain("const Root");
+  it("lifts a tree that uses a typed parameter, as a prop of Root", () => {
+    const { result, code } =
+      lower(`import {renderToStream} from '@solidjs/web'; import {Errored, Loading} from 'solid-js'; import Shell from './Shell'; import {Plain} from './App';
+export function render(url: string) {
+  return renderToStream(() => <Shell title={url}><Errored fallback={error => <p>{String(error())}</p>}><Loading><Plain /></Loading></Errored></Shell>);
+}`);
+    expect(code).toMatch(/function\* Root\(props: Props<\{\s*url: string;\s*\}>\)/);
+    // The entry function stays plain; the root is checked as a bare one is.
+    expect(code).toContain("export function render(url: string)");
+    expect(code).toContain("const __nativeRoot = () => Root({");
+    expect(code).toContain("foreign(__nativeRoot satisfies RootCheck<typeof __nativeRoot>)");
+    expect(checked(result.files)).toEqual([]);
+  });
+
+  it("refuses such a root when it may fail or be pending", () => {
+    const { result } =
+      lower(`import {renderToStream} from '@solidjs/web'; import Shell from './Shell'; import {Plain} from './App';
+export function render(url: string) {
+  return renderToStream(() => <Shell title={url}><Plain /></Shell>);
+}`);
+    // Shell's `children` (ParentProps) takes the colors its caller passes
+    // (D-119), so the root, not the Shell, reports them.
+    expect(result.files.get(shell)).toMatch(/children\?: __NativeSource</);
+    const errors = checked(result.files).join("\n");
+    expect(errors).not.toMatch(/SETTLED_PROP/);
+    expect(errors).toMatch(/PENDING_ROOT/);
+    expect(errors).toMatch(/FOREIGN_HANDOFF[^]*chunk/);
+  });
+
+  it("leaves a tree that uses an untyped local", () => {
+    const entry = `import {renderToString} from '@solidjs/web'; import {Loading} from 'solid-js'; import {Plain} from './App';
+export function page(id: string) { let label = id; return renderToString(() => <Loading><Plain /><i>{label}</i></Loading>); }`;
+    let code = "";
+    try {
+      code = lower(entry).code;
+    } catch {
+      // refused as an unknown callback: not lifted either way
+    }
+    expect(code).not.toContain("function* Root");
   });
 
   it("renders a component a factory returns as a native tag", () => {

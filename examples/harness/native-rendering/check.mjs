@@ -22,14 +22,21 @@ const fixed = join(original, ".native-generated/fixed");
 // so it resolves the original's dependencies; the original stays byte-identical.
 rmSync(fixed, { recursive: true, force: true });
 cpSync(join(original, "shared/src"), join(fixed, "shared/src"), { recursive: true });
-cpSync(join(original, "csr"), join(fixed, "csr"), { recursive: true });
+for (const entry of ["csr", "stream", "string"])
+  cpSync(join(original, entry), join(fixed, entry), { recursive: true });
 cpSync(join(original, "types.d.ts"), join(fixed, "types.d.ts"));
 writeFileSync(
   join(fixed, "tsconfig.json"),
   JSON.stringify(
     {
       extends: join(original, "tsconfig.json"),
-      include: ["shared/src/**/*", "csr/**/*.tsx", "types.d.ts"]
+      include: [
+        "shared/src/**/*",
+        "csr/**/*.tsx",
+        "stream/**/*.tsx",
+        "string/**/*.tsx",
+        "types.d.ts"
+      ]
     },
     null,
     2
@@ -136,7 +143,21 @@ try {
       );
       assert.equal(original.retained, true, url);
       assert.equal(native.retained, true, url);
-      assert.equal(markup(native.snapshots[0]), markup(original.snapshots[0]), url);
+      // Home's ticker starts when its lazy route's module arrives, in real
+      // time: it must run in both, and its count is not compared.
+      const ticker = /<span>(\d+)<\/span>/;
+      const settled = html =>
+        url === "/" ? markup(html).replace(ticker, "<span>#</span>") : markup(html);
+      if (url === "/")
+        for (const [name, result] of [
+          ["original", original],
+          ["native", native]
+        ])
+          assert.ok(
+            Number(ticker.exec(markup(result.snapshots[0]))?.[1]) >= 50,
+            `${name}: Home ticks`
+          );
+      assert.equal(settled(native.snapshots[0]), settled(original.snapshots[0]), url);
     }
     console.log(
       `native Rendering hydration: ${urls.length} routes; server nodes retained; settled pages match the original`

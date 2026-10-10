@@ -1447,6 +1447,23 @@ Solid state between Effect steps, and its writes run inside the bridge's own
 `action`. The lowering refuses it (`SUGAR_ESCAPE`: a routine handed to an
 unknown consumer). A foreign generator bridge needs its own contract.
 
+*Narrowed (2026-10-10).* The first refusal, at `placeOrder.interrupt()`, was
+spurious: reading a member of a routine hands nothing over. The escape check
+now accepts a member read, though not `call`, `apply` or `bind`
+(`sugar.test.js`). The real stop is inside the bridge.
+
+- `effectAction` returns `invoke`, which the lowering makes a routine because
+  it calls the action. It returns it through the plain declared type
+  `EffectAction<Args, R>`.
+- The bridge drives the saga generator itself (`it.next`, `it.throw`) inside
+  Solid's raw `action`, and the saga writes Solid state between its Effect
+  steps.
+
+Supporting this needs a contract for writes made inside a transaction the
+library does not own (today a setter's receipt is admitted only in an
+`$event` or an effect's phase), and a typing for a bridge's returned
+callable. Both are Dev's to rule; until then Effect stays refused.
+
 **Room (open, out of the native scope so far).** Room's panels are server
 components (`live(GET(async … => (props) => <…/>))`), the islands line's
 shape, not plain client Solid.
@@ -1654,7 +1671,8 @@ over the prop, the twin's own pattern) type-checks and lints clean.
 
 **Half A** (`scripts/native-rendering-check.mjs`; gate steps
 `native:rendering:diagnostics` and `:typecheck`). The unchanged original
-(`shared/src` and the CSR entry) lowers with five notices: the `RevealOrder`
+(`shared/src` and all five entries: CSR, and the streamed and string servers
+with their clients) lowers with five notices: the `RevealOrder`
 type and four foreign boundaries (`Reveal` and `Portal` from Solid). It gives
 exactly these findings, each at its authored position:
 
@@ -1664,14 +1682,17 @@ exactly these findings, each at its authored position:
 | the same | `router.tsx:22:25` (`props.url ?? …`) | The same, in the factory's component. |
 | `PENDING_ROOT` | `csr/client.tsx:4:15` | The first route is a `lazy` page. Solid defers the mount, and says so itself (`ASYNC_OUTSIDE_LOADING_BOUNDARY`); the library asks for that root `Loading` to be written (D-099). |
 | `FOREIGN_HANDOFF` | `csr/client.tsx:4:15` | A route chunk can fail to load (`ChunkError`), and nothing handles it. While the three components do not type, the list reads `unknown`. |
+| the same two | `stream/client.tsx:7:5`, `stream/entry-server.tsx:6:17` | The streamed entries render the same pending, failing app under `Shell`. |
+| `FOREIGN_HANDOFF` | `string/client.tsx:11:5`, `string/entry-server.tsx:12:17` | The string entries already wrap the app in a `Loading`, so only the unhandled `ChunkError` remains. |
 
-The author's fix (`examples/harness/native-rendering/author-fix.json`, six
-edits in three files) type-checks and lints clean:
+The author's fix (`examples/harness/native-rendering/author-fix.json`, 14
+edits in 7 files) type-checks and lints clean:
 
 - Each setup read becomes a local override signal and a memo over the prop
   (`const [chosen, setId] = createSignal<string>(); const id = createMemo(() => chosen() ?? props.id);`),
   the twin's own pattern.
-- The CSR root is wrapped in an `Errored` and a fallback-less `Loading`.
+- Each entry's app is wrapped in an `Errored`, and the CSR and streamed ones
+  also in a fallback-less `Loading` (the string ones already have theirs).
 
 **Half B** (`examples/harness/native-rendering/check.mjs`; gate steps
 `native:rendering:parity`, `:ssr`, `:hydrate`). It compares the original, the
@@ -1693,8 +1714,21 @@ What it took, besides F-S51–F-S53:
   call is at module level and uses only module-level bindings, is now declared
   as `Root` before the call. The file is then lowered as a module, its render
   becomes the library's, and the root is checked (`RootCheck`). A bare
-  `<App />` keeps the entry's existing handoff check. Tests:
-  `native-entries.test.js`.
+  `<App />` keeps the entry's existing handoff check. A tree inside a
+  module-level function (`renderToStream(() => <Shell><App url={url} /></Shell>)`
+  in `render(url: string)`) may use the function's typed parameters and typed
+  constants. Each becomes a prop of `Root`, and the root code is bound and
+  checked as a bare root is:
+  `const __nativeRoot = () => Root({ url }); renderToStream(foreign(__nativeRoot satisfies RootCheck<typeof __nativeRoot>))`.
+  The renderers fail nothing of their own in the inference, since the root
+  check owns their root's failures, so `render(url)` stays a plain function.
+  Tests: `native-entries.test.js`, and the renderer test in
+  `failure-inference.test.mjs`.
+- **`ParentProps` children widen (D-119).** `Shell(props: ParentProps<{ clientEntry: string }>)`
+  received a pending, failing `App` as `children`. The widening only edited
+  `Props<{ … }>` literals, so it refused the call (`SETTLED_PROP`) instead of
+  letting the colors reach the root. `ParentProps<L>` (`NativeParentProps`) now
+  counts as L's members plus a plain `children`.
 - **A factory's result is a native tag.** An imported tag whose binding is a
   call to a selected component factory (`App = RouteHOC(…)`) was treated as
   foreign (`foreign(App)`). It is now a yield component.

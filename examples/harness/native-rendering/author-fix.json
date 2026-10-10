@@ -38,6 +38,58 @@
           "to": "render(\n  () => (\n    <Errored fallback={error => <p>Something went wrong: {String(error())}</p>}>\n      <Loading>\n        <App />\n      </Loading>\n    </Errored>\n  ),\n  document.getElementById(\"app\")!\n);"
         }
       ]
+    },
+    {
+      "file": "stream/client.tsx",
+      "edits": [
+        {
+          "from": "import { hydrate } from \"@solidjs/web\";\n",
+          "to": "import { hydrate } from \"@solidjs/web\";\nimport { Errored, Loading } from \"solid-js\";\n"
+        },
+        {
+          "from": "      <App />\n    </Shell>",
+          "to": "      <Errored fallback={error => <p>Something went wrong: {String(error())}</p>}>\n        <Loading>\n          <App />\n        </Loading>\n      </Errored>\n    </Shell>"
+        }
+      ]
+    },
+    {
+      "file": "stream/entry-server.tsx",
+      "edits": [
+        {
+          "from": "import { renderToStream } from \"@solidjs/web\";\n",
+          "to": "import { renderToStream } from \"@solidjs/web\";\nimport { Errored, Loading } from \"solid-js\";\n"
+        },
+        {
+          "from": "        <App url={url} />\n      </Shell>",
+          "to": "        <Errored fallback={error => <p>Something went wrong: {String(error())}</p>}>\n          <Loading>\n            <App url={url} />\n          </Loading>\n        </Errored>\n      </Shell>"
+        }
+      ]
+    },
+    {
+      "file": "string/client.tsx",
+      "edits": [
+        {
+          "from": "import { Loading } from \"solid-js\";",
+          "to": "import { Errored, Loading } from \"solid-js\";"
+        },
+        {
+          "from": "      <Loading fallback={<div>Loading…</div>}>\n        <App />\n      </Loading>",
+          "to": "      <Errored fallback={error => <p>Something went wrong: {String(error())}</p>}>\n        <Loading fallback={<div>Loading…</div>}>\n          <App />\n        </Loading>\n      </Errored>"
+        }
+      ]
+    },
+    {
+      "file": "string/entry-server.tsx",
+      "edits": [
+        {
+          "from": "import { Loading } from \"solid-js\";",
+          "to": "import { Errored, Loading } from \"solid-js\";"
+        },
+        {
+          "from": "        <Loading fallback={<div>Loading…</div>}>\n          <App url={url} />\n        </Loading>",
+          "to": "        <Errored fallback={error => <p>Something went wrong: {String(error())}</p>}>\n          <Loading fallback={<div>Loading…</div>}>\n            <App url={url} />\n          </Loading>\n        </Errored>"
+        }
+      ]
     }
   ]
 }

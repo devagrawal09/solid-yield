@@ -251,3 +251,13 @@ test("an authored generator a loop drives fails with its body; one that escapes 
   for (const name of ["failing", "quiet", "relay", "handsOff", "iterated"])
     assert.deepEqual(summary(report, name), ["unknown"], name);
 });
+
+test("a root renderer fails nothing of its own: its root is checked where it is rendered", () => {
+  const report = infer({
+    "entry.tsx": `import {renderToString} from '@solidjs/web';
+ class E extends Error{}
+ function Bad(){ throw new E(); }
+ export function page(){ return renderToString(() => <Bad/>); }`
+  });
+  assert.deepEqual(summary(report, "page"), []);
+});

@@ -577,6 +577,13 @@ export function inferFailures(
     if (contextId(callee)) return "context";
     // F-S45: marks an error safe to serialize; it does not throw.
     if (api?.source === "@solidjs/web" && api.name === "markSafeError") return "web";
+    // A root renderer's root is checked where it is rendered (RootCheck: a
+    // root that may fail or be pending is refused); the call fails nothing more.
+    if (
+      api?.source === "@solidjs/web" &&
+      ["render", "hydrate", "renderToString", "renderToStream"].includes(api.name)
+    )
+      return "renderer";
     if (
       p.isNewExpression() &&
       callee.isIdentifier({ name: "Promise" }) &&
@@ -1009,6 +1016,7 @@ export function inferFailures(
       }
       const primitive = nativeCall(p);
       if (primitive) {
+        if (primitive === "renderer") return argEffects;
         if (primitive === "builtin")
           return union(
             argEffects,

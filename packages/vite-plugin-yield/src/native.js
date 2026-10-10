@@ -764,10 +764,81 @@ function surface(
     },
     CallExpression(q) {
       const api = imported(q.get("callee"));
-      if (api?.module === "@solidjs/web" && ["render", "hydrate"].includes(api.name)) {
+      if (
+        api?.module === "@solidjs/web" &&
+        ["render", "hydrate", "renderToString", "renderToStream"].includes(api.name)
+      ) {
         const callback = q.get("arguments.0");
         if (callback?.isArrowFunctionExpression() && t.isJSXElement(callback.node.body)) {
           const element = callback.node.body;
+          const tag = element.openingElement.name;
+          const attributes = element.openingElement.attributes;
+          // F-S53: a root given props (`renderToStream(() => <Root url={url} />)`,
+          // a lifted entry tree): the library's renderer takes that root code,
+          // `() => Root({ url })`, and checks it (RootCheck).
+          const local = t.isJSXIdentifier(tag) ? q.scope.getBinding(tag.name)?.path : null;
+          if (
+            t.isJSXIdentifier(tag) &&
+            attributes.length &&
+            !element.children.length &&
+            local?.isFunctionDeclaration() &&
+            attributes.every(
+              a =>
+                t.isJSXAttribute(a) &&
+                t.isJSXIdentifier(a.name) &&
+                (t.isStringLiteral(a.value) ||
+                  (t.isJSXExpressionContainer(a.value) && t.isExpression(a.value.expression)))
+            )
+          ) {
+            const props = t.objectExpression(
+              attributes.map(a => {
+                const attribute = /** @type {any} */ (a);
+                const value = t.isStringLiteral(attribute.value)
+                  ? attribute.value
+                  : attribute.value.expression;
+                return t.objectProperty(t.identifier(attribute.name.name), value);
+              })
+            );
+            // Bound first, so the root is checked as a bare one is: RootCheck
+            // (pending, requirements) and, as a foreign handoff, no failures.
+            let name = "__nativeRoot";
+            for (let i = 1; q.scope.hasBinding(name); i++) name = `__nativeRoot${i}`;
+            const root = t.identifier(name);
+            q.getStatementParent()?.insertBefore(
+              t.variableDeclaration("const", [
+                t.variableDeclarator(
+                  root,
+                  t.arrowFunctionExpression(
+                    [],
+                    copyPosition(t.callExpression(t.identifier(tag.name), [props]), element)
+                  )
+                )
+              ])
+            );
+            needed.add("RootCheck");
+            needed.add("foreign");
+            needed.add(`__native${api.name}`);
+            q.node.callee = t.identifier(`__native${api.name}`);
+            q.node.arguments[0] = copyPosition(
+              t.callExpression(t.identifier("foreign"), [
+                copyPosition(
+                  t.tsSatisfiesExpression(
+                    t.identifier(name),
+                    copyPosition(
+                      t.tsTypeReference(
+                        t.identifier("RootCheck"),
+                        t.tsTypeParameterInstantiation([t.tsTypeQuery(t.identifier(name))])
+                      ),
+                      element
+                    )
+                  ),
+                  element
+                )
+              ]),
+              element
+            );
+            return;
+          }
           if (
             t.isJSXIdentifier(element.openingElement.name) &&
             !element.openingElement.attributes.length &&
@@ -788,9 +859,12 @@ function surface(
           const check = copyPosition(
             t.tsSatisfiesExpression(
               target,
-              t.tsTypeReference(
-                t.identifier("RootCheck"),
-                t.tsTypeParameterInstantiation([t.tsTypeQuery(t.identifier(target.name))])
+              copyPosition(
+                t.tsTypeReference(
+                  t.identifier("RootCheck"),
+                  t.tsTypeParameterInstantiation([t.tsTypeQuery(t.identifier(target.name))])
+                ),
+                target
               )
             ),
             target
@@ -801,10 +875,16 @@ function surface(
             needed.add("foreign");
             q.node.callee = t.identifier(`__native${api.name}`);
             needed.add(`__native${api.name}`);
-            q.node.arguments[0] = t.callExpression(t.identifier("foreign"), [check]);
+            q.node.arguments[0] = copyPosition(
+              t.callExpression(t.identifier("foreign"), [check]),
+              target
+            );
           } else {
             needed.add("foreign");
-            q.node.arguments[0] = t.callExpression(t.identifier("foreign"), [check]);
+            q.node.arguments[0] = copyPosition(
+              t.callExpression(t.identifier("foreign"), [check]),
+              target
+            );
           }
         }
         return;
@@ -1515,7 +1595,9 @@ function surface(
         [...needed].map(name => {
           const spec = t.importSpecifier(
             t.identifier(name),
-            t.identifier(name.replace(/^__native(?=render$|hydrate$)/, ""))
+            t.identifier(
+              name.replace(/^__native(?=render$|hydrate$|renderToString$|renderToStream$)/, "")
+            )
           );
           if (name === "Props" || name === "RootCheck" || name === "Element")
             spec.importKind = "type";

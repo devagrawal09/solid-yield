@@ -1,5 +1,5 @@
 import { traverseOwned } from "./native-owned.js";
-import { printMapped } from "./positions.js";
+import { copyPosition, printMapped } from "./positions.js";
 // @ts-check
 import babel from "@babel/core";
 import { parseProgram } from "./transform.js";
@@ -279,23 +279,30 @@ const key = n => n?.name ?? n?.value;
  * F-S53: a root render whose tree wraps a component in Solid's own markup
  * (`render(() => <Errored …><Loading><App /></Loading></Errored>, el)`, the
  * shape D-099 asks of a pending app) is a component of its entry. It is
- * declared as `Root` before the call and rendered as `<Root />`, so its tree
- * is lowered and the root is checked. Only a module-level call whose tree uses
- * module-level bindings alone is lifted.
+ * declared as `Root` before the statement that renders it and rendered as
+ * `<Root />`, so its tree is lowered and the root is checked. A tree inside a
+ * module-level function may use that function's typed parameters and typed
+ * constants (`renderToStream(() => <Shell><App url={url} /></Shell>)` in
+ * `render(url: string)`): each becomes a prop of `Root`.
  * @param {Path} p @returns {boolean}
  */
 function liftRootTrees(p) {
+  /** @type {Path[]} */ const calls = [];
+  p.traverse({
+    CallExpression(q) {
+      const from = api(q.get("callee"));
+      if (
+        from?.module === "@solidjs/web" &&
+        ["render", "hydrate", "renderToString", "renderToStream"].includes(from.name)
+      )
+        calls.push(q);
+    }
+  });
   let changed = false;
-  for (const statement of /** @type {Path[]} */ (p.get("body"))) {
-    const call = statement.isExpressionStatement() ? statement.get("expression") : null;
-    if (!call?.isCallExpression()) continue;
-    const from = api(call.get("callee"));
-    if (
-      from?.module !== "@solidjs/web" ||
-      !["render", "hydrate", "renderToString", "renderToStream"].includes(from.name)
-    )
-      continue;
-    const tree = call.get("arguments.0");
+  for (const call of calls) {
+    const statement = call.findParent(q => !!q.parentPath?.isProgram());
+    if (!statement) continue;
+    const tree = /** @type {Path} */ (call.get("arguments.0"));
     if (!tree?.isArrowFunctionExpression() || tree.node.params.length) continue;
     const body = tree.get("body");
     if (!body.isJSXElement() && !body.isJSXFragment()) continue;
@@ -303,37 +310,90 @@ function liftRootTrees(p) {
     const opening = body.isJSXElement() ? body.node.openingElement : null;
     if (opening && !opening.attributes.length && !body.node.children.length) continue;
     let component = false,
-      local = false;
-    /** A name bound outside the tree but not at module level. @param {Path} q */
-    const closes = q => {
+      lifts = true;
+    /** @type {Map<string, any>} the captured locals, with their declared types */
+    const captured = new Map();
+    /** @type {Path[]} */ const uses = [];
+    /** A name bound outside the tree and below module level: a typed
+     * parameter or constant of the enclosing function becomes a prop.
+     * @param {Path} q @param {boolean} tag */
+    const capture = (q, tag) => {
       const binding = q.scope.getBinding(q.node.name);
-      return !!binding && binding.scope !== p.scope && !binding.path.isDescendant(body);
+      if (!binding || binding.scope === p.scope || binding.path.isDescendant(body)) return;
+      const declared =
+        binding.kind === "param" && binding.path.isIdentifier()
+          ? binding.path.node.typeAnnotation
+          : binding.kind === "const" && binding.path.isVariableDeclarator()
+            ? /** @type {any} */ (binding.path.node.id).typeAnnotation
+            : null;
+      if (tag || !declared || !t.isTSTypeAnnotation(declared)) {
+        lifts = false;
+        return;
+      }
+      captured.set(q.node.name, declared.typeAnnotation);
+      uses.push(q);
     };
     body.traverse({
+      /** @param {Path} q */
       JSXOpeningElement(q) {
         if (t.isJSXIdentifier(q.node.name) && /^[A-Z]/.test(q.node.name.name)) component = true;
       },
+      /** @param {Path} q */
       Identifier(q) {
-        if (q.isReferencedIdentifier()) local ||= closes(q);
+        if (q.isReferencedIdentifier()) capture(q, false);
       },
+      /** @param {Path} q */
       JSXIdentifier(q) {
-        if (q.parentPath.isJSXOpeningElement() || q.parentPath.isJSXClosingElement())
-          local ||= closes(q);
+        if (q.parentPath?.isJSXOpeningElement() || q.parentPath?.isJSXClosingElement())
+          capture(q, true);
       }
     });
-    if (!component || local) continue;
+    if (!component || !lifts) continue;
     let name = "Root";
     while (p.scope.hasBinding(name)) name += "Inline";
+    let param = "props";
+    while (body.scope.hasBinding(param) || captured.has(param))
+      param = `root${param[0].toUpperCase()}${param.slice(1)}`;
+    for (const use of uses) {
+      const property = use.parentPath;
+      if (property?.isObjectProperty() && property.node.shorthand) property.node.shorthand = false;
+      use.replaceWith(t.memberExpression(t.identifier(param), t.identifier(use.node.name)));
+    }
+    const params = captured.size
+      ? [
+          Object.assign(t.identifier(param), {
+            typeAnnotation: t.tsTypeAnnotation(
+              t.tsTypeLiteral(
+                [...captured].map(([prop, type]) =>
+                  t.tsPropertySignature(t.identifier(prop), t.tsTypeAnnotation(t.cloneNode(type)))
+                )
+              )
+            )
+          })
+        ]
+      : [];
     const lifted = t.functionDeclaration(
       t.identifier(name),
-      [],
+      params,
       t.blockStatement([t.returnStatement(body.node)])
     );
     lifted.loc = body.node.loc;
     lifted.start = body.node.start;
     lifted.end = body.node.end;
     body.replaceWith(
-      t.jsxElement(t.jsxOpeningElement(t.jsxIdentifier(name), [], true), null, [], true)
+      t.jsxElement(
+        t.jsxOpeningElement(
+          // Reported at the authored tree: a root finding names the render.
+          copyPosition(t.jsxIdentifier(name), body.node),
+          [...captured.keys()].map(prop =>
+            t.jsxAttribute(t.jsxIdentifier(prop), t.jsxExpressionContainer(t.identifier(prop)))
+          ),
+          true
+        ),
+        null,
+        [],
+        true
+      )
     );
     statement.insertBefore(lifted);
     p.scope.crawl();

@@ -1413,7 +1413,7 @@
       "diagnostics": [
         {
           "code": "SUGAR_ESCAPE",
-          "message": "[SUGAR_ESCAPE] Routine placeOrder is handed to an unknown consumer; a plain callback cannot drive it."
+          "message": "[SUGAR_ESCAPE] Routine invoke is handed to an unknown consumer; a plain callback cannot drive it."
         },
         {
           "code": "MODULE_STATE",

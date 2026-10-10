@@ -92,7 +92,10 @@ const sourceOptions = ts.parseJsonConfigFileContent(
 async function check(files) {
   const result = lowerNativeProject(files, { compilerOptions: sourceOptions });
   // Typed lint needs the program on disk: a scratch copy, removed after.
-  const out = join(root, "packages/vite-plugin-yield/test/.native-generated/rendering-half-a");
+  const out = join(
+    root,
+    `packages/vite-plugin-yield/test/.native-generated/rendering-half-a-${stage}`
+  );
   rmSync(out, { recursive: true, force: true });
   const written = new Map();
   for (const [file, code] of result.files) {

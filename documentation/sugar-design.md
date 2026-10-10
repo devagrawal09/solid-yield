@@ -573,8 +573,8 @@ readonly "[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail wit
 ```
 
 [The exact snapshot](../examples/harness/native-hackernews/expected-diagnostics.json)
-records the complete three TypeScript errors at generated `app.tsx:14:32`,
-`app.tsx:18:32`, and `app.tsx:22:32`. The expected-diagnostics gate requires exactly
+records the complete three TypeScript errors at generated `app.tsx:14:37`,
+`app.tsx:18:37`, and `app.tsx:22:37`. The expected-diagnostics gate requires exactly
 that boundary and those three failures; any extra error, missing rejection, or
 changed failure set fails. This is the model finding an unhandled failure in the
 original, not a native lowering blocker. The separate
@@ -1217,8 +1217,8 @@ generated component setup, which only admits setup operations. It maps to
 `FilterBar` at `filters.tsx:32:17`. The requested stop rule applies. Both native
 acceptance halves fail, the author patch is empty, and final panel/route colors
 and native hydrated, SSR, AckFailed and NotFound comparisons are unavailable.
-`native:dashboard:structural-stop` pins F-S37 with
-[side-by-side evidence](native-dashboard-blocker.md).
+`native:dashboard:structural-stop` pinned F-S37 (now `native:dashboard:diagnostics`;
+see [the dashboard record](native-dashboard.md)).
 
 ### Native failure rules after review 3
 
@@ -1258,7 +1258,7 @@ handoff summaries agree.
 The native dashboard now passes F-S37 and reports 15 errors in seven groups:
 one question for Dev (review slot T08: a pending value passed into a prop typed
 as a plain value, inside the caller's own boundaries) and six compiler gaps,
-F-S38–F-S43. See [the dashboard record](native-dashboard-blocker.md).
+F-S38–F-S43. See [the dashboard record](native-dashboard.md).
 
 The same rule removes Effect's F-S34: `createRuntime` reads its context value
 inside `() => ManagedRuntime.make(layer, parent?.memoMap)`, which is now the held
@@ -1291,3 +1291,54 @@ widens.
 Effects on the corpus: the native `colored-prop` fixture (no root) is accepted; docs
 loses its `article` settled-prop error; the dashboard drops five errors (T08 and
 F-S38) to ten in five groups (F-S39–F-S43).
+
+
+### Native dashboard acceptance (F-S39–F-S45, 2026-10-10)
+
+The dashboard original now passes both acceptance halves with an empty author
+patch ([record](native-dashboard.md)). Half A: lowering reports exactly the
+Router boundary notice, and the generated program type-checks. Half B: 30-state
+client parity, streamed SSR of three URLs and hydration all match the original.
+
+**Foreign routers (F-S43).** Take a module-level component from a foreign
+package, such as `createRouter(...)`. If every render of it sits under
+providers, its `component:` values receive those contexts as provided:
+`nativeForeignProvided(Page, witness)`, which discharges them as `foreign`'s
+`provided` does. Providers are intersected across renders, so one render without
+the provider keeps `NO_PROVIDER`. The native route handoff `nativeForeign` is
+typed as the plain call: the router passes its route props, and a page that
+declares none ignores them, as the author's Solid function did. The library
+dialect's `foreign` keeps the component's own type (D-088). Library authors
+declare the route props (`router.type-tests`).
+
+**Context members (F-S45).** A call through a member of a context's value
+(`filters.setRange(r)`) calls what every provider of that context put there.
+The value can be `useContext(Ctx)` directly, or through constant bindings and
+hooks whose every return is that value. The inference collects every
+provider's `value` and the context's default:
+
+- A member that is a function or method fails what it fails.
+- A Solid setter fails nothing; its callback arguments are the caller's.
+- A signal getter fails what its computation fails.
+- Anything else stays `unknown`. That covers a provider value that is not an
+  object literal, a spread, a member from a non-Solid producer, and a context
+  that escapes (used other than as a provider tag or `useContext` argument).
+
+A context's provider tag, `HydrationScript`, `NoHydration` and `markSafeError`
+fail nothing.
+
+**Setters in plain function types.** TypeScript accepts a library `Setter`
+where `(range: Range) => void` is expected, and the receipt it returns would
+write nothing. Where the native lowering finds a setter meeting a plain
+(non-receipt) function type, it wraps it as `nativeWrite(setX)`. This applies to
+an object property or a call argument. The wrapper writes when called, and the
+runtime checks the write where it runs, as for every write (`SETTER_OUTSIDE_RUN`
+with no routine running, `WRITE_IN_REACTIVE` in a view).
+
+**Event-phase callbacks.** F-S40 hosts a writing callback prop in the event
+that calls it. At runtime, an event-phase lexical callback now runs in the
+calling event when an event calls it, rather than in the view that created it.
+
+**Lazy children.** A component's or provider's single expression child
+(`{props.children}`) lowers to a fragment hole, `<>{child}</>`. A lazy child is a
+view, which has no body.

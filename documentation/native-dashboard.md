@@ -1,36 +1,70 @@
-# Native dashboard: F-S37 and D-119 in; next reasons F-S39–F-S43 (2026-10-09)
+# Native dashboard: both acceptance halves pass (2026-10-10)
 
-F-S36 was a type-lowering gap and is fixed: Solid `Accessor<T>` imports name the
-library's `Source<T>` contract (`native:dashboard:type-contract`).
+The operations dashboard (`examples/originals/dashboard`) is plain Solid 2 with
+no solid-yield imports. In native mode it now lowers, type-checks and runs as
+the original does. The author patch is empty.
 
-**F-S37 is fixed.** `useFilters()` reads its context during `FilterBar`'s setup
-and guards it with `if (!value) throw …`. Setup admits context acquisition but
-not reads or raises, so the generated helper was refused at `filters.tsx:32:17`.
+- **Half A: PASS.** Lowering reports exactly the Router boundary notice at
+  `app.tsx:92:9`. The generated program has no errors.
+  `native:dashboard:diagnostics` checks this, and
+  [the evidence](../examples/harness/native-dashboard/half-a.json) records it.
+- **Half B: PASS.** `examples/harness/native-dashboard/check.mjs` runs the
+  unchanged original against its native lowering, in three gate steps:
+  - `native:dashboard:parity`: the shared 30-step client script, with
+    independent content checks. It covers range and team changes, sorting, the
+    optimistic acknowledgement and its `AckFailed` rollback, the metric switch,
+    notes and storage, the refresh tick, detail navigation and the `NotFound`
+    route boundary. All 30 states match.
+  - `native:dashboard:ssr`: the streamed server render of `/overview`,
+    `/incidents/inc-101` and `/incidents/missing`. The resolved documents match.
+    Both streams serialize the public `NotFound`. Native mode carries it inside
+    its `NativeFailure` wrapper, by design.
+  - `native:dashboard:hydrate`: `/overview` and `/incidents/missing`. Server
+    nodes are retained. A notes edit after hydration, and the hydrated not-found
+    boundary, match the original.
 
-Two Solid 2 facts make the read and the guard safe:
+The comparisons ignore owner-tree ids: hydration keys and streaming placeholder
+ids. The library's owners make these differ; the markup must not.
 
-- A provider sets its value once, when it is created
-  (`setContext(provider, props.value)`), and `useContext` returns that value. A
-  consumer holds the same value for its whole life, so reading it in setup cannot
-  miss an update.
-- `useContext` itself throws when no provider (and no default) is above it, before
-  the author's guard runs. That case is the context's requirement, which the
-  library already carries in the component's type and refuses at a root or
-  handoff that leaves it unprovided. The guard can only see a value a provider
-  gave.
+## Final checked colors
 
-The lowering now gives a context value used whole (a guard, a return) as the
-provided value itself, through `nativeUseContext(Ctx)`, whose only operation is
-the context read (`ContextRead<Q>`, admitted in setup). The guard's throw lowers
-to `nativeContextGuard(value, failure)`: its raise is typed from TypeScript's
-narrowing of `value` in the guarded branch. `Filters` is an object type, so
-`!value` narrows to `never` and the guard raises nothing; a context typed
-`User | null` keeps the raise, and setup still refuses it. The failure inference
-applies the same rule, so `useFilters` infers no failure and `FilterBar` does not
-inherit the guard's `Error`. A context value read only through its members (the
-prelude's destructuring, as in Todos) keeps the path form unchanged.
+These are read from the accepted program (`finalCheckedColors` in the
+evidence). Each panel and each route is settled: it handles its own pending
+data and failures through `Panel`'s `Errored`/`Loading`, or through the route's
+own. Each requires only `FilterContext`, which `FilterProvider` gives above the
+foreign router (F-S43).
 
-## Side by side
+| Component                                                                  | Pending | Fails   | Requires        |
+| -------------------------------------------------------------------------- | ------- | ------- | --------------- |
+| `SummaryPanel`, `SeriesPanel`, `IncidentsPanel`, `TeamPanel`, `NotesPanel` | `false` | `never` | `FilterContext` |
+| `Overview` (`/`, `/overview`)                                              | `false` | `never` | `FilterContext` |
+| `IncidentDetail` (`/incidents/:id`)                                        | `false` | `never` | `FilterContext` |
+
+## What it took
+
+Compiler gaps, each found as a TypeScript error in the generated program:
+
+| Finding | What changed                                                                                                                                                                                                                                         |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| F-S36   | Solid `Accessor<T>` annotations name the library's `Source<T>`.                                                                                                                                                                                      |
+| F-S37   | `useContext` held in setup (`nativeUseContext`); its guard raises only what the context's type admits (`nativeContextGuard`).                                                                                                                        |
+| D-119   | A plain-typed prop takes the colors its callers pass (T08, F-S38).                                                                                                                                                                                   |
+| F-S39   | A member a source lacks reads the source first (`props.title.toLowerCase()`). An `Errored` fallback keeps Solid's `(error, reset)` types.                                                                                                            |
+| F-S40   | A callback prop that writes is hosted by the event that calls it.                                                                                                                                                                                    |
+| F-S41   | Only a component that places `props.children` under a provider is a provider wrapper.                                                                                                                                                                |
+| F-S42   | An effect function's returned cleanup registers through `onCleanup`.                                                                                                                                                                                 |
+| F-S43   | A foreign router rendered only under providers hands its route components those contexts (`nativeForeignProvided`). The route handoff is typed as the plain call (`nativeForeign`), so a page that declares no props takes the router's route props. |
+| F-S45   | A call through a context value's member calls what every provider put there. `setRange` is a signal setter, so it fails nothing. A context's provider tag, `HydrationScript` and `markSafeError` fail nothing either.                                |
+
+Runtime gaps, found by half B once the program type-checked:
+
+| Gap                   | What changed                                                                                                                                                                                                                                                                                                                                                                                                 |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Provider children     | `<FilterContext value={…}>{props.children}</FilterContext>`: an expression child of a lowered component or provider now reads in a hole of its lazy view (`<>{yield* props.children}</>`). A view has no body (`READ_IN_VIEW`).                                                                                                                                                                              |
+| Plain setter types    | `Filters.setRange: (range: Range) => void` holds a library setter. A library setter writes when its receipt is delegated to, while the author's setter wrote when called. Where a setter meets a plain function type (an object property or a call argument), the lowering adapts it with `nativeWrite`, which writes when called. The runtime still checks where the write runs (`UNYIELDED_WRITE` before). |
+| Event-phase callbacks | F-S40's `reload={() => refresh(incidents)}` is created in a view but called from the row's action. An event-phase lexical callback now runs in the event that calls it, not the host that created it (`WRITE_IN_REACTIVE` before).                                                                                                                                                                           |
+
+## Side by side (F-S37)
 
 Author, `filters.tsx:26–34`:
 
@@ -51,39 +85,11 @@ Generated:
 ```tsx
 export function* useFilters() {
   const value = yield* __nativeUseContext(FilterContext);
-  if (!value) return yield* __nativeContextGuard(value, __nativeFailure(["global:Error"], new Error("Dashboard filters need a provider")));
+  if (!value)
+    return yield* __nativeContextGuard(
+      value,
+      __nativeFailure(["global:Error"], new Error("Dashboard filters need a provider"))
+    );
   return value;
 }
 ```
-
-## What the dashboard reports now
-
-**D-119 (Dev, 2026-10-09)** resolves two groups: a plain-typed prop takes the
-colors its callers pass (Solid reads props lazily, inside the child), lowered to
-`Source<T, E, P>` with the component's own type parameters (D-029). That covers
-`app.tsx:69` (the pending, failing `incident()` inside `IncidentDetail`'s own
-`Errored`/`Loading`, formerly review slot T08's `SETTLED_PROP`) and F-S38
-(`Panel`'s `children`, which `Panel` wraps in its own boundaries; a hole prop may
-now bind events, as a view may).
-
-Lowering emits exactly the Router notice at `app.tsx:92:9`. The generated program
-then has 10 TypeScript errors in 5 groups, pinned by
-`native:dashboard:structural-stop` ([evidence](../examples/harness/native-dashboard/structural-stop.json)):
-
-| Group | Authored positions | What happens |
-| --- | --- | --- |
-| F-S39 | `chart.tsx:108`, `panel.tsx:12`, `panel.tsx:18` | A prop or row value used as a method receiver (`props.title.toLowerCase()`, `point.value.toFixed(0)`) is not read before the call. |
-| F-S40 | `incidents.tsx:108` | `reload={() => refresh(incidents)}` is hosted by the JSX hole that creates it, not the child event that calls it, so its write is refused. |
-| F-S41 | `main.tsx:3` | `render(() => <App />)` refuses an entry component whose props are all optional. |
-| F-S42 | `panels.tsx:30` | `createEffect`'s effect function returns a cleanup; the library's effect phase returns nothing. |
-| F-S43 | `app.tsx:78`, `app.tsx:79` | Route components require `FilterContext`. `FilterProvider` surrounds the foreign `Router`, but the requirement is not discharged across it. |
-
-F-S39–F-S43 are compiler gaps, not author mistakes. No author patch or further
-lowering change was attempted for them.
-
-## Acceptance
-
-- Half A: **FAIL** (compiler gaps remain).
-- Half B: **FAIL / not run.** The author patch is empty; native hydrated parity,
-  SSR, `AckFailed` rollback and `NotFound` comparisons have not run.
-- Final panel and route colors are unavailable while the program is rejected.

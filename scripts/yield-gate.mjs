@@ -276,20 +276,29 @@ function buildSteps(twins) {
     });
   }
 
-  // Check F-S36 independently; the stop pins F-S37 fixed and the remaining groups (F-S45 on).
+  // Check F-S36 independently; half A is the exact diagnostics and a
+  // type-checked program, half B the runtime comparisons with the original.
   steps.push({
     name: "native:dashboard:type-contract",
     cwd: root,
     fast: true,
     cmd: process.execPath,
-    args: ["scripts/native-dashboard-blocker.mjs", "type-contract"]
+    args: ["scripts/native-dashboard-check.mjs", "type-contract"]
   });
   steps.push({
-    name: "native:dashboard:structural-stop",
+    name: "native:dashboard:diagnostics",
     cwd: root,
     cmd: process.execPath,
-    args: ["scripts/native-dashboard-blocker.mjs"]
+    args: ["scripts/native-dashboard-check.mjs"]
   });
+  for (const stage of ["parity", "ssr", "hydrate"]) {
+    steps.push({
+      name: `native:dashboard:${stage}`,
+      cwd: root,
+      cmd: process.execPath,
+      args: ["examples/harness/native-dashboard/check.mjs", stage]
+    });
+  }
 
   steps.push({
     name: "original:docs:typecheck",
@@ -464,6 +473,7 @@ function buildSteps(twins) {
       "examples/harness/native-sierpinski/*.mjs",
       "examples/harness/native-todos/*.mjs",
       "examples/harness/native-hackernews/*.mjs",
+      "examples/harness/native-dashboard/*.mjs",
       "scripts/*.mjs"
     ]
   });

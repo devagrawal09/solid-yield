@@ -1,5 +1,8 @@
 #!/usr/bin/env node
-// F-S36, F-S37 and D-119 are in. Pin the remaining errors by group (F-S45 onward); this is not runtime acceptance.
+// Native dashboard half A: the unchanged original lowers with exactly the Router
+// boundary notice, and the generated program type-checks. Records the evidence
+// (fixed gaps, side by side, final checked colors). Half B is
+// examples/harness/native-dashboard/check.mjs.
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { createRequire } from "node:module";
@@ -101,13 +104,11 @@ assert.deepEqual(
   [],
   "F-S37 regressed: the context guard adds a failure"
 );
-// FilterBar's own unknown comes from its onChange calls into the provided setters.
-assert.ok(
-  !summary("FilterBar").fails.includes("global:Error"),
-  "F-S37 regressed: FilterBar inherits the guard's failure"
-);
+// F-S45: FilterBar's onChange calls reach the provider's setters, which fail nothing.
+assert.deepEqual(summary("FilterBar").fails, [], "F-S45 regressed: FilterBar fails");
+assert.match(output, /setRange: __nativeWrite\(setRange\)/);
 
-// Every remaining error, at its authored position, in the group it was classified into.
+// Half A: the generated program has no errors.
 const authoredAt = d => {
   const file = d.file?.fileName;
   const table = file && result.positions.get(file);
@@ -116,33 +117,46 @@ const authoredAt = d => {
   const prefix = files.get(file).slice(0, origin.sourceStart).split("\n");
   return `${relative(source, file)}:${prefix.length}:${prefix.at(-1).length + 1}`;
 };
-const groups = {
-  "F-S45": ["main.tsx:3:15"]
+assert.deepEqual(
+  errors.map(d => ({ at: authoredAt(d), code: `TS${d.code}` })),
+  [],
+  "The native dashboard has errors"
+);
+
+// Final checked colors: each panel's and route's component type, as the
+// accepted program types it.
+const checker = program.getTypeChecker();
+const colorsOf = (name, fileName) => {
+  const file = program.getSourceFile(join(source, fileName));
+  let declaration;
+  const visit = node => {
+    if (ts.isVariableDeclaration(node) && node.name.getText(file) === name) declaration = node;
+    else ts.forEachChild(node, visit);
+  };
+  visit(file);
+  assert.ok(declaration, `${name} in ${fileName}`);
+  const [signature] = checker.getTypeAtLocation(declaration.name).getCallSignatures();
+  const view = checker.getReturnTypeOfSignature(signature);
+  const [pending, fails, waits, requires] = (view.aliasTypeArguments ?? []).map(t =>
+    checker.typeToString(t).replaceAll(root, "<root>")
+  );
+  assert.equal(view.aliasSymbol?.name, "ComponentView", `${name}'s view`);
+  return { pending, fails, waits, requires };
 };
-const groupOf = at => Object.keys(groups).find(g => groups[g].includes(at)) ?? "unclassified";
-const remaining = errors
-  .map(d => {
-    const at = authoredAt(d);
-    return { group: groupOf(at), at, code: `TS${d.code}` };
-  })
-  .sort((a, b) => `${a.group} ${a.at} ${a.code}`.localeCompare(`${b.group} ${b.at} ${b.code}`));
-assert.ok(
-  remaining.every(r => r.group !== "unclassified"),
-  "A dashboard error outside the recorded classification: " +
-    JSON.stringify(remaining.filter(r => r.group === "unclassified"))
-);
-assert.ok(
-  !remaining.some(r => r.at?.startsWith("filters.tsx")),
-  "F-S37 regressed: an error in filters.tsx"
-);
-const panels = ["SummaryPanel", "SeriesPanel", "IncidentsPanel", "TeamPanel", "NotesPanel"];
+const panels = [
+  ["SummaryPanel", "panels.tsx"],
+  ["SeriesPanel", "chart.tsx"],
+  ["IncidentsPanel", "incidents.tsx"],
+  ["TeamPanel", "panels.tsx"],
+  ["NotesPanel", "panels.tsx"]
+];
 const routes = [
-  { name: "Overview", paths: ["/", "/overview"] },
-  { name: "IncidentDetail", paths: ["/incidents/inc-101", "/incidents/missing"] }
+  { name: "Overview", file: "app.tsx", paths: ["/", "/overview"] },
+  { name: "IncidentDetail", file: "app.tsx", paths: ["/incidents/inc-101", "/incidents/missing"] }
 ];
 const evidence = {
   finding:
-    "F-S37 fixed: useContext's value is the provider's (set once), held in setup; its guard raises only what the context's declared type admits",
+    "Half A PASS: the unchanged original lowers with exactly the Router boundary notice; the generated program type-checks",
   fixed: [
     "F-S36: Accessor imports name the library Source; both provider fields typecheck",
     "F-S37: useFilters lowers to nativeUseContext + nativeContextGuard; it and FilterBar infer no failure",
@@ -151,43 +165,46 @@ const evidence = {
     "F-S40: a component callback prop whose body writes (refresh, a setter) is hosted by the event that calls it, not the hole that creates it",
     "F-S41: a component that renders its own provider but never places props.children is not a provider wrapper; App keeps its declared props",
     "F-S42: an effect function's returned cleanup registers through onCleanup ($cleanup), which runs before the next effect run or on disposal, as Solid 2 does",
-    "F-S43: a foreign router rendered only under providers hands its route components those contexts (nativeForeignProvided); the route handoff is typed as the plain call, so a page that declares no props takes the router's route props"
+    "F-S43: a foreign router rendered only under providers hands its route components those contexts (nativeForeignProvided); the route handoff is typed as the plain call, so a page that declares no props takes the router's route props",
+    "F-S45: a call through a context value's member calls what every provider put there (setRange is a signal setter: no failure); a context's provider tag, HydrationScript and markSafeError fail nothing"
   ],
-  next: {
-    "F-S45":
-      "App may fail with unknown: FilterBar's onChange calls filters.setRange/setTeam, signal setters reached through the context value's plain function type; markSafeError (@solidjs/web) is opaque too. A precision gap, not a real failure"
-  },
+  runtimeFixes: [
+    "nativeWrite: a library setter in a plain function type (setRange: (range: Range) => void) writes when called, where a write is admitted",
+    "a provider's expression child (props.children) reads in a hole of the provider's lazy view",
+    "an event-phase lexical callback (F-S40's reload) runs in the event that calls it, not the view that created it"
+  ],
   halfA:
-    "FAIL: lowering has exactly the Router boundary notice; the generated program has the 1 errors below, all compiler gaps",
+    "PASS: lowering has exactly the Router boundary notice; the generated program has no errors",
   halfB:
-    "FAIL / not run: compiler gaps remain; empty author patch; native hydrated parity, SSR, AckFailed and NotFound comparisons not run",
+    "examples/harness/native-dashboard/check.mjs: 30-state client parity (AckFailed rollback, NotFound boundary), streamed SSR of 3 URLs, hydration",
   boundaries: result.diagnostics.map(d => ({ ...d, file: relative(root, d.file) })),
-  remaining,
   sideBySide: {
     author: authored.split("\n").slice(25, 34).join("\n"),
     generated: helper.replaceAll(root, "<root>")
   },
   patch,
   finalCheckedColors: {
-    status:
-      "unavailable: the generated program is still rejected; inferred any or unknown from rejected output are not final checked colors",
-    panels: panels.map(name => ({ name, sharedFilter: "FilterContext" })),
-    routes: routes.map(route => ({ ...route, sharedFilter: "FilterContext" }))
-  },
-  failurePaths: {
-    AckFailed: "native comparison not run: compiler gaps remain",
-    NotFound: "native comparison not run: compiler gaps remain"
+    panels: panels.map(([name, file]) => ({
+      name,
+      sharedFilter: "FilterContext",
+      ...colorsOf(name, file)
+    })),
+    routes: routes.map(({ name, file, paths }) => ({
+      name,
+      paths,
+      sharedFilter: "FilterContext",
+      ...colorsOf(name, file)
+    }))
   },
   originalHashes
 };
 for (const [f, c] of files) assert.equal(hash(readFileSync(f, "utf8")), hash(c));
-const expected = join(root, "examples/harness/native-dashboard/structural-stop.json");
+const expected = join(root, "examples/harness/native-dashboard/half-a.json");
 if (process.argv.includes("--record"))
   writeFileSync(expected, JSON.stringify(evidence, null, 2) + "\n");
 else assert.deepEqual(evidence, JSON.parse(readFileSync(expected, "utf8")));
 for (const d of evidence.boundaries)
   console.log(`[${d.code}] ${d.message} (${d.file}:${d.line}:${d.column})`);
-for (const r of remaining) console.log(`${r.group} [${r.code}] (${r.at})`);
-console.log(
-  `native dashboard: F-S37 fixed; ${remaining.length} errors pinned in ${new Set(remaining.map(r => r.group)).size} groups; half A FAIL; half B not run; patch empty`
-);
+for (const panel of evidence.finalCheckedColors.panels)
+  console.log(`${panel.name}: pending ${panel.pending}, fails ${panel.fails}`);
+console.log("native dashboard half A: PASS (exact diagnostics; generated program type-checks)");

@@ -1,5 +1,5 @@
 {
-  "finding": "F-S37 fixed: useContext's value is the provider's (set once), held in setup; its guard raises only what the context's declared type admits",
+  "finding": "Half A PASS: the unchanged original lowers with exactly the Router boundary notice; the generated program type-checks",
   "fixed": [
     "F-S36: Accessor imports name the library Source; both provider fields typecheck",
     "F-S37: useFilters lowers to nativeUseContext + nativeContextGuard; it and FilterBar infer no failure",
@@ -8,13 +8,16 @@
     "F-S40: a component callback prop whose body writes (refresh, a setter) is hosted by the event that calls it, not the hole that creates it",
     "F-S41: a component that renders its own provider but never places props.children is not a provider wrapper; App keeps its declared props",
     "F-S42: an effect function's returned cleanup registers through onCleanup ($cleanup), which runs before the next effect run or on disposal, as Solid 2 does",
-    "F-S43: a foreign router rendered only under providers hands its route components those contexts (nativeForeignProvided); the route handoff is typed as the plain call, so a page that declares no props takes the router's route props"
+    "F-S43: a foreign router rendered only under providers hands its route components those contexts (nativeForeignProvided); the route handoff is typed as the plain call, so a page that declares no props takes the router's route props",
+    "F-S45: a call through a context value's member calls what every provider put there (setRange is a signal setter: no failure); a context's provider tag, HydrationScript and markSafeError fail nothing"
   ],
-  "next": {
-    "F-S45": "App may fail with unknown: FilterBar's onChange calls filters.setRange/setTeam, signal setters reached through the context value's plain function type; markSafeError (@solidjs/web) is opaque too. A precision gap, not a real failure"
-  },
-  "halfA": "FAIL: lowering has exactly the Router boundary notice; the generated program has the 1 errors below, all compiler gaps",
-  "halfB": "FAIL / not run: compiler gaps remain; empty author patch; native hydrated parity, SSR, AckFailed and NotFound comparisons not run",
+  "runtimeFixes": [
+    "nativeWrite: a library setter in a plain function type (setRange: (range: Range) => void) writes when called, where a write is admitted",
+    "a provider's expression child (props.children) reads in a hole of the provider's lazy view",
+    "an event-phase lexical callback (F-S40's reload) runs in the event that calls it, not the view that created it"
+  ],
+  "halfA": "PASS: lowering has exactly the Router boundary notice; the generated program has no errors",
+  "halfB": "examples/harness/native-dashboard/check.mjs: 30-state client parity (AckFailed rollback, NotFound boundary), streamed SSR of 3 URLs, hydration",
   "boundaries": [
     {
       "code": "NATIVE_FOREIGN_BOUNDARY",
@@ -24,58 +27,80 @@
       "column": 9
     }
   ],
-  "remaining": [
-    {
-      "group": "F-S45",
-      "at": "main.tsx:3:15",
-      "code": "TS2345"
-    }
-  ],
   "sideBySide": {
     "author": "export function useFilters() {\n  const value = useContext(FilterContext);\n  if (!value) throw new Error(\"Dashboard filters need a provider\");\n  return value;\n}\n\nexport function FilterBar() {\n  const filters = useFilters();\n  return (",
     "generated": "export function* useFilters() {\n  const value = yield* __nativeUseContext(FilterContext);\n  if (!value) return yield* __nativeContextGuard(value, __nativeFailure([\"global:Error\"], new Error(\"Dashboard filters need a provider\")));\n  return value;\n}\n"
   },
   "patch": "",
   "finalCheckedColors": {
-    "status": "unavailable: the generated program is still rejected; inferred any or unknown from rejected output are not final checked colors",
     "panels": [
       {
         "name": "SummaryPanel",
-        "sharedFilter": "FilterContext"
+        "sharedFilter": "FilterContext",
+        "pending": "false",
+        "fails": "never",
+        "waits": "false",
+        "requires": "RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\"> | HoleRequires<A>"
       },
       {
         "name": "SeriesPanel",
-        "sharedFilter": "FilterContext"
+        "sharedFilter": "FilterContext",
+        "pending": "false",
+        "fails": "never",
+        "waits": "false",
+        "requires": "RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\"> | HoleRequires<A>"
       },
       {
         "name": "IncidentsPanel",
-        "sharedFilter": "FilterContext"
+        "sharedFilter": "FilterContext",
+        "pending": "false",
+        "fails": "never",
+        "waits": "false",
+        "requires": "RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\"> | HoleRequires<A>"
       },
       {
         "name": "TeamPanel",
-        "sharedFilter": "FilterContext"
+        "sharedFilter": "FilterContext",
+        "pending": "false",
+        "fails": "never",
+        "waits": "false",
+        "requires": "RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\"> | HoleRequires<A>"
       },
       {
         "name": "NotesPanel",
-        "sharedFilter": "FilterContext"
+        "sharedFilter": "FilterContext",
+        "pending": "false",
+        "fails": "never",
+        "waits": "false",
+        "requires": "RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\"> | HoleRequires<A>"
       }
     ],
     "routes": [
       {
         "name": "Overview",
-        "paths": ["/", "/overview"],
-        "sharedFilter": "FilterContext"
+        "paths": [
+          "/",
+          "/overview"
+        ],
+        "sharedFilter": "FilterContext",
+        "pending": "false",
+        "fails": "never",
+        "waits": "false",
+        "requires": "RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\"> | HoleRequires<A>"
       },
       {
         "name": "IncidentDetail",
-        "paths": ["/incidents/inc-101", "/incidents/missing"],
-        "sharedFilter": "FilterContext"
+        "paths": [
+          "/incidents/inc-101",
+          "/incidents/missing"
+        ],
+        "sharedFilter": "FilterContext",
+        "pending": "false",
+        "fails": "never",
+        "waits": "false",
+        "requires": "RequiredContext<Filters, \"<root>/examples/originals/dashboard/src/filters.tsx#FilterContext\">"
       }
     ]
-  },
-  "failurePaths": {
-    "AckFailed": "native comparison not run: compiler gaps remain",
-    "NotFound": "native comparison not run: compiler gaps remain"
   },
   "originalHashes": {
     "examples/originals/dashboard/src/api.ts": "bef20441971b979d82c69519c83991c55fe8425031bbb80266c359eee439d298",

@@ -498,8 +498,25 @@ export type PropsOf<TP> = unknown extends TP
     ? D
     : {};
 
-/** A component's arguments: the props object, optional when every prop is. */
-export type PropsArgs<D> = {} extends D ? [props?: PropsInput<D>] : [props: PropsInput<D>];
+/**
+ * Phantom on a generated generic component's props (F-S49): `Q` is what its
+ * hole props may require, a type parameter of the setup, inferred per call.
+ * Authored props never carry it, so `HoleQ` is `never` for them.
+ */
+export declare const HOLE_REQUIRES: unique symbol;
+export type HoleQ<TP> = unknown extends TP
+  ? never
+  : typeof HOLE_REQUIRES extends keyof TP
+    ? TP extends { readonly [HOLE_REQUIRES]?: (q: infer Q) => any }
+      ? Q
+      : never
+    : never;
+
+/** A component's arguments: the props object, optional when every prop is.
+ * `Q` is what its hole props may require (`PropsInput`). */
+export type PropsArgs<D, Q = never> = {} extends D
+  ? [props?: PropsInput<D, Q>]
+  : [props: PropsInput<D, Q>];
 /**
  * A component's call (D-098 amended): generic in its props literal `A`, so
  * the view carries what the literal's hole props require (`HoleRequires`).

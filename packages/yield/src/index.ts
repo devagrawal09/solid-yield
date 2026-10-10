@@ -91,6 +91,7 @@ export type {
   HoleProp,
   HoleCall,
   HoleRequires,
+  HoleQ,
   PlainCall,
   Undeclared,
   Props,

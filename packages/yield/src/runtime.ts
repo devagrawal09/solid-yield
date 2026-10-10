@@ -70,6 +70,7 @@ import type {
   Path,
   PendingOf,
   PropsArgs,
+  HoleQ,
   HoleCall,
   PropsOf,
   Raise,
@@ -1882,7 +1883,9 @@ export function renderView(
  * fails that overload (TypeScript cannot infer its props) and gets the
  * plain function type, which keeps its type parameters: TypeScript passes a
  * generic argument's type parameters on only to a result with one
- * non-generic call signature. Its hole props carry no requirement.
+ * non-generic call signature. Its hole props carry no requirement, unless
+ * its props declare one as a type parameter (`HoleQ`, F-S49: generated
+ * components only), which each call infers from its holes and carries.
  */
 export function component<
   TP = unknown,
@@ -1906,12 +1909,12 @@ export function component<
   body: ((props: TP) => Generator<Y, V, any>) & ViewWrapperCheck<V>,
   ..._rule: NoJsxViewRule<ViewYield<V>, ViewReturn<V>>
 ): (
-  ...props: PropsArgs<PropsOf<TP>>
+  ...props: PropsArgs<PropsOf<TP>, HoleQ<TP>>
 ) => ComponentView<
   ViewPending<ViewYield<V>, ViewReturn<V>>,
   ViewFails<ViewYield<V>, ViewReturn<V>> | FailsOf<Y>,
   ViewMayWait<ViewYield<V>, ViewReturn<V>>,
-  ViewRequires<ViewYield<V>, ViewReturn<V>> | RequiresOf<Y>
+  ViewRequires<ViewYield<V>, ViewReturn<V>> | RequiresOf<Y> | HoleQ<TP>
 >;
 export function component<
   TP = unknown,
@@ -1921,12 +1924,12 @@ export function component<
   body: ((props: TP) => Generator<Y, V, any>) & ViewWrapperCheck<V>,
   ..._rule: NoJsxViewRule<ViewYield<V>, ViewReturn<V>>
 ): (
-  ...props: PropsArgs<PropsOf<TP>>
+  ...props: PropsArgs<PropsOf<TP>, HoleQ<TP>>
 ) => ComponentView<
   ViewPending<ViewYield<V>, ViewReturn<V>>,
   ViewFails<ViewYield<V>, ViewReturn<V>> | FailsOf<Y>,
   ViewMayWait<ViewYield<V>, ViewReturn<V>>,
-  ViewRequires<ViewYield<V>, ViewReturn<V>> | RequiresOf<Y>
+  ViewRequires<ViewYield<V>, ViewReturn<V>> | RequiresOf<Y> | HoleQ<TP>
 > {
   const comp: any = function (props?: object) {
     const view = runSetup(body as any, [typedProps(props || {})], body.name || "anonymous");

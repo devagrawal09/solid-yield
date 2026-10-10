@@ -76,6 +76,24 @@ describe("native context hooks (F-S37)", () => {
     ]);
   }, 30_000);
 
+  it("a guard inline in a component is a failure path, not a return", () => {
+    const source = app("Filters", "{range, setRange}").replace(
+      `export function FilterBar() {
+  const filters = useFilters();`,
+      `export function FilterBar() {
+  const filters = useContext(FilterContext);
+  if (!filters) throw new Error('FilterBar needs a provider');`
+    );
+    const result = lowerNativeProject(new Map([[file, source]]));
+    const code = result.files.get(file);
+    expect(result.diagnostics).toEqual([]);
+    expect(code).toMatch(
+      /if \(!filters\) return \(yield\* __nativeContextGuard\(filters,[^]*\) as never;/
+    );
+    expect(checked(code)).toEqual([]);
+    expect(result.inference.functions.find(f => f.name === "FilterBar").fails).toEqual([]);
+  }, 30_000);
+
   it("leaves the destructured form a path, as todos reads it", () => {
     const result = lowerNativeProject(
       new Map([

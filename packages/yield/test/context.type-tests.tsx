@@ -33,6 +33,7 @@ import {
   type YieldContext
 } from "solid-yield";
 import { h } from "solid-yield/h";
+import type { NativeRequiring } from "solid-yield/internal";
 
 type Equal<A, B> =
   (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
@@ -714,6 +715,69 @@ const GenericFramed = component(function* GenericFramed() {
   });
 });
 void GenericFramed;
+
+// F-S49: a generated generic component declares what its hole props may require as a type
+// parameter (`NativeRequiring`); each call infers it from its holes and carries it
+const RequiringFrame = component(function* RequiringFrame<E, R = never>(
+  props: Props<{ children: Source<Element, E> }> & NativeRequiring<R>
+) {
+  return view(function* () {
+    return <section>{yield* props.children}</section>;
+  });
+});
+export const requiringKept: View<false, FetchFailure> = RequiringFrame({ children: failing });
+const RequiringFramed = component(function* RequiringFramed() {
+  return view(function* () {
+    return (
+      <>
+        {
+          yield* RequiringFrame({
+            children: function* () {
+              return <>{yield* Greeting({})}</>;
+            }
+          })
+        }
+      </>
+    );
+  });
+});
+type _requiringCarried = Expect<Equal<RequiresOfComponent<typeof RequiringFramed>, typeof UserCtx>>;
+// @ts-expect-error [NO_PROVIDER] the hole's requirement reaches the root
+render(RequiringFramed, document.body);
+const RequiringProvided = component(function* RequiringProvided() {
+  return view(function* () {
+    return (
+      <>
+        {
+          yield* UserCtx.provide({
+            value: { name: "around" },
+            children: function* () {
+              return <>{yield* RequiringFramed({})}</>;
+            }
+          })
+        }
+      </>
+    );
+  });
+});
+render(RequiringProvided, document.body);
+// a settled hole requires nothing
+const RequiringFree = component(function* RequiringFree() {
+  return view(function* () {
+    return (
+      <>
+        {
+          yield* RequiringFrame({
+            children: function* () {
+              return <p>free</p>;
+            }
+          })
+        }
+      </>
+    );
+  });
+});
+type _requiringFree = Expect<Equal<RequiresOfComponent<typeof RequiringFree>, never>>;
 
 // `h(Comp, props)` and `lazy` do not take a props literal's requirements: there a hole prop that
 // requires a context is refused (children given to `h` as arguments carry theirs, as before)

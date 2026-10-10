@@ -46,13 +46,13 @@ const propKey = fn => (fn.parentPath?.isObjectProperty() ? key(fn.parentPath.nod
 /** @param {Path | null | undefined} p */
 const fnName = p =>
   p?.node.id?.name ?? (p?.parentPath?.isVariableDeclarator() ? key(p.parentPath.node.id) : null);
-/** @param {Path | null | undefined} p */
-const lib = p => {
+/** @param {Path | null | undefined} p @param {string} [from] */
+const lib = (p, from = "solid-yield") => {
   if (!p?.isIdentifier()) return null;
   const b = p.scope.getBinding(p.node.name);
   return b?.path.isImportSpecifier() &&
     b.path.parentPath.isImportDeclaration() &&
-    b.path.parentPath.node.source.value === "solid-yield"
+    b.path.parentPath.node.source.value === from
     ? key(b.path.node.imported)
     : null;
 };
@@ -344,10 +344,12 @@ function seed(code, filename, native = false) {
               const failureReturn = q.get("argument").isTSAsExpression()
                 ? q.get("argument.expression")
                 : q.get("argument");
+              // A context guard's raise (F-S37) is one too.
               if (
                 native &&
                 failureReturn.isCallExpression() &&
-                lib(failureReturn.get("callee")) === "raise"
+                (lib(failureReturn.get("callee")) === "raise" ||
+                  lib(failureReturn.get("callee"), "solid-yield/internal") === "nativeContextGuard")
               )
                 return;
               if (!t.isJSXElement(q.node.argument) && !t.isJSXFragment(q.node.argument))
@@ -1304,7 +1306,9 @@ function coloredPropSites(program, active) {
         continue;
       const init = declaration.initializer;
       const fn = init && ts.isCallExpression(init) ? init.arguments[0] : undefined;
-      const annotation = fn && ts.isFunctionExpression(fn) ? fn.parameters[0]?.type : undefined;
+      let annotation = fn && ts.isFunctionExpression(fn) ? fn.parameters[0]?.type : undefined;
+      // A component already widened carries `& __NativeRequiring<_R>` (F-S49).
+      if (annotation && ts.isIntersectionTypeNode(annotation)) annotation = annotation.types[0];
       if (
         !annotation ||
         !ts.isTypeReferenceNode(annotation) ||
@@ -1341,18 +1345,24 @@ function widenColoredProps(code, filename, components) {
       const fn = props && t.isCallExpression(init) ? init.arguments[0] : null;
       if (!props || !t.isFunctionExpression(fn)) return;
       const param = fn.params[0];
-      const annotation =
+      const typed =
         param && "typeAnnotation" in param && t.isTSTypeAnnotation(param.typeAnnotation)
-          ? param.typeAnnotation.typeAnnotation
+          ? param.typeAnnotation
           : null;
+      const requiring = t.isTSIntersectionType(typed?.typeAnnotation);
+      const annotation = requiring
+        ? /** @type {import("@babel/core").types.TSIntersectionType} */ (typed?.typeAnnotation)
+            .types[0]
+        : typed?.typeAnnotation;
       const literal =
         t.isTSTypeReference(annotation) && t.isIdentifier(annotation.typeName, { name: "Props" })
           ? annotation.typeParameters?.params[0]
           : null;
-      if (!t.isTSTypeLiteral(literal)) return;
+      if (!typed || !annotation || !t.isTSTypeLiteral(literal)) return;
       const parameters = t.isTSTypeParameterDeclaration(fn.typeParameters)
         ? fn.typeParameters.params
         : [];
+      let widened = false;
       for (const declared of literal.members) {
         if (!t.isTSPropertySignature(declared) || !declared.typeAnnotation) continue;
         const name = key(declared.key);
@@ -1371,16 +1381,38 @@ function widenColoredProps(code, filename, components) {
           t.tsTypeParameter(null, null, fails),
           t.tsTypeParameter(t.tsBooleanKeyword(), null, pending)
         );
-        changed = true;
+        changed = widened = true;
       }
-      fn.typeParameters = t.tsTypeParameterDeclaration(parameters);
+      // F-S49: a generic setup takes the plain call, whose hole props would
+      // require nothing; one requirement parameter, inferred per call from
+      // its holes, lets a child that needs a context pass through.
+      if (widened && !requiring) {
+        const requires = q.scope.generateUid("R");
+        parameters.push(t.tsTypeParameter(null, t.tsNeverKeyword(), requires));
+        typed.typeAnnotation = t.tsIntersectionType([
+          annotation,
+          t.tsTypeReference(
+            t.identifier("__NativeRequiring"),
+            t.tsTypeParameterInstantiation([t.tsTypeReference(t.identifier(requires))])
+          )
+        ]);
+      }
+      // A defaulted parameter stays after the required ones.
+      fn.typeParameters = t.tsTypeParameterDeclaration([
+        ...parameters.filter(param => !param.default),
+        ...parameters.filter(param => param.default)
+      ]);
     }
   });
   if (!changed) return code;
-  if (!p.scope.hasBinding("__NativeSource")) {
+  for (const [local, imported, from] of [
+    ["__NativeSource", "Source", "solid-yield"],
+    ["__NativeRequiring", "NativeRequiring", "solid-yield/internal"]
+  ]) {
+    if (p.scope.hasBinding(local)) continue;
     const source = t.importDeclaration(
-      [t.importSpecifier(t.identifier("__NativeSource"), t.identifier("Source"))],
-      t.stringLiteral("solid-yield")
+      [t.importSpecifier(t.identifier(local), t.identifier(imported))],
+      t.stringLiteral(from)
     );
     source.importKind = "type";
     p.node.body.unshift(source);

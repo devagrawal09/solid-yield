@@ -42,7 +42,7 @@ export function Detail(props: {id: string}) {
   return <Errored fallback={() => <p>failed</p>}><Loading fallback={<p>…</p>}><Body item={item()}/></Loading></Errored>;
 }`);
     expect(result.diagnostics).toEqual([]);
-    expect(code).toMatch(/function\* Body<_E_item, _P_item extends boolean>/);
+    expect(code).toMatch(/function\* Body<_E_item, _P_item extends boolean, _R = never>/);
     expect(code).toContain("item: __NativeSource<{");
     expect(checked(code)).toEqual([]);
   });
@@ -65,7 +65,7 @@ export function App() {
   const [n, setN] = createSignal(0);
   return <Panel title="t"><button onClick={() => setN(n() + 1)}>{item().title}</button></Panel>;
 }`);
-    expect(code).toMatch(/function\* Panel<_E_children, _P_children extends boolean>/);
+    expect(code).toMatch(/function\* Panel<_E_children, _P_children extends boolean, _R = never>/);
     expect(checked(code)).toEqual([]);
   });
 
@@ -77,8 +77,8 @@ export function App() {
   const item = createMemo(() => load('a'));
   return <Errored fallback={() => <p>failed</p>}><Loading fallback={<p>…</p>}><Middle item={item()}/></Loading></Errored>;
 }`);
-    expect(code).toMatch(/function\* Middle<_E_item, _P_item extends boolean>/);
-    expect(code).toMatch(/function\* Inner<_E_item, _P_item extends boolean>/);
+    expect(code).toMatch(/function\* Middle<_E_item, _P_item extends boolean, _R = never>/);
+    expect(code).toMatch(/function\* Inner<_E_item, _P_item extends boolean, _R = never>/);
     expect(checked(code)).toEqual([]);
   });
 

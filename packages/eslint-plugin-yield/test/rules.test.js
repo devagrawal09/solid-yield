@@ -1119,6 +1119,11 @@ tester.run("no-unchecked-foreign-handoff", rules["no-unchecked-foreign-handoff"]
     live +
       'import { foreign as checked } from "solid-yield"; defineRoute({ component: checked(Live) });',
     live + "defineRoute({ path: '/', component: foreign(Live) });",
+    // the native lowering's internal handoffs (F-S43)
+    live +
+      'import { nativeForeign as __v, nativeForeignProvided as __p } from "solid-yield/internal";\n' +
+      "defineRoute({ path: '/', component: __v(Live) });\n" +
+      "defineRoute({ path: '/a', component: __p(Live, null) });",
     live + "const r = <Route path='/' component={foreign(Live)} />;",
     live + 'import { render } from "@solidjs/web";\nrender(foreign(Live), root);',
     live + 'import { render } from "@solidjs/web";\nrender(() => foreign(Live)(), root);',

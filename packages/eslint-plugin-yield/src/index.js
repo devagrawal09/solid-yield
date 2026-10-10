@@ -1568,12 +1568,17 @@ const noUncheckedForeignHandoff = {
         }
       return null;
     };
-    const isForeignCall = node =>
-      node.type === "CallExpression" &&
-      node.callee.type === "Identifier" &&
-      (node.callee.name === "foreign" ||
-        (importedFrom(context, node.callee)?.module === "solid-yield" &&
-          importedFrom(context, node.callee)?.imported === "foreign"));
+    // The native lowering hands over with its internal `foreign`s (F-S43).
+    const isForeignCall = node => {
+      if (node.type !== "CallExpression" || node.callee.type !== "Identifier") return false;
+      if (node.callee.name === "foreign") return true;
+      const api = importedFrom(context, node.callee);
+      return (
+        (api?.module === "solid-yield" && api.imported === "foreign") ||
+        (api?.module === "solid-yield/internal" &&
+          ["nativeForeign", "nativeForeignProvided"].includes(api.imported))
+      );
+    };
     /** Report `value` (a component handed over) when it is a yield component not checked. */
     const check = (value, where) => {
       if (!value || isForeignCall(value)) return;

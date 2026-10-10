@@ -61,6 +61,7 @@ const fixture = resolve(
 );
 const server = await devServer(fixture, {
   mode: "native",
+  emit: "lowered",
   include: file => file === resolve(fixture, "FailureView.tsx")
 });
 try {

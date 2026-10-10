@@ -99,6 +99,7 @@ async function record(mode, task, urls) {
         ? [
             solidYield({
               mode: "native",
+              emit: "lowered",
               include: file => file.startsWith(join(fixed, "shared/src/"))
             })
           ]

@@ -1,6 +1,8 @@
 # Sugar mode: a spelling of the library route
 
-**Current direction (2026-10-08): see [Native mode](#native-mode).** Native source uses Solid APIs; virtual-code typing is decided. The earlier sections record the directive-sugar experiment.
+**Current direction (2026-10-08): see [Native mode](#native-mode).** Native source uses Solid APIs; virtual-code typing is decided.
+
+**What ships (D-120, 2026-10-10):** native files ship as written, as plain Solid. The lowering is the checker's model (`solid-yield check`, the editor plugin); the Vite plugin emits it only with `emit: "lowered"`, which the parity harnesses use to run the model against the original. Rewriting returns when it lowers all the way to an optimized output. The earlier sections record the directive-sugar experiment.
 
 Prototype, 2026-10-07, branch `proto/sugar`, based on `28ff9bb`.
 This is the requested follow-up to D-108's C0 Q6 (“sugar after C3”). It does not

@@ -82,6 +82,9 @@ export interface YieldPluginOptions {
   mode?: "native" | "explicit";
   /** Select native source files; dependencies and explicit modules stay outside. */
   include?: string[] | ((file: string) => boolean);
+  /** What a native file ships as: the authored Solid source (default; the
+   * lowering is the checker's model, D-120) or the lowered library code. */
+  emit?: "source" | "lowered";
   /** Where `perform` and `lazy` come from (default `"solid-yield"`). */
   yieldModule?: string;
   /** Annotate `lazy(() => import("…"))` from the yield module with its module URL (default `true`, D-047). */

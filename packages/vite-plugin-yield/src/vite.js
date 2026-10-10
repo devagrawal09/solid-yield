@@ -29,6 +29,8 @@ const SCRIPT = /\.[mc]?[jt]sx?$/i;
  * @property {string} [yieldModule] the module `perform` and `lazy` come from (default `solid-yield`)
  * @property {"native" | "explicit"} [mode] native Solid front end (opt-in)
  * @property {string[] | ((file: string) => boolean)} [include] required native file selection
+ * @property {"source" | "lowered"} [emit] what a native file ships as: the authored Solid source
+ *   (default; the lowering is the checker's model, D-120) or the lowered library code
  * @property {boolean} [lazy] annotate `lazy(() => import("…"))` from the yield module with its module URL (default `true`)
  * @property {(file: string) => boolean} [filter] which files to look at (default: `.js`/`.jsx`/`.ts`/`.tsx` and their `m`/`c` forms, outside `node_modules`)
  */
@@ -71,6 +73,12 @@ export default function solidYield(options = {}) {
       const file = id.replace(/[?#].*$/, "");
       if (!filter(file)) return null;
       if (options.mode === "native" && include?.(file)) {
+        // D-120: native mode checks plain Solid (`solid-yield check`, the
+        // editor plugin) and ships it as written. The lowered code would add
+        // the library's runtime for nothing until it lowers all the way to an
+        // optimized output; it ships only on request, as the parity harnesses
+        // run it against the original.
+        if (options.emit !== "lowered") return null;
         code = lowerNativeFile(code, file, include, sugarCache, diagnostic =>
           this.warn({
             message: `[${diagnostic.code}] ${diagnostic.message}`,

@@ -93,17 +93,39 @@ describe("native front end", { timeout: 30_000 }, () => {
       ["NATIVE_COMPONENT", 2]
     ]);
   });
+  it("ships a selected native file as written by default (D-120)", async () => {
+    const plugin = solidYield({ mode: "native", include: () => true });
+    const source = `import {createSignal} from 'solid-js';\nexport function App(){const [n]=createSignal(1);return <p>{n()}</p>;}`;
+    expect(await plugin.transform.call({}, source, id)).toBeNull();
+  });
   it("keeps unselected files on the explicit route", async () => {
     const plugin = solidYield({ mode: "native", include: () => false });
     expect(await plugin.transform.call({}, "export const n=1;", id)).toBeNull();
   });
 });
 
+it("serves native Solid source unchanged by default: no library runtime", async () => {
+  const { devServer } = await import("./server.js");
+  const root = resolve(import.meta.dirname, "fixtures/native-app");
+  const server = await devServer(root, {
+    mode: "native",
+    include: file => file === resolve(root, "Counter.tsx")
+  });
+  try {
+    const served = await server.transformRequest("/Counter.tsx", { ssr: true });
+    expect(served?.code).toContain("solid-js");
+    expect(served?.code).not.toContain("solid-yield");
+  } finally {
+    await server.close();
+  }
+}, 30_000);
+
 it("renders native Solid source through the actual Vite/SSR pipeline", async () => {
   const { devServer } = await import("./server.js");
   const root = resolve(import.meta.dirname, "fixtures/native-app");
   const server = await devServer(root, {
     mode: "native",
+    emit: "lowered",
     include: file => file === resolve(root, "Counter.tsx")
   });
   try {
@@ -136,6 +158,7 @@ it("preserves native catches through the SSR runtime", async () => {
   const root = resolve(import.meta.dirname, "fixtures/native-app");
   const server = await devServer(root, {
     mode: "native",
+    emit: "lowered",
     include: file => file === resolve(root, "Catch.tsx")
   });
   try {

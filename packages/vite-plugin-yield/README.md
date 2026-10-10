@@ -24,10 +24,14 @@ export default {
 };
 ```
 
-Use the same selection in the TS plugin, and the native ESLint setting on those
-files. [Complete installation and native tsconfig](../ts-plugin-yield/README.md).
-Tarball and file installs are tested without workspace links. Native lowering
-has no composed runtime source map yet; unsupported forms can be refused.
+Native files ship as written (D-120): `solid()` compiles them as plain Solid,
+and no library runtime is added. They are checked by `solid-yield check` and
+the TS plugin, which lower them in memory and map the errors back. Use the same
+selection there, and the native ESLint setting on those files. [Complete
+installation and native tsconfig](../ts-plugin-yield/README.md). Tarball and
+file installs are tested without workspace links. `emit: "lowered"` ships the
+lowered library code instead (the parity harnesses use it); it has no composed
+runtime source map yet.
 
 `solidYield()` runs `enforce: "pre"`, before the JSX compiler. It skips a module whose source has no `yield` (and no `lazy` from the yield module) without parsing it (every spelling of a generator, `function *f`, `*method()`, `async *gen`, is a candidate; the parse decides), and returns `null` (no change) for a module with no hole. Its source map is chained by Vite with the compiler's, so a runtime error maps back to the authored line and column. Options: `yieldModule`, `lazy`, and `filter(file)` (by default `.js`/`.jsx`/`.ts`/`.tsx` and their `m`/`c` forms, outside `node_modules`).
 

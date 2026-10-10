@@ -122,8 +122,10 @@ before the next. Ignoring the returned cleanup runs none.
 
 ## Not covered here
 
-- **The type-driven `yield*` insertion itself.** That a lowered program means
-  what the original meant is checked by parity, not proved. The evidence is the
+- **The type-driven `yield*` insertion itself.** Native apps ship as written
+  (D-120): the lowered program is the checker's model of them, and these
+  results are about that model. That it means what the original meant is
+  checked by parity, not proved. The evidence is the
   native harnesses' DOM comparisons with each original: Todos, Sierpinski,
   Hacker News, and the dashboard (30 states, streamed SSR, hydration). The
   compiler correspondence remains the core's P-ENCODING obligation.

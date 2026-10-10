@@ -53,6 +53,7 @@ if (!process.argv.includes("--child")) {
     plugins: [
       solidYield({
         mode: "native",
+        emit: "lowered",
         include: file =>
           ["Counter.tsx", "CatchAction.tsx", "AsyncReads.tsx"].some(
             name => file === join(fixture, name)

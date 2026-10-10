@@ -63,7 +63,7 @@ async function record(mode, hydrated) {
         }
       },
       ...(mode === "native"
-        ? [solidYield({ mode: "native", include: file => file === main })]
+        ? [solidYield({ mode: "native", emit: "lowered", include: file => file === main })]
         : []),
       solidYield(),
       solid({ ssr: true, hot: false, solid: { hydratable: true } })

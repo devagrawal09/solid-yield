@@ -396,6 +396,8 @@ function createVirtualService(ts, host, config = {}) {
     }
     if (["FOREIGN_HANDOFF", "PENDING_ROOT", "NO_PROVIDER"].includes(code)) {
       let target = node;
+      // A handoff: the library's foreign, or the native lowering's (F-S43).
+      const handoffs = ["foreign", "nativeForeign", "nativeForeignProvided"];
       const unwrap = n =>
         ts.isSatisfiesExpression(n)
           ? n.expression
@@ -407,7 +409,7 @@ function createVirtualService(ts, host, config = {}) {
                   ?.declarations?.some(
                     declaration =>
                       ts.isImportSpecifier(declaration) &&
-                      (declaration.propertyName ?? declaration.name).text === "foreign"
+                      handoffs.includes((declaration.propertyName ?? declaration.name).text)
                   ))
             ? unwrap(n.arguments[0])
             : n;

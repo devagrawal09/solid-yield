@@ -1507,8 +1507,15 @@ function coloredPropSites(program, active) {
       );
       if (declared) {
         if (!ts.isPropertySignature(declared) || !declared.type) continue;
-        // Only a plain declaration widens; a declared Source keeps its own contract.
-        if (member(checker.getTypeFromTypeNode(declared.type), "SOURCE", declared)) continue;
+        // Only a plain declaration widens; a declared Source keeps its own
+        // contract. F-S50's `Source<T, never, false>` for a generic bare prop is plain.
+        const bare =
+          ts.isTypeReferenceNode(declared.type) &&
+          declared.type.typeName.getText() === "__NativeSource" &&
+          declared.type.typeArguments?.[1]?.kind === ts.SyntaxKind.NeverKeyword &&
+          declared.type.typeArguments?.[2]?.getText() === "false";
+        if (!bare && member(checker.getTypeFromTypeNode(declared.type), "SOURCE", declared))
+          continue;
       } else if (!(parent && name === "children")) continue;
       if (!wanted.has(file)) wanted.set(file, new Map());
       const components = /** @type {Map<string, Set<string>>} */ (wanted.get(file));
@@ -1604,6 +1611,14 @@ function widenColoredProps(code, filename, components, concrete) {
         if (!t.isTSPropertySignature(declared) || !declared.typeAnnotation) continue;
         const name = key(declared.key);
         if (!props.has(name)) continue;
+        // F-S50's `Source<T, never, false>` widens its own colors.
+        const own = declared.typeAnnotation.typeAnnotation;
+        if (
+          t.isTSTypeReference(own) &&
+          t.isIdentifier(own.typeName, { name: "__NativeSource" }) &&
+          own.typeParameters?.params.length === 3
+        )
+          declared.typeAnnotation.typeAnnotation = own.typeParameters.params[0];
         const passed = concrete?.get(key(q.node.id))?.get(name);
         if (passed) {
           const failures = [...passed.fails].join(" | ") || "never";

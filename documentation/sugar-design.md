@@ -1518,16 +1518,29 @@ reported a line late, an inline context several lines early. It now carries
 it already did for sugar's own refusals. The two review expectations that had
 recorded the drift now name the destructured parameter's line.
 
-**F-S50 (open): author-generic components.** A plain Solid component generic in
-a value type, `function Labeled<T extends string | number>(props: { value: T;
-children: JSX.Element })`, has two problems:
+**F-S50 (done, 2026-10-10): author-generic components.** A plain Solid
+component generic in a value type, `function Labeled<T extends string | number>(props: { value: T;
+children: JSX.Element })`, had two problems:
 
-- `Props<{ value: T }>` fails `PropsCheck`: a generic value prop has no
-  resolved color.
-- Its children's requirements are dropped, as F-S49's were.
+- `Props<{ value: T }>` failed `PropsCheck`. A prop's checks are conditional
+  types, which stay deferred while `T` is open, so its reads were `unknown`.
+- Its children's requirements were dropped, as F-S49's were: a generic setup
+  takes the plain call, whose holes require nothing.
 
-This is F-S10's open "generic inference". The F-S49 parameter could serve it
-too, once generic value props have a typing.
+Both are fixed in the lowering:
+
+- A prop whose type mentions one of the component's own type parameters
+  (`value: T`, `items: T[]`) is declared as the same bare contract spelled as a
+  source, `Source<T, never, false>`, which the library resolves per
+  instantiation. D-119 treats that form as bare, so a caller passing a pending
+  or failing value widens it to `Source<T, E, P>` as any bare prop.
+- The component also takes F-S49's requirement parameter
+  (`_R = never`, `& NativeRequiring<_R>`), so a child that needs a context
+  passes through.
+
+Tests: `native-generics.test.js` (an open prop typed per instantiation; a
+pending value widened, with a pending root refused; a context child carried,
+with `NO_PROVIDER` at an unprovided root).
 
 ### Rendering through native mode (F-S51, F-S52; 2026-10-10)
 

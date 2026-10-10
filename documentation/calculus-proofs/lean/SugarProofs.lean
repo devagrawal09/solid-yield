@@ -370,6 +370,33 @@ theorem foreign_driver_unknown {V : Type} (body inject : Inference.Failures V) :
     Inference.le (observed body inject .foreign) Inference.unknown :=
   Inference.below_unknown _
 
+/-! ## Root renderers (F-S53)
+
+The inference gives `render`, `hydrate`, `renderToString` and `renderToStream`
+no failures of their own, so an entry function that renders stays plain. A
+render raises its arguments' failures and whatever its root leaves unhandled.
+The root is checked where it is rendered: a native root is a foreign handoff,
+whose residual failures must be empty. -/
+
+/-- What a render call raises: its arguments' failures and its root's residual ones. -/
+def renderRaises {V : Type} (args residual : Inference.Failures V) : Inference.Failures V :=
+  Inference.union args residual
+
+/-- With the root's residual failures checked empty, the arguments bound the call. -/
+theorem renderer_sound {V : Type} (args residual : Inference.Failures V)
+    (checked : Inference.le residual Inference.empty) :
+    Inference.le (renderRaises args residual) args := by
+  intro v h
+  rcases h with h | h
+  · exact h
+  · exact (checked v h).elim
+
+/-- Unchecked, a root can raise what no argument does. -/
+theorem unchecked_root_unsound :
+    ∃ (args residual : Inference.Failures Nat) (v : Nat),
+      renderRaises args residual v ∧ ¬ args v :=
+  ⟨Inference.empty, fun v => v = 0, 0, Or.inr rfl, fun h => h⟩
+
 #print axioms write_admitted_iff
 #print axioms event_phase_runs_in_caller
 #print axioms hook_requirement_provided
@@ -390,5 +417,7 @@ theorem foreign_driver_unknown {V : Type} (body inject : Inference.Failures V) :
 #print axioms plain_slot_unsound
 #print axioms loop_driven_sound
 #print axioms foreign_driver_unsound
+#print axioms renderer_sound
+#print axioms unchecked_root_unsound
 end Sugar
 end Yield

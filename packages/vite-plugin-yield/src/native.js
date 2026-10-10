@@ -744,10 +744,68 @@ function surface(
               needed.add("Element");
               prop.typeAnnotation = t.tsTypeAnnotation(t.tsTypeReference(t.identifier("Element")));
             }
+        // F-S50: a prop typed by the component's own type parameter (`value: T`)
+        // is a bare prop the library cannot resolve while T is open. Declared
+        // as the same contract, `Source<T, never, false>`, its reads and its
+        // callers resolve per instantiation.
+        const generics = new Set(
+          /** @type {any} */ ((q.node).typeParameters?.params ?? []).map(
+            /** @param {any} p */ p => p.name
+          )
+        );
+        if (generics.size && t.isTSTypeLiteral(param.typeAnnotation.typeAnnotation))
+          for (const prop of param.typeAnnotation.typeAnnotation.members) {
+            if (
+              !t.isTSPropertySignature(prop) ||
+              !prop.typeAnnotation ||
+              t.isIdentifier(prop.key, { name: "children" })
+            )
+              continue;
+            const declared = prop.typeAnnotation.typeAnnotation;
+            let open = false;
+            t.traverseFast(declared, n => {
+              if (
+                t.isTSTypeReference(n) &&
+                t.isIdentifier(n.typeName) &&
+                generics.has(n.typeName.name)
+              )
+                open = true;
+            });
+            if (!open) continue;
+            needed.add("__NativeSource");
+            prop.typeAnnotation = t.tsTypeAnnotation(
+              t.tsTypeReference(
+                t.identifier("__NativeSource"),
+                t.tsTypeParameterInstantiation([
+                  declared,
+                  t.tsNeverKeyword(),
+                  t.tsLiteralType(t.booleanLiteral(false))
+                ])
+              )
+            );
+          }
         param.typeAnnotation.typeAnnotation = t.tsTypeReference(
           t.identifier(propsType),
           t.tsTypeParameterInstantiation([param.typeAnnotation.typeAnnotation])
         );
+        // F-S50 with F-S49: a generic setup takes the plain call, whose holes
+        // would require nothing; one requirement parameter, inferred per call
+        // from its holes, lets a child that needs a context pass through.
+        if (generics.size) {
+          let requires = "_R";
+          while (generics.has(requires)) requires = `_${requires}`;
+          /** @type {any} */ (q.node).typeParameters.params.push(
+            t.tsTypeParameter(null, t.tsNeverKeyword(), requires)
+          );
+          needed.add("__NativeRequiring");
+          param.typeAnnotation.typeAnnotation = t.tsIntersectionType([
+            param.typeAnnotation.typeAnnotation,
+            t.tsTypeReference(
+              t.identifier("__NativeRequiring"),
+              t.tsTypeParameterInstantiation([t.tsTypeReference(t.identifier(requires))])
+            )
+          ]);
+        }
       }
       if (
         q.node.returnType &&
@@ -1571,16 +1629,15 @@ function surface(
       }
     });
   }
-  const nativePropsImports = ["__nativeC", "__NativeProps"].filter(name => needed.delete(name));
+  const nativePropsImports = ["__nativeC", "__NativeProps", "__NativeRequiring"].filter(name =>
+    needed.delete(name)
+  );
   if (nativePropsImports.length)
     p.node.body.unshift(
       t.importDeclaration(
         nativePropsImports.map(name => {
-          const spec = t.importSpecifier(
-            t.identifier(name),
-            t.identifier(name === "__nativeC" ? "nativeC" : "NativeProps")
-          );
-          if (name === "__NativeProps") spec.importKind = "type";
+          const spec = t.importSpecifier(t.identifier(name), t.identifier(name.replace(/^__/, "")));
+          if (name !== "__nativeC") spec.importKind = "type";
           return spec;
         }),
         t.stringLiteral("solid-yield/internal")
@@ -1596,10 +1653,12 @@ function surface(
           const spec = t.importSpecifier(
             t.identifier(name),
             t.identifier(
-              name.replace(/^__native(?=render$|hydrate$|renderToString$|renderToStream$)/, "")
+              name === "__NativeSource"
+                ? "Source"
+                : name.replace(/^__native(?=render$|hydrate$|renderToString$|renderToStream$)/, "")
             )
           );
-          if (name === "Props" || name === "RootCheck" || name === "Element")
+          if (["Props", "RootCheck", "Element", "__NativeSource"].includes(name))
             spec.importKind = "type";
           return spec;
         }),

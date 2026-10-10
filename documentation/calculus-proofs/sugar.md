@@ -31,6 +31,7 @@ premise: what the lowering or runtime must establish for the theorem to apply.
 | **S11 Props through `lazy`** (D-119 with F-S51): a lazy page's props take the union of its callers' colors | `lazy_union_bounds`; `missed_caller_unsound` (why every caller is collected) | Every JSX use of a lazy binding of a native page is a collected call site, and each passes the color TypeScript infers for its prop. | `native-lazy-props.test.js` |
 | **S12 Context facades** (F-S52): a retyped slot bounds what the context holds | `facade_bounds_held`; `plain_slot_unsound` (why the slot is retyped) | A declared function slot given a source or routine it does not admit is retyped to the union of the types its providers in the declaring file put there. TypeScript then checks every provider's value, in any file, against the retyped context, with `Source<T, E, P>` covariant in `E` and `P`. | `native-factories.test.js`, `native-context-facades.test.js` |
 | **S13 Loop-driven generators** (F-S53): a generator a loop drives raises what its body raises | `loop_driven_sound`, `foreign_driver_unknown`; `foreign_driver_unsound` (why other generators stay unknown) | The call is the iterable of a `for…of` or `for await…of` itself, so only that loop calls `next()` and `return()`. Its iterator is not bound, returned or passed on. | `failure-inference.test.mjs` (loop-driven generators) |
+| **S14 Root renderers** (F-S53): a render call raises only its arguments' failures | `renderer_sound`; `unchecked_root_unsound` (why the root is checked) | Every native root reaches its renderer through the root check: a bare root as `foreign(App satisfies RootCheck<typeof App>)`, a lifted root as `foreign(__nativeRoot satisfies RootCheck<typeof __nativeRoot>)`. A foreign handoff's residual failures must be empty. | `native-entries.test.js`, `failure-inference.test.mjs` (root renderer) |
 | **S8 Effect cleanup** (F-S42): a returned cleanup runs before the next run and at disposal, once each | `clean_mem_iff`, `run_mem_iff`, `clean_before_next_run`; `ignoring_never_cleans` (the old lowering) | `onCleanup` registered in the effect phase runs before the owner's next run and at disposal (Solid 2's owner contract). | `native-effect-cleanup.test.js` |
 
 ## What each result means
@@ -99,6 +100,12 @@ in place of failures.
 generator's failures are `unknown` (top). A loop injects nothing, so there the
 body's own failures bound what iterating raises. The body's failures are
 computed in the same fixpoint, so a generator that loops over another composes.
+
+**S14.** The inference leaves a render call's root failures out of the
+enclosing function, so an entry function that renders stays a plain function.
+This is sound because the root check, not the enclosing function, owns those
+failures: a checked root leaves none, so the arguments bound what the call
+raises. An unchecked root could raise what no argument does.
 
 **S8.** The trace of `n` runs followed by disposal contains each cleanup
 exactly when its run happened, and each cleanup comes right after its run and

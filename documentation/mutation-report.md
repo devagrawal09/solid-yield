@@ -1,6 +1,6 @@
 # Mutation report
 
-Measured 2026-10-10T14:31:34.661Z. The corpus, operators and checker have changed since the first measurement (2026-10-08); each change is in its own commit, and the catalogue's corrections are listed below. The tests in scripts/mutation/test.mjs verify the harness, not the checker.
+Measured 2026-10-10T16:12:06.074Z. The corpus, operators and checker have changed since the first measurement (2026-10-08); each change is in its own commit, and the catalogue's corrections are listed below. The tests in scripts/mutation/test.mjs verify the harness, not the checker.
 
 ## Commands and scope
 
@@ -12,7 +12,7 @@ node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js ru
 node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js run scripts/mutation/stryker-ts.config.mjs
 ```
 
-Program run: 2790.3 seconds; 41 projects; 470 mutants. Digest: `70c0b52335446e4de488b3c0b487ab358701bad0bc5b6829d98dacb9b7dca3df`.
+Program run: 2703.7 seconds; 41 projects; 470 mutants. Digest: `aa3606a2a432928a51fa6f7bbc9fdf24f6672bad0e24dbe442cbad2f08a85955`.
 
 Every syntactically applicable site is edited separately. Sources stay plain Solid. Each pipeline runs the shared native transform, the exported implementation used by `solid-yield check`, and recommended ESLint on generated code. A transform refusal blocks generated lint and is recorded explicitly. A CLI crash is a finding, never a kill.
 

@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { generate } from "./generate.mjs";
-import { classify } from "./run.mjs";
+import { classify, exactLine } from "./run.mjs";
 import { catalog } from "./catalog.mjs";
 import { corpus } from "./corpus.mjs";
 test("all operators have syntactically valid sites and preserve line count", () => {
@@ -14,18 +14,52 @@ test("all operators have syntactically valid sites and preserve line count", () 
       }
   assert.deepEqual([...found].sort(), Object.keys(catalog).sort());
 });
-test("a kill requires the expected code at exactly the mutated file and line", () => {
-  const m = { operator: "setup-read", file: "App.tsx", line: 4 },
+test("a kill: the expected code at a primary or related location in the mutated routine", () => {
+  const m = {
+      operator: "delete-errored",
+      file: "App.tsx",
+      line: 6,
+      routine: { start: 4, end: 12 }
+    },
     base = { diagnostics: [] };
-  const diag = { file: "App.tsx", line: 4, code: "READ_IN_SETUP", message: "read" };
+  const diag = { file: "App.tsx", line: 8, code: "FOREIGN_HANDOFF", message: "handoff" };
   assert.equal(classify(m, { diagnostics: [diag] }, base), "killed");
-  for (const change of [
-    { file: "other.tsx" },
-    { line: 3 },
-    { line: 5 },
-    { code: "FOREIGN_HANDOFF" }
+  // Reported at the root (another file), the origin in the routine as related.
+  const atRoot = { file: "main.tsx", line: 3, code: "FOREIGN_HANDOFF", message: "handoff" };
+  assert.equal(
+    classify(m, { diagnostics: [{ ...atRoot, related: [{ file: "App.tsx", line: 9 }] }] }, base),
+    "killed"
+  );
+  for (const d of [
+    atRoot,
+    { ...atRoot, related: [{ file: "App.tsx", line: 13 }] },
+    { ...atRoot, related: [{ file: "other.tsx", line: 9 }] },
+    { ...diag, line: 3 },
+    { ...diag, line: 13 },
+    { ...diag, file: "other.tsx" },
+    { ...diag, code: "PENDING_ROOT" }
   ])
-    assert.equal(classify(m, { diagnostics: [{ ...diag, ...change }] }, base), "survived");
+    assert.equal(classify(m, { diagnostics: [d] }, base), "survived", JSON.stringify(d));
+  // The literal rule, kept for comparison, needs the mutated line itself.
+  assert.equal(exactLine(m, { diagnostics: [diag] }), false);
+  assert.equal(exactLine(m, { diagnostics: [{ ...diag, line: 6 }] }), true);
+});
+test("without a routine span, only the mutated line counts", () => {
+  const m = { operator: "setup-read", file: "App.tsx", line: 4 },
+    diag = { file: "App.tsx", line: 4, code: "READ_IN_SETUP", message: "read" };
+  assert.equal(classify(m, { diagnostics: [diag] }, { diagnostics: [] }), "killed");
+  assert.equal(
+    classify(m, { diagnostics: [{ ...diag, line: 5 }] }, { diagnostics: [] }),
+    "survived"
+  );
+});
+test("every generated mutant names its routine, and the routine holds the edit", () => {
+  for (const project of corpus())
+    for (const [file, source] of project.files)
+      for (const m of generate(source, file)) {
+        assert.ok(m.routine, `${file}: ${m.operator}`);
+        assert.ok(m.routine.start <= m.line && m.line <= m.routine.end, `${file}: ${m.operator}`);
+      }
 });
 test("crashes never kill; an existing exact-line diagnostic follows the literal rule", () => {
   const m = { operator: "effect-arity", file: "App.tsx", line: 3 },

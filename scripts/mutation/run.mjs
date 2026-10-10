@@ -6,14 +6,34 @@ import { spawn } from "node:child_process";
 import { corpus, root } from "./corpus.mjs";
 import { generate } from "./generate.mjs";
 import { catalog } from "./catalog.mjs";
+/**
+ * A kill: an expected code whose primary or related location falls in the
+ * mutated routine. A deleted Errored, Loading or provider is reported where
+ * the failure, pending read or requirement reaches a root or handoff, with the
+ * origin inside the routine as a related location; the exact-line rule missed
+ * those (`exactLine` keeps it for comparison).
+ */
+export function inRoutine(mutant, at) {
+  if (!at || at.file !== mutant.file || typeof at.line !== "number") return false;
+  const { start, end } = mutant.routine ?? { start: mutant.line, end: mutant.line };
+  return at.line >= start && at.line <= end;
+}
 export function classify(mutant, result, base) {
   if (mutant.equivalent) return "equivalent";
   const expected = catalog[mutant.operator].expected;
   const match = d =>
-    d.file === mutant.file &&
-    d.line === mutant.line &&
-    [d.code, d.tsCode, d.ruleId].some(code => expected.includes(code));
+    [d.code, d.tsCode, d.ruleId].some(code => expected.includes(code)) &&
+    (inRoutine(mutant, d) || (d.related ?? []).some(r => inRoutine(mutant, r)));
   return result.diagnostics.some(match) ? "killed" : "survived";
+}
+export function exactLine(mutant, result) {
+  const expected = catalog[mutant.operator].expected;
+  return result.diagnostics.some(
+    d =>
+      d.file === mutant.file &&
+      d.line === mutant.line &&
+      [d.code, d.tsCode, d.ruleId].some(code => expected.includes(code))
+  );
 }
 export function fingerprint(projects, runnerText) {
   const hash = createHash("sha256");
@@ -131,15 +151,10 @@ async function main() {
     for (const mutant of mutants) {
       mutant.result = results.get(mutant.id);
       const prior = results.get("base-" + mutant.project);
-      mutant.preExistingMatch = prior.diagnostics.some(
-        d =>
-          d.file === mutant.file &&
-          d.line === mutant.line &&
-          [d.code, d.tsCode, d.ruleId].some(code =>
-            catalog[mutant.operator].expected.includes(code)
-          )
-      );
+      // A match the unmutated program already has is flagged, not discounted.
+      mutant.preExistingMatch = classify(mutant, prior, prior) === "killed";
       mutant.status = classify(mutant, mutant.result, prior);
+      mutant.exactLine = !mutant.equivalent && exactLine(mutant, mutant.result);
       counts[mutant.operator].mutants++;
       counts[mutant.operator][mutant.status]++;
     }

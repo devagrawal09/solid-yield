@@ -35,9 +35,13 @@ export function generate(source, filename) {
     if (mutated === source) return;
     // Reject malformed edits as generator defects, never as killed mutants.
     parseProgram(mutated, filename);
+    // The mutated routine: the top-level declaration holding the edit. Edits
+    // keep every line boundary, so its lines hold in the mutated source.
+    const top = program.node.body.find(st => st.start <= node.start && node.start < st.end);
     out.push({
       operator,
       line: line(source, node.start),
+      routine: top ? { start: line(source, top.start), end: line(source, top.end) } : null,
       offset: node.start,
       source: mutated,
       equivalent: reason ?? catalog[operator].equivalent ?? null

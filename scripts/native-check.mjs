@@ -31,6 +31,8 @@ const plugin = lintRequire("eslint-plugin-solid-yield").default;
 const generated = join(root, "packages/vite-plugin-yield/test/.native-generated");
 mkdirSync(generated, { recursive: true });
 const compilerOptions = {
+  // Keep checkout paths from changing where TypeScript truncates evidence.
+  noErrorTruncation: true,
   strict: true,
   noEmit: true,
   skipLibCheck: true,

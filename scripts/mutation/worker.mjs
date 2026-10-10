@@ -106,6 +106,15 @@ try {
   console.log = old;
 }
 for (const row of log) {
+  // A related location (where the app is rendered, the origin read) belongs
+  // to the diagnostic printed before it.
+  const r = row.match(/^ {2}related: (.*):(\d+):(\d+): /);
+  if (r) {
+    const last = diagnostics.at(-1);
+    if (last?.stage === "cli")
+      (last.related ??= []).push({ file: relative(sourceDir, r[1]), line: Number(r[2]) });
+    continue;
+  }
   const m = row.match(/^(.*):(\d+):(\d+) (?:error|warning|suggestion|message) (TS\d+): (.*)$/);
   if (m)
     diagnostics.push({

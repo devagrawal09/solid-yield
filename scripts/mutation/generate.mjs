@@ -24,6 +24,18 @@ const component = p =>
   ) &&
   p.getFunctionParent() === null;
 const text = (source, n) => source.slice(n.start, n.end);
+const ARRAY_CALLBACKS = new Set([
+  "map",
+  "flatMap",
+  "filter",
+  "find",
+  "findIndex",
+  "findLast",
+  "some",
+  "every",
+  "forEach",
+  "reduce"
+]);
 export function generate(source, filename) {
   const program = parseProgram(source, filename);
   const out = [];
@@ -66,6 +78,56 @@ export function generate(source, filename) {
         q.findParent(a => a.isJSXAttribute() && /^on[A-Z]/.test(a.node.name.name))
       ) ?? false
     );
+  };
+  // A site an Errored handles statically: one around it in its component, or
+  // around every use of its (unexported) component in this module, directly
+  // or as a wrapper's children inside the wrapper's own Errored.
+  const errored = el =>
+    t.isJSXIdentifier(el.node.openingElement.name) &&
+    (() => {
+      const b = el.scope.getBinding(el.node.openingElement.name.name);
+      return b?.path.isImportSpecifier() && b.path.node.imported.name === "Errored";
+    })();
+  const declarations = new Map();
+  for (const st of program.get("body")) {
+    const decl = st.isExportNamedDeclaration() || st.isExportDefaultDeclaration() ? null : st;
+    if (decl?.isFunctionDeclaration() && decl.node.id) declarations.set(decl.node.id.name, decl);
+  }
+  const wraps = name => {
+    let found = false;
+    declarations.get(name)?.traverse({
+      JSXExpressionContainer(q) {
+        if (
+          t.isMemberExpression(q.node.expression) &&
+          t.isIdentifier(q.node.expression.property, { name: "children" }) &&
+          q.findParent(a => a.isJSXElement() && errored(a))
+        )
+          found = true;
+      }
+    });
+    return found;
+  };
+  const underBoundary = q =>
+    !!q.findParent(
+      a =>
+        a.isJSXElement() &&
+        (errored(a) ||
+          (t.isJSXIdentifier(a.node.openingElement.name) &&
+            wraps(a.node.openingElement.name.name) &&
+            a.node.children.some(c => c.start <= q.node.start && q.node.end <= c.end)))
+    );
+  const handled = (q, depth = 0) => {
+    if (underBoundary(q)) return true;
+    const owner = q.findParent(component);
+    const name = owner?.node.id?.name;
+    if (!name || depth > 4 || !declarations.has(name)) return false;
+    const uses = [];
+    program.traverse({
+      JSXElement(u) {
+        if (t.isJSXIdentifier(u.node.openingElement.name, { name })) uses.push(u);
+      }
+    });
+    return uses.length > 0 && uses.every(u => handled(u, depth + 1));
   };
   const signals = [];
   program.traverse({
@@ -223,6 +285,48 @@ export function generate(source, filename) {
           }
         }
       }
+      // F-S46: an array callback in a hole or memo fails its host.
+      if (
+        callee.isMemberExpression() &&
+        !n.callee.computed &&
+        t.isIdentifier(n.callee.property) &&
+        ARRAY_CALLBACKS.has(n.callee.property.name)
+      ) {
+        const fn = p.get("arguments.0"),
+          owner = p.findParent(component);
+        const host = p.findParent(
+          q =>
+            q === owner ||
+            q.isJSXExpressionContainer() ||
+            (q.isCallExpression() && imported(q.get("callee")) === "createMemo")
+        );
+        const inEvent = p.findParent(q => q.isFunction() && eventHandler(q));
+        if (fn?.isFunction() && owner && host && host !== owner && !inEvent) {
+          const guard = 'if (Date.now() < 0) throw new RangeError("mutant failure");';
+          const reason = handled(p)
+            ? "An Errored above handles the callback's failure: in its component, or around every use of the component in this module (through a wrapper's boundary, D-119)."
+            : undefined;
+          const body = fn.node.body;
+          if (t.isBlockStatement(body))
+            add(
+              "callback-throw",
+              body,
+              [{ start: body.start + 1, end: body.start + 1, text: " " + guard }],
+              reason
+            );
+          else {
+            const start = body.extra?.parenthesized ? body.extra.parenStart : body.start;
+            let end = body.end;
+            if (body.extra?.parenthesized) end = source.indexOf(")", end) + 1;
+            add(
+              "callback-throw",
+              body,
+              [{ start, end, text: `{ ${guard} return ${source.slice(start, end)}; }` }],
+              reason
+            );
+          }
+        }
+      }
       const scheduler =
         (callee.isIdentifier() &&
           ["setTimeout", "setInterval", "requestAnimationFrame"].includes(callee.node.name)) ||
@@ -317,10 +421,12 @@ export function generate(source, filename) {
               if (child) singleLine(child);
         };
         singleLine(declaration);
+        // A line comment in the copy would end its line: comments are dropped.
         const printed = babel.transformFromAstSync(t.file(t.program([declaration])), undefined, {
           configFile: false,
           babelrc: false,
-          compact: true
+          compact: true,
+          comments: false
         }).code;
         const edits = [
           { start: owner.node.body.start + 1, end: owner.node.body.start + 1, text: printed },

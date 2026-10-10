@@ -79,6 +79,10 @@ export const catalog = {
       "Removing a server directive changes transport behavior but remains a valid local function; no checker error is required.",
     edit: "Remove each use server directive."
   },
+  "callback-throw": {
+    expected: ["FOREIGN_HANDOFF"],
+    edit: "Insert a conditional throw of a RangeError at the start of each array-method callback in a component's JSX hole or memo (F-S46: the callback's failure is its host's)."
+  },
   "server-new-class": {
     expected: ["FOREIGN_HANDOFF"],
     edit: "Replace each server-function throw with an instance of a fresh local class."

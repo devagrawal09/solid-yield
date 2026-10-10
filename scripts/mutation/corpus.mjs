@@ -48,6 +48,12 @@ export function corpus() {
     origin: "Additional plain Solid controls for catch, async event and server sites",
     files: files("scripts/mutation/corpus/seeds")
   });
+  projects.push({
+    id: "sugar-edges",
+    origin:
+      "Plain Solid exercising the native edges: context hooks and members, setters in plain types, wrappers with boundaries around context readers, array callbacks, effect cleanups, an anonymous default component",
+    files: files("scripts/mutation/corpus/sugar-edges")
+  });
   return projects;
 }
 export const relativeToRoot = file => relative(root, file);

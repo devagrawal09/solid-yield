@@ -54,6 +54,12 @@ export function corpus() {
       "Plain Solid exercising the native edges: context hooks and members, setters in plain types, wrappers with boundaries around context readers, array callbacks, effect cleanups, an anonymous default component",
     files: files("scripts/mutation/corpus/sugar-edges")
   });
+  projects.push({
+    id: "rendering-edges",
+    origin:
+      "Plain Solid exercising Rendering's native edges: a component factory with a tuple context and destructured members, a derived store, async iterable producers, a Repeat index key, isPending thunks, a lazy page, root trees (CSR, and a server function's with a ParentProps shell)",
+    files: files("scripts/mutation/corpus/rendering-edges")
+  });
   return projects;
 }
 export const relativeToRoot = file => relative(root, file);

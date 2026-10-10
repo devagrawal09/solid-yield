@@ -899,6 +899,8 @@ than a fundamental incompatibility.
 | State creation in JSX hole | Refusal in this prototype | `SUGAR_CALLBACK` while reconstructing the nested call; no claim of reaching the host-type check |
 | `<button {...attributes}/>` / `<button ref={fn}/>` | Refusal | `NATIVE_SPREAD` / `NATIVE_REF`: hidden bindings and ref ownership need verified contracts |
 | Event handler using `this` | Refusal | `NATIVE_RECEIVER`: “An event handler using this needs a verified receiver-preserving binding.” Tested in `native.test.js`. |
+| A component declared inside another and used as a tag | Refusal | `NATIVE_COMPONENT` at its declaration: “Declare X at module level; a component declared inside another function has no native lowering.” Tested in `native.test.js`. |
+| `useContext(createContext<T>())` | Refusal | `NO_PROVIDER` at the read: a defaultless context created in its own read can never be provided. Tested in `native-context.test.js`. |
 | Named synchronous local handler | Faithful lowering on tested form | `named-event`: generated TS/lint pass; counter hydration exercises it |
 | `createEffect(compute, {effect: fn})` | Refusal in this implementation | `SUGAR_CALLBACK`; native effect bundles still need a dedicated mapping |
 
@@ -1426,3 +1428,64 @@ unknown consumer). A foreign generator bridge needs its own contract.
 **Room (open, out of the native scope so far).** Room's panels are server
 components (`live(GET(async … => (props) => <…/>))`), the islands line's
 shape, not plain client Solid.
+
+### Wrappers, nested components and refusal positions (F-S49, F-S50; 2026-10-10)
+
+Found by the `sugar-edges` mutation seed and the mutation triage.
+
+**F-S49 (requirements through wrappers).** D-119 makes a wrapper with its own
+boundaries generic in its children's colors (`Panel` around `Errored` and
+`Loading`). A generic setup takes the plain call signature, whose hole props
+require nothing (D-098 amended). So a child that reads a context could not pass
+through such a wrapper, even with the provider above it. The generated call
+failed with `GENERATED_TYPE`.
+
+The widening now also adds one requirement parameter, `_R = never`, and
+`& NativeRequiring<_R>` on the props. The plain-call overload threads it
+(`HoleQ<TP>`):
+
+- the props input admits holes that require `_R`;
+- the call's view carries `_R`, which TypeScript infers per call from its
+  holes.
+
+Authored props never carry the phantom, so `HoleQ` is `never` for them and
+every D-029 type test is unchanged. Without a provider the requirement still
+reaches the root (`NO_PROVIDER`). Proof obligation S10
+([sugar.md](calculus-proofs/sugar.md)). Tests:
+
+- `native-hole-requirements.test.js` (each case fails without the parameter);
+- the F-S49 block in `context.type-tests.tsx`.
+
+**Context guard in a component.** `if (!value) throw …` inline in a component,
+before its JSX, lowers to `return __nativeContextGuard(…) as never`. That is a
+failure path, which `SUGAR_RETURN` now accepts, as it accepts `raise`.
+
+**Nested components: `NATIVE_COMPONENT`.** A component declared inside another
+function and used as a tag was lowered as a plain callback, then failed as a
+generated `TS2554`. It is now refused at its declaration, once per component:
+"Declare X at module level". A lowercase render helper called as a function is
+unaffected. HOCs (F-S48) are a separate case: their component is a call's
+result, not a declaration.
+
+**A context created in its read: `NO_PROVIDER`.** In `useContext(createContext<T>())`,
+a defaultless context created inside its own read can never be provided. It was
+refused as `NATIVE_CONTEXT` ("needs a named declaration"). It is now
+`NO_PROVIDER` at the read.
+
+**Refusal positions.** A refusal raised while lowering carried its line in an
+intermediate program, so it drifted from the source: a destructured prop was
+reported a line late, an inline context several lines early. It now carries
+`id` and `loc`, and `withPositions` maps it back to the authored position, as
+it already did for sugar's own refusals. The two review expectations that had
+recorded the drift now name the destructured parameter's line.
+
+**F-S50 (open): author-generic components.** A plain Solid component generic in
+a value type, `function Labeled<T extends string | number>(props: { value: T;
+children: JSX.Element })`, has two problems:
+
+- `Props<{ value: T }>` fails `PropsCheck`: a generic value prop has no
+  resolved color.
+- Its children's requirements are dropped, as F-S49's were.
+
+This is F-S10's open "generic inference". The F-S49 parameter could serve it
+too, once generic value props have a typing.

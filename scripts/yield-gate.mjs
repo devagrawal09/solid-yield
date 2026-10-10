@@ -326,6 +326,37 @@ function buildSteps(twins) {
     });
   }
 
+  // The native edge example: plain Solid that type-checks as itself, that the
+  // native check accepts, and whose lowering matches it at every scripted state.
+  steps.push({
+    name: "native:edges:typecheck",
+    cwd: root,
+    cmd: process.execPath,
+    args: [
+      "packages/vite-plugin-yield/node_modules/typescript/bin/tsc",
+      "-p",
+      "examples/harness/native-edges/app/tsconfig.json"
+    ]
+  });
+  steps.push({
+    name: "native:edges:diagnostics",
+    cwd: root,
+    cmd: process.execPath,
+    args: [
+      "packages/ts-plugin-yield/src/cli.cjs",
+      "check",
+      "examples/harness/native-edges/app",
+      "--native",
+      "**"
+    ]
+  });
+  steps.push({
+    name: "native:edges:parity",
+    cwd: root,
+    cmd: process.execPath,
+    args: ["examples/harness/native-edges/check.mjs"]
+  });
+
   steps.push({
     name: "original:docs:typecheck",
     cwd: root,
@@ -501,6 +532,8 @@ function buildSteps(twins) {
       "examples/harness/native-hackernews/*.mjs",
       "examples/harness/native-dashboard/*.mjs",
       "examples/harness/native-docs/*.mjs",
+      "examples/harness/native-edges/*.mjs",
+      "examples/harness/native-edges/app/*.[tj]s?(x)",
       "scripts/*.mjs"
     ]
   });

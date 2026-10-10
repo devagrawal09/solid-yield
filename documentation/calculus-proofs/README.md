@@ -23,7 +23,8 @@ matching. Findings F16–F21 record the remaining premises and counterexamples.
 **Sugar mode (2026-10-10).** [sugar.md](sugar.md) states the obligations the
 native lowering adds: writes and event-phase hosting, setters in plain function
 types, context hooks, props carrying their callers' colors (D-119), foreign
-routers (F-S43), context members (F-S45) and effect cleanup (F-S42).
+routers (F-S43), context members (F-S45), array-callback colors (F-S46),
+requirements through generic wrappers (F-S49) and effect cleanup (F-S42).
 [SugarProofs.lean](lean/SugarProofs.lean) proves them on top of `YieldProofs`,
 each with a counterexample for the rejected alternative. They are **not yet
 machine-checked**: this session's network policy refused the Lean toolchain

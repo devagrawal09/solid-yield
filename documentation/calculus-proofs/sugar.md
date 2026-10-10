@@ -27,6 +27,7 @@ premise: what the lowering or runtime must establish for the theorem to apply.
 | **S6 Foreign routers** (F-S43): discharge only contexts provided around every render | `every_render_provided`, `foreign_router_sound`; `render_union_unsound` (why intersection) | The lowering finds every JSX render of the module-level router binding (a router used other than as a tag is not discharged). The runtime provider holds a non-unset value (the core's P-FOREIGN premise). | `native-foreign-provided.test.js` |
 | **S7 Context members** (F-S45): a member call fails what its providers' members fail | `context_member_sound`, `escaping_context_unknown`; `missed_provider_unsound` (why an escaping context is unknown) | The collected values are every value the context can hold: every provider tag's `value` and the default, with no other use of the context (else `unknown`). The receiver is that context's value: `useContext(Ctx)`, through constant bindings and hooks whose every return is it. | `native-context-members.test.js` (15 cases; 14 targeted mutations killed) |
 | **S9 Callback colors** (F-S46): an array callback's operations are its host's | `delegated_callback_colored`, `hole_raise_as_read`; `undelegated_callback_unsound` (why delegation) | The lowering delegates every array-method callback that runs in its own host (`yield* __nativeLexicalCallback(…)`; holes through `nativeHoleColors`). A callback given to another function is not delegated (F-S47, open). | `native-callback-colors.test.js` |
+| **S10 Requirements through generic wrappers** (F-S49): a call carries what its holes require | `wrapped_need`, `hole_requirement_carried`; `dropped_requirement_unsound` (why the parameter) | A wrapper the lowering makes generic gets `_R = never` and `& NativeRequiring<_R>`; the plain-call overload admits holes requiring `_R` and adds `_R` to the call's requirements (`HoleQ`). TypeScript infers `_R` from each call's holes. | `native-hole-requirements.test.js`, `context.type-tests.tsx` (F-S49 block) |
 | **S8 Effect cleanup** (F-S42): a returned cleanup runs before the next run and at disposal, once each | `clean_mem_iff`, `run_mem_iff`, `clean_before_next_run`; `ignoring_never_cleans` (the old lowering) | `onCleanup` registered in the effect phase runs before the owner's next run and at disposal (Solid 2's owner contract). | `native-effect-cleanup.test.js` |
 
 ## What each result means
@@ -71,6 +72,12 @@ or a provider value that is not an object literal, makes the call `unknown`
 observation outside the host's color, exactly the gap F-S46 closed. In a hole
 the lowering presents a raise as a settled read failing with the same
 failures, which has the same color.
+
+**S10.** A requirement passes every frame but a provider, so a need the
+wrapper's subtree emits is one its hole emits (`wrapped_need`), and the call's
+color with the parameter contains it. The caller's providers then discharge it,
+or the root refuses it (`root_no_missing_context`). Without the parameter the
+call would report none while the subtree still emits it.
 
 **S8.** The trace of `n` runs followed by disposal contains each cleanup
 exactly when its run happened, and each cleanup comes right after its run and

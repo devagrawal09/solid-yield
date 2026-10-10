@@ -218,6 +218,47 @@ theorem hole_raise_as_read (ks : List Nat) (x : Effect) :
     opColor (.raise ks) x ↔ opColor (.read false ks) x := by
   cases x <;> simp [opColor, parts]
 
+/-! ## Requirements through generic wrappers (F-S49)
+
+D-119 makes a wrapper with its own boundaries generic, and a generic setup's
+plain call reports nothing its hole props require (D-098 amended). The hole
+runs inside the wrapper's frames. The lowering gives the call a requirement
+parameter inferred from its holes (`HoleQ`), so the call's color carries them. -/
+
+/-- The wrapper's subtree: its hole under the wrapper's own frames. -/
+def wrapped (frames : List Frame) (hole : Term) : Term := frames.foldr Term.scope hole
+
+/-- A need the wrapper's subtree emits from its hole is one the hole emits. -/
+theorem wrapped_need {frames hole q} (run : Emits (wrapped frames hole) (.need q)) :
+    Emits hole (.need q) := by
+  induction frames with
+  | nil => exact run
+  | cons f fs ih =>
+    simp only [wrapped, List.foldr] at run
+    exact ih (discharge.mp run).1
+
+/-- The call's color with the requirement parameter: the wrapper's own color
+    joined with its hole's requirements. -/
+def withHoleQ (base : Color) (hole : Term) : Color :=
+  join base (fun e => ∃ q, e = .need q ∧ color hole e)
+
+/-- Every need the wrapper's subtree emits is in the call's color, so the child
+    interface (`Fires.child`) holds for requirements and the caller's
+    providers or root see each one. -/
+theorem hole_requirement_carried {base frames hole q}
+    (run : Emits (wrapped frames hole) (.need q)) : withHoleQ base hole (.need q) :=
+  .inr ⟨q, rfl, preservation (wrapped_need run)⟩
+
+/-- Without the parameter the plain call reports no hole requirement
+    (`bottom`), yet a hole under an `Errored` (the seed's `Panel`) still emits
+    its need: the reported color would break the child interface. -/
+theorem dropped_requirement_unsound :
+    ∃ (frames : List Frame) (hole : Term) (q : Requirement),
+      Emits (wrapped frames hole) (.need q) ∧ ¬ bottom (.need q) := by
+  refine ⟨[.errored 0 (fun _ => True)], .atom (.context [.live 7]), .live 7, ?_, fun h => h⟩
+  show Emits (.scope (.errored 0 (fun _ => True)) (.atom (.context [.live 7]))) (.need (.live 7))
+  exact .pass (.atom (.context (by simp))) (by simp [Handles])
+
 /-! ## Effect cleanup (F-S42)
 
 An effect function's returned cleanup registers through `onCleanup`, which runs
@@ -270,5 +311,7 @@ theorem ignoring_never_cleans (n i : Nat) : Ev.clean i ∉ traceIgnoring n := by
 #print axioms clean_mem_iff
 #print axioms delegated_callback_colored
 #print axioms undelegated_callback_unsound
+#print axioms hole_requirement_carried
+#print axioms dropped_requirement_unsound
 end Sugar
 end Yield

@@ -1781,7 +1781,7 @@ Both were real gaps, and fixing them exposed a third.
   so it keeps its attempt.
 
   Tests: `native-promises.test.js`. The mutation catalog's `remove-await` now
-  also expects TS2339.
+  also expects TS2339. Proof obligation: S15 (`calculus-proofs/sugar.md`).
 - **A setter given a hoisted callback writes.** F-S47 hoists a lexical
   callback into a binding before its host's statement. Until the callback's
   reads are lowered, it does not delegate the call given it, because that

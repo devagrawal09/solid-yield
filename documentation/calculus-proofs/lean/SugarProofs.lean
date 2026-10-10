@@ -397,6 +397,47 @@ theorem unchecked_root_unsound :
       renderRaises args residual v ∧ ¬ args v :=
   ⟨Inference.empty, fun v => v = 0, 0, Or.inr rfl, fun h => h⟩
 
+/-! ## Kept promises (found by mutation)
+
+In an async routine the lowering attempts a call that returns a promise where
+the call is made, which awaits it. A promise the code keeps as a value (bound
+or passed on, not awaited, returned or discarded) is not awaited there in the
+original. A call to an `async` function then stays a plain call, and the
+promise is attempted where the code awaits it. That loses no failure: an
+`async` function's call raises nothing synchronously, and its rejection is
+raised at the await. A function that is not `async` can throw before it
+returns its promise, so its call keeps its attempt. -/
+
+/-- A call that returns a promise: what making it raises, and what awaiting
+    its promise raises. -/
+structure PromiseCall (V : Type) where
+  made : Inference.Failures V
+  awaited : Inference.Failures V
+
+/-- An `async` callee raises nothing where it is called. -/
+def PromiseCall.fromAsync {V : Type} (c : PromiseCall V) : Prop :=
+  Inference.le c.made Inference.empty
+
+/-- What the original raises across the call and the await of its promise. -/
+def keptRaises {V : Type} (c : PromiseCall V) : Inference.Failures V :=
+  Inference.union c.made c.awaited
+
+/-- What a plain call attempted only at the await accounts for. -/
+def attemptedAtAwait {V : Type} (c : PromiseCall V) : Inference.Failures V := c.awaited
+
+/-- An `async` callee's kept promise, attempted where it is awaited, loses no failure. -/
+theorem kept_async_sound {V : Type} (c : PromiseCall V) (hasync : c.fromAsync) :
+    Inference.le (keptRaises c) (attemptedAtAwait c) := by
+  intro v h
+  rcases h with h | h
+  · exact (hasync v h).elim
+  · exact h
+
+/-- A callee that is not `async` can raise where it is called: hence its attempt. -/
+theorem kept_sync_unsound :
+    ∃ (c : PromiseCall Nat) (v : Nat), keptRaises c v ∧ ¬ attemptedAtAwait c v :=
+  ⟨⟨fun v => v = 0, Inference.empty⟩, 0, Or.inl rfl, fun h => h⟩
+
 #print axioms write_admitted_iff
 #print axioms event_phase_runs_in_caller
 #print axioms hook_requirement_provided
@@ -419,5 +460,7 @@ theorem unchecked_root_unsound :
 #print axioms foreign_driver_unsound
 #print axioms renderer_sound
 #print axioms unchecked_root_unsound
+#print axioms kept_async_sound
+#print axioms kept_sync_unsound
 end Sugar
 end Yield

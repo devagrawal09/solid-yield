@@ -26,7 +26,7 @@ types, context hooks, props carrying their callers' colors (D-119), foreign
 routers (F-S43), context members (F-S45), array-callback colors (F-S46),
 requirements through generic wrappers (F-S49), effect cleanup (F-S42), props
 through `lazy` (S11), context facades (F-S52, S12), loop-driven generators
-(F-S53, S13) and root renderers (S14).
+(F-S53, S13), root renderers (S14) and kept promises (S15).
 [SugarProofs.lean](lean/SugarProofs.lean) proves them on top of `YieldProofs`,
 each with a counterexample for the rejected alternative. They are **not yet
 machine-checked**: this session's network policy refused the Lean toolchain

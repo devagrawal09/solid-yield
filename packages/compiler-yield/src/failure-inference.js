@@ -5,6 +5,8 @@ import { Analysis } from "./semantic.js";
 import { relative } from "node:path";
 const union = (...sets) => new Set(sets.flatMap(s => [...s]));
 const name = n => n?.name ?? n?.value;
+/** `@solidjs/web` components that render no author code that can fail (F-S45). */
+const SAFE_WEB_COMPONENTS = ["HydrationScript", "NoHydration"];
 export function inferFailures(
   modules,
   { program, ts, root = process.cwd(), opaqueGenerators = false }
@@ -168,6 +170,161 @@ export function inferFailures(
     if (ctx) return new Set([ctx]);
     return target(tag)?.provides ?? new Set();
   }
+  /**
+   * F-S45: the context a value is, when it is `useContext(Ctx)` — directly, or
+   * through constant bindings and hooks whose every return is that value.
+   */
+  const contextOfValue = (p, depth = 0) => {
+    if (!p?.node || depth > 4) return null;
+    if (p.isIdentifier()) {
+      const binding = p.scope.getBinding(p.node.name);
+      if (
+        !binding?.constant ||
+        !binding.path.isVariableDeclarator() ||
+        !binding.path.get("id").isIdentifier()
+      )
+        return null;
+      return contextOfValue(binding.path.get("init"), depth + 1);
+    }
+    if (!p.isCallExpression()) return null;
+    const api = imported(p.get("callee"));
+    if (api?.source === "solid-js" && api.name === "useContext")
+      return p.node.arguments.length ? contextId(p.get("arguments.0")) : null;
+    const fn = target(p);
+    if (!fn || fn.path.node.generator || fn.path.node.async) return null;
+    const body = fn.path.get("body");
+    if (!body.isBlockStatement()) return contextOfValue(body, depth + 1);
+    const returns = [];
+    body.traverse({
+      Function(q) {
+        q.skip();
+      },
+      ReturnStatement(q) {
+        returns.push(q.get("argument"));
+      }
+    });
+    const ids = returns.map(r => contextOfValue(r, depth + 1));
+    return ids.length && ids.every(id => id && id === ids[0]) ? ids[0] : null;
+  };
+  /**
+   * F-S45: every value a context can hold — each provider's `value` and its
+   * default — or `null` when one is not an object literal or the context
+   * escapes (is used other than as a provider tag or a `useContext` argument).
+   */
+  let contextValueMap = null;
+  const contextValues = id => {
+    if (!contextValueMap) {
+      contextValueMap = new Map();
+      const add = (ctx, value) => {
+        const values = contextValueMap.has(ctx) ? contextValueMap.get(ctx) : [];
+        if (values)
+          contextValueMap.set(ctx, value?.isObjectExpression() ? [...values, value] : null);
+      };
+      for (const [, record] of analysis.modules)
+        record.program.traverse({
+          "Identifier|JSXIdentifier"(q) {
+            const binding = q.scope.getBinding(q.node.name);
+            if (
+              !binding ||
+              binding.identifier === q.node ||
+              !(binding.kind === "module" || binding.path.isVariableDeclarator())
+            )
+              return;
+            if (q.isIdentifier() && !q.isReferenced()) return;
+            if (q.parentPath.isImportSpecifier() || q.parentPath.isExportSpecifier()) return;
+            if (q.isJSXIdentifier() && q.parentPath.isJSXAttribute()) return;
+            const ctx = contextId(q);
+            if (!ctx) return;
+            if (q.parentPath.isJSXClosingElement()) return;
+            let opening = q.parentPath;
+            if (
+              opening.isJSXMemberExpression() &&
+              q.key === "object" &&
+              name(opening.node.property) === "Provider"
+            )
+              opening = opening.parentPath;
+            if (opening.isJSXOpeningElement()) {
+              const attributes = opening.get("attributes");
+              const attr = attributes.find(a => a.isJSXAttribute() && a.node.name.name === "value");
+              const value = attr?.get("value");
+              add(
+                ctx,
+                attributes.some(a => a.isJSXSpreadAttribute()) || !value?.isJSXExpressionContainer()
+                  ? null
+                  : value.get("expression")
+              );
+              return;
+            }
+            const call = q.parentPath;
+            const api = call.isCallExpression() ? imported(call.get("callee")) : null;
+            if (api?.source === "solid-js" && api.name === "useContext" && q.key === 0) return;
+            add(ctx, null);
+          }
+        });
+    }
+    const values = contextValueMap.has(id) ? contextValueMap.get(id) : [];
+    const [file, local] = [id.slice(0, id.lastIndexOf("#")), id.slice(id.lastIndexOf("#") + 1)];
+    const declaration = analysis.modules.get(file)?.program.scope.getBinding(local)?.path;
+    const init = declaration?.isVariableDeclarator() ? declaration.get("init") : null;
+    if (!values || !init?.isCallExpression()) return null;
+    const [fallback] = init.get("arguments");
+    if (!fallback || fallback.isIdentifier({ name: "undefined" })) return values;
+    return fallback.isObjectExpression() ? [...values, fallback] : null;
+  };
+  const SETTER_PRODUCERS = [
+    "createSignal",
+    "createOptimistic",
+    "createStore",
+    "createOptimisticStore",
+    "createProjection"
+  ];
+  /**
+   * F-S45: what calling `member` of an object literal fails with: its function's
+   * failures, nothing for a Solid setter (its callback arguments are the
+   * caller's), a signal getter's computation (nothing for a plain value), or
+   * `null` when the member is anything else.
+   */
+  const memberCall = (object, member, owner) => {
+    let found = null;
+    for (const prop of object.get("properties")) {
+      if (prop.isSpreadElement()) return null;
+      if (!prop.node.computed && name(prop.node.key) === member) found = prop;
+    }
+    if (!found) return null;
+    const file = analysis.moduleOf.get(found.node)?.id;
+    const body = fn => invoke(byBody.get(`${file}:${fn.node.body.start}`), owner);
+    if (found.isObjectMethod()) return body(found);
+    const value = found.get("value");
+    if (value.isFunction()) return body(value);
+    if (!value.isIdentifier()) return null;
+    const binding = value.scope.getBinding(value.node.name);
+    if (!binding?.constant) return null;
+    if (binding.path.isFunctionDeclaration()) return body(binding.path);
+    if (!binding.path.isVariableDeclarator()) return null;
+    const init = binding.path.get("init");
+    if (init.isFunction()) return body(init);
+    const pattern = binding.path.node.id;
+    const api = init.isCallExpression() ? imported(init.get("callee")) : null;
+    if (pattern.type !== "ArrayPattern" || api?.source !== "solid-js") return null;
+    const index = pattern.elements.findIndex(
+      e => e?.type === "Identifier" && e.name === value.node.name
+    );
+    if (index === 1 && SETTER_PRODUCERS.includes(api.name)) return new Set();
+    if (index === 0 && ["createSignal", "createOptimistic"].includes(api.name)) {
+      const [initial] = init.get("arguments");
+      return initial?.isFunction() ? body(initial) : new Set();
+    }
+    return null;
+  };
+  /** F-S45: a call through a member of a context's value, or `null`. */
+  const contextMember = (callee, owner) => {
+    if (!callee.isMemberExpression() || callee.node.computed) return null;
+    const id = contextOfValue(callee.get("object"));
+    const values = id && contextValues(id);
+    if (!values?.length) return null;
+    const effects = values.map(v => memberCall(v, name(callee.node.property), owner));
+    return effects.every(Boolean) ? union(...effects) : null;
+  };
   // A wrapper provides only what every returned subtree provides. An optional
   // provider in one branch cannot erase requirements in another branch.
   let provisionChanged = true;
@@ -351,6 +508,8 @@ export function inferFailures(
       return api.name;
     }
     if (contextId(callee)) return "context";
+    // F-S45: marks an error safe to serialize; it does not throw.
+    if (api?.source === "@solidjs/web" && api.name === "markSafeError") return "web";
     if (
       p.isNewExpression() &&
       callee.isIdentifier({ name: "Promise" }) &&
@@ -688,8 +847,12 @@ export function inferFailures(
       const attrs = p.get("openingElement.attributes");
       if (api?.source === "solid-js" && api.name === "Errored")
         return union(...attrs.map(a => evaluate(a, owner, caught))); // children are handled, fallback is not
+      // A context is its own provider (F-S45); Solid's web components below fail nothing.
       const called =
-        /^[A-Z]/.test(tag.node.name ?? "") && api?.source !== "solid-js"
+        /^[A-Z]/.test(tag.node.name ?? "") &&
+        api?.source !== "solid-js" &&
+        !(api?.source === "@solidjs/web" && SAFE_WEB_COMPONENTS.includes(api.name)) &&
+        !contextId(tag)
           ? invoke(target(tag), owner)
           : new Set();
       return union(
@@ -874,9 +1037,10 @@ export function inferFailures(
         };
         return union(argEffects, constructorEffects(declaration));
       }
+      const resolved = target(p);
       return union(
         argEffects,
-        invoke(target(p), owner),
+        resolved ? invoke(resolved, owner) : (contextMember(callee, owner) ?? invoke(null, owner)),
         ...args
           .filter(a => a.isFunction())
           .map(a => invoke(byBody.get(`${owner.file}:${a.node.body.start}`), owner))
@@ -1048,7 +1212,11 @@ export function inferFailures(
           });
       },
       "CallExpression|NewExpression"(p) {
-        if (!nativeCall(p) && !target(p))
+        if (
+          !nativeCall(p) &&
+          !target(p) &&
+          !contextMember(p.get("callee"), { calls: new Set(), timerFails: null })
+        )
           unknownOrigins.push({
             file,
             start: p.node.start,

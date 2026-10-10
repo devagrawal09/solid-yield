@@ -1,7 +1,11 @@
 // Sets are fixed before running. Generic TypeScript errors only count for await removal.
+// A later correction names the code the checker documents for the case and says why
+// (`corrected`); the report lists every correction.
 export const catalog = {
   "delete-catch": {
-    expected: ["FOREIGN_HANDOFF", "NATIVE_CALLBACK_FAILURE"],
+    expected: ["FOREIGN_HANDOFF", "NATIVE_CALLBACK_FAILURE", "EVENT_REJECTS"],
+    corrected:
+      "EVENT_REJECTS added (2026-10-10): an event handler's unhandled failure is EVENT_REJECTS (sugar-design, unhandled rejections); NATIVE_CALLBACK_FAILURE is the foreign-callback code.",
     edit: "Remove one catch; retain try body and finally."
   },
   "swallow-catch": {
@@ -40,11 +44,15 @@ export const catalog = {
     edit: "Replace each constructed class throw with an object."
   },
   "async-reject": {
-    expected: ["FOREIGN_HANDOFF", "NATIVE_CALLBACK_FAILURE"],
+    expected: ["FOREIGN_HANDOFF", "NATIVE_CALLBACK_FAILURE", "EVENT_REJECTS"],
+    corrected:
+      "EVENT_REJECTS added (2026-10-10): every site is an event handler, whose unhandled failure is EVENT_REJECTS; NATIVE_CALLBACK_FAILURE is the foreign-callback code.",
     edit: "Insert throw new Error after each await statement in an async JSX event callback."
   },
   "remove-await": {
-    expected: ["TS2322", "TS2345", "GENERATED_TYPE", "SETTLED_PROP"],
+    expected: ["TS2322", "TS2345", "TS2739", "TS2740", "TS2741", "GENERATED_TYPE", "SETTLED_PROP"],
+    corrected:
+      "TS2739, TS2740 and TS2741 added (2026-10-10): TypeScript's assignability error for missing properties (a Promise where its value was expected) is one of these, not TS2322.",
     edit: "Replace each await expression with its operand."
   },
   "memo-write": {

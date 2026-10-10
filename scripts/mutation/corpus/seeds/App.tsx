@@ -14,7 +14,7 @@ function App() {
     try { return await readServer(); } catch (e) { throw e; }
   });
   const twice = createMemo(() => count() * 2);
-  createEffect(() => count(), n => setCount(n));
+  createEffect(() => count(), n => { setCount(n); });
   setTimeout(() => setCount(2), 1);
   const save = async () => {
     await Promise.resolve();

@@ -1,125 +1,313 @@
 {
   "program": {
-    "mutants": 416,
-    "killed": 128,
-    "survived": 231,
-    "equivalent": 57,
-    "score": 35.65459610027855
+    "mutants": 449,
+    "killed": 232,
+    "survived": 128,
+    "equivalent": 89,
+    "score": 64.44444444444444,
+    "exactLine": 217,
+    "detected": 266
   },
   "operators": {
     "delete-catch": {
       "mutants": 9,
-      "killed": 0,
-      "survived": 9,
-      "equivalent": 0
+      "killed": 2,
+      "survived": 7,
+      "equivalent": 0,
+      "exact": 1,
+      "detected": 5,
+      "categories": {
+        "detected elsewhere": 5,
+        "masked: base refused": 0,
+        "masked: base errors": 0,
+        "different code": 0,
+        "silent": 2
+      }
     },
     "swallow-catch": {
       "mutants": 2,
       "killed": 0,
       "survived": 0,
-      "equivalent": 2
+      "equivalent": 2,
+      "exact": 0,
+      "detected": 0,
+      "categories": {
+        "detected elsewhere": 0,
+        "masked: base refused": 0,
+        "masked: base errors": 0,
+        "different code": 0,
+        "silent": 0
+      }
     },
     "delete-errored": {
-      "mutants": 19,
-      "killed": 0,
-      "survived": 19,
-      "equivalent": 0
-    },
-    "delete-loading": {
-      "mutants": 21,
-      "killed": 0,
-      "survived": 21,
-      "equivalent": 0
-    },
-    "setup-read": {
-      "mutants": 110,
-      "killed": 88,
-      "survived": 22,
-      "equivalent": 0
-    },
-    "delete-provider": {
       "mutants": 20,
       "killed": 0,
       "survived": 20,
-      "equivalent": 0
+      "equivalent": 0,
+      "exact": 0,
+      "detected": 10,
+      "categories": {
+        "detected elsewhere": 10,
+        "masked: base refused": 4,
+        "masked: base errors": 5,
+        "different code": 0,
+        "silent": 1
+      }
+    },
+    "delete-loading": {
+      "mutants": 22,
+      "killed": 1,
+      "survived": 21,
+      "equivalent": 0,
+      "exact": 0,
+      "detected": 15,
+      "categories": {
+        "detected elsewhere": 14,
+        "masked: base refused": 4,
+        "masked: base errors": 2,
+        "different code": 0,
+        "silent": 1
+      }
+    },
+    "setup-read": {
+      "mutants": 116,
+      "killed": 95,
+      "survived": 21,
+      "equivalent": 0,
+      "exact": 88,
+      "detected": 91,
+      "categories": {
+        "detected elsewhere": 0,
+        "masked: base refused": 21,
+        "masked: base errors": 0,
+        "different code": 0,
+        "silent": 0
+      }
+    },
+    "delete-provider": {
+      "mutants": 21,
+      "killed": 0,
+      "survived": 21,
+      "equivalent": 0,
+      "exact": 0,
+      "detected": 14,
+      "categories": {
+        "detected elsewhere": 14,
+        "masked: base refused": 4,
+        "masked: base errors": 2,
+        "different code": 0,
+        "silent": 1
+      }
     },
     "never-provided-context": {
-      "mutants": 26,
-      "killed": 0,
-      "survived": 26,
-      "equivalent": 0
+      "mutants": 27,
+      "killed": 23,
+      "survived": 4,
+      "equivalent": 0,
+      "exact": 23,
+      "detected": 23,
+      "categories": {
+        "detected elsewhere": 0,
+        "masked: base refused": 4,
+        "masked: base errors": 0,
+        "different code": 0,
+        "silent": 0
+      }
     },
     "throw-string": {
-      "mutants": 24,
+      "mutants": 26,
       "killed": 0,
       "survived": 0,
-      "equivalent": 24
+      "equivalent": 26,
+      "exact": 0,
+      "detected": 0,
+      "categories": {
+        "detected elsewhere": 0,
+        "masked: base refused": 0,
+        "masked: base errors": 0,
+        "different code": 0,
+        "silent": 0
+      }
     },
     "throw-object": {
-      "mutants": 24,
+      "mutants": 26,
       "killed": 0,
       "survived": 0,
-      "equivalent": 24
+      "equivalent": 26,
+      "exact": 0,
+      "detected": 0,
+      "categories": {
+        "detected elsewhere": 0,
+        "masked: base refused": 0,
+        "masked: base errors": 0,
+        "different code": 0,
+        "silent": 0
+      }
     },
     "async-reject": {
       "mutants": 3,
-      "killed": 0,
-      "survived": 3,
-      "equivalent": 0
+      "killed": 3,
+      "survived": 0,
+      "equivalent": 0,
+      "exact": 1,
+      "detected": 2,
+      "categories": {
+        "detected elsewhere": 0,
+        "masked: base refused": 0,
+        "masked: base errors": 0,
+        "different code": 0,
+        "silent": 0
+      }
     },
     "remove-await": {
-      "mutants": 27,
-      "killed": 0,
-      "survived": 27,
-      "equivalent": 0
+      "mutants": 28,
+      "killed": 1,
+      "survived": 2,
+      "equivalent": 25,
+      "exact": 1,
+      "detected": 1,
+      "categories": {
+        "detected elsewhere": 0,
+        "masked: base refused": 0,
+        "masked: base errors": 1,
+        "different code": 0,
+        "silent": 1
+      }
     },
     "memo-write": {
       "mutants": 23,
-      "killed": 20,
-      "survived": 3,
-      "equivalent": 0
+      "killed": 19,
+      "survived": 4,
+      "equivalent": 0,
+      "exact": 19,
+      "detected": 18,
+      "categories": {
+        "detected elsewhere": 0,
+        "masked: base refused": 4,
+        "masked: base errors": 0,
+        "different code": 0,
+        "silent": 0
+      }
     },
     "timer-read": {
       "mutants": 6,
       "killed": 0,
       "survived": 0,
-      "equivalent": 6
+      "equivalent": 6,
+      "exact": 0,
+      "detected": 0,
+      "categories": {
+        "detected elsewhere": 0,
+        "masked: base refused": 0,
+        "masked: base errors": 0,
+        "different code": 0,
+        "silent": 0
+      }
     },
     "non-core-cache": {
-      "mutants": 43,
-      "killed": 15,
-      "survived": 28,
-      "equivalent": 0
+      "mutants": 46,
+      "killed": 20,
+      "survived": 26,
+      "equivalent": 0,
+      "exact": 17,
+      "detected": 21,
+      "categories": {
+        "detected elsewhere": 1,
+        "masked: base refused": 8,
+        "masked: base errors": 1,
+        "different code": 16,
+        "silent": 0
+      }
     },
     "destructure-props": {
-      "mutants": 7,
-      "killed": 0,
-      "survived": 7,
-      "equivalent": 0
+      "mutants": 13,
+      "killed": 12,
+      "survived": 1,
+      "equivalent": 0,
+      "exact": 12,
+      "detected": 12,
+      "categories": {
+        "detected elsewhere": 0,
+        "masked: base refused": 0,
+        "masked: base errors": 0,
+        "different code": 1,
+        "silent": 0
+      }
     },
     "inline-component": {
-      "mutants": 46,
-      "killed": 1,
-      "survived": 45,
-      "equivalent": 0
+      "mutants": 50,
+      "killed": 50,
+      "survived": 0,
+      "equivalent": 0,
+      "exact": 50,
+      "detected": 50,
+      "categories": {
+        "detected elsewhere": 0,
+        "masked: base refused": 0,
+        "masked: base errors": 0,
+        "different code": 0,
+        "silent": 0
+      }
     },
     "effect-arity": {
-      "mutants": 4,
-      "killed": 4,
+      "mutants": 5,
+      "killed": 5,
       "survived": 0,
-      "equivalent": 0
+      "equivalent": 0,
+      "exact": 5,
+      "detected": 3,
+      "categories": {
+        "detected elsewhere": 0,
+        "masked: base refused": 0,
+        "masked: base errors": 0,
+        "different code": 0,
+        "silent": 0
+      }
     },
     "remove-use-server": {
       "mutants": 1,
       "killed": 0,
       "survived": 0,
-      "equivalent": 1
+      "equivalent": 1,
+      "exact": 0,
+      "detected": 0,
+      "categories": {
+        "detected elsewhere": 0,
+        "masked: base refused": 0,
+        "masked: base errors": 0,
+        "different code": 0,
+        "silent": 0
+      }
+    },
+    "callback-throw": {
+      "mutants": 4,
+      "killed": 1,
+      "survived": 0,
+      "equivalent": 3,
+      "exact": 0,
+      "detected": 1,
+      "categories": {
+        "detected elsewhere": 0,
+        "masked: base refused": 0,
+        "masked: base errors": 0,
+        "different code": 0,
+        "silent": 0
+      }
     },
     "server-new-class": {
       "mutants": 1,
       "killed": 0,
       "survived": 1,
-      "equivalent": 0
+      "equivalent": 0,
+      "exact": 0,
+      "detected": 0,
+      "categories": {
+        "detected elsewhere": 0,
+        "masked: base refused": 0,
+        "masked: base errors": 1,
+        "different code": 0,
+        "silent": 0
+      }
     }
   },
   "checker": [
@@ -148,13 +336,6 @@
   ],
   "topProgram": [
     {
-      "id": "M0001",
-      "operator": "non-core-cache",
-      "project": "sierpinski",
-      "file": "main.tsx",
-      "line": 16
-    },
-    {
       "id": "M0009",
       "operator": "delete-loading",
       "project": "sierpinski",
@@ -169,18 +350,25 @@
       "line": 51
     },
     {
-      "id": "M0013",
-      "operator": "inline-component",
-      "project": "sierpinski",
-      "file": "main.tsx",
-      "line": 13
-    },
-    {
       "id": "M0014",
       "operator": "non-core-cache",
       "project": "sierpinski",
       "file": "main.tsx",
       "line": 62
+    },
+    {
+      "id": "M0035",
+      "operator": "delete-errored",
+      "project": "todos",
+      "file": "app.tsx",
+      "line": 133
+    },
+    {
+      "id": "M0036",
+      "operator": "delete-provider",
+      "project": "todos",
+      "file": "app.tsx",
+      "line": 141
     }
   ],
   "topChecker": [
@@ -221,8 +409,8 @@
     }
   ],
   "findings": {
-    "program": 231,
+    "program": 128,
     "checker": 20,
-    "cliCrashes": 17
+    "cliCrashes": 0
   }
 }

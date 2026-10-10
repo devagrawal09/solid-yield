@@ -55,6 +55,14 @@ Candidates came from the [made-in-solid](https://github.com/solidjs-community/ma
 3. **Medium apps,** then **large apps one slice at a time** (a route or package, not the whole repo).
 4. **SolidStart apps** once SolidStart has a release for Solid 2.
 
+## Migration trials
+
+[migrations/](migrations/README.md) records the first trials (2026-10-10):
+
+- **solid-realworld, aoe4world explorer and opencode-web**, each migrated to Solid 2 with sugar mode as the verifier.
+- **The results:** the per-app reports, 56 repros, and patches for the two MIT apps.
+- **The main finding:** all three apps run as plain Solid 2. The strict-subset claim held for two of them and broke in three reproduced cases in opencode-web.
+
 ## Running it
 
 ```sh

@@ -1,0 +1,43 @@
+import { render } from "@solidjs/web";
+import { action, createContext, createSignal, useContext } from "solid-js";
+import type { ParentProps } from "solid-js";
+import { Pager } from "./Pager";
+
+function createPaging() {
+  const [page, setPage] = createSignal(0);
+  const actions = {
+    setPage,
+    load: action(function* (p?: number) {
+      setPage(p ?? 0);
+    })
+  };
+  return { page, actions };
+}
+const Ctx = createContext<ReturnType<typeof createPaging>>();
+function Provider(props: ParentProps) {
+  const paging = createPaging();
+  return <Ctx value={paging}>{props.children}</Ctx>;
+}
+function Page() {
+  const { page, actions } = useContext(Ctx);
+  const { setPage, load } = actions;
+  return (
+    <div>
+      {page()}
+      <Pager
+        count={3}
+        onSetPage={(p: number) => {
+          setPage(p);
+        }}
+      />
+    </div>
+  );
+}
+function App() {
+  return (
+    <Provider>
+      <Page />
+    </Provider>
+  );
+}
+render(() => <App />, document.body);

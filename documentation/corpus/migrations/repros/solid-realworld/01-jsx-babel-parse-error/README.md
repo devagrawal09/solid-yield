@@ -1,0 +1,3 @@
+Valid Solid 2 `.jsx` entry with a local root component: the lowering inserts TypeScript-only syntax and re-parses it as JS.
+Command (Node 24 on PATH): `ln -sfn /home/user/migrations/solid-realworld/node_modules node_modules; ./node_modules/.bin/solid-yield check .`
+Expected: 0 errors (or a real model diagnostic at an authored position). Actual: `src/index.jsx:3:1 error TS95000: [BABEL_PARSE_ERROR] ... Unexpected token, expected "," (3:14)` pointing at generated `import { type RootCheck, foreign, render as __nativerender } from "solid-yield"` (a `type` import modifier in a `.jsx` file; parser plugins come from the extension, transform.js `parserPlugins`).

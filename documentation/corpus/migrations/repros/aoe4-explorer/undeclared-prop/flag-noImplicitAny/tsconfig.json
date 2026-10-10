@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "jsx": "preserve",
+    "jsxImportSource": "@solidjs/web",
+    "strict": false,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "paths": {
+      "solid-js": ["/home/user/migrations/aoe4-explorer/node_modules/solid-js"],
+      "@solidjs/web": ["/home/user/migrations/aoe4-explorer/node_modules/@solidjs/web"],
+      "@solidjs/web/*": ["/home/user/migrations/aoe4-explorer/node_modules/@solidjs/web/*"],
+      "@solidjs/router": ["/home/user/migrations/aoe4-explorer/node_modules/@solidjs/router"]
+    },
+    "plugins": [{ "name": "ts-plugin-solid-yield", "mode": "native", "include": ["*.tsx"] }]
+  },
+  "include": ["*.tsx"]
+}

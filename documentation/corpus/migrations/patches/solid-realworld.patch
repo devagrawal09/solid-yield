@@ -1,0 +1,4118 @@
+diff --git a/.gitignore b/.gitignore
+index 20cb58b..61903b7 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -1,9 +1,8 @@
+-public/*
+-!public/index.html
+-
+-
+ # dependencies
+ /node_modules
++/dist
++/dist-*
++/e2e/out*
+ 
+ # IDEs and editors
+ /.idea
+@@ -12,7 +11,6 @@ public/*
+ *.launch
+ .settings/
+ 
+-
+ #System Files
+ .DS_Store
+ Thumbs.db
+diff --git a/e2e/compare.mjs b/e2e/compare.mjs
+new file mode 100644
+index 0000000..af240cb
+--- /dev/null
++++ b/e2e/compare.mjs
+@@ -0,0 +1,28 @@
++// Compare two flow output dirs: node e2e/compare.mjs <baselineDir> <otherDir>
++import { readdirSync, readFileSync, existsSync } from "node:fs";
++const [a, b] = process.argv.slice(2);
++const files = new Set([...readdirSync(a), ...readdirSync(b)].filter(f => f.endsWith(".json") && f !== "summary.json"));
++let diffs = 0;
++for (const f of [...files].sort()) {
++  if (!existsSync(`${a}/${f}`) || !existsSync(`${b}/${f}`)) {
++    console.log(`ONLY-IN ${existsSync(`${a}/${f}`) ? a : b}: ${f}`);
++    diffs++;
++    continue;
++  }
++  const x = JSON.parse(readFileSync(`${a}/${f}`, "utf8")), y = JSON.parse(readFileSync(`${b}/${f}`, "utf8"));
++  for (const k of new Set([...Object.keys(x), ...Object.keys(y)])) {
++    if (JSON.stringify(x[k]) !== JSON.stringify(y[k])) {
++      diffs++;
++      console.log(`DIFF ${f} .${k}\n  base: ${JSON.stringify(x[k]).slice(0, 400)}\n  new : ${JSON.stringify(y[k]).slice(0, 400)}`);
++    }
++  }
++}
++const sa = JSON.parse(readFileSync(`${a}/summary.json`, "utf8")), sb = JSON.parse(readFileSync(`${b}/summary.json`, "utf8"));
++for (const k of Object.keys(sa)) {
++  if (sa[k]?.status !== sb[k]?.status) console.log(`STATUS ${k}: ${sa[k]?.status} -> ${sb[k]?.status} ${sb[k]?.failure || ""}`);
++  const ea = (sa[k]?.errors || []).join("\n"), eb = (sb[k]?.errors || []).join("\n");
++  if (ea !== eb) console.log(`ERRORS ${k}:\n  base: ${ea.slice(0, 300)}\n  new : ${eb.slice(0, 300)}`);
++  const la = (sa[k]?.api || []).join("\n"), lb = (sb[k]?.api || []).join("\n");
++  if (la !== lb) console.log(`API ${k}:\n  base: ${(sa[k]?.api || []).join(" | ")}\n  new : ${(sb[k]?.api || []).join(" | ")}`);
++}
++console.log(`${diffs} snapshot field differences`);
+diff --git a/e2e/flows.mjs b/e2e/flows.mjs
+new file mode 100644
+index 0000000..967d323
+--- /dev/null
++++ b/e2e/flows.mjs
+@@ -0,0 +1,255 @@
++// Drives the key RealWorld flows against a served build with a mocked API.
++// usage: node e2e/flows.mjs <baseUrl> <outDir>
++import { createRequire } from "node:module";
++import { mkdirSync, writeFileSync } from "node:fs";
++import { createMockApi } from "./mock-api.mjs";
++
++const require = createRequire("/opt/node-tools/node_modules/");
++const { chromium } = require("playwright-core");
++
++const [base = "http://127.0.0.1:5000", out = "e2e/out"] = process.argv.slice(2);
++mkdirSync(out, { recursive: true });
++
++const snapFn = () => {
++  const t = s => [...document.querySelectorAll(s)].map(e => e.textContent.trim().replace(/\s+/g, " "));
++  const v = s => [...document.querySelectorAll(s)].map(e => e.value);
++  return {
++    hash: location.hash,
++    nav: t("nav.navbar .nav-link"),
++    navActive: t("nav.navbar .nav-link.active"),
++    feedTabs: t(".feed-toggle .nav-link"),
++    feedActive: t(".feed-toggle .nav-link.active"),
++    previews: t(".article-preview h1"),
++    previewMeta: t(".article-preview .info"),
++    previewFav: t(".article-preview .pull-xs-right button"),
++    previewTags: t(".article-preview .tag-list"),
++    previewPlaceholder: t(".article-preview:not(:has(h1))"),
++    pages: t(".pagination .page-item"),
++    pageActive: t(".pagination .page-item.active"),
++    tags: t(".sidebar .tag-pill"),
++    articleTitle: t(".article-page .banner h1"),
++    articleMeta: t(".article-page .banner .article-meta"),
++    articleBody: document.querySelector(".article-content .col-xs-12 > div")?.innerHTML ?? null,
++    articleTags: t(".article-content .tag-list li"),
++    commentForm: document.querySelectorAll(".comment-form").length,
++    comments: t(".card:not(.comment-form) .card-text"),
++    commentDelete: document.querySelectorAll(".mod-options").length,
++    errors: t(".error-messages li"),
++    profile: t(".user-info h4"),
++    profileBio: t(".user-info p"),
++    profileBtns: t(".user-info .action-btn"),
++    articlesToggle: t(".articles-toggle .nav-link"),
++    articlesToggleActive: t(".articles-toggle .nav-link.active"),
++    editorTags: t(".editor-page .tag-list .tag-pill"),
++    inputs: v("form input, form textarea"),
++    text: document.body.innerText.replace(/\s+/g, " ").trim()
++  };
++};
++
++// Fault-injection flows (not in the original baseline set): failures and pending at the root.
++const faults = {
++  failtags: [{ match: /^GET \/tags/, abort: true }],
++  faillist: [{ match: /^GET \/articles\?/, status: 500 }],
++  failarticle: [{ match: /^GET \/articles\/how-to-train-your-dragon$/, abort: true }],
++  failfollow: [{ match: /^POST \/profiles\/alice\/follow/, abort: true }],
++  pending: [{ match: /^GET \/user$/, delay: 1500 }],
++  pendinglist: [{ match: /^GET \/articles\?/, delay: 1500 }],
++  pendingtags: [{ match: /^GET \/tags/, delay: 1500 }]
++};
++
++const flows = {
++  async home(page, s) {
++    await page.goto(`${base}/#/`);
++    await page.waitForSelector(".article-preview h1");
++    await page.waitForSelector(".sidebar .tag-pill");
++    await s("p1");
++    await page.click(".pagination .page-item:nth-child(2) a");
++    await page.waitForFunction(() => [...document.querySelectorAll(".article-preview h1")].some(e => e.textContent.includes("number 11")));
++    await s("p2");
++  },
++  async tag(page, s) {
++    await page.goto(`${base}/#/`);
++    await page.waitForSelector(".sidebar .tag-pill");
++    await page.click(".sidebar .tag-pill >> text=training");
++    await page.waitForFunction(() => {
++      const h = [...document.querySelectorAll(".article-preview h1")];
++      return h.length === 1 && h[0].textContent.includes("dragon");
++    });
++    await s("training");
++  },
++  async article(page, s) {
++    await page.goto(`${base}/#/`);
++    await page.waitForSelector(".article-preview h1");
++    await page.click(".article-preview .preview-link >> nth=0");
++    await page.waitForFunction(() => document.querySelector(".article-page .banner h1")?.textContent.includes("dragon"));
++    await page.waitForFunction(() => document.querySelectorAll(".card .card-text").length >= 2);
++    await s("anon");
++  },
++  async login(page, s) {
++    await page.goto(`${base}/#/login`);
++    await page.waitForSelector(".auth-page form");
++    await fill(page, "input[placeholder=Email]", "jake@example.com");
++    await fill(page, "input[placeholder=Password]", "wrong");
++    await page.click(".auth-page button[type=submit]");
++    await page.waitForSelector(".error-messages li");
++    await s("error");
++    await fill(page, "input[placeholder=Password]", "secret");
++    await page.click(".auth-page button[type=submit]");
++    await page.waitForFunction(() => document.querySelector("nav.navbar")?.textContent.includes("jake"));
++    await page.waitForSelector(".article-preview h1");
++    await s("home");
++  },
++  async profile(page, s) {
++    await page.goto(`${base}/#/@alice`);
++    await page.waitForFunction(() => document.querySelector(".user-info p")?.textContent.includes("dragons"));
++    await page.waitForSelector(".article-preview h1");
++    await s("mine");
++    await page.click(".articles-toggle .nav-link >> text=Favorited");
++    await page.waitForFunction(() => location.hash.includes("favorites"));
++    await page.waitForFunction(() => {
++      const h = [...document.querySelectorAll(".article-preview h1")].map(e => e.textContent);
++      return h.length === 2 && h.every(x => /number (3|6)/.test(x));
++    });
++    await s("favorites");
++  },
++  async authed(page, s, ctx) {
++    await ctx.addInitScript(() => localStorage.setItem("jwt", "jwt-jake"));
++    await page.goto(`${base}/#/article/how-to-train-your-dragon`);
++    await page.waitForFunction(() => document.querySelector("nav.navbar")?.textContent.includes("jake"));
++    await page.waitForFunction(() => document.querySelectorAll(".card:not(.comment-form) .card-text").length >= 2);
++    await s("article");
++    await fill(page, ".comment-form textarea", "A new comment");
++    await page.click(".comment-form button[type=submit]");
++    await page.waitForFunction(() => document.querySelectorAll(".card:not(.comment-form) .card-text").length === 3);
++    await s("commented");
++    await page.dispatchEvent(".mod-options i >> nth=0", "click"); // icon has no box (icon font blocked)
++    await page.waitForFunction(() => document.querySelectorAll(".card:not(.comment-form) .card-text").length === 2);
++    await s("deleted");
++    await page.click("nav.navbar .nav-link >> text=New Post");
++    await page.waitForSelector(".editor-page input[placeholder='Article Title']");
++    await fill(page, "input[placeholder='Article Title']", "Fresh post");
++    await fill(page, "input[placeholder=\"What's this article about?\"]", "About fresh");
++    await fill(page, "textarea[placeholder^='Write your article']", "Some *body*");
++    await fill(page, "input[placeholder='Enter tags']", "newtag");
++    await page.press("input[placeholder='Enter tags']", "Enter");
++    await page.waitForTimeout(300); // Solid 1 original: tag pill never renders (setState mutator), so do not wait on it
++    await s("editor");
++    await page.click(".editor-page button >> text=Publish Article");
++    await page.waitForFunction(() => location.hash === "#/article/fresh-post");
++    await page.waitForFunction(() => document.querySelector(".article-page .banner h1")?.textContent.includes("Fresh post"));
++    await s("published");
++    await page.click("nav.navbar .nav-link >> text=Settings");
++    await page.waitForSelector(".settings-page form");
++    await s("settings");
++    await page.click(".settings-page .btn-outline-danger");
++    await page.waitForFunction(() => document.querySelector("nav.navbar")?.textContent.includes("Sign in"));
++    await page.waitForSelector(".article-preview h1");
++    await s("loggedout");
++  },
++  async failtags(page, s) {
++    await page.goto(`${base}/#/`);
++    await page.waitForSelector(".article-preview h1");
++    await page.waitForTimeout(800);
++    await s("home");
++  },
++  async faillist(page, s) {
++    await page.goto(`${base}/#/`);
++    await page.waitForSelector(".sidebar .tag-pill");
++    await page.waitForTimeout(800);
++    await s("home");
++  },
++  async failarticle(page, s) {
++    await page.goto(`${base}/#/article/how-to-train-your-dragon`);
++    await page.waitForTimeout(1200);
++    await s("article");
++  },
++  async failfollow(page, s, ctx) {
++    await ctx.addInitScript(() => localStorage.setItem("jwt", "jwt-jake"));
++    await page.goto(`${base}/#/@alice`);
++    await page.waitForSelector(".user-info .action-btn");
++    await page.click(".user-info .action-btn");
++    await page.waitForTimeout(800);
++    await s("clicked");
++  },
++  async pending(page, s, ctx) {
++    await ctx.addInitScript(() => localStorage.setItem("jwt", "jwt-jake"));
++    await page.goto(`${base}/#/`);
++    await page.waitForTimeout(400);
++    await s("waiting");
++    await page.waitForFunction(() => document.querySelector("nav.navbar")?.textContent.includes("jake"), null, { timeout: 8000 });
++    await page.waitForSelector(".article-preview h1");
++    await s("loaded");
++  },
++  async pendinglist(page, s) {
++    await page.goto(`${base}/#/`);
++    await page.waitForTimeout(500);
++    await s("waiting");
++    await page.waitForSelector(".article-preview h1", { timeout: 8000 });
++    await s("loaded");
++  },
++  async pendingtags(page, s) {
++    await page.goto(`${base}/#/`);
++    await page.waitForTimeout(500);
++    await s("waiting");
++    await page.waitForSelector(".sidebar .tag-pill", { timeout: 8000 });
++    await s("loaded");
++  },
++  async favorite(page, s, ctx) {
++    await ctx.addInitScript(() => localStorage.setItem("jwt", "jwt-jake"));
++    await page.goto(`${base}/#/@alice`);
++    await page.waitForFunction(() => document.querySelector("nav.navbar")?.textContent.includes("jake"));
++    await page.waitForSelector(".user-info .action-btn");
++    await page.waitForSelector(".article-preview h1");
++    await s("profile");
++    await page.click(".user-info .action-btn");
++    await page.waitForFunction(() => document.querySelector(".user-info .action-btn")?.textContent.includes("Unfollow"));
++    await s("followed");
++    await page.click(".article-preview .pull-xs-right button >> nth=0");
++    await page.waitForTimeout(500);
++    await s("favclick");
++  }
++};
++
++async function fill(page, sel, value) {
++  await page.fill(sel, value);
++  await page.dispatchEvent(sel, "change");
++}
++
++const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome" });
++const only = process.env.FLOWS ? process.env.FLOWS.split(",") : Object.keys(flows).filter(f => !faults[f]);
++const summary = {};
++for (const name of only) {
++  const ctx = await browser.newContext();
++  const api = createMockApi({ faults: faults[name] ?? [] });
++  await api.install(ctx);
++  const page = await ctx.newPage();
++  const errors = [];
++  page.on("pageerror", e => errors.push(`pageerror: ${e.message}`));
++  const warnings = [];
++  page.on("console", m => {
++    if (m.type() === "error") errors.push(`console: ${m.text()}`);
++    else if (m.type() === "warning") warnings.push(m.text().slice(0, 300));
++  });
++  page.setDefaultTimeout(8000);
++  const steps = [];
++  const s = async step => {
++    await page.waitForTimeout(name.startsWith("pending") && step === "waiting" ? 0 : 300);
++    const snap = await page.evaluate(snapFn);
++    writeFileSync(`${out}/${name}-${step}.json`, JSON.stringify(snap, null, 2));
++    writeFileSync(`${out}/${name}-${step}.html`, await page.evaluate(() => document.body.innerHTML));
++    steps.push(step);
++  };
++  let status = "pass", failure;
++  try {
++    await flows[name](page, s, ctx);
++  } catch (e) {
++    status = "fail";
++    failure = e.message.split("\n")[0];
++    try { await s("FAILED"); } catch {}
++  }
++  summary[name] = { status, steps, failure, errors, warnings, api: api.log };
++  console.log(`${status.toUpperCase()} ${name} [${steps.join(",")}]${failure ? " :: " + failure : ""}${errors.length ? " errors=" + errors.length : ""}${warnings.length ? " warnings=" + warnings.length : ""}`);
++  await ctx.close();
++}
++writeFileSync(`${out}/summary.json`, JSON.stringify(summary, null, 2));
++await browser.close();
+diff --git a/e2e/mock-api.mjs b/e2e/mock-api.mjs
+new file mode 100644
+index 0000000..bcfc81b
+--- /dev/null
++++ b/e2e/mock-api.mjs
+@@ -0,0 +1,183 @@
++// Stateful mock of the RealWorld API (https://api.realworld.io/api), used by flows.mjs
++// through Playwright's page.route. One instance per browser context.
++const API = "https://api.realworld.io/api";
++
++const seedUsers = () => ({
++  jake: { username: "jake", email: "jake@example.com", bio: "I work at statefarm", image: "img/jake.png", token: "jwt-jake" }
++});
++const seedProfiles = () => ({
++  alice: { username: "alice", bio: "Alice writes about dragons", image: "img/alice.png", following: false },
++  bob: { username: "bob", bio: null, image: "img/bob.png", following: true },
++  jake: { username: "jake", bio: "I work at statefarm", image: "img/jake.png", following: false }
++});
++
++function makeArticles(profiles) {
++  const out = [];
++  for (let i = 1; i <= 12; i++) {
++    const author = i % 3 === 0 ? "bob" : "alice";
++    out.push({
++      slug: i === 1 ? "how-to-train-your-dragon" : `article-${i}`,
++      title: i === 1 ? "How to train your dragon" : `Article number ${i}`,
++      description: i === 1 ? "Ever wonder how?" : `Description ${i}`,
++      body: i === 1 ? "# Dragons\n\nIt takes a **Jacobian**.\n\n- one\n- two" : `Body of article ${i}`,
++      tagList: i === 1 ? ["dragons", "training"] : i % 2 === 0 ? ["welcome"] : ["solid", "welcome"],
++      createdAt: new Date(Date.UTC(2021, 0, 13 - i, 12)).toISOString(),
++      updatedAt: new Date(Date.UTC(2021, 0, 13 - i, 12)).toISOString(),
++      favorited: i === 2,
++      favoritesCount: i === 2 ? 3 : i,
++      author: { ...profiles[author] }
++    });
++  }
++  return out;
++}
++
++// faults: [{ match: RegExp on "METHOD /path?query", abort?: true, status?: number, delay?: ms }]
++export function createMockApi({ delay = 30, faults = [] } = {}) {
++  // Fresh state per browser context (flows must not see each other's follows/registrations).
++  const users = seedUsers(), profiles = seedProfiles();
++  const articles = makeArticles(profiles);
++  const comments = {
++    "how-to-train-your-dragon": [
++      { id: 1, body: "It takes a Jacobian", createdAt: "2021-01-14T10:00:00.000Z", author: { ...profiles.bob } },
++      { id: 2, body: "Jake was here", createdAt: "2021-01-15T10:00:00.000Z", author: { ...profiles.jake } }
++    ]
++  };
++  let nextComment = 3;
++  const favoritedBy = { jake: new Set(["article-2"]), alice: new Set(["article-3", "article-6"]) };
++  const log = [];
++
++  const view = (a, viewer) => ({ ...a, favorited: viewer ? favoritedBy[viewer]?.has(a.slug) || false : false });
++
++  function handle(method, url, body, auth) {
++    const u = new URL(url);
++    const path = u.pathname.replace(/^\/api/, "");
++    const q = u.searchParams;
++    const viewer = auth ? Object.values(users).find(x => `Token ${x.token}` === auth)?.username : undefined;
++    const page = list => {
++      const limit = +(q.get("limit") || 10), offset = +(q.get("offset") || 0);
++      return { articles: list.slice(offset, offset + limit).map(a => view(a, viewer)), articlesCount: list.length };
++    };
++    let m;
++    if (method === "GET" && path === "/tags") return [200, { tags: ["Dragons", "training", "welcome", "solid"] }];
++    if (method === "GET" && path === "/articles/feed") return [200, page(articles.filter(a => a.author.username === "bob"))];
++    if (method === "GET" && path === "/articles") {
++      let list = articles;
++      if (q.get("tag")) list = list.filter(a => a.tagList.includes(q.get("tag")));
++      if (q.get("author")) list = list.filter(a => a.author.username === q.get("author"));
++      if (q.get("favorited")) list = list.filter(a => favoritedBy[q.get("favorited")]?.has(a.slug));
++      return [200, page(list)];
++    }
++    if (method === "POST" && path === "/articles") {
++      const a = body.article;
++      if (!a.title) return [422, { errors: { title: ["can't be blank"] } }];
++      const slug = a.title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
++      const art = {
++        slug, title: a.title, description: a.description || "", body: a.body || "", tagList: a.tagList || [],
++        createdAt: "2021-02-01T12:00:00.000Z", updatedAt: "2021-02-01T12:00:00.000Z",
++        favorited: false, favoritesCount: 0, author: { ...profiles[viewer || "jake"] }
++      };
++      articles.unshift(art);
++      return [200, { article: art }];
++    }
++    if ((m = path.match(/^\/articles\/([^/]+)\/comments$/))) {
++      const slug = m[1];
++      if (method === "GET") return [200, { comments: comments[slug] || [] }];
++      if (method === "POST") {
++        if (!body.comment.body) return [422, { errors: { body: ["can't be blank"] } }];
++        const c = { id: nextComment++, body: body.comment.body, createdAt: "2021-02-02T10:00:00.000Z", author: { ...profiles[viewer] } };
++        (comments[slug] ||= []).push(c);
++        return [200, { comment: c }];
++      }
++    }
++    if ((m = path.match(/^\/articles\/([^/]+)\/comments\/(\d+)$/)) && method === "DELETE") {
++      comments[m[1]] = (comments[m[1]] || []).filter(c => c.id !== +m[2]);
++      return [200, {}];
++    }
++    if ((m = path.match(/^\/articles\/([^/]+)\/favorite$/))) {
++      const a = articles.find(x => x.slug === m[1]);
++      const set = (favoritedBy[viewer] ||= new Set());
++      if (method === "POST" && !set.has(a.slug)) { set.add(a.slug); a.favoritesCount++; }
++      if (method === "DELETE" && set.has(a.slug)) { set.delete(a.slug); a.favoritesCount--; }
++      return [200, { article: view(a, viewer) }];
++    }
++    if ((m = path.match(/^\/articles\/([^/]+)$/))) {
++      const idx = articles.findIndex(x => x.slug === m[1]);
++      if (idx < 0) return [404, { errors: { article: ["not found"] } }];
++      if (method === "GET") return [200, { article: view(articles[idx], viewer) }];
++      if (method === "PUT") {
++        Object.assign(articles[idx], Object.fromEntries(Object.entries(body.article).filter(([, v]) => v !== undefined)));
++        return [200, { article: view(articles[idx], viewer) }];
++      }
++      if (method === "DELETE") { articles.splice(idx, 1); return [200, {}]; }
++    }
++    if ((m = path.match(/^\/profiles\/([^/]+)(\/follow)?$/))) {
++      const p = profiles[m[1]];
++      if (!p) return [404, { errors: { profile: ["not found"] } }];
++      if (m[2]) p.following = method === "POST";
++      return [200, { profile: { ...p } }];
++    }
++    if (method === "POST" && path === "/users/login") {
++      const { email, password } = body.user;
++      const user = Object.values(users).find(x => x.email === email);
++      if (!user || password !== "secret") return [422, { errors: { "email or password": ["is invalid"] } }];
++      return [200, { user }];
++    }
++    if (method === "POST" && path === "/users") {
++      const { username, email } = body.user;
++      if (users[username]) return [422, { errors: { username: ["has already been taken"] } }];
++      const user = { username, email, bio: null, image: null, token: `jwt-${username}` };
++      users[username] = user;
++      profiles[username] = { username, bio: null, image: null, following: false };
++      return [200, { user }];
++    }
++    if (path === "/user") {
++      if (!viewer) return [401, { errors: { token: ["is missing"] } }];
++      if (method === "GET") return [200, { user: users[viewer] }];
++      if (method === "PUT") {
++        Object.assign(users[viewer], body.user);
++        Object.assign(profiles[viewer], { bio: users[viewer].bio, image: users[viewer].image });
++        return [200, { user: users[viewer] }];
++      }
++    }
++    return [404, { errors: { route: [`${method} ${path} not mocked`] } }];
++  }
++
++  async function install(context) {
++    await context.route("**/*", async route => {
++      const req = route.request();
++      const url = req.url();
++      if (url.startsWith(API)) {
++        if (req.method() === "OPTIONS") return route.fulfill({ status: 204, headers: cors });
++        const key = `${req.method()} ${url.slice(API.length)}`;
++        const fault = faults.find(f => f.match.test(key));
++        if (fault?.delay) await new Promise(r => setTimeout(r, fault.delay));
++        if (fault?.abort) {
++          log.push(`${key} -> aborted`);
++          return route.abort("failed");
++        }
++        if (fault?.status) {
++          log.push(`${key} -> ${fault.status}`);
++          return route.fulfill({ status: fault.status, contentType: "application/json", headers: cors, body: JSON.stringify({ errors: { server: ["error"] } }) });
++        }
++        const body = req.postData() ? JSON.parse(req.postData()) : undefined;
++        const [status, json] = handle(req.method(), url, body, req.headers()["authorization"]);
++        log.push(`${req.method()} ${url.slice(API.length)} -> ${status}`);
++        if (delay) await new Promise(r => setTimeout(r, delay));
++        return route.fulfill({ status, contentType: "application/json", headers: cors, body: JSON.stringify(json) });
++      }
++      if (url.startsWith("http://127.0.0.1") || url.startsWith("http://localhost")) {
++        if (/\/img\//.test(url)) return route.fulfill({ status: 200, contentType: "image/png", body: PNG });
++        return route.continue();
++      }
++      // Fonts, CDN CSS and anything else external: blocked here, fulfil empty.
++      return route.fulfill({ status: 200, contentType: url.endsWith(".css") ? "text/css" : "text/plain", body: "" });
++    });
++  }
++  return { install, log, handle };
++}
++
++const cors = { "access-control-allow-origin": "*", "access-control-allow-headers": "*", "access-control-allow-methods": "*" };
++const PNG = Buffer.from(
++  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
++  "base64"
++);
+diff --git a/e2e/serve.mjs b/e2e/serve.mjs
+new file mode 100644
+index 0000000..3050d21
+--- /dev/null
++++ b/e2e/serve.mjs
+@@ -0,0 +1,25 @@
++// Tiny static server: node e2e/serve.mjs <dir> <port>
++import { createServer } from "node:http";
++import { readFile, stat } from "node:fs/promises";
++import { join, extname, resolve } from "node:path";
++
++const [dir = "public", port = "5000"] = process.argv.slice(2);
++const root = resolve(dir);
++const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".svg": "image/svg+xml", ".map": "application/json" };
++
++createServer(async (req, res) => {
++  let p = decodeURIComponent(new URL(req.url, "http://x").pathname);
++  let file = join(root, p);
++  if (!file.startsWith(root)) return res.writeHead(403).end();
++  try {
++    if ((await stat(file)).isDirectory()) file = join(file, "index.html");
++  } catch {
++    file = join(root, "index.html");
++  }
++  try {
++    const body = await readFile(file);
++    res.writeHead(200, { "content-type": types[extname(file)] || "application/octet-stream" }).end(body);
++  } catch {
++    res.writeHead(404).end("not found");
++  }
++}).listen(+port, "127.0.0.1", () => console.log(`serving ${root} on http://127.0.0.1:${port}`));
+diff --git a/public/index.html b/index.html
+similarity index 92%
+rename from public/index.html
+rename to index.html
+index ed9ecec..c342e75 100644
+--- a/public/index.html
++++ b/index.html
+@@ -28,6 +28,6 @@
+     <style>body{min-height: 101vh;}</style>
+   </head>
+   <body>
+-    <script type="module" src="./index.js"></script>
++    <script type="module" src="/src/index.tsx"></script>
+   </body>
+ </html>
+diff --git a/package.json b/package.json
+index 29e4d47..82cc7c9 100644
+--- a/package.json
++++ b/package.json
+@@ -1,43 +1,46 @@
+-{
+-  "name": "solid-realworld",
+-  "version": "0.0.0",
+-  "description": "A Solid Implementation of the Realworld Example App",
+-  "main": "public/index.js",
+-  "scripts": {
+-    "start": "serve public -l 5000 -s & rollup -w -c",
+-    "build": "rollup -c --environment production",
+-    "test": "test"
+-  },
+-  "repository": {
+-    "type": "git",
+-    "url": "git+https://github.com/solidjs/solid-realworld.git"
+-  },
+-  "keywords": [
+-    "Solid",
+-    "Realworld",
+-    "example"
+-  ],
+-  "author": "Ryan Carniato",
+-  "license": "MIT",
+-  "bugs": {
+-    "url": "https://github.com/solidjs/solid-realworld/issues"
+-  },
+-  "homepage": "https://github.com/solidjs/solid-realworld#readme",
+-  "dependencies": {
+-    "marked": "^0.8.0",
+-    "solid-js": "^1.3.3"
+-  },
+-  "devDependencies": {
+-    "@babel/core": "7.12.13",
+-    "@babel/plugin-proposal-optional-chaining": "7.12.13",
+-    "@babel/plugin-syntax-dynamic-import": "7.8.3",
+-    "@rollup/plugin-babel": "5.2.0",
+-    "@rollup/plugin-commonjs": "21.0.0",
+-    "@rollup/plugin-node-resolve": "13.0.5",
+-    "babel-preset-solid": "^1.3.2",
+-    "rollup": "2.52.3",
+-    "rollup-plugin-delete": "^2.0.0",
+-    "rollup-plugin-terser": "^7.0.0",
+-    "serve": "^11.3.2"
+-  }
+-}
++{
++  "name": "solid-realworld",
++  "version": "0.0.0",
++  "description": "A Solid Implementation of the Realworld Example App",
++  "main": "src/index.tsx",
++  "scripts": {
++    "dev": "vite",
++    "build": "vite build",
++    "build:yield": "SOLID_YIELD=1 vite build --outDir dist-yield",
++    "preview": "vite preview",
++    "check": "solid-yield check ."
++  },
++  "repository": {
++    "type": "git",
++    "url": "git+https://github.com/solidjs/solid-realworld.git"
++  },
++  "keywords": [
++    "Solid",
++    "Realworld",
++    "example"
++  ],
++  "author": "Ryan Carniato",
++  "license": "MIT",
++  "bugs": {
++    "url": "https://github.com/solidjs/solid-realworld/issues"
++  },
++  "homepage": "https://github.com/solidjs/solid-realworld#readme",
++  "dependencies": {
++    "@solidjs/web": "2.0.0-rc.13",
++    "marked": "^0.8.0",
++    "solid-js": "2.0.0-rc.13",
++    "solid-yield": "file:/home/user/solid-yield-packs/solid-yield-0.0.0.tgz"
++  },
++  "type": "module",
++  "devDependencies": {
++    "@solidjs/vite-plugin": "3.0.0-next.47",
++    "@typescript-eslint/parser": "^8.71.1",
++    "eslint": "^9.39.5",
++    "eslint-plugin-solid-yield": "file:/home/user/solid-yield-packs/eslint-plugin-solid-yield-0.0.0.tgz",
++    "ts-plugin-solid-yield": "file:/home/user/solid-yield-packs/ts-plugin-solid-yield-0.0.0.tgz",
++    "typescript": "6.0.3",
++    "vite": "^8.3.4",
++    "vite-plugin-solid-yield": "file:/home/user/solid-yield-packs/vite-plugin-solid-yield-0.0.0.tgz"
++  },
++  "packageManager": "pnpm@11.20.0"
++}
+diff --git a/pnpm-workspace.yaml b/pnpm-workspace.yaml
+new file mode 100644
+index 0000000..77b44d1
+--- /dev/null
++++ b/pnpm-workspace.yaml
+@@ -0,0 +1,9 @@
++allowBuilds:
++  esbuild: true
++overrides:
++  solid-yield: file:/home/user/solid-yield-packs/solid-yield-0.0.0.tgz
++  compiler-yield: file:/home/user/solid-yield-packs/compiler-yield-0.0.0.tgz
++  vite-plugin-solid-yield: file:/home/user/solid-yield-packs/vite-plugin-solid-yield-0.0.0.tgz
++  ts-plugin-solid-yield: file:/home/user/solid-yield-packs/ts-plugin-solid-yield-0.0.0.tgz
++  # solid-js@2.0.0-rc.13 depends on ^2.0.0-rc.13, which otherwise resolves to rc.14.
++  "@solidjs/signals": 2.0.0-rc.13
+diff --git a/rollup.config.js b/rollup.config.js
+deleted file mode 100644
+index a9b170c..0000000
+--- a/rollup.config.js
++++ /dev/null
+@@ -1,31 +0,0 @@
+-import resolve from "@rollup/plugin-node-resolve";
+-import commonjs from "@rollup/plugin-commonjs";
+-import babel from "@rollup/plugin-babel";
+-import del from "rollup-plugin-delete";
+-import { terser } from "rollup-plugin-terser";
+-
+-const plugins = [
+-  del({
+-    targets: ["public/*", "!public/index.html"],
+-    watch: true
+-  }),
+-  babel({
+-    exclude: "node_modules/**",
+-    babelHelpers: "bundled",
+-    presets: ["solid"],
+-    plugins: ["@babel/syntax-dynamic-import", "@babel/plugin-proposal-optional-chaining"]
+-  }),
+-  resolve({ extensions: [".js", ".jsx"] }),
+-  commonjs(),
+-  process.env.production && terser()
+-];
+-
+-export default {
+-  input: "src/index.js",
+-  output: {
+-    dir: "public",
+-    format: "esm"
+-  },
+-  preserveEntrySignatures: false,
+-  plugins
+-};
+diff --git a/src/App.js b/src/App.js
+deleted file mode 100644
+index 3ce6813..0000000
+--- a/src/App.js
++++ /dev/null
+@@ -1,41 +0,0 @@
+-import { lazy, createSignal, createComputed } from "solid-js";
+-import { useStore, useRouter } from "./store";
+-import NavBar from "./components/NavBar";
+-import Home from "./pages/Home";
+-import Article from "./pages/Article";
+-import Profile from "./pages/Profile";
+-import Editor from "./pages/Editor";
+-
+-const Settings = lazy(() => import("./pages/Settings")),
+-  Auth = lazy(() => import("./pages/Auth"));
+-
+-export default () => {
+-  const [store, { pullUser }] = useStore(),
+-    [appLoaded, setAppLoaded] = createSignal(false),
+-    { match, getParams } = useRouter();
+-
+-  if (!store.token) setAppLoaded(true);
+-  else {
+-    pullUser();
+-    createComputed(() => store.currentUser && setAppLoaded(true));
+-  }
+-
+-  return (
+-    <>
+-      <NavBar />
+-      <Show when={appLoaded()}>
+-        <Suspense fallback={<div class="container">Loading...</div>}>
+-          <Switch>
+-            <Match when={match("editor", /^editor\/?(.*)/)}><Editor {...getParams()} /></Match>
+-            <Match when={match("settings", /^settings/)}><Settings /></Match>
+-            <Match when={match("login", /^login/)}><Auth /></Match>
+-            <Match when={match("register", /^register/)}><Auth /></Match>
+-            <Match when={match("article", /^article\/(.*)/)}><Article {...getParams()} /></Match>
+-            <Match when={match("profile", /^@([^/]*)\/?(favorites)?/)}><Profile {...getParams()} /></Match>
+-            <Match when={match("", /^#?$/)}><Home /></Match>
+-          </Switch>
+-        </Suspense>
+-      </Show>
+-    </>
+-  );
+-};
+diff --git a/src/App.tsx b/src/App.tsx
+new file mode 100644
+index 0000000..246950d
+--- /dev/null
++++ b/src/App.tsx
+@@ -0,0 +1,63 @@
++import { createMemo, Errored, Loading, Match, Show, Switch, useContext } from "solid-js";
++import { StoreContext, RouterContext } from "./store";
++import NavBar from "./components/NavBar";
++import Home from "./pages/Home";
++import Article from "./pages/Article";
++import Profile from "./pages/Profile";
++import Editor from "./pages/Editor";
++// Settings and Auth were lazy(): lazy() of a checked component cannot pass the checker even
++// inside Errored + Loading (repro 10), so every page is imported statically now.
++import Settings from "./pages/Settings";
++import Auth from "./pages/Auth";
++
++export default function App() {
++  const [store] = useContext(StoreContext),
++    { getParams } = useContext(RouterContext),
++    match = (name: string) => (getParams()?.routeName === name ? getParams() : undefined),
++    // Was a signal set from the component body and from a createComputed.
++    appLoaded = createMemo(() => !store.token() || !!store.currentUser());
++
++  return (
++    <Loading fallback={<div class="container">Loading...</div>}>
++      {/* This boundary only exists because NavLink's props inherit the failures of other call
++          sites (repro 15): the static brand/Home links are otherwise reported as failing. */}
++      <Errored fallback={<nav class="navbar navbar-light" />}>
++        <NavBar />
++      </Errored>
++      <Show when={store.notice()}>
++        {notice => (
++          <div class="container">
++            <ul class="error-messages">
++              <li>{notice()}</li>
++            </ul>
++          </div>
++        )}
++      </Show>
++      {/* Errored added: route data (user, article, profile) can reject; the original had no boundary. */}
++      {/* No retry button: calling Errored's reset() is reported as EVENT_REJECTS (repro 12). */}
++      <Errored
++        fallback={
++          <div class="container">
++            <ul class="error-messages">
++              <li>Could not load this page.</li>
++            </ul>
++          </div>
++        }
++      >
++      <Show when={appLoaded()}>
++        <Switch>
++          <Match when={match("editor")}>{route => <Editor params={route().params} />}</Match>
++          <Match when={match("settings")}><Settings /></Match>
++          <Match when={match("login")}><Auth /></Match>
++          <Match when={match("register")}><Auth /></Match>
++          <Match when={match("article")}>{route => <Article params={route().params} />}</Match>
++          <Match when={match("profile")}>
++            {route => <Profile params={route().params} routeName={route().routeName} />}
++          </Match>
++          <Match when={match("")}><Home /></Match>
++        </Switch>
++      </Show>
++      </Errored>
++    </Loading>
++  );
++}
+diff --git a/src/components/ArticleList.js b/src/components/ArticleList.js
+deleted file mode 100644
+index 5ddb10b..0000000
+--- a/src/components/ArticleList.js
++++ /dev/null
+@@ -1,44 +0,0 @@
+-import { useStore } from "../store";
+-import ArticlePreview from "./ArticlePreview";
+-
+-export default props => {
+-  const [{ token }, { unmakeFavorite, makeFavorite }] = useStore(),
+-    handleClickFavorite = (article, e) => {
+-      e.preventDefault();
+-      article.favorited ? unmakeFavorite(slug) : makeFavorite(slug);
+-    },
+-    handlePage = (v, e) => {
+-      e.preventDefault();
+-      props.onSetPage(v);
+-      setTimeout(() => window.scrollTo(0, 0), 200);
+-    };
+-  return (
+-    <Suspense fallback={<div class="article-preview">Loading articles...</div>}>
+-      <For
+-        each={props.articles}
+-        fallback={<div class="article-preview">No articles are here... yet.</div>}
+-      >
+-        {article => (
+-          <ArticlePreview article={article} token={token} onClickFavorite={handleClickFavorite} />
+-        )}
+-      </For>
+-      <Show when={props.totalPagesCount > 1}>
+-        <nav>
+-          <ul class="pagination">
+-            <For each={[...Array(props.totalPagesCount).keys()]}>
+-              {v => (
+-                <li
+-                  class="page-item"
+-                  classList={{ active: props.currentPage === v }}
+-                  onClick={[handlePage, v]}
+-                >
+-                  <a class="page-link" href="" textContent={v + 1} />
+-                </li>
+-              )}
+-            </For>
+-          </ul>
+-        </nav>
+-      </Show>
+-    </Suspense>
+-  );
+-};
+diff --git a/src/components/ArticleList.tsx b/src/components/ArticleList.tsx
+new file mode 100644
+index 0000000..7a2c092
+--- /dev/null
++++ b/src/components/ArticleList.tsx
+@@ -0,0 +1,51 @@
++import { Errored, For, Loading, Show, useContext } from "solid-js";
++import { StoreContext } from "../store";
++import ArticlePreview from "./ArticlePreview";
++import type { Article, Predicate } from "../types";
++
++// The parents used to pass onSetPage (and this list passed onClickFavorite to each preview). A
++// callback prop that calls a context action is reported as a write in a reactive scope (repro 11),
++// so the list pages through the context itself; Home passes its predicate instead.
++export default function ArticleList(props: {
++  articles: Article[];
++  totalPagesCount: number;
++  currentPage?: number;
++  predicate?: Predicate;
++}) {
++  const [store, { setPage, loadArticles }] = useContext(StoreContext);
++  return (
++    // Errored added: the list memo can reject (the checker reported it unhandled at the root).
++    <Errored fallback={<div class="article-preview">Could not load articles.</div>}>
++      <Loading fallback={<div class="article-preview">Loading articles...</div>}>
++        <For
++          each={props.articles}
++          fallback={<div class="article-preview">No articles are here... yet.</div>}
++        >
++          {article => <ArticlePreview article={article} token={store.token()} />}
++        </For>
++        <Show when={props.totalPagesCount > 1}>
++          <nav>
++            <ul class="pagination">
++              <For each={[...Array(props.totalPagesCount).keys()]}>
++                {v => (
++                  <li
++                    class={["page-item", { active: props.currentPage === v }]}
++                    onClick={e => {
++                      e.preventDefault();
++                      const predicate = props.predicate;
++                      setPage(v);
++                      loadArticles(predicate);
++                      setTimeout(() => window.scrollTo(0, 0), 200);
++                    }}
++                  >
++                    <a class="page-link" href="" textContent={v + 1} />
++                  </li>
++                )}
++              </For>
++            </ul>
++          </nav>
++        </Show>
++      </Loading>
++    </Errored>
++  );
++}
+diff --git a/src/components/ArticlePreview.js b/src/components/ArticlePreview.js
+deleted file mode 100644
+index 6dcc471..0000000
+--- a/src/components/ArticlePreview.js
++++ /dev/null
+@@ -1,55 +0,0 @@
+-import NavLink from "./NavLink";
+-
+-const FAVORITED_CLASS = "btn btn-sm btn-primary";
+-const NOT_FAVORITED_CLASS = "btn btn-sm btn-outline-primary";
+-
+-export default ({ article, token, onClickFavorite }) => {
+-  const {
+-    title,
+-    description,
+-    slug,
+-    createdAt,
+-    tagList,
+-    author: { username, image }
+-  } = article;
+-
+-  return (
+-    <div class="article-preview">
+-      <div class="article-meta">
+-        <NavLink href={`@${username}`} route="profile">
+-          <img src={image} alt="" />
+-        </NavLink>
+-
+-        <div class="info">
+-          <NavLink class="author" href={`@${username}`} route="profile">
+-            {username}
+-          </NavLink>
+-          <span class="date" textContent={/*@once*/ new Date(createdAt).toDateString()} />
+-        </div>
+-
+-        {token && (
+-          <div class="pull-xs-right">
+-            <button
+-              class={article.favorited ? FAVORITED_CLASS : NOT_FAVORITED_CLASS}
+-              onClick={[onClickFavorite, article]}
+-            >
+-              <i class="ion-heart" /> {article.favoritesCount}
+-            </button>
+-          </div>
+-        )}
+-      </div>
+-
+-      <NavLink href={`article/${slug}`} route="article" class="preview-link">
+-        <h1>{title}</h1>
+-        <p>{description}</p>
+-        <span>Read more...</span>
+-        <ul class="tag-list">
+-          {/*@once*/
+-          tagList.map(tag => (
+-            <li class="tag-default tag-pill tag-outline" textContent={tag} />
+-          ))}
+-        </ul>
+-      </NavLink>
+-    </div>
+-  );
+-};
+diff --git a/src/components/ArticlePreview.tsx b/src/components/ArticlePreview.tsx
+new file mode 100644
+index 0000000..188be8f
+--- /dev/null
++++ b/src/components/ArticlePreview.tsx
+@@ -0,0 +1,59 @@
++import { For, useContext } from "solid-js";
++import NavLink from "./NavLink";
++import { StoreContext } from "../store";
++import type { Article } from "../types";
++
++const FAVORITED_CLASS = "btn btn-sm btn-primary";
++const NOT_FAVORITED_CLASS = "btn btn-sm btn-outline-primary";
++
++export default function ArticlePreview(props: { article: Article; token?: string | null }) {
++  // Was ArticleList's handleClickFavorite, passed down as onClickFavorite (repro 11). The original
++  // passed an undeclared `slug` (ReferenceError on click).
++  const [, { makeFavorite, unmakeFavorite }] = useContext(StoreContext);
++  return (
++    <div class="article-preview">
++      <div class="article-meta">
++        <NavLink href={`@${props.article.author.username}`} route="profile">
++          <img src={props.article.author.image ?? undefined} alt="" />
++        </NavLink>
++
++        <div class="info">
++          <NavLink class="author" href={`@${props.article.author.username}`} route="profile">
++            {props.article.author.username}
++          </NavLink>
++          <span class="date" textContent={new Date(props.article.createdAt).toDateString()} />
++        </div>
++
++        {props.token && (
++          <div class="pull-xs-right">
++            <button
++              class={props.article.favorited ? FAVORITED_CLASS : NOT_FAVORITED_CLASS}
++              onClick={e => {
++                e.preventDefault();
++                // Fields read one by one: members of a hoisted props.article are lowered as reads
++                // of the value they hold (repro 14).
++                const slug = props.article.slug;
++                if (props.article.favorited) unmakeFavorite(slug);
++                else makeFavorite(slug);
++              }}
++            >
++              <i class="ion-heart" /> {props.article.favoritesCount}
++            </button>
++          </div>
++        )}
++      </div>
++
++      <NavLink href={`article/${props.article.slug}`} route="article" class="preview-link">
++        <h1>{props.article.title}</h1>
++        <p>{props.article.description}</p>
++        <span>Read more...</span>
++        <ul class="tag-list">
++          {/* Was tagList.map(...): an array map over a prop in a hole is typed unknown (repro 11). */}
++          <For each={props.article.tagList}>
++            {tag => <li class="tag-default tag-pill tag-outline" textContent={tag} />}
++          </For>
++        </ul>
++      </NavLink>
++    </div>
++  );
++}
+diff --git a/src/components/ListErrors.js b/src/components/ListErrors.js
+deleted file mode 100644
+index 4072cb7..0000000
+--- a/src/components/ListErrors.js
++++ /dev/null
+@@ -1,11 +0,0 @@
+-export default props => (
+-  <Show when={props.errors}>
+-    <ul class="error-messages">
+-      <For each={Object.keys(props.errors)}>
+-        {key => (
+-          <li>{key} {props.errors[key]}</li>
+-        )}
+-      </For>
+-    </ul>
+-  </Show>
+-);
+\ No newline at end of file
+diff --git a/src/components/ListErrors.tsx b/src/components/ListErrors.tsx
+new file mode 100644
+index 0000000..f413cd7
+--- /dev/null
++++ b/src/components/ListErrors.tsx
+@@ -0,0 +1,20 @@
++import { For, Show } from "solid-js";
++import type { Errors } from "../types";
++
++export default function ListErrors(props: { errors?: Errors }) {
++  return (
++    <Show when={props.errors}>
++      {errors => (
++        <ul class="error-messages">
++          <For each={Object.keys(errors())}>
++            {key => (
++              <li>
++                {key} {errors()[key]}
++              </li>
++            )}
++          </For>
++        </ul>
++      )}
++    </Show>
++  );
++}
+diff --git a/src/components/NavBar.js b/src/components/NavBar.js
+deleted file mode 100644
+index 301f190..0000000
+--- a/src/components/NavBar.js
++++ /dev/null
+@@ -1,56 +0,0 @@
+-import { useStore } from "../store";
+-import NavLink from "./NavLink";
+-
+-export default () => {
+-  const [store] = useStore();
+-
+-  return (
+-    <nav class="navbar navbar-light">
+-      <div class="container">
+-        <NavLink class="navbar-brand" route="">
+-          {store.appName}
+-        </NavLink>
+-        <ul class="nav navbar-nav pull-xs-right">
+-          <li class="nav-item">
+-            <NavLink class="nav-link" route="">
+-              Home
+-            </NavLink>
+-          </li>
+-          <Show
+-            when={store.currentUser}
+-            fallback={
+-              <>
+-                <li class="nav-item">
+-                  <NavLink class="nav-link" route="login">
+-                    Sign in
+-                  </NavLink>
+-                </li>
+-                <li class="nav-item">
+-                  <NavLink class="nav-link" route="register">
+-                    Sign up
+-                  </NavLink>
+-                </li>
+-              </>
+-            }
+-          >
+-            <li class="nav-item">
+-              <NavLink class="nav-link" route="editor">
+-                <i class="ion-compose" /> New Post
+-              </NavLink>
+-            </li>
+-            <li class="nav-item">
+-              <NavLink class="nav-link" route="settings">
+-                <i class="ion-gear-a" /> Settings
+-              </NavLink>
+-            </li>
+-            <li class="nav-item">
+-              <NavLink class="nav-link" route="profile" href={`@${store.currentUser.username}`}>
+-                {store.currentUser.username}
+-              </NavLink>
+-            </li>
+-          </Show>
+-        </ul>
+-      </div>
+-    </nav>
+-  );
+-};
+diff --git a/src/components/NavBar.tsx b/src/components/NavBar.tsx
+new file mode 100644
+index 0000000..ade26f5
+--- /dev/null
++++ b/src/components/NavBar.tsx
+@@ -0,0 +1,66 @@
++import { Errored, Show, useContext } from "solid-js";
++import { StoreContext } from "../store";
++import NavLink from "./NavLink";
++
++function AnonLinks() {
++  return (
++    <>
++      <li class="nav-item">
++        <NavLink class="nav-link" route="login">
++          Sign in
++        </NavLink>
++      </li>
++      <li class="nav-item">
++        <NavLink class="nav-link" route="register">
++          Sign up
++        </NavLink>
++      </li>
++    </>
++  );
++}
++
++export default function NavBar() {
++  const [store] = useContext(StoreContext);
++
++  return (
++    <nav class="navbar navbar-light">
++      <div class="container">
++        <NavLink class="navbar-brand" route="">
++          {store.appName}
++        </NavLink>
++        <ul class="nav navbar-nav pull-xs-right">
++          <li class="nav-item">
++            <NavLink class="nav-link" route="">
++              Home
++            </NavLink>
++          </li>
++          {/* Errored added: the current-user request can reject (checker: FOREIGN_HANDOFF at the root).
++              A failed lookup shows the signed-out links. */}
++          <Errored fallback={<AnonLinks />}>
++            <Show when={store.currentUser()} fallback={<AnonLinks />}>
++              {user => (
++                <>
++                  <li class="nav-item">
++                    <NavLink class="nav-link" route="editor">
++                      <i class="ion-compose" /> New Post
++                    </NavLink>
++                  </li>
++                  <li class="nav-item">
++                    <NavLink class="nav-link" route="settings">
++                      <i class="ion-gear-a" /> Settings
++                    </NavLink>
++                  </li>
++                  <li class="nav-item">
++                    <NavLink class="nav-link" route="profile" href={`@${user().username}`}>
++                      {user().username}
++                    </NavLink>
++                  </li>
++                </>
++              )}
++            </Show>
++          </Errored>
++        </ul>
++      </div>
++    </nav>
++  );
++}
+diff --git a/src/components/NavLink.js b/src/components/NavLink.js
+deleted file mode 100644
+index 8a05823..0000000
+--- a/src/components/NavLink.js
++++ /dev/null
+@@ -1,15 +0,0 @@
+-import { useRouter } from "../store";
+-
+-export default props => {
+-  const { getParams } = useRouter();
+-  return (
+-    <a
+-      class={props.class}
+-      classList={{ active: props.active || getParams()?.routeName === props.route }}
+-      href={`#/${props.href || props.route}`}
+-      onClick={() => window.scrollTo(0, 0)}
+-    >
+-      {props.children}
+-    </a>
+-  );
+-};
+diff --git a/src/components/NavLink.tsx b/src/components/NavLink.tsx
+new file mode 100644
+index 0000000..480d436
+--- /dev/null
++++ b/src/components/NavLink.tsx
+@@ -0,0 +1,18 @@
++import { useContext } from "solid-js";
++import type { JSX } from "@solidjs/web";
++import { RouterContext } from "../store";
++
++export default function NavLink(
++  props: { class?: string; active?: boolean | number; href?: string; route?: string; children?: JSX.Element }
++) {
++  const { getParams } = useContext(RouterContext);
++  return (
++    <a
++      class={[props.class, { active: !!props.active || getParams()?.routeName === props.route }]}
++      href={`#/${props.href || props.route}`}
++      onClick={() => window.scrollTo(0, 0)}
++    >
++      {props.children}
++    </a>
++  );
++}
+diff --git a/src/index.js b/src/index.js
+deleted file mode 100644
+index 50bf66a..0000000
+--- a/src/index.js
++++ /dev/null
+@@ -1,9 +0,0 @@
+-import { render } from 'solid-js/web';
+-import App from './App';
+-import { Provider } from './store';
+-
+-render(() => (
+-  <Provider>
+-    <App />
+-  </Provider>
+-), document.body);
+\ No newline at end of file
+diff --git a/src/index.tsx b/src/index.tsx
+new file mode 100644
+index 0000000..c0297ad
+--- /dev/null
++++ b/src/index.tsx
+@@ -0,0 +1,14 @@
++import { render } from "@solidjs/web";
++import App from "./App";
++import { Provider } from "./store";
++
++// A prop-less root: rendering <Provider> (which takes children) directly is refused (repro 03).
++function Root() {
++  return (
++    <Provider>
++      <App />
++    </Provider>
++  );
++}
++
++render(() => <Root />, document.body);
+diff --git a/src/marked.d.ts b/src/marked.d.ts
+new file mode 100644
+index 0000000..276cf55
+--- /dev/null
++++ b/src/marked.d.ts
+@@ -0,0 +1,3 @@
++declare module "marked" {
++  export default function marked(src: string, options?: { sanitize?: boolean }): string;
++}
+diff --git a/src/pages/Article/Article.js b/src/pages/Article/Article.tsx
+similarity index 50%
+rename from src/pages/Article/Article.js
+rename to src/pages/Article/Article.tsx
+index a91bdb4..a9df3d5 100644
+--- a/src/pages/Article/Article.js
++++ b/src/pages/Article/Article.tsx
+@@ -1,76 +1,95 @@
+-import marked from "marked";
+-import NavLink from "../../components/NavLink";
+-import { useStore } from "../../store";
+-
+-import Comments from "./Comments";
+-
+-const ArticleMeta = props => (
+-  <div class="article-meta">
+-    <NavLink href={`@${props.article?.author.username}`} route="profile">
+-      <img src={props.article?.author.image} alt="" />
+-    </NavLink>
+-
+-    <div class="info">
+-      <NavLink href={`@${props.article?.author.username}`} route="profile" class="author">
+-        {props.article?.author.username}
+-      </NavLink>
+-      <span class="date">{new Date(props.article?.createdAt).toDateString()}</span>
+-    </div>
+-
+-    <Show when={props.canModify} fallback={<span />}>
+-      <span>
+-        <NavLink
+-          href={`editor/${props.article.slug}`}
+-          route="editor"
+-          class="btn btn-outline-secondary btn-sm"
+-        >
+-          <i class="ion-edit" /> Edit Article
+-        </NavLink>
+-        <button class="btn btn-outline-danger btn-sm" onClick={props.onDelete}>
+-          <i class="ion-trash-a" /> Delete Article
+-        </button>
+-      </span>
+-    </Show>
+-  </div>
+-);
+-
+-export default ({ slug }) => {
+-  const [store, { deleteArticle }] = useStore(),
+-    article = () => store.articles[slug],
+-    canModify = () =>
+-      store.currentUser && store.currentUser.username === article()?.author.username,
+-    handleDeleteArticle = () => deleteArticle(slug).then(() => (location.hash = "/"));
+-
+-  return (
+-    <div class="article-page">
+-      <div class="banner">
+-        <div class="container">
+-          <h1>{article()?.title}</h1>
+-          <ArticleMeta article={article()} canModify={canModify()} onDelete={handleDeleteArticle} />
+-        </div>
+-      </div>
+-
+-      <div class="container page">
+-        <div class="row article-content">
+-          <div class="col-xs-12">
+-            <div innerHTML={article() && marked(article()?.body, { sanitize: true })} />
+-
+-            <ul class="tag-list">
+-              {article()?.tagList.map(tag => (
+-                <li class="tag-default tag-pill tag-outline">{tag}</li>
+-              ))}
+-            </ul>
+-          </div>
+-        </div>
+-
+-        <hr />
+-
+-        <div class="article-actions" />
+-
+-        <div class="row">
+-          <Comments />
+-        </div>
+-      </div>
+-    </div>
+-  );
+-};
++import marked from "marked";
++import { Show, useContext } from "solid-js";
++import NavLink from "../../components/NavLink";
++import { StoreContext } from "../../store";
++import type { Article } from "../../types";
++
++import Comments from "./Comments";
++
++// onDelete was a callback prop (handleDeleteArticle); a callback prop calling a context action is
++// refused (repro 11), so ArticleMeta deletes through the context action in its own click event.
++function ArticleMeta(props: { article?: Article; canModify: boolean; slug: string }) {
++  const [, { deleteArticle }] = useContext(StoreContext);
++  return (
++  <div class="article-meta">
++    <NavLink href={`@${props.article?.author.username}`} route="profile">
++      <img src={props.article?.author.image ?? undefined} alt="" />
++    </NavLink>
++
++    <div class="info">
++      <NavLink href={`@${props.article?.author.username}`} route="profile" class="author">
++        {props.article?.author.username}
++      </NavLink>
++      <span class="date">{new Date(props.article?.createdAt ?? NaN).toDateString()}</span>
++    </div>
++
++    <Show when={props.canModify} fallback={<span />}>
++      <span>
++        <NavLink
++          href={`editor/${props.article?.slug}`}
++          route="editor"
++          class="btn btn-outline-secondary btn-sm"
++        >
++          <i class="ion-edit" /> Edit Article
++        </NavLink>
++        <button
++          class="btn btn-outline-danger btn-sm"
++          onClick={() => {
++            const slug = props.slug;
++            // deleteArticle navigates home once the article is gone.
++            deleteArticle(slug);
++          }}
++        >
++          <i class="ion-trash-a" /> Delete Article
++        </button>
++      </span>
++    </Show>
++  </div>
++  );
++}
++
++export default function ArticlePage(props: { slug: string }) {
++  const [store] = useContext(StoreContext),
++    article = () => store.articles()[props.slug],
++    canModify = () => {
++      const user = store.currentUser();
++      return !!user && user.username === article()?.author.username;
++    },
++    body = () => {
++      const a = article();
++      return a ? marked(a.body, { sanitize: true }) : undefined;
++    };
++
++  return (
++    <div class="article-page">
++      <div class="banner">
++        <div class="container">
++          <h1>{article()?.title}</h1>
++          <ArticleMeta article={article()} canModify={canModify()} slug={props.slug} />
++        </div>
++      </div>
++
++      <div class="container page">
++        <div class="row article-content">
++          <div class="col-xs-12">
++            <div innerHTML={body()} />
++
++            <ul class="tag-list">
++              {article()?.tagList.map(tag => (
++                <li class="tag-default tag-pill tag-outline">{tag}</li>
++              ))}
++            </ul>
++          </div>
++        </div>
++
++        <hr />
++
++        <div class="article-actions" />
++
++        <div class="row">
++          <Comments />
++        </div>
++      </div>
++    </div>
++  );
++}
+diff --git a/src/pages/Article/Comments.js b/src/pages/Article/Comments.js
+deleted file mode 100644
+index d1847f6..0000000
+--- a/src/pages/Article/Comments.js
++++ /dev/null
+@@ -1,107 +0,0 @@
+-import { createStore } from "solid-js/store";
+-import NavLink from "../../components/NavLink";
+-import ListErrors from "../../components/ListErrors";
+-import { useStore } from "../../store";
+-
+-const Comment = ({ comment, currentUser, onDelete }) => {
+-  const show = currentUser && currentUser.username === comment.author.username,
+-    {
+-      id,
+-      body,
+-      author: { username, image },
+-      createdAt
+-    } = comment;
+-  return (
+-    <div class="card">
+-      <div class="card-block">
+-        <p class="card-text" textContent={body} />
+-      </div>
+-      <div class="card-footer">
+-        <NavLink href={`@${username}`} route="profile" class="comment-author">
+-          <img src={image} class="comment-author-img" alt="" />
+-        </NavLink>
+-        &nbsp;
+-        <NavLink href={`@${username}`} route="profile" class="comment-author">
+-          {username}
+-        </NavLink>
+-        <span class="date-posted">{new Date(createdAt).toDateString()}</span>
+-        {show && (
+-          <span class="mod-options">
+-            <i class="ion-trash-a" onClick={[onDelete, id]} />
+-          </span>
+-        )}
+-      </div>
+-    </div>
+-  );
+-};
+-
+-const CommentInput = ({ slug, createComment, loadComments, currentUser }) => {
+-  const [state, setState] = createStore({ body: "" }),
+-    handleBodyChange = ev => setState({ body: ev.target.value }),
+-    createCommentHandler = ev => {
+-      ev.preventDefault();
+-      setState({ isCreatingComment: true });
+-      createComment({ body: state.body })
+-        .then(() => {
+-          setState({ body: "" });
+-          loadComments(slug, true);
+-        })
+-        .catch(errors => setState({ errors }))
+-        .finally(() => setState({ isCreatingComment: false }));
+-    };
+-  return (
+-    <>
+-      <ListErrors errors={state.errors} />
+-      <form class="card comment-form" onSubmit={createCommentHandler}>
+-        <div class="card-block">
+-          <textarea
+-            class="form-control"
+-            placeholder="Write a comment..."
+-            value={state.body}
+-            disabled={state.isCreatingComment}
+-            onChange={handleBodyChange}
+-            rows="3"
+-          />
+-        </div>
+-        <div class="card-footer">
+-          <img src={currentUser.image} class="comment-author-img" alt="" />
+-          <button class="btn btn-sm btn-primary" type="submit">
+-            Post Comment
+-          </button>
+-        </div>
+-      </form>
+-    </>
+-  );
+-};
+-
+-export default () => {
+-  const [store, { createComment, deleteComment, loadComments }] = useStore(),
+-    { currentUser, articleSlug } = store,
+-    handleDeleteComment = commentId => deleteComment(commentId);
+-  return (
+-    <div class="col-xs-12 col-md-8 offset-md-2">
+-      {currentUser ? (
+-        <CommentInput
+-          slug={articleSlug}
+-          currentUser={currentUser}
+-          createComment={createComment}
+-          loadComments={loadComments}
+-        />
+-      ) : (
+-        <p>
+-          <NavLink route="login">Sign in</NavLink>
+-          &nbsp;or&nbsp;
+-          <NavLink route="register">sign up</NavLink>
+-          &nbsp;to add comments on this article.
+-        </p>
+-      )}
+-      <Suspense fallback="Loading comments">
+-        <For each={store.comments}>
+-          {comment => (
+-            <Comment comment={comment} currentUser={currentUser} onDelete={handleDeleteComment} />
+-          )}
+-        </For>
+-      </Suspense>
+-    </div>
+-  );
+-};
+diff --git a/src/pages/Article/Comments.tsx b/src/pages/Article/Comments.tsx
+new file mode 100644
+index 0000000..f2ca5da
+--- /dev/null
++++ b/src/pages/Article/Comments.tsx
+@@ -0,0 +1,132 @@
++import { createStore, Errored, For, Loading, Show, useContext } from "solid-js";
++import NavLink from "../../components/NavLink";
++import ListErrors from "../../components/ListErrors";
++import { StoreContext } from "../../store";
++import { isErrors, type Comment as CommentData, type Errors, type User } from "../../types";
++
++// onDelete used to come from Comments; a callback prop calling a context action is refused
++// (repro 11), so the comment deletes through the context.
++function Comment(props: { comment: CommentData; currentUser?: User }) {
++  const [, { deleteComment }] = useContext(StoreContext),
++    show = () => props.currentUser && props.currentUser.username === props.comment.author.username;
++  return (
++    <div class="card">
++      <div class="card-block">
++        <p class="card-text" textContent={props.comment.body} />
++      </div>
++      <div class="card-footer">
++        <NavLink href={`@${props.comment.author.username}`} route="profile" class="comment-author">
++          <img src={props.comment.author.image ?? undefined} class="comment-author-img" alt="" />
++        </NavLink>
++        &nbsp;
++        <NavLink href={`@${props.comment.author.username}`} route="profile" class="comment-author">
++          {props.comment.author.username}
++        </NavLink>
++        <span class="date-posted">{new Date(props.comment.createdAt).toDateString()}</span>
++        {show() && (
++          <span class="mod-options">
++            <i
++              class="ion-trash-a"
++              onClick={() => {
++                const id = props.comment.id;
++                deleteComment(id);
++              }}
++            />
++          </span>
++        )}
++      </div>
++    </div>
++  );
++}
++
++// createComment/loadComments were passed down as props; calling prop callbacks from the async
++// submit helper is refused, so CommentInput reads them from the context itself.
++function CommentInput(props: { slug?: string; currentUser: User }) {
++  const [, { createComment, loadComments }] = useContext(StoreContext),
++    [state, setState] = createStore<{ body: string; isCreatingComment?: boolean; errors?: Errors }>({
++      body: ""
++    }),
++    handleBodyChange = (ev: Event & { currentTarget: HTMLTextAreaElement }) => {
++      const body = ev.currentTarget.value;
++      setState(s => {
++        s.body = body;
++      });
++    },
++    createCommentHandler = async (ev: SubmitEvent) => {
++      ev.preventDefault();
++      setState(s => {
++        s.isCreatingComment = true;
++      });
++      try {
++        await createComment({ body: state.body });
++        setState(s => {
++          s.body = "";
++        });
++        const slug = String(props.slug);
++        loadComments(slug, true);
++      } catch (errors) {
++        setState(s => {
++          s.errors = isErrors(errors) ? errors : { error: [String(errors)] };
++        });
++      } finally {
++        setState(s => {
++          s.isCreatingComment = false;
++        });
++      }
++    };
++  return (
++    <>
++      <ListErrors errors={state.errors} />
++      <form class="card comment-form" onSubmit={createCommentHandler}>
++        <div class="card-block">
++          <textarea
++            class="form-control"
++            placeholder="Write a comment..."
++            value={state.body}
++            disabled={state.isCreatingComment}
++            onChange={handleBodyChange}
++            rows="3"
++          />
++        </div>
++        <div class="card-footer">
++          <img src={props.currentUser.image ?? undefined} class="comment-author-img" alt="" />
++          <button class="btn btn-sm btn-primary" type="submit">
++            Post Comment
++          </button>
++        </div>
++      </form>
++    </>
++  );
++}
++
++export default function Comments() {
++  const [store] = useContext(StoreContext);
++  return (
++    <div class="col-xs-12 col-md-8 offset-md-2">
++      <Show
++        when={store.currentUser()}
++        fallback={
++        <p>
++          <NavLink route="login">Sign in</NavLink>
++          &nbsp;or&nbsp;
++          <NavLink route="register">sign up</NavLink>
++          &nbsp;to add comments on this article.
++        </p>
++        }
++      >
++        {user => (
++          <CommentInput slug={store.articleSlug()} currentUser={user()} />
++        )}
++      </Show>
++      <Errored fallback="Could not load comments.">
++        <Loading fallback="Loading comments">
++          <For each={store.comments()}>
++            {comment => (
++              <Comment comment={comment} currentUser={store.currentUser()} />
++            )}
++          </For>
++        </Loading>
++      </Errored>
++    </div>
++  );
++}
+diff --git a/src/pages/Article/index.js b/src/pages/Article/index.js
+deleted file mode 100644
+index 7c7a02c..0000000
+--- a/src/pages/Article/index.js
++++ /dev/null
+@@ -1,11 +0,0 @@
+-import { lazy } from "solid-js";
+-import { useStore } from "../../store";
+-const Article = lazy(() => import("./Article"));
+-
+-export default function(props) {
+-  const [, { loadArticle, loadComments }] = useStore(),
+-    slug = props.params[0];
+-  loadArticle(slug);
+-  loadComments(slug);
+-  return Article({ slug });
+-}
+diff --git a/src/pages/Article/index.tsx b/src/pages/Article/index.tsx
+new file mode 100644
+index 0000000..fab2270
+--- /dev/null
++++ b/src/pages/Article/index.tsx
+@@ -0,0 +1,18 @@
++import { createEffect, useContext } from "solid-js";
++import { StoreContext } from "../../store";
++import Article from "./Article"; // was lazy() (repro 10)
++
++export default function ArticleIndex(props: { params: (string | undefined)[] }) {
++  const [, { loadArticle, loadComments }] = useContext(StoreContext);
++  // Was called directly in the component body (a write during setup).
++  createEffect(
++    () => props.params[0],
++    slug => {
++      if (slug) {
++        loadArticle(slug);
++        loadComments(slug);
++      }
++    }
++  );
++  return <Article slug={props.params[0] ?? ""} />;
++}
+diff --git a/src/pages/Auth.js b/src/pages/Auth.js
+deleted file mode 100644
+index a90c625..0000000
+--- a/src/pages/Auth.js
++++ /dev/null
+@@ -1,77 +0,0 @@
+-import { createStore } from "solid-js/store";
+-import NavLink from "../components/NavLink";
+-import ListErrors from "../components/ListErrors";
+-import { useStore } from "../store";
+-
+-export default () => {
+-  const [state, setState] = createStore({ username: "", inProgress: false }),
+-    [, { register, login }] = useStore(),
+-    isLogin = location.hash.includes("login"),
+-    text = isLogin ? "Sign in" : "Sign up",
+-    link = isLogin ? (
+-      <NavLink route="register">Need an account?</NavLink>
+-    ) : (
+-      <NavLink route="login">Have an account?</NavLink>
+-    ),
+-    handleSubmit = e => {
+-      e.preventDefault();
+-      setState({ inProgress: true });
+-      const p = isLogin
+-        ? login(state.email, state.password)
+-        : register(state.username, state.email, state.password);
+-      p.then(() => (location.hash = "/"))
+-        .catch(errors => setState({ errors }))
+-        .finally(() => setState({ inProgress: false }));
+-    };
+-
+-  return (
+-    <div class="auth-page">
+-      <div class="container page">
+-        <div class="row">
+-          <div class="col-md-6 offset-md-3 col-xs-12">
+-            <h1 class="text-xs-center" textContent={text} />
+-            <p class="text-xs-center">{link}</p>
+-            <ListErrors errors={state.errors} />
+-            <form onSubmit={handleSubmit}>
+-              {!isLogin && (
+-                <fieldset class="form-group">
+-                  <input
+-                    class="form-control form-control-lg"
+-                    type="text"
+-                    placeholder="Username"
+-                    value={state.username}
+-                    onChange={e => setState({ username: e.target.value })}
+-                  />
+-                </fieldset>
+-              )}
+-              <fieldset class="form-group">
+-                <input
+-                  class="form-control form-control-lg"
+-                  type="text"
+-                  placeholder="Email"
+-                  value={state.email}
+-                  onChange={e => setState({ email: e.target.value })}
+-                />
+-              </fieldset>
+-              <fieldset class="form-group">
+-                <input
+-                  class="form-control form-control-lg"
+-                  type="password"
+-                  placeholder="Password"
+-                  value={state.password}
+-                  onChange={e => setState({ password: e.target.value })}
+-                />
+-              </fieldset>
+-              <button
+-                class="btn btn-lg btn-primary pull-xs-right"
+-                type="submit"
+-                disabled={state.inProgress}
+-                textContent={text}
+-              />
+-            </form>
+-          </div>
+-        </div>
+-      </div>
+-    </div>
+-  );
+-};
+diff --git a/src/pages/Auth.tsx b/src/pages/Auth.tsx
+new file mode 100644
+index 0000000..a27642b
+--- /dev/null
++++ b/src/pages/Auth.tsx
+@@ -0,0 +1,110 @@
++import { createStore, useContext } from "solid-js";
++import NavLink from "../components/NavLink";
++import ListErrors from "../components/ListErrors";
++import { StoreContext } from "../store";
++import { isErrors, type Errors } from "../types";
++
++export default function Auth() {
++  const [state, setState] = createStore<{
++      username: string;
++      email: string;
++      password: string;
++      inProgress: boolean;
++      errors?: Errors;
++    }>({ username: "", email: "", password: "", inProgress: false }),
++    [, { register, login }] = useContext(StoreContext),
++    isLogin = location.hash.includes("login"),
++    text = isLogin ? "Sign in" : "Sign up",
++    handleSubmit = async (e: SubmitEvent) => {
++      e.preventDefault();
++      setState(s => {
++        s.inProgress = true;
++      });
++      try {
++        if (isLogin) await login(state.email, state.password);
++        else await register(state.username, state.email, state.password);
++        location.hash = "/";
++      } catch (errors) {
++        setState(s => {
++          s.errors = isErrors(errors) ? errors : { error: [String(errors)] };
++        });
++      } finally {
++        setState(s => {
++          s.inProgress = false;
++        });
++      }
++    };
++
++  return (
++    <div class="auth-page">
++      <div class="container page">
++        <div class="row">
++          <div class="col-md-6 offset-md-3 col-xs-12">
++            <h1 class="text-xs-center" textContent={text} />
++            <p class="text-xs-center">
++              {/* Was JSX built in the component body (refused as eager JSX). */}
++              {isLogin ? (
++                <NavLink route="register">Need an account?</NavLink>
++              ) : (
++                <NavLink route="login">Have an account?</NavLink>
++              )}
++            </p>
++            <ListErrors errors={state.errors} />
++            <form onSubmit={handleSubmit}>
++              {!isLogin && (
++                <fieldset class="form-group">
++                  <input
++                    class="form-control form-control-lg"
++                    type="text"
++                    placeholder="Username"
++                    value={state.username}
++                    onChange={e => {
++                      const username = e.currentTarget.value;
++                      setState(s => {
++                        s.username = username;
++                      });
++                    }}
++                  />
++                </fieldset>
++              )}
++              <fieldset class="form-group">
++                <input
++                  class="form-control form-control-lg"
++                  type="text"
++                  placeholder="Email"
++                  value={state.email}
++                  onChange={e => {
++                    const email = e.currentTarget.value;
++                    setState(s => {
++                      s.email = email;
++                    });
++                  }}
++                />
++              </fieldset>
++              <fieldset class="form-group">
++                <input
++                  class="form-control form-control-lg"
++                  type="password"
++                  placeholder="Password"
++                  value={state.password}
++                  onChange={e => {
++                    const password = e.currentTarget.value;
++                    setState(s => {
++                      s.password = password;
++                    });
++                  }}
++                />
++              </fieldset>
++              <button
++                class="btn btn-lg btn-primary pull-xs-right"
++                type="submit"
++                disabled={state.inProgress}
++                textContent={text}
++              />
++            </form>
++          </div>
++        </div>
++      </div>
++    </div>
++  );
++}
+diff --git a/src/pages/Editor/Editor.js b/src/pages/Editor/Editor.tsx
+similarity index 51%
+rename from src/pages/Editor/Editor.js
+rename to src/pages/Editor/Editor.tsx
+index 10b500a..904fe95 100644
+--- a/src/pages/Editor/Editor.js
++++ b/src/pages/Editor/Editor.tsx
+@@ -1,123 +1,165 @@
+-import { createComputed } from "solid-js"
+-import { createStore } from "solid-js/store";
+-import { useStore } from "../../store";
+-import ListErrors from "../../components/ListErrors";
+-
+-export default ({ slug }) => {
+-  const [store, { createArticle, updateArticle }] = useStore(),
+-    [state, setState] = createStore({ tagInput: "", tagList: [] }),
+-    updateState = field => ev => setState(field, ev.target.value),
+-    handleAddTag = () => {
+-      if (state.tagInput) {
+-        setState(s => {
+-          s.tagList.push(s.tagInput.trim());
+-          s.tagInput = "";
+-        });
+-      }
+-    },
+-    handleRemoveTag = tag => {
+-      !state.inProgress && setState("tagList", tags => tags.filter(t => t !== tag));
+-    },
+-    handleTagInputKeyDown = ev => {
+-      switch (ev.keyCode) {
+-        case 13: // Enter
+-        case 9: // Tab
+-        case 188: // ,
+-          if (ev.keyCode !== 9) ev.preventDefault();
+-          handleAddTag();
+-          break;
+-        default:
+-          break;
+-      }
+-    },
+-    submitForm = ev => {
+-      ev.preventDefault();
+-      setState({ inProgress: true });
+-      const { inProgress, tagsInput, ...article } = state;
+-      (slug ? updateArticle : createArticle)(article)
+-        .then(article => (location.hash = `/article/${article.slug}`))
+-        .catch(errors => setState({ errors }))
+-        .finally(() => setState({ inProgress: false }));
+-    };
+-  createComputed(() => {
+-    let article;
+-    if (!slug || !(article = store.articles[slug])) return;
+-    setState(article);
+-  });
+-
+-  return (
+-    <div class="editor-page">
+-      <div class="container page">
+-        <div class="row">
+-          <div class="col-md-10 offset-md-1 col-xs-12">
+-            <ListErrors errors={state.errors} />
+-            <form>
+-              <fieldset>
+-                <fieldset class="form-group">
+-                  <input
+-                    type="text"
+-                    class="form-control form-control-lg"
+-                    placeholder="Article Title"
+-                    value={state.title}
+-                    onChange={updateState("title")}
+-                    disabled={state.inProgress}
+-                  />
+-                </fieldset>
+-                <fieldset class="form-group">
+-                  <input
+-                    type="text"
+-                    class="form-control"
+-                    placeholder="What's this article about?"
+-                    value={state.description}
+-                    onChange={updateState("description")}
+-                    disabled={state.inProgress}
+-                  />
+-                </fieldset>
+-                <fieldset class="form-group">
+-                  <textarea
+-                    class="form-control"
+-                    rows="8"
+-                    placeholder="Write your article (in markdown)"
+-                    value={state.body}
+-                    onChange={updateState("body")}
+-                    disabled={state.inProgress}
+-                  ></textarea>
+-                </fieldset>
+-                <fieldset class="form-group">
+-                  <input
+-                    type="text"
+-                    class="form-control"
+-                    placeholder="Enter tags"
+-                    value={state.tagInput}
+-                    onChange={updateState("tagInput")}
+-                    onBlur={handleAddTag}
+-                    onKeyup={handleTagInputKeyDown}
+-                    disabled={state.inProgress}
+-                  />
+-                  <div class="tag-list">
+-                    <For each={state.tagList}>
+-                      {tag => (
+-                        <span class="tag-default tag-pill">
+-                          <i class="ion-close-round" onClick={[handleRemoveTag, tag]} />
+-                          {tag}
+-                        </span>
+-                      )}
+-                    </For>
+-                  </div>
+-                </fieldset>
+-                <button
+-                  class="btn btn-lg pull-xs-right btn-primary"
+-                  type="button"
+-                  disabled={state.inProgress}
+-                  onClick={submitForm}
+-                >
+-                  Publish Article
+-                </button>
+-              </fieldset>
+-            </form>
+-          </div>
+-        </div>
+-      </div>
+-    </div>
+-  );
+-};
++import { createEffect, createStore, For, useContext } from "solid-js";
++import { StoreContext } from "../../store";
++import ListErrors from "../../components/ListErrors";
++import { isErrors, type ArticleDraft, type Errors } from "../../types";
++
++interface EditorState extends ArticleDraft {
++  tagInput: string;
++  inProgress?: boolean;
++  errors?: Errors;
++}
++type Field = "title" | "description" | "body" | "tagInput";
++
++export default function Editor(props: { slug?: string }) {
++  const [store, { createArticle, updateArticle }] = useContext(StoreContext),
++    [state, setState] = createStore<EditorState>({ tagInput: "", tagList: [] }),
++    updateState = (field: Field, ev: Event & { currentTarget: HTMLInputElement | HTMLTextAreaElement }) => {
++      const value = ev.currentTarget.value;
++      setState(s => {
++        s[field] = value;
++      });
++    },
++    handleAddTag = () => {
++      if (state.tagInput) {
++        setState(s => {
++          s.tagList.push(s.tagInput.trim());
++          s.tagInput = "";
++        });
++      }
++    },
++    handleRemoveTag = (tag: string) => {
++      !state.inProgress &&
++        setState(s => {
++          s.tagList = s.tagList.filter(t => t !== tag);
++        });
++    },
++    handleTagInputKeyDown = (ev: KeyboardEvent) => {
++      switch (ev.keyCode) {
++        case 13: // Enter
++        case 9: // Tab
++        case 188: // ,
++          if (ev.keyCode !== 9) ev.preventDefault();
++          handleAddTag();
++          break;
++        default:
++          break;
++      }
++    },
++    submitForm = async (ev: MouseEvent) => {
++      ev.preventDefault();
++      setState(s => {
++        s.inProgress = true;
++      });
++      // Was `const { inProgress, tagsInput, ...article } = state` (rest of a store, typed as its
++      // Source); the article fields are listed instead (tagInput and errors are no longer sent).
++      const article: ArticleDraft = {
++        slug: state.slug,
++        title: state.title,
++        description: state.description,
++        body: state.body,
++        tagList: [...state.tagList]
++      };
++      try {
++        const saved = props.slug ? await updateArticle(article) : await createArticle(article);
++        location.hash = `/article/${saved.slug}`;
++      } catch (errors) {
++        setState(s => {
++          s.errors = isErrors(errors) ? errors : { error: [String(errors)] };
++        });
++      } finally {
++        setState(s => {
++          s.inProgress = false;
++        });
++      }
++    };
++  // Was a createComputed that wrote the loaded article into the form state.
++  createEffect(
++    () => {
++      // Read once: the narrowing of a repeated props.slug read is lost in the lowering.
++      const slug = props.slug;
++      return slug ? store.articles()[slug] : undefined;
++    },
++    article => {
++      if (article)
++        setState(s => {
++          Object.assign(s, article, { tagList: [...article.tagList] });
++        });
++    }
++  );
++
++  return (
++    <div class="editor-page">
++      <div class="container page">
++        <div class="row">
++          <div class="col-md-10 offset-md-1 col-xs-12">
++            <ListErrors errors={state.errors} />
++            <form>
++              <fieldset>
++                <fieldset class="form-group">
++                  <input
++                    type="text"
++                    class="form-control form-control-lg"
++                    placeholder="Article Title"
++                    value={state.title}
++                    onChange={e => updateState("title", e)}
++                    disabled={state.inProgress}
++                  />
++                </fieldset>
++                <fieldset class="form-group">
++                  <input
++                    type="text"
++                    class="form-control"
++                    placeholder="What's this article about?"
++                    value={state.description}
++                    onChange={e => updateState("description", e)}
++                    disabled={state.inProgress}
++                  />
++                </fieldset>
++                <fieldset class="form-group">
++                  <textarea
++                    class="form-control"
++                    rows="8"
++                    placeholder="Write your article (in markdown)"
++                    value={state.body}
++                    onChange={e => updateState("body", e)}
++                    disabled={state.inProgress}
++                  ></textarea>
++                </fieldset>
++                <fieldset class="form-group">
++                  <input
++                    type="text"
++                    class="form-control"
++                    placeholder="Enter tags"
++                    value={state.tagInput}
++                    onChange={e => updateState("tagInput", e)}
++                    onBlur={handleAddTag}
++                    onKeyUp={handleTagInputKeyDown}
++                    disabled={state.inProgress}
++                  />
++                  <div class="tag-list">
++                    <For each={state.tagList}>
++                      {tag => (
++                        <span class="tag-default tag-pill">
++                          <i class="ion-close-round" onClick={() => handleRemoveTag(tag)} />
++                          {tag}
++                        </span>
++                      )}
++                    </For>
++                  </div>
++                </fieldset>
++                <button
++                  class="btn btn-lg pull-xs-right btn-primary"
++                  type="button"
++                  disabled={state.inProgress}
++                  onClick={submitForm}
++                >
++                  Publish Article
++                </button>
++              </fieldset>
++            </form>
++          </div>
++        </div>
++      </div>
++    </div>
++  );
++}
+diff --git a/src/pages/Editor/index.js b/src/pages/Editor/index.js
+deleted file mode 100644
+index 0309088..0000000
+--- a/src/pages/Editor/index.js
++++ /dev/null
+@@ -1,10 +0,0 @@
+-import { lazy } from "solid-js";
+-import { useStore } from "../../store";
+-const Editor = lazy(() => import("./Editor"));
+-
+-export default function(props) {
+-  const [, { loadArticle }] = useStore(),
+-    slug = props.params[0];
+-  slug && loadArticle(slug);
+-  return Editor({ slug });
+-}
+\ No newline at end of file
+diff --git a/src/pages/Editor/index.tsx b/src/pages/Editor/index.tsx
+new file mode 100644
+index 0000000..e913fee
+--- /dev/null
++++ b/src/pages/Editor/index.tsx
+@@ -0,0 +1,15 @@
++import { createEffect, useContext } from "solid-js";
++import { StoreContext } from "../../store";
++import Editor from "./Editor"; // was lazy() (repro 10)
++
++export default function EditorIndex(props: { params: (string | undefined)[] }) {
++  const [, { loadArticle }] = useContext(StoreContext);
++  // Was called directly in the component body (a write during setup).
++  createEffect(
++    () => props.params[0],
++    slug => {
++      if (slug) loadArticle(slug);
++    }
++  );
++  return <Editor slug={props.params[0]} />;
++}
+diff --git a/src/pages/Home/Home.js b/src/pages/Home/Home.js
+deleted file mode 100644
+index 9aa02f0..0000000
+--- a/src/pages/Home/Home.js
++++ /dev/null
+@@ -1,69 +0,0 @@
+-import NavLink from "../../components/NavLink";
+-import ArticleList from "../../components/ArticleList";
+-
+-export default ({ appName, token, handleSetPage, tab, store }) => {
+-  return (
+-    <div class="home-page">
+-      <div class="banner">
+-        <div class="container">
+-          <h1 class="logo-font" textContent={appName} />
+-          <p>A place to share your knowledge.</p>
+-        </div>
+-      </div>
+-
+-      <div class="container page">
+-        <div class="row">
+-          <div class="col-md-9">
+-            <div class="feed-toggle">
+-              <ul class="nav nav-pills outline-active">
+-                {token && (
+-                  <li class="nav-item">
+-                    <NavLink class="nav-link" href="?tab=feed" active={tab() === "feed"}>
+-                      Your Feed
+-                    </NavLink>
+-                  </li>
+-                )}
+-                <li class="nav-item">
+-                  <NavLink class="nav-link" href="?tab=all" active={tab() === "all"}>
+-                    Global Feed
+-                  </NavLink>
+-                </li>
+-                <Show when={tab() !== "all" && tab() !== "feed"}>
+-                  <li class="nav-item">
+-                    <a href="" class="nav-link active">
+-                      <i class="ion-pound" /> {tab()}
+-                    </a>
+-                  </li>
+-                </Show>
+-              </ul>
+-            </div>
+-
+-            <ArticleList
+-              articles={Object.values(store.articles)}
+-              totalPagesCount={store.totalPagesCount}
+-              currentPage={store.page}
+-              onSetPage={handleSetPage}
+-            />
+-          </div>
+-
+-          <div class="col-md-3">
+-            <div class="sidebar">
+-              <p>Popular Tags</p>
+-              <Suspense fallback="Loading tags...">
+-                <div class="tag-list">
+-                  <For each={store.tags}>
+-                    {tag => (
+-                      <a href={`#/?tab=${tag}`} class="tag-pill tag-default">
+-                        {tag}
+-                      </a>
+-                    )}
+-                  </For>
+-                </div>
+-              </Suspense>
+-            </div>
+-          </div>
+-        </div>
+-      </div>
+-    </div>
+-  );
+-};
+diff --git a/src/pages/Home/Home.tsx b/src/pages/Home/Home.tsx
+new file mode 100644
+index 0000000..8325467
+--- /dev/null
++++ b/src/pages/Home/Home.tsx
+@@ -0,0 +1,77 @@
++import { Errored, For, Loading, Show, useContext } from "solid-js";
++import NavLink from "../../components/NavLink";
++import ArticleList from "../../components/ArticleList";
++import { StoreContext } from "../../store";
++import { predicateFor } from "./predicate";
++
++export default function Home(props: { appName: string; token?: string | null; tab: string | null }) {
++  const [store] = useContext(StoreContext);
++  return (
++    <div class="home-page">
++      <div class="banner">
++        <div class="container">
++          <h1 class="logo-font" textContent={props.appName} />
++          <p>A place to share your knowledge.</p>
++        </div>
++      </div>
++
++      <div class="container page">
++        <div class="row">
++          <div class="col-md-9">
++            <div class="feed-toggle">
++              <ul class="nav nav-pills outline-active">
++                {props.token && (
++                  <li class="nav-item">
++                    <NavLink class="nav-link" href="?tab=feed" active={props.tab === "feed"}>
++                      Your Feed
++                    </NavLink>
++                  </li>
++                )}
++                <li class="nav-item">
++                  <NavLink class="nav-link" href="?tab=all" active={props.tab === "all"}>
++                    Global Feed
++                  </NavLink>
++                </li>
++                <Show when={props.tab !== "all" && props.tab !== "feed"}>
++                  <li class="nav-item">
++                    <a href="" class="nav-link active">
++                      <i class="ion-pound" /> {props.tab}
++                    </a>
++                  </li>
++                </Show>
++              </ul>
++            </div>
++
++            <ArticleList
++              articles={Object.values(store.articles())}
++              totalPagesCount={store.totalPagesCount()}
++              currentPage={store.page()}
++              // Was Home/index's handleSetPage (setPage + loadArticles inside useTransition's
++              // start()); ArticleList now pages through the context with this predicate.
++              predicate={predicateFor(props.tab)}
++            />
++          </div>
++
++          <div class="col-md-3">
++            <div class="sidebar">
++              <p>Popular Tags</p>
++              <Errored fallback="Could not load tags.">
++                <Loading fallback="Loading tags...">
++                  <div class="tag-list">
++                    <For each={store.tags()}>
++                      {tag => (
++                        <a href={`#/?tab=${tag}`} class="tag-pill tag-default">
++                          {tag}
++                        </a>
++                      )}
++                    </For>
++                  </div>
++                </Loading>
++              </Errored>
++            </div>
++          </div>
++        </div>
++      </div>
++    </div>
++  );
++}
+diff --git a/src/pages/Home/index.js b/src/pages/Home/index.js
+deleted file mode 100644
+index 5f4a637..0000000
+--- a/src/pages/Home/index.js
++++ /dev/null
+@@ -1,38 +0,0 @@
+-import { createComputed, createMemo, useTransition, lazy } from "solid-js";
+-import { useStore, useRouter } from "../../store";
+-const Home = lazy(() => import("./Home"));
+-
+-export default function() {
+-  const [store, { loadArticles, setPage }] = useStore(),
+-    { token, appName } = store,
+-    { location } = useRouter(),
+-    tab = createMemo(() => {
+-      const search = location().split("?")[1];
+-      if (!search) return token ? "feed" : "all";
+-      const query = new URLSearchParams(search);
+-      return query.get("tab");
+-    }),
+-    [, start] = useTransition(),
+-    getPredicate = () => {
+-      switch (tab()) {
+-        case "feed":
+-          return { myFeed: true };
+-        case "all":
+-          return {};
+-        case undefined:
+-          return undefined;
+-        default:
+-          return { tag: tab() };
+-      }
+-    },
+-    handleSetPage = page => {
+-      start(() => {
+-        setPage(page);
+-        loadArticles(getPredicate());
+-      });
+-    };
+-
+-  createComputed(() => loadArticles(getPredicate()));
+-
+-  return Home({ handleSetPage, appName, token, tab, store });
+-}
+diff --git a/src/pages/Home/index.tsx b/src/pages/Home/index.tsx
+new file mode 100644
+index 0000000..73fcb92
+--- /dev/null
++++ b/src/pages/Home/index.tsx
+@@ -0,0 +1,25 @@
++import { createEffect, createMemo, useContext } from "solid-js";
++import { StoreContext, RouterContext } from "../../store";
++import { predicateFor } from "./predicate";
++import Home from "./Home"; // was lazy() (repro 10)
++
++export default function HomeIndex() {
++  const [store, { loadArticles }] = useContext(StoreContext),
++    { location } = useContext(RouterContext),
++    tab = createMemo(() => {
++      const search = location().split("?")[1];
++      if (!search) return store.token() ? "feed" : "all";
++      const query = new URLSearchParams(search);
++      return query.get("tab");
++    });
++
++  // Was createComputed(() => loadArticles(getPredicate())): a write from a computation.
++  createEffect(
++    () => predicateFor(tab()),
++    predicate => {
++      loadArticles(predicate);
++    }
++  );
++
++  return <Home appName={store.appName} token={store.token()} tab={tab()} />;
++}
+diff --git a/src/pages/Home/predicate.ts b/src/pages/Home/predicate.ts
+new file mode 100644
+index 0000000..ab1280b
+--- /dev/null
++++ b/src/pages/Home/predicate.ts
+@@ -0,0 +1,14 @@
++import type { Predicate } from "../../types";
++
++export function predicateFor(tab: string | null | undefined): Predicate | undefined {
++  switch (tab) {
++    case "feed":
++      return { myFeed: true };
++    case "all":
++      return {};
++    case undefined:
++      return undefined;
++    default:
++      return { tag: tab ?? undefined };
++  }
++}
+diff --git a/src/pages/Profile/Profile.js b/src/pages/Profile/Profile.js
+deleted file mode 100644
+index 57d59db..0000000
+--- a/src/pages/Profile/Profile.js
++++ /dev/null
+@@ -1,87 +0,0 @@
+-import { useStore, useRouter } from "../../store";
+-import NavLink from "../../components/NavLink";
+-import ArticleList from "../../components/ArticleList";
+-
+-export default props => {
+-  const [store, { setPage, loadArticles, unfollow, follow }] = useStore(),
+-    { location } = useRouter(),
+-    handleClick = ev => {
+-      ev.preventDefault();
+-      store.profile.following ? unfollow() : follow();
+-    },
+-    handleSetPage = page => {
+-      setPage(page);
+-      loadArticles();
+-    },
+-    isUser = () => store.currentUser && props.username === store.currentUser.username;
+-
+-  return (
+-    <div class="profile-page">
+-      <div class="user-info">
+-        <div class="container">
+-          <div class="row">
+-            <div class="col-xs-12 col-md-10 offset-md-1">
+-              <img src={store.profile?.image} class="user-img" alt="" />
+-              <h4 textContent={props.username} />
+-              <p>{store.profile?.bio}</p>
+-              {isUser() && (
+-                <NavLink route="settings" class="btn btn-sm btn-outline-secondary action-btn">
+-                  <i class="ion-gear-a" /> Edit Profile Settings
+-                </NavLink>
+-              )}
+-              {store.token && !isUser() && (
+-                <button
+-                  class="btn btn-sm action-btn"
+-                  classList={{
+-                    "btn-secondary": store.profile?.following,
+-                    "btn-outline-secondary": !store.profile?.following
+-                  }}
+-                  onClick={handleClick}
+-                >
+-                  <i class="ion-plus-round" /> {store.profile?.following ? "Unfollow" : "Follow"}{" "}
+-                  {store.profile?.username}
+-                </button>
+-              )}
+-            </div>
+-          </div>
+-        </div>
+-      </div>
+-
+-      <div class="container">
+-        <div class="row">
+-          <div class="col-xs-12 col-md-10 offset-md-1">
+-            <div class="articles-toggle">
+-              <ul class="nav nav-pills outline-active">
+-                <li class="nav-item">
+-                  <NavLink
+-                    class="nav-link"
+-                    active={location().includes("/favorites") ? 0 : 1}
+-                    href={`@${props.username}`}
+-                  >
+-                    My Articles
+-                  </NavLink>
+-                </li>
+-
+-                <li class="nav-item">
+-                  <NavLink
+-                    class="nav-link"
+-                    active={location().includes("/favorites")}
+-                    href={`@${props.username}/favorites`}
+-                  >
+-                    Favorited Articles
+-                  </NavLink>
+-                </li>
+-              </ul>
+-            </div>
+-
+-            <ArticleList
+-              articles={Object.values(store.articles)}
+-              totalPagesCount={store.totalPagesCount}
+-              onSetPage={handleSetPage}
+-            />
+-          </div>
+-        </div>
+-      </div>
+-    </div>
+-  );
+-};
+diff --git a/src/pages/Profile/Profile.tsx b/src/pages/Profile/Profile.tsx
+new file mode 100644
+index 0000000..5b14e5f
+--- /dev/null
++++ b/src/pages/Profile/Profile.tsx
+@@ -0,0 +1,98 @@
++import { Show, useContext } from "solid-js";
++import { StoreContext, RouterContext } from "../../store";
++import NavLink from "../../components/NavLink";
++import ArticleList from "../../components/ArticleList";
++
++export default function Profile(props: { username: string }) {
++  const [store, { unfollow, follow }] = useContext(StoreContext),
++    { location } = useContext(RouterContext),
++
++    isUser = () => props.username === store.currentUser()?.username;
++
++  return (
++    <div class="profile-page">
++      <div class="user-info">
++        <div class="container">
++          <div class="row">
++            <div class="col-xs-12 col-md-10 offset-md-1">
++              <img src={store.profile()?.image ?? undefined} class="user-img" alt="" />
++              <h4 textContent={props.username} />
++              <p>{store.profile()?.bio}</p>
++              {isUser() && (
++                <NavLink route="settings" class="btn btn-sm btn-outline-secondary action-btn">
++                  <i class="ion-gear-a" /> Edit Profile Settings
++                </NavLink>
++              )}
++              {/* One button whose click read store.profile() became two: reading the profile
++                  memo in the handler is reported as an unhandled failure (EVENT_REJECTS). */}
++              {store.token() && !isUser() && (
++                <Show
++                  when={store.profile()?.following}
++                  fallback={
++                    <button
++                      class="btn btn-sm action-btn btn-outline-secondary"
++                      onClick={ev => {
++                        ev.preventDefault();
++                        const name = props.username;
++                        follow(name);
++                      }}
++                    >
++                      <i class="ion-plus-round" /> Follow {store.profile()?.username}
++                    </button>
++                  }
++                >
++                  <button
++                    class="btn btn-sm action-btn btn-secondary"
++                    onClick={ev => {
++                      ev.preventDefault();
++                      const name = props.username;
++                      unfollow(name);
++                    }}
++                  >
++                    <i class="ion-plus-round" /> Unfollow {store.profile()?.username}
++                  </button>
++                </Show>
++              )}
++            </div>
++          </div>
++        </div>
++      </div>
++
++      <div class="container">
++        <div class="row">
++          <div class="col-xs-12 col-md-10 offset-md-1">
++            <div class="articles-toggle">
++              <ul class="nav nav-pills outline-active">
++                <li class="nav-item">
++                  <NavLink
++                    class="nav-link"
++                    active={location().includes("/favorites") ? 0 : 1}
++                    href={`@${props.username}`}
++                  >
++                    My Articles
++                  </NavLink>
++                </li>
++
++                <li class="nav-item">
++                  <NavLink
++                    class="nav-link"
++                    active={location().includes("/favorites")}
++                    href={`@${props.username}/favorites`}
++                  >
++                    Favorited Articles
++                  </NavLink>
++                </li>
++              </ul>
++            </div>
++
++            <ArticleList
++              articles={Object.values(store.articles())}
++              totalPagesCount={store.totalPagesCount()}
++              // Was onSetPage={handleSetPage} (setPage + loadArticles() with no predicate, as here).
++            />
++          </div>
++        </div>
++      </div>
++    </div>
++  );
++}
+diff --git a/src/pages/Profile/index.js b/src/pages/Profile/index.js
+deleted file mode 100644
+index a9c557a..0000000
+--- a/src/pages/Profile/index.js
++++ /dev/null
+@@ -1,17 +0,0 @@
+-import { createComputed, lazy } from "solid-js";
+-import { useStore, useRouter } from "../../store";
+-const Profile = lazy(() => import("./Profile"));
+-
+-export default function (props) {
+-  const [, { loadProfile, loadArticles }] = useStore(),
+-    { location } = useRouter();
+-  createComputed(() => props.routeName === "profile" && loadProfile(props.params[0]));
+-  createComputed(
+-    () =>
+-    props.routeName === "profile" &&
+-      (location().includes("/favorites")
+-        ? loadArticles({ favoritedBy: props.params[0] })
+-        : loadArticles({ author: props.params[0] }))
+-  );
+-  return <Profile username={props.params[0]} />;
+-}
+diff --git a/src/pages/Profile/index.tsx b/src/pages/Profile/index.tsx
+new file mode 100644
+index 0000000..3467099
+--- /dev/null
++++ b/src/pages/Profile/index.tsx
+@@ -0,0 +1,26 @@
++import { createEffect, useContext } from "solid-js";
++import { StoreContext, RouterContext } from "../../store";
++import Profile from "./Profile"; // was lazy() (repro 10)
++
++export default function ProfileIndex(props: { params: (string | undefined)[]; routeName: string }) {
++  const [, { loadProfile, loadArticles }] = useContext(StoreContext),
++    { location } = useContext(RouterContext);
++  // Both were createComputed calls that wrote the store's sources.
++  createEffect(
++    () => (props.routeName === "profile" ? props.params[0] : undefined),
++    username => {
++      if (username) loadProfile(username);
++    }
++  );
++  createEffect(
++    () => {
++      if (props.routeName !== "profile") return undefined;
++      const username = props.params[0];
++      return location().includes("/favorites") ? { favoritedBy: username } : { author: username };
++    },
++    predicate => {
++      if (predicate) loadArticles(predicate);
++    }
++  );
++  return <Profile username={props.params[0] ?? ""} />;
++}
+diff --git a/src/pages/Settings.js b/src/pages/Settings.tsx
+similarity index 55%
+rename from src/pages/Settings.js
+rename to src/pages/Settings.tsx
+index 584e34c..999ffde 100644
+--- a/src/pages/Settings.js
++++ b/src/pages/Settings.tsx
+@@ -1,107 +1,149 @@
+-import { useStore } from "../store";
+-import ListErrors from "../components/ListErrors";
+-import { createStore } from "solid-js/store";
+-
+-export default () => {
+-  const [store, { logout, updateUser }] = useStore(),
+-    [state, setState] = createStore({
+-      image: store.currentUser.image || "",
+-      username: store.currentUser.username,
+-      bio: store.currentUser.bio || "",
+-      email: store.currentUser.email,
+-      password: ""
+-    }),
+-    updateState = field => ev => setState(field, ev.target.value),
+-    submitForm = ev => {
+-      ev.preventDefault();
+-      const user = Object.assign({}, state);
+-      if (!user.password) delete user.password;
+-      if (!user.image) delete user.image;
+-      setState({ updatingUser: true });
+-      updateUser(user)
+-        .then(() => (location.hash = `/@${user.username}`))
+-        .catch(errors => setState({ errors }))
+-        .finally(() => setState({ updatingUser: false }));
+-    };
+-
+-  return (
+-    <div class="settings-page">
+-      <div class="container page">
+-        <div class="row">
+-          <div class="col-md-6 offset-md-3 col-xs-12">
+-            <h1 class="text-xs-center">Your Settings</h1>
+-            <ListErrors errors={state.errors} />
+-            <form onSubmit={submitForm}>
+-              <fieldset>
+-                <fieldset class="form-group">
+-                  <input
+-                    class="form-control"
+-                    type="text"
+-                    placeholder="URL of profile picture"
+-                    value={state.image}
+-                    onChange={updateState("image")}
+-                    disabled={state.updatingUser}
+-                  />
+-                </fieldset>
+-                <fieldset class="form-group">
+-                  <input
+-                    class="form-control form-control-lg"
+-                    type="text"
+-                    placeholder="Your Name"
+-                    value={state.username}
+-                    onChange={updateState("username")}
+-                    disabled={state.updatingUser}
+-                  />
+-                </fieldset>
+-                <fieldset class="form-group">
+-                  <textarea
+-                    class="form-control form-control-lg"
+-                    rows="8"
+-                    placeholder="Short bio about you"
+-                    value={state.bio}
+-                    onChange={updateState("bio")}
+-                    disabled={state.updatingUser}
+-                  ></textarea>
+-                </fieldset>
+-                <fieldset class="form-group">
+-                  <input
+-                    class="form-control form-control-lg"
+-                    type="text"
+-                    placeholder="Email"
+-                    value={state.email}
+-                    onChange={updateState("email")}
+-                    disabled={state.updatingUser}
+-                  />
+-                </fieldset>
+-                <fieldset class="form-group">
+-                  <input
+-                    class="form-control form-control-lg"
+-                    type="password"
+-                    placeholder="Password"
+-                    value={state.password}
+-                    onChange={updateState("password")}
+-                    disabled={state.updatingUser}
+-                  />
+-                </fieldset>
+-                <button
+-                  class="btn btn-lg btn-primary pull-xs-right"
+-                  type="submit"
+-                  disabled={state.updatingUser}
+-                >
+-                  Update Settings
+-                </button>
+-              </fieldset>
+-            </form>
+-            <hr />
+-            <button
+-              class="btn btn-outline-danger"
+-              onClick={() => (logout(), (location.hash = "/"))}
+-            >
+-              Or click here to logout.
+-            </button>
+-          </div>
+-        </div>
+-      </div>
+-    </div>
+-  );
+-};
++import { createEffect, createStore, useContext } from "solid-js";
++import { StoreContext } from "../store";
++import ListErrors from "../components/ListErrors";
++import { isErrors, type Errors, type UserUpdate } from "../types";
++
++type Field = "image" | "username" | "bio" | "email" | "password";
++
++export default function Settings() {
++  const [store, { logout, updateUser }] = useContext(StoreContext),
++    [state, setState] = createStore<{
++      image: string;
++      username: string;
++      bio: string;
++      email: string;
++      password: string;
++      updatingUser?: boolean;
++      errors?: Errors;
++    }>({ image: "", username: "", bio: "", email: "", password: "" }),
++    updateState = (field: Field, ev: Event & { currentTarget: HTMLInputElement | HTMLTextAreaElement }) => {
++      const value = ev.currentTarget.value;
++      setState(s => {
++        s[field] = value;
++      });
++    },
++    submitForm = async (ev: SubmitEvent) => {
++      ev.preventDefault();
++      // Was Object.assign({}, state): copying a store is typed as copying its Source.
++      const user: UserUpdate = {
++        image: state.image,
++        username: state.username,
++        bio: state.bio,
++        email: state.email,
++        password: state.password
++      };
++      if (!user.password) delete user.password;
++      if (!user.image) delete user.image;
++      setState(s => {
++        s.updatingUser = true;
++      });
++      try {
++        await updateUser(user);
++        location.hash = `/@${user.username}`;
++      } catch (errors) {
++        setState(s => {
++          s.errors = isErrors(errors) ? errors : { error: [String(errors)] };
++        });
++      } finally {
++        setState(s => {
++          s.updatingUser = false;
++        });
++      }
++    };
++
++  // The form was initialised from store.currentUser in the component body (a setup read);
++  // untrack() has no native lowering, so an effect copies the loaded user into the form.
++  createEffect(
++    () => store.currentUser(),
++    user => {
++      if (user)
++        setState(s => {
++          s.image = user.image || "";
++          s.username = user.username;
++          s.bio = user.bio || "";
++          s.email = user.email;
++        });
++    }
++  );
++
++  return (
++    <div class="settings-page">
++      <div class="container page">
++        <div class="row">
++          <div class="col-md-6 offset-md-3 col-xs-12">
++            <h1 class="text-xs-center">Your Settings</h1>
++            <ListErrors errors={state.errors} />
++            <form onSubmit={submitForm}>
++              <fieldset>
++                <fieldset class="form-group">
++                  <input
++                    class="form-control"
++                    type="text"
++                    placeholder="URL of profile picture"
++                    value={state.image}
++                    onChange={e => updateState("image", e)}
++                    disabled={state.updatingUser}
++                  />
++                </fieldset>
++                <fieldset class="form-group">
++                  <input
++                    class="form-control form-control-lg"
++                    type="text"
++                    placeholder="Your Name"
++                    value={state.username}
++                    onChange={e => updateState("username", e)}
++                    disabled={state.updatingUser}
++                  />
++                </fieldset>
++                <fieldset class="form-group">
++                  <textarea
++                    class="form-control form-control-lg"
++                    rows="8"
++                    placeholder="Short bio about you"
++                    value={state.bio}
++                    onChange={e => updateState("bio", e)}
++                    disabled={state.updatingUser}
++                  ></textarea>
++                </fieldset>
++                <fieldset class="form-group">
++                  <input
++                    class="form-control form-control-lg"
++                    type="text"
++                    placeholder="Email"
++                    value={state.email}
++                    onChange={e => updateState("email", e)}
++                    disabled={state.updatingUser}
++                  />
++                </fieldset>
++                <fieldset class="form-group">
++                  <input
++                    class="form-control form-control-lg"
++                    type="password"
++                    placeholder="Password"
++                    value={state.password}
++                    onChange={e => updateState("password", e)}
++                    disabled={state.updatingUser}
++                  />
++                </fieldset>
++                <button
++                  class="btn btn-lg btn-primary pull-xs-right"
++                  type="submit"
++                  disabled={state.updatingUser}
++                >
++                  Update Settings
++                </button>
++              </fieldset>
++            </form>
++            <hr />
++            <button
++              class="btn btn-outline-danger"
++              onClick={() => (logout(), (location.hash = "/"))}
++            >
++              Or click here to logout.
++            </button>
++          </div>
++        </div>
++      </div>
++    </div>
++  );
++}
+diff --git a/src/store/createAgent.js b/src/store/createAgent.js
+deleted file mode 100644
+index ea5b097..0000000
+--- a/src/store/createAgent.js
++++ /dev/null
+@@ -1,78 +0,0 @@
+-const API_ROOT = "https://api.realworld.io/api";
+-
+-const encode = encodeURIComponent;
+-
+-export default function createAgent([state, actions]) {
+-  async function send(method, url, data, resKey) {
+-    const headers = {},
+-      opts = { method, headers };
+-
+-    if (data !== undefined) {
+-      headers["Content-Type"] = "application/json";
+-      opts.body = JSON.stringify(data);
+-    }
+-
+-    if (state.token) headers["Authorization"] = `Token ${state.token}`;
+-
+-    try {
+-      const response = await fetch(API_ROOT + url, opts);
+-      const json = await response.json();
+-      return resKey ? json[resKey] : json;
+-    } catch (err) {
+-      if (err && err.response && err.response.status === 401) {
+-        actions.logout();
+-      }
+-      return err;
+-    }
+-  }
+-
+-  const Auth = {
+-    current: () => send("get", "/user", undefined, "user"),
+-    login: (email, password) => send("post", "/users/login", { user: { email, password } }),
+-    register: (username, email, password) =>
+-      send("post", "/users", { user: { username, email, password } }),
+-    save: user => send("put", "/user", { user })
+-  };
+-
+-  const Tags = {
+-    getAll: () => send("get", "/tags", undefined, "tags")
+-  };
+-
+-  const limit = (count, p) => `limit=${count}&offset=${p ? p * count : 0}`;
+-  const omitSlug = article => Object.assign({}, article, { slug: undefined });
+-
+-  const Articles = {
+-    all: (page, lim = 10) => send("get", `/articles?${limit(lim, page)}`),
+-    byAuthor: (author, page) => send("get", `/articles?author=${encode(author)}&${limit(5, page)}`),
+-    byTag: (tag, page, lim = 10) => send("get", `/articles?tag=${encode(tag)}&${limit(lim, page)}`),
+-    del: slug => send("delete", `/articles/${slug}`),
+-    favorite: slug => send("post", `/articles/${slug}/favorite`),
+-    favoritedBy: (author, page) =>
+-      send("get", `/articles?favorited=${encode(author)}&${limit(5, page)}`),
+-    feed: () => send("get", "/articles/feed?limit=10&offset=0"),
+-    get: slug => send("get", `/articles/${slug}`, undefined, "article"),
+-    unfavorite: slug => send("delete", `/articles/${slug}/favorite`),
+-    update: article => send("put", `/articles/${article.slug}`, { article: omitSlug(article) }),
+-    create: article => send("post", "/articles", { article })
+-  };
+-
+-  const Comments = {
+-    create: (slug, comment) => send("post", `/articles/${slug}/comments`, { comment }),
+-    delete: (slug, commentId) => send("delete", `/articles/${slug}/comments/${commentId}`),
+-    forArticle: slug => send("get", `/articles/${slug}/comments`, undefined, "comments")
+-  };
+-
+-  const Profile = {
+-    follow: username => send("post", `/profiles/${username}/follow`),
+-    get: username => send("get", `/profiles/${username}`, undefined, "profile"),
+-    unfollow: username => send("delete", `/profiles/${username}/follow`)
+-  };
+-
+-  return {
+-    Articles,
+-    Auth,
+-    Comments,
+-    Profile,
+-    Tags
+-  };
+-}
+diff --git a/src/store/createAgent.ts b/src/store/createAgent.ts
+new file mode 100644
+index 0000000..b41dde4
+--- /dev/null
++++ b/src/store/createAgent.ts
+@@ -0,0 +1,102 @@
++import type { Article, ArticleDraft, Comment, Errors, Profile, User, UserUpdate } from "../types";
++
++const API_ROOT = "https://api.realworld.io/api";
++
++const encode = encodeURIComponent;
++
++export interface ArticlesPage {
++  articles: Article[];
++  articlesCount: number;
++}
++export type Result<K extends string, T> = { [P in K]: T } & { errors?: Errors };
++
++// `session` is a plain (non-reactive) mirror of the token: a Solid 1 resource fetcher read
++// state.token untracked; reading the token signal here would make every fetching memo depend on it.
++export default function createAgent(
++  session: { token: string | null | undefined },
++  setToken: (token: undefined) => void
++) {
++  async function send<T>(method: string, url: string, data?: unknown, resKey?: string): Promise<T> {
++    const headers: Record<string, string> = {},
++      opts: RequestInit = { method, headers };
++
++    if (data !== undefined) {
++      headers["Content-Type"] = "application/json";
++      opts.body = JSON.stringify(data);
++    }
++
++    if (session.token) headers["Authorization"] = `Token ${session.token}`;
++
++    try {
++      const response = await fetch(API_ROOT + url, opts);
++      const json = await response.json();
++      return resKey ? json[resKey] : json;
++    } catch (err) {
++      if (err && (err as { response?: Response }).response?.status === 401) {
++        session.token = undefined;
++        setToken(undefined);
++      }
++      // The original returns the error as the response value.
++      return err as T;
++    }
++  }
++
++  const Auth = {
++    current: () => send<User>("get", "/user", undefined, "user"),
++    login: (email: string, password: string) =>
++      send<Result<"user", User>>("post", "/users/login", { user: { email, password } }),
++    register: (username: string, email: string, password: string) =>
++      send<Result<"user", User>>("post", "/users", { user: { username, email, password } }),
++    save: (user: UserUpdate) => send<Result<"user", User>>("put", "/user", { user })
++  };
++
++  const Tags = {
++    getAll: () => send<string[]>("get", "/tags", undefined, "tags")
++  };
++
++  const limit = (count: number, p?: number) => `limit=${count}&offset=${p ? p * count : 0}`;
++  const omitSlug = (article: ArticleDraft) => Object.assign({}, article, { slug: undefined });
++
++  const Articles = {
++    all: (page: number, lim = 10) => send<ArticlesPage>("get", `/articles?${limit(lim, page)}`),
++    byAuthor: (author: string, page: number) =>
++      send<ArticlesPage>("get", `/articles?author=${encode(author)}&${limit(5, page)}`),
++    byTag: (tag: string, page: number, lim = 10) =>
++      send<ArticlesPage>("get", `/articles?tag=${encode(tag)}&${limit(lim, page)}`),
++    del: (slug: string) => send<{ errors?: Errors }>("delete", `/articles/${slug}`),
++    favorite: (slug: string) => send<Result<"article", Article>>("post", `/articles/${slug}/favorite`),
++    favoritedBy: (author: string, page: number) =>
++      send<ArticlesPage>("get", `/articles?favorited=${encode(author)}&${limit(5, page)}`),
++    feed: () => send<ArticlesPage>("get", "/articles/feed?limit=10&offset=0"),
++    get: (slug: string) => send<Article>("get", `/articles/${slug}`, undefined, "article"),
++    unfavorite: (slug: string) => send<Result<"article", Article>>("delete", `/articles/${slug}/favorite`),
++    update: (article: ArticleDraft) =>
++      send<Result<"article", Article>>("put", `/articles/${article.slug}`, { article: omitSlug(article) }),
++    create: (article: ArticleDraft) => send<Result<"article", Article>>("post", "/articles", { article })
++  };
++
++  const Comments = {
++    create: (slug: string, comment: { body: string }) =>
++      send<Result<"comment", Comment>>("post", `/articles/${slug}/comments`, { comment }),
++    delete: (slug: string, commentId: number) =>
++      send<{ errors?: Errors }>("delete", `/articles/${slug}/comments/${commentId}`),
++    forArticle: (slug: string) => send<Comment[]>("get", `/articles/${slug}/comments`, undefined, "comments")
++  };
++
++  const Profile = {
++    follow: (username: string) => send<Result<"profile", Profile>>("post", `/profiles/${username}/follow`),
++    get: (username: string) => send<Profile>("get", `/profiles/${username}`, undefined, "profile"),
++    unfollow: (username: string) =>
++      send<Result<"profile", Profile>>("delete", `/profiles/${username}/follow`)
++  };
++
++  return {
++    Articles,
++    Auth,
++    Comments,
++    Profile,
++    Tags
++  };
++}
++
++export type Agent = ReturnType<typeof createAgent>;
+diff --git a/src/store/createArticles.js b/src/store/createArticles.js
+deleted file mode 100644
+index 1bf7813..0000000
+--- a/src/store/createArticles.js
++++ /dev/null
+@@ -1,102 +0,0 @@
+-import { createResource, createSignal } from "solid-js";
+-const LIMIT = 10;
+-
+-export default function createArticles(agent, actions, state, setState) {
+-  const [articleSource, setArticleSource] = createSignal();
+-  const [articles] = createResource(
+-    articleSource,
+-    (args, { value }) => {
+-      if (args[0] === "articles") {
+-        return $req(args[1]).then(({ articles, articlesCount }) => {
+-          queueMicrotask(() => setState({ totalPagesCount: Math.ceil(articlesCount / LIMIT) }));
+-          return articles.reduce((memo, article) => {
+-            memo[article.slug] = article;
+-            return memo;
+-          }, {});
+-        });
+-      }
+-      const article = state.articles[args[1]];
+-      if (article) return value;
+-      return agent.Articles.get(args[1]).then((article) => ({ ...value, [args[1]]: article }));
+-    },
+-    { initialValue: {} }
+-  );
+-
+-  function $req(predicate) {
+-    if (predicate.myFeed) return agent.Articles.feed(state.page, LIMIT);
+-    if (predicate.favoritedBy)
+-      return agent.Articles.favoritedBy(predicate.favoritedBy, state.page, LIMIT);
+-    if (predicate.tag) return agent.Articles.byTag(predicate.tag, state.page, LIMIT);
+-    if (predicate.author) return agent.Articles.byAuthor(predicate.author, state.page, LIMIT);
+-    return agent.Articles.all(state.page, LIMIT, predicate);
+-  }
+-
+-  Object.assign(actions, {
+-    setPage: (page) => setState({ page }),
+-    loadArticles(predicate) {
+-      setArticleSource(["articles", predicate]);
+-    },
+-    loadArticle(slug) {
+-      setArticleSource(["article", slug]);
+-    },
+-    async makeFavorite(slug) {
+-      const article = state.articles[slug];
+-      if (article && !article.favorited) {
+-        setState("articles", slug, (s) => ({
+-          favorited: true,
+-          favoritesCount: s.favoritesCount + 1
+-        }));
+-        try {
+-          await agent.Articles.favorite(slug);
+-        } catch (err) {
+-          setState("articles", slug, (s) => ({
+-            favorited: false,
+-            favoritesCount: s.favoritesCount - 1
+-          }));
+-          throw err;
+-        }
+-      }
+-    },
+-    async unmakeFavorite(slug) {
+-      const article = state.articles[slug];
+-      if (article && article.favorited) {
+-        setState("articles", slug, (s) => ({
+-          favorited: false,
+-          favoritesCount: s.favoritesCount - 1
+-        }));
+-        try {
+-          await agent.Articles.unfavorite(slug);
+-        } catch (err) {
+-          setState("articles", slug, (s) => ({
+-            favorited: true,
+-            favoritesCount: s.favoritesCount + 1
+-          }));
+-          throw err;
+-        }
+-      }
+-    },
+-    async createArticle(newArticle) {
+-      const { article, errors } = await agent.Articles.create(newArticle);
+-      if (errors) throw errors;
+-      setState("articles", { [article.slug]: article });
+-      return article;
+-    },
+-    async updateArticle(data) {
+-      const { article, errors } = await agent.Articles.update(data);
+-      if (errors) throw errors;
+-      setState("articles", { [article.slug]: article });
+-      return article;
+-    },
+-    async deleteArticle(slug) {
+-      const article = state.articles[slug];
+-      setState("articles", { [slug]: undefined });
+-      try {
+-        await agent.Articles.del(slug);
+-      } catch (err) {
+-        setState("articles", { [slug]: article });
+-        throw err;
+-      }
+-    }
+-  });
+-  return articles;
+-}
+diff --git a/src/store/createArticles.ts b/src/store/createArticles.ts
+new file mode 100644
+index 0000000..0b8205f
+--- /dev/null
++++ b/src/store/createArticles.ts
+@@ -0,0 +1,98 @@
++import { action, createMemo, createSignal, refresh } from "solid-js";
++import type { Agent, Result } from "./createAgent";
++import type { Article, ArticleDraft, Predicate } from "../types";
++export const LIMIT = 10;
++
++interface ArticlesValue {
++  map: Record<string, Article>;
++  count: number;
++}
++type Source = ["articles", Predicate | undefined] | ["article", string];
++
++export default function createArticles(agent: Agent) {
++  // New: the last failed action, shown by App. A catch that writes a signal declared here counts
++  // as handling; a setter received as a parameter is reported as CATCH_SWALLOWS.
++  const [error, setError] = createSignal<string | undefined>(undefined);
++  const [page, setPage] = createSignal(0);
++  const [articleSource, setArticleSource] = createSignal<Source | undefined>(undefined);
++  // Was createResource(articleSource, fetcher, { initialValue: {} }); the fetcher's previous
++  // value is the memo's previous value.
++  const value = createMemo((prev?: ArticlesValue) => {
++    const current = prev ?? { map: {}, count: 0 };
++    const args = articleSource();
++    if (!args) return current;
++    if (args[0] === "articles") {
++      return $req(args[1] ?? {}, page()).then(({ articles, articlesCount }) => ({
++        map: Object.fromEntries(articles.map(article => [article.slug, article])),
++        count: articlesCount
++      }));
++    }
++    const slug = args[1];
++    if (current.map[slug]) return current;
++    return agent.Articles.get(slug).then(article => ({ ...current, map: { ...current.map, [slug]: article } }));
++  });
++  const articles = createMemo(() => value().map);
++  const totalPagesCount = createMemo(() => Math.ceil(value().count / LIMIT));
++
++  function $req(predicate: Predicate, page: number) {
++    if (predicate.myFeed) return agent.Articles.feed();
++    if (predicate.favoritedBy) return agent.Articles.favoritedBy(predicate.favoritedBy, page);
++    if (predicate.tag) return agent.Articles.byTag(predicate.tag, page, LIMIT);
++    if (predicate.author) return agent.Articles.byAuthor(predicate.author, page);
++    return agent.Articles.all(page, LIMIT);
++  }
++
++  // The Solid 1 actions wrote optimistic values through the store into the resource value
++  // (and reverted on failure). A read-only memo cannot be written, so each action now waits for
++  // the server and refreshes the memo.
++  const actions = {
++    setPage,
++    loadArticles: action(function* (predicate?: Predicate) {
++      setArticleSource(["articles", predicate]);
++    }),
++    loadArticle: action(function* (slug: string) {
++      setArticleSource(["article", slug]);
++    }),
++    // The caller (ArticlePreview) decides between favorite and unfavorite from the article it shows.
++    makeFavorite: action(function* (slug: string) {
++      setError(undefined);
++      try {
++        yield agent.Articles.favorite(slug);
++        refresh(value);
++      } catch (err) {
++        setError("Could not update the favorite.");
++      }
++    }),
++    unmakeFavorite: action(function* (slug: string) {
++      setError(undefined);
++      try {
++        yield agent.Articles.unfavorite(slug);
++        refresh(value);
++      } catch (err) {
++        setError("Could not update the favorite.");
++      }
++    }),
++    createArticle: action(function* (newArticle: ArticleDraft) {
++      const { article, errors }: Result<"article", Article> = yield agent.Articles.create(newArticle);
++      if (errors) throw errors;
++      return article;
++    }),
++    updateArticle: action(function* (data: ArticleDraft) {
++      const { article, errors }: Result<"article", Article> = yield agent.Articles.update(data);
++      if (errors) throw errors;
++      refresh(value);
++      return article;
++    }),
++    deleteArticle: action(function* (slug: string) {
++      setError(undefined);
++      try {
++        yield agent.Articles.del(slug);
++        refresh(value);
++        location.hash = "/";
++      } catch (err) {
++        setError("Could not delete the article.");
++      }
++    })
++  };
++  return { error, articles, totalPagesCount, page, actions };
++}
+diff --git a/src/store/createAuth.js b/src/store/createAuth.js
+deleted file mode 100644
+index cb342d4..0000000
+--- a/src/store/createAuth.js
++++ /dev/null
+@@ -1,33 +0,0 @@
+-import { createSignal, createResource, batch } from "solid-js";
+-
+-export default function createAuth(agent, actions, setState) {
+-  const [loggedIn, setLoggedIn] = createSignal(false),
+-    [currentUser, { mutate }] = createResource(loggedIn, agent.Auth.current);
+-  Object.assign(actions, {
+-    pullUser: () => setLoggedIn(true),
+-    async login(email, password) {
+-      const { user, errors } = await agent.Auth.login(email, password);
+-      if (errors) throw errors;
+-      actions.setToken(user.token);
+-      setLoggedIn(true);
+-    },
+-    async register(username, email, password) {
+-      const { user, errors } = await agent.Auth.register(username, email, password);
+-      if (errors) throw errors;
+-      actions.setToken(user.token);
+-      setLoggedIn(true);
+-    },
+-    logout() {
+-      batch(() => {
+-        setState({ token: undefined });
+-        mutate(undefined);
+-      })
+-    },
+-    async updateUser(newUser) {
+-      const { user, errors } = await agent.Auth.save(newUser);
+-      if (errors) throw errors;
+-      mutate(user);
+-    }
+-  });
+-  return currentUser;
+-}
+diff --git a/src/store/createAuth.ts b/src/store/createAuth.ts
+new file mode 100644
+index 0000000..3e31289
+--- /dev/null
++++ b/src/store/createAuth.ts
+@@ -0,0 +1,39 @@
++import { action, createMemo, refresh } from "solid-js";
++import type { Accessor, Setter } from "solid-js";
++import type { Agent, Result } from "./createAgent";
++import type { User, UserUpdate } from "../types";
++
++export default function createAuth(
++  agent: Agent,
++  session: { token: string | null | undefined },
++  token: Accessor<string | null | undefined>,
++  setToken: Setter<string | null | undefined>
++) {
++  // Was createResource(loggedIn, agent.Auth.current) + mutate(); keyed on the token now. The
++  // pullUser()/loggedIn signal is gone: App used to write it from its component body.
++  const currentUser = createMemo(() => (token() ? agent.Auth.current() : undefined));
++  const actions = {
++    login: action(function* (email: string, password: string) {
++      const { user, errors }: Result<"user", User> = yield agent.Auth.login(email, password);
++      if (errors) throw errors;
++      session.token = user.token;
++      setToken(user.token);
++    }),
++    register: action(function* (username: string, email: string, password: string) {
++      const { user, errors }: Result<"user", User> = yield agent.Auth.register(username, email, password);
++      if (errors) throw errors;
++      session.token = user.token;
++      setToken(user.token);
++    }),
++    logout: action(function* () {
++      session.token = undefined;
++      setToken(undefined);
++    }),
++    updateUser: action(function* (newUser: UserUpdate) {
++      const { errors }: Result<"user", User> = yield agent.Auth.save(newUser);
++      if (errors) throw errors;
++      refresh(currentUser);
++    })
++  };
++  return { currentUser, actions };
++}
+diff --git a/src/store/createComments.js b/src/store/createComments.js
+deleted file mode 100644
+index 9e24c2d..0000000
+--- a/src/store/createComments.js
++++ /dev/null
+@@ -1,29 +0,0 @@
+-import { createResource } from "solid-js";
+-
+-export default function createComments(agent, actions, state, setState) {
+-  const [comments, { mutate, refetch }] = createResource(
+-    () => state.articleSlug,
+-    agent.Comments.forArticle,
+-    { initialValue: [] }
+-  );
+-  Object.assign(actions, {
+-    loadComments(articleSlug, reload) {
+-      if (reload) return refetch()
+-      setState({ articleSlug });
+-    },
+-    async createComment(comment) {
+-      const { errors } = await agent.Comments.create(state.articleSlug, comment);
+-      if (errors) throw errors;
+-    },
+-    async deleteComment(id) {
+-      mutate(comments().filter((c) => c.id !== id));
+-      try {
+-        await agent.Comments.delete(state.articleSlug, id);
+-      } catch (err) {
+-        actions.loadComments(state.articleSlug);
+-        throw err;
+-      }
+-    }
+-  });
+-  return comments;
+-}
+diff --git a/src/store/createComments.ts b/src/store/createComments.ts
+new file mode 100644
+index 0000000..8d94717
+--- /dev/null
++++ b/src/store/createComments.ts
+@@ -0,0 +1,35 @@
++import { action, createMemo, createSignal, refresh } from "solid-js";
++import type { Agent, Result } from "./createAgent";
++import type { Comment } from "../types";
++
++export default function createComments(agent: Agent) {
++  // New: the last failed action, shown by App. A catch that writes a signal declared here counts
++  // as handling; a setter received as a parameter is reported as CATCH_SWALLOWS.
++  const [error, setError] = createSignal<string | undefined>(undefined);
++  const [articleSlug, setArticleSlug] = createSignal<string | undefined>(undefined);
++  const comments = createMemo(() => {
++    const slug = articleSlug();
++    return slug ? agent.Comments.forArticle(slug) : [];
++  });
++  const actions = {
++    loadComments: action(function* (slug: string, reload?: boolean) {
++      if (reload) refresh(comments);
++      else setArticleSlug(slug);
++    }),
++    createComment: action(function* (comment: { body: string }) {
++      const { errors }: Result<"comment", Comment> = yield agent.Comments.create(String(articleSlug()), comment);
++      if (errors) throw errors;
++    }),
++    // Was an optimistic mutate() of the resource; now delete, then refetch.
++    deleteComment: action(function* (id: number) {
++      setError(undefined);
++      try {
++        yield agent.Comments.delete(String(articleSlug()), id);
++        refresh(comments);
++      } catch (err) {
++        setError("Could not delete the comment.");
++      }
++    })
++  };
++  return { error, comments, articleSlug, actions };
++}
+diff --git a/src/store/createCommon.js b/src/store/createCommon.js
+deleted file mode 100644
+index 69bf3db..0000000
+--- a/src/store/createCommon.js
++++ /dev/null
+@@ -1,14 +0,0 @@
+-import { createEffect, createResource } from "solid-js";
+-
+-export default function createCommon(agent, actions, state, setState) {
+-  const [tags] = createResource(
+-    "tags",
+-    () => agent.Tags.getAll().then((tags) => tags.map((t) => t.toLowerCase())),
+-    { initialValue: [] }
+-  );
+-  createEffect(() => {
+-    state.token ? localStorage.setItem("jwt", state.token) : localStorage.removeItem("jwt");
+-  });
+-  actions.setToken = (token) => setState({ token });
+-  return tags;
+-}
+diff --git a/src/store/createCommon.ts b/src/store/createCommon.ts
+new file mode 100644
+index 0000000..9a60c6f
+--- /dev/null
++++ b/src/store/createCommon.ts
+@@ -0,0 +1,14 @@
++import { createEffect, createMemo } from "solid-js";
++import type { Accessor } from "solid-js";
++import type { Agent } from "./createAgent";
++
++export default function createCommon(agent: Agent, token: Accessor<string | null | undefined>) {
++  const tags = createMemo(() => agent.Tags.getAll().then(tags => tags.map(t => t.toLowerCase())));
++  createEffect(
++    () => token(),
++    token => {
++      token ? localStorage.setItem("jwt", token) : localStorage.removeItem("jwt");
++    }
++  );
++  return { tags };
++}
+diff --git a/src/store/createProfile.js b/src/store/createProfile.js
+deleted file mode 100644
+index 381bd7a..0000000
+--- a/src/store/createProfile.js
++++ /dev/null
+@@ -1,30 +0,0 @@
+-import { createSignal, createResource } from "solid-js";
+-
+-export default function createProfile(agent, actions, state, setState) {
+-  const [username, setUsername] = createSignal();
+-  const [profile] = createResource(username, agent.Profile.get);
+-  Object.assign(actions, {
+-    loadProfile: setUsername,
+-    async follow() {
+-      if (state.profile && !state.profile.following) {
+-        setState("profile", "following", true);
+-        try {
+-          await agent.Profile.follow(state.profile.username);
+-        } catch (err) {
+-          setState("profile", "following", false);
+-        }
+-      }
+-    },
+-    async unfollow() {
+-      if (state.profile && state.profile.following) {
+-        setState("profile", "following", false);
+-        try {
+-          await agent.Profile.unfollow(state.profile.username);
+-        } catch (err) {
+-          setState("profile", "following", true);
+-        }
+-      }
+-    }
+-  });
+-  return profile;
+-}
+diff --git a/src/store/createProfile.ts b/src/store/createProfile.ts
+new file mode 100644
+index 0000000..643cefd
+--- /dev/null
++++ b/src/store/createProfile.ts
+@@ -0,0 +1,37 @@
++import { action, createMemo, createSignal, refresh } from "solid-js";
++import type { Agent } from "./createAgent";
++
++export default function createProfile(agent: Agent) {
++  // New: the last failed action, shown by App. A catch that writes a signal declared here counts
++  // as handling; a setter received as a parameter is reported as CATCH_SWALLOWS.
++  const [error, setError] = createSignal<string | undefined>(undefined);
++  const [username, setUsername] = createSignal<string | undefined>(undefined);
++  const profile = createMemo(() => {
++    const name = username();
++    return name ? agent.Profile.get(name) : undefined;
++  });
++  // Was an optimistic write through the store, reverted (and the error swallowed) on failure;
++  // now follow, then refetch, and report a failure. Profile passes the username it shows.
++  const actions = {
++    loadProfile: setUsername,
++    follow: action(function* (name: string) {
++      setError(undefined);
++      try {
++        yield agent.Profile.follow(name);
++        refresh(profile);
++      } catch (err) {
++        setError("Could not update the follow status.");
++      }
++    }),
++    unfollow: action(function* (name: string) {
++      setError(undefined);
++      try {
++        yield agent.Profile.unfollow(name);
++        refresh(profile);
++      } catch (err) {
++        setError("Could not update the follow status.");
++      }
++    })
++  };
++  return { error, profile, actions };
++}
+diff --git a/src/store/createRouteHandler.js b/src/store/createRouteHandler.js
+deleted file mode 100644
+index 3eb30a9..0000000
+--- a/src/store/createRouteHandler.js
++++ /dev/null
+@@ -1,24 +0,0 @@
+-import { createSignal, onCleanup, useTransition } from "solid-js";
+-
+-export default function createRouteHandler(init) {
+-  const [location, setLocation] = createSignal(window.location.hash.slice(2) || init),
+-    [read, triggerParams] = createSignal(),
+-    [, start] = useTransition(),
+-    locationHandler = () => start(() => setLocation(window.location.hash.slice(2)));
+-  let params;
+-  window.addEventListener("hashchange", locationHandler);
+-  onCleanup(() => window.removeEventListener("hashchange", locationHandler));
+-  return {
+-    location,
+-    match: (name, test) => {
+-      const loc = location().split("?")[0];
+-      const match = test.exec(loc);
+-      if (match) {
+-        params = { params: match.slice(1), routeName: name };
+-        triggerParams();
+-      }
+-      return !!match;
+-    },
+-    getParams: () => (read(), params)
+-  };
+-}
+diff --git a/src/store/createRouteHandler.ts b/src/store/createRouteHandler.ts
+new file mode 100644
+index 0000000..1edefd5
+--- /dev/null
++++ b/src/store/createRouteHandler.ts
+@@ -0,0 +1,32 @@
++import { createMemo, createSignal, onCleanup } from "solid-js";
++
++// The patterns App.js passed to match(name, regex), in its Switch order. match() used to write
++// the matched params into a closure and poke a signal from inside <Match when>; the current
++// route is now a memo over the location.
++const ROUTES: [string, RegExp][] = [
++  ["editor", /^editor\/?(.*)/],
++  ["settings", /^settings/],
++  ["login", /^login/],
++  ["register", /^register/],
++  ["article", /^article\/(.*)/],
++  ["profile", /^@([^/]*)\/?(favorites)?/],
++  ["", /^#?$/]
++];
++
++export default function createRouteHandler(init: string) {
++  const [location, setLocation] = createSignal(window.location.hash.slice(2) || init),
++    locationHandler = () => setLocation(window.location.hash.slice(2));
++  window.addEventListener("hashchange", locationHandler);
++  onCleanup(() => window.removeEventListener("hashchange", locationHandler));
++  const getParams = createMemo(() => {
++    const loc = location().split("?")[0];
++    for (const [routeName, test] of ROUTES) {
++      const match = test.exec(loc);
++      if (match) return { params: match.slice(1), routeName };
++    }
++    return undefined;
++  });
++  return { location, getParams };
++}
++
++export type Router = ReturnType<typeof createRouteHandler>;
+diff --git a/src/store/index.js b/src/store/index.js
+deleted file mode 100644
+index b359e32..0000000
+--- a/src/store/index.js
++++ /dev/null
+@@ -1,60 +0,0 @@
+-import { createContext, useContext } from "solid-js";
+-import { createStore } from "solid-js/store";
+-import createAgent from "./createAgent";
+-import createArticles from "./createArticles";
+-import createAuth from "./createAuth";
+-import createCommon from "./createCommon";
+-import createComments from "./createComments";
+-import createProfile from "./createProfile";
+-import createRouteHandler from "./createRouteHandler";
+-
+-const StoreContext = createContext();
+-const RouterContext = createContext();
+-export function Provider(props) {
+-  let articles, comments, tags, profile, currentUser;
+-  const router = createRouteHandler(""),
+-    [state, setState] = createStore({
+-      get articles() {
+-        return articles();
+-      },
+-      get comments() {
+-        return comments();
+-      },
+-      get tags() {
+-        return tags();
+-      },
+-      get profile() {
+-        return profile();
+-      },
+-      get currentUser() {
+-        return currentUser();
+-      },
+-      page: 0,
+-      totalPagesCount: 0,
+-      token: localStorage.getItem("jwt"),
+-      appName: "conduit"
+-    }),
+-    actions = {},
+-    store = [state, actions],
+-    agent = createAgent(store);
+-
+-  articles = createArticles(agent, actions, state, setState);
+-  comments = createComments(agent, actions, state, setState);
+-  tags = createCommon(agent, actions, state, setState);
+-  profile = createProfile(agent, actions, state, setState);
+-  currentUser = createAuth(agent, actions, setState);
+-
+-  return (
+-    <RouterContext.Provider value={router}>
+-      <StoreContext.Provider value={store}>{props.children}</StoreContext.Provider>
+-    </RouterContext.Provider>
+-  );
+-}
+-
+-export function useStore() {
+-  return useContext(StoreContext);
+-}
+-
+-export function useRouter() {
+-  return useContext(RouterContext);
+-}
+diff --git a/src/store/index.tsx b/src/store/index.tsx
+new file mode 100644
+index 0000000..e907aca
+--- /dev/null
++++ b/src/store/index.tsx
+@@ -0,0 +1,88 @@
++import { createContext, createMemo, createSignal } from "solid-js";
++import type { Accessor, ParentProps } from "solid-js";
++import createAgent from "./createAgent";
++import createArticles from "./createArticles";
++import createAuth from "./createAuth";
++import createCommon from "./createCommon";
++import createComments from "./createComments";
++import createProfile from "./createProfile";
++import createRouteHandler from "./createRouteHandler";
++
++type Articles = ReturnType<typeof createArticles>;
++type Comments = ReturnType<typeof createComments>;
++type Profiles = ReturnType<typeof createProfile>;
++type Auth = ReturnType<typeof createAuth>;
++
++// Solid 1 kept one store whose getters read the resources (state.articles, state.currentUser, ...).
++// The values are now memos and signals, read as store.articles(), store.currentUser(), ...
++export interface Store {
++  appName: string;
++  notice: Accessor<string | undefined>;
++  token: Accessor<string | null | undefined>;
++  page: Articles["page"];
++  articles: Articles["articles"];
++  totalPagesCount: Articles["totalPagesCount"];
++  comments: Comments["comments"];
++  articleSlug: Comments["articleSlug"];
++  tags: ReturnType<typeof createCommon>["tags"];
++  profile: Profiles["profile"];
++  currentUser: Auth["currentUser"];
++}
++export type Actions = Articles["actions"] &
++  Comments["actions"] &
++  Profiles["actions"] &
++  Auth["actions"];
++export type Conduit = [Store, Actions];
++
++// useStore()/useRouter() hooks removed: consumers call useContext(StoreContext) directly.
++export const StoreContext = createContext<Conduit>();
++export const RouterContext = createContext<ReturnType<typeof createRouteHandler>>();
++
++export function Provider(props: ParentProps) {
++  const router = createRouteHandler(""),
++    saved = localStorage.getItem("jwt"),
++    [token, setToken] = createSignal<string | null | undefined>(saved),
++    session: { token: string | null | undefined } = { token: saved },
++    agent = createAgent(session, setToken);
++  // Composed here rather than in a createConduit() helper: a factory composing other factories
++  // makes every consumer's destructuring a setup read (repro 09).
++  const {
++      articles,
++      totalPagesCount,
++      page,
++      error: articlesError,
++      actions: articleActions
++    } = createArticles(agent),
++    { comments, articleSlug, error: commentsError, actions: commentActions } = createComments(agent),
++    { tags } = createCommon(agent, token),
++    { profile, error: profileError, actions: profileActions } = createProfile(agent),
++    { currentUser, actions: authActions } = createAuth(agent, session, token, setToken);
++  // New: the last failed action, shown above the page.
++  const notice = createMemo(() => articlesError() ?? commentsError() ?? profileError());
++  const store: Store = {
++      appName: "conduit",
++      notice,
++      token,
++      page,
++      articles,
++      totalPagesCount,
++      comments,
++      articleSlug,
++      tags,
++      profile,
++      currentUser
++    },
++    actions: Actions = {
++      ...articleActions,
++      ...commentActions,
++      ...profileActions,
++      ...authActions
++    },
++    conduit: Conduit = [store, actions];
++
++  return (
++    <RouterContext value={router}>
++      <StoreContext value={conduit}>{props.children}</StoreContext>
++    </RouterContext>
++  );
++}
+diff --git a/src/types.ts b/src/types.ts
+new file mode 100644
+index 0000000..1a8424e
+--- /dev/null
++++ b/src/types.ts
+@@ -0,0 +1,64 @@
++export interface Profile {
++  username: string;
++  bio: string | null;
++  image: string | null;
++  following: boolean;
++}
++
++export interface Article {
++  slug: string;
++  title: string;
++  description: string;
++  body: string;
++  tagList: string[];
++  createdAt: string;
++  updatedAt: string;
++  favorited: boolean;
++  favoritesCount: number;
++  author: Profile;
++}
++
++export interface Comment {
++  id: number;
++  body: string;
++  createdAt: string;
++  author: Profile;
++}
++
++export interface User {
++  username: string;
++  email: string;
++  bio: string | null;
++  image: string | null;
++  token: string;
++}
++
++export type Errors = Record<string, string[]>;
++
++export interface Predicate {
++  myFeed?: boolean;
++  favoritedBy?: string;
++  tag?: string;
++  author?: string;
++}
++
++export interface ArticleDraft {
++  slug?: string;
++  title?: string;
++  description?: string;
++  body?: string;
++  tagList: string[];
++}
++
++export interface UserUpdate {
++  image?: string;
++  username: string;
++  bio: string;
++  email: string;
++  password?: string;
++}
++
++// API failures are thrown as the response's `errors` object; anything else is shown as one entry.
++export function isErrors(value: unknown): value is Errors {
++  return typeof value === "object" && value !== null && !(value instanceof Error);
++}
+diff --git a/tsconfig.json b/tsconfig.json
+new file mode 100644
+index 0000000..a9c5902
+--- /dev/null
++++ b/tsconfig.json
+@@ -0,0 +1,22 @@
++{
++  "compilerOptions": {
++    "target": "ESNext",
++    "module": "ESNext",
++    "moduleResolution": "Bundler",
++    "lib": ["ESNext", "DOM"],
++    "strict": true,
++    "skipLibCheck": true,
++    "noEmit": true,
++    "jsx": "preserve",
++    "jsxImportSource": "@solidjs/web",
++    "types": ["vite/client"],
++    "plugins": [
++      {
++        "name": "ts-plugin-solid-yield",
++        "mode": "native",
++        "include": ["src/**"]
++      }
++    ]
++  },
++  "include": ["src"]
++}
+diff --git a/vite.config.ts b/vite.config.ts
+new file mode 100644
+index 0000000..1877367
+--- /dev/null
++++ b/vite.config.ts
+@@ -0,0 +1,12 @@
++import { defineConfig } from "vite";
++import solid from "@solidjs/vite-plugin";
++import solidYield from "vite-plugin-solid-yield";
++
++// SOLID_YIELD=1 builds through solid-yield's native mode (the checked lowering); otherwise this is
++// a plain Solid 2 build with Solid's own plugin only.
++const yieldBuild = process.env.SOLID_YIELD === "1";
++
++export default defineConfig({
++  plugins: [...(yieldBuild ? [solidYield({ mode: "native", include: ["src/**"] })] : []), solid()],
++  build: { outDir: yieldBuild ? "dist-yield" : "dist", sourcemap: true }
++});

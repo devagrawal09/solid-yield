@@ -1,0 +1,5 @@
+Two valid compute-phase spellings for `createEffect` are not accepted.
+Command: `ln -sfn /home/user/migrations/solid-realworld/node_modules node_modules; ./node_modules/.bin/solid-yield check .` (plain `tsc` passes).
+1. `createEffect(token, value => ...)` (a signal getter passed directly as the compute function; `src/App.tsx`): Expected 0 errors. Actual: `src/App.tsx:7:16 error TS2345: [GENERATED_TYPE] Check this operation ...` and `src/App.tsx:8:5 error TS1345: An expression of type 'void' cannot be tested for truthiness.` (the effect's value parameter is typed `void`, reported as an author type error in the effect body).
+2. `named-compute-variant.tsx.txt` (copy over `src/App.tsx`): `createEffect(predicate, p => ...)` with `const predicate = () => ...` reading signals. Actual: `src/App.tsx:12:16 error TS95000: [SUGAR_ESCAPE] Routine predicate is handed to an unknown consumer; a plain callback cannot drive it.` (and the refusal hides case 1 in the same file).
+Workaround for both: an inline arrow, `createEffect(() => token(), ...)`.

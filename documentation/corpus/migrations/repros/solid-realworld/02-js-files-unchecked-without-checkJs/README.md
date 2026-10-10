@@ -1,0 +1,4 @@
+`.js/.jsx` files selected with `allowJs` (no `checkJs`) are lowered, but TypeScript does not report semantic diagnostics for JS files, so the generated model errors inside them are never printed.
+Command: `ln -sfn /home/user/migrations/solid-realworld/node_modules node_modules; ./node_modules/.bin/solid-yield check .` (entry is .tsx; only the component is .jsx)
+Expected: `src/Counter.jsx:5:13 error TS2769: [READ_IN_SETUP] Move this read into JSX, ...` (what it reports with `"checkJs": true`).
+Actual: only `src/index.tsx:4:15 error TS2345: [FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any.` — it refers to "earlier errors" that are never printed. In an all-.jsx variant (index.jsx rendering `<Counter label="clicks" />`) the same READ_IN_SETUP produced `2 files, 0 errors`, exit 0. With `"checkJs": true` the READ_IN_SETUP is printed.

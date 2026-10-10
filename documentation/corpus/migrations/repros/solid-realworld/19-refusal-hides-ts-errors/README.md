@@ -1,0 +1,5 @@
+A file refused by the transform reports only the refusal; its ordinary TypeScript errors are not printed, and removed Solid 1 APIs are described as "no verified native lowering".
+Command: `ln -sfn /home/user/migrations/solid-realworld/node_modules node_modules; ./node_modules/.bin/solid-yield check .` and, for comparison, `./node_modules/.bin/tsc --noEmit -p .`.
+Expected: the refusal plus the file's TypeScript errors, and a message that says `createComputed` does not exist in Solid 2.
+Actual: only `src/App.tsx:1:10 error TS95000: [NATIVE_API] Solid API createComputed has no verified native lowering.` Plain tsc reports `TS2305: Module '"solid-js"' has no exported member 'createComputed'.` and `TS2552: Cannot find name 'cuont'. Did you mean 'count'?` (a real bug), neither of which the checker shows.
+In solid-realworld the unmigrated ArticleList was refused for an array-bound handler (NATIVE_HANDLER), which hid the original app's real bug: `TS2304: Cannot find name 'slug'` (a ReferenceError on every favorite click in the Solid 1 app). The same masking happened for createResource, useTransition and batch (11 NATIVE_API refusals).

@@ -1,0 +1,10 @@
+src/App.tsx:18:7 error TS2345: [FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any.
+  related: src/index.tsx:13:15: The app is rendered here. does not suspend; can fail with an unknown error; does not wait; needs an unknown context
+src/components/ChatView.tsx:108:13 error TS2345: [NATIVE_CALLBACK_FAILURE] Catch the failure inside this callback.
+src/components/ChatView.tsx:106:11 error TS2345: [NATIVE_CALLBACK_FAILURE] Catch the failure inside this callback.
+src/components/ChatView.tsx:81:23 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.
+src/components/ChatView.tsx:61:20 error TS2322: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+  related: src/components/MessageItem.tsx:50:3: The expected type comes from property 'message' which is declared here on type 'PropsInput<MessageItemProps, unknown> & NoInfer<Undeclared<PropsInput<MessageItemProps, unknown>, MessageItemProps>>'
+src/components/ChatView.tsx:16:7 error TS2345: [NATIVE_CALLBACK_FAILURE] Catch the failure inside this callback.
+src/components/ChatView.tsx:14:5 error TS2345: [NATIVE_CALLBACK_FAILURE] Catch the failure inside this callback.
+solid-yield check: 16 files, 7 errors

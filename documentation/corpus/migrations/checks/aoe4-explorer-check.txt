@@ -1,0 +1,483 @@
+/home/user/migrations/aoe4-explorer/src/App.tsx:95:27 error TS2344: Type '{ error: unknown; retry: () => void; }' does not satisfy the constraint 'PropsCheck<{ error: unknown; retry: () => void; }>'.
+  Types of property 'error' are incompatible.
+    Type 'unknown' is not assignable to type 'DeclareProp<"error">'.
+/home/user/migrations/aoe4-explorer/src/App.tsx:95:10 error TS2769: [generated] [READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive.
+/home/user/migrations/aoe4-explorer/src/App.tsx:77:53 error TS2322: Type 'unknown' is not assignable to type 'DeclareProp<"error">'.
+  related: /home/user/migrations/aoe4-explorer/src/App.tsx:95:29: The expected type comes from property 'error' which is declared here on type 'PropsInput<{ error: unknown; retry: () => void; }, unknown> & NoInfer<Undeclared<PropsInput<{ error: unknown; retry: () => void; }, unknown>, { error: unknown; retry: () => void; }>>'
+/home/user/migrations/aoe4-explorer/src/App.tsx:51:20 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.
+/home/user/migrations/aoe4-explorer/src/dev.tsx:24:10 error TS2345: [generated] [FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any.
+/home/user/migrations/aoe4-explorer/src/global.tsx:21:14 error TS95000: [MODULE_STATE] reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses
+/home/user/migrations/aoe4-explorer/src/global.tsx:20:14 error TS95000: [MODULE_STATE] reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses
+/home/user/migrations/aoe4-explorer/src/global.tsx:19:14 error TS95000: [MODULE_STATE] reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses
+/home/user/migrations/aoe4-explorer/src/global.tsx:16:14 error TS95000: [MODULE_STATE] reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses
+/home/user/migrations/aoe4-explorer/src/index.tsx:34:17 error TS95000: [generated] [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.
+/home/user/migrations/aoe4-explorer/src/routes.tsx:37:18 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.
+/home/user/migrations/aoe4-explorer/src/routes.tsx:25:18 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.
+/home/user/migrations/aoe4-explorer/src/routes.tsx:20:19 error TS2345: Argument of type 'void' is not assignable to parameter of type '() => void'.
+/home/user/migrations/aoe4-explorer/src/routes.tsx:19:20 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.
+/home/user/migrations/aoe4-explorer/src/components/Abilities.tsx:80:32 error TS2345: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+/home/user/migrations/aoe4-explorer/src/components/Abilities.tsx:30:34 error TS2532: Object is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/components/Backdrop.tsx:69:74 error TS2488: Type '"abbasid" | "ayyubids" | "byzantines" | "chinese" | "delhi" | "english" | "french" | "goldenhorde" | "hre" | "lancaster" | "japanese" | "jeannedarc" | "jindynasty" | "templar" | ... 9 more ... | undefined' must have a '[Symbol.iterator]()' method that returns an iterator.
+/home/user/migrations/aoe4-explorer/src/components/Backdrop.tsx:43:31 error TS2322: Type 'Source<"abbasid" | "ayyubids" | "byzantines" | "chinese" | "delhi" | "english" | "french" | "goldenhorde" | "hre" | "lancaster" | "japanese" | "jeannedarc" | "jindynasty" | "templar" | ... 9 more ... | undefined, never, false>' is not assignable to type '() => "abbasid" | "ayyubids" | "byzantines" | "chinese" | "delhi" | "english" | "french" | "goldenhorde" | "hre" | "lancaster" | "japanese" | "jeannedarc" | "jindynasty" | "templar" | ... 9 more ... | undefined'.
+  Type 'Source<"abbasid" | "ayyubids" | "byzantines" | "chinese" | "delhi" | "english" | "french" | "goldenhorde" | "hre" | "lancaster" | "japanese" | "jeannedarc" | "jindynasty" | "templar" | ... 9 more ... | undefined, never, false>' provides no match for the signature '(): "abbasid" | "ayyubids" | "byzantines" | "chinese" | "delhi" | "english" | "french" | "goldenhorde" | "hre" | "lancaster" | "japanese" | "jeannedarc" | "jindynasty" | "templar" | ... 9 more ... | undefined'.
+/home/user/migrations/aoe4-explorer/src/components/Backdrop.tsx:27:20 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.
+/home/user/migrations/aoe4-explorer/src/components/BuildingCard.tsx:8:14 error TS2322: [generated] [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+  related: /home/user/migrations/aoe4-explorer/src/components/Cards.tsx:23:14: [generated] The expected type comes from property 'children' which is declared here on type 'PropsInput<{ item: UnifiedItem<Item>; civ?: CivConfig | undefined; age?: number | undefined; linkType?: LinkType | undefined; onCivSelect?: ((civ: CivConfig) => void) | undefined; } & { ...; }, unknown> & NoInfer<Undeclared<...>>'
+/home/user/migrations/aoe4-explorer/src/components/Cards.tsx:89:108 error TS2339: Property 'join' does not exist on type 'Path<string[], never, false>'.
+/home/user/migrations/aoe4-explorer/src/components/Cards.tsx:60:25 error TS2339: Property 'preventDefault' does not exist on type 'never'.
+/home/user/migrations/aoe4-explorer/src/components/Cards.tsx:58:29 error TS2339: Property 'ctrlKey' does not exist on type 'never'.
+/home/user/migrations/aoe4-explorer/src/components/Cards.tsx:57:21 error TS2322: Type 'LexicalCallback<[e: never], Read<false, never>, void>' is not assignable to type '((e: MouseEvent) => void) | Source<((e: MouseEvent) => void) | undefined, never, false> | HoleProp<((e: MouseEvent) => void) | undefined, never, false, unknown> | SettledProp<...> | undefined'.
+  Type 'LexicalCallback<[e: never], Read<false, never>, void>' is not assignable to type '(e: MouseEvent) => void'.
+    Types of parameters 'e' and 'e' are incompatible.
+      Type 'MouseEvent' is not assignable to type 'never'.
+/home/user/migrations/aoe4-explorer/src/components/Cards.tsx:23:14 error TS2769: [generated] [ROW_SETUP_OP] a row routine
+/home/user/migrations/aoe4-explorer/src/components/Cards.tsx:26:133 error TS18046: 'v' is of type 'unknown'.
+/home/user/migrations/aoe4-explorer/src/components/Cards.tsx:26:130 error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'number'.
+/home/user/migrations/aoe4-explorer/src/components/Cards.tsx:26:93 error TS18046: 'v' is of type 'unknown'.
+/home/user/migrations/aoe4-explorer/src/components/Cards.tsx:26:82 error TS2345: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+/home/user/migrations/aoe4-explorer/src/components/Cards.tsx:26:75 error TS2339: Property 'reduce' does not exist on type 'Path<Item[], never, false>'.
+/home/user/migrations/aoe4-explorer/src/components/Icon.tsx:3:113 error TS2345: [FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: unknown.
+  related: /home/user/migrations/aoe4-explorer/src/routes/buildings/[id].tsx:26:17: The app is rendered here. can suspend (pending); can fail with an unknown error; does not wait; needs no context
+/home/user/migrations/aoe4-explorer/src/components/ItemIcon.tsx:22:14 error TS2345: [generated] Argument of type 'Item | UnifiedItem<Item> | undefined' is not assignable to parameter of type 'Item | UnifiedItem<Item>'.
+  Type 'undefined' is not assignable to type 'Item | UnifiedItem<Item>'.
+/home/user/migrations/aoe4-explorer/src/components/ItemIcon.tsx:22:14 error TS2345: [generated] Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+/home/user/migrations/aoe4-explorer/src/components/ItemPage.tsx:88:17 error TS2345: [FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: unknown.
+  related: /home/user/migrations/aoe4-explorer/src/routes/buildings/[id].tsx:26:17: The app is rendered here. does not suspend; can fail with an unknown error; can wait; needs no context
+/home/user/migrations/aoe4-explorer/src/components/ItemPage.tsx:54:17 error TS2345: [FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: unknown.
+  related: /home/user/migrations/aoe4-explorer/src/routes/technologies/[id].tsx:18:17: The app is rendered here. does not suspend; can fail with an unknown error; does not wait; needs no context
+/home/user/migrations/aoe4-explorer/src/components/ItemPage.tsx:192:37 error TS2532: Object is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/components/ItemPage.tsx:186:27 error TS2532: Object is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/components/ItemPage.tsx:106:7 error TS2322: [generated] [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+  related: /home/user/migrations/aoe4-explorer/src/components/ItemPage.tsx:143:7: [generated] The expected type comes from property 'children' which is declared here on type 'PropsInput<{ item: UnifiedItem<Item>; civs: ("ab" | "ay" | "by" | "ch" | "de" | "en" | "fr" | "gol" | "hr" | "hl" | "ja" | "je" | "jin" | "kt" | "mac" | "ma" | "mo" | "od" | ... 4 more ... | "zx")[]; prefix?: string | undefined; } & { ...; }, unknown> & NoInfer<Undeclared<...>>'
+/home/user/migrations/aoe4-explorer/src/components/ItemPage.tsx:24:22 error TS2322: Type 'Source<"ab" | "ay" | "by" | "ch" | "de" | "en" | "fr" | "gol" | "hr" | "hl" | "ja" | "je" | "jin" | "kt" | "mac" | "ma" | "mo" | "od" | "ot" | "ru" | "sen" | "tug" | "zx" | undefined, never, false>' is not assignable to type '"ab" | "ay" | "by" | "ch" | "de" | "en" | "fr" | "gol" | "hr" | "hl" | "ja" | "je" | "jin" | "kt" | "mac" | "ma" | "mo" | "od" | "ot" | "ru" | "sen" | "tug" | "zx" | Source<"ab" | "ay" | "by" | ... 19 more ... | "zx", never, false> | HoleProp<...> | SettledProp<...>'.
+  Type 'Source<"ab" | "ay" | "by" | "ch" | "de" | "en" | "fr" | "gol" | "hr" | "hl" | "ja" | "je" | "jin" | "kt" | "mac" | "ma" | "mo" | "od" | "ot" | "ru" | "sen" | "tug" | "zx" | undefined, never, false>' is not assignable to type 'Source<"ab" | "ay" | "by" | "ch" | "de" | "en" | "fr" | "gol" | "hr" | "hl" | "ja" | "je" | "jin" | "kt" | "mac" | "ma" | "mo" | "od" | "ot" | "ru" | "sen" | "tug" | "zx", never, false>'.
+    Type '"ab" | "ay" | "by" | "ch" | "de" | "en" | "fr" | "gol" | "hr" | "hl" | "ja" | "je" | "jin" | "kt" | "mac" | "ma" | "mo" | "od" | "ot" | "ru" | "sen" | "tug" | "zx" | undefined' is not assignable to type '"ab" | "ay" | "by" | "ch" | "de" | "en" | "fr" | "gol" | "hr" | "hl" | "ja" | "je" | "jin" | "kt" | "mac" | "ma" | "mo" | "od" | "ot" | "ru" | "sen" | "tug" | "zx"'.
+      Type 'undefined' is not assignable to type '"ab" | "ay" | "by" | "ch" | "de" | "en" | "fr" | "gol" | "hr" | "hl" | "ja" | "je" | "jin" | "kt" | "mac" | "ma" | "mo" | "od" | "ot" | "ru" | "sen" | "tug" | "zx"'.
+  related: /home/user/migrations/aoe4-explorer/src/components/CivFlag.tsx:8:35: The expected type comes from property 'abbr' which is declared here on type 'PropsInput<{ abbr: "ab" | "ay" | "by" | "ch" | "de" | "en" | "fr" | "gol" | "hr" | "hl" | "ja" | "je" | "jin" | "kt" | "mac" | "ma" | "mo" | "od" | "ot" | "ru" | "sen" | "tug" | "zx"; class?: string | undefined; }, unknown> & NoInfer<Undeclared<...>>'
+/home/user/migrations/aoe4-explorer/src/components/ItemPage.tsx:20:94 error TS2339: Property 'join' does not exist on type 'Path<string[], never, false>'.
+/home/user/migrations/aoe4-explorer/src/components/Nav.tsx:20:17 error TS2322: [generated] [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+  related: /home/user/migrations/aoe4-explorer/src/components/Nav.tsx:7:7: [generated] The expected type comes from property 'children' which is declared here on type 'PropsInput<{ href: string; } & { children?: Element; }, unknown> & NoInfer<Undeclared<PropsInput<{ href: string; } & { children?: Element; }, unknown>, { href: string; } & { ...; }>>'
+/home/user/migrations/aoe4-explorer/src/components/Nav.tsx:42:69 error TS2322: [SETTLED_PROP] Pass a ready value, or allow a pending source in this prop's type.
+  related: /home/user/migrations/aoe4-explorer/src/components/Nav.tsx:7:35: The expected type comes from property 'href' which is declared here on type 'PropsInput<{ href: string; } & { children?: Element; }, unknown> & NoInfer<Undeclared<PropsInput<{ href: string; } & { children?: Element; }, unknown>, { href: string; } & { ...; }>>'
+/home/user/migrations/aoe4-explorer/src/components/Nav.tsx:21:20 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.
+/home/user/migrations/aoe4-explorer/src/components/PatchHistory.tsx:48:75 error TS2322: Type 'unknown' is not assignable to type '"ab" | "ay" | "by" | "ch" | "de" | "en" | "fr" | "gol" | "hr" | "hl" | "ja" | "je" | "jin" | "kt" | "mac" | "ma" | "mo" | "od" | "ot" | "ru" | "sen" | "tug" | "zx" | Source<"ab" | "ay" | "by" | ... 19 more ... | "zx", never, false> | HoleProp<...> | SettledProp<...>'.
+  related: /home/user/migrations/aoe4-explorer/src/components/CivFlag.tsx:8:35: The expected type comes from property 'abbr' which is declared here on type 'PropsInput<{ abbr: "ab" | "ay" | "by" | "ch" | "de" | "en" | "fr" | "gol" | "hr" | "hl" | "ja" | "je" | "jin" | "kt" | "mac" | "ma" | "mo" | "od" | "ot" | "ru" | "sen" | "tug" | "zx"; class?: string | undefined; }, unknown> & NoInfer<Undeclared<...>>'
+/home/user/migrations/aoe4-explorer/src/components/PatchHistory.tsx:48:55 error TS2339: Property 'map' does not exist on type 'Read<false, never>'.
+/home/user/migrations/aoe4-explorer/src/components/PatchHistory.tsx:45:28 error TS2367: This comparison appears to be unintentional because the types 'Read<false, never>' and 'string' have no overlap.
+/home/user/migrations/aoe4-explorer/src/components/PatchHistory.tsx:44:28 error TS2367: This comparison appears to be unintentional because the types 'Read<false, never>' and 'string' have no overlap.
+/home/user/migrations/aoe4-explorer/src/components/PatchHistory.tsx:43:28 error TS2367: This comparison appears to be unintentional because the types 'Read<false, never>' and 'string' have no overlap.
+/home/user/migrations/aoe4-explorer/src/components/PatchHistory.tsx:42:28 error TS2367: This comparison appears to be unintentional because the types 'Read<false, never>' and 'string' have no overlap.
+/home/user/migrations/aoe4-explorer/src/components/PatchHistory.tsx:38:60 error TS18046: 'i' is of type 'unknown'.
+/home/user/migrations/aoe4-explorer/src/components/PatchHistory.tsx:7:14 error TS18046: [generated] '_state' is of type 'unknown'.
+/home/user/migrations/aoe4-explorer/src/components/PatchHistory.tsx:7:14 error TS2345: [generated] [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+/home/user/migrations/aoe4-explorer/src/components/PatchHistory.tsx:29:20 error TS2365: Operator '>' cannot be applied to types 'Object' and 'number'.
+/home/user/migrations/aoe4-explorer/src/components/PatchHistory.tsx:7:14 error TS2345: [generated] Argument of type '(CivConfig | undefined)[] | undefined' is not assignable to parameter of type 'CivConfig[] | undefined'.
+  Type '(CivConfig | undefined)[]' is not assignable to type 'CivConfig[]'.
+    Type 'CivConfig | undefined' is not assignable to type 'CivConfig'.
+      Type 'undefined' is not assignable to type 'CivConfig'.
+/home/user/migrations/aoe4-explorer/src/components/QuickNav.tsx:15:14 error TS95000: [generated] [SUGAR_READ_ARGS] A source read takes no arguments.
+/home/user/migrations/aoe4-explorer/src/components/RelatedContent.tsx:78:79 error TS2532: Object is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/components/RelatedContent.tsx:40:86 error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+/home/user/migrations/aoe4-explorer/src/components/ReportButton.tsx:29:9 warning TS95001: [NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check.
+/home/user/migrations/aoe4-explorer/src/components/ReportButton.tsx:10:20 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.
+/home/user/migrations/aoe4-explorer/src/components/Search.tsx:121:20 error TS95000: [EVENT_REJECTS] This handler can fail with unknown and nothing catches it; wrap the body in try/catch, or declare the failure.
+/home/user/migrations/aoe4-explorer/src/components/Search.tsx:162:30 error TS2345: Argument of type 'HTMLDivElement | undefined' is not assignable to parameter of type 'HTMLElement'.
+  Type 'undefined' is not assignable to type 'HTMLElement'.
+/home/user/migrations/aoe4-explorer/src/components/Search.tsx:140:35 error TS2345: Argument of type 'Path<UnifiedItem<Item>, never, false>' is not assignable to parameter of type 'UnifiedItem<Item>'.
+  Types of property 'id' are incompatible.
+    Type 'Source<string, never, false>' is not assignable to type 'string'.
+/home/user/migrations/aoe4-explorer/src/components/Search.tsx:79:23 error TS18048: 'inputRef' is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/components/Search.tsx:76:5 error TS18048: 'inputRef' is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/components/Search.tsx:68:20 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.
+/home/user/migrations/aoe4-explorer/src/components/SidebarNav.tsx:147:40 warning TS95001: [NATIVE_TYPE_UNMAPPED] Solid type JSX.HTMLAttributes has no native type mapping; the annotation is retained.
+/home/user/migrations/aoe4-explorer/src/components/SidebarNav.tsx:135:39 warning TS95001: [NATIVE_TYPE_UNMAPPED] Solid type JSX.HTMLAttributes has no native type mapping; the annotation is retained.
+/home/user/migrations/aoe4-explorer/src/components/SidebarNav.tsx:148:46 error TS2349: This expression is not callable.
+  Type 'UnnamedContext' has no call signatures.
+/home/user/migrations/aoe4-explorer/src/components/SidebarNav.tsx:147:7 error TS2503: [generated] Cannot find namespace 'JSX'.
+/home/user/migrations/aoe4-explorer/src/components/SidebarNav.tsx:136:44 error TS2349: This expression is not callable.
+  Type 'UnnamedContext' has no call signatures.
+/home/user/migrations/aoe4-explorer/src/components/SidebarNav.tsx:135:39 error TS2503: Cannot find namespace 'JSX'.
+/home/user/migrations/aoe4-explorer/src/components/SidebarNav.tsx:118:7 error TS2339: [generated] Property 'provide' does not exist on type 'UnnamedContext'.
+/home/user/migrations/aoe4-explorer/src/components/SidebarNav.tsx:115:3 error TS2322: Type '() => string' is not assignable to type 'Source<string, never, false>'.
+  related: /home/user/migrations/aoe4-explorer/src/components/SidebarNav.tsx:110:108: The expected type comes from property 'label' which is declared here on type 'TreeMenuContextProps'
+/home/user/migrations/aoe4-explorer/src/components/SidebarNav.tsx:113:18 error TS2322: Type 'undefined' is not assignable to type 'Receipt<U>'.
+/home/user/migrations/aoe4-explorer/src/components/SidebarNav.tsx:112:3 error TS2322: Type '() => boolean' is not assignable to type 'Source<boolean, never, false>'.
+  related: /home/user/migrations/aoe4-explorer/src/components/SidebarNav.tsx:110:31: The expected type comes from property 'isOpen' which is declared here on type 'TreeMenuContextProps'
+/home/user/migrations/aoe4-explorer/src/components/SidebarNav.tsx:80:66 error TS2339: Property 'name' does not exist on type 'Source<never, never, false>'.
+/home/user/migrations/aoe4-explorer/src/components/SidebarNav.tsx:15:14 error TS2322: [generated] [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+/home/user/migrations/aoe4-explorer/src/components/SidebarNav.tsx:67:68 error TS2322: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+/home/user/migrations/aoe4-explorer/src/components/SidebarNav.tsx:62:44 error TS2322: [SETTLED_PROP] Pass a ready value, or allow a pending source in this prop's type.
+  related: /home/user/migrations/aoe4-explorer/src/components/SidebarNav.tsx:118:36: The expected type comes from property 'label' which is declared here on type 'Omit<PropsInput<Omit<{ label: string; isOpen: boolean; } & { children?: Element; }, "children"> & { children: Element; }, unknown>, "children"> & { ...; }'
+/home/user/migrations/aoe4-explorer/src/components/SidebarNav.tsx:60:48 error TS2339: Property 'length' does not exist on type 'Read<false, never>'.
+/home/user/migrations/aoe4-explorer/src/components/SidebarNav.tsx:58:58 error TS2538: Type 'Read<false, never>' cannot be used as an index type.
+/home/user/migrations/aoe4-explorer/src/components/SidebarNav.tsx:53:27 error TS2322: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+/home/user/migrations/aoe4-explorer/src/components/SidebarNav.tsx:46:53 error TS2367: This comparison appears to be unintentional because the types 'string' and 'Read<false, never>' have no overlap.
+/home/user/migrations/aoe4-explorer/src/components/SidebarNav.tsx:46:32 error TS2322: [SETTLED_PROP] Pass a ready value, or allow a pending source in this prop's type.
+  related: /home/user/migrations/aoe4-explorer/src/components/SidebarNav.tsx:118:36: The expected type comes from property 'label' which is declared here on type 'Omit<PropsInput<Omit<{ label: string; isOpen: boolean; } & { children?: Element; }, "children"> & { children: Element; }, unknown>, "children"> & { ...; }'
+/home/user/migrations/aoe4-explorer/src/components/SidebarNav.tsx:16:20 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.
+/home/user/migrations/aoe4-explorer/src/components/Stats.tsx:319:14 error TS18046: [generated] '_state' is of type 'unknown'.
+/home/user/migrations/aoe4-explorer/src/components/Stats.tsx:332:48 error TS2345: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+/home/user/migrations/aoe4-explorer/src/components/Stats.tsx:319:14 error TS2345: [generated] Argument of type 'unknown' is not assignable to parameter of type 'CalculatedStats[]'.
+/home/user/migrations/aoe4-explorer/src/components/Stats.tsx:330:5 error TS2345: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+/home/user/migrations/aoe4-explorer/src/components/Stats.tsx:150:7 error TS2345: [generated] Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+/home/user/migrations/aoe4-explorer/src/components/Stats.tsx:125:41 error TS2322: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+  related: /home/user/migrations/aoe4-explorer/src/components/Stats.tsx:530:3: The expected type comes from property 'numProjectiles' which is declared here on type 'PropsInput<{ numProjectiles: Source<number, _E_multiplier, false>; baseDamage: number; }, never>'
+/home/user/migrations/aoe4-explorer/src/components/Stats.tsx:12:14 error TS2322: [generated] [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+/home/user/migrations/aoe4-explorer/src/components/Stats.tsx:44:34 error TS2322: Type 'Source<string | undefined, never, false>' is not assignable to type 'string | HoleProp<string, never, false, never> | Source<string, never, false>'.
+  Type 'Source<string | undefined, never, false>' is not assignable to type 'Source<string, never, false>'.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+  related: /home/user/migrations/aoe4-explorer/src/components/Icon.tsx:3:32: The expected type comes from property 'icon' which is declared here on type 'PropsInput<{ icon: Source<string, never, false>; class?: string | undefined; title?: string | undefined; }, never>'
+/home/user/migrations/aoe4-explorer/src/components/TableOfContents.tsx:60:21 error TS2349: This expression is not callable.
+  Type 'UnnamedContext' has no call signatures.
+/home/user/migrations/aoe4-explorer/src/components/TableOfContents.tsx:36:26 error TS2349: This expression is not callable.
+  Type 'UnnamedContext' has no call signatures.
+/home/user/migrations/aoe4-explorer/src/components/TableOfContents.tsx:21:14 error TS2339: [generated] Property 'provide' does not exist on type 'UnnamedContext'.
+/home/user/migrations/aoe4-explorer/src/components/TableOfContents.tsx:17:22 error TS2322: Type 'never[]' is not assignable to type 'Receipt<U>'.
+  The types of '[Symbol.iterator]().return' are incompatible between these types.
+    Type '((value?: any) => IteratorResult<never, any>) | undefined' is not assignable to type '(value: U) => IteratorResult<Write, U>'.
+      Type 'undefined' is not assignable to type '(value: U) => IteratorResult<Write, U>'.
+/home/user/migrations/aoe4-explorer/src/components/TableOfContents.tsx:16:3 error TS2322: Type '() => never[]' is not assignable to type 'Source<Heading[], never, false>'.
+  related: /home/user/migrations/aoe4-explorer/src/components/TableOfContents.tsx:9:3: The expected type comes from property 'headings' which is declared here on type 'TocContext'
+/home/user/migrations/aoe4-explorer/src/components/TechnologyCard.tsx:7:14 error TS2322: [generated] [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+  related: /home/user/migrations/aoe4-explorer/src/components/Cards.tsx:23:14: [generated] The expected type comes from property 'children' which is declared here on type 'PropsInput<{ item: UnifiedItem<Item>; civ?: CivConfig | undefined; age?: number | undefined; linkType?: LinkType | undefined; onCivSelect?: ((civ: CivConfig) => void) | undefined; } & { ...; }, unknown> & NoInfer<Undeclared<...>>'
+/home/user/migrations/aoe4-explorer/src/components/Toolbar.tsx:119:90 error TS2322: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+/home/user/migrations/aoe4-explorer/src/components/Toolbar.tsx:16:19 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.
+/home/user/migrations/aoe4-explorer/src/components/Tooltip.tsx:29:9 warning TS95001: [NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check.
+/home/user/migrations/aoe4-explorer/src/components/Tooltip.tsx:30:24 error TS2322: [SETTLED_PROP] Pass a ready value, or allow a pending source in this prop's type.
+/home/user/migrations/aoe4-explorer/src/components/UnitCard.tsx:43:41 error TS2339: Property 'includes' does not exist on type 'Path<string[], never, false>'.
+/home/user/migrations/aoe4-explorer/src/components/UnitCard.tsx:15:14 error TS2322: [generated] [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+  related: /home/user/migrations/aoe4-explorer/src/components/Cards.tsx:23:14: [generated] The expected type comes from property 'children' which is declared here on type 'PropsInput<{ item: UnifiedItem<Item>; civ?: CivConfig | undefined; age?: number | undefined; linkType?: LinkType | undefined; onCivSelect?: ((civ: CivConfig) => void) | undefined; } & { ...; }, unknown> & NoInfer<Undeclared<...>>'
+/home/user/migrations/aoe4-explorer/src/components/UnitCard.tsx:26:29 error TS2322: [SETTLED_PROP] Pass a ready value, or allow a pending source in this prop's type.
+  related: /home/user/migrations/aoe4-explorer/src/components/Cards.tsx:23:57: The expected type comes from property 'civ' which is declared here on type 'PropsInput<{ item: UnifiedItem<Item>; civ?: CivConfig | undefined; age?: number | undefined; linkType?: LinkType | undefined; onCivSelect?: ((civ: CivConfig) => void) | undefined; } & { ...; }, unknown> & NoInfer<Undeclared<...>>'
+/home/user/migrations/aoe4-explorer/src/components/UnitCard.tsx:23:44 error TS2339: Property 'includes' does not exist on type 'Path<string[], never, false>'.
+/home/user/migrations/aoe4-explorer/src/components/UnitSelector.tsx:48:109 error TS2488: Type 'number' must have a '[Symbol.iterator]()' method that returns an iterator.
+/home/user/migrations/aoe4-explorer/src/components/UnitSelector.tsx:48:62 error TS2532: Object is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/BattleReportView.tsx:67:32 error TS95000: [SUGAR_READ_ARGS] A source read takes no arguments.
+/home/user/migrations/aoe4-explorer/src/components/quiz/QuestionInspectPopup.tsx:9:14 error TS2345: [generated] Argument of type 'QuestionItem[] | undefined' is not assignable to parameter of type 'QuestionItem[]'.
+  Type 'undefined' is not assignable to type 'QuestionItem[]'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/SoloQuiz.tsx:40:17 error TS95000: [SUGAR_ESCAPE] Routine pickChoice is handed to an unknown consumer; a plain callback cannot drive it.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TechnologySelector.tsx:94:18 error TS95000: [EVENT_REJECTS] This handler can fail with unknown and nothing catches it; wrap the body in try/catch, or declare the failure.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:127:30 error TS95000: [EVENT_REJECTS] This handler can fail with unknown and nothing catches it; wrap the body in try/catch, or declare the failure.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:108:130 error TS95000: [EVENT_REJECTS] This handler can fail with unknown and nothing catches it; wrap the body in try/catch, or declare the failure.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:119:107 error TS2339: Property 'total' does not exist on type 'Source<never, never, false>'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:119:85 error TS2339: Property 'correct' does not exist on type 'Source<never, never, false>'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:118:36 error TS2339: Property 'user' does not exist on type 'Source<never, never, false>'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:117:36 error TS2339: Property 'user' does not exist on type 'Source<never, never, false>'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:116:99 error TS2339: Property 'user' does not exist on type 'Source<never, never, false>'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:116:74 error TS2339: Property 'user' does not exist on type 'Source<never, never, false>'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:115:150 error TS2339: Property 'user' does not exist on type 'Source<never, never, false>'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:115:61 error TS2339: Property 'user' does not exist on type 'Source<never, never, false>'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:112:81 error TS2339: Property 'user' does not exist on type 'Source<never, never, false>'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:112:62 error TS2339: Property 'includes' does not exist on type 'TypedStore<string[]>'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:108:71 error TS2571: Object is of type 'unknown'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:80:51 error TS2339: Property 'user' does not exist on type 'never'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:76:15 error TS2345: Argument of type 'null' is not assignable to parameter of type 'TwitchUser | ((prev: TwitchUser) => TwitchUser)'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:68:25 error TS2339: Property 'includes' does not exist on type 'TypedStore<string[]>'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:63:17 error TS18046: 'drawnWinner' is of type 'unknown'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:57:65 error TS2339: Property 'user' does not exist on type 'never'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:57:54 error TS2339: Property 'includes' does not exist on type 'TypedStore<string[]>'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:48:39 error TS18046: 'candidate' is of type 'unknown'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:48:30 error TS2339: Property 'includes' does not exist on type 'TypedStore<string[]>'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:47:21 error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'never'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:46:11 error TS18046: 'candidate' is of type 'unknown'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:37:84 error TS18046: 'c' is of type 'unknown'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:37:75 error TS2339: Property 'includes' does not exist on type 'TypedStore<string[]>'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:33:41 error TS18046: 'c' is of type 'unknown'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:32:39 error TS18046: 'c' is of type 'unknown'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:31:12 error TS2571: Object is of type 'unknown'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:27:20 error TS18046: 'c' is of type 'unknown'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:25:44 error TS18046: 's' is of type 'unknown'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:25:20 error TS2698: Spread types may only be created from object types.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:16:14 error TS18046: [generated] '_state' is of type 'unknown'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:16:14 error TS2345: [generated] [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchGiveaway.tsx:21:56 error TS2345: Argument of type 'null' is not assignable to parameter of type 'TwitchUser'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/TwitchQuiz.tsx:74:14 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:709:3 error TS18048: 'history' is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:706:5 error TS18048: 'history' is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:702:45 error TS18048: 'history' is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:620:60 error TS2532: Object is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:600:83 error TS2322: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:600:43 error TS2538: Type 'Read<false, never>' cannot be used as an index type.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:581:32 error TS2339: Property 'costs' does not exist on type 'NonNullable<false | Answer>'.
+  Property 'costs' does not exist on type 'string'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:579:69 error TS2339: Property 'type' does not exist on type 'Answer'.
+  Property 'type' does not exist on type 'string'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:576:69 error TS2339: Property 'type' does not exist on type 'Answer'.
+  Property 'type' does not exist on type 'string'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:570:25 error TS2322: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:566:113 error TS2339: Property 'type' does not exist on type 'Answer'.
+  Property 'type' does not exist on type 'string'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:561:74 error TS2339: Property 'id' does not exist on type 'NonNullable<false | Answer>'.
+  Property 'id' does not exist on type 'string'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:561:43 error TS2339: Property 'id' does not exist on type 'NonNullable<false | Answer>'.
+  Property 'id' does not exist on type 'string'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:561:25 error TS2339: Property 'label' does not exist on type 'NonNullable<false | Answer>'.
+  Property 'label' does not exist on type 'string'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:560:44 error TS2339: Property 'id' does not exist on type 'NonNullable<false | Answer>'.
+  Property 'id' does not exist on type 'string'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:556:69 error TS2339: Property 'type' does not exist on type 'Answer'.
+  Property 'type' does not exist on type 'string'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:551:80 error TS2339: Property 'id' does not exist on type 'NonNullable<false | Answer>'.
+  Property 'id' does not exist on type 'string'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:551:53 error TS2339: Property 'id' does not exist on type 'NonNullable<false | Answer>'.
+  Property 'id' does not exist on type 'string'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:549:69 error TS2339: Property 'type' does not exist on type 'Answer'.
+  Property 'type' does not exist on type 'string'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:543:30 error TS2345: Argument of type 'Answer' is not assignable to parameter of type 'AnswerDefinition'.
+  Type 'string' is not assignable to type 'AnswerDefinition'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:542:108 error TS2339: Property 'type' does not exist on type 'Answer'.
+  Property 'type' does not exist on type 'string'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:479:76 error TS2345: Argument of type 'ItemGroup<Unit> | undefined' is not assignable to parameter of type 'UnifiedItem<Item>'.
+  Type 'undefined' is not assignable to type 'UnifiedItem<Item>'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:479:30 error TS2345: Argument of type 'ItemGroup<Unit> | undefined' is not assignable to parameter of type 'UnifiedItem<Item>'.
+  Type 'undefined' is not assignable to type 'UnifiedItem<Item>'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:471:94 error TS2345: Argument of type 'ItemGroup<Unit> | undefined' is not assignable to parameter of type 'UnifiedItem<Unit>'.
+  Type 'undefined' is not assignable to type 'UnifiedItem<Unit>'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:456:7 error TS18048: 'difficulty' is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:419:8 error TS18048: 'difficulty' is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:405:9 error TS18048: 'difficulty' is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:403:9 error TS18048: 'difficulty' is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:401:5 error TS18048: 'difficulty' is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:347:9 error TS18048: 'difficulty' is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:345:9 error TS18048: 'difficulty' is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:343:5 error TS18048: 'difficulty' is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:249:3 error TS18048: 'history' is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:247:26 error TS18048: 'history' is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:242:43 error TS18048: 'history' is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:242:7 error TS18048: 'history' is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:227:15 error TS18048: 'correctLandmark.description' is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:221:3 error TS18048: 'history' is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:216:5 error TS18048: 'history' is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:214:51 error TS18048: 'history' is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:184:9 error TS2454: Variable 'question' is used before being assigned.
+/home/user/migrations/aoe4-explorer/src/components/quiz/questions.tsx:122:28 error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+  Type 'undefined' is not assignable to type 'number'.
+/home/user/migrations/aoe4-explorer/src/query/stats.ts:188:50 error TS2322: Type 'number' is not assignable to type 'StatPart<Modifier>'.
+  Type 'number' is not assignable to type 'StatPart<Modifier>'.
+/home/user/migrations/aoe4-explorer/src/query/stats.ts:72:33 error TS2322: Type 'number' is not assignable to type 'Unit'.
+/home/user/migrations/aoe4-explorer/src/query/stats.ts:71:7 error TS2345: Argument of type 'IThenBy<Unit>' is not assignable to parameter of type '(a: Unit | Building, b: Unit | Building) => number'.
+  Types of parameters 'v1' and 'a' are incompatible.
+    Type 'Unit | Building' is not assignable to type 'Unit'.
+      Property 'movement' is missing in type 'Building' but required in type 'Unit'.
+  related: /home/user/migrations/aoe4-explorer/data/src/types/items.ts:99:3: 'movement' is declared here.
+/home/user/migrations/aoe4-explorer/src/query/utils.ts:239:148 error TS2345: Argument of type '("ab" | "ay" | "by" | "ch" | "de" | "en" | "fr" | "gol" | "hr" | "hl" | "ja" | "je" | "jin" | "kt" | "mac" | "ma" | "mo" | "od" | "ot" | "ru" | "sen" | "tug" | "zx")[] | undefined' is not assignable to parameter of type '("ab" | "ay" | "by" | "ch" | "de" | "en" | "fr" | "gol" | "hr" | "hl" | "ja" | "je" | "jin" | "kt" | "mac" | "ma" | "mo" | "od" | "ot" | "ru" | "sen" | "tug" | "zx")[]'.
+  Type 'undefined' is not assignable to type '("ab" | "ay" | "by" | "ch" | "de" | "en" | "fr" | "gol" | "hr" | "hl" | "ja" | "je" | "jin" | "kt" | "mac" | "ma" | "mo" | "od" | "ot" | "ru" | "sen" | "tug" | "zx")[]'.
+/home/user/migrations/aoe4-explorer/src/query/utils.ts:239:73 error TS2345: Argument of type '("ab" | "ay" | "by" | "ch" | "de" | "en" | "fr" | "gol" | "hr" | "hl" | "ja" | "je" | "jin" | "kt" | "mac" | "ma" | "mo" | "od" | "ot" | "ru" | "sen" | "tug" | "zx")[] | undefined' is not assignable to parameter of type '("ab" | "ay" | "by" | "ch" | "de" | "en" | "fr" | "gol" | "hr" | "hl" | "ja" | "je" | "jin" | "kt" | "mac" | "ma" | "mo" | "od" | "ot" | "ru" | "sen" | "tug" | "zx")[]'.
+  Type 'undefined' is not assignable to type '("ab" | "ay" | "by" | "ch" | "de" | "en" | "fr" | "gol" | "hr" | "hl" | "ja" | "je" | "jin" | "kt" | "mac" | "ma" | "mo" | "od" | "ot" | "ru" | "sen" | "tug" | "zx")[]'.
+/home/user/migrations/aoe4-explorer/src/query/utils.ts:239:24 error TS2769: No overload matches this call.
+  Overload 1 of 3, '(callbackfn: (previousValue: PatchSet, currentValue: PatchSet, currentIndex: number, array: PatchSet[]) => PatchSet, initialValue: PatchSet): PatchSet', gave the following error.
+    Type '(PatchLine | (string | ("ab" | "ay" | "by" | "ch" | "de" | "en" | "fr" | "gol" | "hr" | "hl" | "ja" | "je" | "jin" | "kt" | "mac" | "ma" | "mo" | "od" | "ot" | "ru" | "sen" | "tug" | "zx")[])[])[]' is missing the following properties from type 'PatchSet': items, civs, diff
+  Overload 2 of 3, '(callbackfn: (previousValue: PatchLine[], currentValue: PatchSet, currentIndex: number, array: PatchSet[]) => PatchLine[], initialValue: PatchLine[]): PatchLine[]', gave the following error.
+    Type '(PatchLine | (string | ("ab" | "ay" | "by" | "ch" | "de" | "en" | "fr" | "gol" | "hr" | "hl" | "ja" | "je" | "jin" | "kt" | "mac" | "ma" | "mo" | "od" | "ot" | "ru" | "sen" | "tug" | "zx")[])[])[]' is not assignable to type 'PatchLine[]'.
+      Type 'PatchLine | (string | ("ab" | "ay" | "by" | "ch" | "de" | "en" | "fr" | "gol" | "hr" | "hl" | "ja" | "je" | "jin" | "kt" | "mac" | "ma" | "mo" | "od" | "ot" | "ru" | "sen" | "tug" | "zx")[])[]' is not assignable to type 'PatchLine'.
+        Type '(string | ("ab" | "ay" | "by" | "ch" | "de" | "en" | "fr" | "gol" | "hr" | "hl" | "ja" | "je" | "jin" | "kt" | "mac" | "ma" | "mo" | "od" | "ot" | "ru" | "sen" | "tug" | "zx")[])[]' is not assignable to type '["nerf" | "buff" | "fix" | "change", string, (("ab" | "ay" | "by" | "ch" | "de" | "en" | "fr" | "gol" | "hr" | "hl" | "ja" | "je" | "jin" | "kt" | "mac" | "ma" | "mo" | "od" | "ot" | "ru" | "sen" | "tug" | "zx")[] | undefined)?]'.
+          Target requires 2 element(s) but source may have fewer.
+/home/user/migrations/aoe4-explorer/src/query/utils.ts:238:12 error TS2488: Type 'PatchSet' must have a '[Symbol.iterator]()' method that returns an iterator.
+/home/user/migrations/aoe4-explorer/src/query/utils.ts:238:9 error TS2345: Argument of type 'any' is not assignable to parameter of type 'never'.
+/home/user/migrations/aoe4-explorer/src/query/utils.ts:236:23 error TS2345: Argument of type '("ab" | "ay" | "by" | "ch" | "de" | "en" | "fr" | "gol" | "hr" | "hl" | "ja" | "je" | "jin" | "kt" | "mac" | "ma" | "mo" | "od" | "ot" | "ru" | "sen" | "tug" | "zx")[] | undefined' is not assignable to parameter of type '("ab" | "ay" | "by" | "ch" | "de" | "en" | "fr" | "gol" | "hr" | "hl" | "ja" | "je" | "jin" | "kt" | "mac" | "ma" | "mo" | "od" | "ot" | "ru" | "sen" | "tug" | "zx")[]'.
+  Type 'undefined' is not assignable to type '("ab" | "ay" | "by" | "ch" | "de" | "en" | "fr" | "gol" | "hr" | "hl" | "ja" | "je" | "jin" | "kt" | "mac" | "ma" | "mo" | "od" | "ot" | "ru" | "sen" | "tug" | "zx")[]'.
+/home/user/migrations/aoe4-explorer/src/query/utils.ts:53:26 error TS18048: 'unifiedItem' is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/query/utils.ts:51:82 error TS2345: Argument of type 'UnifiedItem<Item> | undefined' is not assignable to parameter of type 'Item | UnifiedItem<Item>'.
+  Type 'undefined' is not assignable to type 'Item | UnifiedItem<Item>'.
+/home/user/migrations/aoe4-explorer/src/query/utils.ts:51:72 error TS18048: 'm' is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/query/utils.ts:50:79 error TS2345: Argument of type 'UnifiedItem<Item> | undefined' is not assignable to parameter of type 'Item | UnifiedItem<Item>'.
+  Type 'undefined' is not assignable to type 'Item | UnifiedItem<Item>'.
+/home/user/migrations/aoe4-explorer/src/query/utils.ts:50:69 error TS18048: 'm' is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/query/utils.ts:31:6 error TS2352: Conversion of type 'never[]' to type 'T' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  'never[]' is assignable to the constraint of type 'T', but 'T' could be instantiated with a different subtype of constraint 'UnifiedItem<Item>[]'.
+/home/user/migrations/aoe4-explorer/src/routes/about.tsx:101:90 error TS2322: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+/home/user/migrations/aoe4-explorer/src/routes/about.tsx:10:20 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.
+/home/user/migrations/aoe4-explorer/src/routes/home.tsx:12:20 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.
+/home/user/migrations/aoe4-explorer/src/routes/search.tsx:10:35 error TS2554: Expected 1-2 arguments, but got 0.
+/home/user/migrations/aoe4-explorer/src/routes/search.tsx:9:20 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.
+/home/user/migrations/aoe4-explorer/src/routes/buildings/[id].tsx:145:7 error TS2786: [generated] [COMPONENT_TAG] call a yield component in a hole: {yield* Comp(props)}
+/home/user/migrations/aoe4-explorer/src/routes/buildings/[id].tsx:160:46 error TS2322: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+/home/user/migrations/aoe4-explorer/src/routes/buildings/[id].tsx:119:47 error TS2322: [SETTLED_PROP] Pass a ready value, or allow a pending source in this prop's type.
+  related: /home/user/migrations/aoe4-explorer/src/components/ItemPage.tsx:83:38: The expected type comes from property 'item' which is declared here on type 'IntrinsicAttributes & PropsInput<{ item: UnifiedItem<Item>; civ: CivConfig; }, unknown> & NoInfer<Undeclared<PropsInput<{ item: UnifiedItem<Item>; civ: CivConfig; }, unknown>, { ...; }>>'
+/home/user/migrations/aoe4-explorer/src/routes/buildings/[id].tsx:26:17 error TS2786: [generated] [COMPONENT_TAG] call a yield component in a hole: {yield* Comp(props)}
+/home/user/migrations/aoe4-explorer/src/routes/buildings/[id].tsx:116:47 error TS2322: [SETTLED_PROP] Pass a ready value, or allow a pending source in this prop's type.
+  related: /home/user/migrations/aoe4-explorer/src/components/ItemPage.tsx:106:38: The expected type comes from property 'item' which is declared here on type 'IntrinsicAttributes & PropsInput<{ item: UnifiedItem<Item>; civ: CivConfig; }, unknown> & NoInfer<Undeclared<PropsInput<{ item: UnifiedItem<Item>; civ: CivConfig; }, unknown>, { ...; }>>'
+/home/user/migrations/aoe4-explorer/src/routes/buildings/[id].tsx:111:86 error TS2322: [SETTLED_PROP] Pass a ready value, or allow a pending source in this prop's type.
+  related: /home/user/migrations/aoe4-explorer/src/routes/buildings/[id].tsx:145:102: The expected type comes from property 'age' which is declared here on type 'PropsInput<{ item: UnifiedItem<Building>; variation: Building; civ: CivConfig; age: () => number; setAge: (age: number) => void; }, unknown> & NoInfer<Undeclared<...>>'
+/home/user/migrations/aoe4-explorer/src/routes/buildings/[id].tsx:111:63 error TS2339: Property 'variation' does not exist on type 'Source<NonNullable<false | { item: ItemGroup<Building>; variation: Building; units: ItemList<Unit>; research: ItemList<Technology>; abilities: ItemList<...>; } | undefined>, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/buildings/[id].tsx:111:41 error TS2339: Property 'item' does not exist on type 'Source<NonNullable<false | { item: ItemGroup<Building>; variation: Building; units: ItemList<Unit>; research: ItemList<Technology>; abilities: ItemList<...>; } | undefined>, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/buildings/[id].tsx:109:40 error TS2339: Property 'item' does not exist on type 'Source<NonNullable<false | { item: ItemGroup<Building>; variation: Building; units: ItemList<Unit>; research: ItemList<Technology>; abilities: ItemList<...>; } | undefined>, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/buildings/[id].tsx:107:42 error TS2339: Property 'item' does not exist on type 'Source<NonNullable<false | { item: ItemGroup<Building>; variation: Building; units: ItemList<Unit>; research: ItemList<Technology>; abilities: ItemList<...>; } | undefined>, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/buildings/[id].tsx:94:48 error TS2339: Property 'name' does not exist on type 'Source<any, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/buildings/[id].tsx:89:35 error TS2339: Property 'research' does not exist on type 'Source<NonNullable<false | { item: ItemGroup<Building>; variation: Building; units: ItemList<Unit>; research: ItemList<Technology>; abilities: ItemList<...>; } | undefined>, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/buildings/[id].tsx:85:32 error TS2339: Property 'research' does not exist on type 'Source<NonNullable<false | { item: ItemGroup<Building>; variation: Building; units: ItemList<Unit>; research: ItemList<Technology>; abilities: ItemList<...>; } | undefined>, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/buildings/[id].tsx:73:48 error TS2339: Property 'name' does not exist on type 'Source<any, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/buildings/[id].tsx:71:86 error TS2339: Property 'id' does not exist on type 'Source<any, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/buildings/[id].tsx:68:35 error TS2339: Property 'units' does not exist on type 'Source<NonNullable<false | { item: ItemGroup<Building>; variation: Building; units: ItemList<Unit>; research: ItemList<Technology>; abilities: ItemList<...>; } | undefined>, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/buildings/[id].tsx:64:32 error TS2339: Property 'units' does not exist on type 'Source<NonNullable<false | { item: ItemGroup<Building>; variation: Building; units: ItemList<Unit>; research: ItemList<Technology>; abilities: ItemList<...>; } | undefined>, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/buildings/[id].tsx:59:42 error TS2339: Property 'abilities' does not exist on type 'Source<NonNullable<false | { item: ItemGroup<Building>; variation: Building; units: ItemList<Unit>; research: ItemList<Technology>; abilities: ItemList<...>; } | undefined>, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/buildings/[id].tsx:57:56 error TS2339: Property 'item' does not exist on type 'Source<NonNullable<false | { item: ItemGroup<Building>; variation: Building; units: ItemList<Unit>; research: ItemList<Technology>; abilities: ItemList<...>; } | undefined>, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/buildings/[id].tsx:53:59 error TS2339: Property 'variation' does not exist on type 'Source<NonNullable<false | { item: ItemGroup<Building>; variation: Building; units: ItemList<Unit>; research: ItemList<Technology>; abilities: ItemList<...>; } | undefined>, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/buildings/[id].tsx:52:42 error TS2339: Property 'variation' does not exist on type 'Source<NonNullable<false | { item: ItemGroup<Building>; variation: Building; units: ItemList<Unit>; research: ItemList<Technology>; abilities: ItemList<...>; } | undefined>, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/buildings/[id].tsx:37:5 error TS2345: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+/home/user/migrations/aoe4-explorer/src/routes/buildings/[id].tsx:28:18 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.
+/home/user/migrations/aoe4-explorer/src/routes/buildings/buildings.tsx:39:99 error TS2339: Property 'slice' does not exist on type 'Read<false, never>'.
+/home/user/migrations/aoe4-explorer/src/routes/buildings/buildings.tsx:37:28 error TS2339: Property 'length' does not exist on type 'Read<false, never>'.
+/home/user/migrations/aoe4-explorer/src/routes/buildings/buildings.tsx:11:14 error TS2769: [generated] [LAZY_VIEW] fallback is a lazy view: function* () { return <.../>; }
+/home/user/migrations/aoe4-explorer/src/routes/buildings/buildings.tsx:12:18 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.
+/home/user/migrations/aoe4-explorer/src/routes/civs/[slug].tsx:167:101 error TS2339: Property 'slice' does not exist on type 'Read<false, never>'.
+/home/user/migrations/aoe4-explorer/src/routes/civs/[slug].tsx:165:30 error TS2339: Property 'length' does not exist on type 'Read<false, never>'.
+/home/user/migrations/aoe4-explorer/src/routes/civs/[slug].tsx:140:101 error TS2339: Property 'slice' does not exist on type 'Read<false, never>'.
+/home/user/migrations/aoe4-explorer/src/routes/civs/[slug].tsx:138:30 error TS2339: Property 'length' does not exist on type 'Read<false, never>'.
+/home/user/migrations/aoe4-explorer/src/routes/civs/[slug].tsx:15:14 error TS2345: [generated] [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+  related: /home/user/migrations/aoe4-explorer/src/global.tsx:18:64: 'location' is declared here.
+/home/user/migrations/aoe4-explorer/src/routes/civs/[slug].tsx:23:23 error TS2345: [NATIVE_CALLBACK_FAILURE] Catch the failure inside this callback.
+/home/user/migrations/aoe4-explorer/src/routes/civs/[slug].tsx:16:19 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.
+/home/user/migrations/aoe4-explorer/src/routes/content/content.tsx:65:103 error TS2322: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+/home/user/migrations/aoe4-explorer/src/routes/content/content.tsx:64:33 error TS2322: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+/home/user/migrations/aoe4-explorer/src/routes/content/content.tsx:62:73 error TS2345: Argument of type 'Read<false, never>' is not assignable to parameter of type 'string'.
+/home/user/migrations/aoe4-explorer/src/routes/content/content.tsx:56:83 error TS2345: Argument of type 'Read<false, never>' is not assignable to parameter of type 'string'.
+/home/user/migrations/aoe4-explorer/src/routes/content/content.tsx:13:14 error TS2769: [generated] [LAZY_VIEW] fallback is a lazy view: function* () { return <.../>; }
+/home/user/migrations/aoe4-explorer/src/routes/content/content.tsx:14:18 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:337:23 error TS2339: Property 'slice' does not exist on type 'Source<string, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:334:49 error TS2339: Property 'startsWith' does not exist on type 'Source<string, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:334:20 error TS2339: Property 'startsWith' does not exist on type 'Source<string, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:317:26 error TS2339: Property 'trim' does not exist on type 'Source<string, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:301:16 error TS2339: Property 'label' does not exist on type 'Source<any, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:299:69 error TS2339: Property 'level' does not exist on type 'Source<any, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:298:57 error TS2339: Property 'id' does not exist on type 'Source<any, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:296:25 error TS2339: Property 'id' does not exist on type 'Source<any, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:280:46 error TS2322: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:278:14 error TS2367: This comparison appears to be unintentional because the types 'Read<false, never>' and 'string' have no overlap.
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:277:14 error TS2367: This comparison appears to be unintentional because the types 'Read<false, never>' and 'string' have no overlap.
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:276:14 error TS2367: This comparison appears to be unintentional because the types 'Read<false, never>' and 'string' have no overlap.
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:275:14 error TS2367: This comparison appears to be unintentional because the types 'Read<false, never>' and 'string' have no overlap.
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:256:20 error TS2769: [READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive.
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:247:22 error TS2322: [SETTLED_PROP] Pass a ready value, or allow a pending source in this prop's type.
+  related: /home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:261:28: The expected type comes from property 'note' which is declared here on type 'PropsInput<{ note: string; }, unknown> & NoInfer<Undeclared<PropsInput<{ note: string; }, unknown>, { note: string; }>>'
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:246:36 error TS2339: Property 'sort' does not exist on type 'Path<PatchLine[], never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:237:54 error TS18048: 'item' is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:236:39 error TS2322: Type 'UnifiedItem<Item> | MapItem | undefined' is not assignable to type 'Item | UnifiedItem<Item> | Source<Item | UnifiedItem<Item> | undefined, never, false> | HoleProp<Item | UnifiedItem<...> | undefined, never, false, unknown> | SettledProp<...> | undefined'.
+  Type 'MapItem' is not assignable to type 'Item | UnifiedItem<Item> | Source<Item | UnifiedItem<Item> | undefined, never, false> | HoleProp<Item | UnifiedItem<...> | undefined, never, false, unknown> | SettledProp<...> | undefined'.
+    Type 'MapItem' is not assignable to type 'UnifiedItem<Item>'.
+      Types of property 'variations' are incompatible.
+        Type 'MapItem[]' is not assignable to type 'Item[]'.
+          Type 'MapItem' is missing the following properties from type 'Item': baseId, age, producedBy, costs
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:233:118 error TS2345: Argument of type 'UnifiedItem<Item> | MapItem | undefined' is not assignable to parameter of type 'UnifiedItem<Item>'.
+  Type 'undefined' is not assignable to type 'UnifiedItem<Item>'.
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:233:92 error TS18048: 'item' is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:233:35 error TS18048: 'item' is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:231:53 error TS18048: 'item' is possibly 'undefined'.
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:192:7 error TS2769: [generated] [LAZY_VIEW] fallback is a lazy view: function* () { return <.../>; }
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:218:42 error TS2322: [SETTLED_PROP] Pass a ready value, or allow a pending source in this prop's type.
+  related: /home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:309:33: The expected type comes from property 'md' which is declared here on type 'PropsInput<{ md: string; }, unknown> & NoInfer<Undeclared<PropsInput<{ md: string; }, unknown>, { md: string; }>>'
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:213:58 error TS2322: [SETTLED_PROP] Pass a ready value, or allow a pending source in this prop's type.
+  related: /home/user/migrations/aoe4-explorer/src/components/TableOfContents.tsx:35:49: The expected type comes from property 'label' which is declared here on type 'PropsInput<{ label: string; level?: number | undefined; }, unknown> & NoInfer<Undeclared<PropsInput<{ label: string; level?: number | undefined; }, unknown>, { label: string; level?: number | undefined; }>>'
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:212:55 error TS2322: [SETTLED_PROP] Pass a ready value, or allow a pending source in this prop's type.
+  related: /home/user/migrations/aoe4-explorer/src/components/TableOfContents.tsx:35:49: The expected type comes from property 'label' which is declared here on type 'PropsInput<{ label: string; level?: number | undefined; }, unknown> & NoInfer<Undeclared<PropsInput<{ label: string; level?: number | undefined; }, unknown>, { label: string; level?: number | undefined; }>>'
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:134:39 error TS2345: Argument of type 'null' is not assignable to parameter of type '"ab" | "ay" | "by" | "ch" | "de" | "en" | "fr" | "gol" | "hr" | "hl" | "ja" | "je" | "jin" | "kt" | "mac" | "ma" | "mo" | "od" | "ot" | "ru" | "sen" | "tug" | "zx" | ((prev: "ab" | "ay" | "by" | ... 19 more ... | "zx") => "ab" | ... 21 more ... | "zx")'.
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:124:85 error TS2322: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+  related: /home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:192:51: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:106:39 error TS2345: Argument of type 'null' is not assignable to parameter of type '"ab" | "ay" | "by" | "ch" | "de" | "en" | "fr" | "gol" | "hr" | "hl" | "ja" | "je" | "jin" | "kt" | "mac" | "ma" | "mo" | "od" | "ot" | "ru" | "sen" | "tug" | "zx" | ((prev: "ab" | "ay" | "by" | ... 19 more ... | "zx") => "ab" | ... 21 more ... | "zx")'.
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:23:31 error TS2345: [NATIVE_CALLBACK_FAILURE] Catch the failure inside this callback.
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:17:14 error TS2345: [generated] [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+  related: /home/user/migrations/aoe4-explorer/src/global.tsx:18:64: 'location' is declared here.
+/home/user/migrations/aoe4-explorer/src/routes/patches/[id].tsx:19:18 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.
+/home/user/migrations/aoe4-explorer/src/routes/patches/index.tsx:17:20 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.
+/home/user/migrations/aoe4-explorer/src/routes/quiz/quiz.tsx:77:9 warning TS95001: [NATIVE_FOREIGN_BOUNDARY] Handle failures inside Quiz or its callbacks; this imported component (Quiz from @components/quiz/SoloQuiz) is outside the native check.
+/home/user/migrations/aoe4-explorer/src/routes/quiz/quiz.tsx:14:19 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.
+/home/user/migrations/aoe4-explorer/src/routes/quiz/twitch.tsx:222:36 error TS95000: [EVENT_REJECTS] This handler can fail with TypeError and nothing catches it; wrap the body in try/catch, or declare the failure.
+/home/user/migrations/aoe4-explorer/src/routes/quiz/twitch.tsx:231:9 warning TS95001: [NATIVE_FOREIGN_BOUNDARY] Handle failures inside TwitchQuiz or its callbacks; this imported component (TwitchQuiz from @components/quiz/TwitchQuiz) is outside the native check.
+/home/user/migrations/aoe4-explorer/src/routes/quiz/twitch.tsx:240:28 error TS2345: [WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state.
+/home/user/migrations/aoe4-explorer/src/routes/quiz/twitch.tsx:127:23 error TS2322: [SETTLED_PROP] Pass a ready value, or allow a pending source in this prop's type.
+  related: /home/user/migrations/aoe4-explorer/src/components/common/ToggleSwitch.tsx:7:3: The expected type comes from property 'onChange' which is declared here on type 'PropsInput<ToggleSwitchProps, unknown> & NoInfer<Undeclared<PropsInput<ToggleSwitchProps, unknown>, ToggleSwitchProps>>'
+/home/user/migrations/aoe4-explorer/src/routes/quiz/twitch.tsx:21:14 error TS2345: [generated] Argument of type 'EventHandler<[], never, { title: string; description: string; location: Location<unknown>; }, false, false>' is not assignable to parameter of type '() => PageMeta | undefined'.
+  Property 'location' is missing in type 'EventCall<{ title: string; description: string; location: Location<unknown>; }, never, false, false>' but required in type 'PageMeta'.
+  related: /home/user/migrations/aoe4-explorer/src/global.tsx:18:64: 'location' is declared here.
+/home/user/migrations/aoe4-explorer/src/routes/quiz/twitch.tsx:22:18 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.
+/home/user/migrations/aoe4-explorer/src/routes/technologies/[id].tsx:94:47 error TS2322: [SETTLED_PROP] Pass a ready value, or allow a pending source in this prop's type.
+  related: /home/user/migrations/aoe4-explorer/src/components/ItemPage.tsx:106:38: The expected type comes from property 'item' which is declared here on type 'IntrinsicAttributes & PropsInput<{ item: UnifiedItem<Item>; civ: CivConfig; }, unknown> & NoInfer<Undeclared<PropsInput<{ item: UnifiedItem<Item>; civ: CivConfig; }, unknown>, { ...; }>>'
+/home/user/migrations/aoe4-explorer/src/routes/technologies/[id].tsx:18:17 error TS2786: [generated] [COMPONENT_TAG] call a yield component in a hole: {yield* Comp(props)}
+/home/user/migrations/aoe4-explorer/src/routes/technologies/[id].tsx:86:42 error TS2339: Property 'variation' does not exist on type 'Source<NonNullable<false | { item: ItemGroup<Technology>; variation: Technology; } | undefined>, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/technologies/[id].tsx:84:73 error TS2339: Property 'item' does not exist on type 'Source<NonNullable<false | { item: ItemGroup<Technology>; variation: Technology; } | undefined>, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/technologies/[id].tsx:84:34 error TS2322: [SETTLED_PROP] Pass a ready value, or allow a pending source in this prop's type.
+  related: /home/user/migrations/aoe4-explorer/src/components/ItemPage.tsx:180:28: The expected type comes from property 'age' which is declared here on type 'IntrinsicAttributes & PropsInput<{ age: () => number; setAge: (age: number) => void; minAge?: number | undefined; }, unknown> & NoInfer<Undeclared<PropsInput<{ age: () => number; setAge: (age: number) => void; minAge?: number | undefined; }, unknown>, { ...; }>>'
+/home/user/migrations/aoe4-explorer/src/routes/technologies/[id].tsx:76:42 error TS2339: Property 'item' does not exist on type 'Source<NonNullable<false | { item: ItemGroup<Technology>; variation: Technology; } | undefined>, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/technologies/[id].tsx:74:40 error TS2339: Property 'item' does not exist on type 'Source<NonNullable<false | { item: ItemGroup<Technology>; variation: Technology; } | undefined>, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/technologies/[id].tsx:72:56 error TS2339: Property 'item' does not exist on type 'Source<NonNullable<false | { item: ItemGroup<Technology>; variation: Technology; } | undefined>, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/technologies/[id].tsx:70:46 error TS2339: Property 'item' does not exist on type 'Source<NonNullable<false | { item: ItemGroup<Technology>; variation: Technology; } | undefined>, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/technologies/[id].tsx:66:122 error TS2339: Property 'variation' does not exist on type 'Source<NonNullable<false | { item: ItemGroup<Technology>; variation: Technology; } | undefined>, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/technologies/[id].tsx:66:21 error TS2339: Property 'variation' does not exist on type 'Source<NonNullable<false | { item: ItemGroup<Technology>; variation: Technology; } | undefined>, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/technologies/[id].tsx:65:59 error TS2339: Property 'variation' does not exist on type 'Source<NonNullable<false | { item: ItemGroup<Technology>; variation: Technology; } | undefined>, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/technologies/[id].tsx:64:42 error TS2339: Property 'variation' does not exist on type 'Source<NonNullable<false | { item: ItemGroup<Technology>; variation: Technology; } | undefined>, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/technologies/[id].tsx:43:5 error TS2345: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+/home/user/migrations/aoe4-explorer/src/routes/technologies/[id].tsx:20:18 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.
+/home/user/migrations/aoe4-explorer/src/routes/technologies/technologies.tsx:39:99 error TS2339: Property 'slice' does not exist on type 'Read<false, never>'.
+/home/user/migrations/aoe4-explorer/src/routes/technologies/technologies.tsx:37:28 error TS2339: Property 'length' does not exist on type 'Read<false, never>'.
+/home/user/migrations/aoe4-explorer/src/routes/technologies/technologies.tsx:11:14 error TS2769: [generated] [LAZY_VIEW] fallback is a lazy view: function* () { return <.../>; }
+/home/user/migrations/aoe4-explorer/src/routes/technologies/technologies.tsx:12:18 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.
+/home/user/migrations/aoe4-explorer/src/routes/units/[id].tsx:126:124 error TS2322: [SETTLED_PROP] Pass a ready value, or allow a pending source in this prop's type.
+  related: /home/user/migrations/aoe4-explorer/src/components/Stats.tsx:16:3: The expected type comes from property 'item' which is declared here on type 'PropsInput<{ label: string; icon?: string | undefined; unit?: string | undefined; item: UnifiedItem<Item>; stat?: Source<Stat, never, false> | undefined; displayAlways?: boolean | undefined; multiplier?: Source<...> | undefined; max: number; age?: (() => number) | undefined; }, never>'
+/home/user/migrations/aoe4-explorer/src/routes/units/[id].tsx:125:120 error TS2322: [SETTLED_PROP] Pass a ready value, or allow a pending source in this prop's type.
+  related: /home/user/migrations/aoe4-explorer/src/components/Stats.tsx:16:3: The expected type comes from property 'item' which is declared here on type 'PropsInput<{ label: string; icon?: string | undefined; unit?: string | undefined; item: UnifiedItem<Item>; stat?: Source<Stat, never, false> | undefined; displayAlways?: boolean | undefined; multiplier?: Source<...> | undefined; max: number; age?: (() => number) | undefined; }, never>'
+/home/user/migrations/aoe4-explorer/src/routes/units/[id].tsx:122:19 error TS2322: [SETTLED_PROP] Pass a ready value, or allow a pending source in this prop's type.
+  related: /home/user/migrations/aoe4-explorer/src/components/Stats.tsx:16:3: The expected type comes from property 'item' which is declared here on type 'PropsInput<{ label: string; icon?: string | undefined; unit?: string | undefined; item: UnifiedItem<Item>; stat?: Source<Stat, never, false> | undefined; displayAlways?: boolean | undefined; multiplier?: Source<...> | undefined; max: number; age?: (() => number) | undefined; }, never>'
+/home/user/migrations/aoe4-explorer/src/routes/units/[id].tsx:118:45 error TS2339: Property 'includes' does not exist on type 'Path<string[] | undefined, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/units/[id].tsx:116:125 error TS2322: [SETTLED_PROP] Pass a ready value, or allow a pending source in this prop's type.
+  related: /home/user/migrations/aoe4-explorer/src/components/Stats.tsx:16:3: The expected type comes from property 'item' which is declared here on type 'PropsInput<{ label: string; icon?: string | undefined; unit?: string | undefined; item: UnifiedItem<Item>; stat?: Source<Stat, never, false> | undefined; displayAlways?: boolean | undefined; multiplier?: Source<...> | undefined; max: number; age?: (() => number) | undefined; }, never>'
+/home/user/migrations/aoe4-explorer/src/routes/units/[id].tsx:115:95 error TS2322: [SETTLED_PROP] Pass a ready value, or allow a pending source in this prop's type.
+  related: /home/user/migrations/aoe4-explorer/src/components/Stats.tsx:16:3: The expected type comes from property 'item' which is declared here on type 'PropsInput<{ label: string; icon?: string | undefined; unit?: string | undefined; item: UnifiedItem<Item>; stat?: Source<Stat, never, false> | undefined; displayAlways?: boolean | undefined; multiplier?: Source<...> | undefined; max: number; age?: (() => number) | undefined; }, never>'
+/home/user/migrations/aoe4-explorer/src/routes/units/[id].tsx:114:121 error TS2322: [SETTLED_PROP] Pass a ready value, or allow a pending source in this prop's type.
+  related: /home/user/migrations/aoe4-explorer/src/components/Stats.tsx:16:3: The expected type comes from property 'item' which is declared here on type 'PropsInput<{ label: string; icon?: string | undefined; unit?: string | undefined; item: UnifiedItem<Item>; stat?: Source<Stat, never, false> | undefined; displayAlways?: boolean | undefined; multiplier?: Source<...> | undefined; max: number; age?: (() => number) | undefined; }, never>'
+/home/user/migrations/aoe4-explorer/src/routes/units/[id].tsx:113:91 error TS2322: [SETTLED_PROP] Pass a ready value, or allow a pending source in this prop's type.
+  related: /home/user/migrations/aoe4-explorer/src/components/Stats.tsx:16:3: The expected type comes from property 'item' which is declared here on type 'PropsInput<{ label: string; icon?: string | undefined; unit?: string | undefined; item: UnifiedItem<Item>; stat?: Source<Stat, never, false> | undefined; displayAlways?: boolean | undefined; multiplier?: Source<...> | undefined; max: number; age?: (() => number) | undefined; }, never>'
+/home/user/migrations/aoe4-explorer/src/routes/units/[id].tsx:95:7 error TS2786: [generated] [COMPONENT_TAG] call a yield component in a hole: {yield* Comp(props)}
+/home/user/migrations/aoe4-explorer/src/routes/units/[id].tsx:104:20 error TS2322: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+  related: /home/user/migrations/aoe4-explorer/src/components/Stats.tsx:406:37: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+/home/user/migrations/aoe4-explorer/src/routes/units/[id].tsx:95:7 error TS2345: [generated] Argument of type 'UnifiedItem<Unit> | undefined' is not assignable to parameter of type 'string | UnifiedItem<Unit | Building>'.
+  Type 'undefined' is not assignable to type 'string | UnifiedItem<Unit | Building>'.
+/home/user/migrations/aoe4-explorer/src/routes/units/[id].tsx:88:47 error TS2322: [SETTLED_PROP] Pass a ready value, or allow a pending source in this prop's type.
+  related: /home/user/migrations/aoe4-explorer/src/components/ItemPage.tsx:106:38: The expected type comes from property 'item' which is declared here on type 'IntrinsicAttributes & PropsInput<{ item: UnifiedItem<Item>; civ: CivConfig; }, unknown> & NoInfer<Undeclared<PropsInput<{ item: UnifiedItem<Item>; civ: CivConfig; }, unknown>, { ...; }>>'
+/home/user/migrations/aoe4-explorer/src/routes/units/[id].tsx:20:17 error TS2786: [generated] [COMPONENT_TAG] call a yield component in a hole: {yield* Comp(props)}
+/home/user/migrations/aoe4-explorer/src/routes/units/[id].tsx:85:47 error TS2322: [SETTLED_PROP] Pass a ready value, or allow a pending source in this prop's type.
+  related: /home/user/migrations/aoe4-explorer/src/components/ItemPage.tsx:83:38: The expected type comes from property 'item' which is declared here on type 'IntrinsicAttributes & PropsInput<{ item: UnifiedItem<Item>; civ: CivConfig; }, unknown> & NoInfer<Undeclared<PropsInput<{ item: UnifiedItem<Item>; civ: CivConfig; }, unknown>, { ...; }>>'
+/home/user/migrations/aoe4-explorer/src/routes/units/[id].tsx:80:55 error TS2322: [SETTLED_PROP] Pass a ready value, or allow a pending source in this prop's type.
+  related: /home/user/migrations/aoe4-explorer/src/routes/units/[id].tsx:95:74: The expected type comes from property 'age' which is declared here on type 'PropsInput<{ item?: UnifiedItem<Unit> | undefined; civ: CivConfig; age: () => number; setAge: (age: number) => void; }, unknown> & NoInfer<Undeclared<PropsInput<{ item?: UnifiedItem<Unit> | undefined; civ: CivConfig; age: () => number; setAge: (age: number) => void; }, unknown>, { ...; }>>'
+/home/user/migrations/aoe4-explorer/src/routes/units/[id].tsx:80:37 error TS2339: Property 'item' does not exist on type 'Source<NonNullable<false | { item: ItemGroup<Unit>; variation: Unit; abilities: ItemList<Ability>; } | undefined>, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/units/[id].tsx:74:42 error TS2339: Property 'item' does not exist on type 'Source<NonNullable<false | { item: ItemGroup<Unit>; variation: Unit; abilities: ItemList<Ability>; } | undefined>, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/units/[id].tsx:72:40 error TS2339: Property 'item' does not exist on type 'Source<NonNullable<false | { item: ItemGroup<Unit>; variation: Unit; abilities: ItemList<Ability>; } | undefined>, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/units/[id].tsx:70:56 error TS2339: Property 'item' does not exist on type 'Source<NonNullable<false | { item: ItemGroup<Unit>; variation: Unit; abilities: ItemList<Ability>; } | undefined>, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/units/[id].tsx:68:46 error TS2339: Property 'item' does not exist on type 'Source<NonNullable<false | { item: ItemGroup<Unit>; variation: Unit; abilities: ItemList<Ability>; } | undefined>, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/units/[id].tsx:66:42 error TS2339: Property 'abilities' does not exist on type 'Source<NonNullable<false | { item: ItemGroup<Unit>; variation: Unit; abilities: ItemList<Ability>; } | undefined>, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/units/[id].tsx:62:59 error TS2339: Property 'variation' does not exist on type 'Source<NonNullable<false | { item: ItemGroup<Unit>; variation: Unit; abilities: ItemList<Ability>; } | undefined>, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/units/[id].tsx:61:42 error TS2339: Property 'variation' does not exist on type 'Source<NonNullable<false | { item: ItemGroup<Unit>; variation: Unit; abilities: ItemList<Ability>; } | undefined>, never, false>'.
+/home/user/migrations/aoe4-explorer/src/routes/units/[id].tsx:47:5 error TS2345: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+/home/user/migrations/aoe4-explorer/src/routes/units/[id].tsx:22:18 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.
+/home/user/migrations/aoe4-explorer/src/routes/units/units.tsx:39:99 error TS2339: Property 'slice' does not exist on type 'Read<false, never>'.
+/home/user/migrations/aoe4-explorer/src/routes/units/units.tsx:37:28 error TS2339: Property 'length' does not exist on type 'Read<false, never>'.
+/home/user/migrations/aoe4-explorer/src/routes/units/units.tsx:11:14 error TS2769: [generated] [LAZY_VIEW] fallback is a lazy view: function* () { return <.../>; }
+/home/user/migrations/aoe4-explorer/src/routes/units/units.tsx:12:18 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.
+/home/user/migrations/aoe4-explorer/src/routes/units/versus.tsx:124:13 warning TS95001: [NATIVE_FOREIGN_BOUNDARY] Handle failures inside BattleReportView or its callbacks; this imported component (BattleReportView from @components/quiz/BattleReportView) is outside the native check.
+/home/user/migrations/aoe4-explorer/src/routes/units/versus.tsx:124:75 error TS2322: Type 'Unit | undefined' is not assignable to type 'Unit'.
+  Type 'undefined' is not assignable to type 'Unit'.
+  related: /home/user/migrations/aoe4-explorer/src/components/quiz/BattleReportView.tsx:84:138: The expected type comes from property 'variation1' which is declared here on type 'IntrinsicAttributes & { unit1: UnifiedItem<Unit>; unit2: UnifiedItem<Unit> | undefined; age1?: number | undefined; age2?: number | undefined; variation1: Unit; variation2: Unit | undefined; onCivSelect?: ((civ: CivConfig, unitNumber: 1 | 2) => void) | undefined; }'
+/home/user/migrations/aoe4-explorer/src/routes/units/versus.tsx:124:31 error TS2322: Type 'ItemGroup<Unit> | undefined' is not assignable to type 'UnifiedItem<Unit>'.
+  Type 'undefined' is not assignable to type 'UnifiedItem<Unit>'.
+  related: /home/user/migrations/aoe4-explorer/src/components/quiz/BattleReportView.tsx:84:44: The expected type comes from property 'unit1' which is declared here on type 'IntrinsicAttributes & { unit1: UnifiedItem<Unit>; unit2: UnifiedItem<Unit> | undefined; age1?: number | undefined; age2?: number | undefined; variation1: Unit; variation2: Unit | undefined; onCivSelect?: ((civ: CivConfig, unitNumber: 1 | 2) => void) | undefined; }'
+/home/user/migrations/aoe4-explorer/src/routes/units/versus.tsx:119:13 error TS2322: [SETTLED_PROP] Pass a ready value, or allow a pending source in this prop's type.
+  related: /home/user/migrations/aoe4-explorer/src/components/UnitSelector.tsx:13:3: The expected type comes from property 'onAgeSelect' which is declared here on type 'PropsInput<UnitSelectorProps, unknown> & NoInfer<Undeclared<PropsInput<UnitSelectorProps, unknown>, UnitSelectorProps>>'
+/home/user/migrations/aoe4-explorer/src/routes/units/versus.tsx:118:13 error TS2322: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+  related: /home/user/migrations/aoe4-explorer/src/components/UnitSelector.tsx:12:3: The expected type comes from property 'onSelect' which is declared here on type 'PropsInput<UnitSelectorProps, unknown> & NoInfer<Undeclared<PropsInput<UnitSelectorProps, unknown>, UnitSelectorProps>>'
+/home/user/migrations/aoe4-explorer/src/routes/units/versus.tsx:117:13 error TS2322: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+  related: /home/user/migrations/aoe4-explorer/src/components/UnitSelector.tsx:11:3: The expected type comes from property 'selectedUnit' which is declared here on type 'PropsInput<UnitSelectorProps, unknown> & NoInfer<Undeclared<PropsInput<UnitSelectorProps, unknown>, UnitSelectorProps>>'
+/home/user/migrations/aoe4-explorer/src/routes/units/versus.tsx:109:13 error TS2322: [SETTLED_PROP] Pass a ready value, or allow a pending source in this prop's type.
+  related: /home/user/migrations/aoe4-explorer/src/components/UnitSelector.tsx:13:3: The expected type comes from property 'onAgeSelect' which is declared here on type 'PropsInput<UnitSelectorProps, unknown> & NoInfer<Undeclared<PropsInput<UnitSelectorProps, unknown>, UnitSelectorProps>>'
+/home/user/migrations/aoe4-explorer/src/routes/units/versus.tsx:108:13 error TS2322: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+  related: /home/user/migrations/aoe4-explorer/src/components/UnitSelector.tsx:12:3: The expected type comes from property 'onSelect' which is declared here on type 'PropsInput<UnitSelectorProps, unknown> & NoInfer<Undeclared<PropsInput<UnitSelectorProps, unknown>, UnitSelectorProps>>'
+/home/user/migrations/aoe4-explorer/src/routes/units/versus.tsx:107:13 error TS2322: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+  related: /home/user/migrations/aoe4-explorer/src/components/UnitSelector.tsx:11:3: The expected type comes from property 'selectedUnit' which is declared here on type 'PropsInput<UnitSelectorProps, unknown> & NoInfer<Undeclared<PropsInput<UnitSelectorProps, unknown>, UnitSelectorProps>>'
+/home/user/migrations/aoe4-explorer/src/routes/units/versus.tsx:31:25 error TS2345: [NATIVE_CALLBACK_FAILURE] Catch the failure inside this callback.
+/home/user/migrations/aoe4-explorer/src/routes/units/versus.tsx:11:14 error TS2345: [generated] [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+  related: /home/user/migrations/aoe4-explorer/src/global.tsx:18:64: 'location' is declared here.
+/home/user/migrations/aoe4-explorer/src/routes/units/versus.tsx:12:43 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.
+solid-yield check: 106 files, 344 errors
+exit 1 elapsed 648s

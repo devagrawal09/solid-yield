@@ -1,0 +1,103 @@
+=== 01-jsx-babel-parse-error
+src/index.jsx:3:1 error TS95000: [BABEL_PARSE_ERROR] /home/user/migrations/feedback/solid-realworld-repros/01-jsx-babel-parse-error/src/index.jsx: Unexpected token, expected "," (3:14)
+solid-yield check: 3 files, 1 errors
+(plain tsc: ok)
+=== 02-js-files-unchecked-without-checkJs
+src/index.tsx:4:15 error TS2345: [FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any.
+solid-yield check: 2 files, 1 errors
+(plain tsc: ok)
+=== 03-render-root-with-props-component-tag
+src/index.tsx:4:15 error TS2786: [COMPONENT_TAG] call a yield component in a hole: {yield* Comp(props)}
+solid-yield check: 2 files, 1 errors
+(plain tsc: ok)
+=== 04-createSignal-no-initial-value
+src/App.tsx:5:27 error TS2554: Expected 1-2 arguments, but got 0.
+solid-yield check: 2 files, 1 errors
+(plain tsc: ok)
+=== 05-helper-calling-prop-yield-parse-error
+src/Pager.tsx:4:5 error TS95000: [BABEL_PARSE_ERROR] /home/user/migrations/feedback/solid-realworld-repros/05-helper-calling-prop-yield-parse-error/src/Pager.tsx: Unexpected reserved word 'yield'. (10:5)
+solid-yield check: 3 files, 1 errors
+(plain tsc: ok)
+=== 06-writable-memo-createSignal-fn
+src/App.tsx:7:17 error TS95000: [generated] [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.
+solid-yield check: 2 files, 1 errors
+(plain tsc: ok)
+=== 07-context-tuple-through-hook
+src/App.tsx:15:61 error TS2339: Property 'count' does not exist on type 'Read<false, never>'.
+src/App.tsx:15:47 error TS2339: Property 'label' does not exist on type 'Read<false, never>'.
+src/App.tsx:14:19 error TS2339: Property 'inc' does not exist on type 'Read<false, never>'.
+src/index.tsx:3:15 error TS2345: [FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any.
+solid-yield check: 3 files, 4 errors
+(plain tsc: ok)
+=== 08-prop-callback-with-prop-argument
+src/Preview.tsx:1:17 error TS95000: [generated] [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.
+src/index.tsx:7:74 error TS2345: [WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state.
+solid-yield check: 2 files, 2 errors
+(plain tsc: ok)
+=== 09-nested-store-factory-read-in-setup
+src/App.tsx:11:48 error TS2769: [READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive.
+src/index.tsx:3:15 error TS2345: [FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any.
+solid-yield check: 4 files, 2 errors
+(plain tsc: ok)
+=== 10-lazy-selected-component
+src/App.tsx:8:9 warning TS95001: [NATIVE_FOREIGN_BOUNDARY] Handle failures inside Page or its callbacks; this imported component (lazy from solid-js) is outside the native check.
+src/App.tsx:4:17 error TS2786: [generated] [COMPONENT_TAG] call a yield component in a hole: {yield* Comp(props)}
+src/App.tsx:4:17 error TS2345: [generated] [FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: a transport failure (ChunkError).
+solid-yield check: 3 files, 2 errors
+(plain tsc: ok)
+=== 11-callback-prop-calling-context-action
+src/index.tsx:30:11 error TS2345: [WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state.
+solid-yield check: 2 files, 1 errors
+(plain tsc: ok)
+=== 12-errored-reset-event-rejects
+src/App.tsx:14:26 error TS95000: [EVENT_REJECTS] This handler can fail with unknown and nothing catches it; wrap the body in try/catch, or declare the failure.
+solid-yield check: 2 files, 1 errors
+(plain tsc: ok)
+=== 13-context-setter-in-async-helper
+src/App.tsx:18:5 error TS95000: [BABEL_PARSE_ERROR] /home/user/migrations/feedback/solid-realworld-repros/13-context-setter-in-async-helper/src/App.tsx: Unexpected reserved word 'yield'. (37:5)
+solid-yield check: 2 files, 1 errors
+(plain tsc: ok)
+=== 14-hoisted-prop-member-read
+src/index.tsx:13:16 error TS95000: [EVENT_REJECTS] This handler can fail with unknown and nothing catches it; wrap the body in try/catch, or declare the failure.
+  related: src/index.tsx:27:15: The app is rendered here.
+src/index.tsx:15:13 error TS2488: Type 'boolean' must have a '[Symbol.iterator]()' method that returns an iterator.
+solid-yield check: 1 files, 2 errors
+(plain tsc: ok)
+=== 15-prop-colors-leak-across-callers
+src/index.tsx:10:24 error TS2345: [FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: unknown.
+  related: src/index.tsx:32:15: The app is rendered here. can suspend (pending); can fail with an unknown error; does not wait; needs no context
+src/index.tsx:27:8 error TS1360: [PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.
+  related: src/index.tsx:32:15: The app is rendered here. can suspend (pending); can fail with an unknown error; does not wait; needs no context
+solid-yield check: 1 files, 2 errors
+(plain tsc: ok)
+=== 16-async-generator-action
+src/App.tsx:11:28 error TS2345: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+solid-yield check: 2 files, 1 errors
+(plain tsc: ok)
+=== 17-createMemo-type-annotations
+src/App.tsx:15:25 error TS2339: Property 'name' does not exist on type '{}'.
+src/App.tsx:15:13 error TS2339: Property 'name' does not exist on type '{}'.
+src/App.tsx:12:28 error TS2741: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+  related: src/App.tsx:4:3: 'name' is declared here.
+src/App.tsx:12:24 error TS2345: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+src/App.tsx:10:24 error TS2344: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+solid-yield check: 2 files, 5 errors
+(plain tsc: ok)
+=== 18-createEffect-compute-forms
+src/App.tsx:8:5 error TS1345: An expression of type 'void' cannot be tested for truthiness.
+src/App.tsx:7:16 error TS2345: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+solid-yield check: 2 files, 2 errors
+(plain tsc: ok)
+=== 19-refusal-hides-ts-errors
+src/App.tsx:1:10 error TS95000: [NATIVE_API] Solid API createComputed has no verified native lowering.
+solid-yield check: 2 files, 1 errors
+(plain tsc: 2 errors)
+=== 20-store-copy-and-narrowing
+src/App.tsx:17:15 error TS2322: Type 'Source<Form, never, false> & { readonly title: Source<string, never, false>; readonly body: Source<string, never, false>; }' is not assignable to type 'Form'.
+  Types of property 'title' are incompatible.
+    Type 'Source<string, never, false>' is not assignable to type 'string'.
+src/App.tsx:8:17 error TS2538: [generated] Type 'undefined' cannot be used as an index type.
+src/index.tsx:5:11 error TS1360: [PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.
+  related: src/index.tsx:7:15: The app is rendered here. can suspend (pending); never fails; does not wait; needs no context
+solid-yield check: 2 files, 3 errors
+(plain tsc: ok)

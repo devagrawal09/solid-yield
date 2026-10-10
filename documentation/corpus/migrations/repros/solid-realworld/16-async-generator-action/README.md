@@ -1,0 +1,4 @@
+`action(async function* ...)` in the form Solid's own `action` docs recommend (`await` for a typed result, then a bare `yield` before writing) is rejected.
+Command: `ln -sfn /home/user/migrations/solid-realworld/node_modules node_modules; ./node_modules/.bin/solid-yield check .` (plain `tsc` passes).
+Expected: 0 errors (the native core line lists `action` with sync *and async* generators).
+Actual: `src/App.tsx:11:28 error TS2345: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.` The generated code keeps `$event(async function* ...)` with the `await` and the bare `yield;`. The message does not say async generators are the problem. Workaround in solid-realworld (login, register, updateUser, createComment, createArticle, updateArticle): a sync generator with typed yields, `const res: Result<"user", User> = yield agent.Auth.login(...)`.

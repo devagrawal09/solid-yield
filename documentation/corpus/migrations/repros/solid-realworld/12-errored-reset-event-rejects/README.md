@@ -1,0 +1,4 @@
+Calling the `reset` that `Errored` passes to its fallback, from a retry button, is reported as an unhandled event failure.
+Command: `ln -sfn /home/user/migrations/solid-realworld/node_modules node_modules; ./node_modules/.bin/solid-yield check .` (plain `tsc` passes).
+Expected: 0 errors. `reset` (typed `() => void` by Solid) re-runs the errored branch; a failure of that branch goes back to the same boundary, not to the click handler. This is the documented retry affordance (`<Errored fallback={(err, reset) => <button onClick={reset}>...`).
+Actual: `src/App.tsx:14:26 error TS95000: [EVENT_REJECTS] This handler can fail with unknown and nothing catches it; wrap the body in try/catch, or declare the failure.` The fix the message suggests (try/catch around `reset()`) would be dead code. solid-realworld dropped its retry button instead.

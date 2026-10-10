@@ -1395,3 +1395,34 @@ from the host's type. Failure inference covers the callback's failures in the
 function summaries, but the generated types do not.
 
 Tests: `native-callback-colors.test.js` (10 cases).
+
+### Remaining originals: Rendering, Effect, Room (F-S48; 2026-10-10)
+
+**Anonymous default components (F-S48, done).** `export default () => <…/>`
+or an anonymous `export default function () {…}` that returns JSX is a
+component without a name, and a sugar component needs one. The prelude names
+it after its file: an `index` file takes its directory's name, and a suffix is
+added if the name is taken. It becomes `function Profile() {…}` exported by
+default. Tests: `native-default-components.test.js`.
+
+**Higher-order components (F-S48, open).** Rendering's `RouteHOC(Comp)`
+returns `(props = {}) => <RouterContext …><Comp/></RouterContext>`, a
+component defined inside a function and closing over its argument. Native mode
+lowers only top-level named components, so the inner arrow's reads have no
+routine host (`SUGAR_CALLBACK` at `router.tsx:23`). Probing with the HOC
+bypassed shows nothing else blocking before it: once `App` is a named function
+and `Profile/index.tsx` is named (now automatic), the HOC is the stop.
+
+Supporting it means lowering a component created by a call, with a component
+parameter, to `component(…)` at the call. A design ruling is needed first:
+lower HOCs, or keep them foreign behind a checked boundary.
+
+**Effect (open, design).** `placeOrder = effectAction(function* (…) {…})` is
+an authored generator driven by a hand-written Effect-TS bridge. It writes
+Solid state between Effect steps, and its writes run inside the bridge's own
+`action`. The lowering refuses it (`SUGAR_ESCAPE`: a routine handed to an
+unknown consumer). A foreign generator bridge needs its own contract.
+
+**Room (open, out of the native scope so far).** Room's panels are server
+components (`live(GET(async … => (props) => <…/>))`), the islands line's
+shape, not plain client Solid.

@@ -15,6 +15,46 @@ const api = p => {
       }
     : null;
 };
+/**
+ * F-S48: `export default () => <…/>` (or an anonymous `function`) is a
+ * component without a name, and a sugar component needs one. It becomes
+ * `export default function Profile() {…}`, named after its file (`index`
+ * takes its directory's name), with a suffix if that name is taken.
+ * @param {Path} p @param {string} file
+ */
+function nameDefaultComponent(p, file) {
+  const body = /** @type {Path[]} */ (p.get("body"));
+  const exported = body.find(q => q.isExportDefaultDeclaration());
+  const fn = /** @type {Path | undefined} */ (exported?.get("declaration"));
+  if (!fn || !(fn.isArrowFunctionExpression() || fn.isFunction())) return;
+  /** @type {any} */ const node = fn.node;
+  if (node.id || node.async || node.generator) return;
+  let jsx = t.isJSXElement(fn.node.body) || t.isJSXFragment(fn.node.body);
+  traverseOwned(fn, {
+    Function(inner) {
+      if (inner !== fn) inner.skip();
+    },
+    ReturnStatement(ret) {
+      jsx ||= t.isJSXElement(ret.node.argument) || t.isJSXFragment(ret.node.argument);
+    }
+  });
+  if (!jsx) return;
+  const parts = file.split(/[\\/]/);
+  const base = parts.at(-1)?.replace(/\.[cm]?[jt]sx?$/, "") ?? "Default";
+  const stem = (base === "index" ? (parts.at(-2) ?? "Default") : base).replace(/[^A-Za-z0-9]/g, "");
+  let name = /^[A-Za-z]/.test(stem) ? stem[0].toUpperCase() + stem.slice(1) : "Default" + stem;
+  while (p.scope.hasBinding(name)) name += "Default";
+  const block = t.isBlockStatement(fn.node.body)
+    ? fn.node.body
+    : t.blockStatement([t.returnStatement(/** @type {any} */ (fn.node.body))]);
+  const declaration = t.functionDeclaration(t.identifier(name), node.params, block);
+  declaration.start = fn.node.start;
+  declaration.end = fn.node.end;
+  declaration.loc = fn.node.loc;
+  // Replace the statement: an expression replaced by a declaration is wrapped.
+  /** @type {any} */ (exported).node.declaration = declaration;
+  p.scope.crawl();
+}
 /** Normalize native control contracts before routine reconstruction.
  * @param {Map<string,string>} files */
 export function nativePrelude(files) {
@@ -23,6 +63,7 @@ export function nativePrelude(files) {
     const p = parseProgram(code, file);
     if (!p) continue;
     const used = new Set();
+    nameDefaultComponent(p, file);
     traverseOwned(p, {
       VariableDeclarator(q) {
         const init = q.get("init");

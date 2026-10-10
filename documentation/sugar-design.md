@@ -1794,6 +1794,18 @@ Both were real gaps, and fixing them exposed a third.
   `$store`, `$optimistic` or `$optimisticStore`) is now delegated regardless.
   Tests: `native-callback-colors.test.js`. This shipped with F-S47 in
   `31695cb`.
+- **Nothing in an async producer is delegated.** F-S53 attempts a core
+  async producer (`createMemo(async function* …)`, `createProjection`'s) as a
+  stream: the attempt takes what it yields as the stream's values. The
+  lowering still treated its body as a routine, so a read became `yield* n`
+  and a setter's call `yield* setN(0)`, each yielding the operation into the
+  stream as a value, and `yield n()` became `yield n` (a plain `yield` was
+  taken for a delegation). No check fired: the second run's `memo-write`
+  mutant at `rendering-edges/Feed.tsx:42` survived silently. A read there is
+  now refused with `READ_IN_OPAQUE_GENERATOR`, as in any generator the
+  lowering does not own, and a setter's call stays plain, where
+  `no-unyielded-write` reports it. Only a `yield*` counts as a delegation
+  already made. Tests: `native-owned.test.js` (async producers).
 - **The lint sees aliased setters.** `solid-yield/no-unyielded-write`
   recognized a setter only when its creator was spelled `$signal` (or
   `$store`, …). Native output imports `$signal as createSignal`, so the rule
@@ -1801,5 +1813,11 @@ Both were real gaps, and fixing them exposed a third.
   found the dropped write above, in the accepted `event-updater` fixture. It
   also reports a setter called inside an async iterable producer
   (`createMemo(async function* () { setVersion(0); … })`), which the lowering
-  keeps as plain code, where the write would be dropped. Tests:
+  keeps as plain code (above), where the write would be dropped. Tests:
   `rules.test.js`.
+- **An equivalent the catalogue cannot name.** `delete-loading` at
+  `rendering-edges/Feed.tsx:56` survives silently. The root's `Loading` (in
+  `main.tsx` and `server.tsx`, which the lazy page needs anyway) covers Feed,
+  so removing Feed's own boundary moves the fallback; the program is still
+  accepted, correctly. The catalogue's equivalence is per operator, so the
+  report keeps it as a survivor.

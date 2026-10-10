@@ -835,6 +835,19 @@ function pass(code, filename, program, native = false) {
   function delegate(path, operand = path.node) {
     const fn = path.getFunctionParent();
     if (!fn) return; // root renderer calls and foreign edges stay plain
+    // An async generator is a stream producer (F-S53), not a routine: the
+    // attempt that drives it takes what it yields as the stream's values, so
+    // a `yield*` there would put the operation in the stream. A setter's call
+    // stays plain, where the lint reports the dropped write; a read is refused.
+    if (fn.node.generator && fn.node.async) {
+      if (path.isCallExpression() && setterCall(path)) return;
+      fail(
+        path,
+        "READ_IN_OPAQUE_GENERATOR",
+        "this signal is read inside a generator the compiler does not own; read it outside and pass the value in, or make the read a memo",
+        filename
+      );
+    }
     // A library renderer's root code (`renderToStream(() => Root({ url }))`)
     // is the root, checked by the renderer itself (D-099), not a callback.
     const renderer = fn.parentPath?.isCallExpression() ? fn.parentPath : null;
@@ -1153,7 +1166,7 @@ function pass(code, filename, program, native = false) {
         if (opaqueCall(path)) return;
         const callee = path.get("callee"),
           ct = type(callee);
-        const delegated = path.parentPath.isYieldExpression();
+        const delegated = path.parentPath.isYieldExpression({ delegate: true });
         const fallback = path.getFunctionParent();
         if (
           native &&

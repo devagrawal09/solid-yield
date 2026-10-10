@@ -150,6 +150,26 @@ export function App(){ return <p>{items.length}</p>; }`;
       nativeFailures(new Map([[file, code]])).functions.find(f => f.name === "App").fails
     ).toContain("unknown");
   });
+  // F-S53 attempts a core async producer as a stream: what it yields is the
+  // stream's values, so nothing inside it is delegated (found by mutation).
+  it.each([
+    ["createMemo", "async function* () {\n  yield count();\n }", "5:9"],
+    ["createMemo", "async function* () {\n  const k = count();\n  yield k;\n }", "5:13"],
+    [
+      "createProjection",
+      "async function* (state) {\n  state.n = count();\n  yield state;\n }",
+      "5:13"
+    ]
+  ])("refuses a read in %s's async producer at its source line", (api, producer, at) => {
+    const code = `import {createSignal,${api}} from 'solid-js';\nexport function App(){\n const [count] = createSignal(0);\n const all = ${api}(${producer}${api === "createProjection" ? ", { n: 0 }" : ""});\n return <p>{String(all)}</p>;\n}`;
+    expect(() => lower(code)).toThrow(new RegExp(`READ_IN_OPAQUE_GENERATOR.*:${at}\\)`));
+  });
+  it("leaves a setter's call in an async producer plain, for the lint", () => {
+    const code = `import {createSignal,createMemo} from 'solid-js';\nexport function App(){\n const [count, setCount] = createSignal(0);\n const all = createMemo(async function* () { setCount(1); yield 1; });\n return <p>{all()}{count()}</p>;\n}`;
+    const out = lower(code).files.get(file);
+    expect(out).toMatch(/async function\* \(\) \{\s*setCount\(1\);/);
+    expect(out).not.toContain("yield* setCount");
+  });
   it("maps a later callback refusal to the authored read", () => {
     const code = `import {createSignal,createMemo} from 'solid-js';\nexport function App(){\n const [count] = createSignal(0);\n const doubled = createMemo(()=>count()*2);\n foreignScheduler(()=>count());\n return <p>{doubled()}</p>;\n}`;
     expect(() => lower(code)).toThrow(/:5:23\)/);

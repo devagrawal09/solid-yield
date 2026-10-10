@@ -298,8 +298,13 @@ function seed(code, filename, native = false) {
             returnsJSX ||= t.isJSXElement(q.node.argument) || t.isJSXFragment(q.node.argument);
           }
         });
+        // F-S51: a component a module-level factory returns is one too.
+        const factoryComponent =
+          path.parentPath.isReturnStatement() && !path.getFunctionParent()?.getFunctionParent();
         const isComponent =
-          /^[A-Z]/.test(fnName(path) ?? "") && !path.getFunctionParent() && returnsJSX;
+          /^[A-Z]/.test(fnName(path) ?? "") &&
+          (!path.getFunctionParent() || factoryComponent) &&
+          returnsJSX;
         if (returnsJSX && !path.getFunctionParent() && !isComponent)
           fail(
             path,
@@ -1312,12 +1317,66 @@ function pass(code, filename, program, native = false) {
  * Found where TypeScript refuses the call's prop; only a colored source or hole
  * counts, so a genuine type mismatch stays an error.
  * @param {ts.Program} program @param {Set<string>} active
- * @returns {Map<string, Map<string, Set<string>>>} file → component → props
+ * @returns {{wanted: Map<string, Map<string, Set<string>>>, concrete: Map<string, Map<string, Map<string, {pending: boolean, fails: Set<string>}>>>}} file → component → props
  */
 function coloredPropSites(program, active) {
   const checker = program.getTypeChecker();
   /** @type {Map<string, Map<string, Set<string>>>} */
   const wanted = new Map();
+  /** A component reached through `lazy` loses its type parameters there
+   * (`LazyComponent<T>`): its props widen to the colors every caller passes.
+   * @type {Map<string, Map<string, Map<string, {pending: boolean, fails: Set<string>}>>>} */
+  const concrete = new Map();
+  /** @type {Set<string>} */ const unprintable = new Set();
+  const printer = ts.createPrinter();
+  /** @param {ts.VariableDeclaration} declaration @returns {ts.VariableDeclaration | undefined} */
+  const lazyTarget = declaration => {
+    const init = declaration.initializer;
+    if (!init || !ts.isCallExpression(init) || !ts.isIdentifier(init.expression)) return;
+    let lazy = checker.getSymbolAtLocation(init.expression);
+    if (lazy && lazy.flags & ts.SymbolFlags.Alias) lazy = checker.getAliasedSymbol(lazy);
+    if (lazy?.name !== "lazy") return;
+    const loader = init.arguments[0];
+    const load = loader && ts.isArrowFunction(loader) ? loader.body : undefined;
+    const specifier =
+      load && ts.isCallExpression(load) && load.expression.kind === ts.SyntaxKind.ImportKeyword
+        ? load.arguments[0]
+        : undefined;
+    const module = specifier && checker.getSymbolAtLocation(specifier);
+    let target = module && checker.getExportsOfModule(module).find(e => e.name === "default");
+    if (target && target.flags & ts.SymbolFlags.Alias) target = checker.getAliasedSymbol(target);
+    return target?.declarations?.find(ts.isVariableDeclaration);
+  };
+  /** What a passed value may be: pending, and its failures as types printed
+   * for the component's file, or `null` when one cannot be printed there.
+   * @param {ts.Type} type @param {ts.Node} at @param {ts.Node} place */
+  const colorsOf = (type, at, place) => {
+    /** @type {ts.Type[]} */ const parts = [];
+    if (member(type, "SOURCE", at)) parts.push(type);
+    else
+      for (const sig of type.getCallSignatures()) {
+        const result = checker.getReturnTypeOfSignature(sig);
+        if (result.symbol?.name !== "Generator") continue;
+        const [yields] = checker.getTypeArguments(/** @type {ts.TypeReference} */ (result));
+        if (yields) parts.push(...(yields.isUnion() ? yields.types : [yields]));
+      }
+    let pending = false;
+    /** @type {Set<string>} */ const fails = new Set();
+    for (const part of parts) {
+      const p = member(part, "PENDING", at),
+        f = member(part, "FAILS", at);
+      if (p && checker.typeToString(p) !== "false") pending = true;
+      if (!f || f.flags & ts.TypeFlags.Never) continue;
+      for (const failure of f.isUnion() ? f.types : [f]) {
+        const node = checker.typeToTypeNode(failure, place, ts.NodeBuilderFlags.NoTruncation);
+        const text =
+          node && printer.printNode(ts.EmitHint.Unspecified, node, place.getSourceFile());
+        if (!text || /__@|\bany\b/.test(text)) return null;
+        fails.add(text);
+      }
+    }
+    return { pending, fails };
+  };
   /** @param {ts.Type} type @param {string} name @param {ts.Node} at */
   const member = (type, name, at) => {
     const symbol = checker.getPropertiesOfType(type).find(p => p.name.startsWith(`__@${name}@`));
@@ -1366,7 +1425,10 @@ function coloredPropSites(program, active) {
       if (!colored(checker.getTypeAtLocation(prop.initializer), prop.initializer)) continue;
       let symbol = checker.getSymbolAtLocation(call.expression);
       if (symbol && symbol.flags & ts.SymbolFlags.Alias) symbol = checker.getAliasedSymbol(symbol);
-      const declaration = symbol?.declarations?.find(ts.isVariableDeclaration);
+      let declaration = symbol?.declarations?.find(ts.isVariableDeclaration);
+      // `lazy(() => import("./Page"))`: the page module's default component.
+      const viaLazy = declaration ? lazyTarget(declaration) : undefined;
+      if (viaLazy) declaration = viaLazy;
       const file = declaration?.getSourceFile().fileName;
       if (!declaration || !file || !active.has(file) || !ts.isIdentifier(declaration.name))
         continue;
@@ -1395,12 +1457,40 @@ function coloredPropSites(program, active) {
       const component = declaration.name.text;
       if (!components.has(component)) components.set(component, new Set());
       components.get(component)?.add(name);
+      if (viaLazy) {
+        if (!concrete.has(file)) concrete.set(file, new Map());
+        const props =
+          /** @type {Map<string, Map<string, {pending: boolean, fails: Set<string>}>>} */ (
+            concrete.get(file)
+          );
+        if (!props.has(component)) props.set(component, new Map());
+        const colors = props.get(component);
+        const seen = colors?.get(name) ?? { pending: false, fails: new Set() };
+        const passed = colorsOf(
+          checker.getTypeAtLocation(prop.initializer),
+          prop.initializer,
+          declaration
+        );
+        if (!passed) unprintable.add(`${file}#${component}`);
+        else {
+          seen.pending ||= passed.pending;
+          for (const f of passed.fails) seen.fails.add(f);
+        }
+        colors?.set(name, seen);
+      }
     }
   }
-  return wanted;
+  for (const id of unprintable) {
+    const [file, component] = [id.slice(0, id.lastIndexOf("#")), id.slice(id.lastIndexOf("#") + 1)];
+    concrete.get(file)?.delete(component);
+  }
+  return { wanted, concrete };
 }
-/** D-119: widen the recorded props. @param {string} code @param {string} filename @param {Map<string, Set<string>>} components */
-function widenColoredProps(code, filename, components) {
+/** D-119: widen the recorded props, with the component's own type parameters,
+ * or (a component reached through `lazy`) with the colors its callers pass.
+ * @param {string} code @param {string} filename @param {Map<string, Set<string>>} components
+ * @param {Map<string, Map<string, {pending: boolean, fails: Set<string>}>>} [concrete] */
+function widenColoredProps(code, filename, components, concrete) {
   const p = parseProgram(code, filename);
   if (!p) return code;
   let changed = false;
@@ -1433,6 +1523,24 @@ function widenColoredProps(code, filename, components) {
         if (!t.isTSPropertySignature(declared) || !declared.typeAnnotation) continue;
         const name = key(declared.key);
         if (!props.has(name)) continue;
+        const passed = concrete?.get(key(q.node.id))?.get(name);
+        if (passed) {
+          const failures = [...passed.fails].join(" | ") || "never";
+          const holder = parseProgram(`let __t: ${failures};`, filename);
+          /** @type {any} */ const statement = holder?.node.body[0];
+          const failureType = statement?.declarations?.[0]?.id?.typeAnnotation?.typeAnnotation;
+          if (!failureType) continue;
+          declared.typeAnnotation.typeAnnotation = t.tsTypeReference(
+            t.identifier("__NativeSource"),
+            t.tsTypeParameterInstantiation([
+              declared.typeAnnotation.typeAnnotation,
+              failureType,
+              t.tsLiteralType(t.booleanLiteral(passed.pending))
+            ])
+          );
+          changed = true;
+          continue;
+        }
         const fails = q.scope.generateUid(`E_${name}`),
           pending = q.scope.generateUid(`P_${name}`);
         declared.typeAnnotation.typeAnnotation = t.tsTypeReference(
@@ -1464,10 +1572,11 @@ function widenColoredProps(code, filename, components) {
         ]);
       }
       // A defaulted parameter stays after the required ones.
-      fn.typeParameters = t.tsTypeParameterDeclaration([
-        ...parameters.filter(param => !param.default),
-        ...parameters.filter(param => param.default)
-      ]);
+      if (parameters.length)
+        fn.typeParameters = t.tsTypeParameterDeclaration([
+          ...parameters.filter(param => !param.default),
+          ...parameters.filter(param => param.default)
+        ]);
     }
   });
   if (!changed) return code;
@@ -1485,6 +1594,199 @@ function widenColoredProps(code, filename, components) {
   }
   return printer(t.file(p.node));
 }
+/**
+ * An authored value type on a memo or an effect's compute (`createMemo<T>(…)`).
+ * The library's `$memo<Y, R>` and `$effect<YC, V, YE>` take their operations
+ * first, and TypeScript cannot give only the value: the type moves onto the
+ * settled body's returns, checked as Solid checks them and giving the value
+ * (`(x satisfies T) as T`: a mismatch is still an error). An async iterable of
+ * `T` is left to inference: its items are the value.
+ * @param {string} code @param {string} filename @param {ts.Program} program
+ */
+function typedCreations(code, filename, program) {
+  const p = parseProgram(code, filename);
+  const source = program.getSourceFile(filename);
+  if (!p || !source || source.text !== code) return code;
+  const checker = program.getTypeChecker();
+  /** @type {Map<string, ts.Node>} */ const nodes = new Map();
+  /** @param {ts.Node} node */
+  // The outermost node of a span: a type reference, not its name.
+  const index = node => {
+    const span = `${node.getStart(source)}:${node.end}`;
+    if (!nodes.has(span)) nodes.set(span, node);
+    ts.forEachChild(node, index);
+  };
+  index(source);
+  let changed = false;
+  traverseOwned(p, {
+    CallExpression(q) {
+      const api = lib(q.get("callee"));
+      const params = q.node.typeParameters?.params;
+      if (!params?.length || (api !== "$memo" && api !== "$effect")) return;
+      const annotation = /** @type {any} */ (params[0]);
+      const typeNode = nodes.get(`${annotation.start}:${annotation.end}`);
+      const body = q.get("arguments.0");
+      if (!typeNode || !ts.isTypeNode(typeNode) || !body.isFunction()) return;
+      const declared = checker.getTypeFromTypeNode(typeNode);
+      traverseOwned(body, {
+        Function(inner) {
+          if (inner !== body) inner.skip();
+        },
+        ReturnStatement(ret) {
+          const argument = ret.node.argument;
+          const node = argument && nodes.get(`${argument.start}:${argument.end}`);
+          if (!argument || !node) return;
+          // An async iterable yields `T`s (Stream's memo): its items are the value.
+          const returned = checker.getTypeAtLocation(node);
+          const iterable = (returned.isUnion() ? returned.types : [returned]).some(part =>
+            checker.getPropertiesOfType(part).some(s => s.name.startsWith("__@asyncIterator@"))
+          );
+          if (iterable && !checker.isTypeAssignableTo(returned, declared)) return;
+          ret.node.argument = t.tsAsExpression(
+            t.tsSatisfiesExpression(argument, t.cloneNode(annotation, true)),
+            t.cloneNode(annotation, true)
+          );
+        }
+      });
+      q.node.typeParameters = null;
+      changed = true;
+    }
+  });
+  return changed ? printer(t.file(p.node)) : code;
+}
+/**
+ * F-S52: a context's value type as plain Solid declares it
+ * (`[() => string, { matches: (match: string) => boolean }]`) holds, once
+ * lowered, a source and a routine: Solid reads an accessor or a reactive
+ * helper where it is called; the library reads a source and drives a routine
+ * there. Each provided value is walked with the declared type (tuples by
+ * position, objects by member, through aliases and interfaces). A declared
+ * function type given a source or a routine it does not admit becomes that
+ * value's type, so every consumer reads or delegates it, as D-119 widens a
+ * prop. Run once the bodies are settled.
+ * @param {string} code @param {string} filename @param {ts.Program} program
+ */
+function contextFacades(code, filename, program) {
+  const source = program.getSourceFile(filename);
+  if (!source || source.text !== code) return code;
+  const checker = program.getTypeChecker();
+  /** @param {ts.Type} type */
+  const routineOrSource = type =>
+    checker.getPropertiesOfType(type).some(s => s.name.startsWith("__@SOURCE@")) ||
+    type
+      .getCallSignatures()
+      .some(sig => checker.getReturnTypeOfSignature(sig).symbol?.name === "Generator");
+  /** @type {{start: number, end: number, text: string}[]} */ const edits = [];
+  const printer = ts.createPrinter();
+  for (const [value, declared] of contextSlots(source, checker)) {
+    if (!ts.isFunctionTypeNode(declared)) continue;
+    const actual =
+      ts.isIdentifier(value) && ts.isShorthandPropertyAssignment(value.parent)
+        ? checker.getTypeOfSymbolAtLocation(
+            /** @type {ts.Symbol} */ (checker.getShorthandAssignmentValueSymbol(value.parent)),
+            value
+          )
+        : checker.getTypeAtLocation(value);
+    if (!routineOrSource(actual)) continue;
+    if (checker.isTypeAssignableTo(actual, checker.getTypeFromTypeNode(declared))) continue;
+    const node = checker.typeToTypeNode(actual, value, ts.NodeBuilderFlags.NoTruncation);
+    if (!node) continue;
+    const text = printer.printNode(ts.EmitHint.Unspecified, node, source);
+    // Not settled yet (a generator's own `any` next type aside): leave it.
+    if (/__@|\bany\b|\bunknown\b/.test(text.replace(/,\s*any>/g, ">"))) continue;
+    edits.push({ start: declared.getStart(source), end: declared.end, text: `(${text})` });
+  }
+  if (!edits.length) return code;
+  let out = code;
+  for (const edit of [...new Map(edits.map(e => [`${e.start}`, e])).values()].sort(
+    (a, b) => b.start - a.start
+  ))
+    out = out.slice(0, edit.start) + edit.text + out.slice(edit.end);
+  return out;
+}
+/**
+ * F-S52: each provided value's leaves paired with the context's declared type
+ * nodes (`Ctx.provide({ value })`): tuples by position, objects by member,
+ * through aliases and interfaces declared in the same file.
+ * @param {ts.SourceFile} source @param {ts.TypeChecker} checker
+ * @returns {Map<ts.Node, ts.TypeNode>}
+ */
+function contextSlots(source, checker) {
+  /** @type {Map<ts.Node, ts.TypeNode>} */ const slots = new Map();
+  /** @param {ts.Node | undefined} node @returns {ts.Node | undefined} */
+  const resolveType = node => {
+    for (let i = 0; node && i < 8; i++) {
+      if (ts.isParenthesizedTypeNode(node)) {
+        node = node.type;
+        continue;
+      }
+      if (!ts.isTypeReferenceNode(node)) return node;
+      let symbol = checker.getSymbolAtLocation(node.typeName);
+      if (symbol && symbol.flags & ts.SymbolFlags.Alias) symbol = checker.getAliasedSymbol(symbol);
+      const declaration = symbol?.declarations?.[0];
+      if (!declaration || declaration.getSourceFile() !== source) return node;
+      if (ts.isTypeAliasDeclaration(declaration)) node = declaration.type;
+      else if (ts.isInterfaceDeclaration(declaration)) return declaration;
+      else return node;
+    }
+    return node;
+  };
+  /** @param {ts.Expression} value @param {ts.Node | undefined} declared */
+  const walk = (value, declared) => {
+    const resolved = resolveType(declared);
+    if (!resolved) return;
+    if (ts.isArrayLiteralExpression(value) && ts.isTupleTypeNode(resolved)) {
+      value.elements.forEach((element, i) => {
+        const slot = resolved.elements[i];
+        walk(element, slot && ts.isNamedTupleMember(slot) ? slot.type : slot);
+      });
+      return;
+    }
+    if (ts.isObjectLiteralExpression(value)) {
+      const members =
+        ts.isTypeLiteralNode(resolved) || ts.isInterfaceDeclaration(resolved)
+          ? resolved.members
+          : null;
+      if (!members) return;
+      for (const property of value.properties) {
+        if (!ts.isPropertyAssignment(property) && !ts.isShorthandPropertyAssignment(property))
+          continue;
+        const name = property.name.getText(source);
+        const member = members.find(
+          m => ts.isPropertySignature(m) && m.name.getText(source) === name
+        );
+        if (!member || !ts.isPropertySignature(member) || !member.type) continue;
+        walk(ts.isPropertyAssignment(property) ? property.initializer : property.name, member.type);
+      }
+      return;
+    }
+    if (ts.isTypeNode(resolved)) slots.set(value, resolved);
+  };
+  /** @param {ts.Node} node */
+  const visit = node => {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isPropertyAccessExpression(node.expression) &&
+      node.expression.name.text === "provide" &&
+      node.arguments[0] &&
+      ts.isObjectLiteralExpression(node.arguments[0])
+    ) {
+      let symbol = checker.getSymbolAtLocation(node.expression.expression);
+      if (symbol && symbol.flags & ts.SymbolFlags.Alias) symbol = checker.getAliasedSymbol(symbol);
+      const declaration = symbol?.valueDeclaration;
+      const init =
+        declaration && ts.isVariableDeclaration(declaration) ? declaration.initializer : undefined;
+      const declared = init && ts.isCallExpression(init) ? init.typeArguments?.[0] : undefined;
+      const value = node.arguments[0].properties.find(
+        p => ts.isPropertyAssignment(p) && p.name.getText(source) === "value"
+      );
+      if (declared && value && ts.isPropertyAssignment(value)) walk(value.initializer, declared);
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(source);
+  return slots;
+}
 /** Refuse generator helpers handed to an unknown consumer. The library's
  * callback hosts are the only allowed consumers besides direct delegation.
  * @param {Map<string,string>} files @param {Set<string>} active @param {ts.CompilerOptions} options */
@@ -1494,6 +1796,49 @@ function checkEscapes(files, active, options) {
   for (const id of active) {
     const source = program.getSourceFile(id);
     if (!source) continue;
+    /** A routine captured in a `const` that is only ever called: the lowering
+     * captures a callee before evaluating its arguments, in source order.
+     * @param {ts.Identifier} n */
+    const capturedCallee = n => {
+      const declaration = n.parent;
+      if (
+        !ts.isVariableDeclaration(declaration) ||
+        declaration.initializer !== n ||
+        !ts.isIdentifier(declaration.name) ||
+        !(declaration.parent.flags & ts.NodeFlags.Const)
+      )
+        return false;
+      const symbol = checker.getSymbolAtLocation(declaration.name);
+      const scope = declaration.parent.parent.parent;
+      let calledOnly = true;
+      /** @param {ts.Node} m */
+      const uses = m => {
+        if (
+          ts.isIdentifier(m) &&
+          m !== declaration.name &&
+          checker.getSymbolAtLocation(m) === symbol &&
+          !(ts.isCallExpression(m.parent) && m.parent.expression === m)
+        )
+          calledOnly = false;
+        ts.forEachChild(m, uses);
+      };
+      uses(scope);
+      return calledOnly;
+    };
+    /** A routine given where a routine is expected (F-S52: a context value's
+     * member typed as one): its consumers delegate it. @param {ts.Identifier} n */
+    const slots = contextSlots(source, checker);
+    /** @param {ts.Identifier} n */
+    const routineSlot = n => {
+      const declared = slots.get(n);
+      return (
+        !!declared &&
+        checker
+          .getTypeFromTypeNode(declared)
+          .getCallSignatures()
+          .some(sig => checker.getReturnTypeOfSignature(sig).symbol?.name === "Generator")
+      );
+    };
     /** @param {ts.Node} n */
     function walk(n) {
       if (ts.isTypeNode(n)) return;
@@ -1503,7 +1848,8 @@ function checkEscapes(files, active, options) {
           (ts.isFunctionDeclaration(parent) ||
             ts.isFunctionExpression(parent) ||
             ts.isVariableDeclaration(parent) ||
-            ts.isParameter(parent)) &&
+            ts.isParameter(parent) ||
+            ts.isBindingElement(parent)) &&
           parent.name === n;
         const propertyName =
           (ts.isPropertyAssignment(parent) || ts.isPropertyAccessExpression(parent)) &&
@@ -1535,7 +1881,7 @@ function checkEscapes(files, active, options) {
             ts.isCallExpression(parent) &&
             ts.isIdentifier(parent.expression) &&
             constructors.has(parent.expression.text);
-          if (!direct && !callback) {
+          if (!direct && !callback && !capturedCallee(n) && !routineSlot(n)) {
             const at = n.getSourceFile().getLineAndCharacterOfPosition(n.getStart());
             const error = new Error(
               `[SUGAR_ESCAPE] Routine ${n.text} is handed to an unknown consumer; a plain callback cannot drive it.`
@@ -1583,11 +1929,19 @@ function lowerSugarProjectImpl(input, { compilerOptions = {}, native = false } =
     }
     files = next;
     if (!changed && native)
-      for (const [id, components] of coloredPropSites(program, active)) {
-        const code = widenColoredProps(files.get(id) ?? "", id, components);
+      for (const id of active) {
+        const code = contextFacades(typedCreations(files.get(id) ?? "", id, program), id, program);
         changed ||= code !== files.get(id);
         files.set(id, code);
       }
+    if (!changed && native) {
+      const { wanted, concrete } = coloredPropSites(program, active);
+      for (const [id, components] of wanted) {
+        const code = widenColoredProps(files.get(id) ?? "", id, components, concrete.get(id));
+        changed ||= code !== files.get(id);
+        files.set(id, code);
+      }
+    }
     if (!changed) {
       checkEscapes(files, active, options);
       return { files, iterations: i + 1 };

@@ -28,6 +28,39 @@ export function Bar() {
 }`;
 
 describe("native context members (F-S45)", { timeout: 60_000 }, () => {
+  it("a tuple value and destructured names (Rendering's router) resolve as members do", () => {
+    const tuple = `import {createContext, createSignal, useContext} from 'solid-js';
+import type {JSX} from '@solidjs/web';
+class Boom extends Error { readonly kind = 'boom'; }
+type Router = [() => string, { setLocation: (value: string) => void; go: () => void }];
+const Ctx = createContext<Router>();
+function useRouter() {
+  const value = useContext(Ctx);
+  if (!value) throw new Error('needs a provider');
+  return value;
+}
+export function Provider(props: {children: JSX.Element}) {
+  const [location, setLocation] = createSignal('index');
+  const go = () => { throw new Boom(); };
+  return <Ctx value={[location, { setLocation, go }]}>{props.children}</Ctx>;
+}
+export function Link() {
+  const [location, { setLocation }] = useRouter();
+  return <button onClick={() => setLocation('profile')}>{location()}</button>;
+}
+export function Go() {
+  const [, { go }] = useRouter();
+  return <button onClick={() => go()}>go</button>;
+}`;
+    const result = lowerNativeProject(new Map([[file, tuple]]));
+    const callbacks = result.inference.functions.filter(f => f.name.startsWith("<callback:"));
+    const at = line => callbacks.find(f => f.line === line);
+    // Link's handler (line 18) calls a setter: nothing. Go's (line 22) calls go: Boom.
+    expect([...at(18).fails]).toEqual([]);
+    expect([...at(22).fails].some(k => k.includes("Boom"))).toBe(true);
+    expect([...at(22).fails]).not.toContain("unknown");
+  });
+
   it("a signal setter reached through a hook fails nothing", () => {
     const source = `${prelude}
 export function Provider(props: {children: JSX.Element}) {

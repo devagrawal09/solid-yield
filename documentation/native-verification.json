@@ -1440,11 +1440,12 @@
             "server": false,
             "component": true,
             "fails": [
-              "global:Error",
-              "unknown"
+              "global:Error"
             ],
             "provides": [],
-            "timerFails": []
+            "timerFails": [
+              "global:Error"
+            ]
           },
           {
             "file": "examples/originals/rendering/shared/src/components/ErrorStream.tsx",
@@ -1453,11 +1454,12 @@
             "server": false,
             "component": true,
             "fails": [
-              "global:Error",
-              "unknown"
+              "global:Error"
             ],
             "provides": [],
-            "timerFails": []
+            "timerFails": [
+              "global:Error"
+            ]
           },
           {
             "file": "examples/originals/rendering/shared/src/components/ErrorStream.tsx",
@@ -1466,11 +1468,12 @@
             "server": false,
             "component": true,
             "fails": [
-              "global:Error",
-              "unknown"
+              "global:Error"
             ],
             "provides": [],
-            "timerFails": []
+            "timerFails": [
+              "global:Error"
+            ]
           },
           {
             "file": "examples/originals/rendering/shared/src/components/Home.tsx",
@@ -1478,9 +1481,7 @@
             "line": 3,
             "server": false,
             "component": true,
-            "fails": [
-              "unknown"
-            ],
+            "fails": [],
             "provides": [],
             "timerFails": []
           },
@@ -1500,9 +1501,7 @@
             "line": 7,
             "server": false,
             "component": true,
-            "fails": [
-              "unknown"
-            ],
+            "fails": [],
             "provides": [],
             "timerFails": []
           },
@@ -1512,9 +1511,7 @@
             "line": 22,
             "server": false,
             "component": true,
-            "fails": [
-              "unknown"
-            ],
+            "fails": [],
             "provides": [],
             "timerFails": []
           },
@@ -1587,57 +1584,8 @@
         ],
         "serverRejections": []
       },
-      "status": "refused",
+      "status": "generated-with-diagnostics",
       "foreignBoundaries": [
-        {
-          "code": "NATIVE_FOREIGN_BOUNDARY",
-          "message": "Handle failures inside Home or its callbacks; this imported component (lazy from solid-js) is outside the native check.",
-          "file": "<root>/examples/originals/rendering/shared/src/components/App.tsx",
-          "line": 45,
-          "column": 13
-        },
-        {
-          "code": "NATIVE_FOREIGN_BOUNDARY",
-          "message": "Handle failures inside Settings or its callbacks; this imported component (lazy from solid-js) is outside the native check.",
-          "file": "<root>/examples/originals/rendering/shared/src/components/App.tsx",
-          "line": 51,
-          "column": 13
-        },
-        {
-          "code": "NATIVE_FOREIGN_BOUNDARY",
-          "message": "Handle failures inside Stream or its callbacks; this imported component (lazy from solid-js) is outside the native check.",
-          "file": "<root>/examples/originals/rendering/shared/src/components/App.tsx",
-          "line": 54,
-          "column": 13
-        },
-        {
-          "code": "NATIVE_FOREIGN_BOUNDARY",
-          "message": "Handle failures inside ErrorStream or its callbacks; this imported component (lazy from solid-js) is outside the native check.",
-          "file": "<root>/examples/originals/rendering/shared/src/components/App.tsx",
-          "line": 57,
-          "column": 13
-        },
-        {
-          "code": "NATIVE_FOREIGN_BOUNDARY",
-          "message": "Handle failures inside RevealPage or its callbacks; this imported component (lazy from solid-js) is outside the native check.",
-          "file": "<root>/examples/originals/rendering/shared/src/components/App.tsx",
-          "line": 60,
-          "column": 13
-        },
-        {
-          "code": "NATIVE_FOREIGN_BOUNDARY",
-          "message": "Handle failures inside Skeleton or its callbacks; this imported component (lazy from solid-js) is outside the native check.",
-          "file": "<root>/examples/originals/rendering/shared/src/components/App.tsx",
-          "line": 63,
-          "column": 13
-        },
-        {
-          "code": "NATIVE_FOREIGN_BOUNDARY",
-          "message": "Handle failures inside Profile or its callbacks; this imported component (lazy from solid-js) is outside the native check.",
-          "file": "<root>/examples/originals/rendering/shared/src/components/Profile/index.tsx",
-          "line": 29,
-          "column": 10
-        },
         {
           "code": "NATIVE_FOREIGN_BOUNDARY",
           "message": "Handle failures inside Reveal or its callbacks; this imported component (Reveal from solid-js) is outside the native check.",
@@ -1669,16 +1617,118 @@
       ],
       "diagnostics": [
         {
-          "code": "SUGAR_COMPONENT",
-          "message": "[SUGAR_COMPONENT] A sugar component needs a top-level PascalCase name. (<root>/examples/originals/rendering/shared/src/components/App.tsx:14:22)"
+          "stage": "type",
+          "code": "TS2769",
+          "message": "No overload matches this call.\n  Overload 1 of 2, '(body: (props: Props<{ id: string; }>) => Generator<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>, any>): HoleCall<...>', gave the following error.\n    Argument of type '(props: Props<{ id: string; }>) => Generator<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>, ViewFn<ChildView<false, never, false, never>, Element>, any>' is not assignable to parameter of type '(props: Props<{ id: string; }>) => Generator<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>, any>'.\n      Call signature return types 'Generator<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>, ViewFn<ChildView<false, never, false, never>, Element>, any>' and 'Generator<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>, any>' are incompatible.\n        The types returned by 'next(...)' are incompatible between these types.\n          Type 'IteratorResult<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>, ViewFn<ChildView<false, never, false, never>, Element>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>>'.\n            Type 'IteratorYieldResult<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>>'.\n              Type 'IteratorYieldResult<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>>' is not assignable to type 'IteratorYieldResult<SetupOp>'.\n                Type 'Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>' is not assignable to type 'SetupOp'.\n                  Type 'Read<false, never>' is not assignable to type 'SetupOp'.\n                    Property 'kind' is missing in type 'Read<false, never>' but required in type 'Create<string, any>'.\n  Overload 2 of 2, '(body: (props: Props<{ id: string; }>) => Generator<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>, any>): (props: PropsInput<...>) => ComponentView<...>', gave the following error.\n    Argument of type '(props: Props<{ id: string; }>) => Generator<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>, ViewFn<ChildView<false, never, false, never>, Element>, any>' is not assignable to parameter of type '(props: Props<{ id: string; }>) => Generator<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>, any>'.\n      Call signature return types 'Generator<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>, ViewFn<ChildView<false, never, false, never>, Element>, any>' and 'Generator<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>, any>' are incompatible.\n        The types returned by 'next(...)' are incompatible between these types.\n          Type 'IteratorResult<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>, ViewFn<ChildView<false, never, false, never>, Element>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>>'.\n            Type 'IteratorYieldResult<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>>'.\n              Type 'IteratorYieldResult<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>>' is not assignable to type 'IteratorYieldResult<SetupOp>'.\n                Type 'Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>' is not assignable to type 'SetupOp'.\n                  Type 'Read<false, never>' is not assignable to type 'SetupOp'.\n                    Property 'kind' is missing in type 'Read<false, never>' but required in type 'Create<string, any>'.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/rendering/components/ErrorStream.tsx",
+          "line": 24
+        },
+        {
+          "stage": "type",
+          "code": "TS2769",
+          "message": "No overload matches this call.\n  Overload 1 of 2, '(body: (props: Props<{ id: string; }>) => Generator<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>, any>): HoleCall<...>', gave the following error.\n    Argument of type '(props: Props<{ id: string; }>) => Generator<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>, ViewFn<ChildView<false, never, false, never>, Element>, any>' is not assignable to parameter of type '(props: Props<{ id: string; }>) => Generator<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>, any>'.\n      Call signature return types 'Generator<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>, ViewFn<ChildView<false, never, false, never>, Element>, any>' and 'Generator<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>, any>' are incompatible.\n        The types returned by 'next(...)' are incompatible between these types.\n          Type 'IteratorResult<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>, ViewFn<ChildView<false, never, false, never>, Element>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>>'.\n            Type 'IteratorYieldResult<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>>'.\n              Type 'IteratorYieldResult<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>>' is not assignable to type 'IteratorYieldResult<SetupOp>'.\n                Type 'Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>' is not assignable to type 'SetupOp'.\n                  Type 'Read<false, never>' is not assignable to type 'SetupOp'.\n                    Property 'kind' is missing in type 'Read<false, never>' but required in type 'Create<string, any>'.\n  Overload 2 of 2, '(body: (props: Props<{ id: string; }>) => Generator<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>, any>): (props: PropsInput<...>) => ComponentView<...>', gave the following error.\n    Argument of type '(props: Props<{ id: string; }>) => Generator<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>, ViewFn<ChildView<false, never, false, never>, Element>, any>' is not assignable to parameter of type '(props: Props<{ id: string; }>) => Generator<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>, any>'.\n      Call signature return types 'Generator<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>, ViewFn<ChildView<false, never, false, never>, Element>, any>' and 'Generator<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>, any>' are incompatible.\n        The types returned by 'next(...)' are incompatible between these types.\n          Type 'IteratorResult<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>, ViewFn<ChildView<false, never, false, never>, Element>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>>'.\n            Type 'IteratorYieldResult<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>>'.\n              Type 'IteratorYieldResult<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>>' is not assignable to type 'IteratorYieldResult<SetupOp>'.\n                Type 'Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>' is not assignable to type 'SetupOp'.\n                  Type 'Read<false, never>' is not assignable to type 'SetupOp'.\n                    Property 'kind' is missing in type 'Read<false, never>' but required in type 'Create<string, any>'.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/rendering/components/ErrorStream.tsx",
+          "line": 64
+        },
+        {
+          "stage": "type",
+          "code": "TS2769",
+          "message": "No overload matches this call.\n  Overload 1 of 2, '(body: (props: unknown) => Generator<SetupOp, ViewFn<Read<false, never> | Bind<false, never> | ChildView<false, never, false, never>, Element>, any>): HoleCall<...>', gave the following error.\n    Argument of type '() => Generator<Create<\"signal\", never> | Create<\"memo\", never> | Raise<NativeFailure<\"unknown\">> | Create<\"store\", never>, ViewFn<Read<false, never> | Bind<false, never> | ChildView<false, never, false, never>, Element>, any>' is not assignable to parameter of type '(props: unknown) => Generator<SetupOp, ViewFn<Read<false, never> | Bind<false, never> | ChildView<false, never, false, never>, Element>, any>'.\n      Call signature return types 'Generator<Create<\"signal\", never> | Create<\"memo\", never> | Raise<NativeFailure<\"unknown\">> | Create<\"store\", never>, ViewFn<Read<false, never> | Bind<false, never> | ChildView<false, never, false, never>, Element>, any>' and 'Generator<SetupOp, ViewFn<Read<false, never> | Bind<false, never> | ChildView<false, never, false, never>, Element>, any>' are incompatible.\n        The types returned by 'next(...)' are incompatible between these types.\n          Type 'IteratorResult<Create<\"signal\", never> | Create<\"memo\", never> | Raise<NativeFailure<\"unknown\">> | Create<\"store\", never>, ViewFn<Read<false, never> | Bind<false, never> | ChildView<false, never, false, never>, Element>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<Read<false, never> | Bind<false, never> | ChildView<false, never, false, never>, Element>>'.\n            Type 'IteratorYieldResult<Create<\"signal\", never> | Create<\"memo\", never> | Raise<NativeFailure<\"unknown\">> | Create<\"store\", never>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<Read<false, never> | Bind<false, never> | ChildView<false, never, false, never>, Element>>'.\n              Type 'IteratorYieldResult<Create<\"signal\", never> | Create<\"memo\", never> | Raise<NativeFailure<\"unknown\">> | Create<\"store\", never>>' is not assignable to type 'IteratorYieldResult<SetupOp>'.\n                Type 'Create<\"signal\", never> | Create<\"memo\", never> | Raise<NativeFailure<\"unknown\">> | Create<\"store\", never>' is not assignable to type 'SetupOp'.\n                  Type 'Raise<NativeFailure<\"unknown\">>' is not assignable to type 'SetupOp'.\n                    Property 'kind' is missing in type 'Raise<NativeFailure<\"unknown\">>' but required in type 'Create<string, any>'.\n  Overload 2 of 2, '(body: (props: unknown) => Generator<SetupOp, ViewFn<Read<false, never> | Bind<false, never> | ChildView<false, never, false, never>, Element>, any>): (props?: PropsInput<...> | undefined) => ComponentView<...>', gave the following error.\n    Argument of type '() => Generator<Create<\"signal\", never> | Create<\"memo\", never> | Raise<NativeFailure<\"unknown\">> | Create<\"store\", never>, ViewFn<Read<false, never> | Bind<false, never> | ChildView<false, never, false, never>, Element>, any>' is not assignable to parameter of type '(props: unknown) => Generator<SetupOp, ViewFn<Read<false, never> | Bind<false, never> | ChildView<false, never, false, never>, Element>, any>'.\n      Call signature return types 'Generator<Create<\"signal\", never> | Create<\"memo\", never> | Raise<NativeFailure<\"unknown\">> | Create<\"store\", never>, ViewFn<Read<false, never> | Bind<false, never> | ChildView<false, never, false, never>, Element>, any>' and 'Generator<SetupOp, ViewFn<Read<false, never> | Bind<false, never> | ChildView<false, never, false, never>, Element>, any>' are incompatible.\n        The types returned by 'next(...)' are incompatible between these types.\n          Type 'IteratorResult<Create<\"signal\", never> | Create<\"memo\", never> | Raise<NativeFailure<\"unknown\">> | Create<\"store\", never>, ViewFn<Read<false, never> | Bind<false, never> | ChildView<false, never, false, never>, Element>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<Read<false, never> | Bind<false, never> | ChildView<false, never, false, never>, Element>>'.\n            Type 'IteratorYieldResult<Create<\"signal\", never> | Create<\"memo\", never> | Raise<NativeFailure<\"unknown\">> | Create<\"store\", never>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<Read<false, never> | Bind<false, never> | ChildView<false, never, false, never>, Element>>'.\n              Type 'IteratorYieldResult<Create<\"signal\", never> | Create<\"memo\", never> | Raise<NativeFailure<\"unknown\">> | Create<\"store\", never>>' is not assignable to type 'IteratorYieldResult<SetupOp>'.\n                Type 'Create<\"signal\", never> | Create<\"memo\", never> | Raise<NativeFailure<\"unknown\">> | Create<\"store\", never>' is not assignable to type 'SetupOp'.\n                  Type 'Raise<NativeFailure<\"unknown\">>' is not assignable to type 'SetupOp'.\n                    Property 'kind' is missing in type 'Raise<NativeFailure<\"unknown\">>' but required in type 'Create<string, any>'.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/rendering/components/Skeleton.tsx",
+          "line": 67
+        },
+        {
+          "stage": "type",
+          "code": "TS7006",
+          "message": "Parameter 'draft' implicitly has an 'any' type.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/rendering/components/Skeleton.tsx",
+          "line": 78
+        },
+        {
+          "stage": "type",
+          "code": "TS2554",
+          "message": "Expected 1 arguments, but got 3.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/rendering/components/Skeleton.tsx",
+          "line": 84
+        },
+        {
+          "stage": "type",
+          "code": "TS2345",
+          "message": "Argument of type 'LexicalCallback<[], Read<false, never>, { text: string; }[]>' is not assignable to parameter of type 'Source<unknown, unknown, boolean>'.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/rendering/components/Skeleton.tsx",
+          "line": 89
+        },
+        {
+          "stage": "type",
+          "code": "TS2345",
+          "message": "Argument of type '(state: any) => AsyncGenerator<undefined, void, unknown>' is not assignable to parameter of type '() => AsyncGenerator<undefined, void, unknown>'.\n  Target signature provides too few arguments. Expected 1 or more, but got 0.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/rendering/components/Stream.tsx",
+          "line": 41
+        },
+        {
+          "stage": "type",
+          "code": "TS7006",
+          "message": "Parameter 'state' implicitly has an 'any' type.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/rendering/components/Stream.tsx",
+          "line": 41
+        },
+        {
+          "stage": "type",
+          "code": "TS2538",
+          "message": "Type 'Source<number, never, false>' cannot be used as an index type.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/rendering/components/Stream.tsx",
+          "line": 95
+        },
+        {
+          "stage": "type",
+          "code": "TS2538",
+          "message": "Type 'Source<number, never, false>' cannot be used as an index type.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/rendering/components/Stream.tsx",
+          "line": 95
+        },
+        {
+          "stage": "type",
+          "code": "TS2769",
+          "message": "No overload matches this call.\n  Overload 1 of 2, '(body: (props: Props<{ url?: string | undefined; }>) => Generator<SetupOp, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<...>, Exclude<...>>, Element>, any>): HoleCall<...>', gave the following error.\n    Argument of type '(props: Props<{ url?: string; }>) => Generator<Read<false, never> | Create<\"signal\", never>, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<ChildView<_P0, _E0, _W0, _R0>>, Exclude<Settle<_R0>, RequiredContext<RouterValue, \"<root>/examples/originals/rendering/shared/src/router.tsx#RouterContext\">>>, Element>, any>' is not assignable to parameter of type '(props: Props<{ url?: string | undefined; }>) => Generator<SetupOp, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<ChildView<_P0, _E0, _W0, _R0>>, Exclude<Settle<_R0>, RequiredContext<RouterValue, \"<root>/examples/originals/rendering/shared/src/router.tsx#RouterContext\">>>, Element>, any>'.\n      Call signature return types 'Generator<Read<false, never> | Create<\"signal\", never>, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<ChildView<_P0, _E0, _W0, _R0>>, Exclude<Settle<_R0>, RequiredContext<RouterValue, \"<root>/examples/originals/rendering/shared/src/router.tsx#RouterContext\">>>, Element>, any>' and 'Generator<SetupOp, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<ChildView<_P0, _E0, _W0, _R0>>, Exclude<Settle<_R0>, RequiredContext<RouterValue, \"<root>/examples/originals/rendering/shared/src/router.tsx#RouterContext\">>>, Element>, any>' are incompatible.\n        The types returned by 'next(...)' are incompatible between these types.\n          Type 'IteratorResult<Read<false, never> | Create<\"signal\", never>, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<ChildView<_P0, _E0, _W0, _R0>>, Exclude<Settle<_R0>, RequiredContext<RouterValue, \"<root>/examples/originals/rendering/shared/src/router.tsx#RouterContext\">>>, Element>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<ChildView<_P0, _E0, _W0, _R0>>, Exclude<Settle<_R0>, RequiredContext<RouterValue, \"<root>/examples/originals/rendering/shared/src/router.tsx#RouterContext\">>>, Element>>'.\n            Type 'IteratorYieldResult<Read<false, never> | Create<\"signal\", never>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<ChildView<_P0, _E0, _W0, _R0>>, Exclude<Settle<_R0>, RequiredContext<RouterValue, \"<root>/examples/originals/rendering/shared/src/router.tsx#RouterContext\">>>, Element>>'.\n              Type 'IteratorYieldResult<Read<false, never> | Create<\"signal\", never>>' is not assignable to type 'IteratorYieldResult<SetupOp>'.\n                Type 'Read<false, never> | Create<\"signal\", never>' is not assignable to type 'SetupOp'.\n                  Type 'Read<false, never>' is not assignable to type 'SetupOp'.\n                    Property 'kind' is missing in type 'Read<false, never>' but required in type 'Create<string, any>'.\n  Overload 2 of 2, '(body: (props: Props<{ url?: string | undefined; }>) => Generator<SetupOp, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<...>, Exclude<...>>, Element>, any>): (props?: PropsInput<...> | undefined) => ComponentView<...>', gave the following error.\n    Argument of type '(props: Props<{ url?: string; }>) => Generator<Read<false, never> | Create<\"signal\", never>, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<ChildView<_P0, _E0, _W0, _R0>>, Exclude<Settle<_R0>, RequiredContext<RouterValue, \"<root>/examples/originals/rendering/shared/src/router.tsx#RouterContext\">>>, Element>, any>' is not assignable to parameter of type '(props: Props<{ url?: string | undefined; }>) => Generator<SetupOp, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<ChildView<_P0, _E0, _W0, _R0>>, Exclude<Settle<_R0>, RequiredContext<RouterValue, \"<root>/examples/originals/rendering/shared/src/router.tsx#RouterContext\">>>, Element>, any>'.\n      Call signature return types 'Generator<Read<false, never> | Create<\"signal\", never>, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<ChildView<_P0, _E0, _W0, _R0>>, Exclude<Settle<_R0>, RequiredContext<RouterValue, \"<root>/examples/originals/rendering/shared/src/router.tsx#RouterContext\">>>, Element>, any>' and 'Generator<SetupOp, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<ChildView<_P0, _E0, _W0, _R0>>, Exclude<Settle<_R0>, RequiredContext<RouterValue, \"<root>/examples/originals/rendering/shared/src/router.tsx#RouterContext\">>>, Element>, any>' are incompatible.\n        The types returned by 'next(...)' are incompatible between these types.\n          Type 'IteratorResult<Read<false, never> | Create<\"signal\", never>, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<ChildView<_P0, _E0, _W0, _R0>>, Exclude<Settle<_R0>, RequiredContext<RouterValue, \"<root>/examples/originals/rendering/shared/src/router.tsx#RouterContext\">>>, Element>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<ChildView<_P0, _E0, _W0, _R0>>, Exclude<Settle<_R0>, RequiredContext<RouterValue, \"<root>/examples/originals/rendering/shared/src/router.tsx#RouterContext\">>>, Element>>'.\n            Type 'IteratorYieldResult<Read<false, never> | Create<\"signal\", never>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<ChildView<_P0, _E0, _W0, _R0>>, Exclude<Settle<_R0>, RequiredContext<RouterValue, \"<root>/examples/originals/rendering/shared/src/router.tsx#RouterContext\">>>, Element>>'.\n              Type 'IteratorYieldResult<Read<false, never> | Create<\"signal\", never>>' is not assignable to type 'IteratorYieldResult<SetupOp>'.\n                Type 'Read<false, never> | Create<\"signal\", never>' is not assignable to type 'SetupOp'.\n                  Type 'Read<false, never>' is not assignable to type 'SetupOp'.\n                    Property 'kind' is missing in type 'Read<false, never>' but required in type 'Create<string, any>'.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/rendering/router.tsx",
+          "line": 20
+        },
+        {
+          "stage": "lint",
+          "code": "solid-yield/no-read-in-setup",
+          "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/rendering/components/ErrorStream.tsx",
+          "line": 27,
+          "severity": 2
+        },
+        {
+          "stage": "lint",
+          "code": "solid-yield/no-read-in-setup",
+          "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/rendering/components/ErrorStream.tsx",
+          "line": 67,
+          "severity": 2
+        },
+        {
+          "stage": "lint",
+          "code": "solid-yield/no-read-in-setup",
+          "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event.",
+          "file": "packages/vite-plugin-yield/test/.native-generated/originals/rendering/router.tsx",
+          "line": 23,
+          "severity": 2
         }
       ],
       "parity": "not run: no checked native program",
       "ssr": "not run: no checked native program",
       "differingStatements": null,
-      "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
+      "diffReason": "Generated output still requires a checked app harness.",
       "reasons": [
-        "SUGAR_COMPONENT"
+        "TS2769",
+        "TS7006",
+        "TS2554",
+        "TS2345",
+        "TS2538",
+        "solid-yield/no-read-in-setup"
       ]
     },
     {
@@ -1924,9 +1974,7 @@
             "line": 360,
             "server": false,
             "component": true,
-            "fails": [
-              "unknown"
-            ],
+            "fails": [],
             "provides": [],
             "timerFails": []
           },
@@ -2194,8 +2242,7 @@
             "server": false,
             "component": true,
             "fails": [
-              "ChunkError",
-              "unknown"
+              "ChunkError"
             ],
             "provides": [],
             "timerFails": []
@@ -2207,8 +2254,7 @@
             "server": false,
             "component": true,
             "fails": [
-              "ChunkError",
-              "unknown"
+              "ChunkError"
             ],
             "provides": [],
             "timerFails": []
@@ -2317,8 +2363,7 @@
             "server": false,
             "component": true,
             "fails": [
-              "global:URIError",
-              "unknown"
+              "global:URIError"
             ],
             "provides": [],
             "timerFails": []
@@ -2341,14 +2386,11 @@
             "line": 35,
             "server": true,
             "component": false,
-            "fails": [
-              "unknown"
-            ],
+            "fails": [],
             "provides": [],
             "timerFails": [],
             "rejection": [
-              "ChunkError",
-              "unknown"
+              "ChunkError"
             ]
           },
           {
@@ -2385,7 +2427,7 @@
         {
           "stage": "type",
           "code": "TS2345",
-          "message": "Argument of type 'HoleCall<{ url?: string | undefined; }, false, ViewFails<Read<false, never> | ChildView<false, ViewFails<ChildView<false, FailsOf<Read<true, NativeFailure<\"unknown\"> | ChunkError> | ChildView<true, NativeFailure<\"unknown\"> | ChunkError, false, never>>, false, never>, Element>, false, never> | ChildView<false, ViewFails<ChildView<false, FailsOf<ChildView<true, FailsOf<Read<true, NativeFailure<\"unknown\"> | NativeFailure<\"global:URIError\">>>, false, never>>, false, never>, Element>, false, never>, Element>, false, never>' is not assignable to parameter of type '(<A extends PropsInput<{ url?: string | undefined; }, unknown> = PropsInput<{ url?: string | undefined; }, never>>(props?: (A & NoInfer<Undeclared<A, { url?: string | undefined; }>>) | undefined) => ComponentView<false, ViewFails<Read<false, never> | ChildView<false, ViewFails<ChildView<false, FailsOf<Read<true, NativeFailure<\"unknown\"> | ChunkError> | ChildView<true, NativeFailure<\"unknown\"> | ChunkError, false, never>>, false, never>, Element>, false, never> | ChildView<false, ViewFails<ChildView<false, FailsOf<ChildView<true, FailsOf<Read<true, NativeFailure<\"unknown\"> | NativeFailure<\"global:URIError\">>>, false, never>>, false, never>, Element>, false, never>, Element>, false, HoleRequires<A>>) & { readonly [DECLARED]?: ((props: { url?: string | undefined; }) => { url?: string | undefined; }) | undefined; } & { readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"unknown\" | \"chunk\" | \"global:URIError\"; }'.\n  Type 'HoleCall<{ url?: string | undefined; }, false, ViewFails<Read<false, never> | ChildView<false, ViewFails<ChildView<false, FailsOf<Read<true, NativeFailure<\"unknown\"> | ChunkError> | ChildView<true, NativeFailure<\"unknown\"> | ChunkError, false, never>>, false, never>, Element>, false, never> | ChildView<false, ViewFails<ChildView<false, FailsOf<ChildView<true, FailsOf<Read<true, NativeFailure<\"unknown\"> | NativeFailure<\"global:URIError\">>>, false, never>>, false, never>, Element>, false, never>, Element>, false, never>' is not assignable to type '{ readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"unknown\" | \"chunk\" | \"global:URIError\"; }'.",
+          "message": "Argument of type 'HoleCall<{ url?: string | undefined; }, false, ViewFails<Read<false, never> | ChildView<false, ChunkError, false, never> | ChildView<false, NativeFailure<\"global:URIError\">, false, never>, Element>, false, never>' is not assignable to parameter of type '(<A extends PropsInput<{ url?: string | undefined; }, unknown> = PropsInput<{ url?: string | undefined; }, never>>(props?: (A & NoInfer<Undeclared<A, { url?: string | undefined; }>>) | undefined) => ComponentView<false, ViewFails<Read<false, never> | ChildView<false, ChunkError, false, never> | ChildView<false, NativeFailure<\"global:URIError\">, false, never>, Element>, false, HoleRequires<A>>) & { readonly [DECLARED]?: ((props: { url?: string | undefined; }) => { url?: string | undefined; }) | undefined; } & { readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"chunk\" | \"global:URIError\"; }'.\n  Type 'HoleCall<{ url?: string | undefined; }, false, ViewFails<Read<false, never> | ChildView<false, ChunkError, false, never> | ChildView<false, NativeFailure<\"global:URIError\">, false, never>, Element>, false, never>' is not assignable to type '{ readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"chunk\" | \"global:URIError\"; }'.",
           "file": "packages/vite-plugin-yield/test/.native-generated/originals/docs/main.tsx",
           "line": 4
         }

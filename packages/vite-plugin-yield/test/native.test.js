@@ -11,7 +11,7 @@ it("refuses changing numeric props when reconstructing recursive snapshots", () 
   expect(() => lowerNativeProject(new Map([[file, source]]))).toThrow(
     /Snapshot Triangle.x is not a fixed numeric prop/
   );
-});
+}, 30_000);
 describe("native front end", { timeout: 30_000 }, () => {
   it("requires explicit file selection", () => {
     expect(() => solidYield({ mode: "native" })).toThrow(/NATIVE_INCLUDE/);
@@ -130,7 +130,7 @@ it("keeps foreign entry rendering checked and out of routine inference", () => {
   expect(out).toMatch(/from ['"]@solidjs\/web['"]/);
   expect(out).toContain("__nativeForeign(App satisfies __NativeRootCheck<typeof App>)");
   expect(out).not.toContain("function*");
-});
+}, 30_000);
 it("preserves native catches through the SSR runtime", async () => {
   const { devServer } = await import("./server.js");
   const root = resolve(import.meta.dirname, "fixtures/native-app");

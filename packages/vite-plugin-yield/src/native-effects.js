@@ -118,13 +118,25 @@ export function lowerNativeEffects(files, report) {
       e.typeAnnotation = t.tsTypeAnnotation(t.tsUnknownKeyword());
       return t.arrowFunctionExpression([e], adapt(kinds, t.identifier("error")));
     };
-    /** @param {any} value @param {string[]} kinds */
-    const attempt = (value, kinds) => {
+    /** @param {any} value @param {string[]} kinds @param {import("@babel/core").types.TSTypeAnnotation | null} [returnType] */
+    const attempt = (value, kinds, returnType = null) => {
       used.add("attempt");
-      return t.callExpression(t.identifier("__nativeAttempt"), [
-        t.arrowFunctionExpression([], value),
-        handler(kinds)
-      ]);
+      const thunk = t.arrowFunctionExpression([], value);
+      if (returnType) thunk.returnType = returnType;
+      return t.callExpression(t.identifier("__nativeAttempt"), [thunk, handler(kinds)]);
+    };
+    /** A plain function's declared return type, for the attempt that wraps the
+     * whole value it returns: the routine it becomes drops the annotation, and
+     * the value (`new Promise(…)`) was typed from it. @param {Path} q */
+    const declaredReturn = q => {
+      const fn = q.getFunctionParent();
+      const returned =
+        q.parentPath?.isReturnStatement() ||
+        (fn?.isArrowFunctionExpression() && fn.node.body === q.node);
+      if (!returned || !fn || fn.node.async || fn.node.generator) return null;
+      return t.isTSTypeAnnotation(fn.node.returnType)
+        ? t.cloneNode(fn.node.returnType, true)
+        : null;
     };
     /** Known routine hosts; foreign callbacks remain plain and are caught at their call. @param {Path | null} fn */
     const host = fn => {
@@ -592,7 +604,7 @@ export function lowerNativeEffects(files, report) {
                 []
               )
             );
-          } else if (!unawaited) q.replaceWith(attempt(call, kinds));
+          } else if (!unawaited) q.replaceWith(attempt(call, kinds, declaredReturn(q)));
           if (pending)
             q.replaceWith(
               t.callExpression(t.memberExpression(pending.id, t.identifier("push")), [

@@ -628,7 +628,10 @@ function surface(
         (q.parentPath.isVariableDeclarator() && t.isIdentifier(q.parentPath.node.id)
           ? q.parentPath.node.id.name
           : "");
-      if (q.getFunctionParent() || !/^[A-Z]/.test(name ?? "")) return;
+      // F-S51: a component a module-level factory returns is one too.
+      const factory =
+        q.parentPath.isReturnStatement() && !q.getFunctionParent()?.getFunctionParent();
+      if ((q.getFunctionParent() && !factory) || !/^[A-Z]/.test(name ?? "")) return;
       let jsx = t.isJSXElement(q.node.body) || t.isJSXFragment(q.node.body);
       traverseOwned(q, {
         Function(inner) {
@@ -967,6 +970,31 @@ function surface(
       }
     }
   });
+  // A DOM or window handler property (`window.onpopstate = () => …`) is an
+  // event, as a JSX handler is: the browser calls it.
+  traverseOwned(p, {
+    AssignmentExpression(q) {
+      const left = q.get("left"),
+        right = q.get("right");
+      if (
+        q.node.operator !== "=" ||
+        !left.isMemberExpression() ||
+        left.node.computed ||
+        !t.isIdentifier(left.node.property) ||
+        !/^on[a-z]/.test(left.node.property.name) ||
+        !(right.isArrowFunctionExpression() || right.isFunctionExpression())
+      )
+        return;
+      for (const param of right.node.params)
+        if (t.isIdentifier(param) && !param.typeAnnotation)
+          param.typeAnnotation = t.tsTypeAnnotation(t.tsTypeReference(t.identifier("Event")));
+      needed.add("$event");
+      right.replaceWith(
+        copyPosition(t.callExpression(t.identifier("$event"), [right.node]), right.node)
+      );
+      right.skip();
+    }
+  });
   traverseOwned(p, {
     JSXElement: {
       exit(q) {
@@ -1178,7 +1206,32 @@ function surface(
         if (!api && !contexts.has(name)) {
           const binding = tag.scope.getBinding(name)?.path;
           const init = binding?.isVariableDeclarator() ? binding.get("init") : binding;
-          if (!init?.isFunction()) {
+          // F-S51: a factory's component parameter is a yield component.
+          const annotation = /** @type {any} */ (binding?.node)?.typeAnnotation?.typeAnnotation;
+          const factoryParam =
+            t.isTSTypeReference(annotation) &&
+            t.isIdentifier(annotation.typeName, { name: "__NativeComponent" });
+          // `lazy(() => import("./Page"))` of a native module is the library's
+          // lazy component: pending while its chunk loads, failing ChunkError.
+          const lazyCall = init?.isCallExpression() ? imported(init.get("callee")) : null;
+          const loader =
+            lazyCall?.module === "solid-js" && lazyCall.name === "lazy"
+              ? /** @type {Path | undefined} */ (init?.get("arguments.0"))
+              : null;
+          const loaded =
+            loader?.isArrowFunctionExpression() &&
+            t.isCallExpression(loader.node.body) &&
+            t.isImport(loader.node.body.callee) &&
+            t.isStringLiteral(loader.node.body.arguments[0])
+              ? loader.node.body.arguments[0].value
+              : null;
+          const base = loaded ? resolve(dirname(filename), loaded) : null;
+          const nativeLazy =
+            !!base &&
+            [base, base + ".tsx", base + ".ts", base + "/index.tsx", base + "/index.ts"].some(f =>
+              modules.has(f)
+            );
+          if (!init?.isFunction() && !factoryParam && !nativeLazy) {
             wrapForeign(q, t.identifier(name));
             return;
           }
@@ -1596,6 +1649,19 @@ export function nativeForeignDiagnostics(files, options = {}) {
           const declaration = tag.scope.getBinding(tag.node.name)?.path;
           const init = declaration?.isVariableDeclarator() ? declaration.get("init") : null;
           if (init?.isCallExpression()) api = imported(init.get("callee"));
+          // A lazy native module is checked natively (the library's lazy).
+          const loader =
+            api?.module === "solid-js" && api.name === "lazy" ? init?.get("arguments.0") : null;
+          const body = loader?.isArrowFunctionExpression() ? loader.node.body : null;
+          if (
+            t.isCallExpression(body) &&
+            t.isImport(body.callee) &&
+            t.isStringLiteral(body.arguments[0]) &&
+            [".tsx", ".ts", "/index.tsx", "/index.ts", ""].some(ext =>
+              files.has(resolve(dirname(file), /** @type {any} */ (body.arguments[0]).value) + ext)
+            )
+          )
+            return;
         }
         if (!api && tag.isJSXMemberExpression()) {
           let base = tag.get("object");

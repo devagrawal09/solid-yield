@@ -218,7 +218,10 @@ export function inferFailures(
       const add = (ctx, value) => {
         const values = contextValueMap.has(ctx) ? contextValueMap.get(ctx) : [];
         if (values)
-          contextValueMap.set(ctx, value?.isObjectExpression() ? [...values, value] : null);
+          contextValueMap.set(
+            ctx,
+            value?.isObjectExpression() || value?.isArrayExpression() ? [...values, value] : null
+          );
       };
       for (const [, record] of analysis.modules)
         record.program.traverse({
@@ -269,7 +272,9 @@ export function inferFailures(
     if (!values || !init?.isCallExpression()) return null;
     const [fallback] = init.get("arguments");
     if (!fallback || fallback.isIdentifier({ name: "undefined" })) return values;
-    return fallback.isObjectExpression() ? [...values, fallback] : null;
+    return fallback.isObjectExpression() || fallback.isArrayExpression()
+      ? [...values, fallback]
+      : null;
   };
   const SETTER_PRODUCERS = [
     "createSignal",
@@ -285,16 +290,24 @@ export function inferFailures(
    * `null` when the member is anything else.
    */
   const memberCall = (object, member, owner) => {
+    if (!object?.isObjectExpression()) return null;
     let found = null;
     for (const prop of object.get("properties")) {
       if (prop.isSpreadElement()) return null;
       if (!prop.node.computed && name(prop.node.key) === member) found = prop;
     }
     if (!found) return null;
-    const file = analysis.moduleOf.get(found.node)?.id;
+    if (found.isObjectMethod()) {
+      const file = analysis.moduleOf.get(found.node)?.id;
+      return invoke(byBody.get(`${file}:${found.node.body.start}`), owner);
+    }
+    return valueCall(found.get("value"), owner);
+  };
+  /** What calling a value held in a context's value fails with (see memberCall). */
+  const valueCall = (value, owner) => {
+    if (!value?.node) return null;
+    const file = analysis.moduleOf.get(value.node)?.id;
     const body = fn => invoke(byBody.get(`${file}:${fn.node.body.start}`), owner);
-    if (found.isObjectMethod()) return body(found);
-    const value = found.get("value");
     if (value.isFunction()) return body(value);
     if (!value.isIdentifier()) return null;
     const binding = value.scope.getBinding(value.node.name);
@@ -316,8 +329,62 @@ export function inferFailures(
     }
     return null;
   };
+  /** The steps from a destructuring pattern to one of its names (indices and
+   * keys), or `null` when it is behind a default, a rest or a computed key. */
+  const patternPath = (pattern, target) => {
+    if (pattern === target) return [];
+    if (pattern?.type === "ArrayPattern")
+      for (const [i, element] of pattern.elements.entries()) {
+        const rest = element && patternPath(element, target);
+        if (rest) return [i, ...rest];
+      }
+    if (pattern?.type === "ObjectPattern")
+      for (const prop of pattern.properties) {
+        if (prop.type !== "ObjectProperty" || prop.computed) continue;
+        const rest = patternPath(prop.value, target);
+        if (rest) return [name(prop.key), ...rest];
+      }
+    return null;
+  };
+  /** F-S45: a call through a name destructured from a context's value
+   * (`const [, { setLocation }] = useRouter()`), or `null`. */
+  const destructuredMember = (callee, owner) => {
+    if (!callee.isIdentifier()) return null;
+    const binding = callee.scope.getBinding(callee.node.name);
+    const declarator = binding?.path;
+    if (!binding?.constant || !declarator?.isVariableDeclarator()) return null;
+    if (declarator.node.id === binding.identifier) return null;
+    const steps = patternPath(declarator.node.id, binding.identifier);
+    const id = steps?.length && contextOfValue(declarator.get("init"));
+    const values = id && contextValues(id);
+    if (!values?.length) return null;
+    const effects = values.map(root => {
+      let container = root;
+      for (const step of steps.slice(0, -1)) {
+        if (typeof step === "number") {
+          if (!container?.isArrayExpression()) return null;
+          container = container.get(`elements.${step}`);
+        } else {
+          const prop = container?.isObjectExpression()
+            ? container
+                .get("properties")
+                .find(p => p.isObjectProperty() && !p.node.computed && name(p.node.key) === step)
+            : null;
+          container = prop?.get("value") ?? null;
+        }
+      }
+      const last = steps.at(-1);
+      return typeof last === "number"
+        ? container?.isArrayExpression()
+          ? valueCall(container.get(`elements.${last}`), owner)
+          : null
+        : memberCall(container, last, owner);
+    });
+    return effects.every(Boolean) ? union(...effects) : null;
+  };
   /** F-S45: a call through a member of a context's value, or `null`. */
   const contextMember = (callee, owner) => {
+    if (callee.isIdentifier()) return destructuredMember(callee, owner);
     if (!callee.isMemberExpression() || callee.node.computed) return null;
     const id = contextOfValue(callee.get("object"));
     const values = id && contextValues(id);
@@ -520,6 +587,21 @@ export function inferFailures(
       const binding = callee.scope.getBinding(callee.node.name);
       const fn = binding?.path.getFunctionParent();
       const construct = fn?.parentPath;
+      // An Errored fallback's `reset` (its second parameter) clears the
+      // boundary and re-runs its children; the call itself throws nothing.
+      const attribute = construct?.parentPath;
+      const errored =
+        attribute?.isJSXAttribute() && attribute.get("name").isJSXIdentifier({ name: "fallback" })
+          ? imported(attribute.parentPath.get("name"))
+          : null;
+      if (
+        binding?.kind === "param" &&
+        construct?.isJSXExpressionContainer() &&
+        errored?.source === "solid-js" &&
+        errored.name === "Errored" &&
+        fn.node.params[1]?.name === callee.node.name
+      )
+        return "errored-reset";
       if (
         binding?.kind === "param" &&
         construct?.isNewExpression() &&
@@ -534,8 +616,12 @@ export function inferFailures(
     const declaration = call && checker.getResolvedSignature(call)?.declaration;
     const builtin = declaration && program.isSourceFileDefaultLibrary(declaration.getSourceFile());
     if (builtin && callee.isSuper()) return "builtin-super";
+    // Node's own timer globals (`@types/node`) schedule as the DOM's do.
+    const nodeGlobal =
+      !!declaration &&
+      /[\\/]node_modules[\\/]@types[\\/]node[\\/]/.test(declaration.getSourceFile().fileName);
     if (
-      builtin &&
+      (builtin || nodeGlobal) &&
       callee.isIdentifier() &&
       !callee.scope.getBinding(callee.node.name) &&
       /^(setTimeout|setInterval|clearTimeout|clearInterval|requestAnimationFrame|cancelAnimationFrame|requestIdleCallback|cancelIdleCallback)$/.test(
@@ -935,9 +1021,12 @@ export function inferFailures(
                 ts.TypeFlags.Undefined |
                 ts.TypeFlags.Void)
             );
+          // A value with no `then` cannot be a thenable, so it cannot adopt a
+          // rejection (an object literal, an array, a primitive).
+          const settled = part => primitiveValue(part) || !checker.getPropertyOfType(part, "then");
           return union(
             argEffects,
-            !type || (type.isUnion() ? type.types : [type]).every(primitiveValue) ? [] : ["unknown"]
+            !type || (type.isUnion() ? type.types : [type]).every(settled) ? [] : ["unknown"]
           );
         }
         if (primitive === "promise-reject")

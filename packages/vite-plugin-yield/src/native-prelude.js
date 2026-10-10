@@ -55,6 +55,170 @@ function nameDefaultComponent(p, file) {
   /** @type {any} */ (exported).node.declaration = declaration;
   p.scope.crawl();
 }
+/** Does this function return JSX on some path of its own (not a nested one's)?
+ * @param {Path} fn */
+const returnsJsx = fn => {
+  let jsx = t.isJSXElement(fn.node.body) || t.isJSXFragment(fn.node.body);
+  traverseOwned(fn, {
+    Function(inner) {
+      if (inner !== fn) inner.skip();
+    },
+    ReturnStatement(ret) {
+      jsx ||= t.isJSXElement(ret.node.argument) || t.isJSXFragment(ret.node.argument);
+    }
+  });
+  return jsx;
+};
+/** A Solid component type annotation (`Component<D>`, `ParentComponent<D>`,
+ * `VoidComponent<D>`): its kind and props type. @param {Path | null | undefined} annotation */
+const componentType = annotation => {
+  if (!annotation?.isTSTypeReference() || !t.isIdentifier(annotation.node.typeName)) return null;
+  const binding = annotation.scope.getBinding(annotation.node.typeName.name)?.path;
+  const source = binding?.isImportSpecifier()
+    ? /** @type {any} */ (binding.parentPath.node).source.value
+    : null;
+  const imported = binding?.isImportSpecifier() ? binding.node.imported : null;
+  const name = t.isIdentifier(imported) ? imported.name : null;
+  if (
+    source !== "solid-js" ||
+    !name ||
+    !["Component", "ParentComponent", "VoidComponent"].includes(name)
+  )
+    return null;
+  return { kind: name, props: annotation.node.typeParameters?.params[0] ?? null };
+};
+/**
+ * F-S51: a component factory, a module-level function that returns a
+ * component (Rendering's `RouteHOC(Comp)` returns `(props = {}) => …`). The
+ * returned function is named (`RouteHOCComponent`), so every stage treats it as
+ * a component; its props take the factory's declared `Component<D>` and lose
+ * a default (a component is always given its props object). Each `Component`
+ * parameter becomes generic in its colors (`Component<D, P, E, W, R>`), so a
+ * factory's component carries what its argument's does; the factory's own
+ * return annotation goes (it returns a yield component).
+ * @param {Path} p
+ */
+function componentFactories(p) {
+  let factoryTypes = false;
+  for (const statement of /** @type {Path[]} */ (p.get("body"))) {
+    const declaration = statement.isExportNamedDeclaration()
+      ? /** @type {Path} */ (statement.get("declaration"))
+      : statement;
+    if (!declaration?.isFunctionDeclaration() || !declaration.node.id) continue;
+    /** @type {Path[]} */ const returned = [];
+    let other = false;
+    traverseOwned(declaration, {
+      Function(inner) {
+        if (inner !== declaration) inner.skip();
+      },
+      ReturnStatement(ret) {
+        const value = ret.get("argument");
+        if (
+          (value.isArrowFunctionExpression() || value.isFunctionExpression()) &&
+          returnsJsx(value)
+        )
+          returned.push(value);
+        else other = true;
+      }
+    });
+    if (!returned.length || other) continue;
+    const declared = declaration.node.returnType
+      ? componentType(declaration.get("returnType.typeAnnotation"))
+      : null;
+    const factory = declaration.node.id.name;
+    for (const fn of returned) {
+      const [first] = fn.node.params;
+      const param = t.isAssignmentPattern(first) ? first.left : first;
+      if (t.isIdentifier(param) && !param.typeAnnotation && declared?.props)
+        param.typeAnnotation = t.tsTypeAnnotation(t.cloneNode(declared.props, true));
+      if (param && param !== first) fn.node.params[0] = param;
+      if (fn.isArrowFunctionExpression()) fn.arrowFunctionToExpression();
+      const named = /** @type {any} */ (fn.node);
+      if (!named.id)
+        named.id = t.identifier(
+          `${factory[0].toUpperCase()}${factory.slice(1)}Component`.replace(/^[^A-Za-z]/, "C")
+        );
+    }
+    /** @type {any[]} */ const typeParams =
+      /** @type {any} */ (declaration.node.typeParameters)?.params ?? [];
+    declaration.get("params").forEach((param, index) => {
+      const contract = /** @type {any} */ (param.node).typeAnnotation
+        ? componentType(param.get("typeAnnotation.typeAnnotation"))
+        : null;
+      if (!contract || !t.isIdentifier(param.node)) return;
+      const names = ["P", "E", "W", "R"].map(n => `_${n}${index}`);
+      typeParams.push(
+        t.tsTypeParameter(t.tsBooleanKeyword(), null, names[0]),
+        t.tsTypeParameter(null, null, names[1]),
+        t.tsTypeParameter(t.tsBooleanKeyword(), null, names[2]),
+        t.tsTypeParameter(null, null, names[3])
+      );
+      param.node.typeAnnotation = t.tsTypeAnnotation(
+        t.tsTypeReference(
+          t.identifier("__NativeComponent"),
+          t.tsTypeParameterInstantiation([
+            contract.props ? t.cloneNode(contract.props, true) : t.tsTypeLiteral([]),
+            ...names.map(n => t.tsTypeReference(t.identifier(n)))
+          ])
+        )
+      );
+      factoryTypes = true;
+    });
+    if (typeParams.length)
+      declaration.node.typeParameters = t.tsTypeParameterDeclaration(typeParams);
+    if (declared) declaration.node.returnType = null;
+  }
+  if (factoryTypes && !p.scope.hasBinding("__NativeComponent")) {
+    const source = t.importDeclaration(
+      [t.importSpecifier(t.identifier("__NativeComponent"), t.identifier("Component"))],
+      t.stringLiteral("solid-yield")
+    );
+    source.importKind = "type";
+    p.node.body.unshift(source);
+  }
+  p.scope.crawl();
+}
+/**
+ * F-S51: a component written inline as an argument at module level
+ * (`const App = RouteHOC(() => …)`) is named after its binding
+ * (`AppComponent`) and declared before it.
+ * @param {Path} p
+ */
+function liftInlineComponents(p) {
+  for (const statement of /** @type {Path[]} */ (p.get("body"))) {
+    const declaration = statement.isExportNamedDeclaration()
+      ? /** @type {Path} */ (statement.get("declaration"))
+      : statement;
+    if (!declaration?.isVariableDeclaration()) continue;
+    for (const declarator of /** @type {Path[]} */ (declaration.get("declarations"))) {
+      const init = /** @type {Path} */ (declarator.get("init"));
+      if (!init?.isCallExpression() || !t.isIdentifier(declarator.node.id)) continue;
+      // Solid's own APIs (render, lazy, the primitives) take no component here.
+      const callee = init.get("callee");
+      const from = callee.isIdentifier() ? api(callee)?.module : null;
+      if (from === "solid-js" || from === "@solidjs/web") continue;
+      for (const argument of /** @type {Path[]} */ (init.get("arguments"))) {
+        if (!(argument.isArrowFunctionExpression() || argument.isFunctionExpression())) continue;
+        if (argument.node.async || argument.node.generator || argument.node.params.length > 1)
+          continue;
+        if (!returnsJsx(argument)) continue;
+        const base = declarator.node.id.name;
+        let name = `${base[0].toUpperCase()}${base.slice(1)}Component`;
+        while (p.scope.hasBinding(name)) name += "Inline";
+        const body = t.isBlockStatement(argument.node.body)
+          ? argument.node.body
+          : t.blockStatement([t.returnStatement(/** @type {any} */ (argument.node.body))]);
+        const lifted = t.functionDeclaration(t.identifier(name), argument.node.params, body);
+        lifted.loc = argument.node.loc;
+        lifted.start = argument.node.start;
+        lifted.end = argument.node.end;
+        argument.replaceWith(t.identifier(name));
+        statement.insertBefore(lifted);
+        p.scope.crawl();
+      }
+    }
+  }
+}
 /** Normalize native control contracts before routine reconstruction.
  * @param {Map<string,string>} files */
 export function nativePrelude(files) {
@@ -64,6 +228,8 @@ export function nativePrelude(files) {
     if (!p) continue;
     const used = new Set();
     nameDefaultComponent(p, file);
+    liftInlineComponents(p);
+    componentFactories(p);
     traverseOwned(p, {
       VariableDeclarator(q) {
         const init = q.get("init");

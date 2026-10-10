@@ -191,3 +191,31 @@ test("review 3 built-ins and local helper contracts do not become opaque failure
   assert.deepEqual(summary(report, "digits"), ["global:RangeError"]);
   assert.deepEqual(summary(report, "client"), ["global:Error"]);
 });
+
+test("Rendering's rules: an Errored reset, values that cannot be thenables, Node's timers", () => {
+  const files = new Map(
+    Object.entries({
+      "reset.tsx": `import {Errored} from 'solid-js';
+ export function View(){return <Errored fallback={(error, reset) => { reset(); return <p/>; }}><p/></Errored>}
+ export function Click(){return <Errored fallback={(error, reset) => <button onClick={() => reset()}>retry</button>}><p/></Errored>}`,
+      "settle.ts": `class E extends Error{}
+ function record(){return new Promise<{id:number}>(resolve=>resolve({id:1}))}
+ function list(){return new Promise<number[]>(resolve=>resolve([1,2]))}
+ function thenable(value:PromiseLike<number>){return new Promise<number>(resolve=>resolve(value))}
+ function later(){return new Promise<number>(resolve=>setTimeout(()=>resolve(1),10))}
+ function late(){setTimeout(()=>{throw new E()},10)}`
+    }).map(([file, source]) => [resolve(root, file), source])
+  );
+  // With @types/node, `setTimeout` is declared there rather than in the DOM lib.
+  const node = {
+    typeRoots: [resolve(import.meta.dirname, "../../vite-plugin-yield/node_modules/@types")],
+    types: ["node"]
+  };
+  for (const report of [nativeFailures(files), nativeFailures(files, node)]) {
+    const kind = report.classes.find(c => c.name === "E").id;
+    for (const name of ["View", "Click", "record", "list", "later"])
+      assert.deepEqual(summary(report, name), [], name);
+    assert.deepEqual(summary(report, "thenable"), ["unknown"]);
+    assert.deepEqual(summary(report, "late"), [kind]);
+  }
+});

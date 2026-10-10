@@ -1432,17 +1432,14 @@ it after its file: an `index` file takes its directory's name, and a suffix is
 added if the name is taken. It becomes `function Profile() {…}` exported by
 default. Tests: `native-default-components.test.js`.
 
-**Higher-order components (F-S48, open).** Rendering's `RouteHOC(Comp)`
-returns `(props = {}) => <RouterContext …><Comp/></RouterContext>`, a
-component defined inside a function and closing over its argument. Native mode
-lowers only top-level named components, so the inner arrow's reads have no
-routine host (`SUGAR_CALLBACK` at `router.tsx:23`). Probing with the HOC
-bypassed shows nothing else blocking before it: once `App` is a named function
-and `Profile/index.tsx` is named (now automatic), the HOC is the stop.
-
-Supporting it means lowering a component created by a call, with a component
-parameter, to `component(…)` at the call. A design ruling is needed first:
-lower HOCs, or keep them foreign behind a checked boundary.
+**Higher-order components (F-S48, done as F-S51 below).** Rendering's
+`RouteHOC(Comp)` returns `(props = {}) => <RouterContext …><Comp/></RouterContext>`,
+a component defined inside a function and closing over its argument. Native
+mode lowered only top-level named components, so the inner arrow's reads had no
+routine host (`SUGAR_CALLBACK` at `router.tsx:23`). The choice was between
+lowering such factories and keeping them foreign behind a checked boundary.
+They are lowered: a foreign boundary would leave the app's router, and every
+page under it, outside the check. That choice is open to Dev's review.
 
 **Effect (open, design).** `placeOrder = effectAction(function* (…) {…})` is
 an authored generator driven by a hand-written Effect-TS bridge. It writes
@@ -1514,3 +1511,86 @@ children: JSX.Element })`, has two problems:
 
 This is F-S10's open "generic inference". The F-S49 parameter could serve it
 too, once generic value props have a typing.
+
+### Rendering through native mode (F-S51, F-S52; 2026-10-10)
+
+Rendering's shared app now lowers without a refusal. What it needed:
+
+**F-S51 (component factories).** A module-level function whose every return is
+a function returning JSX is a component factory (`RouteHOC(Comp)`). In the
+prelude:
+
+- The returned function is named `<Factory>Component`, so every later stage
+  treats it as a component. It takes the props of the factory's declared
+  `Component<D>` and loses a default (`props = {}`): a component is always
+  given a props object.
+- Each `Component` parameter becomes generic in its colors,
+  `Comp: Component<{}, P, E, W, R>` on the factory's own type parameters. The
+  factory's component carries what its argument's does: pending, failures,
+  waits and requirements.
+- A component written inline as a module-level argument
+  (`const App = RouteHOC(() => …)`) is declared before its binding, named
+  after it (`AppComponent`).
+- `window.onpopstate = () => setLocation(…)`: a callback assigned to an `on*`
+  property is an event, hosted as `$event`.
+
+Tests: `native-factories.test.js` (a factory generic in its component's colors;
+an inline component; a consumer rendered outside the factory gets `NO_PROVIDER`
+for the router).
+
+**F-S52 (context facades).** Plain Solid declares a context's value with plain
+function types, e.g. Rendering's
+`RouterValue = [() => string, { setLocation: (value: string) => void; matches: (match: string) => boolean }]`.
+Lowered, the provider puts a source, a setter and a routine there. Solid calls
+an accessor or a reactive helper where it is used; the library reads a source
+and drives a routine there, and neither is assignable to the declared function
+type.
+
+Each provided value is walked with the declared type, through aliases and
+interfaces in the same file: tuples by position, objects by member. A declared
+function type given a source or a routine it does not admit becomes that
+value's type, so every consumer reads it or delegates to it, as D-119 widens a
+prop. The escape check accepts a routine in such a slot as given where a
+routine is expected. Tests: `native-factories.test.js` (the value is typed as
+what is provided).
+
+**Context members (F-S45, extended).** A tuple value is followed by position,
+and a name destructured from a context's value
+(`const [, { setLocation }] = useRouter()`) is followed through its pattern. A
+call through it calls what every provider put there. Tests:
+`native-context-members.test.js`.
+
+**Typed creations.** `createMemo<T>(…)` and `createEffect<T>(…)` declare their
+value type. The library's `$memo<Y, R>` and `$effect<YC, V, YE>` take their
+operations first, and TypeScript cannot be given the value type alone. The type
+moves onto the settled body's returns as `(x satisfies T) as T`, so a mismatch
+is still an error. An async iterable of `T` (Stream's memo) is left to
+inference, since its items are the value. A function's declared return type
+also types the attempt thunk that wraps it. Tests:
+`native-typed-values.test.js`.
+
+**D-119 through `lazy`.** `lazy(() => import("./Page"))` of a native module is
+a native tag. `LazyComponent<T>` drops the page's type parameters, so a lazy
+target's widened props take the concrete union of colors its callers pass
+(`Source<T, E, P>` with concrete `E` and `P`), not type parameters. Tests:
+`native-lazy-props.test.js`.
+
+**Failure inference (Rendering's rules).**
+
+- An Errored fallback's `reset()` clears the boundary and re-runs its
+  children. The call itself throws nothing.
+- A Promise resolved with a value that has no `then` (an object literal, an
+  array, a primitive) cannot adopt a rejection.
+- With `@types/node` loaded, `setTimeout` is declared there rather than in the
+  DOM library, and it schedules as the DOM's does.
+
+Tests: the "Rendering's rules" test in `failure-inference.test.mjs`.
+
+**A captured routine callee is not an escape.** The lowering captures a callee
+before evaluating its arguments, in source order. A routine captured in a
+`const` that is only ever called is still delegated.
+
+Rendering then lowered with 14 diagnostics (`native-verification.json`). The
+three setup reads (`createSignal(props.id)` twice in ErrorStream, and
+`props.url` in the router; D-042) are correct, each with its `TS2769` at the
+component. Stream and Skeleton still had type errors; they are F-S53.

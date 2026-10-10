@@ -1,0 +1,2487 @@
+{
+  "date": "2026-10-10",
+  "dir": "(outside the repo)",
+  "npm": {
+    "@corvu/drawer": {
+      "npm": true,
+      "solid2": null
+    },
+    "@solid-primitives/bounds": {
+      "npm": true,
+      "solid2": {
+        "version": "1.0.0-next.2",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@solid-primitives/audio": {
+      "npm": true,
+      "solid2": {
+        "version": "3.0.0-next.2",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@solid-primitives/event-bus": {
+      "npm": true,
+      "solid2": {
+        "version": "3.0.0-next.3",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@kobalte/core": {
+      "npm": true,
+      "solid2": {
+        "version": "2.0.0-alpha.2",
+        "solid": "2.0.0-rc.3"
+      }
+    },
+    "@solid-primitives/active-element": {
+      "npm": true,
+      "solid2": {
+        "version": "3.0.0-next.2",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@dnd-kit/solid": {
+      "npm": true,
+      "solid2": null
+    },
+    "@sentry/solid": {
+      "npm": true,
+      "solid2": null
+    },
+    "@solid-primitives/event-listener": {
+      "npm": true,
+      "solid2": {
+        "version": "3.0.0-next.5",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@solid-primitives/i18n": {
+      "npm": true,
+      "solid2": {
+        "version": "3.0.0-next.4",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@solid-primitives/media": {
+      "npm": true,
+      "solid2": {
+        "version": "4.0.0-next.2",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@solid-primitives/storage": {
+      "npm": true,
+      "solid2": {
+        "version": "5.0.0-next.4",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@solid-primitives/scheduled": {
+      "npm": true,
+      "solid2": {
+        "version": "2.0.0-next.2",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@solid-primitives/scroll": {
+      "npm": true,
+      "solid2": {
+        "version": "3.0.0-next.4",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@solid-primitives/timer": {
+      "npm": true,
+      "solid2": {
+        "version": "1.4.5-next.1",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@solid-primitives/resize-observer": {
+      "npm": true,
+      "solid2": {
+        "version": "4.0.0-next.3",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@solid-primitives/websocket": {
+      "npm": true,
+      "solid2": {
+        "version": "2.0.0-next.3",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@solidjs/router": {
+      "npm": true,
+      "solid2": {
+        "version": "2.0.0-next.38",
+        "solid": "^2.0.0-rc.14"
+      }
+    },
+    "@solidjs/start": {
+      "npm": true,
+      "solid2": null
+    },
+    "@tanstack/solid-virtual": {
+      "npm": true,
+      "solid2": null
+    },
+    "@solidjs/meta": {
+      "npm": true,
+      "solid2": {
+        "version": "1.0.0-next.2",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "solid-list": {
+      "npm": true,
+      "solid2": null
+    },
+    "solid-presence": {
+      "npm": true,
+      "solid2": null
+    },
+    "solid-stripe": {
+      "npm": true,
+      "solid2": null
+    },
+    "@tanstack/solid-query": {
+      "npm": true,
+      "solid2": {
+        "version": "6.0.0-rc.5",
+        "solid": ">=2.0.0-rc.13 <3.0.0"
+      }
+    },
+    "@thisbeyond/solid-dnd": {
+      "npm": true,
+      "solid2": null
+    },
+    "vite-plugin-solid": {
+      "npm": true,
+      "solid2": {
+        "version": "3.0.0-next.26",
+        "solid": ">=2.0.0-beta.32 <2.0.0-experimental.0"
+      }
+    },
+    "@corvu/dialog": {
+      "npm": true,
+      "solid2": null
+    },
+    "@corvu/calendar": {
+      "npm": true,
+      "solid2": null
+    },
+    "@solid-primitives/keyed": {
+      "npm": true,
+      "solid2": {
+        "version": "3.0.0-next.2",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "solid-sonner": {
+      "npm": true,
+      "solid2": null
+    },
+    "@solid-primitives/context": {
+      "npm": true,
+      "solid2": {
+        "version": "2.0.0-next.2",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@solid-primitives/map": {
+      "npm": true,
+      "solid2": {
+        "version": "1.0.0-next.2",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@solid-primitives/rootless": {
+      "npm": true,
+      "solid2": {
+        "version": "2.0.0-next.2",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@solid-primitives/stream": {
+      "npm": true,
+      "solid2": null
+    },
+    "@solid-primitives/lifecycle": {
+      "npm": true,
+      "solid2": {
+        "version": "1.0.0-next.2",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@solid-primitives/memo": {
+      "npm": true,
+      "solid2": {
+        "version": "2.0.0-next.2",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@solidjs/testing-library": {
+      "npm": true,
+      "solid2": {
+        "version": "1.0.0-beta.3",
+        "solid": ">=2.0.0-0"
+      }
+    },
+    "@tanstack/solid-table": {
+      "npm": true,
+      "solid2": null
+    },
+    "solid-gesture": {
+      "npm": true,
+      "solid2": null
+    },
+    "solid-custom-scrollbars": {
+      "npm": true,
+      "solid2": null
+    },
+    "solid-transition-group": {
+      "npm": true,
+      "solid2": null
+    },
+    "solid-styled-components": {
+      "npm": true,
+      "solid2": null
+    },
+    "vite-plugin-solid-svg": {
+      "npm": true,
+      "solid2": null
+    },
+    "@aerofoil/rive-solid-canvas": {
+      "npm": true,
+      "solid2": null
+    },
+    "@corvu/tooltip": {
+      "npm": true,
+      "solid2": null
+    },
+    "@solid-primitives/broadcast-channel": {
+      "npm": true,
+      "solid2": {
+        "version": "1.0.0-next.2",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@solid-devtools/overlay": {
+      "npm": true,
+      "solid2": null
+    },
+    "@solid-primitives/date": {
+      "npm": true,
+      "solid2": {
+        "version": "3.0.0-next.3",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@solid-primitives/deep": {
+      "npm": true,
+      "solid2": {
+        "version": "1.0.0-next.3",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "solid-devtools": {
+      "npm": true,
+      "solid2": null
+    },
+    "@solid-primitives/mouse": {
+      "npm": true,
+      "solid2": {
+        "version": "4.0.0-next.3",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "solid-markdown": {
+      "npm": true,
+      "solid2": null
+    },
+    "@solid-primitives/refs": {
+      "npm": true,
+      "solid2": {
+        "version": "3.0.0-next.2",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@solid-primitives/history": {
+      "npm": true,
+      "solid2": {
+        "version": "1.0.0-next.3",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "solid-toast": {
+      "npm": true,
+      "solid2": null
+    },
+    "@solid-primitives/promise": {
+      "npm": true,
+      "solid2": {
+        "version": "2.0.0-next.2",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@macaron-css/solid": {
+      "npm": true,
+      "solid2": null
+    },
+    "@openauthjs/solid": {
+      "npm": true,
+      "solid2": null
+    },
+    "@modular-forms/solid": {
+      "npm": true,
+      "solid2": null
+    },
+    "@solid-primitives/input-mask": {
+      "npm": true,
+      "solid2": {
+        "version": "1.0.0-next.2",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@solid-primitives/platform": {
+      "npm": true,
+      "solid2": {
+        "version": "1.0.0-next.2",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@dschz/solid-auto-sizer": {
+      "npm": true,
+      "solid2": null
+    },
+    "@lingui/solid": {
+      "npm": true,
+      "solid2": null
+    },
+    "@solid-primitives/keyboard": {
+      "npm": true,
+      "solid2": {
+        "version": "2.0.0-next.5",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@minht11/solid-virtual-container": {
+      "npm": true,
+      "solid2": null
+    },
+    "@solid-aria/button": {
+      "npm": true,
+      "solid2": null
+    },
+    "@solid-devtools/debugger": {
+      "npm": true,
+      "solid2": null
+    },
+    "@solid-primitives/mutation-observer": {
+      "npm": true,
+      "solid2": {
+        "version": "3.0.0-next.2",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@solid-primitives/set": {
+      "npm": true,
+      "solid2": {
+        "version": "1.0.0-next.2",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@solid-devtools/transform": {
+      "npm": true,
+      "solid2": null
+    },
+    "solid-dnd-directive": {
+      "npm": true,
+      "solid2": null
+    },
+    "solid-forms": {
+      "npm": true,
+      "solid2": null
+    },
+    "solid-hcaptcha": {
+      "npm": true,
+      "solid2": null
+    },
+    "solid-floating-ui": {
+      "npm": true,
+      "solid2": null
+    },
+    "solid-icons": {
+      "npm": true,
+      "solid2": null
+    },
+    "solid-motionone": {
+      "npm": true,
+      "solid2": null
+    },
+    "@solid-primitives/transition-group": {
+      "npm": true,
+      "solid2": {
+        "version": "2.0.0-next.2",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "solid-qr-code": {
+      "npm": true,
+      "solid2": null
+    },
+    "@tanstack/solid-db": {
+      "npm": true,
+      "solid2": null
+    },
+    "@tanstack/solid-hotkeys-devtools": {
+      "npm": true,
+      "solid2": null
+    },
+    "eslint-plugin-solid": {
+      "npm": true,
+      "solid2": null
+    },
+    "@tanstack/solid-hotkeys": {
+      "npm": true,
+      "solid2": null
+    },
+    "@nerimity/solid-emoji-picker": {
+      "npm": true,
+      "solid2": null
+    },
+    "@tanstack/solid-devtools": {
+      "npm": true,
+      "solid2": null
+    },
+    "@nerimity/solid-i18lite": {
+      "npm": true,
+      "solid2": null
+    },
+    "solid-codemirror": {
+      "npm": true,
+      "solid2": null
+    },
+    "@nerimity/solid-turnstile": {
+      "npm": true,
+      "solid2": null
+    },
+    "solid-sortablejs": {
+      "npm": true,
+      "solid2": null
+    },
+    "solid-navigator": {
+      "npm": true,
+      "solid2": null
+    },
+    "@signaldb/solid": {
+      "npm": true,
+      "solid2": null
+    },
+    "babel-preset-solid": {
+      "npm": true,
+      "solid2": {
+        "version": "2.0.0-rc.2",
+        "solid": "^2.0.0-rc.2"
+      }
+    },
+    "@neoconfetti/solid": {
+      "npm": true,
+      "solid2": null
+    },
+    "@solidjs-use/integrations": {
+      "npm": true,
+      "solid2": null
+    },
+    "solidjs-use": {
+      "npm": true,
+      "solid2": null
+    },
+    "@tanstack/solid-query-devtools": {
+      "npm": true,
+      "solid2": {
+        "version": "6.0.0-rc.5",
+        "solid": ">=2.0.0-rc.13 <3.0.0"
+      }
+    },
+    "@ark-ui/solid": {
+      "npm": true,
+      "solid2": null
+    },
+    "solid-contextmenu": {
+      "npm": true,
+      "solid2": null
+    },
+    "@motionone/solid": {
+      "npm": true,
+      "solid2": null
+    },
+    "@corvu/utils": {
+      "npm": true,
+      "solid2": null
+    },
+    "@hope-ui/solid": {
+      "npm": true,
+      "solid2": null
+    },
+    "@kobalte/utils": {
+      "npm": true,
+      "solid2": {
+        "version": "2.0.0-alpha.0",
+        "solid": "2.0.0-rc.0"
+      }
+    },
+    "@solid-aria/types": {
+      "npm": true,
+      "solid2": null
+    },
+    "@tanstack/solid-form": {
+      "npm": true,
+      "solid2": null
+    },
+    "@solid-aria/utils": {
+      "npm": true,
+      "solid2": null
+    },
+    "@solid-primitives/utils": {
+      "npm": true,
+      "solid2": {
+        "version": "7.0.0-next.4",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@solid-primitives/props": {
+      "npm": true,
+      "solid2": {
+        "version": "4.0.0-next.3",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@tanstack/solid-router": {
+      "npm": true,
+      "solid2": {
+        "version": "2.0.0-rc.8",
+        "solid": ">=2.0.0-0 <3.0.0"
+      }
+    },
+    "@kobalte/vanilla-extract": {
+      "npm": true,
+      "solid2": null
+    },
+    "rolldown-plugin-solid": {
+      "npm": true,
+      "solid2": null
+    },
+    "rollup-preset-solid": {
+      "npm": true,
+      "solid2": null
+    },
+    "solid-headless": {
+      "npm": true,
+      "solid2": null
+    },
+    "solid-mdx": {
+      "npm": true,
+      "solid2": null
+    },
+    "solid-use": {
+      "npm": true,
+      "solid2": {
+        "version": "1.0.0-next.3",
+        "solid": "^2.0.0-rc.5"
+      }
+    },
+    "solid-heroicons": {
+      "npm": true,
+      "solid2": null
+    },
+    "@kobalte/solidbase": {
+      "npm": true,
+      "solid2": null
+    },
+    "@tanstack/solid-start": {
+      "npm": true,
+      "solid2": {
+        "version": "2.0.0-rc.8",
+        "solid": ">=2.0.0-0 <3.0.0"
+      }
+    },
+    "@solid-primitives/marker": {
+      "npm": true,
+      "solid2": {
+        "version": "2.0.0-next.2",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@tanstack/solid-router-ssr-query": {
+      "npm": true,
+      "solid2": {
+        "version": "2.0.0-rc.6",
+        "solid": ">=2.0.0-beta.17"
+      }
+    },
+    "@tanstack/solid-router-devtools": {
+      "npm": true,
+      "solid2": {
+        "version": "2.0.0-rc.6",
+        "solid": "^2.0.0-rc.8"
+      }
+    },
+    "@kobalte/tailwindcss": {
+      "npm": true,
+      "solid2": null
+    },
+    "solid-dismiss": {
+      "npm": true,
+      "solid2": null
+    },
+    "@solid-primitives/clipboard": {
+      "npm": true,
+      "solid2": {
+        "version": "2.0.0-next.17",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@solid-primitives/intersection-observer": {
+      "npm": true,
+      "solid2": {
+        "version": "3.0.0-next.3",
+        "solid": "^2.0.0-rc.0"
+      }
+    },
+    "@solid.js/docs": {
+      "npm": true,
+      "solid2": null
+    },
+    "solid-repl": {
+      "npm": true,
+      "solid2": null
+    },
+    "solid-utils": {
+      "npm": true,
+      "solid2": null
+    },
+    "esbuild-plugin-solid": {
+      "npm": true,
+      "solid2": null
+    },
+    "solid-app-router": {
+      "npm": true,
+      "solid2": null
+    },
+    "vite-plugin-solid-styled": {
+      "npm": true,
+      "solid2": null
+    },
+    "solid-styled": {
+      "npm": true,
+      "solid2": null
+    },
+    "solid-social": {
+      "npm": true,
+      "solid2": null
+    },
+    "@felte/solid": {
+      "npm": true,
+      "solid2": null
+    },
+    "solid-start": {
+      "npm": true,
+      "solid2": null
+    },
+    "solid-start-static": {
+      "npm": true,
+      "solid2": null
+    },
+    "@zag-js/solid": {
+      "npm": true,
+      "solid2": null
+    }
+  },
+  "apps": [
+    {
+      "repo": "anomalyco/opencode",
+      "kind": "web app + Electron desktop + SolidStart sites",
+      "sha": "055d95bb7e278c94baf06235a52cac79dd13ba67",
+      "lastCommit": "2026-10-09",
+      "license": "MIT",
+      "solid": [
+        "1.9.10",
+        "^1.9.0"
+      ],
+      "stack": [
+        "Electron",
+        "Kobalte",
+        "Router",
+        "SolidStart",
+        "TanStack Query"
+      ],
+      "deps": [
+        "@corvu/drawer",
+        "@dnd-kit/solid",
+        "@kobalte/core",
+        "@sentry/solid",
+        "@solid-primitives/active-element",
+        "@solid-primitives/audio",
+        "@solid-primitives/bounds",
+        "@solid-primitives/event-bus",
+        "@solid-primitives/event-listener",
+        "@solid-primitives/i18n",
+        "@solid-primitives/media",
+        "@solid-primitives/resize-observer",
+        "@solid-primitives/scheduled",
+        "@solid-primitives/scroll",
+        "@solid-primitives/storage",
+        "@solid-primitives/timer",
+        "@solid-primitives/websocket",
+        "@solidjs/meta",
+        "@solidjs/router",
+        "@solidjs/start",
+        "@tanstack/solid-query",
+        "@tanstack/solid-virtual",
+        "@thisbeyond/solid-dnd",
+        "solid-list",
+        "solid-presence",
+        "solid-sonner",
+        "solid-stripe",
+        "vite-plugin-solid"
+      ],
+      "files": {
+        "source": 1333,
+        "solid": 469,
+        "solidLines": 104327
+      },
+      "tests": {
+        "e2e": true,
+        "unit": 237
+      },
+      "changes": {
+        "solid-js/web": 47,
+        "ErrorBoundary": 6,
+        "createResource": 35,
+        "createEffect": 260,
+        "solid-js/store": 118,
+        "onMount": 71,
+        "classList": 348,
+        "batch": 52,
+        "produce": 91,
+        "startTransition": 18,
+        "splitProps": 151,
+        "on": 52,
+        "createComputed": 5,
+        "use: directives": 4,
+        "Suspense": 11,
+        "Index": 8,
+        "mergeProps": 3,
+        "Context.Provider": 7,
+        "attr:/bool:/on:/oncapture:": 18
+      },
+      "kept": {
+        "createSignal": 153,
+        "createMemo": 1110,
+        "onCleanup": 147,
+        "lazy": 6,
+        "For": 239,
+        "Show": 922,
+        "Dynamic": 22,
+        "createStore": 164,
+        "Switch": 45,
+        "Match": 119,
+        "untrack": 18,
+        "children": 3,
+        "Portal": 7,
+        "createRoot": 13,
+        "createContext": 6,
+        "useContext": 6
+      },
+      "router": {
+        "createAsync": 50,
+        "query": 33,
+        "\"use server\"": 64,
+        "action": 28,
+        "useSubmission": 25,
+        "useAction": 9
+      }
+    },
+    {
+      "repo": "macro-inc/macro",
+      "kind": "web app + Tauri desktop/mobile",
+      "sha": "8de380e086b1f7424a6cd71eee42451f67f22763",
+      "lastCommit": "2026-10-10",
+      "license": "AGPL-3.0",
+      "solid": [
+        "^1.9.7"
+      ],
+      "stack": [
+        "Kobalte",
+        "Router",
+        "TanStack Query",
+        "Tauri"
+      ],
+      "deps": [
+        "@corvu/calendar",
+        "@corvu/dialog",
+        "@corvu/drawer",
+        "@kobalte/core",
+        "@solid-primitives/context",
+        "@solid-primitives/event-bus",
+        "@solid-primitives/keyed",
+        "@solid-primitives/lifecycle",
+        "@solid-primitives/map",
+        "@solid-primitives/media",
+        "@solid-primitives/memo",
+        "@solid-primitives/platform",
+        "@solid-primitives/promise",
+        "@solid-primitives/resize-observer",
+        "@solid-primitives/rootless",
+        "@solid-primitives/scheduled",
+        "@solid-primitives/storage",
+        "@solid-primitives/stream",
+        "@solidjs/meta",
+        "@solidjs/router",
+        "@solidjs/testing-library",
+        "@tanstack/solid-query",
+        "@tanstack/solid-table",
+        "@tanstack/solid-virtual",
+        "@thisbeyond/solid-dnd",
+        "solid-custom-scrollbars",
+        "solid-gesture",
+        "solid-styled-components",
+        "solid-transition-group",
+        "vite-plugin-solid",
+        "vite-plugin-solid-svg"
+      ],
+      "files": {
+        "source": 11946,
+        "solid": 3510,
+        "solidLines": 714942
+      },
+      "tests": {
+        "e2e": true,
+        "unit": 1792
+      },
+      "changes": {
+        "classList": 426,
+        "Context.Provider": 140,
+        "Suspense": 259,
+        "createEffect": 925,
+        "onMount": 459,
+        "solid-js/web": 219,
+        "on": 361,
+        "createResource": 33,
+        "attr:/bool:/on:/oncapture:": 153,
+        "splitProps": 241,
+        "solid-js/store": 129,
+        "createSelector": 20,
+        "batch": 203,
+        "createComputed": 30,
+        "produce": 32,
+        "Index": 62,
+        "unwrap": 53,
+        "use: directives": 69,
+        "ErrorBoundary": 21,
+        "destructured props": 1,
+        "mergeProps": 5,
+        "startTransition": 2,
+        "indexArray": 2
+      },
+      "kept": {
+        "createSignal": 4079,
+        "Show": 6023,
+        "createMemo": 1759,
+        "Switch": 318,
+        "Match": 1132,
+        "For": 1699,
+        "createContext": 138,
+        "useContext": 279,
+        "onCleanup": 1014,
+        "lazy": 140,
+        "Dynamic": 215,
+        "untrack": 263,
+        "Portal": 47,
+        "createStore": 114,
+        "children": 37,
+        "mapArray": 8,
+        "createRoot": 33
+      },
+      "router": {
+        "createAsync": 1
+      }
+    },
+    {
+      "repo": "CapSoftware/Cap",
+      "kind": "Tauri desktop (SolidStart)",
+      "sha": "36c24dcd883431e661c8f0f8a37c193bda350a21",
+      "lastCommit": "2026-10-10",
+      "license": "AGPL-3.0",
+      "solid": [
+        "^1.9.3"
+      ],
+      "stack": [
+        "Kobalte",
+        "Router",
+        "SolidStart",
+        "TanStack Query",
+        "Tauri"
+      ],
+      "deps": [
+        "@aerofoil/rive-solid-canvas",
+        "@corvu/tooltip",
+        "@kobalte/core",
+        "@solid-devtools/overlay",
+        "@solid-primitives/bounds",
+        "@solid-primitives/broadcast-channel",
+        "@solid-primitives/context",
+        "@solid-primitives/date",
+        "@solid-primitives/deep",
+        "@solid-primitives/event-bus",
+        "@solid-primitives/event-listener",
+        "@solid-primitives/history",
+        "@solid-primitives/memo",
+        "@solid-primitives/mouse",
+        "@solid-primitives/refs",
+        "@solid-primitives/resize-observer",
+        "@solid-primitives/scheduled",
+        "@solid-primitives/storage",
+        "@solid-primitives/timer",
+        "@solid-primitives/websocket",
+        "@solidjs/router",
+        "@solidjs/start",
+        "@tanstack/solid-query",
+        "solid-devtools",
+        "solid-markdown",
+        "solid-presence",
+        "solid-toast",
+        "solid-transition-group"
+      ],
+      "files": {
+        "source": 325,
+        "solid": 179,
+        "solidLines": 76401
+      },
+      "tests": {
+        "e2e": false,
+        "unit": 55
+      },
+      "changes": {
+        "Suspense": 27,
+        "onMount": 62,
+        "createEffect": 197,
+        "solid-js/store": 50,
+        "ErrorBoundary": 4,
+        "classList": 36,
+        "on": 49,
+        "splitProps": 18,
+        "createResource": 31,
+        "solid-js/web": 9,
+        "produce": 108,
+        "batch": 72,
+        "Index": 9,
+        "Context.Provider": 3,
+        "mergeProps": 10,
+        "unwrap": 36,
+        "startTransition": 1
+      },
+      "kept": {
+        "createSignal": 416,
+        "onCleanup": 129,
+        "lazy": 35,
+        "Show": 579,
+        "createMemo": 271,
+        "createStore": 44,
+        "createRoot": 33,
+        "children": 2,
+        "For": 141,
+        "Switch": 21,
+        "Match": 59,
+        "Portal": 2,
+        "Dynamic": 9,
+        "untrack": 4,
+        "createContext": 2,
+        "useContext": 2
+      },
+      "router": {
+        "action": 1,
+        "useAction": 1,
+        "useSubmission": 1
+      }
+    },
+    {
+      "repo": "anomalyco/console",
+      "kind": "web app (SST Console)",
+      "sha": "0344688fc4b9b48732b0842406ef2c1270a41ad3",
+      "lastCommit": "2026-09-29",
+      "license": "none",
+      "solid": [
+        "1.9.3"
+      ],
+      "stack": [
+        "Kobalte",
+        "Router"
+      ],
+      "deps": [
+        "@kobalte/core",
+        "@macaron-css/solid",
+        "@modular-forms/solid",
+        "@openauthjs/solid",
+        "@solid-primitives/event-bus",
+        "@solid-primitives/event-listener",
+        "@solid-primitives/input-mask",
+        "@solid-primitives/keyboard",
+        "@solid-primitives/mutation-observer",
+        "@solid-primitives/storage",
+        "@solidjs/router",
+        "solid-list",
+        "vite-plugin-solid"
+      ],
+      "files": {
+        "source": 110,
+        "solid": 86,
+        "solidLines": 32214
+      },
+      "tests": {
+        "e2e": false,
+        "unit": 0
+      },
+      "changes": {
+        "Context.Provider": 9,
+        "mergeProps": 1,
+        "solid-js/store": 17,
+        "produce": 23,
+        "unwrap": 5,
+        "batch": 9,
+        "createEffect": 32,
+        "solid-js/web": 5,
+        "Suspense": 7,
+        "createResource": 7,
+        "destructured props": 1,
+        "onMount": 4,
+        "createComputed": 3,
+        "on": 1,
+        "splitProps": 2
+      },
+      "kept": {
+        "createSignal": 37,
+        "onCleanup": 12,
+        "Switch": 54,
+        "Match": 138,
+        "createContext": 9,
+        "useContext": 10,
+        "Show": 212,
+        "createMemo": 89,
+        "For": 45,
+        "createStore": 24,
+        "Portal": 3,
+        "Dynamic": 1
+      },
+      "router": {}
+    },
+    {
+      "repo": "stoatchat/for-web",
+      "kind": "chat PWA (Stoat, formerly Revolt)",
+      "sha": "8cd48758a419e1f679c9f12cdb219821c5ca6553",
+      "lastCommit": "2026-10-08",
+      "license": "AGPL-3.0",
+      "solid": [
+        "^1.9.14"
+      ],
+      "stack": [
+        "Router",
+        "TanStack Query",
+        "Tauri"
+      ],
+      "deps": [
+        "@dschz/solid-auto-sizer",
+        "@lingui/solid",
+        "@minht11/solid-virtual-container",
+        "@solid-aria/button",
+        "@solid-devtools/debugger",
+        "@solid-devtools/overlay",
+        "@solid-devtools/transform",
+        "@solid-primitives/date",
+        "@solid-primitives/i18n",
+        "@solid-primitives/keyed",
+        "@solid-primitives/map",
+        "@solid-primitives/resize-observer",
+        "@solid-primitives/set",
+        "@solidjs/router",
+        "@tanstack/solid-query",
+        "@thisbeyond/solid-dnd",
+        "solid-dnd-directive",
+        "solid-floating-ui",
+        "solid-forms",
+        "solid-hcaptcha",
+        "solid-icons",
+        "solid-motionone",
+        "solid-qr-code",
+        "solid-stripe",
+        "vite-plugin-solid",
+        "vite-plugin-solid-svg"
+      ],
+      "files": {
+        "source": 428,
+        "solid": 340,
+        "solidLines": 56923
+      },
+      "tests": {
+        "e2e": true,
+        "unit": 3
+      },
+      "changes": {
+        "onMount": 47,
+        "use: directives": 120,
+        "Context.Provider": 15,
+        "on": 41,
+        "createEffect": 74,
+        "splitProps": 38,
+        "batch": 9,
+        "Suspense": 6,
+        "ErrorBoundary": 2,
+        "createResource": 2,
+        "solid-js/web": 16,
+        "solid-js/store": 4,
+        "mergeProps": 3,
+        "classList": 4,
+        "attr:/bool:/on:/oncapture:": 4
+      },
+      "kept": {
+        "createMemo": 73,
+        "For": 94,
+        "Show": 386,
+        "Switch": 132,
+        "Match": 285,
+        "createSignal": 153,
+        "createContext": 16,
+        "useContext": 18,
+        "onCleanup": 47,
+        "untrack": 3,
+        "Portal": 13,
+        "Dynamic": 2,
+        "createStore": 3,
+        "createRoot": 2,
+        "children": 1
+      },
+      "router": {}
+    },
+    {
+      "repo": "monkeytypegame/monkeytype",
+      "kind": "web app, partly Solid (incremental adoption)",
+      "sha": "cbaa65cce81a95eb753308cece40ea8c34a20787",
+      "lastCommit": "2026-10-08",
+      "license": "GPL",
+      "solid": [
+        "1.9.13"
+      ],
+      "stack": [
+        "TanStack Query"
+      ],
+      "deps": [
+        "@solid-devtools/overlay",
+        "@solid-primitives/refs",
+        "@solid-primitives/transition-group",
+        "@solidjs/meta",
+        "@solidjs/testing-library",
+        "@tanstack/solid-db",
+        "@tanstack/solid-devtools",
+        "@tanstack/solid-form",
+        "@tanstack/solid-hotkeys",
+        "@tanstack/solid-hotkeys-devtools",
+        "@tanstack/solid-query",
+        "@tanstack/solid-query-devtools",
+        "@tanstack/solid-table",
+        "eslint-plugin-solid",
+        "solid-devtools",
+        "vite-plugin-solid"
+      ],
+      "files": {
+        "source": 562,
+        "solid": 235,
+        "solidLines": 36319
+      },
+      "tests": {
+        "e2e": false,
+        "unit": 56
+      },
+      "changes": {
+        "ErrorBoundary": 1,
+        "createEffect": 45,
+        "onMount": 11,
+        "solid-js/web": 4,
+        "splitProps": 13,
+        "solid-js/store": 12,
+        "on": 5,
+        "mergeProps": 1,
+        "Context.Provider": 3,
+        "batch": 6,
+        "Suspense": 1,
+        "classList": 3,
+        "attr:/bool:/on:/oncapture:": 1,
+        "Index": 1,
+        "createResource": 5,
+        "unwrap": 3
+      },
+      "kept": {
+        "createSignal": 203,
+        "createMemo": 105,
+        "Show": 202,
+        "onCleanup": 28,
+        "Switch": 9,
+        "Match": 27,
+        "Dynamic": 3,
+        "createStore": 13,
+        "children": 5,
+        "For": 59,
+        "useContext": 2,
+        "createContext": 2,
+        "lazy": 4,
+        "untrack": 7
+      },
+      "router": {}
+    },
+    {
+      "repo": "Nerimity/nerimity-web",
+      "kind": "chat web app",
+      "sha": "6f1be8615688b306d0f869c3386c73dbfaaf5196",
+      "lastCommit": "2026-09-10",
+      "license": "GPL",
+      "solid": [
+        "^1.9.14"
+      ],
+      "stack": [],
+      "deps": [
+        "@nerimity/solid-emoji-picker",
+        "@nerimity/solid-i18lite",
+        "@nerimity/solid-turnstile",
+        "@sentry/solid",
+        "@solid-primitives/context",
+        "@solid-primitives/keyed",
+        "@solidjs/meta",
+        "eslint-plugin-solid",
+        "solid-codemirror",
+        "solid-navigator",
+        "solid-sortablejs",
+        "solid-styled-components",
+        "vite-plugin-solid"
+      ],
+      "files": {
+        "source": 370,
+        "solid": 292,
+        "solidLines": 65607
+      },
+      "tests": {
+        "e2e": false,
+        "unit": 0
+      },
+      "changes": {
+        "onMount": 112,
+        "batch": 52,
+        "solid-js/store": 37,
+        "produce": 4,
+        "unwrap": 1,
+        "on": 136,
+        "createEffect": 226,
+        "solid-js/web": 19,
+        "classList": 8,
+        "Index": 1,
+        "Suspense": 1,
+        "createResource": 1,
+        "Context.Provider": 6,
+        "splitProps": 2
+      },
+      "kept": {
+        "createSignal": 644,
+        "createMemo": 105,
+        "onCleanup": 89,
+        "lazy": 98,
+        "Show": 803,
+        "createStore": 35,
+        "children": 9,
+        "For": 154,
+        "Dynamic": 13,
+        "Switch": 41,
+        "Match": 114,
+        "Portal": 8,
+        "untrack": 8,
+        "mapArray": 1,
+        "createContext": 6,
+        "useContext": 6
+      },
+      "router": {}
+    },
+    {
+      "repo": "johannesjo/parallel-code",
+      "kind": "Electron desktop",
+      "sha": "f0849414a33f2a007c28eba35b9eaacc3c4a43c9",
+      "lastCommit": "2026-10-10",
+      "license": "MIT",
+      "solid": [
+        "^1.9.16"
+      ],
+      "stack": [
+        "Electron"
+      ],
+      "deps": [
+        "eslint-plugin-solid",
+        "vite-plugin-solid"
+      ],
+      "files": {
+        "source": 1098,
+        "solid": 277,
+        "solidLines": 71360
+      },
+      "tests": {
+        "e2e": true,
+        "unit": 446
+      },
+      "changes": {
+        "ErrorBoundary": 2,
+        "onMount": 63,
+        "createEffect": 261,
+        "classList": 34,
+        "solid-js/store": 32,
+        "unwrap": 9,
+        "solid-js/web": 24,
+        "batch": 54,
+        "on": 56,
+        "Index": 8,
+        "createResource": 20,
+        "Context.Provider": 1,
+        "attr:/bool:/on:/oncapture:": 10,
+        "produce": 48
+      },
+      "kept": {
+        "createSignal": 686,
+        "onCleanup": 175,
+        "lazy": 6,
+        "Show": 1038,
+        "For": 224,
+        "untrack": 135,
+        "createMemo": 156,
+        "createStore": 16,
+        "Portal": 22,
+        "Switch": 6,
+        "Match": 23,
+        "Dynamic": 3,
+        "createContext": 1,
+        "useContext": 1,
+        "children": 1,
+        "createRoot": 6
+      },
+      "router": {}
+    },
+    {
+      "repo": "vriteio/vrite",
+      "kind": "CMS web app",
+      "sha": "630280b0685a6d80b0f8a3866e8d5620642b50ab",
+      "lastCommit": "2026-10-04",
+      "license": "AGPL-3.0",
+      "solid": [
+        "^1.9.14"
+      ],
+      "stack": [
+        "Router",
+        "TanStack Query"
+      ],
+      "deps": [
+        "@ark-ui/solid",
+        "@signaldb/solid",
+        "@solid-primitives/active-element",
+        "@solid-primitives/lifecycle",
+        "@solid-primitives/media",
+        "@solid-primitives/scheduled",
+        "@solidjs/meta",
+        "@solidjs/router",
+        "@tanstack/solid-query",
+        "babel-preset-solid",
+        "vite-plugin-solid"
+      ],
+      "files": {
+        "source": 452,
+        "solid": 302,
+        "solidLines": 48810
+      },
+      "tests": {
+        "e2e": false,
+        "unit": 0
+      },
+      "changes": {
+        "solid-js/web": 45,
+        "Suspense": 33,
+        "ErrorBoundary": 3,
+        "createEffect": 135,
+        "Context.Provider": 18,
+        "on": 29,
+        "onMount": 47,
+        "solid-js/store": 5,
+        "useTransition": 10,
+        "batch": 2,
+        "unwrap": 1,
+        "createComputed": 1,
+        "mergeProps": 4,
+        "Index": 4,
+        "splitProps": 16
+      },
+      "kept": {
+        "createSignal": 334,
+        "For": 66,
+        "Show": 366,
+        "createMemo": 169,
+        "createContext": 19,
+        "useContext": 21,
+        "onCleanup": 88,
+        "Dynamic": 33,
+        "Portal": 8,
+        "createStore": 2,
+        "lazy": 12,
+        "untrack": 27,
+        "Switch": 17,
+        "Match": 54,
+        "children": 1
+      },
+      "router": {
+        "createAsync": 56,
+        "query": 36,
+        "revalidate": 77
+      }
+    },
+    {
+      "repo": "relagit/relagit",
+      "kind": "Electron desktop (Git client)",
+      "sha": "75160ad4d16d62eb8c6b567dfab5cbbc6b36b0f9",
+      "lastCommit": "2026-07-27",
+      "license": "LGPL-3.0-or-later",
+      "solid": [
+        "^1.9.4"
+      ],
+      "stack": [
+        "Electron"
+      ],
+      "deps": [
+        "@neoconfetti/solid",
+        "@solid-devtools/overlay",
+        "@solidjs-use/integrations",
+        "@solidjs/meta",
+        "babel-preset-solid",
+        "solid-devtools",
+        "solid-transition-group",
+        "solidjs-use",
+        "vite-plugin-solid"
+      ],
+      "files": {
+        "source": 158,
+        "solid": 61,
+        "solidLines": 11642
+      },
+      "tests": {
+        "e2e": false,
+        "unit": 0
+      },
+      "changes": {
+        "onMount": 10,
+        "classList": 66,
+        "solid-js/web": 7,
+        "createEffect": 21,
+        "ErrorBoundary": 1,
+        "from": 2,
+        "use: directives": 2
+      },
+      "kept": {
+        "createSignal": 125,
+        "For": 42,
+        "Show": 158,
+        "createRoot": 13,
+        "onCleanup": 2,
+        "Portal": 4,
+        "untrack": 3,
+        "createMemo": 4,
+        "Dynamic": 2
+      },
+      "router": {}
+    },
+    {
+      "repo": "alist-org/alist-web",
+      "kind": "web app (file manager)",
+      "sha": "7572d9cd890ba8b59af0b51eca68f670aa7bed3b",
+      "lastCommit": "2026-09-24",
+      "license": "MIT",
+      "solid": [
+        "^1.4.8"
+      ],
+      "stack": [],
+      "deps": [
+        "@hope-ui/solid",
+        "@motionone/solid",
+        "@solid-primitives/i18n",
+        "@solid-primitives/keyboard",
+        "@solid-primitives/storage",
+        "solid-contextmenu",
+        "solid-icons",
+        "solid-markdown",
+        "solid-transition-group",
+        "vite-plugin-solid"
+      ],
+      "files": {
+        "source": 231,
+        "solid": 171,
+        "solidLines": 26208
+      },
+      "tests": {
+        "e2e": false,
+        "unit": 0
+      },
+      "changes": {
+        "solid-js/web": 8,
+        "createEffect": 37,
+        "onMount": 26,
+        "Suspense": 8,
+        "ErrorBoundary": 1,
+        "Context.Provider": 4,
+        "mergeProps": 5,
+        "solid-js/store": 15,
+        "on": 13,
+        "createResource": 5,
+        "attr:/bool:/on:/oncapture:": 21,
+        "classList": 3,
+        "batch": 13,
+        "produce": 4,
+        "Index": 3
+      },
+      "kept": {
+        "createSignal": 254,
+        "onCleanup": 48,
+        "lazy": 76,
+        "Switch": 16,
+        "Match": 52,
+        "Portal": 3,
+        "For": 88,
+        "Show": 228,
+        "createMemo": 71,
+        "createContext": 2,
+        "useContext": 2,
+        "createStore": 14,
+        "untrack": 2,
+        "Dynamic": 4
+      },
+      "router": {}
+    },
+    {
+      "repo": "riccardoperra/codeimage",
+      "kind": "web app",
+      "sha": "27b185f18d36f2baec3a8cc5a43e8794586096c3",
+      "lastCommit": "2026-03-28",
+      "license": "MIT",
+      "solid": [
+        "^1.9.12"
+      ],
+      "stack": [
+        "Kobalte",
+        "Router"
+      ],
+      "deps": [
+        "@corvu/utils",
+        "@kobalte/core",
+        "@kobalte/utils",
+        "@kobalte/vanilla-extract",
+        "@motionone/solid",
+        "@solid-aria/types",
+        "@solid-aria/utils",
+        "@solid-primitives/context",
+        "@solid-primitives/event-bus",
+        "@solid-primitives/event-listener",
+        "@solid-primitives/i18n",
+        "@solid-primitives/media",
+        "@solid-primitives/platform",
+        "@solid-primitives/props",
+        "@solid-primitives/refs",
+        "@solid-primitives/resize-observer",
+        "@solid-primitives/utils",
+        "@solidjs/router",
+        "@tanstack/solid-router",
+        "@tanstack/solid-router-devtools",
+        "@tanstack/solid-router-ssr-query",
+        "@tanstack/solid-start",
+        "@thisbeyond/solid-dnd",
+        "rolldown-plugin-solid",
+        "rollup-preset-solid",
+        "solid-codemirror",
+        "solid-headless",
+        "solid-mdx",
+        "solid-motionone",
+        "solid-toast",
+        "solid-use",
+        "vite-plugin-solid"
+      ],
+      "files": {
+        "source": 549,
+        "solid": 254,
+        "solidLines": 17306
+      },
+      "tests": {
+        "e2e": false,
+        "unit": 1
+      },
+      "changes": {
+        "solid-js/web": 18,
+        "Suspense": 24,
+        "SuspenseList": 1,
+        "on": 39,
+        "createEffect": 49,
+        "createResource": 12,
+        "onMount": 34,
+        "use: directives": 6,
+        "mergeProps": 14,
+        "ErrorBoundary": 5,
+        "solid-js/store": 15,
+        "unwrap": 7,
+        "splitProps": 10,
+        "createSelector": 2,
+        "batch": 3,
+        "Context.Provider": 2,
+        "Index": 1,
+        "classList": 1,
+        "observable": 4,
+        "from": 1
+      },
+      "kept": {
+        "createSignal": 88,
+        "Show": 103,
+        "Portal": 4,
+        "For": 29,
+        "lazy": 14,
+        "createMemo": 39,
+        "Switch": 5,
+        "Match": 12,
+        "onCleanup": 12,
+        "Dynamic": 9,
+        "children": 2,
+        "untrack": 19,
+        "createStore": 4,
+        "createRoot": 8,
+        "mapArray": 1,
+        "createContext": 1,
+        "useContext": 1
+      },
+      "router": {}
+    },
+    {
+      "repo": "bjesus/opencode-web",
+      "kind": "web app (opencode client)",
+      "sha": "7205e20c2c89412382eac32e4159b59133fb9d99",
+      "lastCommit": "2025-10-21",
+      "license": "none",
+      "solid": [
+        "^1.9.9"
+      ],
+      "stack": [
+        "Router"
+      ],
+      "deps": [
+        "@solidjs/router",
+        "@tanstack/solid-virtual",
+        "vite-plugin-solid"
+      ],
+      "files": {
+        "source": 16,
+        "solid": 10,
+        "solidLines": 1439
+      },
+      "tests": {
+        "e2e": false,
+        "unit": 0
+      },
+      "changes": {
+        "onMount": 3,
+        "createEffect": 3,
+        "solid-js/web": 1,
+        "solid-js/store": 1
+      },
+      "kept": {
+        "createSignal": 20,
+        "onCleanup": 2,
+        "Show": 17,
+        "For": 8,
+        "Switch": 1,
+        "Match": 3,
+        "createStore": 1
+      },
+      "router": {}
+    },
+    {
+      "repo": "solidjs/solid-docs",
+      "kind": "SolidStart docs site",
+      "sha": "c0e44ba82e29b1069a8f09caa45d041934bc8f93",
+      "lastCommit": "2026-10-09",
+      "license": "none",
+      "solid": [
+        "1.9.14",
+        "^1.9.14"
+      ],
+      "stack": [
+        "Kobalte",
+        "Router",
+        "SolidStart"
+      ],
+      "deps": [
+        "@kobalte/core",
+        "@kobalte/solidbase",
+        "@kobalte/tailwindcss",
+        "@solid-primitives/context",
+        "@solid-primitives/event-listener",
+        "@solid-primitives/marker",
+        "@solid-primitives/platform",
+        "@solidjs/meta",
+        "@solidjs/router",
+        "@solidjs/start",
+        "eslint-plugin-solid",
+        "solid-heroicons",
+        "solid-list"
+      ],
+      "files": {
+        "source": 40,
+        "solid": 37,
+        "solidLines": 3369
+      },
+      "tests": {
+        "e2e": false,
+        "unit": 0
+      },
+      "changes": {
+        "ErrorBoundary": 1,
+        "solid-js/web": 3,
+        "splitProps": 3,
+        "classList": 8,
+        "mergeProps": 1,
+        "onMount": 2,
+        "on": 1,
+        "Index": 2,
+        "createEffect": 2,
+        "Suspense": 2,
+        "startTransition": 1
+      },
+      "kept": {
+        "createSignal": 14,
+        "createMemo": 10,
+        "children": 2,
+        "For": 7,
+        "Switch": 1,
+        "Match": 2,
+        "untrack": 2,
+        "Show": 24,
+        "onCleanup": 1
+      },
+      "router": {
+        "createAsync": 1
+      }
+    },
+    {
+      "repo": "solidjs/solid-playground",
+      "kind": "web app (REPL)",
+      "sha": "a20a3d2e807374e18d2ad86a90ba91db615cc77e",
+      "lastCommit": "2026-10-04",
+      "license": "MIT",
+      "solid": [
+        "1.9.15",
+        ">=1.7.0"
+      ],
+      "stack": [
+        "Router"
+      ],
+      "deps": [
+        "@solid-primitives/media",
+        "@solid-primitives/scheduled",
+        "@solidjs/router",
+        "@zag-js/solid",
+        "babel-preset-solid",
+        "eslint-plugin-solid",
+        "solid-heroicons",
+        "vite-plugin-solid"
+      ],
+      "files": {
+        "source": 57,
+        "solid": 40,
+        "solidLines": 5090
+      },
+      "tests": {
+        "e2e": false,
+        "unit": 0
+      },
+      "changes": {
+        "Suspense": 3,
+        "solid-js/web": 7,
+        "createResource": 4,
+        "createEffect": 17,
+        "Context.Provider": 3,
+        "batch": 4,
+        "solid-js/store": 2,
+        "produce": 1,
+        "onMount": 6,
+        "classList": 2,
+        "on": 2,
+        "splitProps": 6
+      },
+      "kept": {
+        "Show": 34,
+        "createSignal": 33,
+        "createMemo": 17,
+        "onCleanup": 11,
+        "children": 1,
+        "Portal": 4,
+        "createContext": 2,
+        "useContext": 2,
+        "lazy": 1,
+        "createStore": 2,
+        "For": 10,
+        "createRoot": 1
+      },
+      "router": {}
+    },
+    {
+      "repo": "solidjs/solid-site",
+      "kind": "website",
+      "sha": "0028cfd588cdd3796b68066a173526bb8d065037",
+      "lastCommit": "2026-05-29",
+      "license": "MIT",
+      "solid": [
+        "1.9.10"
+      ],
+      "stack": [
+        "Router"
+      ],
+      "deps": [
+        "@solid-primitives/clipboard",
+        "@solid-primitives/date",
+        "@solid-primitives/event-listener",
+        "@solid-primitives/i18n",
+        "@solid-primitives/intersection-observer",
+        "@solid-primitives/scheduled",
+        "@solid-primitives/scroll",
+        "@solid-primitives/storage",
+        "@solid-primitives/utils",
+        "@solid.js/docs",
+        "@solidjs/meta",
+        "@solidjs/router",
+        "babel-preset-solid",
+        "solid-dismiss",
+        "solid-heroicons",
+        "solid-mdx",
+        "solid-repl",
+        "solid-social",
+        "solid-transition-group",
+        "solid-utils",
+        "vite-plugin-solid"
+      ],
+      "files": {
+        "source": 77,
+        "solid": 38,
+        "solidLines": 4810
+      },
+      "tests": {
+        "e2e": false,
+        "unit": 0
+      },
+      "changes": {
+        "Suspense": 4,
+        "solid-js/store": 3,
+        "Context.Provider": 1,
+        "createResource": 10,
+        "startTransition": 1,
+        "createEffect": 11,
+        "classList": 24,
+        "on": 5,
+        "onMount": 5,
+        "batch": 7,
+        "createComputed": 2,
+        "use: directives": 8,
+        "ErrorBoundary": 3,
+        "solid-js/web": 2
+      },
+      "kept": {
+        "createStore": 3,
+        "createContext": 1,
+        "useContext": 1,
+        "createSignal": 36,
+        "createMemo": 15,
+        "For": 23,
+        "Show": 39,
+        "Switch": 1,
+        "Match": 8,
+        "onCleanup": 3,
+        "lazy": 16
+      },
+      "router": {}
+    },
+    {
+      "repo": "solidjs/solid-realworld",
+      "kind": "reference app (RealWorld)",
+      "sha": "f6e77ecd652bf32f0dc9238f291313fd1af7e98b",
+      "lastCommit": "2022-04-24",
+      "license": "MIT",
+      "solid": [
+        "^1.3.3"
+      ],
+      "stack": [],
+      "deps": [
+        "babel-preset-solid"
+      ],
+      "files": {
+        "source": 27,
+        "solid": 17,
+        "solidLines": 847
+      },
+      "tests": {
+        "e2e": false,
+        "unit": 0
+      },
+      "changes": {
+        "createComputed": 5,
+        "solid-js/web": 1,
+        "solid-js/store": 5,
+        "destructured props": 2,
+        "useTransition": 2,
+        "createResource": 5,
+        "batch": 1,
+        "createEffect": 1,
+        "Context.Provider": 2
+      },
+      "kept": {
+        "createSignal": 6,
+        "lazy": 6,
+        "createStore": 5,
+        "createMemo": 1,
+        "onCleanup": 1,
+        "createContext": 2,
+        "useContext": 2
+      },
+      "router": {}
+    },
+    {
+      "repo": "solidjs/solid-hackernews",
+      "kind": "reference app (Hacker News)",
+      "sha": "68add8ebaf1398baa9a072c7c62e6ac3ad02e665",
+      "lastCommit": "2023-12-08",
+      "license": "MIT",
+      "solid": [
+        "1.8.7"
+      ],
+      "stack": [
+        "Router"
+      ],
+      "deps": [
+        "@solidjs/router",
+        "babel-preset-solid"
+      ],
+      "files": {
+        "source": 15,
+        "solid": 11,
+        "solidLines": 297
+      },
+      "tests": {
+        "e2e": false,
+        "unit": 0
+      },
+      "changes": {
+        "classList": 1,
+        "solid-js/web": 1
+      },
+      "kept": {
+        "createSignal": 1,
+        "lazy": 3
+      },
+      "router": {
+        "cache": 3,
+        "createAsync": 3
+      }
+    },
+    {
+      "repo": "pfgithub/threadclient",
+      "kind": "web app + browser extension (Reddit/Mastodon client)",
+      "sha": "a7b94792decd8ad75209e156f12814b9b2b27d06",
+      "lastCommit": "2026-07-26",
+      "license": "none",
+      "solid": [
+        "^1.9.11"
+      ],
+      "stack": [],
+      "deps": [
+        "solid-headless",
+        "vite-plugin-solid"
+      ],
+      "files": {
+        "source": 164,
+        "solid": 107,
+        "solidLines": 25181
+      },
+      "tests": {
+        "e2e": false,
+        "unit": 1
+      },
+      "changes": {
+        "solid-js/web": 15,
+        "on": 3,
+        "createEffect": 50,
+        "createSelector": 6,
+        "batch": 17,
+        "solid-js/store": 6,
+        "createResource": 2,
+        "Context.Provider": 18,
+        "onMount": 12,
+        "produce": 1,
+        "Index": 3,
+        "attr:/bool:/on:/oncapture:": 5,
+        "classList": 2,
+        "ErrorBoundary": 5,
+        "createComputed": 1,
+        "mergeProps": 1,
+        "createMutable": 1
+      },
+      "kept": {
+        "onCleanup": 44,
+        "createSignal": 153,
+        "Portal": 1,
+        "createMemo": 79,
+        "For": 64,
+        "untrack": 58,
+        "useContext": 26,
+        "lazy": 4,
+        "createStore": 5,
+        "createContext": 14,
+        "Switch": 1,
+        "Match": 3,
+        "Dynamic": 3,
+        "createRoot": 4,
+        "children": 1
+      },
+      "router": {}
+    },
+    {
+      "repo": "aoe4world/explorer",
+      "kind": "web app",
+      "sha": "f5b5476188bc3d5fe279bd736aad31c98b8ede4d",
+      "lastCommit": "2026-05-06",
+      "license": "MIT",
+      "solid": [
+        "^1.9.11"
+      ],
+      "stack": [
+        "Router"
+      ],
+      "deps": [
+        "@solidjs/router",
+        "vite-plugin-solid"
+      ],
+      "files": {
+        "source": 112,
+        "solid": 95,
+        "solidLines": 24745
+      },
+      "tests": {
+        "e2e": false,
+        "unit": 0
+      },
+      "changes": {
+        "ErrorBoundary": 1,
+        "on": 10,
+        "createEffect": 31,
+        "createResource": 39,
+        "Context.Provider": 4,
+        "splitProps": 3,
+        "classList": 5,
+        "solid-js/web": 5,
+        "Suspense": 7,
+        "onMount": 4,
+        "Index": 2,
+        "solid-js/store": 2,
+        "unwrap": 1,
+        "produce": 2
+      },
+      "kept": {
+        "createSignal": 68,
+        "Show": 92,
+        "For": 71,
+        "createMemo": 23,
+        "createContext": 3,
+        "useContext": 5,
+        "onCleanup": 8,
+        "Portal": 3,
+        "createStore": 5,
+        "Switch": 2,
+        "Match": 8,
+        "lazy": 3
+      },
+      "router": {}
+    },
+    {
+      "repo": "okikio/bundle",
+      "kind": "web app",
+      "sha": "96033c66d7361f79e25bb9b511f4286805fcb9fb",
+      "lastCommit": "2026-08-31",
+      "license": "MIT",
+      "solid": [
+        "^1.9.12"
+      ],
+      "stack": [],
+      "deps": [
+        "esbuild-plugin-solid"
+      ],
+      "files": {
+        "source": 109,
+        "solid": 20,
+        "solidLines": 1765
+      },
+      "tests": {
+        "e2e": false,
+        "unit": 0
+      },
+      "changes": {
+        "solid-js/web": 2,
+        "onMount": 1,
+        "createEffect": 2,
+        "destructured props": 15,
+        "useTransition": 1,
+        "Context.Provider": 3
+      },
+      "kept": {
+        "createSignal": 6,
+        "createMemo": 1,
+        "onCleanup": 1,
+        "For": 2,
+        "Show": 4
+      },
+      "router": {}
+    },
+    {
+      "repo": "lvl-mattwells/DevsPlayingPoker",
+      "kind": "web app",
+      "sha": "5c7cad15374e6410ca210e70f73bdf9dc9becb95",
+      "lastCommit": "2023-12-09",
+      "license": "none",
+      "solid": [
+        "^1.8.7"
+      ],
+      "stack": [
+        "Router"
+      ],
+      "deps": [
+        "@solidjs/router",
+        "@zag-js/solid",
+        "solid-toast",
+        "solid-transition-group",
+        "vite-plugin-solid"
+      ],
+      "files": {
+        "source": 53,
+        "solid": 30,
+        "solidLines": 2408
+      },
+      "tests": {
+        "e2e": false,
+        "unit": 0
+      },
+      "changes": {
+        "splitProps": 7,
+        "mergeProps": 2,
+        "Context.Provider": 3,
+        "solid-js/web": 2,
+        "solid-js/store": 2,
+        "createComputed": 2,
+        "createResource": 1,
+        "createMutable": 1,
+        "createEffect": 4,
+        "classList": 3,
+        "batch": 1
+      },
+      "kept": {
+        "Show": 24,
+        "createMemo": 2,
+        "createContext": 3,
+        "useContext": 3,
+        "createSignal": 13,
+        "Portal": 1,
+        "createStore": 2,
+        "For": 5,
+        "Switch": 3,
+        "Match": 8,
+        "onCleanup": 3
+      },
+      "router": {}
+    },
+    {
+      "repo": "srsholmes/yal",
+      "kind": "desktop launcher",
+      "sha": "2a689b7c076a75584fdb58ab46c96aaa87768191",
+      "lastCommit": "2023-04-24",
+      "license": "none",
+      "solid": [
+        "^1.6.10"
+      ],
+      "stack": [
+        "Tauri"
+      ],
+      "deps": [
+        "solid-app-router",
+        "solid-markdown",
+        "solid-toast",
+        "vite-plugin-solid"
+      ],
+      "files": {
+        "source": 58,
+        "solid": 23,
+        "solidLines": 1237
+      },
+      "tests": {
+        "e2e": false,
+        "unit": 0
+      },
+      "changes": {
+        "onMount": 2,
+        "createEffect": 9,
+        "solid-js/store": 4,
+        "unwrap": 5,
+        "destructured props": 1,
+        "solid-js/web": 1
+      },
+      "kept": {
+        "createSignal": 11,
+        "For": 2,
+        "Show": 3,
+        "onCleanup": 1,
+        "Switch": 2,
+        "Match": 5,
+        "createStore": 1
+      },
+      "router": {}
+    },
+    {
+      "repo": "egoist/dropcode",
+      "kind": "Tauri desktop",
+      "sha": "ad4e7304b34f24671b4d1580a0daed83ce0acb9e",
+      "lastCommit": "2022-11-09",
+      "license": "MIT",
+      "solid": [
+        "^1.6.0"
+      ],
+      "stack": [
+        "Router",
+        "Tauri"
+      ],
+      "deps": [
+        "@solidjs/router",
+        "solid-floating-ui",
+        "vite-plugin-solid"
+      ],
+      "files": {
+        "source": 18,
+        "solid": 12,
+        "solidLines": 1439
+      },
+      "tests": {
+        "e2e": false,
+        "unit": 0
+      },
+      "changes": {
+        "onMount": 6,
+        "classList": 11,
+        "use: directives": 2,
+        "createEffect": 11,
+        "solid-js/web": 2,
+        "on": 4,
+        "solid-js/store": 1
+      },
+      "kept": {
+        "Show": 13,
+        "createSignal": 14,
+        "onCleanup": 6,
+        "createMemo": 7,
+        "For": 2,
+        "Portal": 1,
+        "createStore": 1
+      },
+      "router": {}
+    },
+    {
+      "repo": "ianthehenry/bauble",
+      "kind": "web app (3D playground)",
+      "sha": "ae2f140283062f61f0c3b5b3365b5884d0b9c580",
+      "lastCommit": "2025-11-24",
+      "license": "MIT",
+      "solid": [
+        "^1.8.22"
+      ],
+      "stack": [],
+      "deps": [
+        "babel-preset-solid"
+      ],
+      "files": {
+        "source": 18,
+        "solid": 6,
+        "solidLines": 1593
+      },
+      "tests": {
+        "e2e": false,
+        "unit": 0
+      },
+      "changes": {
+        "onMount": 2,
+        "createSelector": 1,
+        "batch": 8,
+        "createEffect": 6,
+        "solid-js/web": 1,
+        "on": 1
+      },
+      "kept": {
+        "createMemo": 6,
+        "For": 1,
+        "Show": 1,
+        "Switch": 1,
+        "Match": 4,
+        "untrack": 1
+      },
+      "router": {}
+    },
+    {
+      "repo": "kevintyj/ambient",
+      "kind": "web app",
+      "sha": "821e755b5352c571ed117bd6133f7cc2563a9f84",
+      "lastCommit": "2023-12-03",
+      "license": "BSD",
+      "solid": [
+        "^1.8.6"
+      ],
+      "stack": [
+        "Router"
+      ],
+      "deps": [
+        "@felte/solid",
+        "@solidjs/router",
+        "solid-styled",
+        "solid-toast",
+        "vite-plugin-solid",
+        "vite-plugin-solid-styled"
+      ],
+      "files": {
+        "source": 53,
+        "solid": 45,
+        "solidLines": 3586
+      },
+      "tests": {
+        "e2e": false,
+        "unit": 0
+      },
+      "changes": {
+        "onMount": 2,
+        "splitProps": 2,
+        "classList": 11,
+        "createEffect": 7,
+        "solid-js/web": 1,
+        "Context.Provider": 1
+      },
+      "kept": {
+        "createSignal": 14,
+        "For": 16,
+        "Show": 11,
+        "createMemo": 2,
+        "lazy": 4,
+        "onCleanup": 1,
+        "createContext": 1,
+        "useContext": 1
+      },
+      "router": {}
+    },
+    {
+      "repo": "solidjs-community/html-to-solidjsx",
+      "kind": "web app",
+      "sha": "b77b123576d78a7096e642777cad8b204c90d89f",
+      "lastCommit": "2024-04-11",
+      "license": "MIT",
+      "solid": [
+        "^1.7.12"
+      ],
+      "stack": [
+        "Router"
+      ],
+      "deps": [
+        "@solid-primitives/clipboard",
+        "@solid-primitives/media",
+        "@solid-primitives/platform",
+        "@solid-primitives/resize-observer",
+        "@solid-primitives/scheduled",
+        "@solidjs/meta",
+        "@solidjs/router",
+        "solid-codemirror",
+        "solid-dismiss",
+        "solid-floating-ui",
+        "solid-icons",
+        "solid-start",
+        "solid-start-static"
+      ],
+      "files": {
+        "source": 46,
+        "solid": 31,
+        "solidLines": 2574
+      },
+      "tests": {
+        "e2e": false,
+        "unit": 0
+      },
+      "changes": {
+        "solid-js/web": 3,
+        "classList": 13,
+        "on": 13,
+        "createEffect": 12,
+        "solid-js/store": 2,
+        "onMount": 8,
+        "produce": 4,
+        "createComputed": 1,
+        "destructured props": 1,
+        "Suspense": 1
+      },
+      "kept": {
+        "createSignal": 19,
+        "createMemo": 1,
+        "For": 3,
+        "Dynamic": 1,
+        "createStore": 2,
+        "Show": 2,
+        "Switch": 1,
+        "Match": 3
+      },
+      "router": {}
+    },
+    {
+      "repo": "kurtsmurf/clips",
+      "kind": "web app",
+      "sha": "15c0f234c8d60ddbf009b121dd68ebc7bda5ed4a",
+      "lastCommit": "2023-03-05",
+      "license": "MIT",
+      "solid": [
+        "^1.5.1"
+      ],
+      "stack": [],
+      "deps": [
+        "vite-plugin-solid"
+      ],
+      "files": {
+        "source": 12,
+        "solid": 5,
+        "solidLines": 422
+      },
+      "tests": {
+        "e2e": true,
+        "unit": 1
+      },
+      "changes": {
+        "createEffect": 2,
+        "solid-js/web": 1
+      },
+      "kept": {
+        "For": 1,
+        "Show": 4,
+        "createSignal": 8,
+        "onCleanup": 1
+      },
+      "router": {}
+    }
+  ]
+}

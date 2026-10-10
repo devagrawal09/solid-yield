@@ -1,0 +1,305 @@
+{
+  "about": "Open-source Solid 1 apps used as the migration corpus (documentation/corpus/README.md). `paths` are the repo's Solid packages that make up the app; `outOfScope` names Solid code left out and why. Pins move only with `node scripts/corpus.mjs pin`.",
+  "apps": [
+    {
+      "repo": "anomalyco/opencode",
+      "sha": "055d95bb7e278c94baf06235a52cac79dd13ba67",
+      "kind": "web app + Electron desktop + SolidStart sites",
+      "paths": [
+        "packages/app",
+        "packages/ui",
+        "packages/session-ui",
+        "packages/desktop",
+        "packages/enterprise",
+        "packages/console/app",
+        "packages/console/support",
+        "packages/stats/app"
+      ],
+      "outOfScope": {
+        "packages/tui": "terminal renderer (@opentui/solid), not DOM",
+        "packages/cli": "terminal renderer (@opentui/solid), not DOM",
+        "packages/opencode": "terminal renderer (@opentui/solid), not DOM",
+        "packages/web": "Astro site; Solid islands render through Astro",
+        "packages/storybook": "Storybook harness",
+        "packages/console/mail": "React email templates"
+      }
+    },
+    {
+      "repo": "macro-inc/macro",
+      "sha": "8de380e086b1f7424a6cd71eee42451f67f22763",
+      "kind": "web app + Tauri desktop/mobile",
+      "paths": [
+        "apps/web",
+        "apps/marketing",
+        "packages/machine",
+        "packages/collaboration",
+        "packages/graphics"
+      ]
+    },
+    {
+      "repo": "CapSoftware/Cap",
+      "sha": "36c24dcd883431e661c8f0f8a37c193bda350a21",
+      "kind": "Tauri desktop (SolidStart)",
+      "paths": [
+        "apps/desktop",
+        "packages/ui-solid"
+      ],
+      "outOfScope": {
+        "apps/web": "Next.js (React)"
+      }
+    },
+    {
+      "repo": "anomalyco/console",
+      "sha": "0344688fc4b9b48732b0842406ef2c1270a41ad3",
+      "kind": "web app (SST Console)",
+      "paths": [
+        "packages/web/workspace"
+      ]
+    },
+    {
+      "repo": "stoatchat/for-web",
+      "sha": "8cd48758a419e1f679c9f12cdb219821c5ca6553",
+      "kind": "chat PWA (Stoat, formerly Revolt)",
+      "paths": [
+        "packages/client"
+      ]
+    },
+    {
+      "repo": "monkeytypegame/monkeytype",
+      "sha": "cbaa65cce81a95eb753308cece40ea8c34a20787",
+      "kind": "web app, partly Solid (incremental adoption)",
+      "paths": [
+        "frontend"
+      ],
+      "outOfScope": {
+        "frontend/storybook": "Storybook harness"
+      }
+    },
+    {
+      "repo": "Nerimity/nerimity-web",
+      "sha": "6f1be8615688b306d0f869c3386c73dbfaaf5196",
+      "kind": "chat web app",
+      "paths": [
+        "."
+      ]
+    },
+    {
+      "repo": "johannesjo/parallel-code",
+      "sha": "f0849414a33f2a007c28eba35b9eaacc3c4a43c9",
+      "kind": "Electron desktop",
+      "paths": [
+        "."
+      ]
+    },
+    {
+      "repo": "vriteio/vrite",
+      "sha": "630280b0685a6d80b0f8a3866e8d5620642b50ab",
+      "kind": "CMS web app",
+      "paths": [
+        "apps/web",
+        "packages/private/editor",
+        "packages/private/components",
+        "packages/public/ui"
+      ],
+      "outOfScope": {
+        "apps/landing": "Astro site",
+        "packages/public/pages-template": "Astro template"
+      }
+    },
+    {
+      "repo": "relagit/relagit",
+      "sha": "75160ad4d16d62eb8c6b567dfab5cbbc6b36b0f9",
+      "kind": "Electron desktop (Git client)",
+      "paths": [
+        "."
+      ]
+    },
+    {
+      "repo": "alist-org/alist-web",
+      "sha": "7572d9cd890ba8b59af0b51eca68f670aa7bed3b",
+      "kind": "web app (file manager)",
+      "paths": [
+        "."
+      ]
+    },
+    {
+      "repo": "riccardoperra/codeimage",
+      "sha": "27b185f18d36f2baec3a8cc5a43e8794586096c3",
+      "kind": "web app",
+      "paths": [
+        "apps/codeimage",
+        "apps/website",
+        "packages/ui",
+        "packages/locale",
+        "packages/highlight",
+        "packages/dom-export",
+        "packages/atomic-state",
+        "packages/config"
+      ]
+    },
+    {
+      "repo": "bjesus/opencode-web",
+      "sha": "7205e20c2c89412382eac32e4159b59133fb9d99",
+      "kind": "web app (opencode client)",
+      "paths": [
+        "."
+      ]
+    },
+    {
+      "repo": "solidjs/solid-docs",
+      "sha": "c0e44ba82e29b1069a8f09caa45d041934bc8f93",
+      "kind": "SolidStart docs site",
+      "paths": [
+        "."
+      ]
+    },
+    {
+      "repo": "solidjs/solid-playground",
+      "sha": "a20a3d2e807374e18d2ad86a90ba91db615cc77e",
+      "kind": "web app (REPL)",
+      "paths": [
+        "packages/playground",
+        "packages/solid-repl"
+      ]
+    },
+    {
+      "repo": "solidjs/solid-site",
+      "sha": "0028cfd588cdd3796b68066a173526bb8d065037",
+      "kind": "website",
+      "paths": [
+        "."
+      ]
+    },
+    {
+      "repo": "solidjs/solid-realworld",
+      "sha": "f6e77ecd652bf32f0dc9238f291313fd1af7e98b",
+      "kind": "reference app (RealWorld)",
+      "paths": [
+        "."
+      ]
+    },
+    {
+      "repo": "solidjs/solid-hackernews",
+      "sha": "68add8ebaf1398baa9a072c7c62e6ac3ad02e665",
+      "kind": "reference app (Hacker News)",
+      "paths": [
+        "."
+      ]
+    },
+    {
+      "repo": "pfgithub/threadclient",
+      "sha": "a7b94792decd8ad75209e156f12814b9b2b27d06",
+      "kind": "web app + browser extension (Reddit/Mastodon client)",
+      "paths": [
+        "packages/threadclient-ui-web",
+        "packages/tmeta-util-solid",
+        "packages/animator-ui-web",
+        "packages/threadclient-extension",
+        "packages/canvasui",
+        "packages/jsoneditor"
+      ]
+    },
+    {
+      "repo": "aoe4world/explorer",
+      "sha": "f5b5476188bc3d5fe279bd736aad31c98b8ede4d",
+      "kind": "web app",
+      "paths": [
+        "."
+      ]
+    },
+    {
+      "repo": "okikio/bundle",
+      "sha": "96033c66d7361f79e25bb9b511f4286805fcb9fb",
+      "kind": "web app",
+      "paths": [
+        "."
+      ]
+    },
+    {
+      "repo": "lvl-mattwells/DevsPlayingPoker",
+      "sha": "5c7cad15374e6410ca210e70f73bdf9dc9becb95",
+      "kind": "web app",
+      "paths": [
+        "web"
+      ]
+    },
+    {
+      "repo": "srsholmes/yal",
+      "sha": "2a689b7c076a75584fdb58ab46c96aaa87768191",
+      "kind": "desktop launcher",
+      "paths": [
+        "apps/yal"
+      ]
+    },
+    {
+      "repo": "egoist/dropcode",
+      "sha": "ad4e7304b34f24671b4d1580a0daed83ce0acb9e",
+      "kind": "Tauri desktop",
+      "paths": [
+        "."
+      ]
+    },
+    {
+      "repo": "ianthehenry/bauble",
+      "sha": "ae2f140283062f61f0c3b5b3365b5884d0b9c580",
+      "kind": "web app (3D playground)",
+      "paths": [
+        "studio"
+      ]
+    },
+    {
+      "repo": "kevintyj/ambient",
+      "sha": "821e755b5352c571ed117bd6133f7cc2563a9f84",
+      "kind": "web app",
+      "paths": [
+        "."
+      ]
+    },
+    {
+      "repo": "solidjs-community/html-to-solidjsx",
+      "sha": "b77b123576d78a7096e642777cad8b204c90d89f",
+      "kind": "web app",
+      "paths": [
+        "."
+      ]
+    },
+    {
+      "repo": "kurtsmurf/clips",
+      "sha": "15c0f234c8d60ddbf009b121dd68ebc7bda5ed4a",
+      "kind": "web app",
+      "paths": [
+        "."
+      ]
+    }
+  ],
+  "excluded": [
+    {
+      "repo": "MetaCubeX/metacubexd",
+      "reason": "now Nuxt/Vue; no solid-js package at HEAD"
+    },
+    {
+      "repo": "different-ai/openwork",
+      "reason": "now React; no solid-js package at HEAD"
+    },
+    {
+      "repo": "learn-anything/learn-anything.xyz",
+      "reason": "no solid-js package at HEAD"
+    },
+    {
+      "repo": "the-abe-train/globle-capitals",
+      "reason": "not publicly cloneable (listed in made-in-solid)"
+    },
+    {
+      "repo": "lightning-js/solid-demo-app",
+      "reason": "WebGL TV renderer, not DOM"
+    },
+    {
+      "repo": "solidjs/solid-start",
+      "reason": "framework repo; its examples track SolidStart 2 on main"
+    },
+    {
+      "repo": "asciinema/asciinema-player",
+      "reason": "embeddable widget, library-shaped"
+    }
+  ]
+}

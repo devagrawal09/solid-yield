@@ -52,7 +52,7 @@
   {
     "case": "m11_destructure.tsx",
     "code": "NATIVE_PROPS",
-    "line": 6
+    "line": 5
   },
   {
     "case": "m12_arity.tsx",

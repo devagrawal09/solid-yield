@@ -206,6 +206,10 @@ export function withPositions(input, run) {
               column = (prefix.at(-1) ?? "").length;
             error.loc = { ...error.loc, line, column };
             error.message = error.message.replace(/:\d+:\d+\)$/, `:${line}:${column + 1})`);
+            // A native refusal carries its one diagnostic too.
+            const [only, ...rest] = error.diagnostics ?? [];
+            if (only && !rest.length && resolve(only.file) === resolve(file))
+              error.diagnostics = [{ ...only, line, column: column + 1 }];
           }
         }
       }

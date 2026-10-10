@@ -182,6 +182,7 @@ export function inspectNativeProject(files) {
   };
   /** @type {Diagnostic[]} */
   const diagnostics = [];
+  /** @type {WeakSet<object>} */ const nestedComponents = new WeakSet();
   for (const [file, code] of files) {
     const p = parseProgram(code, file);
     if (!p) continue;
@@ -310,6 +311,26 @@ export function inspectNativeProject(files) {
             "NATIVE_THROW",
             "Throw an Error object so callers can identify and handle this failure."
           );
+      },
+      JSXOpeningElement(q) {
+        // A component declared inside another function: the lowering builds
+        // components at module level only.
+        const tag = q.get("name");
+        if (!tag.isJSXIdentifier() || !/^[A-Z]/.test(tag.node.name)) return;
+        const declaration = tag.scope.getBinding(tag.node.name)?.path;
+        const fn = declaration?.isFunctionDeclaration()
+          ? declaration
+          : declaration?.isVariableDeclarator() && declaration.get("init").isFunction()
+            ? declaration.get("init")
+            : null;
+        if (!declaration || !fn?.node || !fn.getFunctionParent() || nestedComponents.has(fn.node))
+          return;
+        nestedComponents.add(fn.node);
+        report(
+          declaration,
+          "NATIVE_COMPONENT",
+          `Declare ${tag.node.name} at module level; a component declared inside another function has no native lowering.`
+        );
       },
       JSXSpreadAttribute(q) {
         report(
@@ -521,16 +542,19 @@ function surface(
     }
   };
   /** @param {Path} q @param {string} code @param {string} message @returns {never} */
+  // Its position is in this intermediate program; `withPositions` maps it
+  // back to the authored source by `id` and `loc`.
   const fail = (q, code, message) => {
-    throw new NativeDiagnosticError([
+    const line = q.node.loc?.start.line ?? 1,
+      column = q.node.loc?.start.column ?? 0;
+    throw Object.assign(
+      new NativeDiagnosticError([{ code, message, file: filename, line, column: column + 1 }]),
       {
-        code,
-        message,
-        file: filename,
-        line: q.node.loc?.start.line ?? 1,
-        column: (q.node.loc?.start.column ?? 0) + 1
+        id: filename,
+        loc: { file: filename, line, column },
+        length: Math.max(0, (q.node.end ?? 0) - (q.node.start ?? 0))
       }
-    ]);
+    );
   };
   /** @type {WeakSet<object>} */ const foreignWrapped = new WeakSet();
   /** Preserve the foreign tag and JSX capture positions. @param {Path} q @param {any} target */
@@ -871,6 +895,23 @@ function surface(
       if (api.name === "useContext") {
         if (q.node.arguments.length !== 1 || !t.isExpression(q.node.arguments[0]))
           fail(q, "NATIVE_CONTEXT", "useContext requires one statically resolved context.");
+        // A defaultless context created in the read itself has no identity a
+        // provider could give: the read can never be provided.
+        const created = q.get("arguments.0");
+        const createdCall = t.isCallExpression(created.node) ? created.node : null;
+        const createdApi = createdCall ? imported(created.get("callee")) : null;
+        if (
+          createdCall &&
+          createdApi?.module === "solid-js" &&
+          createdApi.name === "createContext" &&
+          (createdCall.arguments.length === 0 ||
+            t.isIdentifier(createdCall.arguments[0], { name: "undefined" }))
+        )
+          fail(
+            created,
+            "NO_PROVIDER",
+            "This context is created in the read itself, so no provider can be above it: declare it once, provide it, and read that declaration."
+          );
         const declarator = q.parentPath.isVariableDeclarator() ? q.parentPath : null;
         const name =
           declarator && t.isIdentifier(declarator.node.id) ? declarator.node.id.name : null;

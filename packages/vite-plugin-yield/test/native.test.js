@@ -74,6 +74,25 @@ describe("native front end", { timeout: 30_000 }, () => {
     );
     expect(diagnostics.map(d => d.code)).toEqual([]);
   });
+  it("refuses a component declared inside another, once, at its declaration", () => {
+    const diagnostics = inspectNativeProject(
+      new Map([
+        [
+          id,
+          `export function App() {
+  const Item = (props: {label: string}) => <li>{props.label}</li>;
+  function Title() { return <h1>t</h1>; }
+  const render = (n: number) => <b>{n}</b>;
+  return <ul><Title/><Item label="a"/><Item label="b"/>{render(1)}</ul>;
+}`
+        ]
+      ])
+    );
+    expect(diagnostics.map(d => [d.code, d.line])).toEqual([
+      ["NATIVE_COMPONENT", 3],
+      ["NATIVE_COMPONENT", 2]
+    ]);
+  });
   it("keeps unselected files on the explicit route", async () => {
     const plugin = solidYield({ mode: "native", include: () => false });
     expect(await plugin.transform.call({}, "export const n=1;", id)).toBeNull();

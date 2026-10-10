@@ -94,6 +94,18 @@ describe("native context hooks (F-S37)", () => {
     expect(result.inference.functions.find(f => f.name === "FilterBar").fails).toEqual([]);
   }, 30_000);
 
+  it("a defaultless context created in its read can never be provided", () => {
+    const source = app("Filters", "{range, setRange}").replace(
+      "const value = useContext(FilterContext);",
+      "const value = useContext(createContext<Filters>());"
+    );
+    expect(() => lowerNativeProject(new Map([[file, source]]))).toThrow(
+      expect.objectContaining({
+        diagnostics: [expect.objectContaining({ code: "NO_PROVIDER", line: 9, column: 28 })]
+      })
+    );
+  }, 30_000);
+
   it("leaves the destructured form a path, as todos reads it", () => {
     const result = lowerNativeProject(
       new Map([

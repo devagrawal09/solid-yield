@@ -1,6 +1,6 @@
 # Mutation report
 
-Measured 2026-10-10T05:56:19.937Z. The corpus, operators and checker have changed since the first measurement (2026-10-08); each change is in its own commit, and the catalogue's corrections are listed below. The tests in scripts/mutation/test.mjs verify the harness, not the checker.
+Measured 2026-10-10T14:31:34.661Z. The corpus, operators and checker have changed since the first measurement (2026-10-08); each change is in its own commit, and the catalogue's corrections are listed below. The tests in scripts/mutation/test.mjs verify the harness, not the checker.
 
 ## Commands and scope
 
@@ -12,7 +12,7 @@ node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js ru
 node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js run scripts/mutation/stryker-ts.config.mjs
 ```
 
-Program run: 2595.1 seconds; 40 projects; 449 mutants. Digest: `fc4968bbdb65bae47433ef4d04e9e111ad80eff56891b3b15c7c7e3fe35db925`.
+Program run: 2790.3 seconds; 41 projects; 470 mutants. Digest: `70c0b52335446e4de488b3c0b487ab358701bad0bc5b6829d98dacb9b7dca3df`.
 
 Every syntactically applicable site is edited separately. Sources stay plain Solid. Each pipeline runs the shared native transform, the exported implementation used by `solid-yield check`, and recommended ESLint on generated code. A transform refusal blocks generated lint and is recorded explicitly. A CLI crash is a finding, never a kill.
 
@@ -26,26 +26,26 @@ The gate runs `node scripts/mutation/run.mjs --cached --baseline documentation/y
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
 | delete-catch | 9 | 0 | 2 | 7 | 22.22% | 1 (11.11%) | 5 (55.56%) | FOREIGN_HANDOFF, NATIVE_CALLBACK_FAILURE, EVENT_REJECTS |
 | swallow-catch | 2 | 2 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | equivalent |
-| delete-errored | 20 | 0 | 0 | 20 | 0.00% | 0 (0.00%) | 10 (50.00%) | FOREIGN_HANDOFF |
-| delete-loading | 22 | 0 | 1 | 21 | 4.55% | 0 (0.00%) | 15 (68.18%) | PENDING_ROOT |
-| setup-read | 116 | 0 | 95 | 21 | 81.90% | 88 (75.86%) | 91 (78.45%) | READ_IN_SETUP, solid-yield/no-read-in-setup |
-| delete-provider | 21 | 0 | 0 | 21 | 0.00% | 0 (0.00%) | 14 (66.67%) | NO_PROVIDER |
-| never-provided-context | 27 | 0 | 23 | 4 | 85.19% | 23 (85.19%) | 23 (85.19%) | NO_PROVIDER |
-| throw-string | 26 | 26 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | equivalent |
-| throw-object | 26 | 26 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | equivalent |
+| delete-errored | 22 | 0 | 2 | 20 | 9.09% | 0 (0.00%) | 12 (54.55%) | FOREIGN_HANDOFF |
+| delete-loading | 25 | 0 | 3 | 22 | 12.00% | 0 (0.00%) | 17 (68.00%) | PENDING_ROOT |
+| setup-read | 117 | 0 | 96 | 21 | 82.05% | 96 (82.05%) | 96 (82.05%) | READ_IN_SETUP, solid-yield/no-read-in-setup |
+| delete-provider | 22 | 0 | 0 | 22 | 0.00% | 0 (0.00%) | 15 (68.18%) | NO_PROVIDER |
+| never-provided-context | 28 | 0 | 24 | 4 | 85.71% | 24 (85.71%) | 24 (85.71%) | NO_PROVIDER |
+| throw-string | 27 | 27 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | equivalent |
+| throw-object | 27 | 27 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | equivalent |
 | async-reject | 3 | 0 | 3 | 0 | 100.00% | 1 (33.33%) | 2 (66.67%) | FOREIGN_HANDOFF, NATIVE_CALLBACK_FAILURE, EVENT_REJECTS |
-| remove-await | 28 | 25 | 1 | 2 | 33.33% | 1 (33.33%) | 1 (33.33%) | TS2322, TS2345, TS2739, TS2740, TS2741, GENERATED_TYPE, SETTLED_PROP |
-| memo-write | 23 | 0 | 19 | 4 | 82.61% | 19 (82.61%) | 18 (78.26%) | WRITE_IN_REACTIVE, solid-yield/no-unyielded-write |
+| remove-await | 31 | 27 | 2 | 2 | 50.00% | 1 (25.00%) | 2 (50.00%) | TS2322, TS2345, TS2739, TS2740, TS2741, TS2339, GENERATED_TYPE, SETTLED_PROP |
+| memo-write | 25 | 0 | 21 | 4 | 84.00% | 21 (84.00%) | 20 (80.00%) | WRITE_IN_REACTIVE, solid-yield/no-unyielded-write |
 | timer-read | 6 | 6 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | equivalent |
-| non-core-cache | 46 | 0 | 20 | 26 | 43.48% | 17 (36.96%) | 21 (45.65%) | SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP |
-| destructure-props | 13 | 0 | 12 | 1 | 92.31% | 12 (92.31%) | 12 (92.31%) | NATIVE_PROPS |
+| non-core-cache | 48 | 0 | 21 | 27 | 43.75% | 18 (37.50%) | 22 (45.83%) | SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP |
+| destructure-props | 17 | 0 | 16 | 1 | 94.12% | 16 (94.12%) | 16 (94.12%) | NATIVE_PROPS |
 | inline-component | 50 | 0 | 50 | 0 | 100.00% | 50 (100.00%) | 50 (100.00%) | NATIVE_COMPONENT, SUGAR_CALLBACK, SUGAR_RETURN, FOREIGN_HANDOFF |
 | effect-arity | 5 | 0 | 5 | 0 | 100.00% | 5 (100.00%) | 3 (60.00%) | NATIVE_EFFECT_PHASES, TS2554 |
 | remove-use-server | 1 | 1 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | equivalent |
 | callback-throw | 4 | 3 | 1 | 0 | 100.00% | 0 (0.00%) | 1 (100.00%) | FOREIGN_HANDOFF |
 | server-new-class | 1 | 0 | 0 | 1 | 0.00% | 0 (0.00%) | 0 (0.00%) | FOREIGN_HANDOFF |
 
-**Program mutation score: 64.44% = 232 / (232 + 128).** 89 equivalents excluded. Exact line: 60.28% (217). Detected: 73.89% (266).
+**Program mutation score: 65.25% = 246 / (246 + 131).** 93 equivalents excluded. Exact line: 61.80% (233). Detected: 75.60% (285).
 
 ### Why mutants survive
 
@@ -55,13 +55,13 @@ Each survivor of the gate's rule falls in one category: **detected elsewhere** (
 | --- | ---: | ---: | ---: | ---: | ---: |
 | delete-catch | 5 | 0 | 0 | 0 | 2 |
 | delete-errored | 10 | 4 | 5 | 0 | 1 |
-| delete-loading | 14 | 4 | 2 | 0 | 1 |
+| delete-loading | 14 | 4 | 2 | 0 | 2 |
 | setup-read | 0 | 21 | 0 | 0 | 0 |
-| delete-provider | 14 | 4 | 2 | 0 | 1 |
+| delete-provider | 15 | 4 | 2 | 0 | 1 |
 | never-provided-context | 0 | 4 | 0 | 0 | 0 |
 | remove-await | 0 | 0 | 1 | 0 | 1 |
 | memo-write | 0 | 4 | 0 | 0 | 0 |
-| non-core-cache | 1 | 8 | 1 | 16 | 0 |
+| non-core-cache | 1 | 8 | 1 | 17 | 0 |
 | destructure-props | 0 | 0 | 0 | 1 | 0 |
 | server-new-class | 0 | 0 | 1 | 0 | 0 |
 
@@ -77,7 +77,7 @@ Each survivor of the gate's rule falls in one category: **detected elsewhere** (
 - **throw-string:** Replace each constructed class throw with a string. Equivalent reason: Unknown thrown values are allowed by the unknown floor; changing the value is not itself an error. Handoff diagnostics are still recorded.
 - **throw-object:** Replace each constructed class throw with an object. Equivalent reason: Unknown thrown values are allowed by the unknown floor; changing the value is not itself an error. Handoff diagnostics are still recorded.
 - **async-reject:** Insert throw new Error after each await statement in an async JSX event callback. Correction: EVENT_REJECTS added (2026-10-10): every site is an event handler, whose unhandled failure is EVENT_REJECTS; NATIVE_CALLBACK_FAILURE is the foreign-callback code.
-- **remove-await:** Replace each await expression with its operand. Correction: TS2739, TS2740 and TS2741 added (2026-10-10): TypeScript's assignability error for missing properties (a Promise where its value was expected) is one of these, not TS2322.
+- **remove-await:** Replace each await expression with its operand. Correction: TS2739, TS2740 and TS2741 added (2026-10-10): TypeScript's assignability error for missing properties (a Promise where its value was expected) is one of these, not TS2322. TS2339 added (2026-10-10, with the kept-promise fix): reading a property of the un-awaited Promise (`data.title`) is that error.
 - **memo-write:** Insert a write to each visible signal setter in each memo callback.
 - **timer-read:** Insert a settled signal read in each setup-time timer/listener callback. Equivalent reason: A settled signal read in an ignored timer/listener callback is an allowed event read. Failure diagnostics remain recorded.
 - **non-core-cache:** Replace createMemo with an inline hand-rolled last-value cache.
@@ -134,6 +134,7 @@ The reviewer app and all 17 stored variants are verbatim snapshots under `script
 | review-slots-unhandled-failure | 1 | completed / diagnostics / passed | scripts/native/fixtures.mjs; reconstructed slots R09 |
 | operator-seeds | 2 | completed / diagnostics / passed | Additional plain Solid controls for catch, async event and server sites |
 | sugar-edges | 4 | completed / passed / passed | Plain Solid exercising the native edges: context hooks and members, setters in plain types, wrappers with boundaries around context readers, array callbacks, effect cleanups, an anonymous default component |
+| rendering-edges | 5 | completed / passed / passed | Plain Solid exercising Rendering's native edges: a component factory with a tuple context and destructured members, a derived store, async iterable producers, a Repeat index key, isPending thunks, a lazy page, root trees (CSR, and a server function's with a ParentProps shell) |
 
 ## Checker mutants (Stryker)
 
@@ -971,7 +972,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"diagnostics"}
 <job>/source/App.tsx:8:20 error TS2769: [READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive.
 <job>/source/index.tsx:3:15 error TS2345: [FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any.
 solid-yield check: 3 files, 3 errors
-lint App.tsx:6 [READ_IN_SETUP] [READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event.
+lint App.tsx:8 [READ_IN_SETUP] [READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event.
 ```
 
 ### F-M17: M0072 delete-provider at reviewer-m01_setup_read/App.tsx:26 (masked: base errors)
@@ -1006,7 +1007,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"diagnostics"}
 <job>/source/App.tsx:8:20 error TS2769: [READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive.
 <job>/source/index.tsx:3:15 error TS2345: [FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any.
 solid-yield check: 3 files, 2 errors
-lint App.tsx:6 [READ_IN_SETUP] [READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event.
+lint App.tsx:8 [READ_IN_SETUP] [READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event.
 ```
 
 ### F-M18: M0073 delete-errored at reviewer-m01_setup_read/App.tsx:28 (masked: base errors)
@@ -1039,7 +1040,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"diagnostics"}
 <job>/source/App.tsx:8:20 error TS2769: [READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive.
 <job>/source/index.tsx:3:15 error TS2345: [FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any.
 solid-yield check: 3 files, 2 errors
-lint App.tsx:6 [READ_IN_SETUP] [READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event.
+lint App.tsx:8 [READ_IN_SETUP] [READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event.
 ```
 
 ### F-M19: M0074 delete-loading at reviewer-m01_setup_read/App.tsx:29 (masked: base errors)
@@ -1070,7 +1071,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"diagnostics"}
 <job>/source/App.tsx:8:20 error TS2769: [READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive.
 <job>/source/index.tsx:3:15 error TS2345: [FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any.
 solid-yield check: 3 files, 2 errors
-lint App.tsx:6 [READ_IN_SETUP] [READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event.
+lint App.tsx:8 [READ_IN_SETUP] [READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event.
 ```
 
 ### F-M20: M0088 non-core-cache at reviewer-m02_noprovider2/App.tsx:16 (different code)
@@ -2223,7 +2224,7 @@ solid-yield check: 3 files, 0 errors
 
 ### F-M59: M0182 remove-await at reviewer-m05_swallow/App.tsx:14 (silent)
 
-Expected in the mutated routine (lines 12–20): TS2322, TS2345, TS2739, TS2740, TS2741, GENERATED_TYPE, SETTLED_PROP.
+Expected in the mutated routine (lines 12–20): TS2322, TS2345, TS2739, TS2740, TS2741, TS2339, GENERATED_TYPE, SETTLED_PROP.
 
 ```diff
 --- reviewer-m05_swallow/App.tsx
@@ -4092,7 +4093,7 @@ solid-yield check: 2 files, 1 errors
 
 ### F-M122: M0393 remove-await at operator-seeds/App.tsx:14 (masked: base errors)
 
-Expected in the mutated routine (lines 11–28): TS2322, TS2345, TS2739, TS2740, TS2741, GENERATED_TYPE, SETTLED_PROP.
+Expected in the mutated routine (lines 11–28): TS2322, TS2345, TS2739, TS2740, TS2741, TS2339, GENERATED_TYPE, SETTLED_PROP.
 
 ```diff
 --- operator-seeds/App.tsx
@@ -4290,9 +4291,101 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 4 files, 2 errors
 ```
 
+### F-M129: M0453 non-core-cache at rendering-edges/Feed.tsx:42 (different code)
+
+Expected in the mutated routine (lines 29–72): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
+
+```diff
+--- rendering-edges/Feed.tsx
++++ rendering-edges/Feed.tsx (mutant)
+@@ -39,7 +39,7 @@
+     { seedLoadingValue: true }
+   );
+   // F-S53: async iterable producers; a projection's draft; Repeat's index as a key.
+-  const all = createMemo<Item[]>(async function* () {
++  const all = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })<Item[]>(async function* () {
+     let seen: Item[] = [];
+     for await (const item of items()) yield (seen = [...seen, item]);
+   });
+```
+
+Checker said instead:
+
+```text
+Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
+<job>/source/Feed.tsx:58:48 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+<job>/source/Feed.tsx:42:87 error TS2558: Expected 0 type arguments, but got 1.
+solid-yield check: 5 files, 2 errors
+```
+
+### F-M130: M0455 delete-loading at rendering-edges/Feed.tsx:56 (silent)
+
+Expected in the mutated routine (lines 29–72): PENDING_ROOT.
+
+```diff
+--- rendering-edges/Feed.tsx
++++ rendering-edges/Feed.tsx (mutant)
+@@ -53,7 +53,7 @@
+     <section class={{ busy: isPending(() => feed.items) }}>
+       <h2>{feed.title}</h2>
+       <button onClick={() => setVersion(v => v + 1)}>refetch</button>
+-      <Loading fallback="…">
++      <>
+         <ul>
+           <For each={all()}>{item => <li>{item.text}</li>}</For>
+         </ul>
+@@ -66,7 +66,7 @@
+             )}
+           </Repeat>
+         </ol>
+-      </Loading>
++      </>
+     </section>
+   );
+ }
+```
+
+Checker said instead:
+
+```text
+Stages: {"transform":"completed","cli":"passed","lint":"passed"}
+solid-yield check: 5 files, 0 errors
+```
+
+### F-M131: M0461 delete-provider at rendering-edges/router.tsx:17 (detected elsewhere)
+
+Expected in the mutated routine (lines 10–22): NO_PROVIDER.
+
+```diff
+--- rendering-edges/router.tsx
++++ rendering-edges/router.tsx (mutant)
+@@ -14,9 +14,9 @@
+     const is = (match: string) => match === path();
+     window.onpopstate = () => go(location.pathname);
+     return (
+-      <RouterContext value={[path, { go, is }]}>
++      <>
+         <Page />
+-      </RouterContext>
++      </>
+     );
+   };
+ }
+```
+
+Checker said instead:
+
+```text
+Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
+<job>/source/main.tsx:8:5 error TS2345: [NO_PROVIDER] Fix the earlier errors in this component before checking its render call. Missing: any.
+<job>/source/router.tsx:36:16 error TS95000: [EVENT_REJECTS] This handler can fail with unknown and nothing catches it; wrap the body in try/catch, or declare the failure.
+<job>/source/router.tsx:30:17 error TS2345: [generated] [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+solid-yield check: 5 files, 3 errors
+```
+
 ## Findings list
 
-- F-M1–F-M128: 128 survivors of the gate's rule, each with its category, full diff and actual diagnostics above.
+- F-M1–F-M131: 131 survivors of the gate's rule, each with its category, full diff and actual diagnostics above.
 - F-C1–F-C20: the top checker survivors above; remaining survivors stay in the raw Stryker reports.
 - F-MAP: 0 mutant CLI crashes; the current position/error mapping can throw instead of returning diagnostics. IDs: none.
 - F-SCOPE: Vite native/sugar/transform/positions and compiler inference still need full checker-mutant runs. The full command-runner configuration is checked in.

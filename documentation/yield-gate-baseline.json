@@ -670,7 +670,7 @@
     }
   ],
   "mutation": {
-    "score": 64.44444444444444,
+    "score": 65.25198938992042,
     "counts": {
       "delete-catch": {
         "mutants": 9,
@@ -685,46 +685,46 @@
         "equivalent": 2
       },
       "delete-errored": {
-        "mutants": 20,
-        "killed": 0,
+        "mutants": 22,
+        "killed": 2,
         "survived": 20,
         "equivalent": 0
       },
       "delete-loading": {
-        "mutants": 22,
-        "killed": 1,
-        "survived": 21,
+        "mutants": 25,
+        "killed": 3,
+        "survived": 22,
         "equivalent": 0
       },
       "setup-read": {
-        "mutants": 116,
-        "killed": 95,
+        "mutants": 117,
+        "killed": 96,
         "survived": 21,
         "equivalent": 0
       },
       "delete-provider": {
-        "mutants": 21,
+        "mutants": 22,
         "killed": 0,
-        "survived": 21,
+        "survived": 22,
         "equivalent": 0
       },
       "never-provided-context": {
-        "mutants": 27,
-        "killed": 23,
+        "mutants": 28,
+        "killed": 24,
         "survived": 4,
         "equivalent": 0
       },
       "throw-string": {
-        "mutants": 26,
+        "mutants": 27,
         "killed": 0,
         "survived": 0,
-        "equivalent": 26
+        "equivalent": 27
       },
       "throw-object": {
-        "mutants": 26,
+        "mutants": 27,
         "killed": 0,
         "survived": 0,
-        "equivalent": 26
+        "equivalent": 27
       },
       "async-reject": {
         "mutants": 3,
@@ -733,14 +733,14 @@
         "equivalent": 0
       },
       "remove-await": {
-        "mutants": 28,
-        "killed": 1,
+        "mutants": 31,
+        "killed": 2,
         "survived": 2,
-        "equivalent": 25
+        "equivalent": 27
       },
       "memo-write": {
-        "mutants": 23,
-        "killed": 19,
+        "mutants": 25,
+        "killed": 21,
         "survived": 4,
         "equivalent": 0
       },
@@ -751,14 +751,14 @@
         "equivalent": 6
       },
       "non-core-cache": {
-        "mutants": 46,
-        "killed": 20,
-        "survived": 26,
+        "mutants": 48,
+        "killed": 21,
+        "survived": 27,
         "equivalent": 0
       },
       "destructure-props": {
-        "mutants": 13,
-        "killed": 12,
+        "mutants": 17,
+        "killed": 16,
         "survived": 1,
         "equivalent": 0
       },
@@ -793,8 +793,8 @@
         "equivalent": 0
       }
     },
-    "recordedAt": "2026-10-10T05:56:19.937Z",
-    "digest": "fc4968bbdb65bae47433ef4d04e9e111ad80eff56891b3b15c7c7e3fe35db925"
+    "recordedAt": "2026-10-10T14:31:34.661Z",
+    "digest": "70c0b52335446e4de488b3c0b487ab358701bad0bc5b6829d98dacb9b7dca3df"
   },
   "strykerReportOnly": {
     "mode": "REPORT-ONLY",

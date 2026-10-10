@@ -1,8 +1,8 @@
 {
-  "startedAt": "2026-10-10T05:13:04.806Z",
-  "finishedAt": "2026-10-10T05:56:19.937Z",
-  "durationMs": 2595131,
-  "digest": "fc4968bbdb65bae47433ef4d04e9e111ad80eff56891b3b15c7c7e3fe35db925",
+  "startedAt": "2026-10-10T13:45:04.351Z",
+  "finishedAt": "2026-10-10T14:31:34.661Z",
+  "durationMs": 2790310,
+  "digest": "70c0b52335446e4de488b3c0b487ab358701bad0bc5b6829d98dacb9b7dca3df",
   "projects": [
     {
       "id": "sierpinski",
@@ -116,7 +116,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 8,
             "generatedLine": 13,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -642,7 +642,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 2,
+            "line": 4,
             "generatedLine": 5,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -1069,6 +1069,22 @@
           "solid-yield check: 4 files, 0 errors"
         ]
       }
+    },
+    {
+      "id": "rendering-edges",
+      "origin": "Plain Solid exercising Rendering's native edges: a component factory with a tuple context and destructured members, a derived store, async iterable producers, a Repeat index key, isPending thunks, a lazy page, root trees (CSR, and a server function's with a ParentProps shell)",
+      "files": 5,
+      "base": {
+        "diagnostics": [],
+        "stages": {
+          "transform": "completed",
+          "cli": "passed",
+          "lint": "passed"
+        },
+        "cliOutput": [
+          "solid-yield check: 5 files, 0 errors"
+        ]
+      }
     }
   ],
   "counts": {
@@ -1085,46 +1101,46 @@
       "equivalent": 2
     },
     "delete-errored": {
-      "mutants": 20,
-      "killed": 0,
+      "mutants": 22,
+      "killed": 2,
       "survived": 20,
       "equivalent": 0
     },
     "delete-loading": {
-      "mutants": 22,
-      "killed": 1,
-      "survived": 21,
+      "mutants": 25,
+      "killed": 3,
+      "survived": 22,
       "equivalent": 0
     },
     "setup-read": {
-      "mutants": 116,
-      "killed": 95,
+      "mutants": 117,
+      "killed": 96,
       "survived": 21,
       "equivalent": 0
     },
     "delete-provider": {
-      "mutants": 21,
+      "mutants": 22,
       "killed": 0,
-      "survived": 21,
+      "survived": 22,
       "equivalent": 0
     },
     "never-provided-context": {
-      "mutants": 27,
-      "killed": 23,
+      "mutants": 28,
+      "killed": 24,
       "survived": 4,
       "equivalent": 0
     },
     "throw-string": {
-      "mutants": 26,
+      "mutants": 27,
       "killed": 0,
       "survived": 0,
-      "equivalent": 26
+      "equivalent": 27
     },
     "throw-object": {
-      "mutants": 26,
+      "mutants": 27,
       "killed": 0,
       "survived": 0,
-      "equivalent": 26
+      "equivalent": 27
     },
     "async-reject": {
       "mutants": 3,
@@ -1133,14 +1149,14 @@
       "equivalent": 0
     },
     "remove-await": {
-      "mutants": 28,
-      "killed": 1,
+      "mutants": 31,
+      "killed": 2,
       "survived": 2,
-      "equivalent": 25
+      "equivalent": 27
     },
     "memo-write": {
-      "mutants": 23,
-      "killed": 19,
+      "mutants": 25,
+      "killed": 21,
       "survived": 4,
       "equivalent": 0
     },
@@ -1151,14 +1167,14 @@
       "equivalent": 6
     },
     "non-core-cache": {
-      "mutants": 46,
-      "killed": 20,
-      "survived": 26,
+      "mutants": 48,
+      "killed": 21,
+      "survived": 27,
       "equivalent": 0
     },
     "destructure-props": {
-      "mutants": 13,
-      "killed": 12,
+      "mutants": 17,
+      "killed": 16,
       "survived": 1,
       "equivalent": 0
     },
@@ -1194,11 +1210,11 @@
     }
   },
   "total": {
-    "mutants": 449,
-    "killed": 232,
-    "survived": 128,
-    "equivalent": 89,
-    "score": 64.44444444444444
+    "mutants": 470,
+    "killed": 246,
+    "survived": 131,
+    "equivalent": 93,
+    "score": 65.25198938992042
   },
   "mutants": [
     {
@@ -1352,7 +1368,7 @@
           {
             "stage": "lint",
             "file": "main.tsx",
-            "line": 13,
+            "line": 35,
             "generatedLine": 41,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -1563,7 +1579,7 @@
           {
             "stage": "lint",
             "file": "main.tsx",
-            "line": 13,
+            "line": 35,
             "generatedLine": 41,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -1612,7 +1628,7 @@
           {
             "stage": "lint",
             "file": "main.tsx",
-            "line": 13,
+            "line": 35,
             "generatedLine": 41,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -1859,7 +1875,7 @@
           {
             "stage": "lint",
             "file": "main.tsx",
-            "line": 51,
+            "line": 74,
             "generatedLine": 107,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -1880,7 +1896,7 @@
       },
       "preExistingMatch": false,
       "status": "killed",
-      "exactLine": false
+      "exactLine": true
     },
     {
       "operator": "setup-read",
@@ -1917,7 +1933,7 @@
           {
             "stage": "lint",
             "file": "main.tsx",
-            "line": 51,
+            "line": 74,
             "generatedLine": 107,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -1938,7 +1954,7 @@
       },
       "preExistingMatch": false,
       "status": "killed",
-      "exactLine": false
+      "exactLine": true
     },
     {
       "operator": "setup-read",
@@ -1975,7 +1991,7 @@
           {
             "stage": "lint",
             "file": "main.tsx",
-            "line": 51,
+            "line": 74,
             "generatedLine": 107,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -1996,7 +2012,7 @@
       },
       "preExistingMatch": false,
       "status": "killed",
-      "exactLine": false
+      "exactLine": true
     },
     {
       "operator": "destructure-props",
@@ -2125,7 +2141,7 @@
           {
             "stage": "lint",
             "file": "main.tsx",
-            "line": 89,
+            "line": 95,
             "generatedLine": 167,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -2183,7 +2199,7 @@
           {
             "stage": "lint",
             "file": "main.tsx",
-            "line": 89,
+            "line": 95,
             "generatedLine": 167,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -3746,7 +3762,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 9,
             "generatedLine": 16,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -3804,7 +3820,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 9,
             "generatedLine": 16,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -3862,7 +3878,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 9,
             "generatedLine": 16,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -3920,7 +3936,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 9,
             "generatedLine": 16,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -4109,7 +4125,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 12,
+            "line": 15,
             "generatedLine": 27,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -4509,7 +4525,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 8,
             "generatedLine": 13,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -4568,7 +4584,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 8,
             "generatedLine": 13,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -4578,7 +4594,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 11,
             "generatedLine": 18,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -4599,7 +4615,7 @@
       },
       "preExistingMatch": true,
       "status": "killed",
-      "exactLine": false
+      "exactLine": true
     },
     {
       "operator": "setup-read",
@@ -4636,7 +4652,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 8,
             "generatedLine": 13,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -4646,7 +4662,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 11,
             "generatedLine": 18,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -4667,7 +4683,7 @@
       },
       "preExistingMatch": true,
       "status": "killed",
-      "exactLine": false
+      "exactLine": true
     },
     {
       "operator": "setup-read",
@@ -4704,7 +4720,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 8,
             "generatedLine": 13,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -4714,7 +4730,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 11,
             "generatedLine": 18,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -4735,7 +4751,7 @@
       },
       "preExistingMatch": true,
       "status": "killed",
-      "exactLine": false
+      "exactLine": true
     },
     {
       "operator": "setup-read",
@@ -4772,7 +4788,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 8,
             "generatedLine": 13,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -4782,7 +4798,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 11,
             "generatedLine": 18,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -4803,7 +4819,7 @@
       },
       "preExistingMatch": true,
       "status": "killed",
-      "exactLine": false
+      "exactLine": true
     },
     {
       "operator": "inline-component",
@@ -4940,7 +4956,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 8,
             "generatedLine": 13,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -5007,7 +5023,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 8,
             "generatedLine": 13,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -5017,7 +5033,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 14,
+            "line": 17,
             "generatedLine": 29,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -5076,7 +5092,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 8,
             "generatedLine": 13,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -5134,7 +5150,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 8,
             "generatedLine": 13,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -5192,7 +5208,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 8,
             "generatedLine": 13,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -5250,7 +5266,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 8,
             "generatedLine": 13,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -5372,7 +5388,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 8,
             "generatedLine": 13,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -5570,7 +5586,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 7,
+            "line": 10,
             "generatedLine": 19,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -5628,7 +5644,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 7,
+            "line": 10,
             "generatedLine": 19,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -5686,7 +5702,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 7,
+            "line": 10,
             "generatedLine": 19,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -5744,7 +5760,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 7,
+            "line": 10,
             "generatedLine": 19,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -5995,7 +6011,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 13,
+            "line": 17,
             "generatedLine": 31,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -8272,7 +8288,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 9,
             "generatedLine": 16,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -8339,7 +8355,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 9,
             "generatedLine": 16,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -8498,7 +8514,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 9,
             "generatedLine": 16,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -8565,7 +8581,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 9,
             "generatedLine": 16,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -8632,7 +8648,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 9,
             "generatedLine": 16,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -8844,7 +8860,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 12,
+            "line": 15,
             "generatedLine": 28,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -9384,7 +9400,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 10,
             "generatedLine": 20,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -9635,7 +9651,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 10,
             "generatedLine": 20,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -9702,7 +9718,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 10,
             "generatedLine": 20,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -9914,7 +9930,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 13,
+            "line": 16,
             "generatedLine": 31,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -10437,7 +10453,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 9,
             "generatedLine": 17,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -10495,7 +10511,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 9,
             "generatedLine": 17,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -10553,7 +10569,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 9,
             "generatedLine": 17,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -10611,7 +10627,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 9,
             "generatedLine": 17,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -10858,7 +10874,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 12,
+            "line": 15,
             "generatedLine": 45,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -11289,7 +11305,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 9,
             "generatedLine": 17,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -11356,7 +11372,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 9,
             "generatedLine": 17,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -11423,7 +11439,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 9,
             "generatedLine": 17,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -11490,7 +11506,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 9,
             "generatedLine": 17,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -11557,7 +11573,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 9,
             "generatedLine": 17,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -11773,7 +11789,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 12,
+            "line": 15,
             "generatedLine": 28,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -12305,7 +12321,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 10,
             "generatedLine": 21,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -12363,7 +12379,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 10,
             "generatedLine": 21,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -12421,7 +12437,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 10,
             "generatedLine": 21,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -12479,7 +12495,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 10,
             "generatedLine": 21,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -12668,7 +12684,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 13,
+            "line": 16,
             "generatedLine": 32,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -13139,7 +13155,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 7,
+            "line": 10,
             "generatedLine": 17,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -13213,7 +13229,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 7,
+            "line": 10,
             "generatedLine": 17,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -13287,7 +13303,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 7,
+            "line": 10,
             "generatedLine": 17,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -13361,7 +13377,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 7,
+            "line": 10,
             "generatedLine": 17,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -13582,7 +13598,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 13,
+            "line": 16,
             "generatedLine": 28,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -14905,7 +14921,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 10,
             "generatedLine": 19,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -14963,7 +14979,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 10,
             "generatedLine": 19,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -15021,7 +15037,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 10,
             "generatedLine": 19,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -15079,7 +15095,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 10,
             "generatedLine": 19,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -15268,7 +15284,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 13,
+            "line": 16,
             "generatedLine": 30,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -15728,7 +15744,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 10,
             "generatedLine": 19,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -15796,7 +15812,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 10,
             "generatedLine": 17,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -15864,7 +15880,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 10,
             "generatedLine": 19,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -15932,7 +15948,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 10,
             "generatedLine": 19,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -16000,7 +16016,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 10,
             "generatedLine": 19,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -16209,7 +16225,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 13,
+            "line": 16,
             "generatedLine": 30,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -17593,7 +17609,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 9,
             "generatedLine": 16,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -17651,7 +17667,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 9,
             "generatedLine": 16,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -17709,7 +17725,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 9,
             "generatedLine": 16,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -17767,7 +17783,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 9,
             "generatedLine": 16,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -17956,7 +17972,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 12,
+            "line": 15,
             "generatedLine": 27,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -18432,7 +18448,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 9,
             "generatedLine": 16,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -18490,7 +18506,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 9,
             "generatedLine": 16,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -18548,7 +18564,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 9,
             "generatedLine": 16,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -18606,7 +18622,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 9,
             "generatedLine": 16,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -18811,7 +18827,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 12,
+            "line": 15,
             "generatedLine": 27,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -19287,7 +19303,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 9,
             "generatedLine": 16,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -19345,7 +19361,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 9,
             "generatedLine": 16,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -19403,7 +19419,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 9,
             "generatedLine": 16,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -19461,7 +19477,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 6,
+            "line": 9,
             "generatedLine": 16,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -19650,7 +19666,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 12,
+            "line": 15,
             "generatedLine": 27,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -20109,7 +20125,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 3,
+            "line": 5,
             "generatedLine": 14,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -20296,7 +20312,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 7,
+            "line": 9,
             "generatedLine": 20,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -20612,7 +20628,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 2,
+            "line": 5,
             "generatedLine": 6,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -20786,7 +20802,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 2,
+            "line": 8,
             "generatedLine": 9,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -20844,7 +20860,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 2,
+            "line": 8,
             "generatedLine": 9,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -21616,7 +21632,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 11,
+            "line": 23,
             "generatedLine": 64,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -22089,7 +22105,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 11,
+            "line": 23,
             "generatedLine": 64,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -22232,7 +22248,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 11,
+            "line": 23,
             "generatedLine": 64,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -22290,7 +22306,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 11,
+            "line": 23,
             "generatedLine": 64,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -23132,7 +23148,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 39,
+            "line": 46,
             "generatedLine": 81,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -23181,7 +23197,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 39,
+            "line": 46,
             "generatedLine": 75,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -23305,7 +23321,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 39,
+            "line": 46,
             "generatedLine": 78,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -23354,7 +23370,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 39,
+            "line": 46,
             "generatedLine": 81,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -23432,7 +23448,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 39,
+            "line": 46,
             "generatedLine": 81,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -23573,7 +23589,7 @@
           {
             "stage": "lint",
             "file": "App.tsx",
-            "line": 54,
+            "line": 65,
             "generatedLine": 112,
             "generated": true,
             "code": "READ_IN_SETUP",
@@ -24004,6 +24020,996 @@
           "<job>/source/filters.tsx:26:19 error TS2345: [FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: RangeError.",
           "  related: <job>/source/App.tsx:79:15: The app is rendered here. does not suspend; can fail with RangeError; does not wait; needs no context",
           "solid-yield check: 4 files, 1 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "killed",
+      "exactLine": false
+    },
+    {
+      "operator": "remove-await",
+      "line": 19,
+      "routine": {
+        "start": 17,
+        "end": 22
+      },
+      "offset": 275,
+      "source": "import {\n  createMemo,\n  createProjection,\n  createSignal,\n  createStore,\n  For,\n  isPending,\n  Loading,\n  Repeat\n} from \"solid-js\";\n\ninterface Item {\n  id: number;\n  text: string;\n}\n\nasync function* items(): AsyncIterable<Item> {\n  for (const text of [\"a\", \"b\", \"c\"]) {\n    new Promise(resolve => setTimeout(resolve, 100));\n    yield { id: text.charCodeAt(0), text };\n  }\n}\n\nasync function load(version: number): Promise<{ title: string; items: Item[] }> {\n  await new Promise(resolve => setTimeout(resolve, 50));\n  return { title: `v${version}`, items: [{ id: 1, text: \"x\" }] };\n}\n\nexport default function Feed() {\n  const [version, setVersion] = createSignal(0);\n  // F-S53: a derived store is a projection; isPending takes its path.\n  const [feed] = createStore(\n    async draft => {\n      const data = await load(version());\n      draft.title = data.title;\n      draft.items = data.items;\n    },\n    { title: \"\", items: [] as Item[] },\n    { seedLoadingValue: true }\n  );\n  // F-S53: async iterable producers; a projection's draft; Repeat's index as a key.\n  const all = createMemo<Item[]>(async function* () {\n    let seen: Item[] = [];\n    for await (const item of items()) yield (seen = [...seen, item]);\n  });\n  const rows = createProjection<Item[]>(async function* (state) {\n    for await (const item of items()) {\n      state.push(item);\n      yield;\n    }\n  }, []);\n  return (\n    <section class={{ busy: isPending(() => feed.items) }}>\n      <h2>{feed.title}</h2>\n      <button onClick={() => setVersion(v => v + 1)}>refetch</button>\n      <Loading fallback=\"…\">\n        <ul>\n          <For each={all()}>{item => <li>{item.text}</li>}</For>\n        </ul>\n        <ol>\n          <Repeat count={rows.length}>\n            {i => (\n              <li>\n                {i}: {rows[i].text}\n              </li>\n            )}\n          </Repeat>\n        </ol>\n      </Loading>\n    </section>\n  );\n}\n",
+      "equivalent": "The awaited value is discarded: without the await the statement leaves a floating promise, which type-checks unchanged. Whether its rejection is still handled is a no-floating-promises concern, outside the catalogue.",
+      "id": "M0450",
+      "project": "rendering-edges",
+      "file": "Feed.tsx",
+      "original": "import {\n  createMemo,\n  createProjection,\n  createSignal,\n  createStore,\n  For,\n  isPending,\n  Loading,\n  Repeat\n} from \"solid-js\";\n\ninterface Item {\n  id: number;\n  text: string;\n}\n\nasync function* items(): AsyncIterable<Item> {\n  for (const text of [\"a\", \"b\", \"c\"]) {\n    await new Promise(resolve => setTimeout(resolve, 100));\n    yield { id: text.charCodeAt(0), text };\n  }\n}\n\nasync function load(version: number): Promise<{ title: string; items: Item[] }> {\n  await new Promise(resolve => setTimeout(resolve, 50));\n  return { title: `v${version}`, items: [{ id: 1, text: \"x\" }] };\n}\n\nexport default function Feed() {\n  const [version, setVersion] = createSignal(0);\n  // F-S53: a derived store is a projection; isPending takes its path.\n  const [feed] = createStore(\n    async draft => {\n      const data = await load(version());\n      draft.title = data.title;\n      draft.items = data.items;\n    },\n    { title: \"\", items: [] as Item[] },\n    { seedLoadingValue: true }\n  );\n  // F-S53: async iterable producers; a projection's draft; Repeat's index as a key.\n  const all = createMemo<Item[]>(async function* () {\n    let seen: Item[] = [];\n    for await (const item of items()) yield (seen = [...seen, item]);\n  });\n  const rows = createProjection<Item[]>(async function* (state) {\n    for await (const item of items()) {\n      state.push(item);\n      yield;\n    }\n  }, []);\n  return (\n    <section class={{ busy: isPending(() => feed.items) }}>\n      <h2>{feed.title}</h2>\n      <button onClick={() => setVersion(v => v + 1)}>refetch</button>\n      <Loading fallback=\"…\">\n        <ul>\n          <For each={all()}>{item => <li>{item.text}</li>}</For>\n        </ul>\n        <ol>\n          <Repeat count={rows.length}>\n            {i => (\n              <li>\n                {i}: {rows[i].text}\n              </li>\n            )}\n          </Repeat>\n        </ol>\n      </Loading>\n    </section>\n  );\n}\n",
+      "result": {
+        "diagnostics": [],
+        "stages": {
+          "transform": "completed",
+          "cli": "passed",
+          "lint": "passed"
+        },
+        "cliOutput": [
+          "solid-yield check: 5 files, 0 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "equivalent",
+      "exactLine": false
+    },
+    {
+      "operator": "remove-await",
+      "line": 25,
+      "routine": {
+        "start": 24,
+        "end": 27
+      },
+      "offset": 466,
+      "source": "import {\n  createMemo,\n  createProjection,\n  createSignal,\n  createStore,\n  For,\n  isPending,\n  Loading,\n  Repeat\n} from \"solid-js\";\n\ninterface Item {\n  id: number;\n  text: string;\n}\n\nasync function* items(): AsyncIterable<Item> {\n  for (const text of [\"a\", \"b\", \"c\"]) {\n    await new Promise(resolve => setTimeout(resolve, 100));\n    yield { id: text.charCodeAt(0), text };\n  }\n}\n\nasync function load(version: number): Promise<{ title: string; items: Item[] }> {\n  new Promise(resolve => setTimeout(resolve, 50));\n  return { title: `v${version}`, items: [{ id: 1, text: \"x\" }] };\n}\n\nexport default function Feed() {\n  const [version, setVersion] = createSignal(0);\n  // F-S53: a derived store is a projection; isPending takes its path.\n  const [feed] = createStore(\n    async draft => {\n      const data = await load(version());\n      draft.title = data.title;\n      draft.items = data.items;\n    },\n    { title: \"\", items: [] as Item[] },\n    { seedLoadingValue: true }\n  );\n  // F-S53: async iterable producers; a projection's draft; Repeat's index as a key.\n  const all = createMemo<Item[]>(async function* () {\n    let seen: Item[] = [];\n    for await (const item of items()) yield (seen = [...seen, item]);\n  });\n  const rows = createProjection<Item[]>(async function* (state) {\n    for await (const item of items()) {\n      state.push(item);\n      yield;\n    }\n  }, []);\n  return (\n    <section class={{ busy: isPending(() => feed.items) }}>\n      <h2>{feed.title}</h2>\n      <button onClick={() => setVersion(v => v + 1)}>refetch</button>\n      <Loading fallback=\"…\">\n        <ul>\n          <For each={all()}>{item => <li>{item.text}</li>}</For>\n        </ul>\n        <ol>\n          <Repeat count={rows.length}>\n            {i => (\n              <li>\n                {i}: {rows[i].text}\n              </li>\n            )}\n          </Repeat>\n        </ol>\n      </Loading>\n    </section>\n  );\n}\n",
+      "equivalent": "The awaited value is discarded: without the await the statement leaves a floating promise, which type-checks unchanged. Whether its rejection is still handled is a no-floating-promises concern, outside the catalogue.",
+      "id": "M0451",
+      "project": "rendering-edges",
+      "file": "Feed.tsx",
+      "original": "import {\n  createMemo,\n  createProjection,\n  createSignal,\n  createStore,\n  For,\n  isPending,\n  Loading,\n  Repeat\n} from \"solid-js\";\n\ninterface Item {\n  id: number;\n  text: string;\n}\n\nasync function* items(): AsyncIterable<Item> {\n  for (const text of [\"a\", \"b\", \"c\"]) {\n    await new Promise(resolve => setTimeout(resolve, 100));\n    yield { id: text.charCodeAt(0), text };\n  }\n}\n\nasync function load(version: number): Promise<{ title: string; items: Item[] }> {\n  await new Promise(resolve => setTimeout(resolve, 50));\n  return { title: `v${version}`, items: [{ id: 1, text: \"x\" }] };\n}\n\nexport default function Feed() {\n  const [version, setVersion] = createSignal(0);\n  // F-S53: a derived store is a projection; isPending takes its path.\n  const [feed] = createStore(\n    async draft => {\n      const data = await load(version());\n      draft.title = data.title;\n      draft.items = data.items;\n    },\n    { title: \"\", items: [] as Item[] },\n    { seedLoadingValue: true }\n  );\n  // F-S53: async iterable producers; a projection's draft; Repeat's index as a key.\n  const all = createMemo<Item[]>(async function* () {\n    let seen: Item[] = [];\n    for await (const item of items()) yield (seen = [...seen, item]);\n  });\n  const rows = createProjection<Item[]>(async function* (state) {\n    for await (const item of items()) {\n      state.push(item);\n      yield;\n    }\n  }, []);\n  return (\n    <section class={{ busy: isPending(() => feed.items) }}>\n      <h2>{feed.title}</h2>\n      <button onClick={() => setVersion(v => v + 1)}>refetch</button>\n      <Loading fallback=\"…\">\n        <ul>\n          <For each={all()}>{item => <li>{item.text}</li>}</For>\n        </ul>\n        <ol>\n          <Repeat count={rows.length}>\n            {i => (\n              <li>\n                {i}: {rows[i].text}\n              </li>\n            )}\n          </Repeat>\n        </ol>\n      </Loading>\n    </section>\n  );\n}\n",
+      "result": {
+        "diagnostics": [],
+        "stages": {
+          "transform": "completed",
+          "cli": "passed",
+          "lint": "passed"
+        },
+        "cliOutput": [
+          "solid-yield check: 5 files, 0 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "equivalent",
+      "exactLine": false
+    },
+    {
+      "operator": "remove-await",
+      "line": 34,
+      "routine": {
+        "start": 29,
+        "end": 72
+      },
+      "offset": 813,
+      "source": "import {\n  createMemo,\n  createProjection,\n  createSignal,\n  createStore,\n  For,\n  isPending,\n  Loading,\n  Repeat\n} from \"solid-js\";\n\ninterface Item {\n  id: number;\n  text: string;\n}\n\nasync function* items(): AsyncIterable<Item> {\n  for (const text of [\"a\", \"b\", \"c\"]) {\n    await new Promise(resolve => setTimeout(resolve, 100));\n    yield { id: text.charCodeAt(0), text };\n  }\n}\n\nasync function load(version: number): Promise<{ title: string; items: Item[] }> {\n  await new Promise(resolve => setTimeout(resolve, 50));\n  return { title: `v${version}`, items: [{ id: 1, text: \"x\" }] };\n}\n\nexport default function Feed() {\n  const [version, setVersion] = createSignal(0);\n  // F-S53: a derived store is a projection; isPending takes its path.\n  const [feed] = createStore(\n    async draft => {\n      const data = load(version());\n      draft.title = data.title;\n      draft.items = data.items;\n    },\n    { title: \"\", items: [] as Item[] },\n    { seedLoadingValue: true }\n  );\n  // F-S53: async iterable producers; a projection's draft; Repeat's index as a key.\n  const all = createMemo<Item[]>(async function* () {\n    let seen: Item[] = [];\n    for await (const item of items()) yield (seen = [...seen, item]);\n  });\n  const rows = createProjection<Item[]>(async function* (state) {\n    for await (const item of items()) {\n      state.push(item);\n      yield;\n    }\n  }, []);\n  return (\n    <section class={{ busy: isPending(() => feed.items) }}>\n      <h2>{feed.title}</h2>\n      <button onClick={() => setVersion(v => v + 1)}>refetch</button>\n      <Loading fallback=\"…\">\n        <ul>\n          <For each={all()}>{item => <li>{item.text}</li>}</For>\n        </ul>\n        <ol>\n          <Repeat count={rows.length}>\n            {i => (\n              <li>\n                {i}: {rows[i].text}\n              </li>\n            )}\n          </Repeat>\n        </ol>\n      </Loading>\n    </section>\n  );\n}\n",
+      "equivalent": null,
+      "id": "M0452",
+      "project": "rendering-edges",
+      "file": "Feed.tsx",
+      "original": "import {\n  createMemo,\n  createProjection,\n  createSignal,\n  createStore,\n  For,\n  isPending,\n  Loading,\n  Repeat\n} from \"solid-js\";\n\ninterface Item {\n  id: number;\n  text: string;\n}\n\nasync function* items(): AsyncIterable<Item> {\n  for (const text of [\"a\", \"b\", \"c\"]) {\n    await new Promise(resolve => setTimeout(resolve, 100));\n    yield { id: text.charCodeAt(0), text };\n  }\n}\n\nasync function load(version: number): Promise<{ title: string; items: Item[] }> {\n  await new Promise(resolve => setTimeout(resolve, 50));\n  return { title: `v${version}`, items: [{ id: 1, text: \"x\" }] };\n}\n\nexport default function Feed() {\n  const [version, setVersion] = createSignal(0);\n  // F-S53: a derived store is a projection; isPending takes its path.\n  const [feed] = createStore(\n    async draft => {\n      const data = await load(version());\n      draft.title = data.title;\n      draft.items = data.items;\n    },\n    { title: \"\", items: [] as Item[] },\n    { seedLoadingValue: true }\n  );\n  // F-S53: async iterable producers; a projection's draft; Repeat's index as a key.\n  const all = createMemo<Item[]>(async function* () {\n    let seen: Item[] = [];\n    for await (const item of items()) yield (seen = [...seen, item]);\n  });\n  const rows = createProjection<Item[]>(async function* (state) {\n    for await (const item of items()) {\n      state.push(item);\n      yield;\n    }\n  }, []);\n  return (\n    <section class={{ busy: isPending(() => feed.items) }}>\n      <h2>{feed.title}</h2>\n      <button onClick={() => setVersion(v => v + 1)}>refetch</button>\n      <Loading fallback=\"…\">\n        <ul>\n          <For each={all()}>{item => <li>{item.text}</li>}</For>\n        </ul>\n        <ol>\n          <Repeat count={rows.length}>\n            {i => (\n              <li>\n                {i}: {rows[i].text}\n              </li>\n            )}\n          </Repeat>\n        </ol>\n      </Loading>\n    </section>\n  );\n}\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "cli",
+            "file": "Feed.tsx",
+            "line": 36,
+            "code": "TS2339",
+            "tsCode": "TS2339",
+            "message": "Property 'items' does not exist on type 'Promise<{ title: string; items: Item[]; }>'.",
+            "related": [
+              {
+                "file": "Feed.tsx",
+                "line": 36
+              }
+            ]
+          },
+          {
+            "stage": "cli",
+            "file": "Feed.tsx",
+            "line": 35,
+            "code": "TS2339",
+            "tsCode": "TS2339",
+            "message": "Property 'title' does not exist on type 'Promise<{ title: string; items: Item[]; }>'.",
+            "related": [
+              {
+                "file": "Feed.tsx",
+                "line": 35
+              }
+            ]
+          }
+        ],
+        "stages": {
+          "transform": "completed",
+          "cli": "diagnostics",
+          "lint": "passed"
+        },
+        "cliOutput": [
+          "<job>/source/Feed.tsx:36:26 error TS2339: Property 'items' does not exist on type 'Promise<{ title: string; items: Item[]; }>'.",
+          "  related: <job>/source/Feed.tsx:36:26: Did you forget to use 'await'?",
+          "<job>/source/Feed.tsx:35:26 error TS2339: Property 'title' does not exist on type 'Promise<{ title: string; items: Item[]; }>'.",
+          "  related: <job>/source/Feed.tsx:35:26: Did you forget to use 'await'?",
+          "solid-yield check: 5 files, 2 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "killed",
+      "exactLine": false
+    },
+    {
+      "operator": "non-core-cache",
+      "line": 42,
+      "routine": {
+        "start": 29,
+        "end": 72
+      },
+      "offset": 1082,
+      "source": "import {\n  createMemo,\n  createProjection,\n  createSignal,\n  createStore,\n  For,\n  isPending,\n  Loading,\n  Repeat\n} from \"solid-js\";\n\ninterface Item {\n  id: number;\n  text: string;\n}\n\nasync function* items(): AsyncIterable<Item> {\n  for (const text of [\"a\", \"b\", \"c\"]) {\n    await new Promise(resolve => setTimeout(resolve, 100));\n    yield { id: text.charCodeAt(0), text };\n  }\n}\n\nasync function load(version: number): Promise<{ title: string; items: Item[] }> {\n  await new Promise(resolve => setTimeout(resolve, 50));\n  return { title: `v${version}`, items: [{ id: 1, text: \"x\" }] };\n}\n\nexport default function Feed() {\n  const [version, setVersion] = createSignal(0);\n  // F-S53: a derived store is a projection; isPending takes its path.\n  const [feed] = createStore(\n    async draft => {\n      const data = await load(version());\n      draft.title = data.title;\n      draft.items = data.items;\n    },\n    { title: \"\", items: [] as Item[] },\n    { seedLoadingValue: true }\n  );\n  // F-S53: async iterable producers; a projection's draft; Repeat's index as a key.\n  const all = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })<Item[]>(async function* () {\n    let seen: Item[] = [];\n    for await (const item of items()) yield (seen = [...seen, item]);\n  });\n  const rows = createProjection<Item[]>(async function* (state) {\n    for await (const item of items()) {\n      state.push(item);\n      yield;\n    }\n  }, []);\n  return (\n    <section class={{ busy: isPending(() => feed.items) }}>\n      <h2>{feed.title}</h2>\n      <button onClick={() => setVersion(v => v + 1)}>refetch</button>\n      <Loading fallback=\"…\">\n        <ul>\n          <For each={all()}>{item => <li>{item.text}</li>}</For>\n        </ul>\n        <ol>\n          <Repeat count={rows.length}>\n            {i => (\n              <li>\n                {i}: {rows[i].text}\n              </li>\n            )}\n          </Repeat>\n        </ol>\n      </Loading>\n    </section>\n  );\n}\n",
+      "equivalent": null,
+      "id": "M0453",
+      "project": "rendering-edges",
+      "file": "Feed.tsx",
+      "original": "import {\n  createMemo,\n  createProjection,\n  createSignal,\n  createStore,\n  For,\n  isPending,\n  Loading,\n  Repeat\n} from \"solid-js\";\n\ninterface Item {\n  id: number;\n  text: string;\n}\n\nasync function* items(): AsyncIterable<Item> {\n  for (const text of [\"a\", \"b\", \"c\"]) {\n    await new Promise(resolve => setTimeout(resolve, 100));\n    yield { id: text.charCodeAt(0), text };\n  }\n}\n\nasync function load(version: number): Promise<{ title: string; items: Item[] }> {\n  await new Promise(resolve => setTimeout(resolve, 50));\n  return { title: `v${version}`, items: [{ id: 1, text: \"x\" }] };\n}\n\nexport default function Feed() {\n  const [version, setVersion] = createSignal(0);\n  // F-S53: a derived store is a projection; isPending takes its path.\n  const [feed] = createStore(\n    async draft => {\n      const data = await load(version());\n      draft.title = data.title;\n      draft.items = data.items;\n    },\n    { title: \"\", items: [] as Item[] },\n    { seedLoadingValue: true }\n  );\n  // F-S53: async iterable producers; a projection's draft; Repeat's index as a key.\n  const all = createMemo<Item[]>(async function* () {\n    let seen: Item[] = [];\n    for await (const item of items()) yield (seen = [...seen, item]);\n  });\n  const rows = createProjection<Item[]>(async function* (state) {\n    for await (const item of items()) {\n      state.push(item);\n      yield;\n    }\n  }, []);\n  return (\n    <section class={{ busy: isPending(() => feed.items) }}>\n      <h2>{feed.title}</h2>\n      <button onClick={() => setVersion(v => v + 1)}>refetch</button>\n      <Loading fallback=\"…\">\n        <ul>\n          <For each={all()}>{item => <li>{item.text}</li>}</For>\n        </ul>\n        <ol>\n          <Repeat count={rows.length}>\n            {i => (\n              <li>\n                {i}: {rows[i].text}\n              </li>\n            )}\n          </Repeat>\n        </ol>\n      </Loading>\n    </section>\n  );\n}\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "cli",
+            "file": "Feed.tsx",
+            "line": 58,
+            "code": "GENERATED_TYPE",
+            "tsCode": "TS2339",
+            "message": "[GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host."
+          },
+          {
+            "stage": "cli",
+            "file": "Feed.tsx",
+            "line": 42,
+            "code": "TS2558",
+            "tsCode": "TS2558",
+            "message": "Expected 0 type arguments, but got 1."
+          }
+        ],
+        "stages": {
+          "transform": "completed",
+          "cli": "diagnostics",
+          "lint": "passed"
+        },
+        "cliOutput": [
+          "<job>/source/Feed.tsx:58:48 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
+          "<job>/source/Feed.tsx:42:87 error TS2558: Expected 0 type arguments, but got 1.",
+          "solid-yield check: 5 files, 2 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "survived",
+      "exactLine": false
+    },
+    {
+      "operator": "memo-write",
+      "line": 42,
+      "routine": {
+        "start": 29,
+        "end": 72
+      },
+      "offset": 1082,
+      "source": "import {\n  createMemo,\n  createProjection,\n  createSignal,\n  createStore,\n  For,\n  isPending,\n  Loading,\n  Repeat\n} from \"solid-js\";\n\ninterface Item {\n  id: number;\n  text: string;\n}\n\nasync function* items(): AsyncIterable<Item> {\n  for (const text of [\"a\", \"b\", \"c\"]) {\n    await new Promise(resolve => setTimeout(resolve, 100));\n    yield { id: text.charCodeAt(0), text };\n  }\n}\n\nasync function load(version: number): Promise<{ title: string; items: Item[] }> {\n  await new Promise(resolve => setTimeout(resolve, 50));\n  return { title: `v${version}`, items: [{ id: 1, text: \"x\" }] };\n}\n\nexport default function Feed() {\n  const [version, setVersion] = createSignal(0);\n  // F-S53: a derived store is a projection; isPending takes its path.\n  const [feed] = createStore(\n    async draft => {\n      const data = await load(version());\n      draft.title = data.title;\n      draft.items = data.items;\n    },\n    { title: \"\", items: [] as Item[] },\n    { seedLoadingValue: true }\n  );\n  // F-S53: async iterable producers; a projection's draft; Repeat's index as a key.\n  const all = createMemo<Item[]>(async function* () { setVersion(0);\n    let seen: Item[] = [];\n    for await (const item of items()) yield (seen = [...seen, item]);\n  });\n  const rows = createProjection<Item[]>(async function* (state) {\n    for await (const item of items()) {\n      state.push(item);\n      yield;\n    }\n  }, []);\n  return (\n    <section class={{ busy: isPending(() => feed.items) }}>\n      <h2>{feed.title}</h2>\n      <button onClick={() => setVersion(v => v + 1)}>refetch</button>\n      <Loading fallback=\"…\">\n        <ul>\n          <For each={all()}>{item => <li>{item.text}</li>}</For>\n        </ul>\n        <ol>\n          <Repeat count={rows.length}>\n            {i => (\n              <li>\n                {i}: {rows[i].text}\n              </li>\n            )}\n          </Repeat>\n        </ol>\n      </Loading>\n    </section>\n  );\n}\n",
+      "equivalent": null,
+      "id": "M0454",
+      "project": "rendering-edges",
+      "file": "Feed.tsx",
+      "original": "import {\n  createMemo,\n  createProjection,\n  createSignal,\n  createStore,\n  For,\n  isPending,\n  Loading,\n  Repeat\n} from \"solid-js\";\n\ninterface Item {\n  id: number;\n  text: string;\n}\n\nasync function* items(): AsyncIterable<Item> {\n  for (const text of [\"a\", \"b\", \"c\"]) {\n    await new Promise(resolve => setTimeout(resolve, 100));\n    yield { id: text.charCodeAt(0), text };\n  }\n}\n\nasync function load(version: number): Promise<{ title: string; items: Item[] }> {\n  await new Promise(resolve => setTimeout(resolve, 50));\n  return { title: `v${version}`, items: [{ id: 1, text: \"x\" }] };\n}\n\nexport default function Feed() {\n  const [version, setVersion] = createSignal(0);\n  // F-S53: a derived store is a projection; isPending takes its path.\n  const [feed] = createStore(\n    async draft => {\n      const data = await load(version());\n      draft.title = data.title;\n      draft.items = data.items;\n    },\n    { title: \"\", items: [] as Item[] },\n    { seedLoadingValue: true }\n  );\n  // F-S53: async iterable producers; a projection's draft; Repeat's index as a key.\n  const all = createMemo<Item[]>(async function* () {\n    let seen: Item[] = [];\n    for await (const item of items()) yield (seen = [...seen, item]);\n  });\n  const rows = createProjection<Item[]>(async function* (state) {\n    for await (const item of items()) {\n      state.push(item);\n      yield;\n    }\n  }, []);\n  return (\n    <section class={{ busy: isPending(() => feed.items) }}>\n      <h2>{feed.title}</h2>\n      <button onClick={() => setVersion(v => v + 1)}>refetch</button>\n      <Loading fallback=\"…\">\n        <ul>\n          <For each={all()}>{item => <li>{item.text}</li>}</For>\n        </ul>\n        <ol>\n          <Repeat count={rows.length}>\n            {i => (\n              <li>\n                {i}: {rows[i].text}\n              </li>\n            )}\n          </Repeat>\n        </ol>\n      </Loading>\n    </section>\n  );\n}\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "lint",
+            "file": "Feed.tsx",
+            "line": 42,
+            "generatedLine": 51,
+            "generated": false,
+            "code": "solid-yield/no-unyielded-write",
+            "ruleId": "solid-yield/no-unyielded-write",
+            "message": "`setVersion(…)` writes nothing until it is delegated to: `yield* setVersion(…)`, in an $event or an $effect's effect phase."
+          }
+        ],
+        "stages": {
+          "transform": "completed",
+          "cli": "passed",
+          "lint": "diagnostics"
+        },
+        "cliOutput": [
+          "solid-yield check: 5 files, 0 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "killed",
+      "exactLine": true
+    },
+    {
+      "operator": "delete-loading",
+      "line": 56,
+      "routine": {
+        "start": 29,
+        "end": 72
+      },
+      "offset": 1559,
+      "source": "import {\n  createMemo,\n  createProjection,\n  createSignal,\n  createStore,\n  For,\n  isPending,\n  Loading,\n  Repeat\n} from \"solid-js\";\n\ninterface Item {\n  id: number;\n  text: string;\n}\n\nasync function* items(): AsyncIterable<Item> {\n  for (const text of [\"a\", \"b\", \"c\"]) {\n    await new Promise(resolve => setTimeout(resolve, 100));\n    yield { id: text.charCodeAt(0), text };\n  }\n}\n\nasync function load(version: number): Promise<{ title: string; items: Item[] }> {\n  await new Promise(resolve => setTimeout(resolve, 50));\n  return { title: `v${version}`, items: [{ id: 1, text: \"x\" }] };\n}\n\nexport default function Feed() {\n  const [version, setVersion] = createSignal(0);\n  // F-S53: a derived store is a projection; isPending takes its path.\n  const [feed] = createStore(\n    async draft => {\n      const data = await load(version());\n      draft.title = data.title;\n      draft.items = data.items;\n    },\n    { title: \"\", items: [] as Item[] },\n    { seedLoadingValue: true }\n  );\n  // F-S53: async iterable producers; a projection's draft; Repeat's index as a key.\n  const all = createMemo<Item[]>(async function* () {\n    let seen: Item[] = [];\n    for await (const item of items()) yield (seen = [...seen, item]);\n  });\n  const rows = createProjection<Item[]>(async function* (state) {\n    for await (const item of items()) {\n      state.push(item);\n      yield;\n    }\n  }, []);\n  return (\n    <section class={{ busy: isPending(() => feed.items) }}>\n      <h2>{feed.title}</h2>\n      <button onClick={() => setVersion(v => v + 1)}>refetch</button>\n      <>\n        <ul>\n          <For each={all()}>{item => <li>{item.text}</li>}</For>\n        </ul>\n        <ol>\n          <Repeat count={rows.length}>\n            {i => (\n              <li>\n                {i}: {rows[i].text}\n              </li>\n            )}\n          </Repeat>\n        </ol>\n      </>\n    </section>\n  );\n}\n",
+      "equivalent": null,
+      "id": "M0455",
+      "project": "rendering-edges",
+      "file": "Feed.tsx",
+      "original": "import {\n  createMemo,\n  createProjection,\n  createSignal,\n  createStore,\n  For,\n  isPending,\n  Loading,\n  Repeat\n} from \"solid-js\";\n\ninterface Item {\n  id: number;\n  text: string;\n}\n\nasync function* items(): AsyncIterable<Item> {\n  for (const text of [\"a\", \"b\", \"c\"]) {\n    await new Promise(resolve => setTimeout(resolve, 100));\n    yield { id: text.charCodeAt(0), text };\n  }\n}\n\nasync function load(version: number): Promise<{ title: string; items: Item[] }> {\n  await new Promise(resolve => setTimeout(resolve, 50));\n  return { title: `v${version}`, items: [{ id: 1, text: \"x\" }] };\n}\n\nexport default function Feed() {\n  const [version, setVersion] = createSignal(0);\n  // F-S53: a derived store is a projection; isPending takes its path.\n  const [feed] = createStore(\n    async draft => {\n      const data = await load(version());\n      draft.title = data.title;\n      draft.items = data.items;\n    },\n    { title: \"\", items: [] as Item[] },\n    { seedLoadingValue: true }\n  );\n  // F-S53: async iterable producers; a projection's draft; Repeat's index as a key.\n  const all = createMemo<Item[]>(async function* () {\n    let seen: Item[] = [];\n    for await (const item of items()) yield (seen = [...seen, item]);\n  });\n  const rows = createProjection<Item[]>(async function* (state) {\n    for await (const item of items()) {\n      state.push(item);\n      yield;\n    }\n  }, []);\n  return (\n    <section class={{ busy: isPending(() => feed.items) }}>\n      <h2>{feed.title}</h2>\n      <button onClick={() => setVersion(v => v + 1)}>refetch</button>\n      <Loading fallback=\"…\">\n        <ul>\n          <For each={all()}>{item => <li>{item.text}</li>}</For>\n        </ul>\n        <ol>\n          <Repeat count={rows.length}>\n            {i => (\n              <li>\n                {i}: {rows[i].text}\n              </li>\n            )}\n          </Repeat>\n        </ol>\n      </Loading>\n    </section>\n  );\n}\n",
+      "result": {
+        "diagnostics": [],
+        "stages": {
+          "transform": "completed",
+          "cli": "passed",
+          "lint": "passed"
+        },
+        "cliOutput": [
+          "solid-yield check: 5 files, 0 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "survived",
+      "exactLine": false
+    },
+    {
+      "operator": "setup-read",
+      "line": 52,
+      "routine": {
+        "start": 29,
+        "end": 72
+      },
+      "offset": 621,
+      "source": "import {\n  createMemo,\n  createProjection,\n  createSignal,\n  createStore,\n  For,\n  isPending,\n  Loading,\n  Repeat\n} from \"solid-js\";\n\ninterface Item {\n  id: number;\n  text: string;\n}\n\nasync function* items(): AsyncIterable<Item> {\n  for (const text of [\"a\", \"b\", \"c\"]) {\n    await new Promise(resolve => setTimeout(resolve, 100));\n    yield { id: text.charCodeAt(0), text };\n  }\n}\n\nasync function load(version: number): Promise<{ title: string; items: Item[] }> {\n  await new Promise(resolve => setTimeout(resolve, 50));\n  return { title: `v${version}`, items: [{ id: 1, text: \"x\" }] };\n}\n\nexport default function Feed() {\n  const [version, setVersion] = createSignal(0);\n  // F-S53: a derived store is a projection; isPending takes its path.\n  const [feed] = createStore(\n    async draft => {\n      const data = await load(version());\n      draft.title = data.title;\n      draft.items = data.items;\n    },\n    { title: \"\", items: [] as Item[] },\n    { seedLoadingValue: true }\n  );\n  // F-S53: async iterable producers; a projection's draft; Repeat's index as a key.\n  const all = createMemo<Item[]>(async function* () {\n    let seen: Item[] = [];\n    for await (const item of items()) yield (seen = [...seen, item]);\n  });\n  const rows = createProjection<Item[]>(async function* (state) {\n    for await (const item of items()) {\n      state.push(item);\n      yield;\n    }\n  }, []);\n  const __mutantSnapshot1616 = all(); return (\n    <section class={{ busy: isPending(() => feed.items) }}>\n      <h2>{feed.title}</h2>\n      <button onClick={() => setVersion(v => v + 1)}>refetch</button>\n      <Loading fallback=\"…\">\n        <ul>\n          <For each={__mutantSnapshot1616}>{item => <li>{item.text}</li>}</For>\n        </ul>\n        <ol>\n          <Repeat count={rows.length}>\n            {i => (\n              <li>\n                {i}: {rows[i].text}\n              </li>\n            )}\n          </Repeat>\n        </ol>\n      </Loading>\n    </section>\n  );\n}\n",
+      "equivalent": null,
+      "id": "M0456",
+      "project": "rendering-edges",
+      "file": "Feed.tsx",
+      "original": "import {\n  createMemo,\n  createProjection,\n  createSignal,\n  createStore,\n  For,\n  isPending,\n  Loading,\n  Repeat\n} from \"solid-js\";\n\ninterface Item {\n  id: number;\n  text: string;\n}\n\nasync function* items(): AsyncIterable<Item> {\n  for (const text of [\"a\", \"b\", \"c\"]) {\n    await new Promise(resolve => setTimeout(resolve, 100));\n    yield { id: text.charCodeAt(0), text };\n  }\n}\n\nasync function load(version: number): Promise<{ title: string; items: Item[] }> {\n  await new Promise(resolve => setTimeout(resolve, 50));\n  return { title: `v${version}`, items: [{ id: 1, text: \"x\" }] };\n}\n\nexport default function Feed() {\n  const [version, setVersion] = createSignal(0);\n  // F-S53: a derived store is a projection; isPending takes its path.\n  const [feed] = createStore(\n    async draft => {\n      const data = await load(version());\n      draft.title = data.title;\n      draft.items = data.items;\n    },\n    { title: \"\", items: [] as Item[] },\n    { seedLoadingValue: true }\n  );\n  // F-S53: async iterable producers; a projection's draft; Repeat's index as a key.\n  const all = createMemo<Item[]>(async function* () {\n    let seen: Item[] = [];\n    for await (const item of items()) yield (seen = [...seen, item]);\n  });\n  const rows = createProjection<Item[]>(async function* (state) {\n    for await (const item of items()) {\n      state.push(item);\n      yield;\n    }\n  }, []);\n  return (\n    <section class={{ busy: isPending(() => feed.items) }}>\n      <h2>{feed.title}</h2>\n      <button onClick={() => setVersion(v => v + 1)}>refetch</button>\n      <Loading fallback=\"…\">\n        <ul>\n          <For each={all()}>{item => <li>{item.text}</li>}</For>\n        </ul>\n        <ol>\n          <Repeat count={rows.length}>\n            {i => (\n              <li>\n                {i}: {rows[i].text}\n              </li>\n            )}\n          </Repeat>\n        </ol>\n      </Loading>\n    </section>\n  );\n}\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "cli",
+            "file": "Feed.tsx",
+            "line": 52,
+            "code": "READ_IN_SETUP",
+            "tsCode": "TS2769",
+            "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
+          },
+          {
+            "stage": "cli",
+            "file": "main.tsx",
+            "line": 8,
+            "code": "NO_PROVIDER",
+            "tsCode": "TS2345",
+            "message": "[NO_PROVIDER] Fix the earlier errors in this component before checking its render call. Missing: any."
+          },
+          {
+            "stage": "lint",
+            "file": "Feed.tsx",
+            "line": 52,
+            "generatedLine": 63,
+            "generated": true,
+            "code": "READ_IN_SETUP",
+            "ruleId": "solid-yield/no-read-in-setup",
+            "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
+          }
+        ],
+        "stages": {
+          "transform": "completed",
+          "cli": "diagnostics",
+          "lint": "diagnostics"
+        },
+        "cliOutput": [
+          "<job>/source/Feed.tsx:52:32 error TS2769: [READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive.",
+          "<job>/source/main.tsx:8:5 error TS2345: [NO_PROVIDER] Fix the earlier errors in this component before checking its render call. Missing: any.",
+          "solid-yield check: 5 files, 2 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "killed",
+      "exactLine": true
+    },
+    {
+      "operator": "delete-errored",
+      "line": 8,
+      "routine": {
+        "start": 6,
+        "end": 15
+      },
+      "offset": 217,
+      "source": "import { render } from \"@solidjs/web\";\nimport { Errored, Loading } from \"solid-js\";\nimport App from \"./App\";\n\n// F-S53: a root tree of Solid's own boundaries is the entry's checked root (D-099).\nrender(\n  () => (\n    <>\n      <Loading>\n        <App />\n      </Loading>\n    </>\n  ),\n  document.body\n);\n",
+      "equivalent": null,
+      "id": "M0457",
+      "project": "rendering-edges",
+      "file": "main.tsx",
+      "original": "import { render } from \"@solidjs/web\";\nimport { Errored, Loading } from \"solid-js\";\nimport App from \"./App\";\n\n// F-S53: a root tree of Solid's own boundaries is the entry's checked root (D-099).\nrender(\n  () => (\n    <Errored fallback={error => <p>{String(error())}</p>}>\n      <Loading>\n        <App />\n      </Loading>\n    </Errored>\n  ),\n  document.body\n);\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "cli",
+            "file": "main.tsx",
+            "line": 10,
+            "code": "FOREIGN_HANDOFF",
+            "tsCode": "TS2345",
+            "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: a transport failure (ChunkError).",
+            "related": [
+              {
+                "file": "main.tsx",
+                "line": 8
+              }
+            ]
+          }
+        ],
+        "stages": {
+          "transform": "completed",
+          "cli": "diagnostics",
+          "lint": "passed"
+        },
+        "cliOutput": [
+          "<job>/source/main.tsx:10:10 error TS2345: [FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: a transport failure (ChunkError).",
+          "  related: <job>/source/main.tsx:8:5: The app is rendered here. does not suspend; can fail with a transport failure (ChunkError); does not wait; needs no context",
+          "solid-yield check: 5 files, 1 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "killed",
+      "exactLine": false
+    },
+    {
+      "operator": "delete-loading",
+      "line": 9,
+      "routine": {
+        "start": 6,
+        "end": 15
+      },
+      "offset": 278,
+      "source": "import { render } from \"@solidjs/web\";\nimport { Errored, Loading } from \"solid-js\";\nimport App from \"./App\";\n\n// F-S53: a root tree of Solid's own boundaries is the entry's checked root (D-099).\nrender(\n  () => (\n    <Errored fallback={error => <p>{String(error())}</p>}>\n      <>\n        <App />\n      </>\n    </Errored>\n  ),\n  document.body\n);\n",
+      "equivalent": null,
+      "id": "M0458",
+      "project": "rendering-edges",
+      "file": "main.tsx",
+      "original": "import { render } from \"@solidjs/web\";\nimport { Errored, Loading } from \"solid-js\";\nimport App from \"./App\";\n\n// F-S53: a root tree of Solid's own boundaries is the entry's checked root (D-099).\nrender(\n  () => (\n    <Errored fallback={error => <p>{String(error())}</p>}>\n      <Loading>\n        <App />\n      </Loading>\n    </Errored>\n  ),\n  document.body\n);\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "cli",
+            "file": "main.tsx",
+            "line": 10,
+            "code": "PENDING_ROOT",
+            "tsCode": "TS1360",
+            "message": "[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.",
+            "related": [
+              {
+                "file": "main.tsx",
+                "line": 8
+              }
+            ]
+          }
+        ],
+        "stages": {
+          "transform": "completed",
+          "cli": "diagnostics",
+          "lint": "passed"
+        },
+        "cliOutput": [
+          "<job>/source/main.tsx:10:10 error TS1360: [PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.",
+          "  related: <job>/source/main.tsx:8:5: The app is rendered here. can suspend (pending); never fails; does not wait; needs no context",
+          "solid-yield check: 5 files, 1 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "killed",
+      "exactLine": false
+    },
+    {
+      "operator": "non-core-cache",
+      "line": 13,
+      "routine": {
+        "start": 10,
+        "end": 22
+      },
+      "offset": 636,
+      "source": "import { createContext, createMemo, createSignal, useContext, type Component } from \"solid-js\";\n\n// F-S52: a context value declared with plain function types, given a source,\n// a setter and a routine; F-S45: a tuple, read through destructuring.\ntype RouterValue = [() => string, { go: (path: string) => void; is: (path: string) => boolean }];\n\nconst RouterContext = createContext<RouterValue>();\n\n// F-S51: a component factory; its component closes over the page.\nexport function withRouter(Page: Component): Component<{ url?: string }> {\n  return (props = {}) => {\n    const [navigated, go] = createSignal<string>();\n    const path = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => navigated() ?? props.url ?? \"/\");\n    const is = (match: string) => match === path();\n    window.onpopstate = () => go(location.pathname);\n    return (\n      <RouterContext value={[path, { go, is }]}>\n        <Page />\n      </RouterContext>\n    );\n  };\n}\n\nexport function useRouter() {\n  const router = useContext(RouterContext);\n  if (!router) throw new Error(\"no router\");\n  return router;\n}\n\nexport function Link(props: { to: string; label: string }) {\n  const [, { go, is }] = useRouter();\n  return (\n    <a\n      class={{ active: is(props.to) }}\n      href={props.to}\n      onClick={event => {\n        event.preventDefault();\n        go(props.to);\n      }}\n    >\n      {props.label}\n    </a>\n  );\n}\n",
+      "equivalent": null,
+      "id": "M0459",
+      "project": "rendering-edges",
+      "file": "router.tsx",
+      "original": "import { createContext, createMemo, createSignal, useContext, type Component } from \"solid-js\";\n\n// F-S52: a context value declared with plain function types, given a source,\n// a setter and a routine; F-S45: a tuple, read through destructuring.\ntype RouterValue = [() => string, { go: (path: string) => void; is: (path: string) => boolean }];\n\nconst RouterContext = createContext<RouterValue>();\n\n// F-S51: a component factory; its component closes over the page.\nexport function withRouter(Page: Component): Component<{ url?: string }> {\n  return (props = {}) => {\n    const [navigated, go] = createSignal<string>();\n    const path = createMemo(() => navigated() ?? props.url ?? \"/\");\n    const is = (match: string) => match === path();\n    window.onpopstate = () => go(location.pathname);\n    return (\n      <RouterContext value={[path, { go, is }]}>\n        <Page />\n      </RouterContext>\n    );\n  };\n}\n\nexport function useRouter() {\n  const router = useContext(RouterContext);\n  if (!router) throw new Error(\"no router\");\n  return router;\n}\n\nexport function Link(props: { to: string; label: string }) {\n  const [, { go, is }] = useRouter();\n  return (\n    <a\n      class={{ active: is(props.to) }}\n      href={props.to}\n      onClick={event => {\n        event.preventDefault();\n        go(props.to);\n      }}\n    >\n      {props.label}\n    </a>\n  );\n}\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "transform",
+            "file": "router.tsx",
+            "line": 13,
+            "code": "SUGAR_CALLBACK",
+            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/router.tsx:13:111)"
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 9,
+            "code": "NATIVE_SETUP_FAILURE",
+            "tsCode": "TS2769",
+            "message": "[NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure."
+          },
+          {
+            "stage": "cli",
+            "file": "router.tsx",
+            "line": 13,
+            "code": "SUGAR_CALLBACK",
+            "tsCode": "TS95000",
+            "message": "[SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event."
+          }
+        ],
+        "stages": {
+          "transform": "refused",
+          "cli": "diagnostics",
+          "lint": "blocked-by-transform"
+        },
+        "cliOutput": [
+          "<job>/source/App.tsx:9:18 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.",
+          "<job>/source/router.tsx:13:111 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
+          "solid-yield check: 5 files, 2 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "killed",
+      "exactLine": true
+    },
+    {
+      "operator": "memo-write",
+      "line": 13,
+      "routine": {
+        "start": 10,
+        "end": 22
+      },
+      "offset": 647,
+      "source": "import { createContext, createMemo, createSignal, useContext, type Component } from \"solid-js\";\n\n// F-S52: a context value declared with plain function types, given a source,\n// a setter and a routine; F-S45: a tuple, read through destructuring.\ntype RouterValue = [() => string, { go: (path: string) => void; is: (path: string) => boolean }];\n\nconst RouterContext = createContext<RouterValue>();\n\n// F-S51: a component factory; its component closes over the page.\nexport function withRouter(Page: Component): Component<{ url?: string }> {\n  return (props = {}) => {\n    const [navigated, go] = createSignal<string>();\n    const path = createMemo(()=>{go(0);return navigated()??props.url??\"/\";});\n    const is = (match: string) => match === path();\n    window.onpopstate = () => go(location.pathname);\n    return (\n      <RouterContext value={[path, { go, is }]}>\n        <Page />\n      </RouterContext>\n    );\n  };\n}\n\nexport function useRouter() {\n  const router = useContext(RouterContext);\n  if (!router) throw new Error(\"no router\");\n  return router;\n}\n\nexport function Link(props: { to: string; label: string }) {\n  const [, { go, is }] = useRouter();\n  return (\n    <a\n      class={{ active: is(props.to) }}\n      href={props.to}\n      onClick={event => {\n        event.preventDefault();\n        go(props.to);\n      }}\n    >\n      {props.label}\n    </a>\n  );\n}\n",
+      "equivalent": null,
+      "id": "M0460",
+      "project": "rendering-edges",
+      "file": "router.tsx",
+      "original": "import { createContext, createMemo, createSignal, useContext, type Component } from \"solid-js\";\n\n// F-S52: a context value declared with plain function types, given a source,\n// a setter and a routine; F-S45: a tuple, read through destructuring.\ntype RouterValue = [() => string, { go: (path: string) => void; is: (path: string) => boolean }];\n\nconst RouterContext = createContext<RouterValue>();\n\n// F-S51: a component factory; its component closes over the page.\nexport function withRouter(Page: Component): Component<{ url?: string }> {\n  return (props = {}) => {\n    const [navigated, go] = createSignal<string>();\n    const path = createMemo(() => navigated() ?? props.url ?? \"/\");\n    const is = (match: string) => match === path();\n    window.onpopstate = () => go(location.pathname);\n    return (\n      <RouterContext value={[path, { go, is }]}>\n        <Page />\n      </RouterContext>\n    );\n  };\n}\n\nexport function useRouter() {\n  const router = useContext(RouterContext);\n  if (!router) throw new Error(\"no router\");\n  return router;\n}\n\nexport function Link(props: { to: string; label: string }) {\n  const [, { go, is }] = useRouter();\n  return (\n    <a\n      class={{ active: is(props.to) }}\n      href={props.to}\n      onClick={event => {\n        event.preventDefault();\n        go(props.to);\n      }}\n    >\n      {props.label}\n    </a>\n  );\n}\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "cli",
+            "file": "router.tsx",
+            "line": 13,
+            "code": "TS2345",
+            "tsCode": "TS2345",
+            "message": "Argument of type '0' is not assignable to parameter of type 'string | ((prev: string | undefined) => string | undefined) | undefined'."
+          },
+          {
+            "stage": "cli",
+            "file": "router.tsx",
+            "line": 13,
+            "code": "WRITE_IN_REACTIVE",
+            "tsCode": "TS2345",
+            "message": "[WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state."
+          }
+        ],
+        "stages": {
+          "transform": "completed",
+          "cli": "diagnostics",
+          "lint": "passed"
+        },
+        "cliOutput": [
+          "<job>/source/router.tsx:17:30 error TS2322: Type 'Source<string, any, false>' is not assignable to type '() => string'.\n  Type 'Source<string, any, false>' provides no match for the signature '(): string'.",
+          "<job>/source/router.tsx:13:37 error TS2345: Argument of type '0' is not assignable to parameter of type 'string | ((prev: string | undefined) => string | undefined) | undefined'.",
+          "<job>/source/router.tsx:13:34 error TS2345: [WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state.",
+          "solid-yield check: 5 files, 3 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "killed",
+      "exactLine": true
+    },
+    {
+      "operator": "delete-provider",
+      "line": 17,
+      "routine": {
+        "start": 10,
+        "end": 22
+      },
+      "offset": 811,
+      "source": "import { createContext, createMemo, createSignal, useContext, type Component } from \"solid-js\";\n\n// F-S52: a context value declared with plain function types, given a source,\n// a setter and a routine; F-S45: a tuple, read through destructuring.\ntype RouterValue = [() => string, { go: (path: string) => void; is: (path: string) => boolean }];\n\nconst RouterContext = createContext<RouterValue>();\n\n// F-S51: a component factory; its component closes over the page.\nexport function withRouter(Page: Component): Component<{ url?: string }> {\n  return (props = {}) => {\n    const [navigated, go] = createSignal<string>();\n    const path = createMemo(() => navigated() ?? props.url ?? \"/\");\n    const is = (match: string) => match === path();\n    window.onpopstate = () => go(location.pathname);\n    return (\n      <>\n        <Page />\n      </>\n    );\n  };\n}\n\nexport function useRouter() {\n  const router = useContext(RouterContext);\n  if (!router) throw new Error(\"no router\");\n  return router;\n}\n\nexport function Link(props: { to: string; label: string }) {\n  const [, { go, is }] = useRouter();\n  return (\n    <a\n      class={{ active: is(props.to) }}\n      href={props.to}\n      onClick={event => {\n        event.preventDefault();\n        go(props.to);\n      }}\n    >\n      {props.label}\n    </a>\n  );\n}\n",
+      "equivalent": null,
+      "id": "M0461",
+      "project": "rendering-edges",
+      "file": "router.tsx",
+      "original": "import { createContext, createMemo, createSignal, useContext, type Component } from \"solid-js\";\n\n// F-S52: a context value declared with plain function types, given a source,\n// a setter and a routine; F-S45: a tuple, read through destructuring.\ntype RouterValue = [() => string, { go: (path: string) => void; is: (path: string) => boolean }];\n\nconst RouterContext = createContext<RouterValue>();\n\n// F-S51: a component factory; its component closes over the page.\nexport function withRouter(Page: Component): Component<{ url?: string }> {\n  return (props = {}) => {\n    const [navigated, go] = createSignal<string>();\n    const path = createMemo(() => navigated() ?? props.url ?? \"/\");\n    const is = (match: string) => match === path();\n    window.onpopstate = () => go(location.pathname);\n    return (\n      <RouterContext value={[path, { go, is }]}>\n        <Page />\n      </RouterContext>\n    );\n  };\n}\n\nexport function useRouter() {\n  const router = useContext(RouterContext);\n  if (!router) throw new Error(\"no router\");\n  return router;\n}\n\nexport function Link(props: { to: string; label: string }) {\n  const [, { go, is }] = useRouter();\n  return (\n    <a\n      class={{ active: is(props.to) }}\n      href={props.to}\n      onClick={event => {\n        event.preventDefault();\n        go(props.to);\n      }}\n    >\n      {props.label}\n    </a>\n  );\n}\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "cli",
+            "file": "main.tsx",
+            "line": 8,
+            "code": "NO_PROVIDER",
+            "tsCode": "TS2345",
+            "message": "[NO_PROVIDER] Fix the earlier errors in this component before checking its render call. Missing: any."
+          },
+          {
+            "stage": "cli",
+            "file": "router.tsx",
+            "line": 36,
+            "code": "EVENT_REJECTS",
+            "tsCode": "TS95000",
+            "message": "[EVENT_REJECTS] This handler can fail with unknown and nothing catches it; wrap the body in try/catch, or declare the failure."
+          },
+          {
+            "stage": "cli",
+            "file": "router.tsx",
+            "line": 30,
+            "code": "GENERATED_TYPE",
+            "tsCode": "TS2345",
+            "message": "[generated] [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host."
+          }
+        ],
+        "stages": {
+          "transform": "completed",
+          "cli": "diagnostics",
+          "lint": "passed"
+        },
+        "cliOutput": [
+          "<job>/source/main.tsx:8:5 error TS2345: [NO_PROVIDER] Fix the earlier errors in this component before checking its render call. Missing: any.",
+          "<job>/source/router.tsx:36:16 error TS95000: [EVENT_REJECTS] This handler can fail with unknown and nothing catches it; wrap the body in try/catch, or declare the failure.",
+          "<job>/source/router.tsx:30:17 error TS2345: [generated] [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
+          "solid-yield check: 5 files, 3 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "survived",
+      "exactLine": false
+    },
+    {
+      "operator": "never-provided-context",
+      "line": 25,
+      "routine": {
+        "start": 24,
+        "end": 28
+      },
+      "offset": 967,
+      "source": "import { createContext, createMemo, createSignal, useContext, type Component } from \"solid-js\";\n\n// F-S52: a context value declared with plain function types, given a source,\n// a setter and a routine; F-S45: a tuple, read through destructuring.\ntype RouterValue = [() => string, { go: (path: string) => void; is: (path: string) => boolean }];\n\nconst RouterContext = createContext<RouterValue>();\n\n// F-S51: a component factory; its component closes over the page.\nexport function withRouter(Page: Component): Component<{ url?: string }> {\n  return (props = {}) => {\n    const [navigated, go] = createSignal<string>();\n    const path = createMemo(() => navigated() ?? props.url ?? \"/\");\n    const is = (match: string) => match === path();\n    window.onpopstate = () => go(location.pathname);\n    return (\n      <RouterContext value={[path, { go, is }]}>\n        <Page />\n      </RouterContext>\n    );\n  };\n}\n\nexport function useRouter() {\n  const router = useContext(createContext<number>());\n  if (!router) throw new Error(\"no router\");\n  return router;\n}\n\nexport function Link(props: { to: string; label: string }) {\n  const [, { go, is }] = useRouter();\n  return (\n    <a\n      class={{ active: is(props.to) }}\n      href={props.to}\n      onClick={event => {\n        event.preventDefault();\n        go(props.to);\n      }}\n    >\n      {props.label}\n    </a>\n  );\n}\n",
+      "equivalent": null,
+      "id": "M0462",
+      "project": "rendering-edges",
+      "file": "router.tsx",
+      "original": "import { createContext, createMemo, createSignal, useContext, type Component } from \"solid-js\";\n\n// F-S52: a context value declared with plain function types, given a source,\n// a setter and a routine; F-S45: a tuple, read through destructuring.\ntype RouterValue = [() => string, { go: (path: string) => void; is: (path: string) => boolean }];\n\nconst RouterContext = createContext<RouterValue>();\n\n// F-S51: a component factory; its component closes over the page.\nexport function withRouter(Page: Component): Component<{ url?: string }> {\n  return (props = {}) => {\n    const [navigated, go] = createSignal<string>();\n    const path = createMemo(() => navigated() ?? props.url ?? \"/\");\n    const is = (match: string) => match === path();\n    window.onpopstate = () => go(location.pathname);\n    return (\n      <RouterContext value={[path, { go, is }]}>\n        <Page />\n      </RouterContext>\n    );\n  };\n}\n\nexport function useRouter() {\n  const router = useContext(RouterContext);\n  if (!router) throw new Error(\"no router\");\n  return router;\n}\n\nexport function Link(props: { to: string; label: string }) {\n  const [, { go, is }] = useRouter();\n  return (\n    <a\n      class={{ active: is(props.to) }}\n      href={props.to}\n      onClick={event => {\n        event.preventDefault();\n        go(props.to);\n      }}\n    >\n      {props.label}\n    </a>\n  );\n}\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "transform",
+            "file": "router.tsx",
+            "line": 25,
+            "code": "NO_PROVIDER",
+            "message": "This context is created in the read itself, so no provider can be above it: declare it once, provide it, and read that declaration."
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 9,
+            "code": "TS2488",
+            "tsCode": "TS2488",
+            "message": "Type 'number' must have a '[Symbol.iterator]()' method that returns an iterator."
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 9,
+            "code": "NATIVE_SETUP_FAILURE",
+            "tsCode": "TS2769",
+            "message": "[NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure."
+          },
+          {
+            "stage": "cli",
+            "file": "router.tsx",
+            "line": 25,
+            "code": "NO_PROVIDER",
+            "tsCode": "TS95000",
+            "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value."
+          }
+        ],
+        "stages": {
+          "transform": "refused",
+          "cli": "diagnostics",
+          "lint": "blocked-by-transform"
+        },
+        "cliOutput": [
+          "<job>/source/App.tsx:9:9 error TS2488: Type 'number' must have a '[Symbol.iterator]()' method that returns an iterator.",
+          "<job>/source/App.tsx:9:18 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.",
+          "<job>/source/router.tsx:25:29 error TS95000: [NO_PROVIDER] Add a context provider above this component; this context has no default value.",
+          "solid-yield check: 5 files, 3 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "killed",
+      "exactLine": true
+    },
+    {
+      "operator": "throw-string",
+      "line": 26,
+      "routine": {
+        "start": 24,
+        "end": 28
+      },
+      "offset": 1004,
+      "source": "import { createContext, createMemo, createSignal, useContext, type Component } from \"solid-js\";\n\n// F-S52: a context value declared with plain function types, given a source,\n// a setter and a routine; F-S45: a tuple, read through destructuring.\ntype RouterValue = [() => string, { go: (path: string) => void; is: (path: string) => boolean }];\n\nconst RouterContext = createContext<RouterValue>();\n\n// F-S51: a component factory; its component closes over the page.\nexport function withRouter(Page: Component): Component<{ url?: string }> {\n  return (props = {}) => {\n    const [navigated, go] = createSignal<string>();\n    const path = createMemo(() => navigated() ?? props.url ?? \"/\");\n    const is = (match: string) => match === path();\n    window.onpopstate = () => go(location.pathname);\n    return (\n      <RouterContext value={[path, { go, is }]}>\n        <Page />\n      </RouterContext>\n    );\n  };\n}\n\nexport function useRouter() {\n  const router = useContext(RouterContext);\n  if (!router) throw \"mutant failure\";\n  return router;\n}\n\nexport function Link(props: { to: string; label: string }) {\n  const [, { go, is }] = useRouter();\n  return (\n    <a\n      class={{ active: is(props.to) }}\n      href={props.to}\n      onClick={event => {\n        event.preventDefault();\n        go(props.to);\n      }}\n    >\n      {props.label}\n    </a>\n  );\n}\n",
+      "equivalent": "Unknown thrown values are allowed by the unknown floor; changing the value is not itself an error. Handoff diagnostics are still recorded.",
+      "id": "M0463",
+      "project": "rendering-edges",
+      "file": "router.tsx",
+      "original": "import { createContext, createMemo, createSignal, useContext, type Component } from \"solid-js\";\n\n// F-S52: a context value declared with plain function types, given a source,\n// a setter and a routine; F-S45: a tuple, read through destructuring.\ntype RouterValue = [() => string, { go: (path: string) => void; is: (path: string) => boolean }];\n\nconst RouterContext = createContext<RouterValue>();\n\n// F-S51: a component factory; its component closes over the page.\nexport function withRouter(Page: Component): Component<{ url?: string }> {\n  return (props = {}) => {\n    const [navigated, go] = createSignal<string>();\n    const path = createMemo(() => navigated() ?? props.url ?? \"/\");\n    const is = (match: string) => match === path();\n    window.onpopstate = () => go(location.pathname);\n    return (\n      <RouterContext value={[path, { go, is }]}>\n        <Page />\n      </RouterContext>\n    );\n  };\n}\n\nexport function useRouter() {\n  const router = useContext(RouterContext);\n  if (!router) throw new Error(\"no router\");\n  return router;\n}\n\nexport function Link(props: { to: string; label: string }) {\n  const [, { go, is }] = useRouter();\n  return (\n    <a\n      class={{ active: is(props.to) }}\n      href={props.to}\n      onClick={event => {\n        event.preventDefault();\n        go(props.to);\n      }}\n    >\n      {props.label}\n    </a>\n  );\n}\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "transform",
+            "file": "router.tsx",
+            "line": 26,
+            "code": "NATIVE_THROW",
+            "message": "Throw an Error object so callers can identify and handle this failure."
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 9,
+            "code": "NATIVE_SETUP_FAILURE",
+            "tsCode": "TS2769",
+            "message": "[NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure."
+          },
+          {
+            "stage": "cli",
+            "file": "router.tsx",
+            "line": 26,
+            "code": "NATIVE_THROW",
+            "tsCode": "TS95000",
+            "message": "[NATIVE_THROW] Throw an Error object so callers can identify and handle this failure."
+          }
+        ],
+        "stages": {
+          "transform": "refused",
+          "cli": "diagnostics",
+          "lint": "blocked-by-transform"
+        },
+        "cliOutput": [
+          "<job>/source/App.tsx:9:18 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.",
+          "<job>/source/router.tsx:26:16 error TS95000: [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.",
+          "solid-yield check: 5 files, 2 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "equivalent",
+      "exactLine": false
+    },
+    {
+      "operator": "throw-object",
+      "line": 26,
+      "routine": {
+        "start": 24,
+        "end": 28
+      },
+      "offset": 1004,
+      "source": "import { createContext, createMemo, createSignal, useContext, type Component } from \"solid-js\";\n\n// F-S52: a context value declared with plain function types, given a source,\n// a setter and a routine; F-S45: a tuple, read through destructuring.\ntype RouterValue = [() => string, { go: (path: string) => void; is: (path: string) => boolean }];\n\nconst RouterContext = createContext<RouterValue>();\n\n// F-S51: a component factory; its component closes over the page.\nexport function withRouter(Page: Component): Component<{ url?: string }> {\n  return (props = {}) => {\n    const [navigated, go] = createSignal<string>();\n    const path = createMemo(() => navigated() ?? props.url ?? \"/\");\n    const is = (match: string) => match === path();\n    window.onpopstate = () => go(location.pathname);\n    return (\n      <RouterContext value={[path, { go, is }]}>\n        <Page />\n      </RouterContext>\n    );\n  };\n}\n\nexport function useRouter() {\n  const router = useContext(RouterContext);\n  if (!router) throw ({message:\"mutant failure\"});\n  return router;\n}\n\nexport function Link(props: { to: string; label: string }) {\n  const [, { go, is }] = useRouter();\n  return (\n    <a\n      class={{ active: is(props.to) }}\n      href={props.to}\n      onClick={event => {\n        event.preventDefault();\n        go(props.to);\n      }}\n    >\n      {props.label}\n    </a>\n  );\n}\n",
+      "equivalent": "Unknown thrown values are allowed by the unknown floor; changing the value is not itself an error. Handoff diagnostics are still recorded.",
+      "id": "M0464",
+      "project": "rendering-edges",
+      "file": "router.tsx",
+      "original": "import { createContext, createMemo, createSignal, useContext, type Component } from \"solid-js\";\n\n// F-S52: a context value declared with plain function types, given a source,\n// a setter and a routine; F-S45: a tuple, read through destructuring.\ntype RouterValue = [() => string, { go: (path: string) => void; is: (path: string) => boolean }];\n\nconst RouterContext = createContext<RouterValue>();\n\n// F-S51: a component factory; its component closes over the page.\nexport function withRouter(Page: Component): Component<{ url?: string }> {\n  return (props = {}) => {\n    const [navigated, go] = createSignal<string>();\n    const path = createMemo(() => navigated() ?? props.url ?? \"/\");\n    const is = (match: string) => match === path();\n    window.onpopstate = () => go(location.pathname);\n    return (\n      <RouterContext value={[path, { go, is }]}>\n        <Page />\n      </RouterContext>\n    );\n  };\n}\n\nexport function useRouter() {\n  const router = useContext(RouterContext);\n  if (!router) throw new Error(\"no router\");\n  return router;\n}\n\nexport function Link(props: { to: string; label: string }) {\n  const [, { go, is }] = useRouter();\n  return (\n    <a\n      class={{ active: is(props.to) }}\n      href={props.to}\n      onClick={event => {\n        event.preventDefault();\n        go(props.to);\n      }}\n    >\n      {props.label}\n    </a>\n  );\n}\n",
+      "result": {
+        "diagnostics": [],
+        "stages": {
+          "transform": "completed",
+          "cli": "passed",
+          "lint": "passed"
+        },
+        "cliOutput": [
+          "solid-yield check: 5 files, 0 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "equivalent",
+      "exactLine": false
+    },
+    {
+      "operator": "destructure-props",
+      "line": 30,
+      "routine": {
+        "start": 30,
+        "end": 44
+      },
+      "offset": 1069,
+      "source": "import { createContext, createMemo, createSignal, useContext, type Component } from \"solid-js\";\n\n// F-S52: a context value declared with plain function types, given a source,\n// a setter and a routine; F-S45: a tuple, read through destructuring.\ntype RouterValue = [() => string, { go: (path: string) => void; is: (path: string) => boolean }];\n\nconst RouterContext = createContext<RouterValue>();\n\n// F-S51: a component factory; its component closes over the page.\nexport function withRouter(Page: Component): Component<{ url?: string }> {\n  return (props = {}) => {\n    const [navigated, go] = createSignal<string>();\n    const path = createMemo(() => navigated() ?? props.url ?? \"/\");\n    const is = (match: string) => match === path();\n    window.onpopstate = () => go(location.pathname);\n    return (\n      <RouterContext value={[path, { go, is }]}>\n        <Page />\n      </RouterContext>\n    );\n  };\n}\n\nexport function useRouter() {\n  const router = useContext(RouterContext);\n  if (!router) throw new Error(\"no router\");\n  return router;\n}\n\nexport function Link({ to: __mutantProp1069, ...props }: { to: string; label: string }) {\n  const [, { go, is }] = useRouter();\n  return (\n    <a\n      class={{ active: is(__mutantProp1069) }}\n      href={__mutantProp1069}\n      onClick={event => {\n        event.preventDefault();\n        go(__mutantProp1069);\n      }}\n    >\n      {props.label}\n    </a>\n  );\n}\n",
+      "equivalent": null,
+      "id": "M0465",
+      "project": "rendering-edges",
+      "file": "router.tsx",
+      "original": "import { createContext, createMemo, createSignal, useContext, type Component } from \"solid-js\";\n\n// F-S52: a context value declared with plain function types, given a source,\n// a setter and a routine; F-S45: a tuple, read through destructuring.\ntype RouterValue = [() => string, { go: (path: string) => void; is: (path: string) => boolean }];\n\nconst RouterContext = createContext<RouterValue>();\n\n// F-S51: a component factory; its component closes over the page.\nexport function withRouter(Page: Component): Component<{ url?: string }> {\n  return (props = {}) => {\n    const [navigated, go] = createSignal<string>();\n    const path = createMemo(() => navigated() ?? props.url ?? \"/\");\n    const is = (match: string) => match === path();\n    window.onpopstate = () => go(location.pathname);\n    return (\n      <RouterContext value={[path, { go, is }]}>\n        <Page />\n      </RouterContext>\n    );\n  };\n}\n\nexport function useRouter() {\n  const router = useContext(RouterContext);\n  if (!router) throw new Error(\"no router\");\n  return router;\n}\n\nexport function Link(props: { to: string; label: string }) {\n  const [, { go, is }] = useRouter();\n  return (\n    <a\n      class={{ active: is(props.to) }}\n      href={props.to}\n      onClick={event => {\n        event.preventDefault();\n        go(props.to);\n      }}\n    >\n      {props.label}\n    </a>\n  );\n}\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "transform",
+            "file": "router.tsx",
+            "line": 30,
+            "code": "NATIVE_PROPS",
+            "message": "Use a props parameter and read props.name where needed; destructuring loses reactive updates."
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 9,
+            "code": "NATIVE_SETUP_FAILURE",
+            "tsCode": "TS2769",
+            "message": "[NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure."
+          },
+          {
+            "stage": "cli",
+            "file": "router.tsx",
+            "line": 30,
+            "code": "NATIVE_PROPS",
+            "tsCode": "TS95000",
+            "message": "[NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates."
+          }
+        ],
+        "stages": {
+          "transform": "refused",
+          "cli": "diagnostics",
+          "lint": "blocked-by-transform"
+        },
+        "cliOutput": [
+          "<job>/source/App.tsx:9:18 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.",
+          "<job>/source/router.tsx:30:8 error TS95000: [NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates.",
+          "solid-yield check: 5 files, 2 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "killed",
+      "exactLine": true
+    },
+    {
+      "operator": "destructure-props",
+      "line": 30,
+      "routine": {
+        "start": 30,
+        "end": 44
+      },
+      "offset": 1069,
+      "source": "import { createContext, createMemo, createSignal, useContext, type Component } from \"solid-js\";\n\n// F-S52: a context value declared with plain function types, given a source,\n// a setter and a routine; F-S45: a tuple, read through destructuring.\ntype RouterValue = [() => string, { go: (path: string) => void; is: (path: string) => boolean }];\n\nconst RouterContext = createContext<RouterValue>();\n\n// F-S51: a component factory; its component closes over the page.\nexport function withRouter(Page: Component): Component<{ url?: string }> {\n  return (props = {}) => {\n    const [navigated, go] = createSignal<string>();\n    const path = createMemo(() => navigated() ?? props.url ?? \"/\");\n    const is = (match: string) => match === path();\n    window.onpopstate = () => go(location.pathname);\n    return (\n      <RouterContext value={[path, { go, is }]}>\n        <Page />\n      </RouterContext>\n    );\n  };\n}\n\nexport function useRouter() {\n  const router = useContext(RouterContext);\n  if (!router) throw new Error(\"no router\");\n  return router;\n}\n\nexport function Link({ label: __mutantProp1069, ...props }: { to: string; label: string }) {\n  const [, { go, is }] = useRouter();\n  return (\n    <a\n      class={{ active: is(props.to) }}\n      href={props.to}\n      onClick={event => {\n        event.preventDefault();\n        go(props.to);\n      }}\n    >\n      {__mutantProp1069}\n    </a>\n  );\n}\n",
+      "equivalent": null,
+      "id": "M0466",
+      "project": "rendering-edges",
+      "file": "router.tsx",
+      "original": "import { createContext, createMemo, createSignal, useContext, type Component } from \"solid-js\";\n\n// F-S52: a context value declared with plain function types, given a source,\n// a setter and a routine; F-S45: a tuple, read through destructuring.\ntype RouterValue = [() => string, { go: (path: string) => void; is: (path: string) => boolean }];\n\nconst RouterContext = createContext<RouterValue>();\n\n// F-S51: a component factory; its component closes over the page.\nexport function withRouter(Page: Component): Component<{ url?: string }> {\n  return (props = {}) => {\n    const [navigated, go] = createSignal<string>();\n    const path = createMemo(() => navigated() ?? props.url ?? \"/\");\n    const is = (match: string) => match === path();\n    window.onpopstate = () => go(location.pathname);\n    return (\n      <RouterContext value={[path, { go, is }]}>\n        <Page />\n      </RouterContext>\n    );\n  };\n}\n\nexport function useRouter() {\n  const router = useContext(RouterContext);\n  if (!router) throw new Error(\"no router\");\n  return router;\n}\n\nexport function Link(props: { to: string; label: string }) {\n  const [, { go, is }] = useRouter();\n  return (\n    <a\n      class={{ active: is(props.to) }}\n      href={props.to}\n      onClick={event => {\n        event.preventDefault();\n        go(props.to);\n      }}\n    >\n      {props.label}\n    </a>\n  );\n}\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "transform",
+            "file": "router.tsx",
+            "line": 30,
+            "code": "NATIVE_PROPS",
+            "message": "Use a props parameter and read props.name where needed; destructuring loses reactive updates."
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 9,
+            "code": "NATIVE_SETUP_FAILURE",
+            "tsCode": "TS2769",
+            "message": "[NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure."
+          },
+          {
+            "stage": "cli",
+            "file": "router.tsx",
+            "line": 30,
+            "code": "NATIVE_PROPS",
+            "tsCode": "TS95000",
+            "message": "[NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates."
+          }
+        ],
+        "stages": {
+          "transform": "refused",
+          "cli": "diagnostics",
+          "lint": "blocked-by-transform"
+        },
+        "cliOutput": [
+          "<job>/source/App.tsx:9:18 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.",
+          "<job>/source/router.tsx:30:8 error TS95000: [NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates.",
+          "solid-yield check: 5 files, 2 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "killed",
+      "exactLine": true
+    },
+    {
+      "operator": "destructure-props",
+      "line": 6,
+      "routine": {
+        "start": 6,
+        "end": 13
+      },
+      "offset": 222,
+      "source": "import { renderToString } from \"@solidjs/web\";\nimport { Errored, Loading, type ParentProps } from \"solid-js\";\nimport App from \"./App\";\n\n// D-119: a ParentProps wrapper's children take what its callers pass.\nfunction Shell({ title: __mutantProp222, ...props }: ParentProps<{ title: string }>) {\n  return (\n    <main>\n      <h1>{__mutantProp222}</h1>\n      {props.children}\n    </main>\n  );\n}\n\n// F-S53: a root tree inside a function; its typed parameter becomes a prop.\nexport function page(url: string) {\n  return renderToString(() => (\n    <Shell title={url}>\n      <Errored fallback={error => <p>{String(error())}</p>}>\n        <Loading fallback=\"…\">\n          <App url={url} />\n        </Loading>\n      </Errored>\n    </Shell>\n  ));\n}\n",
+      "equivalent": null,
+      "id": "M0467",
+      "project": "rendering-edges",
+      "file": "server.tsx",
+      "original": "import { renderToString } from \"@solidjs/web\";\nimport { Errored, Loading, type ParentProps } from \"solid-js\";\nimport App from \"./App\";\n\n// D-119: a ParentProps wrapper's children take what its callers pass.\nfunction Shell(props: ParentProps<{ title: string }>) {\n  return (\n    <main>\n      <h1>{props.title}</h1>\n      {props.children}\n    </main>\n  );\n}\n\n// F-S53: a root tree inside a function; its typed parameter becomes a prop.\nexport function page(url: string) {\n  return renderToString(() => (\n    <Shell title={url}>\n      <Errored fallback={error => <p>{String(error())}</p>}>\n        <Loading fallback=\"…\">\n          <App url={url} />\n        </Loading>\n      </Errored>\n    </Shell>\n  ));\n}\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "transform",
+            "file": "server.tsx",
+            "line": 6,
+            "code": "NATIVE_PROPS",
+            "message": "Use a props parameter and read props.name where needed; destructuring loses reactive updates."
+          },
+          {
+            "stage": "cli",
+            "file": "server.tsx",
+            "line": 6,
+            "code": "NATIVE_PROPS",
+            "tsCode": "TS95000",
+            "message": "[NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates."
+          }
+        ],
+        "stages": {
+          "transform": "refused",
+          "cli": "diagnostics",
+          "lint": "blocked-by-transform"
+        },
+        "cliOutput": [
+          "<job>/source/server.tsx:6:1 error TS95000: [NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates.",
+          "solid-yield check: 5 files, 1 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "killed",
+      "exactLine": true
+    },
+    {
+      "operator": "destructure-props",
+      "line": 6,
+      "routine": {
+        "start": 6,
+        "end": 13
+      },
+      "offset": 222,
+      "source": "import { renderToString } from \"@solidjs/web\";\nimport { Errored, Loading, type ParentProps } from \"solid-js\";\nimport App from \"./App\";\n\n// D-119: a ParentProps wrapper's children take what its callers pass.\nfunction Shell({ children: __mutantProp222, ...props }: ParentProps<{ title: string }>) {\n  return (\n    <main>\n      <h1>{props.title}</h1>\n      {__mutantProp222}\n    </main>\n  );\n}\n\n// F-S53: a root tree inside a function; its typed parameter becomes a prop.\nexport function page(url: string) {\n  return renderToString(() => (\n    <Shell title={url}>\n      <Errored fallback={error => <p>{String(error())}</p>}>\n        <Loading fallback=\"…\">\n          <App url={url} />\n        </Loading>\n      </Errored>\n    </Shell>\n  ));\n}\n",
+      "equivalent": null,
+      "id": "M0468",
+      "project": "rendering-edges",
+      "file": "server.tsx",
+      "original": "import { renderToString } from \"@solidjs/web\";\nimport { Errored, Loading, type ParentProps } from \"solid-js\";\nimport App from \"./App\";\n\n// D-119: a ParentProps wrapper's children take what its callers pass.\nfunction Shell(props: ParentProps<{ title: string }>) {\n  return (\n    <main>\n      <h1>{props.title}</h1>\n      {props.children}\n    </main>\n  );\n}\n\n// F-S53: a root tree inside a function; its typed parameter becomes a prop.\nexport function page(url: string) {\n  return renderToString(() => (\n    <Shell title={url}>\n      <Errored fallback={error => <p>{String(error())}</p>}>\n        <Loading fallback=\"…\">\n          <App url={url} />\n        </Loading>\n      </Errored>\n    </Shell>\n  ));\n}\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "transform",
+            "file": "server.tsx",
+            "line": 6,
+            "code": "NATIVE_PROPS",
+            "message": "Use a props parameter and read props.name where needed; destructuring loses reactive updates."
+          },
+          {
+            "stage": "cli",
+            "file": "server.tsx",
+            "line": 6,
+            "code": "NATIVE_PROPS",
+            "tsCode": "TS95000",
+            "message": "[NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates."
+          }
+        ],
+        "stages": {
+          "transform": "refused",
+          "cli": "diagnostics",
+          "lint": "blocked-by-transform"
+        },
+        "cliOutput": [
+          "<job>/source/server.tsx:6:1 error TS95000: [NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates.",
+          "solid-yield check: 5 files, 1 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "killed",
+      "exactLine": true
+    },
+    {
+      "operator": "delete-errored",
+      "line": 19,
+      "routine": {
+        "start": 16,
+        "end": 26
+      },
+      "offset": 532,
+      "source": "import { renderToString } from \"@solidjs/web\";\nimport { Errored, Loading, type ParentProps } from \"solid-js\";\nimport App from \"./App\";\n\n// D-119: a ParentProps wrapper's children take what its callers pass.\nfunction Shell(props: ParentProps<{ title: string }>) {\n  return (\n    <main>\n      <h1>{props.title}</h1>\n      {props.children}\n    </main>\n  );\n}\n\n// F-S53: a root tree inside a function; its typed parameter becomes a prop.\nexport function page(url: string) {\n  return renderToString(() => (\n    <Shell title={url}>\n      <>\n        <Loading fallback=\"…\">\n          <App url={url} />\n        </Loading>\n      </>\n    </Shell>\n  ));\n}\n",
+      "equivalent": null,
+      "id": "M0469",
+      "project": "rendering-edges",
+      "file": "server.tsx",
+      "original": "import { renderToString } from \"@solidjs/web\";\nimport { Errored, Loading, type ParentProps } from \"solid-js\";\nimport App from \"./App\";\n\n// D-119: a ParentProps wrapper's children take what its callers pass.\nfunction Shell(props: ParentProps<{ title: string }>) {\n  return (\n    <main>\n      <h1>{props.title}</h1>\n      {props.children}\n    </main>\n  );\n}\n\n// F-S53: a root tree inside a function; its typed parameter becomes a prop.\nexport function page(url: string) {\n  return renderToString(() => (\n    <Shell title={url}>\n      <Errored fallback={error => <p>{String(error())}</p>}>\n        <Loading fallback=\"…\">\n          <App url={url} />\n        </Loading>\n      </Errored>\n    </Shell>\n  ));\n}\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "cli",
+            "file": "server.tsx",
+            "line": 21,
+            "code": "FOREIGN_HANDOFF",
+            "tsCode": "TS2345",
+            "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: a transport failure (ChunkError).",
+            "related": [
+              {
+                "file": "server.tsx",
+                "line": 16
+              }
+            ]
+          }
+        ],
+        "stages": {
+          "transform": "completed",
+          "cli": "diagnostics",
+          "lint": "passed"
+        },
+        "cliOutput": [
+          "<job>/source/server.tsx:21:12 error TS2345: [FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: a transport failure (ChunkError).",
+          "  related: <job>/source/server.tsx:16:17: The app is rendered here. does not suspend; can fail with a transport failure (ChunkError); does not wait; needs no context",
+          "solid-yield check: 5 files, 1 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "killed",
+      "exactLine": false
+    },
+    {
+      "operator": "delete-loading",
+      "line": 20,
+      "routine": {
+        "start": 16,
+        "end": 26
+      },
+      "offset": 595,
+      "source": "import { renderToString } from \"@solidjs/web\";\nimport { Errored, Loading, type ParentProps } from \"solid-js\";\nimport App from \"./App\";\n\n// D-119: a ParentProps wrapper's children take what its callers pass.\nfunction Shell(props: ParentProps<{ title: string }>) {\n  return (\n    <main>\n      <h1>{props.title}</h1>\n      {props.children}\n    </main>\n  );\n}\n\n// F-S53: a root tree inside a function; its typed parameter becomes a prop.\nexport function page(url: string) {\n  return renderToString(() => (\n    <Shell title={url}>\n      <Errored fallback={error => <p>{String(error())}</p>}>\n        <>\n          <App url={url} />\n        </>\n      </Errored>\n    </Shell>\n  ));\n}\n",
+      "equivalent": null,
+      "id": "M0470",
+      "project": "rendering-edges",
+      "file": "server.tsx",
+      "original": "import { renderToString } from \"@solidjs/web\";\nimport { Errored, Loading, type ParentProps } from \"solid-js\";\nimport App from \"./App\";\n\n// D-119: a ParentProps wrapper's children take what its callers pass.\nfunction Shell(props: ParentProps<{ title: string }>) {\n  return (\n    <main>\n      <h1>{props.title}</h1>\n      {props.children}\n    </main>\n  );\n}\n\n// F-S53: a root tree inside a function; its typed parameter becomes a prop.\nexport function page(url: string) {\n  return renderToString(() => (\n    <Shell title={url}>\n      <Errored fallback={error => <p>{String(error())}</p>}>\n        <Loading fallback=\"…\">\n          <App url={url} />\n        </Loading>\n      </Errored>\n    </Shell>\n  ));\n}\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "cli",
+            "file": "server.tsx",
+            "line": 21,
+            "code": "PENDING_ROOT",
+            "tsCode": "TS1360",
+            "message": "[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.",
+            "related": [
+              {
+                "file": "server.tsx",
+                "line": 16
+              }
+            ]
+          }
+        ],
+        "stages": {
+          "transform": "completed",
+          "cli": "diagnostics",
+          "lint": "passed"
+        },
+        "cliOutput": [
+          "<job>/source/server.tsx:21:12 error TS1360: [PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.",
+          "  related: <job>/source/server.tsx:16:17: The app is rendered here. can suspend (pending); never fails; does not wait; needs no context",
+          "solid-yield check: 5 files, 1 errors"
         ]
       },
       "preExistingMatch": false,

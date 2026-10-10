@@ -1,0 +1,228 @@
+{
+  "program": {
+    "mutants": 416,
+    "killed": 128,
+    "survived": 231,
+    "equivalent": 57,
+    "score": 35.65459610027855
+  },
+  "operators": {
+    "delete-catch": {
+      "mutants": 9,
+      "killed": 0,
+      "survived": 9,
+      "equivalent": 0
+    },
+    "swallow-catch": {
+      "mutants": 2,
+      "killed": 0,
+      "survived": 0,
+      "equivalent": 2
+    },
+    "delete-errored": {
+      "mutants": 19,
+      "killed": 0,
+      "survived": 19,
+      "equivalent": 0
+    },
+    "delete-loading": {
+      "mutants": 21,
+      "killed": 0,
+      "survived": 21,
+      "equivalent": 0
+    },
+    "setup-read": {
+      "mutants": 110,
+      "killed": 88,
+      "survived": 22,
+      "equivalent": 0
+    },
+    "delete-provider": {
+      "mutants": 20,
+      "killed": 0,
+      "survived": 20,
+      "equivalent": 0
+    },
+    "never-provided-context": {
+      "mutants": 26,
+      "killed": 0,
+      "survived": 26,
+      "equivalent": 0
+    },
+    "throw-string": {
+      "mutants": 24,
+      "killed": 0,
+      "survived": 0,
+      "equivalent": 24
+    },
+    "throw-object": {
+      "mutants": 24,
+      "killed": 0,
+      "survived": 0,
+      "equivalent": 24
+    },
+    "async-reject": {
+      "mutants": 3,
+      "killed": 0,
+      "survived": 3,
+      "equivalent": 0
+    },
+    "remove-await": {
+      "mutants": 27,
+      "killed": 0,
+      "survived": 27,
+      "equivalent": 0
+    },
+    "memo-write": {
+      "mutants": 23,
+      "killed": 20,
+      "survived": 3,
+      "equivalent": 0
+    },
+    "timer-read": {
+      "mutants": 6,
+      "killed": 0,
+      "survived": 0,
+      "equivalent": 6
+    },
+    "non-core-cache": {
+      "mutants": 43,
+      "killed": 15,
+      "survived": 28,
+      "equivalent": 0
+    },
+    "destructure-props": {
+      "mutants": 7,
+      "killed": 0,
+      "survived": 7,
+      "equivalent": 0
+    },
+    "inline-component": {
+      "mutants": 46,
+      "killed": 1,
+      "survived": 45,
+      "equivalent": 0
+    },
+    "effect-arity": {
+      "mutants": 4,
+      "killed": 4,
+      "survived": 0,
+      "equivalent": 0
+    },
+    "remove-use-server": {
+      "mutants": 1,
+      "killed": 0,
+      "survived": 0,
+      "equivalent": 1
+    },
+    "server-new-class": {
+      "mutants": 1,
+      "killed": 0,
+      "survived": 1,
+      "equivalent": 0
+    }
+  },
+  "checker": [
+    {
+      "name": "eslint-plugin-yield",
+      "counts": {
+        "Killed": 2060,
+        "Timeout": 17,
+        "Survived": 851,
+        "NoCoverage": 217
+      },
+      "score": 66.04133545310016,
+      "total": 3145
+    },
+    {
+      "name": "ts-plugin-yield",
+      "counts": {
+        "NoCoverage": 150,
+        "Killed": 331,
+        "Survived": 213,
+        "Timeout": 5
+      },
+      "score": 48.06866952789699,
+      "total": 699
+    }
+  ],
+  "topProgram": [
+    {
+      "id": "M0001",
+      "operator": "non-core-cache",
+      "project": "sierpinski",
+      "file": "main.tsx",
+      "line": 16
+    },
+    {
+      "id": "M0009",
+      "operator": "delete-loading",
+      "project": "sierpinski",
+      "file": "main.tsx",
+      "line": 36
+    },
+    {
+      "id": "M0012",
+      "operator": "destructure-props",
+      "project": "sierpinski",
+      "file": "main.tsx",
+      "line": 51
+    },
+    {
+      "id": "M0013",
+      "operator": "inline-component",
+      "project": "sierpinski",
+      "file": "main.tsx",
+      "line": 13
+    },
+    {
+      "id": "M0014",
+      "operator": "non-core-cache",
+      "project": "sierpinski",
+      "file": "main.tsx",
+      "line": 62
+    }
+  ],
+  "topChecker": [
+    {
+      "file": "packages/eslint-plugin-yield/src/calls.js",
+      "line": 23,
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": "packages/eslint-plugin-yield/src/calls.js",
+      "line": 23,
+      "status": "Survived",
+      "mutatorName": "LogicalOperator",
+      "replacement": "!type && seen.has(type)"
+    },
+    {
+      "file": "packages/eslint-plugin-yield/src/calls.js",
+      "line": 25,
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": "packages/eslint-plugin-yield/src/calls.js",
+      "line": 37,
+      "status": "Survived",
+      "mutatorName": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": "packages/eslint-plugin-yield/src/calls.js",
+      "line": 37,
+      "status": "Survived",
+      "mutatorName": "LogicalOperator",
+      "replacement": "!type && seen.has(type)"
+    }
+  ],
+  "findings": {
+    "program": 231,
+    "checker": 20,
+    "cliCrashes": 17
+  }
+}

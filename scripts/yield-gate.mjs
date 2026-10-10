@@ -189,6 +189,13 @@ function buildSteps(twins) {
   });
 
   steps.push({
+    name: "mutation",
+    cwd: root,
+    cmd: process.execPath,
+    args: ["scripts/mutation/gate.mjs", "documentation/yield-gate-baseline.json"]
+  });
+
+  steps.push({
     name: "native:contracts",
     cwd: root,
     cmd: process.execPath,

@@ -1,0 +1,1 @@
+{"name":"solid-yield-mutation-tools","private":true,"type":"module","dependencies":{"@stryker-mutator/core":"10.0.0","@stryker-mutator/vitest-runner":"10.0.0","pnpm":"11.1.1"}}

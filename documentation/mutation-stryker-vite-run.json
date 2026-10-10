@@ -1,0 +1,23 @@
+{
+  "package": "vite-plugin-yield",
+  "command": "node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js run scripts/mutation/stryker-vite-ruled.config.mjs",
+  "startedAt": "2026-10-08T21:11:29.281Z",
+  "finishedAt": "2026-10-08T21:24:45.643Z",
+  "durationSeconds": 796,
+  "exitCode": 0,
+  "counts": {
+    "Killed": 623,
+    "Survived": 567,
+    "Timeout": 51,
+    "NoCoverage": 1623
+  },
+  "countsIncludeCachedOutsideScope": true,
+  "scopedCounts": {
+    "Killed": 407,
+    "Survived": 311,
+    "Timeout": 47,
+    "NoCoverage": 201
+  },
+  "scopedMutants": 966,
+  "scopedScore": 46.997929606625256
+}

@@ -1,0 +1,18 @@
+{
+  "command": "node scripts/mutation/stryker-bounded.mjs vite-heart --minutes 40 --concurrency 2 --incremental",
+  "strykerCommand": "node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js run scripts/mutation/stryker-vite-heart.config.mjs --concurrency 2 --incremental",
+  "startedAt": "2026-10-08T20:59:52.714Z",
+  "finishedAt": "2026-10-08T21:10:59.000Z",
+  "wallSeconds": 666.286,
+  "budgetMinutes": 40,
+  "budgetExceeded": false,
+  "exitCode": 130,
+  "signal": null,
+  "scope": [
+    "packages/vite-plugin-yield/src/native-effects.js",
+    "packages/vite-plugin-yield/src/sugar.js",
+    "packages/vite-plugin-yield/src/positions.js",
+    "packages/vite-plugin-yield/src/transform.js"
+  ],
+  "stopReason": "Projected to exceed the remaining budget; narrowed to callback/catch and position-map files."
+}

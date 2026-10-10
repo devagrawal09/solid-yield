@@ -1,0 +1,33 @@
+{
+  "mode": "REPORT-ONLY",
+  "complete": true,
+  "scope": [
+    "packages/vite-plugin-yield/src/native-effects.js",
+    "packages/vite-plugin-yield/src/positions.js",
+    "packages/vite-plugin-yield/src/transform.js"
+  ],
+  "score": 46.997929606625256,
+  "mutants": 966,
+  "killed": 407,
+  "survived": 311,
+  "timeout": 47,
+  "noCoverage": 201,
+  "errors": 0,
+  "report": "documentation/mutation-stryker-vite.json",
+  "rawIncrementalReport": "documentation/mutation-stryker-vite-incremental-raw.json",
+  "wallSeconds": 3912.541,
+  "boundedFollowupSeconds": 1464.916,
+  "finalRunSeconds": 798.63,
+  "testCount": 228,
+  "excludedScope": [
+    "packages/vite-plugin-yield/src/native-entry.js",
+    "packages/vite-plugin-yield/src/native-prelude.js",
+    "packages/vite-plugin-yield/src/native-recursion.js",
+    "packages/vite-plugin-yield/src/native.js",
+    "packages/vite-plugin-yield/src/sugar.js"
+  ],
+  "fullScopeComplete": false,
+  "fullScopePlannedMutants": 4316,
+  "fullScopeCompletedMutants": 2864,
+  "fullScopeUnmeasuredMutants": 1452
+}

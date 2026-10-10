@@ -307,6 +307,25 @@ function buildSteps(twins) {
     });
   }
 
+  // Docs: half A is the exact root diagnostic and the author fix type-checking;
+  // half B compares the original, the fix and its native lowering.
+  for (const stage of ["diagnostics", "typecheck"]) {
+    steps.push({
+      name: `native:docs:${stage}`,
+      cwd: root,
+      cmd: process.execPath,
+      args: ["scripts/native-docs-check.mjs", stage]
+    });
+  }
+  for (const stage of ["parity", "ssr", "hydrate"]) {
+    steps.push({
+      name: `native:docs:${stage}`,
+      cwd: root,
+      cmd: process.execPath,
+      args: ["examples/harness/native-docs/check.mjs", stage]
+    });
+  }
+
   steps.push({
     name: "original:docs:typecheck",
     cwd: root,
@@ -481,6 +500,7 @@ function buildSteps(twins) {
       "examples/harness/native-todos/*.mjs",
       "examples/harness/native-hackernews/*.mjs",
       "examples/harness/native-dashboard/*.mjs",
+      "examples/harness/native-docs/*.mjs",
       "scripts/*.mjs"
     ]
   });

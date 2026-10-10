@@ -1,0 +1,15 @@
+{
+  "notices": [
+    {
+      "code": "NATIVE_FOREIGN_BOUNDARY",
+      "at": "app.tsx:47:11"
+    }
+  ],
+  "errors": [
+    {
+      "code": "FOREIGN_HANDOFF",
+      "fails": "\"chunk\" | \"global:URIError\"",
+      "at": "main.tsx:3:15"
+    }
+  ]
+}

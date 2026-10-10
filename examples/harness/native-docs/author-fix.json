@@ -1,0 +1,17 @@
+{
+  "file": "src/app.tsx",
+  "edits": [
+    {
+      "from": "import \"./app.css\";",
+      "to": "import \"./app.css\";\nimport { Errored } from \"solid-js\";"
+    },
+    {
+      "from": "  return (\n    <div class=\"site\">",
+      "to": "  return (\n    <Errored fallback={error => <p class=\"site-error\">Something went wrong: {String(error())}</p>}>\n    <div class=\"site\">"
+    },
+    {
+      "from": "      <SiteFooter />\n    </div>\n  );",
+      "to": "      <SiteFooter />\n    </div>\n    </Errored>\n  );"
+    }
+  ]
+}

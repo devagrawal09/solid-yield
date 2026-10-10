@@ -748,10 +748,9 @@ function surface(
         // is a bare prop the library cannot resolve while T is open. Declared
         // as the same contract, `Source<T, never, false>`, its reads and its
         // callers resolve per instantiation.
+        const declared = /** @type {any} */ (q.node);
         const generics = new Set(
-          /** @type {any} */ ((q.node).typeParameters?.params ?? []).map(
-            /** @param {any} p */ p => p.name
-          )
+          (declared.typeParameters?.params ?? []).map(/** @param {any} p */ p => p.name)
         );
         if (generics.size && t.isTSTypeLiteral(param.typeAnnotation.typeAnnotation))
           for (const prop of param.typeAnnotation.typeAnnotation.members) {

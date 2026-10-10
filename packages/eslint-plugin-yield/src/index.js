@@ -318,12 +318,27 @@ function isYieldSetter(context, identifier) {
   const element = decl.id.elements[1];
   if (!element || element.type !== "Identifier" || element.name !== identifier.name) return false;
   const init = decl.init;
-  return (
-    !!init &&
-    init.type === "YieldExpression" &&
-    init.delegate &&
-    isCallTo(init.argument, ["$signal", "$store", "$optimistic", "$optimisticStore"])
-  );
+  if (!init || init.type !== "YieldExpression" || !init.delegate) return false;
+  const creators = ["$signal", "$store", "$optimistic", "$optimisticStore"];
+  if (isCallTo(init.argument, creators)) return true;
+  // Imported under another name (the native lowering's `$signal as createSignal`).
+  const callee = init.argument?.type === "CallExpression" ? init.argument.callee : null;
+  return !!callee && creators.includes(importedName(context, callee, "solid-yield") ?? "");
+}
+
+/** The name an identifier is imported under from `source`, or null. */
+function importedName(context, identifier, source) {
+  if (identifier.type !== "Identifier") return null;
+  let s = context.sourceCode.getScope(identifier);
+  let variable = null;
+  while (s && !variable) {
+    variable = s.set.get(identifier.name) || null;
+    s = s.upper;
+  }
+  const def = variable?.defs[0];
+  if (!def || def.type !== "ImportBinding" || def.parent?.source?.value !== source) return null;
+  const imported = def.node.type === "ImportSpecifier" ? def.node.imported : null;
+  return imported ? (imported.name ?? imported.value) : null;
 }
 
 const OP_TYPES = new Set(["Yieldable", "Receipt", "EventCall", "Generator"]);

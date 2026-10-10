@@ -527,6 +527,25 @@ function pass(code, filename, program, native = false) {
     v && checker.getPropertiesOfType(v).some(s => s.name.startsWith(`__@${b}@`));
   /** @param {ts.Type | undefined} v */
   const sourceType = v => brand(v, "SOURCE") || brand(v, "CONTEXT");
+  /** A call to a library setter (`set` of `const [v, set] = yield* $signal(…)`):
+   * its receipt's type does not follow its callback's, so a setter given a
+   * lexical callback is still delegated, and its write performed.
+   * @param {Path} call */
+  const setterCall = call => {
+    const callee = /** @type {Path} */ (call.get("callee"));
+    const binding = callee.isIdentifier() ? callee.scope.getBinding(callee.node.name) : null;
+    const declarator = binding?.path;
+    if (!declarator?.isVariableDeclarator() || !t.isArrayPattern(declarator.node.id)) return false;
+    if (declarator.node.id.elements[1] !== binding?.identifier) return false;
+    const init = declarator.get("init");
+    const created = init.isYieldExpression() ? init.get("argument") : null;
+    return (
+      !!created?.isCallExpression() &&
+      ["$signal", "$store", "$optimistic", "$optimisticStore"].includes(
+        lib(created.get("callee")) ?? ""
+      )
+    );
+  };
   /** @param {ts.Type | undefined} v */
   const isOperation = v => {
     if (!v) return false;
@@ -1174,7 +1193,7 @@ function pass(code, filename, program, native = false) {
           }
         } else if (
           !delegated &&
-          ((isOperation(type(path)) && !bridgedCall(path)) ||
+          ((isOperation(type(path)) && (!bridgedCall(path) || setterCall(path))) ||
             lib(callee) === "readStore" ||
             (native && ["latestOf", "isPendingOf"].includes(lib(callee))))
         )

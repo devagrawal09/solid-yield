@@ -609,6 +609,15 @@ tester.run("no-unyielded-write", rules["no-unyielded-write"], {
       errors: [{ messageId: "unyielded", data: { name: "setN" } }]
     },
     {
+      // the native lowering's import alias: still the library's $signal
+      code:
+        'import { $signal as createSignal } from "solid-yield"; ' +
+        component(
+          "const [n, setN] = yield* createSignal(1); const all = $memo(function* () { return yield* attempt(async function* () { setN(0); yield 1; }); }); return view(function* () { return <p />; });"
+        ),
+      errors: [{ messageId: "unyielded", data: { name: "setN" } }]
+    },
+    {
       code: component(
         "const [n, setN] = yield* $signal(1); const go = $event(function* () { yield setN(1); }); return view(function* () { return <p onClick={yield* go} />; });"
       ),

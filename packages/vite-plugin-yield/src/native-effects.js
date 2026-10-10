@@ -434,6 +434,20 @@ export function lowerNativeEffects(files, report) {
             t.isIdentifier(c.node.property) &&
             ["then", "catch", "finally"].includes(c.node.property.name) &&
             q.parentPath?.isExpressionStatement();
+          // A promise an async routine keeps as a value (`const data = load()`)
+          // is a promise in the original: attempting it here would await it.
+          // An async callee cannot throw synchronously, so the call stays plain;
+          // the promise is attempted where the code awaits it.
+          const kept =
+            !unawaited &&
+            info.promise &&
+            info.async &&
+            !!fn &&
+            asyncRoutines.has(`${file}:${fn.node.start}`) &&
+            !q.parentPath?.isAwaitExpression() &&
+            !q.parentPath?.isReturnStatement() &&
+            !q.parentPath?.isExpressionStatement() &&
+            !(fn.isArrowFunctionExpression() && fn.node.body === q.node);
           /** @type {{id: import("@babel/core").types.Identifier, kinds: Set<string>} | undefined} */
           let pending;
           if (unawaited && fn) {
@@ -597,14 +611,14 @@ export function lowerNativeEffects(files, report) {
               if (t.isVariableDeclaration(cast) && t.isTSAsExpression(cast.declarations[0].init))
                 value = t.tsAsExpression(invoke, cast.declarations[0].init.typeAnnotation);
             }
-            statements.push(t.returnStatement(unawaited ? value : attempt(value, kinds)));
+            statements.push(t.returnStatement(unawaited || kept ? value : attempt(value, kinds)));
             q.replaceWith(
               t.callExpression(
                 t.functionExpression(null, [], t.blockStatement(statements), true),
                 []
               )
             );
-          } else if (!unawaited) q.replaceWith(attempt(call, kinds, declaredReturn(q)));
+          } else if (!unawaited && !kept) q.replaceWith(attempt(call, kinds, declaredReturn(q)));
           if (pending)
             q.replaceWith(
               t.callExpression(t.memberExpression(pending.id, t.identifier("push")), [

@@ -1760,3 +1760,46 @@ What it took, besides F-S51–F-S53:
   the bad item's error that the original does not. A lexical callback now
   keeps its body's arity. Tests: `native-write.spec.tsx` (both cases fail
   without the fix).
+
+### Found by the rendering-edges mutants (2026-10-10)
+
+The mutation corpus's new `rendering-edges` seed left two silent survivors.
+Both were real gaps, and fixing them exposed a third.
+
+- **A kept promise stays a promise.** In an async routine,
+  `const data = load(n())` (no `await`) holds a Promise in the original. The
+  lowering attempted every promise-returning call where it was made, which
+  awaits it. So the lowered program read `data.title` from the resolved value,
+  where the original reads `undefined`, and TypeScript's error (no `title` on a
+  Promise) was lost.
+
+  A call to an `async` function whose promise is kept as a value (assigned or
+  passed on; not awaited, returned or discarded) now stays a plain call. An
+  `async` callee cannot throw synchronously, so the attempt lost nothing but
+  the waiting. The promise is attempted where the code awaits it. A call to a
+  non-`async` function that returns a promise can throw before returning it,
+  so it keeps its attempt.
+
+  Tests: `native-promises.test.js`. The mutation catalog's `remove-await` now
+  also expects TS2339.
+- **A setter given a hoisted callback writes.** F-S47 hoists a lexical
+  callback into a binding before its host's statement. Until the callback's
+  reads are lowered, it does not delegate the call given it, because that
+  call's type can follow the callback's. A setter's call was caught by the
+  same rule: `onClick={() => write(c => { c.n = n(); })}` lowered to
+  `return write(_callback)`, a receipt returned unperformed, so the write was
+  dropped.
+
+  A call to a library setter (the second element of `yield* $signal(…)`,
+  `$store`, `$optimistic` or `$optimisticStore`) is now delegated regardless.
+  Tests: `native-callback-colors.test.js`. This shipped with F-S47 in
+  `31695cb`.
+- **The lint sees aliased setters.** `solid-yield/no-unyielded-write`
+  recognized a setter only when its creator was spelled `$signal` (or
+  `$store`, …). Native output imports `$signal as createSignal`, so the rule
+  never fired on lowered code. It now resolves the import. That is how it
+  found the dropped write above, in the accepted `event-updater` fixture. It
+  also reports a setter called inside an async iterable producer
+  (`createMemo(async function* () { setVersion(0); … })`), which the lowering
+  keeps as plain code, where the write would be dropped. Tests:
+  `rules.test.js`.

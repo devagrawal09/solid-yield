@@ -200,6 +200,18 @@ export function List() {
       /const _callback = yield\* __nativeHoleColors\(__nativeLexicalCallback\("hole"/
     );
   });
+
+  it("still delegates a setter given a hoisted callback: its receipt writes", () => {
+    const code = lower(`import {createSignal, createStore} from 'solid-js';
+export function App() {
+  const [n] = createSignal(1);
+  const [state, write] = createStore({ n: 0 });
+  return <button onClick={() => write(c => { c.n = n(); })}>{state.n}</button>;
+}`);
+    // A plain `return write(_callback)` would return the receipt unperformed.
+    expect(code).toContain("return yield* write(_callback);");
+    expect(checked(code)).toEqual([]);
+  });
 });
 
 describe("native hole callbacks build JSX (F-S44)", { timeout: 60_000 }, () => {

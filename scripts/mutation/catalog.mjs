@@ -50,9 +50,18 @@ export const catalog = {
     edit: "Insert throw new Error after each await statement in an async JSX event callback."
   },
   "remove-await": {
-    expected: ["TS2322", "TS2345", "TS2739", "TS2740", "TS2741", "GENERATED_TYPE", "SETTLED_PROP"],
+    expected: [
+      "TS2322",
+      "TS2345",
+      "TS2739",
+      "TS2740",
+      "TS2741",
+      "TS2339",
+      "GENERATED_TYPE",
+      "SETTLED_PROP"
+    ],
     corrected:
-      "TS2739, TS2740 and TS2741 added (2026-10-10): TypeScript's assignability error for missing properties (a Promise where its value was expected) is one of these, not TS2322.",
+      "TS2739, TS2740 and TS2741 added (2026-10-10): TypeScript's assignability error for missing properties (a Promise where its value was expected) is one of these, not TS2322. TS2339 added (2026-10-10, with the kept-promise fix): reading a property of the un-awaited Promise (`data.title`) is that error.",
     edit: "Replace each await expression with its operand."
   },
   "memo-write": {

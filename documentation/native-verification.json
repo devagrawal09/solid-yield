@@ -1413,14 +1413,6 @@
       "diagnostics": [
         {
           "stage": "lint",
-          "code": "solid-yield/no-read-in-prop",
-          "message": "read in a prop: pass the source (`value: src`), or a hole (`value: function* () { return …; }`) the component reads (D-065).",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/effect/app.tsx",
-          "line": 61,
-          "severity": 2
-        },
-        {
-          "stage": "lint",
           "code": "solid-yield/no-foreign-reactive",
           "message": "`createStore` from \"solid-js\" is reactive state routines cannot see: routines read and write only with `yield*`. Use `$store`.",
           "file": "packages/vite-plugin-yield/test/.native-generated/originals/effect/log.ts",
@@ -1440,7 +1432,6 @@
       "differingStatements": null,
       "diffReason": "Generated output still requires a checked app harness.",
       "reasons": [
-        "solid-yield/no-read-in-prop",
         "solid-yield/no-foreign-reactive",
         "MODULE_STATE"
       ]

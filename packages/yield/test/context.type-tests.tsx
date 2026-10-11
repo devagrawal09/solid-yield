@@ -14,6 +14,7 @@ import {
   foreign,
   lazy,
   hydrate,
+  raise,
   render,
   Show,
   $signal,
@@ -21,6 +22,7 @@ import {
   type ContextNames,
   type ContextValue,
   type ContextRead,
+  type FailsOf,
   type Component,
   type Element,
   type Path,
@@ -899,3 +901,40 @@ createContext<User, "RuntimeUser">();
 // @ts-expect-error the runtime name is the same literal as the type-level name
 createContext<User, "RuntimeUser">(undefined, { name: "Different" });
 createContext<User, "RuntimeUser">(undefined, { name: "RuntimeUser" });
+
+// D-122: a provider's `init` runs as a setup and may fail: its failures are
+// the provider's; it does not read.
+class NoRuntime extends Failure("no-runtime") {}
+const RuntimeCtx = createContext<{ id: number } | null>(null);
+const initProvided = RuntimeCtx.provide({
+  init: function* () {
+    const [count] = yield* $signal(0);
+    void count;
+    if (Math.random() > 1) yield* raise(new NoRuntime("none"));
+    return { id: 1 };
+  },
+  children: function* () {
+    return <p />;
+  }
+});
+type _initFails = Expect<Equal<FailsOf<typeof initProvided>, NoRuntime>>;
+export const InitReads = component(function* () {
+  const [count] = yield* $signal(0);
+  return view(function* () {
+    return (
+      <>
+        {
+          yield* RuntimeCtx.provide({
+            // @ts-expect-error a provider's init does not read
+            init: function* () {
+              return { id: yield* count };
+            },
+            children: function* () {
+              return <p />;
+            }
+          })
+        }
+      </>
+    );
+  });
+});

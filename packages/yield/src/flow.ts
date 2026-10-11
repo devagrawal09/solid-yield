@@ -40,7 +40,8 @@ import {
   runRow,
   throughHole,
   flowControl,
-  getterSource
+  getterSource,
+  runInit
 } from "./runtime.js";
 import type { Element } from "./element.js";
 import type {
@@ -59,7 +60,8 @@ import type {
   RequiresOf,
   RowRoutine,
   Settle,
-  Source
+  Source,
+  ViewOp
 } from "./types.js";
 import type { OpsOfHole } from "./holes.js";
 
@@ -107,7 +109,10 @@ type Content = HView<boolean, any, boolean, any> | Text | readonly Content[];
  */
 type Rendered = Content | View<boolean, any, boolean, any>;
 /** A lazy view (D-066): built where (and each time) the control shows it. JSX goes here. */
-type LazyView = () => Generator<any, Element | Rendered, any>;
+/** A lazy view yields what a view may (D-032): reads, child views and bound
+ * events. A setup's creation or cleanup, or a write, is refused here, as the
+ * runtime refuses it (`CLEANUP_OUTSIDE_OWNER`, …). */
+type LazyView = () => Generator<ViewOp, Element | Rendered, any>;
 /**
  * `children` in call form (D-066, D-094): a lazy view `function* () { return
  * <…/>; }` built inside the flow control (it may hold holes), `h` output or
@@ -629,6 +634,18 @@ export function provideView(ctx: any, props: any): unknown {
     // `h` hands a function prop (a source, a hole) over as a getter that
     // reads it: kept a source, so readers read it where they read
     const d = Object.getOwnPropertyDescriptor(p, "value");
+    // D-122: Solid reads a provider's value once, in the provider's own root.
+    if (typeof p.init === "function") {
+      const init = p.init;
+      return createComponent(ctx, {
+        get value() {
+          return runInit(init);
+        },
+        get children() {
+          return children();
+        }
+      });
+    }
     return createComponent(ctx, {
       value: d && d.get ? getterSource(() => p.value) : p.value,
       get children() {

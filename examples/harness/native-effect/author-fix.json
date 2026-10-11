@@ -1,0 +1,13 @@
+{
+  "files": [
+    {
+      "file": "src/checkout.tsx",
+      "edits": [
+        {
+          "from": "          <button class=\"danger\" onClick={() => placeOrder.interrupt()}>",
+          "to": "          <button\n            class=\"danger\"\n            onClick={() => {\n              try {\n                placeOrder.interrupt();\n              } catch (error) {\n                // @yield-absorb: cancelling is best effort; the action settles either way.\n                console.error(error);\n              }\n            }}\n          >"
+        }
+      ]
+    }
+  ]
+}

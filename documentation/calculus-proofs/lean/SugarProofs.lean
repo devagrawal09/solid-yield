@@ -459,6 +459,33 @@ theorem driven_saga_write_admitted : Admits (sagaHost .event) .write :=
 theorem memo_driven_saga_refused : ¬ Admits (sagaHost .memo) .write := by
   simp [sagaHost, Admits]
 
+/-! ## A provider's value computed in its own owner (D-122)
+
+Solid computes a provider's value once, in the provider's own owner. The
+lowering gives it to the provider as an `init` run there as a setup is: it may
+create, clean up and read a context, and it may fail. Its failures are the
+provider's: the provider raises what its `init` raises and what its children
+raise, for the boundary above. -/
+
+/-- What a provider with an `init` raises. -/
+def providerRaises {V : Type} (init children : Inference.Failures V) : Inference.Failures V :=
+  Inference.union init children
+
+/-- The init runs as a setup: it may create and clean up. -/
+theorem init_admits_cleanup : Admits .setup .cleanup := by simp [Admits]
+
+/-- The provider's color bounds both its init's failures and its children's. -/
+theorem provider_bounds {V : Type} (init children : Inference.Failures V) :
+    Inference.le init (providerRaises init children) ∧
+      Inference.le children (providerRaises init children) :=
+  ⟨fun _ h => Or.inl h, fun _ h => Or.inr h⟩
+
+/-- Leaving the init's failures out of the provider's color misses one. -/
+theorem init_dropped_unsound :
+    ∃ (init children : Inference.Failures Nat) (v : Nat),
+      providerRaises init children v ∧ ¬ children v :=
+  ⟨fun v => v = 0, Inference.empty, 0, Or.inl rfl, fun h => h⟩
+
 #print axioms write_admitted_iff
 #print axioms event_phase_runs_in_caller
 #print axioms hook_requirement_provided
@@ -485,5 +512,8 @@ theorem memo_driven_saga_refused : ¬ Admits (sagaHost .memo) .write := by
 #print axioms kept_sync_unsound
 #print axioms driven_saga_write_admitted
 #print axioms memo_driven_saga_refused
+#print axioms init_admits_cleanup
+#print axioms provider_bounds
+#print axioms init_dropped_unsound
 end Sugar
 end Yield

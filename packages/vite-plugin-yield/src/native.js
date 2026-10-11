@@ -1920,7 +1920,11 @@ export function lowerNativeFile(code, filename, include, cache, report) {
   if (entry?.signature !== signature) {
     const lowered = lowerNativeProject(files, { compilerOptions: parsed.options });
     entry = { signature, files: lowered.files };
-    const errors = lowered.diagnostics.filter(d => d.severity === "error");
+    // Module state stays plain Solid, so the lowered program still runs:
+    // reported, not refused.
+    const errors = lowered.diagnostics.filter(
+      d => d.severity === "error" && d.code !== "MODULE_STATE"
+    );
     if (errors.length) throw new NativeDiagnosticError(errors);
     for (const diagnostic of lowered.diagnostics) report?.(diagnostic);
     cache.set(configPath, entry);

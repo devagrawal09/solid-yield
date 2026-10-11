@@ -347,6 +347,25 @@ function buildSteps(twins) {
     });
   }
 
+  // Native Effect (D-121, D-122): half A (the original's diagnostics at their
+  // authored positions, `solid-yield check` included; the author's fix checks
+  // clean but for the module state) and half B (the original, the fix and its
+  // native model, the twin's script).
+  for (const stage of ["diagnostics", "typecheck"]) {
+    steps.push({
+      name: `native:effect:${stage}`,
+      cwd: root,
+      cmd: process.execPath,
+      args: ["scripts/native-effect-check.mjs", stage]
+    });
+  }
+  steps.push({
+    name: "native:effect:parity",
+    cwd: root,
+    cmd: process.execPath,
+    args: ["examples/harness/native-effect/check.mjs"]
+  });
+
   // The native edge example: plain Solid that type-checks as itself, that the
   // native check accepts, and whose lowering matches it at every scripted state.
   steps.push({

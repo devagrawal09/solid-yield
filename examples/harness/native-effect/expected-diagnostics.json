@@ -1,0 +1,25 @@
+{
+  "notices": [
+    {
+      "code": "MODULE_STATE",
+      "at": "src/log.ts:20:7"
+    }
+  ],
+  "errors": [],
+  "lint": [
+    {
+      "code": "solid-yield/no-foreign-reactive",
+      "at": "src/log.ts:6:10"
+    }
+  ],
+  "product": [
+    {
+      "code": "EVENT_REJECTS",
+      "at": "src/checkout.tsx:194:43"
+    },
+    {
+      "code": "MODULE_STATE",
+      "at": "src/log.ts:20:7"
+    }
+  ]
+}

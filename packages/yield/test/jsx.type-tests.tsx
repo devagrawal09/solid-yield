@@ -108,6 +108,45 @@ export const CreatesInView = component(function* () {
     return <p>{yield* count}</p>;
   });
 });
+// A flow control's lazy children are a view (D-032): they do not create,
+// clean up or write, as the runtime refuses (CLEANUP_OUTSIDE_OWNER, …).
+export const CreatesInLazyView = component(function* () {
+  return view(function* () {
+    return (
+      <>
+        {
+          yield* Errored({
+            fallback: () => <p>!</p>,
+            // @ts-expect-error a lazy view does not create
+            children: function* () {
+              const [n] = yield* $signal(0);
+              return <p>{yield* n}</p>;
+            }
+          })
+        }
+      </>
+    );
+  });
+});
+export const WritesInLazyView = component(function* () {
+  const [n, setN] = yield* $signal(0);
+  return view(function* () {
+    return (
+      <>
+        {
+          yield* Errored({
+            fallback: () => <p>!</p>,
+            // @ts-expect-error a lazy view does not write
+            children: function* () {
+              yield* setN(1);
+              return <p>{yield* n}</p>;
+            }
+          })
+        }
+      </>
+    );
+  });
+});
 export const HiddenRead = component(function* () {
   const [count] = yield* $signal(0);
   return view(function* () {

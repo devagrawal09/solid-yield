@@ -1447,6 +1447,29 @@ function pass(code, filename, program, native = false) {
             (operations.isUnion() ? operations.types : [operations]).every(
               operation => operation.symbol?.name === "Create"
             );
+          // D-122: a value that also cleans up, reads a context or may fail
+          // (Effect's `createRuntime`) is computed as Solid computes a
+          // provider's: once, in the provider's own owner. It becomes the
+          // provider's `init`, whose failures are the provider's.
+          if (
+            operations &&
+            !creates &&
+            (operations.isUnion() ? operations.types : [operations]).every(operation =>
+              ["Create", "Cleanup", "ContextRead", "Raise"].includes(operation.symbol?.name ?? "")
+            )
+          ) {
+            path.node.key = t.identifier("init");
+            value.replaceWith(
+              t.functionExpression(
+                null,
+                [],
+                t.blockStatement([t.returnStatement(value.node)]),
+                true
+              )
+            );
+            changed = true;
+            return;
+          }
           if (!creates) return;
           if (
             path.findParent(

@@ -45,8 +45,18 @@ export function lowerNativeEffects(files, report) {
           ? producer.scope.getBinding(producer.node.name)?.path
           : undefined;
         const sourceApi = imported(sourceBinding);
+        // `onCleanup` makes a routine (the library's `$cleanup`), but in a
+        // Promise executor it stays Solid's owner cleanup (native.js).
+        const executor = (() => {
+          const owner = q.getFunctionParent();
+          return (
+            !!owner?.parentPath?.isNewExpression() &&
+            t.isIdentifier(owner.parentPath.node.callee, { name: "Promise" })
+          );
+        })();
         if (
-          (imported(b)?.source === "solid-js" && imported(b)?.name !== "onCleanup") ||
+          (imported(b)?.source === "solid-js" &&
+            (imported(b)?.name !== "onCleanup" || !executor)) ||
           (!!init?.getFunctionParent() &&
             sourceApi?.source === "solid-js" &&
             /^create(Signal|Memo|Optimistic|Store|Projection)/.test(sourceApi.name))

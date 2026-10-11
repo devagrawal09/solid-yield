@@ -1459,7 +1459,14 @@ export function readContext(ctx: any): unknown {
  * returns, which its provider set once when it was created. Same host and
  * provider checks as `readContext`.
  */
+/**
+ * Native `useContext` (F-S37). A context with a default requires nothing and
+ * its read cannot fail, so it is read wherever Solid's `useContext` is (a
+ * helper a memo calls, a provider's value); one without a default is read in a
+ * setup, whose requirement it is.
+ */
 export function readContextValue(ctx: any): unknown {
+  if (ctx.defaultValue !== undefined) return useContext(ctx);
   return contextValue(ctx);
 }
 function contextValue(ctx: any): unknown {
@@ -1835,6 +1842,16 @@ export function flowControl<T>(create: () => T): T {
 }
 
 // --- components and views -------------------------------------------------------------------
+
+/**
+ * @internal D-122: a provider's `init`, run as a setup is (it may create, clean
+ * up and read a context) where Solid computes a provider's value: in the
+ * provider's own owner. A failure it raises is thrown there, for the `Errored`
+ * above the provider.
+ */
+export function runInit(init: () => Generator<unknown, unknown, unknown>): unknown {
+  return runAs(SETUP, () => drive(init(), SYNC_RUN), null, null, false, false, state.name);
+}
 
 function runSetup(
   body: (...args: any[]) => Generator<unknown, unknown, unknown>,

@@ -1895,3 +1895,35 @@ below is general; the Effect original was the first to reach it. Tests:
   identifier too (`w => w.length` over strings), once the source's value is
   known.
 
+**Effect accepted in two halves (D-121, D-122; 2026-10-11).** Half A
+(`scripts/native-effect-check.mjs`; `native:effect:diagnostics|typecheck`): the
+unchanged original reports exactly `MODULE_STATE` (`log.ts:20:7`) and, in
+`solid-yield check`, `EVENT_REJECTS` (`checkout.tsx:194:43`). The author's fix
+is one edit: the cancel handler's call in a `try` whose `catch` is marked
+`@yield-absorb`. It then checks clean but for the module state. Half B
+(`examples/harness/native-effect/check.mjs`; `native:effect:parity`): the
+original, the fix and its native model (`emit: "lowered"`) match at all 36
+states of the twin's script, console output included.
+
+- **A provider's value in the provider's own owner (D-122, S17).** Effect's
+  `<RuntimeContext value={createRuntime(layer)}>` creates a runtime, registers
+  its cleanup and may fail. Solid computes it once in the provider's root; the
+  model computed it in the enclosing view, which may not own a cleanup (the
+  model ran into `CLEANUP_OUTSIDE_OWNER`). `Ctx.provide` now takes `{ init,
+  children }`: `init` runs there as a setup does and may fail, its failures
+  the provider's. The lowering moves a value there when its operations are
+  setup operations or a raise.
+- **Lazy views are views.** A flow control's lazy children were typed
+  `Generator<any, …>`, so a creation, a cleanup or a write there type-checked
+  and the runtime refused it. They are `Generator<ViewOp, …>` now
+  (`jsx.type-tests.tsx`); every twin and native original was unaffected.
+- **`onCleanup` makes a routine for throw lowering too.** A helper whose only
+  reactive call is `onCleanup` became a routine in the last pass, after its
+  `throw` was left plain: an untyped failure. It is seeded as a routine like
+  any Solid API call, but in a Promise executor, where `onCleanup` stays
+  Solid's.
+- **A defaulted context is read anywhere at run time too.** `readContextValue`
+  skips the setup check for a context with a default, as its type does.
+- **Module state does not block `emit: "lowered"`.** It stays plain Solid in
+  the model, so the model still runs; the finding is reported.
+

@@ -1608,3 +1608,11 @@ The second review’s ten-line summary, verbatim:
 
 1. **Effect: model it.** The saga's setter calls count as writes inside the action that drives it, so they are admitted. `invoke` is outside code whose failures are `unknown`; the checkout's `.catch(() => {})` handles them, so the app checks clean apart from real findings. Nothing changes at runtime. (Rejected: carrying the saga's typed failures to each `placeOrder(…)` call, more precise and more work; keeping Effect refused.)
 2. **Room: leave for islands.** Room's panels are server components returned from `"use server"` functions, outside D-116's bounded core. No checker work until the islands line.
+
+### D-122 — A provider's value is computed in the provider's own owner
+
+**Decided (Dev, 2026-10-11), the recommended option: provider values.** Effect's `<RuntimeContext value={createRuntime(layer)}>` creates a runtime, registers its cleanup and calls `ManagedRuntime.make` (an unanalyzed package, so it may fail). Solid computes a provider's value once, in the provider's own owner (`setContext(provider, props.value)` in its root). The model evaluated it in the enclosing view, which may not own a cleanup.
+
+1. **Model.** `Ctx.provide` takes `{ init, children }` (library overload): `init` runs as a setup does, where Solid computes the value, so it may create, clean up and read a context; it may also fail, and its failures are the provider's, for the `Errored` above. Native mode lowers a provider value that cleans up, reads a context or may fail to `init`; a value that only creates keeps the existing rule (hoisted into the setup).
+2. **Not widened.** A component's setup still may not fail (`NATIVE_SETUP_FAILURE`).
+3. **Found with it.** A flow control's lazy children were typed `Generator<any, …>`: a creation, a cleanup or a write there type-checked and the runtime refused it (`CLEANUP_OUTSIDE_OWNER`). They are now `Generator<ViewOp, …>`, every twin and native original unaffected. A function whose only reactive call is `onCleanup` is a routine for throw lowering too, so its throws are typed.

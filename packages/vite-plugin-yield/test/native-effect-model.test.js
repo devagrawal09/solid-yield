@@ -237,3 +237,36 @@ export function Search() {
     expect(checked(code)).toEqual([]);
   });
 });
+
+describe("a provider's value computed in its own owner (D-122)", { timeout: 60_000 }, () => {
+  const source = (
+    around = tree => tree
+  ) => `import { createContext, onCleanup, Errored } from "solid-js";
+import { render } from "@solidjs/web";
+const Runtime = createContext<{ id: number } | null>(null);
+class NoRuntime extends Error {}
+function createRuntime() {
+  const runtime = { id: 1 };
+  onCleanup(() => void runtime);
+  if (Math.random() > 2) throw new NoRuntime("none");
+  return runtime;
+}
+function Child() { return <p>child</p>; }
+export function App() {
+  return ${around("<Runtime value={createRuntime()}><Child/></Runtime>")};
+}
+render(() => <App/>, document.body);`;
+
+  it("runs a value that cleans up and may fail as the provider's init", () => {
+    const code = lower(source(tree => `<Errored fallback="!">${tree}</Errored>`));
+    expect(code).toMatch(
+      /Runtime\.provide\(\{\s*init: function\* \(\) \{\s*return yield\* createRuntime\(\)/
+    );
+    expect(checked(code)).toEqual([]);
+  });
+
+  it("its failure is the provider's: with no Errored above, the root's", () => {
+    const code = lower(source());
+    expect(checked(code).join("\n")).toMatch(/FOREIGN_HANDOFF[^]*NoRuntime/);
+  });
+});

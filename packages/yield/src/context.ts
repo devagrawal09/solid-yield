@@ -29,8 +29,10 @@ import type {
   MayWaitOf,
   Path,
   PendingOf,
+  Raise,
   RequiresOf,
   Settle,
+  SetupOp,
   Source
 } from "./types.js";
 
@@ -100,6 +102,21 @@ export interface ContextOps<T, N extends string, Q> {
 }
 /** `Ctx.provide`: a call-form yield component (D-062, D-066). */
 export interface Provide<T, Q> {
+  /**
+   * D-122 (native): the value as Solid computes a provider's, once, in the
+   * provider's own owner. `init` runs there as a setup does (it may create,
+   * clean up and read a context) and may also fail: its failures are the
+   * provider's, for the `Errored` above, and what it requires is too.
+   */
+  <C, Y extends SetupOp | Raise<any>>(props: {
+    init: () => Generator<Y, T, any>;
+    children: LazyParam<C, Children<[]>, "children">;
+  }): ComponentView<
+    PendingOf<Ops<C>>,
+    FailsOf<Ops<C>> | FailsOf<Y>,
+    MayWaitOf<Ops<C>>,
+    Exclude<Settle<RequiresOf<Ops<C>>>, Q> | Settle<RequiresOf<Y>>
+  >;
   <C>(props: {
     value: ProvidedValue<T>;
     children: LazyParam<C, Children<[]>, "children">;

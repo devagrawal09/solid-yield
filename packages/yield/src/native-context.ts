@@ -19,10 +19,15 @@ import { raise, readContextValue } from "./runtime.js";
 import type { ContextOps } from "./context.js";
 import type { ContextRead, Raise, Yieldable } from "./types.js";
 
-/** `const value = useContext(Ctx)`: the provided value, requiring `Ctx` when it has no default. */
+/**
+ * `const value = useContext(Ctx)`: the provided value, requiring `Ctx` when it
+ * has no default. A context with a default requires nothing and its read
+ * cannot fail, so the read is no operation: it is admitted wherever Solid's
+ * `useContext` is (Effect's `runEffect` resolves its runtime inside a memo).
+ */
 export function nativeUseContext<T, N extends string, Q>(
   ctx: ContextOps<T, N, Q>
-): Yieldable<ContextRead<Q>, T> {
+): Yieldable<[Q] extends [never] ? never : ContextRead<Q>, T> {
   return {
     *[Symbol.iterator]() {
       return readContextValue(ctx) as T;

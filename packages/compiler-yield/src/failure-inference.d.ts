@@ -49,6 +49,10 @@ export interface FailureReport {
     target?: string;
     promise: boolean;
     async: boolean;
+    /** An async iterable result: a stream. */
+    stream: boolean;
+    /** The argument a type guard narrows, if the callee is one. */
+    predicate: number | null;
     resultType: string;
   } | null;
   foreignState(file: string, start: number, end: number): boolean;

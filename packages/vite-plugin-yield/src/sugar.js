@@ -546,6 +546,52 @@ function pass(code, filename, program, native = false) {
       )
     );
   };
+  /** A `then`/`catch`/`finally` receiver, or a const only ever one.
+   * @param {Path} value */
+  const chained = value => {
+    /** @param {Path} p */
+    const receiver = p =>
+      p.key === "object" &&
+      !!p.parentPath?.isMemberExpression() &&
+      !p.parentPath.node.computed &&
+      ["then", "catch", "finally"].includes(key(p.parentPath.node.property));
+    if (receiver(value)) return true;
+    const declarator = value.parentPath;
+    if (!declarator?.isVariableDeclarator() || !t.isIdentifier(declarator.node.id)) return false;
+    const refs = declarator.scope.getBinding(declarator.node.id.name)?.referencePaths ?? [];
+    return refs.length > 0 && refs.every(receiver);
+  };
+  /** A plain function handed out as a value: returned, passed or stored, not
+   * only called or read a member of (Effect's `invoke`).
+   * @param {Path} fn */
+  const handedOut = fn => {
+    const id = fn.parentPath?.isVariableDeclarator()
+      ? fn.parentPath.node.id
+      : fn.isFunctionDeclaration()
+        ? fn.node.id
+        : null;
+    if (!t.isIdentifier(id)) return false;
+    const refs = fn.scope.parent?.getBinding(id.name)?.referencePaths ?? [];
+    return refs.some(
+      ref =>
+        !(ref.key === "callee" && ref.parentPath?.isCallExpression()) &&
+        !(ref.key === "object" && ref.parentPath?.isMemberExpression())
+    );
+  };
+  /** An event call whose promise the code keeps (S15, D-121): chained with
+   * `then`/`catch`/`finally`, or returned by a plain function handed out as a
+   * value. Delegating would wait for the result, where the original holds
+   * the promise and handles its rejection.
+   * @param {Path} call */
+  const keptEventCall = call => {
+    if (!native || !brand(type(call), "EVENT_CALL")) return false;
+    if (chained(call)) return true;
+    const fn = call.getFunctionParent();
+    const returned =
+      call.parentPath?.isReturnStatement() ||
+      (!!fn?.isArrowFunctionExpression() && fn.node.body === call.node);
+    return returned && !!fn && !fn.node.generator && handedOut(fn);
+  };
   /** @param {ts.Type | undefined} v */
   const isOperation = v => {
     if (!v) return false;
@@ -840,6 +886,42 @@ function pass(code, filename, program, native = false) {
     });
     return found;
   };
+  /** A routine's declared result type (`resolveFork(): <A, E>(effect: …) =>
+   * …`) stays on what it returns (`as T`): it types the returned callbacks'
+   * parameters and gives callers that type, which the inferred union may not
+   * (an `as any` branch makes it `any`). An assertion, not `satisfies`: the
+   * model's values can differ from Solid's here (an `$event`'s promise may
+   * resolve `undefined`, D-085, where an action's does not). An async
+   * function's declared `Promise<T>` was removed when its awaits were lowered.
+   * @param {Path} fn */
+  function keepDeclaredResult(fn) {
+    const declared = fn.node.returnType;
+    if (!t.isTSTypeAnnotation(declared) || t.isTSTypePredicate(declared.typeAnnotation)) return;
+    let result = /** @type {import("@babel/core").types.TSType} */ (declared.typeAnnotation);
+    // A promise it returns is attempted (awaited) where it is made: the
+    // routine's result is the promised value.
+    if (
+      t.isTSTypeReference(result) &&
+      t.isIdentifier(result.typeName) &&
+      ["Promise", "PromiseLike"].includes(result.typeName.name) &&
+      result.typeParameters?.params.length === 1
+    )
+      result = result.typeParameters.params[0];
+    // `() => T` is Solid's accessor shape: the model returns a source there.
+    /** @type {any} */ const accessor = result;
+    if (t.isTSFunctionType(result) && !(accessor.parameters ?? accessor.params ?? []).length)
+      return;
+    traverseOwned(fn, {
+      Function(inner) {
+        inner.skip();
+      },
+      ReturnStatement(ret) {
+        const value = ret.node.argument;
+        if (!value || t.isTSAsExpression(value)) return;
+        ret.node.argument = t.tsAsExpression(value, t.cloneNode(result, true));
+      }
+    });
+  }
   /** @param {Path} path @param {any} [operand] */
   function delegate(path, operand = path.node) {
     const fn = path.getFunctionParent();
@@ -1016,7 +1098,10 @@ function pass(code, filename, program, native = false) {
       if (!nativeHost) {
         if (fn.isArrowFunctionExpression()) fn.arrowFunctionToExpression();
         fn.node.generator = true;
-        if (native) fn.node.returnType = null;
+        if (native) {
+          keepDeclaredResult(fn);
+          fn.node.returnType = null;
+        }
       }
     }
     path.replaceWith(t.yieldExpression(operand, true));
@@ -1037,9 +1122,29 @@ function pass(code, filename, program, native = false) {
         const value = symbol && checker.getTypeOfSymbolAtLocation(symbol, source);
         if (!value || (!checker.isArrayType(value) && !checker.isTupleType(value))) return;
         if (
-          !["filter", "map", "every", "some", "find", "findIndex", "slice"].includes(
-            key(callee.node.property)
-          )
+          ![
+            "filter",
+            "map",
+            "every",
+            "some",
+            "find",
+            "findIndex",
+            "findLast",
+            "findLastIndex",
+            "slice",
+            "reduce",
+            "reduceRight",
+            "includes",
+            "indexOf",
+            "lastIndexOf",
+            "join",
+            "flatMap",
+            "flat",
+            "at",
+            "concat",
+            "toSorted",
+            "toReversed"
+          ].includes(key(callee.node.property))
         )
           return;
         /** @type {Path} */ let chain = path;
@@ -1215,7 +1320,9 @@ function pass(code, filename, program, native = false) {
           }
         } else if (
           !delegated &&
-          ((isOperation(type(path)) && (!bridgedCall(path) || setterCall(path))) ||
+          ((isOperation(type(path)) &&
+            (!bridgedCall(path) || setterCall(path)) &&
+            !keptEventCall(path)) ||
             lib(callee) === "readStore" ||
             (native && ["latestOf", "isPendingOf"].includes(lib(callee))))
         )
@@ -1239,7 +1346,36 @@ function pass(code, filename, program, native = false) {
           return;
         // F-S39: a member the source itself lacks (a string's toLowerCase, a
         // number's toFixed) belongs to its value: read the source, then look
-        // the member up. A path key (props.item.title) stays a path.
+        // the member up. A path key (props.item.title) stays a path. A
+        // parameter too: a row of strings (`w => w.length`). Not a setup local
+        // holding a source (`const p = props.url ?? …`): that read is the
+        // setup's, already refused there (READ_IN_SETUP).
+        const base = path.get("object");
+        if (
+          native &&
+          base.isIdentifier() &&
+          !path.node.computed &&
+          base.scope.getBinding(base.node.name)?.kind === "param"
+        ) {
+          const own = type(base);
+          const name = key(path.node.property);
+          const brandSymbol = own
+            ?.getProperties()
+            .find(/** @param {ts.Symbol} s */ s => s.name.startsWith("__@SOURCE@"));
+          const held = brandSymbol && checker.getTypeOfSymbolAtLocation(brandSymbol, source);
+          if (
+            own &&
+            name &&
+            held &&
+            // A row's item is `Source<never>` until its list is lowered.
+            !(held.flags & (ts.TypeFlags.Never | ts.TypeFlags.Any | ts.TypeFlags.Unknown)) &&
+            !own.getProperty(name) &&
+            !checker.getIndexInfosOfType(own).length
+          ) {
+            delegate(base);
+            return;
+          }
+        }
         if (
           path.parentPath.isMemberExpression() &&
           path.key === "object" &&
@@ -1402,9 +1538,10 @@ function pass(code, filename, program, native = false) {
  * colors are the child's: such a prop is widened to `Source<T, E, P>` with the
  * component's own type parameters (D-029), and each call carries what it passes.
  * Found where TypeScript refuses the call's prop; only a colored source or hole
- * counts, so a genuine type mismatch stays an error.
+ * counts, so a genuine type mismatch stays an error. An accessor prop (F-S54:
+ * declared `() => T`, given a source) counts too, colored or not.
  * @param {ts.Program} program @param {Set<string>} active
- * @returns {{wanted: Map<string, Map<string, Set<string>>>, concrete: Map<string, Map<string, Map<string, {pending: boolean, fails: Set<string>}>>>}} file → component → props
+ * @returns {{wanted: Map<string, Map<string, Set<string>>>, concrete: Map<string, Map<string, Map<string, {pending: boolean, fails: Set<string>}>>>, accessors: Map<string, Map<string, Set<string>>>}} file → component → props
  */
 function coloredPropSites(program, active) {
   const checker = program.getTypeChecker();
@@ -1415,6 +1552,10 @@ function coloredPropSites(program, active) {
    * @type {Map<string, Map<string, Map<string, {pending: boolean, fails: Set<string>}>>>} */
   const concrete = new Map();
   /** @type {Set<string>} */ const unprintable = new Set();
+  /** Accessor props (F-S54): declared `() => T`, given a source, as Solid
+   * passes a memo or signal getter. They take the value's type, `T`.
+   * @type {Map<string, Map<string, Set<string>>>} */
+  const accessors = new Map();
   const printer = ts.createPrinter();
   /** @param {ts.VariableDeclaration} declaration @returns {ts.VariableDeclaration | undefined} */
   const lazyTarget = declaration => {
@@ -1509,7 +1650,10 @@ function coloredPropSites(program, active) {
       const literal = prop.parent,
         call = literal.parent;
       if (!ts.isCallExpression(call) || call.arguments[0] !== literal) continue;
-      if (!colored(checker.getTypeAtLocation(prop.initializer), prop.initializer)) continue;
+      const passedType = checker.getTypeAtLocation(prop.initializer);
+      const passedSource = !!member(passedType, "SOURCE", prop.initializer);
+      const isColored = colored(passedType, prop.initializer);
+      if (!passedSource && !isColored) continue;
       let symbol = checker.getSymbolAtLocation(call.expression);
       if (symbol && symbol.flags & ts.SymbolFlags.Alias) symbol = checker.getAliasedSymbol(symbol);
       let declaration = symbol?.declarations?.find(ts.isVariableDeclaration);
@@ -1546,7 +1690,23 @@ function coloredPropSites(program, active) {
       const declared = inner?.members.find(
         m => ts.isPropertySignature(m) && m.name.getText() === name && m.type
       );
-      if (declared) {
+      const accessor =
+        passedSource &&
+        !!declared &&
+        ts.isPropertySignature(declared) &&
+        !!declared.type &&
+        ts.isFunctionTypeNode(declared.type) &&
+        !declared.type.parameters.length &&
+        !declared.type.typeParameters;
+      if (!accessor && !isColored) continue;
+      if (accessor) {
+        if (!accessors.has(file)) accessors.set(file, new Map());
+        const byComponent = /** @type {Map<string, Set<string>>} */ (accessors.get(file));
+        const component = /** @type {ts.Identifier} */ (declaration.name).text;
+        if (!byComponent.has(component)) byComponent.set(component, new Set());
+        byComponent.get(component)?.add(prop.name.getText());
+      }
+      if (declared && !accessor) {
         if (!ts.isPropertySignature(declared) || !declared.type) continue;
         // Only a plain declaration widens; a declared Source keeps its own
         // contract. F-S50's `Source<T, never, false>` for a generic bare prop is plain.
@@ -1557,7 +1717,7 @@ function coloredPropSites(program, active) {
           declared.type.typeArguments?.[2]?.getText() === "false";
         if (!bare && member(checker.getTypeFromTypeNode(declared.type), "SOURCE", declared))
           continue;
-      } else if (!(parent && name === "children")) continue;
+      } else if (!accessor && !(parent && name === "children")) continue;
       if (!wanted.has(file)) wanted.set(file, new Map());
       const components = /** @type {Map<string, Set<string>>} */ (wanted.get(file));
       const component = declaration.name.text;
@@ -1590,13 +1750,14 @@ function coloredPropSites(program, active) {
     const [file, component] = [id.slice(0, id.lastIndexOf("#")), id.slice(id.lastIndexOf("#") + 1)];
     concrete.get(file)?.delete(component);
   }
-  return { wanted, concrete };
+  return { wanted, concrete, accessors };
 }
 /** D-119: widen the recorded props, with the component's own type parameters,
  * or (a component reached through `lazy`) with the colors its callers pass.
  * @param {string} code @param {string} filename @param {Map<string, Set<string>>} components
- * @param {Map<string, Map<string, {pending: boolean, fails: Set<string>}>>} [concrete] */
-function widenColoredProps(code, filename, components, concrete) {
+ * @param {Map<string, Map<string, {pending: boolean, fails: Set<string>}>>} [concrete]
+ * @param {Map<string, Set<string>>} [accessors] */
+function widenColoredProps(code, filename, components, concrete, accessors) {
   const p = parseProgram(code, filename);
   if (!p) return code;
   let changed = false;
@@ -1654,6 +1815,37 @@ function widenColoredProps(code, filename, components, concrete) {
         if (!props.has(name)) continue;
         // F-S50's `Source<T, never, false>` widens its own colors.
         const own = declared.typeAnnotation.typeAnnotation;
+        // F-S54: an accessor prop (`results: () => Package[]`) its callers
+        // pass a source takes the value's type; a call of it is a read.
+        /** @type {any} */ const getter = own;
+        const getterResult = getter.typeAnnotation ?? getter.returnType;
+        if (
+          accessors?.get(key(q.node.id))?.has(name) &&
+          t.isTSFunctionType(own) &&
+          !(getter.parameters ?? getter.params ?? []).length &&
+          t.isTSTypeAnnotation(getterResult)
+        ) {
+          declared.typeAnnotation.typeAnnotation = getterResult.typeAnnotation;
+          const holder = t.isIdentifier(param) ? param.name : null;
+          if (holder)
+            q.get("init").traverse({
+              CallExpression(c) {
+                let callee = c.get("callee");
+                while (callee.isParenthesizedExpression()) callee = callee.get("expression");
+                const read = callee.isYieldExpression({ delegate: true })
+                  ? callee.get("argument")
+                  : null;
+                if (
+                  !c.node.arguments.length &&
+                  read?.isMemberExpression() &&
+                  read.get("object").isIdentifier({ name: holder }) &&
+                  key(read.node.property) === name
+                )
+                  c.replaceWith(callee.node);
+              }
+            });
+          changed = true;
+        }
         if (
           t.isTSTypeReference(own) &&
           t.isIdentifier(own.typeName, { name: "__NativeSource" }) &&
@@ -2098,9 +2290,15 @@ function lowerSugarProjectImpl(input, { compilerOptions = {}, native = false } =
         files.set(id, code);
       }
     if (!changed && native) {
-      const { wanted, concrete } = coloredPropSites(program, active);
+      const { wanted, concrete, accessors } = coloredPropSites(program, active);
       for (const [id, components] of wanted) {
-        const code = widenColoredProps(files.get(id) ?? "", id, components, concrete.get(id));
+        const code = widenColoredProps(
+          files.get(id) ?? "",
+          id,
+          components,
+          concrete.get(id),
+          accessors.get(id)
+        );
         changed ||= code !== files.get(id);
         files.set(id, code);
       }

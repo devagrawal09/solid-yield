@@ -73,13 +73,27 @@ export function nativeCallback<H>(
   return handler;
 }
 
-/** Invoke a captured method without consulting its user-visible .call property. */
-export function nativeInvoke<F extends (...args: any[]) => any>(
-  fn: F,
+/** Invoke a captured method without consulting its user-visible .call property.
+ * Typed by its parameters and result, not `Parameters<F>`/`ReturnType<F>`, so a
+ * generic method (`Effect.runPromise`) is instantiated from its arguments. */
+export function nativeInvoke<A extends unknown[], R>(
+  fn: (...args: A) => R,
   receiver: unknown,
-  args: Parameters<F>
-): ReturnType<F> {
+  args: A
+): R {
   return Reflect.apply(fn, receiver, args);
+}
+
+/** A type guard's attempted result, keeping its narrowing: the attempt ran the
+ * guard (`Exit.isSuccess(exit)`); `guard` is passed only for its type. */
+export function nativeGuarded<T, U extends T>(
+  value: T,
+  result: boolean,
+  guard: (value: T, ...rest: any[]) => value is U
+): value is U {
+  void value;
+  void guard;
+  return result;
 }
 
 /** A source-authored dynamic action call has unchecked arguments, but its

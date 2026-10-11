@@ -438,6 +438,27 @@ theorem kept_sync_unsound :
     ∃ (c : PromiseCall Nat) (v : Nat), keptRaises c v ∧ ¬ attemptedAtAwait c v :=
   ⟨⟨fun v => v = 0, Inference.empty⟩, 0, Or.inl rfl, fun h => h⟩
 
+/-! ## Sagas driven inside an action (D-121)
+
+A generator handed to a function that calls it only inside an `action`'s
+generator (Effect's `effectAction`) runs step by step inside that action: the
+driver calls `next` and `throw` from the action's body, and Solid's `action`
+is the library's `$event`. A setter call in the saga cannot be delegated, since
+its `yield*` belongs to the driver; it is performed where it is made, and so
+runs in its driver's host. -/
+
+/-- The host a driven saga's code runs in: its driver's. -/
+def sagaHost (driver : Host) : Host := driver
+
+/-- Driven inside an action (an event), the saga's writes are admitted. -/
+theorem driven_saga_write_admitted : Admits (sagaHost .event) .write :=
+  (write_admitted_iff _).mpr (Or.inr rfl)
+
+/-- Driven from a memo, the same write would not be: hence the check that every
+    call of the saga is inside the action. -/
+theorem memo_driven_saga_refused : ¬ Admits (sagaHost .memo) .write := by
+  simp [sagaHost, Admits]
+
 #print axioms write_admitted_iff
 #print axioms event_phase_runs_in_caller
 #print axioms hook_requirement_provided
@@ -462,5 +483,7 @@ theorem kept_sync_unsound :
 #print axioms unchecked_root_unsound
 #print axioms kept_async_sound
 #print axioms kept_sync_unsound
+#print axioms driven_saga_write_admitted
+#print axioms memo_driven_saga_refused
 end Sugar
 end Yield

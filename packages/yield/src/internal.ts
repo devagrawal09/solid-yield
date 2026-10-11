@@ -20,6 +20,7 @@ export {
   nativeLexicalCallback,
   nativeHoleColors,
   nativeInvoke,
+  nativeGuarded,
   nativeDispatch
 } from "./native-control.js";
 

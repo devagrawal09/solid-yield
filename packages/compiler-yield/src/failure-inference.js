@@ -1402,6 +1402,18 @@ export function inferFailures(
         target: fn?.id,
         promise: !!checker.getPromisedTypeOfPromise(checker.getTypeAtLocation(nodeFor(site))),
         async: !!fn?.path.node.async,
+        // An async iterable result: a stream, which a memo takes through an attempt.
+        stream: ["AsyncIterable", "AsyncIterableIterator", "AsyncGenerator"].includes(
+          checker.getTypeAtLocation(nodeFor(site)).symbol?.name ?? ""
+        ),
+        // Which argument a type guard narrows (`Exit.isSuccess(exit)`), so its
+        // lowered attempt can keep the narrowing.
+        predicate: (() => {
+          const node = nodeFor(site);
+          const signature = ts.isCallExpression(node) ? checker.getResolvedSignature(node) : null;
+          const guard = signature && checker.getTypePredicateOfSignature(signature);
+          return guard?.kind === ts.TypePredicateKind.Identifier ? guard.parameterIndex : null;
+        })(),
         resultType: checker.typeToString(
           checker.getTypeAtLocation(nodeFor(site)),
           nodeFor(site),

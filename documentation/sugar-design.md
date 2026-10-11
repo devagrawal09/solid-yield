@@ -1837,3 +1837,61 @@ Both were real gaps, and fixing them exposed a third.
   so removing Feed's own boundary moves the fallback; the program is still
   accepted, correctly. The catalogue's equivalence is per operator, so the
   report keeps it as a survivor.
+
+### Effect through native mode (D-121; 2026-10-11)
+
+Dev ruled the Effect bridge is modeled, not refused (D-121), and native mode
+now checks plain Solid and ships it as written (D-120). Lowered past its
+refusal, the Effect original reached 26 errors; it now reports two, both
+findings the checker should make: `MODULE_STATE` at `log.ts:20:7` (a notice:
+the fiber log is module state, written from Effect's scheduler) and
+`EVENT_REJECTS` at `checkout.tsx:194:43` (`placeOrder.interrupt()` calls
+`Effect.runFork`, an unanalyzed package, and nothing catches it). Each gap
+below is general; the Effect original was the first to reach it. Tests:
+`native-effect-model.test.js` (14 cases).
+
+- **A saga driven inside an action writes there (S16).** A generator handed
+  to a function whose every use of it is a direct call inside the generator
+  given to Solid's `action` (checked through TypeScript, across files) runs
+  inside that action. Its `yield*` belongs to its driver, so a setter call
+  there is performed where it is made (`__nativeWrite(setPhase)("charging")`)
+  and `refresh` is the library's, performed the same way. A write in a nested
+  callback stays plain: it may run outside the action (`native-sagas.js`).
+- **A kept action promise stays a promise.** An event call chained with
+  `then`/`catch`/`finally`, or returned by a plain function handed out as a
+  value (Effect's `invoke`), is not delegated: delegating waits for the result,
+  where the original holds the promise and handles its rejection. Before this,
+  `save(x).catch(() => {})` lowered to `.catch` on the action's result, and the
+  action's failures leaked into the handler's.
+- **A generator yielding its own values is called** (`8b5af4a`): only a
+  generator yielding library operations (`KIND`-branded) is a routine.
+- **A store's root is a path for `For`.** `each={cart}` passes the store, not a
+  thunk returning it (which gave rows of `never`).
+- **Read-only array methods read a store's value:** `reduce`, `includes`,
+  `join`, `flatMap`, `at`, `findLast` and the rest join `map`/`filter`.
+- **A routine keeps its declared result type** (`return value as T`): it types
+  the returned callbacks' parameters (`resolveFork`'s `effect =>`) and gives
+  callers `T`. An assertion, because the model's values can differ from
+  Solid's there (an `$event`'s promise may resolve `undefined`, D-085). A
+  declared `Promise<T>` gives `T` (the promise is attempted where it is made);
+  `() => T` is Solid's accessor shape, a source in the model, and is left alone.
+- **A captured method keeps its generics.** `nativeInvoke` is typed by its
+  parameters and result, so `Effect.runPromise` is instantiated from its
+  argument (it gave `Promise<unknown>`).
+- **A type guard narrows through its attempt.** `if (Exit.isSuccess(exit))`
+  lowers to `__nativeGuarded(exit, yield* attempt(() => Exit.isSuccess(exit)),
+  Exit.isSuccess)`: the attempt runs the guard once, and `nativeGuarded`
+  carries its narrowing.
+- **A context with a default is read anywhere.** Its read requires nothing and
+  cannot fail, so it is no operation; `runEffect` resolves its runtime inside a
+  memo, as Effect's comment says it should.
+- **A routine's stream returned from a memo is attempted** (D-091), as a plain
+  function's is, with `unknown` failures: what its iterator raises is not
+  inferred.
+- **Accessor props (F-S54).** A prop declared `() => T` that callers pass a
+  source (a memo or signal getter, as in Solid) is declared `T`; a call of it
+  is a read, and `latest`/`isPending` take the source.
+- **F-S39 for identifiers.** A member a source lacks is read through it for an
+  identifier too (`w => w.length` over strings), once the source's value is
+  known.
+

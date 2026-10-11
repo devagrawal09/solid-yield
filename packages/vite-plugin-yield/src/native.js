@@ -27,6 +27,7 @@ import { nativeProviders } from "./native-providers.js";
 import { nativeEntry } from "./native-entry.js";
 import { componentFactory, nativePrelude, nativeRootTrees } from "./native-prelude.js";
 import { lowerNativeEffects } from "./native-effects.js";
+import { lowerDrivenSagas } from "./native-sagas.js";
 import { lowerNativeRecursion } from "./native-recursion.js";
 const t = babel.types;
 /** @typedef {import('@babel/core').NodePath<any>} Path */
@@ -86,6 +87,31 @@ export const nativeTypes = new Set([
 ]);
 const controls = new Set(["Loading", "Errored", "For", "Show", "Match", "Switch", "Repeat"]);
 const print = /** @param {any} p */ p => printMapped(t.file(p.node));
+/** A store's root (`const [cart] = createStore(…)`): already a path, which
+ * `For` takes as given, so its rows are paths too (D-055). A thunk returning
+ * it would hand `For` the store, not its items.
+ * @param {Path} at @param {any} value */
+function storeRoot(at, value) {
+  if (!t.isIdentifier(value)) return false;
+  const binding = at.scope.getBinding(value.name);
+  const declarator = binding?.path;
+  if (!declarator?.isVariableDeclarator() || !t.isArrayPattern(declarator.node.id)) return false;
+  if (declarator.node.id.elements[0] !== binding?.identifier) return false;
+  const callee = declarator.get("init.callee");
+  const api = Array.isArray(callee) ? null : imported(callee);
+  return (
+    !!api &&
+    ["solid-js", "solid-yield"].includes(api.module) &&
+    [
+      "createStore",
+      "createOptimisticStore",
+      "createProjection",
+      "$store",
+      "$optimisticStore",
+      "$projection"
+    ].includes(api.name)
+  );
+}
 /** @param {Path} p */
 function imported(p) {
   if (!p.isIdentifier() && !p.isJSXIdentifier()) return null;
@@ -1443,7 +1469,12 @@ function surface(
               ? attr.value.expression
               : attr.value;
           if (t.isJSXEmptyExpression(value)) continue;
-          if (api && ["when", "each", "fallback"].includes(attr.name.name) && !t.isFunction(value))
+          if (
+            api &&
+            ["when", "each", "fallback"].includes(attr.name.name) &&
+            !t.isFunction(value) &&
+            !(attr.name.name === "each" && storeRoot(q, value))
+          )
             value = t.arrowFunctionExpression([], value);
           props.push(
             copyPosition(
@@ -1746,7 +1777,9 @@ function lowerNativeProjectImpl(input, options = {}) {
     if (source) visit(source);
   }
   const sourceFailures = nativeFailures(files, options.compilerOptions);
-  const prepared = nativePrelude(markOpaqueGenerators(selected));
+  // D-121: a saga its driver steps only inside an action writes there.
+  const driven = lowerDrivenSagas(selected, () => nativeProgram(selected, options.compilerOptions));
+  const prepared = nativePrelude(markOpaqueGenerators(driven));
   const failures = nativeFailures(prepared, options.compilerOptions, "marked");
   const effects = new Map(
     [...nativePrelude(lowerNativeEffects(prepared, failures))].map(([id, code]) => [

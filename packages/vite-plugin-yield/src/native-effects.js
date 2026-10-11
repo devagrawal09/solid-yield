@@ -413,6 +413,39 @@ export function lowerNativeEffects(files, report) {
           }
           const info = report.call(file, q.node.start, q.node.end ?? 0);
           const kinds = info?.ownFails ?? info?.fails ?? [];
+          // A routine's stream returned from a memo (`return runEffect(…)`): the
+          // memo takes it through an attempt (D-091), as it does a plain
+          // function's. What its iterator raises is not inferred: `unknown`.
+          if (
+            info?.stream &&
+            info.target &&
+            routines.has(info.target) &&
+            (q.parentPath?.isReturnStatement() ||
+              (!!fn?.isArrowFunctionExpression() && fn.node.body === q.node))
+          ) {
+            const stream = q.scope.generateUidIdentifier("stream");
+            q.replaceWith(
+              t.callExpression(
+                t.functionExpression(
+                  null,
+                  [],
+                  t.blockStatement([
+                    t.variableDeclaration("const", [
+                      t.variableDeclarator(
+                        stream,
+                        /** @type {import("@babel/core").types.Expression} */ (q.node)
+                      )
+                    ]),
+                    t.returnStatement(attempt(t.cloneNode(stream), ["unknown"]))
+                  ]),
+                  true
+                ),
+                []
+              )
+            );
+            q.skip();
+            return;
+          }
           // A reactive Promise continuation keeps its lexical host (sugar.js
           // wraps it as a lexical callback); it is not a separate event.
           if (
@@ -618,7 +651,23 @@ export function lowerNativeEffects(files, report) {
                 []
               )
             );
-          } else if (!unawaited && !kept) q.replaceWith(attempt(call, kinds, declaredReturn(q)));
+          } else if (!unawaited && !kept) {
+            const attempted = attempt(call, kinds, declaredReturn(q));
+            const subject = call.arguments[0];
+            // A type guard's narrowing survives its attempt (`if
+            // (Exit.isSuccess(exit)) … exit.value`): the attempted result is
+            // handed to a guard of the same type.
+            if (info.predicate === 0 && t.isIdentifier(subject) && t.isExpression(call.callee)) {
+              used.add("nativeGuarded");
+              q.replaceWith(
+                t.callExpression(t.identifier("__nativeGuarded"), [
+                  t.cloneNode(subject),
+                  attempted,
+                  t.cloneNode(call.callee, true)
+                ])
+              );
+            } else q.replaceWith(attempted);
+          }
           if (pending)
             q.replaceWith(
               t.callExpression(t.memberExpression(pending.id, t.identifier("push")), [
@@ -817,6 +866,7 @@ export function lowerNativeEffects(files, report) {
       registerNativeFailure: "__nativeRegister",
       nativeFailureValue: "__nativeValue",
       nativeInvoke: "__nativeInvoke",
+      nativeGuarded: "__nativeGuarded",
       nativeContextGuard: "__nativeContextGuard"
     };
     for (const module of ["solid-yield", "solid-yield/internal"]) {

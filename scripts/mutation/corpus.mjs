@@ -60,6 +60,12 @@ export function corpus() {
       "Plain Solid exercising Rendering's native edges: a component factory with a tuple context and destructured members, a derived store, async iterable producers, a Repeat index key, isPending thunks, a lazy page, root trees (CSR, and a server function's with a ParentProps shell)",
     files: files("scripts/mutation/corpus/rendering-edges")
   });
+  projects.push({
+    id: "effect-edges",
+    origin:
+      "Plain Solid exercising Effect's native edges (D-121, D-122): a saga its driver steps inside an action, a kept action promise, a provider value that creates, cleans up and may fail, an accessor prop, a store's root in For, a store reduce, a routine's stream a memo returns",
+    files: files("scripts/mutation/corpus/effect-edges")
+  });
   return projects;
 }
 export const relativeToRoot = file => relative(root, file);

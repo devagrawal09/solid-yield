@@ -58,6 +58,20 @@ export function Saga() {
     expect(checked(code)).toEqual([]);
   });
 
+  it("keeps a yielded value's narrowing (`yield step.value` in the driver's loop)", () => {
+    const code = lower(`import { action } from "solid-js";
+export function drive<R>(steps: () => Generator<Promise<number>, R, number>) {
+  return action(function* () {
+    const it = steps();
+    let step = it.next(0);
+    while (!step.done) step = it.next((yield step.value) as number);
+    return step.value;
+  });
+}`);
+    expect(code).toMatch(/__nativeAttempt\(\(_awaited => \(\) => _awaited\)\(step\.value\)/);
+    expect(checked(code)).toEqual([]);
+  });
+
   it("leaves them plain when the driver calls the saga outside an action", () => {
     const code = lower(`import { createSignal } from "solid-js";
 function later<R>(steps: () => Generator<number, R, number>) {

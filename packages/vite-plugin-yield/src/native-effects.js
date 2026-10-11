@@ -309,11 +309,32 @@ export function lowerNativeEffects(files, report) {
           const fn = q.getFunctionParent();
           if (!fn || !host(fn) || fn.node.async || q.node.delegate || !q.node.argument) return;
           const value = q.node.argument;
-          q.replaceWith(
-            t.isCallExpression(value) && t.isIdentifier(value.callee, { name: "__nativeAttempt" })
-              ? value
-              : attempt(value, ["unknown"])
-          );
+          if (
+            t.isCallExpression(value) &&
+            t.isIdentifier(value.callee, { name: "__nativeAttempt" })
+          )
+            q.replaceWith(value);
+          else if (t.isCallExpression(value) || t.isNewExpression(value))
+            q.replaceWith(attempt(value, ["unknown"]));
+          else {
+            // A value read here keeps its narrowing (`yield step.value` in a
+            // `while (!step.done)` loop): a closure would read the reassigned
+            // `let` unnarrowed. It is evaluated here and handed to the attempt.
+            const held = q.scope.generateUidIdentifier("awaited");
+            used.add("attempt");
+            q.replaceWith(
+              t.callExpression(t.identifier("__nativeAttempt"), [
+                t.callExpression(
+                  t.arrowFunctionExpression(
+                    [held],
+                    t.arrowFunctionExpression([], t.cloneNode(held))
+                  ),
+                  [value]
+                ),
+                handler(["unknown"])
+              ])
+            );
+          }
         }
       },
       ThrowStatement(q) {

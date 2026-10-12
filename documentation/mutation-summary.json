@@ -1,12 +1,12 @@
 {
   "program": {
     "mutants": 488,
-    "killed": 260,
-    "survived": 131,
+    "killed": 278,
+    "survived": 113,
     "equivalent": 97,
-    "score": 66.49616368286445,
-    "exactLine": 241,
-    "detected": 299
+    "score": 71.09974424552429,
+    "exactLine": 243,
+    "detected": 316
   },
   "operators": {
     "delete-catch": {
@@ -206,17 +206,17 @@
     },
     "non-core-cache": {
       "mutants": 50,
-      "killed": 24,
-      "survived": 26,
+      "killed": 42,
+      "survived": 8,
       "equivalent": 0,
-      "exact": 18,
-      "detected": 25,
+      "exact": 20,
+      "detected": 42,
       "categories": {
-        "detected elsewhere": 1,
+        "detected elsewhere": 0,
         "masked: base refused": 8,
-        "masked: base errors": 9,
-        "different code": 1,
-        "silent": 7
+        "masked: base errors": 0,
+        "different code": 0,
+        "silent": 0
       }
     },
     "destructure-props": {
@@ -350,13 +350,6 @@
       "line": 51
     },
     {
-      "id": "M0014",
-      "operator": "non-core-cache",
-      "project": "sierpinski",
-      "file": "main.tsx",
-      "line": 62
-    },
-    {
       "id": "M0035",
       "operator": "delete-errored",
       "project": "todos",
@@ -369,6 +362,13 @@
       "project": "todos",
       "file": "app.tsx",
       "line": 141
+    },
+    {
+      "id": "M0037",
+      "operator": "delete-loading",
+      "project": "todos",
+      "file": "app.tsx",
+      "line": 144
     }
   ],
   "topChecker": [
@@ -409,7 +409,7 @@
     }
   ],
   "findings": {
-    "program": 131,
+    "program": 113,
     "checker": 20,
     "cliCrashes": 0
   }

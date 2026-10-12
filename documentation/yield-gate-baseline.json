@@ -670,7 +670,7 @@
     }
   ],
   "mutation": {
-    "score": 66.49616368286445,
+    "score": 71.09974424552429,
     "counts": {
       "delete-catch": {
         "mutants": 9,
@@ -752,8 +752,8 @@
       },
       "non-core-cache": {
         "mutants": 50,
-        "killed": 24,
-        "survived": 26,
+        "killed": 42,
+        "survived": 8,
         "equivalent": 0
       },
       "destructure-props": {
@@ -793,8 +793,8 @@
         "equivalent": 0
       }
     },
-    "recordedAt": "2026-10-12T05:55:35.357Z",
-    "digest": "6a391eb63eb17d6eef1e146ea27f46ec4a5fa638508b7ec8ac2ad6494a80bf48"
+    "recordedAt": "2026-10-12T09:13:19.756Z",
+    "digest": "129ebaa8a3b29ef08daeebc3e850a27e85eba1265ae9270b8f83b0f53d1c232c"
   },
   "strykerReportOnly": {
     "mode": "REPORT-ONLY",

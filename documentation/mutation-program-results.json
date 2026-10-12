@@ -1,8 +1,8 @@
 {
-  "startedAt": "2026-10-12T04:53:52.723Z",
-  "finishedAt": "2026-10-12T05:55:35.357Z",
-  "durationMs": 3702634,
-  "digest": "6a391eb63eb17d6eef1e146ea27f46ec4a5fa638508b7ec8ac2ad6494a80bf48",
+  "startedAt": "2026-10-12T08:12:17.923Z",
+  "finishedAt": "2026-10-12T09:13:19.756Z",
+  "durationMs": 3661833,
+  "digest": "129ebaa8a3b29ef08daeebc3e850a27e85eba1265ae9270b8f83b0f53d1c232c",
   "projects": [
     {
       "id": "sierpinski",
@@ -1200,8 +1200,8 @@
     },
     "non-core-cache": {
       "mutants": 50,
-      "killed": 24,
-      "survived": 26,
+      "killed": 42,
+      "survived": 8,
       "equivalent": 0
     },
     "destructure-props": {
@@ -1243,10 +1243,10 @@
   },
   "total": {
     "mutants": 488,
-    "killed": 260,
-    "survived": 131,
+    "killed": 278,
+    "survived": 113,
     "equivalent": 97,
-    "score": 66.49616368286445
+    "score": 71.09974424552429
   },
   "mutants": [
     {
@@ -1257,7 +1257,7 @@
         "end": 49
       },
       "offset": 354,
-      "source": "import { createSignal, onCleanup, createMemo, Loading } from \"solid-js\";\nimport { render } from \"@solidjs/web\";\n\ntype TriangleProps = {\n  x: number;\n  y: number;\n  s: number;\n  children: number;\n};\n\nconst TARGET = 25;\n\nconst TriangleDemo = () => {\n  const [elapsed, setElapsed] = createSignal(0),\n    [seconds, setSeconds] = createSignal(0),\n    scale = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => {\n      const e = (elapsed() / 1000) % 10;\n      return 1 + (e > 5 ? 10 - e : e) / 10;\n    }),\n    start = Date.now(),\n    t = setInterval(() => setSeconds(s => (s % 10) + 1), 1000);\n\n  let f: number;\n  const update = () => {\n    setElapsed(Date.now() - start);\n    f = requestAnimationFrame(update);\n  };\n  f = requestAnimationFrame(update);\n\n  onCleanup(() => {\n    clearInterval(t);\n    cancelAnimationFrame(f);\n  });\n\n  return (\n    <Loading fallback={\"Loading...\"}>\n      <div\n        class=\"container\"\n        style={{\n          transform: \"scaleX(\" + scale() / 2.1 + \") scaleY(0.7) translateZ(0.1px)\"\n        }}\n      >\n        <Triangle x={0} y={0} s={1000}>\n          {seconds()}\n        </Triangle>\n      </div>\n    </Loading>\n  );\n};\n\nconst Triangle = (props: TriangleProps) => {\n  let { x, y, s } = props;\n  if (s <= TARGET) {\n    return (\n      <Dot x={x - TARGET / 2} y={y - TARGET / 2} s={TARGET}>\n        {props.children}\n      </Dot>\n    );\n  }\n  s = s / 2;\n\n  const slowChildren = createMemo(() => {\n    const seconds = props.children;\n    return new Promise<number>(res => {\n      const t = requestIdleCallback(() => {\n        const e = performance.now() + 0.8;\n        while (performance.now() < e) {}\n        res(seconds);\n      });\n      onCleanup(() => cancelIdleCallback(t));\n    });\n  });\n\n  return (\n    <>\n      <Triangle x={x} y={y - s / 2} s={s}>\n        {slowChildren()}\n      </Triangle>\n      <Triangle x={x - s} y={y + s / 2} s={s}>\n        {slowChildren()}\n      </Triangle>\n      <Triangle x={x + s} y={y + s / 2} s={s}>\n        {slowChildren()}\n      </Triangle>\n    </>\n  );\n};\n\nconst Dot = (props: TriangleProps) => {\n  const { x, y, s } = props;\n  const [hover, setHover] = createSignal(false),\n    onEnter = () => setHover(true),\n    onExit = () => setHover(false);\n\n  return (\n    <div\n      class=\"dot\"\n      style={{\n        width: s + \"px\",\n        height: s + \"px\",\n        left: x + \"px\",\n        top: y + \"px\",\n        \"border-radius\": s / 2 + \"px\",\n        \"line-height\": s + \"px\",\n        background: hover() ? \"#ff0\" : \"#61dafb\"\n      }}\n      onMouseEnter={onEnter}\n      onMouseLeave={onExit}\n    >\n      {hover() ? \"**\" + props.children + \"**\" : props.children}\n    </div>\n  );\n};\n\nrender(TriangleDemo, document.body);\n",
+      "source": "import { createSignal, onCleanup, createMemo, Loading } from \"solid-js\";\nimport { render } from \"@solidjs/web\";\n\ntype TriangleProps = {\n  x: number;\n  y: number;\n  s: number;\n  children: number;\n};\n\nconst TARGET = 25;\n\nconst TriangleDemo = () => {\n  const [elapsed, setElapsed] = createSignal(0),\n    [seconds, setSeconds] = createSignal(0),\n    scale = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => {\n      const e = (elapsed() / 1000) % 10;\n      return 1 + (e > 5 ? 10 - e : e) / 10;\n    }),\n    start = Date.now(),\n    t = setInterval(() => setSeconds(s => (s % 10) + 1), 1000);\n\n  let f: number;\n  const update = () => {\n    setElapsed(Date.now() - start);\n    f = requestAnimationFrame(update);\n  };\n  f = requestAnimationFrame(update);\n\n  onCleanup(() => {\n    clearInterval(t);\n    cancelAnimationFrame(f);\n  });\n\n  return (\n    <Loading fallback={\"Loading...\"}>\n      <div\n        class=\"container\"\n        style={{\n          transform: \"scaleX(\" + scale() / 2.1 + \") scaleY(0.7) translateZ(0.1px)\"\n        }}\n      >\n        <Triangle x={0} y={0} s={1000}>\n          {seconds()}\n        </Triangle>\n      </div>\n    </Loading>\n  );\n};\n\nconst Triangle = (props: TriangleProps) => {\n  let { x, y, s } = props;\n  if (s <= TARGET) {\n    return (\n      <Dot x={x - TARGET / 2} y={y - TARGET / 2} s={TARGET}>\n        {props.children}\n      </Dot>\n    );\n  }\n  s = s / 2;\n\n  const slowChildren = createMemo(() => {\n    const seconds = props.children;\n    return new Promise<number>(res => {\n      const t = requestIdleCallback(() => {\n        const e = performance.now() + 0.8;\n        while (performance.now() < e) {}\n        res(seconds);\n      });\n      onCleanup(() => cancelIdleCallback(t));\n    });\n  });\n\n  return (\n    <>\n      <Triangle x={x} y={y - s / 2} s={s}>\n        {slowChildren()}\n      </Triangle>\n      <Triangle x={x - s} y={y + s / 2} s={s}>\n        {slowChildren()}\n      </Triangle>\n      <Triangle x={x + s} y={y + s / 2} s={s}>\n        {slowChildren()}\n      </Triangle>\n    </>\n  );\n};\n\nconst Dot = (props: TriangleProps) => {\n  const { x, y, s } = props;\n  const [hover, setHover] = createSignal(false),\n    onEnter = () => setHover(true),\n    onExit = () => setHover(false);\n\n  return (\n    <div\n      class=\"dot\"\n      style={{\n        width: s + \"px\",\n        height: s + \"px\",\n        left: x + \"px\",\n        top: y + \"px\",\n        \"border-radius\": s / 2 + \"px\",\n        \"line-height\": s + \"px\",\n        background: hover() ? \"#ff0\" : \"#61dafb\"\n      }}\n      onMouseEnter={onEnter}\n      onMouseLeave={onExit}\n    >\n      {hover() ? \"**\" + props.children + \"**\" : props.children}\n    </div>\n  );\n};\n\nrender(TriangleDemo, document.body);\n",
       "equivalent": null,
       "id": "M0001",
       "project": "sierpinski",
@@ -1782,7 +1782,7 @@
         "end": 87
       },
       "offset": 1370,
-      "source": "import { createSignal, onCleanup, createMemo, Loading } from \"solid-js\";\nimport { render } from \"@solidjs/web\";\n\ntype TriangleProps = {\n  x: number;\n  y: number;\n  s: number;\n  children: number;\n};\n\nconst TARGET = 25;\n\nconst TriangleDemo = () => {\n  const [elapsed, setElapsed] = createSignal(0),\n    [seconds, setSeconds] = createSignal(0),\n    scale = createMemo(() => {\n      const e = (elapsed() / 1000) % 10;\n      return 1 + (e > 5 ? 10 - e : e) / 10;\n    }),\n    start = Date.now(),\n    t = setInterval(() => setSeconds(s => (s % 10) + 1), 1000);\n\n  let f: number;\n  const update = () => {\n    setElapsed(Date.now() - start);\n    f = requestAnimationFrame(update);\n  };\n  f = requestAnimationFrame(update);\n\n  onCleanup(() => {\n    clearInterval(t);\n    cancelAnimationFrame(f);\n  });\n\n  return (\n    <Loading fallback={\"Loading...\"}>\n      <div\n        class=\"container\"\n        style={{\n          transform: \"scaleX(\" + scale() / 2.1 + \") scaleY(0.7) translateZ(0.1px)\"\n        }}\n      >\n        <Triangle x={0} y={0} s={1000}>\n          {seconds()}\n        </Triangle>\n      </div>\n    </Loading>\n  );\n};\n\nconst Triangle = (props: TriangleProps) => {\n  let { x, y, s } = props;\n  if (s <= TARGET) {\n    return (\n      <Dot x={x - TARGET / 2} y={y - TARGET / 2} s={TARGET}>\n        {props.children}\n      </Dot>\n    );\n  }\n  s = s / 2;\n\n  const slowChildren = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => {\n    const seconds = props.children;\n    return new Promise<number>(res => {\n      const t = requestIdleCallback(() => {\n        const e = performance.now() + 0.8;\n        while (performance.now() < e) {}\n        res(seconds);\n      });\n      onCleanup(() => cancelIdleCallback(t));\n    });\n  });\n\n  return (\n    <>\n      <Triangle x={x} y={y - s / 2} s={s}>\n        {slowChildren()}\n      </Triangle>\n      <Triangle x={x - s} y={y + s / 2} s={s}>\n        {slowChildren()}\n      </Triangle>\n      <Triangle x={x + s} y={y + s / 2} s={s}>\n        {slowChildren()}\n      </Triangle>\n    </>\n  );\n};\n\nconst Dot = (props: TriangleProps) => {\n  const { x, y, s } = props;\n  const [hover, setHover] = createSignal(false),\n    onEnter = () => setHover(true),\n    onExit = () => setHover(false);\n\n  return (\n    <div\n      class=\"dot\"\n      style={{\n        width: s + \"px\",\n        height: s + \"px\",\n        left: x + \"px\",\n        top: y + \"px\",\n        \"border-radius\": s / 2 + \"px\",\n        \"line-height\": s + \"px\",\n        background: hover() ? \"#ff0\" : \"#61dafb\"\n      }}\n      onMouseEnter={onEnter}\n      onMouseLeave={onExit}\n    >\n      {hover() ? \"**\" + props.children + \"**\" : props.children}\n    </div>\n  );\n};\n\nrender(TriangleDemo, document.body);\n",
+      "source": "import { createSignal, onCleanup, createMemo, Loading } from \"solid-js\";\nimport { render } from \"@solidjs/web\";\n\ntype TriangleProps = {\n  x: number;\n  y: number;\n  s: number;\n  children: number;\n};\n\nconst TARGET = 25;\n\nconst TriangleDemo = () => {\n  const [elapsed, setElapsed] = createSignal(0),\n    [seconds, setSeconds] = createSignal(0),\n    scale = createMemo(() => {\n      const e = (elapsed() / 1000) % 10;\n      return 1 + (e > 5 ? 10 - e : e) / 10;\n    }),\n    start = Date.now(),\n    t = setInterval(() => setSeconds(s => (s % 10) + 1), 1000);\n\n  let f: number;\n  const update = () => {\n    setElapsed(Date.now() - start);\n    f = requestAnimationFrame(update);\n  };\n  f = requestAnimationFrame(update);\n\n  onCleanup(() => {\n    clearInterval(t);\n    cancelAnimationFrame(f);\n  });\n\n  return (\n    <Loading fallback={\"Loading...\"}>\n      <div\n        class=\"container\"\n        style={{\n          transform: \"scaleX(\" + scale() / 2.1 + \") scaleY(0.7) translateZ(0.1px)\"\n        }}\n      >\n        <Triangle x={0} y={0} s={1000}>\n          {seconds()}\n        </Triangle>\n      </div>\n    </Loading>\n  );\n};\n\nconst Triangle = (props: TriangleProps) => {\n  let { x, y, s } = props;\n  if (s <= TARGET) {\n    return (\n      <Dot x={x - TARGET / 2} y={y - TARGET / 2} s={TARGET}>\n        {props.children}\n      </Dot>\n    );\n  }\n  s = s / 2;\n\n  const slowChildren = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => {\n    const seconds = props.children;\n    return new Promise<number>(res => {\n      const t = requestIdleCallback(() => {\n        const e = performance.now() + 0.8;\n        while (performance.now() < e) {}\n        res(seconds);\n      });\n      onCleanup(() => cancelIdleCallback(t));\n    });\n  });\n\n  return (\n    <>\n      <Triangle x={x} y={y - s / 2} s={s}>\n        {slowChildren()}\n      </Triangle>\n      <Triangle x={x - s} y={y + s / 2} s={s}>\n        {slowChildren()}\n      </Triangle>\n      <Triangle x={x + s} y={y + s / 2} s={s}>\n        {slowChildren()}\n      </Triangle>\n    </>\n  );\n};\n\nconst Dot = (props: TriangleProps) => {\n  const { x, y, s } = props;\n  const [hover, setHover] = createSignal(false),\n    onEnter = () => setHover(true),\n    onExit = () => setHover(false);\n\n  return (\n    <div\n      class=\"dot\"\n      style={{\n        width: s + \"px\",\n        height: s + \"px\",\n        left: x + \"px\",\n        top: y + \"px\",\n        \"border-radius\": s / 2 + \"px\",\n        \"line-height\": s + \"px\",\n        background: hover() ? \"#ff0\" : \"#61dafb\"\n      }}\n      onMouseEnter={onEnter}\n      onMouseLeave={onExit}\n    >\n      {hover() ? \"**\" + props.children + \"**\" : props.children}\n    </div>\n  );\n};\n\nrender(TriangleDemo, document.body);\n",
       "equivalent": null,
       "id": "M0014",
       "project": "sierpinski",
@@ -1803,6 +1803,14 @@
                 "line": 115
               }
             ]
+          },
+          {
+            "stage": "cli",
+            "file": "main.tsx",
+            "line": 77,
+            "code": "TS2488",
+            "tsCode": "TS2488",
+            "message": "Type 'number | Promise<number>' must have a '[Symbol.iterator]()' method that returns an iterator."
           },
           {
             "stage": "cli",
@@ -1845,16 +1853,17 @@
         "cliOutput": [
           "<job>/source/main.tsx:110:25 error TS2345: [FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: unknown.",
           "  related: <job>/source/main.tsx:115:8: The app is rendered here. does not suspend; can fail with an unknown error; does not wait; needs no context",
-          "<job>/source/main.tsx:62:96 error TS2345: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
+          "<job>/source/main.tsx:77:10 error TS2488: Type 'number | Promise<number>' must have a '[Symbol.iterator]()' method that returns an iterator.",
+          "<job>/source/main.tsx:62:138 error TS2345: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
           "<job>/source/main.tsx:51:7 error TS2769: [generated] [LAZY_VIEW] fallback is a lazy view: function* () { return <.../>; }",
           "<job>/source/main.tsx:51:7 error TS2589: [generated] Type instantiation is excessively deep and possibly infinite.",
           "<job>/source/main.tsx:51:7 error TS2322: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
-          "solid-yield check: 1 files, 5 errors"
+          "solid-yield check: 1 files, 6 errors"
         ]
       },
       "preExistingMatch": false,
-      "status": "survived",
-      "exactLine": false
+      "status": "killed",
+      "exactLine": true
     },
     {
       "operator": "setup-read",
@@ -3657,7 +3666,7 @@
         "end": 10
       },
       "offset": 265,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0045",
       "project": "reviewer-myapp",
@@ -3670,7 +3679,7 @@
             "file": "App.tsx",
             "line": 8,
             "code": "SUGAR_CALLBACK",
-            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:8:95)"
+            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:8:137)"
           },
           {
             "stage": "cli",
@@ -3687,7 +3696,7 @@
           "lint": "blocked-by-transform"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:8:95 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
+          "<job>/source/App.tsx:8:137 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
           "solid-yield check: 3 files, 1 errors"
         ]
       },
@@ -4075,25 +4084,44 @@
         "end": 20
       },
       "offset": 458,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0053",
       "project": "reviewer-myapp",
       "file": "App.tsx",
       "original": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "result": {
-        "diagnostics": [],
+        "diagnostics": [
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 17,
+            "code": "TS2339",
+            "tsCode": "TS2339",
+            "message": "Property 'name' does not exist on type 'Source<never, never, false>'."
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 17,
+            "code": "FOR_EACH",
+            "tsCode": "TS2769",
+            "message": "[FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo"
+          }
+        ],
         "stages": {
           "transform": "completed",
-          "cli": "passed",
+          "cli": "diagnostics",
           "lint": "passed"
         },
         "cliOutput": [
-          "solid-yield check: 3 files, 0 errors"
+          "<job>/source/App.tsx:17:46 error TS2339: Property 'name' does not exist on type 'Source<never, never, false>'.",
+          "<job>/source/App.tsx:17:8 error TS2769: [FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo",
+          "solid-yield check: 3 files, 2 errors"
         ]
       },
       "preExistingMatch": false,
-      "status": "survived",
+      "status": "killed",
       "exactLine": false
     },
     {
@@ -4450,7 +4478,7 @@
         "end": 12
       },
       "offset": 318,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const snapshot = count();\n  console.log(snapshot);\n  const twice = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const snapshot = count();\n  console.log(snapshot);\n  const twice = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0062",
       "project": "reviewer-m01_setup_read",
@@ -4463,7 +4491,7 @@
             "file": "App.tsx",
             "line": 10,
             "code": "SUGAR_CALLBACK",
-            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:10:95)"
+            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:10:137)"
           },
           {
             "stage": "cli",
@@ -4480,7 +4508,7 @@
           "lint": "blocked-by-transform"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:10:95 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
+          "<job>/source/App.tsx:10:137 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
           "solid-yield check: 3 files, 1 errors"
         ]
       },
@@ -4927,7 +4955,7 @@
         "end": 22
       },
       "offset": 511,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const snapshot = count();\n  console.log(snapshot);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const snapshot = count();\n  console.log(snapshot);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0070",
       "project": "reviewer-m01_setup_read",
@@ -4935,6 +4963,22 @@
       "original": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const snapshot = count();\n  console.log(snapshot);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "result": {
         "diagnostics": [
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 19,
+            "code": "TS2339",
+            "tsCode": "TS2339",
+            "message": "Property 'name' does not exist on type 'Source<never, never, false>'."
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 19,
+            "code": "FOR_EACH",
+            "tsCode": "TS2769",
+            "message": "[FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo"
+          },
           {
             "stage": "cli",
             "file": "App.tsx",
@@ -4968,13 +5012,15 @@
           "lint": "diagnostics"
         },
         "cliOutput": [
+          "<job>/source/App.tsx:19:46 error TS2339: Property 'name' does not exist on type 'Source<never, never, false>'.",
+          "<job>/source/App.tsx:19:8 error TS2769: [FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo",
           "<job>/source/App.tsx:8:20 error TS2769: [READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive.",
           "<job>/source/index.tsx:3:15 error TS2345: [FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any.",
-          "solid-yield check: 3 files, 2 errors"
+          "solid-yield check: 3 files, 4 errors"
         ]
       },
       "preExistingMatch": false,
-      "status": "survived",
+      "status": "killed",
       "exactLine": false
     },
     {
@@ -5462,7 +5508,7 @@
         "end": 11
       },
       "offset": 306,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\nconst UserCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const user = useContext(UserCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme + user}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\nconst UserCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const user = useContext(UserCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme + user}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0079",
       "project": "reviewer-m02_noprovider2",
@@ -5475,7 +5521,7 @@
             "file": "App.tsx",
             "line": 9,
             "code": "SUGAR_CALLBACK",
-            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:9:95)"
+            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:9:137)"
           },
           {
             "stage": "cli",
@@ -5492,7 +5538,7 @@
           "lint": "blocked-by-transform"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:9:95 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
+          "<job>/source/App.tsx:9:137 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
           "solid-yield check: 3 files, 1 errors"
         ]
       },
@@ -5926,7 +5972,7 @@
         "end": 22
       },
       "offset": 535,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\nconst UserCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const user = useContext(UserCtx);\n  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());\n  return (\n    <ul class={theme + user}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\nconst UserCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const user = useContext(UserCtx);\n  const items = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => fetchItems());\n  return (\n    <ul class={theme + user}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0088",
       "project": "reviewer-m02_noprovider2",
@@ -5947,6 +5993,22 @@
                 "line": 3
               }
             ]
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 19,
+            "code": "TS2339",
+            "tsCode": "TS2339",
+            "message": "Property 'name' does not exist on type 'Source<never, never, false>'."
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 19,
+            "code": "FOR_EACH",
+            "tsCode": "TS2769",
+            "message": "[FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo"
           }
         ],
         "stages": {
@@ -5956,12 +6018,14 @@
         },
         "cliOutput": [
           "<job>/source/App.tsx:15:16 error TS1360: [NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: UserCtx.",
-          "  related: <job>/source/index.tsx:3:15: The app is rendered here. does not suspend; never fails; does not wait; needs UserCtx",
-          "solid-yield check: 3 files, 1 errors"
+          "  related: <job>/source/index.tsx:3:15: The app is rendered here. does not suspend; never fails; can wait; needs UserCtx",
+          "<job>/source/App.tsx:19:46 error TS2339: Property 'name' does not exist on type 'Source<never, never, false>'.",
+          "<job>/source/App.tsx:19:8 error TS2769: [FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo",
+          "solid-yield check: 3 files, 3 errors"
         ]
       },
       "preExistingMatch": false,
-      "status": "survived",
+      "status": "killed",
       "exactLine": false
     },
     {
@@ -6432,7 +6496,7 @@
         "end": 11
       },
       "offset": 303,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  if (count() > 100) throw 'too big';\n  const twice = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  if (count() > 100) throw 'too big';\n  const twice = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0097",
       "project": "reviewer-m03_throw_string",
@@ -6816,7 +6880,7 @@
         "end": 21
       },
       "offset": 496,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  if (count() > 100) throw 'too big';\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  if (count() > 100) throw 'too big';\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0105",
       "project": "reviewer-m03_throw_string",
@@ -7278,7 +7342,7 @@
         "end": 10
       },
       "offset": 265,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => { if (count() > 100) throw 'too big'; return count() * 2; });\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => { if (count() > 100) throw 'too big'; return count() * 2; });\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0114",
       "project": "reviewer-m03b_throw_in_memo",
@@ -7308,7 +7372,7 @@
           "lint": "blocked-by-transform"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:8:116 error TS95000: [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.",
+          "<job>/source/App.tsx:8:158 error TS95000: [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.",
           "solid-yield check: 3 files, 1 errors"
         ]
       },
@@ -7708,7 +7772,7 @@
         "end": 20
       },
       "offset": 506,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => { if (count() > 100) throw 'too big'; return count() * 2; });\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => { if (count() > 100) throw 'too big'; return count() * 2; });\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0123",
       "project": "reviewer-m03b_throw_in_memo",
@@ -8138,7 +8202,7 @@
         "end": 10
       },
       "offset": 265,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => count() * 2);\n  return <button onClick={() => { if (count() > 100) throw new Error('x'); setCount(count() + 1); }}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => count() * 2);\n  return <button onClick={() => { if (count() > 100) throw new Error('x'); setCount(count() + 1); }}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0132",
       "project": "reviewer-m03c_throw_in_handler",
@@ -8151,7 +8215,7 @@
             "file": "App.tsx",
             "line": 8,
             "code": "SUGAR_CALLBACK",
-            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:8:95)"
+            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:8:137)"
           },
           {
             "stage": "cli",
@@ -8168,7 +8232,7 @@
           "lint": "blocked-by-transform"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:8:95 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
+          "<job>/source/App.tsx:8:137 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
           "solid-yield check: 3 files, 1 errors"
         ]
       },
@@ -8760,7 +8824,7 @@
         "end": 20
       },
       "offset": 504,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => { if (count() > 100) throw new Error('x'); setCount(count() + 1); }}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => { if (count() > 100) throw new Error('x'); setCount(count() + 1); }}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0143",
       "project": "reviewer-m03c_throw_in_handler",
@@ -8781,6 +8845,22 @@
                 "line": 3
               }
             ]
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 17,
+            "code": "TS2339",
+            "tsCode": "TS2339",
+            "message": "Property 'name' does not exist on type 'Source<never, never, false>'."
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 17,
+            "code": "FOR_EACH",
+            "tsCode": "TS2769",
+            "message": "[FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo"
           }
         ],
         "stages": {
@@ -8791,11 +8871,13 @@
         "cliOutput": [
           "<job>/source/App.tsx:9:27 error TS95000: [EVENT_REJECTS] This handler can fail with Error and nothing catches it; wrap the body in try/catch, or declare the failure.",
           "  related: <job>/source/index.tsx:3:15: The app is rendered here.",
-          "solid-yield check: 3 files, 1 errors"
+          "<job>/source/App.tsx:17:46 error TS2339: Property 'name' does not exist on type 'Source<never, never, false>'.",
+          "<job>/source/App.tsx:17:8 error TS2769: [FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo",
+          "solid-yield check: 3 files, 3 errors"
         ]
       },
       "preExistingMatch": false,
-      "status": "survived",
+      "status": "killed",
       "exactLine": false
     },
     {
@@ -9241,7 +9323,7 @@
         "end": 11
       },
       "offset": 265,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => count() * 2);\n  const save = async () => { await fetchItems(); throw new Error('nope'); };\n  return <button onClick={save}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => count() * 2);\n  const save = async () => { await fetchItems(); throw new Error('nope'); };\n  return <button onClick={save}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0152",
       "project": "reviewer-m04_async_handler",
@@ -9254,7 +9336,7 @@
             "file": "App.tsx",
             "line": 8,
             "code": "SUGAR_CALLBACK",
-            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:8:95)"
+            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:8:137)"
           },
           {
             "stage": "cli",
@@ -9271,7 +9353,7 @@
           "lint": "blocked-by-transform"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:8:95 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
+          "<job>/source/App.tsx:8:137 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
           "solid-yield check: 3 files, 1 errors"
         ]
       },
@@ -9821,7 +9903,7 @@
         "end": 21
       },
       "offset": 512,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  const save = async () => { await fetchItems(); throw new Error('nope'); };\n  return <button onClick={save}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  const save = async () => { await fetchItems(); throw new Error('nope'); };\n  return <button onClick={save}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0163",
       "project": "reviewer-m04_async_handler",
@@ -9842,6 +9924,22 @@
                 "line": 3
               }
             ]
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 18,
+            "code": "TS2339",
+            "tsCode": "TS2339",
+            "message": "Property 'name' does not exist on type 'Source<never, never, false>'."
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 18,
+            "code": "FOR_EACH",
+            "tsCode": "TS2769",
+            "message": "[FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo"
           }
         ],
         "stages": {
@@ -9852,11 +9950,13 @@
         "cliOutput": [
           "<job>/source/App.tsx:10:27 error TS95000: [EVENT_REJECTS] This handler can fail with Error and nothing catches it; wrap the body in try/catch, or declare the failure.",
           "  related: <job>/source/index.tsx:3:15: The app is rendered here.",
-          "solid-yield check: 3 files, 1 errors"
+          "<job>/source/App.tsx:18:46 error TS2339: Property 'name' does not exist on type 'Source<never, never, false>'.",
+          "<job>/source/App.tsx:18:8 error TS2769: [FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo",
+          "solid-yield check: 3 files, 3 errors"
         ]
       },
       "preExistingMatch": false,
-      "status": "survived",
+      "status": "killed",
       "exactLine": false
     },
     {
@@ -10302,7 +10402,7 @@
         "end": 10
       },
       "offset": 265,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(async () => { try { return await fetchItems(); } catch { return []; } });\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(async () => { try { return await fetchItems(); } catch { return []; } });\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0172",
       "project": "reviewer-m05_swallow",
@@ -10315,7 +10415,7 @@
             "file": "App.tsx",
             "line": 8,
             "code": "SUGAR_CALLBACK",
-            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:8:95)"
+            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:8:137)"
           },
           {
             "stage": "cli",
@@ -10332,7 +10432,7 @@
           "lint": "blocked-by-transform"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:8:95 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
+          "<job>/source/App.tsx:8:137 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
           "solid-yield check: 3 files, 1 errors"
         ]
       },
@@ -10720,25 +10820,44 @@
         "end": 20
       },
       "offset": 458,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(async () => { try { return await fetchItems(); } catch { return []; } });\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(async () => { try { return await fetchItems(); } catch { return []; } });\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0180",
       "project": "reviewer-m05_swallow",
       "file": "App.tsx",
       "original": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(async () => { try { return await fetchItems(); } catch { return []; } });\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "result": {
-        "diagnostics": [],
+        "diagnostics": [
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 17,
+            "code": "TS2339",
+            "tsCode": "TS2339",
+            "message": "Property 'name' does not exist on type 'Source<never, never, false>'."
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 17,
+            "code": "FOR_EACH",
+            "tsCode": "TS2769",
+            "message": "[FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo"
+          }
+        ],
         "stages": {
           "transform": "completed",
-          "cli": "passed",
+          "cli": "diagnostics",
           "lint": "passed"
         },
         "cliOutput": [
-          "solid-yield check: 3 files, 0 errors"
+          "<job>/source/App.tsx:17:46 error TS2339: Property 'name' does not exist on type 'Source<never, never, false>'.",
+          "<job>/source/App.tsx:17:8 error TS2769: [FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo",
+          "solid-yield check: 3 files, 2 errors"
         ]
       },
       "preExistingMatch": false,
-      "status": "survived",
+      "status": "killed",
       "exactLine": false
     },
     {
@@ -11136,7 +11255,7 @@
         "end": 10
       },
       "offset": 265,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => { setCount(count() + 1); return count() * 2; });\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => { setCount(count() + 1); return count() * 2; });\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0191",
       "project": "reviewer-m06_memo_writes",
@@ -11149,7 +11268,7 @@
             "file": "App.tsx",
             "line": 8,
             "code": "SUGAR_CALLBACK",
-            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:8:106)"
+            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:8:148)"
           },
           {
             "stage": "cli",
@@ -11166,11 +11285,11 @@
           "lint": "blocked-by-transform"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:8:106 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
+          "<job>/source/App.tsx:8:148 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
           "solid-yield check: 3 files, 1 errors"
         ]
       },
-      "preExistingMatch": false,
+      "preExistingMatch": true,
       "status": "killed",
       "exactLine": true
     },
@@ -11657,7 +11776,7 @@
         "end": 20
       },
       "offset": 493,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => { setCount(count() + 1); return count() * 2; });\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => { setCount(count() + 1); return count() * 2; });\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0200",
       "project": "reviewer-m06_memo_writes",
@@ -11665,6 +11784,22 @@
       "original": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => { setCount(count() + 1); return count() * 2; });\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "result": {
         "diagnostics": [
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 17,
+            "code": "TS2339",
+            "tsCode": "TS2339",
+            "message": "Property 'name' does not exist on type 'Source<never, never, false>'."
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 17,
+            "code": "FOR_EACH",
+            "tsCode": "TS2769",
+            "message": "[FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo"
+          },
           {
             "stage": "cli",
             "file": "App.tsx",
@@ -11688,13 +11823,15 @@
           "lint": "passed"
         },
         "cliOutput": [
+          "<job>/source/App.tsx:17:46 error TS2339: Property 'name' does not exist on type 'Source<never, never, false>'.",
+          "<job>/source/App.tsx:17:8 error TS2769: [FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo",
           "<job>/source/App.tsx:8:36 error TS2345: [WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state.",
           "<job>/source/index.tsx:3:15 error TS2345: [FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any.",
-          "solid-yield check: 3 files, 2 errors"
+          "solid-yield check: 3 files, 4 errors"
         ]
       },
       "preExistingMatch": false,
-      "status": "survived",
+      "status": "killed",
       "exactLine": false
     },
     {
@@ -12151,7 +12288,7 @@
         "end": 11
       },
       "offset": 311,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  setTimeout(() => console.log(count()), 10);\n  const twice = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  setTimeout(() => console.log(count()), 10);\n  const twice = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0210",
       "project": "reviewer-m07_timeout_read",
@@ -12164,7 +12301,7 @@
             "file": "App.tsx",
             "line": 9,
             "code": "SUGAR_CALLBACK",
-            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:9:95)"
+            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:9:137)"
           },
           {
             "stage": "cli",
@@ -12181,7 +12318,7 @@
           "lint": "blocked-by-transform"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:9:95 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
+          "<job>/source/App.tsx:9:137 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
           "solid-yield check: 3 files, 1 errors"
         ]
       },
@@ -12569,25 +12706,44 @@
         "end": 21
       },
       "offset": 504,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  setTimeout(() => console.log(count()), 10);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  setTimeout(() => console.log(count()), 10);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0218",
       "project": "reviewer-m07_timeout_read",
       "file": "App.tsx",
       "original": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  setTimeout(() => console.log(count()), 10);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "result": {
-        "diagnostics": [],
+        "diagnostics": [
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 18,
+            "code": "TS2339",
+            "tsCode": "TS2339",
+            "message": "Property 'name' does not exist on type 'Source<never, never, false>'."
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 18,
+            "code": "FOR_EACH",
+            "tsCode": "TS2769",
+            "message": "[FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo"
+          }
+        ],
         "stages": {
           "transform": "completed",
-          "cli": "passed",
+          "cli": "diagnostics",
           "lint": "passed"
         },
         "cliOutput": [
-          "solid-yield check: 3 files, 0 errors"
+          "<job>/source/App.tsx:18:46 error TS2339: Property 'name' does not exist on type 'Source<never, never, false>'.",
+          "<job>/source/App.tsx:18:8 error TS2769: [FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo",
+          "solid-yield check: 3 files, 2 errors"
         ]
       },
       "preExistingMatch": false,
-      "status": "survived",
+      "status": "killed",
       "exactLine": false
     },
     {
@@ -12944,7 +13100,7 @@
         "end": 11
       },
       "offset": 304,
-      "source": "import { Portal } from \"@solidjs/web\";\nimport { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Portal><Counter /></Portal>\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { Portal } from \"@solidjs/web\";\nimport { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Portal><Counter /></Portal>\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0227",
       "project": "reviewer-m08_portal",
@@ -12957,7 +13113,7 @@
             "file": "App.tsx",
             "line": 9,
             "code": "SUGAR_CALLBACK",
-            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:9:95)"
+            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:9:137)"
           },
           {
             "stage": "cli",
@@ -12974,7 +13130,7 @@
           "lint": "blocked-by-transform"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:9:95 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
+          "<job>/source/App.tsx:9:137 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
           "solid-yield check: 3 files, 1 errors"
         ]
       },
@@ -13442,7 +13598,7 @@
         "end": 21
       },
       "offset": 497,
-      "source": "import { Portal } from \"@solidjs/web\";\nimport { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Portal><Counter /></Portal>\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { Portal } from \"@solidjs/web\";\nimport { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Portal><Counter /></Portal>\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0235",
       "project": "reviewer-m08_portal",
@@ -13464,20 +13620,38 @@
             "code": "NATIVE_FOREIGN_BOUNDARY",
             "tsCode": "TS95001",
             "message": "[NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check."
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 18,
+            "code": "TS2339",
+            "tsCode": "TS2339",
+            "message": "Property 'name' does not exist on type 'Source<never, never, false>'."
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 18,
+            "code": "FOR_EACH",
+            "tsCode": "TS2769",
+            "message": "[FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo"
           }
         ],
         "stages": {
           "transform": "completed",
-          "cli": "passed",
+          "cli": "diagnostics",
           "lint": "passed"
         },
         "cliOutput": [
           "<job>/source/App.tsx:26:7 warning TS95001: [NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check.",
-          "solid-yield check: 3 files, 0 errors"
+          "<job>/source/App.tsx:18:46 error TS2339: Property 'name' does not exist on type 'Source<never, never, false>'.",
+          "<job>/source/App.tsx:18:8 error TS2769: [FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo",
+          "solid-yield check: 3 files, 2 errors"
         ]
       },
       "preExistingMatch": false,
-      "status": "survived",
+      "status": "killed",
       "exactLine": false
     },
     {
@@ -13941,7 +14115,7 @@
         "end": 10
       },
       "offset": 265,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List({ title }: { title: string }) {\n  console.log(title);\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List title=\"x\" />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List({ title }: { title: string }) {\n  console.log(title);\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List title=\"x\" />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0244",
       "project": "reviewer-m09_destructure",
@@ -14309,7 +14483,7 @@
         "end": 21
       },
       "offset": 508,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List({ title }: { title: string }) {\n  console.log(title);\n  const theme = useContext(ThemeCtx);\n  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List title=\"x\" />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List({ title }: { title: string }) {\n  console.log(title);\n  const theme = useContext(ThemeCtx);\n  const items = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List title=\"x\" />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0252",
       "project": "reviewer-m09_destructure",
@@ -14732,7 +14906,7 @@
         "end": 11
       },
       "offset": 265,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => (count() > 2 ? items2() : 0));\n  const items2 = () => count();\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => (count() > 2 ? items2() : 0));\n  const items2 = () => count();\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0261",
       "project": "reviewer-m10_conditional",
@@ -14745,7 +14919,7 @@
             "file": "App.tsx",
             "line": 8,
             "code": "SUGAR_CALLBACK",
-            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:8:96)"
+            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:8:138)"
           },
           {
             "stage": "cli",
@@ -14762,7 +14936,7 @@
           "lint": "blocked-by-transform"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:8:96 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
+          "<job>/source/App.tsx:8:138 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
           "solid-yield check: 3 files, 1 errors"
         ]
       },
@@ -15150,25 +15324,44 @@
         "end": 21
       },
       "offset": 507,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => (count() > 2 ? items2() : 0));\n  const items2 = () => count();\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => (count() > 2 ? items2() : 0));\n  const items2 = () => count();\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0269",
       "project": "reviewer-m10_conditional",
       "file": "App.tsx",
       "original": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => (count() > 2 ? items2() : 0));\n  const items2 = () => count();\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "result": {
-        "diagnostics": [],
+        "diagnostics": [
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 18,
+            "code": "TS2339",
+            "tsCode": "TS2339",
+            "message": "Property 'name' does not exist on type 'Source<never, never, false>'."
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 18,
+            "code": "FOR_EACH",
+            "tsCode": "TS2769",
+            "message": "[FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo"
+          }
+        ],
         "stages": {
           "transform": "completed",
-          "cli": "passed",
+          "cli": "diagnostics",
           "lint": "passed"
         },
         "cliOutput": [
-          "solid-yield check: 3 files, 0 errors"
+          "<job>/source/App.tsx:18:46 error TS2339: Property 'name' does not exist on type 'Source<never, never, false>'.",
+          "<job>/source/App.tsx:18:8 error TS2769: [FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo",
+          "solid-yield check: 3 files, 2 errors"
         ]
       },
       "preExistingMatch": false,
-      "status": "survived",
+      "status": "killed",
       "exactLine": false
     },
     {
@@ -15525,7 +15718,7 @@
         "end": 11
       },
       "offset": 265,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => count() * 2);\n  const Inner = () => <i>{count()}</i>;\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => count() * 2);\n  const Inner = () => <i>{count()}</i>;\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0278",
       "project": "reviewer-m11_nested_comp",
@@ -15538,7 +15731,7 @@
             "file": "App.tsx",
             "line": 8,
             "code": "SUGAR_CALLBACK",
-            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:8:95)"
+            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:8:137)"
           },
           {
             "stage": "cli",
@@ -15555,7 +15748,7 @@
           "lint": "blocked-by-transform"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:8:95 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
+          "<job>/source/App.tsx:8:137 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
           "solid-yield check: 3 files, 1 errors"
         ]
       },
@@ -16061,7 +16254,7 @@
         "end": 21
       },
       "offset": 498,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  const Inner = () => <i>{count()}</i>;\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  const Inner = () => <i>{count()}</i>;\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0287",
       "project": "reviewer-m11_nested_comp",
@@ -16069,6 +16262,22 @@
       "original": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  const Inner = () => <i>{count()}</i>;\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "result": {
         "diagnostics": [
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 18,
+            "code": "TS2339",
+            "tsCode": "TS2339",
+            "message": "Property 'name' does not exist on type 'Source<never, never, false>'."
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 18,
+            "code": "FOR_EACH",
+            "tsCode": "TS2769",
+            "message": "[FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo"
+          },
           {
             "stage": "lint",
             "file": "App.tsx",
@@ -16082,15 +16291,17 @@
         ],
         "stages": {
           "transform": "completed",
-          "cli": "passed",
+          "cli": "diagnostics",
           "lint": "diagnostics"
         },
         "cliOutput": [
-          "solid-yield check: 3 files, 0 errors"
+          "<job>/source/App.tsx:18:46 error TS2339: Property 'name' does not exist on type 'Source<never, never, false>'.",
+          "<job>/source/App.tsx:18:8 error TS2769: [FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo",
+          "solid-yield check: 3 files, 2 errors"
         ]
       },
       "preExistingMatch": false,
-      "status": "survived",
+      "status": "killed",
       "exactLine": false
     },
     {
@@ -16587,7 +16798,7 @@
         "end": 11
       },
       "offset": 328,
-      "source": "import { createEffect, createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  createEffect(() => { console.log(count()); });\n  const twice = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createEffect, createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  createEffect(() => { console.log(count()); });\n  const twice = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0297",
       "project": "reviewer-m12_effect_arity",
@@ -16971,7 +17182,7 @@
         "end": 21
       },
       "offset": 521,
-      "source": "import { createEffect, createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  createEffect(() => { console.log(count()); });\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createEffect, createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  createEffect(() => { console.log(count()); });\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0305",
       "project": "reviewer-m12_effect_arity",
@@ -17401,7 +17612,7 @@
         "end": 10
       },
       "offset": 265,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <>\n          <List />\n        </>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <>\n          <List />\n        </>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0314",
       "project": "reviewer-s2a_noloading",
@@ -17414,7 +17625,7 @@
             "file": "App.tsx",
             "line": 8,
             "code": "SUGAR_CALLBACK",
-            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:8:95)"
+            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:8:137)"
           },
           {
             "stage": "cli",
@@ -17431,7 +17642,7 @@
           "lint": "blocked-by-transform"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:8:95 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
+          "<job>/source/App.tsx:8:137 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
           "solid-yield check: 3 files, 1 errors"
         ]
       },
@@ -17819,25 +18030,44 @@
         "end": 20
       },
       "offset": 458,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <>\n          <List />\n        </>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <>\n          <List />\n        </>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0322",
       "project": "reviewer-s2a_noloading",
       "file": "App.tsx",
       "original": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <>\n          <List />\n        </>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "result": {
-        "diagnostics": [],
+        "diagnostics": [
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 17,
+            "code": "TS2339",
+            "tsCode": "TS2339",
+            "message": "Property 'name' does not exist on type 'Source<never, never, false>'."
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 17,
+            "code": "FOR_EACH",
+            "tsCode": "TS2769",
+            "message": "[FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo"
+          }
+        ],
         "stages": {
           "transform": "completed",
-          "cli": "passed",
+          "cli": "diagnostics",
           "lint": "passed"
         },
         "cliOutput": [
-          "solid-yield check: 3 files, 0 errors"
+          "<job>/source/App.tsx:17:46 error TS2339: Property 'name' does not exist on type 'Source<never, never, false>'.",
+          "<job>/source/App.tsx:17:8 error TS2769: [FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo",
+          "solid-yield check: 3 files, 2 errors"
         ]
       },
       "preExistingMatch": false,
-      "status": "survived",
+      "status": "killed",
       "exactLine": false
     },
     {
@@ -18230,7 +18460,7 @@
         "end": 10
       },
       "offset": 265,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <>\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <>\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </>\n  );\n}\n",
       "equivalent": null,
       "id": "M0330",
       "project": "reviewer-s2b_noprovider",
@@ -18243,7 +18473,7 @@
             "file": "App.tsx",
             "line": 8,
             "code": "SUGAR_CALLBACK",
-            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:8:95)"
+            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:8:137)"
           },
           {
             "stage": "cli",
@@ -18260,7 +18490,7 @@
           "lint": "blocked-by-transform"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:8:95 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
+          "<job>/source/App.tsx:8:137 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
           "solid-yield check: 3 files, 1 errors"
         ]
       },
@@ -18648,7 +18878,7 @@
         "end": 20
       },
       "offset": 458,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <>\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <>\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </>\n  );\n}\n",
       "equivalent": null,
       "id": "M0338",
       "project": "reviewer-s2b_noprovider",
@@ -18669,6 +18899,22 @@
                 "line": 3
               }
             ]
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 17,
+            "code": "TS2339",
+            "tsCode": "TS2339",
+            "message": "Property 'name' does not exist on type 'Source<never, never, false>'."
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 17,
+            "code": "FOR_EACH",
+            "tsCode": "TS2769",
+            "message": "[FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo"
           }
         ],
         "stages": {
@@ -18678,12 +18924,14 @@
         },
         "cliOutput": [
           "<job>/source/App.tsx:13:17 error TS1360: [NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: ThemeCtx.",
-          "  related: <job>/source/index.tsx:3:15: The app is rendered here. does not suspend; never fails; does not wait; needs ThemeCtx",
-          "solid-yield check: 3 files, 1 errors"
+          "  related: <job>/source/index.tsx:3:15: The app is rendered here. does not suspend; never fails; can wait; needs ThemeCtx",
+          "<job>/source/App.tsx:17:46 error TS2339: Property 'name' does not exist on type 'Source<never, never, false>'.",
+          "<job>/source/App.tsx:17:8 error TS2769: [FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo",
+          "solid-yield check: 3 files, 3 errors"
         ]
       },
       "preExistingMatch": false,
-      "status": "survived",
+      "status": "killed",
       "exactLine": false
     },
     {
@@ -19076,7 +19324,7 @@
         "end": 10
       },
       "offset": 265,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0346",
       "project": "reviewer-s2c_noerrored",
@@ -19089,7 +19337,7 @@
             "file": "App.tsx",
             "line": 8,
             "code": "SUGAR_CALLBACK",
-            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:8:95)"
+            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:8:137)"
           },
           {
             "stage": "cli",
@@ -19106,7 +19354,7 @@
           "lint": "blocked-by-transform"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:8:95 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
+          "<job>/source/App.tsx:8:137 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
           "solid-yield check: 3 files, 1 errors"
         ]
       },
@@ -19494,25 +19742,44 @@
         "end": 20
       },
       "offset": 458,
-      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </>\n    </ThemeCtx>\n  );\n}\n",
+      "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </>\n    </ThemeCtx>\n  );\n}\n",
       "equivalent": null,
       "id": "M0354",
       "project": "reviewer-s2c_noerrored",
       "file": "App.tsx",
       "original": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </>\n    </ThemeCtx>\n  );\n}\n",
       "result": {
-        "diagnostics": [],
+        "diagnostics": [
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 17,
+            "code": "TS2339",
+            "tsCode": "TS2339",
+            "message": "Property 'name' does not exist on type 'Source<never, never, false>'."
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 17,
+            "code": "FOR_EACH",
+            "tsCode": "TS2769",
+            "message": "[FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo"
+          }
+        ],
         "stages": {
           "transform": "completed",
-          "cli": "passed",
+          "cli": "diagnostics",
           "lint": "passed"
         },
         "cliOutput": [
-          "solid-yield check: 3 files, 0 errors"
+          "<job>/source/App.tsx:17:46 error TS2339: Property 'name' does not exist on type 'Source<never, never, false>'.",
+          "<job>/source/App.tsx:17:8 error TS2769: [FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo",
+          "solid-yield check: 3 files, 2 errors"
         ]
       },
       "preExistingMatch": true,
-      "status": "survived",
+      "status": "killed",
       "exactLine": false
     },
     {
@@ -19951,7 +20218,7 @@
         "end": 6
       },
       "offset": 182,
-      "source": "import { createSignal, createMemo, createEffect, For, Show, Loading, createContext, useContext } from \"solid-js\";\nimport { render } from '@solidjs/web';\nfunction App() {\n  const n = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(async () => 1);\n  return <p>{n()}</p>;\n}\nrender(App, document.body);",
+      "source": "import { createSignal, createMemo, createEffect, For, Show, Loading, createContext, useContext } from \"solid-js\";\nimport { render } from '@solidjs/web';\nfunction App() {\n  const n = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(async () => 1);\n  return <p>{n()}</p>;\n}\nrender(App, document.body);",
       "equivalent": null,
       "id": "M0363",
       "project": "review-slots-pending-root",
@@ -19962,16 +20229,10 @@
           {
             "stage": "cli",
             "file": "App.tsx",
-            "line": 5,
-            "code": "FOREIGN_HANDOFF",
+            "line": 3,
+            "code": "GENERATED_TYPE",
             "tsCode": "TS2345",
-            "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: unknown.",
-            "related": [
-              {
-                "file": "App.tsx",
-                "line": 7
-              }
-            ]
+            "message": "[generated] [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host."
           }
         ],
         "stages": {
@@ -19980,8 +20241,7 @@
           "lint": "passed"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:5:14 error TS2345: [FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: unknown.",
-          "  related: <job>/source/App.tsx:7:8: The app is rendered here. does not suspend; can fail with an unknown error; does not wait; needs no context",
+          "<job>/source/App.tsx:3:10 error TS2345: [generated] [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
           "solid-yield check: 1 files, 1 errors"
         ]
       },
@@ -20138,25 +20398,42 @@
         "end": 10
       },
       "offset": 213,
-      "source": "import { createSignal, createMemo, createEffect, For, Show, Loading, createContext, useContext } from \"solid-js\";\nfunction Child(p: {\n  n: number;\n}) {\n  return <p>{p.n}</p>;\n}\nexport function App() {\n  const n = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(async () => 1);\n  return <Child n={n()} />;\n}",
+      "source": "import { createSignal, createMemo, createEffect, For, Show, Loading, createContext, useContext } from \"solid-js\";\nfunction Child(p: {\n  n: number;\n}) {\n  return <p>{p.n}</p>;\n}\nexport function App() {\n  const n = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(async () => 1);\n  return <Child n={n()} />;\n}",
       "equivalent": null,
       "id": "M0367",
       "project": "review-slots-colored-prop",
       "file": "App.tsx",
       "original": "import { createSignal, createMemo, createEffect, For, Show, Loading, createContext, useContext } from \"solid-js\";\nfunction Child(p: {\n  n: number;\n}) {\n  return <p>{p.n}</p>;\n}\nexport function App() {\n  const n = createMemo(async () => 1);\n  return <Child n={n()} />;\n}",
       "result": {
-        "diagnostics": [],
+        "diagnostics": [
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 9,
+            "code": "GENERATED_TYPE",
+            "tsCode": "TS2322",
+            "message": "[GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
+            "related": [
+              {
+                "file": "App.tsx",
+                "line": 3
+              }
+            ]
+          }
+        ],
         "stages": {
           "transform": "completed",
-          "cli": "passed",
+          "cli": "diagnostics",
           "lint": "passed"
         },
         "cliOutput": [
-          "solid-yield check: 1 files, 0 errors"
+          "<job>/source/App.tsx:9:17 error TS2322: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
+          "  related: <job>/source/App.tsx:3:3: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
+          "solid-yield check: 1 files, 1 errors"
         ]
       },
       "preExistingMatch": false,
-      "status": "survived",
+      "status": "killed",
       "exactLine": false
     },
     {
@@ -20564,7 +20841,7 @@
         "end": 9
       },
       "offset": 194,
-      "source": "import { createSignal, createMemo, createEffect, For, Show, Loading, createContext, useContext } from \"solid-js\";\nexport function Counter() {\n  const [count, set] = createSignal(0);\n  const n = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => {\n    set(1);\n    return count();\n  });\n  return <p>{n()}</p>;\n}",
+      "source": "import { createSignal, createMemo, createEffect, For, Show, Loading, createContext, useContext } from \"solid-js\";\nexport function Counter() {\n  const [count, set] = createSignal(0);\n  const n = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => {\n    set(1);\n    return count();\n  });\n  return <p>{n()}</p>;\n}",
       "equivalent": null,
       "id": "M0377",
       "project": "review-slots-memo-write",
@@ -20598,7 +20875,7 @@
           "solid-yield check: 1 files, 1 errors"
         ]
       },
-      "preExistingMatch": false,
+      "preExistingMatch": true,
       "status": "killed",
       "exactLine": false
     },
@@ -21165,7 +21442,7 @@
         "end": 28
       },
       "offset": 518,
-      "source": "import { createSignal, createMemo, createEffect, createContext, useContext, Loading, Errored } from 'solid-js';\nimport { render } from '@solidjs/web';\nimport { readServer } from './server';\nconst Identity = createContext<number>();\nclass Problem extends Error {}\nfunction fail() { throw new Problem('failure'); }\nfunction Child(props: { value: number }) {\n  const identity = useContext(Identity);\n  return <p>{props.value}{identity}</p>;\n}\nfunction App() {\n  const [count, setCount] = createSignal(1);\n  const value = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(async () => {\n    try { return await readServer(); } catch (e) { throw e; }\n  });\n  const twice = createMemo(() => count() * 2);\n  createEffect(() => count(), n => { setCount(n); });\n  setTimeout(() => setCount(2), 1);\n  const save = async () => {\n    await Promise.resolve();\n    setCount(count() + 1);\n  };\n  return <Identity value={1}><Errored fallback={() => <p>failed</p>}><Loading fallback=\"wait\">\n    <button onClick={async () => { await save(); }}>{twice()}</button>\n    <button onClick={() => { try { fail(); } catch (e) { throw e; } }}>Fail</button>\n    <Child value={count()} /><p>{value()}</p>\n  </Loading></Errored></Identity>;\n}\nrender(() => <App />, document.body);\n",
+      "source": "import { createSignal, createMemo, createEffect, createContext, useContext, Loading, Errored } from 'solid-js';\nimport { render } from '@solidjs/web';\nimport { readServer } from './server';\nconst Identity = createContext<number>();\nclass Problem extends Error {}\nfunction fail() { throw new Problem('failure'); }\nfunction Child(props: { value: number }) {\n  const identity = useContext(Identity);\n  return <p>{props.value}{identity}</p>;\n}\nfunction App() {\n  const [count, setCount] = createSignal(1);\n  const value = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(async () => {\n    try { return await readServer(); } catch (e) { throw e; }\n  });\n  const twice = createMemo(() => count() * 2);\n  createEffect(() => count(), n => { setCount(n); });\n  setTimeout(() => setCount(2), 1);\n  const save = async () => {\n    await Promise.resolve();\n    setCount(count() + 1);\n  };\n  return <Identity value={1}><Errored fallback={() => <p>failed</p>}><Loading fallback=\"wait\">\n    <button onClick={async () => { await save(); }}>{twice()}</button>\n    <button onClick={() => { try { fail(); } catch (e) { throw e; } }}>Fail</button>\n    <Child value={count()} /><p>{value()}</p>\n  </Loading></Errored></Identity>;\n}\nrender(() => <App />, document.body);\n",
       "equivalent": null,
       "id": "M0390",
       "project": "operator-seeds",
@@ -21180,6 +21457,14 @@
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with Problem and nothing catches it; wrap the body in try/catch, or declare the failure."
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 11,
+            "code": "LAZY_VIEW",
+            "tsCode": "TS2322",
+            "message": "[generated] [LAZY_VIEW] children is a lazy view: function* () { return <.../>; }"
           }
         ],
         "stages": {
@@ -21189,11 +21474,12 @@
         },
         "cliOutput": [
           "<job>/source/App.tsx:25:22 error TS95000: [EVENT_REJECTS] This handler can fail with Problem and nothing catches it; wrap the body in try/catch, or declare the failure.",
-          "solid-yield check: 2 files, 1 errors"
+          "<job>/source/App.tsx:11:10 error TS2322: [generated] [LAZY_VIEW] children is a lazy view: function* () { return <.../>; }",
+          "solid-yield check: 2 files, 2 errors"
         ]
       },
       "preExistingMatch": false,
-      "status": "survived",
+      "status": "killed",
       "exactLine": false
     },
     {
@@ -21385,7 +21671,7 @@
         "end": 28
       },
       "offset": 627,
-      "source": "import { createSignal, createMemo, createEffect, createContext, useContext, Loading, Errored } from 'solid-js';\nimport { render } from '@solidjs/web';\nimport { readServer } from './server';\nconst Identity = createContext<number>();\nclass Problem extends Error {}\nfunction fail() { throw new Problem('failure'); }\nfunction Child(props: { value: number }) {\n  const identity = useContext(Identity);\n  return <p>{props.value}{identity}</p>;\n}\nfunction App() {\n  const [count, setCount] = createSignal(1);\n  const value = createMemo(async () => {\n    try { return await readServer(); } catch (e) { throw e; }\n  });\n  const twice = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => count() * 2);\n  createEffect(() => count(), n => { setCount(n); });\n  setTimeout(() => setCount(2), 1);\n  const save = async () => {\n    await Promise.resolve();\n    setCount(count() + 1);\n  };\n  return <Identity value={1}><Errored fallback={() => <p>failed</p>}><Loading fallback=\"wait\">\n    <button onClick={async () => { await save(); }}>{twice()}</button>\n    <button onClick={() => { try { fail(); } catch (e) { throw e; } }}>Fail</button>\n    <Child value={count()} /><p>{value()}</p>\n  </Loading></Errored></Identity>;\n}\nrender(() => <App />, document.body);\n",
+      "source": "import { createSignal, createMemo, createEffect, createContext, useContext, Loading, Errored } from 'solid-js';\nimport { render } from '@solidjs/web';\nimport { readServer } from './server';\nconst Identity = createContext<number>();\nclass Problem extends Error {}\nfunction fail() { throw new Problem('failure'); }\nfunction Child(props: { value: number }) {\n  const identity = useContext(Identity);\n  return <p>{props.value}{identity}</p>;\n}\nfunction App() {\n  const [count, setCount] = createSignal(1);\n  const value = createMemo(async () => {\n    try { return await readServer(); } catch (e) { throw e; }\n  });\n  const twice = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => count() * 2);\n  createEffect(() => count(), n => { setCount(n); });\n  setTimeout(() => setCount(2), 1);\n  const save = async () => {\n    await Promise.resolve();\n    setCount(count() + 1);\n  };\n  return <Identity value={1}><Errored fallback={() => <p>failed</p>}><Loading fallback=\"wait\">\n    <button onClick={async () => { await save(); }}>{twice()}</button>\n    <button onClick={() => { try { fail(); } catch (e) { throw e; } }}>Fail</button>\n    <Child value={count()} /><p>{value()}</p>\n  </Loading></Errored></Identity>;\n}\nrender(() => <App />, document.body);\n",
       "equivalent": null,
       "id": "M0395",
       "project": "operator-seeds",
@@ -21398,7 +21684,7 @@
             "file": "App.tsx",
             "line": 16,
             "code": "SUGAR_CALLBACK",
-            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:16:95)"
+            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:16:137)"
           },
           {
             "stage": "cli",
@@ -21415,7 +21701,7 @@
           "lint": "blocked-by-transform"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:16:95 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
+          "<job>/source/App.tsx:16:137 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
           "solid-yield check: 2 files, 1 errors"
         ]
       },
@@ -22882,7 +23168,7 @@
         "end": 53
       },
       "offset": 1195,
-      "source": "import {\n  createEffect,\n  createMemo,\n  createSignal,\n  Errored,\n  For,\n  Loading,\n  onCleanup,\n  refresh\n} from \"solid-js\";\nimport { render, type JSX } from \"@solidjs/web\";\nimport { loadRows } from \"./api\";\nimport Badge from \"./Badge\";\nimport { FilterBar, FilterProvider, useFilters } from \"./filters\";\n// D-119: a wrapper's own boundaries cover its children's colors.\nfunction Panel(props: { title: string; children: JSX.Element }) {\n  return (\n    <section>\n      <h2>{props.title.toLowerCase()}</h2>\n      <Errored fallback={error => <p role=\"alert\">{String(error())}</p>}>\n        <Loading fallback=\"loading\">{props.children}</Loading>\n      </Errored>\n    </section>\n  );\n}\n// F-S40: a callback prop that writes, called from the child's event.\nfunction Row(props: { title: string; score: number; reload: () => void }) {\n  return (\n    <li>\n      {props.title} {props.score.toFixed(1)}\n      <button onClick={() => props.reload()}>reload</button>\n    </li>\n  );\n}\n// F-S47: a user function given a callback; the callback's reads color its host.\nfunction describe(count: () => number): string {\n  return `${count()} rows`;\n}\nfunction Rows() {\n  const filters = useFilters();\n  const rows = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => loadRows(filters.range()));\n  const [minimum] = createSignal(0);\n  // F-S46: array callbacks color their host.\n  const shown = createMemo(() => rows().filter(row => row.score >= minimum()));\n  const summary = createMemo(() => describe(() => shown().length));\n  return (\n    <ul title={summary()}>\n      {shown().map(row => (\n        <Row title={row.title} score={row.score} reload={() => refresh(rows)} />\n      ))}\n    </ul>\n  );\n}\nfunction Clock() {\n  const [tick, setTick] = createSignal(0);\n  // F-S42: the effect's returned cleanup runs before the next run.\n  createEffect(\n    () => tick(),\n    value => {\n      const id = setTimeout(() => setTick(value + 1), 1000);\n      return () => clearTimeout(id);\n    }\n  );\n  onCleanup(() => console.info(\"clock stopped\"));\n  return <p>{tick()}</p>;\n}\nfunction App() {\n  return (\n    <FilterProvider>\n      <FilterBar />\n      <Badge label=\"rows\" />\n      <Panel title=\"Rows\">\n        <Rows />\n      </Panel>\n      <Clock />\n    </FilterProvider>\n  );\n}\nrender(() => <App />, document.body);\n",
+      "source": "import {\n  createEffect,\n  createMemo,\n  createSignal,\n  Errored,\n  For,\n  Loading,\n  onCleanup,\n  refresh\n} from \"solid-js\";\nimport { render, type JSX } from \"@solidjs/web\";\nimport { loadRows } from \"./api\";\nimport Badge from \"./Badge\";\nimport { FilterBar, FilterProvider, useFilters } from \"./filters\";\n// D-119: a wrapper's own boundaries cover its children's colors.\nfunction Panel(props: { title: string; children: JSX.Element }) {\n  return (\n    <section>\n      <h2>{props.title.toLowerCase()}</h2>\n      <Errored fallback={error => <p role=\"alert\">{String(error())}</p>}>\n        <Loading fallback=\"loading\">{props.children}</Loading>\n      </Errored>\n    </section>\n  );\n}\n// F-S40: a callback prop that writes, called from the child's event.\nfunction Row(props: { title: string; score: number; reload: () => void }) {\n  return (\n    <li>\n      {props.title} {props.score.toFixed(1)}\n      <button onClick={() => props.reload()}>reload</button>\n    </li>\n  );\n}\n// F-S47: a user function given a callback; the callback's reads color its host.\nfunction describe(count: () => number): string {\n  return `${count()} rows`;\n}\nfunction Rows() {\n  const filters = useFilters();\n  const rows = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => loadRows(filters.range()));\n  const [minimum] = createSignal(0);\n  // F-S46: array callbacks color their host.\n  const shown = createMemo(() => rows().filter(row => row.score >= minimum()));\n  const summary = createMemo(() => describe(() => shown().length));\n  return (\n    <ul title={summary()}>\n      {shown().map(row => (\n        <Row title={row.title} score={row.score} reload={() => refresh(rows)} />\n      ))}\n    </ul>\n  );\n}\nfunction Clock() {\n  const [tick, setTick] = createSignal(0);\n  // F-S42: the effect's returned cleanup runs before the next run.\n  createEffect(\n    () => tick(),\n    value => {\n      const id = setTimeout(() => setTick(value + 1), 1000);\n      return () => clearTimeout(id);\n    }\n  );\n  onCleanup(() => console.info(\"clock stopped\"));\n  return <p>{tick()}</p>;\n}\nfunction App() {\n  return (\n    <FilterProvider>\n      <FilterBar />\n      <Badge label=\"rows\" />\n      <Panel title=\"Rows\">\n        <Rows />\n      </Panel>\n      <Clock />\n    </FilterProvider>\n  );\n}\nrender(() => <App />, document.body);\n",
       "equivalent": null,
       "id": "M0427",
       "project": "sugar-edges",
@@ -22895,7 +23181,7 @@
             "file": "App.tsx",
             "line": 41,
             "code": "SUGAR_CALLBACK",
-            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:41:103)"
+            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:41:145)"
           },
           {
             "stage": "cli",
@@ -22912,7 +23198,7 @@
           "lint": "blocked-by-transform"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:41:103 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
+          "<job>/source/App.tsx:41:145 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
           "solid-yield check: 4 files, 1 errors"
         ]
       },
@@ -22928,7 +23214,7 @@
         "end": 53
       },
       "offset": 1339,
-      "source": "import {\n  createEffect,\n  createMemo,\n  createSignal,\n  Errored,\n  For,\n  Loading,\n  onCleanup,\n  refresh\n} from \"solid-js\";\nimport { render, type JSX } from \"@solidjs/web\";\nimport { loadRows } from \"./api\";\nimport Badge from \"./Badge\";\nimport { FilterBar, FilterProvider, useFilters } from \"./filters\";\n// D-119: a wrapper's own boundaries cover its children's colors.\nfunction Panel(props: { title: string; children: JSX.Element }) {\n  return (\n    <section>\n      <h2>{props.title.toLowerCase()}</h2>\n      <Errored fallback={error => <p role=\"alert\">{String(error())}</p>}>\n        <Loading fallback=\"loading\">{props.children}</Loading>\n      </Errored>\n    </section>\n  );\n}\n// F-S40: a callback prop that writes, called from the child's event.\nfunction Row(props: { title: string; score: number; reload: () => void }) {\n  return (\n    <li>\n      {props.title} {props.score.toFixed(1)}\n      <button onClick={() => props.reload()}>reload</button>\n    </li>\n  );\n}\n// F-S47: a user function given a callback; the callback's reads color its host.\nfunction describe(count: () => number): string {\n  return `${count()} rows`;\n}\nfunction Rows() {\n  const filters = useFilters();\n  const rows = createMemo(() => loadRows(filters.range()));\n  const [minimum] = createSignal(0);\n  // F-S46: array callbacks color their host.\n  const shown = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => rows().filter(row => row.score >= minimum()));\n  const summary = createMemo(() => describe(() => shown().length));\n  return (\n    <ul title={summary()}>\n      {shown().map(row => (\n        <Row title={row.title} score={row.score} reload={() => refresh(rows)} />\n      ))}\n    </ul>\n  );\n}\nfunction Clock() {\n  const [tick, setTick] = createSignal(0);\n  // F-S42: the effect's returned cleanup runs before the next run.\n  createEffect(\n    () => tick(),\n    value => {\n      const id = setTimeout(() => setTick(value + 1), 1000);\n      return () => clearTimeout(id);\n    }\n  );\n  onCleanup(() => console.info(\"clock stopped\"));\n  return <p>{tick()}</p>;\n}\nfunction App() {\n  return (\n    <FilterProvider>\n      <FilterBar />\n      <Badge label=\"rows\" />\n      <Panel title=\"Rows\">\n        <Rows />\n      </Panel>\n      <Clock />\n    </FilterProvider>\n  );\n}\nrender(() => <App />, document.body);\n",
+      "source": "import {\n  createEffect,\n  createMemo,\n  createSignal,\n  Errored,\n  For,\n  Loading,\n  onCleanup,\n  refresh\n} from \"solid-js\";\nimport { render, type JSX } from \"@solidjs/web\";\nimport { loadRows } from \"./api\";\nimport Badge from \"./Badge\";\nimport { FilterBar, FilterProvider, useFilters } from \"./filters\";\n// D-119: a wrapper's own boundaries cover its children's colors.\nfunction Panel(props: { title: string; children: JSX.Element }) {\n  return (\n    <section>\n      <h2>{props.title.toLowerCase()}</h2>\n      <Errored fallback={error => <p role=\"alert\">{String(error())}</p>}>\n        <Loading fallback=\"loading\">{props.children}</Loading>\n      </Errored>\n    </section>\n  );\n}\n// F-S40: a callback prop that writes, called from the child's event.\nfunction Row(props: { title: string; score: number; reload: () => void }) {\n  return (\n    <li>\n      {props.title} {props.score.toFixed(1)}\n      <button onClick={() => props.reload()}>reload</button>\n    </li>\n  );\n}\n// F-S47: a user function given a callback; the callback's reads color its host.\nfunction describe(count: () => number): string {\n  return `${count()} rows`;\n}\nfunction Rows() {\n  const filters = useFilters();\n  const rows = createMemo(() => loadRows(filters.range()));\n  const [minimum] = createSignal(0);\n  // F-S46: array callbacks color their host.\n  const shown = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => rows().filter(row => row.score >= minimum()));\n  const summary = createMemo(() => describe(() => shown().length));\n  return (\n    <ul title={summary()}>\n      {shown().map(row => (\n        <Row title={row.title} score={row.score} reload={() => refresh(rows)} />\n      ))}\n    </ul>\n  );\n}\nfunction Clock() {\n  const [tick, setTick] = createSignal(0);\n  // F-S42: the effect's returned cleanup runs before the next run.\n  createEffect(\n    () => tick(),\n    value => {\n      const id = setTimeout(() => setTick(value + 1), 1000);\n      return () => clearTimeout(id);\n    }\n  );\n  onCleanup(() => console.info(\"clock stopped\"));\n  return <p>{tick()}</p>;\n}\nfunction App() {\n  return (\n    <FilterProvider>\n      <FilterBar />\n      <Badge label=\"rows\" />\n      <Panel title=\"Rows\">\n        <Rows />\n      </Panel>\n      <Clock />\n    </FilterProvider>\n  );\n}\nrender(() => <App />, document.body);\n",
       "equivalent": null,
       "id": "M0428",
       "project": "sugar-edges",
@@ -22941,7 +23227,7 @@
             "file": "App.tsx",
             "line": 44,
             "code": "SUGAR_CALLBACK",
-            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:44:95)"
+            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:44:137)"
           },
           {
             "stage": "cli",
@@ -22958,7 +23244,7 @@
           "lint": "blocked-by-transform"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:44:95 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
+          "<job>/source/App.tsx:44:137 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
           "solid-yield check: 4 files, 1 errors"
         ]
       },
@@ -23101,7 +23387,7 @@
         "end": 53
       },
       "offset": 1421,
-      "source": "import {\n  createEffect,\n  createMemo,\n  createSignal,\n  Errored,\n  For,\n  Loading,\n  onCleanup,\n  refresh\n} from \"solid-js\";\nimport { render, type JSX } from \"@solidjs/web\";\nimport { loadRows } from \"./api\";\nimport Badge from \"./Badge\";\nimport { FilterBar, FilterProvider, useFilters } from \"./filters\";\n// D-119: a wrapper's own boundaries cover its children's colors.\nfunction Panel(props: { title: string; children: JSX.Element }) {\n  return (\n    <section>\n      <h2>{props.title.toLowerCase()}</h2>\n      <Errored fallback={error => <p role=\"alert\">{String(error())}</p>}>\n        <Loading fallback=\"loading\">{props.children}</Loading>\n      </Errored>\n    </section>\n  );\n}\n// F-S40: a callback prop that writes, called from the child's event.\nfunction Row(props: { title: string; score: number; reload: () => void }) {\n  return (\n    <li>\n      {props.title} {props.score.toFixed(1)}\n      <button onClick={() => props.reload()}>reload</button>\n    </li>\n  );\n}\n// F-S47: a user function given a callback; the callback's reads color its host.\nfunction describe(count: () => number): string {\n  return `${count()} rows`;\n}\nfunction Rows() {\n  const filters = useFilters();\n  const rows = createMemo(() => loadRows(filters.range()));\n  const [minimum] = createSignal(0);\n  // F-S46: array callbacks color their host.\n  const shown = createMemo(() => rows().filter(row => row.score >= minimum()));\n  const summary = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => describe(() => shown().length));\n  return (\n    <ul title={summary()}>\n      {shown().map(row => (\n        <Row title={row.title} score={row.score} reload={() => refresh(rows)} />\n      ))}\n    </ul>\n  );\n}\nfunction Clock() {\n  const [tick, setTick] = createSignal(0);\n  // F-S42: the effect's returned cleanup runs before the next run.\n  createEffect(\n    () => tick(),\n    value => {\n      const id = setTimeout(() => setTick(value + 1), 1000);\n      return () => clearTimeout(id);\n    }\n  );\n  onCleanup(() => console.info(\"clock stopped\"));\n  return <p>{tick()}</p>;\n}\nfunction App() {\n  return (\n    <FilterProvider>\n      <FilterBar />\n      <Badge label=\"rows\" />\n      <Panel title=\"Rows\">\n        <Rows />\n      </Panel>\n      <Clock />\n    </FilterProvider>\n  );\n}\nrender(() => <App />, document.body);\n",
+      "source": "import {\n  createEffect,\n  createMemo,\n  createSignal,\n  Errored,\n  For,\n  Loading,\n  onCleanup,\n  refresh\n} from \"solid-js\";\nimport { render, type JSX } from \"@solidjs/web\";\nimport { loadRows } from \"./api\";\nimport Badge from \"./Badge\";\nimport { FilterBar, FilterProvider, useFilters } from \"./filters\";\n// D-119: a wrapper's own boundaries cover its children's colors.\nfunction Panel(props: { title: string; children: JSX.Element }) {\n  return (\n    <section>\n      <h2>{props.title.toLowerCase()}</h2>\n      <Errored fallback={error => <p role=\"alert\">{String(error())}</p>}>\n        <Loading fallback=\"loading\">{props.children}</Loading>\n      </Errored>\n    </section>\n  );\n}\n// F-S40: a callback prop that writes, called from the child's event.\nfunction Row(props: { title: string; score: number; reload: () => void }) {\n  return (\n    <li>\n      {props.title} {props.score.toFixed(1)}\n      <button onClick={() => props.reload()}>reload</button>\n    </li>\n  );\n}\n// F-S47: a user function given a callback; the callback's reads color its host.\nfunction describe(count: () => number): string {\n  return `${count()} rows`;\n}\nfunction Rows() {\n  const filters = useFilters();\n  const rows = createMemo(() => loadRows(filters.range()));\n  const [minimum] = createSignal(0);\n  // F-S46: array callbacks color their host.\n  const shown = createMemo(() => rows().filter(row => row.score >= minimum()));\n  const summary = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => describe(() => shown().length));\n  return (\n    <ul title={summary()}>\n      {shown().map(row => (\n        <Row title={row.title} score={row.score} reload={() => refresh(rows)} />\n      ))}\n    </ul>\n  );\n}\nfunction Clock() {\n  const [tick, setTick] = createSignal(0);\n  // F-S42: the effect's returned cleanup runs before the next run.\n  createEffect(\n    () => tick(),\n    value => {\n      const id = setTimeout(() => setTick(value + 1), 1000);\n      return () => clearTimeout(id);\n    }\n  );\n  onCleanup(() => console.info(\"clock stopped\"));\n  return <p>{tick()}</p>;\n}\nfunction App() {\n  return (\n    <FilterProvider>\n      <FilterBar />\n      <Badge label=\"rows\" />\n      <Panel title=\"Rows\">\n        <Rows />\n      </Panel>\n      <Clock />\n    </FilterProvider>\n  );\n}\nrender(() => <App />, document.body);\n",
       "equivalent": null,
       "id": "M0432",
       "project": "sugar-edges",
@@ -24028,7 +24314,7 @@
         "end": 72
       },
       "offset": 1082,
-      "source": "import {\n  createMemo,\n  createProjection,\n  createSignal,\n  createStore,\n  For,\n  isPending,\n  Loading,\n  Repeat\n} from \"solid-js\";\n\ninterface Item {\n  id: number;\n  text: string;\n}\n\nasync function* items(): AsyncIterable<Item> {\n  for (const text of [\"a\", \"b\", \"c\"]) {\n    await new Promise(resolve => setTimeout(resolve, 100));\n    yield { id: text.charCodeAt(0), text };\n  }\n}\n\nasync function load(version: number): Promise<{ title: string; items: Item[] }> {\n  await new Promise(resolve => setTimeout(resolve, 50));\n  return { title: `v${version}`, items: [{ id: 1, text: \"x\" }] };\n}\n\nexport default function Feed() {\n  const [version, setVersion] = createSignal(0);\n  // F-S53: a derived store is a projection; isPending takes its path.\n  const [feed] = createStore(\n    async draft => {\n      const data = await load(version());\n      draft.title = data.title;\n      draft.items = data.items;\n    },\n    { title: \"\", items: [] as Item[] },\n    { seedLoadingValue: true }\n  );\n  // F-S53: async iterable producers; a projection's draft; Repeat's index as a key.\n  const all = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })<Item[]>(async function* () {\n    let seen: Item[] = [];\n    for await (const item of items()) yield (seen = [...seen, item]);\n  });\n  const rows = createProjection<Item[]>(async function* (state) {\n    for await (const item of items()) {\n      state.push(item);\n      yield;\n    }\n  }, []);\n  return (\n    <section class={{ busy: isPending(() => feed.items) }}>\n      <h2>{feed.title}</h2>\n      <button onClick={() => setVersion(v => v + 1)}>refetch</button>\n      <Loading fallback=\"…\">\n        <ul>\n          <For each={all()}>{item => <li>{item.text}</li>}</For>\n        </ul>\n        <ol>\n          <Repeat count={rows.length}>\n            {i => (\n              <li>\n                {i}: {rows[i].text}\n              </li>\n            )}\n          </Repeat>\n        </ol>\n      </Loading>\n    </section>\n  );\n}\n",
+      "source": "import {\n  createMemo,\n  createProjection,\n  createSignal,\n  createStore,\n  For,\n  isPending,\n  Loading,\n  Repeat\n} from \"solid-js\";\n\ninterface Item {\n  id: number;\n  text: string;\n}\n\nasync function* items(): AsyncIterable<Item> {\n  for (const text of [\"a\", \"b\", \"c\"]) {\n    await new Promise(resolve => setTimeout(resolve, 100));\n    yield { id: text.charCodeAt(0), text };\n  }\n}\n\nasync function load(version: number): Promise<{ title: string; items: Item[] }> {\n  await new Promise(resolve => setTimeout(resolve, 50));\n  return { title: `v${version}`, items: [{ id: 1, text: \"x\" }] };\n}\n\nexport default function Feed() {\n  const [version, setVersion] = createSignal(0);\n  // F-S53: a derived store is a projection; isPending takes its path.\n  const [feed] = createStore(\n    async draft => {\n      const data = await load(version());\n      draft.title = data.title;\n      draft.items = data.items;\n    },\n    { title: \"\", items: [] as Item[] },\n    { seedLoadingValue: true }\n  );\n  // F-S53: async iterable producers; a projection's draft; Repeat's index as a key.\n  const all = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })<Item[]>(async function* () {\n    let seen: Item[] = [];\n    for await (const item of items()) yield (seen = [...seen, item]);\n  });\n  const rows = createProjection<Item[]>(async function* (state) {\n    for await (const item of items()) {\n      state.push(item);\n      yield;\n    }\n  }, []);\n  return (\n    <section class={{ busy: isPending(() => feed.items) }}>\n      <h2>{feed.title}</h2>\n      <button onClick={() => setVersion(v => v + 1)}>refetch</button>\n      <Loading fallback=\"…\">\n        <ul>\n          <For each={all()}>{item => <li>{item.text}</li>}</For>\n        </ul>\n        <ol>\n          <Repeat count={rows.length}>\n            {i => (\n              <li>\n                {i}: {rows[i].text}\n              </li>\n            )}\n          </Repeat>\n        </ol>\n      </Loading>\n    </section>\n  );\n}\n",
       "equivalent": null,
       "id": "M0453",
       "project": "rendering-edges",
@@ -24040,9 +24326,9 @@
             "stage": "cli",
             "file": "Feed.tsx",
             "line": 42,
-            "code": "TS2558",
-            "tsCode": "TS2558",
-            "message": "Expected 0 type arguments, but got 1."
+            "code": "TS2345",
+            "tsCode": "TS2345",
+            "message": "Argument of type '() => AsyncGenerator<Item[], void, unknown>' is not assignable to parameter of type '() => Item[]'.\n  Type 'AsyncGenerator<Item[], void, unknown>' is missing the following properties from type 'Item[]': length, pop, push, concat, and 35 more."
           }
         ],
         "stages": {
@@ -24051,13 +24337,13 @@
           "lint": "passed"
         },
         "cliOutput": [
-          "<job>/source/Feed.tsx:42:87 error TS2558: Expected 0 type arguments, but got 1.",
+          "<job>/source/Feed.tsx:42:137 error TS2345: Argument of type '() => AsyncGenerator<Item[], void, unknown>' is not assignable to parameter of type '() => Item[]'.\n  Type 'AsyncGenerator<Item[], void, unknown>' is missing the following properties from type 'Item[]': length, pop, push, concat, and 35 more.",
           "solid-yield check: 5 files, 1 errors"
         ]
       },
       "preExistingMatch": false,
-      "status": "survived",
-      "exactLine": false
+      "status": "killed",
+      "exactLine": true
     },
     {
       "operator": "memo-write",
@@ -24286,7 +24572,7 @@
         "end": 22
       },
       "offset": 636,
-      "source": "import { createContext, createMemo, createSignal, useContext, type Component } from \"solid-js\";\n\n// F-S52: a context value declared with plain function types, given a source,\n// a setter and a routine; F-S45: a tuple, read through destructuring.\ntype RouterValue = [() => string, { go: (path: string) => void; is: (path: string) => boolean }];\n\nconst RouterContext = createContext<RouterValue>();\n\n// F-S51: a component factory; its component closes over the page.\nexport function withRouter(Page: Component): Component<{ url?: string }> {\n  return (props = {}) => {\n    const [navigated, go] = createSignal<string>();\n    const path = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => navigated() ?? props.url ?? \"/\");\n    const is = (match: string) => match === path();\n    window.onpopstate = () => go(location.pathname);\n    return (\n      <RouterContext value={[path, { go, is }]}>\n        <Page />\n      </RouterContext>\n    );\n  };\n}\n\nexport function useRouter() {\n  const router = useContext(RouterContext);\n  if (!router) throw new Error(\"no router\");\n  return router;\n}\n\nexport function Link(props: { to: string; label: string }) {\n  const [, { go, is }] = useRouter();\n  return (\n    <a\n      class={{ active: is(props.to) }}\n      href={props.to}\n      onClick={event => {\n        event.preventDefault();\n        go(props.to);\n      }}\n    >\n      {props.label}\n    </a>\n  );\n}\n",
+      "source": "import { createContext, createMemo, createSignal, useContext, type Component } from \"solid-js\";\n\n// F-S52: a context value declared with plain function types, given a source,\n// a setter and a routine; F-S45: a tuple, read through destructuring.\ntype RouterValue = [() => string, { go: (path: string) => void; is: (path: string) => boolean }];\n\nconst RouterContext = createContext<RouterValue>();\n\n// F-S51: a component factory; its component closes over the page.\nexport function withRouter(Page: Component): Component<{ url?: string }> {\n  return (props = {}) => {\n    const [navigated, go] = createSignal<string>();\n    const path = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => navigated() ?? props.url ?? \"/\");\n    const is = (match: string) => match === path();\n    window.onpopstate = () => go(location.pathname);\n    return (\n      <RouterContext value={[path, { go, is }]}>\n        <Page />\n      </RouterContext>\n    );\n  };\n}\n\nexport function useRouter() {\n  const router = useContext(RouterContext);\n  if (!router) throw new Error(\"no router\");\n  return router;\n}\n\nexport function Link(props: { to: string; label: string }) {\n  const [, { go, is }] = useRouter();\n  return (\n    <a\n      class={{ active: is(props.to) }}\n      href={props.to}\n      onClick={event => {\n        event.preventDefault();\n        go(props.to);\n      }}\n    >\n      {props.label}\n    </a>\n  );\n}\n",
       "equivalent": null,
       "id": "M0459",
       "project": "rendering-edges",
@@ -24299,7 +24585,7 @@
             "file": "router.tsx",
             "line": 13,
             "code": "SUGAR_CALLBACK",
-            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/router.tsx:13:111)"
+            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/router.tsx:13:153)"
           },
           {
             "stage": "cli",
@@ -24325,7 +24611,7 @@
         },
         "cliOutput": [
           "<job>/source/App.tsx:9:18 error TS2769: [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.",
-          "<job>/source/router.tsx:13:111 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
+          "<job>/source/router.tsx:13:153 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
           "solid-yield check: 5 files, 2 errors"
         ]
       },
@@ -25012,7 +25298,7 @@
         "end": 36
       },
       "offset": 603,
-      "source": "import { createMemo, createSignal, createStore, For, isPending, latest } from \"solid-js\";\nimport { drive } from \"./bridge\";\nimport { ticks } from \"./runtime\";\n\nfunction Totals(props: { totals: () => number }) {\n  const shown = () => latest(props.totals);\n  return <p class={isPending(props.totals) ? \"stale\" : \"\"}>{shown().toFixed(1)}</p>;\n}\n\nexport function Checkout() {\n  const [cart, setCart] = createStore([{ name: \"a\", price: 2, quantity: 1 }]);\n  const [phase, setPhase] = createSignal(\"idle\");\n  const total = () => cart.reduce((sum, item) => sum + item.price * item.quantity, 0);\n  const tick = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })<number>(() => ticks(total()));\n  const place = drive(function* (count: number) {\n    setPhase(\"reserving\");\n    const reserved = yield Promise.resolve(count);\n    setPhase(`placed ${reserved}`);\n    return reserved;\n  });\n  return (\n    <section>\n      <For each={cart}>\n        {item => (\n          <p>\n            {item.name}: {item.quantity}\n          </p>\n        )}\n      </For>\n      <button onClick={() => setCart(c => void c[0].quantity++)}>more</button>\n      <button onClick={() => place(cart.length).catch(() => {})}>place</button>\n      <p>{phase()}</p>\n      <Totals totals={tick} />\n    </section>\n  );\n}\n",
+      "source": "import { createMemo, createSignal, createStore, For, isPending, latest } from \"solid-js\";\nimport { drive } from \"./bridge\";\nimport { ticks } from \"./runtime\";\n\nfunction Totals(props: { totals: () => number }) {\n  const shown = () => latest(props.totals);\n  return <p class={isPending(props.totals) ? \"stale\" : \"\"}>{shown().toFixed(1)}</p>;\n}\n\nexport function Checkout() {\n  const [cart, setCart] = createStore([{ name: \"a\", price: 2, quantity: 1 }]);\n  const [phase, setPhase] = createSignal(\"idle\");\n  const total = () => cart.reduce((sum, item) => sum + item.price * item.quantity, 0);\n  const tick = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })<number>(() => ticks(total()));\n  const place = drive(function* (count: number) {\n    setPhase(\"reserving\");\n    const reserved = yield Promise.resolve(count);\n    setPhase(`placed ${reserved}`);\n    return reserved;\n  });\n  return (\n    <section>\n      <For each={cart}>\n        {item => (\n          <p>\n            {item.name}: {item.quantity}\n          </p>\n        )}\n      </For>\n      <button onClick={() => setCart(c => void c[0].quantity++)}>more</button>\n      <button onClick={() => place(cart.length).catch(() => {})}>place</button>\n      <p>{phase()}</p>\n      <Totals totals={tick} />\n    </section>\n  );\n}\n",
       "equivalent": null,
       "id": "M0473",
       "project": "effect-edges",
@@ -25498,7 +25784,7 @@
         "end": 51
       },
       "offset": 772,
-      "source": "import {\n  createContext,\n  createMemo,\n  createSignal,\n  createStore,\n  Errored,\n  For,\n  useContext\n} from \"solid-js\";\n// A call that may fail, made in a JSX hole: its failure is the hole's, taken\n// by the Errored above (nativeHole). Values typed `any`: their members are\n// unchecked, as TypeScript leaves them; a method of `any` is outside code.\nfunction money(cents: number) {\n  if (!Number.isFinite(cents)) throw new RangeError(\"not an amount\");\n  return (cents / 100).toFixed(2);\n}\nconst Settings = createContext<any>({ currency: \"EUR\" });\nexport function Ledger() {\n  const [rows, setRows] = createStore<any>({ items: [{ label: \"tea\", cents: 350 }] });\n  const [user] = createSignal<any>({ name: \"ada\" });\n  const settings = useContext(Settings);\n  const total = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() =>\n    rows.items.reduce((sum: number, item: any) => sum + item.cents, 0)\n  );\n  return (\n    <section class={settings.currency}>\n      <h2>{user().name}</h2>\n      <Errored fallback={err => <p>bad amount: {String(err())}</p>}>\n        <p>{money(total())}</p>\n        <ul>\n          <For each={rows.items}>\n            {item => (\n              <li>\n                {item.label}: {money(item.cents)}\n              </li>\n            )}\n          </For>\n        </ul>\n      </Errored>\n      <button\n        onClick={() =>\n          setRows(s => {\n            s.items.push({ label: \"cake\", cents: 420 });\n          })\n        }\n      >\n        add\n      </button>\n    </section>\n  );\n}\n",
+      "source": "import {\n  createContext,\n  createMemo,\n  createSignal,\n  createStore,\n  Errored,\n  For,\n  useContext\n} from \"solid-js\";\n// A call that may fail, made in a JSX hole: its failure is the hole's, taken\n// by the Errored above (nativeHole). Values typed `any`: their members are\n// unchecked, as TypeScript leaves them; a method of `any` is outside code.\nfunction money(cents: number) {\n  if (!Number.isFinite(cents)) throw new RangeError(\"not an amount\");\n  return (cents / 100).toFixed(2);\n}\nconst Settings = createContext<any>({ currency: \"EUR\" });\nexport function Ledger() {\n  const [rows, setRows] = createStore<any>({ items: [{ label: \"tea\", cents: 350 }] });\n  const [user] = createSignal<any>({ name: \"ada\" });\n  const settings = useContext(Settings);\n  const total = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() =>\n    rows.items.reduce((sum: number, item: any) => sum + item.cents, 0)\n  );\n  return (\n    <section class={settings.currency}>\n      <h2>{user().name}</h2>\n      <Errored fallback={err => <p>bad amount: {String(err())}</p>}>\n        <p>{money(total())}</p>\n        <ul>\n          <For each={rows.items}>\n            {item => (\n              <li>\n                {item.label}: {money(item.cents)}\n              </li>\n            )}\n          </For>\n        </ul>\n      </Errored>\n      <button\n        onClick={() =>\n          setRows(s => {\n            s.items.push({ label: \"cake\", cents: 420 });\n          })\n        }\n      >\n        add\n      </button>\n    </section>\n  );\n}\n",
       "equivalent": null,
       "id": "M0484",
       "project": "hole-edges",

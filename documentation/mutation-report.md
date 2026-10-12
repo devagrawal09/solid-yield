@@ -1,6 +1,6 @@
 # Mutation report
 
-Measured 2026-10-12T05:55:35.357Z. The corpus, operators and checker have changed since the first measurement (2026-10-08); each change is in its own commit, and the catalogue's corrections are listed below. The tests in scripts/mutation/test.mjs verify the harness, not the checker.
+Measured 2026-10-12T09:13:19.756Z. The corpus, operators and checker have changed since the first measurement (2026-10-08); each change is in its own commit, and the catalogue's corrections are listed below. The tests in scripts/mutation/test.mjs verify the harness, not the checker.
 
 ## Commands and scope
 
@@ -12,7 +12,7 @@ node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js ru
 node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js run scripts/mutation/stryker-ts.config.mjs
 ```
 
-Program run: 3702.6 seconds; 43 projects; 488 mutants. Digest: `6a391eb63eb17d6eef1e146ea27f46ec4a5fa638508b7ec8ac2ad6494a80bf48`.
+Program run: 3661.8 seconds; 43 projects; 488 mutants. Digest: `129ebaa8a3b29ef08daeebc3e850a27e85eba1265ae9270b8f83b0f53d1c232c`.
 
 Every syntactically applicable site is edited separately. Sources stay plain Solid. Each pipeline runs the shared native transform, the exported implementation used by `solid-yield check`, and recommended ESLint on generated code. A transform refusal blocks generated lint and is recorded explicitly. A CLI crash is a finding, never a kill.
 
@@ -37,7 +37,7 @@ The gate runs `node scripts/mutation/run.mjs --cached --baseline documentation/y
 | remove-await | 31 | 27 | 2 | 2 | 50.00% | 1 (25.00%) | 2 (50.00%) | TS2322, TS2345, TS2739, TS2740, TS2741, TS2339, GENERATED_TYPE, SETTLED_PROP |
 | memo-write | 26 | 0 | 22 | 4 | 84.62% | 22 (84.62%) | 21 (80.77%) | WRITE_IN_REACTIVE, solid-yield/no-unyielded-write |
 | timer-read | 6 | 6 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | equivalent |
-| non-core-cache | 50 | 0 | 24 | 26 | 48.00% | 18 (36.00%) | 25 (50.00%) | SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP |
+| non-core-cache | 50 | 0 | 42 | 8 | 84.00% | 20 (40.00%) | 42 (84.00%) | SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP, TS2322, TS2345, TS2739, TS2740, TS2741, TS2339, FOR_EACH |
 | destructure-props | 18 | 0 | 17 | 1 | 94.44% | 17 (94.44%) | 17 (94.44%) | NATIVE_PROPS |
 | inline-component | 51 | 0 | 51 | 0 | 100.00% | 51 (100.00%) | 51 (100.00%) | NATIVE_COMPONENT, SUGAR_CALLBACK, SUGAR_RETURN, FOREIGN_HANDOFF |
 | effect-arity | 5 | 0 | 5 | 0 | 100.00% | 5 (100.00%) | 3 (60.00%) | NATIVE_EFFECT_PHASES, TS2554 |
@@ -45,7 +45,7 @@ The gate runs `node scripts/mutation/run.mjs --cached --baseline documentation/y
 | callback-throw | 5 | 3 | 1 | 1 | 50.00% | 0 (0.00%) | 1 (50.00%) | FOREIGN_HANDOFF |
 | server-new-class | 1 | 0 | 0 | 1 | 0.00% | 0 (0.00%) | 0 (0.00%) | FOREIGN_HANDOFF |
 
-**Program mutation score: 66.50% = 260 / (260 + 131).** 97 equivalents excluded. Exact line: 61.64% (241). Detected: 76.47% (299).
+**Program mutation score: 71.10% = 278 / (278 + 113).** 97 equivalents excluded. Exact line: 62.15% (243). Detected: 80.82% (316).
 
 ### Why mutants survive
 
@@ -61,7 +61,7 @@ Each survivor of the gate's rule falls in one category: **detected elsewhere** (
 | never-provided-context | 0 | 4 | 0 | 0 | 0 |
 | remove-await | 0 | 0 | 1 | 0 | 1 |
 | memo-write | 0 | 4 | 0 | 0 | 0 |
-| non-core-cache | 1 | 8 | 9 | 1 | 7 |
+| non-core-cache | 0 | 8 | 0 | 0 | 0 |
 | destructure-props | 0 | 0 | 0 | 1 | 0 |
 | callback-throw | 0 | 0 | 0 | 0 | 1 |
 | server-new-class | 0 | 0 | 1 | 0 | 0 |
@@ -81,7 +81,7 @@ Each survivor of the gate's rule falls in one category: **detected elsewhere** (
 - **remove-await:** Replace each await expression with its operand. Correction: TS2739, TS2740 and TS2741 added (2026-10-10): TypeScript's assignability error for missing properties (a Promise where its value was expected) is one of these, not TS2322. TS2339 added (2026-10-10, with the kept-promise fix): reading a property of the un-awaited Promise (`data.title`) is that error.
 - **memo-write:** Insert a write to each visible signal setter in each memo callback.
 - **timer-read:** Insert a settled signal read in each setup-time timer/listener callback. Equivalent reason: A settled signal read in an ignored timer/listener callback is an allowed event read. Failure diagnostics remain recorded.
-- **non-core-cache:** Replace createMemo with an inline hand-rolled last-value cache.
+- **non-core-cache:** Replace createMemo with an inline hand-rolled last-value cache, generic in the cached value's type. Correction: The cache is generic in the cached value (2026-10-12, Dev's ruling): typed `any`, it hid a cached promise from TypeScript and the checker alike, so a defect no type-based check can see. Over an async memo the generic cache leaves a promise (or a stream) where its value was expected, remove-await's defect; TypeScript's assignability and member errors for it are expected too, and FOR_EACH where the promise is a For's list (Solid's For fails on it).
 - **destructure-props:** Destructure each directly read property in a component parameter; rewrite its references. Parameter snapshots are currently refused (setup snapshots are valid).
 - **inline-component:** Define an inline copy at every JSX use of a local component, and use that copy at the edited site. Other callers and exports remain valid.
 - **effect-arity:** Remove all but the compute argument (or the only argument).
@@ -460,38 +460,7 @@ solid-yield check: 1 files, 1 errors
 transform main.tsx:1 [NATIVE_RECURSION] [NATIVE_RECURSION] Snapshot Dot.x is not a fixed numeric prop; ordered snapshot lowering is required. (<job>/source/main.tsx)
 ```
 
-### F-M3: M0014 non-core-cache at sierpinski/main.tsx:62 (detected elsewhere)
-
-Expected in the mutated routine (lines 51–87): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
-
-```diff
---- sierpinski/main.tsx
-+++ sierpinski/main.tsx (mutant)
-@@ -59,7 +59,7 @@
-   }
-   s = s / 2;
- 
--  const slowChildren = createMemo(() => {
-+  const slowChildren = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => {
-     const seconds = props.children;
-     return new Promise<number>(res => {
-       const t = requestIdleCallback(() => {
-```
-
-Checker said instead:
-
-```text
-Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
-<job>/source/main.tsx:110:25 error TS2345: [FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: unknown.
-  related: <job>/source/main.tsx:115:8: The app is rendered here. does not suspend; can fail with an unknown error; does not wait; needs no context
-<job>/source/main.tsx:62:96 error TS2345: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
-<job>/source/main.tsx:51:7 error TS2769: [generated] [LAZY_VIEW] fallback is a lazy view: function* () { return <.../>; }
-<job>/source/main.tsx:51:7 error TS2589: [generated] Type instantiation is excessively deep and possibly infinite.
-<job>/source/main.tsx:51:7 error TS2322: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
-solid-yield check: 1 files, 5 errors
-```
-
-### F-M4: M0035 delete-errored at todos/app.tsx:133 (detected elsewhere)
+### F-M3: M0035 delete-errored at todos/app.tsx:133 (detected elsewhere)
 
 Expected in the mutated routine (lines 130–152): FOREIGN_HANDOFF.
 
@@ -545,7 +514,7 @@ lint app.tsx:65 [solid-yield/no-unshown-wait] this view binds a handler that may
 lint app.tsx:93 [solid-yield/no-unshown-wait] this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* (...args: __NativeAr...`, D-075).
 ```
 
-### F-M5: M0036 delete-provider at todos/app.tsx:141 (detected elsewhere)
+### F-M4: M0036 delete-provider at todos/app.tsx:141 (detected elsewhere)
 
 Expected in the mutated routine (lines 130–152): NO_PROVIDER.
 
@@ -586,7 +555,7 @@ lint app.tsx:65 [solid-yield/no-unshown-wait] this view binds a handler that may
 lint app.tsx:93 [solid-yield/no-unshown-wait] this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* (...args: __NativeAr...`, D-075).
 ```
 
-### F-M6: M0037 delete-loading at todos/app.tsx:144 (detected elsewhere)
+### F-M5: M0037 delete-loading at todos/app.tsx:144 (detected elsewhere)
 
 Expected in the mutated routine (lines 130–152): PENDING_ROOT.
 
@@ -622,7 +591,7 @@ lint app.tsx:65 [solid-yield/no-unshown-wait] this view binds a handler that may
 lint app.tsx:93 [solid-yield/no-unshown-wait] this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* (...args: __NativeAr...`, D-075).
 ```
 
-### F-M7: M0039 delete-catch at todos/todos.ts:99 (detected elsewhere)
+### F-M6: M0039 delete-catch at todos/todos.ts:99 (detected elsewhere)
 
 Expected in the mutated routine (lines 85–176): FOREIGN_HANDOFF, NATIVE_CALLBACK_FAILURE, EVENT_REJECTS.
 
@@ -661,7 +630,7 @@ lint app.tsx:65 [solid-yield/no-unshown-wait] this view binds a handler that may
 lint app.tsx:93 [solid-yield/no-unshown-wait] this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* (...args: __NativeAr...`, D-075).
 ```
 
-### F-M8: M0040 delete-catch at todos/todos.ts:109 (detected elsewhere)
+### F-M7: M0040 delete-catch at todos/todos.ts:109 (detected elsewhere)
 
 Expected in the mutated routine (lines 85–176): FOREIGN_HANDOFF, NATIVE_CALLBACK_FAILURE, EVENT_REJECTS.
 
@@ -700,7 +669,7 @@ lint app.tsx:65 [solid-yield/no-unshown-wait] this view binds a handler that may
 lint app.tsx:93 [solid-yield/no-unshown-wait] this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* (...args: __NativeAr...`, D-075).
 ```
 
-### F-M9: M0041 delete-catch at todos/todos.ts:125 (detected elsewhere)
+### F-M8: M0041 delete-catch at todos/todos.ts:125 (detected elsewhere)
 
 Expected in the mutated routine (lines 85–176): FOREIGN_HANDOFF, NATIVE_CALLBACK_FAILURE, EVENT_REJECTS.
 
@@ -739,7 +708,7 @@ lint app.tsx:65 [solid-yield/no-unshown-wait] this view binds a handler that may
 lint app.tsx:93 [solid-yield/no-unshown-wait] this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* (...args: __NativeAr...`, D-075).
 ```
 
-### F-M10: M0042 delete-catch at todos/todos.ts:144 (detected elsewhere)
+### F-M9: M0042 delete-catch at todos/todos.ts:144 (detected elsewhere)
 
 Expected in the mutated routine (lines 85–176): FOREIGN_HANDOFF, NATIVE_CALLBACK_FAILURE, EVENT_REJECTS.
 
@@ -784,7 +753,7 @@ lint app.tsx:65 [solid-yield/no-unshown-wait] this view binds a handler that may
 lint app.tsx:93 [solid-yield/no-unshown-wait] this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* (...args: __NativeAr...`, D-075).
 ```
 
-### F-M11: M0043 delete-catch at todos/todos.ts:159 (detected elsewhere)
+### F-M10: M0043 delete-catch at todos/todos.ts:159 (detected elsewhere)
 
 Expected in the mutated routine (lines 85–176): FOREIGN_HANDOFF, NATIVE_CALLBACK_FAILURE, EVENT_REJECTS.
 
@@ -825,32 +794,7 @@ lint app.tsx:65 [solid-yield/no-unshown-wait] this view binds a handler that may
 lint app.tsx:93 [solid-yield/no-unshown-wait] this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* (...args: __NativeAr...`, D-075).
 ```
 
-### F-M12: M0053 non-core-cache at reviewer-myapp/App.tsx:14 (silent)
-
-Expected in the mutated routine (lines 12–20): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
-
-```diff
---- reviewer-myapp/App.tsx
-+++ reviewer-myapp/App.tsx (mutant)
-@@ -11,7 +11,7 @@
- 
- function List() {
-   const theme = useContext(ThemeCtx);
--  const items = createMemo(() => fetchItems());
-+  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());
-   return (
-     <ul class={theme}>
-       <For each={items()}>{item => <li>{item.name}</li>}</For>
-```
-
-Checker said instead:
-
-```text
-Stages: {"transform":"completed","cli":"passed","lint":"passed"}
-solid-yield check: 3 files, 0 errors
-```
-
-### F-M13: M0055 delete-provider at reviewer-myapp/App.tsx:24 (detected elsewhere)
+### F-M11: M0055 delete-provider at reviewer-myapp/App.tsx:24 (detected elsewhere)
 
 Expected in the mutated routine (lines 22–33): NO_PROVIDER.
 
@@ -884,7 +828,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 1 errors
 ```
 
-### F-M14: M0056 delete-errored at reviewer-myapp/App.tsx:26 (detected elsewhere)
+### F-M12: M0056 delete-errored at reviewer-myapp/App.tsx:26 (detected elsewhere)
 
 Expected in the mutated routine (lines 22–33): FOREIGN_HANDOFF.
 
@@ -916,7 +860,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 1 errors
 ```
 
-### F-M15: M0057 delete-loading at reviewer-myapp/App.tsx:27 (detected elsewhere)
+### F-M13: M0057 delete-loading at reviewer-myapp/App.tsx:27 (detected elsewhere)
 
 Expected in the mutated routine (lines 22–33): PENDING_ROOT.
 
@@ -946,35 +890,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 1 errors
 ```
 
-### F-M16: M0070 non-core-cache at reviewer-m01_setup_read/App.tsx:16 (masked: base errors)
-
-Expected in the mutated routine (lines 14–22): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
-
-```diff
---- reviewer-m01_setup_read/App.tsx
-+++ reviewer-m01_setup_read/App.tsx (mutant)
-@@ -13,7 +13,7 @@
- 
- function List() {
-   const theme = useContext(ThemeCtx);
--  const items = createMemo(() => fetchItems());
-+  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());
-   return (
-     <ul class={theme}>
-       <For each={items()}>{item => <li>{item.name}</li>}</For>
-```
-
-Checker said instead:
-
-```text
-Stages: {"transform":"completed","cli":"diagnostics","lint":"diagnostics"}
-<job>/source/App.tsx:8:20 error TS2769: [READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive.
-<job>/source/index.tsx:3:15 error TS2345: [FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any.
-solid-yield check: 3 files, 2 errors
-lint App.tsx:8 [READ_IN_SETUP] [READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event.
-```
-
-### F-M17: M0072 delete-provider at reviewer-m01_setup_read/App.tsx:26 (masked: base errors)
+### F-M14: M0072 delete-provider at reviewer-m01_setup_read/App.tsx:26 (masked: base errors)
 
 Expected in the mutated routine (lines 24–35): NO_PROVIDER.
 
@@ -1009,7 +925,7 @@ solid-yield check: 3 files, 2 errors
 lint App.tsx:8 [READ_IN_SETUP] [READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event.
 ```
 
-### F-M18: M0073 delete-errored at reviewer-m01_setup_read/App.tsx:28 (masked: base errors)
+### F-M15: M0073 delete-errored at reviewer-m01_setup_read/App.tsx:28 (masked: base errors)
 
 Expected in the mutated routine (lines 24–35): FOREIGN_HANDOFF.
 
@@ -1042,7 +958,7 @@ solid-yield check: 3 files, 2 errors
 lint App.tsx:8 [READ_IN_SETUP] [READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event.
 ```
 
-### F-M19: M0074 delete-loading at reviewer-m01_setup_read/App.tsx:29 (masked: base errors)
+### F-M16: M0074 delete-loading at reviewer-m01_setup_read/App.tsx:29 (masked: base errors)
 
 Expected in the mutated routine (lines 24–35): PENDING_ROOT.
 
@@ -1073,34 +989,7 @@ solid-yield check: 3 files, 2 errors
 lint App.tsx:8 [READ_IN_SETUP] [READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event.
 ```
 
-### F-M20: M0088 non-core-cache at reviewer-m02_noprovider2/App.tsx:16 (masked: base errors)
-
-Expected in the mutated routine (lines 13–22): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
-
-```diff
---- reviewer-m02_noprovider2/App.tsx
-+++ reviewer-m02_noprovider2/App.tsx (mutant)
-@@ -13,7 +13,7 @@
- function List() {
-   const theme = useContext(ThemeCtx);
-   const user = useContext(UserCtx);
--  const items = createMemo(() => fetchItems());
-+  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());
-   return (
-     <ul class={theme + user}>
-       <For each={items()}>{item => <li>{item.name}</li>}</For>
-```
-
-Checker said instead:
-
-```text
-Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
-<job>/source/App.tsx:15:16 error TS1360: [NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: UserCtx.
-  related: <job>/source/index.tsx:3:15: The app is rendered here. does not suspend; never fails; does not wait; needs UserCtx
-solid-yield check: 3 files, 1 errors
-```
-
-### F-M21: M0090 delete-provider at reviewer-m02_noprovider2/App.tsx:26 (detected elsewhere)
+### F-M17: M0090 delete-provider at reviewer-m02_noprovider2/App.tsx:26 (detected elsewhere)
 
 Expected in the mutated routine (lines 24–35): NO_PROVIDER.
 
@@ -1134,7 +1023,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 1 errors
 ```
 
-### F-M22: M0091 delete-errored at reviewer-m02_noprovider2/App.tsx:28 (detected elsewhere)
+### F-M18: M0091 delete-errored at reviewer-m02_noprovider2/App.tsx:28 (detected elsewhere)
 
 Expected in the mutated routine (lines 24–35): FOREIGN_HANDOFF.
 
@@ -1168,7 +1057,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 2 errors
 ```
 
-### F-M23: M0092 delete-loading at reviewer-m02_noprovider2/App.tsx:29 (detected elsewhere)
+### F-M19: M0092 delete-loading at reviewer-m02_noprovider2/App.tsx:29 (detected elsewhere)
 
 Expected in the mutated routine (lines 24–35): PENDING_ROOT.
 
@@ -1200,9 +1089,9 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 2 errors
 ```
 
-### F-M24: M0097 non-core-cache at reviewer-m03_throw_string/App.tsx:9 (masked: base refused)
+### F-M20: M0097 non-core-cache at reviewer-m03_throw_string/App.tsx:9 (masked: base refused)
 
-Expected in the mutated routine (lines 6–11): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
+Expected in the mutated routine (lines 6–11): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP, TS2322, TS2345, TS2739, TS2740, TS2741, TS2339, FOR_EACH.
 
 ```diff
 --- reviewer-m03_throw_string/App.tsx
@@ -1212,7 +1101,7 @@ Expected in the mutated routine (lines 6–11): SUGAR_CALLBACK, NATIVE_FOREIGN_B
    const [count, setCount] = createSignal(0);
    if (count() > 100) throw 'too big';
 -  const twice = createMemo(() => count() * 2);
-+  const twice = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => count() * 2);
++  const twice = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => count() * 2);
    return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;
  }
 ```
@@ -1226,7 +1115,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.
 ```
 
-### F-M25: M0098 memo-write at reviewer-m03_throw_string/App.tsx:9 (masked: base refused)
+### F-M21: M0098 memo-write at reviewer-m03_throw_string/App.tsx:9 (masked: base refused)
 
 Expected in the mutated routine (lines 6–11): WRITE_IN_REACTIVE, solid-yield/no-unyielded-write.
 
@@ -1252,7 +1141,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.
 ```
 
-### F-M26: M0099 setup-read at reviewer-m03_throw_string/App.tsx:10 (masked: base refused)
+### F-M22: M0099 setup-read at reviewer-m03_throw_string/App.tsx:10 (masked: base refused)
 
 Expected in the mutated routine (lines 6–11): READ_IN_SETUP, solid-yield/no-read-in-setup.
 
@@ -1281,7 +1170,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.
 ```
 
-### F-M27: M0100 setup-read at reviewer-m03_throw_string/App.tsx:10 (masked: base refused)
+### F-M23: M0100 setup-read at reviewer-m03_throw_string/App.tsx:10 (masked: base refused)
 
 Expected in the mutated routine (lines 6–11): READ_IN_SETUP, solid-yield/no-read-in-setup.
 
@@ -1308,7 +1197,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.
 ```
 
-### F-M28: M0101 setup-read at reviewer-m03_throw_string/App.tsx:10 (masked: base refused)
+### F-M24: M0101 setup-read at reviewer-m03_throw_string/App.tsx:10 (masked: base refused)
 
 Expected in the mutated routine (lines 6–11): READ_IN_SETUP, solid-yield/no-read-in-setup.
 
@@ -1335,7 +1224,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.
 ```
 
-### F-M29: M0102 setup-read at reviewer-m03_throw_string/App.tsx:10 (masked: base refused)
+### F-M25: M0102 setup-read at reviewer-m03_throw_string/App.tsx:10 (masked: base refused)
 
 Expected in the mutated routine (lines 6–11): READ_IN_SETUP, solid-yield/no-read-in-setup.
 
@@ -1362,7 +1251,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.
 ```
 
-### F-M30: M0104 never-provided-context at reviewer-m03_throw_string/App.tsx:14 (masked: base refused)
+### F-M26: M0104 never-provided-context at reviewer-m03_throw_string/App.tsx:14 (masked: base refused)
 
 Expected in the mutated routine (lines 13–21): NO_PROVIDER.
 
@@ -1389,9 +1278,9 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.
 ```
 
-### F-M31: M0105 non-core-cache at reviewer-m03_throw_string/App.tsx:15 (masked: base refused)
+### F-M27: M0105 non-core-cache at reviewer-m03_throw_string/App.tsx:15 (masked: base refused)
 
-Expected in the mutated routine (lines 13–21): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
+Expected in the mutated routine (lines 13–21): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP, TS2322, TS2345, TS2739, TS2740, TS2741, TS2339, FOR_EACH.
 
 ```diff
 --- reviewer-m03_throw_string/App.tsx
@@ -1401,7 +1290,7 @@ Expected in the mutated routine (lines 13–21): SUGAR_CALLBACK, NATIVE_FOREIGN_
  function List() {
    const theme = useContext(ThemeCtx);
 -  const items = createMemo(() => fetchItems());
-+  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());
++  const items = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => fetchItems());
    return (
      <ul class={theme}>
        <For each={items()}>{item => <li>{item.name}</li>}</For>
@@ -1416,7 +1305,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.
 ```
 
-### F-M32: M0106 setup-read at reviewer-m03_throw_string/App.tsx:16 (masked: base refused)
+### F-M28: M0106 setup-read at reviewer-m03_throw_string/App.tsx:16 (masked: base refused)
 
 Expected in the mutated routine (lines 13–21): READ_IN_SETUP, solid-yield/no-read-in-setup.
 
@@ -1446,7 +1335,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.
 ```
 
-### F-M33: M0107 delete-provider at reviewer-m03_throw_string/App.tsx:25 (masked: base refused)
+### F-M29: M0107 delete-provider at reviewer-m03_throw_string/App.tsx:25 (masked: base refused)
 
 Expected in the mutated routine (lines 23–34): NO_PROVIDER.
 
@@ -1480,7 +1369,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.
 ```
 
-### F-M34: M0108 delete-errored at reviewer-m03_throw_string/App.tsx:27 (masked: base refused)
+### F-M30: M0108 delete-errored at reviewer-m03_throw_string/App.tsx:27 (masked: base refused)
 
 Expected in the mutated routine (lines 23–34): FOREIGN_HANDOFF.
 
@@ -1512,7 +1401,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.
 ```
 
-### F-M35: M0109 delete-loading at reviewer-m03_throw_string/App.tsx:28 (masked: base refused)
+### F-M31: M0109 delete-loading at reviewer-m03_throw_string/App.tsx:28 (masked: base refused)
 
 Expected in the mutated routine (lines 23–34): PENDING_ROOT.
 
@@ -1542,9 +1431,9 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.
 ```
 
-### F-M36: M0114 non-core-cache at reviewer-m03b_throw_in_memo/App.tsx:8 (masked: base refused)
+### F-M32: M0114 non-core-cache at reviewer-m03b_throw_in_memo/App.tsx:8 (masked: base refused)
 
-Expected in the mutated routine (lines 6–10): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
+Expected in the mutated routine (lines 6–10): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP, TS2322, TS2345, TS2739, TS2740, TS2741, TS2339, FOR_EACH.
 
 ```diff
 --- reviewer-m03b_throw_in_memo/App.tsx
@@ -1554,7 +1443,7 @@ Expected in the mutated routine (lines 6–10): SUGAR_CALLBACK, NATIVE_FOREIGN_B
  function Counter() {
    const [count, setCount] = createSignal(0);
 -  const twice = createMemo(() => { if (count() > 100) throw 'too big'; return count() * 2; });
-+  const twice = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => { if (count() > 100) throw 'too big'; return count() * 2; });
++  const twice = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => { if (count() > 100) throw 'too big'; return count() * 2; });
    return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;
  }
 ```
@@ -1563,12 +1452,12 @@ Checker said instead:
 
 ```text
 Stages: {"transform":"refused","cli":"diagnostics","lint":"blocked-by-transform"}
-<job>/source/App.tsx:8:116 error TS95000: [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.
+<job>/source/App.tsx:8:158 error TS95000: [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.
 solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.
 ```
 
-### F-M37: M0115 memo-write at reviewer-m03b_throw_in_memo/App.tsx:8 (masked: base refused)
+### F-M33: M0115 memo-write at reviewer-m03b_throw_in_memo/App.tsx:8 (masked: base refused)
 
 Expected in the mutated routine (lines 6–10): WRITE_IN_REACTIVE, solid-yield/no-unyielded-write.
 
@@ -1594,7 +1483,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.
 ```
 
-### F-M38: M0116 setup-read at reviewer-m03b_throw_in_memo/App.tsx:9 (masked: base refused)
+### F-M34: M0116 setup-read at reviewer-m03b_throw_in_memo/App.tsx:9 (masked: base refused)
 
 Expected in the mutated routine (lines 6–10): READ_IN_SETUP, solid-yield/no-read-in-setup.
 
@@ -1623,7 +1512,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.
 ```
 
-### F-M39: M0117 setup-read at reviewer-m03b_throw_in_memo/App.tsx:9 (masked: base refused)
+### F-M35: M0117 setup-read at reviewer-m03b_throw_in_memo/App.tsx:9 (masked: base refused)
 
 Expected in the mutated routine (lines 6–10): READ_IN_SETUP, solid-yield/no-read-in-setup.
 
@@ -1652,7 +1541,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.
 ```
 
-### F-M40: M0118 setup-read at reviewer-m03b_throw_in_memo/App.tsx:9 (masked: base refused)
+### F-M36: M0118 setup-read at reviewer-m03b_throw_in_memo/App.tsx:9 (masked: base refused)
 
 Expected in the mutated routine (lines 6–10): READ_IN_SETUP, solid-yield/no-read-in-setup.
 
@@ -1679,7 +1568,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.
 ```
 
-### F-M41: M0119 setup-read at reviewer-m03b_throw_in_memo/App.tsx:9 (masked: base refused)
+### F-M37: M0119 setup-read at reviewer-m03b_throw_in_memo/App.tsx:9 (masked: base refused)
 
 Expected in the mutated routine (lines 6–10): READ_IN_SETUP, solid-yield/no-read-in-setup.
 
@@ -1706,7 +1595,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.
 ```
 
-### F-M42: M0120 setup-read at reviewer-m03b_throw_in_memo/App.tsx:9 (masked: base refused)
+### F-M38: M0120 setup-read at reviewer-m03b_throw_in_memo/App.tsx:9 (masked: base refused)
 
 Expected in the mutated routine (lines 6–10): READ_IN_SETUP, solid-yield/no-read-in-setup.
 
@@ -1733,7 +1622,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.
 ```
 
-### F-M43: M0122 never-provided-context at reviewer-m03b_throw_in_memo/App.tsx:13 (masked: base refused)
+### F-M39: M0122 never-provided-context at reviewer-m03b_throw_in_memo/App.tsx:13 (masked: base refused)
 
 Expected in the mutated routine (lines 12–20): NO_PROVIDER.
 
@@ -1760,9 +1649,9 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.
 ```
 
-### F-M44: M0123 non-core-cache at reviewer-m03b_throw_in_memo/App.tsx:14 (masked: base refused)
+### F-M40: M0123 non-core-cache at reviewer-m03b_throw_in_memo/App.tsx:14 (masked: base refused)
 
-Expected in the mutated routine (lines 12–20): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
+Expected in the mutated routine (lines 12–20): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP, TS2322, TS2345, TS2739, TS2740, TS2741, TS2339, FOR_EACH.
 
 ```diff
 --- reviewer-m03b_throw_in_memo/App.tsx
@@ -1772,7 +1661,7 @@ Expected in the mutated routine (lines 12–20): SUGAR_CALLBACK, NATIVE_FOREIGN_
  function List() {
    const theme = useContext(ThemeCtx);
 -  const items = createMemo(() => fetchItems());
-+  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());
++  const items = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => fetchItems());
    return (
      <ul class={theme}>
        <For each={items()}>{item => <li>{item.name}</li>}</For>
@@ -1787,7 +1676,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.
 ```
 
-### F-M45: M0124 setup-read at reviewer-m03b_throw_in_memo/App.tsx:15 (masked: base refused)
+### F-M41: M0124 setup-read at reviewer-m03b_throw_in_memo/App.tsx:15 (masked: base refused)
 
 Expected in the mutated routine (lines 12–20): READ_IN_SETUP, solid-yield/no-read-in-setup.
 
@@ -1817,7 +1706,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.
 ```
 
-### F-M46: M0125 delete-provider at reviewer-m03b_throw_in_memo/App.tsx:24 (masked: base refused)
+### F-M42: M0125 delete-provider at reviewer-m03b_throw_in_memo/App.tsx:24 (masked: base refused)
 
 Expected in the mutated routine (lines 22–33): NO_PROVIDER.
 
@@ -1851,7 +1740,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.
 ```
 
-### F-M47: M0126 delete-errored at reviewer-m03b_throw_in_memo/App.tsx:26 (masked: base refused)
+### F-M43: M0126 delete-errored at reviewer-m03b_throw_in_memo/App.tsx:26 (masked: base refused)
 
 Expected in the mutated routine (lines 22–33): FOREIGN_HANDOFF.
 
@@ -1883,7 +1772,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.
 ```
 
-### F-M48: M0127 delete-loading at reviewer-m03b_throw_in_memo/App.tsx:27 (masked: base refused)
+### F-M44: M0127 delete-loading at reviewer-m03b_throw_in_memo/App.tsx:27 (masked: base refused)
 
 Expected in the mutated routine (lines 22–33): PENDING_ROOT.
 
@@ -1913,34 +1802,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.
 ```
 
-### F-M49: M0143 non-core-cache at reviewer-m03c_throw_in_handler/App.tsx:14 (masked: base errors)
-
-Expected in the mutated routine (lines 12–20): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
-
-```diff
---- reviewer-m03c_throw_in_handler/App.tsx
-+++ reviewer-m03c_throw_in_handler/App.tsx (mutant)
-@@ -11,7 +11,7 @@
- 
- function List() {
-   const theme = useContext(ThemeCtx);
--  const items = createMemo(() => fetchItems());
-+  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());
-   return (
-     <ul class={theme}>
-       <For each={items()}>{item => <li>{item.name}</li>}</For>
-```
-
-Checker said instead:
-
-```text
-Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
-<job>/source/App.tsx:9:27 error TS95000: [EVENT_REJECTS] This handler can fail with Error and nothing catches it; wrap the body in try/catch, or declare the failure.
-  related: <job>/source/index.tsx:3:15: The app is rendered here.
-solid-yield check: 3 files, 1 errors
-```
-
-### F-M50: M0145 delete-provider at reviewer-m03c_throw_in_handler/App.tsx:24 (detected elsewhere)
+### F-M45: M0145 delete-provider at reviewer-m03c_throw_in_handler/App.tsx:24 (detected elsewhere)
 
 Expected in the mutated routine (lines 22–33): NO_PROVIDER.
 
@@ -1976,7 +1838,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 2 errors
 ```
 
-### F-M51: M0146 delete-errored at reviewer-m03c_throw_in_handler/App.tsx:26 (masked: base errors)
+### F-M46: M0146 delete-errored at reviewer-m03c_throw_in_handler/App.tsx:26 (masked: base errors)
 
 Expected in the mutated routine (lines 22–33): FOREIGN_HANDOFF.
 
@@ -2008,7 +1870,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 1 errors
 ```
 
-### F-M52: M0147 delete-loading at reviewer-m03c_throw_in_handler/App.tsx:27 (detected elsewhere)
+### F-M47: M0147 delete-loading at reviewer-m03c_throw_in_handler/App.tsx:27 (detected elsewhere)
 
 Expected in the mutated routine (lines 22–33): PENDING_ROOT.
 
@@ -2040,34 +1902,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 2 errors
 ```
 
-### F-M53: M0163 non-core-cache at reviewer-m04_async_handler/App.tsx:15 (masked: base errors)
-
-Expected in the mutated routine (lines 13–21): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
-
-```diff
---- reviewer-m04_async_handler/App.tsx
-+++ reviewer-m04_async_handler/App.tsx (mutant)
-@@ -12,7 +12,7 @@
- 
- function List() {
-   const theme = useContext(ThemeCtx);
--  const items = createMemo(() => fetchItems());
-+  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());
-   return (
-     <ul class={theme}>
-       <For each={items()}>{item => <li>{item.name}</li>}</For>
-```
-
-Checker said instead:
-
-```text
-Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
-<job>/source/App.tsx:10:27 error TS95000: [EVENT_REJECTS] This handler can fail with Error and nothing catches it; wrap the body in try/catch, or declare the failure.
-  related: <job>/source/index.tsx:3:15: The app is rendered here.
-solid-yield check: 3 files, 1 errors
-```
-
-### F-M54: M0165 delete-provider at reviewer-m04_async_handler/App.tsx:25 (detected elsewhere)
+### F-M48: M0165 delete-provider at reviewer-m04_async_handler/App.tsx:25 (detected elsewhere)
 
 Expected in the mutated routine (lines 23–34): NO_PROVIDER.
 
@@ -2103,7 +1938,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 2 errors
 ```
 
-### F-M55: M0166 delete-errored at reviewer-m04_async_handler/App.tsx:27 (masked: base errors)
+### F-M49: M0166 delete-errored at reviewer-m04_async_handler/App.tsx:27 (masked: base errors)
 
 Expected in the mutated routine (lines 23–34): FOREIGN_HANDOFF.
 
@@ -2135,7 +1970,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 1 errors
 ```
 
-### F-M56: M0167 delete-loading at reviewer-m04_async_handler/App.tsx:28 (detected elsewhere)
+### F-M50: M0167 delete-loading at reviewer-m04_async_handler/App.tsx:28 (detected elsewhere)
 
 Expected in the mutated routine (lines 23–34): PENDING_ROOT.
 
@@ -2167,32 +2002,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 2 errors
 ```
 
-### F-M57: M0180 non-core-cache at reviewer-m05_swallow/App.tsx:14 (silent)
-
-Expected in the mutated routine (lines 12–20): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
-
-```diff
---- reviewer-m05_swallow/App.tsx
-+++ reviewer-m05_swallow/App.tsx (mutant)
-@@ -11,7 +11,7 @@
- 
- function List() {
-   const theme = useContext(ThemeCtx);
--  const items = createMemo(async () => { try { return await fetchItems(); } catch { return []; } });
-+  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(async () => { try { return await fetchItems(); } catch { return []; } });
-   return (
-     <ul class={theme}>
-       <For each={items()}>{item => <li>{item.name}</li>}</For>
-```
-
-Checker said instead:
-
-```text
-Stages: {"transform":"completed","cli":"passed","lint":"passed"}
-solid-yield check: 3 files, 0 errors
-```
-
-### F-M58: M0181 delete-catch at reviewer-m05_swallow/App.tsx:14 (silent)
+### F-M51: M0181 delete-catch at reviewer-m05_swallow/App.tsx:14 (silent)
 
 Expected in the mutated routine (lines 12–20): FOREIGN_HANDOFF, NATIVE_CALLBACK_FAILURE, EVENT_REJECTS.
 
@@ -2217,7 +2027,7 @@ Stages: {"transform":"completed","cli":"passed","lint":"passed"}
 solid-yield check: 3 files, 0 errors
 ```
 
-### F-M59: M0182 remove-await at reviewer-m05_swallow/App.tsx:14 (silent)
+### F-M52: M0182 remove-await at reviewer-m05_swallow/App.tsx:14 (silent)
 
 Expected in the mutated routine (lines 12–20): TS2322, TS2345, TS2739, TS2740, TS2741, TS2339, GENERATED_TYPE, SETTLED_PROP.
 
@@ -2242,7 +2052,7 @@ Stages: {"transform":"completed","cli":"passed","lint":"passed"}
 solid-yield check: 3 files, 0 errors
 ```
 
-### F-M60: M0184 delete-provider at reviewer-m05_swallow/App.tsx:24 (detected elsewhere)
+### F-M53: M0184 delete-provider at reviewer-m05_swallow/App.tsx:24 (detected elsewhere)
 
 Expected in the mutated routine (lines 22–33): NO_PROVIDER.
 
@@ -2276,7 +2086,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 1 errors
 ```
 
-### F-M61: M0185 delete-errored at reviewer-m05_swallow/App.tsx:26 (silent)
+### F-M54: M0185 delete-errored at reviewer-m05_swallow/App.tsx:26 (silent)
 
 Expected in the mutated routine (lines 22–33): FOREIGN_HANDOFF.
 
@@ -2306,7 +2116,7 @@ Stages: {"transform":"completed","cli":"passed","lint":"passed"}
 solid-yield check: 3 files, 0 errors
 ```
 
-### F-M62: M0186 delete-loading at reviewer-m05_swallow/App.tsx:27 (detected elsewhere)
+### F-M55: M0186 delete-loading at reviewer-m05_swallow/App.tsx:27 (detected elsewhere)
 
 Expected in the mutated routine (lines 22–33): PENDING_ROOT.
 
@@ -2336,34 +2146,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 1 errors
 ```
 
-### F-M63: M0200 non-core-cache at reviewer-m06_memo_writes/App.tsx:14 (masked: base errors)
-
-Expected in the mutated routine (lines 12–20): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
-
-```diff
---- reviewer-m06_memo_writes/App.tsx
-+++ reviewer-m06_memo_writes/App.tsx (mutant)
-@@ -11,7 +11,7 @@
- 
- function List() {
-   const theme = useContext(ThemeCtx);
--  const items = createMemo(() => fetchItems());
-+  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());
-   return (
-     <ul class={theme}>
-       <For each={items()}>{item => <li>{item.name}</li>}</For>
-```
-
-Checker said instead:
-
-```text
-Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
-<job>/source/App.tsx:8:36 error TS2345: [WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state.
-<job>/source/index.tsx:3:15 error TS2345: [FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any.
-solid-yield check: 3 files, 2 errors
-```
-
-### F-M64: M0202 delete-provider at reviewer-m06_memo_writes/App.tsx:24 (masked: base errors)
+### F-M56: M0202 delete-provider at reviewer-m06_memo_writes/App.tsx:24 (masked: base errors)
 
 Expected in the mutated routine (lines 22–33): NO_PROVIDER.
 
@@ -2397,7 +2180,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 2 errors
 ```
 
-### F-M65: M0203 delete-errored at reviewer-m06_memo_writes/App.tsx:26 (masked: base errors)
+### F-M57: M0203 delete-errored at reviewer-m06_memo_writes/App.tsx:26 (masked: base errors)
 
 Expected in the mutated routine (lines 22–33): FOREIGN_HANDOFF.
 
@@ -2429,7 +2212,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 2 errors
 ```
 
-### F-M66: M0204 delete-loading at reviewer-m06_memo_writes/App.tsx:27 (masked: base errors)
+### F-M58: M0204 delete-loading at reviewer-m06_memo_writes/App.tsx:27 (masked: base errors)
 
 Expected in the mutated routine (lines 22–33): PENDING_ROOT.
 
@@ -2459,32 +2242,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 2 errors
 ```
 
-### F-M67: M0218 non-core-cache at reviewer-m07_timeout_read/App.tsx:15 (silent)
-
-Expected in the mutated routine (lines 13–21): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
-
-```diff
---- reviewer-m07_timeout_read/App.tsx
-+++ reviewer-m07_timeout_read/App.tsx (mutant)
-@@ -12,7 +12,7 @@
- 
- function List() {
-   const theme = useContext(ThemeCtx);
--  const items = createMemo(() => fetchItems());
-+  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());
-   return (
-     <ul class={theme}>
-       <For each={items()}>{item => <li>{item.name}</li>}</For>
-```
-
-Checker said instead:
-
-```text
-Stages: {"transform":"completed","cli":"passed","lint":"passed"}
-solid-yield check: 3 files, 0 errors
-```
-
-### F-M68: M0220 delete-provider at reviewer-m07_timeout_read/App.tsx:25 (detected elsewhere)
+### F-M59: M0220 delete-provider at reviewer-m07_timeout_read/App.tsx:25 (detected elsewhere)
 
 Expected in the mutated routine (lines 23–34): NO_PROVIDER.
 
@@ -2518,7 +2276,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 1 errors
 ```
 
-### F-M69: M0221 delete-errored at reviewer-m07_timeout_read/App.tsx:27 (detected elsewhere)
+### F-M60: M0221 delete-errored at reviewer-m07_timeout_read/App.tsx:27 (detected elsewhere)
 
 Expected in the mutated routine (lines 23–34): FOREIGN_HANDOFF.
 
@@ -2550,7 +2308,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 1 errors
 ```
 
-### F-M70: M0222 delete-loading at reviewer-m07_timeout_read/App.tsx:28 (detected elsewhere)
+### F-M61: M0222 delete-loading at reviewer-m07_timeout_read/App.tsx:28 (detected elsewhere)
 
 Expected in the mutated routine (lines 23–34): PENDING_ROOT.
 
@@ -2580,34 +2338,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 1 errors
 ```
 
-### F-M71: M0235 non-core-cache at reviewer-m08_portal/App.tsx:15 (silent)
-
-Expected in the mutated routine (lines 13–21): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
-
-```diff
---- reviewer-m08_portal/App.tsx
-+++ reviewer-m08_portal/App.tsx (mutant)
-@@ -12,7 +12,7 @@
- 
- function List() {
-   const theme = useContext(ThemeCtx);
--  const items = createMemo(() => fetchItems());
-+  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());
-   return (
-     <ul class={theme}>
-       <For each={items()}>{item => <li>{item.name}</li>}</For>
-```
-
-Checker said instead:
-
-```text
-Stages: {"transform":"completed","cli":"passed","lint":"passed"}
-<job>/source/App.tsx:26:7 warning TS95001: [NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check.
-solid-yield check: 3 files, 0 errors
-transform App.tsx:26 [NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check.
-```
-
-### F-M72: M0237 delete-provider at reviewer-m08_portal/App.tsx:25 (detected elsewhere)
+### F-M62: M0237 delete-provider at reviewer-m08_portal/App.tsx:25 (detected elsewhere)
 
 Expected in the mutated routine (lines 23–34): NO_PROVIDER.
 
@@ -2643,7 +2374,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:26 [NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check.
 ```
 
-### F-M73: M0238 delete-errored at reviewer-m08_portal/App.tsx:27 (detected elsewhere)
+### F-M63: M0238 delete-errored at reviewer-m08_portal/App.tsx:27 (detected elsewhere)
 
 Expected in the mutated routine (lines 23–34): FOREIGN_HANDOFF.
 
@@ -2677,7 +2408,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:26 [NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check.
 ```
 
-### F-M74: M0239 delete-loading at reviewer-m08_portal/App.tsx:28 (detected elsewhere)
+### F-M64: M0239 delete-loading at reviewer-m08_portal/App.tsx:28 (detected elsewhere)
 
 Expected in the mutated routine (lines 23–34): PENDING_ROOT.
 
@@ -2709,9 +2440,9 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:26 [NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check.
 ```
 
-### F-M75: M0244 non-core-cache at reviewer-m09_destructure/App.tsx:8 (masked: base refused)
+### F-M65: M0244 non-core-cache at reviewer-m09_destructure/App.tsx:8 (masked: base refused)
 
-Expected in the mutated routine (lines 6–10): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
+Expected in the mutated routine (lines 6–10): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP, TS2322, TS2345, TS2739, TS2740, TS2741, TS2339, FOR_EACH.
 
 ```diff
 --- reviewer-m09_destructure/App.tsx
@@ -2721,7 +2452,7 @@ Expected in the mutated routine (lines 6–10): SUGAR_CALLBACK, NATIVE_FOREIGN_B
  function Counter() {
    const [count, setCount] = createSignal(0);
 -  const twice = createMemo(() => count() * 2);
-+  const twice = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => count() * 2);
++  const twice = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => count() * 2);
    return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;
  }
 ```
@@ -2735,7 +2466,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:12 [NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates.
 ```
 
-### F-M76: M0245 memo-write at reviewer-m09_destructure/App.tsx:8 (masked: base refused)
+### F-M66: M0245 memo-write at reviewer-m09_destructure/App.tsx:8 (masked: base refused)
 
 Expected in the mutated routine (lines 6–10): WRITE_IN_REACTIVE, solid-yield/no-unyielded-write.
 
@@ -2761,7 +2492,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:12 [NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates.
 ```
 
-### F-M77: M0246 setup-read at reviewer-m09_destructure/App.tsx:9 (masked: base refused)
+### F-M67: M0246 setup-read at reviewer-m09_destructure/App.tsx:9 (masked: base refused)
 
 Expected in the mutated routine (lines 6–10): READ_IN_SETUP, solid-yield/no-read-in-setup.
 
@@ -2790,7 +2521,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:12 [NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates.
 ```
 
-### F-M78: M0247 setup-read at reviewer-m09_destructure/App.tsx:9 (masked: base refused)
+### F-M68: M0247 setup-read at reviewer-m09_destructure/App.tsx:9 (masked: base refused)
 
 Expected in the mutated routine (lines 6–10): READ_IN_SETUP, solid-yield/no-read-in-setup.
 
@@ -2817,7 +2548,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:12 [NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates.
 ```
 
-### F-M79: M0248 setup-read at reviewer-m09_destructure/App.tsx:9 (masked: base refused)
+### F-M69: M0248 setup-read at reviewer-m09_destructure/App.tsx:9 (masked: base refused)
 
 Expected in the mutated routine (lines 6–10): READ_IN_SETUP, solid-yield/no-read-in-setup.
 
@@ -2844,7 +2575,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:12 [NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates.
 ```
 
-### F-M80: M0249 setup-read at reviewer-m09_destructure/App.tsx:9 (masked: base refused)
+### F-M70: M0249 setup-read at reviewer-m09_destructure/App.tsx:9 (masked: base refused)
 
 Expected in the mutated routine (lines 6–10): READ_IN_SETUP, solid-yield/no-read-in-setup.
 
@@ -2871,7 +2602,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:12 [NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates.
 ```
 
-### F-M81: M0251 never-provided-context at reviewer-m09_destructure/App.tsx:14 (masked: base refused)
+### F-M71: M0251 never-provided-context at reviewer-m09_destructure/App.tsx:14 (masked: base refused)
 
 Expected in the mutated routine (lines 12–21): NO_PROVIDER.
 
@@ -2898,9 +2629,9 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:12 [NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates.
 ```
 
-### F-M82: M0252 non-core-cache at reviewer-m09_destructure/App.tsx:15 (masked: base refused)
+### F-M72: M0252 non-core-cache at reviewer-m09_destructure/App.tsx:15 (masked: base refused)
 
-Expected in the mutated routine (lines 12–21): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
+Expected in the mutated routine (lines 12–21): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP, TS2322, TS2345, TS2739, TS2740, TS2741, TS2339, FOR_EACH.
 
 ```diff
 --- reviewer-m09_destructure/App.tsx
@@ -2910,7 +2641,7 @@ Expected in the mutated routine (lines 12–21): SUGAR_CALLBACK, NATIVE_FOREIGN_
    console.log(title);
    const theme = useContext(ThemeCtx);
 -  const items = createMemo(() => fetchItems());
-+  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());
++  const items = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => fetchItems());
    return (
      <ul class={theme}>
        <For each={items()}>{item => <li>{item.name}</li>}</For>
@@ -2925,7 +2656,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:12 [NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates.
 ```
 
-### F-M83: M0253 setup-read at reviewer-m09_destructure/App.tsx:16 (masked: base refused)
+### F-M73: M0253 setup-read at reviewer-m09_destructure/App.tsx:16 (masked: base refused)
 
 Expected in the mutated routine (lines 12–21): READ_IN_SETUP, solid-yield/no-read-in-setup.
 
@@ -2955,7 +2686,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:12 [NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates.
 ```
 
-### F-M84: M0254 delete-provider at reviewer-m09_destructure/App.tsx:25 (masked: base refused)
+### F-M74: M0254 delete-provider at reviewer-m09_destructure/App.tsx:25 (masked: base refused)
 
 Expected in the mutated routine (lines 23–34): NO_PROVIDER.
 
@@ -2989,7 +2720,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:12 [NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates.
 ```
 
-### F-M85: M0255 delete-errored at reviewer-m09_destructure/App.tsx:27 (masked: base refused)
+### F-M75: M0255 delete-errored at reviewer-m09_destructure/App.tsx:27 (masked: base refused)
 
 Expected in the mutated routine (lines 23–34): FOREIGN_HANDOFF.
 
@@ -3021,7 +2752,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:12 [NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates.
 ```
 
-### F-M86: M0256 delete-loading at reviewer-m09_destructure/App.tsx:28 (masked: base refused)
+### F-M76: M0256 delete-loading at reviewer-m09_destructure/App.tsx:28 (masked: base refused)
 
 Expected in the mutated routine (lines 23–34): PENDING_ROOT.
 
@@ -3051,32 +2782,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:12 [NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates.
 ```
 
-### F-M87: M0269 non-core-cache at reviewer-m10_conditional/App.tsx:15 (silent)
-
-Expected in the mutated routine (lines 13–21): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
-
-```diff
---- reviewer-m10_conditional/App.tsx
-+++ reviewer-m10_conditional/App.tsx (mutant)
-@@ -12,7 +12,7 @@
- 
- function List() {
-   const theme = useContext(ThemeCtx);
--  const items = createMemo(() => fetchItems());
-+  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());
-   return (
-     <ul class={theme}>
-       <For each={items()}>{item => <li>{item.name}</li>}</For>
-```
-
-Checker said instead:
-
-```text
-Stages: {"transform":"completed","cli":"passed","lint":"passed"}
-solid-yield check: 3 files, 0 errors
-```
-
-### F-M88: M0271 delete-provider at reviewer-m10_conditional/App.tsx:25 (detected elsewhere)
+### F-M77: M0271 delete-provider at reviewer-m10_conditional/App.tsx:25 (detected elsewhere)
 
 Expected in the mutated routine (lines 23–34): NO_PROVIDER.
 
@@ -3110,7 +2816,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 1 errors
 ```
 
-### F-M89: M0272 delete-errored at reviewer-m10_conditional/App.tsx:27 (detected elsewhere)
+### F-M78: M0272 delete-errored at reviewer-m10_conditional/App.tsx:27 (detected elsewhere)
 
 Expected in the mutated routine (lines 23–34): FOREIGN_HANDOFF.
 
@@ -3142,7 +2848,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 1 errors
 ```
 
-### F-M90: M0273 delete-loading at reviewer-m10_conditional/App.tsx:28 (detected elsewhere)
+### F-M79: M0273 delete-loading at reviewer-m10_conditional/App.tsx:28 (detected elsewhere)
 
 Expected in the mutated routine (lines 23–34): PENDING_ROOT.
 
@@ -3172,33 +2878,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 1 errors
 ```
 
-### F-M91: M0287 non-core-cache at reviewer-m11_nested_comp/App.tsx:15 (silent)
-
-Expected in the mutated routine (lines 13–21): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
-
-```diff
---- reviewer-m11_nested_comp/App.tsx
-+++ reviewer-m11_nested_comp/App.tsx (mutant)
-@@ -12,7 +12,7 @@
- 
- function List() {
-   const theme = useContext(ThemeCtx);
--  const items = createMemo(() => fetchItems());
-+  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());
-   return (
-     <ul class={theme}>
-       <For each={items()}>{item => <li>{item.name}</li>}</For>
-```
-
-Checker said instead:
-
-```text
-Stages: {"transform":"completed","cli":"passed","lint":"diagnostics"}
-solid-yield check: 3 files, 0 errors
-lint App.tsx:9 [solid-yield/jsx-only-in-view] JSX in a setup: elements are built by the view it returns (`return view(function* () { return <…/>; })`).
-```
-
-### F-M92: M0289 delete-provider at reviewer-m11_nested_comp/App.tsx:25 (detected elsewhere)
+### F-M80: M0289 delete-provider at reviewer-m11_nested_comp/App.tsx:25 (detected elsewhere)
 
 Expected in the mutated routine (lines 23–34): NO_PROVIDER.
 
@@ -3233,7 +2913,7 @@ solid-yield check: 3 files, 1 errors
 lint App.tsx:9 [solid-yield/jsx-only-in-view] JSX in a setup: elements are built by the view it returns (`return view(function* () { return <…/>; })`).
 ```
 
-### F-M93: M0290 delete-errored at reviewer-m11_nested_comp/App.tsx:27 (detected elsewhere)
+### F-M81: M0290 delete-errored at reviewer-m11_nested_comp/App.tsx:27 (detected elsewhere)
 
 Expected in the mutated routine (lines 23–34): FOREIGN_HANDOFF.
 
@@ -3266,7 +2946,7 @@ solid-yield check: 3 files, 1 errors
 lint App.tsx:9 [solid-yield/jsx-only-in-view] JSX in a setup: elements are built by the view it returns (`return view(function* () { return <…/>; })`).
 ```
 
-### F-M94: M0291 delete-loading at reviewer-m11_nested_comp/App.tsx:28 (detected elsewhere)
+### F-M82: M0291 delete-loading at reviewer-m11_nested_comp/App.tsx:28 (detected elsewhere)
 
 Expected in the mutated routine (lines 23–34): PENDING_ROOT.
 
@@ -3297,9 +2977,9 @@ solid-yield check: 3 files, 1 errors
 lint App.tsx:9 [solid-yield/jsx-only-in-view] JSX in a setup: elements are built by the view it returns (`return view(function* () { return <…/>; })`).
 ```
 
-### F-M95: M0297 non-core-cache at reviewer-m12_effect_arity/App.tsx:9 (masked: base refused)
+### F-M83: M0297 non-core-cache at reviewer-m12_effect_arity/App.tsx:9 (masked: base refused)
 
-Expected in the mutated routine (lines 6–11): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
+Expected in the mutated routine (lines 6–11): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP, TS2322, TS2345, TS2739, TS2740, TS2741, TS2339, FOR_EACH.
 
 ```diff
 --- reviewer-m12_effect_arity/App.tsx
@@ -3309,7 +2989,7 @@ Expected in the mutated routine (lines 6–11): SUGAR_CALLBACK, NATIVE_FOREIGN_B
    const [count, setCount] = createSignal(0);
    createEffect(() => { console.log(count()); });
 -  const twice = createMemo(() => count() * 2);
-+  const twice = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => count() * 2);
++  const twice = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => count() * 2);
    return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;
  }
 ```
@@ -3323,7 +3003,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_EFFECT_PHASES] createEffect needs a tracked compute and an untracked effect phase.
 ```
 
-### F-M96: M0298 memo-write at reviewer-m12_effect_arity/App.tsx:9 (masked: base refused)
+### F-M84: M0298 memo-write at reviewer-m12_effect_arity/App.tsx:9 (masked: base refused)
 
 Expected in the mutated routine (lines 6–11): WRITE_IN_REACTIVE, solid-yield/no-unyielded-write.
 
@@ -3349,7 +3029,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_EFFECT_PHASES] createEffect needs a tracked compute and an untracked effect phase.
 ```
 
-### F-M97: M0299 setup-read at reviewer-m12_effect_arity/App.tsx:10 (masked: base refused)
+### F-M85: M0299 setup-read at reviewer-m12_effect_arity/App.tsx:10 (masked: base refused)
 
 Expected in the mutated routine (lines 6–11): READ_IN_SETUP, solid-yield/no-read-in-setup.
 
@@ -3378,7 +3058,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_EFFECT_PHASES] createEffect needs a tracked compute and an untracked effect phase.
 ```
 
-### F-M98: M0300 setup-read at reviewer-m12_effect_arity/App.tsx:10 (masked: base refused)
+### F-M86: M0300 setup-read at reviewer-m12_effect_arity/App.tsx:10 (masked: base refused)
 
 Expected in the mutated routine (lines 6–11): READ_IN_SETUP, solid-yield/no-read-in-setup.
 
@@ -3405,7 +3085,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_EFFECT_PHASES] createEffect needs a tracked compute and an untracked effect phase.
 ```
 
-### F-M99: M0301 setup-read at reviewer-m12_effect_arity/App.tsx:10 (masked: base refused)
+### F-M87: M0301 setup-read at reviewer-m12_effect_arity/App.tsx:10 (masked: base refused)
 
 Expected in the mutated routine (lines 6–11): READ_IN_SETUP, solid-yield/no-read-in-setup.
 
@@ -3432,7 +3112,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_EFFECT_PHASES] createEffect needs a tracked compute and an untracked effect phase.
 ```
 
-### F-M100: M0302 setup-read at reviewer-m12_effect_arity/App.tsx:10 (masked: base refused)
+### F-M88: M0302 setup-read at reviewer-m12_effect_arity/App.tsx:10 (masked: base refused)
 
 Expected in the mutated routine (lines 6–11): READ_IN_SETUP, solid-yield/no-read-in-setup.
 
@@ -3459,7 +3139,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_EFFECT_PHASES] createEffect needs a tracked compute and an untracked effect phase.
 ```
 
-### F-M101: M0304 never-provided-context at reviewer-m12_effect_arity/App.tsx:14 (masked: base refused)
+### F-M89: M0304 never-provided-context at reviewer-m12_effect_arity/App.tsx:14 (masked: base refused)
 
 Expected in the mutated routine (lines 13–21): NO_PROVIDER.
 
@@ -3486,9 +3166,9 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_EFFECT_PHASES] createEffect needs a tracked compute and an untracked effect phase.
 ```
 
-### F-M102: M0305 non-core-cache at reviewer-m12_effect_arity/App.tsx:15 (masked: base refused)
+### F-M90: M0305 non-core-cache at reviewer-m12_effect_arity/App.tsx:15 (masked: base refused)
 
-Expected in the mutated routine (lines 13–21): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
+Expected in the mutated routine (lines 13–21): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP, TS2322, TS2345, TS2739, TS2740, TS2741, TS2339, FOR_EACH.
 
 ```diff
 --- reviewer-m12_effect_arity/App.tsx
@@ -3498,7 +3178,7 @@ Expected in the mutated routine (lines 13–21): SUGAR_CALLBACK, NATIVE_FOREIGN_
  function List() {
    const theme = useContext(ThemeCtx);
 -  const items = createMemo(() => fetchItems());
-+  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());
++  const items = (<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })(() => fetchItems());
    return (
      <ul class={theme}>
        <For each={items()}>{item => <li>{item.name}</li>}</For>
@@ -3513,7 +3193,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_EFFECT_PHASES] createEffect needs a tracked compute and an untracked effect phase.
 ```
 
-### F-M103: M0306 setup-read at reviewer-m12_effect_arity/App.tsx:16 (masked: base refused)
+### F-M91: M0306 setup-read at reviewer-m12_effect_arity/App.tsx:16 (masked: base refused)
 
 Expected in the mutated routine (lines 13–21): READ_IN_SETUP, solid-yield/no-read-in-setup.
 
@@ -3543,7 +3223,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_EFFECT_PHASES] createEffect needs a tracked compute and an untracked effect phase.
 ```
 
-### F-M104: M0307 delete-provider at reviewer-m12_effect_arity/App.tsx:25 (masked: base refused)
+### F-M92: M0307 delete-provider at reviewer-m12_effect_arity/App.tsx:25 (masked: base refused)
 
 Expected in the mutated routine (lines 23–34): NO_PROVIDER.
 
@@ -3577,7 +3257,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_EFFECT_PHASES] createEffect needs a tracked compute and an untracked effect phase.
 ```
 
-### F-M105: M0308 delete-errored at reviewer-m12_effect_arity/App.tsx:27 (masked: base refused)
+### F-M93: M0308 delete-errored at reviewer-m12_effect_arity/App.tsx:27 (masked: base refused)
 
 Expected in the mutated routine (lines 23–34): FOREIGN_HANDOFF.
 
@@ -3609,7 +3289,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_EFFECT_PHASES] createEffect needs a tracked compute and an untracked effect phase.
 ```
 
-### F-M106: M0309 delete-loading at reviewer-m12_effect_arity/App.tsx:28 (masked: base refused)
+### F-M94: M0309 delete-loading at reviewer-m12_effect_arity/App.tsx:28 (masked: base refused)
 
 Expected in the mutated routine (lines 23–34): PENDING_ROOT.
 
@@ -3639,32 +3319,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_EFFECT_PHASES] createEffect needs a tracked compute and an untracked effect phase.
 ```
 
-### F-M107: M0322 non-core-cache at reviewer-s2a_noloading/App.tsx:14 (masked: base errors)
-
-Expected in the mutated routine (lines 12–20): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
-
-```diff
---- reviewer-s2a_noloading/App.tsx
-+++ reviewer-s2a_noloading/App.tsx (mutant)
-@@ -11,7 +11,7 @@
- 
- function List() {
-   const theme = useContext(ThemeCtx);
--  const items = createMemo(() => fetchItems());
-+  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());
-   return (
-     <ul class={theme}>
-       <For each={items()}>{item => <li>{item.name}</li>}</For>
-```
-
-Checker said instead:
-
-```text
-Stages: {"transform":"completed","cli":"passed","lint":"passed"}
-solid-yield check: 3 files, 0 errors
-```
-
-### F-M108: M0324 delete-provider at reviewer-s2a_noloading/App.tsx:24 (detected elsewhere)
+### F-M95: M0324 delete-provider at reviewer-s2a_noloading/App.tsx:24 (detected elsewhere)
 
 Expected in the mutated routine (lines 22–33): NO_PROVIDER.
 
@@ -3700,7 +3355,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 2 errors
 ```
 
-### F-M109: M0325 delete-errored at reviewer-s2a_noloading/App.tsx:26 (detected elsewhere)
+### F-M96: M0325 delete-errored at reviewer-s2a_noloading/App.tsx:26 (detected elsewhere)
 
 Expected in the mutated routine (lines 22–33): FOREIGN_HANDOFF.
 
@@ -3734,34 +3389,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 2 errors
 ```
 
-### F-M110: M0338 non-core-cache at reviewer-s2b_noprovider/App.tsx:14 (masked: base errors)
-
-Expected in the mutated routine (lines 12–20): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
-
-```diff
---- reviewer-s2b_noprovider/App.tsx
-+++ reviewer-s2b_noprovider/App.tsx (mutant)
-@@ -11,7 +11,7 @@
- 
- function List() {
-   const theme = useContext(ThemeCtx);
--  const items = createMemo(() => fetchItems());
-+  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());
-   return (
-     <ul class={theme}>
-       <For each={items()}>{item => <li>{item.name}</li>}</For>
-```
-
-Checker said instead:
-
-```text
-Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
-<job>/source/App.tsx:13:17 error TS1360: [NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: ThemeCtx.
-  related: <job>/source/index.tsx:3:15: The app is rendered here. does not suspend; never fails; does not wait; needs ThemeCtx
-solid-yield check: 3 files, 1 errors
-```
-
-### F-M111: M0340 delete-errored at reviewer-s2b_noprovider/App.tsx:26 (detected elsewhere)
+### F-M97: M0340 delete-errored at reviewer-s2b_noprovider/App.tsx:26 (detected elsewhere)
 
 Expected in the mutated routine (lines 22–33): FOREIGN_HANDOFF.
 
@@ -3795,7 +3423,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 2 errors
 ```
 
-### F-M112: M0341 delete-loading at reviewer-s2b_noprovider/App.tsx:27 (detected elsewhere)
+### F-M98: M0341 delete-loading at reviewer-s2b_noprovider/App.tsx:27 (detected elsewhere)
 
 Expected in the mutated routine (lines 22–33): PENDING_ROOT.
 
@@ -3827,32 +3455,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 2 errors
 ```
 
-### F-M113: M0354 non-core-cache at reviewer-s2c_noerrored/App.tsx:14 (masked: base errors)
-
-Expected in the mutated routine (lines 12–20): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
-
-```diff
---- reviewer-s2c_noerrored/App.tsx
-+++ reviewer-s2c_noerrored/App.tsx (mutant)
-@@ -11,7 +11,7 @@
- 
- function List() {
-   const theme = useContext(ThemeCtx);
--  const items = createMemo(() => fetchItems());
-+  const items = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() => fetchItems());
-   return (
-     <ul class={theme}>
-       <For each={items()}>{item => <li>{item.name}</li>}</For>
-```
-
-Checker said instead:
-
-```text
-Stages: {"transform":"completed","cli":"passed","lint":"passed"}
-solid-yield check: 3 files, 0 errors
-```
-
-### F-M114: M0356 delete-provider at reviewer-s2c_noerrored/App.tsx:24 (detected elsewhere)
+### F-M99: M0356 delete-provider at reviewer-s2c_noerrored/App.tsx:24 (detected elsewhere)
 
 Expected in the mutated routine (lines 22–33): NO_PROVIDER.
 
@@ -3888,7 +3491,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 2 errors
 ```
 
-### F-M115: M0357 delete-loading at reviewer-s2c_noerrored/App.tsx:27 (detected elsewhere)
+### F-M100: M0357 delete-loading at reviewer-s2c_noerrored/App.tsx:27 (detected elsewhere)
 
 Expected in the mutated routine (lines 22–33): PENDING_ROOT.
 
@@ -3920,32 +3523,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 2 errors
 ```
 
-### F-M116: M0367 non-core-cache at review-slots-colored-prop/App.tsx:8 (silent)
-
-Expected in the mutated routine (lines 7–10): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
-
-```diff
---- review-slots-colored-prop/App.tsx
-+++ review-slots-colored-prop/App.tsx (mutant)
-@@ -5,6 +5,6 @@
-   return <p>{p.n}</p>;
- }
- export function App() {
--  const n = createMemo(async () => 1);
-+  const n = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(async () => 1);
-   return <Child n={n()} />;
- }
-\ No newline at end of file
-```
-
-Checker said instead:
-
-```text
-Stages: {"transform":"completed","cli":"passed","lint":"passed"}
-solid-yield check: 1 files, 0 errors
-```
-
-### F-M117: M0373 delete-provider at review-slots-context/App.tsx:8 (silent)
+### F-M101: M0373 delete-provider at review-slots-context/App.tsx:8 (silent)
 
 Expected in the mutated routine (lines 7–9): NO_PROVIDER.
 
@@ -3969,7 +3547,7 @@ Stages: {"transform":"completed","cli":"passed","lint":"passed"}
 solid-yield check: 1 files, 0 errors
 ```
 
-### F-M118: M0374 delete-loading at review-slots-lazy-child/App.tsx:3 (silent)
+### F-M102: M0374 delete-loading at review-slots-lazy-child/App.tsx:3 (silent)
 
 Expected in the mutated routine (lines 2–4): PENDING_ROOT.
 
@@ -3992,7 +3570,7 @@ Stages: {"transform":"completed","cli":"passed","lint":"passed"}
 solid-yield check: 1 files, 0 errors
 ```
 
-### F-M119: M0376 delete-catch at review-slots-catch/App.tsx:5 (silent)
+### F-M103: M0376 delete-catch at review-slots-catch/App.tsx:5 (silent)
 
 Expected in the mutated routine (lines 2–11): FOREIGN_HANDOFF, NATIVE_CALLBACK_FAILURE, EVENT_REJECTS.
 
@@ -4023,33 +3601,7 @@ Stages: {"transform":"completed","cli":"passed","lint":"passed"}
 solid-yield check: 1 files, 0 errors
 ```
 
-### F-M120: M0390 non-core-cache at operator-seeds/App.tsx:13 (masked: base errors)
-
-Expected in the mutated routine (lines 11–28): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
-
-```diff
---- operator-seeds/App.tsx
-+++ operator-seeds/App.tsx (mutant)
-@@ -10,7 +10,7 @@
- }
- function App() {
-   const [count, setCount] = createSignal(1);
--  const value = createMemo(async () => {
-+  const value = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(async () => {
-     try { return await readServer(); } catch (e) { throw e; }
-   });
-   const twice = createMemo(() => count() * 2);
-```
-
-Checker said instead:
-
-```text
-Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
-<job>/source/App.tsx:25:22 error TS95000: [EVENT_REJECTS] This handler can fail with Problem and nothing catches it; wrap the body in try/catch, or declare the failure.
-solid-yield check: 2 files, 1 errors
-```
-
-### F-M121: M0393 remove-await at operator-seeds/App.tsx:14 (masked: base errors)
+### F-M104: M0393 remove-await at operator-seeds/App.tsx:14 (masked: base errors)
 
 Expected in the mutated routine (lines 11–28): TS2322, TS2345, TS2739, TS2740, TS2741, TS2339, GENERATED_TYPE, SETTLED_PROP.
 
@@ -4075,7 +3627,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 2 files, 1 errors
 ```
 
-### F-M122: M0402 delete-provider at operator-seeds/App.tsx:23 (detected elsewhere)
+### F-M105: M0402 delete-provider at operator-seeds/App.tsx:23 (detected elsewhere)
 
 Expected in the mutated routine (lines 11–28): NO_PROVIDER.
 
@@ -4107,7 +3659,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 2 files, 2 errors
 ```
 
-### F-M123: M0403 delete-errored at operator-seeds/App.tsx:23 (masked: base errors)
+### F-M106: M0403 delete-errored at operator-seeds/App.tsx:23 (masked: base errors)
 
 Expected in the mutated routine (lines 11–28): FOREIGN_HANDOFF.
 
@@ -4138,7 +3690,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 2 files, 1 errors
 ```
 
-### F-M124: M0416 server-new-class at operator-seeds/server.ts:5 (masked: base errors)
+### F-M107: M0416 server-new-class at operator-seeds/server.ts:5 (masked: base errors)
 
 Expected in the mutated routine (lines 2–7): FOREIGN_HANDOFF.
 
@@ -4163,7 +3715,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 2 files, 1 errors
 ```
 
-### F-M125: M0420 delete-errored at sugar-edges/App.tsx:20 (detected elsewhere)
+### F-M108: M0420 delete-errored at sugar-edges/App.tsx:20 (detected elsewhere)
 
 Expected in the mutated routine (lines 16–25): FOREIGN_HANDOFF.
 
@@ -4193,7 +3745,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 4 files, 1 errors
 ```
 
-### F-M126: M0421 delete-loading at sugar-edges/App.tsx:21 (detected elsewhere)
+### F-M109: M0421 delete-loading at sugar-edges/App.tsx:21 (detected elsewhere)
 
 Expected in the mutated routine (lines 16–25): PENDING_ROOT.
 
@@ -4220,7 +3772,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 4 files, 1 errors
 ```
 
-### F-M127: M0445 delete-provider at sugar-edges/filters.tsx:11 (detected elsewhere)
+### F-M110: M0445 delete-provider at sugar-edges/filters.tsx:11 (detected elsewhere)
 
 Expected in the mutated routine (lines 9–12): NO_PROVIDER.
 
@@ -4249,33 +3801,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 4 files, 2 errors
 ```
 
-### F-M128: M0453 non-core-cache at rendering-edges/Feed.tsx:42 (different code)
-
-Expected in the mutated routine (lines 29–72): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
-
-```diff
---- rendering-edges/Feed.tsx
-+++ rendering-edges/Feed.tsx (mutant)
-@@ -39,7 +39,7 @@
-     { seedLoadingValue: true }
-   );
-   // F-S53: async iterable producers; a projection's draft; Repeat's index as a key.
--  const all = createMemo<Item[]>(async function* () {
-+  const all = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })<Item[]>(async function* () {
-     let seen: Item[] = [];
-     for await (const item of items()) yield (seen = [...seen, item]);
-   });
-```
-
-Checker said instead:
-
-```text
-Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
-<job>/source/Feed.tsx:42:87 error TS2558: Expected 0 type arguments, but got 1.
-solid-yield check: 5 files, 1 errors
-```
-
-### F-M129: M0455 delete-loading at rendering-edges/Feed.tsx:56 (silent)
+### F-M111: M0455 delete-loading at rendering-edges/Feed.tsx:56 (silent)
 
 Expected in the mutated routine (lines 29–72): PENDING_ROOT.
 
@@ -4309,7 +3835,7 @@ Stages: {"transform":"completed","cli":"passed","lint":"passed"}
 solid-yield check: 5 files, 0 errors
 ```
 
-### F-M130: M0461 delete-provider at rendering-edges/router.tsx:17 (detected elsewhere)
+### F-M112: M0461 delete-provider at rendering-edges/router.tsx:17 (detected elsewhere)
 
 Expected in the mutated routine (lines 10–22): NO_PROVIDER.
 
@@ -4342,7 +3868,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 5 files, 3 errors
 ```
 
-### F-M131: M0485 callback-throw at hole-edges/App.tsx:23 (silent)
+### F-M113: M0485 callback-throw at hole-edges/App.tsx:23 (silent)
 
 Expected in the mutated routine (lines 18–51): FOREIGN_HANDOFF.
 
@@ -4369,7 +3895,7 @@ solid-yield check: 2 files, 0 errors
 
 ## Findings list
 
-- F-M1–F-M131: 131 survivors of the gate's rule, each with its category, full diff and actual diagnostics above.
+- F-M1–F-M113: 113 survivors of the gate's rule, each with its category, full diff and actual diagnostics above.
 - F-C1–F-C20: the top checker survivors above; remaining survivors stay in the raw Stryker reports.
 - F-MAP: 0 mutant CLI crashes; the current position/error mapping can throw instead of returning diagnostics. IDs: none.
 - F-SCOPE: Vite native/sugar/transform/positions and compiler inference still need full checker-mutant runs. The full command-runner configuration is checked in.

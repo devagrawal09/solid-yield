@@ -1,8 +1,8 @@
 {
-  "startedAt": "2026-10-12T08:12:17.923Z",
-  "finishedAt": "2026-10-12T09:13:19.756Z",
-  "durationMs": 3661833,
-  "digest": "129ebaa8a3b29ef08daeebc3e850a27e85eba1265ae9270b8f83b0f53d1c232c",
+  "startedAt": "2026-10-12T20:51:06.605Z",
+  "finishedAt": "2026-10-12T21:29:17.041Z",
+  "durationMs": 2290436,
+  "digest": "480f2564b0e8b2a7e9242ac63c0e3e966c6ae2e48f8d4c0b9a67678b32b42e2e",
   "projects": [
     {
       "id": "sierpinski",
@@ -1123,8 +1123,8 @@
     "delete-catch": {
       "mutants": 9,
       "killed": 2,
-      "survived": 7,
-      "equivalent": 0
+      "survived": 5,
+      "equivalent": 2
     },
     "swallow-catch": {
       "mutants": 2,
@@ -1135,14 +1135,14 @@
     "delete-errored": {
       "mutants": 24,
       "killed": 4,
-      "survived": 20,
-      "equivalent": 0
+      "survived": 19,
+      "equivalent": 1
     },
     "delete-loading": {
       "mutants": 26,
       "killed": 4,
-      "survived": 22,
-      "equivalent": 0
+      "survived": 20,
+      "equivalent": 2
     },
     "setup-read": {
       "mutants": 120,
@@ -1153,8 +1153,8 @@
     "delete-provider": {
       "mutants": 22,
       "killed": 0,
-      "survived": 22,
-      "equivalent": 0
+      "survived": 21,
+      "equivalent": 1
     },
     "never-provided-context": {
       "mutants": 30,
@@ -1183,8 +1183,8 @@
     "remove-await": {
       "mutants": 31,
       "killed": 2,
-      "survived": 2,
-      "equivalent": 27
+      "survived": 1,
+      "equivalent": 28
     },
     "memo-write": {
       "mutants": 26,
@@ -1206,8 +1206,8 @@
     },
     "destructure-props": {
       "mutants": 18,
-      "killed": 17,
-      "survived": 1,
+      "killed": 18,
+      "survived": 0,
       "equivalent": 0
     },
     "inline-component": {
@@ -1231,8 +1231,8 @@
     "callback-throw": {
       "mutants": 5,
       "killed": 1,
-      "survived": 1,
-      "equivalent": 3
+      "survived": 0,
+      "equivalent": 4
     },
     "server-new-class": {
       "mutants": 1,
@@ -1243,10 +1243,10 @@
   },
   "total": {
     "mutants": 488,
-    "killed": 278,
-    "survived": 113,
-    "equivalent": 97,
-    "score": 71.09974424552429
+    "killed": 279,
+    "survived": 104,
+    "equivalent": 105,
+    "score": 72.84595300261097
   },
   "mutants": [
     {
@@ -1701,17 +1701,17 @@
           {
             "stage": "transform",
             "file": "main.tsx",
-            "line": 1,
+            "line": 55,
             "code": "NATIVE_RECURSION",
-            "message": "[NATIVE_RECURSION] Snapshot Dot.x is not a fixed numeric prop; ordered snapshot lowering is required. (<job>/source/main.tsx)"
+            "message": "[NATIVE_RECURSION] Snapshot Dot.x is not a fixed numeric prop; ordered snapshot lowering is required. (<job>/source/main.tsx:55:12)"
           },
           {
             "stage": "cli",
             "file": "main.tsx",
-            "line": 1,
-            "code": "TRANSFORM",
+            "line": 55,
+            "code": "NATIVE_RECURSION",
             "tsCode": "TS95000",
-            "message": "[TRANSFORM] Snapshot Dot.x is not a fixed numeric prop; ordered snapshot lowering is required. (<job>/source/main.tsx)"
+            "message": "[NATIVE_RECURSION] Snapshot Dot.x is not a fixed numeric prop; ordered snapshot lowering is required."
           }
         ],
         "stages": {
@@ -1720,12 +1720,12 @@
           "lint": "blocked-by-transform"
         },
         "cliOutput": [
-          "<job>/source/main.tsx:1:1 error TS95000: [TRANSFORM] Snapshot Dot.x is not a fixed numeric prop; ordered snapshot lowering is required. (<job>/source/main.tsx)",
+          "<job>/source/main.tsx:55:12 error TS95000: [NATIVE_RECURSION] Snapshot Dot.x is not a fixed numeric prop; ordered snapshot lowering is required.",
           "solid-yield check: 1 files, 1 errors"
         ]
       },
       "preExistingMatch": false,
-      "status": "survived",
+      "status": "killed",
       "exactLine": false
     },
     {
@@ -10869,7 +10869,7 @@
       },
       "offset": 483,
       "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(async () => { { return await fetchItems(); } });\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
-      "equivalent": null,
+      "equivalent": "site: The Errored around List takes the failure the deleted catch absorbed.",
       "id": "M0181",
       "project": "reviewer-m05_swallow",
       "file": "App.tsx",
@@ -10886,7 +10886,7 @@
         ]
       },
       "preExistingMatch": false,
-      "status": "survived",
+      "status": "equivalent",
       "exactLine": false
     },
     {
@@ -10898,7 +10898,7 @@
       },
       "offset": 496,
       "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(async () => { try { return fetchItems(); } catch { return []; } });\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
-      "equivalent": null,
+      "equivalent": "site: `return fetchItems()` in an async function has the awaited form's type; the rejection leaves the try unabsorbed and reaches the same Errored.",
       "id": "M0182",
       "project": "reviewer-m05_swallow",
       "file": "App.tsx",
@@ -10915,7 +10915,7 @@
         ]
       },
       "preExistingMatch": false,
-      "status": "survived",
+      "status": "equivalent",
       "exactLine": false
     },
     {
@@ -11031,7 +11031,7 @@
       },
       "offset": 745,
       "source": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(async () => { try { return await fetchItems(); } catch { return []; } });\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </>\n    </ThemeCtx>\n  );\n}\n",
-      "equivalent": null,
+      "equivalent": "site: List's try/catch absorbs every failure under that boundary; nothing reaches the root.",
       "id": "M0185",
       "project": "reviewer-m05_swallow",
       "file": "App.tsx",
@@ -11048,7 +11048,7 @@
         ]
       },
       "preExistingMatch": false,
-      "status": "survived",
+      "status": "equivalent",
       "exactLine": false
     },
     {
@@ -20671,7 +20671,7 @@
       },
       "offset": 258,
       "source": "import { createSignal, createMemo, createEffect, For, Show, Loading, createContext, useContext } from \"solid-js\";\nconst C = createContext<number>();\nexport function Child() {\n  const n = useContext(C);\n  return <p>{n}</p>;\n}\nexport function App() {\n  return <><Child /></>;\n}",
-      "equivalent": null,
+      "equivalent": "site: The program renders nothing: App and Child are exported, so their requirement of C is their callers', as for any library component.",
       "id": "M0373",
       "project": "review-slots-context",
       "file": "App.tsx",
@@ -20688,7 +20688,7 @@
         ]
       },
       "preExistingMatch": false,
-      "status": "survived",
+      "status": "equivalent",
       "exactLine": false
     },
     {
@@ -20700,7 +20700,7 @@
       },
       "offset": 147,
       "source": "import { createSignal, createMemo, createEffect, For, Show, Loading, createContext, useContext } from \"solid-js\";\nexport function App() {\n  return <><p>ready</p></>;\n}",
-      "equivalent": null,
+      "equivalent": "site: The boundary held static text; nothing below it waits.",
       "id": "M0374",
       "project": "review-slots-lazy-child",
       "file": "App.tsx",
@@ -20717,7 +20717,7 @@
         ]
       },
       "preExistingMatch": false,
-      "status": "survived",
+      "status": "equivalent",
       "exactLine": false
     },
     {
@@ -20813,7 +20813,7 @@
       },
       "offset": 220,
       "source": "import { createSignal, createMemo, createEffect, For, Show, Loading, createContext, useContext } from \"solid-js\";\nexport function Counter() {\n  const [count, set] = createSignal(0);\n  return <button onClick={() => {\n    {\n      set(1);\n    }\n\n\n  }} />;\n}",
-      "equivalent": null,
+      "equivalent": "site: The try held a setter's call, which cannot fail.",
       "id": "M0376",
       "project": "review-slots-catch",
       "file": "App.tsx",
@@ -20830,7 +20830,7 @@
         ]
       },
       "preExistingMatch": false,
-      "status": "survived",
+      "status": "equivalent",
       "exactLine": false
     },
     {
@@ -24394,7 +24394,7 @@
       },
       "offset": 1559,
       "source": "import {\n  createMemo,\n  createProjection,\n  createSignal,\n  createStore,\n  For,\n  isPending,\n  Loading,\n  Repeat\n} from \"solid-js\";\n\ninterface Item {\n  id: number;\n  text: string;\n}\n\nasync function* items(): AsyncIterable<Item> {\n  for (const text of [\"a\", \"b\", \"c\"]) {\n    await new Promise(resolve => setTimeout(resolve, 100));\n    yield { id: text.charCodeAt(0), text };\n  }\n}\n\nasync function load(version: number): Promise<{ title: string; items: Item[] }> {\n  await new Promise(resolve => setTimeout(resolve, 50));\n  return { title: `v${version}`, items: [{ id: 1, text: \"x\" }] };\n}\n\nexport default function Feed() {\n  const [version, setVersion] = createSignal(0);\n  // F-S53: a derived store is a projection; isPending takes its path.\n  const [feed] = createStore(\n    async draft => {\n      const data = await load(version());\n      draft.title = data.title;\n      draft.items = data.items;\n    },\n    { title: \"\", items: [] as Item[] },\n    { seedLoadingValue: true }\n  );\n  // F-S53: async iterable producers; a projection's draft; Repeat's index as a key.\n  const all = createMemo<Item[]>(async function* () {\n    let seen: Item[] = [];\n    for await (const item of items()) yield (seen = [...seen, item]);\n  });\n  const rows = createProjection<Item[]>(async function* (state) {\n    for await (const item of items()) {\n      state.push(item);\n      yield;\n    }\n  }, []);\n  return (\n    <section class={{ busy: isPending(() => feed.items) }}>\n      <h2>{feed.title}</h2>\n      <button onClick={() => setVersion(v => v + 1)}>refetch</button>\n      <>\n        <ul>\n          <For each={all()}>{item => <li>{item.text}</li>}</For>\n        </ul>\n        <ol>\n          <Repeat count={rows.length}>\n            {i => (\n              <li>\n                {i}: {rows[i].text}\n              </li>\n            )}\n          </Repeat>\n        </ol>\n      </>\n    </section>\n  );\n}\n",
-      "equivalent": null,
+      "equivalent": "site: The root's Loading (main.tsx, server.tsx) covers Feed; removing Feed's own moves the fallback.",
       "id": "M0455",
       "project": "rendering-edges",
       "file": "Feed.tsx",
@@ -24411,7 +24411,7 @@
         ]
       },
       "preExistingMatch": false,
-      "status": "survived",
+      "status": "equivalent",
       "exactLine": false
     },
     {
@@ -25831,7 +25831,7 @@
       },
       "offset": 839,
       "source": "import {\n  createContext,\n  createMemo,\n  createSignal,\n  createStore,\n  Errored,\n  For,\n  useContext\n} from \"solid-js\";\n// A call that may fail, made in a JSX hole: its failure is the hole's, taken\n// by the Errored above (nativeHole). Values typed `any`: their members are\n// unchecked, as TypeScript leaves them; a method of `any` is outside code.\nfunction money(cents: number) {\n  if (!Number.isFinite(cents)) throw new RangeError(\"not an amount\");\n  return (cents / 100).toFixed(2);\n}\nconst Settings = createContext<any>({ currency: \"EUR\" });\nexport function Ledger() {\n  const [rows, setRows] = createStore<any>({ items: [{ label: \"tea\", cents: 350 }] });\n  const [user] = createSignal<any>({ name: \"ada\" });\n  const settings = useContext(Settings);\n  const total = createMemo(() =>\n    rows.items.reduce((sum: number, item: any) => { if (Date.now() < 0) throw new RangeError(\"mutant failure\"); return sum + item.cents; }, 0)\n  );\n  return (\n    <section class={settings.currency}>\n      <h2>{user().name}</h2>\n      <Errored fallback={err => <p>bad amount: {String(err())}</p>}>\n        <p>{money(total())}</p>\n        <ul>\n          <For each={rows.items}>\n            {item => (\n              <li>\n                {item.label}: {money(item.cents)}\n              </li>\n            )}\n          </For>\n        </ul>\n      </Errored>\n      <button\n        onClick={() =>\n          setRows(s => {\n            s.items.push({ label: \"cake\", cents: 420 });\n          })\n        }\n      >\n        add\n      </button>\n    </section>\n  );\n}\n",
-      "equivalent": null,
+      "equivalent": "site: The throw is in the total memo's reduce callback; the memo is read only under the Errored, which takes it.",
       "id": "M0485",
       "project": "hole-edges",
       "file": "App.tsx",
@@ -25848,7 +25848,7 @@
         ]
       },
       "preExistingMatch": false,
-      "status": "survived",
+      "status": "equivalent",
       "exactLine": false
     },
     {

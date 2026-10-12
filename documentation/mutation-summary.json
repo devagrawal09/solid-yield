@@ -1,19 +1,19 @@
 {
   "program": {
     "mutants": 488,
-    "killed": 278,
-    "survived": 113,
-    "equivalent": 97,
-    "score": 71.09974424552429,
+    "killed": 279,
+    "survived": 104,
+    "equivalent": 105,
+    "score": 72.84595300261097,
     "exactLine": 243,
-    "detected": 316
+    "detected": 317
   },
   "operators": {
     "delete-catch": {
       "mutants": 9,
       "killed": 2,
-      "survived": 7,
-      "equivalent": 0,
+      "survived": 5,
+      "equivalent": 2,
       "exact": 1,
       "detected": 5,
       "categories": {
@@ -21,7 +21,7 @@
         "masked: base refused": 0,
         "masked: base errors": 0,
         "different code": 0,
-        "silent": 2
+        "silent": 0
       }
     },
     "swallow-catch": {
@@ -42,8 +42,8 @@
     "delete-errored": {
       "mutants": 24,
       "killed": 4,
-      "survived": 20,
-      "equivalent": 0,
+      "survived": 19,
+      "equivalent": 1,
       "exact": 0,
       "detected": 14,
       "categories": {
@@ -51,14 +51,14 @@
         "masked: base refused": 4,
         "masked: base errors": 5,
         "different code": 0,
-        "silent": 1
+        "silent": 0
       }
     },
     "delete-loading": {
       "mutants": 26,
       "killed": 4,
-      "survived": 22,
-      "equivalent": 0,
+      "survived": 20,
+      "equivalent": 2,
       "exact": 0,
       "detected": 18,
       "categories": {
@@ -66,7 +66,7 @@
         "masked: base refused": 4,
         "masked: base errors": 2,
         "different code": 0,
-        "silent": 2
+        "silent": 0
       }
     },
     "setup-read": {
@@ -87,8 +87,8 @@
     "delete-provider": {
       "mutants": 22,
       "killed": 0,
-      "survived": 22,
-      "equivalent": 0,
+      "survived": 21,
+      "equivalent": 1,
       "exact": 0,
       "detected": 15,
       "categories": {
@@ -96,7 +96,7 @@
         "masked: base refused": 4,
         "masked: base errors": 2,
         "different code": 0,
-        "silent": 1
+        "silent": 0
       }
     },
     "never-provided-context": {
@@ -162,8 +162,8 @@
     "remove-await": {
       "mutants": 31,
       "killed": 2,
-      "survived": 2,
-      "equivalent": 27,
+      "survived": 1,
+      "equivalent": 28,
       "exact": 1,
       "detected": 2,
       "categories": {
@@ -171,7 +171,7 @@
         "masked: base refused": 0,
         "masked: base errors": 1,
         "different code": 0,
-        "silent": 1
+        "silent": 0
       }
     },
     "memo-write": {
@@ -221,16 +221,16 @@
     },
     "destructure-props": {
       "mutants": 18,
-      "killed": 17,
-      "survived": 1,
+      "killed": 18,
+      "survived": 0,
       "equivalent": 0,
       "exact": 17,
-      "detected": 17,
+      "detected": 18,
       "categories": {
         "detected elsewhere": 0,
         "masked: base refused": 0,
         "masked: base errors": 0,
-        "different code": 1,
+        "different code": 0,
         "silent": 0
       }
     },
@@ -282,8 +282,8 @@
     "callback-throw": {
       "mutants": 5,
       "killed": 1,
-      "survived": 1,
-      "equivalent": 3,
+      "survived": 0,
+      "equivalent": 4,
       "exact": 0,
       "detected": 1,
       "categories": {
@@ -291,7 +291,7 @@
         "masked: base refused": 0,
         "masked: base errors": 0,
         "different code": 0,
-        "silent": 1
+        "silent": 0
       }
     },
     "server-new-class": {
@@ -343,13 +343,6 @@
       "line": 36
     },
     {
-      "id": "M0012",
-      "operator": "destructure-props",
-      "project": "sierpinski",
-      "file": "main.tsx",
-      "line": 51
-    },
-    {
       "id": "M0035",
       "operator": "delete-errored",
       "project": "todos",
@@ -369,6 +362,13 @@
       "project": "todos",
       "file": "app.tsx",
       "line": 144
+    },
+    {
+      "id": "M0039",
+      "operator": "delete-catch",
+      "project": "todos",
+      "file": "todos.ts",
+      "line": 99
     }
   ],
   "topChecker": [
@@ -409,7 +409,7 @@
     }
   ],
   "findings": {
-    "program": 113,
+    "program": 104,
     "checker": 20,
     "cliCrashes": 0
   }

@@ -670,13 +670,13 @@
     }
   ],
   "mutation": {
-    "score": 71.09974424552429,
+    "score": 72.84595300261097,
     "counts": {
       "delete-catch": {
         "mutants": 9,
         "killed": 2,
-        "survived": 7,
-        "equivalent": 0
+        "survived": 5,
+        "equivalent": 2
       },
       "swallow-catch": {
         "mutants": 2,
@@ -687,14 +687,14 @@
       "delete-errored": {
         "mutants": 24,
         "killed": 4,
-        "survived": 20,
-        "equivalent": 0
+        "survived": 19,
+        "equivalent": 1
       },
       "delete-loading": {
         "mutants": 26,
         "killed": 4,
-        "survived": 22,
-        "equivalent": 0
+        "survived": 20,
+        "equivalent": 2
       },
       "setup-read": {
         "mutants": 120,
@@ -705,8 +705,8 @@
       "delete-provider": {
         "mutants": 22,
         "killed": 0,
-        "survived": 22,
-        "equivalent": 0
+        "survived": 21,
+        "equivalent": 1
       },
       "never-provided-context": {
         "mutants": 30,
@@ -735,8 +735,8 @@
       "remove-await": {
         "mutants": 31,
         "killed": 2,
-        "survived": 2,
-        "equivalent": 27
+        "survived": 1,
+        "equivalent": 28
       },
       "memo-write": {
         "mutants": 26,
@@ -758,8 +758,8 @@
       },
       "destructure-props": {
         "mutants": 18,
-        "killed": 17,
-        "survived": 1,
+        "killed": 18,
+        "survived": 0,
         "equivalent": 0
       },
       "inline-component": {
@@ -783,8 +783,8 @@
       "callback-throw": {
         "mutants": 5,
         "killed": 1,
-        "survived": 1,
-        "equivalent": 3
+        "survived": 0,
+        "equivalent": 4
       },
       "server-new-class": {
         "mutants": 1,
@@ -793,8 +793,8 @@
         "equivalent": 0
       }
     },
-    "recordedAt": "2026-10-12T09:13:19.756Z",
-    "digest": "129ebaa8a3b29ef08daeebc3e850a27e85eba1265ae9270b8f83b0f53d1c232c"
+    "recordedAt": "2026-10-12T21:29:17.041Z",
+    "digest": "480f2564b0e8b2a7e9242ac63c0e3e966c6ae2e48f8d4c0b9a67678b32b42e2e"
   },
   "strykerReportOnly": {
     "mode": "REPORT-ONLY",

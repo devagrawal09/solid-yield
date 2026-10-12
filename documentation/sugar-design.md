@@ -1928,42 +1928,43 @@ states of the twin's script, console output included.
   the model, so the model still runs; the finding is reported.
 
 
-**The survivors after the hole-edges seed and the typed cache (2026-10-12).**
-The program run scores 71.10% (488 mutants; 278 killed, 97 equivalent, 113
-survived; it was 65.97% before the fixes below, the `hole-edges` seed and the
-`non-core-cache` correction). Of the survivors, 60 are masked (49 bases
-refused, 11 bases already reporting the expected code), 44 are detected
-outside the mutated routine (a removed boundary is reported where the failure,
-pending read or requirement starts, and at the root), 1 reports a different
-code and 8 are silent: the checker accepts the mutant. Each silent one was
-read against its program, and each is correct to accept, because the edited
-site had nothing left to do. The catalogue's equivalence is per operator, so
-the report keeps them as survivors.
+**The survivors (2026-10-12, final).** The program run scores 72.85% (488
+mutants; 279 killed, 105 equivalent, 104 survived; it was 65.97% this morning).
+No survivor is silent and none reports a different code. Of the 104, 60 are
+masked (49 bases refused by the transform, which stops at its first refusal;
+11 bases already reporting the expected code) and 44 are detected outside the
+mutated routine: a removed boundary is reported where the failure, pending
+read or requirement starts, and at the root.
 
-- `delete-catch` at `reviewer-m05_swallow/App.tsx:14` (F-M51). The `Errored`
-  around `List` takes the failure the deleted `catch` absorbed.
-- `remove-await` at the same line (F-M52). `return fetchItems()` in an
-  `async` function has the awaited form's type, so no type error is lost; the
-  rejection leaves the `try` unabsorbed and reaches the same `Errored`.
-- `delete-errored` at `reviewer-m05_swallow/App.tsx:26` (F-M54). `List`'s
+Eight mutants are site equivalents (Dev's ruling; `scripts/mutation/
+equivalents.mjs`, each with its authored line): each was read against its
+program and is correct to accept, because the edited site has nothing left to
+do.
+
+- `delete-catch` at `reviewer-m05_swallow/App.tsx:14`. The `Errored` around
+  `List` takes the failure the deleted `catch` absorbed.
+- `remove-await` at the same line. `return fetchItems()` in an `async`
+  function has the awaited form's type, so no type error is lost; the rejection
+  leaves the `try` unabsorbed and reaches the same `Errored`.
+- `delete-errored` at `reviewer-m05_swallow/App.tsx:26`. `List`'s
   `try`/`catch` absorbs every failure under that boundary, so nothing reaches
   the root.
-- `delete-provider` at `review-slots-context/App.tsx:8` (F-M101). The program
-  renders nothing: `App` and `Child` are exported, so their requirement of
-  `C` is their callers', as for any library component.
-- `delete-loading` at `review-slots-lazy-child/App.tsx:3` (F-M102). The
-  boundary held static text; nothing below it waits.
-- `delete-catch` at `review-slots-catch/App.tsx:5` (F-M103). The `try` held
-  a setter's call, which cannot fail.
-- `delete-loading` at `rendering-edges/Feed.tsx:56` (F-M111). The root's
-  `Loading` covers Feed (above).
-- `callback-throw` at `hole-edges/App.tsx:23` (F-M113). The throw is in the
-  `total` memo's `reduce` callback; the memo is read only under the
-  `Errored`, which takes it.
+- `delete-provider` at `review-slots-context/App.tsx:8`. The program renders
+  nothing: `App` and `Child` are exported, so their requirement of `C` is
+  their callers', as for any library component.
+- `delete-loading` at `review-slots-lazy-child/App.tsx:3`. The boundary held
+  static text; nothing below it waits.
+- `delete-catch` at `review-slots-catch/App.tsx:5`. The `try` held a
+  setter's call, which cannot fail.
+- `delete-loading` at `rendering-edges/Feed.tsx:56`. The root's `Loading`
+  covers Feed (above).
+- `callback-throw` at `hole-edges/App.tsx:23`. The throw is in the `total`
+  memo's `reduce` callback; the memo is read only under the `Errored`, which
+  takes it.
 
-The one "different code" survivor, `destructure-props` at
-`sierpinski/main.tsx:51` (F-M2), is refused, by the recursion lowering
-(`NATIVE_RECURSION`), which stops at its first refusal before `NATIVE_PROPS`.
+The last "different code" survivor, `destructure-props` at
+`sierpinski/main.tsx:51`, is killed: the recursion lowering's snapshot
+refusal keeps its code and points at the caller that broke the snapshot (below).
 
 ### Found by the non-core-cache survivors (2026-10-12)
 

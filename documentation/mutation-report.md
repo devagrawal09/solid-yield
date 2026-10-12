@@ -1,6 +1,6 @@
 # Mutation report
 
-Measured 2026-10-10T16:12:06.074Z. The corpus, operators and checker have changed since the first measurement (2026-10-08); each change is in its own commit, and the catalogue's corrections are listed below. The tests in scripts/mutation/test.mjs verify the harness, not the checker.
+Measured 2026-10-12T00:01:13.757Z. The corpus, operators and checker have changed since the first measurement (2026-10-08); each change is in its own commit, and the catalogue's corrections are listed below. The tests in scripts/mutation/test.mjs verify the harness, not the checker.
 
 ## Commands and scope
 
@@ -12,7 +12,7 @@ node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js ru
 node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js run scripts/mutation/stryker-ts.config.mjs
 ```
 
-Program run: 2703.7 seconds; 41 projects; 470 mutants. Digest: `aa3606a2a432928a51fa6f7bbc9fdf24f6672bad0e24dbe442cbad2f08a85955`.
+Program run: 3118.5 seconds; 42 projects; 480 mutants. Digest: `473aebfe7b8457bc1ca163ec2d18adfd02b9da11bb9143c11524b1a81f776ea6`.
 
 Every syntactically applicable site is edited separately. Sources stay plain Solid. Each pipeline runs the shared native transform, the exported implementation used by `solid-yield check`, and recommended ESLint on generated code. A transform refusal blocks generated lint and is recorded explicitly. A CLI crash is a finding, never a kill.
 
@@ -26,26 +26,26 @@ The gate runs `node scripts/mutation/run.mjs --cached --baseline documentation/y
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
 | delete-catch | 9 | 0 | 2 | 7 | 22.22% | 1 (11.11%) | 5 (55.56%) | FOREIGN_HANDOFF, NATIVE_CALLBACK_FAILURE, EVENT_REJECTS |
 | swallow-catch | 2 | 2 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | equivalent |
-| delete-errored | 22 | 0 | 2 | 20 | 9.09% | 0 (0.00%) | 12 (54.55%) | FOREIGN_HANDOFF |
-| delete-loading | 25 | 0 | 3 | 22 | 12.00% | 0 (0.00%) | 17 (68.00%) | PENDING_ROOT |
-| setup-read | 117 | 0 | 96 | 21 | 82.05% | 96 (82.05%) | 96 (82.05%) | READ_IN_SETUP, solid-yield/no-read-in-setup |
+| delete-errored | 23 | 0 | 3 | 20 | 13.04% | 0 (0.00%) | 13 (56.52%) | FOREIGN_HANDOFF |
+| delete-loading | 26 | 0 | 4 | 22 | 15.38% | 0 (0.00%) | 18 (69.23%) | PENDING_ROOT |
+| setup-read | 118 | 0 | 97 | 21 | 82.20% | 97 (82.20%) | 97 (82.20%) | READ_IN_SETUP, solid-yield/no-read-in-setup |
 | delete-provider | 22 | 0 | 0 | 22 | 0.00% | 0 (0.00%) | 15 (68.18%) | NO_PROVIDER |
-| never-provided-context | 28 | 0 | 24 | 4 | 85.71% | 24 (85.71%) | 24 (85.71%) | NO_PROVIDER |
-| throw-string | 27 | 27 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | equivalent |
-| throw-object | 27 | 27 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | equivalent |
+| never-provided-context | 29 | 0 | 25 | 4 | 86.21% | 25 (86.21%) | 25 (86.21%) | NO_PROVIDER |
+| throw-string | 28 | 28 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | equivalent |
+| throw-object | 28 | 28 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | equivalent |
 | async-reject | 3 | 0 | 3 | 0 | 100.00% | 1 (33.33%) | 2 (66.67%) | FOREIGN_HANDOFF, NATIVE_CALLBACK_FAILURE, EVENT_REJECTS |
 | remove-await | 31 | 27 | 2 | 2 | 50.00% | 1 (25.00%) | 2 (50.00%) | TS2322, TS2345, TS2739, TS2740, TS2741, TS2339, GENERATED_TYPE, SETTLED_PROP |
-| memo-write | 25 | 0 | 21 | 4 | 84.00% | 21 (84.00%) | 20 (80.00%) | WRITE_IN_REACTIVE, solid-yield/no-unyielded-write |
+| memo-write | 26 | 0 | 22 | 4 | 84.62% | 22 (84.62%) | 21 (80.77%) | WRITE_IN_REACTIVE, solid-yield/no-unyielded-write |
 | timer-read | 6 | 6 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | equivalent |
-| non-core-cache | 48 | 0 | 21 | 27 | 43.75% | 18 (37.50%) | 22 (45.83%) | SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP |
-| destructure-props | 17 | 0 | 16 | 1 | 94.12% | 16 (94.12%) | 16 (94.12%) | NATIVE_PROPS |
-| inline-component | 50 | 0 | 50 | 0 | 100.00% | 50 (100.00%) | 50 (100.00%) | NATIVE_COMPONENT, SUGAR_CALLBACK, SUGAR_RETURN, FOREIGN_HANDOFF |
+| non-core-cache | 49 | 0 | 22 | 27 | 44.90% | 18 (36.73%) | 23 (46.94%) | SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP |
+| destructure-props | 18 | 0 | 17 | 1 | 94.44% | 17 (94.44%) | 17 (94.44%) | NATIVE_PROPS |
+| inline-component | 51 | 0 | 51 | 0 | 100.00% | 51 (100.00%) | 51 (100.00%) | NATIVE_COMPONENT, SUGAR_CALLBACK, SUGAR_RETURN, FOREIGN_HANDOFF |
 | effect-arity | 5 | 0 | 5 | 0 | 100.00% | 5 (100.00%) | 3 (60.00%) | NATIVE_EFFECT_PHASES, TS2554 |
 | remove-use-server | 1 | 1 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | equivalent |
 | callback-throw | 4 | 3 | 1 | 0 | 100.00% | 0 (0.00%) | 1 (100.00%) | FOREIGN_HANDOFF |
 | server-new-class | 1 | 0 | 0 | 1 | 0.00% | 0 (0.00%) | 0 (0.00%) | FOREIGN_HANDOFF |
 
-**Program mutation score: 65.25% = 246 / (246 + 131).** 93 equivalents excluded. Exact line: 61.80% (233). Detected: 75.60% (285).
+**Program mutation score: 65.97% = 254 / (254 + 131).** 95 equivalents excluded. Exact line: 61.82% (238). Detected: 76.10% (293).
 
 ### Why mutants survive
 
@@ -61,7 +61,7 @@ Each survivor of the gate's rule falls in one category: **detected elsewhere** (
 | never-provided-context | 0 | 4 | 0 | 0 | 0 |
 | remove-await | 0 | 0 | 1 | 0 | 1 |
 | memo-write | 0 | 4 | 0 | 0 | 0 |
-| non-core-cache | 1 | 8 | 1 | 17 | 0 |
+| non-core-cache | 1 | 8 | 0 | 18 | 0 |
 | destructure-props | 0 | 0 | 0 | 1 | 0 |
 | server-new-class | 0 | 0 | 1 | 0 | 0 |
 
@@ -135,6 +135,7 @@ The reviewer app and all 17 stored variants are verbatim snapshots under `script
 | operator-seeds | 2 | completed / diagnostics / passed | Additional plain Solid controls for catch, async event and server sites |
 | sugar-edges | 4 | completed / passed / passed | Plain Solid exercising the native edges: context hooks and members, setters in plain types, wrappers with boundaries around context readers, array callbacks, effect cleanups, an anonymous default component |
 | rendering-edges | 5 | completed / passed / passed | Plain Solid exercising Rendering's native edges: a component factory with a tuple context and destructured members, a derived store, async iterable producers, a Repeat index key, isPending thunks, a lazy page, root trees (CSR, and a server function's with a ParentProps shell) |
+| effect-edges | 4 | completed / passed / passed | Plain Solid exercising Effect's native edges (D-121, D-122): a saga its driver steps inside an action, a kept action promise, a provider value that creates, cleans up and may fail, an accessor prop, a store's root in For, a store reduce, a routine's stream a memo returns |
 
 ## Checker mutants (Stryker)
 
@@ -4065,7 +4066,7 @@ Stages: {"transform":"completed","cli":"passed","lint":"passed"}
 solid-yield check: 1 files, 0 errors
 ```
 
-### F-M121: M0390 non-core-cache at operator-seeds/App.tsx:13 (masked: base errors)
+### F-M121: M0390 non-core-cache at operator-seeds/App.tsx:13 (different code)
 
 Expected in the mutated routine (lines 11–28): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
 
@@ -4088,7 +4089,8 @@ Checker said instead:
 ```text
 Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 <job>/source/App.tsx:25:22 error TS95000: [EVENT_REJECTS] This handler can fail with Problem and nothing catches it; wrap the body in try/catch, or declare the failure.
-solid-yield check: 2 files, 1 errors
+<job>/source/App.tsx:11:10 error TS2322: [generated] [LAZY_VIEW] children is a lazy view: function* () { return <.../>; }
+solid-yield check: 2 files, 2 errors
 ```
 
 ### F-M122: M0393 remove-await at operator-seeds/App.tsx:14 (masked: base errors)

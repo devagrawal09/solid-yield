@@ -670,7 +670,7 @@
     }
   ],
   "mutation": {
-    "score": 65.25198938992042,
+    "score": 65.97402597402598,
     "counts": {
       "delete-catch": {
         "mutants": 9,
@@ -685,20 +685,20 @@
         "equivalent": 2
       },
       "delete-errored": {
-        "mutants": 22,
-        "killed": 2,
+        "mutants": 23,
+        "killed": 3,
         "survived": 20,
         "equivalent": 0
       },
       "delete-loading": {
-        "mutants": 25,
-        "killed": 3,
+        "mutants": 26,
+        "killed": 4,
         "survived": 22,
         "equivalent": 0
       },
       "setup-read": {
-        "mutants": 117,
-        "killed": 96,
+        "mutants": 118,
+        "killed": 97,
         "survived": 21,
         "equivalent": 0
       },
@@ -709,22 +709,22 @@
         "equivalent": 0
       },
       "never-provided-context": {
-        "mutants": 28,
-        "killed": 24,
+        "mutants": 29,
+        "killed": 25,
         "survived": 4,
         "equivalent": 0
       },
       "throw-string": {
-        "mutants": 27,
+        "mutants": 28,
         "killed": 0,
         "survived": 0,
-        "equivalent": 27
+        "equivalent": 28
       },
       "throw-object": {
-        "mutants": 27,
+        "mutants": 28,
         "killed": 0,
         "survived": 0,
-        "equivalent": 27
+        "equivalent": 28
       },
       "async-reject": {
         "mutants": 3,
@@ -739,8 +739,8 @@
         "equivalent": 27
       },
       "memo-write": {
-        "mutants": 25,
-        "killed": 21,
+        "mutants": 26,
+        "killed": 22,
         "survived": 4,
         "equivalent": 0
       },
@@ -751,20 +751,20 @@
         "equivalent": 6
       },
       "non-core-cache": {
-        "mutants": 48,
-        "killed": 21,
+        "mutants": 49,
+        "killed": 22,
         "survived": 27,
         "equivalent": 0
       },
       "destructure-props": {
-        "mutants": 17,
-        "killed": 16,
+        "mutants": 18,
+        "killed": 17,
         "survived": 1,
         "equivalent": 0
       },
       "inline-component": {
-        "mutants": 50,
-        "killed": 50,
+        "mutants": 51,
+        "killed": 51,
         "survived": 0,
         "equivalent": 0
       },
@@ -793,8 +793,8 @@
         "equivalent": 0
       }
     },
-    "recordedAt": "2026-10-10T16:12:06.074Z",
-    "digest": "aa3606a2a432928a51fa6f7bbc9fdf24f6672bad0e24dbe442cbad2f08a85955"
+    "recordedAt": "2026-10-12T00:01:13.757Z",
+    "digest": "473aebfe7b8457bc1ca163ec2d18adfd02b9da11bb9143c11524b1a81f776ea6"
   },
   "strykerReportOnly": {
     "mode": "REPORT-ONLY",

@@ -1,12 +1,12 @@
 {
   "program": {
-    "mutants": 470,
-    "killed": 246,
+    "mutants": 480,
+    "killed": 254,
     "survived": 131,
-    "equivalent": 93,
-    "score": 65.25198938992042,
-    "exactLine": 233,
-    "detected": 285
+    "equivalent": 95,
+    "score": 65.97402597402598,
+    "exactLine": 238,
+    "detected": 293
   },
   "operators": {
     "delete-catch": {
@@ -40,12 +40,12 @@
       }
     },
     "delete-errored": {
-      "mutants": 22,
-      "killed": 2,
+      "mutants": 23,
+      "killed": 3,
       "survived": 20,
       "equivalent": 0,
       "exact": 0,
-      "detected": 12,
+      "detected": 13,
       "categories": {
         "detected elsewhere": 10,
         "masked: base refused": 4,
@@ -55,12 +55,12 @@
       }
     },
     "delete-loading": {
-      "mutants": 25,
-      "killed": 3,
+      "mutants": 26,
+      "killed": 4,
       "survived": 22,
       "equivalent": 0,
       "exact": 0,
-      "detected": 17,
+      "detected": 18,
       "categories": {
         "detected elsewhere": 14,
         "masked: base refused": 4,
@@ -70,12 +70,12 @@
       }
     },
     "setup-read": {
-      "mutants": 117,
-      "killed": 96,
+      "mutants": 118,
+      "killed": 97,
       "survived": 21,
       "equivalent": 0,
-      "exact": 96,
-      "detected": 96,
+      "exact": 97,
+      "detected": 97,
       "categories": {
         "detected elsewhere": 0,
         "masked: base refused": 21,
@@ -100,12 +100,12 @@
       }
     },
     "never-provided-context": {
-      "mutants": 28,
-      "killed": 24,
+      "mutants": 29,
+      "killed": 25,
       "survived": 4,
       "equivalent": 0,
-      "exact": 24,
-      "detected": 24,
+      "exact": 25,
+      "detected": 25,
       "categories": {
         "detected elsewhere": 0,
         "masked: base refused": 4,
@@ -115,10 +115,10 @@
       }
     },
     "throw-string": {
-      "mutants": 27,
+      "mutants": 28,
       "killed": 0,
       "survived": 0,
-      "equivalent": 27,
+      "equivalent": 28,
       "exact": 0,
       "detected": 0,
       "categories": {
@@ -130,10 +130,10 @@
       }
     },
     "throw-object": {
-      "mutants": 27,
+      "mutants": 28,
       "killed": 0,
       "survived": 0,
-      "equivalent": 27,
+      "equivalent": 28,
       "exact": 0,
       "detected": 0,
       "categories": {
@@ -175,12 +175,12 @@
       }
     },
     "memo-write": {
-      "mutants": 25,
-      "killed": 21,
+      "mutants": 26,
+      "killed": 22,
       "survived": 4,
       "equivalent": 0,
-      "exact": 21,
-      "detected": 20,
+      "exact": 22,
+      "detected": 21,
       "categories": {
         "detected elsewhere": 0,
         "masked: base refused": 4,
@@ -205,27 +205,27 @@
       }
     },
     "non-core-cache": {
-      "mutants": 48,
-      "killed": 21,
+      "mutants": 49,
+      "killed": 22,
       "survived": 27,
       "equivalent": 0,
       "exact": 18,
-      "detected": 22,
+      "detected": 23,
       "categories": {
         "detected elsewhere": 1,
         "masked: base refused": 8,
-        "masked: base errors": 1,
-        "different code": 17,
+        "masked: base errors": 0,
+        "different code": 18,
         "silent": 0
       }
     },
     "destructure-props": {
-      "mutants": 17,
-      "killed": 16,
+      "mutants": 18,
+      "killed": 17,
       "survived": 1,
       "equivalent": 0,
-      "exact": 16,
-      "detected": 16,
+      "exact": 17,
+      "detected": 17,
       "categories": {
         "detected elsewhere": 0,
         "masked: base refused": 0,
@@ -235,12 +235,12 @@
       }
     },
     "inline-component": {
-      "mutants": 50,
-      "killed": 50,
+      "mutants": 51,
+      "killed": 51,
       "survived": 0,
       "equivalent": 0,
-      "exact": 50,
-      "detected": 50,
+      "exact": 51,
+      "detected": 51,
       "categories": {
         "detected elsewhere": 0,
         "masked: base refused": 0,

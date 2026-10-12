@@ -1,8 +1,8 @@
 {
-  "startedAt": "2026-10-10T15:27:02.386Z",
-  "finishedAt": "2026-10-10T16:12:06.074Z",
-  "durationMs": 2703688,
-  "digest": "aa3606a2a432928a51fa6f7bbc9fdf24f6672bad0e24dbe442cbad2f08a85955",
+  "startedAt": "2026-10-11T23:09:15.221Z",
+  "finishedAt": "2026-10-12T00:01:13.757Z",
+  "durationMs": 3118536,
+  "digest": "473aebfe7b8457bc1ca163ec2d18adfd02b9da11bb9143c11524b1a81f776ea6",
   "projects": [
     {
       "id": "sierpinski",
@@ -1085,6 +1085,22 @@
           "solid-yield check: 5 files, 0 errors"
         ]
       }
+    },
+    {
+      "id": "effect-edges",
+      "origin": "Plain Solid exercising Effect's native edges (D-121, D-122): a saga its driver steps inside an action, a kept action promise, a provider value that creates, cleans up and may fail, an accessor prop, a store's root in For, a store reduce, a routine's stream a memo returns",
+      "files": 4,
+      "base": {
+        "diagnostics": [],
+        "stages": {
+          "transform": "completed",
+          "cli": "passed",
+          "lint": "passed"
+        },
+        "cliOutput": [
+          "solid-yield check: 4 files, 0 errors"
+        ]
+      }
     }
   ],
   "counts": {
@@ -1101,20 +1117,20 @@
       "equivalent": 2
     },
     "delete-errored": {
-      "mutants": 22,
-      "killed": 2,
+      "mutants": 23,
+      "killed": 3,
       "survived": 20,
       "equivalent": 0
     },
     "delete-loading": {
-      "mutants": 25,
-      "killed": 3,
+      "mutants": 26,
+      "killed": 4,
       "survived": 22,
       "equivalent": 0
     },
     "setup-read": {
-      "mutants": 117,
-      "killed": 96,
+      "mutants": 118,
+      "killed": 97,
       "survived": 21,
       "equivalent": 0
     },
@@ -1125,22 +1141,22 @@
       "equivalent": 0
     },
     "never-provided-context": {
-      "mutants": 28,
-      "killed": 24,
+      "mutants": 29,
+      "killed": 25,
       "survived": 4,
       "equivalent": 0
     },
     "throw-string": {
-      "mutants": 27,
+      "mutants": 28,
       "killed": 0,
       "survived": 0,
-      "equivalent": 27
+      "equivalent": 28
     },
     "throw-object": {
-      "mutants": 27,
+      "mutants": 28,
       "killed": 0,
       "survived": 0,
-      "equivalent": 27
+      "equivalent": 28
     },
     "async-reject": {
       "mutants": 3,
@@ -1155,8 +1171,8 @@
       "equivalent": 27
     },
     "memo-write": {
-      "mutants": 25,
-      "killed": 21,
+      "mutants": 26,
+      "killed": 22,
       "survived": 4,
       "equivalent": 0
     },
@@ -1167,20 +1183,20 @@
       "equivalent": 6
     },
     "non-core-cache": {
-      "mutants": 48,
-      "killed": 21,
+      "mutants": 49,
+      "killed": 22,
       "survived": 27,
       "equivalent": 0
     },
     "destructure-props": {
-      "mutants": 17,
-      "killed": 16,
+      "mutants": 18,
+      "killed": 17,
       "survived": 1,
       "equivalent": 0
     },
     "inline-component": {
-      "mutants": 50,
-      "killed": 50,
+      "mutants": 51,
+      "killed": 51,
       "survived": 0,
       "equivalent": 0
     },
@@ -1210,11 +1226,11 @@
     }
   },
   "total": {
-    "mutants": 470,
-    "killed": 246,
+    "mutants": 480,
+    "killed": 254,
     "survived": 131,
-    "equivalent": 93,
-    "score": 65.25198938992042
+    "equivalent": 95,
+    "score": 65.97402597402598
   },
   "mutants": [
     {
@@ -21306,6 +21322,14 @@
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with Problem and nothing catches it; wrap the body in try/catch, or declare the failure."
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 11,
+            "code": "LAZY_VIEW",
+            "tsCode": "TS2322",
+            "message": "[generated] [LAZY_VIEW] children is a lazy view: function* () { return <.../>; }"
           }
         ],
         "stages": {
@@ -21315,7 +21339,8 @@
         },
         "cliOutput": [
           "<job>/source/App.tsx:25:22 error TS95000: [EVENT_REJECTS] This handler can fail with Problem and nothing catches it; wrap the body in try/catch, or declare the failure.",
-          "solid-yield check: 2 files, 1 errors"
+          "<job>/source/App.tsx:11:10 error TS2322: [generated] [LAZY_VIEW] children is a lazy view: function* () { return <.../>; }",
+          "solid-yield check: 2 files, 2 errors"
         ]
       },
       "preExistingMatch": false,
@@ -24486,6 +24511,22 @@
         "diagnostics": [
           {
             "stage": "cli",
+            "file": "main.tsx",
+            "line": 8,
+            "code": "NO_PROVIDER",
+            "tsCode": "TS2345",
+            "message": "[NO_PROVIDER] Fix the earlier errors in this component before checking its render call. Missing: any."
+          },
+          {
+            "stage": "cli",
+            "file": "router.tsx",
+            "line": 10,
+            "code": "LAZY_VIEW",
+            "tsCode": "TS2769",
+            "message": "[generated] [LAZY_VIEW] children is a lazy view: function* () { return <.../>; }"
+          },
+          {
+            "stage": "cli",
             "file": "router.tsx",
             "line": 13,
             "code": "TS2345",
@@ -24507,10 +24548,11 @@
           "lint": "passed"
         },
         "cliOutput": [
-          "<job>/source/router.tsx:17:30 error TS2322: Type 'Source<string, any, false>' is not assignable to type '() => string'.\n  Type 'Source<string, any, false>' provides no match for the signature '(): string'.",
+          "<job>/source/main.tsx:8:5 error TS2345: [NO_PROVIDER] Fix the earlier errors in this component before checking its render call. Missing: any.",
+          "<job>/source/router.tsx:10:17 error TS2769: [generated] [LAZY_VIEW] children is a lazy view: function* () { return <.../>; }",
           "<job>/source/router.tsx:13:37 error TS2345: Argument of type '0' is not assignable to parameter of type 'string | ((prev: string | undefined) => string | undefined) | undefined'.",
           "<job>/source/router.tsx:13:34 error TS2345: [WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state.",
-          "solid-yield check: 5 files, 3 errors"
+          "solid-yield check: 5 files, 4 errors"
         ]
       },
       "preExistingMatch": false,
@@ -25015,6 +25057,481 @@
       "preExistingMatch": false,
       "status": "killed",
       "exactLine": false
+    },
+    {
+      "operator": "destructure-props",
+      "line": 5,
+      "routine": {
+        "start": 5,
+        "end": 8
+      },
+      "offset": 176,
+      "source": "import { createMemo, createSignal, createStore, For, isPending, latest } from \"solid-js\";\nimport { drive } from \"./bridge\";\nimport { ticks } from \"./runtime\";\n\nfunction Totals({ totals: __mutantProp176, ...props }: { totals: () => number }) {\n  const shown = () => latest(__mutantProp176);\n  return <p class={isPending(__mutantProp176) ? \"stale\" : \"\"}>{shown().toFixed(1)}</p>;\n}\n\nexport function Checkout() {\n  const [cart, setCart] = createStore([{ name: \"a\", price: 2, quantity: 1 }]);\n  const [phase, setPhase] = createSignal(\"idle\");\n  const total = () => cart.reduce((sum, item) => sum + item.price * item.quantity, 0);\n  const tick = createMemo<number>(() => ticks(total()));\n  const place = drive(function* (count: number) {\n    setPhase(\"reserving\");\n    const reserved = yield Promise.resolve(count);\n    setPhase(`placed ${reserved}`);\n    return reserved;\n  });\n  return (\n    <section>\n      <For each={cart}>\n        {item => (\n          <p>\n            {item.name}: {item.quantity}\n          </p>\n        )}\n      </For>\n      <button onClick={() => setCart(c => void c[0].quantity++)}>more</button>\n      <button onClick={() => place(cart.length).catch(() => {})}>place</button>\n      <p>{phase()}</p>\n      <Totals totals={tick} />\n    </section>\n  );\n}\n",
+      "equivalent": null,
+      "id": "M0471",
+      "project": "effect-edges",
+      "file": "Checkout.tsx",
+      "original": "import { createMemo, createSignal, createStore, For, isPending, latest } from \"solid-js\";\nimport { drive } from \"./bridge\";\nimport { ticks } from \"./runtime\";\n\nfunction Totals(props: { totals: () => number }) {\n  const shown = () => latest(props.totals);\n  return <p class={isPending(props.totals) ? \"stale\" : \"\"}>{shown().toFixed(1)}</p>;\n}\n\nexport function Checkout() {\n  const [cart, setCart] = createStore([{ name: \"a\", price: 2, quantity: 1 }]);\n  const [phase, setPhase] = createSignal(\"idle\");\n  const total = () => cart.reduce((sum, item) => sum + item.price * item.quantity, 0);\n  const tick = createMemo<number>(() => ticks(total()));\n  const place = drive(function* (count: number) {\n    setPhase(\"reserving\");\n    const reserved = yield Promise.resolve(count);\n    setPhase(`placed ${reserved}`);\n    return reserved;\n  });\n  return (\n    <section>\n      <For each={cart}>\n        {item => (\n          <p>\n            {item.name}: {item.quantity}\n          </p>\n        )}\n      </For>\n      <button onClick={() => setCart(c => void c[0].quantity++)}>more</button>\n      <button onClick={() => place(cart.length).catch(() => {})}>place</button>\n      <p>{phase()}</p>\n      <Totals totals={tick} />\n    </section>\n  );\n}\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "transform",
+            "file": "Checkout.tsx",
+            "line": 5,
+            "code": "NATIVE_PROPS",
+            "message": "Use a props parameter and read props.name where needed; destructuring loses reactive updates."
+          },
+          {
+            "stage": "cli",
+            "file": "Checkout.tsx",
+            "line": 5,
+            "code": "NATIVE_PROPS",
+            "tsCode": "TS95000",
+            "message": "[NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates."
+          }
+        ],
+        "stages": {
+          "transform": "refused",
+          "cli": "diagnostics",
+          "lint": "blocked-by-transform"
+        },
+        "cliOutput": [
+          "<job>/source/Checkout.tsx:5:1 error TS95000: [NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates.",
+          "solid-yield check: 4 files, 1 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "killed",
+      "exactLine": true
+    },
+    {
+      "operator": "inline-component",
+      "line": 10,
+      "routine": {
+        "start": 10,
+        "end": 36
+      },
+      "offset": 370,
+      "source": "import { createMemo, createSignal, createStore, For, isPending, latest } from \"solid-js\";\nimport { drive } from \"./bridge\";\nimport { ticks } from \"./runtime\";\n\nfunction Totals(props: { totals: () => number }) {\n  const shown = () => latest(props.totals);\n  return <p class={isPending(props.totals) ? \"stale\" : \"\"}>{shown().toFixed(1)}</p>;\n}\n\nexport function Checkout() {function MutantInline1186(props:{totals:()=>number;}){const shown=()=>latest(props.totals);return<p class={isPending(props.totals)?\"stale\":\"\"}>{shown().toFixed(1)}</p>;}\n  const [cart, setCart] = createStore([{ name: \"a\", price: 2, quantity: 1 }]);\n  const [phase, setPhase] = createSignal(\"idle\");\n  const total = () => cart.reduce((sum, item) => sum + item.price * item.quantity, 0);\n  const tick = createMemo<number>(() => ticks(total()));\n  const place = drive(function* (count: number) {\n    setPhase(\"reserving\");\n    const reserved = yield Promise.resolve(count);\n    setPhase(`placed ${reserved}`);\n    return reserved;\n  });\n  return (\n    <section>\n      <For each={cart}>\n        {item => (\n          <p>\n            {item.name}: {item.quantity}\n          </p>\n        )}\n      </For>\n      <button onClick={() => setCart(c => void c[0].quantity++)}>more</button>\n      <button onClick={() => place(cart.length).catch(() => {})}>place</button>\n      <p>{phase()}</p>\n      <MutantInline1186 totals={tick} />\n    </section>\n  );\n}\n",
+      "equivalent": null,
+      "id": "M0472",
+      "project": "effect-edges",
+      "file": "Checkout.tsx",
+      "original": "import { createMemo, createSignal, createStore, For, isPending, latest } from \"solid-js\";\nimport { drive } from \"./bridge\";\nimport { ticks } from \"./runtime\";\n\nfunction Totals(props: { totals: () => number }) {\n  const shown = () => latest(props.totals);\n  return <p class={isPending(props.totals) ? \"stale\" : \"\"}>{shown().toFixed(1)}</p>;\n}\n\nexport function Checkout() {\n  const [cart, setCart] = createStore([{ name: \"a\", price: 2, quantity: 1 }]);\n  const [phase, setPhase] = createSignal(\"idle\");\n  const total = () => cart.reduce((sum, item) => sum + item.price * item.quantity, 0);\n  const tick = createMemo<number>(() => ticks(total()));\n  const place = drive(function* (count: number) {\n    setPhase(\"reserving\");\n    const reserved = yield Promise.resolve(count);\n    setPhase(`placed ${reserved}`);\n    return reserved;\n  });\n  return (\n    <section>\n      <For each={cart}>\n        {item => (\n          <p>\n            {item.name}: {item.quantity}\n          </p>\n        )}\n      </For>\n      <button onClick={() => setCart(c => void c[0].quantity++)}>more</button>\n      <button onClick={() => place(cart.length).catch(() => {})}>place</button>\n      <p>{phase()}</p>\n      <Totals totals={tick} />\n    </section>\n  );\n}\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "transform",
+            "file": "Checkout.tsx",
+            "line": 10,
+            "code": "NATIVE_COMPONENT",
+            "message": "Declare MutantInline1186 at module level; a component declared inside another function has no native lowering."
+          },
+          {
+            "stage": "cli",
+            "file": "Checkout.tsx",
+            "line": 10,
+            "code": "NATIVE_COMPONENT",
+            "tsCode": "TS95000",
+            "message": "[NATIVE_COMPONENT] Declare MutantInline1186 at module level; a component declared inside another function has no native lowering."
+          }
+        ],
+        "stages": {
+          "transform": "refused",
+          "cli": "diagnostics",
+          "lint": "blocked-by-transform"
+        },
+        "cliOutput": [
+          "<job>/source/Checkout.tsx:10:29 error TS95000: [NATIVE_COMPONENT] Declare MutantInline1186 at module level; a component declared inside another function has no native lowering.",
+          "solid-yield check: 4 files, 1 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "killed",
+      "exactLine": true
+    },
+    {
+      "operator": "non-core-cache",
+      "line": 14,
+      "routine": {
+        "start": 10,
+        "end": 36
+      },
+      "offset": 603,
+      "source": "import { createMemo, createSignal, createStore, For, isPending, latest } from \"solid-js\";\nimport { drive } from \"./bridge\";\nimport { ticks } from \"./runtime\";\n\nfunction Totals(props: { totals: () => number }) {\n  const shown = () => latest(props.totals);\n  return <p class={isPending(props.totals) ? \"stale\" : \"\"}>{shown().toFixed(1)}</p>;\n}\n\nexport function Checkout() {\n  const [cart, setCart] = createStore([{ name: \"a\", price: 2, quantity: 1 }]);\n  const [phase, setPhase] = createSignal(\"idle\");\n  const total = () => cart.reduce((sum, item) => sum + item.price * item.quantity, 0);\n  const tick = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })<number>(() => ticks(total()));\n  const place = drive(function* (count: number) {\n    setPhase(\"reserving\");\n    const reserved = yield Promise.resolve(count);\n    setPhase(`placed ${reserved}`);\n    return reserved;\n  });\n  return (\n    <section>\n      <For each={cart}>\n        {item => (\n          <p>\n            {item.name}: {item.quantity}\n          </p>\n        )}\n      </For>\n      <button onClick={() => setCart(c => void c[0].quantity++)}>more</button>\n      <button onClick={() => place(cart.length).catch(() => {})}>place</button>\n      <p>{phase()}</p>\n      <Totals totals={tick} />\n    </section>\n  );\n}\n",
+      "equivalent": null,
+      "id": "M0473",
+      "project": "effect-edges",
+      "file": "Checkout.tsx",
+      "original": "import { createMemo, createSignal, createStore, For, isPending, latest } from \"solid-js\";\nimport { drive } from \"./bridge\";\nimport { ticks } from \"./runtime\";\n\nfunction Totals(props: { totals: () => number }) {\n  const shown = () => latest(props.totals);\n  return <p class={isPending(props.totals) ? \"stale\" : \"\"}>{shown().toFixed(1)}</p>;\n}\n\nexport function Checkout() {\n  const [cart, setCart] = createStore([{ name: \"a\", price: 2, quantity: 1 }]);\n  const [phase, setPhase] = createSignal(\"idle\");\n  const total = () => cart.reduce((sum, item) => sum + item.price * item.quantity, 0);\n  const tick = createMemo<number>(() => ticks(total()));\n  const place = drive(function* (count: number) {\n    setPhase(\"reserving\");\n    const reserved = yield Promise.resolve(count);\n    setPhase(`placed ${reserved}`);\n    return reserved;\n  });\n  return (\n    <section>\n      <For each={cart}>\n        {item => (\n          <p>\n            {item.name}: {item.quantity}\n          </p>\n        )}\n      </For>\n      <button onClick={() => setCart(c => void c[0].quantity++)}>more</button>\n      <button onClick={() => place(cart.length).catch(() => {})}>place</button>\n      <p>{phase()}</p>\n      <Totals totals={tick} />\n    </section>\n  );\n}\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "transform",
+            "file": "Checkout.tsx",
+            "line": 10,
+            "code": "SUGAR_CALLBACK",
+            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/Checkout.tsx:10:17)"
+          },
+          {
+            "stage": "cli",
+            "file": "Checkout.tsx",
+            "line": 10,
+            "code": "SUGAR_CALLBACK",
+            "tsCode": "TS95000",
+            "message": "[generated] [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event."
+          }
+        ],
+        "stages": {
+          "transform": "refused",
+          "cli": "diagnostics",
+          "lint": "blocked-by-transform"
+        },
+        "cliOutput": [
+          "<job>/source/Checkout.tsx:10:17 error TS95000: [generated] [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
+          "solid-yield check: 4 files, 1 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "killed",
+      "exactLine": false
+    },
+    {
+      "operator": "memo-write",
+      "line": 14,
+      "routine": {
+        "start": 10,
+        "end": 36
+      },
+      "offset": 622,
+      "source": "import { createMemo, createSignal, createStore, For, isPending, latest } from \"solid-js\";\nimport { drive } from \"./bridge\";\nimport { ticks } from \"./runtime\";\n\nfunction Totals(props: { totals: () => number }) {\n  const shown = () => latest(props.totals);\n  return <p class={isPending(props.totals) ? \"stale\" : \"\"}>{shown().toFixed(1)}</p>;\n}\n\nexport function Checkout() {\n  const [cart, setCart] = createStore([{ name: \"a\", price: 2, quantity: 1 }]);\n  const [phase, setPhase] = createSignal(\"idle\");\n  const total = () => cart.reduce((sum, item) => sum + item.price * item.quantity, 0);\n  const tick = createMemo<number>(()=>{setPhase(0);return ticks(total());});\n  const place = drive(function* (count: number) {\n    setPhase(\"reserving\");\n    const reserved = yield Promise.resolve(count);\n    setPhase(`placed ${reserved}`);\n    return reserved;\n  });\n  return (\n    <section>\n      <For each={cart}>\n        {item => (\n          <p>\n            {item.name}: {item.quantity}\n          </p>\n        )}\n      </For>\n      <button onClick={() => setCart(c => void c[0].quantity++)}>more</button>\n      <button onClick={() => place(cart.length).catch(() => {})}>place</button>\n      <p>{phase()}</p>\n      <Totals totals={tick} />\n    </section>\n  );\n}\n",
+      "equivalent": null,
+      "id": "M0474",
+      "project": "effect-edges",
+      "file": "Checkout.tsx",
+      "original": "import { createMemo, createSignal, createStore, For, isPending, latest } from \"solid-js\";\nimport { drive } from \"./bridge\";\nimport { ticks } from \"./runtime\";\n\nfunction Totals(props: { totals: () => number }) {\n  const shown = () => latest(props.totals);\n  return <p class={isPending(props.totals) ? \"stale\" : \"\"}>{shown().toFixed(1)}</p>;\n}\n\nexport function Checkout() {\n  const [cart, setCart] = createStore([{ name: \"a\", price: 2, quantity: 1 }]);\n  const [phase, setPhase] = createSignal(\"idle\");\n  const total = () => cart.reduce((sum, item) => sum + item.price * item.quantity, 0);\n  const tick = createMemo<number>(() => ticks(total()));\n  const place = drive(function* (count: number) {\n    setPhase(\"reserving\");\n    const reserved = yield Promise.resolve(count);\n    setPhase(`placed ${reserved}`);\n    return reserved;\n  });\n  return (\n    <section>\n      <For each={cart}>\n        {item => (\n          <p>\n            {item.name}: {item.quantity}\n          </p>\n        )}\n      </For>\n      <button onClick={() => setCart(c => void c[0].quantity++)}>more</button>\n      <button onClick={() => place(cart.length).catch(() => {})}>place</button>\n      <p>{phase()}</p>\n      <Totals totals={tick} />\n    </section>\n  );\n}\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "cli",
+            "file": "Checkout.tsx",
+            "line": 14,
+            "code": "TS2345",
+            "tsCode": "TS2345",
+            "message": "Argument of type 'number' is not assignable to parameter of type 'string | ((prev: string) => string)'."
+          },
+          {
+            "stage": "cli",
+            "file": "Checkout.tsx",
+            "line": 14,
+            "code": "WRITE_IN_REACTIVE",
+            "tsCode": "TS2345",
+            "message": "[WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state."
+          }
+        ],
+        "stages": {
+          "transform": "completed",
+          "cli": "diagnostics",
+          "lint": "passed"
+        },
+        "cliOutput": [
+          "<job>/source/Checkout.tsx:14:49 error TS2345: Argument of type 'number' is not assignable to parameter of type 'string | ((prev: string) => string)'.",
+          "<job>/source/Checkout.tsx:14:40 error TS2345: [WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state.",
+          "solid-yield check: 4 files, 2 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "killed",
+      "exactLine": true
+    },
+    {
+      "operator": "setup-read",
+      "line": 21,
+      "routine": {
+        "start": 10,
+        "end": 36
+      },
+      "offset": 370,
+      "source": "import { createMemo, createSignal, createStore, For, isPending, latest } from \"solid-js\";\nimport { drive } from \"./bridge\";\nimport { ticks } from \"./runtime\";\n\nfunction Totals(props: { totals: () => number }) {\n  const shown = () => latest(props.totals);\n  return <p class={isPending(props.totals) ? \"stale\" : \"\"}>{shown().toFixed(1)}</p>;\n}\n\nexport function Checkout() {\n  const [cart, setCart] = createStore([{ name: \"a\", price: 2, quantity: 1 }]);\n  const [phase, setPhase] = createSignal(\"idle\");\n  const total = () => cart.reduce((sum, item) => sum + item.price * item.quantity, 0);\n  const tick = createMemo<number>(() => ticks(total()));\n  const place = drive(function* (count: number) {\n    setPhase(\"reserving\");\n    const reserved = yield Promise.resolve(count);\n    setPhase(`placed ${reserved}`);\n    return reserved;\n  });\n  const __mutantSnapshot1167 = phase(); return (\n    <section>\n      <For each={cart}>\n        {item => (\n          <p>\n            {item.name}: {item.quantity}\n          </p>\n        )}\n      </For>\n      <button onClick={() => setCart(c => void c[0].quantity++)}>more</button>\n      <button onClick={() => place(cart.length).catch(() => {})}>place</button>\n      <p>{__mutantSnapshot1167}</p>\n      <Totals totals={tick} />\n    </section>\n  );\n}\n",
+      "equivalent": null,
+      "id": "M0475",
+      "project": "effect-edges",
+      "file": "Checkout.tsx",
+      "original": "import { createMemo, createSignal, createStore, For, isPending, latest } from \"solid-js\";\nimport { drive } from \"./bridge\";\nimport { ticks } from \"./runtime\";\n\nfunction Totals(props: { totals: () => number }) {\n  const shown = () => latest(props.totals);\n  return <p class={isPending(props.totals) ? \"stale\" : \"\"}>{shown().toFixed(1)}</p>;\n}\n\nexport function Checkout() {\n  const [cart, setCart] = createStore([{ name: \"a\", price: 2, quantity: 1 }]);\n  const [phase, setPhase] = createSignal(\"idle\");\n  const total = () => cart.reduce((sum, item) => sum + item.price * item.quantity, 0);\n  const tick = createMemo<number>(() => ticks(total()));\n  const place = drive(function* (count: number) {\n    setPhase(\"reserving\");\n    const reserved = yield Promise.resolve(count);\n    setPhase(`placed ${reserved}`);\n    return reserved;\n  });\n  return (\n    <section>\n      <For each={cart}>\n        {item => (\n          <p>\n            {item.name}: {item.quantity}\n          </p>\n        )}\n      </For>\n      <button onClick={() => setCart(c => void c[0].quantity++)}>more</button>\n      <button onClick={() => place(cart.length).catch(() => {})}>place</button>\n      <p>{phase()}</p>\n      <Totals totals={tick} />\n    </section>\n  );\n}\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "cli",
+            "file": "Checkout.tsx",
+            "line": 21,
+            "code": "READ_IN_SETUP",
+            "tsCode": "TS2769",
+            "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
+          },
+          {
+            "stage": "cli",
+            "file": "main.tsx",
+            "line": 8,
+            "code": "NO_PROVIDER",
+            "tsCode": "TS2345",
+            "message": "[NO_PROVIDER] Fix the earlier errors in this component before checking its render call. Missing: any."
+          },
+          {
+            "stage": "lint",
+            "file": "Checkout.tsx",
+            "line": 21,
+            "generatedLine": 44,
+            "generated": true,
+            "code": "READ_IN_SETUP",
+            "ruleId": "solid-yield/no-read-in-setup",
+            "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
+          }
+        ],
+        "stages": {
+          "transform": "completed",
+          "cli": "diagnostics",
+          "lint": "diagnostics"
+        },
+        "cliOutput": [
+          "<job>/source/Checkout.tsx:21:32 error TS2769: [READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive.",
+          "<job>/source/main.tsx:8:5 error TS2345: [NO_PROVIDER] Fix the earlier errors in this component before checking its render call. Missing: any.",
+          "solid-yield check: 4 files, 2 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "killed",
+      "exactLine": true
+    },
+    {
+      "operator": "delete-errored",
+      "line": 8,
+      "routine": {
+        "start": 6,
+        "end": 17
+      },
+      "offset": 198,
+      "source": "import { render } from \"@solidjs/web\";\nimport { Errored, Loading } from \"solid-js\";\nimport { Checkout } from \"./Checkout\";\nimport { createRuntime, Runtime } from \"./runtime\";\n\nrender(\n  () => (\n    <>\n      <Loading>\n        <Runtime value={createRuntime(2)}>\n          <Checkout />\n        </Runtime>\n      </Loading>\n    </>\n  ),\n  document.getElementById(\"root\")!\n);\n",
+      "equivalent": null,
+      "id": "M0476",
+      "project": "effect-edges",
+      "file": "main.tsx",
+      "original": "import { render } from \"@solidjs/web\";\nimport { Errored, Loading } from \"solid-js\";\nimport { Checkout } from \"./Checkout\";\nimport { createRuntime, Runtime } from \"./runtime\";\n\nrender(\n  () => (\n    <Errored fallback={error => <p>{String(error())}</p>}>\n      <Loading>\n        <Runtime value={createRuntime(2)}>\n          <Checkout />\n        </Runtime>\n      </Loading>\n    </Errored>\n  ),\n  document.getElementById(\"root\")!\n);\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "cli",
+            "file": "main.tsx",
+            "line": 10,
+            "code": "FOREIGN_HANDOFF",
+            "tsCode": "TS2345",
+            "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: unknown | NoRuntime.",
+            "related": [
+              {
+                "file": "main.tsx",
+                "line": 8
+              }
+            ]
+          }
+        ],
+        "stages": {
+          "transform": "completed",
+          "cli": "diagnostics",
+          "lint": "passed"
+        },
+        "cliOutput": [
+          "<job>/source/main.tsx:10:25 error TS2345: [FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: unknown | NoRuntime.",
+          "  related: <job>/source/main.tsx:8:5: The app is rendered here. does not suspend; can fail with an unknown error | NoRuntime; does not wait; needs no context",
+          "solid-yield check: 4 files, 1 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "killed",
+      "exactLine": false
+    },
+    {
+      "operator": "delete-loading",
+      "line": 9,
+      "routine": {
+        "start": 6,
+        "end": 17
+      },
+      "offset": 259,
+      "source": "import { render } from \"@solidjs/web\";\nimport { Errored, Loading } from \"solid-js\";\nimport { Checkout } from \"./Checkout\";\nimport { createRuntime, Runtime } from \"./runtime\";\n\nrender(\n  () => (\n    <Errored fallback={error => <p>{String(error())}</p>}>\n      <>\n        <Runtime value={createRuntime(2)}>\n          <Checkout />\n        </Runtime>\n      </>\n    </Errored>\n  ),\n  document.getElementById(\"root\")!\n);\n",
+      "equivalent": null,
+      "id": "M0477",
+      "project": "effect-edges",
+      "file": "main.tsx",
+      "original": "import { render } from \"@solidjs/web\";\nimport { Errored, Loading } from \"solid-js\";\nimport { Checkout } from \"./Checkout\";\nimport { createRuntime, Runtime } from \"./runtime\";\n\nrender(\n  () => (\n    <Errored fallback={error => <p>{String(error())}</p>}>\n      <Loading>\n        <Runtime value={createRuntime(2)}>\n          <Checkout />\n        </Runtime>\n      </Loading>\n    </Errored>\n  ),\n  document.getElementById(\"root\")!\n);\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "cli",
+            "file": "Checkout.tsx",
+            "line": 33,
+            "code": "PENDING_ROOT",
+            "tsCode": "TS1360",
+            "message": "[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.",
+            "related": [
+              {
+                "file": "main.tsx",
+                "line": 8
+              }
+            ]
+          }
+        ],
+        "stages": {
+          "transform": "completed",
+          "cli": "diagnostics",
+          "lint": "passed"
+        },
+        "cliOutput": [
+          "<job>/source/Checkout.tsx:33:8 error TS1360: [PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.",
+          "  related: <job>/source/main.tsx:8:5: The app is rendered here. can suspend (pending); never fails; does not wait; needs no context",
+          "solid-yield check: 4 files, 1 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "killed",
+      "exactLine": false
+    },
+    {
+      "operator": "throw-string",
+      "line": 10,
+      "routine": {
+        "start": 7,
+        "end": 12
+      },
+      "offset": 392,
+      "source": "import { createContext, onCleanup, useContext } from \"solid-js\";\n\nexport class NoRuntime extends Error {}\nexport const Runtime = createContext<{ scale: number } | null>(null);\n\n// Created, cleaned up and possibly failing where the provider computes its value.\nexport function createRuntime(scale: number) {\n  const runtime = { scale };\n  onCleanup(() => void runtime);\n  if (scale < 0) throw \"mutant failure\";\n  return runtime;\n}\n\n// Resolved at the reading computation, as Effect's runEffect resolves its runtime.\nexport function ticks(n: number): AsyncIterable<number> {\n  const runtime = useContext(Runtime);\n  return {\n    async *[Symbol.asyncIterator]() {\n      yield n * (runtime?.scale ?? 1);\n    }\n  };\n}\n",
+      "equivalent": "Unknown thrown values are allowed by the unknown floor; changing the value is not itself an error. Handoff diagnostics are still recorded.",
+      "id": "M0478",
+      "project": "effect-edges",
+      "file": "runtime.ts",
+      "original": "import { createContext, onCleanup, useContext } from \"solid-js\";\n\nexport class NoRuntime extends Error {}\nexport const Runtime = createContext<{ scale: number } | null>(null);\n\n// Created, cleaned up and possibly failing where the provider computes its value.\nexport function createRuntime(scale: number) {\n  const runtime = { scale };\n  onCleanup(() => void runtime);\n  if (scale < 0) throw new NoRuntime(\"negative scale\");\n  return runtime;\n}\n\n// Resolved at the reading computation, as Effect's runEffect resolves its runtime.\nexport function ticks(n: number): AsyncIterable<number> {\n  const runtime = useContext(Runtime);\n  return {\n    async *[Symbol.asyncIterator]() {\n      yield n * (runtime?.scale ?? 1);\n    }\n  };\n}\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "transform",
+            "file": "runtime.ts",
+            "line": 10,
+            "code": "NATIVE_THROW",
+            "message": "Throw an Error object so callers can identify and handle this failure."
+          },
+          {
+            "stage": "cli",
+            "file": "main.tsx",
+            "line": 1,
+            "code": "LAZY_VIEW",
+            "tsCode": "TS2322",
+            "message": "[generated] [LAZY_VIEW] children is a lazy view: function* () { return <.../>; }"
+          },
+          {
+            "stage": "cli",
+            "file": "runtime.ts",
+            "line": 10,
+            "code": "NATIVE_THROW",
+            "tsCode": "TS95000",
+            "message": "[NATIVE_THROW] Throw an Error object so callers can identify and handle this failure."
+          }
+        ],
+        "stages": {
+          "transform": "refused",
+          "cli": "diagnostics",
+          "lint": "blocked-by-transform"
+        },
+        "cliOutput": [
+          "<job>/source/main.tsx:1:1 error TS2322: [generated] [LAZY_VIEW] children is a lazy view: function* () { return <.../>; }",
+          "<job>/source/runtime.ts:10:18 error TS95000: [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.",
+          "solid-yield check: 4 files, 2 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "equivalent",
+      "exactLine": false
+    },
+    {
+      "operator": "throw-object",
+      "line": 10,
+      "routine": {
+        "start": 7,
+        "end": 12
+      },
+      "offset": 392,
+      "source": "import { createContext, onCleanup, useContext } from \"solid-js\";\n\nexport class NoRuntime extends Error {}\nexport const Runtime = createContext<{ scale: number } | null>(null);\n\n// Created, cleaned up and possibly failing where the provider computes its value.\nexport function createRuntime(scale: number) {\n  const runtime = { scale };\n  onCleanup(() => void runtime);\n  if (scale < 0) throw ({message:\"mutant failure\"});\n  return runtime;\n}\n\n// Resolved at the reading computation, as Effect's runEffect resolves its runtime.\nexport function ticks(n: number): AsyncIterable<number> {\n  const runtime = useContext(Runtime);\n  return {\n    async *[Symbol.asyncIterator]() {\n      yield n * (runtime?.scale ?? 1);\n    }\n  };\n}\n",
+      "equivalent": "Unknown thrown values are allowed by the unknown floor; changing the value is not itself an error. Handoff diagnostics are still recorded.",
+      "id": "M0479",
+      "project": "effect-edges",
+      "file": "runtime.ts",
+      "original": "import { createContext, onCleanup, useContext } from \"solid-js\";\n\nexport class NoRuntime extends Error {}\nexport const Runtime = createContext<{ scale: number } | null>(null);\n\n// Created, cleaned up and possibly failing where the provider computes its value.\nexport function createRuntime(scale: number) {\n  const runtime = { scale };\n  onCleanup(() => void runtime);\n  if (scale < 0) throw new NoRuntime(\"negative scale\");\n  return runtime;\n}\n\n// Resolved at the reading computation, as Effect's runEffect resolves its runtime.\nexport function ticks(n: number): AsyncIterable<number> {\n  const runtime = useContext(Runtime);\n  return {\n    async *[Symbol.asyncIterator]() {\n      yield n * (runtime?.scale ?? 1);\n    }\n  };\n}\n",
+      "result": {
+        "diagnostics": [],
+        "stages": {
+          "transform": "completed",
+          "cli": "passed",
+          "lint": "passed"
+        },
+        "cliOutput": [
+          "solid-yield check: 4 files, 0 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "equivalent",
+      "exactLine": false
+    },
+    {
+      "operator": "never-provided-context",
+      "line": 16,
+      "routine": {
+        "start": 15,
+        "end": 22
+      },
+      "offset": 617,
+      "source": "import { createContext, onCleanup, useContext } from \"solid-js\";\n\nexport class NoRuntime extends Error {}\nexport const Runtime = createContext<{ scale: number } | null>(null);\n\n// Created, cleaned up and possibly failing where the provider computes its value.\nexport function createRuntime(scale: number) {\n  const runtime = { scale };\n  onCleanup(() => void runtime);\n  if (scale < 0) throw new NoRuntime(\"negative scale\");\n  return runtime;\n}\n\n// Resolved at the reading computation, as Effect's runEffect resolves its runtime.\nexport function ticks(n: number): AsyncIterable<number> {\n  const runtime = useContext(createContext<number>());\n  return {\n    async *[Symbol.asyncIterator]() {\n      yield n * (runtime?.scale ?? 1);\n    }\n  };\n}\n",
+      "equivalent": null,
+      "id": "M0480",
+      "project": "effect-edges",
+      "file": "runtime.ts",
+      "original": "import { createContext, onCleanup, useContext } from \"solid-js\";\n\nexport class NoRuntime extends Error {}\nexport const Runtime = createContext<{ scale: number } | null>(null);\n\n// Created, cleaned up and possibly failing where the provider computes its value.\nexport function createRuntime(scale: number) {\n  const runtime = { scale };\n  onCleanup(() => void runtime);\n  if (scale < 0) throw new NoRuntime(\"negative scale\");\n  return runtime;\n}\n\n// Resolved at the reading computation, as Effect's runEffect resolves its runtime.\nexport function ticks(n: number): AsyncIterable<number> {\n  const runtime = useContext(Runtime);\n  return {\n    async *[Symbol.asyncIterator]() {\n      yield n * (runtime?.scale ?? 1);\n    }\n  };\n}\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "transform",
+            "file": "runtime.ts",
+            "line": 16,
+            "code": "NO_PROVIDER",
+            "message": "This context is created in the read itself, so no provider can be above it: declare it once, provide it, and read that declaration."
+          },
+          {
+            "stage": "cli",
+            "file": "main.tsx",
+            "line": 1,
+            "code": "LAZY_VIEW",
+            "tsCode": "TS2322",
+            "message": "[generated] [LAZY_VIEW] children is a lazy view: function* () { return <.../>; }"
+          },
+          {
+            "stage": "cli",
+            "file": "runtime.ts",
+            "line": 16,
+            "code": "NO_PROVIDER",
+            "tsCode": "TS95000",
+            "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value."
+          }
+        ],
+        "stages": {
+          "transform": "refused",
+          "cli": "diagnostics",
+          "lint": "blocked-by-transform"
+        },
+        "cliOutput": [
+          "<job>/source/main.tsx:1:1 error TS2322: [generated] [LAZY_VIEW] children is a lazy view: function* () { return <.../>; }",
+          "<job>/source/runtime.ts:16:30 error TS95000: [NO_PROVIDER] Add a context provider above this component; this context has no default value.",
+          "solid-yield check: 4 files, 2 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "killed",
+      "exactLine": true
     }
   ]
 }

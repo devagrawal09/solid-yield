@@ -1927,3 +1927,32 @@ states of the twin's script, console output included.
 - **Module state does not block `emit: "lowered"`.** It stays plain Solid in
   the model, so the model still runs; the finding is reported.
 
+
+**The silent survivors after the effect-edges seed (2026-10-12).** The program
+run scores 65.97% (480 mutants; 254 killed, 131 equivalent, 95 survived). Of
+the survivors, 64 are masked (the base program is refused or already reports
+the expected code), 45 are detected outside the mutated routine (a removed
+boundary is reported where the failure, pending read or requirement starts,
+and at the root), and 19 report a different code. Seven are silent: the
+checker accepts the mutant. Each was read against its program; each is
+correct to accept, because the edited site had nothing left to do. The
+catalogue's equivalence is per operator, so the report keeps them as
+survivors.
+
+- `delete-catch` at `reviewer-m05_swallow/App.tsx:14` (F-M58). The `Errored`
+  around `List` takes the failure the deleted `catch` absorbed.
+- `remove-await` at the same line (F-M59). `return fetchItems()` in an
+  `async` function has the awaited form's type, so no type error is lost; the
+  rejection leaves the `try` unabsorbed and reaches the same `Errored`.
+- `delete-errored` at `reviewer-m05_swallow/App.tsx:26` (F-M61). `List`'s
+  `try`/`catch` absorbs every failure under that boundary, so nothing reaches
+  the root.
+- `delete-provider` at `review-slots-context/App.tsx:8` (F-M118). The program
+  renders nothing: `App` and `Child` are exported, so their requirement of
+  `C` is their callers', as for any library component.
+- `delete-loading` at `review-slots-lazy-child/App.tsx:3` (F-M119). The
+  boundary held static text; nothing below it waits.
+- `delete-catch` at `review-slots-catch/App.tsx:5` (F-M120). The `try` held
+  a setter's call, which cannot fail.
+- `delete-loading` at `rendering-edges/Feed.tsx:56` (F-M130). The root's
+  `Loading` covers Feed (above).

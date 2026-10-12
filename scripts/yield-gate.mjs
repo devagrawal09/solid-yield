@@ -427,7 +427,9 @@ function buildSteps(twins) {
     name: "twins:ssr-smoke",
     cwd: root,
     cmd: process.execPath,
-    args: ["examples/harness/ssr-smoke/smoke.mjs"]
+    args: ["examples/harness/ssr-smoke/smoke.mjs"],
+    // The gate runs steps side by side, loaded as CI is: CI's per-render bound.
+    env: { SMOKE_TIMEOUT_MS: "120000" }
   });
 
   // Twin-hydration smoke (examples/harness/hydrate-smoke/hydrate.mjs): each of those 16
@@ -442,7 +444,9 @@ function buildSteps(twins) {
     name: "twins:hydrate-smoke",
     cwd: root,
     cmd: process.execPath,
-    args: ["examples/harness/hydrate-smoke/hydrate.mjs"]
+    args: ["examples/harness/hydrate-smoke/hydrate.mjs"],
+    // The gate runs steps side by side, loaded as CI is: CI's per-render bound.
+    env: { SMOKE_TIMEOUT_MS: "120000" }
   });
 
   steps.push(

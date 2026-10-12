@@ -1,6 +1,6 @@
 # Mutation report
 
-Measured 2026-10-12T00:01:13.757Z. The corpus, operators and checker have changed since the first measurement (2026-10-08); each change is in its own commit, and the catalogue's corrections are listed below. The tests in scripts/mutation/test.mjs verify the harness, not the checker.
+Measured 2026-10-12T05:55:35.357Z. The corpus, operators and checker have changed since the first measurement (2026-10-08); each change is in its own commit, and the catalogue's corrections are listed below. The tests in scripts/mutation/test.mjs verify the harness, not the checker.
 
 ## Commands and scope
 
@@ -12,7 +12,7 @@ node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js ru
 node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js run scripts/mutation/stryker-ts.config.mjs
 ```
 
-Program run: 3118.5 seconds; 42 projects; 480 mutants. Digest: `473aebfe7b8457bc1ca163ec2d18adfd02b9da11bb9143c11524b1a81f776ea6`.
+Program run: 3702.6 seconds; 43 projects; 488 mutants. Digest: `6a391eb63eb17d6eef1e146ea27f46ec4a5fa638508b7ec8ac2ad6494a80bf48`.
 
 Every syntactically applicable site is edited separately. Sources stay plain Solid. Each pipeline runs the shared native transform, the exported implementation used by `solid-yield check`, and recommended ESLint on generated code. A transform refusal blocks generated lint and is recorded explicitly. A CLI crash is a finding, never a kill.
 
@@ -26,26 +26,26 @@ The gate runs `node scripts/mutation/run.mjs --cached --baseline documentation/y
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
 | delete-catch | 9 | 0 | 2 | 7 | 22.22% | 1 (11.11%) | 5 (55.56%) | FOREIGN_HANDOFF, NATIVE_CALLBACK_FAILURE, EVENT_REJECTS |
 | swallow-catch | 2 | 2 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | equivalent |
-| delete-errored | 23 | 0 | 3 | 20 | 13.04% | 0 (0.00%) | 13 (56.52%) | FOREIGN_HANDOFF |
+| delete-errored | 24 | 0 | 4 | 20 | 16.67% | 0 (0.00%) | 14 (58.33%) | FOREIGN_HANDOFF |
 | delete-loading | 26 | 0 | 4 | 22 | 15.38% | 0 (0.00%) | 18 (69.23%) | PENDING_ROOT |
-| setup-read | 118 | 0 | 97 | 21 | 82.20% | 97 (82.20%) | 97 (82.20%) | READ_IN_SETUP, solid-yield/no-read-in-setup |
+| setup-read | 120 | 0 | 99 | 21 | 82.50% | 99 (82.50%) | 99 (82.50%) | READ_IN_SETUP, solid-yield/no-read-in-setup |
 | delete-provider | 22 | 0 | 0 | 22 | 0.00% | 0 (0.00%) | 15 (68.18%) | NO_PROVIDER |
-| never-provided-context | 29 | 0 | 25 | 4 | 86.21% | 25 (86.21%) | 25 (86.21%) | NO_PROVIDER |
-| throw-string | 28 | 28 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | equivalent |
-| throw-object | 28 | 28 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | equivalent |
+| never-provided-context | 30 | 0 | 26 | 4 | 86.67% | 26 (86.67%) | 26 (86.67%) | NO_PROVIDER |
+| throw-string | 29 | 29 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | equivalent |
+| throw-object | 29 | 29 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | equivalent |
 | async-reject | 3 | 0 | 3 | 0 | 100.00% | 1 (33.33%) | 2 (66.67%) | FOREIGN_HANDOFF, NATIVE_CALLBACK_FAILURE, EVENT_REJECTS |
 | remove-await | 31 | 27 | 2 | 2 | 50.00% | 1 (25.00%) | 2 (50.00%) | TS2322, TS2345, TS2739, TS2740, TS2741, TS2339, GENERATED_TYPE, SETTLED_PROP |
 | memo-write | 26 | 0 | 22 | 4 | 84.62% | 22 (84.62%) | 21 (80.77%) | WRITE_IN_REACTIVE, solid-yield/no-unyielded-write |
 | timer-read | 6 | 6 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | equivalent |
-| non-core-cache | 49 | 0 | 22 | 27 | 44.90% | 18 (36.73%) | 23 (46.94%) | SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP |
+| non-core-cache | 50 | 0 | 24 | 26 | 48.00% | 18 (36.00%) | 25 (50.00%) | SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP |
 | destructure-props | 18 | 0 | 17 | 1 | 94.44% | 17 (94.44%) | 17 (94.44%) | NATIVE_PROPS |
 | inline-component | 51 | 0 | 51 | 0 | 100.00% | 51 (100.00%) | 51 (100.00%) | NATIVE_COMPONENT, SUGAR_CALLBACK, SUGAR_RETURN, FOREIGN_HANDOFF |
 | effect-arity | 5 | 0 | 5 | 0 | 100.00% | 5 (100.00%) | 3 (60.00%) | NATIVE_EFFECT_PHASES, TS2554 |
 | remove-use-server | 1 | 1 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | equivalent |
-| callback-throw | 4 | 3 | 1 | 0 | 100.00% | 0 (0.00%) | 1 (100.00%) | FOREIGN_HANDOFF |
+| callback-throw | 5 | 3 | 1 | 1 | 50.00% | 0 (0.00%) | 1 (50.00%) | FOREIGN_HANDOFF |
 | server-new-class | 1 | 0 | 0 | 1 | 0.00% | 0 (0.00%) | 0 (0.00%) | FOREIGN_HANDOFF |
 
-**Program mutation score: 65.97% = 254 / (254 + 131).** 95 equivalents excluded. Exact line: 61.82% (238). Detected: 76.10% (293).
+**Program mutation score: 66.50% = 260 / (260 + 131).** 97 equivalents excluded. Exact line: 61.64% (241). Detected: 76.47% (299).
 
 ### Why mutants survive
 
@@ -61,8 +61,9 @@ Each survivor of the gate's rule falls in one category: **detected elsewhere** (
 | never-provided-context | 0 | 4 | 0 | 0 | 0 |
 | remove-await | 0 | 0 | 1 | 0 | 1 |
 | memo-write | 0 | 4 | 0 | 0 | 0 |
-| non-core-cache | 1 | 8 | 0 | 18 | 0 |
+| non-core-cache | 1 | 8 | 9 | 1 | 7 |
 | destructure-props | 0 | 0 | 0 | 1 | 0 |
+| callback-throw | 0 | 0 | 0 | 0 | 1 |
 | server-new-class | 0 | 0 | 1 | 0 | 0 |
 
 ### Catalogue and equivalent rules
@@ -136,6 +137,7 @@ The reviewer app and all 17 stored variants are verbatim snapshots under `script
 | sugar-edges | 4 | completed / passed / passed | Plain Solid exercising the native edges: context hooks and members, setters in plain types, wrappers with boundaries around context readers, array callbacks, effect cleanups, an anonymous default component |
 | rendering-edges | 5 | completed / passed / passed | Plain Solid exercising Rendering's native edges: a component factory with a tuple context and destructured members, a derived store, async iterable producers, a Repeat index key, isPending thunks, a lazy page, root trees (CSR, and a server function's with a ParentProps shell) |
 | effect-edges | 4 | completed / passed / passed | Plain Solid exercising Effect's native edges (D-121, D-122): a saga its driver steps inside an action, a kept action promise, a provider value that creates, cleans up and may fail, an accessor prop, a store's root in For, a store reduce, a routine's stream a memo returns |
+| hole-edges | 2 | completed / passed / passed | Plain Solid exercising failing calls in JSX holes (nativeHole) and values typed any: a helper that may throw in a hole, in an attribute and in a row under an Errored; a context, a store, a signal and a memo of any, with a method of any |
 
 ## Checker mutants (Stryker)
 
@@ -482,13 +484,11 @@ Checker said instead:
 Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 <job>/source/main.tsx:110:25 error TS2345: [FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: unknown.
   related: <job>/source/main.tsx:115:8: The app is rendered here. does not suspend; can fail with an unknown error; does not wait; needs no context
-<job>/source/main.tsx:51:7 error TS2322: [generated] [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
-  related: <job>/source/main.tsx:51:7: [generated] [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
 <job>/source/main.tsx:62:96 error TS2345: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
 <job>/source/main.tsx:51:7 error TS2769: [generated] [LAZY_VIEW] fallback is a lazy view: function* () { return <.../>; }
 <job>/source/main.tsx:51:7 error TS2589: [generated] Type instantiation is excessively deep and possibly infinite.
 <job>/source/main.tsx:51:7 error TS2322: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
-solid-yield check: 1 files, 6 errors
+solid-yield check: 1 files, 5 errors
 ```
 
 ### F-M4: M0035 delete-errored at todos/app.tsx:133 (detected elsewhere)
@@ -825,7 +825,7 @@ lint app.tsx:65 [solid-yield/no-unshown-wait] this view binds a handler that may
 lint app.tsx:93 [solid-yield/no-unshown-wait] this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* (...args: __NativeAr...`, D-075).
 ```
 
-### F-M12: M0053 non-core-cache at reviewer-myapp/App.tsx:14 (different code)
+### F-M12: M0053 non-core-cache at reviewer-myapp/App.tsx:14 (silent)
 
 Expected in the mutated routine (lines 12–20): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
 
@@ -846,9 +846,8 @@ Expected in the mutated routine (lines 12–20): SUGAR_CALLBACK, NATIVE_FOREIGN_
 Checker said instead:
 
 ```text
-Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
-<job>/source/App.tsx:17:46 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
-solid-yield check: 3 files, 1 errors
+Stages: {"transform":"completed","cli":"passed","lint":"passed"}
+solid-yield check: 3 files, 0 errors
 ```
 
 ### F-M13: M0055 delete-provider at reviewer-myapp/App.tsx:24 (detected elsewhere)
@@ -947,7 +946,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 1 errors
 ```
 
-### F-M16: M0070 non-core-cache at reviewer-m01_setup_read/App.tsx:16 (different code)
+### F-M16: M0070 non-core-cache at reviewer-m01_setup_read/App.tsx:16 (masked: base errors)
 
 Expected in the mutated routine (lines 14–22): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
 
@@ -969,10 +968,9 @@ Checker said instead:
 
 ```text
 Stages: {"transform":"completed","cli":"diagnostics","lint":"diagnostics"}
-<job>/source/App.tsx:19:46 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
 <job>/source/App.tsx:8:20 error TS2769: [READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive.
 <job>/source/index.tsx:3:15 error TS2345: [FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any.
-solid-yield check: 3 files, 3 errors
+solid-yield check: 3 files, 2 errors
 lint App.tsx:8 [READ_IN_SETUP] [READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event.
 ```
 
@@ -1075,7 +1073,7 @@ solid-yield check: 3 files, 2 errors
 lint App.tsx:8 [READ_IN_SETUP] [READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event.
 ```
 
-### F-M20: M0088 non-core-cache at reviewer-m02_noprovider2/App.tsx:16 (different code)
+### F-M20: M0088 non-core-cache at reviewer-m02_noprovider2/App.tsx:16 (masked: base errors)
 
 Expected in the mutated routine (lines 13–22): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
 
@@ -1099,8 +1097,7 @@ Checker said instead:
 Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 <job>/source/App.tsx:15:16 error TS1360: [NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: UserCtx.
   related: <job>/source/index.tsx:3:15: The app is rendered here. does not suspend; never fails; does not wait; needs UserCtx
-<job>/source/App.tsx:19:46 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
-solid-yield check: 3 files, 2 errors
+solid-yield check: 3 files, 1 errors
 ```
 
 ### F-M21: M0090 delete-provider at reviewer-m02_noprovider2/App.tsx:26 (detected elsewhere)
@@ -1916,7 +1913,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.
 ```
 
-### F-M49: M0143 non-core-cache at reviewer-m03c_throw_in_handler/App.tsx:14 (different code)
+### F-M49: M0143 non-core-cache at reviewer-m03c_throw_in_handler/App.tsx:14 (masked: base errors)
 
 Expected in the mutated routine (lines 12–20): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
 
@@ -1940,8 +1937,7 @@ Checker said instead:
 Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 <job>/source/App.tsx:9:27 error TS95000: [EVENT_REJECTS] This handler can fail with Error and nothing catches it; wrap the body in try/catch, or declare the failure.
   related: <job>/source/index.tsx:3:15: The app is rendered here.
-<job>/source/App.tsx:17:46 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
-solid-yield check: 3 files, 2 errors
+solid-yield check: 3 files, 1 errors
 ```
 
 ### F-M50: M0145 delete-provider at reviewer-m03c_throw_in_handler/App.tsx:24 (detected elsewhere)
@@ -2044,7 +2040,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 2 errors
 ```
 
-### F-M53: M0163 non-core-cache at reviewer-m04_async_handler/App.tsx:15 (different code)
+### F-M53: M0163 non-core-cache at reviewer-m04_async_handler/App.tsx:15 (masked: base errors)
 
 Expected in the mutated routine (lines 13–21): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
 
@@ -2068,8 +2064,7 @@ Checker said instead:
 Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 <job>/source/App.tsx:10:27 error TS95000: [EVENT_REJECTS] This handler can fail with Error and nothing catches it; wrap the body in try/catch, or declare the failure.
   related: <job>/source/index.tsx:3:15: The app is rendered here.
-<job>/source/App.tsx:18:46 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
-solid-yield check: 3 files, 2 errors
+solid-yield check: 3 files, 1 errors
 ```
 
 ### F-M54: M0165 delete-provider at reviewer-m04_async_handler/App.tsx:25 (detected elsewhere)
@@ -2172,7 +2167,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 2 errors
 ```
 
-### F-M57: M0180 non-core-cache at reviewer-m05_swallow/App.tsx:14 (different code)
+### F-M57: M0180 non-core-cache at reviewer-m05_swallow/App.tsx:14 (silent)
 
 Expected in the mutated routine (lines 12–20): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
 
@@ -2193,9 +2188,8 @@ Expected in the mutated routine (lines 12–20): SUGAR_CALLBACK, NATIVE_FOREIGN_
 Checker said instead:
 
 ```text
-Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
-<job>/source/App.tsx:17:46 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
-solid-yield check: 3 files, 1 errors
+Stages: {"transform":"completed","cli":"passed","lint":"passed"}
+solid-yield check: 3 files, 0 errors
 ```
 
 ### F-M58: M0181 delete-catch at reviewer-m05_swallow/App.tsx:14 (silent)
@@ -2342,7 +2336,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 1 errors
 ```
 
-### F-M63: M0200 non-core-cache at reviewer-m06_memo_writes/App.tsx:14 (different code)
+### F-M63: M0200 non-core-cache at reviewer-m06_memo_writes/App.tsx:14 (masked: base errors)
 
 Expected in the mutated routine (lines 12–20): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
 
@@ -2364,10 +2358,9 @@ Checker said instead:
 
 ```text
 Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
-<job>/source/App.tsx:17:46 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
 <job>/source/App.tsx:8:36 error TS2345: [WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state.
 <job>/source/index.tsx:3:15 error TS2345: [FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any.
-solid-yield check: 3 files, 3 errors
+solid-yield check: 3 files, 2 errors
 ```
 
 ### F-M64: M0202 delete-provider at reviewer-m06_memo_writes/App.tsx:24 (masked: base errors)
@@ -2466,7 +2459,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 2 errors
 ```
 
-### F-M67: M0218 non-core-cache at reviewer-m07_timeout_read/App.tsx:15 (different code)
+### F-M67: M0218 non-core-cache at reviewer-m07_timeout_read/App.tsx:15 (silent)
 
 Expected in the mutated routine (lines 13–21): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
 
@@ -2487,9 +2480,8 @@ Expected in the mutated routine (lines 13–21): SUGAR_CALLBACK, NATIVE_FOREIGN_
 Checker said instead:
 
 ```text
-Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
-<job>/source/App.tsx:18:46 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
-solid-yield check: 3 files, 1 errors
+Stages: {"transform":"completed","cli":"passed","lint":"passed"}
+solid-yield check: 3 files, 0 errors
 ```
 
 ### F-M68: M0220 delete-provider at reviewer-m07_timeout_read/App.tsx:25 (detected elsewhere)
@@ -2588,7 +2580,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 1 errors
 ```
 
-### F-M71: M0235 non-core-cache at reviewer-m08_portal/App.tsx:15 (different code)
+### F-M71: M0235 non-core-cache at reviewer-m08_portal/App.tsx:15 (silent)
 
 Expected in the mutated routine (lines 13–21): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
 
@@ -2609,10 +2601,9 @@ Expected in the mutated routine (lines 13–21): SUGAR_CALLBACK, NATIVE_FOREIGN_
 Checker said instead:
 
 ```text
-Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
+Stages: {"transform":"completed","cli":"passed","lint":"passed"}
 <job>/source/App.tsx:26:7 warning TS95001: [NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check.
-<job>/source/App.tsx:18:46 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
-solid-yield check: 3 files, 1 errors
+solid-yield check: 3 files, 0 errors
 transform App.tsx:26 [NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check.
 ```
 
@@ -3060,7 +3051,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:12 [NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates.
 ```
 
-### F-M87: M0269 non-core-cache at reviewer-m10_conditional/App.tsx:15 (different code)
+### F-M87: M0269 non-core-cache at reviewer-m10_conditional/App.tsx:15 (silent)
 
 Expected in the mutated routine (lines 13–21): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
 
@@ -3081,9 +3072,8 @@ Expected in the mutated routine (lines 13–21): SUGAR_CALLBACK, NATIVE_FOREIGN_
 Checker said instead:
 
 ```text
-Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
-<job>/source/App.tsx:18:46 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
-solid-yield check: 3 files, 1 errors
+Stages: {"transform":"completed","cli":"passed","lint":"passed"}
+solid-yield check: 3 files, 0 errors
 ```
 
 ### F-M88: M0271 delete-provider at reviewer-m10_conditional/App.tsx:25 (detected elsewhere)
@@ -3182,7 +3172,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 1 errors
 ```
 
-### F-M91: M0287 non-core-cache at reviewer-m11_nested_comp/App.tsx:15 (different code)
+### F-M91: M0287 non-core-cache at reviewer-m11_nested_comp/App.tsx:15 (silent)
 
 Expected in the mutated routine (lines 13–21): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
 
@@ -3203,9 +3193,8 @@ Expected in the mutated routine (lines 13–21): SUGAR_CALLBACK, NATIVE_FOREIGN_
 Checker said instead:
 
 ```text
-Stages: {"transform":"completed","cli":"diagnostics","lint":"diagnostics"}
-<job>/source/App.tsx:18:46 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
-solid-yield check: 3 files, 1 errors
+Stages: {"transform":"completed","cli":"passed","lint":"diagnostics"}
+solid-yield check: 3 files, 0 errors
 lint App.tsx:9 [solid-yield/jsx-only-in-view] JSX in a setup: elements are built by the view it returns (`return view(function* () { return <…/>; })`).
 ```
 
@@ -3650,7 +3639,7 @@ solid-yield check: 3 files, 1 errors
 transform App.tsx:8 [NATIVE_EFFECT_PHASES] createEffect needs a tracked compute and an untracked effect phase.
 ```
 
-### F-M107: M0322 non-core-cache at reviewer-s2a_noloading/App.tsx:14 (different code)
+### F-M107: M0322 non-core-cache at reviewer-s2a_noloading/App.tsx:14 (masked: base errors)
 
 Expected in the mutated routine (lines 12–20): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
 
@@ -3671,9 +3660,8 @@ Expected in the mutated routine (lines 12–20): SUGAR_CALLBACK, NATIVE_FOREIGN_
 Checker said instead:
 
 ```text
-Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
-<job>/source/App.tsx:17:46 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
-solid-yield check: 3 files, 1 errors
+Stages: {"transform":"completed","cli":"passed","lint":"passed"}
+solid-yield check: 3 files, 0 errors
 ```
 
 ### F-M108: M0324 delete-provider at reviewer-s2a_noloading/App.tsx:24 (detected elsewhere)
@@ -3746,7 +3734,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 2 errors
 ```
 
-### F-M110: M0338 non-core-cache at reviewer-s2b_noprovider/App.tsx:14 (different code)
+### F-M110: M0338 non-core-cache at reviewer-s2b_noprovider/App.tsx:14 (masked: base errors)
 
 Expected in the mutated routine (lines 12–20): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
 
@@ -3770,8 +3758,7 @@ Checker said instead:
 Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 <job>/source/App.tsx:13:17 error TS1360: [NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: ThemeCtx.
   related: <job>/source/index.tsx:3:15: The app is rendered here. does not suspend; never fails; does not wait; needs ThemeCtx
-<job>/source/App.tsx:17:46 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
-solid-yield check: 3 files, 2 errors
+solid-yield check: 3 files, 1 errors
 ```
 
 ### F-M111: M0340 delete-errored at reviewer-s2b_noprovider/App.tsx:26 (detected elsewhere)
@@ -3840,7 +3827,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 2 errors
 ```
 
-### F-M113: M0354 non-core-cache at reviewer-s2c_noerrored/App.tsx:14 (different code)
+### F-M113: M0354 non-core-cache at reviewer-s2c_noerrored/App.tsx:14 (masked: base errors)
 
 Expected in the mutated routine (lines 12–20): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
 
@@ -3861,9 +3848,8 @@ Expected in the mutated routine (lines 12–20): SUGAR_CALLBACK, NATIVE_FOREIGN_
 Checker said instead:
 
 ```text
-Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
-<job>/source/App.tsx:17:46 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
-solid-yield check: 3 files, 1 errors
+Stages: {"transform":"completed","cli":"passed","lint":"passed"}
+solid-yield check: 3 files, 0 errors
 ```
 
 ### F-M114: M0356 delete-provider at reviewer-s2c_noerrored/App.tsx:24 (detected elsewhere)
@@ -3934,34 +3920,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 3 files, 2 errors
 ```
 
-### F-M116: M0363 non-core-cache at review-slots-pending-root/App.tsx:4 (different code)
-
-Expected in the mutated routine (lines 3–6): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
-
-```diff
---- review-slots-pending-root/App.tsx
-+++ review-slots-pending-root/App.tsx (mutant)
-@@ -1,7 +1,7 @@
- import { createSignal, createMemo, createEffect, For, Show, Loading, createContext, useContext } from "solid-js";
- import { render } from '@solidjs/web';
- function App() {
--  const n = createMemo(async () => 1);
-+  const n = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(async () => 1);
-   return <p>{n()}</p>;
- }
- render(App, document.body);
-\ No newline at end of file
-```
-
-Checker said instead:
-
-```text
-Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
-<job>/source/App.tsx:3:10 error TS2345: [generated] [WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state.
-solid-yield check: 1 files, 1 errors
-```
-
-### F-M117: M0367 non-core-cache at review-slots-colored-prop/App.tsx:8 (different code)
+### F-M116: M0367 non-core-cache at review-slots-colored-prop/App.tsx:8 (silent)
 
 Expected in the mutated routine (lines 7–10): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
 
@@ -3982,13 +3941,11 @@ Expected in the mutated routine (lines 7–10): SUGAR_CALLBACK, NATIVE_FOREIGN_B
 Checker said instead:
 
 ```text
-Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
-<job>/source/App.tsx:9:17 error TS2322: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
-  related: <job>/source/App.tsx:3:3: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
-solid-yield check: 1 files, 1 errors
+Stages: {"transform":"completed","cli":"passed","lint":"passed"}
+solid-yield check: 1 files, 0 errors
 ```
 
-### F-M118: M0373 delete-provider at review-slots-context/App.tsx:8 (silent)
+### F-M117: M0373 delete-provider at review-slots-context/App.tsx:8 (silent)
 
 Expected in the mutated routine (lines 7–9): NO_PROVIDER.
 
@@ -4012,7 +3969,7 @@ Stages: {"transform":"completed","cli":"passed","lint":"passed"}
 solid-yield check: 1 files, 0 errors
 ```
 
-### F-M119: M0374 delete-loading at review-slots-lazy-child/App.tsx:3 (silent)
+### F-M118: M0374 delete-loading at review-slots-lazy-child/App.tsx:3 (silent)
 
 Expected in the mutated routine (lines 2–4): PENDING_ROOT.
 
@@ -4035,7 +3992,7 @@ Stages: {"transform":"completed","cli":"passed","lint":"passed"}
 solid-yield check: 1 files, 0 errors
 ```
 
-### F-M120: M0376 delete-catch at review-slots-catch/App.tsx:5 (silent)
+### F-M119: M0376 delete-catch at review-slots-catch/App.tsx:5 (silent)
 
 Expected in the mutated routine (lines 2–11): FOREIGN_HANDOFF, NATIVE_CALLBACK_FAILURE, EVENT_REJECTS.
 
@@ -4066,7 +4023,7 @@ Stages: {"transform":"completed","cli":"passed","lint":"passed"}
 solid-yield check: 1 files, 0 errors
 ```
 
-### F-M121: M0390 non-core-cache at operator-seeds/App.tsx:13 (different code)
+### F-M120: M0390 non-core-cache at operator-seeds/App.tsx:13 (masked: base errors)
 
 Expected in the mutated routine (lines 11–28): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
 
@@ -4089,11 +4046,10 @@ Checker said instead:
 ```text
 Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 <job>/source/App.tsx:25:22 error TS95000: [EVENT_REJECTS] This handler can fail with Problem and nothing catches it; wrap the body in try/catch, or declare the failure.
-<job>/source/App.tsx:11:10 error TS2322: [generated] [LAZY_VIEW] children is a lazy view: function* () { return <.../>; }
-solid-yield check: 2 files, 2 errors
+solid-yield check: 2 files, 1 errors
 ```
 
-### F-M122: M0393 remove-await at operator-seeds/App.tsx:14 (masked: base errors)
+### F-M121: M0393 remove-await at operator-seeds/App.tsx:14 (masked: base errors)
 
 Expected in the mutated routine (lines 11–28): TS2322, TS2345, TS2739, TS2740, TS2741, TS2339, GENERATED_TYPE, SETTLED_PROP.
 
@@ -4119,7 +4075,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 2 files, 1 errors
 ```
 
-### F-M123: M0402 delete-provider at operator-seeds/App.tsx:23 (detected elsewhere)
+### F-M122: M0402 delete-provider at operator-seeds/App.tsx:23 (detected elsewhere)
 
 Expected in the mutated routine (lines 11–28): NO_PROVIDER.
 
@@ -4151,7 +4107,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 2 files, 2 errors
 ```
 
-### F-M124: M0403 delete-errored at operator-seeds/App.tsx:23 (masked: base errors)
+### F-M123: M0403 delete-errored at operator-seeds/App.tsx:23 (masked: base errors)
 
 Expected in the mutated routine (lines 11–28): FOREIGN_HANDOFF.
 
@@ -4182,7 +4138,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 2 files, 1 errors
 ```
 
-### F-M125: M0416 server-new-class at operator-seeds/server.ts:5 (masked: base errors)
+### F-M124: M0416 server-new-class at operator-seeds/server.ts:5 (masked: base errors)
 
 Expected in the mutated routine (lines 2–7): FOREIGN_HANDOFF.
 
@@ -4207,7 +4163,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 2 files, 1 errors
 ```
 
-### F-M126: M0420 delete-errored at sugar-edges/App.tsx:20 (detected elsewhere)
+### F-M125: M0420 delete-errored at sugar-edges/App.tsx:20 (detected elsewhere)
 
 Expected in the mutated routine (lines 16–25): FOREIGN_HANDOFF.
 
@@ -4237,7 +4193,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 4 files, 1 errors
 ```
 
-### F-M127: M0421 delete-loading at sugar-edges/App.tsx:21 (detected elsewhere)
+### F-M126: M0421 delete-loading at sugar-edges/App.tsx:21 (detected elsewhere)
 
 Expected in the mutated routine (lines 16–25): PENDING_ROOT.
 
@@ -4264,7 +4220,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 4 files, 1 errors
 ```
 
-### F-M128: M0445 delete-provider at sugar-edges/filters.tsx:11 (detected elsewhere)
+### F-M127: M0445 delete-provider at sugar-edges/filters.tsx:11 (detected elsewhere)
 
 Expected in the mutated routine (lines 9–12): NO_PROVIDER.
 
@@ -4293,7 +4249,7 @@ Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
 solid-yield check: 4 files, 2 errors
 ```
 
-### F-M129: M0453 non-core-cache at rendering-edges/Feed.tsx:42 (different code)
+### F-M128: M0453 non-core-cache at rendering-edges/Feed.tsx:42 (different code)
 
 Expected in the mutated routine (lines 29–72): SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP.
 
@@ -4315,12 +4271,11 @@ Checker said instead:
 
 ```text
 Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
-<job>/source/Feed.tsx:58:48 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
 <job>/source/Feed.tsx:42:87 error TS2558: Expected 0 type arguments, but got 1.
-solid-yield check: 5 files, 2 errors
+solid-yield check: 5 files, 1 errors
 ```
 
-### F-M130: M0455 delete-loading at rendering-edges/Feed.tsx:56 (silent)
+### F-M129: M0455 delete-loading at rendering-edges/Feed.tsx:56 (silent)
 
 Expected in the mutated routine (lines 29–72): PENDING_ROOT.
 
@@ -4354,7 +4309,7 @@ Stages: {"transform":"completed","cli":"passed","lint":"passed"}
 solid-yield check: 5 files, 0 errors
 ```
 
-### F-M131: M0461 delete-provider at rendering-edges/router.tsx:17 (detected elsewhere)
+### F-M130: M0461 delete-provider at rendering-edges/router.tsx:17 (detected elsewhere)
 
 Expected in the mutated routine (lines 10–22): NO_PROVIDER.
 
@@ -4379,10 +4334,37 @@ Checker said instead:
 
 ```text
 Stages: {"transform":"completed","cli":"diagnostics","lint":"passed"}
-<job>/source/main.tsx:8:5 error TS2345: [NO_PROVIDER] Fix the earlier errors in this component before checking its render call. Missing: any.
+<job>/source/main.tsx:10:10 error TS1360: [NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: RouterContext.
+  related: <job>/source/main.tsx:8:5: The app is rendered here. does not suspend; never fails; does not wait; needs RouterContext
 <job>/source/router.tsx:36:16 error TS95000: [EVENT_REJECTS] This handler can fail with unknown and nothing catches it; wrap the body in try/catch, or declare the failure.
-<job>/source/router.tsx:30:17 error TS2345: [generated] [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+<job>/source/server.tsx:21:12 error TS1360: [NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: RouterContext.
+  related: <job>/source/server.tsx:16:17: The app is rendered here. does not suspend; never fails; does not wait; needs RouterContext
 solid-yield check: 5 files, 3 errors
+```
+
+### F-M131: M0485 callback-throw at hole-edges/App.tsx:23 (silent)
+
+Expected in the mutated routine (lines 18–51): FOREIGN_HANDOFF.
+
+```diff
+--- hole-edges/App.tsx
++++ hole-edges/App.tsx (mutant)
+@@ -20,7 +20,7 @@
+   const [user] = createSignal<any>({ name: "ada" });
+   const settings = useContext(Settings);
+   const total = createMemo(() =>
+-    rows.items.reduce((sum: number, item: any) => sum + item.cents, 0)
++    rows.items.reduce((sum: number, item: any) => { if (Date.now() < 0) throw new RangeError("mutant failure"); return sum + item.cents; }, 0)
+   );
+   return (
+     <section class={settings.currency}>
+```
+
+Checker said instead:
+
+```text
+Stages: {"transform":"completed","cli":"passed","lint":"passed"}
+solid-yield check: 2 files, 0 errors
 ```
 
 ## Findings list

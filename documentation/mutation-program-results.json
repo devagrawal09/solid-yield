@@ -1,8 +1,8 @@
 {
-  "startedAt": "2026-10-11T23:09:15.221Z",
-  "finishedAt": "2026-10-12T00:01:13.757Z",
-  "durationMs": 3118536,
-  "digest": "473aebfe7b8457bc1ca163ec2d18adfd02b9da11bb9143c11524b1a81f776ea6",
+  "startedAt": "2026-10-12T04:53:52.723Z",
+  "finishedAt": "2026-10-12T05:55:35.357Z",
+  "durationMs": 3702634,
+  "digest": "6a391eb63eb17d6eef1e146ea27f46ec4a5fa638508b7ec8ac2ad6494a80bf48",
   "projects": [
     {
       "id": "sierpinski",
@@ -1101,6 +1101,22 @@
           "solid-yield check: 4 files, 0 errors"
         ]
       }
+    },
+    {
+      "id": "hole-edges",
+      "origin": "Plain Solid exercising failing calls in JSX holes (nativeHole) and values typed any: a helper that may throw in a hole, in an attribute and in a row under an Errored; a context, a store, a signal and a memo of any, with a method of any",
+      "files": 2,
+      "base": {
+        "diagnostics": [],
+        "stages": {
+          "transform": "completed",
+          "cli": "passed",
+          "lint": "passed"
+        },
+        "cliOutput": [
+          "solid-yield check: 2 files, 0 errors"
+        ]
+      }
     }
   ],
   "counts": {
@@ -1117,8 +1133,8 @@
       "equivalent": 2
     },
     "delete-errored": {
-      "mutants": 23,
-      "killed": 3,
+      "mutants": 24,
+      "killed": 4,
       "survived": 20,
       "equivalent": 0
     },
@@ -1129,8 +1145,8 @@
       "equivalent": 0
     },
     "setup-read": {
-      "mutants": 118,
-      "killed": 97,
+      "mutants": 120,
+      "killed": 99,
       "survived": 21,
       "equivalent": 0
     },
@@ -1141,22 +1157,22 @@
       "equivalent": 0
     },
     "never-provided-context": {
-      "mutants": 29,
-      "killed": 25,
+      "mutants": 30,
+      "killed": 26,
       "survived": 4,
       "equivalent": 0
     },
     "throw-string": {
-      "mutants": 28,
+      "mutants": 29,
       "killed": 0,
       "survived": 0,
-      "equivalent": 28
+      "equivalent": 29
     },
     "throw-object": {
-      "mutants": 28,
+      "mutants": 29,
       "killed": 0,
       "survived": 0,
-      "equivalent": 28
+      "equivalent": 29
     },
     "async-reject": {
       "mutants": 3,
@@ -1183,9 +1199,9 @@
       "equivalent": 6
     },
     "non-core-cache": {
-      "mutants": 49,
-      "killed": 22,
-      "survived": 27,
+      "mutants": 50,
+      "killed": 24,
+      "survived": 26,
       "equivalent": 0
     },
     "destructure-props": {
@@ -1213,9 +1229,9 @@
       "equivalent": 1
     },
     "callback-throw": {
-      "mutants": 4,
+      "mutants": 5,
       "killed": 1,
-      "survived": 0,
+      "survived": 1,
       "equivalent": 3
     },
     "server-new-class": {
@@ -1226,11 +1242,11 @@
     }
   },
   "total": {
-    "mutants": 480,
-    "killed": 254,
+    "mutants": 488,
+    "killed": 260,
     "survived": 131,
-    "equivalent": 95,
-    "score": 65.97402597402598
+    "equivalent": 97,
+    "score": 66.49616368286445
   },
   "mutants": [
     {
@@ -1791,20 +1807,6 @@
           {
             "stage": "cli",
             "file": "main.tsx",
-            "line": 51,
-            "code": "GENERATED_TYPE",
-            "tsCode": "TS2322",
-            "message": "[generated] [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
-            "related": [
-              {
-                "file": "main.tsx",
-                "line": 51
-              }
-            ]
-          },
-          {
-            "stage": "cli",
-            "file": "main.tsx",
             "line": 62,
             "code": "GENERATED_TYPE",
             "tsCode": "TS2345",
@@ -1843,13 +1845,11 @@
         "cliOutput": [
           "<job>/source/main.tsx:110:25 error TS2345: [FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: unknown.",
           "  related: <job>/source/main.tsx:115:8: The app is rendered here. does not suspend; can fail with an unknown error; does not wait; needs no context",
-          "<job>/source/main.tsx:51:7 error TS2322: [generated] [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
-          "  related: <job>/source/main.tsx:51:7: [generated] [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
           "<job>/source/main.tsx:62:96 error TS2345: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
           "<job>/source/main.tsx:51:7 error TS2769: [generated] [LAZY_VIEW] fallback is a lazy view: function* () { return <.../>; }",
           "<job>/source/main.tsx:51:7 error TS2589: [generated] Type instantiation is excessively deep and possibly infinite.",
           "<job>/source/main.tsx:51:7 error TS2322: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
-          "solid-yield check: 1 files, 6 errors"
+          "solid-yield check: 1 files, 5 errors"
         ]
       },
       "preExistingMatch": false,
@@ -4082,24 +4082,14 @@
       "file": "App.tsx",
       "original": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "result": {
-        "diagnostics": [
-          {
-            "stage": "cli",
-            "file": "App.tsx",
-            "line": 17,
-            "code": "GENERATED_TYPE",
-            "tsCode": "TS2339",
-            "message": "[GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host."
-          }
-        ],
+        "diagnostics": [],
         "stages": {
           "transform": "completed",
-          "cli": "diagnostics",
+          "cli": "passed",
           "lint": "passed"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:17:46 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
-          "solid-yield check: 3 files, 1 errors"
+          "solid-yield check: 3 files, 0 errors"
         ]
       },
       "preExistingMatch": false,
@@ -4948,14 +4938,6 @@
           {
             "stage": "cli",
             "file": "App.tsx",
-            "line": 19,
-            "code": "GENERATED_TYPE",
-            "tsCode": "TS2339",
-            "message": "[GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host."
-          },
-          {
-            "stage": "cli",
-            "file": "App.tsx",
             "line": 8,
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
@@ -4986,10 +4968,9 @@
           "lint": "diagnostics"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:19:46 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
           "<job>/source/App.tsx:8:20 error TS2769: [READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive.",
           "<job>/source/index.tsx:3:15 error TS2345: [FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any.",
-          "solid-yield check: 3 files, 3 errors"
+          "solid-yield check: 3 files, 2 errors"
         ]
       },
       "preExistingMatch": false,
@@ -5966,14 +5947,6 @@
                 "line": 3
               }
             ]
-          },
-          {
-            "stage": "cli",
-            "file": "App.tsx",
-            "line": 19,
-            "code": "GENERATED_TYPE",
-            "tsCode": "TS2339",
-            "message": "[GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host."
           }
         ],
         "stages": {
@@ -5984,8 +5957,7 @@
         "cliOutput": [
           "<job>/source/App.tsx:15:16 error TS1360: [NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: UserCtx.",
           "  related: <job>/source/index.tsx:3:15: The app is rendered here. does not suspend; never fails; does not wait; needs UserCtx",
-          "<job>/source/App.tsx:19:46 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
-          "solid-yield check: 3 files, 2 errors"
+          "solid-yield check: 3 files, 1 errors"
         ]
       },
       "preExistingMatch": false,
@@ -8809,14 +8781,6 @@
                 "line": 3
               }
             ]
-          },
-          {
-            "stage": "cli",
-            "file": "App.tsx",
-            "line": 17,
-            "code": "GENERATED_TYPE",
-            "tsCode": "TS2339",
-            "message": "[GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host."
           }
         ],
         "stages": {
@@ -8827,8 +8791,7 @@
         "cliOutput": [
           "<job>/source/App.tsx:9:27 error TS95000: [EVENT_REJECTS] This handler can fail with Error and nothing catches it; wrap the body in try/catch, or declare the failure.",
           "  related: <job>/source/index.tsx:3:15: The app is rendered here.",
-          "<job>/source/App.tsx:17:46 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
-          "solid-yield check: 3 files, 2 errors"
+          "solid-yield check: 3 files, 1 errors"
         ]
       },
       "preExistingMatch": false,
@@ -9879,14 +9842,6 @@
                 "line": 3
               }
             ]
-          },
-          {
-            "stage": "cli",
-            "file": "App.tsx",
-            "line": 18,
-            "code": "GENERATED_TYPE",
-            "tsCode": "TS2339",
-            "message": "[GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host."
           }
         ],
         "stages": {
@@ -9897,8 +9852,7 @@
         "cliOutput": [
           "<job>/source/App.tsx:10:27 error TS95000: [EVENT_REJECTS] This handler can fail with Error and nothing catches it; wrap the body in try/catch, or declare the failure.",
           "  related: <job>/source/index.tsx:3:15: The app is rendered here.",
-          "<job>/source/App.tsx:18:46 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
-          "solid-yield check: 3 files, 2 errors"
+          "solid-yield check: 3 files, 1 errors"
         ]
       },
       "preExistingMatch": false,
@@ -10773,24 +10727,14 @@
       "file": "App.tsx",
       "original": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(async () => { try { return await fetchItems(); } catch { return []; } });\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "result": {
-        "diagnostics": [
-          {
-            "stage": "cli",
-            "file": "App.tsx",
-            "line": 17,
-            "code": "GENERATED_TYPE",
-            "tsCode": "TS2339",
-            "message": "[GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host."
-          }
-        ],
+        "diagnostics": [],
         "stages": {
           "transform": "completed",
-          "cli": "diagnostics",
+          "cli": "passed",
           "lint": "passed"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:17:46 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
-          "solid-yield check: 3 files, 1 errors"
+          "solid-yield check: 3 files, 0 errors"
         ]
       },
       "preExistingMatch": false,
@@ -11724,14 +11668,6 @@
           {
             "stage": "cli",
             "file": "App.tsx",
-            "line": 17,
-            "code": "GENERATED_TYPE",
-            "tsCode": "TS2339",
-            "message": "[GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host."
-          },
-          {
-            "stage": "cli",
-            "file": "App.tsx",
             "line": 8,
             "code": "WRITE_IN_REACTIVE",
             "tsCode": "TS2345",
@@ -11752,10 +11688,9 @@
           "lint": "passed"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:17:46 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
           "<job>/source/App.tsx:8:36 error TS2345: [WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state.",
           "<job>/source/index.tsx:3:15 error TS2345: [FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any.",
-          "solid-yield check: 3 files, 3 errors"
+          "solid-yield check: 3 files, 2 errors"
         ]
       },
       "preExistingMatch": false,
@@ -12641,24 +12576,14 @@
       "file": "App.tsx",
       "original": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  setTimeout(() => console.log(count()), 10);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "result": {
-        "diagnostics": [
-          {
-            "stage": "cli",
-            "file": "App.tsx",
-            "line": 18,
-            "code": "GENERATED_TYPE",
-            "tsCode": "TS2339",
-            "message": "[GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host."
-          }
-        ],
+        "diagnostics": [],
         "stages": {
           "transform": "completed",
-          "cli": "diagnostics",
+          "cli": "passed",
           "lint": "passed"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:18:46 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
-          "solid-yield check: 3 files, 1 errors"
+          "solid-yield check: 3 files, 0 errors"
         ]
       },
       "preExistingMatch": false,
@@ -13539,25 +13464,16 @@
             "code": "NATIVE_FOREIGN_BOUNDARY",
             "tsCode": "TS95001",
             "message": "[NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check."
-          },
-          {
-            "stage": "cli",
-            "file": "App.tsx",
-            "line": 18,
-            "code": "GENERATED_TYPE",
-            "tsCode": "TS2339",
-            "message": "[GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host."
           }
         ],
         "stages": {
           "transform": "completed",
-          "cli": "diagnostics",
+          "cli": "passed",
           "lint": "passed"
         },
         "cliOutput": [
           "<job>/source/App.tsx:26:7 warning TS95001: [NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check.",
-          "<job>/source/App.tsx:18:46 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
-          "solid-yield check: 3 files, 1 errors"
+          "solid-yield check: 3 files, 0 errors"
         ]
       },
       "preExistingMatch": false,
@@ -15241,24 +15157,14 @@
       "file": "App.tsx",
       "original": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => (count() > 2 ? items2() : 0));\n  const items2 = () => count();\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "result": {
-        "diagnostics": [
-          {
-            "stage": "cli",
-            "file": "App.tsx",
-            "line": 18,
-            "code": "GENERATED_TYPE",
-            "tsCode": "TS2339",
-            "message": "[GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host."
-          }
-        ],
+        "diagnostics": [],
         "stages": {
           "transform": "completed",
-          "cli": "diagnostics",
+          "cli": "passed",
           "lint": "passed"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:18:46 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
-          "solid-yield check: 3 files, 1 errors"
+          "solid-yield check: 3 files, 0 errors"
         ]
       },
       "preExistingMatch": false,
@@ -16164,14 +16070,6 @@
       "result": {
         "diagnostics": [
           {
-            "stage": "cli",
-            "file": "App.tsx",
-            "line": 18,
-            "code": "GENERATED_TYPE",
-            "tsCode": "TS2339",
-            "message": "[GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host."
-          },
-          {
             "stage": "lint",
             "file": "App.tsx",
             "line": 9,
@@ -16184,12 +16082,11 @@
         ],
         "stages": {
           "transform": "completed",
-          "cli": "diagnostics",
+          "cli": "passed",
           "lint": "diagnostics"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:18:46 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
-          "solid-yield check: 3 files, 1 errors"
+          "solid-yield check: 3 files, 0 errors"
         ]
       },
       "preExistingMatch": false,
@@ -17929,24 +17826,14 @@
       "file": "App.tsx",
       "original": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <Errored fallback={err => <p>failed: {String(err)}</p>}>\n        <>\n          <List />\n        </>\n      </Errored>\n    </ThemeCtx>\n  );\n}\n",
       "result": {
-        "diagnostics": [
-          {
-            "stage": "cli",
-            "file": "App.tsx",
-            "line": 17,
-            "code": "GENERATED_TYPE",
-            "tsCode": "TS2339",
-            "message": "[GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host."
-          }
-        ],
+        "diagnostics": [],
         "stages": {
           "transform": "completed",
-          "cli": "diagnostics",
+          "cli": "passed",
           "lint": "passed"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:17:46 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
-          "solid-yield check: 3 files, 1 errors"
+          "solid-yield check: 3 files, 0 errors"
         ]
       },
       "preExistingMatch": false,
@@ -18782,14 +18669,6 @@
                 "line": 3
               }
             ]
-          },
-          {
-            "stage": "cli",
-            "file": "App.tsx",
-            "line": 17,
-            "code": "GENERATED_TYPE",
-            "tsCode": "TS2339",
-            "message": "[GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host."
           }
         ],
         "stages": {
@@ -18800,8 +18679,7 @@
         "cliOutput": [
           "<job>/source/App.tsx:13:17 error TS1360: [NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: ThemeCtx.",
           "  related: <job>/source/index.tsx:3:15: The app is rendered here. does not suspend; never fails; does not wait; needs ThemeCtx",
-          "<job>/source/App.tsx:17:46 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
-          "solid-yield check: 3 files, 2 errors"
+          "solid-yield check: 3 files, 1 errors"
         ]
       },
       "preExistingMatch": false,
@@ -19623,24 +19501,14 @@
       "file": "App.tsx",
       "original": "import { createSignal, createMemo, createContext, useContext, Loading, Errored, For } from \"solid-js\";\nimport { fetchItems } from \"./api\";\n\nconst ThemeCtx = createContext<string>();\n\nfunction Counter() {\n  const [count, setCount] = createSignal(0);\n  const twice = createMemo(() => count() * 2);\n  return <button onClick={() => setCount(count() + 1)}>{count()} / {twice()}</button>;\n}\n\nfunction List() {\n  const theme = useContext(ThemeCtx);\n  const items = createMemo(() => fetchItems());\n  return (\n    <ul class={theme}>\n      <For each={items()}>{item => <li>{item.name}</li>}</For>\n    </ul>\n  );\n}\n\nexport function App() {\n  return (\n    <ThemeCtx value=\"dark\">\n      <Counter />\n      <>\n        <Loading fallback=\"loading…\">\n          <List />\n        </Loading>\n      </>\n    </ThemeCtx>\n  );\n}\n",
       "result": {
-        "diagnostics": [
-          {
-            "stage": "cli",
-            "file": "App.tsx",
-            "line": 17,
-            "code": "GENERATED_TYPE",
-            "tsCode": "TS2339",
-            "message": "[GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host."
-          }
-        ],
+        "diagnostics": [],
         "stages": {
           "transform": "completed",
-          "cli": "diagnostics",
+          "cli": "passed",
           "lint": "passed"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:17:46 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
-          "solid-yield check: 3 files, 1 errors"
+          "solid-yield check: 3 files, 0 errors"
         ]
       },
       "preExistingMatch": true,
@@ -20094,10 +19962,16 @@
           {
             "stage": "cli",
             "file": "App.tsx",
-            "line": 3,
-            "code": "WRITE_IN_REACTIVE",
+            "line": 5,
+            "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
-            "message": "[generated] [WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state."
+            "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: unknown.",
+            "related": [
+              {
+                "file": "App.tsx",
+                "line": 7
+              }
+            ]
           }
         ],
         "stages": {
@@ -20106,12 +19980,13 @@
           "lint": "passed"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:3:10 error TS2345: [generated] [WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state.",
+          "<job>/source/App.tsx:5:14 error TS2345: [FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: unknown.",
+          "  related: <job>/source/App.tsx:7:8: The app is rendered here. does not suspend; can fail with an unknown error; does not wait; needs no context",
           "solid-yield check: 1 files, 1 errors"
         ]
       },
       "preExistingMatch": false,
-      "status": "survived",
+      "status": "killed",
       "exactLine": false
     },
     {
@@ -20270,31 +20145,14 @@
       "file": "App.tsx",
       "original": "import { createSignal, createMemo, createEffect, For, Show, Loading, createContext, useContext } from \"solid-js\";\nfunction Child(p: {\n  n: number;\n}) {\n  return <p>{p.n}</p>;\n}\nexport function App() {\n  const n = createMemo(async () => 1);\n  return <Child n={n()} />;\n}",
       "result": {
-        "diagnostics": [
-          {
-            "stage": "cli",
-            "file": "App.tsx",
-            "line": 9,
-            "code": "GENERATED_TYPE",
-            "tsCode": "TS2322",
-            "message": "[GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
-            "related": [
-              {
-                "file": "App.tsx",
-                "line": 3
-              }
-            ]
-          }
-        ],
+        "diagnostics": [],
         "stages": {
           "transform": "completed",
-          "cli": "diagnostics",
+          "cli": "passed",
           "lint": "passed"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:9:17 error TS2322: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
-          "  related: <job>/source/App.tsx:3:3: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
-          "solid-yield check: 1 files, 1 errors"
+          "solid-yield check: 1 files, 0 errors"
         ]
       },
       "preExistingMatch": false,
@@ -21322,14 +21180,6 @@
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with Problem and nothing catches it; wrap the body in try/catch, or declare the failure."
-          },
-          {
-            "stage": "cli",
-            "file": "App.tsx",
-            "line": 11,
-            "code": "LAZY_VIEW",
-            "tsCode": "TS2322",
-            "message": "[generated] [LAZY_VIEW] children is a lazy view: function* () { return <.../>; }"
           }
         ],
         "stages": {
@@ -21339,8 +21189,7 @@
         },
         "cliOutput": [
           "<job>/source/App.tsx:25:22 error TS95000: [EVENT_REJECTS] This handler can fail with Problem and nothing catches it; wrap the body in try/catch, or declare the failure.",
-          "<job>/source/App.tsx:11:10 error TS2322: [generated] [LAZY_VIEW] children is a lazy view: function* () { return <.../>; }",
-          "solid-yield check: 2 files, 2 errors"
+          "solid-yield check: 2 files, 1 errors"
         ]
       },
       "preExistingMatch": false,
@@ -24190,14 +24039,6 @@
           {
             "stage": "cli",
             "file": "Feed.tsx",
-            "line": 58,
-            "code": "GENERATED_TYPE",
-            "tsCode": "TS2339",
-            "message": "[GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host."
-          },
-          {
-            "stage": "cli",
-            "file": "Feed.tsx",
             "line": 42,
             "code": "TS2558",
             "tsCode": "TS2558",
@@ -24210,9 +24051,8 @@
           "lint": "passed"
         },
         "cliOutput": [
-          "<job>/source/Feed.tsx:58:48 error TS2339: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
           "<job>/source/Feed.tsx:42:87 error TS2558: Expected 0 type arguments, but got 1.",
-          "solid-yield check: 5 files, 2 errors"
+          "solid-yield check: 5 files, 1 errors"
         ]
       },
       "preExistingMatch": false,
@@ -24578,10 +24418,16 @@
           {
             "stage": "cli",
             "file": "main.tsx",
-            "line": 8,
+            "line": 10,
             "code": "NO_PROVIDER",
-            "tsCode": "TS2345",
-            "message": "[NO_PROVIDER] Fix the earlier errors in this component before checking its render call. Missing: any."
+            "tsCode": "TS1360",
+            "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: RouterContext.",
+            "related": [
+              {
+                "file": "main.tsx",
+                "line": 8
+              }
+            ]
           },
           {
             "stage": "cli",
@@ -24593,11 +24439,17 @@
           },
           {
             "stage": "cli",
-            "file": "router.tsx",
-            "line": 30,
-            "code": "GENERATED_TYPE",
-            "tsCode": "TS2345",
-            "message": "[generated] [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host."
+            "file": "server.tsx",
+            "line": 21,
+            "code": "NO_PROVIDER",
+            "tsCode": "TS1360",
+            "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: RouterContext.",
+            "related": [
+              {
+                "file": "server.tsx",
+                "line": 16
+              }
+            ]
           }
         ],
         "stages": {
@@ -24606,9 +24458,11 @@
           "lint": "passed"
         },
         "cliOutput": [
-          "<job>/source/main.tsx:8:5 error TS2345: [NO_PROVIDER] Fix the earlier errors in this component before checking its render call. Missing: any.",
+          "<job>/source/main.tsx:10:10 error TS1360: [NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: RouterContext.",
+          "  related: <job>/source/main.tsx:8:5: The app is rendered here. does not suspend; never fails; does not wait; needs RouterContext",
           "<job>/source/router.tsx:36:16 error TS95000: [EVENT_REJECTS] This handler can fail with unknown and nothing catches it; wrap the body in try/catch, or declare the failure.",
-          "<job>/source/router.tsx:30:17 error TS2345: [generated] [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
+          "<job>/source/server.tsx:21:12 error TS1360: [NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: RouterContext.",
+          "  related: <job>/source/server.tsx:16:17: The app is rendered here. does not suspend; never fails; does not wait; needs RouterContext",
           "solid-yield check: 5 files, 3 errors"
         ]
       },
@@ -25419,14 +25273,6 @@
           },
           {
             "stage": "cli",
-            "file": "main.tsx",
-            "line": 1,
-            "code": "LAZY_VIEW",
-            "tsCode": "TS2322",
-            "message": "[generated] [LAZY_VIEW] children is a lazy view: function* () { return <.../>; }"
-          },
-          {
-            "stage": "cli",
             "file": "runtime.ts",
             "line": 10,
             "code": "NATIVE_THROW",
@@ -25440,9 +25286,8 @@
           "lint": "blocked-by-transform"
         },
         "cliOutput": [
-          "<job>/source/main.tsx:1:1 error TS2322: [generated] [LAZY_VIEW] children is a lazy view: function* () { return <.../>; }",
           "<job>/source/runtime.ts:10:18 error TS95000: [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.",
-          "solid-yield check: 4 files, 2 errors"
+          "solid-yield check: 4 files, 1 errors"
         ]
       },
       "preExistingMatch": false,
@@ -25503,14 +25348,6 @@
           },
           {
             "stage": "cli",
-            "file": "main.tsx",
-            "line": 1,
-            "code": "LAZY_VIEW",
-            "tsCode": "TS2322",
-            "message": "[generated] [LAZY_VIEW] children is a lazy view: function* () { return <.../>; }"
-          },
-          {
-            "stage": "cli",
             "file": "runtime.ts",
             "line": 16,
             "code": "NO_PROVIDER",
@@ -25524,9 +25361,357 @@
           "lint": "blocked-by-transform"
         },
         "cliOutput": [
-          "<job>/source/main.tsx:1:1 error TS2322: [generated] [LAZY_VIEW] children is a lazy view: function* () { return <.../>; }",
           "<job>/source/runtime.ts:16:30 error TS95000: [NO_PROVIDER] Add a context provider above this component; this context has no default value.",
-          "solid-yield check: 4 files, 2 errors"
+          "solid-yield check: 4 files, 1 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "killed",
+      "exactLine": true
+    },
+    {
+      "operator": "throw-string",
+      "line": 14,
+      "routine": {
+        "start": 13,
+        "end": 16
+      },
+      "offset": 420,
+      "source": "import {\n  createContext,\n  createMemo,\n  createSignal,\n  createStore,\n  Errored,\n  For,\n  useContext\n} from \"solid-js\";\n// A call that may fail, made in a JSX hole: its failure is the hole's, taken\n// by the Errored above (nativeHole). Values typed `any`: their members are\n// unchecked, as TypeScript leaves them; a method of `any` is outside code.\nfunction money(cents: number) {\n  if (!Number.isFinite(cents)) throw \"mutant failure\";\n  return (cents / 100).toFixed(2);\n}\nconst Settings = createContext<any>({ currency: \"EUR\" });\nexport function Ledger() {\n  const [rows, setRows] = createStore<any>({ items: [{ label: \"tea\", cents: 350 }] });\n  const [user] = createSignal<any>({ name: \"ada\" });\n  const settings = useContext(Settings);\n  const total = createMemo(() =>\n    rows.items.reduce((sum: number, item: any) => sum + item.cents, 0)\n  );\n  return (\n    <section class={settings.currency}>\n      <h2>{user().name}</h2>\n      <Errored fallback={err => <p>bad amount: {String(err())}</p>}>\n        <p>{money(total())}</p>\n        <ul>\n          <For each={rows.items}>\n            {item => (\n              <li>\n                {item.label}: {money(item.cents)}\n              </li>\n            )}\n          </For>\n        </ul>\n      </Errored>\n      <button\n        onClick={() =>\n          setRows(s => {\n            s.items.push({ label: \"cake\", cents: 420 });\n          })\n        }\n      >\n        add\n      </button>\n    </section>\n  );\n}\n",
+      "equivalent": "Unknown thrown values are allowed by the unknown floor; changing the value is not itself an error. Handoff diagnostics are still recorded.",
+      "id": "M0481",
+      "project": "hole-edges",
+      "file": "App.tsx",
+      "original": "import {\n  createContext,\n  createMemo,\n  createSignal,\n  createStore,\n  Errored,\n  For,\n  useContext\n} from \"solid-js\";\n// A call that may fail, made in a JSX hole: its failure is the hole's, taken\n// by the Errored above (nativeHole). Values typed `any`: their members are\n// unchecked, as TypeScript leaves them; a method of `any` is outside code.\nfunction money(cents: number) {\n  if (!Number.isFinite(cents)) throw new RangeError(\"not an amount\");\n  return (cents / 100).toFixed(2);\n}\nconst Settings = createContext<any>({ currency: \"EUR\" });\nexport function Ledger() {\n  const [rows, setRows] = createStore<any>({ items: [{ label: \"tea\", cents: 350 }] });\n  const [user] = createSignal<any>({ name: \"ada\" });\n  const settings = useContext(Settings);\n  const total = createMemo(() =>\n    rows.items.reduce((sum: number, item: any) => sum + item.cents, 0)\n  );\n  return (\n    <section class={settings.currency}>\n      <h2>{user().name}</h2>\n      <Errored fallback={err => <p>bad amount: {String(err())}</p>}>\n        <p>{money(total())}</p>\n        <ul>\n          <For each={rows.items}>\n            {item => (\n              <li>\n                {item.label}: {money(item.cents)}\n              </li>\n            )}\n          </For>\n        </ul>\n      </Errored>\n      <button\n        onClick={() =>\n          setRows(s => {\n            s.items.push({ label: \"cake\", cents: 420 });\n          })\n        }\n      >\n        add\n      </button>\n    </section>\n  );\n}\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "transform",
+            "file": "App.tsx",
+            "line": 14,
+            "code": "NATIVE_THROW",
+            "message": "Throw an Error object so callers can identify and handle this failure."
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 14,
+            "code": "NATIVE_THROW",
+            "tsCode": "TS95000",
+            "message": "[NATIVE_THROW] Throw an Error object so callers can identify and handle this failure."
+          }
+        ],
+        "stages": {
+          "transform": "refused",
+          "cli": "diagnostics",
+          "lint": "blocked-by-transform"
+        },
+        "cliOutput": [
+          "<job>/source/App.tsx:14:32 error TS95000: [NATIVE_THROW] Throw an Error object so callers can identify and handle this failure.",
+          "solid-yield check: 2 files, 1 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "equivalent",
+      "exactLine": false
+    },
+    {
+      "operator": "throw-object",
+      "line": 14,
+      "routine": {
+        "start": 13,
+        "end": 16
+      },
+      "offset": 420,
+      "source": "import {\n  createContext,\n  createMemo,\n  createSignal,\n  createStore,\n  Errored,\n  For,\n  useContext\n} from \"solid-js\";\n// A call that may fail, made in a JSX hole: its failure is the hole's, taken\n// by the Errored above (nativeHole). Values typed `any`: their members are\n// unchecked, as TypeScript leaves them; a method of `any` is outside code.\nfunction money(cents: number) {\n  if (!Number.isFinite(cents)) throw ({message:\"mutant failure\"});\n  return (cents / 100).toFixed(2);\n}\nconst Settings = createContext<any>({ currency: \"EUR\" });\nexport function Ledger() {\n  const [rows, setRows] = createStore<any>({ items: [{ label: \"tea\", cents: 350 }] });\n  const [user] = createSignal<any>({ name: \"ada\" });\n  const settings = useContext(Settings);\n  const total = createMemo(() =>\n    rows.items.reduce((sum: number, item: any) => sum + item.cents, 0)\n  );\n  return (\n    <section class={settings.currency}>\n      <h2>{user().name}</h2>\n      <Errored fallback={err => <p>bad amount: {String(err())}</p>}>\n        <p>{money(total())}</p>\n        <ul>\n          <For each={rows.items}>\n            {item => (\n              <li>\n                {item.label}: {money(item.cents)}\n              </li>\n            )}\n          </For>\n        </ul>\n      </Errored>\n      <button\n        onClick={() =>\n          setRows(s => {\n            s.items.push({ label: \"cake\", cents: 420 });\n          })\n        }\n      >\n        add\n      </button>\n    </section>\n  );\n}\n",
+      "equivalent": "Unknown thrown values are allowed by the unknown floor; changing the value is not itself an error. Handoff diagnostics are still recorded.",
+      "id": "M0482",
+      "project": "hole-edges",
+      "file": "App.tsx",
+      "original": "import {\n  createContext,\n  createMemo,\n  createSignal,\n  createStore,\n  Errored,\n  For,\n  useContext\n} from \"solid-js\";\n// A call that may fail, made in a JSX hole: its failure is the hole's, taken\n// by the Errored above (nativeHole). Values typed `any`: their members are\n// unchecked, as TypeScript leaves them; a method of `any` is outside code.\nfunction money(cents: number) {\n  if (!Number.isFinite(cents)) throw new RangeError(\"not an amount\");\n  return (cents / 100).toFixed(2);\n}\nconst Settings = createContext<any>({ currency: \"EUR\" });\nexport function Ledger() {\n  const [rows, setRows] = createStore<any>({ items: [{ label: \"tea\", cents: 350 }] });\n  const [user] = createSignal<any>({ name: \"ada\" });\n  const settings = useContext(Settings);\n  const total = createMemo(() =>\n    rows.items.reduce((sum: number, item: any) => sum + item.cents, 0)\n  );\n  return (\n    <section class={settings.currency}>\n      <h2>{user().name}</h2>\n      <Errored fallback={err => <p>bad amount: {String(err())}</p>}>\n        <p>{money(total())}</p>\n        <ul>\n          <For each={rows.items}>\n            {item => (\n              <li>\n                {item.label}: {money(item.cents)}\n              </li>\n            )}\n          </For>\n        </ul>\n      </Errored>\n      <button\n        onClick={() =>\n          setRows(s => {\n            s.items.push({ label: \"cake\", cents: 420 });\n          })\n        }\n      >\n        add\n      </button>\n    </section>\n  );\n}\n",
+      "result": {
+        "diagnostics": [],
+        "stages": {
+          "transform": "completed",
+          "cli": "passed",
+          "lint": "passed"
+        },
+        "cliOutput": [
+          "solid-yield check: 2 files, 0 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "equivalent",
+      "exactLine": false
+    },
+    {
+      "operator": "never-provided-context",
+      "line": 21,
+      "routine": {
+        "start": 18,
+        "end": 51
+      },
+      "offset": 745,
+      "source": "import {\n  createContext,\n  createMemo,\n  createSignal,\n  createStore,\n  Errored,\n  For,\n  useContext\n} from \"solid-js\";\n// A call that may fail, made in a JSX hole: its failure is the hole's, taken\n// by the Errored above (nativeHole). Values typed `any`: their members are\n// unchecked, as TypeScript leaves them; a method of `any` is outside code.\nfunction money(cents: number) {\n  if (!Number.isFinite(cents)) throw new RangeError(\"not an amount\");\n  return (cents / 100).toFixed(2);\n}\nconst Settings = createContext<any>({ currency: \"EUR\" });\nexport function Ledger() {\n  const [rows, setRows] = createStore<any>({ items: [{ label: \"tea\", cents: 350 }] });\n  const [user] = createSignal<any>({ name: \"ada\" });\n  const settings = useContext(createContext<number>());\n  const total = createMemo(() =>\n    rows.items.reduce((sum: number, item: any) => sum + item.cents, 0)\n  );\n  return (\n    <section class={settings.currency}>\n      <h2>{user().name}</h2>\n      <Errored fallback={err => <p>bad amount: {String(err())}</p>}>\n        <p>{money(total())}</p>\n        <ul>\n          <For each={rows.items}>\n            {item => (\n              <li>\n                {item.label}: {money(item.cents)}\n              </li>\n            )}\n          </For>\n        </ul>\n      </Errored>\n      <button\n        onClick={() =>\n          setRows(s => {\n            s.items.push({ label: \"cake\", cents: 420 });\n          })\n        }\n      >\n        add\n      </button>\n    </section>\n  );\n}\n",
+      "equivalent": null,
+      "id": "M0483",
+      "project": "hole-edges",
+      "file": "App.tsx",
+      "original": "import {\n  createContext,\n  createMemo,\n  createSignal,\n  createStore,\n  Errored,\n  For,\n  useContext\n} from \"solid-js\";\n// A call that may fail, made in a JSX hole: its failure is the hole's, taken\n// by the Errored above (nativeHole). Values typed `any`: their members are\n// unchecked, as TypeScript leaves them; a method of `any` is outside code.\nfunction money(cents: number) {\n  if (!Number.isFinite(cents)) throw new RangeError(\"not an amount\");\n  return (cents / 100).toFixed(2);\n}\nconst Settings = createContext<any>({ currency: \"EUR\" });\nexport function Ledger() {\n  const [rows, setRows] = createStore<any>({ items: [{ label: \"tea\", cents: 350 }] });\n  const [user] = createSignal<any>({ name: \"ada\" });\n  const settings = useContext(Settings);\n  const total = createMemo(() =>\n    rows.items.reduce((sum: number, item: any) => sum + item.cents, 0)\n  );\n  return (\n    <section class={settings.currency}>\n      <h2>{user().name}</h2>\n      <Errored fallback={err => <p>bad amount: {String(err())}</p>}>\n        <p>{money(total())}</p>\n        <ul>\n          <For each={rows.items}>\n            {item => (\n              <li>\n                {item.label}: {money(item.cents)}\n              </li>\n            )}\n          </For>\n        </ul>\n      </Errored>\n      <button\n        onClick={() =>\n          setRows(s => {\n            s.items.push({ label: \"cake\", cents: 420 });\n          })\n        }\n      >\n        add\n      </button>\n    </section>\n  );\n}\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "transform",
+            "file": "App.tsx",
+            "line": 21,
+            "code": "NO_PROVIDER",
+            "message": "This context is created in the read itself, so no provider can be above it: declare it once, provide it, and read that declaration."
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 21,
+            "code": "NO_PROVIDER",
+            "tsCode": "TS95000",
+            "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value."
+          }
+        ],
+        "stages": {
+          "transform": "refused",
+          "cli": "diagnostics",
+          "lint": "blocked-by-transform"
+        },
+        "cliOutput": [
+          "<job>/source/App.tsx:21:31 error TS95000: [NO_PROVIDER] Add a context provider above this component; this context has no default value.",
+          "solid-yield check: 2 files, 1 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "killed",
+      "exactLine": true
+    },
+    {
+      "operator": "non-core-cache",
+      "line": 22,
+      "routine": {
+        "start": 18,
+        "end": 51
+      },
+      "offset": 772,
+      "source": "import {\n  createContext,\n  createMemo,\n  createSignal,\n  createStore,\n  Errored,\n  For,\n  useContext\n} from \"solid-js\";\n// A call that may fail, made in a JSX hole: its failure is the hole's, taken\n// by the Errored above (nativeHole). Values typed `any`: their members are\n// unchecked, as TypeScript leaves them; a method of `any` is outside code.\nfunction money(cents: number) {\n  if (!Number.isFinite(cents)) throw new RangeError(\"not an amount\");\n  return (cents / 100).toFixed(2);\n}\nconst Settings = createContext<any>({ currency: \"EUR\" });\nexport function Ledger() {\n  const [rows, setRows] = createStore<any>({ items: [{ label: \"tea\", cents: 350 }] });\n  const [user] = createSignal<any>({ name: \"ada\" });\n  const settings = useContext(Settings);\n  const total = ((fn: () => any) => { let cached: any; return () => cached ??= fn(); })(() =>\n    rows.items.reduce((sum: number, item: any) => sum + item.cents, 0)\n  );\n  return (\n    <section class={settings.currency}>\n      <h2>{user().name}</h2>\n      <Errored fallback={err => <p>bad amount: {String(err())}</p>}>\n        <p>{money(total())}</p>\n        <ul>\n          <For each={rows.items}>\n            {item => (\n              <li>\n                {item.label}: {money(item.cents)}\n              </li>\n            )}\n          </For>\n        </ul>\n      </Errored>\n      <button\n        onClick={() =>\n          setRows(s => {\n            s.items.push({ label: \"cake\", cents: 420 });\n          })\n        }\n      >\n        add\n      </button>\n    </section>\n  );\n}\n",
+      "equivalent": null,
+      "id": "M0484",
+      "project": "hole-edges",
+      "file": "App.tsx",
+      "original": "import {\n  createContext,\n  createMemo,\n  createSignal,\n  createStore,\n  Errored,\n  For,\n  useContext\n} from \"solid-js\";\n// A call that may fail, made in a JSX hole: its failure is the hole's, taken\n// by the Errored above (nativeHole). Values typed `any`: their members are\n// unchecked, as TypeScript leaves them; a method of `any` is outside code.\nfunction money(cents: number) {\n  if (!Number.isFinite(cents)) throw new RangeError(\"not an amount\");\n  return (cents / 100).toFixed(2);\n}\nconst Settings = createContext<any>({ currency: \"EUR\" });\nexport function Ledger() {\n  const [rows, setRows] = createStore<any>({ items: [{ label: \"tea\", cents: 350 }] });\n  const [user] = createSignal<any>({ name: \"ada\" });\n  const settings = useContext(Settings);\n  const total = createMemo(() =>\n    rows.items.reduce((sum: number, item: any) => sum + item.cents, 0)\n  );\n  return (\n    <section class={settings.currency}>\n      <h2>{user().name}</h2>\n      <Errored fallback={err => <p>bad amount: {String(err())}</p>}>\n        <p>{money(total())}</p>\n        <ul>\n          <For each={rows.items}>\n            {item => (\n              <li>\n                {item.label}: {money(item.cents)}\n              </li>\n            )}\n          </For>\n        </ul>\n      </Errored>\n      <button\n        onClick={() =>\n          setRows(s => {\n            s.items.push({ label: \"cake\", cents: 420 });\n          })\n        }\n      >\n        add\n      </button>\n    </section>\n  );\n}\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "transform",
+            "file": "App.tsx",
+            "line": 23,
+            "code": "SUGAR_CALLBACK",
+            "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<job>/source/App.tsx:23:5)"
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 23,
+            "code": "SUGAR_CALLBACK",
+            "tsCode": "TS95000",
+            "message": "[SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event."
+          }
+        ],
+        "stages": {
+          "transform": "refused",
+          "cli": "diagnostics",
+          "lint": "blocked-by-transform"
+        },
+        "cliOutput": [
+          "<job>/source/App.tsx:23:5 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.",
+          "solid-yield check: 2 files, 1 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "killed",
+      "exactLine": false
+    },
+    {
+      "operator": "callback-throw",
+      "line": 23,
+      "routine": {
+        "start": 18,
+        "end": 51
+      },
+      "offset": 839,
+      "source": "import {\n  createContext,\n  createMemo,\n  createSignal,\n  createStore,\n  Errored,\n  For,\n  useContext\n} from \"solid-js\";\n// A call that may fail, made in a JSX hole: its failure is the hole's, taken\n// by the Errored above (nativeHole). Values typed `any`: their members are\n// unchecked, as TypeScript leaves them; a method of `any` is outside code.\nfunction money(cents: number) {\n  if (!Number.isFinite(cents)) throw new RangeError(\"not an amount\");\n  return (cents / 100).toFixed(2);\n}\nconst Settings = createContext<any>({ currency: \"EUR\" });\nexport function Ledger() {\n  const [rows, setRows] = createStore<any>({ items: [{ label: \"tea\", cents: 350 }] });\n  const [user] = createSignal<any>({ name: \"ada\" });\n  const settings = useContext(Settings);\n  const total = createMemo(() =>\n    rows.items.reduce((sum: number, item: any) => { if (Date.now() < 0) throw new RangeError(\"mutant failure\"); return sum + item.cents; }, 0)\n  );\n  return (\n    <section class={settings.currency}>\n      <h2>{user().name}</h2>\n      <Errored fallback={err => <p>bad amount: {String(err())}</p>}>\n        <p>{money(total())}</p>\n        <ul>\n          <For each={rows.items}>\n            {item => (\n              <li>\n                {item.label}: {money(item.cents)}\n              </li>\n            )}\n          </For>\n        </ul>\n      </Errored>\n      <button\n        onClick={() =>\n          setRows(s => {\n            s.items.push({ label: \"cake\", cents: 420 });\n          })\n        }\n      >\n        add\n      </button>\n    </section>\n  );\n}\n",
+      "equivalent": null,
+      "id": "M0485",
+      "project": "hole-edges",
+      "file": "App.tsx",
+      "original": "import {\n  createContext,\n  createMemo,\n  createSignal,\n  createStore,\n  Errored,\n  For,\n  useContext\n} from \"solid-js\";\n// A call that may fail, made in a JSX hole: its failure is the hole's, taken\n// by the Errored above (nativeHole). Values typed `any`: their members are\n// unchecked, as TypeScript leaves them; a method of `any` is outside code.\nfunction money(cents: number) {\n  if (!Number.isFinite(cents)) throw new RangeError(\"not an amount\");\n  return (cents / 100).toFixed(2);\n}\nconst Settings = createContext<any>({ currency: \"EUR\" });\nexport function Ledger() {\n  const [rows, setRows] = createStore<any>({ items: [{ label: \"tea\", cents: 350 }] });\n  const [user] = createSignal<any>({ name: \"ada\" });\n  const settings = useContext(Settings);\n  const total = createMemo(() =>\n    rows.items.reduce((sum: number, item: any) => sum + item.cents, 0)\n  );\n  return (\n    <section class={settings.currency}>\n      <h2>{user().name}</h2>\n      <Errored fallback={err => <p>bad amount: {String(err())}</p>}>\n        <p>{money(total())}</p>\n        <ul>\n          <For each={rows.items}>\n            {item => (\n              <li>\n                {item.label}: {money(item.cents)}\n              </li>\n            )}\n          </For>\n        </ul>\n      </Errored>\n      <button\n        onClick={() =>\n          setRows(s => {\n            s.items.push({ label: \"cake\", cents: 420 });\n          })\n        }\n      >\n        add\n      </button>\n    </section>\n  );\n}\n",
+      "result": {
+        "diagnostics": [],
+        "stages": {
+          "transform": "completed",
+          "cli": "passed",
+          "lint": "passed"
+        },
+        "cliOutput": [
+          "solid-yield check: 2 files, 0 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "survived",
+      "exactLine": false
+    },
+    {
+      "operator": "setup-read",
+      "line": 25,
+      "routine": {
+        "start": 18,
+        "end": 51
+      },
+      "offset": 573,
+      "source": "import {\n  createContext,\n  createMemo,\n  createSignal,\n  createStore,\n  Errored,\n  For,\n  useContext\n} from \"solid-js\";\n// A call that may fail, made in a JSX hole: its failure is the hole's, taken\n// by the Errored above (nativeHole). Values typed `any`: their members are\n// unchecked, as TypeScript leaves them; a method of `any` is outside code.\nfunction money(cents: number) {\n  if (!Number.isFinite(cents)) throw new RangeError(\"not an amount\");\n  return (cents / 100).toFixed(2);\n}\nconst Settings = createContext<any>({ currency: \"EUR\" });\nexport function Ledger() {\n  const [rows, setRows] = createStore<any>({ items: [{ label: \"tea\", cents: 350 }] });\n  const [user] = createSignal<any>({ name: \"ada\" });\n  const settings = useContext(Settings);\n  const total = createMemo(() =>\n    rows.items.reduce((sum: number, item: any) => sum + item.cents, 0)\n  );\n  const __mutantSnapshot927 = user(); return (\n    <section class={settings.currency}>\n      <h2>{__mutantSnapshot927.name}</h2>\n      <Errored fallback={err => <p>bad amount: {String(err())}</p>}>\n        <p>{money(total())}</p>\n        <ul>\n          <For each={rows.items}>\n            {item => (\n              <li>\n                {item.label}: {money(item.cents)}\n              </li>\n            )}\n          </For>\n        </ul>\n      </Errored>\n      <button\n        onClick={() =>\n          setRows(s => {\n            s.items.push({ label: \"cake\", cents: 420 });\n          })\n        }\n      >\n        add\n      </button>\n    </section>\n  );\n}\n",
+      "equivalent": null,
+      "id": "M0486",
+      "project": "hole-edges",
+      "file": "App.tsx",
+      "original": "import {\n  createContext,\n  createMemo,\n  createSignal,\n  createStore,\n  Errored,\n  For,\n  useContext\n} from \"solid-js\";\n// A call that may fail, made in a JSX hole: its failure is the hole's, taken\n// by the Errored above (nativeHole). Values typed `any`: their members are\n// unchecked, as TypeScript leaves them; a method of `any` is outside code.\nfunction money(cents: number) {\n  if (!Number.isFinite(cents)) throw new RangeError(\"not an amount\");\n  return (cents / 100).toFixed(2);\n}\nconst Settings = createContext<any>({ currency: \"EUR\" });\nexport function Ledger() {\n  const [rows, setRows] = createStore<any>({ items: [{ label: \"tea\", cents: 350 }] });\n  const [user] = createSignal<any>({ name: \"ada\" });\n  const settings = useContext(Settings);\n  const total = createMemo(() =>\n    rows.items.reduce((sum: number, item: any) => sum + item.cents, 0)\n  );\n  return (\n    <section class={settings.currency}>\n      <h2>{user().name}</h2>\n      <Errored fallback={err => <p>bad amount: {String(err())}</p>}>\n        <p>{money(total())}</p>\n        <ul>\n          <For each={rows.items}>\n            {item => (\n              <li>\n                {item.label}: {money(item.cents)}\n              </li>\n            )}\n          </For>\n        </ul>\n      </Errored>\n      <button\n        onClick={() =>\n          setRows(s => {\n            s.items.push({ label: \"cake\", cents: 420 });\n          })\n        }\n      >\n        add\n      </button>\n    </section>\n  );\n}\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 25,
+            "code": "READ_IN_SETUP",
+            "tsCode": "TS2769",
+            "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
+          },
+          {
+            "stage": "cli",
+            "file": "main.tsx",
+            "line": 3,
+            "code": "FOREIGN_HANDOFF",
+            "tsCode": "TS2345",
+            "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
+          },
+          {
+            "stage": "lint",
+            "file": "App.tsx",
+            "line": 25,
+            "generatedLine": 34,
+            "generated": true,
+            "code": "READ_IN_SETUP",
+            "ruleId": "solid-yield/no-read-in-setup",
+            "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
+          }
+        ],
+        "stages": {
+          "transform": "completed",
+          "cli": "diagnostics",
+          "lint": "diagnostics"
+        },
+        "cliOutput": [
+          "<job>/source/App.tsx:25:31 error TS2769: [READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive.",
+          "<job>/source/main.tsx:3:15 error TS2345: [FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any.",
+          "solid-yield check: 2 files, 2 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "killed",
+      "exactLine": true
+    },
+    {
+      "operator": "delete-errored",
+      "line": 28,
+      "routine": {
+        "start": 18,
+        "end": 51
+      },
+      "offset": 951,
+      "source": "import {\n  createContext,\n  createMemo,\n  createSignal,\n  createStore,\n  Errored,\n  For,\n  useContext\n} from \"solid-js\";\n// A call that may fail, made in a JSX hole: its failure is the hole's, taken\n// by the Errored above (nativeHole). Values typed `any`: their members are\n// unchecked, as TypeScript leaves them; a method of `any` is outside code.\nfunction money(cents: number) {\n  if (!Number.isFinite(cents)) throw new RangeError(\"not an amount\");\n  return (cents / 100).toFixed(2);\n}\nconst Settings = createContext<any>({ currency: \"EUR\" });\nexport function Ledger() {\n  const [rows, setRows] = createStore<any>({ items: [{ label: \"tea\", cents: 350 }] });\n  const [user] = createSignal<any>({ name: \"ada\" });\n  const settings = useContext(Settings);\n  const total = createMemo(() =>\n    rows.items.reduce((sum: number, item: any) => sum + item.cents, 0)\n  );\n  return (\n    <section class={settings.currency}>\n      <h2>{user().name}</h2>\n      <>\n        <p>{money(total())}</p>\n        <ul>\n          <For each={rows.items}>\n            {item => (\n              <li>\n                {item.label}: {money(item.cents)}\n              </li>\n            )}\n          </For>\n        </ul>\n      </>\n      <button\n        onClick={() =>\n          setRows(s => {\n            s.items.push({ label: \"cake\", cents: 420 });\n          })\n        }\n      >\n        add\n      </button>\n    </section>\n  );\n}\n",
+      "equivalent": null,
+      "id": "M0487",
+      "project": "hole-edges",
+      "file": "App.tsx",
+      "original": "import {\n  createContext,\n  createMemo,\n  createSignal,\n  createStore,\n  Errored,\n  For,\n  useContext\n} from \"solid-js\";\n// A call that may fail, made in a JSX hole: its failure is the hole's, taken\n// by the Errored above (nativeHole). Values typed `any`: their members are\n// unchecked, as TypeScript leaves them; a method of `any` is outside code.\nfunction money(cents: number) {\n  if (!Number.isFinite(cents)) throw new RangeError(\"not an amount\");\n  return (cents / 100).toFixed(2);\n}\nconst Settings = createContext<any>({ currency: \"EUR\" });\nexport function Ledger() {\n  const [rows, setRows] = createStore<any>({ items: [{ label: \"tea\", cents: 350 }] });\n  const [user] = createSignal<any>({ name: \"ada\" });\n  const settings = useContext(Settings);\n  const total = createMemo(() =>\n    rows.items.reduce((sum: number, item: any) => sum + item.cents, 0)\n  );\n  return (\n    <section class={settings.currency}>\n      <h2>{user().name}</h2>\n      <Errored fallback={err => <p>bad amount: {String(err())}</p>}>\n        <p>{money(total())}</p>\n        <ul>\n          <For each={rows.items}>\n            {item => (\n              <li>\n                {item.label}: {money(item.cents)}\n              </li>\n            )}\n          </For>\n        </ul>\n      </Errored>\n      <button\n        onClick={() =>\n          setRows(s => {\n            s.items.push({ label: \"cake\", cents: 420 });\n          })\n        }\n      >\n        add\n      </button>\n    </section>\n  );\n}\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 29,
+            "code": "FOREIGN_HANDOFF",
+            "tsCode": "TS2345",
+            "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: unknown | RangeError.",
+            "related": [
+              {
+                "file": "main.tsx",
+                "line": 3
+              }
+            ]
+          }
+        ],
+        "stages": {
+          "transform": "completed",
+          "cli": "diagnostics",
+          "lint": "passed"
+        },
+        "cliOutput": [
+          "<job>/source/App.tsx:29:13 error TS2345: [FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: unknown | RangeError.",
+          "  related: <job>/source/main.tsx:3:15: The app is rendered here. does not suspend; can fail with an unknown error | RangeError; does not wait; needs no context",
+          "solid-yield check: 2 files, 1 errors"
+        ]
+      },
+      "preExistingMatch": false,
+      "status": "killed",
+      "exactLine": false
+    },
+    {
+      "operator": "setup-read",
+      "line": 25,
+      "routine": {
+        "start": 18,
+        "end": 51
+      },
+      "offset": 573,
+      "source": "import {\n  createContext,\n  createMemo,\n  createSignal,\n  createStore,\n  Errored,\n  For,\n  useContext\n} from \"solid-js\";\n// A call that may fail, made in a JSX hole: its failure is the hole's, taken\n// by the Errored above (nativeHole). Values typed `any`: their members are\n// unchecked, as TypeScript leaves them; a method of `any` is outside code.\nfunction money(cents: number) {\n  if (!Number.isFinite(cents)) throw new RangeError(\"not an amount\");\n  return (cents / 100).toFixed(2);\n}\nconst Settings = createContext<any>({ currency: \"EUR\" });\nexport function Ledger() {\n  const [rows, setRows] = createStore<any>({ items: [{ label: \"tea\", cents: 350 }] });\n  const [user] = createSignal<any>({ name: \"ada\" });\n  const settings = useContext(Settings);\n  const total = createMemo(() =>\n    rows.items.reduce((sum: number, item: any) => sum + item.cents, 0)\n  );\n  const __mutantSnapshot1032 = total(); return (\n    <section class={settings.currency}>\n      <h2>{user().name}</h2>\n      <Errored fallback={err => <p>bad amount: {String(err())}</p>}>\n        <p>{money(__mutantSnapshot1032)}</p>\n        <ul>\n          <For each={rows.items}>\n            {item => (\n              <li>\n                {item.label}: {money(item.cents)}\n              </li>\n            )}\n          </For>\n        </ul>\n      </Errored>\n      <button\n        onClick={() =>\n          setRows(s => {\n            s.items.push({ label: \"cake\", cents: 420 });\n          })\n        }\n      >\n        add\n      </button>\n    </section>\n  );\n}\n",
+      "equivalent": null,
+      "id": "M0488",
+      "project": "hole-edges",
+      "file": "App.tsx",
+      "original": "import {\n  createContext,\n  createMemo,\n  createSignal,\n  createStore,\n  Errored,\n  For,\n  useContext\n} from \"solid-js\";\n// A call that may fail, made in a JSX hole: its failure is the hole's, taken\n// by the Errored above (nativeHole). Values typed `any`: their members are\n// unchecked, as TypeScript leaves them; a method of `any` is outside code.\nfunction money(cents: number) {\n  if (!Number.isFinite(cents)) throw new RangeError(\"not an amount\");\n  return (cents / 100).toFixed(2);\n}\nconst Settings = createContext<any>({ currency: \"EUR\" });\nexport function Ledger() {\n  const [rows, setRows] = createStore<any>({ items: [{ label: \"tea\", cents: 350 }] });\n  const [user] = createSignal<any>({ name: \"ada\" });\n  const settings = useContext(Settings);\n  const total = createMemo(() =>\n    rows.items.reduce((sum: number, item: any) => sum + item.cents, 0)\n  );\n  return (\n    <section class={settings.currency}>\n      <h2>{user().name}</h2>\n      <Errored fallback={err => <p>bad amount: {String(err())}</p>}>\n        <p>{money(total())}</p>\n        <ul>\n          <For each={rows.items}>\n            {item => (\n              <li>\n                {item.label}: {money(item.cents)}\n              </li>\n            )}\n          </For>\n        </ul>\n      </Errored>\n      <button\n        onClick={() =>\n          setRows(s => {\n            s.items.push({ label: \"cake\", cents: 420 });\n          })\n        }\n      >\n        add\n      </button>\n    </section>\n  );\n}\n",
+      "result": {
+        "diagnostics": [
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 25,
+            "code": "READ_IN_SETUP",
+            "tsCode": "TS2769",
+            "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
+          },
+          {
+            "stage": "lint",
+            "file": "App.tsx",
+            "line": 25,
+            "generatedLine": 34,
+            "generated": true,
+            "code": "READ_IN_SETUP",
+            "ruleId": "solid-yield/no-read-in-setup",
+            "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
+          }
+        ],
+        "stages": {
+          "transform": "completed",
+          "cli": "diagnostics",
+          "lint": "diagnostics"
+        },
+        "cliOutput": [
+          "<job>/source/App.tsx:25:32 error TS2769: [READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive.",
+          "solid-yield check: 2 files, 1 errors"
         ]
       },
       "preExistingMatch": false,

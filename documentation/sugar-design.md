@@ -1928,16 +1928,17 @@ states of the twin's script, console output included.
   the model, so the model still runs; the finding is reported.
 
 
-**The silent survivors after the effect-edges seed (2026-10-12).** The program
-run scores 65.97% (480 mutants; 254 killed, 95 equivalent, 131 survived). Of
-the survivors, 60 are masked (49 bases refused, 11 bases already reporting the
-expected code), 45 are detected outside the mutated routine (a removed
-boundary is reported where the failure, pending read or requirement starts,
-and at the root), and 19 report a different code. Seven are silent: the
-checker accepts the mutant. Each was read against its program; each is
-correct to accept, because the edited site had nothing left to do. The
-catalogue's equivalence is per operator, so the report keeps them as
-survivors.
+**The survivors after the hole-edges seed (2026-10-12).** The program run
+scores 66.50% (488 mutants; 260 killed, 97 equivalent, 131 survived; it was
+65.97% before the fixes below and the `hole-edges` seed). Of the survivors,
+69 are masked (49 bases refused, 20 bases already reporting the expected
+code), 45 are detected outside the mutated routine (a removed boundary is
+reported where the failure, pending read or requirement starts, and at the
+root), 2 report a different code and 15 are silent: the checker accepts the
+mutant. Each silent one was read against its program. The catalogue's
+equivalence is per operator, so the report keeps them all as survivors.
+
+Eight are correct to accept, because the edited site had nothing left to do:
 
 - `delete-catch` at `reviewer-m05_swallow/App.tsx:14` (F-M58). The `Errored`
   around `List` takes the failure the deleted `catch` absorbed.
@@ -1947,15 +1948,29 @@ survivors.
 - `delete-errored` at `reviewer-m05_swallow/App.tsx:26` (F-M61). `List`'s
   `try`/`catch` absorbs every failure under that boundary, so nothing reaches
   the root.
-- `delete-provider` at `review-slots-context/App.tsx:8` (F-M118). The program
+- `delete-provider` at `review-slots-context/App.tsx:8` (F-M117). The program
   renders nothing: `App` and `Child` are exported, so their requirement of
   `C` is their callers', as for any library component.
-- `delete-loading` at `review-slots-lazy-child/App.tsx:3` (F-M119). The
+- `delete-loading` at `review-slots-lazy-child/App.tsx:3` (F-M118). The
   boundary held static text; nothing below it waits.
-- `delete-catch` at `review-slots-catch/App.tsx:5` (F-M120). The `try` held
+- `delete-catch` at `review-slots-catch/App.tsx:5` (F-M119). The `try` held
   a setter's call, which cannot fail.
-- `delete-loading` at `rendering-edges/Feed.tsx:56` (F-M130). The root's
+- `delete-loading` at `rendering-edges/Feed.tsx:56` (F-M129). The root's
   `Loading` covers Feed (above).
+- `callback-throw` at `hole-edges/App.tsx:23` (F-M131). The throw is in the
+  `total` memo's `reduce` callback; the memo is read only under the
+  `Errored`, which takes it.
+
+Seven are real defects no type-based check can see: `non-core-cache` over an
+async memo (F-M12, F-M57, F-M67, F-M71, F-M87, F-M91, F-M116). The cache is
+typed `any`, which hides the cached promise from TypeScript and from the model
+alike; Solid's `For` then fails at run time. Until the fixes below, the
+checker refused them only through a false positive (next section).
+
+The two "different code" survivors: `destructure-props` at
+`sierpinski/main.tsx:51` (F-M2, as before), and `non-core-cache` at
+`rendering-edges/Feed.tsx:42` (F-M128), where the operator itself writes
+invalid TypeScript (type arguments on its untyped cache: TS2558).
 
 ### Found by the non-core-cache survivors (2026-10-12)
 
@@ -1989,8 +2004,19 @@ was refused too. Reading why found three gaps.
   hide a colored source). Tests: `jsx.type-tests.tsx` (`AnyRows`),
   `native-hole-failures.test.js`, `native-effect-model.test.js`.
 - **What the cache mutants are now.** With `any` checked as TypeScript checks
-  it, the eighteen mutants are accepted: their `any` hides the cached promise
-  from TypeScript and from the model alike, and Solid's `For` then fails at run
-  time (`t.slice is not a function`). The earlier refusal caught them only
-  through the false positive above. They stay survivors; no type-based check
-  sees through `any`.
+  it, a cache over an async memo is accepted: its `any` hides the cached
+  promise from TypeScript and from the model alike, and Solid's `For` then
+  fails at run time (`t.slice is not a function`). The earlier refusal caught
+  them only through the false positive above. Of the eighteen, seven are now
+  silent, nine sit in reviewer variants whose bases already report the
+  expected codes (masked), one is the operator's own invalid TypeScript
+  (survivors above), and one, at `review-slots-pending-root`, is now killed. No type-based check sees through
+  `any`.
+- **A source of `any` read in a plain function's callback** (`hole-edges`'s
+  cache mutant: `once(() => rows.items.length)`) is `SUGAR_CALLBACK`, as a
+  typed read is; it had been a raw TS2339. The read waits only in a callback
+  that becomes a routine in a later pass (a row's, a hole's).
+- **A component whose props are `any`** is refused at its callers
+  (`PROP_TYPE`); a method call through one of its `any` props is reported in
+  its body too (`SUGAR_CALLBACK`), since such a prop has no typed path to read.
+  Typing the props, as `PROP_TYPE` asks, clears both.

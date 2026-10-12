@@ -670,7 +670,7 @@
     }
   ],
   "mutation": {
-    "score": 65.97402597402598,
+    "score": 66.49616368286445,
     "counts": {
       "delete-catch": {
         "mutants": 9,
@@ -685,8 +685,8 @@
         "equivalent": 2
       },
       "delete-errored": {
-        "mutants": 23,
-        "killed": 3,
+        "mutants": 24,
+        "killed": 4,
         "survived": 20,
         "equivalent": 0
       },
@@ -697,8 +697,8 @@
         "equivalent": 0
       },
       "setup-read": {
-        "mutants": 118,
-        "killed": 97,
+        "mutants": 120,
+        "killed": 99,
         "survived": 21,
         "equivalent": 0
       },
@@ -709,22 +709,22 @@
         "equivalent": 0
       },
       "never-provided-context": {
-        "mutants": 29,
-        "killed": 25,
+        "mutants": 30,
+        "killed": 26,
         "survived": 4,
         "equivalent": 0
       },
       "throw-string": {
-        "mutants": 28,
+        "mutants": 29,
         "killed": 0,
         "survived": 0,
-        "equivalent": 28
+        "equivalent": 29
       },
       "throw-object": {
-        "mutants": 28,
+        "mutants": 29,
         "killed": 0,
         "survived": 0,
-        "equivalent": 28
+        "equivalent": 29
       },
       "async-reject": {
         "mutants": 3,
@@ -751,9 +751,9 @@
         "equivalent": 6
       },
       "non-core-cache": {
-        "mutants": 49,
-        "killed": 22,
-        "survived": 27,
+        "mutants": 50,
+        "killed": 24,
+        "survived": 26,
         "equivalent": 0
       },
       "destructure-props": {
@@ -781,9 +781,9 @@
         "equivalent": 1
       },
       "callback-throw": {
-        "mutants": 4,
+        "mutants": 5,
         "killed": 1,
-        "survived": 0,
+        "survived": 1,
         "equivalent": 3
       },
       "server-new-class": {
@@ -793,8 +793,8 @@
         "equivalent": 0
       }
     },
-    "recordedAt": "2026-10-12T00:01:13.757Z",
-    "digest": "473aebfe7b8457bc1ca163ec2d18adfd02b9da11bb9143c11524b1a81f776ea6"
+    "recordedAt": "2026-10-12T05:55:35.357Z",
+    "digest": "6a391eb63eb17d6eef1e146ea27f46ec4a5fa638508b7ec8ac2ad6494a80bf48"
   },
   "strykerReportOnly": {
     "mode": "REPORT-ONLY",

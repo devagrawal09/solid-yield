@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { resolve, join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { catalog } from "./catalog.mjs";
+import { siteEquivalents } from "./equivalents.mjs";
 const root = resolve(import.meta.dirname, "../..");
 const program = JSON.parse(
   readFileSync(join(root, "documentation/mutation-program-results.json"), "utf8")
@@ -122,6 +123,20 @@ for (const [op, c] of Object.entries(catalog))
   out.push(
     `- **${op}:** ${c.edit}${c.equivalent ? " Equivalent reason: " + c.equivalent : ""}${c.corrected ? " Correction: " + c.corrected : ""}`
   );
+out.push(
+  "",
+  "### Site equivalents",
+  "",
+  "Single sites read against their program and correct to accept (Dev's ruling, 2026-10-12). Each names its authored line; a changed line, or an entry matching no mutant or several, fails the run (`scripts/mutation/equivalents.mjs`).",
+  ""
+);
+for (const e of siteEquivalents) {
+  const m = program.mutants.find(
+    x =>
+      x.project === e.project && x.file === e.file && x.line === e.line && x.operator === e.operator
+  );
+  out.push(`- ${m?.id ?? "?"} ${e.operator} at ${e.project}/${e.file}:${e.line}: ${e.reason}`);
+}
 out.push(
   "",
   "### Corpus provenance",

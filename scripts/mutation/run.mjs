@@ -6,6 +6,7 @@ import { spawn } from "node:child_process";
 import { corpus, root } from "./corpus.mjs";
 import { generate } from "./generate.mjs";
 import { catalog } from "./catalog.mjs";
+import { markSiteEquivalents } from "./equivalents.mjs";
 /**
  * A kill: an expected code whose primary or related location falls in the
  * mutated routine. A deleted Errored, Loading or provider is reported where
@@ -108,6 +109,7 @@ async function main() {
           });
         }
     }
+    markSiteEquivalents(mutants, new Map(projects.map(p => [p.id, p.files])));
     const results = new Map();
     let next = 0,
       complete = 0;

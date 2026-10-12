@@ -2,7 +2,7 @@
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync, readdirSync, mkdirSync, existsSync, rmSync } from "node:fs";
 import { resolve, join } from "node:path";
-import { spawn } from "node:child_process";
+import { fork } from "node:child_process";
 import { corpus, root } from "./corpus.mjs";
 import { generate } from "./generate.mjs";
 import { catalog } from "./catalog.mjs";
@@ -116,34 +116,56 @@ async function main() {
     console.log(
       `mutation: ${projects.length} projects, ${mutants.length} mutants; transform → CLI → generated lint`
     );
+    // A long-lived worker (worker.mjs --serve) per lane: its parsed libraries
+    // and declarations stay warm across pipelines. A failure or a timeout
+    // still fails the run.
     async function worker() {
-      while (next < jobs.length) {
-        const job = jobs[next++],
-          dir = join(scratch, "jobs", job.id);
-        mkdirSync(dir, { recursive: true });
-        const path = join(dir, "job.json");
-        writeFileSync(path, JSON.stringify(job));
-        await new Promise((ok, bad) => {
-          const child = spawn(process.execPath, [join(import.meta.dirname, "worker.mjs"), path], {
-            cwd: root,
-            stdio: ["ignore", "pipe", "pipe"]
+      const child = fork(join(import.meta.dirname, "worker.mjs"), ["--serve"], {
+        cwd: root,
+        stdio: ["ignore", "pipe", "pipe", "ipc"]
+      });
+      let output = "";
+      const keep = s => (output = (output + s).slice(-5000));
+      child.stdout?.on("data", keep);
+      child.stderr?.on("data", keep);
+      try {
+        while (next < jobs.length) {
+          const job = jobs[next++],
+            dir = join(scratch, "jobs", job.id);
+          mkdirSync(dir, { recursive: true });
+          const path = join(dir, "job.json");
+          writeFileSync(path, JSON.stringify(job));
+          await new Promise((ok, bad) => {
+            const timeout = setTimeout(() => child.kill("SIGKILL"), 90_000);
+            /** @param {any} m */
+            const done = m => {
+              if (m?.path !== path) return;
+              cleanup();
+              m.ok
+                ? ok()
+                : bad(new Error(`${job.id}: worker failed: ${String(m.error).slice(-2500)}`));
+            };
+            /** @param {number | null} code */
+            const exited = code => {
+              cleanup();
+              bad(new Error(`${job.id}: worker exited (${code}): ${output.slice(-2500)}`));
+            };
+            const cleanup = () => {
+              clearTimeout(timeout);
+              child.off("message", done);
+              child.off("exit", exited);
+            };
+            child.on("message", done);
+            child.on("exit", exited);
+            child.send({ path });
           });
-          let output = "";
-          child.stdout.on("data", s => (output += s));
-          child.stderr.on("data", s => (output += s));
-          const timeout = setTimeout(() => child.kill("SIGKILL"), 90_000);
-          child.on("error", bad);
-          child.on("close", code => {
-            clearTimeout(timeout);
-            code === 0
-              ? ok()
-              : bad(new Error(`${job.id}: worker failed (${code}): ${output.slice(-2500)}`));
-          });
-        });
-        results.set(job.id, JSON.parse(readFileSync(join(dir, "result.json"), "utf8")));
-        rmSync(dir, { recursive: true, force: true });
-        if (++complete % 25 === 0)
-          console.log(`mutation: ${complete}/${jobs.length} pipelines complete`);
+          results.set(job.id, JSON.parse(readFileSync(join(dir, "result.json"), "utf8")));
+          rmSync(dir, { recursive: true, force: true });
+          if (++complete % 25 === 0)
+            console.log(`mutation: ${complete}/${jobs.length} pipelines complete`);
+        }
+      } finally {
+        child.kill();
       }
     }
     await Promise.all([worker(), worker(), worker()]);

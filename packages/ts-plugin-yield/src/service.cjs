@@ -9,6 +9,16 @@ const {
 const catalog = require("./catalog.cjs");
 const findOrigin = require("./origins.cjs");
 const routineColors = require("./hover.cjs");
+// One document registry per TypeScript instance: the libraries' and packages'
+// parsed declarations are shared by every language service it makes, as
+// tsserver shares them across projects (each service is disposed when replaced).
+const registries = new WeakMap();
+/** @param {any} ts */
+const registryFor = ts => {
+  let registry = registries.get(ts);
+  if (!registry) registries.set(ts, (registry = ts.createDocumentRegistry()));
+  return registry;
+};
 const walk = (ts, n, fn) => {
   fn(n);
   ts.forEachChild(n, c => walk(ts, c, fn));
@@ -308,7 +318,7 @@ function createVirtualService(ts, host, config = {}) {
       selected,
       failures,
       virtualHost,
-      ls: ts.createLanguageService(virtualHost)
+      ls: ts.createLanguageService(virtualHost, registryFor(ts))
     };
     return state;
   }
@@ -699,12 +709,15 @@ function createVirtualService(ts, host, config = {}) {
         qi.displayParts.map(p => p.text).join("")
       )
     ) {
-      s.originalLs ??= ts.createLanguageService({
-        ...s.virtualHost,
-        getCompilationSettings: () => host.getCompilationSettings(),
-        getScriptSnapshot: name => host.getScriptSnapshot(name),
-        getScriptVersion: name => host.getScriptVersion(name)
-      });
+      s.originalLs ??= ts.createLanguageService(
+        {
+          ...s.virtualHost,
+          getCompilationSettings: () => host.getCompilationSettings(),
+          getScriptSnapshot: name => host.getScriptSnapshot(name),
+          getScriptVersion: name => host.getScriptVersion(name)
+        },
+        registryFor(ts)
+      );
       const original = s.originalLs.getQuickInfoAtPosition(f, pos);
       if (original) return original;
       qi = {

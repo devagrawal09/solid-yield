@@ -4,6 +4,7 @@ import { printMapped, withPositions, copyPosition } from "./positions.js";
  * never asserted onto authored calls. See documentation/sugar-design.md. */
 // @ts-check
 import ts from "typescript";
+import { cachedHost } from "./ts-host.js";
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { parseProgram } from "./transform.js";
@@ -480,18 +481,15 @@ function seed(code, filename, native = false) {
   p.node.directives = p.node.directives.filter(d => d.value.value !== "use yield");
   return printer(t.file(p.node));
 }
-/** @param {Map<string,string>} files @param {ts.CompilerOptions} options */
-function programFor(files, options) {
-  const host = ts.createCompilerHost(options);
-  const read = host.readFile.bind(host),
-    exists = host.fileExists.bind(host);
-  host.readFile = f => files.get(f) ?? read(f);
-  host.fileExists = f => files.has(f) || exists(f);
-  host.getSourceFile = (f, lang) => {
-    const s = host.readFile(f);
-    return s === undefined ? undefined : ts.createSourceFile(f, s, lang, true);
-  };
-  return ts.createProgram([...files.keys()], options, host);
+/** A pass's program: the previous one's unchanged files are reused (`ts-host.js`).
+ * @param {Map<string,string>} files @param {ts.CompilerOptions} options @param {ts.Program} [oldProgram] */
+function programFor(files, options, oldProgram) {
+  return ts.createProgram({
+    rootNames: [...files.keys()],
+    options,
+    host: cachedHost(files, options),
+    oldProgram
+  });
 }
 /** @param {string} code @param {string} filename @param {ts.Program} program */
 function pass(code, filename, program, native = false) {
@@ -2326,8 +2324,10 @@ function lowerSugarProjectImpl(input, { compilerOptions = {}, native = false } =
     [...input].map(([id, code]) => [resolve(id), isSugar(code) ? seed(code, id, native) : code])
   );
   const active = new Set([...input].filter(([, c]) => isSugar(c)).map(([id]) => resolve(id)));
+  /** @type {ts.Program | undefined} */ let previous;
   for (let i = 0; i < 24; i++) {
-    const program = programFor(files, options);
+    const program = programFor(files, options, previous);
+    previous = program;
     const next = new Map(files);
     let changed = false;
     for (const id of active) {

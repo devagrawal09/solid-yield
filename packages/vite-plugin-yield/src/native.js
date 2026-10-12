@@ -11,6 +11,7 @@ import { printMapped, withPositions, copyPosition } from "./positions.js";
 // @ts-check
 import babel from "@babel/core";
 import ts from "typescript";
+import { cachedHost } from "./ts-host.js";
 import {
   lowerNativeTypes,
   nativeTypeDiagnostics,
@@ -129,30 +130,22 @@ function imported(p) {
 }
 /** @param {Map<string,string>} files @param {ts.CompilerOptions} [options] */
 function nativeProgram(files, options = {}) {
-  const host = ts.createCompilerHost({});
-  const read = host.readFile.bind(host);
-  host.readFile = f => files.get(f) ?? read(f);
-  const exists = host.fileExists.bind(host);
-  host.fileExists = f => files.has(f) || exists(f);
+  const merged = {
+    target: ts.ScriptTarget.ESNext,
+    module: ts.ModuleKind.ESNext,
+    moduleResolution: ts.ModuleResolutionKind.Bundler,
+    jsx: ts.JsxEmit.Preserve,
+    jsxImportSource: "@solidjs/web",
+    strict: true,
+    skipLibCheck: true,
+    allowJs: true,
+    ...options
+  };
+  const host = cachedHost(files, merged);
   const directoryExists = host.directoryExists?.bind(host);
   host.directoryExists = dir =>
     [...files.keys()].some(f => f.startsWith(dir + "/")) || !!directoryExists?.(dir);
-  const program = ts.createProgram(
-    [...files.keys()],
-    {
-      target: ts.ScriptTarget.ESNext,
-      module: ts.ModuleKind.ESNext,
-      moduleResolution: ts.ModuleResolutionKind.Bundler,
-      jsx: ts.JsxEmit.Preserve,
-      jsxImportSource: "@solidjs/web",
-      strict: true,
-      skipLibCheck: true,
-      allowJs: true,
-      ...options
-    },
-    host
-  );
-  return program;
+  return ts.createProgram([...files.keys()], merged, host);
 }
 /** @param {Map<string,string>} files @param {ts.CompilerOptions} [options] @param {boolean | "marked"} [opaqueGenerators] */
 export function nativeFailures(files, options = {}, opaqueGenerators = true) {

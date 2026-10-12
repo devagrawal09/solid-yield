@@ -176,6 +176,8 @@ async function runJob(jobPath) {
     }
     stages.lint = diagnostics.some(d => d.stage === "lint") ? "diagnostics" : "passed";
   } else stages.lint = "blocked-by-transform";
+  // typescript-eslint keeps a program per tsconfig, and every job has its own.
+  parser.clearCaches?.();
   writeFileSync(
     join(dir, "result.json"),
     JSON.stringify({

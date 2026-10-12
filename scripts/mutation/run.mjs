@@ -117,19 +117,31 @@ async function main() {
       `mutation: ${projects.length} projects, ${mutants.length} mutants; transform → CLI → generated lint`
     );
     // A long-lived worker (worker.mjs --serve) per lane: its parsed libraries
-    // and declarations stay warm across pipelines. A failure or a timeout
-    // still fails the run.
+    // and declarations stay warm across pipelines. It is replaced every
+    // RECYCLE jobs, which bounds what a job leaves behind (a worker serving
+    // all of them grew past 4 GB). A failure or a timeout still fails the run.
+    const RECYCLE = 40;
     async function worker() {
-      const child = fork(join(import.meta.dirname, "worker.mjs"), ["--serve"], {
-        cwd: root,
-        stdio: ["ignore", "pipe", "pipe", "ipc"]
-      });
       let output = "";
       const keep = s => (output = (output + s).slice(-5000));
-      child.stdout?.on("data", keep);
-      child.stderr?.on("data", keep);
+      const start = () => {
+        const forked = fork(join(import.meta.dirname, "worker.mjs"), ["--serve"], {
+          cwd: root,
+          stdio: ["ignore", "pipe", "pipe", "ipc"]
+        });
+        forked.stdout?.on("data", keep);
+        forked.stderr?.on("data", keep);
+        return forked;
+      };
+      let child = start(),
+        served = 0;
       try {
         while (next < jobs.length) {
+          if (served++ === RECYCLE) {
+            child.kill();
+            child = start();
+            served = 1;
+          }
           const job = jobs[next++],
             dir = join(scratch, "jobs", job.id);
           mkdirSync(dir, { recursive: true });

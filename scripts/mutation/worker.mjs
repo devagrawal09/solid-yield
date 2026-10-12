@@ -115,7 +115,10 @@ for (const row of log) {
       (last.related ??= []).push({ file: relative(sourceDir, r[1]), line: Number(r[2]) });
     continue;
   }
-  const m = row.match(/^(.*):(\d+):(\d+) (?:error|warning|suggestion|message) (TS\d+): (.*)$/);
+  // A message chain spans lines (`Type … is missing …`): the row is matched whole.
+  const m = row.match(
+    /^([^\n]*):(\d+):(\d+) (?:error|warning|suggestion|message) (TS\d+): ([\s\S]*)$/
+  );
   if (m)
     diagnostics.push({
       stage: "cli",

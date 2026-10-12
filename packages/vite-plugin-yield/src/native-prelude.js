@@ -1,5 +1,5 @@
 import { traverseOwned } from "./native-owned.js";
-import { copyPosition, printMapped } from "./positions.js";
+import { copyPosition, nativeRefusal, printMapped } from "./positions.js";
 // @ts-check
 import babel from "@babel/core";
 import { parseProgram } from "./transform.js";
@@ -505,7 +505,12 @@ export function nativePrelude(files) {
                   t.arrayExpression(
                     site.node.arguments.map(arg => {
                       if (!t.isExpression(arg) && !t.isSpreadElement(arg))
-                        throw new Error(`[NATIVE_ACTION] Unsupported action argument. (${file})`);
+                        throw nativeRefusal(
+                          file,
+                          arg,
+                          "NATIVE_ACTION",
+                          "Unsupported action argument."
+                        );
                       return arg;
                     })
                   )
@@ -586,10 +591,21 @@ export function nativePrelude(files) {
                   prop.value,
                   t.memberExpression(value, prop.key, prop.computed || !t.isIdentifier(prop.key))
                 );
+              // A rest element was skipped here, its binding left undeclared.
+              else
+                throw nativeRefusal(
+                  file,
+                  prop,
+                  "NATIVE_PATTERN",
+                  "Context rest/default destructuring needs explicit value order."
+                );
             }
           else
-            throw new Error(
-              `[NATIVE_PATTERN] Context rest/default destructuring needs explicit value order. (${file})`
+            throw nativeRefusal(
+              file,
+              pattern,
+              "NATIVE_PATTERN",
+              "Context rest/default destructuring needs explicit value order."
             );
         };
         unpack(q.node.id, binding);
@@ -608,9 +624,12 @@ export function nativePrelude(files) {
               Function(f) {
                 f.skip();
               },
-              ReturnStatement() {
-                throw new Error(
-                  `[NATIVE_CONTROL_TRANSFER] A return from finally needs completion lowering. (${file})`
+              ReturnStatement(r) {
+                throw nativeRefusal(
+                  file,
+                  r.node,
+                  "NATIVE_CONTROL_TRANSFER",
+                  "A return from finally needs completion lowering."
                 );
               }
             });
@@ -656,14 +675,20 @@ export function nativePrelude(files) {
                   r.node.label ||
                   r.findParent(a => a === scope || a.isLoop() || a.isSwitchStatement()) === scope
                 )
-                  throw new Error(
-                    `[NATIVE_CONTROL_TRANSFER] A catch crossing a loop/label needs completion lowering. (${file})`
+                  throw nativeRefusal(
+                    file,
+                    r.node,
+                    "NATIVE_CONTROL_TRANSFER",
+                    "A catch crossing a loop/label needs completion lowering."
                   );
               },
               ContinueStatement(r) {
                 if (r.node.label || r.findParent(a => a === scope || a.isLoop()) === scope)
-                  throw new Error(
-                    `[NATIVE_CONTROL_TRANSFER] A labeled continue crossing a catch needs completion lowering. (${file})`
+                  throw nativeRefusal(
+                    file,
+                    r.node,
+                    "NATIVE_CONTROL_TRANSFER",
+                    "A labeled continue crossing a catch needs completion lowering."
                   );
               }
             });

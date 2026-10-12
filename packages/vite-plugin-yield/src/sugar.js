@@ -426,7 +426,12 @@ function seed(code, filename, native = false) {
         binding.parentPath.isImportDeclaration() &&
         binding.parentPath.node.source.value === "solid-yield";
       if (p.scope.hasBinding(name) && !generatedImport)
-        fail(p, "SUGAR_NAME", `Reserve ${name} for the generated library import.`, filename);
+        fail(
+          binding ?? p,
+          "SUGAR_NAME",
+          `Reserve ${name} for the generated library import.`,
+          filename
+        );
     }
     p.node.body.unshift(
       t.importDeclaration(

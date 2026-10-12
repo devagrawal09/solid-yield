@@ -109,7 +109,7 @@
       "diagnostics": [
         {
           "code": "NATIVE_ASYNC_SETUP",
-          "message": "[NATIVE_ASYNC_SETUP] An async reactive read has setup as its host; call it from an event or memo. (<root>/packages/vite-plugin-yield/test/.native-generated/async-setup-reads.tsx:8:3)"
+          "message": "[NATIVE_ASYNC_SETUP] An async reactive read has setup as its host; call it from an event or memo. (<root>/packages/vite-plugin-yield/test/.native-generated/async-setup-reads.tsx:1:144)"
         }
       ]
     },

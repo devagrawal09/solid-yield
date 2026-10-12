@@ -1,4 +1,4 @@
-import { printMapped, copyPosition } from "./positions.js";
+import { printMapped, copyPosition, nativeRefusal } from "./positions.js";
 // @ts-check
 import babel from "@babel/core";
 import { parseProgram } from "./transform.js";
@@ -76,8 +76,11 @@ export function nativeEntry(code, file) {
   });
   if (adapted) {
     if (p.scope.hasBinding("__nativeForeign"))
-      throw new Error(
-        `[NATIVE_NAME] Reserve __nativeForeign for the generated entry adapter. (${file})`
+      throw nativeRefusal(
+        file,
+        p.scope.getBinding("__nativeForeign")?.path.node,
+        "NATIVE_NAME",
+        "Reserve __nativeForeign for the generated entry adapter."
       );
     p.node.body.unshift(
       t.importDeclaration(

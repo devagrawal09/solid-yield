@@ -153,6 +153,16 @@ function buildSteps(twins) {
   const steps = [];
   const pnpmRun = (dir, script) => ({ cmd: "pnpm", args: ["-C", dir, "run", script] });
 
+  // Every diagnostic the native checker can emit has a test that pins it
+  // (scripts/native-coverage.mjs); unreachable branches are listed with why.
+  steps.push({
+    name: "native:coverage",
+    cwd: root,
+    fast: true,
+    cmd: process.execPath,
+    args: ["scripts/native-coverage.mjs"]
+  });
+
   // The build is not stale (scripts/dist-fresh.mjs): the gate never builds, so a
   // packages/yield/dist older than its src would gate the old library. mtimes only.
   steps.push({

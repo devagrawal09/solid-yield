@@ -513,7 +513,7 @@ describe("setup operations", () => {
 
   devIt("creating outside a setup and writing in a memo are dev errors", () => {
     const CreatesInView = component(function* () {
-      // @ts-expect-error a view only reads (Create is not a ViewOp)
+      // @ts-expect-error [ROW_VIEW_OP] a view only reads (Create is not a ViewOp)
       return view(function* () {
         const [x] = yield* $signal(1);
         return <i>{perform(x)}</i>;

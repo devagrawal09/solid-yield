@@ -1,5 +1,5 @@
 import { traverseOwned } from "./native-owned.js";
-import { printMapped } from "./positions.js";
+import { nativeRefusal, printMapped } from "./positions.js";
 // @ts-check
 import babel from "@babel/core";
 import { parseProgram } from "./transform.js";
@@ -184,8 +184,11 @@ export function lowerNativeRecursion(code, file) {
   for (const [name, aliases] of snapshots)
     for (const field of aliases.values())
       if (!fixed.get(name)?.has(field))
-        throw new Error(
-          `[NATIVE_RECURSION] Snapshot ${name}.${field} is not a fixed numeric prop; ordered snapshot lowering is required. (${file})`
+        throw nativeRefusal(
+          file,
+          null,
+          "NATIVE_RECURSION",
+          `Snapshot ${name}.${field} is not a fixed numeric prop; ordered snapshot lowering is required.`
         );
   /** @param {any} node @param {typeof components extends Map<string,infer V> ? V : never} owner @param {Set<string>} [seen] @returns {Color} */
   function color(node, owner, seen = new Set()) {
@@ -284,7 +287,7 @@ export function lowerNativeRecursion(code, file) {
     );
     if (before === after) break;
     if (pass === components.size * 4 + 3)
-      throw new Error("[NATIVE_RECURSION] Prop colors did not converge.");
+      throw nativeRefusal(undefined, null, "NATIVE_RECURSION", "Prop colors did not converge.");
   }
   const used = new Set();
   /** @param {Color} c */
@@ -374,8 +377,11 @@ export function lowerNativeRecursion(code, file) {
               !t.isIdentifier(prop.key) ||
               !t.isIdentifier(prop.value)
             )
-              throw new Error(
-                "[NATIVE_RECURSION] Prop rest/default snapshots need an ordered mapping."
+              throw nativeRefusal(
+                file,
+                prop,
+                "NATIVE_RECURSION",
+                "Prop rest/default snapshots need an ordered mapping."
               );
             aliases.set(
               prop.value.name,
@@ -438,7 +444,7 @@ export function lowerNativeRecursion(code, file) {
         leaf = nodes[guard].consequent.body[0].argument,
         rest = nodes.slice(guard + 1);
       if (!t.isJSXElement(leaf) && !t.isJSXFragment(leaf))
-        throw new Error("[NATIVE_RECURSION] The early branch must return JSX.");
+        throw nativeRefusal(file, leaf, "NATIVE_RECURSION", "The early branch must return JSX.");
       used.add("__NativeSwitch");
       used.add("__NativeMatch");
       /** @param {any} condition @param {any[]} branch */

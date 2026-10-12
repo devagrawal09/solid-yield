@@ -1,5 +1,5 @@
 import { traverseOwned } from "./native-owned.js";
-import { printMapped, copyPosition } from "./positions.js";
+import { printMapped, copyPosition, nativeRefusal } from "./positions.js";
 // @ts-check
 import babel from "@babel/core";
 import { relative } from "node:path";
@@ -258,8 +258,11 @@ export function lowerNativeEffects(files, report) {
           owner &&
           report.at(file, owner.node.start ?? 0)?.component
         )
-          throw new Error(
-            `[NATIVE_ASYNC_SETUP] An async reactive read has setup as its host; call it from an event or memo. (${file}:${q.node.loc?.start.line}:${(q.node.loc?.start.column ?? 0) + 1})`
+          throw nativeRefusal(
+            file,
+            q.node,
+            "NATIVE_ASYNC_SETUP",
+            "An async reactive read has setup as its host; call it from an event or memo."
           );
       },
       Function(q) {
@@ -979,8 +982,11 @@ export function lowerNativeEffects(files, report) {
         const api = imported(binding.path);
         if (api?.source === module && api.name === name) names.splice(names.indexOf(name), 1);
         else
-          throw new Error(
-            `[NATIVE_NAME] Reserve ${aliases[name]} for the generated native import. (${file})`
+          throw nativeRefusal(
+            file,
+            binding.path.node,
+            "NATIVE_NAME",
+            `Reserve ${aliases[name]} for the generated native import.`
           );
       }
       if (names.length)

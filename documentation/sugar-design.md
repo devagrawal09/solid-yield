@@ -2025,3 +2025,35 @@ was refused too. Reading why found three gaps.
   (`PROP_TYPE`); a method call through one of its `any` props is reported in
   its body too (`SUGAR_CALLBACK`), since such a prop has no typed path to read.
   Typing the props, as `PROP_TYPE` asks, clears both.
+
+### Every native refusal pinned (2026-10-12)
+
+`scripts/native-coverage.mjs` (gate step `native:coverage`) lists every
+diagnostic the native checker can emit: the lowering's refusals (`fail`,
+`report`, `nativeRefusal`), the CLI catalog's codes and the library's type
+brands (`"[CODE] …"`), 65 in all. It fails when a code has no test naming it.
+Three refusal branches cannot fire and are listed with why: `SUGAR_LEXICAL`
+(Babel's arrow conversion hoists `this` and `arguments` first, so a routine
+arrow keeps their meaning), `NATIVE_HOST` (every JSX value has a statement
+parent) and `NATIVE_ACTION` (a call argument is an expression or a spread).
+The first run found seventeen refusals with no test;
+`native-refusals.test.js` now pins each at its authored line and column (18
+cases), and writing them found three gaps:
+
+- **A refusal from a later stage lost its code and its line.** The effects,
+  prelude, recursion and entry stages threw plain errors, which
+  `solid-yield check` reported as `[TRANSFORM]` at 1:1 (sierpinski's
+  `NATIVE_RECURSION` read so in the mutation report). They throw
+  `nativeRefusal(file, node, code, message)` now, which `withPositions` maps
+  to the authored position: `[NATIVE_ASYNC_SETUP]` at the call, not 1:1.
+- **A context's rest binding was dropped.** `const { width, ...rest } =
+  useContext(Size)` lowered without `rest`, so the model failed on a
+  correct program ("Cannot find name 'rest'"). A rest element is refused as a
+  default is (`NATIVE_PATTERN`: the value order must be explicit).
+- **`SUGAR_NAME` pointed at the program**, not the declaration it reserves.
+
+**Site equivalents (Dev's ruling).** The eight silent survivors read as
+correct to accept (above) are marked equivalent in
+`scripts/mutation/equivalents.mjs`, each with its reason and the authored line
+it was read at; a changed line, or an entry matching no mutant or several,
+fails the mutation run. The report lists them.

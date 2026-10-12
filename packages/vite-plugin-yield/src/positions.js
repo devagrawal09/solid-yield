@@ -231,6 +231,20 @@ export function withPositions(input, run) {
   }
 }
 
+/** A native refusal with its code and node: `withPositions` maps it to the
+ * authored line, and the CLI reports its code (a plain Error reads as
+ * TRANSFORM at 1:1). Without a node it keeps its code, at the file's start.
+ * @param {string | undefined} file @param {any} node @param {string} code @param {string} message */
+export function nativeRefusal(file, node, code, message) {
+  const line = node?.loc?.start.line ?? 1,
+    column = node?.loc?.start.column ?? 0;
+  const at = file ? ` (${file}:${line}:${column + 1})` : "";
+  return Object.assign(new Error(`[${code}] ${message}${at}`), {
+    code,
+    ...(file ? { id: file, loc: { file, line, column } } : {})
+  });
+}
+
 /** Mark a replacement's authored origin; synthetic machinery stays unmapped.
  * @template {object} T @param {T} node @param {any} original @returns {T} */
 export function copyPosition(node, original) {

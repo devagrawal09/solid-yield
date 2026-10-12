@@ -1263,7 +1263,16 @@ function pass(code, filename, program, native = false) {
           !opaqueCall(body) &&
           (sourceType(type(body.get("callee"))) || (isOperation(type(body)) && !bridgedCall(body)))
         ) {
-          path.replaceWith(body.node);
+          // A hole's attempt (`__nativeHole(attempt(…))`) goes with its wrapper;
+          // the call put there is visited afresh, the detached attempt not at all.
+          const hole = path.parentPath;
+          if (
+            hole.isCallExpression() &&
+            hole.get("callee").isIdentifier({ name: "__nativeHole" })
+          ) {
+            path.skip();
+            hole.replaceWith(body.node);
+          } else path.replaceWith(body.node);
           changed = true;
         }
       },
@@ -1280,7 +1289,12 @@ function pass(code, filename, program, native = false) {
         if (opaqueCall(path)) return;
         const callee = path.get("callee"),
           ct = type(callee);
-        const delegated = path.parentPath.isYieldExpression({ delegate: true });
+        // A hole's attempt (`__nativeHole(…)`) is delegated through its wrapper.
+        const delegated =
+          path.parentPath.isYieldExpression({ delegate: true }) ||
+          (path.listKey === "arguments" &&
+            path.parentPath.isCallExpression() &&
+            path.parentPath.get("callee").isIdentifier({ name: "__nativeHole" }));
         const fallback = path.getFunctionParent();
         if (
           native &&
@@ -1349,26 +1363,31 @@ function pass(code, filename, program, native = false) {
         // the member up. A path key (props.item.title) stays a path. A
         // parameter too: a row of strings (`w => w.length`). Not a setup local
         // holding a source (`const p = props.url ?? …`): that read is the
-        // setup's, already refused there (READ_IN_SETUP).
+        // setup's, already refused there (READ_IN_SETUP). A source of `any`,
+        // whose members TypeScript leaves unchecked (`row.name`, a store's or
+        // a context's `state.rows`), is read where a routine uses it.
         const base = path.get("object");
-        if (
-          native &&
-          base.isIdentifier() &&
-          !path.node.computed &&
-          base.scope.getBinding(base.node.name)?.kind === "param"
-        ) {
+        const baseKind = base.isIdentifier() ? base.scope.getBinding(base.node.name)?.kind : null;
+        if (native && baseKind && !path.node.computed) {
           const own = type(base);
           const name = key(path.node.property);
           const brandSymbol = own
             ?.getProperties()
             .find(/** @param {ts.Symbol} s */ s => s.name.startsWith("__@SOURCE@"));
           const held = brandSymbol && checker.getTypeOfSymbolAtLocation(brandSymbol, source);
+          const intrinsic = /** @type {{ intrinsicName?: string }} */ (held ?? {}).intrinsicName;
+          // `any` as written, not a list still in error midway through the lowering
+          const writtenAny = !!held && !!(held.flags & ts.TypeFlags.Any) && intrinsic === "any";
           if (
             own &&
             name &&
             held &&
-            // A row's item is `Source<never>` until its list is lowered.
-            !(held.flags & (ts.TypeFlags.Never | ts.TypeFlags.Any | ts.TypeFlags.Unknown)) &&
+            // A row's item is `Source<never>` until its list is lowered;
+            // a member of `unknown` is TypeScript's error, as in the original.
+            !(held.flags & (ts.TypeFlags.Never | ts.TypeFlags.Unknown)) &&
+            (writtenAny
+              ? !!path.getFunctionParent()?.node.generator
+              : !(held.flags & ts.TypeFlags.Any) && baseKind === "param") &&
             !own.getProperty(name) &&
             !checker.getIndexInfosOfType(own).length
           ) {

@@ -1647,3 +1647,17 @@ export type LazyViewMessagePinned = Expect<
     true
   >
 >;
+// A list of `any` has rows of `any`, as Solid's `For` gives: a row's value is
+// unchecked, as the original's is (TypeScript infers `unknown` for an element
+// of `any`).
+declare const anyList: any;
+export const AnyRows = For({
+  each: anyList,
+  children: function* (row) {
+    return view(function* () {
+      const value = yield* row;
+      type RowIsAny = Expect<Equal<typeof value, any>>;
+      return <li>{value.name}</li>;
+    });
+  }
+});

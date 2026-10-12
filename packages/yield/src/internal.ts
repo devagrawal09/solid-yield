@@ -19,6 +19,7 @@ export {
   nativeCallback,
   nativeLexicalCallback,
   nativeHoleColors,
+  nativeHole,
   nativeInvoke,
   nativeGuarded,
   nativeDispatch

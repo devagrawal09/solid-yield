@@ -224,7 +224,9 @@ type MarkupRow<A extends unknown[]> = ((...args: A) => Generator<any, Element, a
 
 // --- For ------------------------------------------------------------------------------------------
 
-type EachOf<T> = T extends readonly (infer U)[] ? U : never;
+// A list of `any` has rows of `any`, as Solid's `For` gives (TypeScript
+// infers `unknown` for an element of `any`).
+type EachOf<T> = 0 extends 1 & T ? any : T extends readonly (infer U)[] ? U : never;
 type ItemOf<W> = Path<EachOf<NonNullable<ValueOf<W>>>>;
 
 /**

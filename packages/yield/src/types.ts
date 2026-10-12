@@ -364,9 +364,11 @@ type PathKeys<T, N, E, P extends boolean> = [T] extends [Opaque]
       ? { readonly [K in keyof T]-?: PathThrough<T[K], N, E, P> }
       : unknown;
 type Nullish<T> = [Extract<T, null | undefined>] extends [never] ? never : undefined;
-type PathThrough<V, N, E, P extends boolean> = [V] extends [Source<infer U, infer E2, infer P2>]
-  ? Path<U | N, E | E2, P | P2>
-  : Path<V | N, E, P>;
+type PathThrough<V, N, E, P extends boolean> = 0 extends 1 & V
+  ? Path<any, E, P> // a key of `any` reads `any` (not a source's `unknown`)
+  : [V] extends [Source<infer U, infer E2, infer P2>]
+    ? Path<U | N, E | E2, P | P2>
+    : Path<V | N, E, P>;
 
 /** A value read through: a source's value, else the value itself. */
 export type ReadThrough<V> = V extends Source<infer T, any, any> ? T : V;
@@ -417,13 +419,15 @@ export type PropsCheck<D> = {
 };
 
 /** The read a declared prop is: a path (a source with keys), `children` a source. */
-type PropRead<V, U, N> = [V] extends [Source<infer T, infer E, infer P>]
-  ? N extends "children"
-    ? Source<T | U, E, P>
-    : Path<T | U, E, P>
-  : N extends "children"
-    ? Source<V | U>
-    : Path<V | U>;
+type PropRead<V, U, N> = 0 extends 1 & V
+  ? Path<any> // refused at its callers ([PROP_TYPE]); its reads are not refused again
+  : [V] extends [Source<infer T, infer E, infer P>]
+    ? N extends "children"
+      ? Source<T | U, E, P>
+      : Path<T | U, E, P>
+    : N extends "children"
+      ? Source<V | U>
+      : Path<V | U>;
 
 /**
  * What callers may pass for each prop (D-065): a value, a source or a hole

@@ -816,10 +816,13 @@ function handled(r: unknown): unknown {
 }
 /**
  * What waiting on `fn`'s result is: an event call's colors (its failures go
- * through the handler, D-077), a promise's wait, or nothing.
+ * through the handler, D-077), a promise's wait, or nothing. An `any` result
+ * is a plain value, as it is to TypeScript: not a wait, an event call or a
+ * stream (it would be every one of them otherwise).
  */
-type AttemptWait<T> =
-  T extends EventCall<any, any, infer P, infer A>
+type AttemptWait<T> = 0 extends 1 & T
+  ? never
+  : T extends EventCall<any, any, infer P, infer A>
     ? EventCallOp<P, A, never>
     : T extends PromiseLike<any>
       ? Wait
@@ -834,8 +837,9 @@ type IsStream<T> =
         ? true
         : false;
 /** A stream given back is a `StreamAttempt`: reactive routines take it, an `$event` does not (D-091). */
-type AttemptStream<T> =
-  true extends IsStream<T>
+type AttemptStream<T> = 0 extends 1 & T
+  ? never
+  : true extends IsStream<T>
     ? StreamAttempt & {
         readonly "[STREAM_IN_EVENT] a stream is consumed in a reactive routine: $memo or $projection": true;
       }
@@ -1199,8 +1203,15 @@ export function until<T, H>(
 /** A memo's value: a promise's, an async iterable's latest — or a promise of an iterable's (Solid flattens one level). */
 type MemoValue<R> = R extends PromiseLike<infer U> ? IteratedValue<U> : IteratedValue<R>;
 type IteratedValue<R> = R extends AsyncIterable<infer U> ? U : R;
+// An `any` result is a value, as it is to TypeScript, not a promise or a stream.
 type MemoPending<Y, R> =
-  PendingOf<Y> extends true ? true : R extends PromiseLike<any> | AsyncIterable<any> ? true : false;
+  PendingOf<Y> extends true
+    ? true
+    : 0 extends 1 & R
+      ? false
+      : R extends PromiseLike<any> | AsyncIterable<any>
+        ? true
+        : false;
 /** A body's result that is a promise or a stream no `attempt` handled. */
 type UnhandledAsync<R> = Exclude<Extract<R, PromiseLike<any> | AsyncIterable<any>>, Handled>;
 /** A body returns a promise or a stream through `attempt`, whose handler types its failure. */

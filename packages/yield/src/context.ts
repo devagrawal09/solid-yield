@@ -47,9 +47,11 @@ export declare const PROVIDES: unique symbol;
  * (`createContext<Source<User, ApiError, true>>()` reads as a path that may
  * be pending and fail).
  */
-export type ContextValue<T> = [T] extends [Source<infer V, infer E, infer P>]
-  ? Path<V, E, P>
-  : Path<T>;
+export type ContextValue<T> = 0 extends 1 & T
+  ? Path<any> // a context of `any` reads `any`, as in TypeScript
+  : [T] extends [Source<infer V, infer E, infer P>]
+    ? Path<V, E, P>
+    : Path<T>;
 /**
  * What `provide`'s `value` takes (D-065): a value, a source of it or a hole,
  * within its declared colors. Never `undefined` itself: Solid reads a

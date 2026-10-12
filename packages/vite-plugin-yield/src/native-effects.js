@@ -13,6 +13,20 @@ const imported = binding =>
   t.isIdentifier(binding.node.imported)
     ? { source: binding.parentPath.node.source.value, name: binding.node.imported.name }
     : null;
+// A flow control's row parameter (`<For each={…}>{row => …}</For>`): a path
+// in the model, read in the row, so a call on it lifts its receiver.
+/** @param {import("@babel/core").NodePath<any> | undefined} param */
+const flowRow = param => {
+  const fn = param?.parentPath;
+  if (!fn?.isFunction() || param?.listKey !== "params") return false;
+  const element = fn.parentPath?.isJSXExpressionContainer() ? fn.parentPath.parentPath : null;
+  const name = element?.isJSXElement() ? element.node.openingElement.name : null;
+  if (!t.isJSXIdentifier(name)) return false;
+  const control = imported(element?.scope.getBinding(name.name)?.path);
+  return (
+    control?.source === "solid-js" && ["For", "Index", "Repeat", "Show"].includes(control.name)
+  );
+};
 /** @param {Map<string,string>} files @param {import('compiler-yield/failure-inference').FailureReport} report */
 export function lowerNativeEffects(files, report) {
   // Seed routine ownership from native primitive calls and propagate to callers
@@ -134,6 +148,19 @@ export function lowerNativeEffects(files, report) {
       const thunk = t.arrowFunctionExpression([], value);
       if (returnType) thunk.returnType = returnType;
       return t.callExpression(t.identifier("__nativeAttempt"), [thunk, handler(kinds)]);
+    };
+    /** A call the view evaluates in a JSX hole (`<p>{format(name())}</p>`): what
+     * its attempt raises is the hole's failure, a failing read of the view.
+     * @param {Path} at @param {any} node */
+    const holed = (at, node) => {
+      for (let up = at.parentPath; up; up = up.parentPath) {
+        if (up.isFunction()) return node;
+        if (up.isJSXExpressionContainer()) {
+          used.add("nativeHole");
+          return t.callExpression(t.identifier("__nativeHole"), [node]);
+        }
+      }
+      return node;
     };
     /** A plain function's declared return type, for the attempt that wraps the
      * whole value it returns: the routine it becomes drops the annotation, and
@@ -541,6 +568,7 @@ export function lowerNativeEffects(files, report) {
             const reactiveValue = value => {
               if (!value.isIdentifier()) return false;
               const binding = value.scope.getBinding(value.node.name)?.path;
+              if (flowRow(binding)) return true;
               const direct = imported(binding);
               // Construction is not a receiver read. Keep invalid creation in
               // a hole at its authored call, rather than lifting it into setup.
@@ -677,9 +705,12 @@ export function lowerNativeEffects(files, report) {
             }
             statements.push(t.returnStatement(unawaited || kept ? value : attempt(value, kinds)));
             q.replaceWith(
-              t.callExpression(
-                t.functionExpression(null, [], t.blockStatement(statements), true),
-                []
+              holed(
+                q,
+                t.callExpression(
+                  t.functionExpression(null, [], t.blockStatement(statements), true),
+                  []
+                )
               )
             );
           } else if (!unawaited && !kept) {
@@ -693,11 +724,11 @@ export function lowerNativeEffects(files, report) {
               q.replaceWith(
                 t.callExpression(t.identifier("__nativeGuarded"), [
                   t.cloneNode(subject),
-                  attempted,
+                  holed(q, attempted),
                   t.cloneNode(call.callee, true)
                 ])
               );
-            } else q.replaceWith(attempted);
+            } else q.replaceWith(holed(q, attempted));
           }
           if (pending)
             q.replaceWith(
@@ -898,6 +929,7 @@ export function lowerNativeEffects(files, report) {
       nativeFailureValue: "__nativeValue",
       nativeInvoke: "__nativeInvoke",
       nativeGuarded: "__nativeGuarded",
+      nativeHole: "__nativeHole",
       nativeContextGuard: "__nativeContextGuard"
     };
     for (const module of ["solid-yield", "solid-yield/internal"]) {

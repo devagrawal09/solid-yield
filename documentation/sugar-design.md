@@ -1929,9 +1929,9 @@ states of the twin's script, console output included.
 
 
 **The silent survivors after the effect-edges seed (2026-10-12).** The program
-run scores 65.97% (480 mutants; 254 killed, 131 equivalent, 95 survived). Of
-the survivors, 64 are masked (the base program is refused or already reports
-the expected code), 45 are detected outside the mutated routine (a removed
+run scores 65.97% (480 mutants; 254 killed, 95 equivalent, 131 survived). Of
+the survivors, 60 are masked (49 bases refused, 11 bases already reporting the
+expected code), 45 are detected outside the mutated routine (a removed
 boundary is reported where the failure, pending read or requirement starts,
 and at the root), and 19 report a different code. Seven are silent: the
 checker accepts the mutant. Each was read against its program; each is
@@ -1956,3 +1956,41 @@ survivors.
   a setter's call, which cannot fail.
 - `delete-loading` at `rendering-edges/Feed.tsx:56` (F-M130). The root's
   `Loading` covers Feed (above).
+
+### Found by the non-core-cache survivors (2026-10-12)
+
+Eighteen of the nineteen "different code" survivors were one operator,
+`non-core-cache`, which replaces `createMemo` with an inline cache typed
+`any`. The checker refused each mutant with `GENERATED_TYPE`, but the same
+refusal hit a correct program: a synchronous function behind the same cache
+was refused too. Reading why found three gaps.
+
+- **A call that may fail, in a JSX hole, is the hole's.** `<p>{format(name())}</p>`
+  with a `format` that may throw lowered to an attempt in the view itself, and
+  a view cannot raise: `GENERATED_TYPE` for every such call, under an
+  `Errored` or not. The attempt is now wrapped in `nativeHole`, which carries
+  what it raises as a failing read of the view (`HoleViewOp`, as
+  `nativeHoleColors` does for a hole callback). An `Errored` above takes it;
+  a root without one reports `FOREIGN_HANDOFF` at the call; an exported
+  component hands it to its callers. When the attempt resolves to a source or
+  routine call (a callback prop, D-119), the wrapper goes with it. Tests:
+  `native-hole-failures.test.js`.
+- **`any` reads as `any`.** TypeScript leaves the members of an `any` value
+  unchecked; the library's types turned it into `unknown` instead (an element
+  of `any`, a key of `any`, a context of `any`, `[any] extends [Source<infer
+  T>]`), and an attempt or a memo over `any` took it for a promise, an event
+  call and a stream at once (`WRITE_IN_REACTIVE`, a pending root). Each now
+  keeps `any`: a row, a store's key, a context, a memo and a method of `any`
+  check as the original does. The lowering reads a source of `any` before its
+  member (`(yield* row).name`, F-S39 extended to setup locals for `any` only),
+  and lifts a row's read out of an attempt's thunk. A method of `any` is
+  outside code: its failures are unknown, so it needs an `Errored` like any
+  other. A prop of `any` is still refused (`PROP_TYPE`, calculus F03: it could
+  hide a colored source). Tests: `jsx.type-tests.tsx` (`AnyRows`),
+  `native-hole-failures.test.js`, `native-effect-model.test.js`.
+- **What the cache mutants are now.** With `any` checked as TypeScript checks
+  it, the eighteen mutants are accepted: their `any` hides the cached promise
+  from TypeScript and from the model alike, and Solid's `For` then fails at run
+  time (`t.slice is not a function`). The earlier refusal caught them only
+  through the false positive above. They stay survivors; no type-based check
+  sees through `any`.

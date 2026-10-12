@@ -235,6 +235,19 @@ export function Words() {
     expect(checked(code)).toEqual([]);
   });
 
+  it("reads a row of `any` before its member, unchecked as in the original", () => {
+    const code = lower(`import { For } from "solid-js";
+const cache = (fn: () => any) => { let last: any; return () => (last ??= fn()); };
+export function Names() {
+  const rows = cache(() => [{ name: "a" }]);
+  return <ul><For each={rows()}>{row => <li>{row.name.toUpperCase()}</li>}</For></ul>;
+}`);
+    // the row's value is read once; its unknown method's failures are attempted
+    expect(code).toContain("const _receiver = (yield* row).name;");
+    expect(code).toMatch(/__nativeAttempt\(\(\) => _receiver\.toUpperCase/);
+    expect(checked(code)).toEqual([]);
+  });
+
   it("types an accessor prop by its value (F-S54)", () => {
     const code = lower(`import { createMemo, createSignal, For, isPending, latest } from "solid-js";
 function Results(props: { results: () => string[] }) {

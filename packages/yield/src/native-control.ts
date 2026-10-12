@@ -76,11 +76,17 @@ export function nativeCallback<H>(
 /** Invoke a captured method without consulting its user-visible .call property.
  * Typed by its parameters and result, not `Parameters<F>`/`ReturnType<F>`, so a
  * generic method (`Effect.runPromise`) is instantiated from its arguments. */
+export function nativeInvoke<F>(
+  fn: 0 extends 1 & F ? F : never,
+  receiver: unknown,
+  args: readonly unknown[]
+): any; // a method of `any` returns `any`, as in TypeScript
 export function nativeInvoke<A extends unknown[], R>(
   fn: (...args: A) => R,
   receiver: unknown,
   args: A
-): R {
+): R;
+export function nativeInvoke(fn: any, receiver: unknown, args: readonly unknown[]): unknown {
   return Reflect.apply(fn, receiver, args);
 }
 
@@ -171,4 +177,14 @@ export function nativeHoleColors<C extends Iterable<unknown>>(
       return callback;
     }
   } as Yieldable<HoleViewOp<C extends Iterable<infer Y> ? Y : never>, C>;
+}
+
+/**
+ * A call that may fail, made in a JSX hole (`<p>{format(name())}</p>`): its
+ * attempt runs where the view evaluates the hole, and what it raises is the
+ * hole's failure, carried by the view as a failing read (as `nativeHoleColors`
+ * carries a hole callback's).
+ */
+export function nativeHole<Y, R>(work: Yieldable<Y, R>): Yieldable<HoleViewOp<Y>, R> {
+  return work as unknown as Yieldable<HoleViewOp<Y>, R>;
 }

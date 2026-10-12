@@ -114,6 +114,25 @@ render(() => <Shout />, document.body);`);
     expect(checked(code).join("\n")).toMatch(/unknown/);
   });
 
+  it("read in a callback a plain function is given, it is refused there, as a typed read is", () => {
+    expect(() =>
+      lowerNativeProject(
+        new Map([
+          [
+            file,
+            `import { createStore } from "solid-js";
+const once = (fn: () => any) => { let last: any; return () => (last ??= fn()); };
+export function Count() {
+  const [rows] = createStore<any>({ items: [1] });
+  const count = once(() => rows.items.length);
+  return <p>{count()}</p>;
+}`
+          ]
+        ])
+      )
+    ).toThrow(/SUGAR_CALLBACK.*:5:28/);
+  });
+
   it("a prop of `any` is still refused: it could hide a colored source", () => {
     const code = lower(`function Row(props: any) { return <li>{props.name}</li>; }
 export function List() { return <ul><Row name="a" /></ul>; }`);

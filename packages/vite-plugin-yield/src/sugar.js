@@ -65,6 +65,12 @@ const ownerCall = p =>
 const control = p =>
   controls.has(lib(/** @type {Path | undefined} */ (p?.get("callee")))) ||
   p?.node.callee?.property?.name === "provide";
+/** Where a source of `any` is read before its member: in a routine, or in a
+ * callback that never becomes one (given to a plain function: the read is
+ * refused there, as a typed one is). A row's or a hole's callback becomes a
+ * routine in a later pass; its read waits for it.
+ * @param {Path | null} host */
+const anyHostReady = host => !host || !!host.node.generator || lexicalPhase(host) === null;
 /** Resolve the enclosing phase through any number of plain callbacks.
  * @param {Path} fn @returns {string | null} */
 const lexicalPhase = fn => {
@@ -1386,7 +1392,7 @@ function pass(code, filename, program, native = false) {
             // a member of `unknown` is TypeScript's error, as in the original.
             !(held.flags & (ts.TypeFlags.Never | ts.TypeFlags.Unknown)) &&
             (writtenAny
-              ? !!path.getFunctionParent()?.node.generator
+              ? anyHostReady(path.getFunctionParent())
               : !(held.flags & ts.TypeFlags.Any) && baseKind === "param") &&
             !own.getProperty(name) &&
             !checker.getIndexInfosOfType(own).length

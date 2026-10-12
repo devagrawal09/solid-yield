@@ -66,6 +66,12 @@ export function corpus() {
       "Plain Solid exercising Effect's native edges (D-121, D-122): a saga its driver steps inside an action, a kept action promise, a provider value that creates, cleans up and may fail, an accessor prop, a store's root in For, a store reduce, a routine's stream a memo returns",
     files: files("scripts/mutation/corpus/effect-edges")
   });
+  projects.push({
+    id: "hole-edges",
+    origin:
+      "Plain Solid exercising failing calls in JSX holes (nativeHole) and values typed any: a helper that may throw in a hole, in an attribute and in a row under an Errored; a context, a store, a signal and a memo of any, with a method of any",
+    files: files("scripts/mutation/corpus/hole-edges")
+  });
   return projects;
 }
 export const relativeToRoot = file => relative(root, file);

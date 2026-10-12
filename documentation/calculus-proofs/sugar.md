@@ -35,6 +35,7 @@ premise: what the lowering or runtime must establish for the theorem to apply.
 | **S15 Kept promises** (found by mutation): a promise kept as a value is attempted where it is awaited | `kept_async_sound`; `kept_sync_unsound` (why a non-`async` callee keeps its attempt) | The callee is an `async` function declared in the program, and the call's promise is bound or passed on (not awaited, returned or discarded) inside an async routine. The await that consumes it is attempted. | `native-promises.test.js`; mutation catalog `remove-await` |
 | **S16 Sagas driven inside an action** (D-121): a saga's writes run in the action that drives it | `driven_saga_write_admitted`; `memo_driven_saga_refused` (why every call of the saga must be inside the action) | Every use of the driver's parameter is a direct call whose nearest function is the generator given to Solid's `action` (`native-sagas.js` checks it through TypeScript). The iterator it returns is stepped there and not handed out. A write in a callback nested in the saga is left plain: it may run outside the action. | `native-effect-model.test.js` (sagas) |
 | **S17 Provider values in the provider's owner** (D-122): an `init`'s failures are the provider's | `init_admits_cleanup`, `provider_bounds`; `init_dropped_unsound` (why the init's failures join the provider's color) | `Ctx.provide({ init, children })` runs `init` once, as a setup, inside Solid's provider root (`setContext(provider, props.value)` reads `value` once); its type adds `FailsOf<Y>` and `RequiresOf<Y>` to the provider's. The lowering moves a value there only when its operations are setup operations or a raise. | `provider-init.spec.tsx`, `context.type-tests.tsx` (D-122), `native-effect-model.test.js` (D-122) |
+| **S18 A failing call in a JSX hole** (2026-10-12): its failure is the hole's, a failing read of the view | `hole_hosted_in_view`, `hole_raise_as_read` (S9); `raise_in_view_refused` (why the wrapper is needed) | `nativeHole(work)` is typed `Yieldable<HoleViewOp<Y>, R>`: a `Raise<E>` becomes `Read<false, E>`, a stream attempt nothing (its failures reach its handler). At run time the compiled JSX hole runs the work as a hole, where a raise is admitted. The lowering wraps only an attempt directly in a JSX expression (no function between), and drops the wrapper with the attempt when the call turns out to be a source's or a routine's. | `native-hole-failures.test.js` |
 | **S8 Effect cleanup** (F-S42): a returned cleanup runs before the next run and at disposal, once each | `clean_mem_iff`, `run_mem_iff`, `clean_before_next_run`; `ignoring_never_cleans` (the old lowering) | `onCleanup` registered in the effect phase runs before the owner's next run and at disposal (Solid 2's owner contract). | `native-effect-cleanup.test.js` |
 
 ## What each result means
@@ -129,6 +130,12 @@ so what it creates and cleans up is the provider's, and what it throws is
 caught above the provider. The `init` runs there as a setup does; its failures
 are added to the provider's color, which then bounds both the init's and the
 children's. Leaving them out would let a failure pass the boundary check.
+
+**S18.** A view admits reads, child views and binds, not a raise; a hole admits
+a raise. The work of a call that may fail, made in a JSX hole, runs where the
+view evaluates the hole, so it is the hole's. Seen from the view, its raise is a
+settled read failing with the same failures, which the view admits and the
+boundary above takes. Left in the view, the raise is refused.
 
 **S8.** The trace of `n` runs followed by disposal contains each cleanup
 exactly when its run happened, and each cleanup comes right after its run and

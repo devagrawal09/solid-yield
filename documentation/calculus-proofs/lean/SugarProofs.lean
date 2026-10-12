@@ -486,6 +486,30 @@ theorem init_dropped_unsound :
       providerRaises init children v ∧ ¬ children v :=
   ⟨fun v => v = 0, Inference.empty, 0, Or.inl rfl, fun h => h⟩
 
+/-! ## A failing call in a JSX hole (2026-10-12)
+
+A view cannot raise: a call that may fail, made in a JSX hole, is the hole's
+work. `nativeHole` runs it where the view evaluates the hole and presents what
+it raises as a failing read of the view (`HoleViewOp`): the raise becomes a
+settled read with the same failures (`hole_raise_as_read`, S9), which the
+boundary above takes. -/
+
+/-- `HoleViewOp`: how the view sees a hole's operation. -/
+def holeView : Op → Op
+  | .raise e => .read false e
+  | o => o
+
+/-- What a hole admits, but a stream (whose failures reach its handler), the
+    view admits once seen through `holeView`. -/
+theorem hole_hosted_in_view {o : Op} (h : Admits .hole o) (hs : o ≠ .stream) :
+    Admits .view (holeView o) := by
+  cases o <;> simp_all [Admits, holeView]
+
+/-- Without the wrapper the raise is in the view itself, which refuses it: the
+    `GENERATED_TYPE` every such call met before. -/
+theorem raise_in_view_refused (e : List Nat) : ¬ Admits .view (.raise e) := by
+  simp [Admits]
+
 #print axioms write_admitted_iff
 #print axioms event_phase_runs_in_caller
 #print axioms hook_requirement_provided
@@ -515,5 +539,7 @@ theorem init_dropped_unsound :
 #print axioms init_admits_cleanup
 #print axioms provider_bounds
 #print axioms init_dropped_unsound
+#print axioms hole_hosted_in_view
+#print axioms raise_in_view_refused
 end Sugar
 end Yield

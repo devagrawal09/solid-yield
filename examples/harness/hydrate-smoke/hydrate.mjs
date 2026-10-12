@@ -47,8 +47,9 @@ import {
 } from "../ssr-smoke/docs-contract.mjs";
 import { createRequire } from "node:module";
 import { spawn } from "node:child_process";
-import { writeFileSync } from "node:fs";
+import { writeFileSync, mkdtempSync, rmSync } from "node:fs";
 import { join, dirname } from "node:path";
+import { tmpdir } from "node:os";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const self = fileURLToPath(import.meta.url);
@@ -242,12 +243,17 @@ async function hydrateOne(twin, entry, kind, url, interaction, build) {
   process.on("uncaughtException", e => logged.push(`${phase}: uncaught: ${e?.message ?? e}`));
 
   const server = await vite.createServer({
+    // A cache of its own: the root's node_modules/.vite is shared with
+    // concurrent runs, whose dependency optimizers would rewrite it under this one.
+    cacheDir: mkdtempSync(join(tmpdir(), "yield-vite-")),
     ...(kind === "entry"
       ? { configFile: join(dir, entry, "vite.config.mjs"), root: join(dir, entry) }
       : { root: dir }),
     logLevel: "silent",
     appType: "custom",
-    server: { middlewareMode: true, hmr: false, ws: false },
+    // No watcher: a tsconfig.json added or removed under the root (another
+    // run's materialized copy) makes Vite re-evaluate every module mid-run.
+    server: { middlewareMode: true, hmr: false, ws: false, watch: null },
     plugins: [noHmrClient],
     environments: {
       hydrate: {
@@ -417,6 +423,7 @@ async function hydrateOne(twin, entry, kind, url, interaction, build) {
     if (after) return report({ failed: after.split("\n")[0] });
   }
   await server.close();
+  rmSync(server.config.cacheDir, { recursive: true, force: true });
   report({
     claimed,
     nodes: serverNodes.length,

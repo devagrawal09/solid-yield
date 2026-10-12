@@ -47,6 +47,8 @@ import {
 } from "./docs-contract.mjs";
 import { createRequire } from "node:module";
 import { spawn } from "node:child_process";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -123,16 +125,23 @@ async function renderOne(twin, entry, kind, url, build) {
   // the step a render is in, for the parent to name if it kills the render
   const step = name => process.stdout.write(`\nstep ${name}\n`);
   step("start");
+  // A cache of its own: the twin's node_modules/.vite is shared with the other
+  // renders and the twin's own tests, whose dependency optimizers would rewrite it.
+  const cacheDir = mkdtempSync(join(tmpdir(), "yield-vite-"));
+  process.on("exit", () => rmSync(cacheDir, { recursive: true, force: true }));
   const server =
     build === "production"
       ? null
       : await createServer({
+          cacheDir,
           ...(kind === "entry"
             ? { configFile: join(dir, entry, "vite.config.mjs"), root: join(dir, entry) }
             : { root: dir }),
           logLevel: "silent",
           appType: "custom",
-          server: { middlewareMode: true, hmr: false, ws: false }
+          // No watcher: a tsconfig.json added or removed under the root (another
+          // run's materialized copy) makes Vite re-evaluate every module mid-run.
+          server: { middlewareMode: true, hmr: false, ws: false, watch: null }
         });
   let production;
   let html = "";

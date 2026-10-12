@@ -18,7 +18,9 @@ export async function devServer(root, options = {}) {
     configFile: false,
     logLevel: "error",
     appType: "custom",
-    server: { middlewareMode: true, hmr: false, ws: false },
+    // No watcher: a tsconfig.json added or removed under the root (another
+    // run's materialized copy) makes Vite re-evaluate every module mid-run.
+    server: { middlewareMode: true, hmr: false, ws: false, watch: null },
     optimizeDeps: { noDiscovery: true, include: [] },
     plugins: [solidYield(options), solid({ ssr: true })]
   });

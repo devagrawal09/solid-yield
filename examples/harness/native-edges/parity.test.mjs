@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
-import { writeFileSync, mkdirSync } from "node:fs";
+import { writeFileSync, mkdirSync, mkdtempSync, rmSync } from "node:fs";
 import { createRequire } from "node:module";
 import { resolve, join } from "node:path";
+import { tmpdir } from "node:os";
 import { pathToFileURL } from "node:url";
 import { JSDOM } from "jsdom";
 import { populateGlobal } from "vitest/runtime";
@@ -29,11 +30,16 @@ async function record(mode) {
     .spyOn(console, "error")
     .mockImplementation((...args) => logs.push(args.join(" ")));
   const server = await vite.createServer({
+    // A cache of its own: the root's node_modules/.vite is shared with
+    // concurrent runs, whose dependency optimizers would rewrite it under this one.
+    cacheDir: mkdtempSync(join(tmpdir(), "yield-vite-")),
     root: here,
     configFile: false,
     logLevel: "silent",
     appType: "custom",
-    server: { middlewareMode: true, hmr: false, ws: false },
+    // No watcher: a tsconfig.json added or removed under the root (another
+    // run's materialized copy) makes Vite re-evaluate every module mid-run.
+    server: { middlewareMode: true, hmr: false, ws: false, watch: null },
     optimizeDeps: { noDiscovery: true, include: [] },
     resolve: { dedupe: ["solid-yield", "solid-js", "@solidjs/web"] },
     plugins: [
@@ -124,6 +130,7 @@ async function record(mode) {
     dispose?.();
     vi.useRealTimers();
     await server.close();
+    rmSync(server.config.cacheDir, { recursive: true, force: true });
     warn.mockRestore();
     error.mockRestore();
     document.body.innerHTML = "";

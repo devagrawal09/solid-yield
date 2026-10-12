@@ -21,7 +21,8 @@
 // Manual, outside the gate (D-017).
 import { createRequire } from "node:module";
 import { spawn } from "node:child_process";
-import { writeFileSync } from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -39,12 +40,19 @@ const PROJECTS = {
 async function renderOne(dir, entry, url) {
   const require = createRequire(join(dir, "package.json"));
   const { createServer } = await import(require.resolve("vite"));
+  // A cache of its own: the twin's node_modules/.vite is shared with the other
+  // renders, whose dependency optimizers would rewrite it.
+  const cacheDir = mkdtempSync(join(tmpdir(), "yield-vite-"));
+  process.on("exit", () => rmSync(cacheDir, { recursive: true, force: true }));
   const server = await createServer({
+    cacheDir,
     configFile: join(dir, entry, "vite.config.mjs"),
     root: join(dir, entry),
     logLevel: "silent",
     appType: "custom",
-    server: { middlewareMode: true, hmr: false, ws: false }
+    // No watcher: a tsconfig.json added or removed under the root (another
+    // run's materialized copy) makes Vite re-evaluate every module mid-run.
+    server: { middlewareMode: true, hmr: false, ws: false, watch: null }
   });
   const errors = [];
   console.error = (...a) => errors.push(String(a[0]).split("\n")[0]);

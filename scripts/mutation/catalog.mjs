@@ -93,7 +93,9 @@ export const catalog = {
     edit: "Replace createMemo with an inline hand-rolled last-value cache, generic in the cached value's type."
   },
   "destructure-props": {
-    expected: ["NATIVE_PROPS"],
+    expected: ["NATIVE_PROPS", "NATIVE_RECURSION"],
+    corrected:
+      "NATIVE_RECURSION added (2026-10-12): in a recursive component the recursion lowering refuses the parameter snapshot first, at the caller whose prop stopped being a fixed number. It is the same refusal (a parameter snapshot) from an earlier stage; it had read as TRANSFORM at 1:1 until refusals kept their code and line.",
     edit: "Destructure each directly read property in a component parameter; rewrite its references. Parameter snapshots are currently refused (setup snapshots are valid)."
   },
   "inline-component": {

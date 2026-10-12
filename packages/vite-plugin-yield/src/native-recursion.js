@@ -109,6 +109,10 @@ export function lowerNativeRecursion(code, file) {
   // including the recursive edges; never extend this to changing props.
   /** @type {Map<string, Map<string,string>>} */ const snapshots = new Map();
   /** @type {Map<string, Set<string>>} */ const fixed = new Map();
+  // Where a refusal points: the caller's attribute that stopped a field being
+  // fixed, else the snapshot's declaration.
+  /** @type {Map<string, any>} */ const unfixedAt = new Map();
+  /** @type {Map<string, any>} */ const snapshotAt = new Map();
   for (const [name, info] of components) {
     const aliases = new Map();
     traverseOwned(info.path, {
@@ -119,6 +123,7 @@ export function lowerNativeRecursion(code, file) {
           !t.isIdentifier(q.node.init, { name: info.param })
         )
           return;
+        if (!snapshotAt.has(name)) snapshotAt.set(name, q.node);
         for (const prop of q.node.id.properties)
           if (
             t.isObjectProperty(prop) &&
@@ -175,6 +180,7 @@ export function lowerNativeRecursion(code, file) {
               !numeric(attr.value.expression, name)
             ) {
               fields.delete(field);
+              unfixedAt.set(`${q.node.name.name}.${field}`, attr ?? q.node);
               changed = true;
             }
           }
@@ -186,7 +192,7 @@ export function lowerNativeRecursion(code, file) {
       if (!fixed.get(name)?.has(field))
         throw nativeRefusal(
           file,
-          null,
+          unfixedAt.get(`${name}.${field}`) ?? snapshotAt.get(name),
           "NATIVE_RECURSION",
           `Snapshot ${name}.${field} is not a fixed numeric prop; ordered snapshot lowering is required.`
         );

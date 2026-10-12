@@ -96,6 +96,12 @@ const cases = [
     "export function Tree(props: { depth: number }) {\n  const { depth = 0 } = props;\n  return depth > 0 ? <Tree depth={depth - 1} /> : <i>leaf</i>;\n}"
   ],
   [
+    "NATIVE_RECURSION",
+    "6:15",
+    "a recursive component's snapshot given a value that is not a fixed number, at that caller",
+    "function Dot(props: { x: number; size: number }) {\n  const { x, size } = props;\n  return size > 1 ? <Dot x={x + 1} size={size - 1} /> : <i>{x}</i>;\n}\nexport function Line(props: { label: string }) {\n  return <Dot x={props.label.length} size={3} />;\n}"
+  ],
+  [
     "NATIVE_RETURN_TYPE",
     "1:8",
     "a component return annotation other than JSX.Element",

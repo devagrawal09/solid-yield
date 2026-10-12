@@ -14,7 +14,7 @@ const solid = require("@solidjs/vite-plugin").default;
 const original = join(root, "examples/originals/rendering");
 // check.mjs writes the author's fix (author-fix.json) here as a project of its
 // own, so native mode lowers the whole fixed app once per server.
-const fixed = join(original, ".native-generated/fixed");
+const fixed = process.env.NATIVE_RENDERING_FIXED ?? join(original, ".native-generated/fixed");
 const script = join(root, "examples/rendering-yield/tests/script.ts");
 const host = join(root, "examples/rendering-yield");
 const entryId = join(host, ".native-generated/rendering-entry.tsx");

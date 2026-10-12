@@ -16,7 +16,8 @@ const require = createRequire(join(root, "package.json"));
 const task = process.argv[2] ?? "parity";
 assert.ok(["parity", "ssr", "hydrate"].includes(task));
 const original = join(root, "examples/originals/rendering");
-const fixed = join(original, ".native-generated/fixed");
+// One copy per task: the gate runs the three side by side.
+const fixed = join(original, `.native-generated/fixed-${task}`);
 
 // The author's fix as a project of its own (git-ignored), beside the original
 // so it resolves the original's dependencies; the original stays byte-identical.
@@ -81,6 +82,7 @@ const run = (mode, kind, urls) => {
           ...process.env,
           NATIVE_RENDERING_MODE: mode,
           NATIVE_RENDERING_TASK: kind,
+          NATIVE_RENDERING_FIXED: fixed,
           NATIVE_RENDERING_URLS: urls.join(","),
           NATIVE_RENDERING_OUTPUT: output
         }

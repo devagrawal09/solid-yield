@@ -5,7 +5,9 @@ const path = require("node:path");
 const { spawn } = require("node:child_process");
 test(
   "real tsserver loads the plugin, maps diagnostics and hover, and sees unsaved edits",
-  { timeout: 60000 },
+  // A real tsserver: about 26 s alone; the gate runs this suite's other files
+  // and other steps beside it, which has taken it past 60 s.
+  { timeout: 120000 },
   async () => {
     const dir = path.join(__dirname, ".native-generated", "protocol-" + process.pid);
     fs.mkdirSync(dir, { recursive: true });

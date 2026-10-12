@@ -230,7 +230,9 @@ export function generate(source, filename) {
         replace(
           "non-core-cache",
           n.callee,
-          "((fn: () => any) => { let cached: any; return () => cached ??= fn(); })"
+          // Generic in the cached value, as a hand-written cache is: `any` hid a
+          // cached promise from TypeScript and the checker alike.
+          "(<T,>(fn: () => T) => { let cached: { value: T } | undefined; return () => (cached ??= { value: fn() }).value; })"
         );
         const fn = p.get("arguments.0");
         if (fn?.isFunction())

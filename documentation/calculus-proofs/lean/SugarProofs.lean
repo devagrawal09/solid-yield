@@ -510,6 +510,39 @@ theorem hole_hosted_in_view {o : Op} (h : Admits .hole o) (hs : o ≠ .stream) :
 theorem raise_in_view_refused (e : List Nat) : ¬ Admits .view (.raise e) := by
   simp [Admits]
 
+/-! ## A promise given to For (2026-10-12)
+
+Solid's `For` maps its list where it reads it: given a promise, it fails on
+it. The lowering's attempt awaits what it attempts, so attempting a call that
+returns a promise there would map the resolved list: the model would accept
+what the original fails on. The call's value is boxed instead: the attempt
+takes what making the call raises, and the list is the promise itself, which
+`For`'s type refuses (`[FOR_EACH]`). -/
+
+/-- The boxed attempt raises what making the call raises. -/
+def boxedRaises {V : Type} (c : PromiseCall V) : Inference.Failures V := c.made
+
+/-- It loses none of those failures. -/
+theorem boxed_keeps_made {V : Type} (c : PromiseCall V) :
+    Inference.le c.made (boxedRaises c) := fun _ h => h
+
+/-- The boxed attempt's operations: a raise, no wait. -/
+def boxedOps (e : List Nat) : List Op := [.raise e]
+
+theorem boxed_no_wait (e : List Nat) : Op.wait ∉ boxedOps e := by simp [boxedOps]
+
+/-- What `For` is given: the promise itself (boxed), or what awaiting it gives. -/
+def forList {P : Type} (resolve : P → P) (boxed : Bool) (p : P) : P :=
+  if boxed then p else resolve p
+
+/-- Boxed, it is the original's list. -/
+theorem boxed_list_is_original {P : Type} (resolve : P → P) (p : P) :
+    forList resolve true p = p := by simp [forList]
+
+/-- Awaited, it is another list wherever the promise is not its own value. -/
+theorem awaited_list_unsound : ∃ (resolve : Nat → Nat) (p : Nat), forList resolve false p ≠ p :=
+  ⟨fun p => p + 1, 0, by simp [forList]⟩
+
 #print axioms write_admitted_iff
 #print axioms event_phase_runs_in_caller
 #print axioms hook_requirement_provided
@@ -541,5 +574,9 @@ theorem raise_in_view_refused (e : List Nat) : ¬ Admits .view (.raise e) := by
 #print axioms init_dropped_unsound
 #print axioms hole_hosted_in_view
 #print axioms raise_in_view_refused
+#print axioms boxed_keeps_made
+#print axioms boxed_no_wait
+#print axioms boxed_list_is_original
+#print axioms awaited_list_unsound
 end Sugar
 end Yield

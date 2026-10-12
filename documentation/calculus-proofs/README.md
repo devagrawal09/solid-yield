@@ -27,12 +27,12 @@ routers (F-S43), context members (F-S45), array-callback colors (F-S46),
 requirements through generic wrappers (F-S49), effect cleanup (F-S42), props
 through `lazy` (S11), context facades (F-S52, S12), loop-driven generators
 (F-S53, S13), root renderers (S14), kept promises (S15), sagas driven inside an action
-(S16), provider values computed in the provider's owner (S17) and a failing
-call in a JSX hole (S18).
+(S16), provider values computed in the provider's owner (S17), a failing
+call in a JSX hole (S18) and a promise given to `For` (S19).
 [SugarProofs.lean](lean/SugarProofs.lean) proves them on top of `YieldProofs`,
-each with a counterexample for the rejected alternative. They are **not yet
-machine-checked**: this session's network policy refused the Lean toolchain
-download. Run `lake build` in `lean/` to check them.
+each with a counterexample for the rejected alternative. Both libraries are
+**machine-checked** by Lean 4.24.0 (2026-10-12; `lake build` in `lean/`, no
+`sorryAx` in any `#print axioms`).
 
 **Result:** the abstract effect/owner calculus has checked preservation, discharge,
 and root-safety proofs. The theorem about **every TypeScript-accepted admissible
@@ -189,6 +189,10 @@ ELAN_HOME=/private/tmp/elan /private/tmp/elan/bin/lake build
 ```
 
 `lean-toolchain` pins 4.24.0. No mathlib/download is needed once Lean is installed.
+Where `release.lean-lang.org` is refused, the same toolchain is the GitHub
+release's `lean-4.24.0-linux.zip`, unpacked as
+`$ELAN_HOME/toolchains/leanprover--lean4---v4.24.0` (how it was checked on
+2026-10-12).
 `lake-manifest.json` has no packages. Tooling was installed in the foreground
 using elan with `ELAN_HOME=/private/tmp/elan` and `--no-modify-path`; HOME and its
 configuration were not changed. Neither Lean, Lake, Agda nor Coq was initially on

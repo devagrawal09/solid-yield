@@ -1661,3 +1661,15 @@ export const AnyRows = For({
     });
   }
 });
+// Solid's `For` maps a list; a promise is not one (it fails on it at run time):
+// read it through a memo.
+declare const pendingList: Promise<string[]>;
+// @ts-expect-error [FOR_EACH] each is a list (no overload matches: the call is refused)
+export const PromiseEach = For({
+  each: pendingList,
+  children: function* (row) {
+    return view(function* () {
+      return <li>{String(yield* row)}</li>;
+    });
+  }
+});

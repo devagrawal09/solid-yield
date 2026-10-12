@@ -162,6 +162,30 @@ export function lowerNativeEffects(files, report) {
       }
       return node;
     };
+    /** `<For each={items()}>` with a call that returns a promise: Solid's `For`
+     * takes the promise itself (and fails on it), so the model must not await
+     * it. The attempt takes the value boxed: its synchronous failures, not its
+     * waiting. @param {Path} at */
+    const forEachPromise = at => {
+      const attr = at.parentPath?.isJSXExpressionContainer() ? at.parentPath.parentPath : null;
+      if (!attr?.isJSXAttribute() || !t.isJSXIdentifier(attr.node.name, { name: "each" }))
+        return false;
+      const tag = attr.parentPath?.isJSXOpeningElement() ? attr.parentPath.get("name") : null;
+      const binding =
+        tag && !Array.isArray(tag) && tag.isJSXIdentifier()
+          ? tag.scope.getBinding(tag.node.name)?.path
+          : undefined;
+      const api = imported(binding);
+      return api?.source === "solid-js" && api.name === "For";
+    };
+    /** @param {any} value @param {string[]} kinds @param {Path} [at] in a hole */
+    const boxedAttempt = (value, kinds, at) => {
+      const attempted = attempt(
+        t.objectExpression([t.objectProperty(t.identifier("value"), value)]),
+        kinds
+      );
+      return t.memberExpression(at ? holed(at, attempted) : attempted, t.identifier("value"));
+    };
     /** A plain function's declared return type, for the attempt that wraps the
      * whole value it returns: the routine it becomes drops the annotation, and
      * the value (`new Promise(…)`) was typed from it. @param {Path} q */
@@ -703,7 +727,15 @@ export function lowerNativeEffects(files, report) {
               if (t.isVariableDeclaration(cast) && t.isTSAsExpression(cast.declarations[0].init))
                 value = t.tsAsExpression(invoke, cast.declarations[0].init.typeAnnotation);
             }
-            statements.push(t.returnStatement(unawaited || kept ? value : attempt(value, kinds)));
+            statements.push(
+              t.returnStatement(
+                unawaited || kept
+                  ? value
+                  : info.promise && forEachPromise(q)
+                    ? boxedAttempt(value, kinds)
+                    : attempt(value, kinds)
+              )
+            );
             q.replaceWith(
               holed(
                 q,
@@ -714,7 +746,10 @@ export function lowerNativeEffects(files, report) {
               )
             );
           } else if (!unawaited && !kept) {
-            const attempted = attempt(call, kinds, declaredReturn(q));
+            const boxed = !!info?.promise && forEachPromise(q);
+            const attempted = boxed
+              ? boxedAttempt(call, kinds, q)
+              : attempt(call, kinds, declaredReturn(q));
             const subject = call.arguments[0];
             // A type guard's narrowing survives its attempt (`if
             // (Exit.isSuccess(exit)) … exit.value`): the attempted result is
@@ -728,7 +763,7 @@ export function lowerNativeEffects(files, report) {
                   t.cloneNode(call.callee, true)
                 ])
               );
-            } else q.replaceWith(holed(q, attempted));
+            } else q.replaceWith(boxed ? attempted : holed(q, attempted));
           }
           if (pending)
             q.replaceWith(

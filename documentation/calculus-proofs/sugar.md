@@ -6,12 +6,13 @@ the λ-yield core, in the same abstract model as [the core proofs](README.md).
 [SugarProofs.lean](lean/SugarProofs.lean) states and proves them on top of
 `YieldProofs`.
 
-**Status: written, not machine-checked yet.** This session's network policy
-refuses `release.lean-lang.org`, so the Lean 4.24.0 toolchain could not be
-installed. Run `lake build` in `lean/` to check both libraries. Until then the
-theorems are paper proofs written in Lean syntax. Each one is short, and most
-are corollaries of a checked core theorem. The runtime and compiler behaviour
-each one models is pinned by the tests listed beside it.
+**Status: machine-checked (2026-10-12).** `lake build` in `lean/` builds both
+libraries with Lean 4.24.0 (the toolchain `lean-toolchain` pins; installed from
+the Lean GitHub release, since the session's network policy refuses
+`release.lean-lang.org`). Every `#print axioms` reports only Lean's standard
+axioms (`propext`, `Classical.choice`, `Quot.sound`) or none: no `sorryAx`.
+The runtime and compiler behaviour each theorem models is pinned by the tests
+listed beside it.
 
 As in the core, these are **relative** results. They check the rules the
 lowering relies on, not the compiler. The last column names the implementation
@@ -36,6 +37,7 @@ premise: what the lowering or runtime must establish for the theorem to apply.
 | **S16 Sagas driven inside an action** (D-121): a saga's writes run in the action that drives it | `driven_saga_write_admitted`; `memo_driven_saga_refused` (why every call of the saga must be inside the action) | Every use of the driver's parameter is a direct call whose nearest function is the generator given to Solid's `action` (`native-sagas.js` checks it through TypeScript). The iterator it returns is stepped there and not handed out. A write in a callback nested in the saga is left plain: it may run outside the action. | `native-effect-model.test.js` (sagas) |
 | **S17 Provider values in the provider's owner** (D-122): an `init`'s failures are the provider's | `init_admits_cleanup`, `provider_bounds`; `init_dropped_unsound` (why the init's failures join the provider's color) | `Ctx.provide({ init, children })` runs `init` once, as a setup, inside Solid's provider root (`setContext(provider, props.value)` reads `value` once); its type adds `FailsOf<Y>` and `RequiresOf<Y>` to the provider's. The lowering moves a value there only when its operations are setup operations or a raise. | `provider-init.spec.tsx`, `context.type-tests.tsx` (D-122), `native-effect-model.test.js` (D-122) |
 | **S18 A failing call in a JSX hole** (2026-10-12): its failure is the hole's, a failing read of the view | `hole_hosted_in_view`, `hole_raise_as_read` (S9); `raise_in_view_refused` (why the wrapper is needed) | `nativeHole(work)` is typed `Yieldable<HoleViewOp<Y>, R>`: a `Raise<E>` becomes `Read<false, E>`, a stream attempt nothing (its failures reach its handler). At run time the compiled JSX hole runs the work as a hole, where a raise is admitted. The lowering wraps only an attempt directly in a JSX expression (no function between), and drops the wrapper with the attempt when the call turns out to be a source's or a routine's. | `native-hole-failures.test.js` |
+| **S19 A promise given to For** (2026-10-12): the list is the promise itself, not what awaiting it gives | `boxed_keeps_made`, `boxed_no_wait`, `boxed_list_is_original`; `awaited_list_unsound` (why the attempt is boxed) | The call is the whole value of a `For` (from `solid-js`) `each` and returns a promise; its attempt takes `{ value: call }`, which is not a promise, so the attempt catches what making the call raises and waits for nothing. The library's `For` refuses an `each` whose value is not a list (`EachRule`, `[FOR_EACH]`), as Solid's `For` fails on one at run time. | `native-hole-failures.test.js` (a promise given to For), `jsx.type-tests.tsx` (`PromiseEach`); mutation catalog `non-core-cache` |
 | **S8 Effect cleanup** (F-S42): a returned cleanup runs before the next run and at disposal, once each | `clean_mem_iff`, `run_mem_iff`, `clean_before_next_run`; `ignoring_never_cleans` (the old lowering) | `onCleanup` registered in the effect phase runs before the owner's next run and at disposal (Solid 2's owner contract). | `native-effect-cleanup.test.js` |
 
 ## What each result means
@@ -136,6 +138,12 @@ a raise. The work of a call that may fail, made in a JSX hole, runs where the
 view evaluates the hole, so it is the hole's. Seen from the view, its raise is a
 settled read failing with the same failures, which the view admits and the
 boundary above takes. Left in the view, the raise is refused.
+
+**S19.** Solid's `For` maps the list it is given where it reads it; a promise is
+not a list, and it fails on one. Attempting the call there would await the
+promise and map the resolved list, so the model would accept what the original
+fails on. Boxed, the attempt still takes what making the call raises, and the
+list is the original's promise, which `For`'s type refuses.
 
 **S8.** The trace of `n` runs followed by disposal contains each cleanup
 exactly when its run happened, and each cleanup comes right after its run and

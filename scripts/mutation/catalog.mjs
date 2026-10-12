@@ -75,8 +75,22 @@ export const catalog = {
     edit: "Insert a settled signal read in each setup-time timer/listener callback."
   },
   "non-core-cache": {
-    expected: ["SUGAR_CALLBACK", "NATIVE_FOREIGN_BOUNDARY", "FOREIGN_HANDOFF", "READ_IN_SETUP"],
-    edit: "Replace createMemo with an inline hand-rolled last-value cache."
+    expected: [
+      "SUGAR_CALLBACK",
+      "NATIVE_FOREIGN_BOUNDARY",
+      "FOREIGN_HANDOFF",
+      "READ_IN_SETUP",
+      "TS2322",
+      "TS2345",
+      "TS2739",
+      "TS2740",
+      "TS2741",
+      "TS2339",
+      "FOR_EACH"
+    ],
+    corrected:
+      "The cache is generic in the cached value (2026-10-12, Dev's ruling): typed `any`, it hid a cached promise from TypeScript and the checker alike, so a defect no type-based check can see. Over an async memo the generic cache leaves a promise (or a stream) where its value was expected, remove-await's defect; TypeScript's assignability and member errors for it are expected too, and FOR_EACH where the promise is a For's list (Solid's For fails on it).",
+    edit: "Replace createMemo with an inline hand-rolled last-value cache, generic in the cached value's type."
   },
   "destructure-props": {
     expected: ["NATIVE_PROPS"],

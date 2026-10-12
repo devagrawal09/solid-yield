@@ -140,3 +140,23 @@ export function List() { return <ul><Row name="a" /></ul>; }`);
     expect(checked(code).join("\n")).toMatch(/DeclareProp/);
   });
 });
+
+describe("a promise given to For", { timeout: 60_000 }, () => {
+  const list = each => `import { createMemo, For } from "solid-js";
+declare function load(): Promise<string[]>;
+const once = <T,>(fn: () => T) => { let last: { value: T } | undefined; return () => (last ??= { value: fn() }).value; };
+export function Names() {
+  const cached = once(() => load());
+  const loaded = createMemo(() => load());
+  return <ul><For each={${each}}>{name => <li>{name.length}</li>}</For></ul>;
+}`;
+  it("is the promise itself, as Solid's For takes it: refused, not awaited", () => {
+    const code = lower(list("cached()"));
+    expect(code).toMatch(/__nativeAttempt\(\(\) => \(\{\s*value: cached\(\)\s*\}\)/);
+    expect(checked(code).join("\n")).toMatch(/FOR_EACH/);
+  });
+
+  it("read through a memo, it is the memo's value", () => {
+    expect(checked(lower(list("loaded()")))).toEqual([]);
+  });
+});

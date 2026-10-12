@@ -228,6 +228,15 @@ type MarkupRow<A extends unknown[]> = ((...args: A) => Generator<any, Element, a
 // infers `unknown` for an element of `any`).
 type EachOf<T> = 0 extends 1 & T ? any : T extends readonly (infer U)[] ? U : never;
 type ItemOf<W> = Path<EachOf<NonNullable<ValueOf<W>>>>;
+/** Solid's `For` maps a list: an array, `false`, `null` or `undefined`. A
+ * promise is not one (Solid's `For` fails on it); it is read through a memo. */
+type EachRule<W> = [ValueOf<W>] extends [readonly unknown[] | false | null | undefined]
+  ? unknown
+  : {
+      readonly each: {
+        readonly "[FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo": never;
+      };
+    };
 
 /**
  * `{yield* For({ each: todos, children: function* (todo) { setup; return
@@ -236,33 +245,39 @@ type ItemOf<W> = Path<EachOf<NonNullable<ValueOf<W>>>>;
  * failures join the list's view (D-059, D-063), and so the holding view.
  */
 /** Refuse JSX returned from a row before inferring its view's recursive colors. */
-function ForYield<W, F>(props: {
-  each: W;
-  keyed?: boolean;
-  fallback?: LazyParam<F, Fallback, "fallback">;
-  children: MarkupRow<[item: ItemOf<W>, index: Source<number>]>;
-}): ComponentView<false, never>;
-function ForYield<W, Y, VY, R, F>(props: {
-  each: W;
-  fallback?: LazyParam<F, Fallback, "fallback">;
-  keyed?: boolean | ((item: EachOf<NonNullable<ValueOf<W>>>) => any);
-  children: RowRoutine<[item: ItemOf<W>, index: Source<number>], Y, VY, R>;
-}): FlowView<Ops<W> | Ops<F> | RowOps<VY, R, Y>>;
+function ForYield<W, F>(
+  props: {
+    each: W;
+    keyed?: boolean;
+    fallback?: LazyParam<F, Fallback, "fallback">;
+    children: MarkupRow<[item: ItemOf<W>, index: Source<number>]>;
+  } & EachRule<W>
+): ComponentView<false, never>;
+function ForYield<W, Y, VY, R, F>(
+  props: {
+    each: W;
+    fallback?: LazyParam<F, Fallback, "fallback">;
+    keyed?: boolean | ((item: EachOf<NonNullable<ValueOf<W>>>) => any);
+    children: RowRoutine<[item: ItemOf<W>, index: Source<number>], Y, VY, R>;
+  } & EachRule<W>
+): FlowView<Ops<W> | Ops<F> | RowOps<VY, R, Y>>;
 /** `h`: `For({ each: todos, children: todo => h(TodoItem, { todo }) })`. */
-function ForYield<W, C, F>(props: {
-  each: W;
-  fallback?: LazyParam<F, Fallback, "fallback">;
-  keyed?: boolean | ((item: EachOf<NonNullable<ValueOf<W>>>) => any);
-  children: (
-    item: ItemOf<W>,
-    index: Source<number>
-  ) => C &
-    (C extends Generator<any, any, any>
-      ? {
-          readonly "[ROW_VIEW] a row returns its view: return view(function* () { return <.../>; })": never;
-        }
-      : LazyParam<C, Rendered, "children">);
-}): FlowView<Ops<W> | Ops<F> | OpsOfHole<C>>;
+function ForYield<W, C, F>(
+  props: EachRule<W> & {
+    each: W;
+    fallback?: LazyParam<F, Fallback, "fallback">;
+    keyed?: boolean | ((item: EachOf<NonNullable<ValueOf<W>>>) => any);
+    children: (
+      item: ItemOf<W>,
+      index: Source<number>
+    ) => C &
+      (C extends Generator<any, any, any>
+        ? {
+            readonly "[ROW_VIEW] a row returns its view: return view(function* () { return <.../>; })": never;
+          }
+        : LazyParam<C, Rendered, "children">);
+  }
+): FlowView<Ops<W> | Ops<F> | OpsOfHole<C>>;
 function ForYield(props: any): any {
   const keyedFalse = props.keyed === false;
   return SolidFor(

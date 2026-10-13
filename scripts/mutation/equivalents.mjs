@@ -4,6 +4,7 @@
 // sites. Each names the authored line it was read at: if that line changes,
 // or the entry matches no mutant or more than one, the run fails, so a mark
 // never outlives the reading behind it (sugar-design.md, "The survivors").
+// `edit` names the mutated line when one line has two mutants of an operator.
 export const siteEquivalents = [
   {
     project: "reviewer-m05_swallow",
@@ -102,6 +103,163 @@ export const siteEquivalents = [
     anchor: "if (false) throw new ServerProblem('server');",
     reason:
       "The throw cannot run (`if (false)`), and the Errored above the memo that reads the server takes a failure of any class."
+  },
+  // The language surface (scripts/native-surface/programs.mjs, read
+  // 2026-10-13): an event's await forms catch their own failures, and a form
+  // that throws is shown under an Errored.
+  {
+    project: "surface-await",
+    file: "App.tsx",
+    line: 15,
+    operator: "async-reject",
+    anchor: 'const r = await fetch("/x?n=" + n());',
+    reason:
+      "The throw lands in the form's own try, whose catch absorbs every failure (logged): nothing reaches the handler."
+  },
+  {
+    project: "surface-await",
+    file: "App.tsx",
+    line: 16,
+    operator: "async-reject",
+    anchor: "seen.push(await r.text());",
+    reason:
+      "The throw lands in the form's own try, whose catch absorbs every failure (logged): nothing reaches the handler."
+  },
+  {
+    project: "surface-await",
+    file: "App.tsx",
+    line: 16,
+    operator: "remove-await",
+    anchor: "seen.push(await r.text());",
+    reason:
+      "Unawaited, the promise is kept as a value (pushed to an `unknown[]`), which type-checks unchanged; that its rejection now floats past the catch is a no-floating-promises concern, outside the catalogue (generate.mjs)."
+  },
+  {
+    project: "surface-await-json",
+    file: "App.tsx",
+    line: 15,
+    operator: "async-reject",
+    anchor: 'const r = await fetch("/x");',
+    reason:
+      "The throw lands in the form's own try, whose catch absorbs every failure (logged): nothing reaches the handler."
+  },
+  {
+    project: "surface-await-json",
+    file: "App.tsx",
+    line: 16,
+    operator: "async-reject",
+    anchor: "const data: unknown = await r.json();",
+    reason:
+      "The throw lands in the form's own try, whose catch absorbs every failure (logged): nothing reaches the handler."
+  },
+  {
+    project: "surface-await-json",
+    file: "App.tsx",
+    line: 16,
+    operator: "remove-await",
+    anchor: "const data: unknown = await r.json();",
+    reason:
+      "Unawaited, the promise is kept as a value (assigned to `unknown`), which type-checks unchanged; that its rejection now floats past the catch is a no-floating-promises concern, outside the catalogue (generate.mjs)."
+  },
+  {
+    project: "surface-await-loop",
+    file: "App.tsx",
+    line: 16,
+    operator: "async-reject",
+    anchor: 'const r = await fetch("/x?n=" + x);',
+    reason:
+      "The throw lands in the form's own try, whose catch absorbs every failure (logged): nothing reaches the handler."
+  },
+  {
+    project: "surface-await-nested",
+    file: "App.tsx",
+    line: 15,
+    operator: "async-reject",
+    anchor: 'seen.push(await (await fetch("/x?n=" + n())).text());',
+    reason:
+      "The throw lands in the form's own try, whose catch absorbs every failure (logged): nothing reaches the handler."
+  },
+  {
+    project: "surface-await-nested",
+    file: "App.tsx",
+    line: 15,
+    operator: "remove-await",
+    anchor: 'seen.push(await (await fetch("/x?n=" + n())).text());',
+    edit: 'seen.push((await fetch("/x?n=" + n())).text());',
+    reason:
+      "Unawaited, the promise is kept as a value (the outer one: the text promise pushed to an `unknown[]`), which type-checks unchanged; that its rejection now floats past the catch is a no-floating-promises concern, outside the catalogue (generate.mjs)."
+  },
+  {
+    project: "surface-await-uncaught",
+    file: "App.tsx",
+    line: 15,
+    operator: "async-reject",
+    anchor: 'const r = await fetch("/x?n=" + n());',
+    reason:
+      "The throw lands in the form's own try, whose catch absorbs every failure (logged): nothing reaches the handler."
+  },
+  {
+    project: "surface-promise-kept",
+    file: "App.tsx",
+    line: 16,
+    operator: "async-reject",
+    anchor: "const status = await request.then(r => r.status);",
+    reason:
+      "The throw lands in the form's own try, whose catch absorbs every failure (logged): nothing reaches the handler."
+  },
+  {
+    project: "surface-promise-kept",
+    file: "App.tsx",
+    line: 16,
+    operator: "remove-await",
+    anchor: "const status = await request.then(r => r.status);",
+    reason:
+      "Unawaited, the promise is kept as a value (the status promise pushed to an `unknown[]`), which type-checks unchanged; that its rejection now floats past the catch is a no-floating-promises concern, outside the catalogue (generate.mjs)."
+  },
+  {
+    project: "surface-callback-throw",
+    file: "App.tsx",
+    line: 12,
+    operator: "callback-throw",
+    anchor: "seen.push(items().every(x => {",
+    reason:
+      "The callback already throws; the Errored around the memo's read takes a failure of any class, so a second throw there changes nothing the check can see."
+  },
+  {
+    project: "surface-callback-reads-throw",
+    file: "App.tsx",
+    line: 12,
+    operator: "callback-throw",
+    anchor: "seen.push(items().map(x => {",
+    reason:
+      "The callback already throws; the Errored around the memo's read takes a failure of any class, so a second throw there changes nothing the check can see."
+  },
+  {
+    project: "surface-reduce-throw",
+    file: "App.tsx",
+    line: 12,
+    operator: "callback-throw",
+    anchor: "seen.push(items().reduce((a, x) => {",
+    reason:
+      "The callback already throws; the Errored around the memo's read takes a failure of any class, so a second throw there changes nothing the check can see."
+  },
+  {
+    project: "surface-store-callback-throw",
+    file: "App.tsx",
+    line: 12,
+    operator: "callback-throw",
+    anchor: "seen.push(store.list.map(t => {",
+    reason:
+      "The callback already throws; the Errored around the memo's read takes a failure of any class, so a second throw there changes nothing the check can see."
+  },
+  {
+    project: "surface-callback-failing-call",
+    file: "App.tsx",
+    line: 12,
+    operator: "callback-throw",
+    anchor: "seen.push(items().map(x => JSON.parse(String(x)) as number));",
+    reason:
+      "The callback's JSON.parse already may throw; the Errored around the memo's read takes a failure of any class, so a second throw there changes nothing the check can see."
   }
 ];
 
@@ -117,7 +275,8 @@ export function markSiteEquivalents(mutants, sources) {
         m.project === entry.project &&
         m.file === entry.file &&
         m.line === entry.line &&
-        m.operator === entry.operator
+        m.operator === entry.operator &&
+        (!entry.edit || m.source.split("\n")[entry.line - 1]?.trim() === entry.edit)
     );
     if (matched.length !== 1)
       throw new Error(`site equivalent ${where} matches ${matched.length} mutants, not one`);

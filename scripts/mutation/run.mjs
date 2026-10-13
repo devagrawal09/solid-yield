@@ -202,9 +202,20 @@ async function main() {
     const mutated = projects.filter(p => !(p.seeded && masks(results.get("base-" + p.id))));
     const mutants = [],
       mutantJobs = [];
+    // A surface program's own mutants: the sites in its form's lines, and
+    // the boundaries around it.
+    const own = (project, m) =>
+      !project.lines ||
+      project.boundaries?.includes(m.operator) ||
+      (m.line >= project.lines[0] && m.line <= project.lines[1]);
     for (const project of mutated)
-      for (const [file, source] of project.files)
-        for (const m of generate(source, file)) {
+      for (const [file, source] of project.files) {
+        // Two sites can make the same program (`await (await f()).text()`
+        // rejects after its statement either way): it is one mutant.
+        const made = new Set();
+        for (const m of generate(source, file).filter(m => own(project, m))) {
+          if (made.has(m.source)) continue;
+          made.add(m.source);
           const mutant = {
             ...m,
             id: "M" + String(mutants.length + 1).padStart(4, "0"),
@@ -220,6 +231,7 @@ async function main() {
             files: [...project.files].map(([f, c]) => [f, f === file ? m.source : c])
           });
         }
+      }
     markSiteEquivalents(mutants, new Map(projects.map(p => [p.id, p.files])));
     console.log(
       `mutation: ${projects.length} projects (${mutated.length} mutated), ${mutants.length} mutants; transform → CLI → generated lint`

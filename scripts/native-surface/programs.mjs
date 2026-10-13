@@ -162,3 +162,58 @@ export function cells() {
     });
   return all;
 }
+
+/**
+ * The mutation program's surface corpus (scripts/mutation/corpus.mjs): each
+ * form in a memo of a rendered app that checks clean, its sources pending
+ * (an async memo each), shown in JSX under a Loading when the form reads
+ * one and an Errored when it may throw (an event's handler catches its own).
+ * `lines` is the form's span (the memo through its read in JSX): the operators' sites there are its mutants, and
+ * the boundary deletions.
+ */
+export function mutationPrograms() {
+  return [...forms, ...eventOnly].map(form => {
+    const event = eventOnly.includes(form);
+    const body = form.body(slots("read"));
+    const pending = readsPending(form);
+    const head = `import { createSignal, createMemo, createStore, untrack, Errored, Loading, type Accessor } from "solid-js";
+import { render } from "@solidjs/web";
+export function Surface() {
+${pendingState}
+`;
+    const at = head.split("\n").length;
+    if (event) {
+      // a handler that may fail catches it, as a clean app's does
+      const caught = form.throws
+        ? `try {\n${body}\n} catch (e) {\n/* @yield-absorb: logged */\nconsole.error(e);\n}`
+        : body;
+      const handler = `  return (
+    <button
+      onClick={async () => {
+        const seen: unknown[] = [];
+${caught}
+        setOut(seen.join(","));
+      }}
+    >
+      {String(out())}
+    </button>
+  );`;
+      return {
+        form: form.id,
+        source: `${head}${handler}\n}\nrender(Surface, document.body);\n`,
+        lines: [at, at + handler.split("\n").length - 1]
+      };
+    }
+    const memo = `  const m = createMemo(() => {
+    const seen: unknown[] = [];
+${body}
+    return seen.join(",");
+  });
+`;
+    let view = "<p>{m()}</p>";
+    if (pending) view = `<Loading fallback={<p>…</p>}>${view}</Loading>`;
+    if (form.throws) view = `<Errored fallback={() => <p>failed</p>}>${view}</Errored>`;
+    const source = `${head}${memo}  return ${view};\n}\nrender(Surface, document.body);\n`;
+    return { form: form.id, source, lines: [at, at + memo.split("\n").length - 1] };
+  });
+}

@@ -90,6 +90,53 @@ export const forms = [
     body: s => s.sink(`${s.items}.some(x => x > ${s.n}) && ${s.items}.every(x => x > 0)`)
   },
   { id: "sort-copy", body: s => s.sink(`[...${s.items}].sort((a, b) => (a - b) * ${s.n})`) },
+  // A callback that reads nothing still runs in its host: what it throws is
+  // the host's failure, as a reading callback's is.
+  {
+    id: "callback-throw",
+    throws: true,
+    body: s =>
+      s.sink(
+        `${s.items}.every(x => {\nif (x < 0) throw new RangeError("negative");\nreturn x > 0;\n})`
+      )
+  },
+  {
+    id: "callback-reads-throw",
+    throws: true,
+    body: s =>
+      s.sink(
+        `${s.items}.map(x => {\nif (x < 0) throw new RangeError("negative");\nreturn x * ${s.n};\n})`
+      )
+  },
+  {
+    id: "reduce-throw",
+    throws: true,
+    body: s =>
+      s.sink(
+        `${s.items}.reduce((a, x) => {\nif (x < 0) throw new RangeError("negative");\nreturn a + x;\n}, ${s.n})`
+      )
+  },
+  {
+    id: "callback-failing-call",
+    throws: true,
+    body: s => s.sink(`${s.items}.map(x => JSON.parse(String(x)) as number)`)
+  },
+  {
+    id: "comparator-throw",
+    throws: true,
+    body: s =>
+      s.sink(
+        `[...${s.items}].sort((a, b) => {\nif (Number.isNaN(a - b)) throw new TypeError("not a number");\nreturn (a - b) * ${s.n};\n})`
+      )
+  },
+  {
+    id: "store-callback-throw",
+    throws: true,
+    body: s =>
+      s.sink(
+        `${s.store}.list.map(t => {\nif (!t.title) throw new TypeError("untitled");\nreturn t.title;\n}).join() + ${s.n}`
+      )
+  },
   { id: "for-each", body: s => `${s.items}.forEach(x => {\n${s.sink(`x + ${s.n}`)}\n});` },
   { id: "for-of", body: s => `for (const x of ${s.items}) {\n${s.sink(`x * ${s.n}`)}\n}` },
   {
@@ -300,6 +347,18 @@ export const eventOnly = [
     id: "promise-then",
     body: s =>
       `void fetch("/x?n=" + ${s.n}).then(r => r.status).then(status => {\n${s.sink("status")}\n}).catch((e: unknown) => {\n/* @yield-absorb: logged */\nconsole.error(e);\n});`
+  },
+  // a request started, then awaited: until the await it is a promise
+  {
+    id: "promise-kept",
+    body: s =>
+      `try {\nconst request = fetch("/x?n=" + ${s.n});\nconst status = await request.then(r => r.status);\n${s.sink("status")}\n} catch (e) {\n/* @yield-absorb: logged */\nconsole.error(e);\n}`
+  },
+  // nothing catches the request's failure: the event rejects
+  {
+    id: "await-uncaught",
+    throws: true,
+    body: s => `const r = await fetch("/x?n=" + ${s.n});\n${s.sink("r.status")}`
   },
   {
     id: "await-loop",

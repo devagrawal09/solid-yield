@@ -2,6 +2,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { resolve, relative } from "node:path";
 import babel from "../../packages/vite-plugin-yield/node_modules/@babel/core/lib/index.js";
 import { fixtures } from "../native/fixtures.mjs";
+import { mutationPrograms } from "../native-surface/programs.mjs";
 export const root = resolve(import.meta.dirname, "../..");
 function files(dir) {
   return new Map(
@@ -76,6 +77,16 @@ export function corpus() {
       "Plain Solid exercising failing calls in JSX holes (nativeHole) and values typed any: a helper that may throw in a hole, in an attribute and in a row under an Errored; a context, a store, a signal and a memo of any, with a method of any",
     files: files("scripts/mutation/corpus/hole-edges")
   });
+  // D-124: every language form of the native surface check, in a memo of a
+  // rendered app, mutated where the form is (and its boundaries deleted).
+  for (const program of mutationPrograms())
+    projects.push({
+      id: "surface-" + program.form,
+      origin: `scripts/native-surface: the \`${program.form}\` form in a memo of a rendered app`,
+      files: new Map([["App.tsx", program.source]]),
+      lines: program.lines,
+      boundaries: ["delete-loading", "delete-errored"]
+    });
   return projects;
 }
 export const relativeToRoot = file => relative(root, file);

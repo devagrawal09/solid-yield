@@ -46,7 +46,12 @@ if (process.argv.includes("--cached") && existsSync(cache)) {
 // the lint's suggestions such as `no-unshown-wait`).
 const informational = new Set(["NATIVE_FOREIGN_BOUNDARY", "NATIVE_TYPE_UNMAPPED"]);
 
-const all = cells();
+// `--only <regex>`: the cells whose form matches, for a quick look; nothing is
+// recorded.
+const only = process.argv.includes("--only")
+  ? new RegExp(process.argv[process.argv.indexOf("--only") + 1])
+  : null;
+const all = cells().filter(c => !only || only.test(c.form));
 const groups = new Map();
 for (const cell of all) {
   const key = `${cell.host}/${cell.variant}`;
@@ -153,12 +158,12 @@ const code = all.filter(c => c.variant !== "jsx"),
 console.log(
   `native surface: ${all.length} programs (${new Set(code.map(c => c.form)).size} code forms × ${new Set(code.map(c => c.host)).size} hosts × read/write/pending, ${jsx} JSX constructs), ${all.length - failed.length} as plain Solid says`
 );
-if (process.argv.includes("--write"))
+if (process.argv.includes("--write") && !only)
   writeFileSync(
     join(root, "documentation/native-surface.json"),
     JSON.stringify({ programs: all.length, failed: failed.length, outcome }, null, 2) + "\n"
   );
-if (!failed.length) {
+if (!failed.length && !only) {
   mkdirSync(generated, { recursive: true });
   writeFileSync(
     cache,

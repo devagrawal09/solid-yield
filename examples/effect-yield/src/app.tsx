@@ -27,7 +27,7 @@ const LogPanel = component(function* LogPanel(props: Props<{ log: Log }>) {
     return [...(yield* entries)].reverse();
   });
   const clear = $event(function* () {
-    yield* (yield* props.log.clear)();
+    yield* props.log.clear();
   });
   return view(function* () {
     return (

@@ -1,12 +1,12 @@
-import { component, For, Show, type Component, type Props, view } from "solid-yield";
+import { component, For, Show, type Component, type Props, type Source, view } from "solid-yield";
 import type { CommentDefinition } from "~/types";
 import Toggle from "./toggle";
 
 // Recursive: the type is stated (a component's type is inferred from its
 // view, which renders this component), and the setup is unnamed (a name
 // would shadow the component inside it).
-const Comment: Component<{ comment: CommentDefinition }, false, never> = component(function* (
-  props: Props<{ comment: CommentDefinition }>
+const Comment: Component<{ comment: Source<CommentDefinition> }, false, never> = component(function* (
+  props: Props<{ comment: Source<CommentDefinition> }>
 ) {
   return view(function* () {
     return (

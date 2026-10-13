@@ -18,6 +18,7 @@ import {
   $memo,
   $signal,
   attempt,
+  constant,
   Errored,
   Loading,
   Show,
@@ -33,9 +34,9 @@ import { onCleanup } from "solid-js";
 // triangle passes its own idle-time memo down — pending, failing with an
 // IdleError — so the prop declares that coloring (D-068).
 type TriangleProps = {
-  x: number;
-  y: number;
-  s: number;
+  x: Source<number>;
+  y: Source<number>;
+  s: Source<number>;
   children: Source<number, IdleError, true>;
 };
 
@@ -83,7 +84,9 @@ export const TriangleDemo = component(function* TriangleDemo() {
   });
 });
 
-const Container = component(function* Container(props: Props<{ scale: number; seconds: number }>) {
+const Container = component(function* Container(
+  props: Props<{ scale: Source<number>; seconds: Source<number> }>
+) {
   return view(function* () {
     return h(
       "div",
@@ -95,7 +98,7 @@ const Container = component(function* Container(props: Props<{ scale: number; se
           };
         }
       },
-      h(Triangle, { x: 0, y: 0, s: 1000, children: props.seconds })
+      h(Triangle, { x: constant(0), y: constant(0), s: constant(1000), children: props.seconds })
     );
   });
 });
@@ -180,7 +183,7 @@ const Triangle: Component<TriangleProps, true, IdleError> = component(function* 
       when: function* () {
         return (yield* props.s) <= TARGET;
       },
-      children: h(Dot, { x: dotX, y: dotY, s: TARGET, children: props.children }),
+      children: h(Dot, { x: dotX, y: dotY, s: constant(TARGET), children: props.children }),
       fallback: h([
         h(Triangle, { x: props.x, y: top, s: half, children: slowChildren }),
         h(Triangle, { x: left, y: bottom, s: half, children: slowChildren }),

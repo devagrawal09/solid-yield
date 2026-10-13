@@ -65,7 +65,7 @@ const StatusPill = component(function* StatusPill(props: Props<{ wire: Wire; lab
         title={describe(yield* props.wire.error)}
       >
         <span class="dot" />
-        {(yield* props.label) ? `${yield* props.label} · ` : ""}
+        {props.label ? `${props.label} · ` : ""}
         {yield* props.wire.status}
         {(yield* deaths) > 0
           ? ` (${yield* deaths} reconnect${(yield* deaths) === 1 ? "" : "s"})`

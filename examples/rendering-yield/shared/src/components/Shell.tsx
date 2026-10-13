@@ -30,7 +30,7 @@ const Shell = component(function* Shell<E extends Failure>(
         <body>
           <div id="app">{yield* props.children}</div>
         </body>
-        <script type="module" src={yield* props.clientEntry} async></script>
+        <script type="module" src={props.clientEntry} async></script>
       </html>
     );
   });

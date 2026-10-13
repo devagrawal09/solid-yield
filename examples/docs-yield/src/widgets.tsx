@@ -10,6 +10,7 @@ import {
   Errored,
   For,
   type Props,
+  type Source,
   view
 } from "solid-yield";
 import { search, like, subscribe, comments, avatar } from "./api";
@@ -100,7 +101,7 @@ export const SearchBox = component(function* SearchBox() {
 });
 
 export const LikeButton = component(function* LikeButton(
-  props: Props<{ slug: string | undefined }>
+  props: Props<{ slug: Source<string | undefined> }>
 ) {
   const [count, setCount] = yield* $signal(0);
   const [optimistic, setOptimistic] = yield* $optimistic(0);

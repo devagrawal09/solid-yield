@@ -2,6 +2,8 @@
 
 Status: **goal, decided 2026-10-13 (D-118); no implementation, no branch.** This note records what v0.5 is, how much of it already exists in the repository, what is new, where it can break, what must land first and what is measured before any code is written. It is a C0-style design note, not a release commitment: the order in D-116 stands, and v0.5 follows v0.3 (islands) and v0.4 (the lazy builder).
 
+The builder that v0.5 runs on, on both sides, is worked through in [isomorphic-builder.md](isomorphic-builder.md); its §9 argues that v0.4 is that builder built isomorphic from the start, an amendment to D-118 not yet ruled.
+
 Read with `compiler-c0.md` (provenance, the capture rule, the R region), `calculus.md` (§1.3 hosts, §3.2 where each host runs, §7 what the compiler route must preserve), `yield-library.md` §7 (what the library route cannot do) and D-113/D-114 (the four tiers and the measured islands threshold). The outside reference is Ryan Carniato's note "Server Signals as Architecture" (HackMD, 2026), whose six closing rules this note restates in the project's terms; §8 records where the two differ.
 
 ## 0. The goal in one paragraph

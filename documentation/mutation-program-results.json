@@ -1,8 +1,8 @@
 {
-  "startedAt": "2026-10-13T03:45:00.015Z",
-  "finishedAt": "2026-10-13T03:53:47.824Z",
-  "durationMs": 527809,
-  "digest": "7d64052b5276ce67ebc8f20155619a65b3022dc83ad014368192a3c1f655b36a",
+  "startedAt": "2026-10-13T16:08:39.518Z",
+  "finishedAt": "2026-10-13T16:20:53.963Z",
+  "durationMs": 734445,
+  "digest": "4bf72e6479622ca920caf14683f9fb3eda1697a1b1a538ac66c1fd0c4112e0bb",
   "projects": [
     {
       "id": "sierpinski",
@@ -32,6 +32,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 121,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with SyntaxError and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -40,6 +41,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 82,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with SyntaxError and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -50,6 +52,7 @@
             "line": 65,
             "generatedLine": 111,
             "generated": true,
+            "severity": "warning",
             "code": "solid-yield/no-unshown-wait",
             "ruleId": "solid-yield/no-unshown-wait",
             "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* () {\n              r...`, D-075)."
@@ -60,6 +63,7 @@
             "line": 93,
             "generatedLine": 188,
             "generated": true,
+            "severity": "warning",
             "code": "solid-yield/no-unshown-wait",
             "ruleId": "solid-yield/no-unshown-wait",
             "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* (...args: __NativeAr...`, D-075)."
@@ -105,6 +109,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 8,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -113,6 +118,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -123,6 +129,7 @@
             "line": 8,
             "generatedLine": 13,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -151,6 +158,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 15,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS1360",
             "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: UserCtx.",
@@ -192,6 +200,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 8,
+            "severity": "error",
             "code": "NATIVE_THROW",
             "tsCode": "TS95000",
             "message": "[NATIVE_THROW] Throw an Error object so callers can identify and handle this failure."
@@ -226,6 +235,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 8,
+            "severity": "error",
             "code": "NATIVE_THROW",
             "tsCode": "TS95000",
             "message": "[NATIVE_THROW] Throw an Error object so callers can identify and handle this failure."
@@ -253,6 +263,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 9,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with Error and nothing catches it; wrap the body in try/catch, or declare the failure.",
@@ -287,6 +298,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 10,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with Error and nothing catches it; wrap the body in try/catch, or declare the failure.",
@@ -338,6 +350,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 8,
+            "severity": "error",
             "code": "WRITE_IN_REACTIVE",
             "tsCode": "TS2345",
             "message": "[WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state."
@@ -346,6 +359,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -398,6 +412,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 26,
+            "severity": "warning",
             "code": "NATIVE_FOREIGN_BOUNDARY",
             "tsCode": "TS95001",
             "message": "[NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check."
@@ -432,6 +447,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 12,
+            "severity": "error",
             "code": "NATIVE_PROPS",
             "tsCode": "TS95000",
             "message": "[NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates."
@@ -478,6 +494,7 @@
             "line": 9,
             "generatedLine": 17,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/jsx-only-in-view",
             "ruleId": "solid-yield/jsx-only-in-view",
             "message": "JSX in a setup: elements are built by the view it returns (`return view(function* () { return <…/>; })`)."
@@ -511,6 +528,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 8,
+            "severity": "error",
             "code": "NATIVE_EFFECT_PHASES",
             "tsCode": "TS95000",
             "message": "[NATIVE_EFFECT_PHASES] Pass a tracked compute function and an untracked effect function to createEffect."
@@ -538,6 +556,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 17,
+            "severity": "error",
             "code": "PENDING_ROOT",
             "tsCode": "TS1360",
             "message": "[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.",
@@ -572,6 +591,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 13,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS1360",
             "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: ThemeCtx.",
@@ -606,6 +626,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 17,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: Error.",
@@ -657,6 +678,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 4,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -667,6 +689,7 @@
             "line": 4,
             "generatedLine": 5,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -735,6 +758,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 4,
+            "severity": "error",
             "code": "NATIVE_EFFECT_PHASES",
             "tsCode": "TS95000",
             "message": "[NATIVE_EFFECT_PHASES] Pass a tracked compute function and an untracked effect function to createEffect."
@@ -779,6 +803,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 5,
+            "severity": "error",
             "code": "PENDING_ROOT",
             "tsCode": "TS1360",
             "message": "[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.",
@@ -830,6 +855,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 4,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with Error and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -891,6 +917,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 4,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -901,6 +928,7 @@
             "line": 4,
             "generatedLine": 5,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/jsx-only-in-view",
             "ruleId": "solid-yield/jsx-only-in-view",
             "message": "JSX in a setup: elements are built by the view it returns (`return view(function* () { return <…/>; })`)."
@@ -945,6 +973,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 5,
+            "severity": "error",
             "code": "WRITE_IN_REACTIVE",
             "tsCode": "TS2345",
             "message": "[WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state."
@@ -972,6 +1001,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 4,
+            "severity": "error",
             "code": "CREATE_OUTSIDE_SETUP",
             "tsCode": "TS2345",
             "message": "[CREATE_OUTSIDE_SETUP] Create this state in the component body, before returning JSX."
@@ -1006,6 +1036,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 4,
+            "severity": "error",
             "code": "SUGAR_ASYNC",
             "tsCode": "TS95000",
             "message": "[SUGAR_ASYNC] Keep this function synchronous and use attempt for async work."
@@ -1033,6 +1064,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 5,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS1360",
             "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: C.",
@@ -1067,6 +1099,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 4,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with Error and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -1338,6 +1371,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 17,
+            "severity": "error",
             "code": "SUGAR_CALLBACK",
             "tsCode": "TS95000",
             "message": "[SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event."
@@ -1377,6 +1411,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 16,
+            "severity": "error",
             "code": "WRITE_IN_REACTIVE",
             "tsCode": "TS2345",
             "message": "[WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state."
@@ -1416,6 +1451,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 16,
+            "severity": "error",
             "code": "WRITE_IN_REACTIVE",
             "tsCode": "TS2345",
             "message": "[WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state."
@@ -1455,6 +1491,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 35,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -1465,6 +1502,7 @@
             "line": 35,
             "generatedLine": 41,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -1620,6 +1658,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 110,
+            "severity": "error",
             "code": "PENDING_ROOT",
             "tsCode": "TS1360",
             "message": "[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.",
@@ -1666,6 +1705,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 35,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -1676,6 +1716,7 @@
             "line": 35,
             "generatedLine": 41,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -1715,6 +1756,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 35,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -1725,6 +1767,7 @@
             "line": 35,
             "generatedLine": 41,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -1771,6 +1814,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 55,
+            "severity": "error",
             "code": "NATIVE_RECURSION",
             "tsCode": "TS95000",
             "message": "[NATIVE_RECURSION] Snapshot Dot.x is not a fixed numeric prop; ordered snapshot lowering is required."
@@ -1817,6 +1861,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 13,
+            "severity": "error",
             "code": "NATIVE_COMPONENT",
             "tsCode": "TS95000",
             "message": "[NATIVE_COMPONENT] Declare MutantInline1006 at module level; a component declared inside another function has no native lowering."
@@ -1856,6 +1901,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 110,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: unknown.",
@@ -1870,6 +1916,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 77,
+            "severity": "error",
             "code": "TS2488",
             "tsCode": "TS2488",
             "message": "Type 'number | Promise<number>' must have a '[Symbol.iterator]()' method that returns an iterator."
@@ -1878,6 +1925,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 62,
+            "severity": "error",
             "code": "GENERATED_TYPE",
             "tsCode": "TS2345",
             "message": "[GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host."
@@ -1886,6 +1934,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 51,
+            "severity": "error",
             "code": "LAZY_VIEW",
             "tsCode": "TS2769",
             "message": "[generated] [LAZY_VIEW] fallback is a lazy view: function* () { return <.../>; }"
@@ -1894,6 +1943,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 51,
+            "severity": "error",
             "code": "TS2589",
             "tsCode": "TS2589",
             "message": "[generated] Type instantiation is excessively deep and possibly infinite."
@@ -1902,6 +1952,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 51,
+            "severity": "error",
             "code": "GENERATED_TYPE",
             "tsCode": "TS2322",
             "message": "[GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host."
@@ -1947,6 +1998,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 51,
+            "severity": "error",
             "code": "LAZY_VIEW",
             "tsCode": "TS2769",
             "message": "[generated] [LAZY_VIEW] fallback is a lazy view: function* () { return <.../>; }"
@@ -1955,6 +2007,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 51,
+            "severity": "error",
             "code": "TS2589",
             "tsCode": "TS2589",
             "message": "[generated] Type instantiation is excessively deep and possibly infinite."
@@ -1965,6 +2018,7 @@
             "line": 74,
             "generatedLine": 107,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -2005,6 +2059,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 51,
+            "severity": "error",
             "code": "LAZY_VIEW",
             "tsCode": "TS2769",
             "message": "[generated] [LAZY_VIEW] fallback is a lazy view: function* () { return <.../>; }"
@@ -2013,6 +2068,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 51,
+            "severity": "error",
             "code": "TS2589",
             "tsCode": "TS2589",
             "message": "[generated] Type instantiation is excessively deep and possibly infinite."
@@ -2023,6 +2079,7 @@
             "line": 74,
             "generatedLine": 107,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -2063,6 +2120,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 51,
+            "severity": "error",
             "code": "LAZY_VIEW",
             "tsCode": "TS2769",
             "message": "[generated] [LAZY_VIEW] fallback is a lazy view: function* () { return <.../>; }"
@@ -2071,6 +2129,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 51,
+            "severity": "error",
             "code": "TS2589",
             "tsCode": "TS2589",
             "message": "[generated] Type instantiation is excessively deep and possibly infinite."
@@ -2081,6 +2140,7 @@
             "line": 74,
             "generatedLine": 107,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -2128,6 +2188,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 89,
+            "severity": "error",
             "code": "NATIVE_PROPS",
             "tsCode": "TS95000",
             "message": "[NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates."
@@ -2174,6 +2235,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 51,
+            "severity": "error",
             "code": "NATIVE_COMPONENT",
             "tsCode": "TS95000",
             "message": "[NATIVE_COMPONENT] Declare MutantInline1229 at module level; a component declared inside another function has no native lowering."
@@ -2213,6 +2275,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 95,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -2221,6 +2284,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 51,
+            "severity": "error",
             "code": "GENERATED_TYPE",
             "tsCode": "TS2322",
             "message": "[GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host."
@@ -2231,6 +2295,7 @@
             "line": 95,
             "generatedLine": 167,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -2271,6 +2336,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 95,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -2279,6 +2345,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 51,
+            "severity": "error",
             "code": "GENERATED_TYPE",
             "tsCode": "TS2322",
             "message": "[GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host."
@@ -2289,6 +2356,7 @@
             "line": 95,
             "generatedLine": 167,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -2329,6 +2397,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 121,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with SyntaxError and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -2337,6 +2406,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 82,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with SyntaxError and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -2347,6 +2417,7 @@
             "line": 65,
             "generatedLine": 111,
             "generated": true,
+            "severity": "warning",
             "code": "solid-yield/no-unshown-wait",
             "ruleId": "solid-yield/no-unshown-wait",
             "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* () {\n              r...`, D-075)."
@@ -2357,6 +2428,7 @@
             "line": 93,
             "generatedLine": 188,
             "generated": true,
+            "severity": "warning",
             "code": "solid-yield/no-unshown-wait",
             "ruleId": "solid-yield/no-unshown-wait",
             "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* (...args: __NativeAr...`, D-075)."
@@ -2397,6 +2469,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 121,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with SyntaxError and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -2405,6 +2478,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 82,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with SyntaxError and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -2415,6 +2489,7 @@
             "line": 65,
             "generatedLine": 111,
             "generated": true,
+            "severity": "warning",
             "code": "solid-yield/no-unshown-wait",
             "ruleId": "solid-yield/no-unshown-wait",
             "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* () {\n              r...`, D-075)."
@@ -2425,6 +2500,7 @@
             "line": 93,
             "generatedLine": 188,
             "generated": true,
+            "severity": "warning",
             "code": "solid-yield/no-unshown-wait",
             "ruleId": "solid-yield/no-unshown-wait",
             "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* (...args: __NativeAr...`, D-075)."
@@ -2472,6 +2548,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 130,
+            "severity": "error",
             "code": "NATIVE_COMPONENT",
             "tsCode": "TS95000",
             "message": "[NATIVE_COMPONENT] Declare MutantInline4197 at module level; a component declared inside another function has no native lowering."
@@ -2518,6 +2595,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 8,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS95000",
             "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value."
@@ -2564,6 +2642,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 29,
+            "severity": "error",
             "code": "NATIVE_PROPS",
             "tsCode": "TS95000",
             "message": "[NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates."
@@ -2610,6 +2689,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 65,
+            "severity": "error",
             "code": "NATIVE_COMPONENT",
             "tsCode": "TS95000",
             "message": "[NATIVE_COMPONENT] Declare MutantInline2609 at module level; a component declared inside another function has no native lowering."
@@ -2656,6 +2736,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 30,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS95000",
             "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value."
@@ -2702,6 +2783,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 65,
+            "severity": "error",
             "code": "NATIVE_PROPS",
             "tsCode": "TS95000",
             "message": "[NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates."
@@ -2748,6 +2830,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 130,
+            "severity": "error",
             "code": "NATIVE_COMPONENT",
             "tsCode": "TS95000",
             "message": "[NATIVE_COMPONENT] Declare MutantInline4283 at module level; a component declared inside another function has no native lowering."
@@ -2794,6 +2877,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 66,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS95000",
             "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value."
@@ -2840,6 +2924,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 93,
+            "severity": "error",
             "code": "NATIVE_PROPS",
             "tsCode": "TS95000",
             "message": "[NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates."
@@ -2886,6 +2971,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 130,
+            "severity": "error",
             "code": "NATIVE_COMPONENT",
             "tsCode": "TS95000",
             "message": "[NATIVE_COMPONENT] Declare MutantInline4329 at module level; a component declared inside another function has no native lowering."
@@ -2932,6 +3018,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 94,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS95000",
             "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value."
@@ -2971,6 +3058,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 121,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with SyntaxError and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -2979,6 +3067,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 82,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with SyntaxError and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -2987,6 +3076,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 75,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: SyntaxError.",
@@ -3003,6 +3093,7 @@
             "line": 65,
             "generatedLine": 111,
             "generated": true,
+            "severity": "warning",
             "code": "solid-yield/no-unshown-wait",
             "ruleId": "solid-yield/no-unshown-wait",
             "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* () {\n              r...`, D-075)."
@@ -3013,6 +3104,7 @@
             "line": 93,
             "generatedLine": 188,
             "generated": true,
+            "severity": "warning",
             "code": "solid-yield/no-unshown-wait",
             "ruleId": "solid-yield/no-unshown-wait",
             "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* (...args: __NativeAr...`, D-075)."
@@ -3055,6 +3147,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 121,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with SyntaxError and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -3063,6 +3156,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 82,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with SyntaxError and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -3071,6 +3165,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 8,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS1360",
             "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: TodosContext.",
@@ -3087,6 +3182,7 @@
             "line": 65,
             "generatedLine": 111,
             "generated": true,
+            "severity": "warning",
             "code": "solid-yield/no-unshown-wait",
             "ruleId": "solid-yield/no-unshown-wait",
             "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* () {\n              r...`, D-075)."
@@ -3097,6 +3193,7 @@
             "line": 93,
             "generatedLine": 188,
             "generated": true,
+            "severity": "warning",
             "code": "solid-yield/no-unshown-wait",
             "ruleId": "solid-yield/no-unshown-wait",
             "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* (...args: __NativeAr...`, D-075)."
@@ -3139,6 +3236,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 121,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with SyntaxError and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -3147,6 +3245,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 82,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with SyntaxError and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -3155,6 +3254,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 75,
+            "severity": "error",
             "code": "PENDING_ROOT",
             "tsCode": "TS1360",
             "message": "[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.",
@@ -3171,6 +3271,7 @@
             "line": 65,
             "generatedLine": 111,
             "generated": true,
+            "severity": "warning",
             "code": "solid-yield/no-unshown-wait",
             "ruleId": "solid-yield/no-unshown-wait",
             "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* () {\n              r...`, D-075)."
@@ -3181,6 +3282,7 @@
             "line": 93,
             "generatedLine": 188,
             "generated": true,
+            "severity": "warning",
             "code": "solid-yield/no-unshown-wait",
             "ruleId": "solid-yield/no-unshown-wait",
             "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* (...args: __NativeAr...`, D-075)."
@@ -3223,6 +3325,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 121,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with SyntaxError and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -3231,6 +3334,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 82,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with SyntaxError and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -3239,6 +3343,7 @@
             "stage": "cli",
             "file": "todos.ts",
             "line": 87,
+            "severity": "error",
             "code": "TS2740",
             "tsCode": "TS2740",
             "message": "Type 'Promise<Todo[]>' is missing the following properties from type 'Todo[]': length, pop, push, concat, and 35 more."
@@ -3249,6 +3354,7 @@
             "line": 65,
             "generatedLine": 111,
             "generated": true,
+            "severity": "warning",
             "code": "solid-yield/no-unshown-wait",
             "ruleId": "solid-yield/no-unshown-wait",
             "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* () {\n              r...`, D-075)."
@@ -3259,6 +3365,7 @@
             "line": 93,
             "generatedLine": 188,
             "generated": true,
+            "severity": "warning",
             "code": "solid-yield/no-unshown-wait",
             "ruleId": "solid-yield/no-unshown-wait",
             "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* (...args: __NativeAr...`, D-075)."
@@ -3300,6 +3407,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 121,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with SyntaxError and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -3308,6 +3416,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 82,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with SyntaxError and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -3316,6 +3425,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 55,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with SyntaxError | TypeError | unknown and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -3324,6 +3434,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 16,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with SyntaxError | TypeError | unknown and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -3334,6 +3445,7 @@
             "line": 65,
             "generatedLine": 111,
             "generated": true,
+            "severity": "warning",
             "code": "solid-yield/no-unshown-wait",
             "ruleId": "solid-yield/no-unshown-wait",
             "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* () {\n              r...`, D-075)."
@@ -3344,6 +3456,7 @@
             "line": 93,
             "generatedLine": 188,
             "generated": true,
+            "severity": "warning",
             "code": "solid-yield/no-unshown-wait",
             "ruleId": "solid-yield/no-unshown-wait",
             "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* (...args: __NativeAr...`, D-075)."
@@ -3386,6 +3499,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 121,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with SyntaxError and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -3394,6 +3508,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 82,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with SyntaxError and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -3402,6 +3517,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 59,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with SyntaxError | TypeError | unknown and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -3410,6 +3526,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 55,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with SyntaxError | TypeError | unknown and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -3420,6 +3537,7 @@
             "line": 65,
             "generatedLine": 111,
             "generated": true,
+            "severity": "warning",
             "code": "solid-yield/no-unshown-wait",
             "ruleId": "solid-yield/no-unshown-wait",
             "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* () {\n              r...`, D-075)."
@@ -3430,6 +3548,7 @@
             "line": 93,
             "generatedLine": 188,
             "generated": true,
+            "severity": "warning",
             "code": "solid-yield/no-unshown-wait",
             "ruleId": "solid-yield/no-unshown-wait",
             "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* (...args: __NativeAr...`, D-075)."
@@ -3472,6 +3591,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 121,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with SyntaxError and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -3480,6 +3600,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 82,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with SyntaxError and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -3488,6 +3609,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 55,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with SyntaxError | TypeError | unknown and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -3496,6 +3618,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 47,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with SyntaxError | TypeError | unknown and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -3506,6 +3629,7 @@
             "line": 65,
             "generatedLine": 111,
             "generated": true,
+            "severity": "warning",
             "code": "solid-yield/no-unshown-wait",
             "ruleId": "solid-yield/no-unshown-wait",
             "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* () {\n              r...`, D-075)."
@@ -3516,6 +3640,7 @@
             "line": 93,
             "generatedLine": 188,
             "generated": true,
+            "severity": "warning",
             "code": "solid-yield/no-unshown-wait",
             "ruleId": "solid-yield/no-unshown-wait",
             "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* (...args: __NativeAr...`, D-075)."
@@ -3558,6 +3683,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 121,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with SyntaxError and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -3566,6 +3692,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 82,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with SyntaxError | TypeError | unknown and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -3576,6 +3703,7 @@
             "line": 65,
             "generatedLine": 111,
             "generated": true,
+            "severity": "warning",
             "code": "solid-yield/no-unshown-wait",
             "ruleId": "solid-yield/no-unshown-wait",
             "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* () {\n              r...`, D-075)."
@@ -3586,6 +3714,7 @@
             "line": 93,
             "generatedLine": 188,
             "generated": true,
+            "severity": "warning",
             "code": "solid-yield/no-unshown-wait",
             "ruleId": "solid-yield/no-unshown-wait",
             "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* (...args: __NativeAr...`, D-075)."
@@ -3626,6 +3755,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 121,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with SyntaxError | TypeError | unknown and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -3634,6 +3764,7 @@
             "stage": "cli",
             "file": "app.tsx",
             "line": 82,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with SyntaxError and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -3644,6 +3775,7 @@
             "line": 65,
             "generatedLine": 111,
             "generated": true,
+            "severity": "warning",
             "code": "solid-yield/no-unshown-wait",
             "ruleId": "solid-yield/no-unshown-wait",
             "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* () {\n              r...`, D-075)."
@@ -3654,6 +3786,7 @@
             "line": 93,
             "generatedLine": 188,
             "generated": true,
+            "severity": "warning",
             "code": "solid-yield/no-unshown-wait",
             "ruleId": "solid-yield/no-unshown-wait",
             "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* (...args: __NativeAr...`, D-075)."
@@ -3701,6 +3834,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 6,
+            "severity": "error",
             "code": "MODULE_STATE",
             "tsCode": "TS95000",
             "message": "[MODULE_STATE] reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses"
@@ -3711,6 +3845,7 @@
             "line": 1,
             "generatedLine": 6,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/no-foreign-reactive",
             "ruleId": "solid-yield/no-foreign-reactive",
             "message": "`createSignal` from \"solid-js\" is reactive state routines cannot see: routines read and write only with `yield*`. Use `$signal`."
@@ -3750,6 +3885,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 9,
+            "severity": "error",
             "code": "CREATE_OUTSIDE_SETUP",
             "tsCode": "TS2345",
             "message": "[CREATE_OUTSIDE_SETUP] Create this state in the component body, before returning JSX."
@@ -3758,6 +3894,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -3805,6 +3942,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 22,
+            "severity": "error",
             "code": "NATIVE_COMPONENT",
             "tsCode": "TS95000",
             "message": "[NATIVE_COMPONENT] Declare MutantInline674 at module level; a component declared inside another function has no native lowering."
@@ -3851,6 +3989,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 8,
+            "severity": "error",
             "code": "SUGAR_CALLBACK",
             "tsCode": "TS95000",
             "message": "[SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event."
@@ -3890,6 +4029,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 8,
+            "severity": "error",
             "code": "WRITE_IN_REACTIVE",
             "tsCode": "TS2345",
             "message": "[WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state."
@@ -3898,6 +4038,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -3938,6 +4079,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 9,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -3946,6 +4088,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -3956,6 +4099,7 @@
             "line": 9,
             "generatedLine": 16,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -3996,6 +4140,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 9,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -4004,6 +4149,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -4014,6 +4160,7 @@
             "line": 9,
             "generatedLine": 16,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -4054,6 +4201,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 9,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -4062,6 +4210,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -4072,6 +4221,7 @@
             "line": 9,
             "generatedLine": 16,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -4112,6 +4262,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 9,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -4120,6 +4271,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -4130,6 +4282,7 @@
             "line": 9,
             "generatedLine": 16,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -4170,6 +4323,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 17,
+            "severity": "error",
             "code": "CREATE_OUTSIDE_SETUP",
             "tsCode": "TS2769",
             "message": "[CREATE_OUTSIDE_SETUP] Create this state in the component body, before returning JSX."
@@ -4216,6 +4370,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 22,
+            "severity": "error",
             "code": "NATIVE_COMPONENT",
             "tsCode": "TS95000",
             "message": "[NATIVE_COMPONENT] Declare MutantInline797 at module level; a component declared inside another function has no native lowering."
@@ -4262,6 +4417,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 13,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS95000",
             "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value."
@@ -4301,6 +4457,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 17,
+            "severity": "error",
             "code": "TS2339",
             "tsCode": "TS2339",
             "message": "Property 'name' does not exist on type 'Source<never, never, false>'."
@@ -4309,6 +4466,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 17,
+            "severity": "error",
             "code": "FOR_EACH",
             "tsCode": "TS2769",
             "message": "[FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo"
@@ -4349,6 +4507,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 15,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -4357,6 +4516,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS2345",
             "message": "[NO_PROVIDER] Fix the earlier errors in this component before checking its render call. Missing: any."
@@ -4367,6 +4527,7 @@
             "line": 15,
             "generatedLine": 27,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -4407,6 +4568,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 13,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS1360",
             "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: ThemeCtx.",
@@ -4453,6 +4615,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 17,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: Error.",
@@ -4499,6 +4662,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 17,
+            "severity": "error",
             "code": "PENDING_ROOT",
             "tsCode": "TS1360",
             "message": "[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.",
@@ -4581,6 +4745,7 @@
             "stage": "cli",
             "file": "api.ts",
             "line": 4,
+            "severity": "error",
             "code": "NATIVE_THROW",
             "tsCode": "TS95000",
             "message": "[NATIVE_THROW] Throw an Error object so callers can identify and handle this failure."
@@ -4656,6 +4821,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 6,
+            "severity": "error",
             "code": "MODULE_STATE",
             "tsCode": "TS95000",
             "message": "[MODULE_STATE] reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses"
@@ -4666,6 +4832,7 @@
             "line": 1,
             "generatedLine": 7,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/no-foreign-reactive",
             "ruleId": "solid-yield/no-foreign-reactive",
             "message": "`createSignal` from \"solid-js\" is reactive state routines cannot see: routines read and write only with `yield*`. Use `$signal`."
@@ -4705,6 +4872,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 9,
+            "severity": "error",
             "code": "CREATE_OUTSIDE_SETUP",
             "tsCode": "TS2345",
             "message": "[CREATE_OUTSIDE_SETUP] Create this state in the component body, before returning JSX."
@@ -4713,6 +4881,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -4760,6 +4929,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 22,
+            "severity": "error",
             "code": "NATIVE_COMPONENT",
             "tsCode": "TS95000",
             "message": "[NATIVE_COMPONENT] Declare MutantInline727 at module level; a component declared inside another function has no native lowering."
@@ -4806,6 +4976,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 8,
+            "severity": "error",
             "code": "SUGAR_CALLBACK",
             "tsCode": "TS95000",
             "message": "[SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event."
@@ -4845,6 +5016,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 8,
+            "severity": "error",
             "code": "WRITE_IN_REACTIVE",
             "tsCode": "TS2345",
             "message": "[WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state."
@@ -4853,6 +5025,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -4893,6 +5066,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 9,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -4901,6 +5075,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -4911,6 +5086,7 @@
             "line": 9,
             "generatedLine": 17,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -4951,6 +5127,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 9,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -4959,6 +5136,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -4969,6 +5147,7 @@
             "line": 9,
             "generatedLine": 17,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -5009,6 +5188,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 9,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -5017,6 +5197,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -5027,6 +5208,7 @@
             "line": 9,
             "generatedLine": 17,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -5067,6 +5249,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 9,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -5075,6 +5258,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -5085,6 +5269,7 @@
             "line": 9,
             "generatedLine": 17,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -5125,6 +5310,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 17,
+            "severity": "error",
             "code": "CREATE_OUTSIDE_SETUP",
             "tsCode": "TS2769",
             "message": "[CREATE_OUTSIDE_SETUP] Create this state in the component body, before returning JSX."
@@ -5171,6 +5357,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 22,
+            "severity": "error",
             "code": "NATIVE_COMPONENT",
             "tsCode": "TS95000",
             "message": "[NATIVE_COMPONENT] Declare MutantInline850 at module level; a component declared inside another function has no native lowering."
@@ -5217,6 +5404,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 13,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS95000",
             "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value."
@@ -5256,6 +5444,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 17,
+            "severity": "error",
             "code": "TS2339",
             "tsCode": "TS2339",
             "message": "Property 'name' does not exist on type 'Source<never, never, false>'."
@@ -5264,6 +5453,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 17,
+            "severity": "error",
             "code": "FOR_EACH",
             "tsCode": "TS2769",
             "message": "[FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo"
@@ -5362,6 +5552,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 15,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -5370,6 +5561,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS2345",
             "message": "[NO_PROVIDER] Fix the earlier errors in this component before checking its render call. Missing: any."
@@ -5380,6 +5572,7 @@
             "line": 15,
             "generatedLine": 45,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -5420,6 +5613,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 13,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS1360",
             "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: ThemeCtx.",
@@ -5495,6 +5689,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 17,
+            "severity": "error",
             "code": "PENDING_ROOT",
             "tsCode": "TS1360",
             "message": "[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.",
@@ -5577,6 +5772,7 @@
             "stage": "cli",
             "file": "api.ts",
             "line": 4,
+            "severity": "error",
             "code": "NATIVE_THROW",
             "tsCode": "TS95000",
             "message": "[NATIVE_THROW] Throw an Error object so callers can identify and handle this failure."
@@ -5652,6 +5848,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 6,
+            "severity": "error",
             "code": "MODULE_STATE",
             "tsCode": "TS95000",
             "message": "[MODULE_STATE] reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses"
@@ -5662,6 +5859,7 @@
             "line": 1,
             "generatedLine": 6,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/no-foreign-reactive",
             "ruleId": "solid-yield/no-foreign-reactive",
             "message": "`createSignal` from \"solid-js\" is reactive state routines cannot see: routines read and write only with `yield*`. Use `$signal`."
@@ -5701,6 +5899,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 10,
+            "severity": "error",
             "code": "CREATE_OUTSIDE_SETUP",
             "tsCode": "TS2345",
             "message": "[CREATE_OUTSIDE_SETUP] Create this state in the component body, before returning JSX."
@@ -5709,6 +5908,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -5756,6 +5956,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 23,
+            "severity": "error",
             "code": "NATIVE_COMPONENT",
             "tsCode": "TS95000",
             "message": "[NATIVE_COMPONENT] Declare MutantInline720 at module level; a component declared inside another function has no native lowering."
@@ -5831,6 +6032,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 9,
+            "severity": "error",
             "code": "SUGAR_CALLBACK",
             "tsCode": "TS95000",
             "message": "[SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event."
@@ -5870,6 +6072,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 9,
+            "severity": "error",
             "code": "WRITE_IN_REACTIVE",
             "tsCode": "TS2345",
             "message": "[WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state."
@@ -5878,6 +6081,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -5918,6 +6122,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 10,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -5926,6 +6131,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -5936,6 +6142,7 @@
             "line": 10,
             "generatedLine": 21,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -5976,6 +6183,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 10,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -5984,6 +6192,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -5994,6 +6203,7 @@
             "line": 10,
             "generatedLine": 21,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -6034,6 +6244,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 10,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -6042,6 +6253,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -6052,6 +6264,7 @@
             "line": 10,
             "generatedLine": 21,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -6092,6 +6305,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 10,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -6100,6 +6314,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -6110,6 +6325,7 @@
             "line": 10,
             "generatedLine": 21,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -6150,6 +6366,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 18,
+            "severity": "error",
             "code": "CREATE_OUTSIDE_SETUP",
             "tsCode": "TS2769",
             "message": "[CREATE_OUTSIDE_SETUP] Create this state in the component body, before returning JSX."
@@ -6196,6 +6413,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 23,
+            "severity": "error",
             "code": "NATIVE_COMPONENT",
             "tsCode": "TS95000",
             "message": "[NATIVE_COMPONENT] Declare MutantInline843 at module level; a component declared inside another function has no native lowering."
@@ -6242,6 +6460,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 14,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS95000",
             "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value."
@@ -6281,6 +6500,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 18,
+            "severity": "error",
             "code": "TS2339",
             "tsCode": "TS2339",
             "message": "Property 'name' does not exist on type 'Source<never, never, false>'."
@@ -6289,6 +6509,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 18,
+            "severity": "error",
             "code": "FOR_EACH",
             "tsCode": "TS2769",
             "message": "[FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo"
@@ -6329,6 +6550,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 16,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -6337,6 +6559,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS2345",
             "message": "[NO_PROVIDER] Fix the earlier errors in this component before checking its render call. Missing: any."
@@ -6347,6 +6570,7 @@
             "line": 16,
             "generatedLine": 32,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -6387,6 +6611,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 14,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS1360",
             "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: ThemeCtx.",
@@ -6433,6 +6658,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 18,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: Error.",
@@ -6479,6 +6705,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 18,
+            "severity": "error",
             "code": "PENDING_ROOT",
             "tsCode": "TS1360",
             "message": "[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.",
@@ -6561,6 +6788,7 @@
             "stage": "cli",
             "file": "api.ts",
             "line": 4,
+            "severity": "error",
             "code": "NATIVE_THROW",
             "tsCode": "TS95000",
             "message": "[NATIVE_THROW] Throw an Error object so callers can identify and handle this failure."
@@ -6643,6 +6871,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 26,
+            "severity": "warning",
             "code": "NATIVE_FOREIGN_BOUNDARY",
             "tsCode": "TS95001",
             "message": "[NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check."
@@ -6651,6 +6880,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 7,
+            "severity": "error",
             "code": "MODULE_STATE",
             "tsCode": "TS95000",
             "message": "[MODULE_STATE] reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses"
@@ -6661,6 +6891,7 @@
             "line": 2,
             "generatedLine": 7,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/no-foreign-reactive",
             "ruleId": "solid-yield/no-foreign-reactive",
             "message": "`createSignal` from \"solid-js\" is reactive state routines cannot see: routines read and write only with `yield*`. Use `$signal`."
@@ -6708,6 +6939,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 26,
+            "severity": "warning",
             "code": "NATIVE_FOREIGN_BOUNDARY",
             "tsCode": "TS95001",
             "message": "[NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check."
@@ -6716,6 +6948,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 10,
+            "severity": "error",
             "code": "CREATE_OUTSIDE_SETUP",
             "tsCode": "TS2345",
             "message": "[CREATE_OUTSIDE_SETUP] Create this state in the component body, before returning JSX."
@@ -6724,6 +6957,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -6772,6 +7006,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 23,
+            "severity": "error",
             "code": "NATIVE_COMPONENT",
             "tsCode": "TS95000",
             "message": "[NATIVE_COMPONENT] Declare MutantInline721 at module level; a component declared inside another function has no native lowering."
@@ -6818,6 +7053,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 9,
+            "severity": "error",
             "code": "SUGAR_CALLBACK",
             "tsCode": "TS95000",
             "message": "[SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event."
@@ -6864,6 +7100,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 26,
+            "severity": "warning",
             "code": "NATIVE_FOREIGN_BOUNDARY",
             "tsCode": "TS95001",
             "message": "[NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check."
@@ -6872,6 +7109,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 9,
+            "severity": "error",
             "code": "WRITE_IN_REACTIVE",
             "tsCode": "TS2345",
             "message": "[WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state."
@@ -6880,6 +7118,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -6928,6 +7167,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 26,
+            "severity": "warning",
             "code": "NATIVE_FOREIGN_BOUNDARY",
             "tsCode": "TS95001",
             "message": "[NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check."
@@ -6936,6 +7176,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 10,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -6944,6 +7185,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -6954,6 +7196,7 @@
             "line": 10,
             "generatedLine": 17,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -7002,6 +7245,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 26,
+            "severity": "warning",
             "code": "NATIVE_FOREIGN_BOUNDARY",
             "tsCode": "TS95001",
             "message": "[NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check."
@@ -7010,6 +7254,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 10,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -7018,6 +7263,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -7028,6 +7274,7 @@
             "line": 10,
             "generatedLine": 17,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -7076,6 +7323,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 26,
+            "severity": "warning",
             "code": "NATIVE_FOREIGN_BOUNDARY",
             "tsCode": "TS95001",
             "message": "[NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check."
@@ -7084,6 +7332,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 10,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -7092,6 +7341,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -7102,6 +7352,7 @@
             "line": 10,
             "generatedLine": 17,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -7150,6 +7401,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 26,
+            "severity": "warning",
             "code": "NATIVE_FOREIGN_BOUNDARY",
             "tsCode": "TS95001",
             "message": "[NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check."
@@ -7158,6 +7410,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 10,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -7166,6 +7419,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -7176,6 +7430,7 @@
             "line": 10,
             "generatedLine": 17,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -7224,6 +7479,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 26,
+            "severity": "warning",
             "code": "NATIVE_FOREIGN_BOUNDARY",
             "tsCode": "TS95001",
             "message": "[NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check."
@@ -7232,6 +7488,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 18,
+            "severity": "error",
             "code": "CREATE_OUTSIDE_SETUP",
             "tsCode": "TS2769",
             "message": "[CREATE_OUTSIDE_SETUP] Create this state in the component body, before returning JSX."
@@ -7279,6 +7536,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 23,
+            "severity": "error",
             "code": "NATIVE_COMPONENT",
             "tsCode": "TS95000",
             "message": "[NATIVE_COMPONENT] Declare MutantInline853 at module level; a component declared inside another function has no native lowering."
@@ -7325,6 +7583,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 14,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS95000",
             "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value."
@@ -7371,6 +7630,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 26,
+            "severity": "warning",
             "code": "NATIVE_FOREIGN_BOUNDARY",
             "tsCode": "TS95001",
             "message": "[NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check."
@@ -7379,6 +7639,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 18,
+            "severity": "error",
             "code": "TS2339",
             "tsCode": "TS2339",
             "message": "Property 'name' does not exist on type 'Source<never, never, false>'."
@@ -7387,6 +7648,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 18,
+            "severity": "error",
             "code": "FOR_EACH",
             "tsCode": "TS2769",
             "message": "[FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo"
@@ -7435,6 +7697,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 26,
+            "severity": "warning",
             "code": "NATIVE_FOREIGN_BOUNDARY",
             "tsCode": "TS95001",
             "message": "[NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check."
@@ -7443,6 +7706,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 16,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -7451,6 +7715,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS2345",
             "message": "[NO_PROVIDER] Fix the earlier errors in this component before checking its render call. Missing: any."
@@ -7461,6 +7726,7 @@
             "line": 16,
             "generatedLine": 28,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -7509,6 +7775,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 26,
+            "severity": "warning",
             "code": "NATIVE_FOREIGN_BOUNDARY",
             "tsCode": "TS95001",
             "message": "[NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check."
@@ -7517,6 +7784,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 14,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS1360",
             "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: ThemeCtx.",
@@ -7571,6 +7839,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 26,
+            "severity": "warning",
             "code": "NATIVE_FOREIGN_BOUNDARY",
             "tsCode": "TS95001",
             "message": "[NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check."
@@ -7579,6 +7848,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 18,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: Error.",
@@ -7633,6 +7903,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 26,
+            "severity": "warning",
             "code": "NATIVE_FOREIGN_BOUNDARY",
             "tsCode": "TS95001",
             "message": "[NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check."
@@ -7641,6 +7912,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 18,
+            "severity": "error",
             "code": "PENDING_ROOT",
             "tsCode": "TS1360",
             "message": "[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.",
@@ -7695,6 +7967,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 26,
+            "severity": "warning",
             "code": "NATIVE_FOREIGN_BOUNDARY",
             "tsCode": "TS95001",
             "message": "[NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check."
@@ -7741,6 +8014,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 26,
+            "severity": "warning",
             "code": "NATIVE_FOREIGN_BOUNDARY",
             "tsCode": "TS95001",
             "message": "[NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check."
@@ -7749,6 +8023,7 @@
             "stage": "cli",
             "file": "api.ts",
             "line": 4,
+            "severity": "error",
             "code": "NATIVE_THROW",
             "tsCode": "TS95000",
             "message": "[NATIVE_THROW] Throw an Error object so callers can identify and handle this failure."
@@ -7796,6 +8071,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 26,
+            "severity": "warning",
             "code": "NATIVE_FOREIGN_BOUNDARY",
             "tsCode": "TS95001",
             "message": "[NATIVE_FOREIGN_BOUNDARY] Handle failures inside Portal or its callbacks; this imported component (Portal from @solidjs/web) is outside the native check."
@@ -7842,6 +8118,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 6,
+            "severity": "error",
             "code": "MODULE_STATE",
             "tsCode": "TS95000",
             "message": "[MODULE_STATE] reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses"
@@ -7852,6 +8129,7 @@
             "line": 1,
             "generatedLine": 6,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/no-foreign-reactive",
             "ruleId": "solid-yield/no-foreign-reactive",
             "message": "`createSignal` from \"solid-js\" is reactive state routines cannot see: routines read and write only with `yield*`. Use `$signal`."
@@ -7891,6 +8169,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 10,
+            "severity": "error",
             "code": "CREATE_OUTSIDE_SETUP",
             "tsCode": "TS2345",
             "message": "[CREATE_OUTSIDE_SETUP] Create this state in the component body, before returning JSX."
@@ -7899,6 +8178,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -7946,6 +8226,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 23,
+            "severity": "error",
             "code": "NATIVE_COMPONENT",
             "tsCode": "TS95000",
             "message": "[NATIVE_COMPONENT] Declare MutantInline723 at module level; a component declared inside another function has no native lowering."
@@ -7992,6 +8273,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 8,
+            "severity": "error",
             "code": "SUGAR_CALLBACK",
             "tsCode": "TS95000",
             "message": "[SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event."
@@ -8031,6 +8313,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 8,
+            "severity": "error",
             "code": "WRITE_IN_REACTIVE",
             "tsCode": "TS2345",
             "message": "[WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state."
@@ -8039,6 +8322,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -8079,6 +8363,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 10,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -8087,6 +8372,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -8097,6 +8383,7 @@
             "line": 10,
             "generatedLine": 19,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -8137,6 +8424,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 10,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -8145,6 +8433,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -8155,6 +8444,7 @@
             "line": 10,
             "generatedLine": 19,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -8195,6 +8485,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 10,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -8203,6 +8494,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -8213,6 +8505,7 @@
             "line": 10,
             "generatedLine": 19,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -8253,6 +8546,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 10,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -8261,6 +8555,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -8271,6 +8566,7 @@
             "line": 10,
             "generatedLine": 19,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -8311,6 +8607,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 18,
+            "severity": "error",
             "code": "CREATE_OUTSIDE_SETUP",
             "tsCode": "TS2769",
             "message": "[CREATE_OUTSIDE_SETUP] Create this state in the component body, before returning JSX."
@@ -8357,6 +8654,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 23,
+            "severity": "error",
             "code": "NATIVE_COMPONENT",
             "tsCode": "TS95000",
             "message": "[NATIVE_COMPONENT] Declare MutantInline846 at module level; a component declared inside another function has no native lowering."
@@ -8403,6 +8701,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 14,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS95000",
             "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value."
@@ -8442,6 +8741,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 18,
+            "severity": "error",
             "code": "TS2339",
             "tsCode": "TS2339",
             "message": "Property 'name' does not exist on type 'Source<never, never, false>'."
@@ -8450,6 +8750,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 18,
+            "severity": "error",
             "code": "FOR_EACH",
             "tsCode": "TS2769",
             "message": "[FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo"
@@ -8490,6 +8791,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 16,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -8498,6 +8800,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS2345",
             "message": "[NO_PROVIDER] Fix the earlier errors in this component before checking its render call. Missing: any."
@@ -8508,6 +8811,7 @@
             "line": 16,
             "generatedLine": 30,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -8548,6 +8852,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 14,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS1360",
             "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: ThemeCtx.",
@@ -8594,6 +8899,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 18,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: Error.",
@@ -8640,6 +8946,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 18,
+            "severity": "error",
             "code": "PENDING_ROOT",
             "tsCode": "TS1360",
             "message": "[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.",
@@ -8722,6 +9029,7 @@
             "stage": "cli",
             "file": "api.ts",
             "line": 4,
+            "severity": "error",
             "code": "NATIVE_THROW",
             "tsCode": "TS95000",
             "message": "[NATIVE_THROW] Throw an Error object so callers can identify and handle this failure."
@@ -8797,6 +9105,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 6,
+            "severity": "error",
             "code": "MODULE_STATE",
             "tsCode": "TS95000",
             "message": "[MODULE_STATE] reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses"
@@ -8807,6 +9116,7 @@
             "line": 1,
             "generatedLine": 6,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/no-foreign-reactive",
             "ruleId": "solid-yield/no-foreign-reactive",
             "message": "`createSignal` from \"solid-js\" is reactive state routines cannot see: routines read and write only with `yield*`. Use `$signal`."
@@ -8817,6 +9127,7 @@
             "line": 9,
             "generatedLine": 17,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/jsx-only-in-view",
             "ruleId": "solid-yield/jsx-only-in-view",
             "message": "JSX in a setup: elements are built by the view it returns (`return view(function* () { return <…/>; })`)."
@@ -8856,6 +9167,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 10,
+            "severity": "error",
             "code": "CREATE_OUTSIDE_SETUP",
             "tsCode": "TS2345",
             "message": "[CREATE_OUTSIDE_SETUP] Create this state in the component body, before returning JSX."
@@ -8864,6 +9176,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -8874,6 +9187,7 @@
             "line": 9,
             "generatedLine": 14,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/jsx-only-in-view",
             "ruleId": "solid-yield/jsx-only-in-view",
             "message": "JSX in a setup: elements are built by the view it returns (`return view(function* () { return <…/>; })`)."
@@ -8921,6 +9235,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 23,
+            "severity": "error",
             "code": "NATIVE_COMPONENT",
             "tsCode": "TS95000",
             "message": "[NATIVE_COMPONENT] Declare MutantInline714 at module level; a component declared inside another function has no native lowering."
@@ -8967,6 +9282,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 8,
+            "severity": "error",
             "code": "SUGAR_CALLBACK",
             "tsCode": "TS95000",
             "message": "[SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event."
@@ -9006,6 +9322,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 8,
+            "severity": "error",
             "code": "WRITE_IN_REACTIVE",
             "tsCode": "TS2345",
             "message": "[WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state."
@@ -9014,6 +9331,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -9024,6 +9342,7 @@
             "line": 9,
             "generatedLine": 18,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/jsx-only-in-view",
             "ruleId": "solid-yield/jsx-only-in-view",
             "message": "JSX in a setup: elements are built by the view it returns (`return view(function* () { return <…/>; })`)."
@@ -9064,6 +9383,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 10,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -9072,6 +9392,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -9082,6 +9403,7 @@
             "line": 9,
             "generatedLine": 17,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/jsx-only-in-view",
             "ruleId": "solid-yield/jsx-only-in-view",
             "message": "JSX in a setup: elements are built by the view it returns (`return view(function* () { return <…/>; })`)."
@@ -9092,6 +9414,7 @@
             "line": 10,
             "generatedLine": 19,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -9132,6 +9455,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 10,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -9140,6 +9464,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -9150,6 +9475,7 @@
             "line": 9,
             "generatedLine": 16,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/jsx-only-in-view",
             "ruleId": "solid-yield/jsx-only-in-view",
             "message": "JSX in a setup: elements are built by the view it returns (`return view(function* () { return <…/>; })`)."
@@ -9160,6 +9486,7 @@
             "line": 10,
             "generatedLine": 17,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -9200,6 +9527,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 10,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -9208,6 +9536,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -9218,6 +9547,7 @@
             "line": 9,
             "generatedLine": 17,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/jsx-only-in-view",
             "ruleId": "solid-yield/jsx-only-in-view",
             "message": "JSX in a setup: elements are built by the view it returns (`return view(function* () { return <…/>; })`)."
@@ -9228,6 +9558,7 @@
             "line": 10,
             "generatedLine": 19,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -9268,6 +9599,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 10,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -9276,6 +9608,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -9286,6 +9619,7 @@
             "line": 9,
             "generatedLine": 17,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/jsx-only-in-view",
             "ruleId": "solid-yield/jsx-only-in-view",
             "message": "JSX in a setup: elements are built by the view it returns (`return view(function* () { return <…/>; })`)."
@@ -9296,6 +9630,7 @@
             "line": 10,
             "generatedLine": 19,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -9336,6 +9671,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 10,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -9344,6 +9680,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -9354,6 +9691,7 @@
             "line": 9,
             "generatedLine": 17,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/jsx-only-in-view",
             "ruleId": "solid-yield/jsx-only-in-view",
             "message": "JSX in a setup: elements are built by the view it returns (`return view(function* () { return <…/>; })`)."
@@ -9364,6 +9702,7 @@
             "line": 10,
             "generatedLine": 19,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -9404,6 +9743,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 18,
+            "severity": "error",
             "code": "CREATE_OUTSIDE_SETUP",
             "tsCode": "TS2769",
             "message": "[CREATE_OUTSIDE_SETUP] Create this state in the component body, before returning JSX."
@@ -9414,6 +9754,7 @@
             "line": 9,
             "generatedLine": 17,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/jsx-only-in-view",
             "ruleId": "solid-yield/jsx-only-in-view",
             "message": "JSX in a setup: elements are built by the view it returns (`return view(function* () { return <…/>; })`)."
@@ -9460,6 +9801,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 23,
+            "severity": "error",
             "code": "NATIVE_COMPONENT",
             "tsCode": "TS95000",
             "message": "[NATIVE_COMPONENT] Declare MutantInline837 at module level; a component declared inside another function has no native lowering."
@@ -9506,6 +9848,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 14,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS95000",
             "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value."
@@ -9545,6 +9888,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 18,
+            "severity": "error",
             "code": "TS2339",
             "tsCode": "TS2339",
             "message": "Property 'name' does not exist on type 'Source<never, never, false>'."
@@ -9553,6 +9897,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 18,
+            "severity": "error",
             "code": "FOR_EACH",
             "tsCode": "TS2769",
             "message": "[FOR_EACH] each is a list (an array, false, null or undefined); read a promise through a memo"
@@ -9563,6 +9908,7 @@
             "line": 9,
             "generatedLine": 17,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/jsx-only-in-view",
             "ruleId": "solid-yield/jsx-only-in-view",
             "message": "JSX in a setup: elements are built by the view it returns (`return view(function* () { return <…/>; })`)."
@@ -9603,6 +9949,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 16,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -9611,6 +9958,7 @@
             "stage": "cli",
             "file": "index.tsx",
             "line": 3,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS2345",
             "message": "[NO_PROVIDER] Fix the earlier errors in this component before checking its render call. Missing: any."
@@ -9621,6 +9969,7 @@
             "line": 9,
             "generatedLine": 17,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/jsx-only-in-view",
             "ruleId": "solid-yield/jsx-only-in-view",
             "message": "JSX in a setup: elements are built by the view it returns (`return view(function* () { return <…/>; })`)."
@@ -9631,6 +9980,7 @@
             "line": 16,
             "generatedLine": 30,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -9671,6 +10021,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 14,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS1360",
             "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: ThemeCtx.",
@@ -9687,6 +10038,7 @@
             "line": 9,
             "generatedLine": 17,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/jsx-only-in-view",
             "ruleId": "solid-yield/jsx-only-in-view",
             "message": "JSX in a setup: elements are built by the view it returns (`return view(function* () { return <…/>; })`)."
@@ -9727,6 +10079,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 18,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: Error.",
@@ -9743,6 +10096,7 @@
             "line": 9,
             "generatedLine": 17,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/jsx-only-in-view",
             "ruleId": "solid-yield/jsx-only-in-view",
             "message": "JSX in a setup: elements are built by the view it returns (`return view(function* () { return <…/>; })`)."
@@ -9783,6 +10137,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 18,
+            "severity": "error",
             "code": "PENDING_ROOT",
             "tsCode": "TS1360",
             "message": "[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.",
@@ -9799,6 +10154,7 @@
             "line": 9,
             "generatedLine": 17,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/jsx-only-in-view",
             "ruleId": "solid-yield/jsx-only-in-view",
             "message": "JSX in a setup: elements are built by the view it returns (`return view(function* () { return <…/>; })`)."
@@ -9841,6 +10197,7 @@
             "line": 9,
             "generatedLine": 17,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/jsx-only-in-view",
             "ruleId": "solid-yield/jsx-only-in-view",
             "message": "JSX in a setup: elements are built by the view it returns (`return view(function* () { return <…/>; })`)."
@@ -9886,6 +10243,7 @@
             "stage": "cli",
             "file": "api.ts",
             "line": 4,
+            "severity": "error",
             "code": "NATIVE_THROW",
             "tsCode": "TS95000",
             "message": "[NATIVE_THROW] Throw an Error object so callers can identify and handle this failure."
@@ -9927,6 +10285,7 @@
             "line": 9,
             "generatedLine": 17,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/jsx-only-in-view",
             "ruleId": "solid-yield/jsx-only-in-view",
             "message": "JSX in a setup: elements are built by the view it returns (`return view(function* () { return <…/>; })`)."
@@ -9972,6 +10331,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 4,
+            "severity": "error",
             "code": "NATIVE_COMPONENT",
             "tsCode": "TS95000",
             "message": "[NATIVE_COMPONENT] Declare MutantInline73 at module level; a component declared inside another function has no native lowering."
@@ -10018,6 +10378,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 2,
+            "severity": "error",
             "code": "MODULE_STATE",
             "tsCode": "TS95000",
             "message": "[MODULE_STATE] reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses"
@@ -10028,6 +10389,7 @@
             "line": 1,
             "generatedLine": 4,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/no-foreign-reactive",
             "ruleId": "solid-yield/no-foreign-reactive",
             "message": "`createSignal` from \"solid-js\" is reactive state routines cannot see: routines read and write only with `yield*`. Use `$signal`."
@@ -10074,6 +10436,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 2,
+            "severity": "error",
             "code": "MODULE_STATE",
             "tsCode": "TS95000",
             "message": "[MODULE_STATE] reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses"
@@ -10084,6 +10447,7 @@
             "line": 1,
             "generatedLine": 3,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/no-foreign-reactive",
             "ruleId": "solid-yield/no-foreign-reactive",
             "message": "`createSignal` from \"solid-js\" is reactive state routines cannot see: routines read and write only with `yield*`. Use `$signal`."
@@ -10130,6 +10494,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 2,
+            "severity": "error",
             "code": "NATIVE_PROPS",
             "tsCode": "TS95000",
             "message": "[NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates."
@@ -10176,6 +10541,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 7,
+            "severity": "error",
             "code": "NATIVE_COMPONENT",
             "tsCode": "TS95000",
             "message": "[NATIVE_COMPONENT] Declare MutantInline249 at module level; a component declared inside another function has no native lowering."
@@ -10215,6 +10581,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 9,
+            "severity": "error",
             "code": "CREATE_OUTSIDE_SETUP",
             "tsCode": "TS2322",
             "message": "[CREATE_OUTSIDE_SETUP] Create this state in the component body, before returning JSX.",
@@ -10261,6 +10628,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 9,
+            "severity": "error",
             "code": "GENERATED_TYPE",
             "tsCode": "TS2322",
             "message": "[GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
@@ -10307,6 +10675,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 9,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -10317,6 +10686,7 @@
             "line": 9,
             "generatedLine": 20,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -10363,6 +10733,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 7,
+            "severity": "error",
             "code": "NATIVE_COMPONENT",
             "tsCode": "TS95000",
             "message": "[NATIVE_COMPONENT] Declare MutantInline271 at module level; a component declared inside another function has no native lowering."
@@ -10409,6 +10780,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 4,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS95000",
             "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value."
@@ -10513,6 +10885,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 2,
+            "severity": "error",
             "code": "MODULE_STATE",
             "tsCode": "TS95000",
             "message": "[MODULE_STATE] reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses"
@@ -10523,6 +10896,7 @@
             "line": 1,
             "generatedLine": 4,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/no-foreign-reactive",
             "ruleId": "solid-yield/no-foreign-reactive",
             "message": "`createSignal` from \"solid-js\" is reactive state routines cannot see: routines read and write only with `yield*`. Use `$signal`."
@@ -10598,6 +10972,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 6,
+            "severity": "error",
             "code": "NATIVE_THROW",
             "tsCode": "TS95000",
             "message": "[NATIVE_THROW] Throw an Error object so callers can identify and handle this failure."
@@ -10673,6 +11048,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 7,
+            "severity": "error",
             "code": "NATIVE_PROPS",
             "tsCode": "TS95000",
             "message": "[NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates."
@@ -10719,6 +11095,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 11,
+            "severity": "error",
             "code": "NATIVE_COMPONENT",
             "tsCode": "TS95000",
             "message": "[NATIVE_COMPONENT] Declare MutantInline1130 at module level; a component declared inside another function has no native lowering."
@@ -10765,6 +11142,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 8,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS95000",
             "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value."
@@ -10811,6 +11189,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 11,
+            "severity": "error",
             "code": "MODULE_STATE",
             "tsCode": "TS95000",
             "message": "[MODULE_STATE] reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses"
@@ -10821,6 +11200,7 @@
             "line": 1,
             "generatedLine": 7,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/no-foreign-reactive",
             "ruleId": "solid-yield/no-foreign-reactive",
             "message": "`createSignal` from \"solid-js\" is reactive state routines cannot see: routines read and write only with `yield*`. Use `$signal`."
@@ -10860,6 +11240,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 26,
+            "severity": "error",
             "code": "CREATE_OUTSIDE_SETUP",
             "tsCode": "TS2322",
             "message": "[CREATE_OUTSIDE_SETUP] Create this state in the component body, before returning JSX."
@@ -10899,6 +11280,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 24,
+            "severity": "error",
             "code": "CREATE_OUTSIDE_SETUP",
             "tsCode": "TS2322",
             "message": "[CREATE_OUTSIDE_SETUP] Create this state in the component body, before returning JSX."
@@ -10938,6 +11320,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 11,
+            "severity": "error",
             "code": "LAZY_VIEW",
             "tsCode": "TS2322",
             "message": "[generated] [LAZY_VIEW] children is a lazy view: function* () { return <.../>; }"
@@ -10977,6 +11360,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 13,
+            "severity": "error",
             "code": "WRITE_IN_REACTIVE",
             "tsCode": "TS2345",
             "message": "[WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state."
@@ -11081,6 +11465,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 14,
+            "severity": "error",
             "code": "CATCH_SWALLOWS",
             "tsCode": "TS95000",
             "message": "[CATCH_SWALLOWS] This catch discards a transport failure (ChunkError) | ServerProblem without handling; return a fallback value, rethrow, or mark the absorption intentional with @yield-absorb."
@@ -11127,6 +11512,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 16,
+            "severity": "error",
             "code": "SUGAR_CALLBACK",
             "tsCode": "TS95000",
             "message": "[SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event."
@@ -11166,6 +11552,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 16,
+            "severity": "error",
             "code": "WRITE_IN_REACTIVE",
             "tsCode": "TS2345",
             "message": "[WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state."
@@ -11205,6 +11592,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 23,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -11215,6 +11603,7 @@
             "line": 23,
             "generatedLine": 63,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -11261,6 +11650,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 17,
+            "severity": "error",
             "code": "NATIVE_EFFECT_PHASES",
             "tsCode": "TS95000",
             "message": "[NATIVE_EFFECT_PHASES] Pass a tracked compute function and an untracked effect function to createEffect."
@@ -11358,6 +11748,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 24,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with Error and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -11397,6 +11788,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 8,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS1360",
             "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: Identity.",
@@ -11443,6 +11835,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 26,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: a transport failure (ChunkError) | ServerProblem.",
@@ -11489,6 +11882,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 26,
+            "severity": "error",
             "code": "PENDING_ROOT",
             "tsCode": "TS1360",
             "message": "[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.",
@@ -11564,6 +11958,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 24,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with Error and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -11603,6 +11998,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 23,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -11613,6 +12009,7 @@
             "line": 23,
             "generatedLine": 63,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -11652,6 +12049,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 25,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with Problem and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -11691,6 +12089,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 23,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -11701,6 +12100,7 @@
             "line": 23,
             "generatedLine": 63,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -11740,6 +12140,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 23,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -11750,6 +12151,7 @@
             "line": 23,
             "generatedLine": 63,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -11854,6 +12256,7 @@
             "stage": "cli",
             "file": "server.ts",
             "line": 5,
+            "severity": "error",
             "code": "NATIVE_THROW",
             "tsCode": "TS95000",
             "message": "[NATIVE_THROW] Throw an Error object so callers can identify and handle this failure."
@@ -11958,6 +12361,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 16,
+            "severity": "error",
             "code": "NATIVE_PROPS",
             "tsCode": "TS95000",
             "message": "[NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates."
@@ -12004,6 +12408,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 16,
+            "severity": "error",
             "code": "NATIVE_PROPS",
             "tsCode": "TS95000",
             "message": "[NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates."
@@ -12050,6 +12455,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 67,
+            "severity": "error",
             "code": "NATIVE_COMPONENT",
             "tsCode": "TS95000",
             "message": "[NATIVE_COMPONENT] Declare MutantInline2115 at module level; a component declared inside another function has no native lowering."
@@ -12089,6 +12495,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 47,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: Missing | unknown.",
@@ -12135,6 +12542,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 47,
+            "severity": "error",
             "code": "PENDING_ROOT",
             "tsCode": "TS1360",
             "message": "[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.",
@@ -12188,6 +12596,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 27,
+            "severity": "error",
             "code": "NATIVE_PROPS",
             "tsCode": "TS95000",
             "message": "[NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates."
@@ -12234,6 +12643,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 27,
+            "severity": "error",
             "code": "NATIVE_PROPS",
             "tsCode": "TS95000",
             "message": "[NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates."
@@ -12280,6 +12690,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 27,
+            "severity": "error",
             "code": "NATIVE_PROPS",
             "tsCode": "TS95000",
             "message": "[NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates."
@@ -12326,6 +12737,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 39,
+            "severity": "error",
             "code": "NATIVE_COMPONENT",
             "tsCode": "TS95000",
             "message": "[NATIVE_COMPONENT] Declare MutantInline1545 at module level; a component declared inside another function has no native lowering."
@@ -12372,6 +12784,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 39,
+            "severity": "error",
             "code": "MODULE_STATE",
             "tsCode": "TS95000",
             "message": "[MODULE_STATE] reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses"
@@ -12382,6 +12795,7 @@
             "line": 4,
             "generatedLine": 11,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/no-foreign-reactive",
             "ruleId": "solid-yield/no-foreign-reactive",
             "message": "`createSignal` from \"solid-js\" is reactive state routines cannot see: routines read and write only with `yield*`. Use `$signal`."
@@ -12421,6 +12835,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 47,
+            "severity": "error",
             "code": "CREATE_OUTSIDE_SETUP",
             "tsCode": "TS2345",
             "message": "[CREATE_OUTSIDE_SETUP] Create this state in the component body, before returning JSX."
@@ -12467,6 +12882,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 67,
+            "severity": "error",
             "code": "NATIVE_COMPONENT",
             "tsCode": "TS95000",
             "message": "[NATIVE_COMPONENT] Declare MutantInline2144 at module level; a component declared inside another function has no native lowering."
@@ -12513,6 +12929,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 41,
+            "severity": "error",
             "code": "SUGAR_CALLBACK",
             "tsCode": "TS95000",
             "message": "[SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event."
@@ -12559,6 +12976,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 44,
+            "severity": "error",
             "code": "SUGAR_CALLBACK",
             "tsCode": "TS95000",
             "message": "[SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event."
@@ -12627,6 +13045,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 46,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -12637,6 +13056,7 @@
             "line": 46,
             "generatedLine": 81,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -12676,6 +13096,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 46,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -12686,6 +13107,7 @@
             "line": 46,
             "generatedLine": 75,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -12732,6 +13154,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 39,
+            "severity": "error",
             "code": "SUGAR_CALLBACK",
             "tsCode": "TS95000",
             "message": "[generated] [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event."
@@ -12800,6 +13223,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 46,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -12810,6 +13234,7 @@
             "line": 46,
             "generatedLine": 78,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -12849,6 +13274,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 46,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -12859,6 +13285,7 @@
             "line": 46,
             "generatedLine": 81,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -12927,6 +13354,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 46,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -12937,6 +13365,7 @@
             "line": 46,
             "generatedLine": 81,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -12983,6 +13412,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 54,
+            "severity": "error",
             "code": "MODULE_STATE",
             "tsCode": "TS95000",
             "message": "[MODULE_STATE] reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses"
@@ -12993,6 +13423,7 @@
             "line": 4,
             "generatedLine": 10,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/no-foreign-reactive",
             "ruleId": "solid-yield/no-foreign-reactive",
             "message": "`createSignal` from \"solid-js\" is reactive state routines cannot see: routines read and write only with `yield*`. Use `$signal`."
@@ -13039,6 +13470,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 67,
+            "severity": "error",
             "code": "NATIVE_COMPONENT",
             "tsCode": "TS95000",
             "message": "[NATIVE_COMPONENT] Declare MutantInline2174 at module level; a component declared inside another function has no native lowering."
@@ -13085,6 +13517,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 57,
+            "severity": "error",
             "code": "NATIVE_EFFECT_PHASES",
             "tsCode": "TS95000",
             "message": "[NATIVE_EFFECT_PHASES] Pass a tracked compute function and an untracked effect function to createEffect."
@@ -13124,6 +13557,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 65,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -13134,6 +13568,7 @@
             "line": 65,
             "generatedLine": 112,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -13209,6 +13644,7 @@
             "stage": "cli",
             "file": "api.ts",
             "line": 6,
+            "severity": "error",
             "code": "NATIVE_THROW",
             "tsCode": "TS95000",
             "message": "[NATIVE_THROW] Throw an Error object so callers can identify and handle this failure."
@@ -13284,6 +13720,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 79,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -13292,6 +13729,7 @@
             "stage": "cli",
             "file": "filters.tsx",
             "line": 9,
+            "severity": "error",
             "code": "MODULE_STATE",
             "tsCode": "TS95000",
             "message": "[MODULE_STATE] reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses"
@@ -13300,6 +13738,7 @@
             "stage": "cli",
             "file": "filters.tsx",
             "line": 9,
+            "severity": "error",
             "code": "LAZY_VIEW",
             "tsCode": "TS2769",
             "message": "[generated] [LAZY_VIEW] children is a lazy view: function* () { return <.../>; }"
@@ -13310,6 +13749,7 @@
             "line": 1,
             "generatedLine": 9,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/no-foreign-reactive",
             "ruleId": "solid-yield/no-foreign-reactive",
             "message": "`createSignal` from \"solid-js\" is reactive state routines cannot see: routines read and write only with `yield*`. Use `$signal`."
@@ -13358,6 +13798,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 40,
+            "severity": "error",
             "code": "NATIVE_SETUP_FAILURE",
             "tsCode": "TS2769",
             "message": "[NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure."
@@ -13366,6 +13807,7 @@
             "stage": "cli",
             "file": "filters.tsx",
             "line": 9,
+            "severity": "error",
             "code": "NATIVE_PROPS",
             "tsCode": "TS95000",
             "message": "[NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates."
@@ -13406,6 +13848,7 @@
             "stage": "cli",
             "file": "filters.tsx",
             "line": 25,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with unknown and nothing catches it; wrap the body in try/catch, or declare the failure.",
@@ -13420,6 +13863,7 @@
             "stage": "cli",
             "file": "filters.tsx",
             "line": 23,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS1360",
             "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: FilterContext.",
@@ -13475,6 +13919,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 41,
+            "severity": "error",
             "code": "TS2339",
             "tsCode": "TS2339",
             "message": "Property 'range' does not exist on type 'number'."
@@ -13483,6 +13928,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 40,
+            "severity": "error",
             "code": "NATIVE_SETUP_FAILURE",
             "tsCode": "TS2769",
             "message": "[NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure."
@@ -13491,6 +13937,7 @@
             "stage": "cli",
             "file": "filters.tsx",
             "line": 14,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS95000",
             "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value."
@@ -13539,6 +13986,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 40,
+            "severity": "error",
             "code": "NATIVE_SETUP_FAILURE",
             "tsCode": "TS2769",
             "message": "[NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure."
@@ -13547,6 +13995,7 @@
             "stage": "cli",
             "file": "filters.tsx",
             "line": 15,
+            "severity": "error",
             "code": "NATIVE_THROW",
             "tsCode": "TS95000",
             "message": "[NATIVE_THROW] Throw an Error object so callers can identify and handle this failure."
@@ -13616,6 +14065,7 @@
             "stage": "cli",
             "file": "filters.tsx",
             "line": 26,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: RangeError.",
@@ -13727,6 +14177,7 @@
             "stage": "cli",
             "file": "Feed.tsx",
             "line": 29,
+            "severity": "error",
             "code": "MODULE_STATE",
             "tsCode": "TS95000",
             "message": "[MODULE_STATE] reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses"
@@ -13737,6 +14188,7 @@
             "line": 4,
             "generatedLine": 5,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/no-foreign-reactive",
             "ruleId": "solid-yield/no-foreign-reactive",
             "message": "`createSignal` from \"solid-js\" is reactive state routines cannot see: routines read and write only with `yield*`. Use `$signal`."
@@ -13776,6 +14228,7 @@
             "stage": "cli",
             "file": "Feed.tsx",
             "line": 58,
+            "severity": "error",
             "code": "CREATE_OUTSIDE_SETUP",
             "tsCode": "TS2769",
             "message": "[CREATE_OUTSIDE_SETUP] Create this state in the component body, before returning JSX."
@@ -13815,6 +14268,7 @@
             "stage": "cli",
             "file": "Feed.tsx",
             "line": 36,
+            "severity": "error",
             "code": "TS2339",
             "tsCode": "TS2339",
             "message": "Property 'items' does not exist on type 'Promise<{ title: string; items: Item[]; }>'.",
@@ -13829,6 +14283,7 @@
             "stage": "cli",
             "file": "Feed.tsx",
             "line": 35,
+            "severity": "error",
             "code": "TS2339",
             "tsCode": "TS2339",
             "message": "Property 'title' does not exist on type 'Promise<{ title: string; items: Item[]; }>'.",
@@ -13877,6 +14332,7 @@
             "stage": "cli",
             "file": "Feed.tsx",
             "line": 42,
+            "severity": "error",
             "code": "TS2345",
             "tsCode": "TS2345",
             "message": "Argument of type '() => AsyncGenerator<Item[], void, unknown>' is not assignable to parameter of type '() => Item[]'.\n  Type 'AsyncGenerator<Item[], void, unknown>' is missing the following properties from type 'Item[]': length, pop, push, concat, and 35 more."
@@ -13918,6 +14374,7 @@
             "line": 42,
             "generatedLine": 51,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/no-unyielded-write",
             "ruleId": "solid-yield/no-unyielded-write",
             "message": "`setVersion(…)` writes nothing until it is delegated to: `yield* setVersion(…)`, in an $event or an $effect's effect phase."
@@ -13985,6 +14442,7 @@
             "stage": "cli",
             "file": "Feed.tsx",
             "line": 52,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -13993,6 +14451,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 8,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS2345",
             "message": "[NO_PROVIDER] Fix the earlier errors in this component before checking its render call. Missing: any."
@@ -14003,6 +14462,7 @@
             "line": 52,
             "generatedLine": 63,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -14043,6 +14503,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 10,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: a transport failure (ChunkError).",
@@ -14089,6 +14550,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 10,
+            "severity": "error",
             "code": "PENDING_ROOT",
             "tsCode": "TS1360",
             "message": "[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.",
@@ -14142,6 +14604,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 9,
+            "severity": "error",
             "code": "NATIVE_SETUP_FAILURE",
             "tsCode": "TS2769",
             "message": "[NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure."
@@ -14150,6 +14613,7 @@
             "stage": "cli",
             "file": "router.tsx",
             "line": 13,
+            "severity": "error",
             "code": "SUGAR_CALLBACK",
             "tsCode": "TS95000",
             "message": "[SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event."
@@ -14190,6 +14654,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 8,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS2345",
             "message": "[NO_PROVIDER] Fix the earlier errors in this component before checking its render call. Missing: any."
@@ -14198,6 +14663,7 @@
             "stage": "cli",
             "file": "router.tsx",
             "line": 10,
+            "severity": "error",
             "code": "LAZY_VIEW",
             "tsCode": "TS2769",
             "message": "[generated] [LAZY_VIEW] children is a lazy view: function* () { return <.../>; }"
@@ -14206,6 +14672,7 @@
             "stage": "cli",
             "file": "router.tsx",
             "line": 13,
+            "severity": "error",
             "code": "TS2345",
             "tsCode": "TS2345",
             "message": "Argument of type '0' is not assignable to parameter of type 'string | ((prev: string | undefined) => string | undefined) | undefined'."
@@ -14214,6 +14681,7 @@
             "stage": "cli",
             "file": "router.tsx",
             "line": 13,
+            "severity": "error",
             "code": "WRITE_IN_REACTIVE",
             "tsCode": "TS2345",
             "message": "[WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state."
@@ -14256,6 +14724,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 10,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS1360",
             "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: RouterContext.",
@@ -14270,6 +14739,7 @@
             "stage": "cli",
             "file": "router.tsx",
             "line": 36,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with unknown and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -14278,6 +14748,7 @@
             "stage": "cli",
             "file": "server.tsx",
             "line": 21,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS1360",
             "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: RouterContext.",
@@ -14334,6 +14805,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 9,
+            "severity": "error",
             "code": "TS2488",
             "tsCode": "TS2488",
             "message": "Type 'number' must have a '[Symbol.iterator]()' method that returns an iterator."
@@ -14342,6 +14814,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 9,
+            "severity": "error",
             "code": "NATIVE_SETUP_FAILURE",
             "tsCode": "TS2769",
             "message": "[NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure."
@@ -14350,6 +14823,7 @@
             "stage": "cli",
             "file": "router.tsx",
             "line": 25,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS95000",
             "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value."
@@ -14398,6 +14872,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 9,
+            "severity": "error",
             "code": "NATIVE_SETUP_FAILURE",
             "tsCode": "TS2769",
             "message": "[NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure."
@@ -14406,6 +14881,7 @@
             "stage": "cli",
             "file": "router.tsx",
             "line": 26,
+            "severity": "error",
             "code": "NATIVE_THROW",
             "tsCode": "TS95000",
             "message": "[NATIVE_THROW] Throw an Error object so callers can identify and handle this failure."
@@ -14482,6 +14958,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 9,
+            "severity": "error",
             "code": "NATIVE_SETUP_FAILURE",
             "tsCode": "TS2769",
             "message": "[NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure."
@@ -14490,6 +14967,7 @@
             "stage": "cli",
             "file": "router.tsx",
             "line": 30,
+            "severity": "error",
             "code": "NATIVE_PROPS",
             "tsCode": "TS95000",
             "message": "[NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates."
@@ -14537,6 +15015,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 9,
+            "severity": "error",
             "code": "NATIVE_SETUP_FAILURE",
             "tsCode": "TS2769",
             "message": "[NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure."
@@ -14545,6 +15024,7 @@
             "stage": "cli",
             "file": "router.tsx",
             "line": 30,
+            "severity": "error",
             "code": "NATIVE_PROPS",
             "tsCode": "TS95000",
             "message": "[NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates."
@@ -14592,6 +15072,7 @@
             "stage": "cli",
             "file": "server.tsx",
             "line": 6,
+            "severity": "error",
             "code": "NATIVE_PROPS",
             "tsCode": "TS95000",
             "message": "[NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates."
@@ -14638,6 +15119,7 @@
             "stage": "cli",
             "file": "server.tsx",
             "line": 6,
+            "severity": "error",
             "code": "NATIVE_PROPS",
             "tsCode": "TS95000",
             "message": "[NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates."
@@ -14677,6 +15159,7 @@
             "stage": "cli",
             "file": "server.tsx",
             "line": 21,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: a transport failure (ChunkError).",
@@ -14723,6 +15206,7 @@
             "stage": "cli",
             "file": "server.tsx",
             "line": 21,
+            "severity": "error",
             "code": "PENDING_ROOT",
             "tsCode": "TS1360",
             "message": "[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.",
@@ -14776,6 +15260,7 @@
             "stage": "cli",
             "file": "Checkout.tsx",
             "line": 5,
+            "severity": "error",
             "code": "NATIVE_PROPS",
             "tsCode": "TS95000",
             "message": "[NATIVE_PROPS] Use a props parameter and read props.name where needed; destructuring loses reactive updates."
@@ -14822,6 +15307,7 @@
             "stage": "cli",
             "file": "Checkout.tsx",
             "line": 10,
+            "severity": "error",
             "code": "NATIVE_COMPONENT",
             "tsCode": "TS95000",
             "message": "[NATIVE_COMPONENT] Declare MutantInline1186 at module level; a component declared inside another function has no native lowering."
@@ -14868,6 +15354,7 @@
             "stage": "cli",
             "file": "Checkout.tsx",
             "line": 31,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with unknown and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -14876,6 +15363,7 @@
             "stage": "cli",
             "file": "Checkout.tsx",
             "line": 30,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with unknown and nothing catches it; wrap the body in try/catch, or declare the failure."
@@ -14884,6 +15372,7 @@
             "stage": "cli",
             "file": "Checkout.tsx",
             "line": 10,
+            "severity": "error",
             "code": "MODULE_STATE",
             "tsCode": "TS95000",
             "message": "[MODULE_STATE] reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses"
@@ -14894,6 +15383,7 @@
             "line": 1,
             "generatedLine": 8,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/no-foreign-reactive",
             "ruleId": "solid-yield/no-foreign-reactive",
             "message": "`createStore` from \"solid-js\" is reactive state routines cannot see: routines read and write only with `yield*`. Use `$store`."
@@ -14942,6 +15432,7 @@
             "stage": "cli",
             "file": "Checkout.tsx",
             "line": 10,
+            "severity": "error",
             "code": "MODULE_STATE",
             "tsCode": "TS95000",
             "message": "[MODULE_STATE] reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses"
@@ -14952,6 +15443,7 @@
             "line": 1,
             "generatedLine": 9,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/no-foreign-reactive",
             "ruleId": "solid-yield/no-foreign-reactive",
             "message": "`createSignal` from \"solid-js\" is reactive state routines cannot see: routines read and write only with `yield*`. Use `$signal`."
@@ -14998,6 +15490,7 @@
             "stage": "cli",
             "file": "Checkout.tsx",
             "line": 10,
+            "severity": "error",
             "code": "SUGAR_CALLBACK",
             "tsCode": "TS95000",
             "message": "[generated] [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event."
@@ -15037,6 +15530,7 @@
             "stage": "cli",
             "file": "Checkout.tsx",
             "line": 14,
+            "severity": "error",
             "code": "TS2345",
             "tsCode": "TS2345",
             "message": "Argument of type 'number' is not assignable to parameter of type 'string | ((prev: string) => string)'."
@@ -15045,6 +15539,7 @@
             "stage": "cli",
             "file": "Checkout.tsx",
             "line": 14,
+            "severity": "error",
             "code": "WRITE_IN_REACTIVE",
             "tsCode": "TS2345",
             "message": "[WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state."
@@ -15085,6 +15580,7 @@
             "stage": "cli",
             "file": "Checkout.tsx",
             "line": 21,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -15093,6 +15589,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 8,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS2345",
             "message": "[NO_PROVIDER] Fix the earlier errors in this component before checking its render call. Missing: any."
@@ -15103,6 +15600,7 @@
             "line": 21,
             "generatedLine": 44,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -15143,6 +15641,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 10,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: unknown | NoRuntime.",
@@ -15189,6 +15688,7 @@
             "stage": "cli",
             "file": "Checkout.tsx",
             "line": 33,
+            "severity": "error",
             "code": "PENDING_ROOT",
             "tsCode": "TS1360",
             "message": "[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.",
@@ -15242,6 +15742,7 @@
             "stage": "cli",
             "file": "runtime.ts",
             "line": 10,
+            "severity": "error",
             "code": "NATIVE_THROW",
             "tsCode": "TS95000",
             "message": "[NATIVE_THROW] Throw an Error object so callers can identify and handle this failure."
@@ -15317,6 +15818,7 @@
             "stage": "cli",
             "file": "runtime.ts",
             "line": 16,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS95000",
             "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value."
@@ -15363,6 +15865,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 14,
+            "severity": "error",
             "code": "NATIVE_THROW",
             "tsCode": "TS95000",
             "message": "[NATIVE_THROW] Throw an Error object so callers can identify and handle this failure."
@@ -15438,6 +15941,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 41,
+            "severity": "error",
             "code": "EVENT_REJECTS",
             "tsCode": "TS95000",
             "message": "[EVENT_REJECTS] This handler can fail with unknown and nothing catches it; wrap the body in try/catch, or declare the failure.",
@@ -15452,6 +15956,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 18,
+            "severity": "error",
             "code": "MODULE_STATE",
             "tsCode": "TS95000",
             "message": "[MODULE_STATE] reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses"
@@ -15462,6 +15967,7 @@
             "line": 5,
             "generatedLine": 6,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/no-foreign-reactive",
             "ruleId": "solid-yield/no-foreign-reactive",
             "message": "`createStore` from \"solid-js\" is reactive state routines cannot see: routines read and write only with `yield*`. Use `$store`."
@@ -15510,6 +16016,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 18,
+            "severity": "error",
             "code": "MODULE_STATE",
             "tsCode": "TS95000",
             "message": "[MODULE_STATE] reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses"
@@ -15520,6 +16027,7 @@
             "line": 4,
             "generatedLine": 6,
             "generated": false,
+            "severity": "error",
             "code": "solid-yield/no-foreign-reactive",
             "ruleId": "solid-yield/no-foreign-reactive",
             "message": "`createSignal` from \"solid-js\" is reactive state routines cannot see: routines read and write only with `yield*`. Use `$signal`."
@@ -15559,6 +16067,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 18,
+            "severity": "error",
             "code": "CREATE_OUTSIDE_SETUP",
             "tsCode": "TS2769",
             "message": "[generated] [CREATE_OUTSIDE_SETUP] Create this state in the component body, before returning JSX."
@@ -15605,6 +16114,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 21,
+            "severity": "error",
             "code": "NO_PROVIDER",
             "tsCode": "TS95000",
             "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value."
@@ -15651,6 +16161,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 23,
+            "severity": "error",
             "code": "SUGAR_CALLBACK",
             "tsCode": "TS95000",
             "message": "[SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event."
@@ -15719,6 +16230,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 25,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -15727,6 +16239,7 @@
             "stage": "cli",
             "file": "main.tsx",
             "line": 3,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any."
@@ -15737,6 +16250,7 @@
             "line": 25,
             "generatedLine": 34,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."
@@ -15777,6 +16291,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 29,
+            "severity": "error",
             "code": "FOREIGN_HANDOFF",
             "tsCode": "TS2345",
             "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: unknown | RangeError.",
@@ -15823,6 +16338,7 @@
             "stage": "cli",
             "file": "App.tsx",
             "line": 25,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "tsCode": "TS2769",
             "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
@@ -15833,6 +16349,7 @@
             "line": 25,
             "generatedLine": 34,
             "generated": true,
+            "severity": "error",
             "code": "READ_IN_SETUP",
             "ruleId": "solid-yield/no-read-in-setup",
             "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event."

@@ -178,7 +178,7 @@ but does not yet implement that full recursive analysis (F-S3).
 | `for`, `while`, `if`, `return` inside memo/event/helper                | Preserve order and early returns. All operations still need the host's admission. Event loops/early returns have transform tests. Do not turn a component-body reactive `if` into a dynamic branch. |
 | Static setup branch returning JSX                                      | Wrap each JSX return with a view. Returning a non-JSX value on another branch is `[SUGAR_RETURN]` in the prototype.                                                                                 |
 | `async () => …` as a routine                                           | `[SUGAR_ASYNC]` or `[SUGAR_HOST]`; use synchronous routine code plus `attempt`. A plain async I/O function passed to `attempt` stays plain.                                                         |
-| Reactive class/object method                                           | `[SUGAR_HOST]`. Preserving receiver, inheritance, construction and lexical `super` needs a separate rule. Plain data/API methods stay ordinary JavaScript.                                          |
+| Reactive class/object method                                           | Checked (D-124): a method that reads is a generator method its callers delegate to (receiver kept); a getter hands back a source over its body (`nativeGetter`). A constructor or a setter that reads still reports `[SUGAR_HOST]`. |
 | A routine arrow capturing `this`/`arguments`                           | `[SUGAR_LEXICAL]` for seeded callbacks. Do not change lexical bindings merely to print a generator. General helper arrows are still F-S1.                                                           |
 | `throw`, `try/catch`, writes in a memo, async waits in effect phase    | Existing generated lint/type errors. Sugar does not relax these rules.                                                                                                                              |
 | Reactive `ref`, JSX spread, spread child                               | Existing one-rule refusal (`YIELD_IN_REF`, `YIELD_IN_SPREAD`, `YIELD_IN_SPREAD_CHILD`).                                                                                                             |
@@ -897,9 +897,9 @@ than a fundamental incompatibility.
 | `createEffect(() => memo(), n => { set(n + 1) })` where memo reads that signal | Transform; **cycle not diagnosed** | `feedback` passes TS/lint. No termination guarantee; no runtime execution of this deliberate infinite feedback fixture. |
 | `createEffect(() => {})` | Refusal | `NATIVE_EFFECT_PHASES`: “createEffect needs a tracked compute and an untracked effect phase.” This is also invalid under the installed native two-phase signature. |
 | Async effect phase | Refusal | `SUGAR_ASYNC`: “Use attempt inside a synchronous routine; async functions are not routines.” |
-| `{ read() { return count() } }` | Refusal | `SUGAR_HOST`: “Reactive operations in async functions or methods are unsupported.” |
+| `{ read() { return count() } }` | Checked (D-124) | a generator method; `o.read()` is delegated where it is called |
 | State creation in JSX hole | Refusal in this prototype | `SUGAR_CALLBACK` while reconstructing the nested call; no claim of reaching the host-type check |
-| `<button {...attributes}/>` / `<button ref={fn}/>` | Refusal | `NATIVE_SPREAD` / `NATIVE_REF`: hidden bindings and ref ownership need verified contracts |
+| `<button {...attributes}/>` / `<button ref={fn}/>` | Checked (D-124) | a DOM spread goes through `nativeSpread` (its sources' colors to the view, its events bound; a namespaced attribute on a component still reports `NATIVE_SPREAD`); a ref callback is an event |
 | Event handler using `this` | Refusal | `NATIVE_RECEIVER`: “An event handler using this needs a verified receiver-preserving binding.” Tested in `native.test.js`. |
 | A component declared inside another and used as a tag | Refusal | `NATIVE_COMPONENT` at its declaration: “Declare X at module level; a component declared inside another function has no native lowering.” Tested in `native.test.js`. |
 | `useContext(createContext<T>())` | Refusal | `NO_PROVIDER` at the read: a defaultless context created in its own read can never be provided. Tested in `native-context.test.js`. |
@@ -2162,3 +2162,66 @@ compositional); a settled prop would be tracked by nothing. The lowered event
 leaves the store Solid's event leaves; a computation none of whose tracked
 reads an event wrote keeps its result, so Solid not rerunning it is right, and
 a memo's cache stays Solid's outcome.
+
+### Foreign APIs and the whole language surface (D-124; 2026-10-13)
+
+**Foreign Solid APIs.** Per D-116 and Dev's ruling, a Solid API with no
+native model stays as written: its value is Solid's type and its failures
+are `unknown`, handled where it is used (`nativeForeignApi`). The common ones
+are modelled: `untrack` (`nativeUntrack`: the host's reads, untracked;
+settled only in a component's body), `merge`/`omit`/`mergeProps`
+(non-throwing), `children` (a memo), `createRenderEffect` and
+`createTrackedEffect` (effects), `Dynamic` (a foreign tag). Plain code given a
+source gets Solid's accessor (`nativeAccessor`); a helper's `Accessor<T>`
+parameter carries its callers' colors; a DOM spread reads its sources and
+binds its events where Solid's spread does (`nativeSpread`).
+
+**The surface check.** `scripts/native-surface` is the completeness check:
+every JavaScript and TypeScript form a component is written in (65 forms),
+placed in every host Solid runs code in (hole, attribute, memo, effect
+compute, effect phase, event, component body), reading, writing, and reading
+sources that are pending in a rendered app; the five `await` and promise
+forms in the event; and 40 JSX constructs (attributes, `class`/`style`
+objects, SVG, children, lists, every flow control, components with props,
+children and getter props, every event shape, inputs, refs). 1420 programs,
+each with what plain Solid says about it, through the mutation program's
+pipeline (transform, `solid-yield check`, generated lint). The pending
+variant is the soundness half: a form that dropped a read's color would let
+a suspension or a failure through unreported. All 1420 match
+(`documentation/native-surface.json`); the gate runs it (`native:surface`),
+reusing a result for the same sources.
+
+**What it found.** Gaps in common Solid code, all fixed and each
+pinned by a vitest case (`native-forms.test.js`, `native-foreign-apis.test.js`)
+or a ts-plugin case (C07–C09):
+
+- `store.list.map(…)`/`filter(…)` chains failed to type: the structural read
+  was given the list already read.
+- An IIFE, or an array callback, in a component body was refused
+  (`SUGAR_CALLBACK`) instead of `READ_IN_SETUP`; in a hole an IIFE ran as a
+  callback of its own, so a pending read in it went unreported. An IIFE is
+  now an inline routine (in a hole, a thunk through `nativeHole`, since JSX's
+  contextual typing widened a `try` in it to `any`).
+- A local function only ever called (`const get = () => n(); get() + 1`)
+  ran as a lexical callback: its colors were dropped. It is a routine now, as
+  a reader a function hands back is.
+- An object's getter or method that reads was refused (`SUGAR_HOST`); a
+  class declared inside a memo or a handler was refused (`SUGAR_LEXICAL`,
+  `NATIVE_RECEIVER`), its own `this` taken for the arrow's.
+- Nested `await`s were attempted inside a thunk; `await r.json()`, a promise
+  of `any`, was typed as a stream (`STREAM_IN_EVENT`).
+- An effect phase returning `void` (`v => console.log(v)`) failed to type in
+  the cleanup lowering.
+- `onClick={props.onClick}` and Solid's `onClick={[handler, data]}` were
+  refused (`NATIVE_HANDLER`); a callback prop's unannotated parameters lost
+  the child's declared types.
+- `import type { JSX } from "@solidjs/web"` was dropped (Babel does not count
+  a qualified type name as a reference); an unmapped type-only import was
+  emitted twice.
+- A write in a component body was reported as `JSX_IN_SETUP`
+  (`WRITE_IN_REACTIVE` now); a pending read in an effect phase as
+  `GENERATED_TYPE` (`PENDING_IN_EFFECT`, new); a failure inside a generator
+  declared in a handler twice (handler and root).
+- The type-checking service looped forever when the lowering crashed without
+  naming a file: it blamed a file already dropped, so nothing was dropped.
+

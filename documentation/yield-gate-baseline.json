@@ -805,8 +805,8 @@
         "equivalent": 0
       }
     },
-    "recordedAt": "2026-10-13T03:53:47.824Z",
-    "digest": "7d64052b5276ce67ebc8f20155619a65b3022dc83ad014368192a3c1f655b36a"
+    "recordedAt": "2026-10-13T16:20:53.963Z",
+    "digest": "4bf72e6479622ca920caf14683f9fb3eda1697a1b1a538ac66c1fd0c4112e0bb"
   },
   "strykerReportOnly": {
     "mode": "REPORT-ONLY",

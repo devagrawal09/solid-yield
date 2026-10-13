@@ -709,13 +709,9 @@
     {
       "id": "method-read",
       "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; export function Counter(){const [count,set]=createSignal(0);const obj={read(){return count();}};return <p>{obj.read()}</p>;}",
-      "stage": "transform",
-      "diagnostics": [
-        {
-          "code": "SUGAR_HOST",
-          "message": "[SUGAR_HOST] Reactive operations in async functions or methods are unsupported. (<root>/packages/vite-plugin-yield/test/.native-generated/method-read.tsx:1:191)"
-        }
-      ]
+      "file": "packages/vite-plugin-yield/test/.native-generated/method-read.tsx",
+      "stage": "accepted",
+      "diagnostics": []
     },
     {
       "id": "feedback",
@@ -742,16 +738,9 @@
     {
       "id": "spread",
       "source": "import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from \"solid-js\"; export function Counter(){const [count,set]=createSignal(0);const attributes={onClick:()=>set(1)};return <button {...attributes}/>;}",
-      "stage": "transform",
-      "diagnostics": [
-        {
-          "code": "NATIVE_SPREAD",
-          "message": "A JSX spread may hide reads or event bindings; native spread lowering is not verified.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/spread.tsx",
-          "line": 1,
-          "column": 219
-        }
-      ]
+      "file": "packages/vite-plugin-yield/test/.native-generated/spread.tsx",
+      "stage": "accepted",
+      "diagnostics": []
     },
     {
       "id": "ref",
@@ -2092,7 +2081,7 @@
       "diagnostics": [
         {
           "code": "SUGAR_CALLBACK",
-          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/examples/originals/room/src/lib/room-panel.tsx:56:7)"
+          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/examples/originals/room/src/routes/home.tsx:75:57)"
         }
       ],
       "parity": "not run: no checked native program",

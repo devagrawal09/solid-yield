@@ -502,13 +502,13 @@ describe("setup operations", () => {
 
   devIt("a setup does not read: READ_IN_SETUP", () => {
     // @ts-expect-error a setup does not read (Read is not a SetupOp)
-    const Bad = component(function* (props: Props<{ start: number }>) {
+    const Bad = component(function* (props: Props<{ start: Source<number> }>) {
       const v = yield* props.start;
       return view(function* () {
         return <i>{v}</i>;
       });
     });
-    expect(() => createRoot(() => Bad({ start: 1 }))).toThrow(/READ_IN_SETUP/);
+    expect(() => createRoot(() => Bad({ start: constant(1) }))).toThrow(/READ_IN_SETUP/);
   });
 
   devIt("creating outside a setup and writing in a memo are dev errors", () => {
@@ -694,7 +694,7 @@ describe("setups inside a parent's first view run", () => {
     let parentRuns = 0;
     const Leaf = component(function* (props: Props<{ n: number }>) {
       const n = yield* $memo(function* () {
-        return yield* props.n;
+        return props.n;
       });
       return view(function* () {
         return <i>{perform(n)}</i>;
@@ -715,15 +715,15 @@ describe("setups inside a parent's first view run", () => {
 });
 
 describe("props", () => {
-  it("props are reads; forwarding a source forwards the read; paths walk deep", () => {
+  it("a reactive prop is a path; forwarding a source forwards the read; paths walk deep; a held prop is its value (D-118)", () => {
     let setName!: (v: string) => void;
     let childRuns = 0;
-    const Card = component(function* (props: Props<{ user: { name: string }; tag: string }>) {
+    const Card = component(function* (props: Props<{ user: Source<{ name: string }>; tag: string }>) {
       return view(function* () {
         childRuns++;
         return (
           <p>
-            {perform(props.tag)}:{perform(props.user.name)}
+            {props.tag}:{perform(props.user.name)}
           </p>
         );
       });
@@ -1057,7 +1057,7 @@ describe("context", () => {
     const Child = component(function* () {
       const theme = yield* Theme;
       return view(function* () {
-        return <i>{perform(theme)}</i>;
+        return <i>{theme}</i>;
       });
     });
     mount(() => <Theme value="dark">{Child()}</Theme>);
@@ -1065,7 +1065,10 @@ describe("context", () => {
   });
 
   describe("D-098: a context without a default is required", () => {
-    const UserCtx = createContext<{ name: string }, "UserCtx">(undefined, { name: "UserCtx" });
+    // a reactive context (D-118): the reader holds a path over the provided source or hole
+    const UserCtx = createContext<Source<{ name: string }>, "UserCtx">(undefined, {
+      name: "UserCtx"
+    });
     const Avatar = component(function* Avatar() {
       const user = yield* UserCtx;
       return view(function* () {
@@ -1103,7 +1106,7 @@ describe("context", () => {
             <>
               {
                 yield* UserCtx.provide({
-                  value: { name: "ada" },
+                  value: constant({ name: "ada" }),
                   children: function* () {
                     return (
                       <>
@@ -1135,7 +1138,7 @@ describe("context", () => {
             <>
               {
                 yield* UserCtx.provide({
-                  value: { name: "inner" },
+                  value: constant({ name: "inner" }),
                   children: function* () {
                     return <b>{yield* user.name}</b>;
                   }
@@ -1148,7 +1151,7 @@ describe("context", () => {
       expect(() => createRoot(() => SelfProvider())).toThrow("[NO_PROVIDER]");
     });
 
-    it("the provided value flows: a value, a source (live), a hole; the nearest provider wins", () => {
+    it("the provided value flows: a constant, a source (live), a hole; the nearest provider wins", () => {
       let set!: (name: string) => void;
       const App = component(function* App() {
         const [name, setName] = yield* $signal("ada");
@@ -1158,7 +1161,7 @@ describe("context", () => {
             <>
               {
                 yield* UserCtx.provide({
-                  value: { name: "plain" },
+                  value: constant({ name: "plain" }),
                   children: function* () {
                     return (
                       <>
@@ -1235,7 +1238,7 @@ describe("context", () => {
         return view(function* () {
           return (
             <i>
-              {yield* theme}/{String(yield* who)}
+              {theme}/{String(yield* who)}
             </i>
           );
         });
@@ -1975,7 +1978,7 @@ describe("row routines", () => {
     const rows = [{ t: "a" }, { t: "b" }];
     let set!: (v: typeof rows) => void;
     let views = 0;
-    const Row = component(function* (props: Props<{ row: { t: string } }>) {
+    const Row = component(function* (props: Props<{ row: Source<{ t: string }> }>) {
       const [n] = yield* $signal(0);
       return view(function* () {
         views++;
@@ -2290,7 +2293,7 @@ describe("lazy", () => {
   it("a lazy yield component in call form is built once; its chunk and its state land in place", async () => {
     let setups = 0;
     let bump!: () => void;
-    const Inner = component(function* (props: Props<{ label: string }>) {
+    const Inner = component(function* (props: Props<{ label: Source<string> }>) {
       setups++;
       const [n, setN] = yield* $signal(1);
       bump = () => write(() => setN(v => v + 1));
@@ -2341,7 +2344,7 @@ describe("lazy", () => {
 describe("flow controls keep children lazy", () => {
   it("a hole prop is read in the child, as a source is: a change updates the hole, the child is not re-created (D-065)", () => {
     let setups = 0;
-    const Total = component(function* (props: Props<{ n: number }>) {
+    const Total = component(function* (props: Props<{ n: Source<number> }>) {
       setups++;
       return view(function* () {
         return <b>{yield* props.n}</b>;
@@ -2517,7 +2520,7 @@ describe("flow controls keep children lazy", () => {
 
 describe("computations created in a setup", () => {
   it("read sources in their own pass (their reads are theirs, not the setup's)", () => {
-    const Child = component(function* (props: Props<{ n: number }>) {
+    const Child = component(function* (props: Props<{ n: Source<number> }>) {
       const m = yield* $memo(function* () {
         return (yield* props.n) * 2;
       });
@@ -2541,13 +2544,13 @@ describe("computations created in a setup", () => {
   });
 
   devIt("the setup's own read is still an error", () => {
-    const Child = component(function* (props: Props<{ n: number }>) {
+    const Child = component(function* (props: Props<{ n: Source<number> }>) {
       yield* props.n as unknown as Iterable<never>;
       return view(function* () {
         return <b />;
       });
     });
-    expect(() => createRoot(() => Child({ n: 1 }))).toThrow("[READ_IN_SETUP]");
+    expect(() => createRoot(() => Child({ n: constant(1) }))).toThrow("[READ_IN_SETUP]");
   });
 });
 
@@ -2558,7 +2561,7 @@ describe("D-097: a component runs in its caller's computation (no untrack)", () 
     let effects = 0;
     const [n, setN] = plainSignal(1);
     const Foreign = (props: { value: number }) => <u>{props.value}</u>;
-    const Child = component(function* Child(props: Props<{ n: number; label: string }>) {
+    const Child = component(function* Child(props: Props<{ n: Source<number>; label: string }>) {
       setups++;
       const doubled = yield* $memo(function* () {
         return (yield* props.n) * 2;
@@ -2575,7 +2578,7 @@ describe("D-097: a component runs in its caller's computation (no untrack)", () 
       return view(function* () {
         return (
           <p>
-            {perform(props.label)}:{perform(doubled)}
+            {props.label}:{perform(doubled)}
             {perform(
               Show({
                 when: function* () {
@@ -2628,7 +2631,7 @@ describe("D-097: a component runs in its caller's computation (no untrack)", () 
   devIt(
     "a read in a setup called inside a hole is still READ_IN_SETUP (the hole's observer is the setup's)",
     () => {
-      const Bad = component(function* Bad(props: Props<{ n: number }>) {
+      const Bad = component(function* Bad(props: Props<{ n: Source<number> }>) {
         yield* props.n as unknown as Iterable<never>;
         return view(function* () {
           return <b />;
@@ -2636,7 +2639,7 @@ describe("D-097: a component runs in its caller's computation (no untrack)", () 
       });
       const Parent = component(function* Parent() {
         return view(function* () {
-          return <div>{perform(Bad({ n: 1 }))}</div>;
+          return <div>{perform(Bad({ n: constant(1) }))}</div>;
         });
       });
       expect(() => mount(Parent)).toThrow("[READ_IN_SETUP]");
@@ -3082,7 +3085,7 @@ describe("host state is per run (re-entrancy)", () => {
     const Card = component(function* Card(props: Props<{ name: string }>) {
       return view(function* () {
         cardViews++;
-        return <b>{perform(props.name)}</b>;
+        return <b>{props.name}</b>;
       });
     });
     const App = component(function* App() {
@@ -3302,10 +3305,10 @@ describe("binding an event is a hole (D-072)", () => {
   describe("D-085: a bound event's failure routes to the bind site", () => {
     /** Binds the handler it finds in context: the bind site. */
     const Child = component(function* Child() {
-      // a context's value is read like a prop (D-098): read the handler, then bind it
+      // a context's value is given as a prop is (D-118): the handler itself, bound with one yield*
       const save = yield* SaveContext;
       return view(function* () {
-        return <button onClick={yield* yield* save}>save</button>;
+        return <button onClick={yield* save}>save</button>;
       });
     });
     /** Creates the handler, and renders `Child` under an `Errored` of `Child`'s own. */
@@ -3409,7 +3412,7 @@ describe("binding an event is a hole (D-072)", () => {
       const Caller = component(function* Caller() {
         const save = yield* SaveContext;
         call = $event(function* () {
-          const handler = yield* save;
+          const handler = save;
           yield* attempt(
             () => handler(),
             e => {

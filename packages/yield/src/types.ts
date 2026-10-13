@@ -407,7 +407,9 @@ export type TypedStore<T> = Path<T>;
  * names the declaration that is not.
  */
 export type Props<D extends PropsCheck<D>> = {
-  readonly [N in keyof D]-?: PropRead<
+  // not homomorphic (`Extract<keyof D, …>`): `-?` on an optional key would strip the
+  // `undefined` a prop the caller left out is in the child
+  readonly [N in Extract<keyof D, PropertyKey>]: PropRead<
     Exclude<D[N], undefined>,
     undefined extends D[N] ? undefined : never,
     N

@@ -121,8 +121,8 @@ export const When = component(function* When() {
   });
 });
 export type WhenCaller = Expect<Equal<ViewFailsOf<ReturnType<typeof When>>, Boom>>;
-// a hole that raises is refused for a prop declared settled (D-024)
-const Settled = component(function* Settled(props: Props<{ n: number }>) {
+// a hole that raises is refused for a reactive prop declared settled (D-024, D-118)
+const Settled = component(function* Settled(props: Props<{ n: Source<number> }>) {
   return view(function* () {
     return <i>{yield* props.n}</i>;
   });

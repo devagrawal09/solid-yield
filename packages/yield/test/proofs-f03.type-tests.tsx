@@ -3,7 +3,7 @@ import { component, view, type Props, type PropsInput, type Source } from "solid
 // @ts-expect-error [PROP_TYPE] declare the prop's type
 const Child = component(function* (p: Props<{ value: unknown }>) {
   return view(function* () {
-    return <b>{String(yield* p.value)}</b>;
+    return <b>{String(p.value)}</b>;
   });
 });
 declare const bad: Source<string, Error, true>;
@@ -15,7 +15,7 @@ const anyInput: PropsInput<{ value: any }> = { value: bad };
 type BroadSource = Props<{ value: Source<unknown> }>;
 const Value = component(function* (p: Props<{ value: string }>) {
   return view(function* () {
-    return <b>{yield* p.value}</b>;
+    return <b>{p.value}</b>;
   });
 });
 Value({ value: "ok" });

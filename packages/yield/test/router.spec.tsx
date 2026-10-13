@@ -13,14 +13,14 @@ const ThemeCtx = createContext<Theme, "ThemeCtx">(undefined, { name: "ThemeCtx" 
 
 const Notes = component(function* Notes(props: Props<RouteProps<"/notes/:mode", undefined>>) {
   return view(function* () {
-    return <h1 class="notes">notes: {yield* props.params.mode}</h1>;
+    return <h1 class="notes">notes: {props.params.mode}</h1>;
   });
 });
 
 const Settings = component(function* Settings() {
   const theme = yield* ThemeCtx;
   return view(function* () {
-    return <p class="theme">theme: {yield* theme}</p>;
+    return <p class="theme">theme: {theme}</p>;
   });
 });
 

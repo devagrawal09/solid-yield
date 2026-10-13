@@ -203,7 +203,7 @@ export function fetchNotes(folder: string): Promise<Note[]> {
 
 export const Folder = component(function* Folder(props: Props<{ folder: string }>) {
   const notes = yield* $memo(function* () {
-    const folder = yield* props.folder;
+    const folder = props.folder;
     return yield* attempt(
       () => fetchNotes(folder),
       cause => new LoadFailed(cause instanceof Error ? cause.message : String(cause))

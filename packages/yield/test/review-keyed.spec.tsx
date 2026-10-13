@@ -11,7 +11,8 @@ import {
   Show,
   render,
   view,
-  type Props
+  type Props,
+  type Source
 } from "solid-yield";
 class Drop extends Failure("drop") {}
 const tick = () => new Promise<void>(r => setTimeout(r, 0));
@@ -28,7 +29,7 @@ it("chat review: keyed remount of a failed stream", async () => {
     await tick();
     throw new Error("drop");
   }
-  const Live = component(function* Live(props: Props<{ attempt: number }>) {
+  const Live = component(function* Live(props: Props<{ attempt: Source<number> }>) {
     const data = yield* $memo(function* () {
       yield* props.attempt;
       return yield* attempt(watch, e => new Drop(String(e)));

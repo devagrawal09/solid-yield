@@ -46,20 +46,29 @@ it("D-118's refusals lead with readable type messages", () => {
   const { options } = ts.parseJsonConfigFileContent(config.config, ts.sys, resolve("."));
   const file = resolve("test/type-message-fixture-d118.tsx");
   const text = `
-    import {component, view, $event, $signal, $slot, compose, createSlot, render, type Handler, type Part, type Path, type Props} from "solid-yield";
+    import {component, view, $event, $signal, constant, createContext, type Handler, type Props, type Source} from "solid-yield";
     const Pick = component(function* Pick(props: Props<{ onPick: Handler }>) { return view(function* () { return <p/>; }); });
+    const Room = component(function* Room(props: Props<{ room: string }>) { return view(function* () { return <p>{props.room}</p>; }); });
+    const Count = component(function* Count(props: Props<{ n: Source<number> }>) { return view(function* () { return <p>{yield* props.n}</p>; }); });
+    declare const pending: Source<number, never, true>;
+    const Held = createContext<string, "Held">(undefined, { name: "Held" });
+    const Live = createContext<Source<string>, "Live">(undefined, { name: "Live" });
     const Host = component(function* Host() {
       const pick = $event(function* () {});
       const [held] = yield* $signal(pick);
-      return view(function* () { return <>{yield* Pick({ onPick: held })}</>; });
+      const [room] = yield* $signal("lobby");
+      return view(function* () {
+        return <>
+          {yield* Pick({ onPick: held })}
+          {yield* Room({ room })}
+          {yield* Count({ n: 1 })}
+          {yield* Count({ n: pending })}
+          {yield* Held.provide({ value: room, children: function* () { return <i/>; } })}
+          {yield* Live.provide({ value: "x", children: function* () { return <i/>; } })}
+        </>;
+      });
     });
-    type Optional = Props<{ onPick?: Handler }>;
-    type S = { n: number };
-    const Slot = createSlot<Part<S>, "NSlot">({ name: "NSlot" });
-    const Reader = component(function* Reader() { const s = yield* $slot(Slot); return view(function* () { return <i>{yield* s.at.n}</i>; }); });
-    render(Reader, document.body);
-    const Other = createSlot<{ at: Path<S> }, "Other">({ name: "Other" });
-    compose({ n: { init: (): S => ({ n: 0 }), slot: Other } });
+    void [Host, constant];
   `;
   const host = ts.createCompilerHost(options);
   const read = host.readFile;
@@ -69,15 +78,22 @@ it("D-118's refusals lead with readable type messages", () => {
   const program = ts.createProgram([file], options, host);
   const diagnostics = program.getSemanticDiagnostics(program.getSourceFile(file));
   const messages = diagnostics.map(d => ts.flattenDiagnosticMessageText(d.messageText, "\n"));
-  expect(messages).toHaveLength(4);
+  expect(messages).toHaveLength(6);
   expect(messages[0]).toContain(
     "[HANDLER_PROP] prop `onPick` is an event handler: pass an $event, not a source or a hole"
   );
   expect(messages[1]).toContain(
-    "[OPTIONAL_HANDLER] an event-handler prop is required (it is held, not read)"
+    "[HELD_PROP] prop `room` is held as a value: declare it Source<…> to pass a live one"
   );
-  expect(messages[2]).toContain("[NO_PROVIDER]");
-  expect(messages[2]).toContain('"NSlot"');
-  expect(messages[3]).toContain("[SLOT_PART] entry `n`'s slot must carry its part");
+  expect(messages[2]).toContain(
+    "[REACTIVE_PROP] prop `n` is reactive and settled: pass a settled source, path or hole (constant(v) for a fixed value), or declare it Source<T, E, true>"
+  );
+  expect(messages[3]).toContain("[REACTIVE_PROP] prop `n` is reactive and settled");
+  expect(messages[4]).toContain(
+    "[HELD_PROP] prop `value` is held as a value: declare the context Source<T> to provide a live one"
+  );
+  expect(messages[5]).toContain(
+    "[REACTIVE_PROP] prop `value` is reactive: pass a source, a path or a hole (constant(v) for a fixed value)"
+  );
   expect(diagnostics.some(d => d.code === 2589)).toBe(false);
 });

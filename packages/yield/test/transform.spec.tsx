@@ -17,6 +17,7 @@ import {
   render,
   Show,
   type Props,
+  type Source,
   view
 } from "solid-yield";
 import { toFailed } from "./failed.js";
@@ -109,7 +110,7 @@ it("measured case: runs once, suspends to Loading, updates text and class indepe
 
 it("props, stores, row routines and hole routines read with yield* in JSX", () => {
   let views = 0;
-  const Item = component(function* (props: Props<{ todo: { title: string; done: boolean } }>) {
+  const Item = component(function* (props: Props<{ todo: Source<{ title: string; done: boolean }> }>) {
     return view(function* () {
       views++;
       return <li class={{ done: yield* props.todo.done }}>{yield* props.todo.title}</li>;

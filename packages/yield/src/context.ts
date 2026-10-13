@@ -98,10 +98,14 @@ export interface ContextOps<T, N extends string, Q> {
    */
   readonly provide: Provide<T, Q>;
 }
-/** `Ctx.provide`: a call-form yield component (D-062, D-066). */
-export interface Provide<T, Q> {
+/**
+ * `Ctx.provide`: a call-form yield component (D-062, D-066). `I` is what its
+ * `value` takes: what a prop takes for a context (`ProvidedValue`), a lens
+ * for a slot (D-118).
+ */
+export interface Provide<T, Q, I = ProvidedValue<T>> {
   <C>(props: {
-    value: ProvidedValue<T>;
+    value: I;
     children: LazyParam<C, Children<[]>, "children">;
   }): ComponentView<
     PendingOf<Ops<C>>,
@@ -109,8 +113,8 @@ export interface Provide<T, Q> {
     MayWaitOf<Ops<C>>,
     Exclude<Settle<RequiresOf<Ops<C>>>, Q>
   >;
-  /** Phantom: what it gives and discharges (`h`'s provider overload reads it). */
-  readonly [PROVIDES]: { readonly value: T; readonly discharges: Q };
+  /** Phantom: what it gives, discharges and takes (`h`'s provider overload reads it). */
+  readonly [PROVIDES]: { readonly value: T; readonly discharges: Q; readonly input: I };
 }
 /** A context with a default (D-060): always there to read, so never required. */
 export interface YieldContext<T, N extends string = string>

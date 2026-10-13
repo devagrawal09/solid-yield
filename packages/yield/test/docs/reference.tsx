@@ -57,8 +57,8 @@ export const ThemePicker = component(function* ThemePicker(
   props: Props<{ theme: Source<Theme>; onPick: Handler<[Theme]> }>
 ) {
   const pickDark = $event(function* () {
-    // a handler in a prop is read, then called: `yield* (yield* props.onPick)(…)`
-    yield* (yield* props.onPick)("dark");
+    // a handler prop is a reference (D-118): held, called as a local event is
+    yield* props.onPick("dark");
   });
   return view(function* () {
     return (

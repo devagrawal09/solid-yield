@@ -39,6 +39,8 @@ premise: what the lowering or runtime must establish for the theorem to apply.
 | **S18 A failing call in a JSX hole** (2026-10-12): its failure is the hole's, a failing read of the view | `hole_hosted_in_view`, `hole_raise_as_read` (S9); `raise_in_view_refused` (why the wrapper is needed) | `nativeHole(work)` is typed `Yieldable<HoleViewOp<Y>, R>`: a `Raise<E>` becomes `Read<false, E>`, a stream attempt nothing (its failures reach its handler). At run time the compiled JSX hole runs the work as a hole, where a raise is admitted. The lowering wraps only an attempt directly in a JSX expression (no function between), and drops the wrapper with the attempt when the call turns out to be a source's or a routine's. | `native-hole-failures.test.js` |
 | **S19 A promise given to For** (2026-10-12): the list is the promise itself, not what awaiting it gives | `boxed_keeps_made`, `boxed_no_wait`, `boxed_list_is_original`; `awaited_list_unsound` (why the attempt is boxed) | The call is the whole value of a `For` (from `solid-js`) `each` and returns a promise; its attempt takes `{ value: call }`, which is not a promise, so the attempt catches what making the call raises and waits for nothing. The library's `For` refuses an `each` whose value is not a list (`EachRule`, `[FOR_EACH]`), as Solid's `For` fails on one at run time. | `native-hole-failures.test.js` (a promise given to For), `jsx.type-tests.tsx` (`PromiseEach`); mutation catalog `non-core-cache` |
 | **S20 The insertion itself** (2026-10-12): the lowered routine computes what Solid computes | `insertion_preserves`, `eval_depends_on_trace`, `lowered_reads_are_dependencies` (with `run_bind`); `snapshot_untracked` (why every source read needs its `yield*`) | On a core of plain Solid expressions (literals, plain calls, source reads, sums, conditionals, `throw`), the lowering inserts `yield*` at exactly the reads TypeScript types as sources (an accessor call, a store path, a memo) and leaves every other call plain; the driver returns a settled source's value and tracks it, and suspends on a pending one, as Solid's read does (`NotReadyError`). The premise is checked on the real lowering by a differential run, not proved. | `scripts/native-insertion/check.mjs` (`native:insertion`: seeded programs as written and lowered, every slot through writes); `native.test.js`, `native-jsx-holes.test.js`, `native-receivers.test.js`; the native parity harnesses |
+| **S21 Props are getters** (D-119, 2026-10-13): a child reads its caller's expression where it reads the prop | `lowerWith_subst` (lowering is compositional), `prop_reads_are_callers`; `settled_prop_untracked` (why a prop is a getter) | A prop read in the lowered child delegates to the caller's lowered expression (the lowering passes props as getters, `Source<T, E, P>` per D-119), so it runs and tracks at the child's read. | `native-props.test.js`, ts-plugin T08, `native:insertion` (each memo crosses a child's prop) |
+| **S22 Events and reruns** (2026-10-13): an event writes what Solid writes; a computation reruns exactly when it must | `event_preserves`, `event_untouched`, `untouched_keeps`, `memo_cache_consistent` | An event's writes are its setters' calls in order, each value computed as its expression is (S1, S3); Solid reruns a computation when an event wrote one of its tracked reads. | `native:insertion` (twelve writes per program, every slot compared after each), the native parity harnesses |
 | **S8 Effect cleanup** (F-S42): a returned cleanup runs before the next run and at disposal, once each | `clean_mem_iff`, `run_mem_iff`, `clean_before_next_run`; `ignoring_never_cleans` (the old lowering) | `onCleanup` registered in the effect phase runs before the owner's next run and at disposal (Solid 2's owner contract). | `native-effect-cleanup.test.js` |
 
 ## What each result means
@@ -148,21 +150,26 @@ list is the original's promise, which `For`'s type refuses.
 
 **S20.** The lowering is generator sequencing (`Prog.bind`), so running it is running its parts in order (`run_bind`); by induction on the expression, the lowered routine gives Solid's outcome and Solid's tracked reads, in order, up to and including the read that suspends (`insertion_preserves`). Solid's tracked reads are what the outcome depends on: a store that agrees on them gives the same evaluation (`eval_depends_on_trace`), so the lowered routine's reads are exactly its dependencies and Solid reruns it exactly when it must (`lowered_reads_are_dependencies`). A value read once and kept is tracked by nothing (`snapshot_untracked`): that is the read in setup that `READ_IN_SETUP` refuses.
 
+**S21.** A child's prop reads delegate to the caller's lowered getters. Lowering is compositional (`lowerWith_subst`): the child lowered that way is the lowering of the child with the caller's expressions put where it reads them. So by S20 it computes what Solid computes with getter props, reads tracked at the child's read site (`prop_reads_are_callers`). A value the caller read once and passed is tracked by nothing in the child (`settled_prop_untracked`): the reason D-119 widens a prop rather than settling it.
+
+**S22.** The lowered event leaves the store Solid's event leaves (`event_preserves`, by S20 at each write), and an event changes only the sources it writes (`event_untouched`). So a computation none of whose tracked reads the event wrote keeps its result (`untouched_keeps`): Solid not rerunning it is right, and one it does rerun computes Solid's result at the new store (S20). A memo's cache stays Solid's outcome under the same condition (`memo_cache_consistent`).
+
 **S8.** The trace of `n` runs followed by disposal contains each cleanup
 exactly when its run happened, and each cleanup comes right after its run and
 before the next. Ignoring the returned cleanup runs none.
 
 ## Not covered here
 
-- **The insertion beyond S20's core.** Native apps ship as written (D-120): the
-  lowered program is the checker's model of them. S20 proves that the model
-  means what the original means on a core of expressions (reads, plain calls,
-  conditionals, raises, suspension), given that the lowering finds every source
-  read; `native:insertion` checks that premise on the real lowering. The rest
-  (components, holes, events, effects, lists) is S1–S19's rules plus parity: the
-  native harnesses' DOM comparisons with each original (Todos, Sierpinski,
-  Hacker News, the dashboard, Docs, Rendering, Effect). The compiler
-  correspondence remains the core's P-ENCODING obligation.
+- **The insertion beyond S20–S22's core.** Native apps ship as written (D-120): the
+  lowered program is the checker's model of them. S20–S22 prove that the model
+  means what the original means for expressions (reads, plain calls,
+  conditionals, raises, suspension), components' props (getters), events
+  (writes in order) and reruns (exactly the dependents), given that the
+  lowering finds every source read; `native:insertion` checks that premise on
+  the real lowering. Lists, boundaries and effects are S1–S19's rules plus
+  parity: the native harnesses' DOM comparisons with each original (Todos,
+  Sierpinski, Hacker News, the dashboard, Docs, Rendering, Effect). The
+  compiler correspondence remains the core's P-ENCODING obligation.
 - **Failure inference precision.** S7 and S13 are soundness only. Every
   unresolved call is `unknown`, which is sound and may be imprecise.
 - **Solid's runtime.** "Set once" providers, owner cleanup order and

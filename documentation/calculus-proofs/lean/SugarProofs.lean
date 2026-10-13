@@ -557,7 +557,8 @@ abbrev Store := Nat → Option Nat
 
 /-- Plain Solid expressions: a literal, a read of what TypeScript types as a
     source (`s()`, a store path), a plain function of a value, a sum, a
-    conditional (nonzero is true) and a `throw`. -/
+    conditional (nonzero is true), a `throw`, and a read of the component's
+    `i`-th prop (S21: a getter for the caller's expression). -/
 inductive Expr where
   | lit (n : Nat)
   | read (s : Nat)
@@ -565,6 +566,7 @@ inductive Expr where
   | add (a b : Expr)
   | ite (c t e : Expr)
   | raise (err : Nat)
+  | prop (i : Nat)
 
 /-- How an evaluation ends: a value, suspended on a pending source (Solid's
     `NotReadyError`), or failed. -/
@@ -601,6 +603,9 @@ def eval (σ : Store) : Expr → Outcome × List Nat
       (r.1, t ++ r.2)
     | r => r
   | .raise err => (.failed err, [])
+  -- a prop no caller gave; a rendered component's props are its caller's
+  -- expressions put in place (`subst`, S21)
+  | .prop _ => (.done 0, [])
 
 /-- A lowered routine: done, a `yield*` of a source with its continuation, or
     a raise. -/
@@ -623,6 +628,7 @@ def lower : Expr → Prog
   | .add a b => (lower a).bind (fun x => (lower b).bind (fun y => .ret (x + y)))
   | .ite c th el => (lower c).bind (fun x => if x ≠ 0 then lower th else lower el)
   | .raise err => .raise err
+  | .prop _ => .ret 0
 
 /-- The library's driver: a settled read returns the value and tracks the
     source; a pending one tracks it and suspends. -/
@@ -686,6 +692,7 @@ theorem insertion_preserves (σ : Store) (e : Expr) : run σ (lower e) = eval σ
       | pending s => simp [seq]
       | failed err => simp [seq]
   | raise err => simp [lower, run, eval]
+  | prop i => simp [lower, run, eval]
 
 /-- Solid's tracked reads are what an evaluation depends on. -/
 theorem eval_depends_on_trace (e : Expr) :
@@ -753,6 +760,7 @@ theorem eval_depends_on_trace (e : Expr) :
       | pending _ => rfl
       | failed _ => rfl
   | raise err => intros; rfl
+  | prop i => intros; rfl
 
 /-- The reads the lowered routine performs are what its result depends on: a
     store that agrees on them gives the same run, so Solid, which reruns it when
@@ -769,6 +777,135 @@ theorem lowered_reads_are_dependencies (e : Expr) (σ σ' : Store)
 theorem snapshot_untracked (σ : Store) (s v : Nat) (settled : σ s = some v) :
     run σ (.ret v) = (.done v, []) ∧ eval σ (.read s) = (.done v, [s]) := by
   simp [run, eval, settled]
+
+
+/-! ### Props are getters (S21, D-119)
+
+A prop read in the child is a read of the caller's expression, where the child
+reads it: the caller passes a getter, not a value. -/
+
+/-- The caller's expressions put where the child reads its props. -/
+def subst (args : Nat → Expr) : Expr → Expr
+  | .lit n => .lit n
+  | .read s => .read s
+  | .call f e => .call f (subst args e)
+  | .add a b => .add (subst args a) (subst args b)
+  | .ite c t e => .ite (subst args c) (subst args t) (subst args e)
+  | .raise err => .raise err
+  | .prop i => args i
+
+/-- The child lowered with each prop read delegating to a getter. -/
+def lowerWith (props : Nat → Prog) : Expr → Prog
+  | .lit n => .ret n
+  | .read s => .read s .ret
+  | .call f e => (lowerWith props e).bind (fun v => .ret (f v))
+  | .add a b =>
+    (lowerWith props a).bind (fun x => (lowerWith props b).bind (fun y => .ret (x + y)))
+  | .ite c th el =>
+    (lowerWith props c).bind (fun x => if x ≠ 0 then lowerWith props th else lowerWith props el)
+  | .raise err => .raise err
+  | .prop i => props i
+
+/-- Lowering is compositional: the child lowered with the caller's lowered
+    getters is the lowering of the child with the caller's expressions in place. -/
+theorem lowerWith_subst (args : Nat → Expr) (e : Expr) :
+    lowerWith (fun i => lower (args i)) e = lower (subst args e) := by
+  induction e with
+  | lit n => rfl
+  | read s => rfl
+  | call f e ih => simp [lowerWith, subst, lower, ih]
+  | add a b iha ihb => simp [lowerWith, subst, lower, iha, ihb]
+  | ite c t e ihc iht ihe => simp [lowerWith, subst, lower, ihc, iht, ihe]
+  | raise err => rfl
+  | prop i => rfl
+
+/-- S21: the child, its prop reads delegating to the caller's lowered getters,
+    computes what Solid computes with the caller's expressions read where the
+    child reads them: the same value, tracked reads, suspension and failure. -/
+theorem prop_reads_are_callers (σ : Store) (args : Nat → Expr) (e : Expr) :
+    run σ (lowerWith (fun i => lower (args i)) e) = eval σ (subst args e) := by
+  rw [lowerWith_subst, insertion_preserves]
+
+/-- Why a prop is a getter: a value the caller read once and passed (a settled
+    prop) is tracked by nothing in the child, while Solid's getter tracks the
+    caller's read there. -/
+theorem settled_prop_untracked (σ : Store) (s v : Nat) (settled : σ s = some v) :
+    run σ (lowerWith (fun _ => .ret v) (.prop 0)) = (.done v, []) ∧
+      eval σ (subst (fun _ => .read s) (.prop 0)) = (.done v, [s]) := by
+  simp [lowerWith, run, subst, eval, settled]
+
+/-! ### Events write; exactly the dependents rerun (S22)
+
+An event computes values and writes them, in order; its reads subscribe to
+nothing. After it, Solid reruns a computation when it wrote one of its tracked
+reads. -/
+
+/-- Write `v` to source `s`. -/
+def write (σ : Store) (s v : Nat) : Store := fun t => if t = s then some v else σ t
+
+/-- Solid's event: each write's value from its expression, in order; it stops
+    at a value that is not done. -/
+def evalEvent : Store → List (Nat × Expr) → Option Store
+  | σ, [] => some σ
+  | σ, (s, e) :: rest =>
+    match (eval σ e).1 with
+    | .done v => evalEvent (write σ s v) rest
+    | _ => none
+
+/-- The lowered event: each value from the lowered expression. -/
+def runEvent : Store → List (Nat × Prog) → Option Store
+  | σ, [] => some σ
+  | σ, (s, p) :: rest =>
+    match (run σ p).1 with
+    | .done v => runEvent (write σ s v) rest
+    | _ => none
+
+/-- The lowered event leaves the store Solid's event leaves. -/
+theorem event_preserves (σ : Store) (ev : List (Nat × Expr)) :
+    runEvent σ (ev.map fun w => (w.1, lower w.2)) = evalEvent σ ev := by
+  induction ev generalizing σ with
+  | nil => rfl
+  | cons w rest ih =>
+    obtain ⟨s, e⟩ := w
+    simp only [List.map, runEvent, evalEvent, insertion_preserves]
+    cases (eval σ e).1 <;> simp [ih]
+
+/-- An event changes only the sources it writes. -/
+theorem event_untouched : ∀ (ev : List (Nat × Expr)) (σ σ' : Store),
+    evalEvent σ ev = some σ' → ∀ t, t ∉ ev.map Prod.fst → σ' t = σ t := by
+  intro ev
+  induction ev with
+  | nil => intro σ σ' h t _; simp [evalEvent] at h; rw [h]
+  | cons w rest ih =>
+    obtain ⟨s, e⟩ := w
+    intro σ σ' h t ht
+    simp only [List.map, List.mem_cons, not_or] at ht
+    simp only [evalEvent] at h
+    cases hv : (eval σ e).1 with
+    | done v =>
+      rw [hv] at h
+      rw [ih (write σ s v) σ' h t ht.2]
+      simp [write, ht.1]
+    | pending _ => rw [hv] at h; simp at h
+    | failed _ => rw [hv] at h; simp at h
+
+/-- S22: after an event, a computation none of whose tracked reads it wrote
+    keeps its result, so Solid leaving it alone is right; one it reruns
+    computes Solid's result at the new store (`insertion_preserves`). -/
+theorem untouched_keeps (σ σ' : Store) (ev : List (Nat × Expr)) (e : Expr)
+    (done : evalEvent σ ev = some σ')
+    (disjoint : ∀ s ∈ (run σ (lower e)).2, s ∉ ev.map Prod.fst) :
+    run σ' (lower e) = run σ (lower e) :=
+  lowered_reads_are_dependencies e σ σ' fun s h => event_untouched ev σ σ' done s (disjoint s h)
+
+/-- A memo: a cached outcome read through a getter (S21 with the memo's
+    definition). After an event that wrote none of its tracked reads, the cache
+    is still Solid's outcome. -/
+theorem memo_cache_consistent (σ σ' : Store) (ev : List (Nat × Expr)) (d : Expr)
+    (done : evalEvent σ ev = some σ')
+    (disjoint : ∀ s ∈ (eval σ d).2, s ∉ ev.map Prod.fst) :
+    eval σ' d = eval σ d :=
+  eval_depends_on_trace d σ σ' fun s h => event_untouched ev σ σ' done s (disjoint s h)
 
 end Insertion
 
@@ -812,5 +949,12 @@ end Insertion
 #print axioms Insertion.eval_depends_on_trace
 #print axioms Insertion.lowered_reads_are_dependencies
 #print axioms Insertion.snapshot_untracked
+#print axioms Insertion.lowerWith_subst
+#print axioms Insertion.prop_reads_are_callers
+#print axioms Insertion.settled_prop_untracked
+#print axioms Insertion.event_preserves
+#print axioms Insertion.event_untouched
+#print axioms Insertion.untouched_keeps
+#print axioms Insertion.memo_cache_consistent
 end Sugar
 end Yield

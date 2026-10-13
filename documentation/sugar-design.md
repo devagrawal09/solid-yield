@@ -2148,9 +2148,17 @@ unawaited return inside that try, and a throw behind `if (false)` under an
 `Errored`. `equivalents.mjs` is now part of the run's fingerprint, so editing
 an entry invalidates a cached result.
 
-**Result:** 99.15 % (234 killed / 2 survived / 62 equivalent; 298 mutants on
-22 of 43 programs; every non-equivalent mutant's expected code is reported
-somewhere, 100 % detected). The two survivors are Todos' own: the original
-already reports `EVENT_REJECTS` for the handler at `app.tsx:82`, and deleting
-the catch at `todos.ts:144` or `:159` widens that report (`SyntaxError |
-TypeError | unknown`) rather than adding one, so by D-123's rule it is not new.
+**Result:** 100 % (236 killed / 0 survived / 62 equivalent; 298 mutants on 22
+of 43 programs). The last two survivors were Todos' own: the original already
+reports `EVENT_REJECTS` for the handler at `app.tsx:82`, and deleting the
+catch at `todos.ts:144` or `:159` widens that report (`SyntaxError |
+TypeError | unknown`) rather than adding one. Dev's ruling (D-123 §3): for the
+deletion operators, a report that now lists more failure kinds is caught too.
+
+**Proofs S21 and S22.** S20's core gained props and events. A child whose prop
+reads delegate to its caller's lowered getters computes what Solid computes
+with the caller's expressions read where the child reads them (lowering is
+compositional); a settled prop would be tracked by nothing. The lowered event
+leaves the store Solid's event leaves; a computation none of whose tracked
+reads an event wrote keeps its result, so Solid not rerunning it is right, and
+a memo's cache stays Solid's outcome.

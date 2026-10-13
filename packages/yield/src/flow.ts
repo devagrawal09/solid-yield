@@ -645,35 +645,6 @@ export function provideView(ctx: any, props: any): unknown {
   })(props);
 }
 
-/**
- * @internal `compose(…).provide({ value, children })` (D-118): one Solid
- * provider per context an entry names, nested, the first outermost, each
- * given the value `pairs` computes from the provided `value`; `children` a
- * lazy view built inside the innermost, as `provideView`'s. None: the
- * children alone.
- */
-export function provideEach(
-  pairs: (value: unknown) => readonly (readonly [ctx: any, value: unknown])[],
-  props: any
-): unknown {
-  return untracked((p: any) => {
-    let build = content(p, "provide");
-    const each = pairs(p.value);
-    for (let i = each.length - 1; i >= 0; i--) {
-      const [ctx, value] = each[i];
-      const inner = build;
-      build = () =>
-        createComponent(ctx, {
-          value,
-          get children() {
-            return inner();
-          }
-        });
-    }
-    return build();
-  })(props);
-}
-
 export const For: typeof ForYield = untracked(ForYield);
 export const Repeat: typeof RepeatYield = untracked(RepeatYield);
 export const Show: typeof ShowYield = untracked(ShowYield);

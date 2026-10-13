@@ -52,8 +52,6 @@ export type {
   UnnamedContext,
   YieldContext
 } from "./context.js";
-export { compose } from "./compose.js";
-export type { Part, Composed, ComposedStore, ComposedState, ComposeEntry } from "./compose.js";
 export { For, Show, Switch, Match, Repeat, Loading, Errored } from "./flow.js";
 export type { Reset } from "./flow.js";
 export { render, hydrate, renderToString, renderToStream } from "./render.js";

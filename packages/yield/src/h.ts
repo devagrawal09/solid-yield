@@ -30,7 +30,7 @@ import type {
 } from "./types.js";
 import type { DECLARED } from "./types.js";
 import type { Children, LazyParam, BOUNDARY_KIND, Reset } from "./flow.js";
-import type { PROVIDES } from "./context.js";
+import type { PROVIDES, ProvidedValue } from "./context.js";
 import type { Accessor } from "solid-js";
 
 type Intrinsic = JSX.IntrinsicElements;
@@ -132,11 +132,9 @@ export interface YieldH {
    * A context's provider, `h(Ctx.provide, { value }, ...children)` (D-098):
    * the children's colors pass on, less their requirement of the context.
    */
-  <T, Q, I, const C extends readonly Hole[]>(
-    component: {
-      readonly [PROVIDES]: { readonly value: T; readonly discharges: Q; readonly input: I };
-    },
-    props: { value: NoInfer<I> },
+  <T, Q, const C extends readonly Hole[]>(
+    component: { readonly [PROVIDES]: { readonly value: T; readonly discharges: Q } },
+    props: { value: ProvidedValue<T> },
     ...children: C
   ): HView<
     PendingOf<OpsOfHole<C[number]>>,

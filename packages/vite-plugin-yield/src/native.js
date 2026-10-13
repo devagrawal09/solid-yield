@@ -713,8 +713,8 @@ function surface(
         });
     }
     const alias = q.scope.generateUidIdentifier("NativeForeign");
-    const statement = q.getStatementParent();
-    if (!statement) fail(q, "NATIVE_HOST", "Cannot determine the host of this foreign JSX value.");
+    // a JSX value is always inside a statement
+    const statement = /** @type {Path} */ (q.getStatementParent());
     statement.insertBefore(
       t.variableDeclaration("const", [
         t.variableDeclarator(alias, t.callExpression(t.identifier("foreign"), [target]))
@@ -1388,8 +1388,13 @@ function surface(
                 "NATIVE_HANDLER",
                 "A property event handler needs a checked shared event-call contract."
               );
-            for (const [index, param] of fn.node.params.entries())
-              if (t.isIdentifier(param) && !param.typeAnnotation) {
+            for (const [index, entry] of fn.node.params.entries()) {
+              // a default's annotation is its binding's (`({ key } = fallback)`)
+              /** @type {any} */ const param = t.isAssignmentPattern(entry) ? entry.left : entry;
+              if (t.isRestElement(param) || param.typeAnnotation) continue;
+              if (!t.isIdentifier(param) && !t.isObjectPattern(param) && !t.isArrayPattern(param))
+                continue;
+              {
                 if (bound && index === 0) {
                   param.typeAnnotation = t.tsTypeAnnotation(t.tsAnyKeyword());
                   continue;
@@ -1410,23 +1415,34 @@ function surface(
                     : /Mouse|Click/.test(attribute)
                       ? "MouseEvent"
                       : "Event";
+                // Solid's own type for this element's attribute; one it does
+                // not type (`on:click`) is the event by its name
+                needed.add("__NativeEventOf");
                 param.typeAnnotation = t.tsTypeAnnotation(
-                  t.tsIntersectionType([
-                    t.tsTypeReference(t.identifier(event)),
-                    t.tsTypeLiteral([
-                      t.tsPropertySignature(
-                        t.identifier("currentTarget"),
-                        t.tsTypeAnnotation(
-                          t.tsIndexedAccessType(
-                            t.tsTypeReference(t.identifier("HTMLElementTagNameMap")),
-                            t.tsLiteralType(t.stringLiteral(name))
+                  t.tsTypeReference(
+                    t.identifier("__NativeEventOf"),
+                    t.tsTypeParameterInstantiation([
+                      t.tsLiteralType(t.stringLiteral(name)),
+                      t.tsLiteralType(t.stringLiteral(attribute)),
+                      t.tsIntersectionType([
+                        t.tsTypeReference(t.identifier(event)),
+                        t.tsTypeLiteral([
+                          t.tsPropertySignature(
+                            t.identifier("currentTarget"),
+                            t.tsTypeAnnotation(
+                              t.tsIndexedAccessType(
+                                t.tsTypeReference(t.identifier("HTMLElementTagNameMap")),
+                                t.tsLiteralType(t.stringLiteral(name))
+                              )
+                            )
                           )
-                        )
-                      )
+                        ])
+                      ])
                     ])
-                  ])
+                  )
                 );
               }
+            }
             needed.add("$event");
             const event = t.callExpression(t.identifier("$event"), [fn.node]);
             if (isRef) {
@@ -1744,6 +1760,11 @@ function surface(
         t.stringLiteral("solid-yield/internal")
       )
     );
+  if (needed.delete("__NativeEventOf")) {
+    const spec = t.importSpecifier(t.identifier("__NativeEventOf"), t.identifier("NativeEventOf"));
+    spec.importKind = "type";
+    p.node.body.unshift(t.importDeclaration([spec], t.stringLiteral("solid-yield/internal")));
+  }
   if (needed.delete("__NativeArguments"))
     p.node.body.unshift(
       t.importDeclaration(

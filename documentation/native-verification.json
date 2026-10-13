@@ -951,7 +951,7 @@
           "code": "solid-yield/no-unshown-wait",
           "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* () {\n              r...`, D-075).",
           "file": "packages/vite-plugin-yield/test/.native-generated/originals/todos/app.tsx",
-          "line": 111,
+          "line": 112,
           "severity": 1
         },
         {
@@ -959,7 +959,7 @@
           "code": "solid-yield/no-unshown-wait",
           "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* (...args: __NativeAr...`, D-075).",
           "file": "packages/vite-plugin-yield/test/.native-generated/originals/todos/app.tsx",
-          "line": 188,
+          "line": 189,
           "severity": 1
         }
       ],
@@ -1058,7 +1058,7 @@
           "code": "solid-yield/no-unshown-wait",
           "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* () {\n              r...`, D-075).",
           "file": "packages/vite-plugin-yield/test/.native-generated/originals/todos-h/app.tsx",
-          "line": 111,
+          "line": 112,
           "severity": 1
         },
         {
@@ -1066,7 +1066,7 @@
           "code": "solid-yield/no-unshown-wait",
           "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* (...args: __NativeAr...`, D-075).",
           "file": "packages/vite-plugin-yield/test/.native-generated/originals/todos-h/app.tsx",
-          "line": 188,
+          "line": 189,
           "severity": 1
         }
       ],

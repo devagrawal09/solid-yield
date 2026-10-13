@@ -1,3 +1,4 @@
+import type { JSX } from "@solidjs/web";
 /** Compiler-only control flow. Delegation keeps the current host and transaction. */
 import { untrack } from "solid-js";
 import {
@@ -65,6 +66,28 @@ export function* nativeMap<T, Y, R>(
     if (index in items) result[index] = yield* callback(items[index]!, index, items);
   return result;
 }
+
+/** The event a native handler is called with, as Solid's JSX types it
+ * (`onPointerDown` on a `div`: a `PointerEvent` whose `currentTarget` is the
+ * div). An attribute Solid does not type (an `on:` namespace) takes
+ * `Fallback`. */
+export type NativeEventOf<
+  Tag extends string,
+  Attribute extends string,
+  Fallback
+> = Tag extends keyof JSX.IntrinsicElements
+  ? Attribute extends keyof JSX.IntrinsicElements[Tag]
+    ? HandlerEvent<
+        Extract<NonNullable<JSX.IntrinsicElements[Tag][Attribute]>, (event: never) => unknown>,
+        Fallback
+      >
+    : Fallback
+  : Fallback;
+type HandlerEvent<H, Fallback> = [H] extends [never]
+  ? Fallback
+  : H extends (event: infer E) => unknown
+    ? E
+    : Fallback;
 
 export type NativeArguments<T> =
   T extends Source<infer V, unknown, boolean>

@@ -256,14 +256,11 @@ export function lowerNativeEffects(files, report) {
      * its attempt raises is the hole's failure, a failing read of the view.
      * @param {Path} at @param {any} node */
     const holed = (at, node) => {
-      for (let up = at.parentPath; up; up = up.parentPath) {
-        if (up.isFunction()) return node;
-        if (up.isJSXExpressionContainer()) {
-          used.add("nativeHole");
-          return t.callExpression(t.identifier("__nativeHole"), [node]);
-        }
-      }
-      return node;
+      let up = at.parentPath;
+      while (up && !up.isFunction() && !up.isJSXExpressionContainer()) up = up.parentPath;
+      if (!up?.isJSXExpressionContainer()) return node;
+      used.add("nativeHole");
+      return t.callExpression(t.identifier("__nativeHole"), [node]);
     };
     /** `<For each={items()}>` with a call that returns a promise: Solid's `For`
      * takes the promise itself (and fails on it), so the model must not await
@@ -470,22 +467,6 @@ export function lowerNativeEffects(files, report) {
       ThrowStatement(q) {
         const fn = q.getFunctionParent();
         if (!host(fn)) return;
-        if (
-          t.isStringLiteral(q.node.argument) ||
-          t.isNumericLiteral(q.node.argument) ||
-          t.isBooleanLiteral(q.node.argument) ||
-          t.isNullLiteral(q.node.argument)
-        ) {
-          const error = new Error(
-            "Throw an Error object so callers can identify and handle this failure."
-          );
-          Object.assign(error, {
-            code: "NATIVE_THROW",
-            id: file,
-            loc: { file, ...q.node.loc?.start }
-          });
-          throw error;
-        }
         // F-S37: a context guard raises only what its value's narrowed type admits.
         const guard = report.guard(file, q.node.start ?? 0, q.node.end ?? 0);
         used.add(guard ? "nativeContextGuard" : "raise");
@@ -713,14 +694,10 @@ export function lowerNativeEffects(files, report) {
               }
             };
             readsReceiver(receiver);
-            if (receiver.isAwaitExpression()) readsArgument = true;
+            // an await in it (`(await fetch(url)).text()`) is an attempt by now
             traverseOwned(receiver, {
               Function(inner) {
                 inner.skip();
-              },
-              // `(await fetch(url)).text()`: the receiver waits in the routine
-              AwaitExpression() {
-                readsArgument = true;
               },
               CallExpression: readsReceiver,
               MemberExpression: readsReceiver,
@@ -736,13 +713,9 @@ export function lowerNativeEffects(files, report) {
           for (const arg of evaluated) {
             if (arg.isFunction()) continue;
             if (arg.isCallExpression() || arg.isMemberExpression()) readsArgument = true;
-            if (arg.isAwaitExpression()) readsArgument = true;
             traverseOwned(arg, {
               Function(f) {
                 f.skip();
-              },
-              AwaitExpression() {
-                readsArgument = true;
               },
               CallExpression() {
                 readsArgument = true;

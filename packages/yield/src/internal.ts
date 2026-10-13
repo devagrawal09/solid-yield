@@ -31,7 +31,7 @@ export {
   nativeGetter
 } from "./native-control.js";
 
-export type { NativeArguments } from "./native-control.js";
+export type { NativeArguments, NativeEventOf } from "./native-control.js";
 export { nativeC } from "./native-props.js";
 export { nativeUseContext, nativeContextGuard } from "./native-context.js";
 export { nativeForeign, nativeForeignProvided } from "./foreign.js";

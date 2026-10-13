@@ -7,12 +7,10 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
-const UNREACHABLE = {
-  SUGAR_LEXICAL:
-    "Babel's arrow conversion hoists `this` and `arguments` before the check, so a routine arrow keeps their meaning",
-  NATIVE_HOST: "every JSX value in a program has a statement parent",
-  NATIVE_ACTION: "a call argument is an expression or a spread"
-};
+// Each branch the measured coverage found unreached was removed or given a
+// test (2026-10-13); none is listed now.
+/** @type {Record<string, string>} */
+const UNREACHABLE = {};
 /** @param {string} dir @returns {string[]} */
 const walk = dir =>
   readdirSync(dir).flatMap(name => {

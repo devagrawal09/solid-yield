@@ -59,6 +59,15 @@ export function App(props: {url?: string}) {
     expect(checked(code)).toEqual([]);
   });
 
+  it("takes a route component under a quoted key", () => {
+    const code = lower(`${prelude.replace("component: Page", '"component": Page')}
+export function App() {
+  return <Theme value="light"><Router/></Theme>;
+}`);
+    expect(code).toContain('"component": __nativeForeignProvided(Page,');
+    expect(checked(code)).toEqual([]);
+  });
+
   it("discharges a context provided directly by its provider element", () => {
     const code = lower(`${prelude}
 export function App() {

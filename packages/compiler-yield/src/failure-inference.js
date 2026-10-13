@@ -483,13 +483,22 @@ export function inferFailures(
         result.add("unknown");
         continue;
       }
+      // `const NotFound = class extends Error {}`: the class is NotFound
+      const name =
+        declaration &&
+        ts.isClassExpression(declaration) &&
+        !declaration.name &&
+        ts.isVariableDeclaration(declaration.parent) &&
+        ts.isIdentifier(declaration.parent.name)
+          ? declaration.parent.name.text
+          : symbol.name;
       const id = builtin
         ? `global:${symbol.name}`
-        : `${relative(root, declaration.getSourceFile().fileName)}#${symbol.name}@${declaration.pos}`;
+        : `${relative(root, declaration.getSourceFile().fileName)}#${name}@${declaration.pos}`;
       classTypes.set(id, type);
       classes.set(id, {
         id,
-        name: symbol.name,
+        name,
         file: builtin ? null : relative(root, declaration.getSourceFile().fileName),
         nameStart: declaration?.name?.getStart(),
         classStart: declaration?.getStart()

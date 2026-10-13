@@ -602,17 +602,12 @@ export function nativePrelude(files) {
               site.replaceWith(
                 t.callExpression(t.identifier("__nativeDispatch"), [
                   target.node,
+                  // a call's arguments are expressions and spreads (no
+                  // placeholder syntax is parsed)
                   t.arrayExpression(
-                    site.node.arguments.map(arg => {
-                      if (!t.isExpression(arg) && !t.isSpreadElement(arg))
-                        throw nativeRefusal(
-                          file,
-                          arg,
-                          "NATIVE_ACTION",
-                          "Unsupported action argument."
-                        );
-                      return arg;
-                    })
+                    /** @type {(import("@babel/core").types.Expression | import("@babel/core").types.SpreadElement)[]} */ (
+                      site.node.arguments
+                    )
                   )
                 ])
               );
@@ -712,6 +707,24 @@ export function nativePrelude(files) {
         q.replaceWithMultiple(declarations);
       }
     });
+    /** Whether a break or continue leaves `scope` (a try's block, its
+     * handler or its finalizer): its loop, switch or label is outside it.
+     * @param {Path} r @param {Path} scope */
+    const crosses = (r, scope) => {
+      const label = r.node.label?.name;
+      if (label) {
+        const target = r.findParent(
+          /** @param {Path} a */ a => a.isLabeledStatement() && a.node.label.name === label
+        );
+        return !target || !target.isDescendant(scope);
+      }
+      return (
+        r.findParent(
+          /** @param {Path} a */ a =>
+            a === scope || a.isLoop() || (r.isBreakStatement() && a.isSwitchStatement())
+        ) === scope
+      );
+    };
     traverseOwned(p, {
       TryStatement: {
         exit(q) {
@@ -731,6 +744,24 @@ export function nativePrelude(files) {
                   "NATIVE_CONTROL_TRANSFER",
                   "A return from finally needs completion lowering."
                 );
+              },
+              BreakStatement(r) {
+                if (crosses(r, q.get("finalizer")))
+                  throw nativeRefusal(
+                    file,
+                    r.node,
+                    "NATIVE_CONTROL_TRANSFER",
+                    "A break from finally needs completion lowering."
+                  );
+              },
+              ContinueStatement(r) {
+                if (crosses(r, q.get("finalizer")))
+                  throw nativeRefusal(
+                    file,
+                    r.node,
+                    "NATIVE_CONTROL_TRANSFER",
+                    "A continue from finally needs completion lowering."
+                  );
               }
             });
           const endings = [q.get("block"), q.get("handler.body")].map(block =>
@@ -748,6 +779,37 @@ export function nativePrelude(files) {
           const body = q.node.block;
           const handle = handler.body;
           let returns = false;
+          /** @type {{ type: "break" | "continue", label: string | undefined }[]} */
+          const jumps = [];
+          /** the jump records made here: not outer returns to encode */
+          const records = new WeakSet();
+          /** A crossing break or continue: the helper returns its jump's index,
+           * and the statement that replaces the try makes the jump.
+           * @param {"break" | "continue"} type @param {any} label */
+          const jump = (type, label) => {
+            let index = jumps.findIndex(j => j.type === type && j.label === label?.name);
+            if (index < 0) index = jumps.push({ type, label: label?.name }) - 1;
+            const record = t.returnStatement(
+              t.objectExpression([
+                t.objectProperty(
+                  t.identifier("returned"),
+                  t.tsAsExpression(
+                    t.booleanLiteral(false),
+                    t.tsTypeReference(t.identifier("const"))
+                  )
+                ),
+                t.objectProperty(
+                  t.identifier("jump"),
+                  t.tsAsExpression(
+                    t.numericLiteral(index),
+                    t.tsTypeReference(t.identifier("const"))
+                  )
+                )
+              ])
+            );
+            records.add(record);
+            return record;
+          };
           // Encode an outer return, which cannot become a return from the helper only.
           for (const scope of [q.get("block"), q.get("handler.body")])
             traverseOwned(scope, {
@@ -755,6 +817,7 @@ export function nativePrelude(files) {
                 f.skip();
               },
               ReturnStatement(r) {
+                if (records.has(r.node)) return;
                 returns = true;
                 r.node.argument = t.objectExpression([
                   t.objectProperty(
@@ -771,27 +834,14 @@ export function nativePrelude(files) {
                 ]);
               },
               BreakStatement(r) {
-                if (
-                  r.node.label ||
-                  r.findParent(a => a === scope || a.isLoop() || a.isSwitchStatement()) === scope
-                )
-                  throw nativeRefusal(
-                    file,
-                    r.node,
-                    "NATIVE_CONTROL_TRANSFER",
-                    "A catch crossing a loop/label needs completion lowering."
-                  );
+                if (crosses(r, scope)) r.replaceWith(jump("break", r.node.label));
               },
               ContinueStatement(r) {
-                if (r.node.label || r.findParent(a => a === scope || a.isLoop()) === scope)
-                  throw nativeRefusal(
-                    file,
-                    r.node,
-                    "NATIVE_CONTROL_TRANSFER",
-                    "A labeled continue crossing a catch needs completion lowering."
-                  );
+                if (crosses(r, scope)) r.replaceWith(jump("continue", r.node.label));
               }
             });
+          // a jump is a way out that is not a return
+          const exits = exitsThrough && !jumps.length;
           const rethrows = new Set();
           if (t.isIdentifier(handler.param)) {
             const binding = q.get("handler").scope.getBinding(handler.param.name);
@@ -821,7 +871,7 @@ export function nativePrelude(files) {
             );
           }
           params.push(caught);
-          if (returns && !exitsThrough)
+          if ((returns || jumps.length) && !exits)
             for (const block of [body, handle])
               block.body.push(
                 t.returnStatement(
@@ -832,7 +882,18 @@ export function nativePrelude(files) {
                         t.booleanLiteral(false),
                         t.tsTypeReference(t.identifier("const"))
                       )
-                    )
+                    ),
+                    ...(jumps.length
+                      ? [
+                          t.objectProperty(
+                            t.identifier("jump"),
+                            t.tsAsExpression(
+                              t.unaryExpression("-", t.numericLiteral(1)),
+                              t.tsTypeReference(t.identifier("const"))
+                            )
+                          )
+                        ]
+                      : [])
                   ])
                 )
               );
@@ -843,16 +904,33 @@ export function nativePrelude(files) {
           ];
           if (q.node.finalizer) args.push(t.functionExpression(null, [], q.node.finalizer, true));
           const call = t.callExpression(t.identifier("__nativeTry"), args);
+          const dispatch = jumps.map((j, index) =>
+            t.ifStatement(
+              t.binaryExpression(
+                "===",
+                t.memberExpression(result, t.identifier("jump")),
+                t.numericLiteral(index)
+              ),
+              j.type === "break"
+                ? t.breakStatement(j.label ? t.identifier(j.label) : null)
+                : t.continueStatement(j.label ? t.identifier(j.label) : null)
+            )
+          );
           q.replaceWithMultiple(
-            returns
+            returns || jumps.length
               ? [
                   t.variableDeclaration("const", [t.variableDeclarator(result, call)]),
-                  exitsThrough
-                    ? t.returnStatement(t.memberExpression(result, t.identifier("value")))
-                    : t.ifStatement(
-                        t.memberExpression(result, t.identifier("returned")),
-                        t.returnStatement(t.memberExpression(result, t.identifier("value")))
-                      )
+                  ...(!returns
+                    ? []
+                    : exits
+                      ? [t.returnStatement(t.memberExpression(result, t.identifier("value")))]
+                      : [
+                          t.ifStatement(
+                            t.memberExpression(result, t.identifier("returned")),
+                            t.returnStatement(t.memberExpression(result, t.identifier("value")))
+                          )
+                        ]),
+                  ...dispatch
                 ]
               : [throwsThrough ? t.returnStatement(call) : t.expressionStatement(call)]
           );

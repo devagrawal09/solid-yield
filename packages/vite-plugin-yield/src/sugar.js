@@ -372,26 +372,10 @@ function seed(code, filename, native = false) {
             "Use attempt inside a synchronous routine; async functions are not routines.",
             filename
           );
-        if (path.isArrowFunctionExpression()) {
-          // Reject lexical captures whose meaning would change in a generator.
-          traverseOwned(path, {
-            // a nested function or class binds its own `this` and `arguments`
-            Function(q) {
-              if (!q.isArrowFunctionExpression()) q.skip();
-            },
-            Class(q) {
-              q.skip();
-            },
-            ThisExpression(q) {
-              fail(q, "SUGAR_LEXICAL", "A routine arrow cannot capture this.", filename);
-            },
-            ReferencedIdentifier(q) {
-              if (q.node.name === "arguments")
-                fail(q, "SUGAR_LEXICAL", "A routine arrow cannot capture arguments.", filename);
-            }
-          });
-          path.arrowFunctionToExpression();
-        }
+        // An arrow's `this` and `arguments` are its enclosing function's:
+        // Babel's conversion hoists them there (`const _this = this`), so
+        // the generator keeps their meaning.
+        if (path.isArrowFunctionExpression()) path.arrowFunctionToExpression();
         Object.assign(n, path.node);
         n.generator = true;
         path.node.generator = true;

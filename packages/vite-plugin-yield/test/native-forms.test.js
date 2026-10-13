@@ -166,6 +166,148 @@ export function App() {
   return <p>{triple()}</p>;
 }`,
     []
+  ],
+  // An array method's callback that reads nothing still runs in its host:
+  // what it throws reaches the host's Errored, or the root.
+  [
+    "plain-callback-throw-in-memo",
+    `${head}
+export function App() {
+  const items = createMemo(async () => [1, 2, 3]);
+  const total = createMemo(() =>
+    items().reduce((a, x) => {
+      if (x < 0) throw new RangeError("negative");
+      return a + x;
+    }, 0)
+  );
+  return <Loading fallback={<p>…</p>}><p>{total()}</p></Loading>;
+}
+render(App, document.body);`,
+    ["FOREIGN_HANDOFF"]
+  ],
+  [
+    "store-callback-throw-in-memo",
+    `${head}
+export function App() {
+  const [store] = createStore({ list: [{ title: "t" }] });
+  const titles = createMemo(() =>
+    store.list
+      .map(t => {
+        if (!t.title) throw new TypeError("untitled");
+        return t.title;
+      })
+      .join()
+  );
+  return <p>{titles()}</p>;
+}
+render(App, document.body);`,
+    ["FOREIGN_HANDOFF"]
+  ],
+  [
+    "plain-callback-throw-under-errored",
+    `${head}
+import { Errored } from "solid-js";
+export function App() {
+  const items = createMemo(async () => [1, 2, 3]);
+  const total = createMemo(() =>
+    items().reduce((a, x) => {
+      if (x < 0) throw new RangeError("negative");
+      return a + x;
+    }, 0)
+  );
+  return <Errored fallback={() => <p>failed</p>}><Loading fallback={<p>…</p>}><p>{total()}{items().map(x => JSON.parse(String(x)) as number).join()}</p></Loading></Errored>;
+}
+render(App, document.body);`,
+    []
+  ],
+  [
+    "hole-iife-callback-throw",
+    `${head}
+export function App() {
+  const [n] = createSignal(1);
+  const [items] = createSignal([1, 2, 3]);
+  return <p>{(() => {
+    const seen: unknown[] = [];
+    seen.push(items().map(x => {
+      if (x < 0) throw new RangeError("negative");
+      return x * n();
+    }));
+    return seen.join(",");
+  })()}</p>;
+}
+render(App, document.body);`,
+    ["FOREIGN_HANDOFF"]
+  ],
+  [
+    "kept-promise",
+    `${head}
+export function App() {
+  const [n, setN] = createSignal(0);
+  return <button onClick={async () => {
+    try {
+      const request = fetch("/x?n=" + n());
+      setN(await request.then(r => r.status));
+    } catch (e) {
+      /* @yield-absorb: logged */
+      console.error(e);
+    }
+  }}>{n()}</button>;
+}`,
+    []
+  ],
+  [
+    "kept-promise-is-a-promise",
+    `${head}
+export function App() {
+  const [n, setN] = createSignal(0);
+  return <button onClick={async () => {
+    try {
+      const r = fetch("/x");
+      setN(r.status);
+    } catch (e) {
+      /* @yield-absorb: logged */
+      console.error(e);
+    }
+  }}>{n()}</button>;
+}`,
+    ["TS2339"]
+  ],
+  [
+    "kept-promise-rejects-at-its-await",
+    `${head}
+export function App() {
+  const [n, setN] = createSignal(0);
+  return <button onClick={async () => {
+    const request = fetch("/x");
+    const r = await request;
+    setN(r.status);
+  }}>{n()}</button>;
+}`,
+    ["EVENT_REJECTS"]
+  ],
+  [
+    "kept-promise-rejects-through-then",
+    `${head}
+export function App() {
+  const [n, setN] = createSignal(0);
+  return <button onClick={async () => {
+    const request = fetch("/x");
+    setN(await request.then(r => r.status));
+  }}>{n()}</button>;
+}`,
+    ["EVENT_REJECTS"]
+  ],
+  [
+    "kept-promise-caught-by-its-chain",
+    `${head}
+export function App() {
+  const [n, setN] = createSignal(0);
+  return <button onClick={async () => {
+    const request = fetch("/x");
+    setN(await request.then(r => r.status).catch(() => 0));
+  }}>{n()}</button>;
+}`,
+    []
   ]
 ];
 

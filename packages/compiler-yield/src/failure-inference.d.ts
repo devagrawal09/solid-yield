@@ -46,6 +46,10 @@ export interface FailureReport {
     fails: string[];
     ownFails: string[];
     native: boolean;
+    /** The platform's own function: a promise it returns rejects rather than it throwing. */
+    platform: boolean;
+    /** An array's own method that runs its callbacks at once (`every`, `reduce`). */
+    arrayMethod: boolean;
     target?: string;
     promise: boolean;
     async: boolean;

@@ -725,6 +725,22 @@ export function inferFailures(
     if (builtin) return "builtin";
     return null;
   };
+  const ARRAY_METHODS = new Set([
+    "map",
+    "flatMap",
+    "filter",
+    "find",
+    "findIndex",
+    "findLast",
+    "findLastIndex",
+    "some",
+    "every",
+    "forEach",
+    "reduce",
+    "reduceRight",
+    "sort",
+    "toSorted"
+  ]);
   // Only declarations from the platform libraries are built-ins. A shadowed
   // Math/JSON or a package method must never inherit these contracts.
   const throwingBuiltins = {
@@ -904,6 +920,19 @@ export function inferFailures(
     }
     return result.effects;
   }
+  /** A promise kept by `const` (`const request = fetch(url)`, not awaited):
+   * what it may reject with reaches the continuation chained on it. */
+  function keptRejection(p, owner, caught) {
+    if (!p?.isIdentifier()) return new Set();
+    const binding = p.scope.getBinding(p.node.name);
+    if (binding?.kind !== "const" || !binding.path.isVariableDeclarator()) return new Set();
+    const init = binding.path.get("init");
+    if (!init.isCallExpression() && !init.isNewExpression()) return new Set();
+    const node = nodeFor(init);
+    return node && checker.getPromisedTypeOfPromise(checker.getTypeAtLocation(node))
+      ? evaluate(init, owner, caught)
+      : new Set();
+  }
   function evaluate(p, owner, caught = new Map()) {
     if (!p?.node) return new Set();
     if (Array.isArray(p)) return union(...p.map(q => evaluate(q, owner, caught)));
@@ -991,7 +1020,10 @@ export function inferFailures(
       )
         return method === "allSettled" ? new Set() : argEffects;
       if (["catch", "then", "finally"].includes(method)) {
-        const input = evaluate(receiver, owner, caught);
+        const input = union(
+          evaluate(receiver, owner, caught),
+          keptRejection(receiver, owner, caught)
+        );
         const handler = args[method === "then" ? 1 : 0];
         let handled = input;
         if (handler?.isFunction() && method !== "finally") {
@@ -1404,6 +1436,19 @@ export function inferFailures(
         ownFails: [...own],
         native:
           !!nativeCall(site) && !["promise-constructor", "builtin"].includes(nativeCall(site)),
+        // The platform's own function (`fetch`, `response.json`): one that
+        // returns a promise rejects it rather than throwing (WebIDL).
+        platform: ["builtin", "promise-constructor"].includes(primitive ?? ""),
+        // An array's own method that runs its callbacks at once (`every`,
+        // `reduce`, `sort`): they run in the caller's host.
+        arrayMethod: (() => {
+          if (!["array-callback", "builtin"].includes(primitive ?? "")) return false;
+          if (!callee.isMemberExpression()) return false;
+          if (!ARRAY_METHODS.has(name(callee.node.property) ?? "")) return false;
+          const receiver = nodeFor(callee.get("object"));
+          const type = receiver && checker.getTypeAtLocation(receiver);
+          return !!type && (checker.isArrayType(type) || checker.isTupleType(type));
+        })(),
         target: fn?.id,
         promise: !!checker.getPromisedTypeOfPromise(checker.getTypeAtLocation(nodeFor(site))),
         async: !!fn?.path.node.async,

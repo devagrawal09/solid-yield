@@ -117,6 +117,13 @@ const lexicalPhase = fn => {
     if (!outer.isFunction()) continue;
     const call = outer.parentPath?.isCallExpression() ? outer.parentPath : null;
     const api = lib(call?.get("callee"));
+    // a hole's IIFE, bound before the view's statement (`__nativeHole`)
+    if (
+      call?.node.callee === outer.node &&
+      call.parentPath?.isCallExpression() &&
+      call.parentPath.get("callee").isIdentifier({ name: "__nativeHole" })
+    )
+      return "hole";
     if (api === "$event") return "event";
     if (api === "$memo") return "memo";
     if (api === "$effect") return call?.node.arguments[0] === outer.node ? "compute" : "effect";

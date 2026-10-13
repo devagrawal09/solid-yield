@@ -27,11 +27,63 @@ const flowRow = param => {
     control?.source === "solid-js" && ["For", "Index", "Repeat", "Show"].includes(control.name)
   );
 };
+/** Known routine hosts; foreign callbacks remain plain and are caught at their call.
+ * @param {Set<string>} routines @param {string} file @param {Path | null} fn */
+const hostOf = (routines, file, fn) => {
+  if (!fn || fn.node.async || fn.isClassMethod() || fn.isObjectMethod()) return false;
+  if (routines.has(`${file}:${fn.node.start}`)) return true;
+  const call = fn.parentPath;
+  if (call?.isCallExpression()) {
+    const callee = call.get("callee");
+    /** @type {Path | undefined} */
+    const binding = callee.isIdentifier()
+      ? callee.scope.getBinding(callee.node.name)?.path
+      : undefined;
+    const api = imported(binding);
+    if (api?.source === "solid-yield/internal" && api.name === "nativeTry") return true;
+    if (api?.source === "solid-js")
+      return [
+        "createMemo",
+        "createEffect",
+        "createRenderEffect",
+        "createProjection",
+        "createOptimisticStore",
+        "action"
+      ].includes(api.name);
+  }
+  // Function-valued JSX children and attributes are called by the renderer.
+  // Parentheses, conditionals and functions returned from a hole keep that host.
+  for (let outer = fn.parentPath; outer; outer = outer.parentPath) {
+    if (!outer.isJSXExpressionContainer()) continue;
+    const attr = outer.parentPath;
+    // These already have explicit callback bridges in the native surface.
+    // Their nested JSX expressions still provide holes of their own.
+    if (attr.isJSXAttribute()) {
+      if (attr.node.name.name === "ref") return false;
+      const tag = attr.parentPath.get("name");
+      const binding = tag.isJSXIdentifier() ? tag.scope.getBinding(tag.node.name)?.path : undefined;
+      if (
+        attr.node.name.name === "fallback" &&
+        imported(binding)?.source === "solid-js" &&
+        imported(binding)?.name === "Errored"
+      )
+        return false;
+    }
+    return true;
+  }
+  return false;
+};
 /** @param {Map<string,string>} files @param {import('compiler-yield/failure-inference').FailureReport} report */
 export function lowerNativeEffects(files, report) {
   // Seed routine ownership from native primitive calls and propagate to callers
   // through the analyzer's resolved graph. Ordinary I/O helpers stay JavaScript.
   const routines = new Set();
+  // An array's own method runs its callbacks at once, in its caller's host
+  // (`items.every(x => …)`, `reduce`, `sort`). In a host, a callback that may
+  // fail is a routine too: what it throws is a typed raise there, which the
+  // host takes as it takes a reading callback's (sugar.js delegates both).
+  /** @type {{ file: string, owner: Path, callback: string }[]} */
+  const runAtOnce = [];
   for (const [file, code] of files) {
     const program = parseProgram(code, file);
     traverseOwned(program, {
@@ -40,6 +92,25 @@ export function lowerNativeEffects(files, report) {
       },
       CallExpression(q) {
         const c = q.get("callee");
+        if (c.isMemberExpression()) {
+          const failing = q
+            .get("arguments")
+            .filter(
+              a =>
+                a.isFunction() &&
+                !a.node.async &&
+                !a.node.generator &&
+                !!report.at(file, a.node.start ?? 0)?.fails.size
+            );
+          const owner = q.getFunctionParent();
+          if (
+            owner &&
+            failing.length &&
+            report.call(file, q.node.start ?? 0, q.node.end ?? 0)?.arrayMethod
+          )
+            for (const callback of failing)
+              runAtOnce.push({ file, owner, callback: `${file}:${callback.node.start}` });
+        }
         if (
           c.isIdentifier() &&
           !c.scope.getBinding(c.node.name) &&
@@ -99,6 +170,17 @@ export function lowerNativeEffects(files, report) {
       }
     }
   }
+  for (let grew = true; grew; ) {
+    grew = false;
+    for (const { file, owner, callback } of runAtOnce)
+      if (
+        !routines.has(callback) &&
+        (routines.has(`${file}:${owner.node.start}`) || hostOf(routines, file, owner))
+      ) {
+        routines.add(callback);
+        grew = true;
+      }
+  }
   const asyncRoutines = new Set();
   for (const [file, code] of files)
     parseProgram(code, file)?.traverse({
@@ -121,6 +203,27 @@ export function lowerNativeEffects(files, report) {
     let domException = false;
     /** @type {Map<any, {id: import("@babel/core").types.Identifier, kinds: Set<string>}>} */
     const detached = new Map();
+    // A promise an async routine keeps as a value (`const request = fetch(url)`,
+    // a receiver `fetch(url).text`, an argument) is a promise in the
+    // original: attempting it would await it. Found by the call's authored
+    // position, which a call lifted into the lowering's own routine keeps.
+    const keptSites = new Set();
+    traverseOwned(p, {
+      "CallExpression|NewExpression"(q) {
+        const fn = q.getFunctionParent();
+        if (
+          fn &&
+          asyncRoutines.has(`${file}:${fn.node.start}`) &&
+          !q.parentPath?.isAwaitExpression() &&
+          !q.parentPath?.isReturnStatement() &&
+          !q.parentPath?.isExpressionStatement() &&
+          !(fn.isArrowFunctionExpression() && fn.node.body === q.node)
+        )
+          keptSites.add(`${q.node.start}:${q.node.end}`);
+      }
+    });
+    /** What a kept promise bound by `const` may reject with, for its `await`. */
+    const keptFailures = new Map();
 
     /** @param {string[]} kinds @param {any} value */
     const adapt = (kinds, value) => {
@@ -199,53 +302,8 @@ export function lowerNativeEffects(files, report) {
         ? t.cloneNode(fn.node.returnType, true)
         : null;
     };
-    /** Known routine hosts; foreign callbacks remain plain and are caught at their call. @param {Path | null} fn */
-    const host = fn => {
-      if (!fn || fn.node.async || fn.isClassMethod() || fn.isObjectMethod()) return false;
-      if (routines.has(`${file}:${fn.node.start}`)) return true;
-      const call = fn.parentPath;
-      if (call?.isCallExpression()) {
-        const callee = call.get("callee");
-        /** @type {Path | undefined} */
-        const binding = callee.isIdentifier()
-          ? callee.scope.getBinding(callee.node.name)?.path
-          : undefined;
-        const api = imported(binding);
-        if (api?.source === "solid-yield/internal" && api.name === "nativeTry") return true;
-        if (api?.source === "solid-js")
-          return [
-            "createMemo",
-            "createEffect",
-            "createRenderEffect",
-            "createProjection",
-            "createOptimisticStore",
-            "action"
-          ].includes(api.name);
-      }
-      // Function-valued JSX children and attributes are called by the renderer.
-      // Parentheses, conditionals and functions returned from a hole keep that host.
-      for (let outer = fn.parentPath; outer; outer = outer.parentPath) {
-        if (!outer.isJSXExpressionContainer()) continue;
-        const attr = outer.parentPath;
-        // These already have explicit callback bridges in the native surface.
-        // Their nested JSX expressions still provide holes of their own.
-        if (attr.isJSXAttribute()) {
-          if (attr.node.name.name === "ref") return false;
-          const tag = attr.parentPath.get("name");
-          const binding = tag.isJSXIdentifier()
-            ? tag.scope.getBinding(tag.node.name)?.path
-            : undefined;
-          if (
-            attr.node.name.name === "fallback" &&
-            imported(binding)?.source === "solid-js" &&
-            imported(binding)?.name === "Errored"
-          )
-            return false;
-        }
-        return true;
-      }
-      return false;
-    };
+    /** @param {Path | null} fn */
+    const host = fn => hostOf(routines, file, fn);
 
     // Async reactive helpers run on their caller's host. Await becomes an
     // attempt at its original position; setup cannot admit that read/wait.
@@ -354,12 +412,13 @@ export function lowerNativeEffects(files, report) {
           if (!fn || !asyncRoutines.has(`${file}:${fn.node.start}`)) return;
           const value = q.node.argument;
           const info = report.call(file, value.start ?? 0, value.end ?? 0);
+          const binding = t.isIdentifier(value) ? q.scope.getBinding(value.name) : undefined;
           q.replaceWith(
             (info?.target && asyncRoutines.has(info.target)) ||
               (t.isCallExpression(value) &&
                 t.isIdentifier(value.callee, { name: "__nativeAttempt" }))
               ? value
-              : attempt(value, info?.fails ?? ["unknown"])
+              : attempt(value, info?.fails ?? keptFailures.get(binding?.path.node) ?? ["unknown"])
           );
         }
       },
@@ -573,16 +632,18 @@ export function lowerNativeEffects(files, report) {
           // is a promise in the original: attempting it here would await it.
           // An async callee cannot throw synchronously, so the call stays plain;
           // the promise is attempted where the code awaits it.
-          const kept =
-            !unawaited &&
-            info.promise &&
-            info.async &&
-            !!fn &&
-            asyncRoutines.has(`${file}:${fn.node.start}`) &&
-            !q.parentPath?.isAwaitExpression() &&
-            !q.parentPath?.isReturnStatement() &&
-            !q.parentPath?.isExpressionStatement() &&
-            !(fn.isArrowFunctionExpression() && fn.node.body === q.node);
+          const keeps =
+            !unawaited && info.promise && keptSites.has(`${q.node.start}:${q.node.end}`);
+          // An async callee cannot throw synchronously, nor can the platform's
+          // (WebIDL turns its exceptions into rejections): the call stays
+          // plain. Another may throw before it returns its promise: the
+          // attempt takes the value boxed, its synchronous failures, not its
+          // waiting.
+          const kept = keeps && (info.async || info.platform);
+          const keptBoxed = keeps && !kept;
+          const declarator = q.parentPath?.isVariableDeclarator() ? q.parentPath : null;
+          if (keeps && t.isVariableDeclaration(declarator?.parentPath?.node, { kind: "const" }))
+            keptFailures.set(declarator.node, info.fails);
           /** @type {{id: import("@babel/core").types.Identifier, kinds: Set<string>} | undefined} */
           let pending;
           if (unawaited && fn) {
@@ -763,7 +824,7 @@ export function lowerNativeEffects(files, report) {
               t.returnStatement(
                 unawaited || kept
                   ? value
-                  : info.promise && forEachPromise(q)
+                  : info.promise && (keptBoxed || forEachPromise(q))
                     ? boxedAttempt(value, kinds)
                     : attempt(value, kinds)
               )
@@ -778,7 +839,7 @@ export function lowerNativeEffects(files, report) {
               )
             );
           } else if (!unawaited && !kept) {
-            const boxed = !!info?.promise && forEachPromise(q);
+            const boxed = !!info?.promise && (keptBoxed || forEachPromise(q));
             const attempted = boxed
               ? boxedAttempt(call, kinds, q)
               : attempt(call, kinds, declaredReturn(q));

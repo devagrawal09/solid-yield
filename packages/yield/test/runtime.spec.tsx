@@ -1756,6 +1756,52 @@ describe("row routines", () => {
     expect(views).toBe(2);
   });
 
+  it("keyed by a function: the row's item is the current item at its key, read through a path", () => {
+    let setItems!: (v: { id: number; text: string }[]) => void;
+    let setups = 0;
+    const List = component(function* List() {
+      const [items, set] = yield* $signal([
+        { id: 1, text: "a" },
+        { id: 2, text: "b" }
+      ]);
+      setItems = v => write(() => set(v));
+      return view(function* () {
+        return (
+          <ul>
+            {
+              yield* For({
+                each: items,
+                keyed: (item: { id: number }) => item.id,
+                children: function* (item) {
+                  setups++;
+                  return view(function* () {
+                    return (
+                      <li>
+                        {perform(item.id)}:{perform(item.text)}
+                      </li>
+                    );
+                  });
+                }
+              })
+            }
+          </ul>
+        );
+      });
+    });
+    mount(List);
+    const first = root.querySelector("li")!;
+    expect(root.textContent).toBe("1:a2:b");
+    // a new object at key 1: the same row, its path reads the new item
+    setItems([
+      { id: 1, text: "A" },
+      { id: 2, text: "b" }
+    ]);
+    flush();
+    expect(root.textContent).toBe("1:A2:b");
+    expect(root.querySelector("li")).toBe(first);
+    expect(setups).toBe(2);
+  });
+
   it("a row memo is created once per item", () => {
     let setItems!: (v: { id: number; text: string }[]) => void;
     let setText!: (v: string) => void;

@@ -260,13 +260,15 @@ function ForYield<W, C, F>(props: {
       : LazyParam<C, Rendered, "children">);
 }): FlowView<Ops<W> | Ops<F> | OpsOfHole<C>>;
 function ForYield(props: any): any {
-  const keyedFalse = props.keyed === false;
+  // Solid hands a row its item as an accessor when rows are by index or by a key
+  // function (the item at a key can be replaced), and as the value when by reference
+  const itemAccessor = props.keyed === false || typeof props.keyed === "function";
   return SolidFor(
     forward(props, children =>
       adapt(
         children,
         (item: any, index: any) => [
-          rowArg(item, keyedFalse),
+          rowArg(item, itemAccessor),
           rowArg(index, typeof index === "function")
         ],
         typeof children === "function" && children.length > 1 ? 2 : 1

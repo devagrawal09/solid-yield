@@ -402,11 +402,14 @@ theorem unchecked_root_unsound :
 In an async routine the lowering attempts a call that returns a promise where
 the call is made, which awaits it. A promise the code keeps as a value (bound
 or passed on, not awaited, returned or discarded) is not awaited there in the
-original. A call to an `async` function then stays a plain call, and the
-promise is attempted where the code awaits it. That loses no failure: an
-`async` function's call raises nothing synchronously, and its rejection is
-raised at the await. A function that is not `async` can throw before it
-returns its promise, so its call keeps its attempt. -/
+original. A call to an `async` function, or to the platform's (WebIDL turns
+its exceptions into rejections), then stays a plain call, and the promise is
+attempted where the code awaits it. That loses no failure: such a call raises
+nothing synchronously (`fromAsync`), and its rejection is raised at the
+await. Any other function can throw before it returns its promise, so its
+call keeps an attempt, boxed: its synchronous failures, not its waiting. A
+continuation chained on a kept promise (`request.then(k)`) raises what the
+promise rejects with as well as what `k` raises (2026-10-13). -/
 
 /-- A call that returns a promise: what making it raises, and what awaiting
     its promise raises. -/
@@ -437,6 +440,23 @@ theorem kept_async_sound {V : Type} (c : PromiseCall V) (hasync : c.fromAsync) :
 theorem kept_sync_unsound :
     ∃ (c : PromiseCall Nat) (v : Nat), keptRaises c v ∧ ¬ attemptedAtAwait c v :=
   ⟨⟨fun v => v = 0, Inference.empty⟩, 0, Or.inl rfl, fun h => h⟩
+
+/-- A continuation chained on a kept promise: the promise's rejection and
+    what the continuation raises. -/
+def chainedRaises {V : Type} (c : PromiseCall V) (k : Inference.Failures V) :
+    Inference.Failures V :=
+  Inference.union c.awaited k
+
+theorem chained_carries_rejection {V : Type} (c : PromiseCall V) (k : Inference.Failures V) :
+    Inference.le c.awaited (chainedRaises c k) :=
+  fun _ h => Or.inl h
+
+/-- Taking the kept promise's name for a value with no failure of its own
+    (the receiver of `.then`) drops its rejection. -/
+theorem chained_receiver_dropped_unsound :
+    ∃ (c : PromiseCall Nat) (k : Inference.Failures Nat) (v : Nat),
+      chainedRaises c k v ∧ ¬ k v :=
+  ⟨⟨Inference.empty, fun v => v = 0⟩, Inference.empty, 0, Or.inl rfl, fun h => h⟩
 
 /-! ## Sagas driven inside an action (D-121)
 
@@ -1367,6 +1387,63 @@ theorem catch_takes_failure (σ : Store) (b h : Stmt) (ρ ρ' : Env) (e : Nat) (
 
 end Statements
 
+/-! ### Callbacks an array method runs at once (S26, 2026-10-13)
+
+`items.every(x => …)`, `reduce`, `sort`'s comparator: the method calls its
+callback at once, element by element, in the host that calls the method.
+Each call is an inline routine of that host (S24): its reads are the
+host's, and its first raise ends the method and fails the host, whether or
+not the callback reads anything. Run as plain code (what the lowering did
+with a callback that reads nothing), its raise was not the host's: that
+lowering is unsound. -/
+namespace Callbacks
+
+open Insertion (Store Outcome seq)
+open Surface (Expr eval Prog lower run run_bind)
+
+/-- Solid: the callback evaluated on each element in order, the results
+    summed (`reduce`); the first that does not finish ends the call. -/
+def evalEach (σ : Store) (cb : Nat → Expr) : List Nat → Outcome × List Nat
+  | [] => (.done 0, [])
+  | x :: xs => seq (eval σ (cb x)) (fun v => seq (evalEach σ cb xs) (fun w => (.done (v + w), [])))
+
+/-- The lowering: each call an inline routine of the host. -/
+def lowerEach (cb : Nat → Expr) : List Nat → Prog
+  | [] => .ret 0
+  | x :: xs => (lower (.inline (cb x))).bind (fun v => (lowerEach cb xs).bind (fun w => .ret (v + w)))
+
+theorem each_preserves (σ : Store) (cb : Nat → Expr) (xs : List Nat) :
+    run σ (lowerEach cb xs) = evalEach σ cb xs := by
+  induction xs with
+  | nil => simp [lowerEach, evalEach, run]
+  | cons x xs ih =>
+    have h : run σ (lower (.inline (cb x))) = eval σ (cb x) := by
+      rw [Surface.surface_preserves]; rfl
+    simp only [lowerEach, evalEach, run_bind, h, ih, run]
+
+/-- A callback that raises fails the host with its error, though it reads
+    nothing. -/
+theorem callback_raise_fails_host (σ : Store) (cb : Nat → Expr) (x : Nat) (xs : List Nat)
+    (err : Nat) (h : cb x = .raise err) :
+    (run σ (lowerEach cb (x :: xs))).1 = .failed err := by
+  rw [each_preserves]
+  simp [evalEach, h, eval, seq]
+
+/-- Run as plain code, a callback's raise is not the host's. -/
+def plain : Outcome × List Nat → Outcome × List Nat
+  | (.failed _, t) => (.done 0, t)
+  | r => r
+
+def evalPlain (σ : Store) (cb : Nat → Expr) : List Nat → Outcome × List Nat
+  | [] => (.done 0, [])
+  | x :: xs => seq (plain (eval σ (cb x))) (fun v => seq (evalPlain σ cb xs) (fun w => (.done (v + w), [])))
+
+theorem plain_callback_unsound :
+    ∃ (σ : Store) (cb : Nat → Expr) (xs : List Nat), evalPlain σ cb xs ≠ evalEach σ cb xs :=
+  ⟨fun _ => none, fun _ => .raise 1, [0], by simp [evalPlain, evalEach, plain, eval, seq]⟩
+
+end Callbacks
+
 #print axioms write_admitted_iff
 #print axioms event_phase_runs_in_caller
 #print axioms hook_requirement_provided
@@ -1428,5 +1505,10 @@ end Statements
 #print axioms Statements.statements_preserve
 #print axioms Statements.catch_passes_pending
 #print axioms Statements.catch_takes_failure
+#print axioms chained_carries_rejection
+#print axioms chained_receiver_dropped_unsound
+#print axioms Callbacks.each_preserves
+#print axioms Callbacks.callback_raise_fails_host
+#print axioms Callbacks.plain_callback_unsound
 end Sugar
 end Yield

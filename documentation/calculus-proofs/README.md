@@ -36,7 +36,8 @@ while exactly the dependents rerun (S22), boundaries, lists and effects
 compose these (S23), `untrack` and inline routines (IIFEs, local
 functions, getters, methods) keep Solid's outcome and tracked reads (S24),
 and statements (locals, branches, loops, `throw`, `try`/`catch`) leave
-Solid's locals, reads, suspensions and failures (S25); `sugar.md` maps every
+Solid's locals, reads, suspensions and failures (S25), and an array method's
+callback is an inline routine of its host whose raise is the host's (S26); `sugar.md` maps every
 form of the native surface check to these.
 [SugarProofs.lean](lean/SugarProofs.lean) proves them on top of `YieldProofs`,
 each with a counterexample for the rejected alternative. Both libraries are

@@ -2,7 +2,8 @@ const ts = require("typescript");
 const path = require("node:path");
 const { createVirtualService } = require("../src/service.cjs");
 const root = path.resolve(__dirname, "fixtures");
-function makeService(files, config = { mode: "native", include: ["*.tsx", "*.ts"] }) {
+/** A language service host over `files` (in fixtures/) and the disk. */
+function makeHost(files) {
   const input = new Map(Object.entries(files).map(([f, c]) => [path.join(root, f), c]));
   const options = {
     strict: true,
@@ -29,6 +30,10 @@ function makeService(files, config = { mode: "native", include: ["*.tsx", "*.ts"
     readDirectory: ts.sys.readDirectory,
     directoryExists: f => f === root || ts.sys.directoryExists(f)
   };
-  return { service: createVirtualService(ts, host, config), input, root, ts };
+  return Object.assign(host, { input });
 }
-module.exports = { makeService, root, ts };
+function makeService(files, config = { mode: "native", include: ["*.tsx", "*.ts"] }) {
+  const host = makeHost(files);
+  return { service: createVirtualService(ts, host, config), input: host.input, root, ts };
+}
+module.exports = { makeHost, makeService, root, ts };

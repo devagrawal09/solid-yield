@@ -265,6 +265,7 @@ Public roadmap: https://github.com/devagrawal09/solid-yield/issues/1
 - **Then:** a dashboard twin written as plain Solid.
 - **Then:** islands (server components with client slots) productized, subject to DOM parity and the purity trust model (D-114).
 - **Then:** the lazy builder, with descriptors that become live on first interaction, a step toward resumability without a new runtime.
+- **v0.5:** server signals (D-118): one reactive graph placed across server and client by the compiler. A signal never written on the client is a server node, derivations that read only server nodes never ship and recompute on the server, and only values cross. See [server-signals.md](documentation/server-signals.md).
 
 ## Status
 

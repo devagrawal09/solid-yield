@@ -1,7 +1,10 @@
 import { readFileSync, writeFileSync, mkdirSync, symlinkSync, existsSync } from "node:fs";
 import { resolve, join, dirname, relative } from "node:path";
 import { createRequire } from "node:module";
-import { lowerNativeProject } from "../../packages/vite-plugin-yield/src/native.js";
+import {
+  lowerNativeProject,
+  nativeForeignApi
+} from "../../packages/vite-plugin-yield/src/native.js";
 import { locate } from "../../packages/vite-plugin-yield/src/positions.js";
 const root = resolve(import.meta.dirname, "../..");
 const require = createRequire(join(root, "packages/vite-plugin-yield/package.json"));
@@ -119,21 +122,30 @@ async function runJob(jobPath) {
     }
     // A message chain spans lines (`Type … is missing …`): the row is matched whole.
     const m = row.match(
-      /^([^\n]*):(\d+):(\d+) (?:error|warning|suggestion|message) (TS\d+): ([\s\S]*)$/
+      /^([^\n]*):(\d+):(\d+) (error|warning|suggestion|message) (TS\d+): ([\s\S]*)$/
     );
     if (m)
       diagnostics.push({
         stage: "cli",
         file: relative(sourceDir, m[1]),
         line: Number(m[2]),
-        code: m[5].match(/\[([A-Z_]+)\]/)?.[1] ?? m[4],
-        tsCode: m[4],
-        message: norm(m[5])
+        severity: m[4],
+        code: m[6].match(/\[([A-Z_]+)\]/)?.[1] ?? m[5],
+        tsCode: m[5],
+        message: norm(m[6])
       });
   }
   if (lowered) {
     const entries = [...lowered.files].map(([file, code]) => [relative(sourceDir, file), code]);
     prepare(generatedDir, entries);
+    // the Solid APIs the lowering keeps as plain Solid (D-116), for `no-foreign-reactive`
+    const foreign = {};
+    for (const [, code] of entries)
+      for (const m of code.matchAll(/^import \{([^}]*)\} from "(solid-js|@solidjs\/web)";$/gm))
+        for (const spec of m[1].split(",")) {
+          const name = spec.trim().split(/\s+as\s+/)[0];
+          if (name && nativeForeignApi(m[2], name)) (foreign[m[2]] ??= []).push(name);
+        }
     const eslint = new ESLint({
       cwd: root,
       overrideConfigFile: true,
@@ -145,6 +157,7 @@ async function runJob(jobPath) {
             parserOptions: { project: join(generatedDir, "tsconfig.json"), tsconfigRootDir: root }
           },
           plugins: { "solid-yield": plugin },
+          settings: { "solid-yield": { foreign } },
           rules: plugin.configs.recommended.rules
         }
       ]
@@ -168,6 +181,7 @@ async function runJob(jobPath) {
           line: authored,
           generatedLine: m.line,
           generated: !mapped || mapped.generated,
+          severity: m.severity === 2 ? "error" : "warning",
           code: m.message.match(/\[([A-Z_]+)\]/)?.[1] ?? m.ruleId,
           ruleId: m.ruleId,
           message: norm(m.message)

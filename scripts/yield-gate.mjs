@@ -232,6 +232,14 @@ function buildSteps(twins) {
     cmd: process.execPath,
     args: ["scripts/native-insertion/check.mjs"]
   });
+  // D-124: every language form in every host, and the JSX constructs, get
+  // exactly what plain Solid says (scripts/native-surface).
+  steps.push({
+    name: "native:surface",
+    cwd: root,
+    cmd: process.execPath,
+    args: ["scripts/native-surface/check.mjs", "--cached"]
+  });
   for (const stage of ["transform", "typecheck", "lint"]) {
     steps.push({
       name: `native:sierpinski:${stage}`,
@@ -598,7 +606,8 @@ function buildSteps(twins) {
       "examples/harness/native-edges/*.mjs",
       "examples/harness/native-edges/app/*.[tj]s?(x)",
       "scripts/*.mjs",
-      "scripts/native-insertion/*.mjs"
+      "scripts/native-insertion/*.mjs",
+      "scripts/native-surface/*.mjs"
     ]
   });
 

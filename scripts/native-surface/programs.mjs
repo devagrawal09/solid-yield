@@ -1,0 +1,164 @@
+// Programs for the native surface check: one component per form, host and
+// variant, and what plain Solid says each must get (forms.mjs).
+import { forms, eventOnly } from "./forms.mjs";
+import { jsxCases } from "./jsx.mjs";
+
+export const hosts = ["hole", "attribute", "memo", "compute", "phase", "event", "setup"];
+export const variants = ["read", "write", "pending"];
+
+const state = `  const [n, setN] = createSignal(1);
+  const [items, setItems] = createSignal([1, 2, 3]);
+  const [maybe, setMaybe] = createSignal<number | undefined>(undefined);
+  const [obj, setObj] = createSignal({ inner: { value: 1 }, label: "x" });
+  const [store, setStore] = createStore({ user: { name: "a" }, list: [{ title: "t", done: false }] });
+  const [out, setOut] = createSignal<unknown>(null);`;
+
+// The pending variant: every reactive slot an async memo (pending until it
+// settles; the store stays settled), the app rendered with no Loading. A form
+// must carry the read's color to its host: what plain Solid suspends, the
+// check reports.
+const pendingState = `  const n = createMemo(async () => 1);
+  const items = createMemo(async () => [1, 2, 3]);
+  const maybe = createMemo(async (): Promise<number | undefined> => undefined);
+  const obj = createMemo(async () => ({ inner: { value: 1 }, label: "x" }));
+  const [store, setStore] = createStore({ user: { name: "a" }, list: [{ title: "t", done: false }] });
+  const [out, setOut] = createSignal<unknown>(null);`;
+
+/** Whether a form reads a slot the pending variant makes pending. @param {import("./forms.mjs").Form} form */
+const readsPending = form =>
+  /\b(n|items|maybe|obj)\(\)/.test(form.body(slots("read"))) ||
+  /\btwice\(n\)/.test(form.body(slots("read")));
+
+/** @param {"read" | "write" | "pending"} variant */
+const slots = variant => ({
+  n: "n()",
+  items: "items()",
+  maybe: "maybe()",
+  obj: "obj()",
+  store: "store",
+  /** @param {string} x */
+  sink: x => (variant === "read" ? `seen.push(${x});` : `setOut(${x});`)
+});
+
+/**
+ * What plain Solid says: a read is reactive anywhere but the component body;
+ * a write belongs in an event or an effect's phase.
+ * @param {string} form @param {string} host @param {"read" | "write"} variant
+ * @returns {string[]}
+ */
+export function expected(form, host, variant) {
+  const spec = [...forms, ...eventOnly].find(f => f.id === form);
+  if (variant === "pending") {
+    const pending = !!spec && readsPending(spec);
+    const rejects = host === "event" && spec?.throws ? ["EVENT_REJECTS"] : [];
+    // rendered: what a form may throw reaches the root (FOREIGN_HANDOFF)
+    const fails = spec?.throws ? ["FOREIGN_HANDOFF"] : [];
+    if (host === "setup")
+      return form !== "untrack" ? ["READ_IN_SETUP"] : pending ? ["COLORED_CAPTURE"] : [];
+    // what a view or a memo it shows reads suspends the app: Loading
+    if (["hole", "attribute", "memo"].includes(host))
+      return [...(pending ? ["PENDING_ROOT"] : []), ...fails];
+    // an effect's compute waits for it; an event waits and catches its own
+    if (host === "compute") return fails;
+    if (host === "event") return rejects;
+    // an effect phase does not wait: read it in the compute and pass the value
+    return pending ? ["PENDING_IN_EFFECT"] : fails;
+  }
+  // `untrack` is how Solid reads once in the body; the body never writes
+  if (host === "setup")
+    return form !== "untrack"
+      ? ["READ_IN_SETUP"]
+      : variant === "write"
+        ? ["WRITE_IN_REACTIVE"]
+        : [];
+  // a handler's failure nobody catches is the event's (EVENT_REJECTS)
+  const rejects = host === "event" && spec?.throws ? ["EVENT_REJECTS"] : [];
+  if (variant === "read" || ["event", "phase"].includes(host)) return rejects;
+  return ["WRITE_IN_REACTIVE"];
+}
+
+/**
+ * @param {import("./forms.mjs").Form} form @param {string} host
+ * @param {"read" | "write"} variant
+ */
+export function program(form, host, variant) {
+  const reading = variant !== "write";
+  const s = slots(reading ? "read" : "write");
+  const body = form.body(s);
+  const block = reading ? `const seen: unknown[] = [];\n${body}` : body;
+  const result = reading ? `seen.join(",")` : `1`;
+  const thunk = `(() => {\n${block}\nreturn ${result};\n})()`;
+  const value = form.expr && reading ? `String(${form.expr(s)})` : thunk;
+  const async = eventOnly.includes(form) ? "async " : "";
+  /** @type {Record<string, string>} */
+  const view = {
+    hole: `  return <p>{${value}}</p>;`,
+    attribute: `  return <p title={String(${value})}>x</p>;`,
+    memo: `  const m = createMemo(() => {\n${block}\nreturn ${result};\n});\n  return <p>{m()}</p>;`,
+    compute: `  createEffect(\n() => {\n${block}\nreturn ${result};\n},\nvalue => {\nconsole.log(value);\n}\n);\n  return <p>{String(out())}</p>;`,
+    phase: `  createEffect(\n() => n(),\n() => {\n${block}\n}\n);\n  return <p>{String(out())}</p>;`,
+    event: `  return <button onClick={${async}() => {\n${block}\n}}>{String(out())}</button>;`,
+    setup: `${block}\n  return <p>{String(${result})}</p>;`
+  };
+  const pending = variant === "pending";
+  return `import { createSignal, createMemo, createEffect, createStore, untrack, type Accessor } from "solid-js";
+${pending ? 'import { render } from "@solidjs/web";\n' : ""}export function Surface() {
+${pending ? pendingState : state}
+${view[host]}
+}
+${pending ? "render(Surface, document.body);\n" : ""}`;
+}
+
+/** A JSX construct's program (jsx.mjs). @param {import("./jsx.mjs").JsxCase} c */
+export function jsxProgram(c) {
+  const solid = ["createSignal", "createMemo", "createEffect", "createStore", "untrack"];
+  if (c.imports) solid.push(...c.imports.split(", "));
+  /** @type {Record<string, [string, string]>} module-level and component-level additions */
+  const extras = {
+    pending: ["", "  const pending = createMemo(async () => 1);"],
+    child: [
+      "function Child(props: { value: number; label: string }) {\n  return <p>{props.value}{props.label}</p>;\n}\n",
+      ""
+    ],
+    panel: [
+      'import type { JSX } from "@solidjs/web";\nfunction Panel(props: { title: string; children: JSX.Element }) {\n  return <section><h2>{props.title}</h2>{props.children}</section>;\n}\n',
+      ""
+    ],
+    increment: ["", "  const increment = () => setN(n() + 1);"],
+    ref: ["", "  let input!: HTMLInputElement;"]
+  };
+  const [module, local] = c.extra ? extras[c.extra] : ["", ""];
+  return `import { ${solid.join(", ")} } from "solid-js";
+${module}export function Surface() {
+${state}
+${local}
+  return ${c.view};
+}
+`;
+}
+
+/** Every cell: form × host × variant, with its file name and expectation. */
+export function cells() {
+  const all = [];
+  for (const form of [...forms, ...eventOnly])
+    for (const host of eventOnly.includes(form) ? ["event"] : hosts)
+      for (const variant of /** @type {const} */ (["read", "write", "pending"]))
+        all.push({
+          form: form.id,
+          host,
+          variant,
+          file: `${host}/${variant}/${form.id}.tsx`,
+          source: program(form, host, variant),
+          expected: expected(form.id, host, variant)
+        });
+  for (const c of jsxCases)
+    all.push({
+      form: c.id,
+      host: "view",
+      variant: "jsx",
+      file: `view/jsx/${c.id}.tsx`,
+      source: jsxProgram(c),
+      expected: c.expected ?? []
+    });
+  return all;
+}

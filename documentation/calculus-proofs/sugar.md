@@ -176,10 +176,12 @@ list is the original's promise, which `For`'s type refuses.
 | `for-of`, `for-in`, `for-index`, `while`, `do-while`, `labeled-continue` | loops (a `continue` is a branch around the rest of the body) | S25 |
 | `try-catch`, `try-finally` | `try`/`catch` (a `finally` runs on both paths: after the `try`, and in a handler that runs it and rethrows) | S25 |
 | `map`, `filter`, `reduce`, `find`, `some-every`, `sort-copy`, `for-each`, `array-from` | a loop whose body is the callback, run in place | S25, S24, S9 |
+| `callback-throw`, `callback-reads-throw`, `reduce-throw`, `callback-failing-call`, `comparator-throw`, `store-callback-throw` | that loop, its callback an inline routine that may raise: the raise is the host's | S25 (`catch_takes_failure`), S24, S20 (`raise`), S23 under `Errored` |
 | `iife`, `local-arrow`, `local-function`, `closure-read`, `getter-object`, `getter-this`, `object-method`, `class-method`, `class-instance`, `optional-call`, `reader-helper` | inline routines (the body read where it is called) | S24 (the helper's parameter: S21, D-119) |
 | `untrack` | untracked reads | S24 |
 | `user-generator` | an author's generator, opaque: a call whose failures are unknown | S20 (`call`), S13 (`foreign_driver_unknown`) |
-| `await`, `await-nested`, `await-json`, `await-loop`, `promise-then` (events) | an event's attempts in sequence | S22, S15, S25 |
+| `await`, `await-nested`, `await-json`, `await-loop`, `promise-then`, `await-uncaught` (events) | an event's attempts in sequence | S22, S15, S25 |
+| `promise-kept` (event) | a promise kept as a value: a plain call; its attempt where it is awaited, or chained on | S20 (`call`), S22, S15 |
 
 What the table rests on is the lowering's decomposition of each form, which no proof states: it is checked by `native:surface` (each form in every host, reading, writing and pending, as plain Solid says) and by the surface mutants.
 

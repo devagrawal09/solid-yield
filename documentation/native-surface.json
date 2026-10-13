@@ -1,5 +1,5 @@
 {
-  "programs": 1420,
+  "programs": 1552,
   "failed": 0,
   "outcome": [
     {
@@ -4455,6 +4455,1410 @@
       "pass": true
     },
     {
+      "form": "callback-throw",
+      "host": "hole",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "callback-throw",
+      "host": "hole",
+      "variant": "write",
+      "expected": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "reported": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-throw",
+      "host": "hole",
+      "variant": "pending",
+      "expected": [
+        "PENDING_ROOT",
+        "FOREIGN_HANDOFF"
+      ],
+      "reported": [
+        "FOREIGN_HANDOFF",
+        "PENDING_ROOT"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-throw",
+      "host": "attribute",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "callback-throw",
+      "host": "attribute",
+      "variant": "write",
+      "expected": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "reported": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-throw",
+      "host": "attribute",
+      "variant": "pending",
+      "expected": [
+        "PENDING_ROOT",
+        "FOREIGN_HANDOFF"
+      ],
+      "reported": [
+        "FOREIGN_HANDOFF",
+        "PENDING_ROOT"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-throw",
+      "host": "memo",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "callback-throw",
+      "host": "memo",
+      "variant": "write",
+      "expected": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "reported": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-throw",
+      "host": "memo",
+      "variant": "pending",
+      "expected": [
+        "PENDING_ROOT",
+        "FOREIGN_HANDOFF"
+      ],
+      "reported": [
+        "FOREIGN_HANDOFF",
+        "PENDING_ROOT"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-throw",
+      "host": "compute",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "callback-throw",
+      "host": "compute",
+      "variant": "write",
+      "expected": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "reported": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-throw",
+      "host": "compute",
+      "variant": "pending",
+      "expected": [
+        "FOREIGN_HANDOFF"
+      ],
+      "reported": [
+        "FOREIGN_HANDOFF"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-throw",
+      "host": "phase",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "callback-throw",
+      "host": "phase",
+      "variant": "write",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "callback-throw",
+      "host": "phase",
+      "variant": "pending",
+      "expected": [
+        "PENDING_IN_EFFECT"
+      ],
+      "reported": [
+        "PENDING_IN_EFFECT"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-throw",
+      "host": "event",
+      "variant": "read",
+      "expected": [
+        "EVENT_REJECTS"
+      ],
+      "reported": [
+        "EVENT_REJECTS"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-throw",
+      "host": "event",
+      "variant": "write",
+      "expected": [
+        "EVENT_REJECTS"
+      ],
+      "reported": [
+        "EVENT_REJECTS"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-throw",
+      "host": "event",
+      "variant": "pending",
+      "expected": [
+        "EVENT_REJECTS"
+      ],
+      "reported": [
+        "EVENT_REJECTS"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-throw",
+      "host": "setup",
+      "variant": "read",
+      "expected": [
+        "READ_IN_SETUP"
+      ],
+      "reported": [
+        "READ_IN_SETUP"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-throw",
+      "host": "setup",
+      "variant": "write",
+      "expected": [
+        "READ_IN_SETUP"
+      ],
+      "reported": [
+        "READ_IN_SETUP"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-throw",
+      "host": "setup",
+      "variant": "pending",
+      "expected": [
+        "READ_IN_SETUP"
+      ],
+      "reported": [
+        "READ_IN_SETUP"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-reads-throw",
+      "host": "hole",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "callback-reads-throw",
+      "host": "hole",
+      "variant": "write",
+      "expected": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "reported": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-reads-throw",
+      "host": "hole",
+      "variant": "pending",
+      "expected": [
+        "PENDING_ROOT",
+        "FOREIGN_HANDOFF"
+      ],
+      "reported": [
+        "FOREIGN_HANDOFF",
+        "PENDING_ROOT"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-reads-throw",
+      "host": "attribute",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "callback-reads-throw",
+      "host": "attribute",
+      "variant": "write",
+      "expected": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "reported": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-reads-throw",
+      "host": "attribute",
+      "variant": "pending",
+      "expected": [
+        "PENDING_ROOT",
+        "FOREIGN_HANDOFF"
+      ],
+      "reported": [
+        "FOREIGN_HANDOFF",
+        "PENDING_ROOT"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-reads-throw",
+      "host": "memo",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "callback-reads-throw",
+      "host": "memo",
+      "variant": "write",
+      "expected": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "reported": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-reads-throw",
+      "host": "memo",
+      "variant": "pending",
+      "expected": [
+        "PENDING_ROOT",
+        "FOREIGN_HANDOFF"
+      ],
+      "reported": [
+        "FOREIGN_HANDOFF",
+        "PENDING_ROOT"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-reads-throw",
+      "host": "compute",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "callback-reads-throw",
+      "host": "compute",
+      "variant": "write",
+      "expected": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "reported": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-reads-throw",
+      "host": "compute",
+      "variant": "pending",
+      "expected": [
+        "FOREIGN_HANDOFF"
+      ],
+      "reported": [
+        "FOREIGN_HANDOFF"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-reads-throw",
+      "host": "phase",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "callback-reads-throw",
+      "host": "phase",
+      "variant": "write",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "callback-reads-throw",
+      "host": "phase",
+      "variant": "pending",
+      "expected": [
+        "PENDING_IN_EFFECT"
+      ],
+      "reported": [
+        "PENDING_IN_EFFECT"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-reads-throw",
+      "host": "event",
+      "variant": "read",
+      "expected": [
+        "EVENT_REJECTS"
+      ],
+      "reported": [
+        "EVENT_REJECTS"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-reads-throw",
+      "host": "event",
+      "variant": "write",
+      "expected": [
+        "EVENT_REJECTS"
+      ],
+      "reported": [
+        "EVENT_REJECTS"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-reads-throw",
+      "host": "event",
+      "variant": "pending",
+      "expected": [
+        "EVENT_REJECTS"
+      ],
+      "reported": [
+        "EVENT_REJECTS"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-reads-throw",
+      "host": "setup",
+      "variant": "read",
+      "expected": [
+        "READ_IN_SETUP"
+      ],
+      "reported": [
+        "READ_IN_SETUP"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-reads-throw",
+      "host": "setup",
+      "variant": "write",
+      "expected": [
+        "READ_IN_SETUP"
+      ],
+      "reported": [
+        "READ_IN_SETUP"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-reads-throw",
+      "host": "setup",
+      "variant": "pending",
+      "expected": [
+        "READ_IN_SETUP"
+      ],
+      "reported": [
+        "READ_IN_SETUP"
+      ],
+      "pass": true
+    },
+    {
+      "form": "reduce-throw",
+      "host": "hole",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "reduce-throw",
+      "host": "hole",
+      "variant": "write",
+      "expected": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "reported": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "pass": true
+    },
+    {
+      "form": "reduce-throw",
+      "host": "hole",
+      "variant": "pending",
+      "expected": [
+        "PENDING_ROOT",
+        "FOREIGN_HANDOFF"
+      ],
+      "reported": [
+        "FOREIGN_HANDOFF",
+        "PENDING_ROOT"
+      ],
+      "pass": true
+    },
+    {
+      "form": "reduce-throw",
+      "host": "attribute",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "reduce-throw",
+      "host": "attribute",
+      "variant": "write",
+      "expected": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "reported": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "pass": true
+    },
+    {
+      "form": "reduce-throw",
+      "host": "attribute",
+      "variant": "pending",
+      "expected": [
+        "PENDING_ROOT",
+        "FOREIGN_HANDOFF"
+      ],
+      "reported": [
+        "FOREIGN_HANDOFF",
+        "PENDING_ROOT"
+      ],
+      "pass": true
+    },
+    {
+      "form": "reduce-throw",
+      "host": "memo",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "reduce-throw",
+      "host": "memo",
+      "variant": "write",
+      "expected": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "reported": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "pass": true
+    },
+    {
+      "form": "reduce-throw",
+      "host": "memo",
+      "variant": "pending",
+      "expected": [
+        "PENDING_ROOT",
+        "FOREIGN_HANDOFF"
+      ],
+      "reported": [
+        "FOREIGN_HANDOFF",
+        "PENDING_ROOT"
+      ],
+      "pass": true
+    },
+    {
+      "form": "reduce-throw",
+      "host": "compute",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "reduce-throw",
+      "host": "compute",
+      "variant": "write",
+      "expected": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "reported": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "pass": true
+    },
+    {
+      "form": "reduce-throw",
+      "host": "compute",
+      "variant": "pending",
+      "expected": [
+        "FOREIGN_HANDOFF"
+      ],
+      "reported": [
+        "FOREIGN_HANDOFF"
+      ],
+      "pass": true
+    },
+    {
+      "form": "reduce-throw",
+      "host": "phase",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "reduce-throw",
+      "host": "phase",
+      "variant": "write",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "reduce-throw",
+      "host": "phase",
+      "variant": "pending",
+      "expected": [
+        "PENDING_IN_EFFECT"
+      ],
+      "reported": [
+        "PENDING_IN_EFFECT"
+      ],
+      "pass": true
+    },
+    {
+      "form": "reduce-throw",
+      "host": "event",
+      "variant": "read",
+      "expected": [
+        "EVENT_REJECTS"
+      ],
+      "reported": [
+        "EVENT_REJECTS"
+      ],
+      "pass": true
+    },
+    {
+      "form": "reduce-throw",
+      "host": "event",
+      "variant": "write",
+      "expected": [
+        "EVENT_REJECTS"
+      ],
+      "reported": [
+        "EVENT_REJECTS"
+      ],
+      "pass": true
+    },
+    {
+      "form": "reduce-throw",
+      "host": "event",
+      "variant": "pending",
+      "expected": [
+        "EVENT_REJECTS"
+      ],
+      "reported": [
+        "EVENT_REJECTS"
+      ],
+      "pass": true
+    },
+    {
+      "form": "reduce-throw",
+      "host": "setup",
+      "variant": "read",
+      "expected": [
+        "READ_IN_SETUP"
+      ],
+      "reported": [
+        "READ_IN_SETUP"
+      ],
+      "pass": true
+    },
+    {
+      "form": "reduce-throw",
+      "host": "setup",
+      "variant": "write",
+      "expected": [
+        "READ_IN_SETUP"
+      ],
+      "reported": [
+        "READ_IN_SETUP"
+      ],
+      "pass": true
+    },
+    {
+      "form": "reduce-throw",
+      "host": "setup",
+      "variant": "pending",
+      "expected": [
+        "READ_IN_SETUP"
+      ],
+      "reported": [
+        "READ_IN_SETUP"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-failing-call",
+      "host": "hole",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "callback-failing-call",
+      "host": "hole",
+      "variant": "write",
+      "expected": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "reported": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-failing-call",
+      "host": "hole",
+      "variant": "pending",
+      "expected": [
+        "PENDING_ROOT",
+        "FOREIGN_HANDOFF"
+      ],
+      "reported": [
+        "FOREIGN_HANDOFF",
+        "PENDING_ROOT"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-failing-call",
+      "host": "attribute",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "callback-failing-call",
+      "host": "attribute",
+      "variant": "write",
+      "expected": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "reported": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-failing-call",
+      "host": "attribute",
+      "variant": "pending",
+      "expected": [
+        "PENDING_ROOT",
+        "FOREIGN_HANDOFF"
+      ],
+      "reported": [
+        "FOREIGN_HANDOFF",
+        "PENDING_ROOT"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-failing-call",
+      "host": "memo",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "callback-failing-call",
+      "host": "memo",
+      "variant": "write",
+      "expected": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "reported": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-failing-call",
+      "host": "memo",
+      "variant": "pending",
+      "expected": [
+        "PENDING_ROOT",
+        "FOREIGN_HANDOFF"
+      ],
+      "reported": [
+        "FOREIGN_HANDOFF",
+        "PENDING_ROOT"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-failing-call",
+      "host": "compute",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "callback-failing-call",
+      "host": "compute",
+      "variant": "write",
+      "expected": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "reported": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-failing-call",
+      "host": "compute",
+      "variant": "pending",
+      "expected": [
+        "FOREIGN_HANDOFF"
+      ],
+      "reported": [
+        "FOREIGN_HANDOFF"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-failing-call",
+      "host": "phase",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "callback-failing-call",
+      "host": "phase",
+      "variant": "write",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "callback-failing-call",
+      "host": "phase",
+      "variant": "pending",
+      "expected": [
+        "PENDING_IN_EFFECT"
+      ],
+      "reported": [
+        "PENDING_IN_EFFECT"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-failing-call",
+      "host": "event",
+      "variant": "read",
+      "expected": [
+        "EVENT_REJECTS"
+      ],
+      "reported": [
+        "EVENT_REJECTS"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-failing-call",
+      "host": "event",
+      "variant": "write",
+      "expected": [
+        "EVENT_REJECTS"
+      ],
+      "reported": [
+        "EVENT_REJECTS"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-failing-call",
+      "host": "event",
+      "variant": "pending",
+      "expected": [
+        "EVENT_REJECTS"
+      ],
+      "reported": [
+        "EVENT_REJECTS"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-failing-call",
+      "host": "setup",
+      "variant": "read",
+      "expected": [
+        "READ_IN_SETUP"
+      ],
+      "reported": [
+        "READ_IN_SETUP"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-failing-call",
+      "host": "setup",
+      "variant": "write",
+      "expected": [
+        "READ_IN_SETUP"
+      ],
+      "reported": [
+        "READ_IN_SETUP"
+      ],
+      "pass": true
+    },
+    {
+      "form": "callback-failing-call",
+      "host": "setup",
+      "variant": "pending",
+      "expected": [
+        "READ_IN_SETUP"
+      ],
+      "reported": [
+        "READ_IN_SETUP"
+      ],
+      "pass": true
+    },
+    {
+      "form": "comparator-throw",
+      "host": "hole",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "comparator-throw",
+      "host": "hole",
+      "variant": "write",
+      "expected": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "reported": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "pass": true
+    },
+    {
+      "form": "comparator-throw",
+      "host": "hole",
+      "variant": "pending",
+      "expected": [
+        "PENDING_ROOT",
+        "FOREIGN_HANDOFF"
+      ],
+      "reported": [
+        "FOREIGN_HANDOFF",
+        "PENDING_ROOT"
+      ],
+      "pass": true
+    },
+    {
+      "form": "comparator-throw",
+      "host": "attribute",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "comparator-throw",
+      "host": "attribute",
+      "variant": "write",
+      "expected": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "reported": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "pass": true
+    },
+    {
+      "form": "comparator-throw",
+      "host": "attribute",
+      "variant": "pending",
+      "expected": [
+        "PENDING_ROOT",
+        "FOREIGN_HANDOFF"
+      ],
+      "reported": [
+        "FOREIGN_HANDOFF",
+        "PENDING_ROOT"
+      ],
+      "pass": true
+    },
+    {
+      "form": "comparator-throw",
+      "host": "memo",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "comparator-throw",
+      "host": "memo",
+      "variant": "write",
+      "expected": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "reported": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "pass": true
+    },
+    {
+      "form": "comparator-throw",
+      "host": "memo",
+      "variant": "pending",
+      "expected": [
+        "PENDING_ROOT",
+        "FOREIGN_HANDOFF"
+      ],
+      "reported": [
+        "FOREIGN_HANDOFF",
+        "PENDING_ROOT"
+      ],
+      "pass": true
+    },
+    {
+      "form": "comparator-throw",
+      "host": "compute",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "comparator-throw",
+      "host": "compute",
+      "variant": "write",
+      "expected": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "reported": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "pass": true
+    },
+    {
+      "form": "comparator-throw",
+      "host": "compute",
+      "variant": "pending",
+      "expected": [
+        "FOREIGN_HANDOFF"
+      ],
+      "reported": [
+        "FOREIGN_HANDOFF"
+      ],
+      "pass": true
+    },
+    {
+      "form": "comparator-throw",
+      "host": "phase",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "comparator-throw",
+      "host": "phase",
+      "variant": "write",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "comparator-throw",
+      "host": "phase",
+      "variant": "pending",
+      "expected": [
+        "PENDING_IN_EFFECT"
+      ],
+      "reported": [
+        "PENDING_IN_EFFECT"
+      ],
+      "pass": true
+    },
+    {
+      "form": "comparator-throw",
+      "host": "event",
+      "variant": "read",
+      "expected": [
+        "EVENT_REJECTS"
+      ],
+      "reported": [
+        "EVENT_REJECTS"
+      ],
+      "pass": true
+    },
+    {
+      "form": "comparator-throw",
+      "host": "event",
+      "variant": "write",
+      "expected": [
+        "EVENT_REJECTS"
+      ],
+      "reported": [
+        "EVENT_REJECTS"
+      ],
+      "pass": true
+    },
+    {
+      "form": "comparator-throw",
+      "host": "event",
+      "variant": "pending",
+      "expected": [
+        "EVENT_REJECTS"
+      ],
+      "reported": [
+        "EVENT_REJECTS"
+      ],
+      "pass": true
+    },
+    {
+      "form": "comparator-throw",
+      "host": "setup",
+      "variant": "read",
+      "expected": [
+        "READ_IN_SETUP"
+      ],
+      "reported": [
+        "READ_IN_SETUP"
+      ],
+      "pass": true
+    },
+    {
+      "form": "comparator-throw",
+      "host": "setup",
+      "variant": "write",
+      "expected": [
+        "READ_IN_SETUP"
+      ],
+      "reported": [
+        "READ_IN_SETUP"
+      ],
+      "pass": true
+    },
+    {
+      "form": "comparator-throw",
+      "host": "setup",
+      "variant": "pending",
+      "expected": [
+        "READ_IN_SETUP"
+      ],
+      "reported": [
+        "READ_IN_SETUP"
+      ],
+      "pass": true
+    },
+    {
+      "form": "store-callback-throw",
+      "host": "hole",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "store-callback-throw",
+      "host": "hole",
+      "variant": "write",
+      "expected": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "reported": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "pass": true
+    },
+    {
+      "form": "store-callback-throw",
+      "host": "hole",
+      "variant": "pending",
+      "expected": [
+        "PENDING_ROOT",
+        "FOREIGN_HANDOFF"
+      ],
+      "reported": [
+        "FOREIGN_HANDOFF",
+        "PENDING_ROOT"
+      ],
+      "pass": true
+    },
+    {
+      "form": "store-callback-throw",
+      "host": "attribute",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "store-callback-throw",
+      "host": "attribute",
+      "variant": "write",
+      "expected": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "reported": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "pass": true
+    },
+    {
+      "form": "store-callback-throw",
+      "host": "attribute",
+      "variant": "pending",
+      "expected": [
+        "PENDING_ROOT",
+        "FOREIGN_HANDOFF"
+      ],
+      "reported": [
+        "FOREIGN_HANDOFF",
+        "PENDING_ROOT"
+      ],
+      "pass": true
+    },
+    {
+      "form": "store-callback-throw",
+      "host": "memo",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "store-callback-throw",
+      "host": "memo",
+      "variant": "write",
+      "expected": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "reported": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "pass": true
+    },
+    {
+      "form": "store-callback-throw",
+      "host": "memo",
+      "variant": "pending",
+      "expected": [
+        "PENDING_ROOT",
+        "FOREIGN_HANDOFF"
+      ],
+      "reported": [
+        "FOREIGN_HANDOFF",
+        "PENDING_ROOT"
+      ],
+      "pass": true
+    },
+    {
+      "form": "store-callback-throw",
+      "host": "compute",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "store-callback-throw",
+      "host": "compute",
+      "variant": "write",
+      "expected": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "reported": [
+        "WRITE_IN_REACTIVE"
+      ],
+      "pass": true
+    },
+    {
+      "form": "store-callback-throw",
+      "host": "compute",
+      "variant": "pending",
+      "expected": [
+        "FOREIGN_HANDOFF"
+      ],
+      "reported": [
+        "FOREIGN_HANDOFF"
+      ],
+      "pass": true
+    },
+    {
+      "form": "store-callback-throw",
+      "host": "phase",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "store-callback-throw",
+      "host": "phase",
+      "variant": "write",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "store-callback-throw",
+      "host": "phase",
+      "variant": "pending",
+      "expected": [
+        "PENDING_IN_EFFECT"
+      ],
+      "reported": [
+        "PENDING_IN_EFFECT"
+      ],
+      "pass": true
+    },
+    {
+      "form": "store-callback-throw",
+      "host": "event",
+      "variant": "read",
+      "expected": [
+        "EVENT_REJECTS"
+      ],
+      "reported": [
+        "EVENT_REJECTS"
+      ],
+      "pass": true
+    },
+    {
+      "form": "store-callback-throw",
+      "host": "event",
+      "variant": "write",
+      "expected": [
+        "EVENT_REJECTS"
+      ],
+      "reported": [
+        "EVENT_REJECTS"
+      ],
+      "pass": true
+    },
+    {
+      "form": "store-callback-throw",
+      "host": "event",
+      "variant": "pending",
+      "expected": [
+        "EVENT_REJECTS"
+      ],
+      "reported": [
+        "EVENT_REJECTS"
+      ],
+      "pass": true
+    },
+    {
+      "form": "store-callback-throw",
+      "host": "setup",
+      "variant": "read",
+      "expected": [
+        "READ_IN_SETUP"
+      ],
+      "reported": [
+        "READ_IN_SETUP"
+      ],
+      "pass": true
+    },
+    {
+      "form": "store-callback-throw",
+      "host": "setup",
+      "variant": "write",
+      "expected": [
+        "READ_IN_SETUP"
+      ],
+      "reported": [
+        "READ_IN_SETUP"
+      ],
+      "pass": true
+    },
+    {
+      "form": "store-callback-throw",
+      "host": "setup",
+      "variant": "pending",
+      "expected": [
+        "READ_IN_SETUP"
+      ],
+      "reported": [
+        "READ_IN_SETUP"
+      ],
+      "pass": true
+    },
+    {
       "form": "for-each",
       "host": "hole",
       "variant": "read",
@@ -13906,6 +15310,66 @@
       "variant": "pending",
       "expected": [],
       "reported": [],
+      "pass": true
+    },
+    {
+      "form": "promise-kept",
+      "host": "event",
+      "variant": "read",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "promise-kept",
+      "host": "event",
+      "variant": "write",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "promise-kept",
+      "host": "event",
+      "variant": "pending",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "await-uncaught",
+      "host": "event",
+      "variant": "read",
+      "expected": [
+        "EVENT_REJECTS"
+      ],
+      "reported": [
+        "EVENT_REJECTS"
+      ],
+      "pass": true
+    },
+    {
+      "form": "await-uncaught",
+      "host": "event",
+      "variant": "write",
+      "expected": [
+        "EVENT_REJECTS"
+      ],
+      "reported": [
+        "EVENT_REJECTS"
+      ],
+      "pass": true
+    },
+    {
+      "form": "await-uncaught",
+      "host": "event",
+      "variant": "pending",
+      "expected": [
+        "EVENT_REJECTS"
+      ],
+      "reported": [
+        "EVENT_REJECTS"
+      ],
       "pass": true
     },
     {

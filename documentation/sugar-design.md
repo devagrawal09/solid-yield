@@ -2155,6 +2155,16 @@ catch at `todos.ts:144` or `:159` widens that report (`SyntaxError |
 TypeError | unknown`) rather than adding one. Dev's ruling (D-123 §3): for the
 deletion operators, a report that now lists more failure kinds is caught too.
 
+**Over the language surface (2026-10-13).** The corpus gained the native
+surface's 78 forms, each a program of its own (`mutationPrograms()`), whose
+mutants are the operators' sites in the form and the boundaries around it;
+two sites that make the same program are one mutant. **100 %** (728 killed /
+0 survived / 89 equivalent; 817 mutants on 99 of 121 programs). Its
+survivors were three checker gaps, fixed (see "What mutating it found"
+under the surface check), and 17 sites the check rightly passes, each a site
+equivalent with its reason: a throw that lands in the form's own `try`, a
+promise kept as a value, a second throw under an `Errored`.
+
 **Proofs S21 and S22.** S20's core gained props and events. A child whose prop
 reads delegate to its caller's lowered getters computes what Solid computes
 with the caller's expressions read where the child reads them (lowering is
@@ -2177,17 +2187,17 @@ parameter carries its callers' colors; a DOM spread reads its sources and
 binds its events where Solid's spread does (`nativeSpread`).
 
 **The surface check.** `scripts/native-surface` is the completeness check:
-every JavaScript and TypeScript form a component is written in (65 forms),
+every JavaScript and TypeScript form a component is written in (71 forms),
 placed in every host Solid runs code in (hole, attribute, memo, effect
 compute, effect phase, event, component body), reading, writing, and reading
-sources that are pending in a rendered app; the five `await` and promise
+sources that are pending in a rendered app; the seven `await` and promise
 forms in the event; and 40 JSX constructs (attributes, `class`/`style`
 objects, SVG, children, lists, every flow control, components with props,
-children and getter props, every event shape, inputs, refs). 1420 programs,
+children and getter props, every event shape, inputs, refs). 1552 programs,
 each with what plain Solid says about it, through the mutation program's
 pipeline (transform, `solid-yield check`, generated lint). The pending
 variant is the soundness half: a form that dropped a read's color would let
-a suspension or a failure through unreported. All 1420 match
+a suspension or a failure through unreported. All 1552 match
 (`documentation/native-surface.json`); the gate runs it (`native:surface`),
 reusing a result for the same sources.
 
@@ -2224,4 +2234,25 @@ or a ts-plugin case (C07–C09):
   declared in a handler twice (handler and root).
 - The type-checking service looped forever when the lowering crashed without
   naming a file: it blamed a file already dropped, so nothing was dropped.
+
+**What mutating it found.** The mutation program runs over the surface too
+(`scripts/mutation/corpus.mjs`): each form in a memo of a rendered app (an
+event's in its handler), its sources pending, shown under a Loading when it
+reads one and an Errored when it may throw; the operators' sites in the form,
+and the boundaries around it. Its survivors were three more gaps, each now a
+form of the surface and a vitest case:
+
+- An array method's callback that reads nothing (`items().every(x => …)`,
+  `reduce`, a store list's `map`, a sort comparator) ran as plain code: what
+  it threw never reached the memo's Errored or the root. In a host, such a
+  callback that may fail is a routine now, its throw a typed raise the host
+  takes, as a reading callback's is.
+- A callback in a hole's IIFE lost its host once the IIFE was bound before
+  the view (`nativeHole`): its reads and failures did not color the hole.
+- A promise an event kept as a value (`const request = fetch(url)`, a
+  receiver, an argument) was awaited by the model, so `request.status` typed
+  and `request.then(…)` did not. It stays a promise; a platform function's
+  (`fetch`, which rejects rather than throws) stays plain, another's
+  attempt takes only what it throws before returning. Its rejection reaches
+  the `await` on it and a continuation chained on it (`request.then(…)`).
 

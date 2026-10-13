@@ -1,21 +1,21 @@
 {
   "program": {
-    "mutants": 298,
-    "killed": 236,
+    "mutants": 817,
+    "killed": 728,
     "survived": 0,
-    "equivalent": 62,
+    "equivalent": 89,
     "score": 100,
-    "exactLine": 179,
-    "detected": 236
+    "exactLine": 580,
+    "detected": 728
   },
   "operators": {
     "delete-catch": {
-      "mutants": 9,
-      "killed": 6,
+      "mutants": 16,
+      "killed": 13,
       "survived": 0,
       "equivalent": 3,
       "exact": 1,
-      "detected": 6,
+      "detected": 13,
       "categories": {
         "detected elsewhere": 0,
         "masked: base refused": 0,
@@ -40,12 +40,12 @@
       }
     },
     "delete-errored": {
-      "mutants": 13,
-      "killed": 12,
+      "mutants": 22,
+      "killed": 21,
       "survived": 0,
       "equivalent": 1,
-      "exact": 0,
-      "detected": 12,
+      "exact": 9,
+      "detected": 21,
       "categories": {
         "detected elsewhere": 0,
         "masked: base refused": 0,
@@ -55,12 +55,12 @@
       }
     },
     "delete-loading": {
-      "mutants": 15,
-      "killed": 13,
+      "mutants": 84,
+      "killed": 82,
       "survived": 0,
       "equivalent": 2,
-      "exact": 0,
-      "detected": 13,
+      "exact": 69,
+      "detected": 82,
       "categories": {
         "detected elsewhere": 0,
         "masked: base refused": 0,
@@ -70,12 +70,12 @@
       }
     },
     "setup-read": {
-      "mutants": 54,
-      "killed": 54,
+      "mutants": 234,
+      "killed": 234,
       "survived": 0,
       "equivalent": 0,
-      "exact": 54,
-      "detected": 54,
+      "exact": 234,
+      "detected": 234,
       "categories": {
         "detected elsewhere": 0,
         "masked: base refused": 0,
@@ -115,10 +115,10 @@
       }
     },
     "throw-string": {
-      "mutants": 13,
+      "mutants": 18,
       "killed": 0,
       "survived": 0,
-      "equivalent": 13,
+      "equivalent": 18,
       "exact": 0,
       "detected": 0,
       "categories": {
@@ -130,10 +130,10 @@
       }
     },
     "throw-object": {
-      "mutants": 13,
+      "mutants": 18,
       "killed": 0,
       "survived": 0,
-      "equivalent": 13,
+      "equivalent": 18,
       "exact": 0,
       "detected": 0,
       "categories": {
@@ -145,10 +145,10 @@
       }
     },
     "async-reject": {
-      "mutants": 2,
+      "mutants": 10,
       "killed": 2,
       "survived": 0,
-      "equivalent": 0,
+      "equivalent": 8,
       "exact": 1,
       "detected": 2,
       "categories": {
@@ -160,12 +160,12 @@
       }
     },
     "remove-await": {
-      "mutants": 18,
-      "killed": 2,
+      "mutants": 27,
+      "killed": 7,
       "survived": 0,
-      "equivalent": 16,
-      "exact": 1,
-      "detected": 2,
+      "equivalent": 20,
+      "exact": 2,
+      "detected": 7,
       "categories": {
         "detected elsewhere": 0,
         "masked: base refused": 0,
@@ -175,12 +175,12 @@
       }
     },
     "memo-write": {
-      "mutants": 13,
-      "killed": 13,
+      "mutants": 84,
+      "killed": 84,
       "survived": 0,
       "equivalent": 0,
-      "exact": 13,
-      "detected": 13,
+      "exact": 84,
+      "detected": 84,
       "categories": {
         "detected elsewhere": 0,
         "masked: base refused": 0,
@@ -205,12 +205,12 @@
       }
     },
     "non-core-cache": {
-      "mutants": 24,
-      "killed": 24,
+      "mutants": 95,
+      "killed": 95,
       "survived": 0,
       "equivalent": 0,
       "exact": 12,
-      "detected": 24,
+      "detected": 95,
       "categories": {
         "detected elsewhere": 0,
         "masked: base refused": 0,
@@ -280,12 +280,12 @@
       }
     },
     "callback-throw": {
-      "mutants": 5,
-      "killed": 1,
+      "mutants": 19,
+      "killed": 10,
       "survived": 0,
-      "equivalent": 4,
+      "equivalent": 9,
       "exact": 0,
-      "detected": 1,
+      "detected": 10,
       "categories": {
         "detected elsewhere": 0,
         "masked: base refused": 0,
@@ -325,12 +325,12 @@
       }
     },
     "create-in-hole": {
-      "mutants": 18,
-      "killed": 18,
+      "mutants": 89,
+      "killed": 89,
       "survived": 0,
       "equivalent": 0,
-      "exact": 17,
-      "detected": 18,
+      "exact": 88,
+      "detected": 89,
       "categories": {
         "detected elsewhere": 0,
         "masked: base refused": 0,

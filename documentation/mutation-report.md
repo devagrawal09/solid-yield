@@ -1,6 +1,6 @@
 # Mutation report
 
-Measured 2026-10-13T17:01:42.539Z. The corpus, operators and checker have changed since the first measurement (2026-10-08); each change is in its own commit, and the catalogue's corrections are listed below. The tests in scripts/mutation/test.mjs verify the harness, not the checker.
+Measured 2026-10-13T19:49:45.990Z. The corpus, operators and checker have changed since the first measurement (2026-10-08); each change is in its own commit, and the catalogue's corrections are listed below. The tests in scripts/mutation/test.mjs verify the harness, not the checker.
 
 ## Commands and scope
 
@@ -12,7 +12,7 @@ node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js ru
 node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js run scripts/mutation/stryker-ts.config.mjs
 ```
 
-Program run: 695.1 seconds; 43 projects; 298 mutants. Digest: `c2fbadb9fd987a90c9489374cd146d481a42d29cec9580b655c4921869ba0bdd`.
+Program run: 1367.9 seconds; 121 projects; 817 mutants. Digest: `2e524c9485c9c5a352f064cce2dda460fe1d8ce40ed03d46edac0c95139628de`.
 
 Every syntactically applicable site is edited separately. Sources stay plain Solid. Each pipeline runs the shared native transform, the exported implementation used by `solid-yield check`, and recommended ESLint on generated code. A transform refusal blocks generated lint and is recorded explicitly. A CLI crash is a finding, never a kill.
 
@@ -24,30 +24,30 @@ The gate runs `node scripts/mutation/run.mjs --cached --baseline documentation/y
 
 | Operator | Mutants | Equivalent | Killed | Survived | Score | Exact line | Detected | Expected codes |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
-| delete-catch | 9 | 3 | 6 | 0 | 100.00% | 1 (16.67%) | 6 (100.00%) | FOREIGN_HANDOFF, NATIVE_CALLBACK_FAILURE, EVENT_REJECTS |
+| delete-catch | 16 | 3 | 13 | 0 | 100.00% | 1 (7.69%) | 13 (100.00%) | FOREIGN_HANDOFF, NATIVE_CALLBACK_FAILURE, EVENT_REJECTS |
 | swallow-catch | 1 | 1 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | equivalent |
-| delete-errored | 13 | 1 | 12 | 0 | 100.00% | 0 (0.00%) | 12 (100.00%) | FOREIGN_HANDOFF |
-| delete-loading | 15 | 2 | 13 | 0 | 100.00% | 0 (0.00%) | 13 (100.00%) | PENDING_ROOT |
-| setup-read | 54 | 0 | 54 | 0 | 100.00% | 54 (100.00%) | 54 (100.00%) | READ_IN_SETUP, solid-yield/no-read-in-setup |
+| delete-errored | 22 | 1 | 21 | 0 | 100.00% | 9 (42.86%) | 21 (100.00%) | FOREIGN_HANDOFF |
+| delete-loading | 84 | 2 | 82 | 0 | 100.00% | 69 (84.15%) | 82 (100.00%) | PENDING_ROOT |
+| setup-read | 234 | 0 | 234 | 0 | 100.00% | 234 (100.00%) | 234 (100.00%) | READ_IN_SETUP, solid-yield/no-read-in-setup |
 | delete-provider | 11 | 1 | 10 | 0 | 100.00% | 0 (0.00%) | 10 (100.00%) | NO_PROVIDER |
 | never-provided-context | 16 | 0 | 16 | 0 | 100.00% | 16 (100.00%) | 16 (100.00%) | NO_PROVIDER |
-| throw-string | 13 | 13 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | equivalent |
-| throw-object | 13 | 13 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | equivalent |
-| async-reject | 2 | 0 | 2 | 0 | 100.00% | 1 (50.00%) | 2 (100.00%) | FOREIGN_HANDOFF, NATIVE_CALLBACK_FAILURE, EVENT_REJECTS |
-| remove-await | 18 | 16 | 2 | 0 | 100.00% | 1 (50.00%) | 2 (100.00%) | TS2322, TS2345, TS2739, TS2740, TS2741, TS2339, GENERATED_TYPE, SETTLED_PROP |
-| memo-write | 13 | 0 | 13 | 0 | 100.00% | 13 (100.00%) | 13 (100.00%) | WRITE_IN_REACTIVE, solid-yield/no-unyielded-write |
+| throw-string | 18 | 18 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | equivalent |
+| throw-object | 18 | 18 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | equivalent |
+| async-reject | 10 | 8 | 2 | 0 | 100.00% | 1 (50.00%) | 2 (100.00%) | FOREIGN_HANDOFF, NATIVE_CALLBACK_FAILURE, EVENT_REJECTS |
+| remove-await | 27 | 20 | 7 | 0 | 100.00% | 2 (28.57%) | 7 (100.00%) | TS2322, TS2345, TS2739, TS2740, TS2741, TS2339, GENERATED_TYPE, SETTLED_PROP |
+| memo-write | 84 | 0 | 84 | 0 | 100.00% | 84 (100.00%) | 84 (100.00%) | WRITE_IN_REACTIVE, solid-yield/no-unyielded-write |
 | timer-read | 6 | 6 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | equivalent |
-| non-core-cache | 24 | 0 | 24 | 0 | 100.00% | 12 (50.00%) | 24 (100.00%) | SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP, TS2322, TS2345, TS2739, TS2740, TS2741, TS2339, FOR_EACH |
+| non-core-cache | 95 | 0 | 95 | 0 | 100.00% | 12 (12.63%) | 95 (100.00%) | SUGAR_CALLBACK, NATIVE_FOREIGN_BOUNDARY, FOREIGN_HANDOFF, READ_IN_SETUP, TS2322, TS2345, TS2739, TS2740, TS2741, TS2339, FOR_EACH |
 | destructure-props | 18 | 0 | 18 | 0 | 100.00% | 17 (94.44%) | 18 (100.00%) | NATIVE_PROPS, NATIVE_RECURSION |
 | inline-component | 27 | 0 | 27 | 0 | 100.00% | 27 (100.00%) | 27 (100.00%) | NATIVE_COMPONENT, SUGAR_CALLBACK, SUGAR_RETURN, FOREIGN_HANDOFF |
 | effect-arity | 2 | 0 | 2 | 0 | 100.00% | 2 (100.00%) | 2 (100.00%) | NATIVE_EFFECT_PHASES, TS2554 |
 | remove-use-server | 1 | 1 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | equivalent |
-| callback-throw | 5 | 4 | 1 | 0 | 100.00% | 0 (0.00%) | 1 (100.00%) | FOREIGN_HANDOFF |
+| callback-throw | 19 | 9 | 10 | 0 | 100.00% | 0 (0.00%) | 10 (100.00%) | FOREIGN_HANDOFF |
 | server-new-class | 1 | 1 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | FOREIGN_HANDOFF |
 | module-state | 18 | 0 | 18 | 0 | 100.00% | 18 (100.00%) | 18 (100.00%) | MODULE_STATE |
-| create-in-hole | 18 | 0 | 18 | 0 | 100.00% | 17 (94.44%) | 18 (100.00%) | CREATE_OUTSIDE_SETUP |
+| create-in-hole | 89 | 0 | 89 | 0 | 100.00% | 88 (98.88%) | 89 (100.00%) | CREATE_OUTSIDE_SETUP |
 
-**Program mutation score: 100.00% = 236 / (236 + 0).** 62 equivalents excluded. Exact line: 75.85% (179). Detected: 100.00% (236).
+**Program mutation score: 100.00% = 728 / (728 + 0).** 89 equivalents excluded. Exact line: 79.67% (580). Detected: 100.00% (728).
 
 ### Why mutants survive
 
@@ -96,6 +96,23 @@ Single sites read against their program and correct to accept (Dev's ruling, 202
 - M0192 delete-catch at operator-seeds/App.tsx:14: The deleted catch only rethrew: without it the failure leaves the same way.
 - M0193 remove-await at operator-seeds/App.tsx:14: Unawaited, the rejection leaves the try without passing the catch, which only rethrew it; the async memo's type is the same.
 - M0215 server-new-class at operator-seeds/server.ts:5: The throw cannot run (`if (false)`), and the Errored above the memo that reads the server takes a failure of any class.
+- M0783 async-reject at surface-await/App.tsx:15: The throw lands in the form's own try, whose catch absorbs every failure (logged): nothing reaches the handler.
+- M0786 async-reject at surface-await/App.tsx:16: The throw lands in the form's own try, whose catch absorbs every failure (logged): nothing reaches the handler.
+- M0785 remove-await at surface-await/App.tsx:16: Unawaited, the promise is kept as a value (pushed to an `unknown[]`), which type-checks unchanged; that its rejection now floats past the catch is a no-floating-promises concern, outside the catalogue (generate.mjs).
+- M0796 async-reject at surface-await-json/App.tsx:15: The throw lands in the form's own try, whose catch absorbs every failure (logged): nothing reaches the handler.
+- M0798 async-reject at surface-await-json/App.tsx:16: The throw lands in the form's own try, whose catch absorbs every failure (logged): nothing reaches the handler.
+- M0797 remove-await at surface-await-json/App.tsx:16: Unawaited, the promise is kept as a value (assigned to `unknown`), which type-checks unchanged; that its rejection now floats past the catch is a no-floating-promises concern, outside the catalogue (generate.mjs).
+- M0816 async-reject at surface-await-loop/App.tsx:16: The throw lands in the form's own try, whose catch absorbs every failure (logged): nothing reaches the handler.
+- M0790 async-reject at surface-await-nested/App.tsx:15: The throw lands in the form's own try, whose catch absorbs every failure (logged): nothing reaches the handler.
+- M0789 remove-await at surface-await-nested/App.tsx:15: Unawaited, the promise is kept as a value (the outer one: the text promise pushed to an `unknown[]`), which type-checks unchanged; that its rejection now floats past the catch is a no-floating-promises concern, outside the catalogue (generate.mjs).
+- M0810 async-reject at surface-await-uncaught/App.tsx:15: The throw lands in the form's own try, whose catch absorbs every failure (logged): nothing reaches the handler.
+- M0806 async-reject at surface-promise-kept/App.tsx:16: The throw lands in the form's own try, whose catch absorbs every failure (logged): nothing reaches the handler.
+- M0805 remove-await at surface-promise-kept/App.tsx:16: Unawaited, the promise is kept as a value (the status promise pushed to an `unknown[]`), which type-checks unchanged; that its rejection now floats past the catch is a no-floating-promises concern, outside the catalogue (generate.mjs).
+- M0445 callback-throw at surface-callback-throw/App.tsx:12: The callback already throws; the Errored around the memo's read takes a failure of any class, so a second throw there changes nothing the check can see.
+- M0455 callback-throw at surface-callback-reads-throw/App.tsx:12: The callback already throws; the Errored around the memo's read takes a failure of any class, so a second throw there changes nothing the check can see.
+- M0466 callback-throw at surface-reduce-throw/App.tsx:12: The callback already throws; the Errored around the memo's read takes a failure of any class, so a second throw there changes nothing the check can see.
+- M0495 callback-throw at surface-store-callback-throw/App.tsx:12: The callback already throws; the Errored around the memo's read takes a failure of any class, so a second throw there changes nothing the check can see.
+- M0477 callback-throw at surface-callback-failing-call/App.tsx:12: The callback's JSON.parse already may throw; the Errored around the memo's read takes a failure of any class, so a second throw there changes nothing the check can see.
 
 ### Corpus provenance
 
@@ -149,6 +166,84 @@ A program seeded with a deliberate mistake that the checker reports is a check o
 | rendering-edges | 5 | completed / passed / passed | yes | Plain Solid exercising Rendering's native edges: a component factory with a tuple context and destructured members, a derived store, async iterable producers, a Repeat index key, isPending thunks, a lazy page, root trees (CSR, and a server function's with a ParentProps shell) |
 | effect-edges | 4 | completed / passed / passed | yes | Plain Solid exercising Effect's native edges (D-121, D-122): a saga its driver steps inside an action, a kept action promise, a provider value that creates, cleans up and may fail, an accessor prop, a store's root in For, a store reduce, a routine's stream a memo returns |
 | hole-edges | 2 | completed / passed / passed | yes | Plain Solid exercising failing calls in JSX holes (nativeHole) and values typed any: a helper that may throw in a hole, in an attribute and in a row under an Errored; a context, a store, a signal and a memo of any, with a method of any |
+| surface-plain | 1 | completed / passed / passed | yes | scripts/native-surface: the `plain` form in a memo of a rendered app |
+| surface-ternary | 1 | completed / passed / passed | yes | scripts/native-surface: the `ternary` form in a memo of a rendered app |
+| surface-logical-and | 1 | completed / passed / passed | yes | scripts/native-surface: the `logical-and` form in a memo of a rendered app |
+| surface-logical-or | 1 | completed / passed / passed | yes | scripts/native-surface: the `logical-or` form in a memo of a rendered app |
+| surface-nullish | 1 | completed / passed / passed | yes | scripts/native-surface: the `nullish` form in a memo of a rendered app |
+| surface-optional-chain | 1 | completed / passed / passed | yes | scripts/native-surface: the `optional-chain` form in a memo of a rendered app |
+| surface-template | 1 | completed / passed / passed | yes | scripts/native-surface: the `template` form in a memo of a rendered app |
+| surface-tagged-template | 1 | completed / passed / passed | yes | scripts/native-surface: the `tagged-template` form in a memo of a rendered app |
+| surface-array-literal | 1 | completed / passed / passed | yes | scripts/native-surface: the `array-literal` form in a memo of a rendered app |
+| surface-object-literal | 1 | completed / passed / passed | yes | scripts/native-surface: the `object-literal` form in a memo of a rendered app |
+| surface-array-spread | 1 | completed / passed / passed | yes | scripts/native-surface: the `array-spread` form in a memo of a rendered app |
+| surface-object-spread | 1 | completed / passed / passed | yes | scripts/native-surface: the `object-spread` form in a memo of a rendered app |
+| surface-destructure-object | 1 | completed / passed / passed | yes | scripts/native-surface: the `destructure-object` form in a memo of a rendered app |
+| surface-destructure-array | 1 | completed / passed / passed | yes | scripts/native-surface: the `destructure-array` form in a memo of a rendered app |
+| surface-destructure-default | 1 | completed / passed / passed | yes | scripts/native-surface: the `destructure-default` form in a memo of a rendered app |
+| surface-map | 1 | completed / passed / passed | yes | scripts/native-surface: the `map` form in a memo of a rendered app |
+| surface-filter | 1 | completed / passed / passed | yes | scripts/native-surface: the `filter` form in a memo of a rendered app |
+| surface-reduce | 1 | completed / passed / passed | yes | scripts/native-surface: the `reduce` form in a memo of a rendered app |
+| surface-find | 1 | completed / passed / passed | yes | scripts/native-surface: the `find` form in a memo of a rendered app |
+| surface-some-every | 1 | completed / passed / passed | yes | scripts/native-surface: the `some-every` form in a memo of a rendered app |
+| surface-sort-copy | 1 | completed / passed / passed | yes | scripts/native-surface: the `sort-copy` form in a memo of a rendered app |
+| surface-callback-throw | 1 | completed / passed / passed | yes | scripts/native-surface: the `callback-throw` form in a memo of a rendered app |
+| surface-callback-reads-throw | 1 | completed / passed / passed | yes | scripts/native-surface: the `callback-reads-throw` form in a memo of a rendered app |
+| surface-reduce-throw | 1 | completed / passed / passed | yes | scripts/native-surface: the `reduce-throw` form in a memo of a rendered app |
+| surface-callback-failing-call | 1 | completed / passed / passed | yes | scripts/native-surface: the `callback-failing-call` form in a memo of a rendered app |
+| surface-comparator-throw | 1 | completed / passed / passed | yes | scripts/native-surface: the `comparator-throw` form in a memo of a rendered app |
+| surface-store-callback-throw | 1 | completed / passed / passed | yes | scripts/native-surface: the `store-callback-throw` form in a memo of a rendered app |
+| surface-for-each | 1 | completed / passed / passed | yes | scripts/native-surface: the `for-each` form in a memo of a rendered app |
+| surface-for-of | 1 | completed / passed / passed | yes | scripts/native-surface: the `for-of` form in a memo of a rendered app |
+| surface-for-in | 1 | completed / passed / passed | yes | scripts/native-surface: the `for-in` form in a memo of a rendered app |
+| surface-for-index | 1 | completed / passed / passed | yes | scripts/native-surface: the `for-index` form in a memo of a rendered app |
+| surface-while | 1 | completed / passed / passed | yes | scripts/native-surface: the `while` form in a memo of a rendered app |
+| surface-do-while | 1 | completed / passed / passed | yes | scripts/native-surface: the `do-while` form in a memo of a rendered app |
+| surface-labeled-continue | 1 | completed / passed / passed | yes | scripts/native-surface: the `labeled-continue` form in a memo of a rendered app |
+| surface-switch | 1 | completed / passed / passed | yes | scripts/native-surface: the `switch` form in a memo of a rendered app |
+| surface-if-else | 1 | completed / passed / passed | yes | scripts/native-surface: the `if-else` form in a memo of a rendered app |
+| surface-try-catch | 1 | completed / passed / passed | yes | scripts/native-surface: the `try-catch` form in a memo of a rendered app |
+| surface-try-finally | 1 | completed / passed / passed | yes | scripts/native-surface: the `try-finally` form in a memo of a rendered app |
+| surface-iife | 1 | completed / passed / passed | yes | scripts/native-surface: the `iife` form in a memo of a rendered app |
+| surface-local-arrow | 1 | completed / passed / passed | yes | scripts/native-surface: the `local-arrow` form in a memo of a rendered app |
+| surface-local-function | 1 | completed / passed / passed | yes | scripts/native-surface: the `local-function` form in a memo of a rendered app |
+| surface-closure-read | 1 | completed / passed / passed | yes | scripts/native-surface: the `closure-read` form in a memo of a rendered app |
+| surface-typeof-instanceof | 1 | completed / passed / passed | yes | scripts/native-surface: the `typeof-instanceof` form in a memo of a rendered app |
+| surface-in-operator | 1 | completed / passed / passed | yes | scripts/native-surface: the `in-operator` form in a memo of a rendered app |
+| surface-casts | 1 | completed / passed / passed | yes | scripts/native-surface: the `casts` form in a memo of a rendered app |
+| surface-string-methods | 1 | completed / passed / passed | yes | scripts/native-surface: the `string-methods` form in a memo of a rendered app |
+| surface-math | 1 | completed / passed / passed | yes | scripts/native-surface: the `math` form in a memo of a rendered app |
+| surface-object-statics | 1 | completed / passed / passed | yes | scripts/native-surface: the `object-statics` form in a memo of a rendered app |
+| surface-map-set | 1 | completed / passed / passed | yes | scripts/native-surface: the `map-set` form in a memo of a rendered app |
+| surface-date | 1 | completed / passed / passed | yes | scripts/native-surface: the `date` form in a memo of a rendered app |
+| surface-regex | 1 | completed / passed / passed | yes | scripts/native-surface: the `regex` form in a memo of a rendered app |
+| surface-optional-call | 1 | completed / passed / passed | yes | scripts/native-surface: the `optional-call` form in a memo of a rendered app |
+| surface-compound-assign | 1 | completed / passed / passed | yes | scripts/native-surface: the `compound-assign` form in a memo of a rendered app |
+| surface-increment | 1 | completed / passed / passed | yes | scripts/native-surface: the `increment` form in a memo of a rendered app |
+| surface-exponent-bitwise | 1 | completed / passed / passed | yes | scripts/native-surface: the `exponent-bitwise` form in a memo of a rendered app |
+| surface-bigint | 1 | completed / passed / passed | yes | scripts/native-surface: the `bigint` form in a memo of a rendered app |
+| surface-string-concat | 1 | completed / passed / passed | yes | scripts/native-surface: the `string-concat` form in a memo of a rendered app |
+| surface-array-from | 1 | completed / passed / passed | yes | scripts/native-surface: the `array-from` form in a memo of a rendered app |
+| surface-store-path | 1 | completed / passed / passed | yes | scripts/native-surface: the `store-path` form in a memo of a rendered app |
+| surface-store-list | 1 | completed / passed / passed | yes | scripts/native-surface: the `store-list` form in a memo of a rendered app |
+| surface-json-stringify | 1 | completed / passed / passed | yes | scripts/native-surface: the `json-stringify` form in a memo of a rendered app |
+| surface-class-instance | 1 | completed / passed / passed | yes | scripts/native-surface: the `class-instance` form in a memo of a rendered app |
+| surface-getter-object | 1 | completed / passed / passed | yes | scripts/native-surface: the `getter-object` form in a memo of a rendered app |
+| surface-user-generator | 1 | completed / passed / passed | yes | scripts/native-surface: the `user-generator` form in a memo of a rendered app |
+| surface-object-method | 1 | completed / passed / passed | yes | scripts/native-surface: the `object-method` form in a memo of a rendered app |
+| surface-getter-this | 1 | completed / passed / passed | yes | scripts/native-surface: the `getter-this` form in a memo of a rendered app |
+| surface-class-method | 1 | completed / passed / passed | yes | scripts/native-surface: the `class-method` form in a memo of a rendered app |
+| surface-reader-helper | 1 | completed / passed / passed | yes | scripts/native-surface: the `reader-helper` form in a memo of a rendered app |
+| surface-untrack | 1 | completed / passed / passed | yes | scripts/native-surface: the `untrack` form in a memo of a rendered app |
+| surface-comma-sequence | 1 | completed / passed / passed | yes | scripts/native-surface: the `comma-sequence` form in a memo of a rendered app |
+| surface-nested-ternary-template | 1 | completed / passed / passed | yes | scripts/native-surface: the `nested-ternary-template` form in a memo of a rendered app |
+| surface-await | 1 | completed / passed / diagnostics | yes | scripts/native-surface: the `await` form in a memo of a rendered app |
+| surface-await-nested | 1 | completed / passed / diagnostics | yes | scripts/native-surface: the `await-nested` form in a memo of a rendered app |
+| surface-await-json | 1 | completed / passed / diagnostics | yes | scripts/native-surface: the `await-json` form in a memo of a rendered app |
+| surface-promise-then | 1 | completed / passed / diagnostics | yes | scripts/native-surface: the `promise-then` form in a memo of a rendered app |
+| surface-promise-kept | 1 | completed / passed / diagnostics | yes | scripts/native-surface: the `promise-kept` form in a memo of a rendered app |
+| surface-await-uncaught | 1 | completed / passed / diagnostics | yes | scripts/native-surface: the `await-uncaught` form in a memo of a rendered app |
+| surface-await-loop | 1 | completed / passed / diagnostics | yes | scripts/native-surface: the `await-loop` form in a memo of a rendered app |
 
 ## Checker mutants (Stryker)
 

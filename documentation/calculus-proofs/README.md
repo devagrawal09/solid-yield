@@ -31,8 +31,9 @@ through `lazy` (S11), context facades (F-S52, S12), loop-driven generators
 call in a JSX hole (S18), a promise given to `For` (S19) and the `yield*`
 insertion itself: on expressions the lowered routine computes what Solid
 computes and its reads are exactly its dependencies (S20), props are getters
-read where the child reads them (S21), and an event writes what Solid writes
-while exactly the dependents rerun (S22).
+read where the child reads them (S21), an event writes what Solid writes
+while exactly the dependents rerun (S22), and boundaries, lists and effects
+compose these (S23).
 [SugarProofs.lean](lean/SugarProofs.lean) proves them on top of `YieldProofs`,
 each with a counterexample for the rejected alternative. Both libraries are
 **machine-checked** by Lean 4.24.0 (2026-10-12; `lake build` in `lean/`, no

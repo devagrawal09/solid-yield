@@ -907,6 +907,65 @@ theorem memo_cache_consistent (σ σ' : Store) (ev : List (Nat × Expr)) (d : Ex
     eval σ' d = eval σ d :=
   eval_depends_on_trace d σ σ' fun s h => event_untouched ev σ σ' done s (disjoint s h)
 
+/-! ### Boundaries, lists and effects (S23)
+
+The remaining constructs compose S20–S22: a boundary maps the outcome it is
+given, a list runs its row once per item with the item as the row's prop, and
+an effect computes a value and then writes as an event does. -/
+
+/-- `Errored`: a failure becomes the fallback's value. -/
+def errored (fb : Nat) : Outcome → Outcome
+  | .failed _ => .done fb
+  | o => o
+
+/-- `Loading`: a suspension becomes the fallback's value. -/
+def loading (fb : Nat) : Outcome → Outcome
+  | .pending _ => .done fb
+  | o => o
+
+/-- A boundary sees the lowered routine's outcome as Solid's. -/
+theorem boundary_sees_same (σ : Store) (e : Expr) (fe fl : Nat) :
+    errored fe (loading fl (run σ (lower e)).1) = errored fe (loading fl (eval σ e).1) := by
+  rw [insertion_preserves]
+
+/-- A list's rows: the row with the item as its prop, once per item. -/
+def rows (σ : Store) (items : List Nat) (row : Expr) : List (Outcome × List Nat) :=
+  items.map fun x => eval σ (subst (fun _ => .lit x) row)
+
+/-- The lowered list: the lowered row, its prop the item's value. -/
+def loweredRows (σ : Store) (items : List Nat) (row : Expr) : List (Outcome × List Nat) :=
+  items.map fun x => run σ (lowerWith (fun _ => .ret x) row)
+
+/-- S23: each lowered row computes what Solid's row computes. -/
+theorem rows_preserve (σ : Store) (items : List Nat) (row : Expr) :
+    loweredRows σ items row = rows σ items row := by
+  unfold loweredRows rows
+  congr 1
+  funext x
+  have : (fun _ : Nat => Prog.ret x) = fun i => lower ((fun _ => Expr.lit x) i) := rfl
+  rw [this, prop_reads_are_callers]
+
+/-- Solid's effect: its compute's value, handed to a phase that writes. -/
+def evalEffect (σ : Store) (compute : Expr) (phase : Nat → List (Nat × Expr)) :
+    Option Store :=
+  match (eval σ compute).1 with
+  | .done v => evalEvent σ (phase v)
+  | _ => none
+
+/-- The lowered effect: the lowered compute, then the lowered phase. -/
+def runEffect (σ : Store) (compute : Expr) (phase : Nat → List (Nat × Expr)) :
+    Option Store :=
+  match (run σ (lower compute)).1 with
+  | .done v => runEvent σ ((phase v).map fun w => (w.1, lower w.2))
+  | _ => none
+
+/-- S23: the lowered effect leaves the store Solid's effect leaves. -/
+theorem effect_preserves (σ : Store) (compute : Expr) (phase : Nat → List (Nat × Expr)) :
+    runEffect σ compute phase = evalEffect σ compute phase := by
+  unfold runEffect evalEffect
+  rw [insertion_preserves]
+  cases (eval σ compute).1 <;> simp [event_preserves]
+
 end Insertion
 
 #print axioms write_admitted_iff
@@ -956,5 +1015,8 @@ end Insertion
 #print axioms Insertion.event_untouched
 #print axioms Insertion.untouched_keeps
 #print axioms Insertion.memo_cache_consistent
+#print axioms Insertion.boundary_sees_same
+#print axioms Insertion.rows_preserve
+#print axioms Insertion.effect_preserves
 end Sugar
 end Yield

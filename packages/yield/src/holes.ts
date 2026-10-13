@@ -141,7 +141,7 @@ function toAttribute(key: string, value: any, name?: string | null): any {
 /**
  * Convert the values of a props object (a copy; getters stay lazy). Only
  * the values themselves: a prop holding an array or an object (a context
- * value, a store, a lens) is passed as it is.
+ * value, a store) is passed as it is.
  *
  * A component's `$event` prop is a reference (D-118): the child holds it,
  * unbound, and binds or calls it itself. Solid's `h` turns a zero-arity

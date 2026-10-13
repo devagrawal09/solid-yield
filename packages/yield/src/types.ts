@@ -372,48 +372,6 @@ export type ReadThrough<V> = V extends Source<infer T, any, any> ? T : V;
 /** A store as yield components see it: every path is a read. */
 export type TypedStore<T> = Path<T>;
 
-// --- lenses (D-118) --------------------------------------------------------------------
-
-/** Phantom brand of a lens (D-118): its state type, invariant. The runtime's mark is `LENS_MARK`. */
-export declare const LENS: unique symbol;
-/**
- * A lens (D-118): a read path and a draft setter on one part of a store.
- * `$store` / `$optimisticStore` give one, `focus(lens, key)` narrows one.
- * It is a reference: held, never read — a setup destructures it, a lens prop
- * and a slot hand it over as itself. Reads go through the path (`yield*
- * at.title`), writes through the setter (`yield* set(d => { … })`), under
- * the rules of every store (D-021, D-028). `E` / `P` are the path's colors
- * (an `$optimisticStore` with a body may be pending).
- */
-export type Lens<S extends object, E = never, P extends boolean = false> = readonly [
-  at: Path<S, E, P>,
-  set: StoreSetter<S>
-] & { readonly [LENS]: (state: S) => S };
-/** Any lens (for constraints). */
-export type AnyLens = { readonly [LENS]: (state: never) => unknown };
-
-/**
- * The keys `focus` narrows to (D-118): those whose value is an object. Not
- * an optional or nullable key — the focused setter's draft would be
- * `undefined` — and not a function or another opaque value. A scalar is
- * written through its parent's lens.
- */
-export type KeysToObjects<S> = {
-  [K in keyof S]-?: {} extends Pick<S, K>
-    ? never
-    : [S[K]] extends [object]
-      ? [S[K]] extends [Opaque]
-        ? never
-        : K
-      : never;
-}[keyof S];
-/** `focus`'s refusal of a key that does not hold an object, printed beside the key's type. */
-export type FocusKey<S, K> = K extends KeysToObjects<S>
-  ? unknown
-  : {
-      readonly "[FOCUS_SCALAR] focus narrows to a key holding an object (not optional, not nullable): write a scalar through its parent's lens": never;
-    };
-
 // --- props ---------------------------------------------------------------------------
 
 /**
@@ -453,36 +411,40 @@ export type PropsCheck<D> = {
         ? KindCheck<E> extends NeedsKind
           ? NeedsKind
           : unknown
-        : [Exclude<D[N], undefined>] extends [Reference]
+        : [Exclude<D[N], undefined>] extends [HandlerProp]
           ? undefined extends D[N]
-            ? OptionalReference<N>
+            ? OptionalHandler<N>
             : unknown
           : unknown;
 };
 
 /**
- * A reference (D-118): a lens or an `$event` handler. A prop declared as
- * one is held, never read: it arrives in the child as itself, not as a path.
+ * An `$event` handler (D-118): a reference, held, never read. A prop
+ * declared as one (`Handler<…>`, `EventHandler<…>`) arrives in the child
+ * as itself, not as a path: `yield* props.onSave(x)` calls it, as a local
+ * event, and `onClick={yield* props.onSave}` binds it. A plain function
+ * type is not one, and a handler inside an object prop (`props.log.clear`)
+ * is read through the path, as before.
  */
-type Reference = AnyLens | { readonly [EVENT]: true };
+type HandlerProp = { readonly [EVENT]: true };
 /**
- * A reference prop is required (D-118): the runtime cannot tell a missing
- * one from a path (a setup does not examine a prop, D-042). An optional
+ * A handler prop is required (D-118): the runtime cannot tell a missing one
+ * from a path (a setup does not examine a prop, D-042). An optional
  * handler is declared `Source<Handler<…> | undefined>` and read as before.
  */
-type OptionalReference<N> = {
-  readonly "[REFERENCE_PROP] a lens or event-handler prop is required (it is held, not read): declare it required, or an optional handler as Source<Handler<...> | undefined>": N;
+type OptionalHandler<N> = {
+  readonly "[OPTIONAL_HANDLER] an event-handler prop is required (it is held, not read): declare it required, or an optional one as Source<Handler<...> | undefined>": N;
 };
 
 /**
  * The read a declared prop is: a path (a source with keys), `children` a
- * source. A lens or an `$event` handler is a reference (D-118): itself.
+ * source. An `$event` handler is a reference (D-118): itself.
  */
 type PropRead<V, U, N> = [V] extends [Source<infer T, infer E, infer P>]
   ? N extends "children"
     ? Source<T | U, E, P>
     : Path<T | U, E, P>
-  : [V] extends [Reference]
+  : [V] extends [HandlerProp]
     ? V
     : N extends "children"
       ? Source<V | U>
@@ -512,22 +474,10 @@ type PropInput<V, U, N, Q> = unknown extends V
   ? DeclareProp<N>
   : [V] extends [Source<infer T, infer E, infer P>]
     ? T | U | Source<T | U, E, Widen<P>> | HoleProp<T | U, E, Widen<P>, Q>
-    : [V] extends [AnyLens]
-      ? LensInput<V> | SettledProp<LensMessage<N>>
-      : [V] extends [{ readonly [EVENT]: true }]
-        ? V | SettledProp<HandlerMessage<N>>
-        : V | U | Source<V | U> | HoleProp<V | U, never, false, Q> | SettledProp<SettledMessage<N>>;
-/**
- * A lens prop takes a lens only (D-118): one whose path is within the
- * declared colors (a settled lens passes a pending one's prop).
- */
-type LensInput<V> = V extends readonly [Source<infer S, infer E, infer P>, ...unknown[]]
-  ? S extends object
-    ? Lens<S, E, Widen<P>>
-    : V
-  : V;
-type LensMessage<N> =
-  `[LENS_PROP] prop \`${N & string}\` is a lens: pass a $store's result or focus(...), not a source, a hole or a value`;
+    : [V] extends [HandlerProp]
+      ? V | SettledProp<HandlerMessage<N>>
+      : V | U | Source<V | U> | HoleProp<V | U, never, false, Q> | SettledProp<SettledMessage<N>>;
+/** A handler prop takes an `$event` only (D-118): the message TypeScript prints beside it. */
 type HandlerMessage<N> =
   `[HANDLER_PROP] prop \`${N & string}\` is an event handler: pass an $event, not a source or a hole (an event does not vary per render: one $event chooses between handlers)`;
 /** A declared pending prop also takes a settled source (settled ⊂ pending). */

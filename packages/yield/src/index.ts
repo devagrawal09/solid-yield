@@ -23,7 +23,6 @@ export {
   $store,
   attempt,
   constant,
-  focus,
   isComponent,
   isPendingOf,
   latestOf,
@@ -53,8 +52,8 @@ export type {
   UnnamedContext,
   YieldContext
 } from "./context.js";
-export { createSlot, $slot, compose } from "./lens.js";
-export type { Slot, Composed, ComposeEntry, ComposedState } from "./lens.js";
+export { createSlot, $slot } from "./slot.js";
+export type { Slot } from "./slot.js";
 export { For, Show, Switch, Match, Repeat, Loading, Errored } from "./flow.js";
 export type { Reset } from "./flow.js";
 export { render, hydrate, renderToString, renderToStream } from "./render.js";
@@ -86,8 +85,6 @@ export type {
   EventOp,
   FailsOf,
   KindCheck,
-  KeysToObjects,
-  Lens,
   MayWaitOf,
   NeedsKind,
   HView,

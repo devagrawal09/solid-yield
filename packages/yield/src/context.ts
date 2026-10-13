@@ -100,8 +100,8 @@ export interface ContextOps<T, N extends string, Q> {
 }
 /**
  * `Ctx.provide`: a call-form yield component (D-062, D-066). `I` is what its
- * `value` takes: what a prop takes for a context (`ProvidedValue`), a lens
- * for a slot (D-118).
+ * `value` takes: what a prop takes for a context (`ProvidedValue`), the
+ * value itself for a slot (D-118: its reader holds it raw).
  */
 export interface Provide<T, Q, I = ProvidedValue<T>> {
   <C>(props: {

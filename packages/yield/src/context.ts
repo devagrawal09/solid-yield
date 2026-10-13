@@ -15,29 +15,19 @@
  * hole, and `yield* Ctx` gives the setup a path over it, read in the view's
  * holes, a memo or an event; any other context's value — a constant, an
  * `$event` handler, a bag of those and of paths — is held: `provide` takes
- * the value, and `yield* Ctx` gives it as it is. A required context's
- * `Ctx.orElse(function* () { … })` gives the provider's value, else the
- * component's own.
+ * the value, and `yield* Ctx` gives it as it is. A module that also works
+ * without a provider gives its context a sentinel default and makes its own
+ * value when it reads the sentinel (D-118: a userland pattern).
  */
 declare const __DEV__: boolean;
 
 import type { Context } from "solid-js";
-import {
-  contextValue,
-  devError,
-  NO_PROVIDER,
-  providedOf,
-  readContext,
-  solidCreateContext
-} from "./runtime.js";
+import { devError, readContext, solidCreateContext } from "./runtime.js";
 import { provideView, type Children, type LazyParam, type Ops } from "./flow.js";
 import type {
   CREATED,
   ComponentView,
   ContextRead,
-  Create,
-  SetupOp,
-  Yieldable,
   FailsOf,
   HoleProp,
   MayWaitOf,
@@ -134,20 +124,7 @@ export interface YieldContext<T, N extends string = string>
   extends Context<T>, ContextOps<T, N, never> {}
 /** A context without a default (D-098): reading it requires a provider above. */
 export interface RequiredContext<T, N extends string = string>
-  extends Context<T>, ContextOps<T, N, RequiredContext<T, N>> {
-  /**
-   * `const range = yield* RangeCtx.orElse(function* () { … })` in a setup
-   * (D-118): the value the nearest provider above gives, else the one the
-   * init routine returns — a per-instance local value, which a module-level
-   * default cannot be. The init routine runs in the setup, as a generator
-   * helper does (its creations are the component's), and only when no
-   * provider is above. It requires nothing (beyond what its init routine
-   * reads). Its value is given as a provided one is.
-   */
-  orElse<Y extends SetupOp = never>(
-    init: () => Generator<Y, ProvidedValue<T>, any>
-  ): Yieldable<Y | Create<"context">, ContextValue<T>>;
-}
+  extends Context<T>, ContextOps<T, N, RequiredContext<T, N>> {}
 
 /**
  * What `createContext<T>()` gives without a name (D-098 amended): nothing a
@@ -214,30 +191,10 @@ export function createContext(
       "CONTEXT_NAME",
       "a context without a default needs a runtime name: createContext<T, 'Name'>(undefined, { name: 'Name' }). Type arguments disappear at runtime."
     );
-  // a required context's default is a sentinel: "no provider" is told apart
-  // from any error the read throws (D-118)
-  const required = defaultValue === undefined;
-  const ctx = solidCreateContext(
-    (required ? NO_PROVIDER : defaultValue) as any,
-    options as any
-  ) as any;
+  const ctx = solidCreateContext(defaultValue as any, options as any) as any;
   ctx[Symbol.iterator] = function* (this: unknown): Generator<never, unknown, unknown> {
     return readContext(ctx);
   };
   ctx.provide = (props: unknown) => provideView(ctx, props);
-  if (required)
-    ctx.orElse = (init: () => Generator<unknown, unknown, unknown>) => new OrElse(ctx, init);
   return ctx;
-}
-
-/** `Ctx.orElse(init)` (D-118): the provider's value, else the init routine's, run in the setup. */
-class OrElse {
-  constructor(
-    readonly ctx: unknown,
-    readonly init: () => Generator<unknown, unknown, unknown>
-  ) {}
-  *[Symbol.iterator](): Generator<unknown, unknown, unknown> {
-    const raw = providedOf(this.ctx, true);
-    return contextValue(raw !== NO_PROVIDER ? raw : yield* this.init());
-  }
 }

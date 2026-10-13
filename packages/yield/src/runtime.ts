@@ -1583,46 +1583,31 @@ export function $cleanup(fn: () => void): Yieldable<Cleanup, void> {
 // --- context ------------------------------------------------------------------------------
 
 /**
- * @internal A required context's default (D-098, D-118): what Solid's
- * `useContext` gives where no provider is above. A context without a
- * default has none of its own; the sentinel lets the library tell "no
- * provider" apart from any error the read throws (no owner, a server
- * component's barrier), which passes on.
- */
-export const NO_PROVIDER: unique symbol = Symbol.for("solid.yield.no-provider") as any;
-
-/**
- * @internal The raw value the nearest provider above gives (`NO_PROVIDER`
- * when there is none): the host check of `yield* Ctx` (`CONTEXT_OUTSIDE_SETUP`)
- * or of `Ctx.orElse(…)` (`CREATE_OUTSIDE_SETUP`), then Solid's `useContext`.
- */
-export function providedOf(ctx: any, orElse: boolean): unknown {
-  const host = state.host;
-  if (__DEV__ && host !== SETUP && (orElse || host !== NONE))
-    throw devError(
-      orElse ? "CREATE_OUTSIDE_SETUP" : "CONTEXT_OUTSIDE_SETUP",
-      orElse
-        ? `Ctx.orElse(…) belongs to a setup (it may create the component's own value), not ${HOST_NAMES[host]}.`
-        : `yield* Ctx belongs to a setup, not ${HOST_NAMES[host]}.`
-    );
-  return useContext(ctx);
-}
-
-/**
  * @internal `yield* Ctx` (D-036, D-098, D-118): a setup's read of a library
  * context. The provided value is given as a prop is (`contextValue`): a
  * provided source or hole as a path, read where the setup's view, memo or
  * event reads it, never in the setup; a handler, a constant or a bag as it
  * is. A context created without a default that no provider above gives is
- * `NO_PROVIDER` here, at the read (every build: it has no value to give).
+ * `NO_PROVIDER` here, at the read.
  */
 export function readContext(ctx: any): unknown {
-  const raw = providedOf(ctx, false);
-  if (raw === NO_PROVIDER)
+  const host = state.host;
+  if (__DEV__ && host !== SETUP && host !== NONE)
     throw devError(
-      "NO_PROVIDER",
-      `<${state.name ?? "anonymous"}> reads ${ctx.id.description ? `the context ${ctx.id.description}` : "a context"}, created without a default, and no provider above it gives one: call the component inside Ctx.provide({ value, children }).`
+      "CONTEXT_OUTSIDE_SETUP",
+      `yield* Ctx belongs to a setup, not ${HOST_NAMES[host]}.`
     );
+  let raw: unknown;
+  try {
+    raw = useContext(ctx);
+  } catch (e) {
+    if (__DEV__ && getOwner() !== null && ctx.defaultValue === undefined)
+      throw devError(
+        "NO_PROVIDER",
+        `<${state.name ?? "anonymous"}> reads ${ctx.id.description ? `the context ${ctx.id.description}` : "a context"}, created without a default, and no provider above it gives one: call the component inside Ctx.provide({ value, children }).`
+      );
+    throw e;
+  }
   return contextValue(raw);
 }
 

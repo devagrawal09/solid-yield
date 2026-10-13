@@ -20,9 +20,11 @@ export {
   $optimisticStore,
   $projection,
   $signal,
+  $slot,
   $store,
   attempt,
   constant,
+  focus,
   isComponent,
   isPendingOf,
   latestOf,
@@ -34,8 +36,18 @@ export {
   view
 } from "./runtime.js";
 export { Failure } from "./failure.js";
-export { createContext } from "./context.js";
+export { createContext, createSlot } from "./context.js";
+export { compose } from "./compose.js";
 export type {
+  Composer,
+  ComposeEntry,
+  ComposeSchema,
+  ComposedSlots,
+  ComposedState
+} from "./compose.js";
+export type {
+  Slot,
+  SlotProvide,
   ContextNames,
   ContextOps,
   Provide,
@@ -82,6 +94,9 @@ export type {
   HViewOp,
   HoleOp,
   MemoOp,
+  Lens,
+  AnyLens,
+  LensKey,
   Path,
   PendingOf,
   RequiresOf,

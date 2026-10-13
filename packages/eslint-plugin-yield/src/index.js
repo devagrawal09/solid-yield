@@ -196,7 +196,7 @@ const noReadInSetup = {
       if (decl.id.type === "ArrayPattern")
         return (
           decl.id.elements[0] === def.name &&
-          isCallTo(init.argument, ["$signal", "$optimistic", "$store", "$optimisticStore"])
+          isCallTo(init.argument, ["$signal", "$optimistic", "$store", "$optimisticStore", "$slot"])
         );
       return (
         isCallTo(init.argument, ["$memo", "$projection"]) || init.argument.type === "Identifier"
@@ -302,7 +302,7 @@ const readBeforeAttempt = {
   }
 };
 
-/** Whether an identifier is a setter created by `yield* $signal / $store / $optimistic / $optimisticStore(…)`. */
+/** Whether an identifier is a setter created by `yield* $signal / $store / $optimistic / $optimisticStore / $slot(…)`. */
 function isYieldSetter(context, identifier) {
   const scope = context.sourceCode.getScope(identifier);
   let s = scope;
@@ -322,7 +322,7 @@ function isYieldSetter(context, identifier) {
     !!init &&
     init.type === "YieldExpression" &&
     init.delegate &&
-    isCallTo(init.argument, ["$signal", "$store", "$optimistic", "$optimisticStore"])
+    isCallTo(init.argument, ["$signal", "$store", "$optimistic", "$optimisticStore", "$slot"])
   );
 }
 
@@ -751,7 +751,7 @@ function pathBinding(context, identifier) {
     if (
       decl.id.type === "ArrayPattern" &&
       decl.id.elements[0] === def.name &&
-      isCallTo(init.argument, ["$store", "$optimisticStore"])
+      isCallTo(init.argument, ["$store", "$optimisticStore", "$slot"])
     )
       return "path";
     if (decl.id === def.name && isCallTo(init.argument, ["$projection"])) return "path";

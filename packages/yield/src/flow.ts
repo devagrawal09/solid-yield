@@ -638,6 +638,14 @@ export function provideView(ctx: any, props: any): unknown {
   })(props);
 }
 
+/**
+ * @internal `compose`'s `provide` with no slot to bind: its `children`, built
+ * as a provider builds them (untracked, its output a view).
+ */
+export function childrenView(props: any): unknown {
+  return untracked((p: any) => content(p, "provide")())(props);
+}
+
 export const For: typeof ForYield = untracked(ForYield);
 export const Repeat: typeof RepeatYield = untracked(RepeatYield);
 export const Show: typeof ShowYield = untracked(ShowYield);

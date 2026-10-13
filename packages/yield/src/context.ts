@@ -26,6 +26,7 @@ import type {
   ContextRead,
   FailsOf,
   HoleProp,
+  Lens,
   MayWaitOf,
   Path,
   PendingOf,
@@ -190,4 +191,67 @@ export function createContext(
   };
   ctx.provide = (props: unknown) => provideView(ctx, props);
   return ctx;
+}
+
+// --- slots (D-117) ----------------------------------------------------------------------
+
+/**
+ * A state slot (D-117): a named, required context whose value is a lens. A
+ * module reads its state with `yield* $slot(Slot)` and does not know where
+ * the state is stored; a parent binds it with `Slot.provide({ value:
+ * focus(store, "key"), children })`. The required read adds the slot to
+ * the reader's `R`, and the provider discharges it, as for a context. A
+ * slot is read only with `$slot`: `yield* Slot` would give a path over the
+ * lens (a context's read), so it is refused.
+ */
+export interface Slot<S, N extends string = string> extends Context<Lens<S>> {
+  readonly [CONTEXT]: { readonly value: (value: Lens<S>) => Lens<S>; readonly name: N };
+  /**
+   * `{yield* Slot.provide({ value: lens, children: function* () { return <…/>; } })}`:
+   * binds `value` for the components called in `children`, and discharges
+   * their requirement of this slot. `value` is a settled lens of the slot's
+   * state: a `$store`'s, a `focus`, a lens prop.
+   */
+  readonly provide: SlotProvide<S, Slot<S, N>>;
+}
+/** `Slot.provide`: a context's provider whose value is a settled lens. */
+export interface SlotProvide<S, Q> {
+  <C>(props: {
+    value: Lens<S>;
+    children: LazyParam<C, Children<[]>, "children">;
+  }): ComponentView<
+    PendingOf<Ops<C>>,
+    FailsOf<Ops<C>>,
+    MayWaitOf<Ops<C>>,
+    Exclude<Settle<RequiresOf<Ops<C>>>, Q>
+  >;
+  /** Phantom: what it gives and discharges (`h`'s provider overload reads it). */
+  readonly [PROVIDES]: { readonly value: Lens<S>; readonly discharges: Q };
+}
+
+/**
+ * `createSlot<DateRangeS, "DateRangeState">({ name: "DateRangeState" })`
+ * (D-117): a slot for a module's state. The name is its requirement's
+ * identity and what the root's refusal prints, as for a required context;
+ * it is passed at runtime too, because type arguments are erased.
+ */
+export function createSlot<S, N extends string = string>(
+  this: string extends N ? UnnamedContextCall : void,
+  options: { name: N }
+): string extends N ? UnnamedContext : Slot<S, N>;
+export function createSlot(this: unknown, options: { name: string }): unknown {
+  if (__DEV__ && !options?.name)
+    throw devError(
+      "CONTEXT_NAME",
+      "a slot needs a runtime name: createSlot<S, 'Name'>({ name: 'Name' }). Type arguments disappear at runtime."
+    );
+  const slot = solidCreateContext(undefined as any, options as any) as any;
+  slot[Symbol.iterator] = function* (): Generator<never, never, unknown> {
+    throw devError(
+      "SLOT_READ",
+      `${options.name} is a slot: read it with yield* $slot(${options.name}), which gives its lens.`
+    );
+  };
+  slot.provide = (props: unknown) => provideView(slot, props);
+  return slot;
 }

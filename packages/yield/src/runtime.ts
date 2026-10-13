@@ -43,6 +43,7 @@ import {
   type Store
 } from "solid-js";
 import { isSafeError, markSafeError } from "@solidjs/web";
+import type { Slot } from "./context.js";
 import type {
   Handled,
   StreamAttempt,
@@ -63,9 +64,12 @@ import type {
   EventCallOp,
   EventHandler,
   KindCheck,
+  ContextRead,
   EventOp,
   FailsOf,
   HoleOp,
+  Lens,
+  LensKey,
   MemoOp,
   Path,
   PendingOf,
@@ -77,7 +81,6 @@ import type {
   Receipt as ReceiptType,
   SetupOp,
   Source,
-  TypedStore,
   ViewFails,
   ViewOp,
   ViewPending,
@@ -602,11 +605,18 @@ function readPath(t: PathTarget): unknown {
   return throughHole(v);
 }
 
-/** Props as reads: `props.x` is a path reader over the raw props. */
+/**
+ * Props as reads: `props.x` is a path reader over the raw props. A lens is
+ * given as it is (D-116, amends D-042): it is a reference, not a value, and
+ * holding it reads nothing. Only a lens given as a plain value is: a getter
+ * prop is not run here, in the setup.
+ */
 function typedProps(raw: any): any {
   return new Proxy(raw, {
     get(target, key) {
       if (typeof key === "symbol") return target[key];
+      const d = Object.getOwnPropertyDescriptor(target, key);
+      if (d && !d.get && isLens(d.value)) return d.value;
       return makePath(target, false, [key]);
     }
   });
@@ -1023,6 +1033,66 @@ function receiptSetter(setter: string, set: (v: any) => any, value?: () => any):
   };
 }
 
+// --- lenses (D-116) ---------------------------------------------------------------------
+
+const LENS_MARK: unique symbol = Symbol.for("solid.yield.lens") as any;
+/** What a lens keeps besides its path and setter: the raw write and the value its receipt gives. */
+interface LensParts {
+  readonly write: (fn: (draft: any) => any) => unknown;
+  readonly value: () => unknown;
+}
+function makeLens(at: unknown, parts: LensParts, setter: string): any {
+  const lens = [at, receiptSetter(setter, parts.write, parts.value)];
+  Object.defineProperty(lens, LENS_MARK, { value: parts });
+  return Object.freeze(lens);
+}
+/** @internal Whether a value is a lens the library made. */
+export function isLens(value: unknown): boolean {
+  return Array.isArray(value) && (value as any)[LENS_MARK] !== undefined;
+}
+/** A store's lens: its root path and its setter. */
+function storeLens(store: any, set: (fn: any) => unknown, setter: string): any {
+  return makeLens(makePath(store, false, []), { write: set, value: () => store }, setter);
+}
+/** @internal A new `$store`'s lens, made now (the caller is a setup's creation). */
+export function newStoreLens(value: object): any {
+  const [store, set] = createStore(value as any);
+  return storeLens(store, set as any, "a $store's setter");
+}
+
+/**
+ * `focus(lens, "key")`: a lens on one key of a lens's state (D-116). Its path
+ * is the parent's `path.key`; its setter hands the draft's `key` to the
+ * write and puts back what the write returns, through the parent's setter,
+ * so the write is the parent's (one transaction, one optimistic revert). Its
+ * receipt gives the focused part. It reads nothing: call it in a setup, a
+ * view's hole or a row.
+ */
+export function focus<S, K extends LensKey<S>, E, P extends boolean>(
+  lens: Lens<S, E, P>,
+  key: K
+): Lens<S[K], E, P>;
+export function focus(lens: any, key: PropertyKey): any {
+  const parent: LensParts | undefined = isLens(lens) ? lens[LENS_MARK] : undefined;
+  if (!parent)
+    throw devError(
+      "NOT_A_LENS",
+      "focus takes a lens: what $store or $optimisticStore gives, a focus, a lens prop or what $slot gives."
+    );
+  return makeLens(
+    lens[0][key],
+    {
+      write: fn =>
+        parent.write((draft: any) => {
+          const next = fn(draft[key]);
+          if (next !== undefined) draft[key] = next;
+        }),
+      value: () => (parent.value() as any)[key]
+    },
+    `a focused setter (.${String(key)})`
+  );
+}
+
 function checkCreate(kind: string): void {
   if (state.host !== SETUP)
     throw devError(
@@ -1055,16 +1125,8 @@ export function $signal<T>(
 }
 
 /** `const [todos, setTodos] = yield* $store({ … })` in a setup. */
-export function $store<T extends object>(
-  value: T
-): Yieldable<Create<"store">, [TypedStore<T>, StoreSetter<T>]> {
-  return new CreateOp("store", () => {
-    const [store, set] = createStore(value as any);
-    return [
-      makePath(store, false, []),
-      receiptSetter("a $store's setter", set as any, () => store)
-    ];
-  }) as any;
+export function $store<T extends object>(value: T): Yieldable<Create<"store">, Lens<T>> {
+  return new CreateOp("store", () => newStoreLens(value)) as any;
 }
 
 /**
@@ -1109,17 +1171,17 @@ type SeededStore<T, Y, E = never> = Path<T, FailsOf<Y> | E>;
  */
 export function $optimisticStore<T extends object>(
   value: T
-): Yieldable<Create<"optimisticStore">, [TypedStore<T>, StoreSetter<T>]>;
+): Yieldable<Create<"optimisticStore">, Lens<T>>;
 export function $optimisticStore<T extends object, Y extends MemoOp = never, R = unknown>(
   body: (draft: T) => Generator<Y, SyncReturn<R>, any>,
   seed: Partial<T>,
   options: ProjectionOptions & { seedLoadingValue: true }
-): Yieldable<Create<"optimisticStore">, [SeededStore<T, Y>, StoreSetter<T>]>;
+): Yieldable<Create<"optimisticStore">, Lens<T, FailsOf<Y>>>;
 export function $optimisticStore<T extends object, Y extends MemoOp = never, R = unknown>(
   body: (draft: T) => Generator<Y, SyncReturn<R>, any>,
   seed: Partial<T>,
   options?: ProjectionOptions
-): Yieldable<Create<"optimisticStore">, [ProjectionStore<T, Y, R>, StoreSetter<T>]>;
+): Yieldable<Create<"optimisticStore">, Lens<T, FailsOf<Y>, MemoPending<Y, R>>>;
 export function $optimisticStore(first: any, seed?: any, options?: any): any {
   return new CreateOp("optimisticStore", () => {
     if (__DEV__ && (first === null || (typeof first !== "object" && typeof first !== "function")))
@@ -1131,10 +1193,7 @@ export function $optimisticStore(first: any, seed?: any, options?: any): any {
       typeof first === "function"
         ? createOptimisticStore(memoCompute(first) as any, seed, options)
         : createOptimisticStore(first);
-    return [
-      makePath(store, false, []),
-      receiptSetter("an $optimisticStore's setter", set as any, () => store)
-    ];
+    return storeLens(store, set as any, "an $optimisticStore's setter");
   });
 }
 
@@ -1469,6 +1528,38 @@ export function readContext(ctx: any): unknown {
     throw e;
   }
   return makePath(raw, false, []);
+}
+
+/**
+ * `const [range, setRange] = yield* $slot(DateRangeState)` in a setup
+ * (D-117): the lens the nearest `Slot.provide` above bound, as it is (a
+ * context's read gives a path over its value; a slot's gives the lens).
+ * Without a provider the required form is `NO_PROVIDER`, and the type has
+ * the slot in the component's `R`. With `{ init }`, no provider above makes
+ * a local store from `init()`, owned by this component, and the type
+ * requires nothing.
+ */
+export function $slot<S, N extends string>(
+  slot: Slot<S, N>
+): Yieldable<ContextRead<Slot<S, N>>, Lens<S>>;
+export function $slot<S extends object, N extends string>(
+  slot: Slot<S, N>,
+  options: { init: () => S }
+): Yieldable<Create<"slot">, Lens<S>>;
+export function $slot(slot: any, options?: { init: () => object }): any {
+  return new CreateOp("slot", () => {
+    try {
+      return useContext(slot);
+    } catch (e) {
+      if (options) return newStoreLens(options.init());
+      if (__DEV__ && getOwner() !== null)
+        throw devError(
+          "NO_PROVIDER",
+          `<${state.name ?? "anonymous"}> reads the slot ${slot.id.description ?? ""}, and no provider above it binds a lens: call the component inside Slot.provide({ value: lens, children }), or give $slot an init.`
+        );
+      throw e;
+    }
+  });
 }
 
 // --- events ---------------------------------------------------------------------------------

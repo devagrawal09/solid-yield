@@ -203,6 +203,13 @@ tester.run("no-path-object-use", rules["no-path-object-use"], {
       errors: [{ messageId: "compare" }, { messageId: "spread" }]
     },
     {
+      // a slot's path is a path (D-117)
+      code: component(
+        "const [s] = yield* $slot(Slot, { init }); const m = yield* $memo(function* () { return s.a === 1; }); return view(function* () { return <p />; });"
+      ),
+      errors: [{ messageId: "compare" }]
+    },
+    {
       code: "const r = <For each={xs}>{function* (x) { return view(function* () { return <i>{JSON.stringify(x)}</i>; }); }}</For>;",
       errors: [{ messageId: "stringify" }]
     },
@@ -599,6 +606,13 @@ tester.run("no-unyielded-write", rules["no-unyielded-write"], {
     {
       code: component(
         "const [s, setS] = yield* $store({ a: 1 }); setS(d => { d.a = 2; }); return view(function* () { return <p />; });"
+      ),
+      errors: [{ messageId: "unyielded", data: { name: "setS" } }]
+    },
+    {
+      // a slot's lens writes as a store's does (D-117)
+      code: component(
+        "const [s, setS] = yield* $slot(Slot); const clear = $event(function* () { setS(d => { d.a = 2; }); }); return view(function* () { return <p onClick={yield* clear} />; });"
       ),
       errors: [{ messageId: "unyielded", data: { name: "setS" } }]
     },

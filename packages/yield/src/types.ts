@@ -372,6 +372,34 @@ export type ReadThrough<V> = V extends Source<infer T, any, any> ? T : V;
 /** A store as yield components see it: every path is a read. */
 export type TypedStore<T> = Path<T>;
 
+// --- lenses ----------------------------------------------------------------------------
+
+/** Phantom brand of a `Lens` (its state type, invariant). */
+export declare const LENS: unique symbol;
+/**
+ * A lens on a store (D-116): a read path and a setter for one part of it.
+ * `$store` and `$optimisticStore` give one; `focus(lens, "key")` narrows it
+ * to a key; `$slot` gives the one a provider bound. Destructure it as a
+ * store: `const [range, setRange] = lens`. The path reads as any path does,
+ * and the setter writes as a `$store`'s does — in an `$event` or an effect
+ * phase, when its receipt is delegated to. Only the library makes lenses:
+ * the brand is what a prop or a slot recognizes.
+ */
+export type Lens<S, E = never, P extends boolean = false> = readonly [
+  at: Path<S, E, P>,
+  set: StoreSetter<S>
+] & { readonly [LENS]: (state: S) => S };
+/** Any lens (for constraints). */
+export type AnyLens = Lens<any, any, boolean>;
+/**
+ * The keys `focus` takes: a key whose value is always an object (a lens on a
+ * scalar is a `$signal`'s work; write a scalar through its parent's lens).
+ */
+export type LensKey<S> = {
+  [K in keyof S]-?: [S[K]] extends [Opaque] ? never : [S[K]] extends [object] ? K : never;
+}[keyof S] &
+  (string | number);
+
 // --- props ---------------------------------------------------------------------------
 
 /**
@@ -414,14 +442,20 @@ export type PropsCheck<D> = {
         : unknown;
 };
 
-/** The read a declared prop is: a path (a source with keys), `children` a source. */
-type PropRead<V, U, N> = [V] extends [Source<infer T, infer E, infer P>]
-  ? N extends "children"
-    ? Source<T | U, E, P>
-    : Path<T | U, E, P>
-  : N extends "children"
-    ? Source<V | U>
-    : Path<V | U>;
+/**
+ * The read a declared prop is: a path (a source with keys), `children` a
+ * source. A prop declared `Lens<S>` is given as it is (D-116, amends D-042):
+ * a lens is a reference, not a value, so a setup that holds it reads nothing.
+ */
+type PropRead<V, U, N> = [V] extends [AnyLens]
+  ? V | U
+  : [V] extends [Source<infer T, infer E, infer P>]
+    ? N extends "children"
+      ? Source<T | U, E, P>
+      : Path<T | U, E, P>
+    : N extends "children"
+      ? Source<V | U>
+      : Path<V | U>;
 
 /**
  * What callers may pass for each prop (D-065): a value, a source or a hole
@@ -445,9 +479,12 @@ type DeclareProp<N> = {
 };
 type PropInput<V, U, N, Q> = unknown extends V
   ? DeclareProp<N>
-  : [V] extends [Source<infer T, infer E, infer P>]
-    ? T | U | Source<T | U, E, Widen<P>> | HoleProp<T | U, E, Widen<P>, Q>
-    : V | U | Source<V | U> | HoleProp<V | U, never, false, Q> | SettledProp<SettledMessage<N>>;
+  : [V] extends [Lens<infer S, infer E, infer P>]
+    ? // a lens prop takes a lens, within its declared colors: no value, source or hole
+        Lens<S, E, Widen<P>> | U
+    : [V] extends [Source<infer T, infer E, infer P>]
+      ? T | U | Source<T | U, E, Widen<P>> | HoleProp<T | U, E, Widen<P>, Q>
+      : V | U | Source<V | U> | HoleProp<V | U, never, false, Q> | SettledProp<SettledMessage<N>>;
 /** A declared pending prop also takes a settled source (settled ⊂ pending). */
 type Widen<P extends boolean> = [P] extends [true] ? boolean : P;
 /**

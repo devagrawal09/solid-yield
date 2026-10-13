@@ -11,9 +11,12 @@ import {
   $event,
   $memo,
   $signal,
+  $slot,
   $store,
   attempt,
   createContext,
+  createSlot,
+  focus,
   For,
   Errored,
   Loading,
@@ -188,6 +191,36 @@ describe("h: a context's provider (D-098)", () => {
     set("b");
     flush();
     expect(root.innerHTML).toBe("<p><b>b</b></p>");
+  });
+});
+
+describe("h: a slot's provider (D-117)", () => {
+  it("h(Slot.provide, { value: lens }, ...children) binds the lens for the components in its children", () => {
+    const Count = createSlot<{ n: number }, "Count">({ name: "Count" });
+    let inc!: () => unknown;
+    const Reader = component(function* Reader() {
+      const [count, setCount] = yield* $slot(Count);
+      inc = $event(function* () {
+        yield* setCount(d => {
+          d.n++;
+        });
+      });
+      return view(function* () {
+        return h("b", count.n);
+      });
+    });
+    const App = component(function* App() {
+      const page = yield* $store({ count: { n: 1 } });
+      return view(function* () {
+        return h(Count.provide, { value: focus(page, "count") }, h("p", h(Reader, {})));
+      });
+    });
+    dispose = render(App, root);
+    flush();
+    expect(root.innerHTML).toBe("<p><b>1</b></p>");
+    inc();
+    flush();
+    expect(root.innerHTML).toBe("<p><b>2</b></p>");
   });
 });
 

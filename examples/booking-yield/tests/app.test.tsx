@@ -24,6 +24,13 @@ async function click(s: string, i = 0) {
   (all(s)[i] as HTMLElement).click();
   await settle();
 }
+async function type(s: string, i: number, value: string) {
+  const input = all(s)[i] as HTMLInputElement;
+  input.value = value;
+  input.dispatchEvent(new InputEvent("input", { bubbles: true }));
+  await settle();
+}
+const drafts = () => all(".draft").map(e => (e as HTMLInputElement).value);
 
 it("the page: each module writes the page's store, and the total reads across them", async () => {
   dispose = render(BookingPage, root);
@@ -84,4 +91,41 @@ it("a required slot needs a provider: the count alone is NO_PROVIDER (the type r
   } finally {
     error.mockRestore();
   }
+});
+
+describe("the travellers list: a keyed row's own state and the page's entry for it", () => {
+  it("row-owned state lives and dies with the row: re-adding the same id starts collapsed", async () => {
+    dispose = render(BookingPage, root);
+    await click(".add-traveller");
+    expect(texts(".traveller .name")).toEqual(["Traveller 1", "Traveller 2"]);
+    await click(".toggle", 1);
+    expect(texts(".toggle")).toEqual(["collapsed", "expanded"]);
+    await click(".remove-traveller");
+    expect(texts(".toggle")).toEqual(["collapsed"]);
+    await click(".add-traveller");
+    expect(texts(".traveller .name")).toEqual(["Traveller 1", "Traveller 2"]);
+    expect(texts(".toggle")).toEqual(["collapsed", "collapsed"]);
+  });
+
+  it("prune (the default policy): the draft of a removed traveller is deleted", async () => {
+    dispose = render(BookingPage, root);
+    await click(".add-traveller");
+    await type(".draft", 0, "window seat");
+    await type(".draft", 1, "vegetarian");
+    expect(drafts()).toEqual(["window seat", "vegetarian"]);
+    await click(".remove-traveller");
+    expect(drafts()).toEqual(["window seat"]);
+    await click(".add-traveller");
+    expect(drafts()).toEqual(["window seat", ""]);
+  });
+
+  it("keep (the effect left out): the draft survives the removal and comes back on re-add", async () => {
+    dispose = render(() => BookingPage({ policy: "keep" }), root);
+    await click(".add-traveller");
+    await type(".draft", 1, "vegetarian");
+    await click(".remove-traveller");
+    expect(drafts()).toEqual([""]);
+    await click(".add-traveller");
+    expect(drafts()).toEqual(["", "vegetarian"]);
+  });
 });

@@ -17,7 +17,7 @@ it("F06: a foreign provided claim is checked at the yield child's creation", () 
   const Reader = component(function* Reader() {
     const c = yield* C;
     return view(function* () {
-      return <b>{yield* c}</b>;
+      return <b>{c}</b>;
     });
   });
   const page = foreign(Reader, { provided: [C] });

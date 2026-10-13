@@ -13,7 +13,7 @@ export const Counter = component(function* Counter(props: Props<{ step: number }
   // setup: creates, never reads
   const [count, setCount] = yield* $signal(0);
   const add = $event(function* () {
-    yield* setCount((yield* count) + (yield* props.step));
+    yield* setCount((yield* count) + props.step);
   });
   // view: no body; every read is a hole
   return view(function* () {
@@ -27,7 +27,7 @@ export const Counter = component(function* Counter(props: Props<{ step: number }
 - A view has no body: every read is a hole in JSX, and structure comes from flow controls.
 - A yield component is called (`{yield* Counter({ step })}`), not tagged.
 - Failures are typed: `attempt`, `raise`, and `Errored` with `catch`.
-- A prop's pending/failure color is declared: `Props<{ todo: Source<Todo, FetchError, true> }>`.
+- A prop is given as it is: a reactive one is declared with its pending/failure color, `Props<{ todo: Source<Todo, FetchError, true> }>`, and read with `yield*`; an `$event` handler is itself; any other type is a value, held (`props.step`).
 
 Start with [`documentation/getting-started.md`](https://github.com/devagrawal09/solid-yield/blob/main/documentation/getting-started.md): install, and the dialect on one page. Every refusal (type message, development error, lint rule, transform code) is in [`documentation/refusals.md`](https://github.com/devagrawal09/solid-yield/blob/main/documentation/refusals.md). The full rules, where each is enforced, and what the library cannot do without a compiler are in [`documentation/yield-library.md`](https://github.com/devagrawal09/solid-yield/blob/main/documentation/yield-library.md).
 

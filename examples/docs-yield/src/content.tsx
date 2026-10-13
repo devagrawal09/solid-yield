@@ -5,6 +5,7 @@ import {
   For,
   Loading,
   Errored,
+  constant,
   type Source,
   type Props,
   view
@@ -125,7 +126,7 @@ const FooterLinks = component(function* FooterLinks(
   });
 });
 export const ArticleContent = component(function* ArticleContent(
-  props: Props<{ slug: string | undefined }>
+  props: Props<{ slug: Source<string | undefined> }>
 ) {
   const article = yield* $memo(function* () {
     const slug = (yield* props.slug) ?? "overview";
@@ -299,7 +300,7 @@ export const ReadingGuide = component(function* ReadingGuide() {
     return (
       <section class="reading-guide">
         <h2>Reading guide</h2>
-        {yield* ArticleContent({ slug: "widgets" })}
+        {yield* ArticleContent({ slug: constant("widgets") })}
       </section>
     );
   });

@@ -100,7 +100,7 @@ render(App, document.getElementById("root")!);
 | **Writes**    | A setter returns a receipt, and the write happens when it is delegated to. Only an `$event` or an `$effect`'s effect phase writes (`$effect(compute, effect)`: the compute reads, the effect writes).                                                                                                                                                                                                                                                                        | `yield* setCount((yield* count) + 1)`                               |
 | **Events**    | An `$event` is _bound_ in a view, `onClick={yield* save}`: a hole that attaches the handler, un-called, and gives the view its failures; a call that may wait on a pending read marks the view _may wait_, never pending. Another event _calls_ it, `yield* save(x)`. A call is one transaction (see [Events, transactions and in-flight state](#events-transactions-and-in-flight-state)).                                                                                  | `<button onClick={yield* save}>`                                    |
 | **Call form** | A yield component, a flow control and a boundary are _called_ in a hole, never tagged. Props are a source, a zero-arity `function*` hole, or a settled value. `children` is always a generator.                                                                                                                                                                                                                                                                              | `{yield* Card({ todo, children: function* () { return <i />; } })}` |
-| **Colors**    | Reading may be _pending_ (async) or _fail_ with a typed error: `Source<T, E, P>`. A prop declares the colors it accepts. A call passes only what the declaration admits. Colors flow up through `yield*` to a `Loading` / `Errored`.                                                                                                                                                                                                                                         | `props: Props<{ user: Source<User, NotFound, true> }>`              |
+| **Colors**    | Reading may be _pending_ (async) or _fail_ with a typed error: `Source<T, E, P>`. A prop declares what it is: a `Source<T, E, P>` is reactive (read with `yield*`), a handler an event, any other type a value held as it is. A call passes only what the declaration admits. Colors flow up through `yield*` to a `Loading` / `Errored`.                                                                                                                                                                                                                                         | `props: Props<{ user: Source<User, NotFound, true> }>`              |
 | **Failures**  | A failure is an `Error` with a literal `kind`. `attempt(fn, onError)` gives a failure its type, and `raise(e)` fails with one. An `Errored` handles failures, or with `catch` only the listed ones. With no `Errored` the failure is re-thrown. A plain `throw` is a bug (`UNTYPED_THROW`), and `try` / `catch` is not a routine form (`no-try-catch`): `attempt`'s handler returns the failure, or absorbs it with nothing or a value; it may be a generator, e.g. a retry. | `yield* attempt(() => fetch(u), cause => new NotFound(cause))`      |
 
 ## Build it, rule by rule
@@ -114,7 +114,7 @@ export const Counter = component(function* Counter(props: Props<{ step: number }
   // setup: creates, never reads
   const [count, setCount] = yield* $signal(0);
   const add = $event(function* () {
-    yield* setCount((yield* count) + (yield* props.step));
+    yield* setCount((yield* count) + props.step);
   });
   // view: no body; every read is a hole
   return view(function* () {
@@ -189,9 +189,9 @@ export const UserCard = component(function* UserCard(
 });
 ```
 
-`Props<{ … }>` maps each field to a read. A bare `T` means settled and never failing, and is the default. `Source<T, E, true>` admits pending and `E`. `props.user.name` is a path: a read of one key, not an object.
+`Props<{ … }>` gives each field as it is declared (D-118). A `Source<T, E, P>` is reactive: the child sees a path, and `props.user.name` is a read of one key, not an object; `Source<T>` is settled, `Source<T, E, true>` admits pending and `E`. A handler is the `$event` itself. Any other type is held: the child gets the value the caller passed (`props.step` above), and holding it is not a read.
 
-At the call, `UserCard({ user })` type-checks because the declaration admits the memo's colors. Declared `user: User` instead, the same call would be refused with `[SETTLED_PROP]`. The child's view is now a `View<true, NotFound>`, and the caller must place it where pending and that failure are handled.
+At the call, `UserCard({ user })` type-checks because the declaration admits the memo's colors. Declared `user: Source<User>` (settled), the same call would be refused with `[REACTIVE_PROP]`; declared `user: User` (held), with `[HELD_PROP]`: a value that changes is declared `Source<T>`, so nothing is silently frozen. A reactive prop takes a source, a path or a hole, and `constant(v)` for a fixed value. The child's view is now a `View<true, NotFound>`, and the caller must place it where pending and that failure are handled.
 
 ### 5. Boundaries and flow controls
 
@@ -368,8 +368,8 @@ export const ThemePicker = component(function* ThemePicker(
   props: Props<{ theme: Source<Theme>; onPick: Handler<[Theme]> }>
 ) {
   const pickDark = $event(function* () {
-    // a handler in a prop is read, then called: `yield* (yield* props.onPick)(…)`
-    yield* (yield* props.onPick)("dark");
+    // a handler prop is the handler itself (D-118): called as a local event
+    yield* props.onPick("dark");
   });
   return view(function* () {
     return (
@@ -387,8 +387,10 @@ export const ThemePicker = component(function* ThemePicker(
 
 - **`Handler<Args, E = never>`** is `EventHandler<Args, E, unknown, false, boolean>`: it takes `Args`, may fail with `E`, returns anything, may or may not do async work of its own, and does **not** wait on pending data. Any `$event` within those colors is accepted.
 - **A handler that reads data which may be pending** is refused there; declare the colors it has, `EventHandler<Args, E, unknown, true>` — and a view binding a call of it is marked _may wait_ (the lint asks you to show it). A bare `EventHandler<[Theme]>` defaults to "may wait", so it warns even for a handler that only calls a setter: prefer `Handler`.
-- **A plain function type** (`onPick: (t: Theme) => void`) is not a handler: reading the prop gives a function, and `yield*` of its call fails with "Type 'void' must have a '[Symbol.iterator]()' method". Routine code calls events, not functions.
-- **In a context**, the same: `createContext<Handler<[Theme]>, "SetThemeCtx">(undefined, { name: "SetThemeCtx" })`, read with `yield* (yield* setTheme)("dark")` in an event.
+- **A handler prop is held, never read** (D-118): `props.onPick` is the `$event` itself, not a path. Call it with one `yield*` in an event, `yield* props.onPick("dark")`, or bind it in the view, `onClick={[yield* props.onPick, "dark"]}`. It takes an `$event` only: a source or a hole is refused (`[HANDLER_PROP]`); an event does not vary per render, so a parent that chooses between two handlers writes one `$event` that chooses. An optional one is `undefined` when left out, checked without a read: `if (props.onPick) yield* props.onPick("dark");`.
+- **A plain function type** (`onPick: (t: Theme) => void`) is not a handler: the prop is the function, and `yield*` of its call fails with "Type 'void' must have a '[Symbol.iterator]()' method". Routine code calls events, not functions.
+- **In a context, or inside an object prop** (`props.log.clear`), a handler is the handler too: `createContext<Handler<[Theme]>, "SetThemeCtx">(undefined, { name: "SetThemeCtx" })`, read with `const setTheme = yield* SetThemeCtx` in the setup and called `yield* setTheme("dark")` in an event.
+- **Who calls an event**: routine code (`yield* save(x)` in an `$event` or an `$effect`'s effect phase) or the DOM, through a bind. Called from a timer, a promise callback or a listener added by hand, it is the development error `EVENT_OUTSIDE_RUN` (D-118; production calls it as before). D-118 leaves open how a timer or a listener the DOM does not bind through a view should reach an event.
 
 ### Form inputs
 
@@ -471,7 +473,7 @@ export const Editor = component(function* Editor() {
 
 A required context passes its name twice: as the type's identity and in `{ name: "ThemeCtx" }` for runtime errors. Type arguments disappear when JavaScript is built. The options name must match the type name; `[CONTEXT_NAME]` explains a missing runtime name.
 
-**A context holding a changing value.** Declare the value's type, `createContext<Theme, "ThemeCtx">(undefined, { name: "ThemeCtx" })`, and provide a source, `ThemeCtx.provide({ value: theme, children })`: readers read it like a prop, in holes, memos and events, and see each change. Declare the context as `Source<T, E, true>` only when the provided source may be pending or fail.
+**A context holding a changing value.** Declare it reactive, `createContext<Source<Theme>, "ThemeCtx">(undefined, { name: "ThemeCtx" })`, and provide a source, `ThemeCtx.provide({ value: theme, children })`: readers get a path and read it in holes, memos and events, and see each change. Declared `createContext<Theme, …>`, the context is held: `provide` takes the value itself and readers get it as it is. Declare `Source<T, E, true>` only when the provided source may be pending or fail.
 
 ## Lazy pages and chunk retry
 
@@ -674,7 +676,7 @@ const Room = component(function* Room(props: Props<{ roomId: string }>) {
   let current: { number: number; id: string; stream: AsyncIterable<Message[]> } | undefined;
   const messages = yield* $memo(function* () {
     const number = yield* attemptNumber;
-    const id = yield* props.roomId;
+    const id = props.roomId;
     return yield* attempt(() => {
       // Reset may re-read this memo before the event's writes commit.
       // Keep one iterator per attempt, including those extra reads.
@@ -724,11 +726,11 @@ pnpm add @solidjs/router@2.0.0-next.35
 
 ```ts
 // src/theme.ts
-import { createContext } from "solid-yield";
+import { createContext, type Source } from "solid-yield";
 
 export type Theme = "light" | "dark";
 /** App-wide: provided once, above the router. No default, so a reader requires it. */
-export const ThemeCtx = createContext<Theme, "ThemeCtx">(undefined, { name: "ThemeCtx" });
+export const ThemeCtx = createContext<Source<Theme>, "ThemeCtx">(undefined, { name: "ThemeCtx" });
 ```
 
 ```tsx
@@ -747,7 +749,7 @@ export const Home = component(function* Home() {
 // No preload here: data is undefined, rather than an unchecked unknown prop.
 export const Notes = component(function* Notes(props: Props<RouteProps<"/notes/:mode", undefined>>) {
   return view(function* () {
-    return <h1>notes: {yield* props.params.mode}</h1>;
+    return <h1>notes: {props.params.mode}</h1>;
   });
 });
 
@@ -862,7 +864,7 @@ it("renders the routed page under the app-wide context", async () => {
 
 - **`foreign(Page)`** is the hand-off to plain Solid: a page may pend (the `Loading` around the outlet holds it) and must handle its own failures (an `Errored` in its view); a page that may fail is refused, `[FOREIGN_HANDOFF]`, naming the failures.
 - **`foreign(Page, { provided: [Ctx] })`** says which contexts are provided above the router. Without it, a page that reads `ThemeCtx` is refused, `[NO_PROVIDER] … "ThemeCtx"`: plain Solid carries no requirement from the page to the provider. Listing a context the page does not require is refused too (`[NOT_REQUIRED]`). The claim is checked where the page is created: with no provider above, `NO_PROVIDER` at run time.
-- **Links** are plain `<a href>`; the router intercepts them. A route page reads its URL from its props, declared with the router's types: `component(function* Notes(props: Props<RouteProps<"/notes/:mode", undefined>>) { … })`, then `yield* props.params.mode` in a memo or a hole (as the hackernews twin's pages do). The router's hooks (`useParams`, `useLocation`) are plain Solid reactive state, which routine code does not read (`no-foreign-reactive`).
+- **Links** are plain `<a href>`; the router intercepts them. A route page reads its URL from its props, declared with the router's types: `component(function* Notes(props: Props<RouteProps<"/notes/:mode", undefined>>) { … })`, then `props.params.mode` in a memo or a hole (as the hackernews twin's pages do): the router passes `params` and `location` as Solid reactive objects, held as they are (D-118), read where they are read. The router's hooks (`useParams`, `useLocation`) are plain Solid reactive state, which routine code does not read (`no-foreign-reactive`).
 - **A route whose page reads params is registered with `defineRoute`**: `defineRoute({ path: "/notes/:mode", component: foreign(Notes) })`. `defineRoute` types the page's `params` from its `path`. A bare `{ path, component }` object types `component` as a page with no params, so a page that requires `params.mode` is refused there (`TS2322 … Type '{}' is missing the following properties … params, location, data`). A plain Solid page declared with `RouteProps<…>` is refused the same way: this is the router's rule, not `foreign`'s. Pages that read no params (`Home`, `Settings`) can stay bare objects. [`router.type-tests.tsx`](https://github.com/devagrawal09/solid-yield/blob/main/packages/yield/test/router.type-tests.tsx) pins both against the router version above.
 - **A callback for the pages** (a setter, `toggle`) goes in a context too — `createContext<Handler<[Theme]>, "SetThemeCtx">(undefined, { name: "SetThemeCtx" })` — since a route component gets no props from you; list it in `provided` beside `ThemeCtx`.
 

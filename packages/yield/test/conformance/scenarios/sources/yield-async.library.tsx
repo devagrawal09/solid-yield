@@ -8,7 +8,7 @@ const caught = (error: NotFound) => (h.caught("errored", error), "error");
 
 const User = component(function* User(props: Props<{ id: string }>) {
   const user = yield* $memo(function* () {
-    const id = yield* props.id;
+    const id = props.id;
     return yield* attempt(() => h.task<{ name: string }>("load", id), notFound);
   });
   return view(function* () {

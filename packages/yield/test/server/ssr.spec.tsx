@@ -54,10 +54,10 @@ const strip = (html: string) =>
 describe("server rendering", () => {
   it("renders setup state, props, row routines and context", () => {
     const Theme = createContext("light");
-    const Item = component(function* (props: Props<{ text: string }>) {
+    const Item = component(function* (props: Props<{ text: Source<string> }>) {
       const theme = yield* Theme;
       return view(function* () {
-        return <li class={perform(theme)}>{perform(props.text)}</li>;
+        return <li class={theme}>{perform(props.text)}</li>;
       });
     });
     const App = component(function* () {

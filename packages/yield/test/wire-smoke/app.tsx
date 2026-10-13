@@ -2,7 +2,7 @@ import { $event, attempt, component, Errored, view, type Props } from "solid-yie
 import { NotFound, Sibling } from "./classes.js";
 export const App = component(function* App(props: Props<{ invoke: () => Promise<unknown> }>) {
   const click = $event(function* () {
-    const invoke = yield* props.invoke;
+    const invoke = props.invoke;
     return yield* attempt(invoke, error => error as NotFound | Sibling);
   });
   return view(function* () {

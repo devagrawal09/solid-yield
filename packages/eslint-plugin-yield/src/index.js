@@ -411,7 +411,7 @@ const noUnyieldedWrite = {
 };
 
 const ROUTE_PROPS =
-  "the route component's props (`yield* props.location…`, `yield* props.params…`)";
+  "the route component's props (`props.location…`, `props.params…`: held, read where they are read, D-118)";
 const SOLID_FOREIGN = {
   createSignal: "`$signal`",
   createMemo: "`$memo`",
@@ -759,18 +759,24 @@ function pathBinding(context, identifier) {
   return null;
 }
 
-/** Whether an expression is a path (syntactically): a store, a row argument, a prop, or a key of one. */
-function isPathExpression(context, node) {
+/**
+ * What an expression is rooted in (syntactically): "path" (a store, a row
+ * argument, or a key of one), "props" (a key of a setup's props), or null.
+ */
+function pathRoot(context, node) {
   let n = node;
   while (n.type === "TSNonNullExpression" || n.type === "TSAsExpression") n = n.expression;
   if (n.type === "ChainExpression") n = n.expression;
-  if (n.type === "Identifier") return pathBinding(context, n) === "path";
-  if (n.type !== "MemberExpression") return false;
+  if (n.type === "Identifier") return pathBinding(context, n) === "path" ? "path" : null;
+  if (n.type !== "MemberExpression") return null;
   let root = n;
   while (root.type === "MemberExpression") root = root.object;
-  if (root.type !== "Identifier") return false;
-  const binding = pathBinding(context, root);
-  return binding === "path" || binding === "props";
+  if (root.type !== "Identifier") return null;
+  return pathBinding(context, root);
+}
+/** Whether an expression may be a path (syntactically): a store, a row argument, a prop, or a key of one. */
+function isPathExpression(context, node) {
+  return pathRoot(context, node) !== null;
 }
 
 const noPathObjectUse = {
@@ -791,13 +797,27 @@ const noPathObjectUse = {
     schema: []
   },
   create(context) {
+    const services = context.sourceCode.parserServices;
+    const checker =
+      services?.program && services.esTreeNodeToTSNodeMap
+        ? services.program.getTypeChecker()
+        : null;
     const text = node => {
       const t = context.sourceCode.getText(node);
       return t.length > 40 ? t.slice(0, 37) + "..." : t;
     };
+    // D-118: a prop is given as it is — a reactive one is a path, a held one
+    // (a constant, a bag) is not. Only its type tells them apart: without
+    // type information a props key is not reported.
+    const isPath = node => {
+      const root = pathRoot(context, node);
+      if (root === "path") return true;
+      if (root !== "props" || !checker) return false;
+      const at = services.esTreeNodeToTSNodeMap.get(node);
+      return !!at && !!phantomType(checker, checker.getTypeAtLocation(at), "SOURCE", at);
+    };
     const check = (node, messageId) => {
-      if (node && isPathExpression(context, node))
-        context.report({ node, messageId, data: { text: text(node) } });
+      if (node && isPath(node)) context.report({ node, messageId, data: { text: text(node) } });
     };
     return {
       SpreadElement(node) {
@@ -1081,7 +1101,7 @@ const noReadInProp = {
         "A component call's prop is a source, a hole (`function* () { … }`) or a settled value, never a read in the caller (D-065)."
     },
     messages: {
-      read: "read in a prop: pass the source (`{{key}}: src`), or a hole (`{{key}}: function* () { return …; }`) the component reads (D-065)."
+      read: "read in a prop: pass the source (`{{key}}: src`), or a hole (`{{key}}: function* () { return …; }`) the component reads, to a prop declared Source<T> (D-065, D-118)."
     },
     schema: []
   },

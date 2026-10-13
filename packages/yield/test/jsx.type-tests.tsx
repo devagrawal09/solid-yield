@@ -64,8 +64,8 @@ export const Settled = component(function* (props: Props<{ label: string }>) {
   });
   return view(function* () {
     return (
-      <p onClick={yield* inc} title={yield* props.label}>
-        {yield* props.label}: {yield* doubled} {yield* store.todos[0].title}{" "}
+      <p onClick={yield* inc} title={props.label}>
+        {props.label}: {yield* doubled} {yield* store.todos[0].title}{" "}
         {yield* readStore(store, s => s.todos.length)}
       </p>
     );
@@ -90,7 +90,7 @@ export const ReadsInSetup = component(function* () {
   });
 });
 // the effect phase reads, untracked because its host is (D-083)
-export const ReadsInEffectPhase = component(function* (props: Props<{ start: number }>) {
+export const ReadsInEffectPhase = component(function* (props: Props<{ start: Source<number> }>) {
   yield* $effect(
     function* () {},
     function* () {
@@ -180,7 +180,7 @@ export const asyncInEffect = $effect(
 // pending, and nothing it reads can fail
 export const Pending = component(function* (props: Props<{ id: string }>) {
   const user = yield* $memo(function* () {
-    yield* props.id;
+    void props.id;
     return yield* pendingUser;
   });
   return view(function* () {
@@ -189,7 +189,7 @@ export const Pending = component(function* (props: Props<{ id: string }>) {
 });
 export const Fallible = component(function* (props: Props<{ id: string }>) {
   const user = yield* $memo(function* () {
-    const id = yield* props.id;
+    const id = props.id;
     const u = yield* attempt(
       () => fetchUser(id),
       () => new NotFound()
@@ -205,7 +205,7 @@ export const Fallible = component(function* (props: Props<{ id: string }>) {
 export const Seeded = component(function* (props: Props<{ id: string }>) {
   const user = yield* $memo(
     function* () {
-      const id = yield* props.id;
+      const id = props.id;
       return yield* attempt(
         () => fetchUser(id),
         () => new NotFound()
@@ -448,7 +448,7 @@ export const Rows = component(function* () {
             each: comments,
             children: function* (c) {
               return view(function* () {
-                return <>{yield* Settled({ label: c.text })}</>;
+                return <>{yield* Settled({ label: "row" })}</>;
               });
             }
           })
@@ -487,7 +487,7 @@ export const Rows = component(function* () {
                     {
                       yield* Loading({
                         children: function* () {
-                          return <>{yield* Pending({ id: c.text })}</>;
+                          return <>{yield* Pending({ id: "row" })}</>;
                         }
                       })
                     }
@@ -580,9 +580,7 @@ const pendingRow = function* (c: Path<Comment>) {
       <li>
         {
           yield* Pending({
-            id: function* () {
-              return String(yield* c.id);
-            }
+            id: "row"
           })
         }
       </li>
@@ -740,7 +738,9 @@ const readsInRowSetup = function* (c: Path<Comment>) {
 export const badRowSetup = For({ each: comments, children: readsInRowSetup });
 
 // --- paths through nullable values and nested sources --------------------------------------------
-export const Nullable = component(function* (props: Props<{ me: { name: string } | null }>) {
+export const Nullable = component(function* (
+  props: Props<{ me: Source<{ name: string } | null> }>
+) {
   return view(function* () {
     // through a nullable object a key may read `undefined`
     const name: Source<string | undefined> = props.me.name;
@@ -767,7 +767,7 @@ export const Declared = component(function* (
   });
 });
 declare const settledUser: Source<{ name: string }>;
-// callers pass any source within it (a settled one too) or the value
+// callers pass any source within it (a settled one too), or a constant (D-118: not a plain value)
 export const ok6 = Errored({
   fallback: "!",
   children: function* () {
@@ -792,7 +792,7 @@ export const ok7 = Errored({
         {
           yield* Loading({
             children: function* () {
-              return <>{yield* Declared({ user: { name: "a" } })}</>;
+              return <>{yield* Declared({ user: constant({ name: "a" }) })}</>;
             }
           })
         }
@@ -1140,18 +1140,20 @@ export const readsConstantOk = <div>{ReadsConstant()}</div>;
 
 // --- the call form: tags are DOM elements and foreign components; a yield component is called,
 // its props are sources, holes or values, its children a generator (D-065, D-066, D-067) --------
-const Total = component(function* (props: Props<{ n: number; label: string }>) {
+const Total = component(function* (props: Props<{ n: Source<number>; label: string }>) {
   return view(function* () {
     return (
       <p>
-        {yield* props.label}: {yield* props.n}
+        {props.label}: {yield* props.n}
       </p>
     );
   });
 });
 const count = constant(2);
-// a value, a source, a hole: each is a prop
-export const totalValue: View<false, never> = Total({ n: 1, label: "n" });
+// a reactive prop takes a source or a hole (a constant for a fixed value); a held one its value
+export const totalValue: View<false, never> = Total({ n: constant(1), label: "n" });
+// @ts-expect-error [REACTIVE_PROP] a plain value for a reactive prop
+export const totalPlain = Total({ n: 1, label: "n" });
 export const totalSource: View<false, never> = Total({ n: count, label: "n" });
 export const totalHole = Total({
   n: function* () {
@@ -1210,19 +1212,27 @@ declare const saveTodo: Source<Todo, SaveError, true>;
 declare const twinTodo: Source<Todo, FetchErrorTwin, true>;
 type ReadOf<S> = S extends { [Symbol.iterator](): Generator<infer Y, any, any> } ? Y : never;
 
-// a bare prop is settled and never fails (D-024): its reads are Read<false, never>
+// a bare prop is held (D-118): the child sees the value as it is declared, no read
 const TodoItem = component(function* TodoItem(props: Props<{ todo: Todo; label: string }>) {
+  const held: [Is<typeof props.todo, Todo>, Is<typeof props.label, string>] = [true, true];
+  void held;
+  return view(function* () {
+    return (
+      <li>
+        {props.label}: {props.todo.title}
+      </li>
+    );
+  });
+});
+// a prop declared Source<T> is reactive and settled: the child sees a path, its reads Read<false, never>
+const SettledItem = component(function* SettledItem(props: Props<{ todo: Source<Todo> }>) {
   const reads: [
     Is<ReadOf<typeof props.todo>, Read<false, never>>,
     Is<ReadOf<typeof props.todo.title>, Read<false, never>>
   ] = [true, true];
   void reads;
   return view(function* () {
-    return (
-      <li>
-        {yield* props.label}: {yield* props.todo.title}
-      </li>
-    );
+    return <li>{yield* props.todo.title}</li>;
   });
 });
 // a prop declared Source<T, E, true> may be pending and fail: its reads are Read<true, E>
@@ -1261,52 +1271,67 @@ const PendingItem = component(function* (props: Props<{ todo: Source<Todo, never
 export const asyncView: View<true, FetchError> = AsyncItem({ todo: asyncTodo });
 export const failingView: View<false, FetchError> = FailingItem({ todo: failingTodo });
 export const pendingItemView: View<true, never> = PendingItem({ todo: pendingTodo });
-export const settledView: View<false, never> = TodoItem({ todo: settledTodo, label: "a" });
+export const settledView: View<false, never> = SettledItem({ todo: settledTodo });
+export const heldView: View<false, never> = TodoItem({
+  todo: { title: "a", done: false },
+  label: "a"
+});
 
-// call-site acceptance of a bare prop: a value, a settled source, a settled path, a settled hole
-export const bare1 = TodoItem({ todo: { title: "a", done: false }, label: "a" });
-export const bare2 = TodoItem({ todo: settledTodo, label: constant("a") });
-export const bare3 = TodoItem({ todo: settledTodoPath, label: settledTodoPath.title });
-export const bare4 = TodoItem({
+// call-site acceptance of a held prop: the value only (D-118)
+export const held1 = TodoItem({ todo: { title: "a", done: false }, label: "a" });
+// @ts-expect-error [HELD_PROP] prop `label` is held as a value: a source is refused
+export const heldBad1 = TodoItem({ todo: { title: "a", done: false }, label: constant("a") });
+// @ts-expect-error [HELD_PROP] prop `todo` is held as a value: a path is refused
+export const heldBad2 = TodoItem({ todo: settledTodoPath, label: "a" });
+export const heldBad3 = TodoItem({
+  // @ts-expect-error [HELD_PROP] a hole is refused
   todo: function* () {
     return yield* settledTodo;
   },
   label: "a"
 });
-// … and it refuses a pending or failing source
-// @ts-expect-error [SETTLED_PROP] prop `todo` is settled: a pending source
-export const bareBad1 = TodoItem({ todo: pendingTodo, label: "a" });
-// @ts-expect-error [SETTLED_PROP] prop `todo` is settled: a failing source
-export const bareBad2 = TodoItem({ todo: failingTodo, label: "a" });
-// @ts-expect-error [SETTLED_PROP] prop `todo` is settled: a pending and failing path
-export const bareBad3 = TodoItem({ todo: asyncTodo, label: "a" });
+// call-site acceptance of a reactive settled prop: a settled source, path or hole
+export const settled1 = SettledItem({ todo: settledTodo });
+export const settled2 = SettledItem({ todo: settledTodoPath });
+export const settled3 = SettledItem({
+  todo: function* () {
+    return yield* settledTodo;
+  }
+});
+export const settled4 = SettledItem({ todo: constant({ title: "a", done: false }) });
+// … and it refuses a plain value, a pending or failing source
+// @ts-expect-error [REACTIVE_PROP] prop `todo` is reactive: a plain value is refused (constant(v))
+export const settledBad0 = SettledItem({ todo: { title: "a", done: false } });
+// @ts-expect-error [REACTIVE_PROP] prop `todo` is reactive and settled: a pending source
+export const settledBad1 = SettledItem({ todo: pendingTodo });
+// @ts-expect-error [REACTIVE_PROP] prop `todo` is reactive and settled: a failing source
+export const settledBad2 = SettledItem({ todo: failingTodo });
+// @ts-expect-error [REACTIVE_PROP] prop `todo` is reactive and settled: a pending and failing path
+export const settledBad3 = SettledItem({ todo: asyncTodo });
 // a pending hole does not pass a settled prop
-export const bareBad4 = TodoItem({
+export const settledBad4 = SettledItem({
   // @ts-expect-error the hole reads a pending source
   todo: function* () {
     return yield* pendingTodo;
-  },
-  label: "a"
+  }
 });
 // nor does a failing one
-export const bareBad5 = TodoItem({
+export const settledBad5 = SettledItem({
   // @ts-expect-error the hole reads a failing source
   todo: function* () {
     return yield* failingTodo;
-  },
-  label: "a"
+  }
 });
-export const bareBad6 = TodoItem({
+export const settledBad6 = SettledItem({
   // @ts-expect-error the hole raises
   todo: function* () {
     yield* raise(new FetchError());
     return { title: "a", done: false };
-  },
-  label: "a"
+  }
 });
 
 // a declared Source<T, E, true> takes anything within its coloring: settled ⊂ pending, never ⊂ E
-export const async1 = AsyncItem({ todo: { title: "a", done: false } });
+export const async1 = AsyncItem({ todo: constant({ title: "a", done: false }) });
 export const async2 = AsyncItem({ todo: settledTodo });
 export const async3 = AsyncItem({ todo: pendingTodo });
 export const async4 = AsyncItem({ todo: failingTodo });
@@ -1370,8 +1395,8 @@ export const ForwardsToBare = component(function* <E, P extends boolean>(
   props: Props<{ todo: Source<Todo, E, P> }>
 ) {
   return view(function* () {
-    // @ts-expect-error TodoItem's todo is settled; the forwarded prop may be pending or fail
-    return <ul>{yield* TodoItem({ todo: props.todo, label: "a" })}</ul>;
+    // @ts-expect-error SettledItem's todo is settled; the forwarded prop may be pending or fail
+    return <ul>{yield* SettledItem({ todo: props.todo })}</ul>;
   });
 });
 // forwarding into a declared prop that takes the color compiles
@@ -1429,13 +1454,13 @@ render(
   root
 );
 
-// a prop that may be undefined takes a hole returning undefined; with every prop optional the
-// props object is too
-const Note = component(function* (props: Props<{ note?: string; children: Element }>) {
+// an optional reactive prop takes a hole returning undefined, and is undefined left out (D-118);
+// with every prop optional the props object is optional too
+const Note = component(function* (props: Props<{ note?: Source<string>; children: Element }>) {
   return view(function* () {
     return (
       <p>
-        {yield* props.note}
+        {props.note ? yield* props.note : ""}
         {yield* props.children}
       </p>
     );
@@ -1451,7 +1476,7 @@ export const noteHole = Note({
 });
 const OnlyOptional = component(function* (props: Props<{ note?: string }>) {
   return view(function* () {
-    return <p>{yield* props.note}</p>;
+    return <p>{props.note}</p>;
   });
 });
 export const onlyOptional = OnlyOptional();

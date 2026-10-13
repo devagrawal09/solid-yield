@@ -36,7 +36,7 @@ export const Counter = component(function* Counter(props: Props<{ step: number }
   // setup: creates, never reads
   const [count, setCount] = yield* $signal(0);
   const add = $event(function* () {
-    yield* setCount((yield* count) + (yield* props.step));
+    yield* setCount((yield* count) + props.step);
   });
   // view: no body; every read is a hole
   return view(function* () {

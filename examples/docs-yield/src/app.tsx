@@ -1,5 +1,5 @@
 import { createRouter, defineRoute, defineRoutes, type RouteSectionProps } from "@solidjs/router";
-import { component, foreign, type Props, view } from "solid-yield";
+import { component, constant, foreign, type Props, view } from "solid-yield";
 import { SiteNav, SiteFooter, ArticleContent, ReadingGuide } from "./content";
 import {
   ThemeToggle,
@@ -14,18 +14,23 @@ const Home = component(function* Home(_props: Props<RouteSectionProps<void>>) {
   return view(function* () {
     return (
       <main>
-        {yield* ArticleContent({ slug: "overview" })}
-        {yield* LikeButton({ slug: "overview" })}
+        {yield* ArticleContent({ slug: constant("overview") })}
+        {yield* LikeButton({ slug: constant("overview") })}
       </main>
     );
   });
 });
 const DocPage = component(function* DocPage(props: Props<RouteSectionProps<void>>) {
+  // the router's params are held, a reactive object of its own (D-118): a hole reads the slug
+  // where the child reads it, so a navigation updates the article, not re-creates it
+  const slug = function* () {
+    return props.params.slug;
+  };
   return view(function* () {
     return (
       <main>
-        {yield* ArticleContent({ slug: props.params.slug })}
-        {yield* LikeButton({ slug: props.params.slug })}
+        {yield* ArticleContent({ slug })}
+        {yield* LikeButton({ slug })}
       </main>
     );
   });
@@ -48,7 +53,7 @@ const App = component(function* App(props: Props<{ url?: string }>) {
         <div class="layout">
           <aside>{yield* SiteNav()}</aside>
           <div>
-            <Router url={yield* props.url} />
+            <Router url={props.url} />
           </div>
         </div>
         {yield* NewsletterForm()}

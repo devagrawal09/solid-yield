@@ -57,8 +57,8 @@ export const ThemePicker = component(function* ThemePicker(
   props: Props<{ theme: Source<Theme>; onPick: Handler<[Theme]> }>
 ) {
   const pickDark = $event(function* () {
-    // a handler in a prop is read, then called: `yield* (yield* props.onPick)(…)`
-    yield* (yield* props.onPick)("dark");
+    // a handler prop is a reference (D-118): held, called as a local event is
+    yield* props.onPick("dark");
   });
   return view(function* () {
     return (
@@ -203,7 +203,7 @@ export function fetchNotes(folder: string): Promise<Note[]> {
 
 export const Folder = component(function* Folder(props: Props<{ folder: string }>) {
   const notes = yield* $memo(function* () {
-    const folder = yield* props.folder;
+    const folder = props.folder;
     return yield* attempt(
       () => fetchNotes(folder),
       cause => new LoadFailed(cause instanceof Error ? cause.message : String(cause))

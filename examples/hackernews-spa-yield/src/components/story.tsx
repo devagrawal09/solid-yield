@@ -1,7 +1,7 @@
-import { component, Show, type Props, view } from "solid-yield";
+import { component, Show, type Props, type Source, view } from "solid-yield";
 import type { StoryDefinition } from "../types";
 
-const Story = component(function* Story(props: Props<{ story: StoryDefinition }>) {
+const Story = component(function* Story(props: Props<{ story: Source<StoryDefinition> }>) {
   return view(function* () {
     return (
       <li class="news-item">

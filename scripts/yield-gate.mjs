@@ -17,7 +17,8 @@
 //   --only <substring>  run only steps whose name contains the substring
 //                       (repeatable; a step matching any of them runs)
 //   --fast              run only the quick subset: pkg:yield:dist-fresh,
-//                       twin:*:typecheck, twin:*:lint,
+//                       twin:*:typecheck, twin:*:lint, example:*:typecheck,
+//                       example:*:lint,
 //                       pkg:yield:test, pkg:vite-plugin-yield:typecheck,
 //                       pkg:*:exports and repo:prettier (skips twin tests, the
 //                       server-render smoke, the other package suites and oxlint)
@@ -107,6 +108,9 @@ function fail(message) {
 
 const TWIN_SCRIPTS = ["test", "typecheck", "lint"];
 const EXPECTED_TWINS = 9;
+// Examples that are not twins of an original (no examples/originals counterpart, no
+// parity test): outside the twin count, gated as example:<name>:<script>.
+const NON_TWINS = ["booking-yield"];
 
 function readJson(path) {
   return JSON.parse(readFileSync(path, "utf8"));
@@ -118,6 +122,7 @@ function findTwins() {
   return readdirSync(examples, { withFileTypes: true })
     .filter(d => d.isDirectory() && /-yield(-h)?$/.test(d.name))
     .map(d => d.name)
+    .filter(name => !NON_TWINS.includes(name))
     .filter(name => {
       const pkg = join(examples, name, "package.json");
       if (!existsSync(pkg)) return false;
@@ -145,7 +150,8 @@ const LINT_DIRS = twins => [
   "packages/yield",
   "packages/eslint-plugin-yield",
   "packages/vite-plugin-yield",
-  ...twins.map(t => `examples/${t}`)
+  ...twins.map(t => `examples/${t}`),
+  ...NON_TWINS.map(t => `examples/${t}`)
 ];
 
 function buildSteps(twins) {
@@ -172,6 +178,14 @@ function buildSteps(twins) {
       steps.push(step);
     }
   }
+  for (const example of NON_TWINS)
+    for (const script of TWIN_SCRIPTS)
+      steps.push({
+        name: `example:${example}:${script}`,
+        cwd: root,
+        fast: script === "typecheck" || script === "lint",
+        ...pnpmRun(`examples/${example}`, script)
+      });
 
   steps.push({
     name: "original:docs:typecheck",

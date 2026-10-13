@@ -24,7 +24,7 @@ const CardBody = component(function* CardBody(
   return view(function* () {
     return (
       <div class="reveal-card">
-        <strong>{yield* props.title}</strong>
+        <strong>{props.title}</strong>
         <div>{yield* props.value}</div>
       </div>
     );
@@ -40,8 +40,8 @@ export class RevealError extends Failure("reveal") {
 
 const AsyncCard = component(function* AsyncCard(props: Props<{ delay: number; title: string }>) {
   const value = yield* $memo(function* () {
-    const delay = yield* props.delay;
-    const title = yield* props.title;
+    const delay = props.delay;
+    const title = props.title;
     return yield* attempt(
       () => delayedValue(delay, `${title} resolved in ${delay}ms`),
       cause => new RevealError(cause)
@@ -56,7 +56,7 @@ const AsyncCard = component(function* AsyncCard(props: Props<{ delay: number; ti
         {
           yield* Loading({
             fallback: function* () {
-              return <div class="loader">{yield* props.title} loading...</div>;
+              return <div class="loader">{props.title} loading...</div>;
             },
             children: function* () {
               return (

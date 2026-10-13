@@ -17,7 +17,7 @@ const required: RequiredContext<string | undefined, "C"> = C;
 const Reader = component(function* () {
   const c = yield* C;
   return view(function* () {
-    return <b>{yield* c}</b>;
+    return <b>{c}</b>;
   });
 });
 // @ts-expect-error the reader requires C

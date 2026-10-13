@@ -15,6 +15,7 @@ import {
   holeOf,
   perform,
   READ,
+  REFS,
   isGeneratorFunction,
   runRow
 } from "solid-yield/internal";
@@ -141,21 +142,38 @@ function toAttribute(key: string, value: any, name?: string | null): any {
  * Convert the values of a props object (a copy; getters stay lazy). Only
  * the values themselves: a prop holding an array or an object (a context
  * value, a store) is passed as it is.
+ *
+ * A component's props are passed as they are (D-118): the child's props
+ * give each as it is, a reactive one as a path. Solid's `h` turns a function
+ * prop into a getter that calls it (a zero-arity one) or wraps it (one with
+ * parameters) — a source would be read, a handler called, where the child
+ * reads it — so a function is handed over as a thunk returning it, and its
+ * key is listed under `REFS`: the child's props take it unread. A getter
+ * stays a getter (a reactive value).
  */
-export function toHoleProps(props: any, name?: string | null): any {
+export function toHoleProps(props: any, name?: string | null, component = false): any {
   if (props == null || typeof props !== "object" || Array.isArray(props)) return props;
   if (props instanceof Node) return props;
   if (props[READ] !== undefined) return props;
   const out: any = {};
+  const refs: string[] = [];
   const descriptors = Object.getOwnPropertyDescriptors(props);
   for (const key in descriptors) {
     const d = descriptors[key];
-    if (d.get)
+    if (component) {
+      if (d.get) Object.defineProperty(out, key, { get: () => props[key], enumerable: true });
+      else if (typeof d.value === "function") {
+        const value = d.value;
+        out[key] = () => value;
+        refs.push(key);
+      } else out[key] = d.value;
+    } else if (d.get)
       Object.defineProperty(out, key, {
         get: () => toAttribute(key, props[key], name),
         enumerable: true
       });
     else out[key] = toAttribute(key, d.value, name);
   }
+  if (refs.length) Object.defineProperty(out, REFS, { value: refs });
   return out;
 }

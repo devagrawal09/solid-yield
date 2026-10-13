@@ -25,7 +25,7 @@ export function roomWith(watchRoom: (id: string) => AsyncIterable<Message[]>) {
     let current: { number: number; id: string; stream: AsyncIterable<Message[]> } | undefined;
     const messages = yield* $memo(function* () {
       const number = yield* attemptNumber;
-      const id = yield* props.roomId;
+      const id = props.roomId;
       return yield* attempt(
         () => {
           // Reset may re-read this memo before the event's writes commit.

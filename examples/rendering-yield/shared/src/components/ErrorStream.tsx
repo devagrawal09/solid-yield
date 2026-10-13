@@ -41,7 +41,7 @@ function loadItem(id: string): Promise<Item> {
 function* item(props: Props<{ id: string }>) {
   const [chosen, setId] = yield* $signal<string | undefined>(undefined);
   const item = yield* $memo(function* () {
-    const current = (yield* chosen) ?? (yield* props.id);
+    const current = (yield* chosen) ?? props.id;
     return yield* attempt(
       () => loadItem(current),
       cause => new ItemError(cause)

@@ -185,7 +185,7 @@ class FetchError extends Failure("fetch") {}
 type Todo = { title: string };
 declare const settledTodo: Source<Todo>;
 declare const asyncTodo: Source<Todo, FetchError, true>;
-const Item = component(function* (props: Props<{ todo: Todo }>) {
+const Item = component(function* (props: Props<{ todo: Source<Todo> }>) {
   return view(function* () {
     return h("li", props.todo.title);
   });

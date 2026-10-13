@@ -86,7 +86,7 @@ const NeedsCtx = createContext<string, "NeedsCtx">(undefined, { name: "NeedsCtx"
 const Reader = component(function* Reader() {
   const v = yield* NeedsCtx;
   return view(function* () {
-    return <i>{yield* v}</i>;
+    return <i>{v}</i>;
   });
 });
 type _providerOnly = Expect<Equal<keyof RootCheck<typeof Reader>, ProviderMessage>>;
@@ -96,7 +96,7 @@ const PendingReader = component(function* PendingReader() {
   return view(function* () {
     return (
       <i>
-        {yield* v}
+        {v}
         {yield* App()}
       </i>
     );

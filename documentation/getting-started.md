@@ -528,6 +528,95 @@ const Preferences = component(function* Preferences() {
 });
 ```
 
+### Share a part of a store: lenses and slots
+
+A page must often read the state of its modules, for example to show a total. Then the page must hold that state. A **lens** lets a module keep its state type and its write logic while the page holds the store (D-116). The result of `$store` is a lens. `focus(lens, "key")` makes a lens on one part. These examples are [type-checked and run](https://github.com/devagrawal09/solid-yield/blob/main/packages/yield/test/docs/lenses.tsx).
+
+**A lens prop.** Declare the prop as `Lens<S>`. The module gets the lens itself, not a path, so the setup can destructure it:
+
+```tsx
+import { $event, $memo, $store, component, focus, view, type Lens, type Props } from "solid-yield";
+
+type GuestsS = { adults: number; kids: number };
+const initGuests = (): GuestsS => ({ adults: 1, kids: 0 });
+
+const Guests = component(function* Guests(props: Props<{ state: Lens<GuestsS> }>) {
+  const [guests, setGuests] = props.state; // the lens itself, not a path
+  const addKid = $event(function* () {
+    yield* setGuests(draft => {
+      draft.kids++;
+    });
+  });
+  return view(function* () {
+    return <button onClick={yield* addKid}>{yield* guests.kids}</button>;
+  });
+});
+
+const Party = component(function* Party() {
+  const party = yield* $store({ guests: initGuests(), table: { seats: 4 } });
+  const [state] = party;
+  const free = yield* $memo(function* () {
+    return (yield* state.table.seats) - (yield* state.guests.adults) - (yield* state.guests.kids);
+  });
+  return view(function* () {
+    return (
+      <div>
+        {yield* Guests({ state: focus(party, "guests") })}
+        <p>{yield* free}</p>
+      </div>
+    );
+  });
+});
+```
+
+A write through a focused lens is a write to the page's store: it obeys the same rules (only in an `$event` or an effect phase, and `yield*` each receipt), and an `$optimisticStore` reverts it when the event settles. `focus` takes a key whose value is an object. To write a scalar, use the lens of its parent.
+
+**A slot.** If the module is far below the store, or if it must also operate alone, read the lens from a slot (D-117). A slot is a required context whose value is a lens:
+
+```tsx
+import { $slot, compose, createSlot } from "solid-yield";
+
+const GuestsState = createSlot<GuestsS, "GuestsState">({ name: "GuestsState" });
+
+const SlotGuests = component(function* SlotGuests() {
+  // with `init`: a local store when no provider binds the slot
+  const [guests, setGuests] = yield* $slot(GuestsState, { init: initGuests });
+  // … as Guests above
+});
+
+const PartyState = compose({
+  guests: { init: initGuests, slot: GuestsState },
+  table: { init: () => ({ seats: 4 }) }
+});
+
+const SlotParty = component(function* SlotParty() {
+  const party = yield* PartyState.$store(); // one store for all entries
+  const [state, setParty] = party;
+  const reset = $event(function* () {
+    yield* setParty(() => PartyState.init());
+  });
+  return view(function* () {
+    return (
+      <div>
+        {yield* PartyState.provide({
+          value: party, // binds GuestsState to the guests part
+          children: function* () {
+            return <>{yield* SlotGuests()}</>;
+          }
+        })}
+        <button onClick={yield* reset}>Reset</button>
+      </div>
+    );
+  });
+});
+```
+
+- `yield* $slot(Slot)` without `init` is the required form. The slot goes into the component's requirements, as a context does, and `render` refuses a root without a provider (`[NO_PROVIDER]`).
+- `Slot.provide({ value: lens, children })` binds one slot. `compose`'s `provide` binds each slot in its schema. `PartyState.lenses(party)` gives one lens for each entry, for lens props.
+- Read a slot only with `$slot`. `yield* Slot` is refused (`SLOT_READ`).
+
+Use a lens prop for a module that the parent calls directly, because each call site shows the binding. Use a slot for a module far below the store, or for a module that must also operate alone. [`examples/lenses`](https://github.com/devagrawal09/solid-yield/tree/main/examples/lenses) shows one booking page in three versions: with lifted state, with lens props, and with slots and `compose`.
+
 ### Both effect phases
 
 The compute tracks reads and returns a value. The effect phase receives it, runs untracked after render, and may write state or the DOM. It does not run on the server:
@@ -1014,3 +1103,5 @@ The [complete repository fixture](https://github.com/devagrawal09/solid-yield/bl
 ## Example twins
 
 The full gate checks nine twins: docs-yield, effect-yield, hackernews-spa-yield, rendering-yield, room-yield, sierpinski-yield, sierpinski-yield-h, todos-yield and todos-yield-h. Each has its own README and parity script under `examples/`. The [docs content-site twin](../examples/docs-yield/README.md) exercises article content and six independent widgets through 24 parity steps, typechecking, lint and streamed SSR/hydration checks.
+
+[`examples/lenses`](../examples/lenses/README.md) is not a twin: it has no original, and the gate does not run it. It shows one booking page in three versions (lifted state, lens props, and slots with `compose`), and it runs the same tests on each version.

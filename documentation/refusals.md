@@ -76,7 +76,7 @@ The neighbours of a view, for completeness:
 
 ## Every code, by layer
 
-Counted against the code (2026-10-06): 4 transform codes (`REFUSALS` in `vite-plugin-solid-yield`), 23 development errors, 12 type-level messages, 19 lint rules (17 errors and 2 warnings in `recommended`).
+Counted against the code (2026-10-06; D-116 and D-117 add 2 development errors): 4 transform codes (`REFUSALS` in `vite-plugin-solid-yield`), 25 development errors, 12 type-level messages, 19 lint rules (17 errors and 2 warnings in `recommended`).
 
 **The transform** (`vite-plugin-solid-yield`). A compile error lists each refusal as `[CODE] message (line:column)`. The lint rule `yield-in-jsx-hole` reports the same list.
 
@@ -96,7 +96,9 @@ Counted against the code (2026-10-06): 4 transform codes (`REFUSALS` in `vite-pl
 | `READ_AFTER_ATTEMPT`     | a memo reads after its first async `attempt`                                                                                                                                                                |
 | `CREATE_OUTSIDE_SETUP`   | `$signal` / `$memo` / … outside a setup                                                                                                                                                                     |
 | `CONTEXT_OUTSIDE_SETUP`  | `yield* Ctx` outside a setup                                                                                                                                                                                |
-| `NO_PROVIDER`            | a setup reads a context created without a default, and no provider above gives it (D-098)                                                                                                                   |
+| `NO_PROVIDER`            | a setup reads a context created without a default, and no provider above gives it (D-098); also `$slot(Slot)` without `init` when no provider binds the slot (D-117)                                                                                                                   |
+| `NOT_A_LENS`             | `focus` gets a value that the library did not make as a lens (D-116) |
+| `SLOT_READ`              | `yield* Slot`: a slot is read with `yield* $slot(Slot)` (D-117) |
 | `CLEANUP_OUTSIDE_OWNER`  | `$cleanup` outside a setup or an effect                                                                                                                                                                     |
 | `WRITE_IN_REACTIVE`      | a write in a host that does not write (a setup, a view, a hole, a memo)                                                                                                                                     |
 | `UNYIELDED_WRITE`        | a setter's receipt was not delegated to by the end of its run                                                                                                                                               |

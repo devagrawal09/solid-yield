@@ -1,0 +1,29 @@
+{
+  "name": "lenses-example",
+  "description": "One booking page written three ways: lifted state (without lenses), lens props, and state slots with compose (D-116, D-117)",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "eslint src"
+  },
+  "devDependencies": {
+    "@solidjs/vite-plugin": "3.0.0-next.35",
+    "@solidjs/web": "^2.0.0-rc.11",
+    "@types/node": "^25.6.0",
+    "eslint": "^9.0.0",
+    "jsdom": "^25.0.1",
+    "solid-js": "^2.0.0-rc.11",
+    "solid-yield": "workspace:*",
+    "typescript": "^6.0.2",
+    "vite": "^7.0.0",
+    "vite-plugin-solid-yield": "workspace:*",
+    "vitest": "^4.1.6",
+    "yield-example-harness": "workspace:*"
+  }
+}

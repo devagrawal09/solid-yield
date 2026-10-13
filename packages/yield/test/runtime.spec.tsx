@@ -3453,3 +3453,136 @@ describe("binding an event is a hole (D-072)", () => {
     });
   });
 });
+
+describe("D-020: an event called from an event joins its transaction", () => {
+  it("an event called from an event joins its transaction (D-020): the inner write is held until the outer settles", async () => {
+    let resolve!: () => void;
+    const App = component(function* App() {
+      const [n, setN] = yield* $signal(0);
+      const inner = $event(function* () {
+        yield* setN(1);
+      });
+      const outer = $event(function* () {
+        yield* inner();
+        yield* attempt(() => new Promise<void>(r => (resolve = r)), toError);
+      });
+      return view(function* () {
+        return <button onClick={yield* outer}>{yield* n}</button>;
+      });
+    });
+    mount(App);
+    root.querySelector("button")!.click();
+    await settle();
+    // the inner call finished, but its write is the outer transaction's
+    expect(root.textContent).toBe("0");
+    resolve();
+    await settle();
+    expect(root.textContent).toBe("1");
+  });
+
+  it("an optimistic write the inner event makes shows at once and holds until the outer settles", async () => {
+    let resolve!: () => void;
+    const App = component(function* App() {
+      const [busy, setBusy] = yield* $optimisticStore({ saving: false });
+      const inner = $event(function* () {
+        yield* setBusy(d => {
+          d.saving = true;
+        });
+      });
+      const outer = $event(function* () {
+        yield* inner();
+        yield* attempt(() => new Promise<void>(r => (resolve = r)), toError);
+      });
+      return view(function* () {
+        return <button onClick={yield* outer}>{(yield* busy.saving) ? "saving" : "idle"}</button>;
+      });
+    });
+    mount(App);
+    root.querySelector("button")!.click();
+    await settle();
+    // the inner call is done; its optimistic write stays while the outer waits
+    expect(root.textContent).toBe("saving");
+    resolve();
+    await settle();
+    expect(root.textContent).toBe("idle");
+  });
+});
+
+describe("D-118: an event is called by routine code or by the DOM (EVENT_OUTSIDE_RUN, D-028 for events)", () => {
+  devIt("called from a timer: EVENT_OUTSIDE_RUN at the call", async () => {
+    let save!: () => unknown;
+    const App = component(function* App() {
+      save = $event(function* save() {});
+      return view(function* () {
+        return <i />;
+      });
+    });
+    mount(App);
+    const thrown = await new Promise<unknown>(done =>
+      setTimeout(() => {
+        try {
+          save();
+          done(null);
+        } catch (e) {
+          done(e);
+        }
+      }, 0)
+    );
+    expect(String(thrown)).toMatch(
+      /\[EVENT_OUTSIDE_RUN\] the \$event save of <App> called outside a routine: an event is called with yield\* save\(x\) in an \$event or an \$effect, or by the DOM where a view binds it/
+    );
+  });
+
+  devIt("called from a promise callback: EVENT_OUTSIDE_RUN rejects the chain", async () => {
+    let save!: () => unknown;
+    const App = component(function* App() {
+      save = $event(function* () {});
+      return view(function* () {
+        return <i />;
+      });
+    });
+    mount(App);
+    await expect(Promise.resolve().then(() => save())).rejects.toThrow(
+      /\[EVENT_OUTSIDE_RUN\] an \$event of <App> called outside a routine/
+    );
+  });
+
+  it("a DOM dispatch through a bind, a call from another event and an effect phase still call it", async () => {
+    const calls: string[] = [];
+    const App = component(function* App() {
+      const [go, setGo] = yield* $signal(false);
+      const save = $event(function* (from: string) {
+        calls.push(from);
+      });
+      const outer = $event(function* () {
+        yield* save("event");
+        yield* setGo(true);
+      });
+      yield* $effect(
+        function* () {
+          return yield* go;
+        },
+        function* (on) {
+          if (on) yield* save("effect");
+        }
+      );
+      return view(function* () {
+        return (
+          <>
+            <button class="bound" onClick={[yield* save, "dom"]}>
+              dom
+            </button>
+            <button class="outer" onClick={yield* outer}>
+              outer
+            </button>
+          </>
+        );
+      });
+    });
+    mount(App);
+    root.querySelector<HTMLElement>(".bound")!.click();
+    root.querySelector<HTMLElement>(".outer")!.click();
+    await settle();
+    expect(calls).toEqual(["dom", "event", "effect"]);
+  });
+});

@@ -680,7 +680,7 @@ export const Refusals = component(function* Refusals(
         <button onClick={yield* fn}>b</button>
         {/* @ts-expect-error a plain function: the DOM would call it with its colors in no type */}
         <button onClick={() => {}}>c</button>
-        {/* @ts-expect-error a handler read from a prop is a source's value: wrap it in an $event */}
+        {/* a handler prop is a reference (D-118): `yield* props.onSave` binds it, as a local event */}
         <button onClick={yield* props.onSave}>d</button>
         {/* @ts-expect-error a plain-function prop either */}
         <button onClick={yield* props.fn}>e</button>
@@ -688,12 +688,13 @@ export const Refusals = component(function* Refusals(
     );
   });
 });
-// a handler given as a prop is called by an $event of the child's, which joins its colors
+// a handler given as a prop is called by an $event of the child's, which joins its colors;
+// the prop is the handler itself (D-118): one yield*, as a local event
 export const ForwardsHandler = component(function* ForwardsHandler(
   props: Props<{ onSave: EventHandler<[], Boom, void, false, false> }>
 ) {
   const save = $event(function* () {
-    yield* (yield* props.onSave)();
+    yield* props.onSave();
   });
   return view(function* () {
     return <button onClick={yield* save}>save</button>;

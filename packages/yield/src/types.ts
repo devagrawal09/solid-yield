@@ -411,17 +411,44 @@ export type PropsCheck<D> = {
         ? KindCheck<E> extends NeedsKind
           ? NeedsKind
           : unknown
-        : unknown;
+        : [Exclude<D[N], undefined>] extends [HandlerProp]
+          ? undefined extends D[N]
+            ? OptionalHandler<N>
+            : unknown
+          : unknown;
 };
 
-/** The read a declared prop is: a path (a source with keys), `children` a source. */
+/**
+ * An `$event` handler (D-118): a reference, held, never read. A prop
+ * declared as one (`Handler<…>`, `EventHandler<…>`) arrives in the child
+ * as itself, not as a path: `yield* props.onSave(x)` calls it, as a local
+ * event, and `onClick={yield* props.onSave}` binds it. A plain function
+ * type is not one, and a handler inside an object prop (`props.log.clear`)
+ * is read through the path, as before.
+ */
+type HandlerProp = { readonly [EVENT]: true };
+/**
+ * A handler prop is required (D-118): the runtime cannot tell a missing one
+ * from a path (a setup does not examine a prop, D-042). An optional
+ * handler is declared `Source<Handler<…> | undefined>` and read as before.
+ */
+type OptionalHandler<N> = {
+  readonly "[OPTIONAL_HANDLER] an event-handler prop is required (it is held, not read): declare it required, or an optional one as Source<Handler<...> | undefined>": N;
+};
+
+/**
+ * The read a declared prop is: a path (a source with keys), `children` a
+ * source. An `$event` handler is a reference (D-118): itself.
+ */
 type PropRead<V, U, N> = [V] extends [Source<infer T, infer E, infer P>]
   ? N extends "children"
     ? Source<T | U, E, P>
     : Path<T | U, E, P>
-  : N extends "children"
-    ? Source<V | U>
-    : Path<V | U>;
+  : [V] extends [HandlerProp]
+    ? V
+    : N extends "children"
+      ? Source<V | U>
+      : Path<V | U>;
 
 /**
  * What callers may pass for each prop (D-065): a value, a source or a hole
@@ -447,7 +474,12 @@ type PropInput<V, U, N, Q> = unknown extends V
   ? DeclareProp<N>
   : [V] extends [Source<infer T, infer E, infer P>]
     ? T | U | Source<T | U, E, Widen<P>> | HoleProp<T | U, E, Widen<P>, Q>
-    : V | U | Source<V | U> | HoleProp<V | U, never, false, Q> | SettledProp<SettledMessage<N>>;
+    : [V] extends [HandlerProp]
+      ? V | SettledProp<HandlerMessage<N>>
+      : V | U | Source<V | U> | HoleProp<V | U, never, false, Q> | SettledProp<SettledMessage<N>>;
+/** A handler prop takes an `$event` only (D-118): the message TypeScript prints beside it. */
+type HandlerMessage<N> =
+  `[HANDLER_PROP] prop \`${N & string}\` is an event handler: pass an $event, not a source or a hole (an event does not vary per render: one $event chooses between handlers)`;
 /** A declared pending prop also takes a settled source (settled ⊂ pending). */
 type Widen<P extends boolean> = [P] extends [true] ? boolean : P;
 /**

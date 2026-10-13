@@ -651,14 +651,37 @@ function readPath(t: PathTarget): unknown {
   return throughHole(v);
 }
 
-/** Props as reads: `props.x` is a path reader over the raw props. */
+/**
+ * Props as reads: `props.x` is a path reader over the raw props — except an
+ * `$event` handler, a reference (D-118): held, never read, it is given as
+ * itself. The check looks at the value the caller passed, never through a
+ * getter (that would read in the setup), except a getter `h` made for a
+ * handler (`REFS`), which only returns it.
+ */
 function typedProps(raw: any): any {
   return new Proxy(raw, {
     get(target, key) {
       if (typeof key === "symbol") return target[key];
+      const d = Object.getOwnPropertyDescriptor(target, key);
+      if (d !== undefined) {
+        const v = d.get === undefined ? d.value : isRefKey(target, key) ? d.get.call(target) : null;
+        if (typeof v === "function" && v[EVENT_MARK] === true) return v;
+      }
       return makePath(target, false, [key]);
     }
   });
+}
+
+/**
+ * @internal The keys of a props object whose getters return an `$event`
+ * handler unread (D-118): `h` hands a component's handler prop to Solid's
+ * `h` as a thunk returning it, which Solid turns into a getter calling the
+ * thunk.
+ */
+export const REFS: unique symbol = Symbol.for("solid.yield.refs") as any;
+function isRefKey(target: any, key: string): boolean {
+  const refs = target[REFS];
+  return Array.isArray(refs) && refs.includes(key);
 }
 
 /** A reader over a render argument (a row's item, a branch's value). */
@@ -1558,6 +1581,38 @@ export function readContext(ctx: any): unknown {
   return makePath(raw, false, []);
 }
 
+/**
+ * @internal A slot's default (D-118): what Solid's `useContext` gives where
+ * no provider is above. A slot has no default value of its own; the
+ * sentinel lets `$slot` tell "no provider" from any error the read throws
+ * (no owner, a server component's barrier), which it passes on.
+ */
+export const NO_SLOT: unique symbol = Symbol.for("solid.yield.no-slot") as any;
+
+/**
+ * @internal `yield* $slot(Slot)` / `yield* $slot(Slot, { init })` (D-118): a
+ * setup's read of a slot. It gives the provided value raw (a slot carries
+ * references, held, never read: a path and the handler that writes it),
+ * not a path over it as `yield* Ctx` does. With no provider above, the
+ * required form is `NO_PROVIDER` (every build: a slot has no default to
+ * fall back on); the `init` form gets `NO_SLOT`, and `$slot` runs its init
+ * routine in the setup.
+ */
+export function readSlot(slot: any, hasInit: boolean): unknown {
+  const host = state.host;
+  if (__DEV__ && host !== SETUP && (hasInit || host !== NONE))
+    throw devError(
+      hasInit ? "CREATE_OUTSIDE_SETUP" : "CONTEXT_OUTSIDE_SETUP",
+      `yield* $slot(…) belongs to a setup, not ${HOST_NAMES[host]}.`
+    );
+  const raw = useContext(slot);
+  if (raw !== NO_SLOT || hasInit) return raw;
+  throw devError(
+    "NO_PROVIDER",
+    `<${state.name ?? "anonymous"}> reads the slot ${slot.id.description}, and no provider above it gives one: call the component inside ${slot.id.description}.provide({ value, children }), or give $slot an init.`
+  );
+}
+
 // --- events ---------------------------------------------------------------------------------
 
 /**
@@ -1732,9 +1787,16 @@ function* eventSteps(
  * — goes to the nearest `Errored` above where the handler was bound that
  * takes it (D-085; the promise then resolves `undefined`); with no such
  * boundary there (none, or only ones whose `catch` excludes it, F-7), or for
- * a call of the unbound handler, the promise rejects.
- * Like any action it is called from an event or other imperative code, not
- * synchronously inside a computation (ACTION_CALLED_IN_OWNED_SCOPE).
+ * a call from routine code (`yield* save(x)`, which handles it), the promise
+ * rejects.
+ *
+ * It is called by routine code or by the DOM (D-118, D-028 for events):
+ * `yield* save(x)` in an `$event` or an `$effect`'s effect phase, or the DOM
+ * through a bind. Called directly with no routine running — a timer, a
+ * promise callback, plain or foreign code — it is `EVENT_OUTSIDE_RUN` in
+ * development. An event called from an event joins its transaction (D-020:
+ * Solid's action does). Like any action it is not called synchronously
+ * inside a computation (ACTION_CALLED_IN_OWNED_SCOPE).
  */
 export function $event<Args extends unknown[] = [], Y extends EventOp = never, R = void>(
   body: (...args: Args) => Generator<Y, R, any>
@@ -1793,7 +1855,18 @@ export function $event<Args extends unknown[] = [], Y extends EventOp = never, R
     };
     return result;
   };
-  const handler: any = (...args: Args) => call(null, args);
+  // D-118 (D-028 for events): a handler is called by routine code (`yield*
+  // save(x)` in an `$event` or an effect phase) or by the DOM through a bind
+  // (the bound wrapper calls `call` itself); called with no routine running
+  // — a timer, a promise callback, plain or foreign code — it fails here
+  const handler: any = (...args: Args) => {
+    if (__DEV__ && state.host === NONE)
+      throw devError(
+        "EVENT_OUTSIDE_RUN",
+        `${body.name ? `the $event ${body.name}` : "an $event"}${name ? ` of <${name}>` : ""} called outside a routine: an event is called with yield* save(x) in an $event or an $effect, or by the DOM where a view binds it (onClick={yield* save}); handed to plain code it is not called.`
+      );
+    return call(null, args);
+  };
   handler[EVENT_MARK] = true;
   handler[CALL] = call;
   // `yield* save`: bind it (D-072, D-085) — a wrapper for the DOM, routing

@@ -14,7 +14,7 @@
 import solidH from "@solidjs/h";
 import type { JSX } from "solid-yield/jsx-runtime";
 import { toHole, toHoleProps, type Hole, type HViewOf, type OpsOfHole } from "./holes.js";
-import { routineName, ELEMENT_MARK, READ } from "solid-yield/internal";
+import { routineName, ELEMENT_MARK, READ, isComponent } from "solid-yield/internal";
 import type {
   ChildView,
   Component,
@@ -30,7 +30,7 @@ import type {
 } from "./types.js";
 import type { DECLARED } from "./types.js";
 import type { Children, LazyParam, BOUNDARY_KIND, Reset } from "./flow.js";
-import type { PROVIDES, ProvidedValue } from "./context.js";
+import type { PROVIDES } from "./context.js";
 import type { Accessor } from "solid-js";
 
 type Intrinsic = JSX.IntrinsicElements;
@@ -132,9 +132,11 @@ export interface YieldH {
    * A context's provider, `h(Ctx.provide, { value }, ...children)` (D-098):
    * the children's colors pass on, less their requirement of the context.
    */
-  <T, Q, const C extends readonly Hole[]>(
-    component: { readonly [PROVIDES]: { readonly value: T; readonly discharges: Q } },
-    props: { value: ProvidedValue<T> },
+  <T, Q, I, const C extends readonly Hole[]>(
+    component: {
+      readonly [PROVIDES]: { readonly value: T; readonly discharges: Q; readonly input: I };
+    },
+    props: { value: NoInfer<I> },
     ...children: C
   ): HView<
     PendingOf<OpsOfHole<C[number]>>,
@@ -175,7 +177,7 @@ function convert(args: any[], name: string | null): any[] {
       !Array.isArray(v) &&
       !(v instanceof Node) &&
       (v as any)[READ] === undefined
-        ? toHoleProps(v, name)
+        ? toHoleProps(v, name, isComponent(args[0]))
         : toHole(v, name);
   }
   return out;

@@ -400,7 +400,7 @@ const Composer = component(function* Composer(
     // One transaction with the post: the clear lands when the post settles,
     // and the input shows `latestOf(text)` meanwhile.
     yield* setText("");
-    yield* (yield* props.post)(trimmed);
+    yield* props.post(trimmed);
   });
   const input = $event(function* (e: Input) {
     yield* setText(e.currentTarget.value);

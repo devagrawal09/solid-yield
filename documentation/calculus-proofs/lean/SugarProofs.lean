@@ -968,6 +968,183 @@ theorem effect_preserves (σ : Store) (compute : Expr) (phase : Nat → List (Na
 
 end Insertion
 
+/-! ### Untracked reads and inline routines (S24, D-124)
+
+S20's core with two more forms. `untrack(() => e)`: Solid computes `e` and
+tracks none of its reads (a pending read still suspends). An inline routine:
+an IIFE, a local function only ever called, a getter or a method read where
+it is called; Solid runs its body there, so its reads are the caller's. The
+lowering makes the first `nativeUntrack` (each step run untracked) and the
+second a generator delegated in place (`yield* (function* () { … })()`). -/
+namespace Surface
+
+open Insertion (Store Outcome seq)
+
+inductive Expr where
+  | lit (n : Nat)
+  | read (s : Nat)
+  | call (f : Nat → Nat) (e : Expr)
+  | add (a b : Expr)
+  | ite (c t e : Expr)
+  | raise (err : Nat)
+  | untrack (e : Expr)
+  | inline (e : Expr)
+
+/-- Solid's evaluation: `untrack` keeps the outcome and drops the reads; an
+    inline routine is its body, evaluated where it is called. -/
+def eval (σ : Store) : Expr → Outcome × List Nat
+  | .lit n => (.done n, [])
+  | .read s =>
+    match σ s with
+    | some v => (.done v, [s])
+    | none => (.pending s, [s])
+  | .call f e =>
+    match eval σ e with
+    | (.done v, t) => (.done (f v), t)
+    | r => r
+  | .add a b =>
+    match eval σ a with
+    | (.done x, t) =>
+      match eval σ b with
+      | (.done y, t') => (.done (x + y), t ++ t')
+      | (r, t') => (r, t ++ t')
+    | r => r
+  | .ite c th el =>
+    match eval σ c with
+    | (.done x, t) =>
+      let r := if x ≠ 0 then eval σ th else eval σ el
+      (r.1, t ++ r.2)
+    | r => r
+  | .raise err => (.failed err, [])
+  | .untrack e => ((eval σ e).1, [])
+  | .inline e => eval σ e
+
+/-- A lowered routine; `untracked p k` runs `p` with its reads untracked. -/
+inductive Prog where
+  | ret (v : Nat)
+  | read (s : Nat) (k : Nat → Prog)
+  | raise (err : Nat)
+  | untracked (p : Prog) (k : Nat → Prog)
+
+def Prog.bind : Prog → (Nat → Prog) → Prog
+  | .ret v, k => k v
+  | .read s k', k => .read s (fun v => (k' v).bind k)
+  | .raise e, _ => .raise e
+  | .untracked p k', k => .untracked p (fun v => (k' v).bind k)
+
+def lower : Expr → Prog
+  | .lit n => .ret n
+  | .read s => .read s .ret
+  | .call f e => (lower e).bind (fun v => .ret (f v))
+  | .add a b => (lower a).bind (fun x => (lower b).bind (fun y => .ret (x + y)))
+  | .ite c th el => (lower c).bind (fun x => if x ≠ 0 then lower th else lower el)
+  | .raise err => .raise err
+  | .untrack e => .untracked (lower e) .ret
+  | .inline e => (lower e).bind .ret
+
+/-- The driver: as S20's, and an untracked step keeps its outcome but tracks
+    nothing. -/
+def run (σ : Store) : Prog → Outcome × List Nat
+  | .ret v => (.done v, [])
+  | .read s k =>
+    match σ s with
+    | some v => ((run σ (k v)).1, s :: (run σ (k v)).2)
+    | none => (.pending s, [s])
+  | .raise e => (.failed e, [])
+  | .untracked p k =>
+    match (run σ p).1 with
+    | .done v => run σ (k v)
+    | o => (o, [])
+
+theorem run_bind (σ : Store) (p : Prog) (k : Nat → Prog) :
+    run σ (p.bind k) = seq (run σ p) (fun v => run σ (k v)) := by
+  induction p with
+  | ret v => simp [Prog.bind, run, seq]
+  | read s k' ih =>
+    simp only [Prog.bind, run]
+    cases h : σ s with
+    | none => simp [seq]
+    | some v =>
+      simp only [ih v]
+      cases run σ (k' v) with
+      | mk o t => cases o <;> simp [seq]
+  | raise e => simp [Prog.bind, run, seq]
+  | untracked p k' ihp ihk =>
+    simp only [Prog.bind, run]
+    cases h : (run σ p).1 with
+    | done v => simp [ihk v, seq, run, h]
+    | pending s => simp [seq, run, h]
+    | failed e => simp [seq, run, h]
+
+theorem seq_ret (r : Outcome × List Nat) : seq r (fun v => (.done v, [])) = r := by
+  cases r with
+  | mk o t => cases o <;> simp [seq]
+
+/-- S24: the lowering of the extended core computes Solid's outcome and
+    tracked reads, `untrack` and inline routines included. -/
+theorem surface_preserves (σ : Store) (e : Expr) : run σ (lower e) = eval σ e := by
+  induction e with
+  | lit n => simp [lower, run, eval]
+  | read s => cases h : σ s <;> simp [lower, run, eval, h]
+  | call f e ih =>
+    simp only [lower, run_bind, ih, eval]
+    cases eval σ e with
+    | mk o t => cases o <;> simp [seq, run]
+  | add a b iha ihb =>
+    simp only [lower, run_bind, iha, eval]
+    cases eval σ a with
+    | mk o t =>
+      cases o with
+      | done x =>
+        simp only [seq, ihb]
+        cases eval σ b with
+        | mk o' t' => cases o' <;> simp [run]
+      | pending s => simp [seq]
+      | failed err => simp [seq]
+  | ite c th el ihc iht ihe =>
+    simp only [lower, run_bind, ihc, eval]
+    cases eval σ c with
+    | mk o t =>
+      cases o with
+      | done x =>
+        simp only [seq]
+        by_cases hx : x ≠ 0 <;> simp [hx, iht, ihe]
+      | pending s => simp [seq]
+      | failed err => simp [seq]
+  | raise err => simp [lower, run, eval]
+  | untrack e ih =>
+    simp only [lower, run, ih, eval]
+    cases (eval σ e).1 <;> rfl
+  | inline e ih =>
+    simp only [lower, run_bind, ih, eval]
+    have : (fun v => run σ (Prog.ret v)) = (fun v => ((Outcome.done v), ([] : List Nat))) := by
+      funext v; simp [run]
+    rw [this, seq_ret]
+
+/-- `untrack` tracks nothing and keeps the outcome: a pending read in it
+    still suspends (it is not cast away, D-116). -/
+theorem untrack_tracks_nothing (σ : Store) (e : Expr) :
+    (run σ (lower (.untrack e))).2 = [] ∧
+      (run σ (lower (.untrack e))).1 = (eval σ e).1 := by
+  rw [surface_preserves]
+  exact ⟨rfl, rfl⟩
+
+/-- An inline routine's reads are its caller's: the host tracks them, and a
+    pending one suspends the host. Run on its own (the earlier lowering's
+    lexical callback), a read the host makes through it would be missing from
+    the host's trace. -/
+theorem inline_reads_are_hosts (σ : Store) (e : Expr) :
+    run σ (lower (.inline e)) = eval σ e := by
+  rw [surface_preserves]
+  rfl
+
+theorem inline_pending_suspends_host (σ : Store) (s : Nat) (h : σ s = none) :
+    (run σ (lower (.add (.lit 1) (.inline (.read s))))).1 = .pending s := by
+  rw [surface_preserves]
+  simp [eval, h]
+
+end Surface
+
 #print axioms write_admitted_iff
 #print axioms event_phase_runs_in_caller
 #print axioms hook_requirement_provided
@@ -1018,5 +1195,10 @@ end Insertion
 #print axioms Insertion.boundary_sees_same
 #print axioms Insertion.rows_preserve
 #print axioms Insertion.effect_preserves
+#print axioms Surface.run_bind
+#print axioms Surface.surface_preserves
+#print axioms Surface.untrack_tracks_nothing
+#print axioms Surface.inline_reads_are_hosts
+#print axioms Surface.inline_pending_suspends_host
 end Sugar
 end Yield

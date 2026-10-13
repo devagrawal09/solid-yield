@@ -42,6 +42,7 @@ premise: what the lowering or runtime must establish for the theorem to apply.
 | **S21 Props are getters** (D-119, 2026-10-13): a child reads its caller's expression where it reads the prop | `lowerWith_subst` (lowering is compositional), `prop_reads_are_callers`; `settled_prop_untracked` (why a prop is a getter) | A prop read in the lowered child delegates to the caller's lowered expression (the lowering passes props as getters, `Source<T, E, P>` per D-119), so it runs and tracks at the child's read. | `native-props.test.js`, ts-plugin T08, `native:insertion` (each memo crosses a child's prop) |
 | **S22 Events and reruns** (2026-10-13): an event writes what Solid writes; a computation reruns exactly when it must | `event_preserves`, `event_untouched`, `untouched_keeps`, `memo_cache_consistent` | An event's writes are its setters' calls in order, each value computed as its expression is (S1, S3); Solid reruns a computation when an event wrote one of its tracked reads. | `native:insertion` (twelve writes per program, every slot compared after each), the native parity harnesses |
 | **S23 Boundaries, lists and effects** (2026-10-13): they compose S20–S22 | `boundary_sees_same`, `rows_preserve`, `effect_preserves` | `Errored` and `Loading` map the outcome their content gives (a failure, a suspension) to the fallback; a list runs its row once per item with the item as the row's prop; an effect hands its compute's value to a phase that writes as an event does (S8 for its cleanup). | `native:insertion` (every slot inside its own `Errored` and `Loading`), the native parity harnesses (Todos' lists, the dashboard's effects) |
+| **S24 Untracked reads and inline routines** (2026-10-13, D-124): `untrack` keeps the outcome and tracks nothing; an IIFE, a called-only local function, a getter or a method is its caller's | `surface_preserves`, `untrack_tracks_nothing`, `inline_reads_are_hosts`, `inline_pending_suspends_host` | Solid's `untrack` computes its body without tracking (a pending read still suspends); a function called in place runs its body where it is called. | `native:surface` (the pending variant: each form's pending read reported where Solid suspends), `native-forms.test.js` |
 | **S8 Effect cleanup** (F-S42): a returned cleanup runs before the next run and at disposal, once each | `clean_mem_iff`, `run_mem_iff`, `clean_before_next_run`; `ignoring_never_cleans` (the old lowering) | `onCleanup` registered in the effect phase runs before the owner's next run and at disposal (Solid 2's owner contract). | `native-effect-cleanup.test.js` |
 
 ## What each result means
@@ -157,6 +158,8 @@ list is the original's promise, which `For`'s type refuses.
 
 **S23.** A boundary maps the outcome it is given, and by S20 the lowered content gives Solid's outcome (`boundary_sees_same`). A list's row is a component whose prop is the item: by S21 each lowered row computes what Solid's row computes (`rows_preserve`). An effect computes a value and hands it to a phase that writes: by S20 and S22 the lowered effect leaves the store Solid's effect leaves (`effect_preserves`).
 
+**S24.** S20's core gains `untrack(e)` and an inline routine (an IIFE, a local function only ever called, a getter or a method read where it is called). The lowering makes the first `nativeUntrack`, run step by step untracked, and the second a generator delegated in place; the lowered routine still computes Solid's outcome and tracked reads (`surface_preserves`). `untrack` tracks nothing yet keeps its outcome, so a pending read in it still suspends: no color is cast away (`untrack_tracks_nothing`, D-116). An inline routine's reads are its host's (`inline_reads_are_hosts`), and a pending one suspends the host (`inline_pending_suspends_host`) — what a lexical callback run on its own had hidden, and what the native surface check's pending variant found.
+
 **S8.** The trace of `n` runs followed by disposal contains each cleanup
 exactly when its run happened, and each cleanup comes right after its run and
 before the next. Ignoring the returned cleanup runs none.
@@ -164,9 +167,9 @@ before the next. Ignoring the returned cleanup runs none.
 ## Not covered here
 
 - **What the model rests on.** Native apps ship as written (D-120): the
-  lowered program is the checker's model of them. S20–S23 prove the model means
+  lowered program is the checker's model of them. S20–S24 prove the model means
   what the original means for expressions, props, events and reruns, boundaries,
-  lists and effects, given that the lowering finds every source read (checked
+  lists and effects, `untrack` and inline routines, given that the lowering finds every source read (checked
   on the real lowering by `native:insertion`) and that Solid's runtime behaves
   as its documented semantics (the trust boundary below). The native
   harnesses' DOM comparisons with each original (Todos, Sierpinski, Hacker

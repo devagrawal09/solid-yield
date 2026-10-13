@@ -12,12 +12,6 @@ const file = resolve(import.meta.dirname, "fixtures/native-refusals.tsx");
 /** @type {[code: string, at: string, what: string, source: string][]} */
 const cases = [
   [
-    "NATIVE_API",
-    "1:10",
-    "an API with no verified lowering (Index)",
-    'import { Index } from "solid-js";\nexport function Rows(props: { rows: string[] }) {\n  return <ul><Index each={props.rows}>{row => <li>{row()}</li>}</Index></ul>;\n}'
-  ],
-  [
     "NATIVE_ASYNC_SETUP",
     "5:19",
     "an async reactive helper called in setup",

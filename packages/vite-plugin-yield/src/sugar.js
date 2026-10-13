@@ -47,6 +47,43 @@ const propKey = fn => (fn.parentPath?.isObjectProperty() ? key(fn.parentPath.nod
 /** @param {Path | null | undefined} p */
 const fnName = p =>
   p?.node.id?.name ?? (p?.parentPath?.isVariableDeclarator() ? key(p.parentPath.node.id) : null);
+/**
+ * D-124: a reader a function hands back (`useDouble(count)` returning
+ * `() => count() * 2`, or an object of them): a derived accessor, a routine
+ * its callers read where they call it, as a named one is.
+ * @param {Path} p
+ */
+const returnedReader = p => {
+  const at = p.parentPath;
+  if (at?.isReturnStatement()) return true;
+  if (at?.isArrowFunctionExpression() && at.node.body === p.node) return true;
+  const object = at?.isObjectProperty() && at.node.value === p.node ? at.parentPath : null;
+  return (
+    !!object?.isObjectExpression() &&
+    (!!object.parentPath?.isReturnStatement() ||
+      (!!object.parentPath?.isArrowFunctionExpression() &&
+        object.parentPath.node.body === object.node))
+  );
+};
+/**
+ * A local function only ever called (`const get = () => n(); get() + 1`): it
+ * runs where it is called, so it is a routine its caller delegates to, and
+ * its reads color that host (not a lexical callback, run on its own).
+ * @param {Path} p
+ */
+const calledOnly = p => {
+  const declarator = p.parentPath?.isVariableDeclarator() ? p.parentPath : null;
+  const id = declarator?.node.id ?? (p.isFunctionDeclaration() ? p.node.id : null);
+  if (!t.isIdentifier(id)) return false;
+  const binding = (declarator ?? p).scope.getBinding(id.name);
+  return (
+    !!binding?.constant &&
+    binding.referencePaths.length > 0 &&
+    binding.referencePaths.every(
+      ref => ref.parentPath?.isCallExpression() && ref.parentPath.node.callee === ref.node
+    )
+  );
+};
 /** @param {Path | null | undefined} p @param {string} [from] */
 const lib = (p, from = "solid-yield") => {
   if (!p?.isIdentifier()) return null;
@@ -331,6 +368,13 @@ function seed(code, filename, native = false) {
         if (path.isArrowFunctionExpression()) {
           // Reject lexical captures whose meaning would change in a generator.
           traverseOwned(path, {
+            // a nested function or class binds its own `this` and `arguments`
+            Function(q) {
+              if (!q.isArrowFunctionExpression()) q.skip();
+            },
+            Class(q) {
+              q.skip();
+            },
             ThisExpression(q) {
               fail(q, "SUGAR_LEXICAL", "A routine arrow cannot capture this.", filename);
             },
@@ -463,13 +507,23 @@ function seed(code, filename, native = false) {
           callee?.isMemberExpression() &&
           ["then", "catch", "finally"].includes(key(callee.node.property));
         if (fn.node.generator && !continuation) return;
+        // a method or a getter is lowered where it reads (delegate), never
+        // wrapped; so is a reader a function hands back: its caller reads it
+        if (
+          fn.isObjectMethod() ||
+          fn.isClassMethod() ||
+          (native && (returnedReader(fn) || calledOnly(fn)))
+        )
+          return;
         if (
           api === "attempt" ||
           constructors.has(api) ||
           call?.node.callee === fn.node ||
           call?.get("callee").isIdentifier({ name: "__nativeLexicalCallback" }) ||
           call?.get("callee").isIdentifier({ name: "__nativeTry" }) ||
-          call?.get("callee").isIdentifier({ name: "__nativeMap" })
+          call?.get("callee").isIdentifier({ name: "__nativeMap" }) ||
+          // `untrack`'s callback runs in place (`nativeUntrack`, in delegate)
+          (call?.node.arguments[0] === fn.node && lib(call.get("callee"), "solid-js") === "untrack")
         )
           return;
         const lexical = lexicalPhase(fn);
@@ -704,6 +758,55 @@ function pass(code, filename, program, native = false) {
     changed = true;
   };
   /**
+   * D-116: a callback prop a component's child calls (`<Button onClick={e =>
+   * setN(e.detail)} />`, an F-S40 event) is typed by the child's declared
+   * prop. Wrapped, its parameters lose that contextual type: the input also
+   * admits a source or a hole, and their candidates meet at `never`. Write
+   * the declared ones, from the widest plain function the slot admits.
+   * @param {Path} call
+   */
+  const callbackPropParams = call => {
+    const callee = /** @type {Path} */ (call.get("callee"));
+    if (!native || !callee.isIdentifier({ name: "__nativeLexicalCallback" })) return;
+    const owner = ownerCall(call);
+    if (!owner || control(owner) || !/^[A-Z]/.test(key(owner.node.callee) ?? "")) return;
+    const fn = /** @type {Path} */ (call.get("arguments.1"));
+    const callNode = nodes.get(`${call.node.start}:${call.node.end}`);
+    if (!fn?.isFunction() || !callNode) return;
+    if (fn.node.params.every(/** @param {any} q */ q => q.typeAnnotation || t.isRestElement(q)))
+      return;
+    const slot = checker.getContextualType(callNode)?.getNonNullableType();
+    if (!slot) return;
+    const [signature] = (slot.isUnion() ? slot.types : [slot])
+      .filter(member => !checker.getPropertiesOfType(member).some(m => m.name.startsWith("__@")))
+      .flatMap(member => member.getCallSignatures())
+      .sort((a, b) => b.parameters.length - a.parameters.length);
+    if (!signature) return;
+    const annotations = [];
+    for (const [index, param] of fn.get("params").entries()) {
+      /** @type {any} */ const node = param.node;
+      if (!param.isIdentifier() || node.typeAnnotation) continue;
+      const symbol = signature.parameters[index];
+      const declaration = symbol?.valueDeclaration;
+      if (!symbol || (declaration && ts.isParameter(declaration) && declaration.dotDotDotToken))
+        return;
+      const type = checker.getTypeOfSymbolAtLocation(symbol, callNode);
+      if (type.flags & (ts.TypeFlags.Any | ts.TypeFlags.Unknown)) return;
+      const printed = checker.typeToTypeNode(type, callNode, ts.NodeBuilderFlags.NoTruncation);
+      if (!printed) return;
+      const text = ts.createPrinter().printNode(ts.EmitHint.Unspecified, printed, source);
+      if (/__@|\bthis\b|\bunknown\b|\bany\b/.test(text)) return;
+      const holder = parseProgram(`let __t: ${text};`, filename);
+      /** @type {any} */ const statement = holder?.node.body[0];
+      const annotation = statement?.declarations?.[0]?.id?.typeAnnotation;
+      if (!annotation) return;
+      annotations.push([node, annotation]);
+    }
+    if (!annotations.length) return;
+    for (const [node, annotation] of annotations) node.typeAnnotation = annotation;
+    changed = true;
+  };
+  /**
    * F-S46: an array method's lexical callback that runs in its own host (a
    * map in a hole, a filter in a memo, a forEach in an event) delegates its
    * operations there, so a pending or failing read inside it colors that
@@ -754,7 +857,8 @@ function pass(code, filename, program, native = false) {
         (method.isIdentifier() && method.node.name.startsWith("__native")))
     )
       return;
-    if (lexicalPhase(call) !== phaseArg.value) return;
+    const phaseHere = lexicalPhase(call);
+    if (phaseHere !== phaseArg.value && !(phaseArg.value === "setup" && phaseHere === null)) return;
     const owner = ownerCall(call);
     if (owner && (control(owner) || /^[A-Z]/.test(key(owner.node.callee) ?? ""))) return;
     if (
@@ -967,7 +1071,51 @@ function pass(code, filename, program, native = false) {
     )
       return;
     if (!fn.node.generator) {
-      if (fn.node.async || fn.isObjectMethod() || fn.isClassMethod())
+      const member = fn.isObjectMethod() || fn.isClassMethod();
+      // D-124: a getter that reads (`get total() { return count() * 2; }`)
+      // hands back a source over its body, read where the property is.
+      if (native && member && fn.node.kind === "get" && !fn.node.async) {
+        const self = fn.scope.generateUidIdentifier("self");
+        let usesThis = false;
+        fn.get("body").traverse({
+          Function(q) {
+            if (!q.isArrowFunctionExpression()) q.skip();
+          },
+          Class(q) {
+            q.skip();
+          },
+          ThisExpression(q) {
+            usesThis = true;
+            q.replaceWith(t.cloneNode(self));
+          }
+        });
+        const body = /** @type {import("@babel/core").types.BlockStatement} */ (fn.node.body);
+        fn.node.body = t.blockStatement([
+          ...(usesThis
+            ? [t.variableDeclaration("const", [t.variableDeclarator(self, t.thisExpression())])]
+            : []),
+          t.returnStatement(
+            t.callExpression(t.identifier("__nativeGetter"), [
+              t.functionExpression(null, [], body, true)
+            ])
+          )
+        ]);
+        fn.node.returnType = null;
+        if (p && !p.scope.hasBinding("__nativeGetter")) {
+          p.node.body.unshift(
+            t.importDeclaration(
+              [t.importSpecifier(t.identifier("__nativeGetter"), t.identifier("nativeGetter"))],
+              t.stringLiteral("solid-yield/internal")
+            )
+          );
+          p.scope.crawl();
+        }
+        changed = true;
+        return;
+      }
+      // a method that reads is a routine its callers delegate to (`yield* o.total()`)
+      const method = native && member && fn.node.kind === "method" && !fn.node.async;
+      if (fn.node.async || (member && !method))
         fail(
           path,
           "SUGAR_HOST",
@@ -978,8 +1126,104 @@ function pass(code, filename, program, native = false) {
       const attemptHandler =
         lib(hostCall?.get("callee")) === "attempt" && hostCall?.node.arguments[1] === fn.node;
       let nativeHost = false;
-      let phase = lexicalPhase(fn);
+      // D-124: Solid's `untrack(() => …)`: the callback runs at once in the
+      // routine around it, its reads untracked (`nativeUntrack`); in a
+      // component's body, where Solid reads once, settled reads only.
+      const untrackCall =
+        native &&
+        hostCall?.node.arguments[0] === fn.node &&
+        lib(hostCall.get("callee"), "solid-js") === "untrack";
+      if (untrackCall && hostCall) {
+        const host = hostCall.findParent(f => f.isFunction() && !!f.node.generator);
+        const setup =
+          !!host?.parentPath?.isCallExpression() &&
+          lib(host.parentPath.get("callee")) === "component";
+        const bridge = setup ? "__nativeUntrackSetup" : "__nativeUntrack";
+        if (fn.isArrowFunctionExpression()) fn.arrowFunctionToExpression();
+        fn.node.generator = true;
+        hostCall.get("callee").replaceWith(t.identifier(bridge));
+        if (p && !p.scope.hasBinding(bridge)) {
+          p.node.body.unshift(
+            t.importDeclaration(
+              [t.importSpecifier(t.identifier(bridge), t.identifier(bridge.slice(2)))],
+              t.stringLiteral("solid-yield/internal")
+            )
+          );
+          p.scope.crawl();
+        }
+        nativeHost = true;
+      }
+      // An IIFE runs where it is written: an inline routine its host
+      // delegates to (the call's type is a generator's: `yield*` follows),
+      // so its reads and their colors are the host's.
+      const iife =
+        native &&
+        !untrackCall &&
+        hostCall?.node.callee === fn.node &&
+        !fn.node.async &&
+        !!hostCall?.findParent(f => f.isFunction() && !!f.node.generator);
+      if (iife && hostCall) {
+        if (fn.isArrowFunctionExpression()) fn.arrowFunctionToExpression();
+        fn.node.generator = true;
+        nativeHost = true;
+        // in a JSX hole, what it raises is the hole's failing read
+        // (`nativeHole`). Bound before the view's statement, in a thunk the
+        // hole calls: inline, JSX's contextual typing widens its colors to
+        // `any` (a `try` in it).
+        for (let up = hostCall.parentPath; up && !up.isFunction(); up = up.parentPath)
+          if (up.isJSXExpressionContainer()) {
+            const held = t.callExpression(t.identifier("__nativeHole"), [hostCall.node]);
+            const host = hostCall.getFunctionParent();
+            const statement = host?.node.generator
+              ? hostCall.findParent(x => x.isStatement() && x.getFunctionParent() === host)
+              : null;
+            if (host && statement) {
+              const id = host.scope.generateUidIdentifier("hole");
+              statement.insertBefore(
+                t.variableDeclaration("const", [
+                  t.variableDeclarator(id, t.arrowFunctionExpression([], held))
+                ])
+              );
+              hostCall.replaceWith(t.callExpression(t.cloneNode(id), []));
+            } else hostCall.replaceWith(held);
+            if (p && !p.scope.hasBinding("__nativeHole")) {
+              p.node.body.unshift(
+                t.importDeclaration(
+                  [t.importSpecifier(t.identifier("__nativeHole"), t.identifier("nativeHole"))],
+                  t.stringLiteral("solid-yield/internal")
+                )
+              );
+              p.scope.crawl();
+            }
+            break;
+          }
+      }
+      // a method is a routine of its own (`*total()`), never a lexical callback
+      let phase =
+        untrackCall || iife || method || (native && (returnedReader(fn) || calledOnly(fn)))
+          ? null
+          : lexicalPhase(fn);
       if (phase === "hole" && eventCallbackProp(fn)) phase = "event";
+      // An array method's callback in a component's body runs there: its
+      // operations are the body's (a read is READ_IN_SETUP, as one beside it).
+      // Its receiver may be a read not lowered yet (`items().filter(…)`).
+      if (
+        native &&
+        !phase &&
+        !nativeHost &&
+        hostCall?.isCallExpression() &&
+        hostCall.node.arguments.includes(fn.node) &&
+        t.isMemberExpression(hostCall.node.callee) &&
+        ARRAY_CALLBACKS.has(key(hostCall.node.callee.property) ?? "")
+      ) {
+        const body = hostCall.getFunctionParent();
+        if (
+          body?.node.generator &&
+          body.parentPath?.isCallExpression() &&
+          lib(body.parentPath.get("callee")) === "component"
+        )
+          phase = "setup";
+      }
       // Attempt producers must stay plain: their arguments are handled by the
       // native call lowering, not by turning a producer into a routine.
       if (
@@ -1012,11 +1256,26 @@ function pass(code, filename, program, native = false) {
               (receiver.symbol?.name === "Promise" || receiver.symbol?.name === "PromiseLike")
             );
           })();
+        /** A call whose result nothing takes: a statement, or the body of an
+         * arrow a timer or a listener runs (`setTimeout(() => run(…))`).
+         * @param {Path | null} call */
+        const ignored = call => {
+          if (!call?.isCallExpression()) return false;
+          if (call.parentPath.isExpressionStatement()) return true;
+          const arrow = call.parentPath;
+          if (!arrow.isArrowFunctionExpression() || arrow.node.body !== call.node) return false;
+          if (isScheduler(arrow.parentPath)) return true;
+          const declarator = arrow.parentPath.isVariableDeclarator() ? arrow.parentPath : null;
+          const id = declarator?.node.id;
+          const refs = t.isIdentifier(id)
+            ? (declarator?.scope.getBinding(id.name)?.referencePaths ?? [])
+            : [];
+          return refs.length > 0 && refs.every(ref => isScheduler(ref.parentPath));
+        };
         const eventHost =
           promiseHost ||
           isScheduler(hostCall) ||
-          (hostCall?.parentPath.isExpressionStatement() &&
-            lib(hostCall.get("callee")) !== "attempt") ||
+          (ignored(hostCall) && lib(hostCall?.get("callee")) !== "attempt") ||
           (binding?.referencePaths.length &&
             binding.referencePaths.every(
               ref => ref.findParent(p => p.isTSType()) || isScheduler(ref.parentPath)
@@ -1097,7 +1356,7 @@ function pass(code, filename, program, native = false) {
           nativeHost = true;
         }
       }
-      if (!fnName(fn) && !attemptHandler && !nativeHost)
+      if (!fnName(fn) && !method && !returnedReader(fn) && !attemptHandler && !nativeHost)
         fail(
           path,
           "SUGAR_CALLBACK",
@@ -1124,7 +1383,12 @@ function pass(code, filename, program, native = false) {
       CallExpression(path) {
         const callee = path.get("callee");
         if (!callee.isMemberExpression()) return;
-        const object = callee.get("object"),
+        // a store path's read this pass inserted first (`(yield* store.list).map(…)`)
+        const held = callee.get("object");
+        const object =
+            held.isYieldExpression({ delegate: true }) && held.get("argument").isMemberExpression()
+              ? held.get("argument")
+              : held,
           ct = type(object);
         if (!sourceType(ct)) return;
         const symbol = checker.getPropertiesOfType(ct).find(s => s.name.startsWith("__@SOURCE@"));
@@ -1165,9 +1429,33 @@ function pass(code, filename, program, native = false) {
           if (chain.parentPath?.isCallExpression() && chain.parentPath.node.callee === chain.node)
             chain = chain.parentPath;
         }
+        // An argument that reads or calls (`reduce(add, n())`) stays in the
+        // routine: the selector is a plain function.
+        let reads = false;
+        for (let at = /** @type {Path | null} */ (path); at; at = at.parentPath) {
+          if (at.isCallExpression())
+            for (const arg of /** @type {Path[]} */ (at.get("arguments"))) {
+              if (arg.isFunction()) continue;
+              if (arg.isYieldExpression() || arg.isCallExpression()) reads = true;
+              arg.traverse({
+                Function(q) {
+                  q.skip();
+                },
+                "YieldExpression|CallExpression"() {
+                  reads = true;
+                }
+              });
+            }
+          if (at === chain) break;
+        }
+        if (reads) {
+          // the path is read where it stands (`(yield* store.list).reduce(…)`)
+          if (held === object) delegate(object);
+          return;
+        }
         const store = object.node,
           state = path.scope.generateUidIdentifier("state");
-        object.replaceWith(state);
+        held.replaceWith(state);
         chain.replaceWith(
           copyPosition(
             t.callExpression(t.identifier("__nativeReadStore"), [
@@ -1288,6 +1576,7 @@ function pass(code, filename, program, native = false) {
       exit(path) {
         for (const argument of path.get("arguments")) plainWriter(argument);
         delegateLexical(path);
+        if (path.isCallExpression()) callbackPropParams(path);
         if (!path.isCallExpression()) return;
         if (
           native &&
@@ -1361,10 +1650,14 @@ function pass(code, filename, program, native = false) {
           delegate(property);
           return;
         }
-        // A path given to isPendingOf, latestOf or refresh is that source.
+        // A path given to isPendingOf, latestOf, refresh or readStore (a
+        // structural read's store) is that source.
         if (
           path.listKey === "arguments" &&
-          ["isPendingOf", "latestOf", "refresh"].includes(lib(path.parentPath.get("callee")) ?? "")
+          (["isPendingOf", "latestOf", "refresh"].includes(
+            lib(path.parentPath.get("callee")) ?? ""
+          ) ||
+            (lib(path.parentPath.get("callee")) === "readStore" && path.key === 0))
         )
           return;
         // F-S39: a member the source itself lacks (a string's toLowerCase, a
@@ -1579,6 +1872,18 @@ function pass(code, filename, program, native = false) {
         (brand(type(e), "EVENT") || sourceType(type(e)))
       )
         delegate(e);
+      // Solid's bound form, `onClick={[handler, data]}`: the handler is bound
+      // as an event attribute's is
+      const first = e.isArrayExpression() ? e.get("elements.0") : null;
+      if (
+        path.parentPath.isJSXAttribute() &&
+        /^on/.test(key(path.parentPath.node.name) ?? "") &&
+        e.node.elements?.length === 2 &&
+        first?.isExpression() &&
+        !first.isYieldExpression() &&
+        brand(type(first), "EVENT")
+      )
+        delegate(first);
     }
   });
   return changed ? printer(t.file(p.node)) : code;
@@ -2035,6 +2340,156 @@ function typedCreations(code, filename, program) {
   return changed ? printer(t.file(p.node)) : code;
 }
 /**
+ * D-116's capture rule: a source given where plain code takes an accessor (a
+ * parameter typed as a function: `useDebounced(count)`, `mapArray(items, …)`).
+ * Solid hands over the getter itself; the lowered program hands over Solid's
+ * accessor (`yield* nativeAccessor(count)`), and the routine takes the
+ * source's colors, as if it read it there. Found where TypeScript refuses the
+ * argument, in a routine.
+ * @param {string} code @param {string} filename @param {ts.Program} program
+ */
+function accessorArguments(code, filename, program) {
+  const p = parseProgram(code, filename);
+  const source = program.getSourceFile(filename);
+  if (!p || !source || source.text !== code) return code;
+  const checker = program.getTypeChecker();
+  /** @type {Map<string, ts.Node>} */ const nodes = new Map();
+  /** @param {ts.Node} node */
+  const index = node => {
+    const span = `${node.getStart(source)}:${node.end}`;
+    if (!nodes.has(span)) nodes.set(span, node);
+    ts.forEachChild(node, index);
+  };
+  index(source);
+  /** @param {ts.Type} type */
+  const isSource = type =>
+    checker.getPropertiesOfType(type).some(s => s.name.startsWith("__@SOURCE@"));
+  let changed = false;
+  /** @type {Set<string>} */ const used = new Set();
+  traverseOwned(p, {
+    // A DOM spread (`<div {...props}>`): Solid's spread reads each member, so
+    // the routine takes each source member's colors and binds each `$event`
+    // member, and the element gets the values read through and the events
+    // bound (`nativeSpread`). Taken before the statement: a `yield*` in a
+    // spread cannot become a hole.
+    JSXSpreadAttribute(q) {
+      const name = /** @type {any} */ (q.parent).name;
+      if (!t.isJSXIdentifier(name) || !/^[a-z]/.test(name.name)) return;
+      const host = q.getFunctionParent();
+      if (!host?.node.generator) return;
+      const arg = q.get("argument");
+      // already taken through the bridge
+      const taken = arg.isIdentifier() ? arg.scope.getBinding(arg.node.name)?.path : null;
+      const init = taken?.isVariableDeclarator() ? taken.node.init : null;
+      if (
+        t.isYieldExpression(init) &&
+        t.isCallExpression(init.argument) &&
+        t.isIdentifier(init.argument.callee, { name: "__nativeSpread" })
+      )
+        return;
+      const node = nodes.get(`${arg.node.start}:${arg.node.end}`);
+      if (!node) return;
+      const type = checker.getTypeAtLocation(node);
+      // a member the spread reads (a source) or binds (an `$event`, or a
+      // function under an `on…` key: Solid's spread adds it as a listener)
+      const bridged = (/** @type {ts.Symbol} */ member) => {
+        const value = checker.getTypeOfSymbolAtLocation(member, node).getNonNullableType();
+        return (
+          checker
+            .getPropertiesOfType(value)
+            .some(s => s.name.startsWith("__@SOURCE@") || s.name.startsWith("__@EVENT@")) ||
+          (member.name.startsWith("on") && value.getCallSignatures().length > 0)
+        );
+      };
+      if (!checker.getPropertiesOfType(type).some(bridged)) return;
+      const statement = q.findParent(x => x.isStatement() && x.getFunctionParent() === host);
+      if (!statement) return;
+      const id = host.scope.generateUidIdentifier("spread");
+      statement.insertBefore(
+        t.variableDeclaration("const", [
+          t.variableDeclarator(
+            id,
+            t.yieldExpression(
+              t.callExpression(t.identifier("__nativeSpread"), [t.cloneNode(arg.node)]),
+              true
+            )
+          )
+        ])
+      );
+      arg.replaceWith(id);
+      used.add("__nativeSpread");
+      changed = true;
+    },
+    CallExpression(q) {
+      // The routine: the call's own function, or the one running a thunk at
+      // once (an attempt's `() => twice(n)`).
+      const host = q.findParent(f => f.isFunction() && f.node.generator);
+      if (!host) return;
+      const own = q.getFunctionParent() === host;
+      const thunk = own ? null : q.getFunctionParent();
+      if (thunk && (thunk.getFunctionParent() !== host || !thunk.parentPath?.isCallExpression()))
+        return;
+      // in a component's setup the plain code reads the source later
+      const setup =
+        host.parentPath?.isCallExpression() && lib(host.parentPath.get("callee")) === "component";
+      const call = nodes.get(`${q.node.start}:${q.node.end}`);
+      if (!call || !ts.isCallExpression(call)) return;
+      const signature = checker.getResolvedSignature(call);
+      if (!signature) return;
+      q.get("arguments").forEach((arg, i) => {
+        const node = nodes.get(`${arg.node.start}:${arg.node.end}`);
+        const parameter = signature.parameters[i];
+        if (!node || !parameter || !arg.isExpression() || arg.isFunction()) return;
+        const type = checker.getTypeAtLocation(node);
+        const expected = checker.getTypeOfSymbolAtLocation(parameter, call);
+        if (
+          !isSource(type) ||
+          isSource(expected) ||
+          !expected.getCallSignatures().length ||
+          checker.isTypeAssignableTo(type, expected)
+        )
+          return;
+        const bridge = setup ? "__nativeAccessorSetup" : "__nativeAccessor";
+        const value = t.yieldExpression(
+          t.callExpression(t.identifier(bridge), [t.cloneNode(arg.node)]),
+          true
+        );
+        if (!thunk) arg.replaceWith(value);
+        else {
+          // taken before the statement that runs the thunk, when it names
+          // nothing the thunk binds
+          let local = false;
+          arg.traverse({
+            Identifier(r) {
+              const b = r.isReferencedIdentifier() && r.scope.getBinding(r.node.name);
+              if (b && b.path.findParent(a => a === thunk)) local = true;
+            }
+          });
+          const binding = t.isIdentifier(arg.node) && arg.scope.getBinding(arg.node.name);
+          if (local || (binding && binding.path.findParent(a => a === thunk))) return;
+          const statement = q.findParent(x => x.isStatement() && x.getFunctionParent() === host);
+          if (!statement) return;
+          const id = host.scope.generateUidIdentifier("accessor");
+          statement.insertBefore(t.variableDeclaration("const", [t.variableDeclarator(id, value)]));
+          arg.replaceWith(id);
+        }
+        used.add(bridge);
+        changed = true;
+      });
+    }
+  });
+  if (!changed) return code;
+  for (const bridge of used)
+    if (!p.scope.hasBinding(bridge))
+      p.node.body.unshift(
+        t.importDeclaration(
+          [t.importSpecifier(t.identifier(bridge), t.identifier(bridge.slice(2)))],
+          t.stringLiteral("solid-yield/internal")
+        )
+      );
+  return printer(t.file(p.node));
+}
+/**
  * F-S52: a context's value type as plain Solid declares it
  * (`[() => string, { matches: (match: string) => boolean }]`) holds, once
  * lowered, a source and a routine: Solid reads an accessor or a reactive
@@ -2247,6 +2702,7 @@ function checkEscapes(files, active, options) {
         const declarationName =
           (ts.isFunctionDeclaration(parent) ||
             ts.isFunctionExpression(parent) ||
+            ts.isMethodDeclaration(parent) ||
             ts.isVariableDeclaration(parent) ||
             ts.isParameter(parent) ||
             ts.isBindingElement(parent)) &&
@@ -2356,6 +2812,12 @@ function lowerSugarProjectImpl(input, { compilerOptions = {}, native = false } =
         files.set(id, code);
       }
     }
+    if (!changed && native)
+      for (const id of active) {
+        const code = accessorArguments(files.get(id) ?? "", id, program);
+        changed ||= code !== files.get(id);
+        files.set(id, code);
+      }
     if (!changed) {
       checkEscapes(files, active, options);
       return { files, iterations: i + 1 };

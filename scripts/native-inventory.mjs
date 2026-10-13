@@ -5,6 +5,7 @@ import { resolve, join, relative } from "node:path";
 import { parseProgram } from "../packages/vite-plugin-yield/src/transform.js";
 import { nativeTypeMapping } from "../packages/vite-plugin-yield/src/native-types.js";
 import {
+  nativeForeignApi,
   nativeMapping,
   nativePassthrough,
   nativeTypes
@@ -92,9 +93,11 @@ for (const name of [
           } else if (api === "useContext") form = "context source read";
           else if (api === "onSettled") form = "$effect + $cleanup";
           else if (nativePassthrough.has(api)) form = "pass-through";
-          else if (!(api in nativeMapping)) {
-            status = "refused-with-reason";
-            reason = "NATIVE_API: no native mapping";
+          else if (nativeForeignApi(module, api)) {
+            status = "foreign-boundary";
+            form = "plain Solid";
+            reason =
+              "No native model: the call stays plain Solid, its value and failures handled where it is used (D-116, D-124).";
           }
           if (
             [

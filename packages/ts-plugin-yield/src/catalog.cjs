@@ -16,6 +16,8 @@ module.exports = Object.freeze({
   JSX_IN_SETUP: "Return this JSX from the component's view.",
   CREATE_OUTSIDE_SETUP: "Create this state in the component body, before returning JSX.",
   PENDING_ROOT: "Wrap this read in Loading; it can suspend while waiting for data.",
+  PENDING_IN_EFFECT:
+    "Read this source in the effect's compute and pass the value; the effect phase runs once and does not wait for pending data.",
   NO_PROVIDER: "Add a context provider above this component; this context has no default value.",
   SETTLED_PROP: "Pass a ready value, or allow a pending source in this prop's type.",
   NATIVE_CALLBACK_FAILURE: "Catch the failure inside this callback.",
@@ -24,6 +26,8 @@ module.exports = Object.freeze({
   SUGAR_CALLBACK: "Move this reactive read into JSX, a memo, an effect, or an event.",
   SUGAR_RETURN: "Return JSX on every component or row path.",
   SUGAR_ASYNC: "Keep this function synchronous and use attempt for async work.",
+  COLORED_CAPTURE:
+    "Read this source in JSX or a memo and pass the value; plain code given it in setup reads it outside the check, where a pending or failing read cannot be handled.",
   NATIVE_EFFECT_PHASES:
     "Pass a tracked compute function and an untracked effect function to createEffect.",
   NATIVE_ASYNC_SETUP: "Move this async read into an event or memo.",

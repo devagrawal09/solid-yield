@@ -575,8 +575,13 @@ export function inferFailures(
       return api.name;
     }
     if (contextId(callee)) return "context";
-    // F-S45: marks an error safe to serialize; it does not throw.
-    if (api?.source === "@solidjs/web" && api.name === "markSafeError") return "web";
+    // F-S45: marks an error safe to serialize; it does not throw. Nor do the
+    // props and request helpers: they compose objects or read the request.
+    if (
+      api?.source === "@solidjs/web" &&
+      ["markSafeError", "mergeProps", "getRequestEvent", "dynamic"].includes(api.name)
+    )
+      return "web";
     // A root renderer's root is checked where it is rendered (RootCheck: a
     // root that may fail or be pending is refused); the call fails nothing more.
     if (

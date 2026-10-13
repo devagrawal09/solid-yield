@@ -216,6 +216,7 @@ export function lowerNativeEffects(files, report) {
           return [
             "createMemo",
             "createEffect",
+            "createRenderEffect",
             "createProjection",
             "createOptimisticStore",
             "action"
@@ -635,6 +636,9 @@ export function lowerNativeEffects(files, report) {
               if (report.foreignState(file, value.node.start ?? 0, value.node.end ?? 0))
                 readsArgument = true;
               if (value.isCallExpression()) {
+                // an await lowered already (`(await fetch(url)).text()`)
+                if (value.get("callee").isIdentifier({ name: "__nativeAttempt" }))
+                  readsArgument = true;
                 const site = report.call(file, value.node.start ?? 0, value.node.end ?? 0);
                 if (
                   reactiveValue(value.get("callee")) ||
@@ -648,9 +652,14 @@ export function lowerNativeEffects(files, report) {
               }
             };
             readsReceiver(receiver);
+            if (receiver.isAwaitExpression()) readsArgument = true;
             traverseOwned(receiver, {
               Function(inner) {
                 inner.skip();
+              },
+              // `(await fetch(url)).text()`: the receiver waits in the routine
+              AwaitExpression() {
+                readsArgument = true;
               },
               CallExpression: readsReceiver,
               MemberExpression: readsReceiver,
@@ -666,9 +675,13 @@ export function lowerNativeEffects(files, report) {
           for (const arg of evaluated) {
             if (arg.isFunction()) continue;
             if (arg.isCallExpression() || arg.isMemberExpression()) readsArgument = true;
+            if (arg.isAwaitExpression()) readsArgument = true;
             traverseOwned(arg, {
               Function(f) {
                 f.skip();
+              },
+              AwaitExpression() {
+                readsArgument = true;
               },
               CallExpression() {
                 readsArgument = true;

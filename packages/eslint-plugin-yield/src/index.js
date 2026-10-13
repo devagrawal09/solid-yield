@@ -233,6 +233,15 @@ const noReadInViewBody = {
         if (!node.delegate) return;
         if (kindAt(node) !== "view") return;
         if (jsxPosition(node)) return;
+        // native mode's bridges (D-124) read nothing where they stand: they
+        // give the view the colors of what Solid reads later (a spread's
+        // members, an accessor handed to plain code)
+        if (
+          node.argument?.type === "CallExpression" &&
+          node.argument.callee.type === "Identifier" &&
+          /^__native(Spread|Accessor)$/.test(node.argument.callee.name)
+        )
+          return;
         // an `h` view is held by its type (`[HVIEW_READ]`), not the lint (D-049)
         if (!isJsxView(enclosingFunction(node))) return;
         context.report({
@@ -512,6 +521,9 @@ const noForeignReactive = {
       ImportDeclaration(node) {
         const banned = FOREIGN_REACTIVE[node.source.value];
         if (!banned || node.importKind === "type") return;
+        // Code native mode lowered keeps a Solid API it does not model as plain
+        // Solid on purpose (D-116): the names it kept, by module.
+        const kept = context.settings["solid-yield"]?.foreign?.[node.source.value] ?? [];
         const routineOnly = ROUTINE_FORBIDDEN[node.source.value];
         for (const spec of node.specifiers) {
           if (spec.type !== "ImportSpecifier" || spec.importKind === "type") continue;
@@ -528,7 +540,7 @@ const noForeignReactive = {
                   });
             continue;
           }
-          if (!Object.prototype.hasOwnProperty.call(banned, name)) continue;
+          if (!Object.prototype.hasOwnProperty.call(banned, name) || kept.includes(name)) continue;
           const use = banned[name];
           context.report({
             node: spec,

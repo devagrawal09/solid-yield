@@ -242,9 +242,12 @@ function createVirtualService(ts, host, config = {}) {
           }
           break;
         } catch (e) {
+          const before = pending.size;
+          // an error naming no file is the first pending file's: each retry
+          // drops a file, so the loop ends
           const ds = e.diagnostics ?? [
             {
-              file: e.id ?? e.loc?.file ?? [...files.keys()][0],
+              file: e.id ?? e.loc?.file ?? [...pending.keys()][0],
               line: e.loc?.line ?? 1,
               column: (e.loc?.column ?? 0) + 1,
               code: e.code ?? "TRANSFORM",
@@ -272,6 +275,7 @@ function createVirtualService(ts, host, config = {}) {
               }`
             });
           }
+          if (pending.size === before) pending.delete([...pending.keys()][0]);
         }
       }
     }
@@ -363,6 +367,8 @@ function createVirtualService(ts, host, config = {}) {
     if (message.includes("SetupOp")) {
       if (pick(/\b(Read|Source|Path)\b/)) code = "READ_IN_SETUP";
       else if (pick(/\bRaise\b/)) code = "NATIVE_SETUP_FAILURE";
+      // a component's body creates state; it does not write it (D-124)
+      else if (pick(/\b(Write|EventCallOp)\b/)) code = "WRITE_IN_REACTIVE";
       else if (message.includes("Element")) {
         walk(ts, scope, n => {
           if (!culprit && (ts.isJsxElement(n) || ts.isJsxSelfClosingElement(n)))
@@ -376,6 +382,10 @@ function createVirtualService(ts, host, config = {}) {
     } else if (/EventOp|EffectPhaseOp/.test(message)) {
       // An event and an effect's phase write, but create nothing either.
       if (pick(/\bCreate/)) code = "CREATE_OUTSIDE_SETUP";
+      // An effect's phase does not wait (D-083): a read that may be pending
+      // belongs in its compute.
+      else if (message.includes("EffectPhaseOp") && pick(/\bRead<(?!false\b)/))
+        code = "PENDING_IN_EFFECT";
     }
     // A value prop given as a hole (a flow control's `each` or `when`, a
     // component's prop) runs where it is read, as a memo does: a write or a
@@ -503,13 +513,27 @@ function createVirtualService(ts, host, config = {}) {
               eventOwner = n;
           });
         }
-        if (code === "FOREIGN_HANDOFF" && (origin?.host === "event" || eventOwner)) {
-          const event = s.failures.find(
-            d =>
-              d.file.fileName === (origin.handler?.file ?? origin.file).fileName &&
-              d.messageText.startsWith("[EVENT_REJECTS]") &&
-              (!eventOwner || (d.start >= eventOwner.getStart() && d.start < eventOwner.end))
-          );
+        // the handler's own report, when the origin lies inside it (a
+        // generator or a helper declared in the handler)
+        const containing =
+          code === "FOREIGN_HANDOFF" && origin?.file
+            ? s.failures.find(
+                d =>
+                  d.file.fileName === origin.file.fileName &&
+                  d.messageText.startsWith("[EVENT_REJECTS]") &&
+                  origin.sourceStart >= d.start &&
+                  origin.sourceStart < d.start + d.length
+              )
+            : undefined;
+        if (code === "FOREIGN_HANDOFF" && (origin?.host === "event" || eventOwner || containing)) {
+          const event =
+            containing ??
+            s.failures.find(
+              d =>
+                d.file.fileName === (origin.handler?.file ?? origin.file).fileName &&
+                d.messageText.startsWith("[EVENT_REJECTS]") &&
+                (!eventOwner || (d.start >= eventOwner.getStart() && d.start < eventOwner.end))
+            );
           if (event) {
             const handoff = {
               file: s.originals.get(sf.fileName),
@@ -572,7 +596,78 @@ function createVirtualService(ts, host, config = {}) {
     for (const [file, original] of s.originals) {
       if (!s.positions.has(file)) continue;
       const sf = s.ls.getProgram().getSourceFile(file);
+      /** The failures an event handler's operations carry, each unhandled kind. */
+      const handlerFails = expr => {
+        let type = checker.getTypeAtLocation(expr);
+        const iterator = type.getProperties().find(p => p.name.startsWith("__@iterator@"));
+        const signature =
+          iterator && checker.getTypeOfSymbolAtLocation(iterator, expr).getCallSignatures()[0];
+        if (!signature) return [];
+        type = checker.getReturnTypeOfSignature(signature);
+        if (type.symbol?.name !== "Generator") return [];
+        const operations = checker.getTypeArguments(type)[0];
+        return (operations.isUnion() ? operations.types : [operations]).flatMap(op => {
+          const property = op.getProperties().find(p => p.name.startsWith("__@FAILS@"));
+          const fails = property && checker.getTypeOfSymbolAtLocation(property, expr);
+          return !fails || fails.flags & (ts.TypeFlags.Never | ts.TypeFlags.Any) ? [] : [fails];
+        });
+      };
+      const rejects = (fails, node) =>
+        `[EVENT_REJECTS] This handler can fail with ${publicNames(
+          colorSummary(ts, checker, node, [
+            checker.getNeverType(),
+            fails,
+            checker.getNeverType(),
+            checker.getNeverType()
+          ]).fails
+        )} and nothing catches it; wrap the body in try/catch, or declare the failure.`;
       walk(ts, sf, n => {
+        // D-124: an `$event` a DOM spread binds (`{...{ onClick: async () => … }}`)
+        // is an event attribute too; reported at its authored handler.
+        if (
+          ts.isCallExpression(n) &&
+          ts.isIdentifier(n.expression) &&
+          n.expression.text === "__nativeSpread" &&
+          n.arguments.length === 1
+        ) {
+          const spread = n.arguments[0];
+          for (const member of checker.getTypeAtLocation(spread).getProperties()) {
+            if (!/^on/.test(member.name)) continue;
+            const declaration = member.valueDeclaration;
+            const value =
+              declaration && ts.isPropertyAssignment(declaration)
+                ? declaration.initializer
+                : undefined;
+            if (!value || value.getSourceFile() !== sf) continue;
+            // the authored property (its `$event` wrapper is generated)
+            const at = locate(
+              s.positions.get(file),
+              declaration.name.getStart(),
+              declaration.name.getWidth()
+            );
+            if (!at || at.generated) continue;
+            let authored;
+            walk(ts, original, a => {
+              if (ts.isPropertyAssignment(a) && a.name.getStart(original) === at.sourceStart)
+                authored = a.initializer;
+            });
+            const start = authored?.getStart(original) ?? at.sourceStart;
+            for (const fails of handlerFails(value))
+              result.push({
+                file: original,
+                start,
+                length: Math.max(
+                  1,
+                  authored ? authored.end - start : at.sourceEnd - at.sourceStart
+                ),
+                code: 95000,
+                category: ts.DiagnosticCategory.Error,
+                source: "solid-yield",
+                messageText: rejects(fails, value)
+              });
+          }
+          return;
+        }
         if (
           !ts.isJsxAttribute(n) ||
           !/^on[A-Z]/.test(n.name.getText(sf)) ||

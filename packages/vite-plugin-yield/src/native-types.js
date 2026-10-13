@@ -91,10 +91,51 @@ function importType(q) {
   parts.unshift(name.name);
   return { name: parts.join("."), binding: null };
 }
+/**
+ * D-124, D-119 for helpers: a function's `Accessor<T>` parameter takes the
+ * colors its callers pass (`useLength(title)` with `title` pending), so what
+ * the function reads through it, or hands back, carries them to where it is
+ * read. Each such parameter gets its own failure and pending type
+ * parameters, inferred at every call; a settled argument infers neither.
+ * @param {Path} p
+ */
+function widenAccessorParams(p) {
+  p.traverse({
+    Function(fn) {
+      if (!t.isBlockStatement(fn.node.body) && !t.isExpression(fn.node.body)) return;
+      const added = [];
+      for (const param of fn.get("params")) {
+        if (!param.isIdentifier()) continue;
+        const annotation = param.get("typeAnnotation");
+        const ref = annotation.isTSTypeAnnotation() ? annotation.get("typeAnnotation") : null;
+        if (!ref?.isTSTypeReference() || ref.node.typeParameters?.params.length !== 1) continue;
+        if (solidType(ref)?.name !== "Accessor") continue;
+        const failures = fn.scope.generateUid(`E_${param.node.name}`),
+          pending = fn.scope.generateUid(`P_${param.node.name}`);
+        const e = t.tsTypeParameter(t.tsUnknownKeyword(), t.tsNeverKeyword(), failures);
+        const pendingParameter = t.tsTypeParameter(
+          t.tsBooleanKeyword(),
+          t.tsLiteralType(t.booleanLiteral(false)),
+          pending
+        );
+        added.push(e, pendingParameter);
+        /** @type {any} */ (ref.node.typeParameters).params.push(
+          t.tsTypeReference(t.identifier(failures)),
+          t.tsTypeReference(t.identifier(pending))
+        );
+      }
+      if (!added.length) return;
+      const declared = fn.node.typeParameters;
+      if (t.isTSTypeParameterDeclaration(declared)) declared.params.push(...added);
+      else fn.node.typeParameters = t.tsTypeParameterDeclaration(added);
+    }
+  });
+}
 /** Lower all type positions, including aliases, nested generics and casts.
  * Run after component parameter extraction, before value import rewriting.
  * @param {Path} p */
 export function lowerNativeTypes(p) {
+  widenAccessorParams(p);
   const imports = new Map();
   const rewritten = new Set();
   /** @param {string} module @param {string} name @param {any} local */
@@ -151,14 +192,23 @@ export function lowerNativeTypes(p) {
     TSImportType: rewrite
   });
   // JSX is a namespace, not a named replacement. Drop its import only when
-  // every reference was lowered; other JSX contracts keep their Solid origin.
+  // every reference was lowered; other JSX contracts keep their Solid origin
+  // (`JSX.ButtonHTMLAttributes<…>` types a prop with Solid's plain handlers).
+  // Babel's scope does not count a type's qualified name as a reference.
   p.scope.crawl();
   p.traverse({
     ImportSpecifier(q) {
       if (!q.parentPath.isImportDeclaration()) return;
       if (!["solid-js", "@solidjs/web"].includes(q.parentPath.node.source.value)) return;
       if (!t.isIdentifier(q.node.imported, { name: "JSX" })) return;
-      if (!q.scope.getBinding(q.node.local.name)?.referenced) rewritten.add(q.node);
+      const local = q.node.local.name;
+      let used = !!q.scope.getBinding(local)?.referenced;
+      p.traverse({
+        TSQualifiedName(r) {
+          if (t.isIdentifier(r.node.left, { name: local })) used = true;
+        }
+      });
+      if (!used) rewritten.add(q.node);
     }
   });
   p.traverse({

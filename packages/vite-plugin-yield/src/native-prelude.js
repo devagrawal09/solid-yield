@@ -421,6 +421,104 @@ export function nativeRootTrees(files) {
   return out;
 }
 /**
+ * `createTrackedEffect(fn)` runs `fn` as one tracked computation that may
+ * return a cleanup (Solid guards a write there, as in any computation): it is
+ * `createEffect(fn, cleanup => cleanup)`, whose phase registers what the
+ * compute returned (F-S42).
+ * @param {Path} p
+ */
+function trackedEffects(p) {
+  /** @type {import("@babel/core").types.Identifier | null} */ let effect = null;
+  traverseOwned(p, {
+    CallExpression(q) {
+      const callee = q.get("callee");
+      if (api(callee)?.module !== "solid-js" || api(callee)?.name !== "createTrackedEffect") return;
+      const [fn, ...rest] = q.node.arguments;
+      if (!fn) return;
+      if (!effect) {
+        effect = p.scope.generateUidIdentifier("createEffect");
+        p.node.body.unshift(
+          t.importDeclaration(
+            [t.importSpecifier(effect, t.identifier("createEffect"))],
+            t.stringLiteral("solid-js")
+          )
+        );
+      }
+      const cleanup = q.scope.generateUidIdentifier("cleanup");
+      // what the function returns: nothing, or its cleanup
+      cleanup.typeAnnotation = t.tsTypeAnnotation(
+        t.tsUnionType([
+          t.tsVoidKeyword(),
+          t.tsFunctionType(null, [], t.tsTypeAnnotation(t.tsVoidKeyword()))
+        ])
+      );
+      q.replaceWith(
+        t.callExpression(t.cloneNode(effect), [
+          /** @type {any} */ (fn),
+          t.arrowFunctionExpression([cleanup], cleanup),
+          .../** @type {any[]} */ (rest)
+        ])
+      );
+    }
+  });
+  if (effect) p.scope.crawl();
+}
+
+/**
+ * `children(fn)` is a memo (D-116: modelled as one); its result's
+ * `toArray()` is Solid's resolved children as an array, none as `[]` and one
+ * as `[child]`. Written as that read of the memo, it lowers as any read does.
+ * @param {Path} p
+ */
+function childrenArrays(p) {
+  traverseOwned(p, {
+    VariableDeclarator(q) {
+      const init = q.get("init");
+      if (
+        !t.isIdentifier(q.node.id) ||
+        !init.isCallExpression() ||
+        api(init.get("callee"))?.module !== "solid-js" ||
+        api(init.get("callee"))?.name !== "children"
+      )
+        return;
+      for (const ref of q.scope.getBinding(q.node.id.name)?.referencePaths ?? []) {
+        const member = ref.parentPath,
+          call = member?.parentPath;
+        if (
+          !member?.isMemberExpression() ||
+          member.node.object !== ref.node ||
+          !t.isIdentifier(member.node.property, { name: "toArray" }) ||
+          !call?.isCallExpression() ||
+          call.node.callee !== member.node
+        )
+          continue;
+        const v = call.scope.generateUidIdentifier("children");
+        call.replaceWith(
+          t.callExpression(
+            t.arrowFunctionExpression(
+              [v],
+              t.conditionalExpression(
+                t.callExpression(
+                  t.memberExpression(t.identifier("Array"), t.identifier("isArray")),
+                  [v]
+                ),
+                v,
+                t.conditionalExpression(
+                  t.binaryExpression("!=", v, t.nullLiteral()),
+                  t.arrayExpression([v]),
+                  t.arrayExpression([])
+                )
+              )
+            ),
+            [t.callExpression(t.cloneNode(ref.node), [])]
+          )
+        );
+      }
+    }
+  });
+}
+
+/**
  * F-S53: `isPending(() => store.items)` and `latest(() => feed())` take a
  * thunk; the library's `isPendingOf` and `latestOf` take the source itself.
  * A thunk that only reads one accessor (`feed()`) or one store path
@@ -464,6 +562,8 @@ export function nativePrelude(files) {
     componentFactories(p);
     derivedStores(p);
     pendingThunks(p);
+    childrenArrays(p);
+    trackedEffects(p);
     traverseOwned(p, {
       VariableDeclarator(q) {
         const init = q.get("init");

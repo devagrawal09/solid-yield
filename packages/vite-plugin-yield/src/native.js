@@ -48,7 +48,12 @@ export const nativeMapping = Object.freeze({
   onSettled: null,
   createSignal: "$signal",
   createMemo: "$memo",
+  // a memo over its function, resolving the children it returns (D-116: modelled
+  // as the memo it is; the resolution does not change a color)
+  children: "$memo",
   createEffect: "$effect",
+  // the same two phases, run before paint rather than after it: the same colors
+  createRenderEffect: "$effect",
   createContext: "createContext",
   useContext: null,
   onCleanup: "$cleanup",
@@ -86,6 +91,19 @@ export const nativeTypes = new Set([
   "JSX",
   "RevealOrder"
 ]);
+/** What `@solidjs/web` gives that the library renders itself. */
+const webLibrary = new Set(["render", "hydrate", "renderToString", "renderToStream"]);
+/**
+ * A Solid API with no mapping to the library stays plain Solid: a foreign
+ * boundary (D-116 §5), its value as Solid types it and its failures
+ * `unknown`, handled where it is used. It is not refused.
+ * @param {string} module @param {string} name
+ */
+export function nativeForeignApi(module, name) {
+  if (nativeTypes.has(name)) return false;
+  if (nativePassthrough.has(name)) return true;
+  return module === "solid-js" ? !(name in nativeMapping) : !webLibrary.has(name);
+}
 const controls = new Set(["Loading", "Errored", "For", "Show", "Match", "Switch", "Repeat"]);
 const print = /** @param {any} p */ p => printMapped(t.file(p.node));
 /** A store's root (`const [cart] = createStore(…)`): already a path, which
@@ -114,6 +132,53 @@ function storeRoot(at, value) {
   );
 }
 /** @param {Path} p */
+/** A member chain of names (`props.onClick`) as a type query's entity name.
+ * @param {any} node @returns {any} */
+function entityName(node) {
+  if (t.isIdentifier(node)) return t.identifier(node.name);
+  if (!t.isMemberExpression(node) || node.computed || !t.isIdentifier(node.property)) return null;
+  const left = entityName(node.object);
+  return left && t.tsQualifiedName(left, t.identifier(node.property.name));
+}
+/** A property's static name. @param {any} k */
+const propertyName = k => (t.isIdentifier(k) ? k.name : t.isStringLiteral(k) ? k.value : "");
+/** Whether a spread is on a DOM element. @param {any} p */
+const domSpread = p =>
+  p?.isJSXSpreadAttribute() &&
+  t.isJSXIdentifier(p.parent.name) &&
+  /^[a-z]/.test(p.parent.name.name);
+/**
+ * The handlers of a DOM spread's object (`on…: () => …`): the object written
+ * in the spread, or a constant every use of which is a DOM spread. One read
+ * elsewhere keeps its handlers as written.
+ * @param {any} arg
+ */
+function spreadHandlers(arg) {
+  let object = arg;
+  if (arg.isIdentifier()) {
+    const binding = arg.scope.getBinding(arg.node.name);
+    if (
+      !binding?.constant ||
+      !binding.path.isVariableDeclarator() ||
+      !binding.referencePaths.every(ref => domSpread(ref.parentPath))
+    )
+      return [];
+    object = binding.path.get("init");
+  }
+  if (!object?.isObjectExpression()) return [];
+  return object
+    .get("properties")
+    .filter(
+      /** @param {any} property */ property =>
+        property.isObjectProperty() &&
+        !property.node.computed &&
+        /^on[A-Z]/.test(propertyName(property.node.key)) &&
+        (property.get("value").isFunction() ||
+          property.get("value").isIdentifier() ||
+          (property.get("value").isCallExpression() &&
+            t.isIdentifier(property.node.value.callee, { name: "$event" })))
+    );
+}
 function imported(p) {
   if (!p.isIdentifier() && !p.isJSXIdentifier()) return null;
   const b = p.scope.getBinding(p.node.name);
@@ -236,17 +301,6 @@ export function inspectNativeProject(files) {
             );
             continue;
           }
-          const name = t.isIdentifier(s.node.imported)
-            ? s.node.imported.name
-            : s.node.imported.value;
-          if (
-            !nativePassthrough.has(name) &&
-            !nativeTypes.has(name) &&
-            (module === "solid-js"
-              ? !(name in nativeMapping)
-              : !["render", "hydrate", "renderToString", "renderToStream"].includes(name))
-          )
-            report(s, "NATIVE_API", `Solid API ${name} has no verified native lowering.`);
         }
       },
       Identifier(q) {
@@ -303,19 +357,24 @@ export function inspectNativeProject(files) {
         const api = imported(callee);
         if (api?.module !== "solid-js") return;
         if (
-          /^create(Signal|Memo|Store|Optimistic|Projection)/.test(api.name) &&
+          /^create(Signal|Memo|Store|Optimistic|Projection|Root)/.test(api.name) &&
           !q.getFunctionParent()
         )
           report(
             q.parentPath.isVariableDeclarator() ? q.parentPath : q,
             "MODULE_STATE",
-            "reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses"
+            api.name === "createRoot"
+              ? "a root at module level holds state every render shares (each server request included); create it inside a component and provide it via context, or keep it foreign and handle failures at its uses"
+              : "reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses"
           );
-        if (api.name === "createEffect" && q.node.arguments.length < 2)
+        if (
+          ["createEffect", "createRenderEffect"].includes(api.name) &&
+          q.node.arguments.length < 2
+        )
           report(
             q,
             "NATIVE_EFFECT_PHASES",
-            "createEffect needs a tracked compute and an untracked effect phase."
+            `${api.name} needs a tracked compute and an untracked effect phase.`
           );
       },
       ThrowStatement(q) {
@@ -351,13 +410,6 @@ export function inspectNativeProject(files) {
           `Declare ${tag.node.name} at module level; a component declared inside another function has no native lowering.`
         );
       },
-      JSXSpreadAttribute(q) {
-        report(
-          q,
-          "NATIVE_SPREAD",
-          "A JSX spread may hide reads or event bindings; native spread lowering is not verified."
-        );
-      },
       JSXAttribute(q) {
         if (
           t.isJSXIdentifier(q.node.name) &&
@@ -373,6 +425,13 @@ export function inspectNativeProject(files) {
           }
           if (handler?.isFunction())
             traverseOwned(handler, {
+              // a nested function or class binds its own `this`
+              Function(inner) {
+                if (inner !== handler && !inner.isArrowFunctionExpression()) inner.skip();
+              },
+              Class(inner) {
+                inner.skip();
+              },
               ThisExpression(site) {
                 report(
                   site,
@@ -1019,7 +1078,10 @@ function surface(
         if (declared && q.node.typeParameters)
           q.node.typeParameters.params[0] = t.tsUnionType([declared, t.tsUndefinedKeyword()]);
       }
-      if (api.name === "createEffect" && q.get("arguments.1").isFunction()) {
+      if (
+        ["createEffect", "createRenderEffect"].includes(api.name) &&
+        q.get("arguments.1").isFunction()
+      ) {
         // F-S42: Solid 2 runs an effect function's returned cleanup before the
         // next run or on disposal, as the library's $cleanup does: register it.
         const effect = q.get("arguments.1");
@@ -1064,8 +1126,14 @@ function surface(
               t.variableDeclaration("const", [
                 t.variableDeclarator(cleanup, /** @type {any} */ (ret.node.argument))
               ]),
+              // `typeof`: a phase returning `void` (`v => console.log(v)`)
+              // cannot be tested for truthiness
               t.ifStatement(
-                cleanup,
+                t.binaryExpression(
+                  "===",
+                  t.unaryExpression("typeof", cleanup),
+                  t.stringLiteral("function")
+                ),
                 t.expressionStatement(t.callExpression(t.identifier(local), [cleanup]))
               ),
               t.returnStatement()
@@ -1209,20 +1277,28 @@ function surface(
         const nativeTag = imported(tag);
         if (nativeTag?.module === "@solidjs/web" && nativeTag.name === "HydrationScript") return;
         if (/^[a-z]/.test(name)) {
-          for (const attr of opening.get("attributes")) {
-            if (
-              !attr.isJSXAttribute() ||
-              !t.isJSXIdentifier(attr.node.name) ||
-              (!/^on[A-Z]/.test(attr.node.name.name) && attr.node.name.name !== "ref")
-            )
-              continue;
-            const value = attr.get("value");
-            if (!value.isJSXExpressionContainer()) continue;
-            const fn = value.get("expression");
-            const isRef = attr.node.name.name === "ref";
+          /** An event attribute's or a ref's value: a handler becomes an
+           * `$event` typed by its element.
+           * @param {any} fn @param {string} attribute */
+          const handler = (fn, attribute, bound = false) => {
+            const isRef = attribute === "ref";
+            // Solid's bound form, `onClick={[handler, data]}`: the handler is
+            // called with the data first, then the event
+            if (!isRef && !bound && fn.isArrayExpression() && fn.node.elements.length === 2) {
+              const first = fn.get("elements.0");
+              if (first.isFunction() || first.isIdentifier() || first.isMemberExpression())
+                handler(first, attribute, true);
+              return;
+            }
             if (isRef && fn.isIdentifier()) {
               const binding = fn.scope.getBinding(fn.node.name);
-              if (!binding?.constant) {
+              // `let input!: HTMLInputElement`: Solid assigns it, so no source
+              // line does, and Babel calls it constant; it is still a variable
+              const declared = binding?.path.isVariableDeclarator() ? binding.path.node : null;
+              const variable =
+                !binding?.constant ||
+                (["let", "var"].includes(binding.kind) && !!declared && !declared.init);
+              if (variable) {
                 const element = t.identifier("element");
                 element.typeAnnotation = t.tsTypeAnnotation(
                   t.tsIndexedAccessType(
@@ -1238,8 +1314,7 @@ function surface(
                 );
               }
             }
-            if (fn.isCallExpression() && t.isIdentifier(fn.node.callee, { name: "$event" }))
-              continue;
+            if (fn.isCallExpression() && t.isIdentifier(fn.node.callee, { name: "$event" })) return;
             if (fn.isIdentifier()) {
               const binding = fn.scope.getBinding(fn.node.name);
               const fallback = fn.findParent(
@@ -1256,7 +1331,7 @@ function surface(
                 t.isIdentifier(fallback.node.params[1], { name: fn.node.name }) &&
                 binding?.kind === "param"
               )
-                continue;
+                return;
               const declaration = binding?.path;
               const target = declaration?.isVariableDeclarator()
                 ? declaration.get("init")
@@ -1282,14 +1357,42 @@ function surface(
                 )
               );
             }
+            // `onClick={props.onClick}`: a handler read from a prop or an
+            // object is called through, as a named one is (`?.`: an optional
+            // prop leaves the element without a listener in Solid).
+            const entity = entityName(fn.node);
+            if (fn.isMemberExpression() && entity) {
+              needed.add("__NativeArguments");
+              const rest = t.restElement(t.identifier("args"));
+              rest.typeAnnotation = t.tsTypeAnnotation(
+                t.tsTypeReference(
+                  t.identifier("__NativeArguments"),
+                  t.tsTypeParameterInstantiation([t.tsTypeQuery(entity)])
+                )
+              );
+              fn.replaceWith(
+                t.arrowFunctionExpression(
+                  [rest],
+                  t.optionalCallExpression(
+                    t.cloneNode(fn.node),
+                    [t.spreadElement(t.identifier("args"))],
+                    true
+                  )
+                )
+              );
+            }
             if (!fn.isArrowFunctionExpression() && !fn.isFunctionExpression())
               fail(
                 fn,
                 "NATIVE_HANDLER",
                 "A property event handler needs a checked shared event-call contract."
               );
-            for (const param of fn.node.params)
+            for (const [index, param] of fn.node.params.entries())
               if (t.isIdentifier(param) && !param.typeAnnotation) {
+                if (bound && index === 0) {
+                  param.typeAnnotation = t.tsTypeAnnotation(t.tsAnyKeyword());
+                  continue;
+                }
                 if (isRef) {
                   param.typeAnnotation = t.tsTypeAnnotation(
                     t.tsIndexedAccessType(
@@ -1299,11 +1402,11 @@ function surface(
                   );
                   continue;
                 }
-                const event = /Key/.test(attr.node.name.name)
+                const event = /Key/.test(attribute)
                   ? "KeyboardEvent"
-                  : /Input/.test(attr.node.name.name)
+                  : /Input/.test(attribute)
                     ? "InputEvent"
-                    : /Mouse|Click/.test(attr.node.name.name)
+                    : /Mouse|Click/.test(attribute)
                       ? "MouseEvent"
                       : "Event";
                 param.typeAnnotation = t.tsTypeAnnotation(
@@ -1329,6 +1432,24 @@ function surface(
               needed.add("__nativeCallback");
               fn.replaceWith(t.callExpression(t.identifier("__nativeCallback"), [event]));
             } else fn.replaceWith(event);
+          };
+          for (const attr of opening.get("attributes")) {
+            // D-116: a spread object's handlers (`{...{ onClick: () => … }}`,
+            // or a constant only DOM spreads take) are event attributes too.
+            if (attr.isJSXSpreadAttribute()) {
+              for (const property of spreadHandlers(attr.get("argument")))
+                handler(property.get("value"), propertyName(property.node.key));
+              continue;
+            }
+            if (
+              !attr.isJSXAttribute() ||
+              !t.isJSXIdentifier(attr.node.name) ||
+              (!/^on[A-Z]/.test(attr.node.name.name) && attr.node.name.name !== "ref")
+            )
+              continue;
+            const value = attr.get("value");
+            if (!value.isJSXExpressionContainer()) continue;
+            handler(value.get("expression"), attr.node.name.name);
           }
           return;
         }
@@ -1454,8 +1575,18 @@ function surface(
         }
         const props = [];
         for (const attr of opening.node.attributes) {
-          if (!t.isJSXAttribute(attr) || !t.isJSXIdentifier(attr.name))
-            fail(opening, "NATIVE_SPREAD", "Unsupported JSX attribute contract.");
+          // F-S24: a spread's properties in source order, before and after the
+          // attributes around it, as Solid merges them
+          if (t.isJSXSpreadAttribute(attr)) {
+            props.push(copyPosition(t.spreadElement(attr.argument), attr));
+            continue;
+          }
+          if (!t.isJSXIdentifier(attr.name))
+            fail(
+              opening,
+              "NATIVE_SPREAD",
+              "A namespaced attribute on a component has no native lowering."
+            );
           let value = !attr.value
             ? t.booleanLiteral(true)
             : t.isJSXExpressionContainer(attr.value)
@@ -1540,7 +1671,7 @@ function surface(
         if (!t.isImportSpecifier(spec)) continue;
         if (q.node.importKind === "type" || spec.importKind === "type") continue;
         const name = t.isIdentifier(spec.imported) ? spec.imported.name : spec.imported.value;
-        if (nativePassthrough.has(name) || nativeTypes.has(name)) continue;
+        if (nativeTypes.has(name) || nativeForeignApi(module, name)) continue;
         const mapped = module === "solid-js" ? nativeMapping[name] : name;
         if (!mapped) continue;
         const binding = q.scope.getBinding(spec.local.name);
@@ -1567,7 +1698,11 @@ function surface(
         ...q.node.specifiers.filter(
           s =>
             t.isImportSpecifier(s) &&
-            nativePassthrough.has(t.isIdentifier(s.imported) ? s.imported.name : s.imported.value)
+            !types.includes(s) &&
+            nativeForeignApi(
+              module,
+              t.isIdentifier(s.imported) ? s.imported.name : s.imported.value
+            )
         )
       ];
       if (retained.length) {

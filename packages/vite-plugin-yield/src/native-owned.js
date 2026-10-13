@@ -51,7 +51,7 @@ export const inOpaqueGenerator = path =>
   !!path.findParent(q => q.isFunction() && opaqueGenerator(q.node));
 /** @param {import("@babel/core").NodePath<any>} ref */
 export function foreignStateReference(ref) {
-  if (inOpaqueGenerator(ref)) return true;
+  if (inOpaqueGenerator(ref) || inModuleRoot(ref)) return true;
   const call = ref.parentPath;
   if (!call?.isCallExpression() || call.node.callee !== ref.node) return false;
   const spec = ref.scope.getBinding(ref.node.name)?.path;
@@ -93,6 +93,18 @@ export function moduleStateCall(q) {
     spec.parentPath.isImportDeclaration() &&
     spec.parentPath.node.source.value === "solid-js" &&
     t.isIdentifier(spec.node.imported) &&
-    /^(createSignal|createStore|createMemo)$/.test(spec.node.imported.name)
+    // a root at module level holds state too, plain Solid inside (D-116)
+    /^(createSignal|createStore|createMemo|createRoot)$/.test(spec.node.imported.name)
   );
 }
+/** Inside a module-level `createRoot(() => { … })`: plain Solid, as module state is.
+ * @param {import("@babel/core").NodePath<any>} path */
+export const inModuleRoot = path =>
+  !!path.findParent(
+    q =>
+      moduleStateCall(q) &&
+      q.get("callee").isIdentifier() &&
+      t.isIdentifier(q.get("callee").scope.getBinding(q.node.callee.name)?.path.node.imported, {
+        name: "createRoot"
+      })
+  );

@@ -103,6 +103,25 @@ module.exports = [
     file: "call-create",
     code: "CREATE_OUTSIDE_SETUP",
     line: 7
+  },
+  // D-124: found by the native surface check
+  {
+    slot: "C07",
+    file: "phase-pending",
+    code: "PENDING_IN_EFFECT",
+    line: 7
+  },
+  {
+    slot: "C08",
+    file: "setup-write",
+    code: "WRITE_IN_REACTIVE",
+    line: 4
+  },
+  {
+    slot: "C09",
+    file: "spread-rejects",
+    code: "EVENT_REJECTS",
+    line: 4
   }
 ].map(c => ({
   ...c,

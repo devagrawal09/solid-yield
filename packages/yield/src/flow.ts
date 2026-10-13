@@ -647,9 +647,10 @@ export function provideView(ctx: any, props: any): unknown {
 
 /**
  * @internal `compose(…).provide({ value, children })` (D-118): one Solid
- * provider per slot, nested, the first outermost, each given the value
- * `pairs` computes from the provided `value`; `children` a lazy view built
- * inside the innermost, as `provideView`'s. No slot: the children alone.
+ * provider per context an entry names, nested, the first outermost, each
+ * given the value `pairs` computes from the provided `value`; `children` a
+ * lazy view built inside the innermost, as `provideView`'s. None: the
+ * children alone.
  */
 export function provideEach(
   pairs: (value: unknown) => readonly (readonly [ctx: any, value: unknown])[],

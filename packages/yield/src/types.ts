@@ -375,16 +375,29 @@ export type TypedStore<T> = Path<T>;
 // --- props ---------------------------------------------------------------------------
 
 /**
- * Props as a routine sees them (D-056, D-068): `Props<{ todo: Todo; label:
- * string }>` declares each prop and maps it to a read — `yield* props.todo`,
- * `yield* props.todo.title` — and forwarding `props.todo` to a child forwards
- * the read. A bare type is settled and never fails (D-024): its reads are
- * `Read<false, never>`. A prop that may fail or be pending declares it with
- * the one general type, `Source<T, E, P>` (`Source<Todo, FetchError, true>`):
- * its reads are `Read<P, E>`, and callers may pass anything within that
- * coloring (settled ⊂ pending, `never` ⊂ `E`). Declaring it is permission,
- * not a duty (D-040): its pending and failures reach the nearest `Loading` /
- * `Errored` wherever that is, or are re-thrown at the root (D-033, D-059).
+ * Props as a routine sees them (D-056, D-068, D-118). "The only things going
+ * through props are reactive values and events; everything else is a bag of
+ * those two things": a declared type is literal.
+ *
+ * - `Source<T, E, P>` (or `Path<T, E, P>`) is a reactive value: the child
+ *   sees `Path<T, E, P>` — `yield* props.todo`, `yield* props.todo.title`,
+ *   read where it is read — and forwarding `props.todo` forwards the read.
+ *   Its reads are `Read<P, E>`; declaring colors is permission, not a duty
+ *   (D-040): its pending and failures reach the nearest `Loading` /
+ *   `Errored`, or are re-thrown at the root (D-033, D-059). The caller
+ *   passes a source, a path or a hole within those colors (settled ⊂
+ *   pending, `never` ⊂ `E`); `constant(v)` for a fixed value.
+ * - `Handler<…>` / `EventHandler<…>` is an event: the `$event` itself, called
+ *   `yield* props.onSave(x)` and bound `onClick={yield* props.onSave}`.
+ * - Any other type is held: a constant (`string`, `Identity | null`) or a bag
+ *   (an object type), which the child sees as it is declared — a bag's
+ *   leaves are typed by these same rules (a `Path` leaf has keys, a
+ *   `Source` leaf is yielded, a handler is called) — and the caller passes
+ *   that value only, not a source or a hole (`[HELD_PROP]`). Holding a
+ *   value is not a read (D-042 stands).
+ * - `children` is as before: a lazy view (a source of an element).
+ *
+ * An optional prop the caller leaves out is `undefined` in the child.
  *
  * A component that only forwards a prop declares its color with type
  * parameters (D-029): `function* <E, P extends boolean>(props: Props<{ todo:
@@ -411,53 +424,32 @@ export type PropsCheck<D> = {
         ? KindCheck<E> extends NeedsKind
           ? NeedsKind
           : unknown
-        : [Exclude<D[N], undefined>] extends [HandlerProp]
-          ? undefined extends D[N]
-            ? OptionalHandler<N>
-            : unknown
-          : unknown;
+        : unknown;
 };
 
-/**
- * An `$event` handler (D-118): a reference, held, never read. A prop
- * declared as one (`Handler<…>`, `EventHandler<…>`) arrives in the child
- * as itself, not as a path: `yield* props.onSave(x)` calls it, as a local
- * event, and `onClick={yield* props.onSave}` binds it. A plain function
- * type is not one, and a handler inside an object prop (`props.log.clear`)
- * is read through the path, as before.
- */
+/** An `$event` handler (D-118): an event, given as itself. A plain function type is not one. */
 type HandlerProp = { readonly [EVENT]: true };
-/**
- * A handler prop is required (D-118): the runtime cannot tell a missing one
- * from a path (a setup does not examine a prop, D-042). An optional
- * handler is declared `Source<Handler<…> | undefined>` and read as before.
- */
-type OptionalHandler<N> = {
-  readonly "[OPTIONAL_HANDLER] an event-handler prop is required (it is held, not read): declare it required, or an optional one as Source<Handler<...> | undefined>": N;
-};
 
 /**
- * The read a declared prop is: a path (a source with keys), `children` a
- * source. An `$event` handler is a reference (D-118): itself.
+ * What the child sees of a declared prop (D-118): a reactive one as a path,
+ * any other as it is declared; `children` a source, as before.
  */
-type PropRead<V, U, N> = [V] extends [Source<infer T, infer E, infer P>]
-  ? N extends "children"
+type PropRead<V, U, N> = N extends "children"
+  ? [V] extends [Source<infer T, infer E, infer P>]
     ? Source<T | U, E, P>
-    : Path<T | U, E, P>
-  : [V] extends [HandlerProp]
-    ? V
-    : N extends "children"
-      ? Source<V | U>
-      : Path<V | U>;
+    : Source<V | U>
+  : [V] extends [Source<infer T, infer E, infer P>]
+    ? Path<T, E, P> | U
+    : V | U;
 
 /**
- * What callers may pass for each prop (D-065): a value, a source or a hole
- * within its declared coloring. A bare prop takes a settled value, a settled
- * source or path, or a hole that reads only settled sources; a pending or
- * failing one is refused (`[SETTLED_PROP]`). A prop declared `Source<T, E,
- * P>` takes `T`, any source of `T` failing with part of `E` (pending too when
- * `P` is `true`), or a hole within that; with `E` / `P` type parameters (a
- * pass-through component) they are the caller's.
+ * What callers may pass for each prop (D-118): a reactive prop (`Source<T, E,
+ * P>`) takes a source, a path or a hole within its colors (`[REACTIVE_PROP]`
+ * for anything else); a handler prop an `$event` (`[HANDLER_PROP]`); any
+ * other prop the value itself (`[HELD_PROP]` for a source or a hole).
+ * `children` takes a value, a source or a hole (a lazy view), as before.
+ * With `E` / `P` type parameters (a pass-through component) the colors are
+ * the caller's.
  */
 export type PropsInput<D, Q = never> = {
   [N in keyof D]: PropInput<
@@ -472,14 +464,29 @@ type DeclareProp<N> = {
 };
 type PropInput<V, U, N, Q> = unknown extends V
   ? DeclareProp<N>
-  : [V] extends [Source<infer T, infer E, infer P>]
-    ? T | U | Source<T | U, E, Widen<P>> | HoleProp<T | U, E, Widen<P>, Q>
-    : [V] extends [HandlerProp]
-      ? V | SettledProp<HandlerMessage<N>>
-      : V | U | Source<V | U> | HoleProp<V | U, never, false, Q> | SettledProp<SettledMessage<N>>;
+  : N extends "children"
+    ? [V] extends [Source<infer T, infer E, infer P>]
+      ? T | U | Source<T | U, E, Widen<P>> | HoleProp<T | U, E, Widen<P>, Q>
+      : V | U | Source<V | U> | HoleProp<V | U, never, false, Q>
+    : [V] extends [Source<infer T, infer E, infer P>]
+      ?
+          | U
+          | Source<T | U, E, Widen<P>>
+          | HoleProp<T | U, E, Widen<P>, Q>
+          | SettledProp<ReactiveMessage<N, P>>
+      : [V] extends [HandlerProp]
+        ? V | U | SettledProp<HandlerMessage<N>>
+        : V | U | SettledProp<HeldMessage<N>>;
 /** A handler prop takes an `$event` only (D-118): the message TypeScript prints beside it. */
 type HandlerMessage<N> =
   `[HANDLER_PROP] prop \`${N & string}\` is an event handler: pass an $event, not a source or a hole (an event does not vary per render: one $event chooses between handlers)`;
+/** A held prop takes its value only (D-118). */
+type HeldMessage<N> =
+  `[HELD_PROP] prop \`${N & string}\` is held as a value: declare it Source<…> to pass a live one`;
+/** A reactive prop takes a source, a path or a hole (D-118); a settled one, within its colors. */
+type ReactiveMessage<N, P> = [P] extends [false]
+  ? `[REACTIVE_PROP] prop \`${N & string}\` is reactive and settled: pass a settled source, path or hole (constant(v) for a fixed value), or declare it Source<T, E, true>`
+  : `[REACTIVE_PROP] prop \`${N & string}\` is reactive: pass a source, a path or a hole (constant(v) for a fixed value)`;
 /** A declared pending prop also takes a settled source (settled ⊂ pending). */
 type Widen<P extends boolean> = [P] extends [true] ? boolean : P;
 /**
@@ -511,13 +518,11 @@ type HoleRequiresOf<V> = V extends () => Generator<infer Y, any, any>
     : Settle<RequiresOf<Y>>
   : never;
 /**
- * The call-site refusal of a pending or failing value for a settled prop
- * (D-024): TypeScript prints the alias with its message, `Todo | Source<Todo>
- * | … | SettledProp<"[SETTLED_PROP] prop `todo` is settled: …">`.
+ * A prop's call-site refusal (D-118): TypeScript prints the alias with its
+ * message in the expected type, `Todo | SettledProp<"[HELD_PROP] prop `todo`
+ * is held as a value: …">`.
  */
 export type SettledProp<M extends string> = { readonly [K in M]: never };
-type SettledMessage<N> =
-  `[SETTLED_PROP] prop \`${N & string}\` is settled: pass a settled value, or declare it Source<T, E, true>`;
 
 /** The props type a `Props` annotation declares. */
 export type PropsOf<TP> = unknown extends TP

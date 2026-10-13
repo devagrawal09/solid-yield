@@ -10,20 +10,34 @@
  * one. `createContext(defaultValue)` makes a context that is always there to
  * read: no requirement.
  *
- * A provided value is read like a prop (D-042): `yield* Ctx` gives the setup
- * a path over it, never the value, and the view's holes, a memo or an event
- * read it. `provide`'s `value` takes what a prop takes (D-065): a value, a
- * source or a hole.
+ * A provided value is given as a prop is (D-118): a context declared
+ * `Source<T, E, P>` is reactive — `provide` takes a source, a path or a
+ * hole, and `yield* Ctx` gives the setup a path over it, read in the view's
+ * holes, a memo or an event; any other context's value — a constant, an
+ * `$event` handler, a bag of those and of paths — is held: `provide` takes
+ * the value, and `yield* Ctx` gives it as it is. A required context's
+ * `Ctx.orElse(function* () { … })` gives the provider's value, else the
+ * component's own.
  */
 declare const __DEV__: boolean;
 
 import type { Context } from "solid-js";
-import { devError, readContext, solidCreateContext } from "./runtime.js";
+import {
+  contextValue,
+  devError,
+  NO_PROVIDER,
+  providedOf,
+  readContext,
+  solidCreateContext
+} from "./runtime.js";
 import { provideView, type Children, type LazyParam, type Ops } from "./flow.js";
 import type {
   CREATED,
   ComponentView,
   ContextRead,
+  Create,
+  SetupOp,
+  Yieldable,
   FailsOf,
   HoleProp,
   MayWaitOf,
@@ -40,29 +54,32 @@ export declare const CONTEXT: unique symbol;
 export declare const PROVIDES: unique symbol;
 
 /**
- * What `yield* Ctx` gives a setup: the provided value as a prop is read — a
- * path (D-042). A context of sources declares its colors as a prop does
- * (`createContext<Source<User, ApiError, true>>()` reads as a path that may
- * be pending and fail).
+ * What `yield* Ctx` gives a setup (D-118): the provided value as a prop is
+ * given. A context of sources is reactive and declares its colors as a prop
+ * does (`createContext<Source<User, ApiError, true>>()` reads as a path that
+ * may be pending and fail); any other value — a constant, a handler, a bag —
+ * is held as it is.
  */
-export type ContextValue<T> = [T] extends [Source<infer V, infer E, infer P>]
-  ? Path<V, E, P>
-  : Path<T>;
+export type ContextValue<T> = [T] extends [Source<infer V, infer E, infer P>] ? Path<V, E, P> : T;
 /**
- * What `provide`'s `value` takes (D-065): a value, a source of it or a hole,
- * within its declared colors. Never `undefined` itself: Solid reads a
+ * What `provide`'s `value` takes (D-118): what a prop declared `T` takes.
+ * A reactive context (`Source<V, E, P>`) takes a source, a path or a hole
+ * within its colors, not a plain value (`constant(v)` for a fixed one:
+ * `[REACTIVE_PROP]`); any other context takes the value itself, not a
+ * source or a hole (`[HELD_PROP]`). Never `undefined` itself: Solid reads a
  * provided `undefined` as unset — its default, else no provider (calculus
  * F-3, S11). A context that may carry nothing models it inside the value:
- * `null`, or a source of `T | null`. A source or a hole is a provided
- * value whatever it reads.
+ * `null`, or a source of `T | null`.
  */
 export type ProvidedValue<T> = [T] extends [Source<infer V, infer E, infer P>]
   ?
-      | (V & ({} | null))
       | Source<V, E, [P] extends [true] ? boolean : P>
       | HoleProp<V, E, [P] extends [true] ? boolean : P>
-      | ProvideUndefined<V>
-  : (T & ({} | null)) | Source<T> | HoleProp<T> | ProvideUndefined<T>;
+      | { readonly "[REACTIVE_PROP] prop `value` is reactive: pass a source, a path or a hole (constant(v) for a fixed value)": never }
+  :
+      | (T & ({} | null))
+      | ProvideUndefined<T>
+      | { readonly "[HELD_PROP] prop `value` is held as a value: declare the context Source<T> to provide a live one": never };
 /**
  * The refusal's message, when the value type admits `undefined` (TypeScript
  * prints it in the expected type). Written inline so that it is printed
@@ -86,7 +103,7 @@ type ProvideUndefined<T> = undefined extends T
  */
 export interface ContextOps<T, N extends string, Q> {
   readonly [CONTEXT]: { readonly value: (value: T) => T; readonly name: N };
-  /** `yield* Ctx` in a setup: the value, as a path; a context without a default is required. */
+  /** `yield* Ctx` in a setup: the value, as a prop is given (D-118); a context without a default is required. */
   [Symbol.iterator](): Generator<ContextRead<Q>, ContextValue<T>, any>;
   /**
    * `{yield* Ctx.provide({ value, children: function* () { return <…/>; } })}`
@@ -100,8 +117,8 @@ export interface ContextOps<T, N extends string, Q> {
 }
 /**
  * `Ctx.provide`: a call-form yield component (D-062, D-066). `I` is what its
- * `value` takes: what a prop takes for a context (`ProvidedValue`), the
- * value itself for a slot (D-118: its reader holds it raw).
+ * `value` takes: `ProvidedValue<T>` for a context, the container for
+ * `compose`'s provider (D-118).
  */
 export interface Provide<T, Q, I = ProvidedValue<T>> {
   <C>(props: {
@@ -121,7 +138,20 @@ export interface YieldContext<T, N extends string = string>
   extends Context<T>, ContextOps<T, N, never> {}
 /** A context without a default (D-098): reading it requires a provider above. */
 export interface RequiredContext<T, N extends string = string>
-  extends Context<T>, ContextOps<T, N, RequiredContext<T, N>> {}
+  extends Context<T>, ContextOps<T, N, RequiredContext<T, N>> {
+  /**
+   * `const range = yield* RangeCtx.orElse(function* () { … })` in a setup
+   * (D-118): the value the nearest provider above gives, else the one the
+   * init routine returns — a per-instance local value, which a module-level
+   * default cannot be. The init routine runs in the setup, as a generator
+   * helper does (its creations are the component's), and only when no
+   * provider is above. It requires nothing (beyond what its init routine
+   * reads). Its value is given as a provided one is.
+   */
+  orElse<Y extends SetupOp = never>(
+    init: () => Generator<Y, ProvidedValue<T>, any>
+  ): Yieldable<Y | Create<"context">, ContextValue<T>>;
+}
 
 /**
  * What `createContext<T>()` gives without a name (D-098 amended): nothing a
@@ -188,10 +218,30 @@ export function createContext(
       "CONTEXT_NAME",
       "a context without a default needs a runtime name: createContext<T, 'Name'>(undefined, { name: 'Name' }). Type arguments disappear at runtime."
     );
-  const ctx = solidCreateContext(defaultValue as any, options as any) as any;
+  // a required context's default is a sentinel: "no provider" is told apart
+  // from any error the read throws (D-118)
+  const required = defaultValue === undefined;
+  const ctx = solidCreateContext(
+    (required ? NO_PROVIDER : defaultValue) as any,
+    options as any
+  ) as any;
   ctx[Symbol.iterator] = function* (this: unknown): Generator<never, unknown, unknown> {
     return readContext(ctx);
   };
   ctx.provide = (props: unknown) => provideView(ctx, props);
+  if (required)
+    ctx.orElse = (init: () => Generator<unknown, unknown, unknown>) => new OrElse(ctx, init);
   return ctx;
+}
+
+/** `Ctx.orElse(init)` (D-118): the provider's value, else the init routine's, run in the setup. */
+class OrElse {
+  constructor(
+    readonly ctx: unknown,
+    readonly init: () => Generator<unknown, unknown, unknown>
+  ) {}
+  *[Symbol.iterator](): Generator<unknown, unknown, unknown> {
+    const raw = providedOf(this.ctx, true);
+    return contextValue(raw !== NO_PROVIDER ? raw : yield* this.init());
+  }
 }

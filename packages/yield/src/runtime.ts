@@ -652,31 +652,60 @@ function readPath(t: PathTarget): unknown {
 }
 
 /**
- * Props as reads: `props.x` is a path reader over the raw props — except an
- * `$event` handler, a reference (D-118): held, never read, it is given as
- * itself. The check looks at the value the caller passed, never through a
- * getter (that would read in the setup), except a getter `h` made for a
- * handler (`REFS`), which only returns it.
+ * D-118: what a value given to a component (a prop) or provided to a context
+ * is to its reader. "The only things going through props are reactive
+ * values and events; everything else is a bag of those two things": a
+ * reactive value — a path, a source, a hole (a zero-arity `function*`) — is
+ * read where it is read, so it is given as a path (`path()`; a path stays
+ * itself), keyed reads included; an `$event` handler is itself; anything
+ * else — a primitive, a plain object or array (a bag), a plain function — is
+ * held as it is. Only the top level is looked at: a bag's leaves are what
+ * the caller put there.
+ */
+function heldOrPath(v: any, path: () => unknown): unknown {
+  if (v == null) return v;
+  if (typeof v === "function") {
+    if (v[EVENT_MARK] === true) return v;
+    return v[READ] !== undefined || (isGeneratorFunction(v) && v.length === 0) ? path() : v;
+  }
+  if (typeof v !== "object") return v;
+  // a store proxy tracks a user symbol's read: look untracked
+  const kind = untrack(() => (v[PATH_TARGET] !== undefined ? 2 : v[READ] !== undefined ? 1 : 0));
+  return kind === 2 ? v : kind === 1 ? path() : v;
+}
+
+/**
+ * Props as they are (D-118): `props.x` is the value the caller passed, a
+ * reactive one given as a path over it (`heldOrPath`). `children` is a path,
+ * as before: a lazy view built where the child reads it. A getter — a JSX
+ * tag's, or one written in the props object — is a reactive value: a path
+ * over it, read where the child reads it; never called to look, except one
+ * `h` made for a value it hands over unread (`REFS`).
  */
 function typedProps(raw: any): any {
   return new Proxy(raw, {
     get(target, key) {
       if (typeof key === "symbol") return target[key];
+      const path = () => makePath(target, false, [key]);
+      if (key === "children") return path();
       const d = Object.getOwnPropertyDescriptor(target, key);
-      if (d !== undefined) {
-        const v = d.get === undefined ? d.value : isRefKey(target, key) ? d.get.call(target) : null;
-        if (typeof v === "function" && v[EVENT_MARK] === true) return v;
-      }
-      return makePath(target, false, [key]);
+      if (d === undefined) return target[key];
+      if (d.get !== undefined && !isRefKey(target, key)) return path();
+      return heldOrPath(d.get !== undefined ? d.get.call(target) : d.value, path);
     }
   });
 }
 
+/** @internal A context's provided value as its reader holds it (D-118): `heldOrPath`. */
+export function contextValue(raw: unknown): unknown {
+  return heldOrPath(raw, () => makePath(raw, false, []));
+}
+
 /**
- * @internal The keys of a props object whose getters return an `$event`
- * handler unread (D-118): `h` hands a component's handler prop to Solid's
- * `h` as a thunk returning it, which Solid turns into a getter calling the
- * thunk.
+ * @internal The keys of a props object whose getters return the value
+ * unread (D-118): `h` hands a component's function-valued prop (a source, a
+ * hole, a handler, a plain function) to Solid's `h` as a thunk returning
+ * it, which Solid turns into a getter calling the thunk.
  */
 export const REFS: unique symbol = Symbol.for("solid.yield.refs") as any;
 function isRefKey(target: any, key: string): boolean {
@@ -1554,63 +1583,47 @@ export function $cleanup(fn: () => void): Yieldable<Cleanup, void> {
 // --- context ------------------------------------------------------------------------------
 
 /**
- * @internal `yield* Ctx` (D-036, D-098): a setup's read of a library context.
- * The value is read like a prop (D-042): a path over what the provider gave —
- * a value, a source or a hole — read where the setup's view, memo or event
- * reads it, never in the setup. A context created without a default that no
- * provider above gives is `NO_PROVIDER` here, at the read.
+ * @internal A required context's default (D-098, D-118): what Solid's
+ * `useContext` gives where no provider is above. A context without a
+ * default has none of its own; the sentinel lets the library tell "no
+ * provider" apart from any error the read throws (no owner, a server
+ * component's barrier), which passes on.
  */
-export function readContext(ctx: any): unknown {
+export const NO_PROVIDER: unique symbol = Symbol.for("solid.yield.no-provider") as any;
+
+/**
+ * @internal The raw value the nearest provider above gives (`NO_PROVIDER`
+ * when there is none): the host check of `yield* Ctx` (`CONTEXT_OUTSIDE_SETUP`)
+ * or of `Ctx.orElse(…)` (`CREATE_OUTSIDE_SETUP`), then Solid's `useContext`.
+ */
+export function providedOf(ctx: any, orElse: boolean): unknown {
   const host = state.host;
-  if (__DEV__ && host !== SETUP && host !== NONE)
+  if (__DEV__ && host !== SETUP && (orElse || host !== NONE))
     throw devError(
-      "CONTEXT_OUTSIDE_SETUP",
-      `yield* Ctx belongs to a setup, not ${HOST_NAMES[host]}.`
+      orElse ? "CREATE_OUTSIDE_SETUP" : "CONTEXT_OUTSIDE_SETUP",
+      orElse
+        ? `Ctx.orElse(…) belongs to a setup (it may create the component's own value), not ${HOST_NAMES[host]}.`
+        : `yield* Ctx belongs to a setup, not ${HOST_NAMES[host]}.`
     );
-  let raw: unknown;
-  try {
-    raw = useContext(ctx);
-  } catch (e) {
-    if (__DEV__ && getOwner() !== null && ctx.defaultValue === undefined)
-      throw devError(
-        "NO_PROVIDER",
-        `<${state.name ?? "anonymous"}> reads ${ctx.id.description ? `the context ${ctx.id.description}` : "a context"}, created without a default, and no provider above it gives one: call the component inside Ctx.provide({ value, children }).`
-      );
-    throw e;
-  }
-  return makePath(raw, false, []);
+  return useContext(ctx);
 }
 
 /**
- * @internal A slot's default (D-118): what Solid's `useContext` gives where
- * no provider is above. A slot has no default value of its own; the
- * sentinel lets `$slot` tell "no provider" from any error the read throws
- * (no owner, a server component's barrier), which it passes on.
+ * @internal `yield* Ctx` (D-036, D-098, D-118): a setup's read of a library
+ * context. The provided value is given as a prop is (`contextValue`): a
+ * provided source or hole as a path, read where the setup's view, memo or
+ * event reads it, never in the setup; a handler, a constant or a bag as it
+ * is. A context created without a default that no provider above gives is
+ * `NO_PROVIDER` here, at the read (every build: it has no value to give).
  */
-export const NO_SLOT: unique symbol = Symbol.for("solid.yield.no-slot") as any;
-
-/**
- * @internal `yield* $slot(Slot)` / `yield* $slot(Slot, { init })` (D-118): a
- * setup's read of a slot. It gives the provided value raw (a slot carries
- * references, held, never read: a path and the handler that writes it),
- * not a path over it as `yield* Ctx` does. With no provider above, the
- * required form is `NO_PROVIDER` (every build: a slot has no default to
- * fall back on); the `init` form gets `NO_SLOT`, and `$slot` runs its init
- * routine in the setup.
- */
-export function readSlot(slot: any, hasInit: boolean): unknown {
-  const host = state.host;
-  if (__DEV__ && host !== SETUP && (hasInit || host !== NONE))
+export function readContext(ctx: any): unknown {
+  const raw = providedOf(ctx, false);
+  if (raw === NO_PROVIDER)
     throw devError(
-      hasInit ? "CREATE_OUTSIDE_SETUP" : "CONTEXT_OUTSIDE_SETUP",
-      `yield* $slot(…) belongs to a setup, not ${HOST_NAMES[host]}.`
+      "NO_PROVIDER",
+      `<${state.name ?? "anonymous"}> reads ${ctx.id.description ? `the context ${ctx.id.description}` : "a context"}, created without a default, and no provider above it gives one: call the component inside Ctx.provide({ value, children }).`
     );
-  const raw = useContext(slot);
-  if (raw !== NO_SLOT || hasInit) return raw;
-  throw devError(
-    "NO_PROVIDER",
-    `<${state.name ?? "anonymous"}> reads the slot ${slot.id.description}, and no provider above it gives one: call the component inside ${slot.id.description}.provide({ value, children }), or give $slot an init.`
-  );
+  return contextValue(raw);
 }
 
 // --- events ---------------------------------------------------------------------------------

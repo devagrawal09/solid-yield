@@ -1613,7 +1613,6 @@ export function readSlot(slot: any, hasInit: boolean): unknown {
   );
 }
 
-
 // --- events ---------------------------------------------------------------------------------
 
 /**
@@ -1788,9 +1787,16 @@ function* eventSteps(
  * — goes to the nearest `Errored` above where the handler was bound that
  * takes it (D-085; the promise then resolves `undefined`); with no such
  * boundary there (none, or only ones whose `catch` excludes it, F-7), or for
- * a call of the unbound handler, the promise rejects.
- * Like any action it is called from an event or other imperative code, not
- * synchronously inside a computation (ACTION_CALLED_IN_OWNED_SCOPE).
+ * a call from routine code (`yield* save(x)`, which handles it), the promise
+ * rejects.
+ *
+ * It is called by routine code or by the DOM (D-118, D-028 for events):
+ * `yield* save(x)` in an `$event` or an `$effect`'s effect phase, or the DOM
+ * through a bind. Called directly with no routine running — a timer, a
+ * promise callback, plain or foreign code — it is `EVENT_OUTSIDE_RUN` in
+ * development. An event called from an event joins its transaction (D-020:
+ * Solid's action does). Like any action it is not called synchronously
+ * inside a computation (ACTION_CALLED_IN_OWNED_SCOPE).
  */
 export function $event<Args extends unknown[] = [], Y extends EventOp = never, R = void>(
   body: (...args: Args) => Generator<Y, R, any>

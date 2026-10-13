@@ -368,8 +368,8 @@ export const ThemePicker = component(function* ThemePicker(
   props: Props<{ theme: Source<Theme>; onPick: Handler<[Theme]> }>
 ) {
   const pickDark = $event(function* () {
-    // a handler in a prop is read, then called: `yield* (yield* props.onPick)(…)`
-    yield* (yield* props.onPick)("dark");
+    // a handler prop is the handler itself (D-118): called as a local event
+    yield* props.onPick("dark");
   });
   return view(function* () {
     return (
@@ -387,8 +387,10 @@ export const ThemePicker = component(function* ThemePicker(
 
 - **`Handler<Args, E = never>`** is `EventHandler<Args, E, unknown, false, boolean>`: it takes `Args`, may fail with `E`, returns anything, may or may not do async work of its own, and does **not** wait on pending data. Any `$event` within those colors is accepted.
 - **A handler that reads data which may be pending** is refused there; declare the colors it has, `EventHandler<Args, E, unknown, true>` — and a view binding a call of it is marked _may wait_ (the lint asks you to show it). A bare `EventHandler<[Theme]>` defaults to "may wait", so it warns even for a handler that only calls a setter: prefer `Handler`.
+- **A handler prop is held, never read** (D-118): `props.onPick` is the `$event` itself, not a path. Call it with one `yield*` in an event, `yield* props.onPick("dark")`, or bind it in the view, `onClick={[yield* props.onPick, "dark"]}`. It takes an `$event` only: a source or a hole is refused (`[HANDLER_PROP]`); an event does not vary per render, so a parent that chooses between two handlers writes one `$event` that chooses. It is required (`[OPTIONAL_HANDLER]`); an optional one is declared `Source<Handler<[Theme]> | undefined>` and read before it is called.
 - **A plain function type** (`onPick: (t: Theme) => void`) is not a handler: reading the prop gives a function, and `yield*` of its call fails with "Type 'void' must have a '[Symbol.iterator]()' method". Routine code calls events, not functions.
-- **In a context**, the same: `createContext<Handler<[Theme]>, "SetThemeCtx">(undefined, { name: "SetThemeCtx" })`, read with `yield* (yield* setTheme)("dark")` in an event.
+- **In a context, or inside an object prop** (`props.log.clear`), a handler is still read through its path: `createContext<Handler<[Theme]>, "SetThemeCtx">(undefined, { name: "SetThemeCtx" })`, read with `yield* (yield* setTheme)("dark")` in an event. Only a prop that is itself a handler, and a slot's value, arrive as themselves.
+- **Who calls an event**: routine code (`yield* save(x)` in an `$event` or an `$effect`'s effect phase) or the DOM, through a bind. Called from a timer, a promise callback or a listener added by hand, it is the development error `EVENT_OUTSIDE_RUN` (D-118; production calls it as before). D-118 leaves open how a timer or a listener the DOM does not bind through a view should reach an event.
 
 ### Form inputs
 

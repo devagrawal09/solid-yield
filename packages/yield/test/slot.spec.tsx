@@ -239,12 +239,14 @@ describe("D-118: an $event handler prop arrives as itself", () => {
       return view(function* () {
         return (
           <>
-            {yield* Child({
-              // @ts-expect-error [HANDLER_PROP] a handler prop takes an $event, not a hole
-              onClear: function* () {
-                return clear;
-              }
-            })}
+            {
+              yield* Child({
+                // @ts-expect-error [HANDLER_PROP] a handler prop takes an $event, not a hole
+                onClear: function* () {
+                  return clear;
+                }
+              })
+            }
           </>
         );
       });
@@ -259,11 +261,14 @@ describe("D-118: an $event handler prop arrives as itself", () => {
 });
 
 describe("D-118: state slots", () => {
-  devIt("the required form with no provider above is NO_PROVIDER at the read, naming the reader and the slot", () => {
-    expect(() => createRoot(() => DateRange())).toThrow(
-      /\[NO_PROVIDER\] <DateRange> reads the slot DateRangeState/
-    );
-  });
+  devIt(
+    "the required form with no provider above is NO_PROVIDER at the read, naming the reader and the slot",
+    () => {
+      expect(() => createRoot(() => DateRange())).toThrow(
+        /\[NO_PROVIDER\] <DateRange> reads the slot DateRangeState/
+      );
+    }
+  );
 
   it("the required form with a provider gives its value raw: the same object, not a path", () => {
     let held: unknown;
@@ -288,12 +293,14 @@ describe("D-118: state slots", () => {
       return view(function* () {
         return (
           <>
-            {yield* DateRangeState.provide({
-              value,
-              children: function* () {
-                return <>{yield* Reader()}</>;
-              }
-            })}
+            {
+              yield* DateRangeState.provide({
+                value,
+                children: function* () {
+                  return <>{yield* Reader()}</>;
+                }
+              })
+            }
           </>
         );
       });
@@ -304,7 +311,10 @@ describe("D-118: state slots", () => {
 
   it("two providers for two instances: each module writes its own part", async () => {
     const Twice = compose({
-      outbound: { init: (): DateRangeS => ({ checkIn: null, checkOut: null }), slot: DateRangeState },
+      outbound: {
+        init: (): DateRangeS => ({ checkIn: null, checkOut: null }),
+        slot: DateRangeState
+      },
       inbound: { init: (): DateRangeS => ({ checkIn: null, checkOut: null }) }
     });
     const Page = component(function* Page() {
@@ -313,20 +323,24 @@ describe("D-118: state slots", () => {
         return (
           <>
             <div class="a">
-              {yield* DateRangeState.provide({
-                value: trip.parts.outbound,
-                children: function* () {
-                  return <>{yield* DateRange()}</>;
-                }
-              })}
+              {
+                yield* DateRangeState.provide({
+                  value: trip.parts.outbound,
+                  children: function* () {
+                    return <>{yield* DateRange()}</>;
+                  }
+                })
+              }
             </div>
             <div class="b">
-              {yield* DateRangeState.provide({
-                value: trip.parts.inbound,
-                children: function* () {
-                  return <>{yield* DateRange()}</>;
-                }
-              })}
+              {
+                yield* DateRangeState.provide({
+                  value: trip.parts.inbound,
+                  children: function* () {
+                    return <>{yield* DateRange()}</>;
+                  }
+                })
+              }
             </div>
             <p class="whole">
               {yield* trip.at.outbound.checkOut}/{yield* trip.at.inbound.checkOut}
@@ -403,12 +417,14 @@ describe("D-118: state slots", () => {
       return view(function* () {
         return (
           <>
-            {yield* Provided.provide({
-              value: page,
-              children: function* () {
-                return <>{yield* Picker()}</>;
-              }
-            })}
+            {
+              yield* Provided.provide({
+                value: page,
+                children: function* () {
+                  return <>{yield* Picker()}</>;
+                }
+              })
+            }
             <b>{yield* page.at.dates.checkIn}</b>
           </>
         );

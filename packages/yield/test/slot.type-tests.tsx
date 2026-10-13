@@ -126,7 +126,9 @@ type _slot = Expect<Equal<typeof DateRangeState, Slot<Part<DateRangeS>, "DateRan
 createSlot<Part<DateRangeS>>({ name: "Nameless" });
 
 // the required form: the value raw, and the slot in the component's requirements
-type ReadOf<V> = V extends { [Symbol.iterator](): Generator<infer Y, infer R, any> } ? [Y, R] : never;
+type ReadOf<V> = V extends { [Symbol.iterator](): Generator<infer Y, infer R, any> }
+  ? [Y, R]
+  : never;
 const requiredRead = $slot(DateRangeState);
 type _required = Expect<
   Equal<ReadOf<typeof requiredRead>, [ContextRead<typeof DateRangeState>, Part<DateRangeS>]>
@@ -243,9 +245,7 @@ type BookingStore = ReadOf<ReturnType<typeof Booking.$store>>;
 type _store = Expect<
   Equal<BookingStore, [Create<"store">, ComposedStore<{ dates: DateRangeS; guests: GuestsS }>]>
 >;
-type _part = Expect<
-  Equal<BookingStore[1]["parts"]["guests"], Part<GuestsS>>
->;
+type _part = Expect<Equal<BookingStore[1]["parts"]["guests"], Part<GuestsS>>>;
 type _partAt = Expect<Equal<Part<GuestsS>["at"], Path<GuestsS>>>;
 
 const Guests = component(function* Guests(
@@ -267,10 +267,12 @@ export const BookingPage = component(function* BookingPage() {
               return (
                 <>
                   {yield* DateRange()}
-                  {yield* Guests({
-                    guests: booking.parts.guests.at,
-                    setGuests: booking.parts.guests.set
-                  })}
+                  {
+                    yield* Guests({
+                      guests: booking.parts.guests.at,
+                      setGuests: booking.parts.guests.set
+                    })
+                  }
                 </>
               );
             }

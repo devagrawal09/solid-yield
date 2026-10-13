@@ -22,7 +22,7 @@ function App() {
   };
   return <Identity value={1}><Errored fallback={() => <p>failed</p>}><Loading fallback="wait">
     <button onClick={async () => { await save(); }}>{twice()}</button>
-    <button onClick={() => { try { fail(); } catch (e) { throw e; } }}>Fail</button>
+    <button onClick={() => { try { fail(); } catch (e) { /* @yield-absorb: logged */ console.error(e); } }}>Fail</button>
     <Child value={count()} /><p>{value()}</p>
   </Loading></Errored></Identity>;
 }

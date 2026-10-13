@@ -21,10 +21,16 @@ export function inRoutine(mutant, at) {
 }
 export function classify(mutant, result, base) {
   if (mutant.equivalent) return "equivalent";
-  const expected = catalog[mutant.operator].expected;
+  const { expected, anywhere } = catalog[mutant.operator];
+  // A deleted boundary (Dev, 2026-10-13): an expected code the unmutated
+  // program did not report counts wherever it is, at the read it covered.
+  const key = d => `${d.file}:${d.line}:${d.code}`;
+  const before = new Set((base?.diagnostics ?? []).map(key));
   const match = d =>
     [d.code, d.tsCode, d.ruleId].some(code => expected.includes(code)) &&
-    (inRoutine(mutant, d) || (d.related ?? []).some(r => inRoutine(mutant, r)));
+    (inRoutine(mutant, d) ||
+      (d.related ?? []).some(r => inRoutine(mutant, r)) ||
+      (!!anywhere && !before.has(key(d))));
   return result.diagnostics.some(match) ? "killed" : "survived";
 }
 export function exactLine(mutant, result) {
@@ -57,7 +63,14 @@ export function fingerprint(projects, runnerText) {
       hash.update(readFileSync(join(root, dir, file)));
     }
   }
-  for (const file of ["catalog.mjs", "generate.mjs", "corpus.mjs", "worker.mjs", "run.mjs"]) {
+  for (const file of [
+    "catalog.mjs",
+    "generate.mjs",
+    "corpus.mjs",
+    "equivalents.mjs",
+    "worker.mjs",
+    "run.mjs"
+  ]) {
     hash.update(file);
     hash.update(
       file === "run.mjs" && runnerText !== undefined
@@ -86,36 +99,10 @@ async function main() {
     report = JSON.parse(readFileSync(cache, "utf8"));
     console.log("mutation: content-verified cache " + digest.slice(0, 12));
   } else {
-    const jobs = [],
-      mutants = [];
-    for (const project of projects) {
-      const base = { id: "base-" + project.id, project: project.id, files: [...project.files] };
-      jobs.push(base);
-      for (const [file, source] of project.files)
-        for (const m of generate(source, file)) {
-          const mutant = {
-            ...m,
-            id: "M" + String(mutants.length + 1).padStart(4, "0"),
-            project: project.id,
-            file,
-            original: source
-          };
-          mutants.push(mutant);
-          jobs.push({
-            id: mutant.id,
-            project: project.id,
-            file,
-            files: [...project.files].map(([f, c]) => [f, f === file ? m.source : c])
-          });
-        }
-    }
-    markSiteEquivalents(mutants, new Map(projects.map(p => [p.id, p.files])));
     const results = new Map();
-    let next = 0,
+    let jobs = [],
+      next = 0,
       complete = 0;
-    console.log(
-      `mutation: ${projects.length} projects, ${mutants.length} mutants; transform → CLI → generated lint`
-    );
     // A long-lived worker (worker.mjs --serve) per lane: its parsed libraries
     // and declarations stay warm across pipelines. It is replaced every
     // RECYCLE jobs, which bounds what a job leaves behind (a worker serving
@@ -180,7 +167,51 @@ async function main() {
         child.kill();
       }
     }
-    await Promise.all([worker(), worker(), worker()]);
+    const run = async list => {
+      jobs = list;
+      next = 0;
+      await Promise.all([worker(), worker(), worker()]);
+    };
+    // Every unmutated program first.
+    await run(
+      projects.map(project => ({
+        id: "base-" + project.id,
+        project: project.id,
+        files: [...project.files]
+      }))
+    );
+    // A program seeded with a deliberate mistake the checker reports stays a
+    // check of that mistake: the checker stops at a refusal and holds some
+    // checks until earlier errors are fixed, so a second mistake on top could
+    // not show. Second mistakes go on clean programs (Dev, 2026-10-13).
+    const masks = base => base.stages.transform === "refused" || base.stages.cli === "diagnostics";
+    const mutated = projects.filter(p => !(p.seeded && masks(results.get("base-" + p.id))));
+    const mutants = [],
+      mutantJobs = [];
+    for (const project of mutated)
+      for (const [file, source] of project.files)
+        for (const m of generate(source, file)) {
+          const mutant = {
+            ...m,
+            id: "M" + String(mutants.length + 1).padStart(4, "0"),
+            project: project.id,
+            file,
+            original: source
+          };
+          mutants.push(mutant);
+          mutantJobs.push({
+            id: mutant.id,
+            project: project.id,
+            file,
+            files: [...project.files].map(([f, c]) => [f, f === file ? m.source : c])
+          });
+        }
+    markSiteEquivalents(mutants, new Map(projects.map(p => [p.id, p.files])));
+    console.log(
+      `mutation: ${projects.length} projects (${mutated.length} mutated), ${mutants.length} mutants; transform → CLI → generated lint`
+    );
+    complete = 0;
+    await run(mutantJobs);
     const counts = Object.fromEntries(
       Object.keys(catalog).map(op => [op, { mutants: 0, killed: 0, survived: 0, equivalent: 0 }])
     );
@@ -213,6 +244,7 @@ async function main() {
         id: p.id,
         origin: p.origin,
         files: p.files.size,
+        mutated: mutated.includes(p),
         base: results.get("base-" + p.id)
       })),
       counts,

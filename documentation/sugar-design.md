@@ -2058,3 +2058,99 @@ correct to accept (above) are marked equivalent in
 `scripts/mutation/equivalents.mjs`, each with its reason and the authored line
 it was read at; a changed line, or an entry matching no mutant or several,
 fails the mutation run. The report lists them.
+
+### The insertion, proved on a core and checked on the lowering (2026-10-13)
+
+The calculus proofs covered every rule the lowering relies on (S1–S19) but
+not the insertion itself: that putting `yield*` at the reads TypeScript types
+as sources, and nowhere else, keeps the program's meaning. **S20**
+(`SugarProofs.lean`, `Insertion`) proves it on a core of plain Solid
+expressions (literals, source reads, plain calls, sums, conditionals,
+`throw`). Run by the library's driver, the lowered routine gives what Solid's
+direct evaluation gives: the same value, the same reads tracked in the same
+order, the same suspension at a pending read and the same failure
+(`insertion_preserves`). Its reads are exactly what the result depends on, so
+Solid reruns it exactly when it must (`lowered_reads_are_dependencies`). A
+value read once and kept is tracked by nothing (`snapshot_untracked`): the
+setup read that `READ_IN_SETUP` refuses.
+
+The proof assumes the lowering finds every source read. **`native:insertion`**
+(`scripts/native-insertion/check.mjs`) checks that on the real lowering.
+Seeded programs, each with twelve memos built from signal, store-path,
+async-memo and earlier-memo reads, plain calls, sums, conditionals, `||` and a
+helper that throws past a bound, run side by side as written and lowered
+(`emit: "lowered"`) on one Solid runtime in jsdom. Each memo's value crosses a
+child's prop (D-119) inside its own `Errored` and `Loading`. Every slot (value,
+`Errored` fallback, `Loading` fallback) must match at mount and after each of
+twelve writes. The gate runs seeds 1–8 (104 states in about 15 s); a sweep of
+seeds 9–58 (650 states) found no difference. The harness asserts that the
+native copies were lowered and the originals were not (a first draft compared
+each program with itself), and that some slots changed, failed and suspended.
+A copy given one different constant fails at mount.
+
+**Found by probing new mutation operators.** A signal created in an event
+handler, or in an effect's phase, was reported only as `GENERATED_TYPE`
+("check this operation"). The CLI named `CREATE_OUTSIDE_SETUP` for a creation
+in a memo, a hole or a view, but not in an event or a phase, whose hosts admit
+writes. It does now. When the handler is bound by name (`onClick={add}`), the
+lowering wraps it (`$event(function* (...args) { return yield* add(...args);
+})`), and the rejected yield is that generated delegation: the CLI follows
+the delegation into `add` and reports the creation at its authored line
+(`locality.test.cjs` C01, C02).
+
+**Two operators for mistakes no operator made yet.** `module-state` moves a
+component's own signal or store (its initial value closing over nothing local)
+to module scope, where every render shares it (`MODULE_STATE`).
+`create-in-hole` creates a memo read once in JSX inside that hole
+(`{createMemo(fn)()}`), where it is recreated on every run
+(`CREATE_OUTSIDE_SETUP`).
+
+**Found by `create-in-hole` (its first run left 11 of 18 alive):**
+
+- **A flow control's value prop took any operation.** `<Show when={(setN(2),
+  n() > 0)}>`, `<Show when={createMemo(…)()}>` and `<For
+  each={createMemo(…)()}>` checked clean: a prop given as a hole kept only its
+  colors (`FlowView<Ops<W>>`), and a write or a creation is no color. Solid
+  runs that prop where the control reads it, as a memo. `For`'s `each`,
+  `Repeat`'s `count`, `Show`'s and `Match`'s `when` and `Loading`'s `on` now
+  check a hole that writes, creates or cleans up against `HoleOp`
+  (`HoleCheck`, `flow.ts`; `jsx.type-tests.tsx` `HoleProps`).
+- **The CLI named the wrong code, or none.** TypeScript reports such a hole at
+  the whole call, under the last overload's message (`[LAZY_VIEW]`), and a
+  write in a component's prop as `SETTLED_PROP`; a creation in a call in a
+  hole surfaced at the boundary's generated lazy view. The CLI now looks in
+  the call's hole props (and a parameterless `children`/`fallback`, a lazy
+  view; a row's setup may create) and follows an inline wrapper
+  (`__nativeHole(function* () { … })`) to the authored operation:
+  `WRITE_IN_REACTIVE` or `CREATE_OUTSIDE_SETUP` at its line
+  (`locality.test.cjs` C03–C06).
+- **An async effect phase was accepted when it wrote local state.**
+  `createEffect(() => count(), async n => { set(n); })` (review slot R07)
+  checked clean: the lowering made every async function that touches Solid a
+  routine and dropped `async`. Solid refuses an effect phase's promise (in
+  development "invalid cleanup value"; in production it is called as the next
+  cleanup). An async effect phase is now refused (`SUGAR_ASYNC`, as one that
+  touched nothing already was), whatever its body does
+  (`native-refusals.test.js`).
+
+**Scoring (D-123).** A deleted boundary is caught when its expected code
+appears anywhere the unmutated program did not report it, since the checker
+reports the read the boundary covered. A reviewer program seeded with a
+deliberate mistake that the checker reports is a check of that mistake only:
+a second mistake on top could not show.
+
+**The operator seed's base checks clean.** Its click handler rethrew
+(`catch (e) { throw e; }`, a `swallow-catch` site), so the base reported
+`EVENT_REJECTS` and held three checks back. It logs now, marked
+`@yield-absorb`. Read against a clean base, those three are correct at their
+sites and are site equivalents: a deleted catch that only rethrew, an
+unawaited return inside that try, and a throw behind `if (false)` under an
+`Errored`. `equivalents.mjs` is now part of the run's fingerprint, so editing
+an entry invalidates a cached result.
+
+**Result:** 99.15 % (234 killed / 2 survived / 62 equivalent; 298 mutants on
+22 of 43 programs; every non-equivalent mutant's expected code is reported
+somewhere, 100 % detected). The two survivors are Todos' own: the original
+already reports `EVENT_REJECTS` for the handler at `app.tsx:82`, and deleting
+the catch at `todos.ts:144` or `:159` widens that report (`SyntaxError |
+TypeError | unknown`) rather than adding one, so by D-123's rule it is not new.

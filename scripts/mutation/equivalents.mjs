@@ -74,6 +74,34 @@ export const siteEquivalents = [
     anchor: "rows.items.reduce((sum: number, item: any) => sum + item.cents, 0)",
     reason:
       "The throw is in the total memo's reduce callback; the memo is read only under the Errored, which takes it."
+  },
+  // Read once the operator seed's base checked clean (2026-10-13): before, its
+  // rethrowing click handler reported EVENT_REJECTS and held these checks back.
+  {
+    project: "operator-seeds",
+    file: "App.tsx",
+    line: 14,
+    operator: "delete-catch",
+    anchor: "try { return await readServer(); } catch (e) { throw e; }",
+    reason: "The deleted catch only rethrew: without it the failure leaves the same way."
+  },
+  {
+    project: "operator-seeds",
+    file: "App.tsx",
+    line: 14,
+    operator: "remove-await",
+    anchor: "try { return await readServer(); } catch (e) { throw e; }",
+    reason:
+      "Unawaited, the rejection leaves the try without passing the catch, which only rethrew it; the async memo's type is the same."
+  },
+  {
+    project: "operator-seeds",
+    file: "server.ts",
+    line: 5,
+    operator: "server-new-class",
+    anchor: "if (false) throw new ServerProblem('server');",
+    reason:
+      "The throw cannot run (`if (false)`), and the Errored above the memo that reads the server takes a failure of any class."
   }
 ];
 

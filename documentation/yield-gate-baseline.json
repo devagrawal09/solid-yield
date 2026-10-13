@@ -670,78 +670,78 @@
     }
   ],
   "mutation": {
-    "score": 72.84595300261097,
+    "score": 99.15254237288136,
     "counts": {
       "delete-catch": {
         "mutants": 9,
-        "killed": 2,
-        "survived": 5,
-        "equivalent": 2
+        "killed": 4,
+        "survived": 2,
+        "equivalent": 3
       },
       "swallow-catch": {
-        "mutants": 2,
+        "mutants": 1,
         "killed": 0,
         "survived": 0,
-        "equivalent": 2
+        "equivalent": 1
       },
       "delete-errored": {
-        "mutants": 24,
-        "killed": 4,
-        "survived": 19,
+        "mutants": 13,
+        "killed": 12,
+        "survived": 0,
         "equivalent": 1
       },
       "delete-loading": {
-        "mutants": 26,
-        "killed": 4,
-        "survived": 20,
+        "mutants": 15,
+        "killed": 13,
+        "survived": 0,
         "equivalent": 2
       },
       "setup-read": {
-        "mutants": 120,
-        "killed": 99,
-        "survived": 21,
+        "mutants": 54,
+        "killed": 54,
+        "survived": 0,
         "equivalent": 0
       },
       "delete-provider": {
-        "mutants": 22,
-        "killed": 0,
-        "survived": 21,
+        "mutants": 11,
+        "killed": 10,
+        "survived": 0,
         "equivalent": 1
       },
       "never-provided-context": {
-        "mutants": 30,
-        "killed": 26,
-        "survived": 4,
+        "mutants": 16,
+        "killed": 16,
+        "survived": 0,
         "equivalent": 0
       },
       "throw-string": {
-        "mutants": 29,
+        "mutants": 13,
         "killed": 0,
         "survived": 0,
-        "equivalent": 29
+        "equivalent": 13
       },
       "throw-object": {
-        "mutants": 29,
+        "mutants": 13,
         "killed": 0,
         "survived": 0,
-        "equivalent": 29
+        "equivalent": 13
       },
       "async-reject": {
-        "mutants": 3,
-        "killed": 3,
+        "mutants": 2,
+        "killed": 2,
         "survived": 0,
         "equivalent": 0
       },
       "remove-await": {
-        "mutants": 31,
+        "mutants": 18,
         "killed": 2,
-        "survived": 1,
-        "equivalent": 28
+        "survived": 0,
+        "equivalent": 16
       },
       "memo-write": {
-        "mutants": 26,
-        "killed": 22,
-        "survived": 4,
+        "mutants": 13,
+        "killed": 13,
+        "survived": 0,
         "equivalent": 0
       },
       "timer-read": {
@@ -751,9 +751,9 @@
         "equivalent": 6
       },
       "non-core-cache": {
-        "mutants": 50,
-        "killed": 42,
-        "survived": 8,
+        "mutants": 24,
+        "killed": 24,
+        "survived": 0,
         "equivalent": 0
       },
       "destructure-props": {
@@ -763,14 +763,14 @@
         "equivalent": 0
       },
       "inline-component": {
-        "mutants": 51,
-        "killed": 51,
+        "mutants": 27,
+        "killed": 27,
         "survived": 0,
         "equivalent": 0
       },
       "effect-arity": {
-        "mutants": 5,
-        "killed": 5,
+        "mutants": 2,
+        "killed": 2,
         "survived": 0,
         "equivalent": 0
       },
@@ -789,12 +789,24 @@
       "server-new-class": {
         "mutants": 1,
         "killed": 0,
-        "survived": 1,
+        "survived": 0,
+        "equivalent": 1
+      },
+      "module-state": {
+        "mutants": 18,
+        "killed": 18,
+        "survived": 0,
+        "equivalent": 0
+      },
+      "create-in-hole": {
+        "mutants": 18,
+        "killed": 18,
+        "survived": 0,
         "equivalent": 0
       }
     },
-    "recordedAt": "2026-10-12T22:38:31.201Z",
-    "digest": "ff0755998152bd251e8a9f4c973dc86a7f581dd5d3efccc3dd937058ed11c411"
+    "recordedAt": "2026-10-13T02:26:39.416Z",
+    "digest": "b0f3c8c9dd3b6161965185b41b98f8878ac5129b238165c816f770c324f9db36"
   },
   "strykerReportOnly": {
     "mode": "REPORT-ONLY",

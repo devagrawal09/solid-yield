@@ -375,6 +375,59 @@ export function generate(source, filename) {
     },
     Function(p) {
       if (!component(p)) return;
+      // State the component owns, moved to module scope, where every render
+      // shares it (MODULE_STATE); a memo read once in JSX, created in that hole
+      // instead of the setup (CREATE_OUTSIDE_SETUP). Each moved text is printed
+      // on one line, so the mutant keeps every line boundary.
+      const top = program.node.body.find(st => st.start <= p.node.start && p.node.start < st.end);
+      const closed = init => {
+        let free = true;
+        init.traverse({
+          Identifier(q) {
+            const b = q.isReferencedIdentifier() && q.scope.getBinding(q.node.name);
+            if (b && b.path.findParent(a => a === p)) free = false;
+          }
+        });
+        return free;
+      };
+      const oneLine = node => {
+        const printed = babel.transformFromAstSync(
+          t.file(t.program([t.cloneNode(node, true)])),
+          undefined,
+          { configFile: false, babelrc: false, compact: true, comments: false }
+        ).code;
+        return printed.includes("\n") ? null : printed;
+      };
+      if (top && t.isBlockStatement(p.node.body))
+        for (const st of p.get("body.body")) {
+          if (!st.isVariableDeclaration() || st.node.declarations.length !== 1) continue;
+          const d = st.get("declarations.0"),
+            init = d.get("init");
+          if (!init.isCallExpression()) continue;
+          const api = imported(init.get("callee"));
+          const moved = oneLine(st.node);
+          if ((api === "createSignal" || api === "createStore") && closed(init) && moved)
+            add("module-state", top, [
+              { start: top.start, end: top.start, text: moved + " " },
+              { start: st.node.start, end: st.node.end, text: "" }
+            ]);
+          if (api !== "createMemo" || !t.isIdentifier(d.node.id)) continue;
+          const refs = d.scope.getBinding(d.node.id.name)?.referencePaths ?? [];
+          const call = refs.length === 1 ? refs[0].parentPath : null;
+          const created = oneLine(t.expressionStatement(init.node))?.replace(/;$/, "");
+          if (
+            call?.isCallExpression() &&
+            call.node.callee === refs[0].node &&
+            !call.node.arguments.length &&
+            call.getFunctionParent() === p &&
+            call.findParent(q => q.isJSXExpressionContainer()) &&
+            created
+          )
+            add("create-in-hole", call.node, [
+              { start: call.node.start, end: call.node.end, text: `${created}()` },
+              { start: st.node.start, end: st.node.end, text: "" }
+            ]);
+        }
       const param = p.node.params[0];
       if (t.isIdentifier(param)) {
         const fields = new Map();

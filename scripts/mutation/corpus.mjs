@@ -27,7 +27,9 @@ export function corpus() {
     projects.push({
       id: "reviewer-" + file.replace(".tsx", ""),
       origin: "/private/tmp/sy-review-out/variants/" + file + " (verbatim snapshot)",
-      files: new Map([...base].map(([f, c]) => [f, f === "App.tsx" ? source : c]))
+      files: new Map([...base].map(([f, c]) => [f, f === "App.tsx" ? source : c])),
+      // the reviewer app with one deliberate mistake
+      seeded: true
     });
   }
   for (const fixture of fixtures.filter(f => f.slots)) {
@@ -40,7 +42,9 @@ export function corpus() {
     projects.push({
       id: "review-slots-" + fixture.id,
       origin: "scripts/native/fixtures.mjs; reconstructed slots " + fixture.slots.join(", "),
-      files: new Map([["App.tsx", source]])
+      files: new Map([["App.tsx", source]]),
+      // a reviewer's mistake, reconstructed
+      seeded: true
     });
   }
   projects.push({

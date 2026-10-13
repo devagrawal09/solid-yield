@@ -16,7 +16,7 @@ test("all operators have syntactically valid sites and preserve line count", () 
 });
 test("a kill: the expected code at a primary or related location in the mutated routine", () => {
   const m = {
-      operator: "delete-errored",
+      operator: "callback-throw",
       file: "App.tsx",
       line: 6,
       routine: { start: 4, end: 12 }
@@ -82,4 +82,57 @@ test("valid handling is diagnostic-equivalent with a reason", () => {
   const m = generate(source, "app.ts").find(m => m.operator === "swallow-catch");
   assert.ok(m.equivalent.includes("handle"));
   assert.equal(classify(m, { diagnostics: [] }, { diagnostics: [] }), "equivalent");
+});
+test("state moved to module scope and a memo created in its hole are edit sites", () => {
+  const source = [
+    'import { createSignal, createMemo } from "solid-js";',
+    "export function App() {",
+    "  const [n, set] = createSignal(1);",
+    "  const twice = createMemo(() => n() * 2);",
+    "  const [copy] = createSignal(n());",
+    "  return <button onClick={() => set(copy())}>{twice()}</button>;",
+    "}"
+  ].join("\n");
+  const out = generate(source, "App.tsx");
+  // `copy`'s initial value reads a local: it cannot move
+  const moved = out.filter(m => m.operator === "module-state");
+  assert.equal(moved.length, 1);
+  assert.match(
+    moved[0].source.split("\n")[1],
+    /^const\s*\[n,\s*set\]\s*=\s*createSignal\(1\);\s*export/
+  );
+  const created = out.filter(m => m.operator === "create-in-hole");
+  assert.equal(created.length, 1);
+  assert.match(created[0].source, /\{createMemo\(\(\)\s*=>\s*n\(\)\s*\*\s*2\)\(\)\}/);
+  for (const m of [...moved, ...created])
+    assert.equal(m.source.split("\n").length, source.split("\n").length);
+});
+test("a deleted boundary: an expected code the base did not report counts anywhere", () => {
+  const m = {
+    operator: "delete-loading",
+    file: "App.tsx",
+    line: 6,
+    routine: { start: 4, end: 12 }
+  };
+  // reported at the read the Loading covered, in another component
+  const read = { file: "List.tsx", line: 9, code: "PENDING_ROOT", message: "pending" };
+  assert.equal(classify(m, { diagnostics: [read] }, { diagnostics: [] }), "killed");
+  // the base already reported it there: not this mutant's
+  assert.equal(classify(m, { diagnostics: [read] }, { diagnostics: [read] }), "survived");
+  // another code is not the expected one
+  assert.equal(
+    classify(m, { diagnostics: [{ ...read, code: "NO_PROVIDER" }] }, { diagnostics: [] }),
+    "survived"
+  );
+  // other operators keep the routine rule
+  assert.equal(
+    classify(
+      { ...m, operator: "setup-read" },
+      { diagnostics: [{ ...read, code: "READ_IN_SETUP" }] },
+      {
+        diagnostics: []
+      }
+    ),
+    "survived"
+  );
 });

@@ -83,7 +83,7 @@ const out = [
   "",
   "Every syntactically applicable site is edited separately. Sources stay plain Solid. Each pipeline runs the shared native transform, the exported implementation used by `solid-yield check`, and recommended ESLint on generated code. A transform refusal blocks generated lint and is recorded explicitly. A CLI crash is a finding, never a kill.",
   "",
-  "Each mutant is read three ways. **Killed** (the gate's rule, since 2026-10-10): an expected diagnostic code whose primary or related location falls in the mutated routine, the top-level declaration holding the edit. **Exact line** (the first measurement's rule, as originally requested): an expected code at the edited file and authored line (±0). **Detected**: an expected code the unmutated base program lacks, wherever it is reported; a removed Errored, Loading or provider is reported where the failure, pending read or requirement originates and at the root, never at the removed tag, so only this reading sees it. Generated lint uses the transform position table. Existing diagnostics in broken base programs count for the location rules; those matches are flagged in the JSON evidence (`preExistingMatch`). “Equivalent” means diagnostic-equivalent under the documented design, not identical runtime behavior; equivalent edits still run through the pipeline. Warnings are recorded; only a code in the expected set can kill or detect.",
+  "Each mutant is read three ways. **Killed** (the gate's rule, since 2026-10-10): an expected diagnostic code whose primary or related location falls in the mutated routine, the top-level declaration holding the edit; for a deleted boundary (`delete-catch`, `delete-errored`, `delete-loading`, `delete-provider`; Dev's ruling, 2026-10-13) also an expected code the unmutated program did not report, wherever it is, since the checker reports the read or call the boundary covered. **Exact line** (the first measurement's rule, as originally requested): an expected code at the edited file and authored line (±0). **Detected**: an expected code the unmutated base program lacks, wherever it is reported; a removed Errored, Loading or provider is reported where the failure, pending read or requirement originates and at the root, never at the removed tag, so only this reading sees it. Generated lint uses the transform position table. Existing diagnostics in broken base programs count for the location rules; those matches are flagged in the JSON evidence (`preExistingMatch`). “Equivalent” means diagnostic-equivalent under the documented design, not identical runtime behavior; equivalent edits still run through the pipeline. Warnings are recorded; only a code in the expected set can kill or detect.",
   "",
   "The gate runs `node scripts/mutation/run.mjs --cached --baseline documentation/yield-gate-baseline.json`. The cache hashes corpus content, mutation implementation, checker sources, library declarations/output and dependency lockfile. It is a local speed aid, not a committed result substitute: fresh checkouts run all pipelines. Any hashed change forces a fresh run. The gate checks the score and per-operator site floors. A checker change that raises the score is its own commit with its own tests; a catalogue change is listed as a correction.",
   "",
@@ -121,7 +121,7 @@ for (const [op, r] of Object.entries(readings))
 out.push("", "### Catalogue and equivalent rules", "");
 for (const [op, c] of Object.entries(catalog))
   out.push(
-    `- **${op}:** ${c.edit}${c.equivalent ? " Equivalent reason: " + c.equivalent : ""}${c.corrected ? " Correction: " + c.corrected : ""}`
+    `- **${op}:** ${c.edit}${c.equivalent ? " Equivalent reason: " + c.equivalent : ""}${c.corrected ? " Correction: " + c.corrected : ""}${c.anywhere ? " Kill rule: " + c.anywhere : ""}`
   );
 out.push(
   "",
@@ -143,12 +143,15 @@ out.push(
   "",
   "The reviewer app and all 17 stored variants are verbatim snapshots under `scripts/mutation/corpus/reviewer`. They include all twelve numbered mistakes plus the boundary removals and throw variants. Historical programs come from `scripts/native/fixtures.mjs`: 18 reconstructed programs cover the 27 recoverable slots; T12–T15 and R10–R12 remain unavailable. The original two apps are read directly from their unchanged repository sources. The operator seeds ensure every operator has sites; the sugar-edges seed exercises the native edges added since (context hooks and members, setters in plain types, wrappers with boundaries around context readers, array callbacks, effect cleanups, an anonymous default component).",
   "",
-  "| Project | Files | Base transform / CLI / lint | Origin |",
-  "| --- | ---: | --- | --- |"
+  "",
+  "A program seeded with a deliberate mistake that the checker reports is a check of that mistake only (Dev's ruling, 2026-10-13): the checker stops at a refusal and holds some checks until earlier errors are fixed, so a second mistake on top could not show. Its mutants would repeat the clean reviewer app's.",
+  "",
+  "| Project | Files | Base transform / CLI / lint | Mutated | Origin |",
+  "| --- | ---: | --- | --- | --- |"
 );
 for (const p of program.projects)
   out.push(
-    `| ${p.id} | ${p.files} | ${Object.values(p.base.stages).join(" / ")} | ${safe(p.origin)} |`
+    `| ${p.id} | ${p.files} | ${Object.values(p.base.stages).join(" / ")} | ${p.mutated === false ? "no: base check" : "yes"} | ${safe(p.origin)} |`
   );
 const checker = [];
 for (const [name, file] of [

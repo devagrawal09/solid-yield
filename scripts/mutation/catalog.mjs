@@ -1,12 +1,17 @@
 // Sets are fixed before running. Generic TypeScript errors only count for await removal.
 // A later correction names the code the checker documents for the case and says why
 // (`corrected`); the report lists every correction.
+// `anywhere`: a kill is also an expected code the unmutated program did not
+// report, wherever it is.
+const DELETED_BOUNDARY =
+  "Dev's ruling (2026-10-13): the defect a deleted boundary leaves is at the read or call it covered, which the checker reports there (with the root as related), not at the removed tag; an expected code the unmutated program did not report counts wherever it is.";
 export const catalog = {
   "delete-catch": {
     expected: ["FOREIGN_HANDOFF", "NATIVE_CALLBACK_FAILURE", "EVENT_REJECTS"],
     corrected:
       "EVENT_REJECTS added (2026-10-10): an event handler's unhandled failure is EVENT_REJECTS (sugar-design, unhandled rejections); NATIVE_CALLBACK_FAILURE is the foreign-callback code.",
-    edit: "Remove one catch; retain try body and finally."
+    edit: "Remove one catch; retain try body and finally.",
+    anywhere: DELETED_BOUNDARY
   },
   "swallow-catch": {
     expected: [],
@@ -16,16 +21,22 @@ export const catalog = {
   },
   "delete-errored": {
     expected: ["FOREIGN_HANDOFF"],
-    edit: "Remove Errored tags, retain children."
+    edit: "Remove Errored tags, retain children.",
+    anywhere: DELETED_BOUNDARY
   },
-  "delete-loading": { expected: ["PENDING_ROOT"], edit: "Remove Loading tags, retain children." },
+  "delete-loading": {
+    expected: ["PENDING_ROOT"],
+    edit: "Remove Loading tags, retain children.",
+    anywhere: DELETED_BOUNDARY
+  },
   "setup-read": {
     expected: ["READ_IN_SETUP", "solid-yield/no-read-in-setup"],
     edit: "Hoist each signal/memo read from JSX or a memo to its enclosing component setup."
   },
   "delete-provider": {
     expected: ["NO_PROVIDER"],
-    edit: "Remove a locally declared context provider, retain children."
+    edit: "Remove a locally declared context provider, retain children.",
+    anywhere: DELETED_BOUNDARY
   },
   "never-provided-context": {
     expected: ["NO_PROVIDER"],
@@ -119,5 +130,13 @@ export const catalog = {
   "server-new-class": {
     expected: ["FOREIGN_HANDOFF"],
     edit: "Replace each server-function throw with an instance of a fresh local class."
+  },
+  "module-state": {
+    expected: ["MODULE_STATE"],
+    edit: "Move a component's own signal or store (its initial value closing over nothing local) to module scope, where every render shares it."
+  },
+  "create-in-hole": {
+    expected: ["CREATE_OUTSIDE_SETUP"],
+    edit: "Create a memo read once in JSX in that hole (`{createMemo(fn)()}`) instead of the component's setup."
   }
 };

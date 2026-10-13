@@ -1722,3 +1722,38 @@ The third review's ten-line summary, verbatim:
 **Proofs.** This supplies the runtime subclass/selective and wire-matching mechanism required by I3/I4/I6 and F20, under consistent registration and serialization-safe own-data premises. It does not prove source inference, external membership witnesses, dynamic call/alias closure or general native lowering, and does not fix O27's unsafe structural `Exclude` interpretation. A kind union alone is still no runtime class witness. The sugar branch must adopt these calls before claiming its F-S14/F-S15 gaps closed.
 
 **Evidence.** Development/production runtime and type tests cover base/subclass discharge, same-kind sibling propagation, unknown IDs, frozen values and native author Errors. Real production server/client bundles exercise the server-function HTTP handler and client reference (no JSON imitation), class identity and selective branches. Docs streams/hydrations exercise `/docs/missing` and a sibling route in development and production, pinning client `instanceof`, kind/message/own data and fallback selection. The new RPC step joins the gate; the baseline is extended only for that added step.
+
+### D-123 — Stable identity and per-file emit: emitters stay hot-replaceable
+
+**Decided (Dev, 2026-10-13).** Constraints on every emitter that ships code: the D-120 return of the native rewrite, the parked islands/eager emitters (D-114), and the lazy builder. Nothing is implemented by this entry. D-118–D-122 are numbered on other branches (`claude/inspiring-heisenberg-mes3s5`, `proto/sugar-types`).
+
+**Why.** Hot module replacement, the lazy builder (`resume(root)`, descriptors, keyed attachment) and islands with client slots all need the same primitive: a running component as *(stable code ID, captured environment)*. An audit on 2026-10-13 found nothing in the repository designed against HMR. It also found the prototypes giving up stable identity in ways that are cheap to avoid now:
+
+- `proto/compiler`: ordinal root and inert IDs (`eager.js:114, 239`: `cy${i+1}-`, `ci${n}-`); authored files sliced into `__compiler_<Name>` / `__dep` modules; a one-shot plan from `readdirSync` over `src` (`eager.js:43-45`); component shapes pinned by SHA-256 (`server-components.js:63-78`); literal slot keys.
+- Sugar lowering (`proto/sugar`): closed-world (`sugar.js:995`), up to 24 full `ts.createProgram` rebuilds, a single cache entry per project, cleared on any change (`vite.js:58-66`). Babel counter names (`_state2`) shift when an earlier site is added, including because of a fact from another file. D-120 confines this to `"use yield"` files and `emit: "lowered"`. Native apps ship plain Solid, so their HMR is Solid's.
+- Analyzer IDs are `module:byteOffset` (`analysis.js:39`, `semantic.js:566, 1195`).
+- Already in the right direction: C0's slot key, "(region call-site, slot site, enclosing keyed row identities)… not response positions" (`compiler-c0.md:144`); C0's per-file summaries with a `buildEnd` fixpoint and importer invalidation through Vite's module graph (`compiler-c0.md:279, 334`); D-117's stable failure IDs; the capture rule's codec test; D-047's `moduleUrl`.
+
+**Rules.**
+
+1. **One identity scheme.** An emitted ID is `<root-relative module path>#<Name>[/<role or child name>…]`, built from authored names, for example `src/todos.tsx#TodoList`, `#TodoList/add`, `#FetchError`, `#ThemeCtx`. It covers components, failure classes (the default derivation of D-117's IDs; generated `registerFailure` calls use it), contexts, `$event`s, island regions and slots (C0's slot key composes these IDs with keyed row identities), and lazy chunks. Byte offsets, traversal ordinals and uid counters never appear in emitted code. Analyzer offset IDs stay internal to reports. A site with no name to derive from gets its enclosing ID plus its role; if that is ambiguous, the emitter refuses rather than numbering.
+2. **Per-file emit.** A file's emitted code is a function of its own contents and the summaries of the modules it imports. A summary lists, per export: routine or not, failure set, required contexts, and a color signature (P/E/W/R). Summaries are cached by content hash. A change recomputes a module's dependents only when its summary changes. That set of changed summaries is also the editor's re-check set and the HMR propagation set, and the plugin returns it from `handleHotUpdate`. No emitter scans the source directory.
+3. **Generated names come from source names**, scoped to their component, not from file-wide counters.
+4. **Virtual and sliced modules** get IDs derived from their source path plus the component ID, and are invalidated with that source.
+5. **Dev can always run the unoptimized program** (D-120's default). Every behavior that differs between dev and optimized output is recorded, as D-115/D-120 record theirs.
+6. **Explicit setup → view environment.** When lowering emits code again, a view's captured setup bindings are an explicit named record, not a lexical closure. The same output then lets a view be swapped while state is kept (HMR), rebuilt from a serialized environment (lazy builder), and described by data (islands). State slots are keyed by binding name, not by creation order.
+7. **The color signature is data.** The checker exports each component's P/E/W/R. An edit that keeps a component's signature is accepted in its own module. One that changes it propagates to the importers, whose `Errored`, `Loading` or provider may no longer fit, or the dev overlay names the missing boundary.
+
+**Not decided.** When HMR itself is built, and how live instances are registered in dev.
+
+### D-124 — Library identity survives module re-execution in development
+
+**Decided (Dev, 2026-10-13); not implemented.** This amends D-117's matching rule. It is the runtime half of D-123: re-executing an edited module must not crash or silently change routing.
+
+**Findings (main at 29e6082).** `registerFailure` throws `Failure wire ID already registered` when a re-executed module registers a new class under its existing ID (`failure.ts:14`). Failure matching is `instanceof` (`runtime.ts:64-66`, used by `Errored`, `attempt` and bind routing), so after a swap an `Errored({ catch: [X] })` can stop catching an `X` without any error. Contexts match by object identity (`useContext(ctx)`); the dev `options.name` appears only in the `NO_PROVIDER` message. A re-executed context module therefore separates readers from providers.
+
+**Rules.**
+
+1. **Re-registration.** In development, `registerFailure(NewClass, id)` with an ID already held by another class replaces the registration. The old class keeps its ID, so live old instances still revive and match. Production keeps D-117's refusal.
+2. **Matching registered classes by ID** (amends D-117 "runtime matching uses class identity"). An error matches a registered class `X` when any constructor on its prototype chain is registered under `X`'s ID. Matching stays nominal; the ID is the name. Subclass coverage is unchanged. Unregistered classes keep `instanceof`. This applies in both builds, so development and production route identically.
+3. **Contexts.** In development, `createContext` with a stable ID (D-123 rule 1, or the existing `options.name`) returns the existing context object for that ID, so providers and readers created before and after re-execution keep matching.

@@ -52,8 +52,15 @@ export type {
   UnnamedContext,
   YieldContext
 } from "./context.js";
-export { createSlot, $slot } from "./slot.js";
-export type { Slot } from "./slot.js";
+export { createSlot, $slot, compose } from "./slot.js";
+export type {
+  Slot,
+  Part,
+  Composed,
+  ComposedStore,
+  ComposedState,
+  ComposeEntry
+} from "./slot.js";
 export { For, Show, Switch, Match, Repeat, Loading, Errored } from "./flow.js";
 export type { Reset } from "./flow.js";
 export { render, hydrate, renderToString, renderToStream } from "./render.js";

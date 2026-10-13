@@ -1849,7 +1849,18 @@ export function $event<Args extends unknown[] = [], Y extends EventOp = never, R
     };
     return result;
   };
-  const handler: any = (...args: Args) => call(null, args);
+  // D-118 (D-028 for events): a handler is called by routine code (`yield*
+  // save(x)` in an `$event` or an effect phase) or by the DOM through a bind
+  // (the bound wrapper calls `call` itself); called with no routine running
+  // — a timer, a promise callback, plain or foreign code — it fails here
+  const handler: any = (...args: Args) => {
+    if (__DEV__ && state.host === NONE)
+      throw devError(
+        "EVENT_OUTSIDE_RUN",
+        `${body.name ? `the $event ${body.name}` : "an $event"}${name ? ` of <${name}>` : ""} called outside a routine: an event is called with yield* save(x) in an $event or an $effect, or by the DOM where a view binds it (onClick={yield* save}); handed to plain code it is not called.`
+      );
+    return call(null, args);
+  };
   handler[EVENT_MARK] = true;
   handler[CALL] = call;
   // `yield* save`: bind it (D-072, D-085) — a wrapper for the DOM, routing

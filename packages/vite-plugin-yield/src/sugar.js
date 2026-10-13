@@ -1077,14 +1077,14 @@ function pass(code, filename, program, native = false) {
       if (native && member && fn.node.kind === "get" && !fn.node.async) {
         const self = fn.scope.generateUidIdentifier("self");
         let usesThis = false;
-        fn.get("body").traverse({
-          Function(q) {
+        /** @type {Path} */ (fn.get("body")).traverse({
+          Function(/** @type {Path} */ q) {
             if (!q.isArrowFunctionExpression()) q.skip();
           },
-          Class(q) {
+          Class(/** @type {Path} */ q) {
             q.skip();
           },
-          ThisExpression(q) {
+          ThisExpression(/** @type {Path} */ q) {
             usesThis = true;
             q.replaceWith(t.cloneNode(self));
           }
@@ -1170,7 +1170,11 @@ function pass(code, filename, program, native = false) {
         // (`nativeHole`). Bound before the view's statement, in a thunk the
         // hole calls: inline, JSX's contextual typing widens its colors to
         // `any` (a `try` in it).
-        for (let up = hostCall.parentPath; up && !up.isFunction(); up = up.parentPath)
+        for (
+          let up = /** @type {Path | null} */ (hostCall.parentPath);
+          up && !up.isFunction();
+          up = up.parentPath
+        )
           if (up.isJSXExpressionContainer()) {
             const held = t.callExpression(t.identifier("__nativeHole"), [hostCall.node]);
             const host = hostCall.getFunctionParent();
@@ -1212,7 +1216,7 @@ function pass(code, filename, program, native = false) {
         !phase &&
         !nativeHost &&
         hostCall?.isCallExpression() &&
-        hostCall.node.arguments.includes(fn.node) &&
+        hostCall.node.arguments.includes(/** @type {any} */ (fn.node)) &&
         t.isMemberExpression(hostCall.node.callee) &&
         ARRAY_CALLBACKS.has(key(hostCall.node.callee.property) ?? "")
       ) {
@@ -1453,7 +1457,7 @@ function pass(code, filename, program, native = false) {
           if (held === object) delegate(object);
           return;
         }
-        const store = object.node,
+        const store = /** @type {any} */ (object.node),
           state = path.scope.generateUidIdentifier("state");
         held.replaceWith(state);
         chain.replaceWith(
@@ -1878,7 +1882,8 @@ function pass(code, filename, program, native = false) {
       if (
         path.parentPath.isJSXAttribute() &&
         /^on/.test(key(path.parentPath.node.name) ?? "") &&
-        e.node.elements?.length === 2 &&
+        t.isArrayExpression(e.node) &&
+        e.node.elements.length === 2 &&
         first?.isExpression() &&
         !first.isYieldExpression() &&
         brand(type(first), "EVENT")
@@ -2423,7 +2428,7 @@ function accessorArguments(code, filename, program) {
     CallExpression(q) {
       // The routine: the call's own function, or the one running a thunk at
       // once (an attempt's `() => twice(n)`).
-      const host = q.findParent(f => f.isFunction() && f.node.generator);
+      const host = q.findParent(f => f.isFunction() && !!f.node.generator);
       if (!host) return;
       const own = q.getFunctionParent() === host;
       const thunk = own ? null : q.getFunctionParent();

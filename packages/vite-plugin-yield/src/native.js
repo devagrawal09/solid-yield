@@ -131,7 +131,6 @@ function storeRoot(at, value) {
     ].includes(api.name)
   );
 }
-/** @param {Path} p */
 /** A member chain of names (`props.onClick`) as a type query's entity name.
  * @param {any} node @returns {any} */
 function entityName(node) {
@@ -160,7 +159,7 @@ function spreadHandlers(arg) {
     if (
       !binding?.constant ||
       !binding.path.isVariableDeclarator() ||
-      !binding.referencePaths.every(ref => domSpread(ref.parentPath))
+      !binding.referencePaths.every(/** @param {any} ref */ ref => domSpread(ref.parentPath))
     )
       return [];
     object = binding.path.get("init");
@@ -179,6 +178,7 @@ function spreadHandlers(arg) {
             t.isIdentifier(property.node.value.callee, { name: "$event" })))
     );
 }
+/** @param {Path} p */
 function imported(p) {
   if (!p.isIdentifier() && !p.isJSXIdentifier()) return null;
   const b = p.scope.getBinding(p.node.name);
@@ -1280,6 +1280,7 @@ function surface(
           /** An event attribute's or a ref's value: a handler becomes an
            * `$event` typed by its element.
            * @param {any} fn @param {string} attribute */
+          /** @param {Path} fn @param {string} attribute @param {boolean} [bound] */
           const handler = (fn, attribute, bound = false) => {
             const isRef = attribute === "ref";
             // Solid's bound form, `onClick={[handler, data]}`: the handler is

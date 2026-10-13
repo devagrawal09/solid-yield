@@ -101,10 +101,9 @@ export function moduleStateCall(q) {
  * @param {import("@babel/core").NodePath<any>} path */
 export const inModuleRoot = path =>
   !!path.findParent(
-    q =>
-      moduleStateCall(q) &&
-      q.get("callee").isIdentifier() &&
-      t.isIdentifier(q.get("callee").scope.getBinding(q.node.callee.name)?.path.node.imported, {
-        name: "createRoot"
-      })
+    /** @param {any} q */ q => {
+      if (!moduleStateCall(q) || !q.get("callee").isIdentifier()) return false;
+      /** @type {any} */ const spec = q.scope.getBinding(q.node.callee.name)?.path.node;
+      return t.isIdentifier(spec?.imported, { name: "createRoot" });
+    }
   );

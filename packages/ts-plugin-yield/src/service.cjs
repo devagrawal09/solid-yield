@@ -337,29 +337,32 @@ function createVirtualService(ts, host, config = {}) {
     while (scope.parent && !ts.isCallExpression(scope) && !ts.isFunctionLike(scope))
       scope = scope.parent;
     if (ts.isCallExpression(scope)) scope = scope.arguments.find(ts.isFunctionLike) ?? scope;
-    const yields = [];
-    function operations(n) {
-      if (n !== scope && ts.isFunctionLike(n)) return;
-      if (ts.isYieldExpression(n) && n.expression) {
-        let value = checker.getTypeAtLocation(n.expression);
-        const iterator = value.getProperties().find(p => p.name.startsWith("__@iterator@"));
-        const signature =
-          iterator && checker.getTypeOfSymbolAtLocation(iterator, n).getCallSignatures()[0];
-        if (signature) value = checker.getReturnTypeOfSignature(signature);
-        if (value.symbol?.name === "Generator") value = checker.getTypeArguments(value)[0];
-        const type = checker.typeToString(value, n, ts.TypeFormatFlags.NoTruncation);
-        yields.push({ node: n, type });
-      }
-      ts.forEachChild(n, operations);
+    /** The yields of a generator, each with its library operation type. */
+    function operationsOf(fn) {
+      const found = [];
+      (function visit(n) {
+        if (n !== fn && ts.isFunctionLike(n)) return;
+        if (ts.isYieldExpression(n) && n.expression) {
+          let value = checker.getTypeAtLocation(n.expression);
+          const iterator = value.getProperties().find(p => p.name.startsWith("__@iterator@"));
+          const signature =
+            iterator && checker.getTypeOfSymbolAtLocation(iterator, n).getCallSignatures()[0];
+          if (signature) value = checker.getReturnTypeOfSignature(signature);
+          if (value.symbol?.name === "Generator") value = checker.getTypeArguments(value)[0];
+          const type = checker.typeToString(value, n, ts.TypeFormatFlags.NoTruncation);
+          found.push({ node: n, type });
+        }
+        ts.forEachChild(n, visit);
+      })(fn);
+      return found;
     }
-    operations(scope);
+    const yields = operationsOf(scope);
 
-    let culprit;
+    let culprit, kind;
+    const pick = pattern => (kind = pattern) && (culprit = yields.find(y => pattern.test(y.type)));
     if (message.includes("SetupOp")) {
-      culprit = yields.find(y => /\b(Read|Source|Path)\b/.test(y.type));
-      if (culprit) code = "READ_IN_SETUP";
-      else if ((culprit = yields.find(y => /\bRaise\b/.test(y.type))))
-        code = "NATIVE_SETUP_FAILURE";
+      if (pick(/\b(Read|Source|Path)\b/)) code = "READ_IN_SETUP";
+      else if (pick(/\bRaise\b/)) code = "NATIVE_SETUP_FAILURE";
       else if (message.includes("Element")) {
         walk(ts, scope, n => {
           if (!culprit && (ts.isJsxElement(n) || ts.isJsxSelfClosingElement(n)))
@@ -368,17 +371,70 @@ function createVirtualService(ts, host, config = {}) {
         if (culprit) code = "JSX_IN_SETUP";
       }
     } else if (/MemoOp|HoleOp|ViewOp|ComputeOp/.test(message)) {
-      culprit = yields.find(y => /\b(Write|EventCallOp)\b/.test(y.type));
-      if (culprit) code = "WRITE_IN_REACTIVE";
-      else {
-        culprit = yields.find(y => /\bCreate/.test(y.type));
-        if (culprit) code = "CREATE_OUTSIDE_SETUP";
+      if (pick(/\b(Write|EventCallOp)\b/)) code = "WRITE_IN_REACTIVE";
+      else if (pick(/\bCreate/)) code = "CREATE_OUTSIDE_SETUP";
+    } else if (/EventOp|EffectPhaseOp/.test(message)) {
+      // An event and an effect's phase write, but create nothing either.
+      if (pick(/\bCreate/)) code = "CREATE_OUTSIDE_SETUP";
+    }
+    // A value prop given as a hole (a flow control's `each` or `when`, a
+    // component's prop) runs where it is read, as a memo does: a write or a
+    // creation in it is the error, though TypeScript reports the whole call.
+    if (!culprit && (!code || code === "SETTLED_PROP") && ts.isCallExpression(scope)) {
+      const holes = scope.arguments
+        .filter(ts.isObjectLiteralExpression)
+        .flatMap(o => o.properties)
+        .filter(
+          p =>
+            ts.isPropertyAssignment(p) &&
+            ts.isFunctionExpression(p.initializer) &&
+            !!p.initializer.asteriskToken &&
+            // children and fallback are lazy views (no parameters) or rows,
+            // whose setup may create
+            (!["children", "fallback"].includes(p.name.getText(sf)) ||
+              !p.initializer.parameters.length)
+        );
+      for (const hole of holes) {
+        const ops = operationsOf(hole.initializer);
+        if ((culprit = ops.find(y => /\bWrite\b/.test(y.type)))) {
+          [code, kind] = ["WRITE_IN_REACTIVE", /\bWrite\b/];
+          break;
+        }
+        if ((culprit = ops.find(y => /\bCreate/.test(y.type)))) {
+          [code, kind] = ["CREATE_OUTSIDE_SETUP", /\bCreate/];
+          break;
+        }
       }
     }
-    if (culprit) {
-      start = culprit.node.expression?.getStart(sf) ?? culprit.node.getStart(sf);
-      length = (culprit.node.expression ?? culprit.node).getWidth(sf);
+    const span = c => ({
+      start: c.node.expression?.getStart(sf) ?? c.node.getStart(sf),
+      length: (c.node.expression ?? c.node).getWidth(sf)
+    });
+    // A wrapper the lowering generated has no authored position: an event
+    // handler bound by name runs as `$event(function* (...args) { return yield*
+    // add(...args); })`. The operation is inside the routine it delegates to.
+    for (let depth = 0; culprit?.node.expression && depth < 4; depth++) {
+      const at = locate(s.positions.get(sf.fileName), span(culprit).start, span(culprit).length);
+      const call = culprit.node.expression;
+      if ((at && !at.generated) || !ts.isCallExpression(call)) break;
+      // a generated wrapper around an inline routine (`__nativeHole(function* () { … })`)
+      // or a call of a routine bound by name
+      const inline = call.arguments.find(a => ts.isFunctionExpression(a) && !!a.asteriskToken);
+      const declaration =
+        !inline && ts.isIdentifier(call.expression)
+          ? checker.getSymbolAtLocation(call.expression)?.valueDeclaration
+          : undefined;
+      const routine =
+        inline ??
+        (declaration && ts.isVariableDeclaration(declaration)
+          ? declaration.initializer
+          : declaration);
+      if (!routine || !ts.isFunctionLike(routine) || !routine.asteriskToken) break;
+      const inner = operationsOf(routine).find(y => kind.test(y.type));
+      if (!inner) break;
+      culprit = inner;
     }
+    if (culprit) ({ start, length } = span(culprit));
     let at =
       locate(s.positions.get(sf.fileName), start, length) ??
       locate(s.positions.get(sf.fileName), start);

@@ -108,6 +108,12 @@ const cases = [
     "export function Label(): unknown {\n  return <span>label</span>;\n}"
   ],
   [
+    "SUGAR_ASYNC",
+    "4:31",
+    "an async effect phase: Solid refuses its promise as a cleanup (review slot R07)",
+    'import { createEffect, createSignal } from "solid-js";\nexport function Counter() {\n  const [count, set] = createSignal(0);\n  createEffect(() => count(), async n => {\n    set(n + 1);\n  });\n  return <p>{count()}</p>;\n}'
+  ],
+  [
     "SUGAR_COMPONENT",
     "1:8",
     "a top-level JSX function without a PascalCase name",

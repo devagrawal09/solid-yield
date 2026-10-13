@@ -275,6 +275,22 @@ export function lowerNativeEffects(files, report) {
         const producer =
           api?.source === "solid-js" &&
           ["createMemo", "createProjection", "createOptimisticStore"].includes(api.name);
+        // An effect's phase returns its cleanup or nothing: an async one returns
+        // a promise, which Solid refuses ("invalid cleanup value" in
+        // development; in production it is called as the next cleanup).
+        // Lowered as a routine, its promise would be gone and the check clean.
+        if (
+          api?.source === "solid-js" &&
+          ["createEffect", "createRenderEffect"].includes(api.name) &&
+          call.isCallExpression() &&
+          call.node.arguments[1] === q.node
+        )
+          throw nativeRefusal(
+            file,
+            q.node,
+            "SUGAR_ASYNC",
+            "An effect's phase returns its cleanup; an async function returns a promise, which Solid refuses."
+          );
         const kinds = [...(report.at(file, q.node.start ?? 0)?.fails ?? [])];
         q.node.async = false;
         if (q.isArrowFunctionExpression()) q.arrowFunctionToExpression();

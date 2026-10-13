@@ -1,6 +1,10 @@
 const fs = require("node:fs");
 const { join } = require("node:path");
-// Ten recoverable review slots; three historically overlap as setup reads.
+// Ten recoverable review slots (three historically overlap as setup reads),
+// then creations in an event and in an effect phase (found by a mutation probe:
+// both reported only as GENERATED_TYPE before), and writes and creations in a
+// flow control's or a component's prop and in a call in a hole (found by the
+// create-in-hole operator: silent, or a generated LAZY_VIEW, before).
 module.exports = [
   {
     slot: "T02",
@@ -63,6 +67,42 @@ module.exports = [
     file: "missing-context",
     code: "NO_PROVIDER",
     line: 5
+  },
+  {
+    slot: "C01",
+    file: "event-create",
+    code: "CREATE_OUTSIDE_SETUP",
+    line: 5
+  },
+  {
+    slot: "C02",
+    file: "phase-create",
+    code: "CREATE_OUTSIDE_SETUP",
+    line: 7
+  },
+  {
+    slot: "C03",
+    file: "when-write",
+    code: "WRITE_IN_REACTIVE",
+    line: 5
+  },
+  {
+    slot: "C04",
+    file: "each-create",
+    code: "CREATE_OUTSIDE_SETUP",
+    line: 6
+  },
+  {
+    slot: "C05",
+    file: "prop-write",
+    code: "WRITE_IN_REACTIVE",
+    line: 7
+  },
+  {
+    slot: "C06",
+    file: "call-create",
+    code: "CREATE_OUTSIDE_SETUP",
+    line: 7
   }
 ].map(c => ({
   ...c,

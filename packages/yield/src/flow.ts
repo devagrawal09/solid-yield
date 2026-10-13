@@ -61,7 +61,11 @@ import type {
   RowRoutine,
   Settle,
   Source,
-  ViewOp
+  ViewOp,
+  Write,
+  Create,
+  Cleanup,
+  HoleOp
 } from "./types.js";
 import type { OpsOfHole } from "./holes.js";
 
@@ -81,6 +85,18 @@ export type Ops<V> = V extends (...args: any[]) => infer R
     ? OpsOfHole<V>
     : OpsOfHole<R>
   : OpsOfHole<V>;
+/**
+ * A value prop given as a hole (`when: function* () { … }`) runs where the
+ * control reads it, as a memo does: it may not write, create or clean up (the
+ * runtime refuses each there). One that does is checked against a hole's
+ * operations, so the error names the operation; before, only its colors were
+ * kept and the operation was dropped.
+ */
+type HoleCheck<W> = W extends () => Generator<infer Y, infer T, any>
+  ? [Extract<Y, Write | Create<string, any> | Cleanup>] extends [never]
+    ? unknown
+    : () => Generator<HoleOp, T, any>
+  : unknown;
 /**
  * A flow control's view: the colors of its sources and its content (D-059,
  * D-063, D-062), and their may-wait marker (D-075).
@@ -247,7 +263,7 @@ type EachRule<W> = [ValueOf<W>] extends [readonly unknown[] | false | null | und
 /** Refuse JSX returned from a row before inferring its view's recursive colors. */
 function ForYield<W, F>(
   props: {
-    each: W;
+    each: W & HoleCheck<W>;
     keyed?: boolean;
     fallback?: LazyParam<F, Fallback, "fallback">;
     children: MarkupRow<[item: ItemOf<W>, index: Source<number>]>;
@@ -255,7 +271,7 @@ function ForYield<W, F>(
 ): ComponentView<false, never>;
 function ForYield<W, Y, VY, R, F>(
   props: {
-    each: W;
+    each: W & HoleCheck<W>;
     fallback?: LazyParam<F, Fallback, "fallback">;
     keyed?: boolean | ((item: EachOf<NonNullable<ValueOf<W>>>) => any);
     children: RowRoutine<[item: ItemOf<W>, index: Source<number>], Y, VY, R>;
@@ -264,7 +280,7 @@ function ForYield<W, Y, VY, R, F>(
 /** `h`: `For({ each: todos, children: todo => h(TodoItem, { todo }) })`. */
 function ForYield<W, C, F>(
   props: EachRule<W> & {
-    each: W;
+    each: W & HoleCheck<W>;
     fallback?: LazyParam<F, Fallback, "fallback">;
     keyed?: boolean | ((item: EachOf<NonNullable<ValueOf<W>>>) => any);
     children: (
@@ -299,19 +315,19 @@ function ForYield(props: any): any {
 /** `{yield* Repeat({ count: n, children: function* (index) { … } })}`: the index is a source. */
 /** Refuse JSX returned from a row before inferring its view's recursive colors. */
 function RepeatYield<W, F>(props: {
-  count: W;
+  count: W & HoleCheck<W>;
   keyed?: boolean;
   fallback?: LazyParam<F, Fallback, "fallback">;
   children: MarkupRow<[index: Source<number>]>;
 }): ComponentView<false, never>;
 function RepeatYield<W, Y, VY, R, F>(props: {
-  count: W;
+  count: W & HoleCheck<W>;
   from?: number | undefined;
   fallback?: LazyParam<F, Fallback, "fallback">;
   children: RowRoutine<[index: Source<number>], Y, VY, R>;
 }): FlowView<Ops<W> | Ops<F> | RowOps<VY, R, Y>>;
 function RepeatYield<W, C extends Children<[index: Source<number>]> | Element, F>(props: {
-  count: W;
+  count: W & HoleCheck<W>;
   from?: number | undefined;
   fallback?: LazyParam<F, Fallback, "fallback">;
   children: LazyParam<C, Children<[index: Source<number>]>, "children">;
@@ -334,19 +350,19 @@ type ValuePath<W> = Path<NonNullable<ValueOf<W>>>;
  */
 /** Refuse JSX returned from a row before inferring its view's recursive colors. */
 function ShowYield<W, F>(props: {
-  when: W;
+  when: W & HoleCheck<W>;
   keyed?: boolean;
   fallback?: LazyParam<F, Fallback, "fallback">;
   children: MarkupRow<[value: ValuePath<W>]>;
 }): ComponentView<false, never>;
 function ShowYield<W, Y, VY, R, F>(props: {
-  when: W;
+  when: W & HoleCheck<W>;
   keyed?: boolean;
   fallback?: LazyParam<F, Fallback, "fallback">;
   children: RowRoutine<[value: ValuePath<W>], Y, VY, R>;
 }): FlowView<Ops<W> | Ops<F> | RowOps<VY, R, Y>>;
 function ShowYield<W, C extends Children<[value: ValuePath<W>]> | Element, F>(props: {
-  when: W;
+  when: W & HoleCheck<W>;
   keyed?: boolean;
   fallback?: LazyParam<F, Fallback, "fallback">;
   children: LazyParam<C, Children<[value: ValuePath<W>]>, "children">;
@@ -379,18 +395,18 @@ function SwitchYield(props: any): any {
 /** A branch of `Switch`; its children a row (its value a path) or a lazy view. */
 /** Refuse JSX returned from a row before inferring its view's recursive colors. */
 function MatchYield<W, F>(props: {
-  when: W;
+  when: W & HoleCheck<W>;
   keyed?: boolean;
   fallback?: LazyParam<F, Fallback, "fallback">;
   children: MarkupRow<[value: ValuePath<W>]>;
 }): ComponentView<false, never>;
 function MatchYield<W, Y, VY, R>(props: {
-  when: W;
+  when: W & HoleCheck<W>;
   keyed?: boolean;
   children: RowRoutine<[value: ValuePath<W>], Y, VY, R>;
 }): FlowView<Ops<W> | RowOps<VY, R, Y>>;
 function MatchYield<W, C extends Children<[value: ValuePath<W>]> | Element>(props: {
-  when: W;
+  when: W & HoleCheck<W>;
   keyed?: boolean;
   children: LazyParam<C, Children<[value: ValuePath<W>]>, "children">;
 }): FlowView<Ops<W> | Ops<C>>;
@@ -474,7 +490,7 @@ function content(props: any, name: string): () => unknown {
  */
 function LoadingYield<C, F, O = never>(props: {
   fallback?: LazyParam<F, Fallback, "fallback">;
-  on?: O;
+  on?: O & HoleCheck<O>;
   children: LazyParam<C, Children<[]>, "children">;
 }): ComponentView<
   PendingOf<Ops<F>>,

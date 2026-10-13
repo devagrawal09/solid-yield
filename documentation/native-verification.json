@@ -645,9 +645,13 @@
       "slots": [
         "R07"
       ],
-      "file": "packages/vite-plugin-yield/test/.native-generated/async-effect.tsx",
-      "stage": "accepted",
-      "diagnostics": []
+      "stage": "transform",
+      "diagnostics": [
+        {
+          "code": "SUGAR_ASYNC",
+          "message": "[SUGAR_ASYNC] An effect's phase returns its cleanup; an async function returns a promise, which Solid refuses. (<root>/packages/vite-plugin-yield/test/.native-generated/async-effect.tsx:1:191)"
+        }
+      ]
     },
     {
       "id": "missing-context",

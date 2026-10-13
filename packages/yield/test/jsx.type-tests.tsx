@@ -1673,3 +1673,54 @@ export const PromiseEach = For({
     });
   }
 });
+
+// A value prop given as a hole runs where the control reads it, as a memo
+// does: it may not write or create (the runtime refuses both there). Before,
+// only its colors were kept, and these checked clean.
+export const HoleProps = component(function* HoleProps() {
+  const [count, setCount] = yield* $signal(1);
+  const [names] = yield* $signal(["a"]);
+  return view(function* () {
+    return (
+      <div>
+        {
+          yield* Show({
+            when: function* () {
+              return (yield* count) > 0;
+            },
+            children: function* () {
+              return <p>read only</p>;
+            }
+          })
+        }
+        {
+          yield* Show({
+            // @ts-expect-error a write in Show's `when` (no overload matches)
+            when: function* () {
+              yield* setCount(2);
+              return (yield* count) > 0;
+            },
+            children: function* () {
+              return <p>writes</p>;
+            }
+          })
+        }
+        {
+          // @ts-expect-error a memo created in For's `each` (no overload matches)
+          yield* For({
+            each: function* () {
+              return yield* yield* $memo(function* () {
+                return yield* names;
+              });
+            },
+            children: function* (name) {
+              return view(function* () {
+                return <li>{yield* name}</li>;
+              });
+            }
+          })
+        }
+      </div>
+    );
+  });
+});

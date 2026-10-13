@@ -718,7 +718,9 @@ describe("props", () => {
   it("a reactive prop is a path; forwarding a source forwards the read; paths walk deep; a held prop is its value (D-118)", () => {
     let setName!: (v: string) => void;
     let childRuns = 0;
-    const Card = component(function* (props: Props<{ user: Source<{ name: string }>; tag: string }>) {
+    const Card = component(function* (
+      props: Props<{ user: Source<{ name: string }>; tag: string }>
+    ) {
       return view(function* () {
         childRuns++;
         return (

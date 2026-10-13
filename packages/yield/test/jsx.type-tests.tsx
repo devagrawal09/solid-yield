@@ -738,7 +738,9 @@ const readsInRowSetup = function* (c: Path<Comment>) {
 export const badRowSetup = For({ each: comments, children: readsInRowSetup });
 
 // --- paths through nullable values and nested sources --------------------------------------------
-export const Nullable = component(function* (props: Props<{ me: Source<{ name: string } | null> }>) {
+export const Nullable = component(function* (
+  props: Props<{ me: Source<{ name: string } | null> }>
+) {
   return view(function* () {
     // through a nullable object a key may read `undefined`
     const name: Source<string | undefined> = props.me.name;

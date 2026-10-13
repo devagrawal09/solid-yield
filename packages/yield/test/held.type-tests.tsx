@@ -66,7 +66,12 @@ type _maybe = Expect<Equal<Seen["maybe"], Path<number> | undefined>>;
 // --- what the caller passes ------------------------------------------------------------------
 
 const Child = component(function* Child(
-  props: Props<{ room: string; live: Source<string>; onPick: Handler<[theme: string]>; tools: Tools }>
+  props: Props<{
+    room: string;
+    live: Source<string>;
+    onPick: Handler<[theme: string]>;
+    tools: Tools;
+  }>
 ) {
   const pick = $event(function* () {
     // a handler, and a handler in a bag: called with one yield*
@@ -94,7 +99,12 @@ export const Caller = component(function* Caller() {
   const [room] = yield* $signal("lobby");
   const onPick = $event(function* (_t: string) {});
   const clear = $event(function* () {});
-  const tools: Tools = { label: constant("l") as Path<string>, count: constant(1), clear, name: "n" };
+  const tools: Tools = {
+    label: constant("l") as Path<string>,
+    count: constant(1),
+    clear,
+    name: "n"
+  };
   return view(function* () {
     return (
       <>
@@ -138,7 +148,9 @@ export const Forwards = component(function* Forwards(props: Props<{ onSave: type
 // --- contexts --------------------------------------------------------------------------------
 
 type _heldContext = Expect<Equal<ContextValue<Tools>, Tools>>;
-type _liveContext = Expect<Equal<ContextValue<Source<string, never, true>>, Path<string, never, true>>>;
+type _liveContext = Expect<
+  Equal<ContextValue<Source<string, never, true>>, Path<string, never, true>>
+>;
 // a required context's read is a requirement; a sentinel default adds none (a module that also
 // works alone, D-118)
 const RequiredTools = createContext<Tools, "RequiredTools">(undefined, { name: "RequiredTools" });

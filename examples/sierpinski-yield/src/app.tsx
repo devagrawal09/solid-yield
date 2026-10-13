@@ -113,7 +113,14 @@ const Container = component(function* Container(
           transform: "scaleX(" + (yield* props.scale) / 2.1 + ") scaleY(0.7) translateZ(0.1px)"
         }}
       >
-        {yield* Triangle({ x: constant(0), y: constant(0), s: constant(1000), children: props.seconds })}
+        {
+          yield* Triangle({
+            x: constant(0),
+            y: constant(0),
+            s: constant(1000),
+            children: props.seconds
+          })
+        }
       </div>
     );
   });

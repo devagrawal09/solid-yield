@@ -224,12 +224,14 @@ describe("D-118: props are given as they are", () => {
       return view(function* () {
         return (
           <>
-            {yield* Child({
-              // @ts-expect-error [HANDLER_PROP] a handler prop takes an $event, not a hole
-              onClear: function* () {
-                return clear;
-              }
-            })}
+            {
+              yield* Child({
+                // @ts-expect-error [HANDLER_PROP] a handler prop takes an $event, not a hole
+                onClear: function* () {
+                  return clear;
+                }
+              })
+            }
           </>
         );
       });

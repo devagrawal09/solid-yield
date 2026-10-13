@@ -33,8 +33,11 @@ insertion itself: on expressions the lowered routine computes what Solid
 computes and its reads are exactly its dependencies (S20), props are getters
 read where the child reads them (S21), an event writes what Solid writes
 while exactly the dependents rerun (S22), boundaries, lists and effects
-compose these (S23), and `untrack` and inline routines (IIFEs, local
-functions, getters, methods) keep Solid's outcome and tracked reads (S24).
+compose these (S23), `untrack` and inline routines (IIFEs, local
+functions, getters, methods) keep Solid's outcome and tracked reads (S24),
+and statements (locals, branches, loops, `throw`, `try`/`catch`) leave
+Solid's locals, reads, suspensions and failures (S25); `sugar.md` maps every
+form of the native surface check to these.
 [SugarProofs.lean](lean/SugarProofs.lean) proves them on top of `YieldProofs`,
 each with a counterexample for the rejected alternative. Both libraries are
 **machine-checked** by Lean 4.24.0 (2026-10-12; `lake build` in `lean/`, no

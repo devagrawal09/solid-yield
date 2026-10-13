@@ -43,6 +43,7 @@ premise: what the lowering or runtime must establish for the theorem to apply.
 | **S22 Events and reruns** (2026-10-13): an event writes what Solid writes; a computation reruns exactly when it must | `event_preserves`, `event_untouched`, `untouched_keeps`, `memo_cache_consistent` | An event's writes are its setters' calls in order, each value computed as its expression is (S1, S3); Solid reruns a computation when an event wrote one of its tracked reads. | `native:insertion` (twelve writes per program, every slot compared after each), the native parity harnesses |
 | **S23 Boundaries, lists and effects** (2026-10-13): they compose S20–S22 | `boundary_sees_same`, `rows_preserve`, `effect_preserves` | `Errored` and `Loading` map the outcome their content gives (a failure, a suspension) to the fallback; a list runs its row once per item with the item as the row's prop; an effect hands its compute's value to a phase that writes as an event does (S8 for its cleanup). | `native:insertion` (every slot inside its own `Errored` and `Loading`), the native parity harnesses (Todos' lists, the dashboard's effects) |
 | **S24 Untracked reads and inline routines** (2026-10-13, D-124): `untrack` keeps the outcome and tracks nothing; an IIFE, a called-only local function, a getter or a method is its caller's | `surface_preserves`, `untrack_tracks_nothing`, `inline_reads_are_hosts`, `inline_pending_suspends_host` | Solid's `untrack` computes its body without tracking (a pending read still suspends); a function called in place runs its body where it is called. | `native:surface` (the pending variant: each form's pending read reported where Solid suspends), `native-forms.test.js` |
+| **S25 Statements** (2026-10-13, D-124): locals, sequencing, branches, loops, `throw` and `try` | `statements_preserve` (with `runS_bind`, `toS_run`, `iter_run`), `catch_passes_pending`, `catch_takes_failure` | A statement's expressions are S20's with the locals they name put in; a loop's count is read once (an array callback's list, a bound); `try` is `nativeTry`, which hands a failure to the handler and rethrows a suspension. | `native:surface` (every statement form in all seven hosts, reading, writing and pending), the surface mutants (`scripts/mutation`, 70 programs) |
 | **S8 Effect cleanup** (F-S42): a returned cleanup runs before the next run and at disposal, once each | `clean_mem_iff`, `run_mem_iff`, `clean_before_next_run`; `ignoring_never_cleans` (the old lowering) | `onCleanup` registered in the effect phase runs before the owner's next run and at disposal (Solid 2's owner contract). | `native-effect-cleanup.test.js` |
 
 ## What each result means
@@ -160,6 +161,28 @@ list is the original's promise, which `For`'s type refuses.
 
 **S24.** S20's core gains `untrack(e)` and an inline routine (an IIFE, a local function only ever called, a getter or a method read where it is called). The lowering makes the first `nativeUntrack`, run step by step untracked, and the second a generator delegated in place; the lowered routine still computes Solid's outcome and tracked reads (`surface_preserves`). `untrack` tracks nothing yet keeps its outcome, so a pending read in it still suspends: no color is cast away (`untrack_tracks_nothing`, D-116). An inline routine's reads are its host's (`inline_reads_are_hosts`), and a pending one suspends the host (`inline_pending_suspends_host`) — what a lexical callback run on its own had hidden, and what the native surface check's pending variant found.
 
+**S25.** The surface forms are statements as much as expressions. A statement runs over the locals (an environment) and S20's expressions, with the locals they name put in: an assignment (`const`, `let`, compound assignment, increment, destructuring), a sequence, a branch (`if`, `switch`, a ternary as a statement), a loop whose count is read once (`for`, `for…of`, `for…in`, `while`, `do…while`; an array callback run in place is a loop whose body is an inline routine, S24), `throw`, and `try`/`catch`. The lowered statement, its expressions S20's and its `try` `nativeTry`, leaves Solid's locals, tracks Solid's reads in order and suspends or fails where Solid does (`statements_preserve`). A `catch` takes a failure with the locals at the throw (`catch_takes_failure`) and never a suspension (`catch_passes_pending`): a pending read inside a `try` still suspends the host.
+
+**Every surface form, by what proves it.** The native surface check's forms (`scripts/native-surface/forms.mjs`) each decompose into proved constructs:
+
+| Forms | Constructs | Proofs |
+| --- | --- | --- |
+| `plain`, `ternary`, `logical-and`, `logical-or`, `nullish`, `optional-chain`, `nested-ternary-template`, `typeof-instanceof`, `in-operator`, `casts`, `exponent-bitwise`, `string-concat` | reads, plain calls, sums, conditionals | S20 |
+| `template`, `tagged-template`, `array-literal`, `object-literal`, `array-spread`, `object-spread`, `string-methods`, `math`, `object-statics`, `map-set`, `date`, `regex` | plain calls of read values (a literal is a call building the value) | S20 |
+| `bigint`, `json-stringify` | a plain call that may throw | S20 (`raise`), S18 in a hole, S23 under `Errored` |
+| `store-path`, `store-list` | a read of a path; a structural read (`readStore`) of a list and a loop over it | S20, S25, S9 |
+| `destructure-object`, `destructure-array`, `destructure-default`, `compound-assign`, `increment`, `comma-sequence` | assignments in sequence | S25 |
+| `if-else`, `switch` | branches | S25 |
+| `for-of`, `for-in`, `for-index`, `while`, `do-while`, `labeled-continue` | loops (a `continue` is a branch around the rest of the body) | S25 |
+| `try-catch`, `try-finally` | `try`/`catch` (a `finally` runs on both paths: after the `try`, and in a handler that runs it and rethrows) | S25 |
+| `map`, `filter`, `reduce`, `find`, `some-every`, `sort-copy`, `for-each`, `array-from` | a loop whose body is the callback, run in place | S25, S24, S9 |
+| `iife`, `local-arrow`, `local-function`, `closure-read`, `getter-object`, `getter-this`, `object-method`, `class-method`, `class-instance`, `optional-call`, `reader-helper` | inline routines (the body read where it is called) | S24 (the helper's parameter: S21, D-119) |
+| `untrack` | untracked reads | S24 |
+| `user-generator` | an author's generator, opaque: a call whose failures are unknown | S20 (`call`), S13 (`foreign_driver_unknown`) |
+| `await`, `await-nested`, `await-json`, `await-loop`, `promise-then` (events) | an event's attempts in sequence | S22, S15, S25 |
+
+What the table rests on is the lowering's decomposition of each form, which no proof states: it is checked by `native:surface` (each form in every host, reading, writing and pending, as plain Solid says) and by the surface mutants.
+
 **S8.** The trace of `n` runs followed by disposal contains each cleanup
 exactly when its run happened, and each cleanup comes right after its run and
 before the next. Ignoring the returned cleanup runs none.
@@ -167,9 +190,10 @@ before the next. Ignoring the returned cleanup runs none.
 ## Not covered here
 
 - **What the model rests on.** Native apps ship as written (D-120): the
-  lowered program is the checker's model of them. S20–S24 prove the model means
+  lowered program is the checker's model of them. S20–S25 prove the model means
   what the original means for expressions, props, events and reruns, boundaries,
-  lists and effects, `untrack` and inline routines, given that the lowering finds every source read (checked
+  lists and effects, `untrack` and inline routines, and statements (locals,
+  branches, loops, `throw`, `try`), given that the lowering finds every source read (checked
   on the real lowering by `native:insertion`) and that Solid's runtime behaves
   as its documented semantics (the trust boundary below). The native
   harnesses' DOM comparisons with each original (Todos, Sierpinski, Hacker

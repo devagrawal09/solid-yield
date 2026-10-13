@@ -1072,9 +1072,9 @@ theorem run_bind (σ : Store) (p : Prog) (k : Nat → Prog) :
   | untracked p k' ihp ihk =>
     simp only [Prog.bind, run]
     cases h : (run σ p).1 with
-    | done v => simp [ihk v, seq, run, h]
-    | pending s => simp [seq, run, h]
-    | failed e => simp [seq, run, h]
+    | done v => simp [ihk v, seq]
+    | pending s => simp [seq]
+    | failed e => simp [seq]
 
 theorem seq_ret (r : Outcome × List Nat) : seq r (fun v => (.done v, [])) = r := by
   cases r with
@@ -1145,6 +1145,228 @@ theorem inline_pending_suspends_host (σ : Store) (s : Nat) (h : σ s = none) :
 
 end Surface
 
+/-! ### Statements: locals, sequencing, branches, loops, throw and try (S25, D-124)
+
+The surface forms are statements as much as expressions: `const` and `let`
+bindings, assignment (compound, increment, destructuring), `if`/`else`,
+`switch`, loops (`for`, `for…of`, `for…in`, `while`, `do…while`, array
+callbacks run in place), `throw`, and `try`/`catch`. A statement runs over
+the locals (an environment) and S20's expressions, the locals they name put
+in. Solid runs the statement where it stands; the lowering makes it a
+routine whose expressions are S20's and whose `try` is `nativeTry`. The
+lowered statement leaves the same locals, tracks the same reads in the same
+order, and suspends or fails exactly where Solid does; a `catch` takes a
+failure, never a suspension. -/
+namespace Statements
+
+open Insertion (Store Outcome)
+
+abbrev Env := Nat → Nat
+
+def update (ρ : Env) (x v : Nat) : Env := fun y => if y = x then v else ρ y
+
+inductive Stmt where
+  | skip
+  | assign (x : Nat) (e : Env → Insertion.Expr)
+  | seq (a b : Stmt)
+  | ite (c : Env → Insertion.Expr) (th el : Stmt)
+  | loop (count : Env → Insertion.Expr) (body : Stmt)
+  | raise (err : Nat)
+  | tryCatch (body handler : Stmt)
+
+/-- How a statement ends: with the locals, suspended, or failed (with the
+    locals at the throw, which the `catch` sees). -/
+inductive Status where
+  | ok (ρ : Env)
+  | pending (s : Nat)
+  | failed (err : Nat) (ρ : Env)
+
+abbrev Res := Status × List Nat
+
+def seqR (r : Res) (f : Env → Res) : Res :=
+  match r with
+  | (.ok ρ, t) => ((f ρ).1, t ++ (f ρ).2)
+  | r => r
+
+def expR (ρ : Env) (r : Outcome × List Nat) (f : Nat → Res) : Res :=
+  match r with
+  | (.done v, t) => ((f v).1, t ++ (f v).2)
+  | (.pending s, t) => (.pending s, t)
+  | (.failed e, t) => (.failed e ρ, t)
+
+def iterR (f : Env → Res) : Nat → Env → Res
+  | 0, ρ => (.ok ρ, [])
+  | n + 1, ρ => seqR (f ρ) (fun ρ' => iterR f n ρ')
+
+def catchR (r : Res) (h : Env → Res) : Res :=
+  match r with
+  | (.failed _ ρ, t) => ((h ρ).1, t ++ (h ρ).2)
+  | r => r
+
+/-- Solid's direct execution. -/
+def exec (σ : Store) : Stmt → Env → Res
+  | .skip, ρ => (.ok ρ, [])
+  | .assign x e, ρ => expR ρ (Insertion.eval σ (e ρ)) (fun v => (.ok (update ρ x v), []))
+  | .seq a b, ρ => seqR (exec σ a ρ) (fun ρ' => exec σ b ρ')
+  | .ite c th el, ρ =>
+    expR ρ (Insertion.eval σ (c ρ)) (fun x => if x ≠ 0 then exec σ th ρ else exec σ el ρ)
+  | .loop c body, ρ =>
+    expR ρ (Insertion.eval σ (c ρ)) (fun n => iterR (fun ρ' => exec σ body ρ') n ρ)
+  | .raise err, ρ => (.failed err ρ, [])
+  | .tryCatch b h, ρ => catchR (exec σ b ρ) (fun ρ' => exec σ h ρ')
+
+/-- A lowered statement: a routine that ends with the locals; `handle` is
+    `nativeTry` (its body, its handler given the locals at the failure, and
+    what follows). -/
+inductive SProg where
+  | ret (ρ : Env)
+  | read (s : Nat) (k : Nat → SProg)
+  | raise (err : Nat) (ρ : Env)
+  | handle (body : SProg) (handler : Env → SProg) (k : Env → SProg)
+
+def SProg.bind : SProg → (Env → SProg) → SProg
+  | .ret ρ, k => k ρ
+  | .read s k', k => .read s (fun v => (k' v).bind k)
+  | .raise e ρ, _ => .raise e ρ
+  | .handle b h k', k => .handle b h (fun ρ => (k' ρ).bind k)
+
+/-- S20's lowered expression inside a statement: its failure fails there. -/
+def toS (ρ : Env) : Insertion.Prog → (Nat → SProg) → SProg
+  | .ret v, k => k v
+  | .read s k', k => .read s (fun v => toS ρ (k' v) k)
+  | .raise e, _ => .raise e ρ
+
+def iterS (f : Env → SProg) : Nat → Env → SProg
+  | 0, ρ => .ret ρ
+  | n + 1, ρ => (f ρ).bind (fun ρ' => iterS f n ρ')
+
+def lowerS : Stmt → Env → SProg
+  | .skip, ρ => .ret ρ
+  | .assign x e, ρ => toS ρ (Insertion.lower (e ρ)) (fun v => .ret (update ρ x v))
+  | .seq a b, ρ => (lowerS a ρ).bind (fun ρ' => lowerS b ρ')
+  | .ite c th el, ρ =>
+    toS ρ (Insertion.lower (c ρ)) (fun x => if x ≠ 0 then lowerS th ρ else lowerS el ρ)
+  | .loop c body, ρ =>
+    toS ρ (Insertion.lower (c ρ)) (fun n => iterS (fun ρ' => lowerS body ρ') n ρ)
+  | .raise err, ρ => .raise err ρ
+  | .tryCatch b h, ρ => .handle (lowerS b ρ) (fun ρ' => lowerS h ρ') .ret
+
+/-- The driver: S20's for reads; `nativeTry` hands a failure to its handler
+    and rethrows a suspension. -/
+def runS (σ : Store) : SProg → Res
+  | .ret ρ => (.ok ρ, [])
+  | .read s k =>
+    match σ s with
+    | some v => ((runS σ (k v)).1, s :: (runS σ (k v)).2)
+    | none => (.pending s, [s])
+  | .raise e ρ => (.failed e ρ, [])
+  | .handle b h k =>
+    seqR (catchR (runS σ b) (fun ρ => runS σ (h ρ))) (fun ρ => runS σ (k ρ))
+
+theorem seqR_assoc (r : Res) (f g : Env → Res) :
+    seqR (seqR r f) g = seqR r (fun ρ => seqR (f ρ) g) := by
+  rcases r with ⟨o, t⟩
+  cases o with
+  | ok ρ =>
+    simp only [seqR]
+    rcases hf : f ρ with ⟨o', t'⟩
+    cases o' <;> simp [List.append_assoc]
+  | pending s => rfl
+  | failed e ρ => rfl
+
+theorem seqR_ok (r : Res) : seqR r (fun ρ => (.ok ρ, [])) = r := by
+  rcases r with ⟨o, t⟩
+  cases o <;> simp [seqR]
+
+theorem runS_bind (σ : Store) (p : SProg) (k : Env → SProg) :
+    runS σ (p.bind k) = seqR (runS σ p) (fun ρ => runS σ (k ρ)) := by
+  induction p with
+  | ret ρ => simp [SProg.bind, runS, seqR]
+  | read s k' ih =>
+    simp only [SProg.bind, runS]
+    cases σ s with
+    | none => rfl
+    | some v =>
+      simp only [ih v]
+      rcases runS σ (k' v) with ⟨o, t⟩
+      cases o with
+      | ok ρ => simp [seqR]
+      | pending _ => rfl
+      | failed _ _ => rfl
+  | raise e ρ => rfl
+  | handle b h k' _ _ ihk =>
+    simp only [SProg.bind, runS, ihk, seqR_assoc]
+
+theorem toS_run (σ : Store) (ρ : Env) (p : Insertion.Prog) (k : Nat → SProg) :
+    runS σ (toS ρ p k) = expR ρ (Insertion.run σ p) (fun v => runS σ (k v)) := by
+  induction p with
+  | ret v => simp [toS, Insertion.run, expR]
+  | read s k' ih =>
+    simp only [toS, runS, Insertion.run]
+    cases σ s with
+    | none => rfl
+    | some v =>
+      simp only [ih v]
+      rcases Insertion.run σ (k' v) with ⟨o, t⟩
+      cases o with
+      | done x => simp [expR]
+      | pending _ => rfl
+      | failed _ => rfl
+  | raise e => rfl
+
+theorem iter_run (σ : Store) (f : Env → SProg) (g : Env → Res)
+    (h : ∀ ρ, runS σ (f ρ) = g ρ) : ∀ n ρ, runS σ (iterS f n ρ) = iterR g n ρ := by
+  intro n
+  induction n with
+  | zero => intro ρ; rfl
+  | succ n ih =>
+    intro ρ
+    simp only [iterS, iterR, runS_bind, h, ih]
+
+/-- S25: a lowered statement leaves Solid's locals, tracks Solid's reads in
+    order, and suspends or fails where Solid does. -/
+theorem statements_preserve (σ : Store) (st : Stmt) :
+    ∀ ρ, runS σ (lowerS st ρ) = exec σ st ρ := by
+  induction st with
+  | skip => intro ρ; rfl
+  | assign x e =>
+    intro ρ
+    simp only [lowerS, exec, toS_run, Insertion.insertion_preserves]
+    rfl
+  | seq a b iha ihb =>
+    intro ρ
+    simp only [lowerS, exec, runS_bind, iha, ihb]
+  | ite c th el iht ihe =>
+    intro ρ
+    simp only [lowerS, exec, toS_run, Insertion.insertion_preserves]
+    congr 1
+    funext x
+    by_cases hx : x ≠ 0 <;> simp [hx, iht, ihe]
+  | loop c body ih =>
+    intro ρ
+    simp only [lowerS, exec, toS_run, Insertion.insertion_preserves]
+    congr 1
+    funext n
+    exact iter_run σ _ _ ih n ρ
+  | raise err => intro ρ; rfl
+  | tryCatch b h ihb ihh =>
+    intro ρ
+    simp only [lowerS, exec, runS, ihb, ihh, seqR_ok]
+
+/-- A `catch` never takes a suspension: `nativeTry` rethrows it, as Solid's
+    `NotReadyError` passes a `catch` the checker marks. -/
+theorem catch_passes_pending (σ : Store) (b h : Stmt) (ρ : Env) (s : Nat) (t : List Nat)
+    (hp : exec σ b ρ = (.pending s, t)) : exec σ (.tryCatch b h) ρ = (.pending s, t) := by
+  simp [exec, hp, catchR]
+
+/-- A `catch` takes the failure with the locals at the throw. -/
+theorem catch_takes_failure (σ : Store) (b h : Stmt) (ρ ρ' : Env) (e : Nat) (t : List Nat)
+    (hf : exec σ b ρ = (.failed e ρ', t)) :
+    exec σ (.tryCatch b h) ρ = ((exec σ h ρ').1, t ++ (exec σ h ρ').2) := by
+  simp [exec, hf, catchR]
+
+end Statements
+
 #print axioms write_admitted_iff
 #print axioms event_phase_runs_in_caller
 #print axioms hook_requirement_provided
@@ -1200,5 +1422,11 @@ end Surface
 #print axioms Surface.untrack_tracks_nothing
 #print axioms Surface.inline_reads_are_hosts
 #print axioms Surface.inline_pending_suspends_host
+#print axioms Statements.runS_bind
+#print axioms Statements.toS_run
+#print axioms Statements.iter_run
+#print axioms Statements.statements_preserve
+#print axioms Statements.catch_passes_pending
+#print axioms Statements.catch_takes_failure
 end Sugar
 end Yield

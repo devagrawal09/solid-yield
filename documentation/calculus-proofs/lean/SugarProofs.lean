@@ -543,6 +543,235 @@ theorem boxed_list_is_original {P : Type} (resolve : P → P) (p : P) :
 theorem awaited_list_unsound : ∃ (resolve : Nat → Nat) (p : Nat), forList resolve false p ≠ p :=
   ⟨fun p => p + 1, 0, by simp [forList]⟩
 
+/-! ## The insertion itself (S20)
+
+Native mode inserts `yield*` at the reads TypeScript types as sources and
+leaves every other call plain. On a core of plain Solid expressions, the
+lowered routine run by the library's driver computes what Solid's direct
+evaluation computes, and its reads are exactly what the result depends on. -/
+
+namespace Insertion
+
+/-- Each source's state: settled with a value, or pending. -/
+abbrev Store := Nat → Option Nat
+
+/-- Plain Solid expressions: a literal, a read of what TypeScript types as a
+    source (`s()`, a store path), a plain function of a value, a sum, a
+    conditional (nonzero is true) and a `throw`. -/
+inductive Expr where
+  | lit (n : Nat)
+  | read (s : Nat)
+  | call (f : Nat → Nat) (e : Expr)
+  | add (a b : Expr)
+  | ite (c t e : Expr)
+  | raise (err : Nat)
+
+/-- How an evaluation ends: a value, suspended on a pending source (Solid's
+    `NotReadyError`), or failed. -/
+inductive Outcome where
+  | done (v : Nat)
+  | pending (s : Nat)
+  | failed (err : Nat)
+deriving DecidableEq
+
+/-- Solid's direct evaluation: a source call returns its value and is tracked;
+    a pending one is tracked and suspends the computation. The result is the
+    outcome and the tracked reads, in order. -/
+def eval (σ : Store) : Expr → Outcome × List Nat
+  | .lit n => (.done n, [])
+  | .read s =>
+    match σ s with
+    | some v => (.done v, [s])
+    | none => (.pending s, [s])
+  | .call f e =>
+    match eval σ e with
+    | (.done v, t) => (.done (f v), t)
+    | r => r
+  | .add a b =>
+    match eval σ a with
+    | (.done x, t) =>
+      match eval σ b with
+      | (.done y, t') => (.done (x + y), t ++ t')
+      | (r, t') => (r, t ++ t')
+    | r => r
+  | .ite c th el =>
+    match eval σ c with
+    | (.done x, t) =>
+      let r := if x ≠ 0 then eval σ th else eval σ el
+      (r.1, t ++ r.2)
+    | r => r
+  | .raise err => (.failed err, [])
+
+/-- A lowered routine: done, a `yield*` of a source with its continuation, or
+    a raise. -/
+inductive Prog where
+  | ret (v : Nat)
+  | read (s : Nat) (k : Nat → Prog)
+  | raise (err : Nat)
+
+/-- Generator sequencing. -/
+def Prog.bind : Prog → (Nat → Prog) → Prog
+  | .ret v, k => k v
+  | .read s k', k => .read s (fun v => (k' v).bind k)
+  | .raise e, _ => .raise e
+
+/-- The insertion: `yield*` at each source read and nowhere else. -/
+def lower : Expr → Prog
+  | .lit n => .ret n
+  | .read s => .read s .ret
+  | .call f e => (lower e).bind (fun v => .ret (f v))
+  | .add a b => (lower a).bind (fun x => (lower b).bind (fun y => .ret (x + y)))
+  | .ite c th el => (lower c).bind (fun x => if x ≠ 0 then lower th else lower el)
+  | .raise err => .raise err
+
+/-- The library's driver: a settled read returns the value and tracks the
+    source; a pending one tracks it and suspends. -/
+def run (σ : Store) : Prog → Outcome × List Nat
+  | .ret v => (.done v, [])
+  | .read s k =>
+    match σ s with
+    | some v => ((run σ (k v)).1, s :: (run σ (k v)).2)
+    | none => (.pending s, [s])
+  | .raise e => (.failed e, [])
+
+/-- Sequencing: run `p`; when it is done, continue with `k` on its value. -/
+def seq (r : Outcome × List Nat) (k : Nat → Outcome × List Nat) : Outcome × List Nat :=
+  match r with
+  | (.done v, t) => ((k v).1, t ++ (k v).2)
+  | r => r
+
+theorem run_bind (σ : Store) (p : Prog) (k : Nat → Prog) :
+    run σ (p.bind k) = seq (run σ p) (fun v => run σ (k v)) := by
+  induction p with
+  | ret v => simp [Prog.bind, run, seq]
+  | read s k' ih =>
+    simp only [Prog.bind, run]
+    cases h : σ s with
+    | none => simp [seq]
+    | some v =>
+      simp only [ih v]
+      cases run σ (k' v) with
+      | mk o t => cases o <;> simp [seq]
+  | raise e => simp [Prog.bind, run, seq]
+
+/-- S20: the lowered routine computes what Solid computes: the same value, the
+    same reads tracked in the same order, the same suspension and failure. -/
+theorem insertion_preserves (σ : Store) (e : Expr) : run σ (lower e) = eval σ e := by
+  induction e with
+  | lit n => simp [lower, run, eval]
+  | read s => cases h : σ s <;> simp [lower, run, eval, h]
+  | call f e ih =>
+    simp only [lower, run_bind, ih, eval]
+    cases eval σ e with
+    | mk o t => cases o <;> simp [seq, run]
+  | add a b iha ihb =>
+    simp only [lower, run_bind, iha, eval]
+    cases eval σ a with
+    | mk o t =>
+      cases o with
+      | done x =>
+        simp only [seq, ihb]
+        cases eval σ b with
+        | mk o' t' => cases o' <;> simp [run]
+      | pending s => simp [seq]
+      | failed err => simp [seq]
+  | ite c th el ihc iht ihe =>
+    simp only [lower, run_bind, ihc, eval]
+    cases eval σ c with
+    | mk o t =>
+      cases o with
+      | done x =>
+        simp only [seq]
+        by_cases hx : x ≠ 0 <;> simp [hx, iht, ihe]
+      | pending s => simp [seq]
+      | failed err => simp [seq]
+  | raise err => simp [lower, run, eval]
+
+/-- Solid's tracked reads are what an evaluation depends on. -/
+theorem eval_depends_on_trace (e : Expr) :
+    ∀ σ σ' : Store, (∀ s ∈ (eval σ e).2, σ' s = σ s) → eval σ' e = eval σ e := by
+  induction e with
+  | lit n => intros; rfl
+  | read s =>
+    intro σ σ' h
+    have hs : σ' s = σ s := h s (by simp only [eval]; cases σ s <;> simp)
+    simp only [eval, hs]
+  | call f e ih =>
+    intro σ σ' h
+    have : eval σ' e = eval σ e := ih σ σ' (by
+      intro s hs; apply h; simp only [eval]
+      cases hr : eval σ e with
+      | mk o t => cases o <;> simp_all)
+    simp only [eval, this]
+  | add a b iha ihb =>
+    intro σ σ' h
+    have ha : eval σ' a = eval σ a := iha σ σ' (by
+      intro s hs; apply h; simp only [eval]
+      cases hr : eval σ a with
+      | mk o t =>
+        cases o with
+        | done x =>
+          rw [hr] at hs
+          cases eval σ b with
+          | mk o' t' => cases o' <;> simp_all
+        | pending _ => simp_all
+        | failed _ => simp_all)
+    simp only [eval, ha]
+    cases hr : eval σ a with
+    | mk o t =>
+      cases o with
+      | done x =>
+        have hb : eval σ' b = eval σ b := ihb σ σ' (by
+          intro s hs; apply h; simp only [eval, hr]
+          cases hb' : eval σ b with
+          | mk o' t' => rw [hb'] at hs; cases o' <;> simp_all)
+        simp only [hb]
+      | pending _ => rfl
+      | failed _ => rfl
+  | ite c th el ihc iht ihe =>
+    intro σ σ' h
+    have hc : eval σ' c = eval σ c := ihc σ σ' (by
+      intro s hs; apply h; simp only [eval]
+      cases hr : eval σ c with
+      | mk o t =>
+        cases o with
+        | done x => rw [hr] at hs; simp_all
+        | pending _ => simp_all
+        | failed _ => simp_all)
+    simp only [eval, hc]
+    cases hr : eval σ c with
+    | mk o t =>
+      cases o with
+      | done x =>
+        by_cases hx : x ≠ 0
+        · have := iht σ σ' (by
+            intro s hs; apply h; simp only [eval, hr]; simp_all)
+          simp [hx, this]
+        · have := ihe σ σ' (by
+            intro s hs; apply h; simp only [eval, hr, hx]; simp_all)
+          simp [hx, this]
+      | pending _ => rfl
+      | failed _ => rfl
+  | raise err => intros; rfl
+
+/-- The reads the lowered routine performs are what its result depends on: a
+    store that agrees on them gives the same run, so Solid, which reruns it when
+    a tracked source changes, reruns it exactly when it must. -/
+theorem lowered_reads_are_dependencies (e : Expr) (σ σ' : Store)
+    (agree : ∀ s ∈ (run σ (lower e)).2, σ' s = σ s) :
+    run σ' (lower e) = run σ (lower e) := by
+  rw [insertion_preserves] at agree
+  rw [insertion_preserves, insertion_preserves]
+  exact eval_depends_on_trace e σ σ' agree
+
+/-- Why every source read needs its `yield*`: a value read once and kept
+    (a snapshot) is not tracked, so a write to its source never reruns it. -/
+theorem snapshot_untracked (σ : Store) (s v : Nat) (settled : σ s = some v) :
+    run σ (.ret v) = (.done v, []) ∧ eval σ (.read s) = (.done v, [s]) := by
+  simp [run, eval, settled]
+
+end Insertion
+
 #print axioms write_admitted_iff
 #print axioms event_phase_runs_in_caller
 #print axioms hook_requirement_provided
@@ -578,5 +807,10 @@ theorem awaited_list_unsound : ∃ (resolve : Nat → Nat) (p : Nat), forList re
 #print axioms boxed_no_wait
 #print axioms boxed_list_is_original
 #print axioms awaited_list_unsound
+#print axioms Insertion.run_bind
+#print axioms Insertion.insertion_preserves
+#print axioms Insertion.eval_depends_on_trace
+#print axioms Insertion.lowered_reads_are_dependencies
+#print axioms Insertion.snapshot_untracked
 end Sugar
 end Yield

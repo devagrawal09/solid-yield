@@ -224,6 +224,14 @@ function buildSteps(twins) {
     cmd: process.execPath,
     args: ["scripts/native-runtime.mjs"]
   });
+  // S20's premise on the real lowering: seeded programs run as written and
+  // lowered, slot by slot, through writes.
+  steps.push({
+    name: "native:insertion",
+    cwd: root,
+    cmd: process.execPath,
+    args: ["scripts/native-insertion/check.mjs"]
+  });
   for (const stage of ["transform", "typecheck", "lint"]) {
     steps.push({
       name: `native:sierpinski:${stage}`,
@@ -589,7 +597,8 @@ function buildSteps(twins) {
       "examples/harness/native-rendering/*.mjs",
       "examples/harness/native-edges/*.mjs",
       "examples/harness/native-edges/app/*.[tj]s?(x)",
-      "scripts/*.mjs"
+      "scripts/*.mjs",
+      "scripts/native-insertion/*.mjs"
     ]
   });
 

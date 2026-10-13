@@ -1,23 +1,23 @@
 {
   "program": {
     "mutants": 298,
-    "killed": 234,
-    "survived": 2,
+    "killed": 236,
+    "survived": 0,
     "equivalent": 62,
-    "score": 99.15254237288136,
+    "score": 100,
     "exactLine": 179,
     "detected": 236
   },
   "operators": {
     "delete-catch": {
       "mutants": 9,
-      "killed": 4,
-      "survived": 2,
+      "killed": 6,
+      "survived": 0,
       "equivalent": 3,
       "exact": 1,
       "detected": 6,
       "categories": {
-        "detected elsewhere": 2,
+        "detected elsewhere": 0,
         "masked: base refused": 0,
         "masked: base errors": 0,
         "different code": 0,
@@ -364,22 +364,7 @@
       "total": 699
     }
   ],
-  "topProgram": [
-    {
-      "id": "M0042",
-      "operator": "delete-catch",
-      "project": "todos",
-      "file": "todos.ts",
-      "line": 144
-    },
-    {
-      "id": "M0043",
-      "operator": "delete-catch",
-      "project": "todos",
-      "file": "todos.ts",
-      "line": 159
-    }
-  ],
+  "topProgram": [],
   "topChecker": [
     {
       "file": "packages/eslint-plugin-yield/src/calls.js",
@@ -418,7 +403,7 @@
     }
   ],
   "findings": {
-    "program": 2,
+    "program": 0,
     "checker": 20,
     "cliCrashes": 0
   }

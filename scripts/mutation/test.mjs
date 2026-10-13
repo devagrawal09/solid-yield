@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { generate } from "./generate.mjs";
-import { classify, exactLine } from "./run.mjs";
+import { classify, exactLine, kindsOf } from "./run.mjs";
 import { catalog } from "./catalog.mjs";
 import { corpus } from "./corpus.mjs";
 test("all operators have syntactically valid sites and preserve line count", () => {
@@ -135,4 +135,29 @@ test("a deleted boundary: an expected code the base did not report counts anywhe
     ),
     "survived"
   );
+});
+test("a deleted boundary: an existing report that now lists more failure kinds counts", () => {
+  const m = {
+    operator: "delete-catch",
+    file: "todos.ts",
+    line: 144,
+    routine: { start: 140, end: 150 }
+  };
+  const at = { file: "app.tsx", line: 82, code: "EVENT_REJECTS" };
+  const said = kinds => ({
+    ...at,
+    message: `[EVENT_REJECTS] This handler can fail with ${kinds} and nothing catches it; wrap the body.`
+  });
+  assert.deepEqual(kindsOf(said("SyntaxError | TypeError").message), ["SyntaxError", "TypeError"]);
+  assert.deepEqual(kindsOf("[FOREIGN_HANDOFF] Wrap it. Remaining: A | B."), ["A", "B"]);
+  const base = { diagnostics: [said("SyntaxError")] };
+  // the base's report, widened by the failures the deleted catch absorbed
+  assert.equal(
+    classify(m, { diagnostics: [said("SyntaxError | TypeError | unknown")] }, base),
+    "killed"
+  );
+  // the same report, unchanged
+  assert.equal(classify(m, { diagnostics: [said("SyntaxError")] }, base), "survived");
+  // a different list that is not wider
+  assert.equal(classify(m, { diagnostics: [said("TypeError")] }, base), "survived");
 });

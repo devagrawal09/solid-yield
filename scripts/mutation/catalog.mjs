@@ -2,9 +2,9 @@
 // A later correction names the code the checker documents for the case and says why
 // (`corrected`); the report lists every correction.
 // `anywhere`: a kill is also an expected code the unmutated program did not
-// report, wherever it is.
+// report, wherever it is, or one it reported that now lists more failure kinds.
 const DELETED_BOUNDARY =
-  "Dev's ruling (2026-10-13): the defect a deleted boundary leaves is at the read or call it covered, which the checker reports there (with the root as related), not at the removed tag; an expected code the unmutated program did not report counts wherever it is.";
+  "Dev's ruling (2026-10-13): the defect a deleted boundary leaves is at the read or call it covered, which the checker reports there (with the root as related), not at the removed tag; an expected code the unmutated program did not report counts wherever it is, and so does one it reported that now lists more failure kinds (Dev, 2026-10-13: the Todos handler's report widened by a deleted catch).";
 export const catalog = {
   "delete-catch": {
     expected: ["FOREIGN_HANDOFF", "NATIVE_CALLBACK_FAILURE", "EVENT_REJECTS"],

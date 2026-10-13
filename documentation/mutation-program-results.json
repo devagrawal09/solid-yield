@@ -1,8 +1,8 @@
 {
-  "startedAt": "2026-10-13T02:17:35.804Z",
-  "finishedAt": "2026-10-13T02:26:39.416Z",
-  "durationMs": 543612,
-  "digest": "b0f3c8c9dd3b6161965185b41b98f8878ac5129b238165c816f770c324f9db36",
+  "startedAt": "2026-10-13T03:45:00.015Z",
+  "finishedAt": "2026-10-13T03:53:47.824Z",
+  "durationMs": 527809,
+  "digest": "7d64052b5276ce67ebc8f20155619a65b3022dc83ad014368192a3c1f655b36a",
   "projects": [
     {
       "id": "sierpinski",
@@ -1172,8 +1172,8 @@
   "counts": {
     "delete-catch": {
       "mutants": 9,
-      "killed": 4,
-      "survived": 2,
+      "killed": 6,
+      "survived": 0,
       "equivalent": 3
     },
     "swallow-catch": {
@@ -1305,10 +1305,10 @@
   },
   "total": {
     "mutants": 298,
-    "killed": 234,
-    "survived": 2,
+    "killed": 236,
+    "survived": 0,
     "equivalent": 62,
-    "score": 99.15254237288136
+    "score": 100
   },
   "mutants": [
     {
@@ -3603,7 +3603,7 @@
         ]
       },
       "preExistingMatch": false,
-      "status": "survived",
+      "status": "killed",
       "exactLine": false
     },
     {
@@ -3671,7 +3671,7 @@
         ]
       },
       "preExistingMatch": false,
-      "status": "survived",
+      "status": "killed",
       "exactLine": false
     },
     {

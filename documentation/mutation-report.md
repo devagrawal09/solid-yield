@@ -1,6 +1,6 @@
 # Mutation report
 
-Measured 2026-10-13T02:26:39.416Z. The corpus, operators and checker have changed since the first measurement (2026-10-08); each change is in its own commit, and the catalogue's corrections are listed below. The tests in scripts/mutation/test.mjs verify the harness, not the checker.
+Measured 2026-10-13T03:53:47.824Z. The corpus, operators and checker have changed since the first measurement (2026-10-08); each change is in its own commit, and the catalogue's corrections are listed below. The tests in scripts/mutation/test.mjs verify the harness, not the checker.
 
 ## Commands and scope
 
@@ -12,11 +12,11 @@ node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js ru
 node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js run scripts/mutation/stryker-ts.config.mjs
 ```
 
-Program run: 543.6 seconds; 43 projects; 298 mutants. Digest: `b0f3c8c9dd3b6161965185b41b98f8878ac5129b238165c816f770c324f9db36`.
+Program run: 527.8 seconds; 43 projects; 298 mutants. Digest: `7d64052b5276ce67ebc8f20155619a65b3022dc83ad014368192a3c1f655b36a`.
 
 Every syntactically applicable site is edited separately. Sources stay plain Solid. Each pipeline runs the shared native transform, the exported implementation used by `solid-yield check`, and recommended ESLint on generated code. A transform refusal blocks generated lint and is recorded explicitly. A CLI crash is a finding, never a kill.
 
-Each mutant is read three ways. **Killed** (the gate's rule, since 2026-10-10): an expected diagnostic code whose primary or related location falls in the mutated routine, the top-level declaration holding the edit; for a deleted boundary (`delete-catch`, `delete-errored`, `delete-loading`, `delete-provider`; Dev's ruling, 2026-10-13) also an expected code the unmutated program did not report, wherever it is, since the checker reports the read or call the boundary covered. **Exact line** (the first measurement's rule, as originally requested): an expected code at the edited file and authored line (±0). **Detected**: an expected code the unmutated base program lacks, wherever it is reported; a removed Errored, Loading or provider is reported where the failure, pending read or requirement originates and at the root, never at the removed tag, so only this reading sees it. Generated lint uses the transform position table. Existing diagnostics in broken base programs count for the location rules; those matches are flagged in the JSON evidence (`preExistingMatch`). “Equivalent” means diagnostic-equivalent under the documented design, not identical runtime behavior; equivalent edits still run through the pipeline. Warnings are recorded; only a code in the expected set can kill or detect.
+Each mutant is read three ways. **Killed** (the gate's rule, since 2026-10-10): an expected diagnostic code whose primary or related location falls in the mutated routine, the top-level declaration holding the edit; for a deleted boundary (`delete-catch`, `delete-errored`, `delete-loading`, `delete-provider`; Dev's ruling, 2026-10-13) also an expected code the unmutated program did not report, wherever it is, since the checker reports the read or call the boundary covered, or one it reported that now lists more failure kinds. **Exact line** (the first measurement's rule, as originally requested): an expected code at the edited file and authored line (±0). **Detected**: an expected code the unmutated base program lacks, wherever it is reported; a removed Errored, Loading or provider is reported where the failure, pending read or requirement originates and at the root, never at the removed tag, so only this reading sees it. Generated lint uses the transform position table. Existing diagnostics in broken base programs count for the location rules; those matches are flagged in the JSON evidence (`preExistingMatch`). “Equivalent” means diagnostic-equivalent under the documented design, not identical runtime behavior; equivalent edits still run through the pipeline. Warnings are recorded; only a code in the expected set can kill or detect.
 
 The gate runs `node scripts/mutation/run.mjs --cached --baseline documentation/yield-gate-baseline.json`. The cache hashes corpus content, mutation implementation, checker sources, library declarations/output and dependency lockfile. It is a local speed aid, not a committed result substitute: fresh checkouts run all pipelines. Any hashed change forces a fresh run. The gate checks the score and per-operator site floors. A checker change that raises the score is its own commit with its own tests; a catalogue change is listed as a correction.
 
@@ -24,7 +24,7 @@ The gate runs `node scripts/mutation/run.mjs --cached --baseline documentation/y
 
 | Operator | Mutants | Equivalent | Killed | Survived | Score | Exact line | Detected | Expected codes |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
-| delete-catch | 9 | 3 | 4 | 2 | 66.67% | 1 (16.67%) | 6 (100.00%) | FOREIGN_HANDOFF, NATIVE_CALLBACK_FAILURE, EVENT_REJECTS |
+| delete-catch | 9 | 3 | 6 | 0 | 100.00% | 1 (16.67%) | 6 (100.00%) | FOREIGN_HANDOFF, NATIVE_CALLBACK_FAILURE, EVENT_REJECTS |
 | swallow-catch | 1 | 1 | 0 | 0 | n/a | 0 (n/a) | 0 (n/a) | equivalent |
 | delete-errored | 13 | 1 | 12 | 0 | 100.00% | 0 (0.00%) | 12 (100.00%) | FOREIGN_HANDOFF |
 | delete-loading | 15 | 2 | 13 | 0 | 100.00% | 0 (0.00%) | 13 (100.00%) | PENDING_ROOT |
@@ -47,7 +47,7 @@ The gate runs `node scripts/mutation/run.mjs --cached --baseline documentation/y
 | module-state | 18 | 0 | 18 | 0 | 100.00% | 18 (100.00%) | 18 (100.00%) | MODULE_STATE |
 | create-in-hole | 18 | 0 | 18 | 0 | 100.00% | 17 (94.44%) | 18 (100.00%) | CREATE_OUTSIDE_SETUP |
 
-**Program mutation score: 99.15% = 234 / (234 + 2).** 62 equivalents excluded. Exact line: 75.85% (179). Detected: 100.00% (236).
+**Program mutation score: 100.00% = 236 / (236 + 0).** 62 equivalents excluded. Exact line: 75.85% (179). Detected: 100.00% (236).
 
 ### Why mutants survive
 
@@ -55,16 +55,15 @@ Each survivor of the gate's rule falls in one category: **detected elsewhere** (
 
 | Operator | Detected elsewhere | Masked: base refused | Masked: base errors | Different code | Silent |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| delete-catch | 2 | 0 | 0 | 0 | 0 |
 
 ### Catalogue and equivalent rules
 
-- **delete-catch:** Remove one catch; retain try body and finally. Correction: EVENT_REJECTS added (2026-10-10): an event handler's unhandled failure is EVENT_REJECTS (sugar-design, unhandled rejections); NATIVE_CALLBACK_FAILURE is the foreign-callback code. Kill rule: Dev's ruling (2026-10-13): the defect a deleted boundary leaves is at the read or call it covered, which the checker reports there (with the root as related), not at the removed tag; an expected code the unmutated program did not report counts wherever it is.
+- **delete-catch:** Remove one catch; retain try body and finally. Correction: EVENT_REJECTS added (2026-10-10): an event handler's unhandled failure is EVENT_REJECTS (sugar-design, unhandled rejections); NATIVE_CALLBACK_FAILURE is the foreign-callback code. Kill rule: Dev's ruling (2026-10-13): the defect a deleted boundary leaves is at the read or call it covered, which the checker reports there (with the root as related), not at the removed tag; an expected code the unmutated program did not report counts wherever it is, and so does one it reported that now lists more failure kinds (Dev, 2026-10-13: the Todos handler's report widened by a deleted catch).
 - **swallow-catch:** Remove each direct rethrow in a catch. Equivalent reason: A catch may deliberately handle a failure. Removing a rethrow is permitted handling, not a checker error.
-- **delete-errored:** Remove Errored tags, retain children. Kill rule: Dev's ruling (2026-10-13): the defect a deleted boundary leaves is at the read or call it covered, which the checker reports there (with the root as related), not at the removed tag; an expected code the unmutated program did not report counts wherever it is.
-- **delete-loading:** Remove Loading tags, retain children. Kill rule: Dev's ruling (2026-10-13): the defect a deleted boundary leaves is at the read or call it covered, which the checker reports there (with the root as related), not at the removed tag; an expected code the unmutated program did not report counts wherever it is.
+- **delete-errored:** Remove Errored tags, retain children. Kill rule: Dev's ruling (2026-10-13): the defect a deleted boundary leaves is at the read or call it covered, which the checker reports there (with the root as related), not at the removed tag; an expected code the unmutated program did not report counts wherever it is, and so does one it reported that now lists more failure kinds (Dev, 2026-10-13: the Todos handler's report widened by a deleted catch).
+- **delete-loading:** Remove Loading tags, retain children. Kill rule: Dev's ruling (2026-10-13): the defect a deleted boundary leaves is at the read or call it covered, which the checker reports there (with the root as related), not at the removed tag; an expected code the unmutated program did not report counts wherever it is, and so does one it reported that now lists more failure kinds (Dev, 2026-10-13: the Todos handler's report widened by a deleted catch).
 - **setup-read:** Hoist each signal/memo read from JSX or a memo to its enclosing component setup.
-- **delete-provider:** Remove a locally declared context provider, retain children. Kill rule: Dev's ruling (2026-10-13): the defect a deleted boundary leaves is at the read or call it covered, which the checker reports there (with the root as related), not at the removed tag; an expected code the unmutated program did not report counts wherever it is.
+- **delete-provider:** Remove a locally declared context provider, retain children. Kill rule: Dev's ruling (2026-10-13): the defect a deleted boundary leaves is at the read or call it covered, which the checker reports there (with the root as related), not at the removed tag; an expected code the unmutated program did not report counts wherever it is, and so does one it reported that now lists more failure kinds (Dev, 2026-10-13: the Todos handler's report widened by a deleted catch).
 - **never-provided-context:** Replace each context argument with a fresh context.
 - **throw-string:** Replace each constructed class throw with a string. Equivalent reason: Unknown thrown values are allowed by the unknown floor; changing the value is not itself an error. Handoff diagnostics are still recorded.
 - **throw-object:** Replace each constructed class throw with an object. Equivalent reason: Unknown thrown values are allowed by the unknown floor; changing the value is not itself an error. Handoff diagnostics are still recorded.
@@ -396,95 +395,9 @@ Covered test IDs: 56, 57, 58, 59, 63, 155.
 
 Each surviving mutant below is its own F-M finding for the next session. A survivor is a finding under this catalogue and locality rule, not automatically a soundness bug: follow-up must distinguish valid edits, root-location diagnostics, wrong codes, and missing checks. Messages are the full CLI output plus generated-lint/transform diagnostics, with temporary paths normalized. No output means no diagnostic, not a passed behavioral test.
 
-### F-M1: M0042 delete-catch at todos/todos.ts:144 (detected elsewhere)
-
-Expected in the mutated routine (lines 85–176): FOREIGN_HANDOFF, NATIVE_CALLBACK_FAILURE, EVENT_REJECTS.
-
-```diff
---- todos/todos.ts
-+++ todos/todos.ts (mutant)
-@@ -141,16 +141,16 @@
-           }
-         });
-       });
--      try {
-+      {
-         yield api.toggleAll(ids, completed);
-         ids.forEach(id => delete Errors[id]);
--      } catch {
--        // Bulk failed — fan the error out to per-item entries so each
--        // failed item gets its own retry affordance via `retryTodo`.
--        ids.forEach(id => {
--          Errors[id] ||= { type: "toggleTodo", args: [id, completed] };
--        });
-       }
-+
-+
-+
-+
-+
-+
-       refresh(todos);
-     }),
-     clearCompleted: action(function* () {
-```
-
-Checker said instead:
-
-```text
-Stages: {"transform":"completed","cli":"diagnostics","lint":"diagnostics"}
-<job>/source/app.tsx:121:52 error TS95000: [EVENT_REJECTS] This handler can fail with SyntaxError and nothing catches it; wrap the body in try/catch, or declare the failure.
-<job>/source/app.tsx:82:21 error TS95000: [EVENT_REJECTS] This handler can fail with SyntaxError | TypeError | unknown and nothing catches it; wrap the body in try/catch, or declare the failure.
-solid-yield check: 5 files, 2 errors
-lint app.tsx:65 [solid-yield/no-unshown-wait] this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* () {
-              r...`, D-075).
-lint app.tsx:93 [solid-yield/no-unshown-wait] this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* (...args: __NativeAr...`, D-075).
-```
-
-### F-M2: M0043 delete-catch at todos/todos.ts:159 (detected elsewhere)
-
-Expected in the mutated routine (lines 85–176): FOREIGN_HANDOFF, NATIVE_CALLBACK_FAILURE, EVENT_REJECTS.
-
-```diff
---- todos/todos.ts
-+++ todos/todos.ts (mutant)
-@@ -156,14 +156,14 @@
-     clearCompleted: action(function* () {
-       const ids = todos.filter(t => t.completed).map(t => t.id);
-       setTodos(t => t.filter(todo => !todo.completed));
--      try {
-+      {
-         yield api.clearCompleted(ids);
-         ids.forEach(id => delete Errors[id]);
--      } catch {
--        ids.forEach(id => {
--          Errors[id] ||= { type: "removeTodo", args: [id] };
--        });
-       }
-+
-+
-+
-+
-       refresh(todos);
-     }),
-     retryTodo(todo: Todo): Promise<void> {
-```
-
-Checker said instead:
-
-```text
-Stages: {"transform":"completed","cli":"diagnostics","lint":"diagnostics"}
-<job>/source/app.tsx:121:52 error TS95000: [EVENT_REJECTS] This handler can fail with SyntaxError | TypeError | unknown and nothing catches it; wrap the body in try/catch, or declare the failure.
-<job>/source/app.tsx:82:21 error TS95000: [EVENT_REJECTS] This handler can fail with SyntaxError and nothing catches it; wrap the body in try/catch, or declare the failure.
-solid-yield check: 5 files, 2 errors
-lint app.tsx:65 [solid-yield/no-unshown-wait] this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* () {
-              r...`, D-075).
-lint app.tsx:93 [solid-yield/no-unshown-wait] this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* (...args: __NativeAr...`, D-075).
-```
-
 ## Findings list
 
-- F-M1–F-M2: 2 survivors of the gate's rule, each with its category, full diff and actual diagnostics above.
+- F-M1–F-M0: 0 survivors of the gate's rule, each with its category, full diff and actual diagnostics above.
 - F-C1–F-C20: the top checker survivors above; remaining survivors stay in the raw Stryker reports.
 - F-MAP: 0 mutant CLI crashes; the current position/error mapping can throw instead of returning diagnostics. IDs: none.
 - F-SCOPE: Vite native/sugar/transform/positions and compiler inference still need full checker-mutant runs. The full command-runner configuration is checked in.

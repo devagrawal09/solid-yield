@@ -19,18 +19,32 @@ export function inRoutine(mutant, at) {
   const { start, end } = mutant.routine ?? { start: mutant.line, end: mutant.line };
   return at.line >= start && at.line <= end;
 }
+/** The failure kinds a diagnostic lists ("can fail with A | B and …",
+ * "Remaining: A | B."), or none. */
+export function kindsOf(message = "") {
+  const list = /(?:fail with|Remaining:)\s+(.+?)(?:\s+and\b|[;.]|$)/.exec(message)?.[1];
+  return list ? list.split("|").map(k => k.trim()) : [];
+}
 export function classify(mutant, result, base) {
   if (mutant.equivalent) return "equivalent";
   const { expected, anywhere } = catalog[mutant.operator];
   // A deleted boundary (Dev, 2026-10-13): an expected code the unmutated
-  // program did not report counts wherever it is, at the read it covered.
+  // program did not report counts wherever it is, at the read it covered;
+  // so does one it reported there that now lists more failure kinds.
   const key = d => `${d.file}:${d.line}:${d.code}`;
-  const before = new Set((base?.diagnostics ?? []).map(key));
+  const before = new Map((base?.diagnostics ?? []).map(d => [key(d), d]));
+  const fresh = d => {
+    const prior = before.get(key(d));
+    if (!prior) return true;
+    const now = kindsOf(d.message),
+      then = kindsOf(prior.message);
+    return then.every(k => now.includes(k)) && now.some(k => !then.includes(k));
+  };
   const match = d =>
     [d.code, d.tsCode, d.ruleId].some(code => expected.includes(code)) &&
     (inRoutine(mutant, d) ||
       (d.related ?? []).some(r => inRoutine(mutant, r)) ||
-      (!!anywhere && !before.has(key(d))));
+      (!!anywhere && fresh(d)));
   return result.diagnostics.some(match) ? "killed" : "survived";
 }
 export function exactLine(mutant, result) {

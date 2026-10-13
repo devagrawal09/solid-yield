@@ -827,15 +827,18 @@ type AttemptWait<T> = 0 extends 1 & T
     : T extends PromiseLike<any>
       ? Wait
       : never;
-/** Whether `fn`'s result is a stream (or a promise of one): an attempt gives it back (D-091). */
+/** Whether `fn`'s result is a stream (or a promise of one): an attempt gives it back (D-091).
+ * A promise of `any` (`response.json()`) is a value, as `any` itself is. */
 type IsStream<T> =
   T extends EventCall<any, any, any, any>
     ? false
     : [Awaited<T>] extends [never]
       ? false
-      : Awaited<T> extends AsyncIterable<any>
-        ? true
-        : false;
+      : 0 extends 1 & Awaited<T>
+        ? false
+        : Awaited<T> extends AsyncIterable<any>
+          ? true
+          : false;
 /** A stream given back is a `StreamAttempt`: reactive routines take it, an `$event` does not (D-091). */
 type AttemptStream<T> = 0 extends 1 & T
   ? never

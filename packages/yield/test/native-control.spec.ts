@@ -4,12 +4,18 @@ import {
   nativeMap,
   nativeCallback,
   nativeInvoke,
-  nativeLexicalCallback
+  nativeLexicalCallback,
+  nativeAccessor,
+  nativeAccessorSetup,
+  nativeGetter,
+  nativeSpread,
+  nativeUntrack,
+  nativeUntrackSetup
 } from "../src/native-control.js";
 import { nativeFailure, nativeFailureValue } from "../src/native-failure.js";
-import { createRoot, createSignal, createMemo, flush } from "solid-js";
+import { createRoot, createSignal, createMemo, createRenderEffect, flush } from "solid-js";
 import { raise, $event, getterSource, memoCompute, attempt } from "../src/runtime.js";
-import type { FailsOf, Raise, Read, Write, Create } from "../src/types.js";
+import type { FailsOf, Raise, Read, Write, Create, Source, Yieldable, Bind } from "../src/types.js";
 import type { NativeHandled } from "../src/native-control.js";
 
 describe("native control delegation", () => {
@@ -177,3 +183,149 @@ it("restores an event for a deferred callback and its async continuation", async
   });
   expect(await run()).toBe(14);
 });
+
+/** Drive a bridge's iterator to its value (no operation is yielded here). */
+const run = <T>(y: Yieldable<unknown, T>): T => {
+  const step = y[Symbol.iterator]().next();
+  if (!step.done) throw new Error("the bridge yielded");
+  return step.value;
+};
+describe("D-124 bridges", () => {
+  it("a spread reads its sources where Solid's spread reads members", () => {
+    const { result, set, dispose } = createRoot(dispose => {
+      const [n, set] = createSignal(1);
+      const spread = run(nativeSpread({ title: getterSource(n), plain: "x" }));
+      const seen: unknown[] = [];
+      createRenderEffect(
+        () => spread.title,
+        value => {
+          seen.push(value);
+        }
+      );
+      return { result: { spread, seen }, set, dispose };
+    });
+    flush();
+    expect(result.spread.plain).toBe("x");
+    set(2);
+    flush();
+    expect(result.seen).toEqual([1, 2]);
+    expect(Object.keys(result.spread)).toEqual(["title", "plain"]);
+    dispose();
+  });
+  it("a spread binds an $event member once, and passes others through", () => {
+    let calls = 0;
+    const save = $event(function* () {
+      calls++;
+    });
+    const spread = run(nativeSpread({ onClick: save, onHover: () => calls++ }));
+    expect(spread.onClick).toBe(spread.onClick);
+    expect(spread.onClick).not.toBe(save);
+    void spread.onClick();
+    spread.onHover();
+    expect(calls).toBe(2);
+    expect(run(nativeSpread(null))).toBe(null);
+  });
+  it("untrack drives its body untracked; the host does not rerun", () => {
+    const { runs, set, dispose } = createRoot(dispose => {
+      const [a, setA] = createSignal(1);
+      const [b, setB] = createSignal(10);
+      const source = getterSource(b);
+      const runs: number[] = [];
+      createRenderEffect(
+        () =>
+          a() +
+          run(
+            nativeUntrack(function* () {
+              return yield* source;
+            })
+          ),
+        value => {
+          runs.push(value);
+        }
+      );
+      return { runs, set: { a: setA, b: setB }, dispose };
+    });
+    flush();
+    set.b(20);
+    flush();
+    expect(runs).toEqual([11]);
+    set.a(2);
+    flush();
+    expect(runs).toEqual([11, 22]);
+    dispose();
+  });
+  it("untrack in setup returns its value", () => {
+    const source = getterSource(() => 3) as Source<number>;
+    expect(
+      run(
+        nativeUntrackSetup(function* () {
+          return (yield* source) + 1;
+        })
+      )
+    ).toBe(4);
+  });
+  it("a getter's source reads its body where it is read", () => {
+    const { m, set, dispose } = createRoot(dispose => {
+      const [n, set] = createSignal(2);
+      const source = getterSource(n);
+      const double = nativeGetter(function* () {
+        return (yield* source) * 2;
+      });
+      const m = createMemo(() => run(double as unknown as Yieldable<unknown, number>));
+      return { m, set, dispose };
+    });
+    flush();
+    expect(m()).toBe(4);
+    set(5);
+    flush();
+    expect(m()).toBe(10);
+    dispose();
+  });
+  it("an accessor bridge hands plain code Solid's accessor", () => {
+    const source = getterSource(() => 7) as Source<number>;
+    expect(run(nativeAccessor(source))()).toBe(7);
+    expect(run(nativeAccessorSetup(source))()).toBe(7);
+  });
+});
+
+// The bridges' types: what each hands its host and its plain code.
+declare const settled: Source<number>;
+declare const pending: Source<number, never, true>;
+declare const failing: Source<string, Error & { kind: "Parse" }, false>;
+type Ops<Y> = Y extends Yieldable<infer O, any> ? O : never;
+type Value<Y> = Y extends Yieldable<any, infer V> ? V : never;
+type Same<A, B> =
+  (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
+// never called: the declared sources exist only in types
+export function bridgeTypes() {
+  const spreadSources = nativeSpread({ title: failing, count: pending, plain: 1 });
+  const spreadValues: Same<
+    Value<typeof spreadSources>,
+    { title: string; count: number; plain: number }
+  > = true;
+  const spreadReads: Same<
+    Ops<typeof spreadSources>,
+    Read<false, Error & { kind: "Parse" }> | Read<true, never>
+  > = true;
+  const spreadEvent = nativeSpread({ onClick: $event(function* () {}) });
+  const spreadBinds: Same<Ops<typeof spreadEvent>, Bind<false, never>> = true;
+  const untrackOps = nativeUntrack(function* () {
+    return yield* pending;
+  });
+  const untrackKeeps: Same<Ops<typeof untrackOps>, Read<true, never>> = true;
+  nativeUntrackSetup(function* () {
+    return yield* settled;
+  });
+  // @ts-expect-error [COLORED_CAPTURE] a pending read untracked in setup
+  nativeUntrackSetup(function* () {
+    return yield* pending;
+  });
+  const getter = nativeGetter(function* () {
+    return (yield* failing).length;
+  });
+  const getterColors: Same<typeof getter, Source<number, Error & { kind: "Parse" }, false>> = true;
+  nativeAccessorSetup(settled);
+  // @ts-expect-error [COLORED_CAPTURE] a pending source handed to plain code in setup
+  nativeAccessorSetup(pending);
+  void [spreadValues, spreadReads, spreadBinds, untrackKeeps, getterColors];
+}

@@ -1,7 +1,20 @@
 /** Compiler-only control flow. Delegation keeps the current host and transaction. */
-import { isFailure, nativeHostCallback } from "./runtime.js";
+import { untrack } from "solid-js";
+import {
+  accessor,
+  bindEvent,
+  EVENT_MARK,
+  getterSource,
+  isFailure,
+  nativeHostCallback,
+  perform,
+  through
+} from "./runtime.js";
 import type {
   Bind,
+  Bound,
+  BoundEvent,
+  EventHandler,
   ChildView,
   Read,
   Raise,
@@ -9,6 +22,7 @@ import type {
   Yieldable,
   EventCallOp,
   FailsOf,
+  ReadsPendingOf,
   Source,
   EventOp,
   MemoOp,
@@ -117,17 +131,21 @@ type LexicalCallback<A extends unknown[], Y, R> = ((...args: A) => R) & {
   [Symbol.iterator](): Generator<Y, LexicalCallback<A, Y, R>, unknown>;
 };
 
-type LexicalPhase = "event" | "memo" | "compute" | "effect" | "hole";
-type PhaseOps<M extends LexicalPhase> = M extends "event"
-  ? EventOp
-  : M extends "memo"
-    ? MemoOp
-    : M extends "compute"
-      ? ComputeOp
-      : M extends "effect"
-        ? EffectPhaseOp
-        : // A hole callback may build JSX, as a view does (F-S44: `.map(item => <Row/>)`).
-            HoleOp | ChildView<boolean, any, boolean, any> | Bind<boolean, any>;
+type LexicalPhase = "event" | "memo" | "compute" | "effect" | "hole" | "setup";
+// A component body's synchronous callback (`items().filter(x => x > n())`):
+// its operations are the body's, admitted or refused there (READ_IN_SETUP).
+type PhaseOps<M extends LexicalPhase> = M extends "setup"
+  ? unknown
+  : M extends "event"
+    ? EventOp
+    : M extends "memo"
+      ? MemoOp
+      : M extends "compute"
+        ? ComputeOp
+        : M extends "effect"
+          ? EffectPhaseOp
+          : // A hole callback may build JSX, as a view does (F-S44: `.map(item => <Row/>)`).
+              HoleOp | ChildView<boolean, any, boolean, any> | Bind<boolean, any>;
 /** The phase argument keeps host admission visible in generated TypeScript. */
 export function nativeLexicalCallback<
   M extends LexicalPhase,
@@ -187,4 +205,162 @@ export function nativeHoleColors<C extends Iterable<unknown>>(
  */
 export function nativeHole<Y, R>(work: Yieldable<Y, R>): Yieldable<HoleViewOp<Y>, R> {
   return work as unknown as Yieldable<HoleViewOp<Y>, R>;
+}
+
+/**
+ * D-116's capture rule: a source handed to plain code that takes an accessor
+ * (`useDebounced(count)`, `mapArray(items, …)`). The host takes the source's
+ * colors, as if it read it there, since the plain code may read it at once;
+ * the plain code gets Solid's accessor, which reads the source where it is
+ * called. Nothing is read here: at run time the host does what Solid's does.
+ */
+export function nativeAccessor<T, E, P extends boolean>(
+  source: Source<T, E, P>
+): Yieldable<Read<P, E>, () => T> {
+  return {
+    *[Symbol.iterator]() {
+      return accessor(source);
+    }
+  } as any;
+}
+/** Message for a colored source handed to plain code in setup. */
+type ColoredCapture = {
+  readonly "[COLORED_CAPTURE] a source that may be pending or fail is handed to plain code in setup, where its reads are outside the check: read it in JSX or a memo and pass the value": never;
+};
+/**
+ * In setup the plain code given a source reads it later, where the check
+ * cannot follow it. A settled source loses nothing there; one that may be
+ * pending or fail would lose its colors, so it is refused (D-116: no failure
+ * union is cast away).
+ */
+export function nativeAccessorSetup<T, E, P extends boolean>(
+  source: Source<T, E, P> &
+    ([E] extends [never] ? ([P] extends [false] ? unknown : ColoredCapture) : ColoredCapture)
+): Yieldable<never, () => T> {
+  return {
+    *[Symbol.iterator]() {
+      return accessor(source);
+    }
+  } as any;
+}
+/** A spread object's members as Solid's spread takes them: a source as the
+ * value it reads, an `$event` bound, and a plain function under an `on…`
+ * key (a prop's handler) bound as Solid binds it, as `onClick={props.onClick}`
+ * is. `any` slots: a member carrying its caller's colors as type parameters
+ * (D-119) is still known to be a source. */
+type SpreadValues<O> = {
+  [K in keyof O]: SpreadValue<K, O[K] extends Source<infer T, any, any> ? T : O[K]>;
+};
+type SpreadValue<K, V> =
+  V extends EventHandler<infer A, any, any, any, any>
+    ? BoundEvent<A>
+    : K extends `on${string}`
+      ? V extends (...args: any[]) => unknown
+        ? Bound<V>
+        : // Solid's bound form, `[handler, data]`
+          V extends { 0: infer H extends (...args: any[]) => unknown; 1: infer D }
+          ? { 0: Bound<H>; 1: D }
+          : V
+      : V;
+/** What a spread does: a read per source member, a binding per `$event`. */
+type SpreadReads<O> = {
+  [K in keyof O]-?: O[K] extends Source<unknown, infer E, infer P>
+    ? Read<P, E>
+    : O[K] extends EventHandler<any, infer E, any, infer P, any>
+      ? Bind<P, E>
+      : never;
+}[keyof O];
+/**
+ * D-116 on a DOM spread (`<div {...props}>`, `<button {...omit(props, "label")}>`,
+ * `<button {...{ onClick: () => … }}>`): Solid's spread reads each member in
+ * its own effect. The host takes the colors of every source member, as if it
+ * read them there, and binds every `$event` member, as an event attribute
+ * does (D-072); the element gets the object with each source member read
+ * through and each `$event` bound where the spread reads it. Nothing is read
+ * here.
+ */
+export function nativeSpread<O>(spread: O): Yieldable<SpreadReads<O>, SpreadValues<O>> {
+  return {
+    *[Symbol.iterator]() {
+      if (spread == null || typeof spread !== "object") return spread;
+      // each handler bound once, at this spread's boundary
+      const boundEvents = new WeakMap<object, unknown>();
+      return new Proxy(spread, {
+        get: (target, key) => {
+          const value = Reflect.get(target, key);
+          if (typeof key === "symbol") return value;
+          const read = through(value);
+          if (typeof read !== "function" || (read as any)[EVENT_MARK] !== true) return read;
+          let bound = boundEvents.get(read);
+          if (!bound) boundEvents.set(read, (bound = bindEvent(read)));
+          return bound;
+        }
+      });
+    }
+  } as any;
+}
+/** Drive `body` with each synchronous step untracked; what it yields goes to the host. */
+function* untracked<T>(body: () => Generator<unknown, T, unknown>): Generator<unknown, T, unknown> {
+  const it = body();
+  let step = untrack(() => it.next());
+  try {
+    while (!step.done) {
+      let input: unknown,
+        error: unknown,
+        threw = false;
+      try {
+        input = yield step.value;
+      } catch (e) {
+        threw = true;
+        error = e;
+      }
+      step = untrack(() => (threw ? it.throw(error) : it.next(input)));
+    }
+    return step.value;
+  } finally {
+    if (!step.done) it.return(undefined as T);
+  }
+}
+/**
+ * D-124: Solid's `untrack(() => …)` in a routine. The body's reads are the
+ * host's, with their colors (a pending read there still suspends), but not
+ * tracked: the host does not rerun when they change.
+ */
+export function nativeUntrack<Y, T>(body: () => Generator<Y, T, unknown>): Yieldable<Y, T> {
+  return { [Symbol.iterator]: () => untracked(body) } as any;
+}
+/**
+ * `untrack` in a component's body is how Solid reads once where nothing
+ * tracks: admitted for settled reads. A read that may be pending or fail
+ * would lose its colors there (D-116: none is cast away), so it is refused.
+ */
+export function nativeUntrackSetup<Y, T>(
+  body: (() => Generator<Y, T, unknown>) &
+    ([UntrackedColors<Y>] extends [never]
+      ? unknown
+      : {
+          readonly "[COLORED_CAPTURE] a source that may be pending or fail is read untracked in setup, where its reads are outside the check: read it in JSX or a memo": never;
+        })
+): Yieldable<never, T> {
+  return { [Symbol.iterator]: () => untracked(body) } as any;
+}
+/** The pending or failing reads among a body's operations. */
+type UntrackedColors<Y> =
+  Y extends Read<infer P, infer E>
+    ? [E] extends [never]
+      ? [P] extends [false]
+        ? never
+        : Y
+      : Y
+    : never;
+/**
+ * D-124: a getter that reads (`{ get total() { return count() * 2; } }`,
+ * Solid's reactive props object) hands back a source over its body: whoever
+ * reads the property reads through it, where Solid's getter would run, with
+ * the body's colors.
+ */
+export function nativeGetter<Y, T>(
+  body: () => Generator<Y, T, unknown>
+): Source<T, FailsOf<Y>, ReadsPendingOf<Y>> {
+  return getterSource(() => perform({ [Symbol.iterator]: body } as Yieldable<Y, T>)) as any;
 }

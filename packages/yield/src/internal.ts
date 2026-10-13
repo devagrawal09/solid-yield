@@ -22,7 +22,13 @@ export {
   nativeHole,
   nativeInvoke,
   nativeGuarded,
-  nativeDispatch
+  nativeDispatch,
+  nativeAccessor,
+  nativeAccessorSetup,
+  nativeSpread,
+  nativeUntrack,
+  nativeUntrackSetup,
+  nativeGetter
 } from "./native-control.js";
 
 export type { NativeArguments } from "./native-control.js";

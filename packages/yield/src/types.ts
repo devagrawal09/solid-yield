@@ -540,7 +540,9 @@ export type HoleCall<D, P extends boolean, E, W extends boolean, R> = (<
  * `HoleCall` refuses an undeclared prop itself.
  */
 export type Undeclared<A, D> = {
-  readonly [K in Exclude<keyof A, keyof D>]: {
+  // a component's own props spread into another's carry their phantom key,
+  // which is no prop (F-S24: `<Inner {...props} />`)
+  readonly [K in Exclude<keyof A, keyof D | typeof PROPS>]: {
     readonly [M in `[UNDECLARED_PROP] \`${K & string}\` is not a declared prop`]: never;
   };
 };

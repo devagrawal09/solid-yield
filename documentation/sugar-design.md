@@ -2420,3 +2420,15 @@ are the compiler package's experiments (analysis, semantic, reachability,
 report), not sugar mode. In the native checker, two are not fully covered,
 both at 98 % (`handler`, `coloredPropSites`). The surface mutation program:
 817 mutants, 728 killed, 89 recorded equivalents, 0 survived (100 %); the full gate at `27761e6`: 101 pass, 0 fail, 0 skip.
+
+**Checking time.** `solid-yield check` on the dashboard, interleaved across
+every commit of this work (3 rounds each, medians): `28f969d` 19.0 s,
+`71e790d` 18.9 s, `79e25b4` 18.8 s, `7d4e0fd` 19.8 s, `360cd1d` 18.5 s,
+`27761e6` 19.2 s, `de4fadd` 19.1 s; the spread between runs of one commit is
+about ±1.5 s, so no change is measurable. Paired against `28f969d`:
+hackernews 13.4 → 13.5 s, rendering 26.3 → 26.7 s, effect 53.9 → 53.5 s,
+docs 17.8 → 15.3 s (noisy). The helpers added here (context calls, named
+callbacks, provider scans, facades across files) take under 0.1 s of the
+dashboard's 20 s in a CPU profile; TypeScript's checking of the lowered
+program dominates, as before. (This machine runs about twice as slow as the
+2026-10-13 measurements, old and new alike.)

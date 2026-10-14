@@ -162,6 +162,12 @@ tester.run("no-dollar-block", rules["no-dollar-block"], {
       errors: [{ messageId: "hole" }, { messageId: "other" }, { messageId: "other" }]
     },
     {
+      // `$` given to any other call is no hole of `h`
+      code: "const v = wrap($(function* () { return 1; }));",
+      output: null,
+      errors: [{ messageId: "other" }]
+    },
+    {
       // `$` of a plain function has no routine form
       code: 'import { $ } from "solid-yield";\nconst d = $(() => 1);',
       output: null,
@@ -1236,7 +1242,9 @@ tester.run("no-unchecked-foreign-handoff", rules["no-unchecked-foreign-handoff"]
     // a plain Solid component: nothing to check
     "const Page = () => <i />;\ndefineRoute({ path: '/', component: Page });",
     // a yield component called in a routine is not a handoff
-    live + "function* v() { return <>{yield* Live()}</>; }"
+    live + "function* v() { return <>{yield* Live()}</>; }",
+    // without types, what a call hands over is not known
+    live + "defineRoute({ path: '/', component: pick(Live) });"
   ],
   invalid: [
     {

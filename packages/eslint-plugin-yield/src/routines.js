@@ -169,9 +169,9 @@ export function kindAt(node) {
  * `null` (not in JSX), `{ hole: "child" | "attribute" | "spread" | "spread-child", name }`.
  */
 export function jsxPosition(node) {
-  let p = node.parent;
-  while (p) {
-    if (isFunction(p) || p.type === "ClassBody") return null;
+  // a yield sits in a generator: the walk meets a function before the root
+  for (let p = node.parent; ; p = p.parent) {
+    if (!p || isFunction(p) || p.type === "ClassBody") return null;
     if (p.type === "JSXSpreadAttribute") return { hole: "spread" };
     if (p.type === "JSXSpreadChild") return { hole: "spread-child" };
     if (p.type === "JSXExpressionContainer") {
@@ -183,9 +183,7 @@ export function jsxPosition(node) {
       }
       return { hole: "child" };
     }
-    p = p.parent;
   }
-  return null;
 }
 
 export function isCallTo(node, names) {

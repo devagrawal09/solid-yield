@@ -859,6 +859,106 @@ export function App() {
   return <button {...{ onClick: make(2) }}>{n()}</button>;
 }`,
     []
+  ],
+  // a signal handed as an accessor to a foreign function inside a memo's
+  // attempt thunk: taken before the statement, outside the thunk
+  [
+    "accessor-in-attempt-thunk",
+    `import { createSignal, createMemo, Errored } from "solid-js";
+declare function sample(get: () => number): number;
+export function App() {
+  const [n] = createSignal(1);
+  const m = createMemo(() => sample(n) + 1);
+  return <Errored fallback={() => <p>failed</p>}><p>{m()}</p></Errored>;
+}`,
+    []
+  ],
+  // a context typed by a class: its slots are the class's, not a literal's
+  [
+    "context-class-typed",
+    `import { createContext, useContext } from "solid-js";
+class Settings {
+  constructor(public theme: string) {}
+}
+const Ctx = createContext<Settings>();
+function Themed() {
+  const settings = useContext(Ctx);
+  return <p>{settings.theme}</p>;
+}
+export function App() {
+  return <Ctx value={new Settings("dark")}><Themed /></Ctx>;
+}`,
+    []
+  ],
+  // a context typed in parentheses
+  [
+    "context-parenthesized-type",
+    `import { createContext, useContext, createSignal } from "solid-js";
+const Ctx = createContext<({ count: () => number; bump: () => void })>();
+function Counter() {
+  const { count, bump } = useContext(Ctx);
+  return <button onClick={() => bump()}>{count()}</button>;
+}
+export function App() {
+  const [n, setN] = createSignal(0);
+  return <Ctx value={{ count: n, bump: () => setN(n() + 1) }}><Counter /></Ctx>;
+}`,
+    []
+  ],
+  // an async handler with no reactive work stays a producer behind one
+  // attempt; its destructured parameter keeps Solid's event type
+  [
+    "async-handler-destructured",
+    `async function save(text: string | null): Promise<void> {
+  if (!text) throw new Error("empty");
+}
+export function App() {
+  return (
+    <button
+      onClick={async ({ currentTarget }) => {
+        try {
+          await save(currentTarget.textContent);
+        } catch (error) {
+          /* @yield-absorb: logged */
+          console.error(error);
+        }
+      }}
+    >
+      save
+    </button>
+  );
+}`,
+    []
+  ],
+  // the same handler uncaught: its rejection reaches no boundary (Errored
+  // does not catch an event's)
+  [
+    "async-handler-destructured-uncaught",
+    `import { Errored } from "solid-js";
+async function save(text: string | null): Promise<void> {
+  if (!text) throw new Error("empty");
+}
+export function App() {
+  return (
+    <Errored fallback={() => <p>failed</p>}>
+      <button onClick={async ({ currentTarget }) => { await save(currentTarget.textContent); }}>save</button>
+    </Errored>
+  );
+}`,
+    ["EVENT_REJECTS"]
+  ],
+  // a function expression handed by name to an array method
+  [
+    "named-function-expression-callback",
+    `import { createSignal, createMemo } from "solid-js";
+export function App() {
+  const [n] = createSignal(2);
+  const [items] = createSignal([1, 2]);
+  const scale = function (x: number) { return x * n(); };
+  const m = createMemo(() => items().map(scale).join());
+  return <p>{m()}</p>;
+}`,
+    []
   ]
 ];
 /** refusals stop a project's check: each on its own */
@@ -898,6 +998,22 @@ export function App() {
     let total = 0;
     for (let i = 0; i < n(); i++) {
       try { total += JSON.parse(String(i)) as number; } catch { /* @yield-absorb: a number parses */ total = -1; } finally { if (total < 0) break; }
+    }
+    return total;
+  });
+  return <p>{m()}</p>;
+}`,
+    ["NATIVE_CONTROL_TRANSFER"]
+  ],
+  [
+    "continue-in-finally",
+    `import { createSignal, createMemo } from "solid-js";
+export function App() {
+  const [n] = createSignal(1);
+  const m = createMemo(() => {
+    let total = 0;
+    for (let i = 0; i < n(); i++) {
+      try { total += JSON.parse(String(i)) as number; } catch { /* @yield-absorb: a number parses */ total = -1; } finally { if (total < 0) continue; }
     }
     return total;
   });

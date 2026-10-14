@@ -71,6 +71,12 @@ describe("sugar: existing library semantics", { timeout: 30_000 }, () => {
     expect(result).toContain("component(function* Child");
     expect(result).toContain("if (true) return view(function*");
   });
+  it("refuses a return that is not JSX (native mode renders what Solid does, D-125)", () => {
+    for (const body of ["if (n() > 1) return null; return <p/>;", "return n() > 1 ? <b/> : <p/>;"])
+      expect(() =>
+        lower(`${start} function Counter() { const [n] = $signal(0); ${body} }`)
+      ).toThrow(/SUGAR_RETURN/);
+  });
   it("refuses reads in unknown callbacks", () => {
     expect(() =>
       lower(`${start} function Counter() { const [n] = $signal(0);

@@ -32,6 +32,18 @@ describe("native lazy components' props (D-119 through lazy)", { timeout: 120_00
     expect(result.files.get(page)).not.toContain("foreign(");
   });
 
+  it("widens to the failures the callers pass, printed for the page's file", () => {
+    const fails = resolve(import.meta.dirname, "fixtures/native-lazy-fails");
+    const [index, page] = ["index.tsx", "Page.tsx"].map(name => resolve(fails, name));
+    const result = lowerNativeProject(
+      new Map([index, page].map(file => [file, readFileSync(file, "utf8")]))
+    );
+    expect(result.diagnostics).toEqual([]);
+    expect(result.files.get(page)).toContain(
+      'count: __NativeSource<number, import("solid-yield/internal").NativeFailure<"global:RangeError">, true>;'
+    );
+  });
+
   it("resolving a promise with a value that has no `then` fails nothing", () => {
     const result = lower();
     const fails = name => [...result.inference.functions.find(f => f.name === name).fails];

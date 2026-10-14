@@ -12,6 +12,10 @@ const routerTypes = `declare module "foreign-router" {
   export function createRouter(options: {
     routes: { path: string; component: (props: { params: Record<string, string> }) => JSX.Element }[];
   }): (props: { url?: string }) => JSX.Element;
+  export function defineRoute(route: {
+    path: string;
+    component: (props: { params: Record<string, string> }) => JSX.Element;
+  }): { path: string };
 }`;
 const checked = code => {
   const options = {
@@ -103,5 +107,35 @@ export function App() {
 }`);
     expect(code).not.toMatch(/__nativeForeignProvided\(Page, [^\n]*#Theme"/);
     expect(checked(code).join("\n")).toContain("[NO_PROVIDER]");
+  });
+});
+
+// A component a foreign API takes as `component` keeps the plain Solid call
+// signature there (`__nativeC`), however it is declared: an arrow or an
+// anonymous function was not named a component once wrapped (SUGAR_COMPONENT).
+describe("native components handed to a foreign slot", { timeout: 60_000 }, () => {
+  const page = "<p>{props.params.id}</p>";
+  it.each([
+    ["an arrow", `const Page = (props: {params: Record<string, string>}) => ${page};`],
+    [
+      "a function expression",
+      `const Page = function (props: {params: Record<string, string>}) { return ${page}; };`
+    ],
+    [
+      "a function declaration",
+      `function Page(props: {params: Record<string, string>}) { return ${page}; }`
+    ],
+    [
+      "a default export",
+      `export default function Page(props: {params: Record<string, string>}) { return ${page}; }`
+    ]
+  ])("keeps %s's call signature at the slot", (_name, declaration) => {
+    const code = lower(`import {defineRoute} from 'foreign-router';
+${declaration}
+export const route = defineRoute({path: '/', component: Page});`);
+    expect(code).toContain(
+      "const Page = __nativeC(component(function* Page(props: __NativeProps<{"
+    );
+    expect(checked(code)).toEqual([]);
   });
 });

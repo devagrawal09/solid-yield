@@ -45,8 +45,18 @@ const key = n => n?.name ?? n?.value;
 /** The property key a function is the value of, if any. @param {Path} fn */
 const propKey = fn => (fn.parentPath?.isObjectProperty() ? key(fn.parentPath.node.key) : null);
 /** @param {Path | null | undefined} p */
-const fnName = p =>
-  p?.node.id?.name ?? (p?.parentPath?.isVariableDeclarator() ? key(p.parentPath.node.id) : null);
+const fnName = p => {
+  // a component a foreign slot takes, `const Page = __nativeC((props) => …)`, is Page
+  const held =
+    p?.parentPath?.isCallExpression() &&
+    t.isIdentifier(p.parentPath.node.callee, { name: "__nativeC" })
+      ? p.parentPath
+      : p;
+  return (
+    p?.node.id?.name ??
+    (held?.parentPath?.isVariableDeclarator() ? key(held.parentPath.node.id) : null)
+  );
+};
 /**
  * D-124: a reader a function hands back (`useDouble(count)` returning
  * `() => count() * 2`, or an object of them): a derived accessor, a routine
@@ -141,7 +151,11 @@ const lexicalPhase = fn => {
  * @param {Path} fn
  */
 const providedValue = fn => {
-  for (let held = fn, at = fn.parentPath; at; held = at, at = at.parentPath) {
+  for (
+    let held = fn, at = fn.parentPath;
+    at?.isObjectProperty() || at?.isObjectExpression() || at?.isArrayExpression();
+    held = at, at = at.parentPath
+  ) {
     if (at.isObjectProperty() && at.node.value === held.node && key(at.node.key) === "value") {
       const call = at.parentPath?.parentPath;
       if (
@@ -152,7 +166,6 @@ const providedValue = fn => {
       )
         return true;
     }
-    if (!at.isObjectProperty() && !at.isObjectExpression() && !at.isArrayExpression()) return false;
   }
   return false;
 };

@@ -607,9 +607,9 @@ function isHHole(node) {
       }
       if (callee && FLOW_CONTROLS.has(callee))
         return key !== null && FLOW_SOURCE_PROPS.has(String(key)) && child === p.arguments[0];
-      return false;
     }
-    return false;
+    // any other parent: not a hole of `h`
+    break;
   }
   return false;
 }
@@ -1585,15 +1585,13 @@ const noUncheckedForeignHandoff = {
       if (!tsNode) return null;
       const type = checker.getTypeAtLocation(tsNode);
       const types = type.isUnion && type.isUnion() ? type.types : [type];
-      for (const t of types)
-        for (const sig of t.getCallSignatures ? t.getCallSignatures() : []) {
-          const fails = phantomType(checker, sig.getReturnType(), "FAILS", tsNode);
-          if (fails) {
-            const text = checker.typeToString(fails);
-            return text === "never" ? null : text;
-          }
-        }
-      return null;
+      // a yield component's view carries its FAILS
+      const fails = types
+        .flatMap(t => (t.getCallSignatures ? t.getCallSignatures() : []))
+        .map(sig => phantomType(checker, sig.getReturnType(), "FAILS", tsNode))
+        .find(Boolean);
+      const text = fails && checker.typeToString(fails);
+      return text && text !== "never" ? text : null;
     };
     // The native lowering hands over with its internal `foreign`s (F-S43).
     const isForeignCall = node => {
@@ -1718,13 +1716,14 @@ const reportedConfigs = new Set();
 let typescript;
 function loadTypescript() {
   if (typescript === undefined) {
-    try {
-      typescript = createRequire(import.meta.url)("typescript");
-    } catch {
+    typescript = null;
+    // the plugin's own TypeScript, else the project's (the plugin installed alone)
+    for (const base of [import.meta.url, join(process.cwd(), "package.json")]) {
       try {
-        typescript = createRequire(join(process.cwd(), "package.json"))("typescript");
+        typescript = createRequire(base)("typescript");
+        break;
       } catch {
-        typescript = null;
+        // the next place
       }
     }
   }

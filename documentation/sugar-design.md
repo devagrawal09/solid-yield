@@ -2346,10 +2346,18 @@ became a test) or the line could not be reached (removed). What it found:
     read once in the body, as Solid's destructuring reads it: READ_IN_SETUP,
     the lost-reactivity bug plain Solid has there; read through the value,
     it is the hole's read.
+  - a context declared in one file and provided in another with a getter or
+    a store failed to type (LAZY_VIEW): facades read only the declaring
+    file's providers, and edited positions of the wrong file. They read every
+    file's providers now and retype each slot in the file that declares it.
   The surface gains thirteen context constructs (a provider's accessor and
   action read through each form, a getter read through the value and
   destructured, a store, a default, the call form and its refused key);
   `native-paths.test.js` the probes.
+- **Handlers an expression computes** (`onClick={make(2)}`,
+  `onClick={n() > 3 ? down : up}`) stay refused (NATIVE_HANDLER: Solid runs
+  the expression once, where the element is created); the message now says
+  so and what to write instead.
 - **Promise chains a body starts.** `fetch(url).then(setData)` in a
   component's body, a chain that cannot fail, was taken as the body waiting
   for it (NATIVE_SETUP_FAILURE), and its continuation as a bare event
@@ -2391,3 +2399,24 @@ function with JSX anywhere in what it returns (a ternary, a logical
 operator, an array, parentheses) is a component; what the return computes
 outside its JSX is computed in the body before the view, as in Solid (a
 read there is READ_IN_SETUP); `return null` and `return;` render nothing.
+
+**Measured** (2026-10-14, the code of `27761e6` plus the tests above; the
+whole test system: each package's suite, the surface corpus, the native gate
+steps and the mutation run, under V8 coverage). Each function's own lines:
+
+| Package | Functions | Own-line coverage | CRAP > 30 | Mean CRAP |
+| --- | --- | --- | --- | --- |
+| vite-plugin-yield (the native checker) | 610 | 98.9 % (97.9 % before) | 13 | 6.2 |
+| eslint-plugin-yield | 159 | 99.1 % (96.7 %) | 1 | 5.3 |
+| ts-plugin-yield | 139 | 98.7 % (95.4 %) | 3 | 4.0 |
+| yield (the library) | 328 | 92.5 % | 0 | 2.4 |
+| compiler-yield | 530 | 89.6 % | 15 | 5.9 |
+| all | 1766 | | 32 (1.8 %) | 5.2 |
+
+Of the 32 functions over CRAP 30, 17 are fully covered (their CRAP is their
+complexity: the lowering's large visitors, `delegate`, the effects pass's
+`exit`, native's `exit`, failure inference's `evaluate`), and 12 of the rest
+are the compiler package's experiments (analysis, semantic, reachability,
+report), not sugar mode. In the native checker, two are not fully covered,
+both at 98 % (`handler`, `coloredPropSites`). The surface mutation program:
+817 mutants, 728 killed, 89 recorded equivalents, 0 survived (100 %); the full gate at `27761e6`: 101 pass, 0 fail, 0 skip.

@@ -790,6 +790,75 @@ export function App() {
   return <Provider><Child /></Provider>;
 }`,
     []
+  ],
+  // a context declared in one file, provided (as a call) and destructured in another: the provider's getter is found across files
+  [
+    "ctx-shared",
+    `import { createContext } from "solid-js";
+export const Shared = createContext<{ readonly count: number; label: () => string }>();`,
+    []
+  ],
+  [
+    "ctx-shared-consumer",
+    `import { createSignal, useContext } from "solid-js";
+import { Shared } from "./ctx-shared";
+function Reader() {
+  const { count, label } = useContext(Shared);
+  return <p title={label()}>{count}</p>;
+}
+export function SharedApp() {
+  const [n] = createSignal(1);
+  return Shared({ value: { get count() { return n(); }, label: () => "x" }, children: () => <Reader /> });
+}`,
+    ["READ_IN_SETUP"]
+  ],
+  // a context call's spread is its JSX form's
+  [
+    "ctx-spread-call",
+    `import { createContext, useContext } from "solid-js";
+const Theme = createContext("light");
+function Themed() {
+  return <p>{useContext(Theme)}</p>;
+}
+export function App() {
+  const props = { value: "dark" };
+  return Theme({ ...props, children: () => <Themed /> });
+}`,
+    []
+  ],
+  // a context read in an array callback of the view is the component's
+  [
+    "ctx-read-in-map",
+    `import { createContext, useContext, createSignal } from "solid-js";
+const Scale = createContext(2);
+export function App() {
+  const [items] = createSignal([1, 2]);
+  return <ul>{items().map(x => <li>{x * useContext(Scale)}</li>)}</ul>;
+}`,
+    []
+  ],
+  // a foreign component's render callback with a block body returns a checked view
+  [
+    "foreign-block-callback",
+    `import { createSignal } from "solid-js";
+import type { JSX } from "@solidjs/web";
+declare const List: (props: { each: number[]; children: (n: number) => JSX.Element }) => JSX.Element;
+export function App() {
+  const [n] = createSignal(1);
+  return <List each={[1, 2]}>{x => { const d = x * 2; return <p>{d}</p>; }}</List>;
+}`,
+    []
+  ],
+  // a spread object's handler computed by a call stays as written (D-116)
+  [
+    "spread-handler-call",
+    `import { createSignal } from "solid-js";
+export function App() {
+  const [n, setN] = createSignal(1);
+  const make = (k: number) => () => setN(n() + k);
+  return <button {...{ onClick: make(2) }}>{n()}</button>;
+}`,
+    []
   ]
 ];
 /** refusals stop a project's check: each on its own */
@@ -954,6 +1023,28 @@ export function App() {
   return <Ctx.Provider value={1}><Show /></Ctx.Provider>;
 }`,
     []
+  ],
+  // a handler an expression computes runs once where the element is created
+  [
+    "handler-from-call",
+    `import { createSignal } from "solid-js";
+export function App() {
+  const [n, setN] = createSignal(1);
+  const make = (k: number) => () => setN(n() + k);
+  return <button onClick={make(2)}>{n()}</button>;
+}`,
+    ["NATIVE_HANDLER"]
+  ],
+  [
+    "handler-ternary",
+    `import { createSignal } from "solid-js";
+export function App() {
+  const [n, setN] = createSignal(1);
+  const up = () => setN(n() + 1);
+  const down = () => setN(n() - 1);
+  return <button onClick={n() > 3 ? down : up}>{n()}</button>;
+}`,
+    ["NATIVE_HANDLER"]
   ]
 ];
 

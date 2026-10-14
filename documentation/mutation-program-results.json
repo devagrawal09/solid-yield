@@ -1,8 +1,8 @@
 {
-  "startedAt": "2026-10-14T08:22:51.756Z",
-  "finishedAt": "2026-10-14T09:00:08.251Z",
-  "durationMs": 2236495,
-  "digest": "10b812be5b08e6641cd4d88559d36fc21f6f3b93532225d5f5f6ab2e19ead3ea",
+  "startedAt": "2026-10-14T12:47:25.190Z",
+  "finishedAt": "2026-10-14T13:28:48.756Z",
+  "durationMs": 2483566,
+  "digest": "4ec85d71ceda13bb1a015dc61ed732610a5a6ad77cbe9bcadced56733ae6a6c8",
   "projects": [
     {
       "id": "sierpinski",

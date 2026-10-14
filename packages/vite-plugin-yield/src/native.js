@@ -1565,7 +1565,7 @@ function surface(
               fail(
                 fn,
                 "NATIVE_HANDLER",
-                "A property event handler needs a checked shared event-call contract."
+                "Write the handler as a function (`onClick={e => …}`) or name one (`onClick={handler}`): an expression that computes a handler (a call, a ternary) runs once where the element is created, and the handler it gives is not checked."
               );
             for (const [index, entry] of fn.node.params.entries()) {
               // a default's annotation is its binding's (`({ key } = fallback)`)

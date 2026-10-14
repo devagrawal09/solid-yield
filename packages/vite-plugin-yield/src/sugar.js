@@ -849,7 +849,7 @@ function pass(code, filename, program, native = false) {
     if (fn.node.params.every(/** @param {any} q */ q => q.typeAnnotation || t.isRestElement(q)))
       return;
     const declared = providedValue(call)
-      ? (providedSlots ??= contextSlots(source, checker)).get(callNode)
+      ? (providedSlots ??= contextSlots(program, checker)).get(callNode)
       : undefined;
     const slot = declared
       ? checker.getTypeFromTypeNode(declared)
@@ -2596,7 +2596,9 @@ function contextFacades(code, filename, program) {
       .some(sig => checker.getReturnTypeOfSignature(sig).symbol?.name === "Generator");
   /** @type {{start: number, end: number, text: string}[]} */ const edits = [];
   const tsPrinter = ts.createPrinter();
-  for (const [value, declared] of contextSlots(source, checker)) {
+  for (const [value, declared] of contextSlots(program, checker)) {
+    // a slot is retyped in the file that declares it
+    if (declared.getSourceFile() !== source) continue;
     // a getter (D-124) hands back a source over its body, and a store is
     // one: plain Solid types them as their values, the slot holds the source
     const getter = ts.isGetAccessorDeclaration(value);
@@ -2646,17 +2648,25 @@ function contextFacades(code, filename, program) {
   });
   return replaced ? printer(t.file(p.node)) : code;
 }
+/** @type {WeakMap<ts.Program, Map<ts.Node, ts.TypeNode>>} */
+const slotsOf = new WeakMap();
 /**
  * F-S52: each provided value's leaves paired with the context's declared type
  * nodes (`Ctx.provide({ value })`): tuples by position, objects by member,
- * through aliases and interfaces declared in the same file.
- * @param {ts.SourceFile} source @param {ts.TypeChecker} checker
+ * through aliases and interfaces declared in the context's file. Every file's
+ * providers: a context declared in one file may be provided in another.
+ * @param {ts.Program} program @param {ts.TypeChecker} checker
  * @returns {Map<ts.Node, ts.TypeNode>}
  */
-function contextSlots(source, checker) {
+function contextSlots(program, checker) {
+  const cached = slotsOf.get(program);
+  if (cached) return cached;
   /** @type {Map<ts.Node, ts.TypeNode>} */ const slots = new Map();
+  slotsOf.set(program, slots);
   /** @param {ts.Node | undefined} node @returns {ts.Node | undefined} */
   const resolveType = node => {
+    // aliases and interfaces of the file that declares the context's type
+    const home = node?.getSourceFile();
     for (let i = 0; node && i < 8; i++) {
       if (ts.isParenthesizedTypeNode(node)) {
         node = node.type;
@@ -2666,7 +2676,7 @@ function contextSlots(source, checker) {
       let symbol = checker.getSymbolAtLocation(node.typeName);
       if (symbol && symbol.flags & ts.SymbolFlags.Alias) symbol = checker.getAliasedSymbol(symbol);
       const declaration = symbol?.declarations?.[0];
-      if (!declaration || declaration.getSourceFile() !== source) return node;
+      if (!declaration || declaration.getSourceFile() !== home) return node;
       if (ts.isTypeAliasDeclaration(declaration)) node = declaration.type;
       else if (ts.isInterfaceDeclaration(declaration)) return declaration;
       else return node;
@@ -2697,10 +2707,8 @@ function contextSlots(source, checker) {
           !ts.isGetAccessorDeclaration(property)
         )
           continue;
-        const name = property.name.getText(source);
-        const member = members.find(
-          m => ts.isPropertySignature(m) && m.name.getText(source) === name
-        );
+        const name = property.name.getText();
+        const member = members.find(m => ts.isPropertySignature(m) && m.name.getText() === name);
         if (!member || !ts.isPropertySignature(member) || !member.type) continue;
         if (ts.isGetAccessorDeclaration(property)) slots.set(property, member.type);
         else
@@ -2732,13 +2740,14 @@ function contextSlots(source, checker) {
         declaration && ts.isVariableDeclaration(declaration) ? declaration.initializer : undefined;
       const declared = init && ts.isCallExpression(init) ? init.typeArguments?.[0] : undefined;
       const value = node.arguments[0].properties.find(
-        p => ts.isPropertyAssignment(p) && p.name.getText(source) === "value"
+        p => ts.isPropertyAssignment(p) && p.name.getText() === "value"
       );
       if (declared && value && ts.isPropertyAssignment(value)) walk(value.initializer, declared);
     }
     ts.forEachChild(node, visit);
   };
-  visit(source);
+  for (const file of program.getSourceFiles())
+    if (!file.isDeclarationFile && !/[\\/]node_modules[\\/]/.test(file.fileName)) visit(file);
   return slots;
 }
 /** Refuse generator helpers handed to an unknown consumer. The library's
@@ -2781,7 +2790,7 @@ function checkEscapes(files, active, options) {
     };
     /** A routine given where a routine is expected (F-S52: a context value's
      * member typed as one): its consumers delegate it. @param {ts.Identifier} n */
-    const slots = contextSlots(source, checker);
+    const slots = contextSlots(program, checker);
     /** @param {ts.Identifier} n */
     const routineSlot = n => {
       const declared = slots.get(n);

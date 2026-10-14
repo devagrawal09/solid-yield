@@ -13,6 +13,19 @@ function merge(into, from) {
   into.pending ||= from.pending;
   for (const kind of from.fails) into.fails.add(kind);
 }
+/** `Math.floor(…)` and its kin: pure, and numeric given numeric arguments. */
+const PURE_MATH = new Set(["floor", "ceil", "round", "trunc", "abs", "min", "max", "sign", "sqrt"]);
+/** @param {any} n @param {Path} scope @param {(a: any) => boolean} each */
+const mathCall = (n, scope, each) =>
+  t.isCallExpression(n) &&
+  t.isMemberExpression(n.callee) &&
+  !n.callee.computed &&
+  t.isIdentifier(n.callee.object, { name: "Math" }) &&
+  !scope.scope.getBinding("Math") &&
+  t.isIdentifier(n.callee.property) &&
+  PURE_MATH.has(n.callee.property.name) &&
+  n.arguments.length > 0 &&
+  n.arguments.every(each);
 /** Reconstruct the numeric prop/early-return surface of self-recursive native
  * components. This pass never admits a read in setup: aliases are paths, pure
  * arithmetic is substituted at its use, and branch setup runs in a Match row.
@@ -147,6 +160,8 @@ export function lowerNativeRecursion(code, file) {
     if (t.isBinaryExpression(n) && ["+", "-", "*", "/", "%"].includes(n.operator))
       return numeric(n.left, owner, seen) && numeric(n.right, owner, seen);
     const info = components.get(owner);
+    if (info && mathCall(n, info.path, /** @param {any} a */ a => numeric(a, owner, seen)))
+      return true;
     if (
       t.isMemberExpression(n) &&
       t.isIdentifier(n.object, { name: info?.param }) &&
@@ -424,10 +439,14 @@ export function lowerNativeRecursion(code, file) {
             (t.isBinaryExpression(n) &&
               ["+", "-", "*", "/", "%"].includes(n.operator) &&
               pure(n.left) &&
-              pure(n.right));
+              pure(n.right)) ||
+            mathCall(n, q, pure);
           if (!pure(a.right))
-            throw new Error(
-              "[NATIVE_RECURSION] A prop snapshot write needs pure numeric arithmetic."
+            throw nativeRefusal(
+              file,
+              a.right,
+              "NATIVE_RECURSION",
+              "A prop snapshot write needs pure numeric arithmetic."
             );
           aliases.set(a.left.name, a.right);
           statement.remove();
@@ -437,17 +456,18 @@ export function lowerNativeRecursion(code, file) {
     // An early JSX return followed by branch setup becomes Match rows. Keep
     // state creation in the selected row, rather than in a reading setup/view.
     const nodes = /** @type {any[]} */ (q.node.body.body);
-    const guard = nodes.findIndex(
-      n =>
-        t.isIfStatement(n) &&
-        !n.alternate &&
-        t.isBlockStatement(n.consequent) &&
-        n.consequent.body.length === 1 &&
-        t.isReturnStatement(n.consequent.body[0])
-    );
+    // `if (test) return <…/>;`, with or without braces
+    /** @param {any} n */
+    const early = n =>
+      t.isReturnStatement(n)
+        ? n
+        : t.isBlockStatement(n) && n.body.length === 1 && t.isReturnStatement(n.body[0])
+          ? n.body[0]
+          : null;
+    const guard = nodes.findIndex(n => t.isIfStatement(n) && !n.alternate && !!early(n.consequent));
     if (guard >= 0) {
       const test = nodes[guard].test,
-        leaf = nodes[guard].consequent.body[0].argument,
+        leaf = /** @type {any} */ (early(nodes[guard].consequent)).argument,
         rest = nodes.slice(guard + 1);
       if (!t.isJSXElement(leaf) && !t.isJSXFragment(leaf))
         throw nativeRefusal(file, leaf, "NATIVE_RECURSION", "The early branch must return JSX.");

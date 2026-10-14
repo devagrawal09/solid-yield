@@ -67,22 +67,52 @@ export function* nativeMap<T, Y, R>(
   return result;
 }
 
+/** The fallback event for an attribute Solid's JSX does not type (`on:click`). */
+interface NativeFallbackEvents {
+  Event: Event;
+  MouseEvent: MouseEvent;
+  KeyboardEvent: KeyboardEvent;
+  InputEvent: InputEvent;
+}
 /** The event a native handler is called with, as Solid's JSX types it
  * (`onPointerDown` on a `div`: a `PointerEvent` whose `currentTarget` is the
- * div). An attribute Solid does not type (an `on:` namespace) takes
- * `Fallback`. */
+ * div). An attribute Solid does not type takes the `Kind` event, on the
+ * element. Every argument is a literal, so TypeScript computes one
+ * instantiation per element and attribute however many handlers share it. */
 export type NativeEventOf<
   Tag extends string,
   Attribute extends string,
-  Fallback
+  Kind extends keyof NativeFallbackEvents
 > = Tag extends keyof JSX.IntrinsicElements
   ? Attribute extends keyof JSX.IntrinsicElements[Tag]
     ? HandlerEvent<
         Extract<NonNullable<JSX.IntrinsicElements[Tag][Attribute]>, (event: never) => unknown>,
-        Fallback
+        NativeFallbackEvents[Kind] & { currentTarget: ElementOf<Tag> }
       >
-    : Fallback
-  : Fallback;
+    : NativeFallbackEvents[Kind] & { currentTarget: ElementOf<Tag> }
+  : NativeFallbackEvents[Kind] & { currentTarget: ElementOf<Tag> };
+type ElementOf<Tag extends string> = Tag extends keyof HTMLElementTagNameMap
+  ? HTMLElementTagNameMap[Tag]
+  : Tag extends keyof SVGElementTagNameMap
+    ? SVGElementTagNameMap[Tag]
+    : Element;
+type FormControl = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+/** A native handler's event as Solid's JSX types it, given the event type
+ * the lowering read from Solid's types (scripts/native-events.mjs): the
+ * element is `currentTarget`, and an input, change or focus handler's
+ * `target` is the element when it is a form control. Cheap: no JSX lookup. */
+export type NativeHandlerEvent<
+  E extends Event,
+  Tag extends string,
+  Kind extends "plain" | "input" | "change" | "focus"
+> = E & {
+  currentTarget: ElementOf<Tag>;
+  target: Kind extends "plain"
+    ? Element
+    : ElementOf<Tag> extends FormControl
+      ? ElementOf<Tag>
+      : Element;
+};
 type HandlerEvent<H, Fallback> = [H] extends [never]
   ? Fallback
   : H extends (event: infer E) => unknown

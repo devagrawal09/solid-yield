@@ -995,8 +995,11 @@ export function nativePrelude(files) {
             t.isIdentifier(binding.path.node.imported, { name: x })
           )
             return false;
-          throw new Error(
-            `[NATIVE_NAME] Reserve ${names[x]} for the generated native import. (${file})`
+          throw nativeRefusal(
+            file,
+            binding.path.node,
+            "NATIVE_NAME",
+            `Reserve ${names[x]} for the generated native import.`
           );
         });
       if (group.length)

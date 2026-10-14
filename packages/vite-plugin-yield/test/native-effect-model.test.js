@@ -72,6 +72,27 @@ export function drive<R>(steps: () => Generator<Promise<number>, R, number>) {
     expect(checked(code)).toEqual([]);
   });
 
+  it("finds a driver bound to a const arrow", () => {
+    const code = lower(`${bridge()
+      .replace(
+        "function drive<R>(steps: () => Generator<number, R, number>) {\n  return action(",
+        "const drive = <R,>(steps: () => Generator<number, R, number>) => {\n  return action("
+      )
+      .replace(/\n  \}\);\n\}$/, "\n  });\n};")}
+export function Saga() {
+  const [phase, setPhase] = createSignal("idle");
+  const run = drive(function* () {
+    setPhase("one");
+    const n = yield 1;
+    setPhase("two");
+    return n;
+  });
+  return <button onClick={() => run()}>{phase()}</button>;
+}`);
+    expect(code).toContain('__nativeWrite(setPhase)("one")');
+    expect(checked(code)).toEqual([]);
+  });
+
   it("leaves them plain when the driver calls the saga outside an action", () => {
     const code = lower(`import { createSignal } from "solid-js";
 function later<R>(steps: () => Generator<number, R, number>) {

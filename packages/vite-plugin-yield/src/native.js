@@ -1,3 +1,4 @@
+import { SOLID_EVENTS } from "./native-events.js";
 import {
   traverseOwned,
   authoredOpaqueGenerator,
@@ -1415,8 +1416,25 @@ function surface(
                     : /Mouse|Click/.test(attribute)
                       ? "MouseEvent"
                       : "Event";
-                // Solid's own type for this element's attribute; one it does
-                // not type (`on:click`) is the event by its name
+                // Solid's own type for this element's attribute, read from
+                // Solid's types at build time (native-events.js); one it does
+                // not type there (`on:click`, an SVG timing event) is asked
+                // of Solid's JSX types, or is the event by its name
+                const known = SOLID_EVENTS[attribute];
+                if (known?.[0]) {
+                  needed.add("__NativeHandlerEvent");
+                  param.typeAnnotation = t.tsTypeAnnotation(
+                    t.tsTypeReference(
+                      t.identifier("__NativeHandlerEvent"),
+                      t.tsTypeParameterInstantiation([
+                        t.tsTypeReference(t.identifier(known[0])),
+                        t.tsLiteralType(t.stringLiteral(name)),
+                        t.tsLiteralType(t.stringLiteral(known[1]))
+                      ])
+                    )
+                  );
+                  continue;
+                }
                 needed.add("__NativeEventOf");
                 param.typeAnnotation = t.tsTypeAnnotation(
                   t.tsTypeReference(
@@ -1424,20 +1442,7 @@ function surface(
                     t.tsTypeParameterInstantiation([
                       t.tsLiteralType(t.stringLiteral(name)),
                       t.tsLiteralType(t.stringLiteral(attribute)),
-                      t.tsIntersectionType([
-                        t.tsTypeReference(t.identifier(event)),
-                        t.tsTypeLiteral([
-                          t.tsPropertySignature(
-                            t.identifier("currentTarget"),
-                            t.tsTypeAnnotation(
-                              t.tsIndexedAccessType(
-                                t.tsTypeReference(t.identifier("HTMLElementTagNameMap")),
-                                t.tsLiteralType(t.stringLiteral(name))
-                              )
-                            )
-                          )
-                        ])
-                      ])
+                      t.tsLiteralType(t.stringLiteral(event))
                     ])
                   )
                 );
@@ -1760,11 +1765,12 @@ function surface(
         t.stringLiteral("solid-yield/internal")
       )
     );
-  if (needed.delete("__NativeEventOf")) {
-    const spec = t.importSpecifier(t.identifier("__NativeEventOf"), t.identifier("NativeEventOf"));
-    spec.importKind = "type";
-    p.node.body.unshift(t.importDeclaration([spec], t.stringLiteral("solid-yield/internal")));
-  }
+  for (const name of ["__NativeEventOf", "__NativeHandlerEvent"])
+    if (needed.delete(name)) {
+      const spec = t.importSpecifier(t.identifier(name), t.identifier(name.slice(2)));
+      spec.importKind = "type";
+      p.node.body.unshift(t.importDeclaration([spec], t.stringLiteral("solid-yield/internal")));
+    }
   if (needed.delete("__NativeArguments"))
     p.node.body.unshift(
       t.importDeclaration(

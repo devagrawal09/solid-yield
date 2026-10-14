@@ -323,6 +323,59 @@ export const App = () => {
   return <p>{n()}{String(this)}</p>;
 };`,
     []
+  ],
+  // a self-recursive component (Sierpinski's shape): a prop read in member
+  // arithmetic, a braceless early return, a failing prop, a Math call
+  [
+    "recursion-member",
+    `import { render } from "@solidjs/web";
+type TreeProps = { depth: number; children: number };
+const Tree = (props: TreeProps) => {
+  let { depth } = props;
+  if (depth <= 0) return <i>{props.children}</i>;
+  depth = depth - 1;
+  return <b><Tree depth={props.depth - 1}>{props.children}</Tree><Tree depth={depth}>{props.children}</Tree></b>;
+};
+export function App() {
+  return <Tree depth={3}>{1}</Tree>;
+}
+render(App, document.body);`,
+    []
+  ],
+  [
+    "recursion-failing-prop",
+    `import { createSignal, createMemo, Errored } from "solid-js";
+import { render } from "@solidjs/web";
+type TreeProps = { depth: number; children: number };
+const Tree = (props: TreeProps) => {
+  let { depth } = props;
+  if (depth <= 0) return <i>{props.children}</i>;
+  depth = depth - 1;
+  return <b><Tree depth={depth}>{props.children}</Tree></b>;
+};
+export function App() {
+  const [n] = createSignal(1);
+  const checked = createMemo(() => { if (n() < 0) throw new RangeError("negative"); return n(); });
+  return <Errored fallback={() => <p>failed</p>}><Tree depth={3}>{checked()}</Tree></Errored>;
+}
+render(App, document.body);`,
+    []
+  ],
+  [
+    "recursion-math-write",
+    `import { render } from "@solidjs/web";
+type TreeProps = { depth: number; children: number };
+const Tree = (props: TreeProps) => {
+  let { depth } = props;
+  if (depth <= 0) return <i>{props.children}</i>;
+  depth = Math.floor(depth / 2);
+  return <b><Tree depth={depth}>{props.children}</Tree></b>;
+};
+export function App() {
+  return <Tree depth={3}>{1}</Tree>;
+}
+render(App, document.body);`,
+    []
   ]
 ];
 /** refusals stop a project's check: each on its own */
@@ -368,6 +421,35 @@ export function App() {
   return <p>{m()}</p>;
 }`,
     ["NATIVE_CONTROL_TRANSFER"]
+  ],
+  // a snapshot write that is not pure arithmetic: refused at the write
+  [
+    "recursion-impure-write",
+    `import { render } from "@solidjs/web";
+type TreeProps = { depth: number; children: number };
+const Tree = (props: TreeProps) => {
+  let { depth } = props;
+  if (depth <= 0) return <i>{props.children}</i>;
+  depth = Math.random() * depth;
+  return <b><Tree depth={depth}>{props.children}</Tree></b>;
+};
+export function App() {
+  return <Tree depth={3}>{1}</Tree>;
+}
+render(App, document.body);`,
+    ["NATIVE_RECURSION"]
+  ],
+  // a name the lowering reserves: refused at its declaration
+  [
+    "prelude-reserved-name",
+    `import { createSignal, createMemo } from "solid-js";
+const __nativeTry = "taken";
+export function App() {
+  const [n] = createSignal("1");
+  const m = createMemo(() => { try { return JSON.parse(n()) as number; } catch { /* @yield-absorb: bad input */ return -1; } });
+  return <p>{m()}{__nativeTry}</p>;
+}`,
+    ["NATIVE_NAME"]
   ]
 ];
 
@@ -417,6 +499,19 @@ describe("native lowering paths, checked as plain Solid says", { timeout: 300_00
       r => r.includes("class-expression-error.tsx") && r.includes("FOREIGN_HANDOFF")
     );
     expect(row).toMatch(/Remaining: NotFound\./);
+  });
+
+  it("reserves the entry adapter's name", () => {
+    const dir = `${base}-entry`;
+    const project = checkProject(dir, [
+      ["app", "export function App() {\n  return <p>app</p>;\n}"],
+      [
+        "main",
+        'import { render } from "@solidjs/web";\nimport { App } from "./app";\nconst __nativeForeign = 1;\nrender(App, document.body);\nexport { __nativeForeign };'
+      ]
+    ]);
+    rmSync(dir, { recursive: true, force: true });
+    expect(project.codes.get("main"), project.log.join("\n")).toEqual(["NATIVE_NAME"]);
   });
 
   it.each(refusals)("%s (refused)", (name, source, expected) => {

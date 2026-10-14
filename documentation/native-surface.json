@@ -1,5 +1,5 @@
 {
-  "programs": 1552,
+  "programs": 1569,
   "failed": 0,
   "outcome": [
     {
@@ -15698,6 +15698,166 @@
       "variant": "jsx",
       "expected": [],
       "reported": [],
+      "pass": true
+    },
+    {
+      "form": "return-ternary",
+      "host": "view",
+      "variant": "jsx",
+      "expected": [
+        "READ_IN_SETUP"
+      ],
+      "reported": [
+        "READ_IN_SETUP"
+      ],
+      "pass": true
+    },
+    {
+      "form": "return-and",
+      "host": "view",
+      "variant": "jsx",
+      "expected": [
+        "READ_IN_SETUP"
+      ],
+      "reported": [
+        "READ_IN_SETUP"
+      ],
+      "pass": true
+    },
+    {
+      "form": "return-array",
+      "host": "view",
+      "variant": "jsx",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "return-string",
+      "host": "view",
+      "variant": "jsx",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "jsx-helper",
+      "host": "view",
+      "variant": "jsx",
+      "expected": [
+        "SUGAR_COMPONENT"
+      ],
+      "reported": [
+        "SUGAR_COMPONENT"
+      ],
+      "pass": true
+    },
+    {
+      "form": "jsx-in-body",
+      "host": "view",
+      "variant": "jsx",
+      "expected": [
+        "solid-yield/jsx-only-in-view"
+      ],
+      "reported": [
+        "solid-yield/jsx-only-in-view"
+      ],
+      "pass": true
+    },
+    {
+      "form": "jsx-local-arrow",
+      "host": "view",
+      "variant": "jsx",
+      "expected": [
+        "solid-yield/jsx-only-in-view"
+      ],
+      "reported": [
+        "solid-yield/jsx-only-in-view"
+      ],
+      "pass": true
+    },
+    {
+      "form": "context-destructured",
+      "host": "view",
+      "variant": "jsx",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "context-members",
+      "host": "view",
+      "variant": "jsx",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "context-guarded",
+      "host": "view",
+      "variant": "jsx",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "context-in-place",
+      "host": "view",
+      "variant": "jsx",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "context-handler-member",
+      "host": "view",
+      "variant": "jsx",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "context-tuple",
+      "host": "view",
+      "variant": "jsx",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "context-default",
+      "host": "view",
+      "variant": "jsx",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "context-call",
+      "host": "view",
+      "variant": "jsx",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "context-call-computed",
+      "host": "view",
+      "variant": "jsx",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "context-call-computed-key",
+      "host": "view",
+      "variant": "jsx",
+      "expected": [
+        "NATIVE_CONTEXT"
+      ],
+      "reported": [
+        "NATIVE_CONTEXT"
+      ],
       "pass": true
     },
     {

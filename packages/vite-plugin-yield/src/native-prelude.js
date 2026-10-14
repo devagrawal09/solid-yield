@@ -2,6 +2,7 @@ import { traverseOwned } from "./native-owned.js";
 import { copyPosition, nativeRefusal, printMapped } from "./positions.js";
 // @ts-check
 import babel from "@babel/core";
+import { dirname, resolve } from "node:path";
 import { parseProgram } from "./transform.js";
 const t = babel.types;
 /** @typedef {import('@babel/core').NodePath<any>} Path */
@@ -407,16 +408,8 @@ function liftRootTrees(p) {
 export function nativeRootTrees(files) {
   const out = new Map();
   for (const [file, code] of files) {
-    if (!/@solidjs\/web/.test(code)) {
-      out.set(file, code);
-      continue;
-    }
-    const p = parseProgram(code, file);
-    if (!p) {
-      out.set(file, code);
-      continue;
-    }
-    out.set(file, liftRootTrees(p) ? printMapped(t.file(p.node)) : code);
+    const p = /@solidjs\/web/.test(code) ? parseProgram(code, file) : null;
+    out.set(file, p && liftRootTrees(p) ? printMapped(t.file(p.node)) : code);
   }
   return out;
 }
@@ -645,6 +638,87 @@ function overloaded(declared, name) {
     )
   );
 }
+/**
+ * Whether `ref` names a context (`createContext(…)`), declared in this file
+ * or exported by a selected one.
+ * @param {Path} ref @param {Map<string,string>} files @param {string} file
+ */
+function contextName(ref, files, file) {
+  /** @type {Path | undefined} */ let declaration = ref.scope.getBinding(ref.node.name)?.path;
+  const from = api(ref);
+  if (from?.module.startsWith(".")) {
+    const base = resolve(dirname(file), from.module);
+    const target = [
+      base,
+      `${base}.tsx`,
+      `${base}.ts`,
+      `${base}/index.tsx`,
+      `${base}/index.ts`
+    ].find(f => files.has(f));
+    declaration = target
+      ? parseProgram(files.get(target) ?? "", target)?.scope.getBinding(from.name)?.path
+      : undefined;
+  }
+  const init = declaration?.isVariableDeclarator() ? declaration.get("init") : null;
+  return !!init?.isCallExpression() && api(init.get("callee"))?.name === "createContext";
+}
+/**
+ * A context called as a function (`Ctx({ value, children })`) is checked as
+ * its JSX form (`<Ctx value={value}>{children}</Ctx>`, review 3): what it
+ * provides is that form's. The call evaluates its props before the context
+ * provides (`children: props.children` creates them first), which the JSX form
+ * defers; the check reads them as the JSX form does. A prop with no static
+ * name, a method or a getter has no JSX form: refused.
+ * @param {Path} p @param {Map<string,string>} files @param {string} file
+ */
+function contextCalls(p, files, file) {
+  traverseOwned(p, {
+    CallExpression(q) {
+      const callee = q.get("callee");
+      const [props] = q.node.arguments;
+      if (!callee.isIdentifier() || q.node.arguments.length !== 1 || !t.isObjectExpression(props))
+        return;
+      if (!contextName(callee, files, file)) return;
+      const named = props.properties.every(
+        prop =>
+          t.isSpreadElement(prop) ||
+          (t.isObjectProperty(prop) &&
+            !prop.computed &&
+            t.isExpression(prop.value) &&
+            /^[A-Za-z_$][\w$-]*$/.test(key(prop.key) ?? ""))
+      );
+      if (!named)
+        throw nativeRefusal(
+          file,
+          q.node,
+          "NATIVE_CONTEXT",
+          "Provide a context with JSX (`<Ctx value={…}>…</Ctx>`), or call it with props of static names: a computed key, a method or a getter has no JSX form."
+        );
+      /** @type {any[]} */ const attributes = [];
+      /** @type {any[]} */ const children = [];
+      for (const prop of /** @type {any[]} */ (props.properties)) {
+        if (t.isSpreadElement(prop)) {
+          attributes.push(t.jsxSpreadAttribute(prop.argument));
+          continue;
+        }
+        const container = t.jsxExpressionContainer(prop.value);
+        if (key(prop.key) === "children") children.push(container);
+        else attributes.push(t.jsxAttribute(t.jsxIdentifier(key(prop.key)), container));
+      }
+      const name = callee.node.name;
+      q.replaceWith(
+        copyPosition(
+          t.jsxElement(
+            t.jsxOpeningElement(t.jsxIdentifier(name), attributes, !children.length),
+            children.length ? t.jsxClosingElement(t.jsxIdentifier(name)) : null,
+            children
+          ),
+          q.node
+        )
+      );
+    }
+  });
+}
 /** Normalize native control contracts before routine reconstruction.
  * @param {Map<string,string>} files */
 export function nativePrelude(files) {
@@ -654,6 +728,7 @@ export function nativePrelude(files) {
     if (!p) continue;
     const used = new Set();
     nameDefaultComponent(p, file);
+    contextCalls(p, files, file);
     liftInlineComponents(p);
     componentFactories(p);
     derivedStores(p);

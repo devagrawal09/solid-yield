@@ -106,13 +106,18 @@ describe("native context hooks (F-S37)", () => {
     );
   }, 30_000);
 
-  it("leaves the destructured form a path, as todos reads it", () => {
+  it("reads a destructured name off the value where it is used, as todos does", () => {
     const result = lowerNativeProject(
       new Map([
         [
           file,
           `import {createContext, createSignal, useContext} from 'solid-js';
+import type {JSX} from '@solidjs/web';
 const Ctx = createContext<[() => number, {bump: () => void}]>();
+export function Provider(props: {children: JSX.Element}) {
+  const [count, setCount] = createSignal(0);
+  return <Ctx value={[count, {bump: () => setCount(count() + 1)}]}>{props.children}</Ctx>;
+}
 export function Child() {
   const [count, {bump}] = useContext(Ctx);
   return <button onClick={() => bump()}>{count()}</button>;
@@ -121,7 +126,12 @@ export function Child() {
       ])
     );
     const code = result.files.get(file);
-    expect(code).not.toContain("__nativeUseContext");
-    expect(code).toContain("yield* Ctx");
+    expect(code).toMatch(/const (_context\d*) = yield\* __nativeUseContext\(Ctx\);/);
+    // the provider's action is the event's that calls it (F-S40); the
+    // accessor, read where it is used, is the hole's read
+    expect(code).toMatch(/bump: __nativeLexicalCallback\("event"/);
+    expect(code).toMatch(/return _context\d*\[1\]\.bump\(\);/);
+    expect(code).toMatch(/\{yield\* _context\d*\[0\]\}/);
+    expect(checked(code)).toEqual([]);
   }, 30_000);
 });

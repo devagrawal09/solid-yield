@@ -134,15 +134,38 @@ const lexicalPhase = fn => {
   }
   return null;
 };
+/**
+ * Whether `fn` is held in a provider's value (`Ctx.provide({ value: { bump:
+ * () => setCount(…) } })`, `<Ctx value={…}>` lowered): its consumers call it,
+ * the provider's render does not; one that writes is an event's (F-S40).
+ * @param {Path} fn
+ */
+const providedValue = fn => {
+  for (let held = fn, at = fn.parentPath; at; held = at, at = at.parentPath) {
+    if (at.isObjectProperty() && at.node.value === held.node && key(at.node.key) === "value") {
+      const call = at.parentPath?.parentPath;
+      if (
+        call?.isCallExpression() &&
+        call.node.arguments[0] === at.parent &&
+        t.isMemberExpression(call.node.callee) &&
+        key(call.node.callee.property) === "provide"
+      )
+        return true;
+    }
+    if (!at.isObjectProperty() && !at.isObjectExpression() && !at.isArrayExpression()) return false;
+  }
+  return false;
+};
 /** F-S40, before types: a function passed as a component prop (not children or a
  * fallback) whose body writes (refresh, a setter of a signal/store/optimistic)
  * is called from the child's event, not during render, so its host is an event.
  * @param {Path} fn */
 const writingCallbackProp = fn => {
-  const call = ownerCall(fn);
-  const callee = call?.get("callee");
-  if (!callee?.isIdentifier() || !/^[A-Z]/.test(callee.node.name) || lib(callee)) return false;
-  if (["children", "fallback"].includes(propKey(fn))) return false;
+  if (!providedValue(fn)) {
+    const callee = ownerCall(fn)?.get("callee");
+    if (!callee?.isIdentifier() || !/^[A-Z]/.test(callee.node.name) || lib(callee)) return false;
+    if (["children", "fallback"].includes(propKey(fn))) return false;
+  }
   let writes = false;
   traverseOwned(fn, {
     Function(inner) {
@@ -397,11 +420,14 @@ function seed(code, filename, native = false) {
         path.node.generator = true;
         if (isComponent || row) {
           needsView = true;
+          /** Returns made views: wrapping one in a block revisits it. */
+          const viewed = new WeakSet();
           traverseOwned(path, {
             Function(q) {
               q.skip();
             },
             ReturnStatement(q) {
+              if (viewed.has(q.node)) return;
               // Native throw lowering returns raise(), which never completes.
               // It is a failure path, not a component return needing JSX.
               const failureReturn = q.get("argument").isTSAsExpression()
@@ -457,6 +483,7 @@ function seed(code, filename, native = false) {
               q.node.argument = t.callExpression(t.identifier("view"), [
                 t.functionExpression(null, [], t.blockStatement([t.returnStatement(shown)]), true)
               ]);
+              viewed.add(q.node);
               if (before.length) {
                 if (q.parentPath.isBlockStatement() || q.parentPath.isProgram())
                   q.insertBefore(before);
@@ -1025,8 +1052,10 @@ function pass(code, filename, program, native = false) {
    * @param {Path} fn */
   const eventCallbackProp = fn => {
     const call = ownerCall(fn);
-    if (!call || control(call) || !brand(type(call), "COMPONENT")) return false;
-    if (["children", "fallback"].includes(propKey(fn))) return false;
+    if (!providedValue(fn)) {
+      if (!call || control(call) || !brand(type(call), "COMPONENT")) return false;
+      if (["children", "fallback"].includes(propKey(fn))) return false;
+    }
     let found = false;
     traverseOwned(fn, {
       Function(inner) {
@@ -1342,9 +1371,7 @@ function pass(code, filename, program, native = false) {
             const event = t.callExpression(t.identifier("__nativeEvent"), [
               /** @type {import("@babel/core").types.FunctionExpression} */ (fn.node)
             ]);
-            fn.replaceWith(
-              promiseHost ? event : t.callExpression(t.identifier("__nativeCallback"), [event])
-            );
+            fn.replaceWith(t.callExpression(t.identifier("__nativeCallback"), [event]));
           }
           if (p && !p.scope.hasBinding("__nativeEvent")) {
             p.node.body.unshift(
@@ -1355,7 +1382,7 @@ function pass(code, filename, program, native = false) {
             );
             p.scope.crawl();
           }
-          if (!promiseHost && p && !p.scope.hasBinding("__nativeCallback")) {
+          if (p && !p.scope.hasBinding("__nativeCallback")) {
             p.node.body.unshift(
               t.importDeclaration(
                 [

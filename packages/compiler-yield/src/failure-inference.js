@@ -346,16 +346,27 @@ export function inferFailures(
       }
     return null;
   };
-  /** F-S45: a call through a name destructured from a context's value
-   * (`const [, { setLocation }] = useRouter()`), or `null`. */
-  const destructuredMember = (callee, owner) => {
-    if (!callee.isIdentifier()) return null;
-    const binding = callee.scope.getBinding(callee.node.name);
-    const declarator = binding?.path;
-    if (!binding?.constant || !declarator?.isVariableDeclarator()) return null;
-    if (declarator.node.id === binding.identifier) return null;
-    const steps = patternPath(declarator.node.id, binding.identifier);
-    const id = steps?.length && contextOfValue(declarator.get("init"));
+  /** The keys and indices from a member chain's root to its end
+   * (`value[1].bump`), or `null` when one is computed from a value. */
+  const chainSteps = member => {
+    const steps = [];
+    let base = member;
+    while (base.isMemberExpression()) {
+      const key = base.node.property;
+      const step = !base.node.computed
+        ? key.name
+        : key.type === "NumericLiteral" || key.type === "StringLiteral"
+          ? key.value
+          : null;
+      if (step == null) return null;
+      steps.unshift(step);
+      base = base.get("object");
+    }
+    return { base, steps };
+  };
+  /** F-S45: what calling the member `steps` names in each value the context
+   * `id` can hold fails with, or `null` when one is not known. */
+  const valuesCall = (id, steps, owner) => {
     const values = id && contextValues(id);
     if (!values?.length) return null;
     const effects = values.map(root => {
@@ -382,15 +393,30 @@ export function inferFailures(
     });
     return effects.every(Boolean) ? union(...effects) : null;
   };
-  /** F-S45: a call through a member of a context's value, or `null`. */
+  /** F-S45: a call through a name destructured from a context's value
+   * (`const [, { setLocation }] = useRouter()`), or `null`. */
+  const destructuredMember = (callee, owner) => {
+    const binding = callee.scope.getBinding(callee.node.name);
+    const declarator = binding?.path;
+    if (!binding?.constant || !declarator?.isVariableDeclarator()) return null;
+    // a name declared from a member of the value (`bump = context[1].bump`)
+    const chain =
+      declarator.node.id === binding.identifier
+        ? chainSteps(declarator.get("init"))
+        : {
+            base: declarator.get("init"),
+            steps: patternPath(declarator.node.id, binding.identifier)
+          };
+    if (!chain?.steps?.length) return null;
+    return valuesCall(contextOfValue(chain.base), chain.steps, owner);
+  };
+  /** F-S45: a call through a member of a context's value (`value[1].bump()`),
+   * or `null`. */
   const contextMember = (callee, owner) => {
     if (callee.isIdentifier()) return destructuredMember(callee, owner);
-    if (!callee.isMemberExpression() || callee.node.computed) return null;
-    const id = contextOfValue(callee.get("object"));
-    const values = id && contextValues(id);
-    if (!values?.length) return null;
-    const effects = values.map(v => memberCall(v, name(callee.node.property), owner));
-    return effects.every(Boolean) ? union(...effects) : null;
+    const chain = callee.isMemberExpression() ? chainSteps(callee) : null;
+    if (!chain) return null;
+    return valuesCall(contextOfValue(chain.base), chain.steps, owner);
   };
   // A wrapper provides only what every returned subtree provides. An optional
   // provider in one branch cannot erase requirements in another branch.

@@ -39,6 +39,13 @@ tester.run("no-throw", rules["no-throw"], {
       errors: [{ messageId: "throw" }]
     },
     {
+      // a row declared in a setup (a function* returning its view) is a routine
+      code: component(
+        "function* item(x) { if (!x) throw new Error('none'); return view(function* () { return <li />; }); } return view(function* () { return <ul><For each={xs}>{item}</For></ul>; });"
+      ),
+      errors: [{ messageId: "throw" }]
+    },
+    {
       code: component("return view(function* () { throw new Error('view'); });"),
       errors: [{ messageId: "throw" }]
     },
@@ -145,6 +152,20 @@ tester.run("no-dollar-block", rules["no-dollar-block"], {
       output:
         "const v = h('p', { class: function* () { return 'a'; } }, function* () { return 1; }, Show({ when: function* () { return true; }, children: 'x' }));",
       errors: [{ messageId: "hole" }, { messageId: "hole" }, { messageId: "hole" }]
+    },
+    {
+      // an `h` child in an array is a hole too; a value nested in a prop's
+      // object, or a flow control's prop that is not a source, is not
+      code: "const v = h('ul', [$(function* () { return 1; })], { style: { color: $(function* () { return 'red'; }) } }, Show({ fallback: $(function* () { return 'x'; }), when: true }));",
+      output:
+        "const v = h('ul', [function* () { return 1; }], { style: { color: $(function* () { return 'red'; }) } }, Show({ fallback: $(function* () { return 'x'; }), when: true }));",
+      errors: [{ messageId: "hole" }, { messageId: "other" }, { messageId: "other" }]
+    },
+    {
+      // `$` of a plain function has no routine form
+      code: 'import { $ } from "solid-yield";\nconst d = $(() => 1);',
+      output: null,
+      errors: [{ messageId: "import" }, { messageId: "other" }]
     },
     {
       // `html` is removed (D-046): a value in a tagged template is no hole of `h`
@@ -350,6 +371,37 @@ tester.run("no-component-tag", rules["no-component-tag"], {
       errors: [{ messageId: "tag" }]
     },
     {
+      // a spread keeps its place among the props, as Solid merges them
+      code:
+        imports +
+        Card +
+        component("return view(function* () { return <ul><Card {...rest} a={1} /></ul>; });"),
+      output:
+        imports +
+        Card +
+        component(
+          "return view(function* () { return <ul>{yield* Card({ ...rest, a: 1 })}</ul>; });"
+        ),
+      errors: [{ messageId: "tag" }]
+    },
+    {
+      // a named render callback is passed as it is; a view call is delegated
+      // in the lazy view it is shown in, so its colors reach the component
+      code:
+        imports +
+        Card +
+        component(
+          "return view(function* () { return <>{<For each={xs}>{row}</For>}{<Loading fallback='…'>{Card({ a: 1 })}</Loading>}</>; });"
+        ),
+      output:
+        imports +
+        Card +
+        component(
+          'return view(function* () { return <>{<>{yield* For({ each: xs, children: row })}</>}{<>{yield* Loading({ fallback: "…", children: function* () {\nreturn <>{yield* Card({ a: 1 })}</>;\n} })}</>}</>; });'
+        ),
+      errors: [{ messageId: "tag" }, { messageId: "tag" }]
+    },
+    {
       // outside a routine (a root, a test) it is the plain call
       code: imports + "const f = () => <Show when={x}><i /></Show>;",
       output:
@@ -472,6 +524,47 @@ tester.run("component-children-generator", rules["component-children-generator"]
         imports +
         component(
           "return view(function* () { return <ul>{yield* Show({ when: x, children: function* () {\nreturn <b />;\n} })}</ul>; });"
+        ),
+      errors: [{ messageId: "children" }]
+    },
+    // a block that only returns JSX is that JSX's lazy view
+    {
+      filename: "app.tsx",
+      code:
+        imports +
+        component(
+          "return view(function* () { return <ul>{yield* Show({ when: x, children: () => { return <b />; } })}</ul>; });"
+        ),
+      output:
+        imports +
+        component(
+          "return view(function* () { return <ul>{yield* Show({ when: x, children: function* () {\nreturn <b />;\n} })}</ul>; });"
+        ),
+      errors: [{ messageId: "children" }]
+    },
+    // a block that does more has no fix
+    {
+      filename: "app.tsx",
+      code:
+        imports +
+        component(
+          "return view(function* () { return <ul>{yield* Show({ when: x, children: () => { const y = 1; return <b>{y}</b>; } })}</ul>; });"
+        ),
+      output: null,
+      errors: [{ messageId: "children" }]
+    },
+    // a row's fix returns a view: the yield module's import gains `view`
+    {
+      filename: "app.tsx",
+      code:
+        'import { component, For } from "solid-yield";\n' +
+        component(
+          "return view(function* () { return <ul>{yield* For({ each: xs, children: (x) => <li>{x}</li> })}</ul>; });"
+        ),
+      output:
+        'import { component, For, view } from "solid-yield";\n' +
+        component(
+          "return view(function* () { return <ul>{yield* For({ each: xs, children: function* (x) {\nreturn view(function* () {\nreturn <li>{x}</li>;\n});\n} })}</ul>; });"
         ),
       errors: [{ messageId: "children" }]
     }

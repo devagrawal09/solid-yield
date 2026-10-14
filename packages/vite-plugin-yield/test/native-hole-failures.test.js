@@ -96,7 +96,8 @@ export function Any() {
     </section>
   );
 }`);
-    expect(code).toContain("(yield* settings).theme");
+    expect(code).toContain("const settings = yield* __nativeUseContext(Settings)");
+    expect(code).toContain("class={settings.theme}");
     expect(code).toContain("(yield* state).rows");
     expect(code).toContain("(yield* row).name");
     expect(checked(code)).toEqual([]);

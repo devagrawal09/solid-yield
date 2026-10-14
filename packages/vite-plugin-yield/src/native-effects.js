@@ -627,7 +627,9 @@ export function lowerNativeEffects(files, report) {
             keptFailures.set(declarator.node, info.fails);
           /** @type {{id: import("@babel/core").types.Identifier, kinds: Set<string>} | undefined} */
           let pending;
-          if (unawaited && fn) {
+          // A chain that cannot fail has nothing for its host to take: it
+          // runs on after the host, as in Solid, and is not waited for.
+          if (unawaited && fn && kinds.length) {
             pending = detached.get(fn.node);
             if (!pending) {
               pending = { id: fn.scope.generateUidIdentifier("pendingChains"), kinds: new Set() };

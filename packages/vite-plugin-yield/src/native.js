@@ -140,6 +140,23 @@ function entityName(node) {
   const left = entityName(node.object);
   return left && t.tsQualifiedName(left, t.identifier(node.property.name));
 }
+/** A member chain of static keys (`props.onClick`, `context[1].bump`) as a
+ * type: a type query of its names, indexed by each computed key.
+ * @param {any} node @returns {any} */
+function memberType(node) {
+  const entity = entityName(node);
+  if (entity) return t.tsTypeQuery(entity);
+  if (!t.isMemberExpression(node)) return null;
+  const key = !node.computed
+    ? t.isIdentifier(node.property)
+      ? t.stringLiteral(node.property.name)
+      : null
+    : t.isNumericLiteral(node.property) || t.isStringLiteral(node.property)
+      ? t.cloneNode(node.property)
+      : null;
+  const object = key && memberType(node.object);
+  return object && t.tsIndexedAccessType(object, t.tsLiteralType(key));
+}
 /** A property's static name. @param {any} k */
 const propertyName = k => (t.isIdentifier(k) ? k.name : t.isStringLiteral(k) ? k.value : "");
 /** Whether a spread is on a DOM element. @param {any} p */
@@ -471,26 +488,6 @@ function surface(
   if (!p) throw new Error(`Cannot parse ${filename}`);
   const needed = new Set();
   const contexts = new Set();
-  /** @param {Path} ref */
-  const contextReference = ref => {
-    if (!ref.isIdentifier() && !ref.isJSXIdentifier()) return false;
-    let declaration = ref.scope.getBinding(ref.node.name)?.path;
-    const api = imported(ref);
-    if (api?.module.startsWith(".")) {
-      const base = resolve(dirname(filename), api.module);
-      const target = [
-        base,
-        base + ".tsx",
-        base + ".ts",
-        base + "/index.tsx",
-        base + "/index.ts"
-      ].find(f => modules.has(f));
-      const module = target ? parseProgram(modules.get(target) ?? "", target) : null;
-      declaration = module?.scope.getBinding(api.name)?.path;
-    }
-    const init = declaration?.isVariableDeclarator() ? declaration.get("init") : null;
-    return !!(init?.isCallExpression() && imported(init.get("callee"))?.name === "createContext");
-  };
   // F-S43: a module-level foreign component (a router) that is rendered only
   // under providers hands its component-valued props those contexts.
   /** @param {Path} tag @returns {string[]} */
@@ -619,6 +616,123 @@ function surface(
         copyPosition(t.callExpression(copyPosition(t.identifier(name), ref.node), []), ref.node)
       );
     }
+  };
+  /**
+   * A name declared from a member of a context's value (the prelude's split
+   * of `const { count, bump } = useContext(Ctx)`: `count = _context.count`)
+   * is that member, read where the name is used, as the value's members are
+   * when it is held whole: `count()` is `_context.count()`.
+   * @param {Path} q the `useContext(…)` call
+   */
+  const inlineMembers = q => {
+    const declarator = q.parentPath;
+    const declaration = declarator?.parentPath;
+    if (
+      !declarator?.isVariableDeclarator() ||
+      !t.isIdentifier(declarator.node.id) ||
+      !t.isVariableDeclaration(declaration?.node, { kind: "const" })
+    )
+      return;
+    const name = declarator.node.id.name;
+    for (const sibling of /** @type {Path[]} */ (declaration.get("declarations"))) {
+      if (!t.isIdentifier(sibling.node.id)) continue;
+      let root = sibling.node.init;
+      while (
+        t.isMemberExpression(root) &&
+        (!root.computed || t.isNumericLiteral(root.property) || t.isStringLiteral(root.property))
+      )
+        root = root.object;
+      if (root === sibling.node.init || !t.isIdentifier(root, { name })) continue;
+      const binding = sibling.scope.getBinding(sibling.node.id.name);
+      if (!binding?.constant) continue;
+      for (const ref of binding.referencePaths)
+        ref.replaceWith(copyPosition(t.cloneNode(sibling.node.init, true), ref.node));
+      sibling.remove();
+    }
+  };
+  /** Whether `ref` names a context, declared here or by a selected module.
+   * @param {Path} ref */
+  const contextReference = ref => {
+    if (!ref.isIdentifier() && !ref.isJSXIdentifier()) return false;
+    let declaration = ref.scope.getBinding(ref.node.name)?.path;
+    const api = imported(ref);
+    if (api?.module.startsWith(".")) {
+      const base = resolve(dirname(filename), api.module);
+      const target = [
+        base,
+        base + ".tsx",
+        base + ".ts",
+        base + "/index.tsx",
+        base + "/index.ts"
+      ].find(f => modules.has(f));
+      const module = target ? parseProgram(modules.get(target) ?? "", target) : null;
+      declaration = module?.scope.getBinding(api.name)?.path;
+    }
+    const init = declaration?.isVariableDeclarator() ? declaration.get("init") : null;
+    return !!(init?.isCallExpression() && imported(init.get("callee"))?.name === "createContext");
+  };
+  /** @type {WeakMap<object, Map<string, any>>} */ const componentReads = new WeakMap();
+  /**
+   * A context read where the component renders (`<p>{useContext(Ctx)}</p>`, a
+   * row's, a memo's) is the component's: its provider is the one above the
+   * component and its value the one that provider set. It is read once in
+   * the component's body, where a requirement is the component's (a view
+   * takes none), and the read is that value. A read in a handler, which runs
+   * with no owner, or of a context named inside the component stays put.
+   * @param {Path} q @returns {any}
+   */
+  const renderRead = q => {
+    const context = q.node.arguments[0];
+    if (!t.isIdentifier(context)) return null;
+    const binding = q.scope.getBinding(context.name);
+    if (binding && !binding.scope.path.isProgram()) return null;
+    let rendered = false;
+    /** @type {Path | null} */ let component = null;
+    for (let at = q.parentPath; at; at = at.parentPath) {
+      if (at.isJSXExpressionContainer()) rendered = true;
+      if (!at.isFunction()) continue;
+      if (!at.getFunctionParent()) {
+        component = at;
+        break;
+      }
+      const parent = at.parentPath;
+      const call = parent?.isCallExpression() ? parent : null;
+      const api = call ? imported(call.get("callee")) : null;
+      const renderChild = parent?.isJSXExpressionContainer() && parent.parentPath?.isJSXElement();
+      const computed =
+        !!call &&
+        call.node.arguments[0] === at.node &&
+        api?.module === "solid-js" &&
+        ["createMemo", "createProjection"].includes(api.name);
+      const atOnce =
+        !!call &&
+        t.isMemberExpression(call.node.callee) &&
+        t.isIdentifier(call.node.callee.property) &&
+        ["map", "filter", "find", "some", "every", "reduce", "flatMap"].includes(
+          call.node.callee.property.name
+        );
+      if (!renderChild && !computed && !atOnce) return null;
+      rendered = true;
+    }
+    if (!component || !rendered) return null;
+    let reads = componentReads.get(component.node);
+    if (!reads) componentReads.set(component.node, (reads = new Map()));
+    let id = reads.get(context.name);
+    if (!id) {
+      id = component.scope.generateUidIdentifier("context");
+      reads.set(context.name, id);
+      if (!t.isBlockStatement(component.node.body))
+        component.node.body = t.blockStatement([t.returnStatement(component.node.body)]);
+      component.node.body.body.unshift(
+        t.variableDeclaration("const", [
+          t.variableDeclarator(
+            t.cloneNode(id),
+            t.callExpression(t.identifier("__nativeUseContext"), [t.cloneNode(context)])
+          )
+        ])
+      );
+    }
+    return id;
   };
   /** @param {Path} q @param {string} code @param {string} message @returns {never} */
   // Its position is in this intermediate program; `withPositions` maps it
@@ -1025,36 +1139,6 @@ function surface(
         }
         return;
       }
-      if (
-        t.isExpression(q.node.callee) &&
-        contextReference(q.get("callee")) &&
-        q.node.arguments.length === 1 &&
-        t.isObjectExpression(q.node.arguments[0])
-      ) {
-        const value = q.node.arguments[0];
-        for (const prop of value.properties)
-          if (
-            t.isObjectProperty(prop) &&
-            t.isIdentifier(prop.key, { name: "children" }) &&
-            !t.isFunction(prop.value) &&
-            t.isExpression(prop.value)
-          ) {
-            prop.value = t.arrowFunctionExpression(
-              [],
-              t.jsxFragment(t.jsxOpeningFragment(), t.jsxClosingFragment(), [
-                t.jsxExpressionContainer(prop.value)
-              ])
-            );
-          }
-        q.node.callee = t.memberExpression(q.node.callee, t.identifier("provide"));
-        if (q.parentPath.isReturnStatement())
-          q.replaceWith(
-            t.jsxFragment(t.jsxOpeningFragment(), t.jsxClosingFragment(), [
-              t.jsxExpressionContainer(q.node)
-            ])
-          );
-        return;
-      }
       if (api?.module !== "solid-js") return;
       if (foreignStateReference(q.get("callee"))) return;
       if (
@@ -1173,34 +1257,43 @@ function surface(
             "NO_PROVIDER",
             "This context is created in the read itself, so no provider can be above it: declare it once, provide it, and read that declaration."
           );
-        const declarator = q.parentPath.isVariableDeclarator() ? q.parentPath : null;
-        const name =
-          declarator && t.isIdentifier(declarator.node.id) ? declarator.node.id.name : null;
-        // F-S37: a value used whole (a guard, a return) is what Solid's useContext
-        // returns, set once by its provider, so setup may hold it; only the
-        // requirement is an op. A value read only through its members (the
-        // prelude's destructuring) stays a path, read where its members are.
-        const whole =
-          name &&
-          declarator?.scope
-            .getBinding(name)
-            ?.referencePaths.some(
-              ref =>
-                !ref.findParent(r => r.isTSType()) &&
-                !(ref.parentPath?.isMemberExpression() && ref.key === "object")
-            );
-        if (whole) {
-          needed.add("__nativeUseContext");
-          q.replaceWith(
-            copyPosition(
-              t.callExpression(t.identifier("__nativeUseContext"), [q.node.arguments[0]]),
-              q.node
+        // F-S37: the value is what Solid's useContext returns, set once by its
+        // provider, so setup may hold it, whole or read through its members
+        // (the prelude reads a destructured name off it where it is used);
+        // only the requirement is an op.
+        // A handler runs with no reactive owner (Solid calls it from the DOM
+        // listener), where Solid's useContext throws NoOwnerError.
+        const handler = q.findParent(
+          at =>
+            at.isFunction() &&
+            (at.parentPath?.isJSXExpressionContainer() ||
+              (at.parentPath?.isArrayExpression() &&
+                at.parentPath.parentPath?.isJSXExpressionContainer())) &&
+            !!at.findParent(
+              a =>
+                a.isJSXAttribute() &&
+                (t.isJSXNamespacedName(a.node.name) || /^on[A-Z]/.test(String(a.node.name.name)))
             )
+        );
+        if (handler)
+          fail(
+            q,
+            "NATIVE_CONTEXT",
+            "A handler runs with no reactive owner, where useContext throws (NoOwnerError): read the context in the component's body (`const value = useContext(Ctx)`) and use the value here."
           );
-        } else {
-          if (name && declarator) valueReads(declarator, name);
-          q.replaceWith(copyPosition(t.callExpression(q.node.arguments[0], []), q.node));
+        needed.add("__nativeUseContext");
+        inlineMembers(q);
+        const read = renderRead(q);
+        if (read) {
+          q.replaceWith(copyPosition(t.cloneNode(read), q.node));
+          return;
         }
+        q.replaceWith(
+          copyPosition(
+            t.callExpression(t.identifier("__nativeUseContext"), [q.node.arguments[0]]),
+            q.node
+          )
+        );
       } else if (api.name === "createContext") {
         if (!q.parentPath.isVariableDeclarator() || !t.isIdentifier(q.parentPath.node.id))
           fail(
@@ -1261,15 +1354,15 @@ function surface(
         // A member tag can have a getter. Preserve its lookup at the JSX
         // position; hoisting an alias would run it before a conditional arm.
         // The existing JSX tag contract is the foreign check at this edge.
+        // Solid 1's `<Ctx.Provider>` is the context's provider (review 3).
         if (tag.isJSXMemberExpression()) {
           if (
             !t.isJSXIdentifier(tag.node.property, { name: "Provider" }) ||
-            !t.isJSXIdentifier(tag.node.object)
+            !t.isJSXIdentifier(tag.node.object) ||
+            !contextReference(tag.get("object"))
           )
             return;
           const name = tag.node.object.name;
-          const api = imported(tag.get("object"));
-          if (!contextReference(tag.get("object"))) return;
           tag.replaceWith(copyPosition(t.jsxIdentifier(name), tag.node.object));
           if (q.node.closingElement) q.node.closingElement.name = t.jsxIdentifier(name);
         }
@@ -1362,24 +1455,33 @@ function surface(
             // `onClick={props.onClick}`: a handler read from a prop or an
             // object is called through, as a named one is (`?.`: an optional
             // prop leaves the element without a listener in Solid).
-            const entity = entityName(fn.node);
-            if (fn.isMemberExpression() && entity) {
+            const member = memberType(fn.node);
+            if (fn.isMemberExpression() && member) {
               needed.add("__NativeArguments");
               const rest = t.restElement(t.identifier("args"));
               rest.typeAnnotation = t.tsTypeAnnotation(
                 t.tsTypeReference(
                   t.identifier("__NativeArguments"),
-                  t.tsTypeParameterInstantiation([t.tsTypeQuery(entity)])
+                  t.tsTypeParameterInstantiation([member])
                 )
               );
+              // A context's value holds what its provider set: called as
+              // it is (an action is an event call the handler waits for).
+              /** @type {any} */ let root = fn.node;
+              while (t.isMemberExpression(root)) root = root.object;
+              const held = t.isIdentifier(root) ? fn.scope.getBinding(root.name)?.path : null;
+              const init = held?.isVariableDeclarator() ? held.node.init : null;
+              const provided =
+                t.isCallExpression(init) &&
+                (t.isIdentifier(init.callee, { name: "__nativeUseContext" }) ||
+                  imported(/** @type {Path} */ (held?.get("init.callee")))?.name === "useContext");
+              const args = [t.spreadElement(t.identifier("args"))];
               fn.replaceWith(
                 t.arrowFunctionExpression(
                   [rest],
-                  t.optionalCallExpression(
-                    t.cloneNode(fn.node),
-                    [t.spreadElement(t.identifier("args"))],
-                    true
-                  )
+                  provided
+                    ? t.callExpression(t.cloneNode(fn.node), args)
+                    : t.optionalCallExpression(t.cloneNode(fn.node), args, true)
                 )
               );
             }

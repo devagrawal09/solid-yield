@@ -109,6 +109,71 @@ ${view[host]}
 ${pending ? "render(Surface, document.body);\n" : ""}`;
 }
 
+// A context's provider (the view) and one consumer (module level) each.
+const counter = `type Counter = { count: () => number; bump: () => void };
+const Ctx = createContext<Counter>();
+`;
+/** @type {Record<string, [string, string]>} */
+const contextExtras = {
+  "ctx-destructured": [
+    `${counter}function Consumer() {
+  const { count, bump } = useContext(Ctx);
+  return <button onClick={() => bump()}>{count()}</button>;
+}
+`,
+    ""
+  ],
+  "ctx-members": [
+    `${counter}function Consumer() {
+  const counter = useContext(Ctx);
+  return <button onClick={() => counter.bump()}>{counter.count()}</button>;
+}
+`,
+    ""
+  ],
+  "ctx-guarded": [
+    `${counter}function Consumer() {
+  const counter = useContext(Ctx);
+  if (!counter) throw new Error("no provider");
+  return <button onClick={counter.bump}>{counter.count()}</button>;
+}
+`,
+    ""
+  ],
+  "ctx-in-place": [
+    `${counter}function Consumer() {
+  return <p title={String(useContext(Ctx).count())}>{useContext(Ctx).count()}</p>;
+}
+`,
+    ""
+  ],
+  "ctx-handler-member": [
+    `${counter}function Consumer() {
+  const { bump } = useContext(Ctx);
+  return <button onClick={bump}>+</button>;
+}
+`,
+    ""
+  ],
+  "ctx-tuple": [
+    `const Pair = createContext<[() => number, { bump: () => void }]>();
+function Consumer() {
+  const [count, { bump }] = useContext(Pair);
+  return <button onClick={() => bump()}>{count()}</button>;
+}
+`,
+    ""
+  ],
+  "ctx-theme": [
+    `const Theme = createContext("light");
+function Consumer() {
+  return <p>{useContext(Theme)}</p>;
+}
+`,
+    ""
+  ]
+};
+
 /** A JSX construct's program (jsx.mjs). @param {import("./jsx.mjs").JsxCase} c */
 export function jsxProgram(c) {
   const solid = ["createSignal", "createMemo", "createEffect", "createStore", "untrack"];
@@ -128,7 +193,8 @@ export function jsxProgram(c) {
     ref: ["", "  let input!: HTMLInputElement;"],
     row: ["function row(label: string) {\n  return <li>{label}</li>;\n}\n", ""],
     header: ["", "  const header = <h1>title</h1>;"],
-    badge: ["", "  const badge = () => <b>{n()}</b>;"]
+    badge: ["", "  const badge = () => <b>{n()}</b>;"],
+    ...contextExtras
   };
   const [module, local] = c.extra ? extras[c.extra] : ["", ""];
   return `import { ${solid.join(", ")} } from "solid-js";

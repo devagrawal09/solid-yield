@@ -503,6 +503,235 @@ export function App() {
   return <p>{m()}</p>;
 }`,
     []
+  ],
+  // a context called as a function is its JSX form (D-116: valid Solid)
+  [
+    "context-call-return",
+    `import { createContext, useContext } from "solid-js";
+const Theme = createContext("light");
+function Themed() {
+  return <p>{useContext(Theme)}</p>;
+}
+export function App() {
+  return Theme({ value: "dark", children: () => <Themed /> });
+}`,
+    []
+  ],
+  // a context without a default read in a hole is the component's read
+  [
+    "context-required-in-hole",
+    `import { createContext, useContext, createSignal } from "solid-js";
+const Ctx = createContext<{ count: () => number }>();
+function InPlace() {
+  return <p>{useContext(Ctx).count()}</p>;
+}
+export function App() {
+  const [n] = createSignal(1);
+  return <Ctx value={{ count: n }}><InPlace /></Ctx>;
+}`,
+    []
+  ],
+  [
+    "context-read-in-row",
+    `import { createContext, useContext, createSignal, For } from "solid-js";
+const Ctx = createContext<{ count: () => number }>();
+function Rows() {
+  const [items] = createSignal([1, 2]);
+  return <For each={items()}>{x => <p>{useContext(Ctx).count() + x}</p>}</For>;
+}
+export function App() {
+  const [n] = createSignal(1);
+  return <Ctx value={{ count: n }}><Rows /></Ctx>;
+}`,
+    []
+  ],
+  [
+    "context-two-reads-in-place",
+    `import { createContext, useContext, createSignal } from "solid-js";
+const Ctx = createContext<{ count: () => number; label: string }>();
+function Both() {
+  return <p title={useContext(Ctx).label}>{useContext(Ctx).count()}</p>;
+}
+export function App() {
+  const [n] = createSignal(1);
+  return <Ctx value={{ count: n, label: "x" }}><Both /></Ctx>;
+}`,
+    []
+  ],
+  // a destructured accessor and action: read where used; the action is the event's (F-S40)
+  [
+    "context-destructured-accessor-action",
+    `import { createContext, useContext, createSignal } from "solid-js";
+import type { JSX } from "@solidjs/web";
+const Ctx = createContext<{ count: () => number; bump: () => void }>();
+function Provider(props: { children: JSX.Element }) {
+  const [count, setCount] = createSignal(0);
+  return <Ctx value={{ count, bump: () => setCount(count() + 1) }}>{props.children}</Ctx>;
+}
+function Child() {
+  const { count, bump } = useContext(Ctx);
+  return <button onClick={() => bump()}>{count()}</button>;
+}
+export function App() {
+  return <Provider><Child /></Provider>;
+}`,
+    []
+  ],
+  [
+    "context-tuple-accessor-action",
+    `import { createContext, useContext, createSignal } from "solid-js";
+import type { JSX } from "@solidjs/web";
+const Ctx = createContext<[() => number, { bump: () => void }]>();
+function Provider(props: { children: JSX.Element }) {
+  const [count, setCount] = createSignal(0);
+  return <Ctx value={[count, { bump: () => setCount(count() + 1) }]}>{props.children}</Ctx>;
+}
+function Child() {
+  const [count, { bump }] = useContext(Ctx);
+  return <button onClick={() => bump()}>{count()}</button>;
+}
+export function App() {
+  return <Provider><Child /></Provider>;
+}`,
+    []
+  ],
+  [
+    "context-reader-in-value",
+    `import { createContext, useContext, createSignal } from "solid-js";
+import type { JSX } from "@solidjs/web";
+const Ctx = createContext<{ double: () => number }>();
+function Provider(props: { children: JSX.Element }) {
+  const [count] = createSignal(2);
+  return <Ctx value={{ double: () => count() * 2 }}>{props.children}</Ctx>;
+}
+function Child() {
+  const { double } = useContext(Ctx);
+  return <p>{double()}</p>;
+}
+export function App() {
+  return <Provider><Child /></Provider>;
+}`,
+    []
+  ],
+  // a promise chain a component body starts and that cannot fail runs on after it, as in Solid; its continuation is an event's
+  [
+    "setup-promise-continuation",
+    `import { createSignal } from "solid-js";
+export function App() {
+  const [n] = createSignal(1);
+  const [out, setOut] = createSignal(0);
+  Promise.resolve(2).then(v => setOut(v + n()));
+  return <p>{out()}</p>;
+}`,
+    []
+  ],
+  [
+    "setup-promise-caught",
+    `import { createSignal } from "solid-js";
+export function App() {
+  const [n] = createSignal(1);
+  const [out, setOut] = createSignal(0);
+  Promise.resolve(2).then(v => setOut(v + n())).catch(() => {});
+  return <p>{out()}</p>;
+}`,
+    []
+  ],
+  // one that may reject has no boundary in the body (review 3)
+  [
+    "setup-promise-rejects",
+    `import { createSignal } from "solid-js";
+class Bad extends Error {}
+async function risk(): Promise<number> { throw new Bad(); }
+export function App() {
+  const [n] = createSignal(1);
+  const [out, setOut] = createSignal(0);
+  risk().then(v => setOut(v + n()));
+  return <p>{out()}</p>;
+}`,
+    ["NATIVE_SETUP_FAILURE"]
+  ],
+  // D-125: a braceless return's computed part is the body's
+  [
+    "return-braceless-split",
+    `import { createSignal } from "solid-js";
+export function App() {
+  const [n] = createSignal(1);
+  if (n() > 5) return n() > 9 ? <b>big</b> : <i>mid</i>;
+  return <p>small</p>;
+}`,
+    ["READ_IN_SETUP"]
+  ],
+  // a function declaration only a timer runs is an event's
+  [
+    "scheduled-declaration",
+    `import { createSignal } from "solid-js";
+export function App() {
+  const [n, setN] = createSignal(1);
+  function tick() { setN(n() + 1); }
+  setInterval(tick, 1000);
+  return <p>{n()}</p>;
+}`,
+    []
+  ],
+  [
+    "map-in-helper",
+    `import { createSignal } from "solid-js";
+function labels(items: () => number[], n: () => number) {
+  return items().map(x => x + n());
+}
+export function App() {
+  const [items] = createSignal([1, 2]);
+  const [n] = createSignal(1);
+  return <p>{labels(items, n).join()}</p>;
+}`,
+    []
+  ],
+  // a function declaration handed out returns its action's promise (D-121)
+  [
+    "handed-out-declaration",
+    `import { action, createSignal } from "solid-js";
+function saver(set: (k: number) => void) {
+  const base = action(function* (k: number) { set(k); return k; });
+  function invoke(k: number) { return base(k); }
+  invoke.label = "save";
+  return invoke;
+}
+export function Save() {
+  const [n, setN] = createSignal(0);
+  const save = saver(setN);
+  return <button onClick={() => save(n() + 1).catch(() => {})}>{n()}</button>;
+}`,
+    []
+  ],
+  [
+    "getter-nested-function-class",
+    `import { createSignal } from "solid-js";
+export function App() {
+  const [n] = createSignal(2);
+  const totals = {
+    get total() {
+      const double = function (x: number) { return x * 2; };
+      class Box { v = 1; }
+      return double(n()) + new Box().v;
+    }
+  };
+  return <p>{totals.total}</p>;
+}`,
+    []
+  ],
+  // a callback prop calling a routine that writes is the event's that calls it (F-S40)
+  [
+    "prop-calls-writing-routine",
+    `import { createSignal } from "solid-js";
+function Child(props: { onBump: () => void }) {
+  return <button onClick={() => props.onBump()}>+</button>;
+}
+export function App() {
+  const [n, setN] = createSignal(0);
+  function bumpTwice() { setN(n() + 2); }
+  return <div><p>{n()}</p><Child onBump={() => bumpTwice()} /></div>;
+}`,
+    []
   ]
 ];
 /** refusals stop a project's check: each on its own */
@@ -613,6 +842,60 @@ export function App() {
   return <p>{m()}</p>;
 }`,
     ["SUGAR_ESCAPE"]
+  ],
+  // a context called with a key that has no JSX form
+  [
+    "context-call-computed-key",
+    `import { createContext, useContext } from "solid-js";
+const Ctx = createContext(0);
+function Show() {
+  return <p>{useContext(Ctx)}</p>;
+}
+export function App() {
+  return Ctx({ ["value"]: 1, children: () => <Show /> });
+}`,
+    ["NATIVE_CONTEXT"]
+  ],
+  // called with its children as a value, it is checked as its JSX form (review 3)
+  [
+    "context-call-eager-children",
+    `import { createContext, useContext } from "solid-js";
+const Ctx = createContext(0);
+function Show() {
+  return <p>{useContext(Ctx)}</p>;
+}
+export function App() {
+  return Ctx({ value: 1, children: <Show /> });
+}`,
+    []
+  ],
+  // a handler has no reactive owner: Solid's useContext throws there
+  [
+    "context-read-in-handler",
+    `import { createContext, useContext, createSignal } from "solid-js";
+const Ctx = createContext<{ count: () => number }>();
+function Child() {
+  const [n, setN] = createSignal(0);
+  return <button onClick={() => setN(useContext(Ctx).count())}>{n()}</button>;
+}
+export function App() {
+  const [n] = createSignal(1);
+  return <Ctx value={{ count: n }}><Child /></Ctx>;
+}`,
+    ["NATIVE_CONTEXT"]
+  ],
+  // Solid 1's `Ctx.Provider` is the context's provider (review 3)
+  [
+    "solid1-provider",
+    `import { createContext, useContext } from "solid-js";
+const Ctx = createContext(0);
+function Show() {
+  return <p>{useContext(Ctx)}</p>;
+}
+export function App() {
+  return <Ctx.Provider value={1}><Show /></Ctx.Provider>;
+}`,
+    []
   ]
 ];
 

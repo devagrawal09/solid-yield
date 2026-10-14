@@ -158,6 +158,53 @@ export const jsxCases = [
     extra: "badge",
     expected: ["solid-yield/jsx-only-in-view"]
   },
+  // contexts: a provider's accessor and action, read through a destructuring,
+  // its members, a guard, in place, as a handler, as a tuple; a default; a
+  // context called as a function (checked as its JSX form, review 3), with a
+  // key that has no JSX form refused
+  ...[
+    ["context-destructured", "ctx-destructured"],
+    ["context-members", "ctx-members"],
+    ["context-guarded", "ctx-guarded"],
+    ["context-in-place", "ctx-in-place"],
+    ["context-handler-member", "ctx-handler-member"]
+  ].map(([id, extra]) => ({
+    id,
+    view: `<Ctx value={{ count: n, bump: () => setN(n() + 1) }}><Consumer /></Ctx>`,
+    extra,
+    imports: "createContext, useContext"
+  })),
+  {
+    id: "context-tuple",
+    view: `<Pair value={[n, { bump: () => setN(n() + 1) }]}><Consumer /></Pair>`,
+    extra: "ctx-tuple",
+    imports: "createContext, useContext"
+  },
+  {
+    id: "context-default",
+    view: `<div><Consumer /><Theme value="dark"><Consumer /></Theme></div>`,
+    extra: "ctx-theme",
+    imports: "createContext, useContext"
+  },
+  {
+    id: "context-call",
+    view: `<div>{Theme({ value: "dark", children: () => <Consumer /> })}</div>`,
+    extra: "ctx-theme",
+    imports: "createContext, useContext"
+  },
+  {
+    id: "context-call-computed",
+    view: `<div>{Theme({ value: n() > 1 ? "dark" : "light", children: () => <Consumer /> })}</div>`,
+    extra: "ctx-theme",
+    imports: "createContext, useContext"
+  },
+  {
+    id: "context-call-computed-key",
+    view: `<div>{Theme({ ["value"]: "dark", children: () => <Consumer /> })}</div>`,
+    extra: "ctx-theme",
+    imports: "createContext, useContext",
+    expected: ["NATIVE_CONTEXT"]
+  },
   // what a view still may not do
   { id: "write-in-hole", view: `<p>{String(setN(1))}</p>`, expected: ["WRITE_IN_REACTIVE"] },
   {

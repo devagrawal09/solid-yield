@@ -443,6 +443,66 @@ export function App() {
   return <p>{n()}</p>;
 }`,
     []
+  ],
+  // a function of the file handed by name to an array method is an inline
+  // callback (`items().map(scale)`); a built-in (`map(Number)`) stays plain
+  [
+    "named-callback",
+    `import { createSignal, createMemo } from "solid-js";
+export function App() {
+  const [n] = createSignal(2);
+  const [items] = createSignal([1, 2]);
+  function scale(x: number) { return x * n(); }
+  const m = createMemo(() => items().map(scale).join());
+  return <p>{m()}</p>;
+}`,
+    []
+  ],
+  [
+    "named-comparator",
+    `import { createSignal, createMemo } from "solid-js";
+export function App() {
+  const [n] = createSignal(1);
+  const [items] = createSignal([3, 1, 2]);
+  const byWeight = (a: number, b: number) => (a - b) * n();
+  const m = createMemo(() => [...items()].sort(byWeight).join());
+  return <p>{m()}</p>;
+}`,
+    []
+  ],
+  [
+    "builtin-callback",
+    `import { createSignal, createMemo } from "solid-js";
+export function App() {
+  const [items] = createSignal(["1", "2"]);
+  const m = createMemo(() => items().map(Number).join());
+  return <p>{m()}</p>;
+}`,
+    []
+  ],
+  [
+    "named-callback-in-setup",
+    `import { createSignal } from "solid-js";
+export function App() {
+  const [n] = createSignal(2);
+  const scale = (x: number) => x * n();
+  const doubled = [1, 2].map(scale);
+  return <p>{doubled.join()}</p>;
+}`,
+    ["READ_IN_SETUP"]
+  ],
+  // a reduce's seed is not a callback: only the first argument is wrapped
+  [
+    "named-reducer",
+    `import { createSignal, createMemo } from "solid-js";
+export function App() {
+  const [n] = createSignal(2);
+  const [items] = createSignal([1, 2]);
+  const add = (total: number, x: number) => total + x * n();
+  const m = createMemo(() => items().reduce(add, 0));
+  return <p>{m()}</p>;
+}`,
+    []
   ]
 ];
 /** refusals stop a project's check: each on its own */
@@ -527,6 +587,32 @@ export function App() {
   return render2("x");
 }`,
     ["SUGAR_COMPONENT"]
+  ],
+  // a generic function keeps its instantiation: handed on as written
+  [
+    "generic-named-callback",
+    `import { createSignal, createMemo } from "solid-js";
+export function App() {
+  const [n] = createSignal(2);
+  const [items] = createSignal([1, 2]);
+  function tag<T>(x: T): string { return \`\${x}:\${n()}\`; }
+  const m = createMemo(() => items().map(tag).join());
+  return <p>{m()}</p>;
+}`,
+    ["SUGAR_ESCAPE"]
+  ],
+  // a \`function\` handed a \`this\` keeps it: handed on as written
+  [
+    "this-bound-named-callback",
+    `import { createSignal, createMemo } from "solid-js";
+export function App() {
+  const [n] = createSignal(2);
+  const [items] = createSignal([1, 2]);
+  function scale(this: { k: number }, x: number) { return x * this.k * n(); }
+  const m = createMemo(() => items().map(scale, { k: 2 }).join());
+  return <p>{m()}</p>;
+}`,
+    ["SUGAR_ESCAPE"]
   ]
 ];
 

@@ -549,6 +549,102 @@ function pendingThunks(p) {
     }
   });
 }
+const ARRAY_METHODS = new Set([
+  "map",
+  "flatMap",
+  "filter",
+  "find",
+  "findIndex",
+  "findLast",
+  "findLastIndex",
+  "some",
+  "every",
+  "forEach",
+  "reduce",
+  "reduceRight",
+  "sort",
+  "toSorted"
+]);
+/**
+ * A function of this file handed by name to an array method
+ * (`items().map(scale)`) is called there as an inline callback is: written as
+ * one (`(...args: Parameters<typeof scale>) => scale(...args)`), the same call
+ * with the same arguments, it is lowered as one. A routine handed to an
+ * unknown consumer stays refused (SUGAR_ESCAPE).
+ * @param {Path} p
+ */
+function namedCallbacks(p) {
+  traverseOwned(p, {
+    CallExpression(q) {
+      const callee = q.node.callee;
+      if (
+        !t.isMemberExpression(callee) ||
+        callee.computed ||
+        !t.isIdentifier(callee.property) ||
+        !ARRAY_METHODS.has(callee.property.name)
+      )
+        return;
+      // the callback is the first argument: a second is a reduce's seed or a
+      // `this`, and the wrapper must not stand in for either
+      const [arg] = q.get("arguments");
+      if (!arg?.isIdentifier()) return;
+      const binding = arg.scope.getBinding(arg.node.name);
+      const declared = binding?.path;
+      /** @type {any} */
+      const fn = declared?.isFunctionDeclaration()
+        ? declared.node
+        : declared?.isVariableDeclarator()
+          ? declared.node.init
+          : null;
+      // a generic or overloaded function keeps its own instantiation, a
+      // reassigned one its value at the call, a `function` its `this`
+      // (stays as written: refused as any routine handed on, SUGAR_ESCAPE)
+      if (
+        !binding?.constant ||
+        !(
+          t.isFunctionDeclaration(fn) ||
+          t.isArrowFunctionExpression(fn) ||
+          t.isFunctionExpression(fn)
+        ) ||
+        fn.typeParameters ||
+        (t.isIdentifier(fn.params[0]) && fn.params[0].name === "this") ||
+        overloaded(/** @type {Path} */ (declared), arg.node.name) ||
+        (!t.isArrowFunctionExpression(fn) &&
+          q.node.arguments.length > 1 &&
+          !callee.property.name.startsWith("reduce"))
+      )
+        return;
+      const rest = t.restElement(t.identifier("args"));
+      rest.typeAnnotation = t.tsTypeAnnotation(
+        t.tsTypeReference(
+          t.identifier("Parameters"),
+          t.tsTypeParameterInstantiation([t.tsTypeQuery(t.identifier(arg.node.name))])
+        )
+      );
+      arg.replaceWith(
+        t.arrowFunctionExpression(
+          [rest],
+          t.callExpression(t.identifier(arg.node.name), [t.spreadElement(t.identifier("args"))])
+        )
+      );
+    }
+  });
+}
+/** Whether `name` has overload signatures beside `declared`. @param {Path} declared @param {string} name */
+function overloaded(declared, name) {
+  const at = declared.parentPath?.isExportNamedDeclaration() ? declared.parentPath : declared;
+  const siblings = /** @type {any} */ (at.parentPath?.node)?.body;
+  return (
+    Array.isArray(siblings) &&
+    siblings.some(
+      /** @param {any} n */ n =>
+        (t.isTSDeclareFunction(n) && n.id?.name === name) ||
+        (t.isExportNamedDeclaration(n) &&
+          t.isTSDeclareFunction(n.declaration) &&
+          n.declaration.id?.name === name)
+    )
+  );
+}
 /** Normalize native control contracts before routine reconstruction.
  * @param {Map<string,string>} files */
 export function nativePrelude(files) {
@@ -564,6 +660,7 @@ export function nativePrelude(files) {
     pendingThunks(p);
     childrenArrays(p);
     trackedEffects(p);
+    namedCallbacks(p);
     traverseOwned(p, {
       VariableDeclarator(q) {
         const init = q.get("init");

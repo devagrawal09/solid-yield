@@ -10,7 +10,7 @@ import {
   view
 } from "solid-yield";
 import { getSite, getArticle, type Article, type Site } from "./api";
-import { NotFound } from "./errors";
+import { NotFound, ArticleUnavailable } from "./errors";
 export const SiteNav = component(function* SiteNav() {
   const site = yield* $memo(function* () {
     return yield* attempt(
@@ -131,7 +131,7 @@ export const ArticleContent = component(function* ArticleContent(
     const slug = (yield* props.slug) ?? "overview";
     return yield* attempt(
       () => getArticle(slug),
-      cause => new NotFound(cause)
+      cause => (cause instanceof ArticleUnavailable ? cause : new NotFound(cause))
     );
   });
   return view(function* () {
@@ -139,12 +139,23 @@ export const ArticleContent = component(function* ArticleContent(
       <>
         {
           yield* Errored({
-            catch: [NotFound],
-            fallback: err => (
-              <p class="not-found">
-                {err().kind}: {err().message}
-              </p>
-            ),
+            catch: [NotFound, ArticleUnavailable],
+            fallback: err => {
+              const error = err();
+              if (error instanceof NotFound && error.resource === "article")
+                return (
+                  <p class="not-found">
+                    {err().kind}: {err().message}
+                  </p>
+                );
+              if (error instanceof ArticleUnavailable && error.resource === "article")
+                return (
+                  <p class="article-unavailable">
+                    {err().kind}: {err().message}
+                  </p>
+                );
+              return "Article unavailable";
+            },
             children: function* () {
               return (
                 <>
@@ -166,7 +177,7 @@ export const ArticleContent = component(function* ArticleContent(
   });
 });
 const ArticleBody = component(function* ArticleBody(
-  props: Props<{ article: Source<Article, NotFound, true> }>
+  props: Props<{ article: Source<Article, NotFound | ArticleUnavailable, true> }>
 ) {
   return view(function* () {
     return (

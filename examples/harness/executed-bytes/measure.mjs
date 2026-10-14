@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { resolve, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
+import { phaseLimit } from "./coverage.mjs";
 
 const repo = resolve(fileURLToPath(new URL("../../..", import.meta.url)));
 const args = process.argv.slice(2);
@@ -141,10 +142,11 @@ if (args.includes("--baseline")) {
       throw new Error(`${row.twin}/${row.app}: parity phases differ from baseline`);
     for (let i = 0; i < row.phases.length; i++) {
       const phase = row.phases[i],
-        expected = before.phases[i];
-      if (phase.phase !== expected.phase || phase.bytes > expected.maxBytes)
+        expected = before.phases[i],
+        limit = phaseLimit(expected);
+      if (phase.phase !== expected.phase || phase.bytes > limit)
         throw new Error(
-          `${row.twin}/${row.app}/${phase.phase}: ${phase.bytes} exceeds ${expected.maxBytes} or phase name changed`
+          `${row.twin}/${row.app}/${phase.phase}: ${phase.bytes} exceeds ${limit} (threshold ${expected.maxBytes}, tolerance ${expected.tolerance ?? 0}) or phase name changed`
         );
     }
   }

@@ -1,0 +1,33 @@
+{
+  "calls": 10001,
+  "ids": [
+    {
+      "call": 1,
+      "id": "00010",
+      "parentCount": 1
+    },
+    {
+      "call": 2,
+      "id": "00011",
+      "parentCount": 2
+    },
+    {
+      "call": 3,
+      "id": "00012",
+      "parentCount": 3
+    },
+    {
+      "call": 10000,
+      "id": "0001B7pr",
+      "parentCount": 10000
+    },
+    {
+      "call": 10001,
+      "id": "0001B7ps",
+      "parentCount": 10001
+    }
+  ],
+  "errors": [
+    "<Loading> boundary discovery did not converge after 10001 passes — an async source produces a new pending answer on every retry. Ensure repeated reads settle (e.g. return a stable promise or value for the same question)."
+  ]
+}

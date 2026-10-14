@@ -73,3 +73,52 @@ test("opaque pipeline calls remain unknown without an explicit purity contract",
   );
   assert.equal(r.sources.at(-1).provenance, "U");
 });
+
+test("use pure trusts exported derivations, preserves S/R/U/C, and reports unused modules", () => {
+  for (const [input, expected] of [
+    ['"a"', "S"],
+    ["yield* article", "R"],
+    ["yield* slug", "U"],
+    ["yield* n", "C"]
+  ]) {
+    for (const directive of [true, false]) {
+      const r = analyzeRecomputable(
+        new Map([
+          [
+            "/pipeline.ts",
+            `${directive ? '"use pure";' : ""}
+            import {render} from "opaque-package";
+            export function derive(input) { return render(input); }
+            // Source edits do not invalidate the author's assertion.`
+          ],
+          ["/unused.ts", '"use pure"; export const unused = x => x;'],
+          [
+            "/fixture.tsx",
+            `import {component,view,$memo,$signal,$event,attempt,foreignSource} from "solid-yield";
+            import {derive} from "./pipeline";
+            async function load(slug:string){"use server";return slug;}
+            const App=component(function*(){
+              const slug=foreignSource(()=>"a");
+              const [n,setN]=yield* $signal(0);
+              const click=$event(function*(){yield* setN(1);});
+              ${memo("yield* slug")}
+              const html=yield* $memo(function*(){return derive(${input});});
+              return view(function*(){return <><button onClick={yield* click}/><div innerHTML={yield* html}/></>;});
+            });`
+          ]
+        ]),
+        { resolve: spec => (spec === "./pipeline" ? "/pipeline.ts" : undefined) }
+      );
+      assert.equal(
+        r.sources.at(-1).provenance,
+        directive ? expected : expected === "C" ? "C" : "U"
+      );
+      assert.deepEqual(
+        r.trustedPureModules.map(f => f.at),
+        directive ? ["/pipeline.ts", "/unused.ts"] : ["/unused.ts"]
+      );
+      assert(r.trustedPureModules.every(f => f.reason.includes("implementation is not checked")));
+      assert.equal(r.captures.length, 0);
+    }
+  }
+});

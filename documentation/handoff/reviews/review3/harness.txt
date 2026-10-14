@@ -1,0 +1,14 @@
+== native-todos parity
+exit 0
+native Todos client parity: 27 states match original
+native Todos hydrated parity: 27 states match original
+== native-todos ssr
+exit 0
+native Todos streamed SSR smoke: two seeded todos match original; no render errors
+== native-sierpinski parity
+exit 0
+native Sierpinski client parity: 11 states match original
+native Sierpinski hydrated parity: 11 states match original
+== native-sierpinski ssr
+exit 0
+native Sierpinski streamed SSR smoke: 729 dots match original; no render errors

@@ -35,7 +35,14 @@ export {
   until,
   view
 } from "./runtime.js";
-export { Failure } from "./failure.js";
+export {
+  Failure,
+  registerFailure,
+  failureClass,
+  rehydrateFailure,
+  prepareFailure
+} from "./runtime.js";
+export type { FailureClass } from "./runtime.js";
 export { createContext, createSlot } from "./context.js";
 export { compose } from "./compose.js";
 export type {

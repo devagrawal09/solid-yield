@@ -1,0 +1,25 @@
+import { createSignal } from "solid-js";
+import { placeOrder } from "./api";
+import { useContext } from "solid-js";
+import { CartCtx } from "./cart";
+export function Checkout() {
+  const [items, setItems] = useContext(CartCtx);
+  const [status, setStatus] = createSignal("");
+  const submit = async (e: SubmitEvent & { currentTarget: HTMLFormElement }) => {
+    try {
+      e.preventDefault();
+      const email = String(new FormData(e.currentTarget).get("email"));
+      await placeOrder(items().map(i => i.id), email);
+      setStatus("ordered");
+      setItems([]);
+    } catch (err) {
+      setStatus("failed");
+    }
+  };
+  return (
+    <form onSubmit={submit}>
+      <p>Pay for your cart</p>
+      <input name="email" /><button>Pay</button><span>{status()}</span>
+    </form>
+  );
+}

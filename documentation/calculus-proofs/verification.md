@@ -37,6 +37,52 @@ Repository integration checks: `pnpm build` PASS, then the full gate GREEN:
 The gate baseline was regenerated only because the `proofs` step was added;
 all 45 earlier steps remain PASS. No executed-byte baseline changed.
 
+## D-116 inference audit — 2026-10-08
+
+2026-10-08: audited main `4fb160d` against fetched, read-only sugar `5e03328`;
+added [inference.md](inference.md), F16–F21 and the separate `Yield.Inference`
+model. O1–O52 appear exactly once: **25 held / 25 restated / 2 failed as native
+wording**. All 15 paper lemmas are covered: **3 held / 12 restated**. These are
+native applicability statuses, not changes to the historical M/P/U counts.
+
+The actual Lean 4.24.0 compile passed (2.1 seconds) with
+`ELAN_HOME=/private/tmp/elan /private/tmp/elan/bin/lake build` in `lean/`.
+The new printed proofs use either no axioms or the standard `propext` and
+`Quot.sound`; the older routing proofs also use standard `Classical.choice`.
+There are no project axiom declarations, unfinished proofs or native_decide.
+The checked results cover class/subclass inclusion, unknown top, safe removal
+and handler output, closed recursive call bounds, the server transport union
+and the empty-failure contradiction. Compiler/runtime refinement remains paper.
+
+Pre-commit repository validation:
+
+| Commit scope | Build | Full gate, unchanged baseline | Proofs step |
+| --- | --- | --- | --- |
+| Lean extension (`c180304`) | PASS | GREEN: 46 pass / 0 fail / 0 skip, 79 seconds | PASS: Lake plus 11/11 probes |
+| Native audit documentation | PASS | GREEN: 46 pass / 0 fail / 0 skip, 80 seconds | PASS: Lake plus 11/11 probes |
+
+Both commands are `pnpm build` then
+`node scripts/yield-gate.mjs --baseline documentation/yield-gate-baseline.json`;
+the reports are `/private/tmp/sy-inference-gate-1-fast.json` and
+`/private/tmp/sy-inference-gate-2.json`.
+The original slow run was interrupted and is not counted. The system pnpm
+11.20.0 launcher repeatedly resolves the project's pinned 11.1.1, adding about
+70 seconds per invocation. Completed validation uses the already-installed
+**11.1.1** executable through a temporary PATH entry; no repository/global
+configuration, dependency or baseline changed. The full gate still uses its
+default three jobs and every step, including executed-byte measurement.
+
+The separate production-library probe command also passed **11/11**:
+`PROOF_PRODUCTION=1 node node_modules/vitest/vitest.mjs run --config documentation/calculus-proofs/probes/vite.config.mjs`.
+As before, this switches the library flag, not Solid's client build. Direct
+Node checks passed 10 assertions for subclass matching, structural mismatch,
+conditional rethrow, unknown, promise catch timing, finally, Error-valued return
+and repeated class evaluation. Strict TypeScript accepts the cast-free
+`const e: A = new B()` witness. These are source semantic witnesses, not native
+compiler tests. No sugar branch test suite or end-to-end RPC proof is claimed.
+The O/P table coverage check, local link-target check and `git diff --check`
+passed. Changes are local on main; nothing was pushed.
+
 ## Historical branch verification
 
 ### Proof assistant

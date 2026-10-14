@@ -1,0 +1,11 @@
+/private/tmp/sy-review3-out/app/src/Checkout.tsx:21:21 error TS95000: [EVENT_REJECTS] This handler can fail with unknown and nothing catches it; wrap the body in try/catch, or declare the failure.
+/private/tmp/sy-review3-out/app/src/Checkout.tsx:6:17 error TS2345: [generated] [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+/private/tmp/sy-review3-out/app/src/Details.tsx:4:17 error TS2345: [generated] [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+/private/tmp/sy-review3-out/app/src/cart.tsx:7:33 error TS2345: [FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: unknown.
+  related: /private/tmp/sy-review3-out/app/src/index.tsx:22:15: The app is rendered here. can suspend (pending); can fail with an unknown error; does not wait; needs no context
+/private/tmp/sy-review3-out/app/src/cart.tsx:7:33 error TS1360: [PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.
+  related: /private/tmp/sy-review3-out/app/src/index.tsx:22:15: The app is rendered here. can suspend (pending); can fail with an unknown error; does not wait; needs no context
+/private/tmp/sy-review3-out/app/src/cart.tsx:5:17 error TS2322: [generated] [LAZY_VIEW] children is a lazy view: function* () { return <.../>; }
+/private/tmp/sy-review3-out/app/src/index.tsx:8:10 error TS2322: [generated] [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.
+  related: /private/tmp/sy-review3-out/app/src/cart.tsx:5:39: The expected type comes from property 'children' which is declared here on type 'PropsInput<{ children: any; }, unknown> & NoInfer<Undeclared<PropsInput<{ children: any; }, unknown>, { children: any; }>>'
+solid-yield check: 9 files, 7 errors

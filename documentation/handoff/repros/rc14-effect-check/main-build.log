@@ -1,0 +1,30 @@
+$ pnpm --filter "./packages/*" --if-present run build
+Scope: 4 of 23 workspace projects
+packages/yield build$ npm-run-all -nl build:clean build:js types
+packages/yield build: [build:clean] 
+packages/yield build: [build:clean] > solid-yield@0.0.0 build:clean /private/tmp/sy-docs/packages/yield/package.json
+packages/yield build: [build:clean] > rimraf dist/ 
+packages/yield build: [build:clean] 
+packages/yield build: [build:clean] $ rimraf dist/
+packages/yield build: [build:js   ] 
+packages/yield build: [build:js   ] > solid-yield@0.0.0 build:js /private/tmp/sy-docs/packages/yield/package.json
+packages/yield build: [build:js   ] > node scripts/build.mjs 
+packages/yield build: [build:js   ] 
+packages/yield build: [build:js   ] $ node scripts/build.mjs
+packages/yield build: [types      ] 
+packages/yield build: [types      ] > solid-yield@0.0.0 types /private/tmp/sy-docs/packages/yield/package.json
+packages/yield build: [types      ] > npm-run-all -nl types:jsx types:src 
+packages/yield build: [types      ] 
+packages/yield build: [types      ] $ npm-run-all -nl types:jsx types:src
+packages/yield build: [types      ] [types:jsx] 
+packages/yield build: [types      ] [types:jsx] > solid-yield@0.0.0 types:jsx /private/tmp/sy-docs/packages/yield/package.json
+packages/yield build: [types      ] [types:jsx] > node scripts/jsx-from-web.mjs && node scripts/jsx-web-shared.mjs 
+packages/yield build: [types      ] [types:jsx] 
+packages/yield build: [types      ] [types:jsx] $ node scripts/jsx-from-web.mjs && node scripts/jsx-web-shared.mjs
+packages/yield build: [types      ] [types:jsx] jsx-from-web: jsx/ regenerated from @solidjs/web@2.0.0-rc.13
+packages/yield build: [types      ] [types:src] 
+packages/yield build: [types      ] [types:src] > solid-yield@0.0.0 types:src /private/tmp/sy-docs/packages/yield/package.json
+packages/yield build: [types      ] [types:src] > tsc -p tsconfig.build.json 
+packages/yield build: [types      ] [types:src] 
+packages/yield build: [types      ] [types:src] $ tsc -p tsconfig.build.json
+packages/yield build: Done

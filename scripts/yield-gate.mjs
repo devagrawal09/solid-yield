@@ -180,6 +180,18 @@ function buildSteps(twins) {
     ...pnpmRun("examples/originals/docs", "typecheck")
   });
 
+  // D-116: plain-Solid originals are first-class inputs for native sugar.
+  // Dashboard has a 30-step original self-check and its own SSR/hydrate cases;
+  // it does not need a hand-written yield twin to enter the gate.
+  for (const script of ["test", "typecheck", "ssr-smoke", "hydrate-smoke"]) {
+    steps.push({
+      name: `original:dashboard:${script}`,
+      cwd: root,
+      fast: script === "typecheck",
+      ...pnpmRun("examples/originals/dashboard", script)
+    });
+  }
+
   // Server-render smoke (examples/harness/ssr-smoke/smoke.mjs): every twin with a server
   // entry renders each of its routes through Vite's SSR loader, each render in its own
   // process with a 30 s timeout (120 s on GitHub Actions) — rendering-yield's string and
@@ -207,6 +219,14 @@ function buildSteps(twins) {
     cwd: root,
     cmd: process.execPath,
     args: ["examples/harness/hydrate-smoke/hydrate.mjs"]
+  });
+
+  // D-117: separate production peers; streamed hydration precedes the real RPC.
+  steps.push({
+    name: "pkg:yield:failure-wire-smoke",
+    cwd: root,
+    cmd: process.execPath,
+    args: ["packages/yield/test/failure-wire-smoke.mjs"]
   });
 
   steps.push(
@@ -247,6 +267,28 @@ function buildSteps(twins) {
     }
   );
 
+  // Soak is a manual report: even one minute per twin adds nine minutes and
+  // process-wide heap slopes vary by host. Keep a visible skip, never a blocker.
+  steps.push({
+    name: "twins:soak-analysis-test",
+    cwd: root,
+    fast: true,
+    cmd: process.execPath,
+    args: [
+      "--test",
+      "examples/harness/soak/analysis.test.mjs",
+      "examples/harness/soak/heap-diff.test.mjs",
+      "examples/harness/soak/sample-cleanup.test.mjs"
+    ]
+  });
+  steps.push({
+    name: "twins:soak-report",
+    cwd: root,
+    cmd: process.execPath,
+    args: ["examples/harness/soak/run.mjs", "--minutes", "1"],
+    skip: "manual REPORT-ONLY: pnpm soak (10 minutes/twin; --minutes 60 available); nine-minute short run is too slow per commit"
+  });
+
   // Like analyzer:report, this reports evidence without coverage thresholds.
   // Lean is optional: a missing Lake skips this step without failing the gate.
   steps.push({
@@ -269,6 +311,7 @@ function buildSteps(twins) {
 
   // D-105: source bytes in V8 executed ranges at load and each authored parity step.
   // The committed baseline permits 2% or 1024 bytes per phase (whichever is larger).
+  // A phase's optional measured tolerance adds only to that phase's limit.
   steps.push(
     {
       name: "twins:executed-bytes-test",
@@ -318,10 +361,15 @@ function buildSteps(twins) {
       "packages/compiler-yield/src/*.js",
       "examples/originals/docs/src/**/*.[tj]s?(x)",
       "examples/originals/docs/stream/**/*.[tj]s?(x)",
+      "examples/originals/dashboard/src/**/*.[tj]s?(x)",
+      "examples/originals/dashboard/stream/**/*.[tj]s?(x)",
+      "examples/originals/dashboard/tests/**/*.[tj]s?(x)",
+      "examples/harness/dashboard/*.{ts,mjs}",
       "packages/*/test/*.mjs",
       "examples/harness/ssr-smoke/*.mjs",
       "examples/harness/hydrate-smoke/*.mjs",
       "examples/harness/executed-bytes/*.mjs",
+      "examples/harness/soak/*.mjs",
       "scripts/*.mjs"
     ]
   });

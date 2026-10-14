@@ -8,9 +8,17 @@ No library code is changed here.
 above: **12 mechanized obligations / 26 paper proofs / 14 unprovable as worded**.
 Main's later repairs supersede some findings. The runtime probes now supply the
 required context names and expect frozen failures to be absorbed; their old
-static witnesses are refused by main's repaired types. The Lean proofs and
-historical classifications are unchanged. See [verification.md](verification.md)
+static witnesses are refused by main's repaired types. The historical
+classifications are unchanged. See [verification.md](verification.md)
 for the integration results and the original branch record.
+
+**Native inference audit (2026-10-08, D-116).** [inference.md](inference.md)
+re-reads all 52 obligations and all 15 paper lemmas against class-based throw
+inference: 25 obligations held, 25 restated, 2 failed as native wording.
+It specifies subclass coverage, unknown as top, recursive upper bounds and
+safe catch removal. The additional `Yield.Inference` Lean namespace checks
+those abstract failure rules; it does not verify the native compiler or wire
+matching. Findings F16–F21 record the remaining premises and counterexamples.
 
 **Result:** the abstract effect/owner calculus has checked preservation, discharge,
 and root-safety proofs. The theorem about **every TypeScript-accepted admissible
@@ -57,6 +65,11 @@ natural numbers. Primitive sets are finite lists; arbitrary predicate colors
 also admit widened interfaces. No proof relies on finiteness. Equality of
 these identifiers models true class/context identity, not TypeScript's
 structural approximation to it.
+
+For D-116, the separate `Yield.Inference` model instead uses value predicates
+and an explicit class relation. It admits unknown as the universal set and
+subclass inclusion. Its connection to the older owner model remains the
+P-STATE simulation premise; see [inference.md](inference.md#mechanization-and-limits).
 
 `WellHosted H Y` is `∀ o ∈ Y, Admits H o`. It models only the yield-union check,
 not JavaScript purity, positions inside JSX, order of operations, or whether

@@ -1,0 +1,98 @@
+[
+  {
+    "name": "derived-inside",
+    "renderer": "frames",
+    "errors": 0,
+    "hasContent": true
+  },
+  {
+    "name": "derived-inside",
+    "renderer": "stream",
+    "errors": 0,
+    "hasContent": true
+  },
+  {
+    "name": "derived-inside-lazy-body-errored",
+    "renderer": "frames",
+    "errors": 0,
+    "hasContent": true
+  },
+  {
+    "name": "derived-inside-lazy-body-hole",
+    "renderer": "frames",
+    "errors": 0,
+    "hasContent": true
+  },
+  {
+    "name": "derived-inside-lazy-body-hole-wrapped",
+    "renderer": "frames",
+    "errors": 0,
+    "hasContent": true
+  },
+  {
+    "name": "derived-inside-hoisted",
+    "renderer": "frames",
+    "errors": 0,
+    "hasContent": true
+  },
+  {
+    "name": "nested-loader",
+    "renderer": "frames",
+    "errors": 0,
+    "hasContent": true
+  },
+  {
+    "name": "nested-loader-lazy-body-sync",
+    "renderer": "frames",
+    "errors": 0,
+    "hasContent": true
+  },
+  {
+    "name": "nested-loader-lazy-body-sync-no-derived",
+    "renderer": "frames",
+    "errors": 0,
+    "hasContent": true
+  },
+  {
+    "name": "nested-loader-lazy-body-hole",
+    "renderer": "frames",
+    "errors": 0,
+    "hasContent": true
+  },
+  {
+    "name": "nested-loader-lazy-body-stable-promise",
+    "renderer": "frames",
+    "errors": 0,
+    "hasContent": true
+  },
+  {
+    "name": "derived-inside-lazy-body-promise-derived",
+    "renderer": "frames",
+    "errors": 1,
+    "hasContent": false
+  },
+  {
+    "name": "derived-inside-lazy-body-promise-derived",
+    "renderer": "stream",
+    "errors": 1,
+    "hasContent": false
+  },
+  {
+    "name": "nested async + derived",
+    "renderer": "frames",
+    "errors": 1,
+    "hasContent": false
+  },
+  {
+    "name": "nested async + derived",
+    "renderer": "stream",
+    "errors": 1,
+    "hasContent": false
+  },
+  {
+    "name": "minimal single async memo",
+    "renderer": "frames",
+    "errors": 1,
+    "hasContent": false
+  }
+]

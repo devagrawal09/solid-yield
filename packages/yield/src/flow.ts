@@ -27,7 +27,10 @@ import {
 } from "solid-js";
 import {
   BOUNDARY,
+  soakOwned,
   boundaryAbove,
+  restoreFailure,
+  matchesFailure,
   type Boundary,
   isGeneratorFunction,
   renderView,
@@ -393,6 +396,7 @@ function lazyView(body: any): unknown {
 // --- boundaries ---------------------------------------------------------------------------------
 
 declare const __DEV__: boolean;
+declare const __YIELD_SOAK__: boolean;
 
 /**
  * Whether a value is `solid-yield/h` / automatic-`jsx` output, an element
@@ -461,6 +465,7 @@ function LoadingYield<C, F, O = never>(props: {
   Settle<RequiresOf<Ops<C> | Ops<F> | Ops<O>>>
 >;
 function LoadingYield(props: any): any {
+  if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__) soakOwned("boundaries");
   const children = content(props, "Loading");
   // `on` may be a source: every other prop is read through where it is read
   const out: any = {};
@@ -554,6 +559,7 @@ function ErroredYield<C, F extends ErroredFallback<FailsOf<Ops<C>>> | Element>(p
   Settle<RequiresOf<Ops<C> | Ops<F>>>
 >;
 function ErroredYield(props: any): any {
+  if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__) soakOwned("boundaries");
   const children = content(props, "Errored");
   const fallback = props.fallback as any;
   const handles = props.catch as readonly ErrorClass[] | undefined;
@@ -579,12 +585,13 @@ function ErroredYield(props: any): any {
   return SolidErrored({
     get fallback() {
       const render = adapted || props.fallback;
-      if (!handles) return render;
-      // only the listed error types: any other goes to the boundary above
+      // Solid has no hydrate decode callback. Restore at our boundary's
+      // incoming error accessor, before selective matching or user fallback.
       return (err: Accessor<unknown>, reset: () => void) => {
-        const error = err();
-        if (!handles.some(C => error instanceof (C as any))) throw error;
-        return typeof render === "function" ? render(err, reset) : render;
+        const restored = () => restoreFailure(err());
+        const error = restored();
+        if (handles && !matchesFailure(error, handles)) throw error;
+        return typeof render === "function" ? render(restored, reset) : render;
       };
     },
     get children() {

@@ -1,6 +1,6 @@
 # The solid-yield compiler, C0: definitions, analysis, codegen, correctness claim, open decisions
 
-Status: **D-114 (Dev, 2026-10-07): the compiler line is measured and parked.** Main has the analysis tool; eager-islands, single-root and R emission remain experiments on proto/compiler at 778a0d5 (single-root report at 43bb41b). v0.2 is the next library release, including D-115; v0.3 is the library's lazy builder. §§2–6 preserve the compiler design and earlier rulings, not a release commitment.
+Status: **D-114 (Dev, 2026-10-07): the compiler is measured; R emit is a roadmap candidate after v0.3.** Main has the analysis tool; static extraction with eager root splitting (seven-root/single-root modes) and R islands emission remain experiments on proto/compiler at ada81a8 (single-root report at 43bb41b). v0.2 is the next library release, including D-115; v0.3 is the library's lazy builder. §§2–6 preserve the compiler design and earlier rulings, not a release commitment.
 
 Read the evidence on the pinned branch: [compiler-c1-report.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-c1-report.md), [compiler-reachability.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-reachability.md), [compiler-c2-finding.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-c2-finding.md), [compiler-single-root.md](https://github.com/devagrawal09/solid-yield/blob/43bb41b77af461df199315485b8cdec259efd51a/documentation/compiler-single-root.md), [compiler-c3-server-components.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-c3-server-components.md), [compiler-c3b-payload.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-c3b-payload.md) and [compiler-findings.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-findings.md). D-114 in DECISIONS.md records the chain and its differing measurement scopes.
 
@@ -12,24 +12,23 @@ Vocabulary is the project's (D-096): a **routine**, its **host**, a **hole**, a 
 
 ## 0. The plan
 
-D-114 amends D-103–D-108 and D-113: **measured and parked**. The four tiers retain their distinct attachment models:
+**Terminology (2026-10-08).** Dev corrected the earlier use of “islands”: C2 (seven-root and single-root modes) is **static extraction + eager root split**. Every root remains a full client component, and the article still renders in the browser. Islands in the Astro/Marko sense are server-rendered content with small interactive leaves: **C3–C3c are islands, i.e. server components with client slots** such as LikeButton and copy-code. Dev’s measured summary: “static extraction and root splitting never pay; islands (server components with client slots) pay above ~25 KB gzip of server-derivable code and scale.” The `eagerIslands` pass name predates this correction and is unchanged; read older branch reports with this distinction.
+
+D-114 amends D-103–D-108 and D-113: **compiler measured; R emit a roadmap candidate after v0.3** (C3c amendment). The four tiers retain their distinct attachment models:
 
 | Tier | Result / route | Status |
 | --- | --- | --- |
-| 1. Eager islands | Solid's public hydration; seven roots cost +9.9% load execution / +4.5% raw shipping; single root saves about 800 raw bytes but costs +3.8% load execution | Measured; emission parked on the branch |
-| 2. Lazy islands | Delayed Solid hydrate is unsafe; #3845 by design, D-111 withdrawn | Rejected |
+| 1. Eager root split + static extraction | Solid's public hydration; seven roots cost +9.9% load execution / +4.5% raw shipping; single root saves about 800 raw bytes but costs +3.8% load execution | Measured; emission parked on the branch |
+| 2. Delayed root hydration | Delayed Solid hydrate is unsafe; #3845 by design, D-111 withdrawn | Rejected |
 | 3. resume(root) | Library route on Solid's public API: descriptors, keyed attachment, first-interaction materialization, own event queue/payload, validated claims and render fallback | v0.3 lazy builder proceeds |
 | 4. Full resumability | Library's own runtime, preserving the same semantics | Horizon |
 
 C1 groups, eager causes, C1b directed per-event reach and S/R/client provenance
 join main as an analyzer tool, with capture checks and a report-only gate step
 for all nine twins. Their graph counts do not prove hydration roots or savings.
-The R experiment removes server-derived code but needs about **76 KB raw /
-25.6 KB gzip** to pay the fixed frame/RPC and shell/slot integration cost;
-successful markup refetches add about **0.94 KB gzip** per navigation versus
-Markdown JSON ([compiler-c3b-payload.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-c3b-payload.md)). Return when that runtime
-shrinks or a user has the payload. v0.2 is the next library release, not the
-compiler. The remaining plan below describes the parked experiment.
+C3c measures the scaling threshold: **islands (server components with client slots) for yield apps are a wash near 25 KB gzip of server-derivable code, a clear win from ~110 KB, and the gap widens with payload** ([compiler-c3c-scaling.md](https://github.com/devagrawal09/solid-yield/blob/ada81a8d3af2c1e3a783468ac820875fff1fb99d/documentation/compiler-c3c-scaling.md)). S/M/L save 4.55%/51.99%/56.74% shipped gzip and 16.22%/41.47%/44.38% load execution versus the eager library SPA. R's client load/shipping stays constant; response expansion remains. At L, seven navigations add 8,500 gzip bytes versus equivalent JSON, leaving 101,332 bytes of initial JS savings; session execution excluding load is 7.97% lower. C3b's 25.6 KB code-only break-even has a different control; this is a measured candidate threshold, not a universal package-size rule.
+
+**Islands: server components with client slots (R emit) productized** is a roadmap candidate **after v0.3**, gated on F-C11/F-C13 exact DOM parity and the purity directive's trust model. R emit remains on proto/compiler; v0.2 is the next library release and v0.3 is the library lazy builder. The remaining plan preserves the experiment's design.
 
 - **Where.** The compiler lives in this repository. It changes nothing in Solid: D-004 (Solid's public API only) holds for the compiler route as it does for the runtime. Its input is the yield dialect as it is today: any program that is admissible by calculus §4.1 (C1–C7). It has no dialect of its own until C4, and Q6 asks whether it ever should.
 - **What it does.**
@@ -38,8 +37,8 @@ compiler. The remaining plan below describes the parked experiment.
 - **Its fallback is the library route.** Anything the compiler cannot analyse compiles to "this region is a client root running the library runtime". That is always correct, because inside a root the program *is* the library route. In the limit (nothing analysable) the whole app is one eager root, which is today's output.
 - **Sequencing**, in the style of D-057 (each step starts after the previous one has landed and been ruled on):
   - **C1** is a report and nothing else (§2.5).
-  - **C2** emits eager islands only (§3.1); lazy/visible stay report classes.
-  - **C3** emits server components (§3.2).
+  - **C2** emits static extraction + eager root split only (§3.1); lazy/visible stay report classes.
+  - **C3** emits islands (server components with client slots) (§3.2).
   - **C4** is the ergonomic layer: `$hoistedEffect` (D-079's note), and possibly Q6.
 
 Three things the compiler is **not**:
@@ -98,6 +97,7 @@ How provenance flows through each construct:
 
 - **Through `Source`.** A path over a source has the source's π: `yield* story.title` has π(story).
 - **Through pure derivations.** Memos, holes, settled values, paths and flow sources derived only from S/R are S/R. Any C read, event/effect write, browser operation or unproved impure operation keeps the affected computation client. A U value is not made R just because another operand is R.
+- **Trusted pipeline modules (F-C12, C3c).** A module-level `"use pure"` directive asserts that its exported functions are deterministic functions of their arguments, with no observable side effects or reads of mutable external state. Calls join argument provenance: S stays S, R stays R, U stays U, C stays C. This includes transitive package calls; the compiler does not inspect or prove the implementation. It is an author trust contract, not a package whitelist or source hash. Every marked module is listed as a `trusted-pure-module` diagnostic, including unused marked modules supplied to analysis. Removing the directive leaves opaque package work client-owned under the normal conservative analysis. Local helpers still use ordinary inference. The theorem assumes the assertion is true; a false assertion is outside the admitted program contract. Capture checks still apply to every server argument and slot edge.
 - **Through `$memo` bodies.** A memo's π is the transfer described above. A memo is atomic: C2 does not split a memo whose branches mix S and C (R3). The whole memo is C.
 - **Through props (call form, D-065).** At a call site `C({ x: v })`, the prop `x` has π(v): a source's π, a hole prop's join over its reads, or a settled value's π. Inside C, `yield* props.x` has the π of the call site's argument. A component therefore has a **summary** parameterised by its props' provenance, which each call site instantiates (§2.3).
 - **Through context (D-098).** `yield* Ctx` has the join of the π of every `value` given by a `Ctx.provide` that can be above the reader, plus the default if the context has one. Statically, "can be above" is over-approximated as every `provide` of Ctx in the module graph. Across a `foreign(C, { provided: [Ctx] })` edge (D-102) the analysis cannot see the tree, so it uses all of Ctx's providers.
@@ -112,7 +112,7 @@ A template literal with interpolations is an expression, not a literal constant.
 Both the receiver and the computed key contribute provenance; a dynamic key
 must not change the stored equation of a statically selected field.
 
-**R execution (parked C3 experiment).** Pure derivation on the server data runs
+**R execution (branch-only C3 experiment).** Pure derivation on the server data runs
 inside a generated "use server" function; client navigation refetches its markup,
 with slots for client children. Only settled serializable inputs cross; their
 producers stay client. Event-written C inputs remain client under the branch's
@@ -237,9 +237,9 @@ Event handlers do not cross: a handler is created in a setup, so its creator is 
 | **visible** | it has no effect, but it has a C or U source that changes without a bind: a memo whose attempt targets a non-server promise or stream, a foreign source | when its span becomes visible |
 | **lazy** | every change in it starts at one of its binds | on the first event at one of its binds; the event is captured before hydration and replayed after it |
 
-These are analysis report classes. In the parked tier-1 experiment **every emitted island hydrates eagerly**; neither visible nor lazy schedules use delayed Solid hydrate (D-111). The proposed independent v0.3 builder needs its own event queue, payload and validated DOM claims with render fallback. Every eager island must report its effect reach: the effects making it eager and the dependent parts/providers/readers merged with them (D-104).
+These are analysis report classes. In the parked tier-1 experiment **every emitted client root hydrates eagerly**; neither visible nor lazy schedules use delayed Solid hydrate (D-111). The proposed independent v0.3 builder needs its own event queue, payload and validated DOM claims with render fallback. Every eager client group must report its effect reach: the effects making it eager and the dependent parts/providers/readers merged with them (D-104).
 
-The original lazy design argument was that a setup only creates (D-042: it never reads, writes or builds JSX), so effects would be its only visible work. C1 finding F-C2 qualifies that argument: the Sierpinski setups register timers directly without an effect. Unproved setup calls therefore make a candidate group eager too. Absence of an effect alone does not justify deferral. Tier 3 must validate its independent builder; the parked tier-1 experiment defers no island.
+The original lazy design argument was that a setup only creates (D-042: it never reads, writes or builds JSX), so effects would be its only visible work. C1 finding F-C2 qualifies that argument: the Sierpinski setups register timers directly without an effect. Unproved setup calls therefore make a candidate group eager too. Absence of an effect alone does not justify deferral. Tier 3 must validate its independent builder; the parked tier-1 experiment defers no client root.
 
 The fact "this component is eager" is already in each setup's yield union (`Create<"effect">`, calculus §1.2). D-104 requires a marker on `ComponentView`, folded like may-wait (D-075), and effect-reach diagnostics. D-114 parks that compiler requirement. C1 effect-reach reports and build diagnostics now belong to the analyzer tool on main; the EAGER type marker remains unimplemented.
 
@@ -356,7 +356,7 @@ This section says what the output contains, not how it is built.
 - a streamed one as a source that pends until it lands;
 - a failure re-branded as its class.
 
-**A loader (parked tier-1 experiment).** A small client entry hydrates every emitted island at once, in document order, regardless of its eager/visible/lazy report class. Per-root claims and pre-hydration event handling must be verified, not assumed. Delayed visible/lazy Solid hydration is rejected (tier 2, D-111/D-113); first-interaction attachment belongs to the independent v0.3 resume(root) builder (tier 3).
+**A loader (parked tier-1 experiment).** A small client entry hydrates every emitted client root at once, in document order, regardless of its eager/visible/lazy report class. Per-root claims and pre-hydration event handling must be verified, not assumed. Delayed visible/lazy Solid hydration is rejected (tier 2, D-111/D-113); first-interaction attachment belongs to the independent v0.3 resume(root) builder (tier 3).
 
 **What is preserved:**
 
@@ -441,9 +441,9 @@ Q3 was the compiler's savings question; D-114 records its measured answer.
 
 ## 5. Earlier decisions (Dev, 2026-10-07; release plan superseded by D-114)
 
-These Q1–Q6 rulings describe the parked experiment. D-114 keeps analysis as a tool and makes v0.2 the next library release.
+These Q1–Q6 rulings describe the branch experiment. D-114 keeps analysis as a tool and makes v0.2 the next library release.
 
-Q1–Q6 are ruled by D-103–D-108: C, B (also report each eager island's effect reach), B (with a measured tolerance), A, B (implemented on proto/compiler), B after C3. The alternatives below remain the design record. D-111 overrides delayed hydration: **v0.2 emits eager islands only**. Lazy/visible describe analysis report classes, not v0.2 attachment schedules. v0.3 will attach by key without Solid's hydrate, with its own delegated event queue and payload, validated claims and render fallback. No reset of Solid's private hydration completion flag is permitted.
+Q1–Q6 are ruled by D-103–D-108: C, B (also report each eager client group's effect reach), B (with a measured tolerance), A, B (implemented on proto/compiler), B after C3. The alternatives below remain the design record. D-111 overrides delayed hydration: **the earlier v0.2 plan emits static extraction + eager root split only**. Lazy/visible describe analysis report classes, not v0.2 attachment schedules. v0.3 will attach by key without Solid's hydrate, with its own delegated event queue and payload, validated claims and render fallback. No reset of Solid's private hydration completion flag is permitted.
 
 ### Q1. What does v0.2 split the app into? (ML-Q1) — ruled C (D-103)
 
@@ -491,7 +491,7 @@ Under §1, `me` is a written cell (C) provided above the whole app. M3 puts ever
 - **B.** A root with `Create<"effect">` in any of its setups is **eager**, and the others are lazy or visible (§1.7). The fact is surfaced in two places:
   - **as a marker in the types**: a phantom `[EAGER]` on `ComponentView`, folded like may-wait (D-075). It is not a color, has no boundary and is never discharged, so a component's eagerness is visible at its call;
   - **as a diagnostic** in the report and in the build, at the effect, naming the root it made eager (ML-L8);
-  - **effect reach (D-104 addition):** for every eager island, list the effects, their transitive reads/writes/calls and the dependent parts, providers and readers merged with them. Report unproved setup work separately as an eager cause (F-C2).
+  - **effect reach (D-104 addition):** for every eager client group, list the effects, their transitive reads/writes/calls and the dependent parts, providers and readers merged with them. Report unproved setup work separately as an eager cause (F-C2).
 - **C.** Remove `$effect` in favour of triggered behaviours, as markless does (no effects, `onVisible` / `attach`).
 
 **Recommendation: B.** It keeps D-079 and D-101 (4 run-once sites migrated). The fact is already in the types. And it makes an effect's cost visible exactly where v0.2 pays for it. Revisit C only if C1's eager-root counts are high.
@@ -577,7 +577,7 @@ D-098's rejected alternative was components as plain functions, with lazy contex
 | R10 | **Scope creep toward a framework.** A router, a bundler, a runtime of its own, resumability. | ML §5 "contradicts" 4 | C1 is a report only. Q1-C keeps Solid's client. The compiler adds a loader and nothing else. B (resumability) is a separate ruling, not drift. |
 | R11 | **Partial hydration may not fit Solid's public hydration** (nested namespaces, event replay per root). | §3.1 | C2's first spike checks it. A gap is a finding (D-004), not a workaround. |
 | R12 | **Failures crossing an edge must keep their class and brand,** or `catch: [K]` and `attempt` mis-handle them (calculus T4, D-087). | §1.6 | Failure classes are registered with the serializer by module id. A failure class that cannot be registered makes its region client (a capture failure). |
-| R13 | **Deferred setups.** Code that relies on setup timing would break under lazy roots. | §1.7 | v0.2 defers no island. C1 reports effects and unproved setup work as eager causes (F-C2); the future tier 3 builder must validate deferral and its declared trace differences. |
+| R13 | **Deferred setups.** Code that relies on setup timing would break under lazy roots. | §1.7 | v0.2 defers no client root. C1 reports effects and unproved setup work as eager causes (F-C2); the future tier 3 builder must validate deferral and its declared trace differences. |
 
 ---
 
@@ -603,4 +603,6 @@ the original while load execution is 12% lower. The fake embedded corpus,
 byte-budget scopes, purity contract and F-C11/F-C13/F-C14 limits are explicit in
 [compiler-c3b-payload.md](https://github.com/devagrawal09/solid-yield/blob/778a0d59fab7d6711c96aa911febe11456ba9a21/documentation/compiler-c3b-payload.md). That fixture and all emitters remain on
 the branch; no main twin, authored script or executed-byte baseline is replaced.
-D-114 parks the compiler and keeps the analyzer as a report-only tool.
+C3c extends the branch docs fixture to three levels and a **40-step session**: S is marked + highlight.js with three grammars (84,629 raw / 26,331 gzip); M adds KaTeX, four blog posts and the report's nine grammars (370,215 / 111,656); L adds a 20-entry schema-generated API reference and an eight-release diff-rendered changelog (424,033 / 127,547). The ruling's “10 grammars” differs from the report's nine; D-114 records the difference. Six pipeline modules assert `"use pure"`; their adjacent pipeline memos remain S/R/S. All levels use seven region navigations. See [compiler-c3c-scaling.md](https://github.com/devagrawal09/solid-yield/blob/ada81a8d3af2c1e3a783468ac820875fff1fb99d/documentation/compiler-c3c-scaling.md) for the four-row tables, F-C15 and response trade; exact R parity remains 0/40 at L, with 40/40 authored-content diagnostics.
+
+The three-level fixture stays on proto/compiler. Main's nine twins retain the earlier 24-step docs script, with no marked modules, new gate steps or baseline changes. D-114's amendment makes productized R emission a measured roadmap candidate after v0.3 and keeps the analyzer report-only.

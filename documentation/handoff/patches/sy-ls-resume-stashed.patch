@@ -1,0 +1,2255 @@
+diff --git a/documentation/reviews/sugar-review-3.md b/documentation/reviews/sugar-review-3.md
+new file mode 100644
+index 0000000..71dde1a
+--- /dev/null
++++ b/documentation/reviews/sugar-review-3.md
+@@ -0,0 +1,97 @@
++# solid-yield "plain Solid 2" mode — independent newcomer review
++
++Checkout: /private/tmp/sy-review3 (proto/sugar-ls, ed90200). App: /private/tmp/sy-review3-out/app. Raw logs: cli1.txt, cli2.txt, mut1-3.txt, harness.txt, notes.md, base/ (final clean app source), ts.cjs (tsserver hover/diag helper), mut.py (mutation runner).
++
++**Mode note.** The brief said "sugar mode", but the README's promise ("plain Solid 2 + Vite plugin + TS plugin") is what the README calls *native* mode (`mode: "native"`, no `"use yield"`). "Sugar mode" in the README is the `"use yield"` directive dialect with library calls, not plain Solid. I followed the README and used `mode: "native"`. `"use server"` is just an ordinary directive string here: removing it from api.ts changed nothing in the output; typed failures come from inferring `throw new X` through async functions.
++
++## 1. Install and build the app
++
++**Expected:** README steps work verbatim. **Actual:**
++- README sends you to packages/ts-plugin-yield/README.md. Build + pack steps worked. `/tmp/solid-yield-packs` already contained tarballs older than the checkout (18:36 vs commit 20:33), so I re-packed into my own dir and pointed the overrides there (one deviation from the literal text). The pnpm-workspace overrides + two `pnpm add` commands worked first time (3.9 s). `pnpm exec solid-yield` exists. `vite build` succeeded; ESLint ran with no output.
++- App: errors.ts (`ApiError`, `NotFound`, `RateLimited`), api.ts (`"use server"`, `listProducts` throws RateLimited every 5th call, `getProduct` throws NotFound, `placeOrder`), format.ts (no directive), cart (context holding `createSignal`), ProductList, Details, Checkout (async submit), Clock (setInterval), index.tsx with Errored/Loading.
++- **Reaching a checkable 200-line plain Solid app took ~40 CLI iterations**, because many ordinary patterns are refused or cascade (details in step 2). I changed my app's shape repeatedly to stay inside what the tool supports; the final app is *not* the app I first wrote.
++
++## 2. CLI check, diagnostics, fixes, hover
++
++### First diagnostics (verbatim), in the order met
++1. First run of my natural code:
++   `ProductList.tsx:5:17 error TS95000: [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.`
++   - Right line? **No.** 5:17 is the *function name* `ProductList`, not the read. The read was `onClick={() => cart.add(p())}` inside a `<For>` child. My code *was* in an event. The message gives no help. Bisecting showed: an inline arrow in `onClick` that reads a signal/prop/accessor inside a component body is refused (`console.log(p())` too). The README's own 15-line example has `onClick={() => setCount(count() + 1)}` and passes, so the rule is not what the message says. It also moved: with a different edit the same code reported at `cart.tsx:7:54` (a different file).
++2. Same family, after more edits: `Checkout.tsx:19:6 error TS95000: [BABEL_PARSE_ERROR] /private/tmp/sy-review3-out/app/src/ProductList.tsx: Unexpected reserved word 'yield'. (19:5)` — followed by a dump of the generated code `(yield* cart.setItems)([...(yield* cart.items)(), {`. **Wrong file** (reported against Checkout.tsx; message names ProductList.tsx) and leaks lowered code. Trigger: a named setup-level handler `const add = (e) => {...; setItems([...items(), ...])}` used as `onClick={add}`. Neighbouring forms passed.
++3. Same root cause, different symptom: the CLI **crashed**: `Error: Debug Failure. False expression. at computePositionOfLineAndCharacter ... ts-plugin-solid-yield/src/service.cjs:193:18` (a transform error's line/column from generated code is applied to the original file without clamping). Reproduced 3 times (crash1.txt).
++4. `Checkout.tsx:21:21 error TS95000: [EVENT_REJECTS] This handler can fail with unknown and nothing catches it; wrap the body in try/catch, or declare the failure.` — right line (the `onSubmit={submit}` binding), message understandable, fix right *but*: my submit had a try/catch around `await placeOrder`. The "unknown" came from `String(new FormData(...).get("email"))` and `e.preventDefault()` *before* the `try`. Any call to a built-in is an "unknown" failure source. The message does not say what it is; only hover does. Fix: move the whole body into the `try`. Applied, cleared.
++5. `Checkout.tsx:6:17 error TS2345: [generated] [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.` and the same at `Details.tsx:4:17`, `index.tsx:8:10`. **Not actionable.** They were follow-ons of unknown-failure contagion (below).
++6. `Details.tsx:6:34 warning TS95001: [NATIVE_FOREIGN_BOUNDARY] Handle failures inside p or its callbacks; this imported component (createMemo from solid-js) is outside the native check.` **Bogus.** I had a local variable `p` (`const p = createMemo(...)`) and a plain `<p>` intrinsic tag at col 34. The tool resolved the lowercase JSX tag `<p>` to my variable. Renaming `p` -> `prod` removed it. A name collision with an HTML tag produces a message about "createMemo" as an "imported component".
++7. For-item misuse was mine (Solid 2 rc.13's default `For` passes the item, not an accessor) and the tool's `ProductList.tsx:10:58 error TS2349: This expression is not callable. Type 'Product' has no call signatures.` was correct (ordinary TS message).
++8. Provider wrapper component: I wrote the usual `CartProvider(props:{children: JSX.Element})` that renders `<CartCtx value=...>{props.children}</CartCtx>`. Result: `ProductList.tsx:6:40 error TS1360: [NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: CartCtx.` even though `<CartProvider>` wraps it. With `children: any` it was worse: `cart.tsx:7:33 error TS2345: [FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: unknown.`, `cart.tsx:7:33 error TS1360: [PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.`, `cart.tsx:5:17 error TS2322: [generated] [LAZY_VIEW] children is a lazy view: function* () { return <.../>; }` — location is `{props.children}` in the provider, far from the real cause. Workaround: put `<CartCtx value={...}>` directly in `App`. (A custom provider component is the most common context pattern in Solid.)
++9. Unknown-failure contagion from helper modules (this is the "third-party-ish helper without a directive" case). Hover: `Details — can suspend (pending); can fail with an unknown error (from n.toFixed at format.ts:2); can wait; needs an unknown context`. Replacing `toFixed` with `Math.round` gave `(from Math.round at format.ts:2)`; `reduce` and `String(e)` likewise (`String at index.tsx:12`). `"use pure"` at the top of format.ts did not change it. One `money(prod().price)` in a hole made `Details`, `Checkout`, `App` all "unknown error / can wait / needs an unknown context". I removed the helper from those components; it still works in ProductList where `money(p.price)` receives a plain For item. Calling a *signal accessor from a context-held tuple in a hole* (`items().length`) was also "unknown (from items at Checkout.tsx:22)"; I removed that too (Checkout can only read the cart inside the handler).
++10. Cart design: an object context with arrow properties (`add: p => setItems([...items(), p])`) -> SUGAR_CALLBACK at `cart.tsx:7:54`; a `createStore` in context -> `Argument of type 'unknown' is not assignable to parameter of type 'string[]'` / `'_state' is of type 'unknown'`; `createContext<[Accessor<T>, Setter<T>]>` with a `createSignal` value -> `Type 'Source<Product[], never, false>' is not assignable to type 'Accessor<Product[]>'`. Only `ReturnType<typeof makeCart>` (a signal tuple) passed.
++
++**Final state:** `solid-yield check: 9 files, 0 errors`; vite build ok; eslint silent.
++
++### Hovers (tsserver quickinfo, as in the plugin tests; helper = ts.cjs), clean baseline
++- `ProductList — can suspend (pending); can fail with __nativeChunk | RateLimited; does not wait; needs CartCtx`
++- `Details — can suspend (pending); can fail with __nativeChunk | NotFound; does not wait; needs no context`
++- `Checkout — does not suspend; never fails; does not wait; needs CartCtx`
++- (also) `Clock — does not suspend; never fails; does not wait; needs no context`; `App — does not suspend; never fails; does not wait; needs no context`
++
++Very good when it works: `NotFound` vs `RateLimited` per component is exactly the promise, and it came from reading throws in a `"use server"`-less async function in another file. Warts: `__nativeChunk` is an internal name (also `import("solid-yield").ChunkError` in App hovers, and "ChunkError" in messages — a user never wrote it); the Checkout "never fails" is right only because everything is in a try. **Whenever any file has a transform refusal or error (SUGAR_*, NATIVE_THROW), all hovers across the project fall back to e.g. `function ProductList(): JSX.Element`.**
++
++## 3. Fifteen mistakes (each from the clean baseline; runner mut.py; raw: mut1-3.txt)
++
++| # | Mistake | Caught? Tool / location | Message (verbatim) | Actionable | Score |
++|---|---|---|---|---|---|
++| 1 | empty catch (Checkout) | yes, CATCH_SWALLOWS, `Checkout.tsx:15:7` (the catch) | `This catch discards ChunkError \| RateLimited \| unknown without handling; return a fallback value, rethrow, or mark the absorption intentional with @yield-absorb.` | yes, fix options are right; "ChunkError" jargon | 2 |
++| 2 | log-only catch | same | same text, same line | yes (console.error isn't "handling": strict but defensible) | 2 |
++| 3 | `catch(e){ if (e instanceof ApiError) return []; throw e }` base-class catch in the list memo | no diagnostic; hover narrows to `can fail with __nativeChunk` (RateLimited gone) | none | hover is accurate; nothing flags that a sibling class is silently turned into `[]` | 1 |
++| 4 | selective `instanceof RateLimited` + rethrow | clean (correct); hover `can fail with __nativeChunk`: precise narrowing | none | n/a | 2 |
++| 5 | selective instanceof WITHOUT rethrow | yes, CATCH_SWALLOWS `ProductList.tsx:8:82` | `This catch discards ChunkError \| RateLimited without handling; ...` | right place; but RateLimited *is* handled in the branch — it's the other path that leaks. Hover says `never fails`. | 1 |
++| 6 | `onClick={async () => { await placeOrder(...); await getProduct("zzz") }}` | yes, EVENT_REJECTS `Clock.tsx:7:45` | `This handler can fail with __nativeChunk \| unknown \| RateLimited \| NotFound and nothing catches it; wrap the body in try/catch, or declare the failure.` | yes | 2 |
++| 7 | `placeOrder(...).then(() => setStatus("ok"))`, no `.catch` | only a refusal: `Checkout.tsx:12:18 [SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.` | wrong diagnosis (it is a signal *write* in a callback; not a missing catch); all hovers die | no | 1 |
++| 8 | `throw "slow down"` in server fn | yes, NATIVE_THROW `api.ts:10:26` | `Throw an Error object so callers can identify and handle this failure.` | yes | 2 |
++| 9 | `setTimeout(() => { throw new Error("late") })` | **no** (0 errors; Clock "never fails") | none | n/a | 0 |
++| 10 | server fn starts throwing new `Banned` | no diagnostic (Errored has a catch-all fallback); hover on Details changes to `can fail with __nativeChunk \| Banned \| NotFound` | none | hover shows it; with a generic fallback nothing to enforce | 1 |
++| 11 | `Promise.all([getProduct(..), getProduct("9")])` in memo | accidental: `Details.tsx:6:44 error TS2571: Object is of type 'unknown'.` (x2); hover `an unknown error (from Promise.all at Details.tsx:5)` | TS2571 is a **false positive** (plain tsc types the tuple); real signal only in hover | misleading | 1 |
++| 12 | try/finally, no catch | yes, EVENT_REJECTS `Checkout.tsx:20:21` + `index.tsx:19:43 [FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: import("solid-yield").ChunkError \| unknown \| RateLimited.` | handler message as #6 | yes (second diag shows the chain) | 2 |
++| 13 | `createMemo(async () => { const x = await getProduct(...) })` | refusal only: `Details.tsx:5:68 error TS95000: [SUGAR_HOST] Reactive operations in async functions or methods are unsupported.` | no failure analysis; async memos are a core Solid 2 form | unsupported, hovers die | 1 |
++| 14 | context read without provider | yes, NO_PROVIDER `ProductList.tsx:6:40` | `Add a context provider above this component; this context has no default value. Missing: CartCtx.` | yes (hover on App: `needs CartCtx`) | 2 |
++| 15 | remove Errored | yes, FOREIGN_HANDOFF `ProductList.tsx:10:18` (the read), App hover lists failures | `Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: import("solid-yield").ChunkError \| RateLimited \| NotFound.` | yes; names the classes. "ChunkError" and `handle with attempt` (a library API I'm not using) are noise | 2 |
++
++**Total: 22 / 30.** Strong where failures flow through plain `try/catch`, event bindings, `Errored`, and context. Weak on: timers (0), `.then` chains, async memos, Promise.all (each refused or mislabelled).
++
++## 4. Native harness steps from the README
++
++`node examples/harness/{native-todos,native-sierpinski}/check.mjs {parity,ssr}` — all exit 0:
++- `native Todos client parity: 27 states match original`; `native Todos hydrated parity: 27 states match original`; `native Todos streamed SSR smoke: two seeded todos match original; no render errors`
++- `native Sierpinski client parity: 11 states match original`; `native Sierpinski hydrated parity: 11 states match original`; `native Sierpinski streamed SSR smoke: 729 dots match original; no render errors`
++- They show that the *transform* preserves runtime behaviour on two real apps (after the "minimal bulk-handler catch patch" for Todos). They say nothing about whether the checker's diagnostics are usable on new code, which is where I spent my time. The README's own `PENDING_ROOT` example reproduced exactly (`index.tsx:11:20 ... [PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.` with the render as related location; README says line 11, `remote()`).
++
++## 5. Verdict
++
++**Would I use it on a real app today?** As an **advisory, non-blocking CI report or a hover aid on a small, conventional codebase**: yes, curious to. **As a gate: no.** Typed-failure hovers are the best feature (they were right on every component once the code was in the supported subset). But the supported subset is narrow and invisible: ordinary Solid (inline handlers reading signals, provider components, async memos, store/tuple contexts, any helper that calls a built-in, a variable named `p`) either trips a refusal with a misleading message at the wrong location, makes the CLI crash, or poisons the hovers with "unknown error". A single refusal turns off hovers in the whole project.
++
++**Top three fixes**
++1. Refusal/diagnostic quality: report SUGAR_CALLBACK / BABEL_PARSE_ERROR / GENERATED_TYPE at the offending authored expression and file, never the function name or another file; fix the `Debug Failure` crash (clamp positions in service.cjs:193); say *which* construct is unsupported. Keep hovers working for unaffected files.
++2. Stop treating every built-in call (`Math.round`, `toFixed`, `String`, `FormData`, `includes`, `Promise.all` typing) as an "unknown" failure that infects callers; or at least tell the user the source in the diagnostic text (hover already does). Respect `"use pure"` as the README implies.
++3. Support the common idioms: provider wrapper components, inline handlers reading signals, async `createMemo`, `.then` chains (report the missing catch), and timers (`setTimeout` throws). Hide `__nativeChunk` / `ChunkError` / `import("solid-yield")` from user-facing text.
++
++**Most impressive:** the per-component failure type read straight off plain code across modules — `Details — ... can fail with __nativeChunk | NotFound`, `ProductList — ... RateLimited`, and then `... | Banned | NotFound` appearing in the hover the moment the server function gained a throw, with zero client change. Narrowing through `instanceof` + rethrow was exact (#4). CATCH_SWALLOWS with the `@yield-absorb` escape was a pleasant, well-judged rule.
++
++**README sentences that over-promise (verbatim)**
++- "Checked event handlers report `EVENT_REJECTS` at the handler when their inferred failures escape." — true, but "inferred failures" includes every built-in call, see step 2.4/2.9.
++- (ts-plugin README) "Use the TS plugin or CLI for native failure and structural diagnostics." — a refusal in one file removes all hover info; some failures (#9) are invisible.
++- "Native mode checks selected plain Solid 2 files and transforms them into the library's generator form before Vite compiles JSX." with "the supported forms have tests, but unsupported forms, generated-location fallbacks and missing runtime source maps remain." — the second half is honest; the first reads as if ordinary Solid works. In my run the unsupported forms were the common ones.
++- "These two examples bound the tested scope; they do not establish that every Solid app works." — honest, and borne out.
++- "`pnpm exec solid-yield check .` reports ... at `remote()` on line 11" — true for that 15-line app; my app's first diagnostics were mislocated.
++
++## 10-line summary
++1. Used native mode (README's "plain Solid"); "sugar" = `"use yield"` dialect, not tested; `"use server"` had no effect.
++2. Install per ts-plugin README worked first try (re-packed tarballs into my own dir; /tmp ones were stale).
++3. Getting a ~200-line plain app to check clean took ~40 iterations; common idioms were refused or mis-reported.
++4. Bugs: SUGAR_CALLBACK at function name not the read; BABEL_PARSE_ERROR reported in the wrong file; CLI crash `Debug Failure` (service.cjs:193); `<p>` tag vs variable `p` bogus FOREIGN_BOUNDARY; provider wrapper -> NO_PROVIDER.
++5. Built-in calls (`Math.round`, `toFixed`) in helpers make everything "unknown error"; `"use pure"` didn't help.
++6. Hovers excellent when clean: `Details — ... can fail with __nativeChunk | NotFound`; internal `__nativeChunk`/`ChunkError` leak; any refusal blanks all hovers.
++7. Fifteen mistakes: 22/30 (empty/log-only catch, throw string, no provider, no Errored, try/finally, async onClick all caught well; setTimeout throw missed; .then, async memo, Promise.all refused/mislabelled).
++8. Harness: todos 27 client+27 hydrated states + SSR, sierpinski 11+11 + SSR, all pass; README PENDING_ROOT example reproduces.
++9. Verdict: advisory report/hover on small conventional code, not a gate; fix diagnostic locations, unknown-contagion, common idioms.
++10. Path: /private/tmp/sy-review3-out/REVIEW.md
+diff --git a/packages/compiler-yield/src/failure-inference.d.ts b/packages/compiler-yield/src/failure-inference.d.ts
+index 7177fed..ecec532 100644
+--- a/packages/compiler-yield/src/failure-inference.d.ts
++++ b/packages/compiler-yield/src/failure-inference.d.ts
+@@ -7,11 +7,20 @@ export interface FailureFunction {
+   component: boolean;
+   fails: string[];
+   calls: string[];
++  provides: string[];
++  timerFails: string[];
+   rejection?: string[];
+ }
+ export interface FailureReport {
+   iterations: number;
+-  diagnostics: { file: string; code: string; message: string; line: number; column: number }[];
++  diagnostics: {
++    file: string;
++    code: string;
++    message: string;
++    line: number;
++    column: number;
++    timer?: boolean;
++  }[];
+   unknownOrigins: {
+     file: string;
+     start: number;
+@@ -32,7 +41,15 @@ export interface FailureReport {
+     file: string,
+     start: number,
+     end: number
+-  ): { fails: string[]; native: boolean; target?: string; promise: boolean; async: boolean } | null;
++  ): {
++    fails: string[];
++    ownFails: string[];
++    native: boolean;
++    target?: string;
++    promise: boolean;
++    async: boolean;
++    resultType: string;
++  } | null;
+   at(
+     file: string,
+     start: number
+diff --git a/packages/compiler-yield/src/failure-inference.js b/packages/compiler-yield/src/failure-inference.js
+index fbb3d6f..ab99364 100644
+--- a/packages/compiler-yield/src/failure-inference.js
++++ b/packages/compiler-yield/src/failure-inference.js
+@@ -18,7 +18,10 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
+     byBody = new Map(),
+     tsNodes = new Map(),
+     classes = new Map(),
+-    classTypes = new Map();
++    classTypes = new Map(),
++    callSites = new Map(),
++    throwSites = new Map(),
++    swallowed = new Map();
+   for (const [file, record] of analysis.modules) {
+     const source = program.getSourceFile(file);
+     if (source) {
+@@ -29,6 +32,9 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
+       walk(source);
+     }
+     record.program.traverse({
++      "CallExpression|NewExpression"(path) {
++        callSites.set(`${file}:${path.node.start}:${path.node.end}`, path);
++      },
+       Function(path) {
+         const parent = path.parentPath;
+         const label =
+@@ -36,7 +42,8 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
+           (parent.isVariableDeclarator() ? name(parent.node.id) : name(path.node.key)) ??
+           `<callback:${path.node.loc.start.line}:${path.node.loc.start.column + 1}>`;
+         const server =
+-          record.server || path.node.body?.directives?.some(d => d.value.value === "use server");
++          path.node.async &&
++          (record.server || path.node.body?.directives?.some(d => d.value.value === "use server"));
+         let component = false;
+         path.traverse({
+           Function(q) {
+@@ -59,7 +66,9 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
+           pure: record.pure,
+           component: component && /^[A-Z]/.test(label),
+           fails: new Set(),
+-          calls: new Set()
++          calls: new Set(),
++          provides: new Set(),
++          timerFails: new Set()
+         };
+         functions.push(fn);
+         byBody.set(`${file}:${path.node.body.start}`, fn);
+@@ -88,6 +97,104 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
+     if (symbol?.flags & ts.SymbolFlags.Alias) symbol = checker.getAliasedSymbol(symbol);
+     return symbol?.declarations?.map(functionFor).find(Boolean) ?? null;
+   };
++  const contextId = path => {
++    const node = nodeFor(path);
++    let symbol = node && checker.getSymbolAtLocation(node);
++    if (symbol?.flags & ts.SymbolFlags.Alias) symbol = checker.getAliasedSymbol(symbol);
++    const declaration = symbol?.declarations?.find(ts.isVariableDeclaration);
++    const init = declaration?.initializer;
++    if (!init || !ts.isCallExpression(init)) return null;
++    const signature = checker.getResolvedSignature(init)?.declaration;
++    const fn = signature?.name?.getText();
++    if (
++      fn !== "createContext" ||
++      !/(solid-js|@solidjs)[/\\]/.test(signature.getSourceFile().fileName)
++    )
++      return null;
++    return `${declaration.getSourceFile().fileName}#${declaration.name.getText()}`;
++  };
++  function provided(value) {
++    if (!value?.node) return new Set();
++    let tag;
++    if (value.isJSXElement()) tag = value.get("openingElement.name");
++    else if (value.isCallExpression()) tag = value.get("callee");
++    if (!tag) return new Set();
++    if (
++      (tag.isJSXMemberExpression() || tag.isMemberExpression()) &&
++      ["Provider", "provide"].includes(name(tag.node.property))
++    )
++      tag = tag.get("object");
++    const ctx = contextId(tag);
++    if (ctx) return new Set([ctx]);
++    return target(tag)?.provides ?? new Set();
++  }
++  // A wrapper provides only what every returned subtree provides. An optional
++  // provider in one branch cannot erase requirements in another branch.
++  let provisionChanged = true;
++  while (provisionChanged) {
++    provisionChanged = false;
++    for (const fn of functions) {
++      const returns = [];
++      const body = fn.path.get("body");
++      if (body.isExpression()) returns.push(body);
++      else
++        body.traverse({
++          Function(q) {
++            q.skip();
++          },
++          ReturnStatement(q) {
++            if (q.node.argument) returns.push(q.get("argument"));
++          }
++        });
++      const parameter = fn.path.node.params[0];
++      const propBinding = parameter?.name && fn.path.scope.getBinding(parameter.name);
++      const contexts = [];
++      for (const value of returns) {
++        const references = [];
++        const visit = ref => {
++          if (
++            !ref.isMemberExpression() ||
++            name(ref.node.property) !== "children" ||
++            !ref.get("object").isIdentifier({ name: parameter?.name }) ||
++            ref.scope.getBinding(parameter.name) !== propBinding
++          )
++            return;
++          const scope = new Set();
++          let child = ref;
++          for (let parent = ref.parentPath; parent; child = parent, parent = parent.parentPath) {
++            if (parent.isJSXElement() && !child.isJSXOpeningElement())
++              for (const id of provided(parent)) scope.add(id);
++            if (parent.isCallExpression()) {
++              let edge = ref;
++              while (
++                edge &&
++                edge !== parent &&
++                !(edge.isObjectProperty() && name(edge.node.key) === "children")
++              )
++                edge = edge.parentPath;
++              if (edge !== parent) for (const id of provided(parent)) scope.add(id);
++            }
++            if (parent === value) break;
++          }
++          references.push(scope);
++        };
++        if (propBinding) {
++          visit(value);
++          value.traverse({ MemberExpression: visit });
++        }
++        contexts.push(...(references.length ? references : [provided(value)]));
++      }
++      const common = contexts.length
++        ? [...contexts[0]].filter(id => contexts.every(s => s.has(id)))
++        : [];
++      for (const id of common)
++        if (!fn.provides.has(id)) {
++          fn.provides.add(id);
++          provisionChanged = true;
++          if (/^[A-Z]/.test(fn.name)) fn.component = true;
++        }
++    }
++  }
+   const classSet = p => {
+     const node = nodeFor(p),
+       result = new Set();
+@@ -136,6 +243,7 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
+     const callee = p.get("callee"),
+       api = imported(callee);
+     if (api?.source === "solid-js") return api.name;
++    if (contextId(callee)) return "context";
+     if (
+       p.isNewExpression() &&
+       callee.isIdentifier({ name: "Promise" }) &&
+@@ -184,9 +292,8 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
+         valueType = value && checker.getTypeAtLocation(value);
+       if (
+         valueType &&
+-        ((valueType.flags & ts.TypeFlags.StringLike &&
+-          ["trim", "slice", "substring", "toLowerCase", "toUpperCase"].includes(method)) ||
+-          (valueType.flags & ts.TypeFlags.NumberLike && method === "toString"))
++        valueType.flags & ts.TypeFlags.StringLike &&
++        ["trim", "slice", "substring", "toLowerCase", "toUpperCase"].includes(method)
+       )
+         return "primitive-method";
+       if (
+@@ -241,11 +348,110 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
+         }
+       }
+     }
++    // Context-held accessors and setters have the same Solid contract as
++    // locally destructured signals, even when there is no local producer call.
++    if (declaration && /(?:solid-js|@solidjs)[/\\]/.test(declaration.getSourceFile().fileName)) {
++      let parent = declaration;
++      while (parent && !ts.isInterfaceDeclaration(parent) && !ts.isTypeAliasDeclaration(parent))
++        parent = parent.parent;
++      if (["Accessor", "Setter", "Source", "Action"].includes(parent?.name?.text))
++        return "signal-contract";
++    }
++    if (builtin) return "builtin";
+     return null;
+   };
++  // Only declarations from the platform libraries are built-ins. A shadowed
++  // Math/JSON or a package method must never inherit these contracts.
++  const throwingBuiltins = {
++    "JSON.parse": ["SyntaxError"],
++    "JSON.stringify": ["TypeError"],
++    URL: ["TypeError"],
++    decodeURI: ["URIError"],
++    decodeURIComponent: ["URIError"],
++    encodeURI: ["URIError"],
++    encodeURIComponent: ["URIError"],
++    fetch: ["TypeError", "DOMException"],
++    "Number.toFixed": ["RangeError"],
++    "Number.toPrecision": ["RangeError"],
++    "Number.toExponential": ["RangeError"],
++    "Number.toString": ["RangeError"],
++    "String.repeat": ["RangeError"],
++    "String.normalize": ["RangeError"],
++    RegExp: ["SyntaxError"],
++    BigInt: ["SyntaxError", "RangeError", "TypeError"],
++    "Date.toISOString": ["RangeError"],
++    "Array.reduce": ["TypeError"],
++    "Array.reduceRight": ["TypeError"],
++    Array: ["RangeError"],
++    Intl: ["RangeError", "TypeError"]
++  };
++  function platformFailures(p) {
++    const callee = p.get("callee");
++    let key = callee.isIdentifier() ? callee.node.name : "";
++    if (callee.isMemberExpression()) {
++      const object = callee.get("object"),
++        method = name(callee.node.property);
++      const node = nodeFor(object),
++        type = node && checker.getTypeAtLocation(node);
++      const text = object.toString();
++      key =
++        text === "JSON"
++          ? `JSON.${method}`
++          : text.startsWith("Intl") || text === "Intl"
++            ? "Intl"
++            : type?.flags & ts.TypeFlags.NumberLike || type?.symbol?.name === "Number"
++              ? `Number.${method}`
++              : type?.flags & ts.TypeFlags.StringLike || type?.symbol?.name === "String"
++                ? `String.${method}`
++                : type && (checker.isArrayType(type) || checker.isTupleType(type))
++                  ? `Array.${method}`
++                  : type?.symbol?.name === "Date"
++                    ? `Date.${method}`
++                    : "";
++    }
++    // Default numeric formatting is valid. Known valid literal options do not
++    // add a possible RangeError; dynamic/out-of-range options retain it.
++    const args = p.get("arguments");
++    if (/^Number\.to(Fixed|Precision|Exponential)$/.test(key)) {
++      if (!args.length || args[0].isIdentifier({ name: "undefined" })) return [];
++      const minimum = key === "Number.toPrecision" ? 1 : 0;
++      if (args[0].isNumericLiteral() && args[0].node.value >= minimum && args[0].node.value <= 100)
++        return [];
++    }
++    if (
++      key === "Number.toString" &&
++      (!args.length ||
++        (args[0].isNumericLiteral() && args[0].node.value >= 2 && args[0].node.value <= 36))
++    )
++      return [];
++    if (key === "BigInt" && args[0]?.isNumericLiteral() && Number.isInteger(args[0].node.value))
++      return [];
++    if (/^Array\.reduce(Right)?$/.test(key) && args.length >= 2) return [];
++    if (key === "Array") {
++      if (args.length !== 1) return [];
++      if (
++        args[0].isNumericLiteral() &&
++        Number.isInteger(args[0].node.value) &&
++        args[0].node.value >= 0 &&
++        args[0].node.value < 4294967296
++      )
++        return [];
++      const node = nodeFor(args[0]),
++        type = node && checker.getTypeAtLocation(node);
++      if (type && !(type.flags & ts.TypeFlags.NumberLike)) return [];
++    }
++    return (throwingBuiltins[key] ?? []).map(error => {
++      const id = `global:${error}`;
++      const symbol = checker.resolveName(error, nodeFor(p), ts.SymbolFlags.Type, false);
++      if (symbol) classTypes.set(id, checker.getDeclaredTypeOfSymbol(symbol));
++      classes.set(id, { id, name: error, file: null });
++      return id;
++    });
++  }
+   const invoke = (fn, owner) => {
+     if (!fn) return new Set(["unknown"]);
+     owner.calls.add(fn.id);
++    if (owner.timerFails) owner.timerFails = union(owner.timerFails, fn.timerFails);
+     return union(fn.fails, fn.server ? new Set(["ChunkError"]) : []);
+   };
+   // Match nominal inheritance, never TypeScript structural assignability (I3/I4).
+@@ -315,7 +521,12 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
+         paths: p.isReturnStatement() || p.isThrowStatement() ? [] : [env]
+       };
+     }
+-    return flow(body, next).effects;
++    const result = flow(body, next);
++    if (body.parentPath.isCatchClause() && binding) {
++      const remaining = union(...result.paths.map(env => env.get(binding) ?? []));
++      swallowed.set(`${owner.file}:${body.parentPath.node.start}`, remaining);
++    }
++    return result.effects;
+   }
+   function evaluate(p, owner, caught = new Map()) {
+     if (!p?.node) return new Set();
+@@ -326,7 +537,10 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
+       const forwarded = arg.isIdentifier()
+         ? caught.get(arg.scope.getBinding(arg.node.name))
+         : undefined;
+-      return union(forwarded ?? classSet(arg), evaluate(arg, owner, caught));
++      const kinds = forwarded ?? classSet(arg);
++      const key = `${owner.file}:${p.node.start}:${p.node.end}`;
++      throwSites.set(key, union(throwSites.get(key) ?? [], kinds));
++      return union(kinds, evaluate(arg, owner, caught));
+     }
+     if (p.isTryStatement()) {
+       const body = evaluate(p.get("block"), owner, caught),
+@@ -387,9 +601,9 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
+       if (
+         receiver?.isIdentifier({ name: "Promise" }) &&
+         !receiver.scope.getBinding("Promise") &&
+-        method === "resolve"
++        ["resolve", "all", "allSettled", "race", "any"].includes(method)
+       )
+-        return argEffects;
++        return method === "allSettled" ? new Set() : argEffects;
+       if (["catch", "then", "finally"].includes(method)) {
+         const input = evaluate(receiver, owner, caught);
+         const handler = args[method === "then" ? 1 : 0];
+@@ -421,6 +635,15 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
+       }
+       const primitive = nativeCall(p);
+       if (primitive) {
++        if (primitive === "builtin")
++          return union(
++            argEffects,
++            platformFailures(p),
++            receiver ? evaluate(receiver, owner, caught) : [],
++            ...args
++              .filter(a => a.isFunction())
++              .map(a => invoke(byBody.get(`${owner.file}:${a.node.body.start}`), owner))
++          );
+         if (primitive === "promise-resolve") {
+           const value = args[0]?.node && nodeFor(args[0]);
+           const type = value && checker.getTypeAtLocation(value);
+@@ -459,6 +682,8 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
+                 .map(a => invoke(byBody.get(`${owner.file}:${a.node.body.start}`), owner))
+             );
+         }
++        if (primitive === "scheduler" && owner.timerFails)
++          owner.timerFails = union(owner.timerFails, ...callbacks);
+         return union(argEffects, receiver ? evaluate(receiver, owner, caught) : [], ...callbacks);
+       }
+       // Intrinsics are explicit contracts, not a claim that arbitrary packages are pure.
+@@ -541,7 +766,7 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
+     changed = false;
+     iterations++;
+     for (const fn of functions) {
+-      const next = fn.pure ? new Set() : evaluate(fn.path.get("body"), fn);
++      const next = fn.pure ? new Set() : union(evaluate(fn.path.get("body"), fn), fn.timerFails);
+       if ([...next].some(k => !fn.fails.has(k))) {
+         fn.fails = union(fn.fails, next);
+         changed = true;
+@@ -641,7 +866,7 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
+           emit(
+             p,
+             "CATCH_SWALLOWS",
+-            `This catch discards ${display(input)} without handling; return a fallback value, rethrow, or mark the absorption intentional with @yield-absorb.`
++            `This catch discards ${display(swallowed.get(`${file}:${p.node.start}`)?.size ? swallowed.get(`${file}:${p.node.start}`) : input)} without handling; return a fallback value, rethrow, or mark the absorption intentional with @yield-absorb.`
+           );
+       },
+       JSXAttribute(p) {
+@@ -659,12 +884,16 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
+               nativeCall(binding.get("init"))
+             ? evaluate(binding.get("init"), ownerOf(p))
+             : new Set(["unknown"]);
+-        if (fails.size)
++        if (fails.size) {
+           emit(
+             value,
+             "EVENT_REJECTS",
+-            `This handler can fail with ${display(fails)} and nothing catches it; wrap the body in try/catch, or declare the failure.`
++            fn?.timerFails.size
++              ? `This handler starts a timer that can fail with ${display(fn.timerFails)}; catch the failure inside the timer callback.`
++              : `This handler can fail with ${display(fails)} and nothing catches it; wrap the body in try/catch, or declare the failure.`
+           );
++          diagnostics.at(-1).timer = !!fn?.timerFails.size;
++        }
+       },
+       ThrowStatement(p) {
+         if (classSet(p.get("argument")).has("unknown"))
+@@ -700,42 +929,52 @@ export function inferFailures(modules, { program, ts, root = process.cwd() }) {
+       file: relative(root, fn.file),
+       id: fn.id.replace(root, "<root>"),
+       fails: [...fn.fails].sort(),
++      provides: [...fn.provides],
++      timerFails: [...fn.timerFails],
+       calls: [...fn.calls].map(id => id.replace(root, "<root>")),
+       rejection: fn.server ? [...union(fn.fails, ["ChunkError"])].sort() : undefined
+     })),
+     call(file, start, end) {
+-      let site;
+-      analysis.modules.get(file)?.program.traverse({
+-        "CallExpression|NewExpression"(p) {
+-          if (p.node.start === start && p.node.end === end) site = p;
+-        }
+-      });
++      const site = callSites.get(`${file}:${start}:${end}`);
+       if (!site) return null;
+       const owner = functions.find(f => f.path.node === site.getFunctionParent()?.node) ?? {
+         calls: new Set(),
+         file
+       };
+       const fn = target(site);
++      const total = evaluate(site, owner);
++      const primitive = nativeCall(site);
++      const callee = site.get("callee");
++      const promiseMethod =
++        callee.isMemberExpression() &&
++        ["then", "catch", "finally", "all", "race", "any", "allSettled", "reject"].includes(
++          name(callee.node.property)
++        );
++      const own = fn
++        ? invoke(fn, owner)
++        : primitive === "builtin" && !promiseMethod
++          ? new Set(platformFailures(site))
++          : total;
+       return {
+-        fails: [...evaluate(site, owner)],
+-        native: !!nativeCall(site) && nativeCall(site) !== "promise-constructor",
++        fails: [...total],
++        ownFails: [...own],
++        native:
++          !!nativeCall(site) && !["promise-constructor", "builtin"].includes(nativeCall(site)),
+         target: fn?.id,
+         promise: !!checker.getPromisedTypeOfPromise(checker.getTypeAtLocation(nodeFor(site))),
+-        async: !!fn?.path.node.async
++        async: !!fn?.path.node.async,
++        resultType: checker.typeToString(
++          checker.getTypeAtLocation(nodeFor(site)),
++          nodeFor(site),
++          ts.TypeFormatFlags.NoTruncation | ts.TypeFormatFlags.UseFullyQualifiedType
++        )
+       };
+     },
+     at(file, start) {
+       return functions.find(f => f.file === file && f.path.node.start === start);
+     },
+     throws(file, start, end) {
+-      const record = analysis.modules.get(file);
+-      let found;
+-      record?.program.traverse({
+-        ThrowStatement(p) {
+-          if (p.node.start === start && p.node.end === end) found = classSet(p.get("argument"));
+-        }
+-      });
+-      return [...(found ?? new Set(["unknown"]))];
++      return [...(throwSites.get(`${file}:${start}:${end}`) ?? new Set(["unknown"]))];
+     }
+   };
+ }
+diff --git a/packages/compiler-yield/test/failure-inference.test.mjs b/packages/compiler-yield/test/failure-inference.test.mjs
+index 16df9eb..6f2d85a 100644
+--- a/packages/compiler-yield/test/failure-inference.test.mjs
++++ b/packages/compiler-yield/test/failure-inference.test.mjs
+@@ -49,8 +49,8 @@ test("unknown floor, pure contract, server transport and class typed parameter",
+   });
+   const kind = report.classes.find(c => c.name === "E").id;
+   assert.deepEqual(summary(report, "instance"), [kind]);
+-  for (const name of ["unknown", "value", "foreign"])
+-    assert.deepEqual(summary(report, name), ["unknown"]);
++  for (const name of ["unknown", "value"]) assert.deepEqual(summary(report, name), ["unknown"]);
++  assert.deepEqual(summary(report, "foreign"), ["global:DOMException", "global:TypeError"]);
+   assert.deepEqual(summary(report, "pure"), []);
+   assert.deepEqual(summary(report, "client"), ["ChunkError", kind].sort());
+ });
+@@ -152,3 +152,27 @@ test("Promise platform contracts retain executor throws, reject calls and opaque
+   assert.deepEqual(summary(report, "rejects"), [kind]);
+   assert.deepEqual(summary(report, "thenable"), ["unknown"]);
+ });
++
++test("review 3 built-ins and local helper contracts do not become opaque failures", () => {
++  const report = infer({
++    "format.ts": `export function money(n:number){return n.toFixed(2)};export function rounded(n:number){return Math.round(n)};`,
++    "builtin.ts": `import {money,rounded} from './format';
++      function safe(n:number,s:string){console.log(money(n),rounded(n),s.includes('x'));return JSON.stringify ? Object.keys({x:n}).map(k=>k.toUpperCase()).join(',') : ''}
++      function parse(s:string){return JSON.parse(s)}
++      function url(s:string){return new URL(s)}
++      function decode(s:string){return decodeURIComponent(s)}
++      function options(){return new Intl.NumberFormat('en',{minimumFractionDigits:101})}
++      function digits(n:number){return n.toFixed(101)}
++      function plain(){return new Map<string,number>().set('n',1).get('n')}
++      async function load(){throw new Error('local')}
++      function client(){return load()}`
++  });
++  for (const name of ["money", "rounded", "safe", "plain"])
++    assert.deepEqual(summary(report, name), [], name);
++  assert.deepEqual(summary(report, "parse"), ["global:SyntaxError"]);
++  assert.deepEqual(summary(report, "url"), ["global:TypeError"]);
++  assert.deepEqual(summary(report, "decode"), ["global:URIError"]);
++  assert.deepEqual(summary(report, "options"), ["global:RangeError", "global:TypeError"]);
++  assert.deepEqual(summary(report, "digits"), ["global:RangeError"]);
++  assert.deepEqual(summary(report, "client"), ["global:Error"]);
++});
+diff --git a/packages/ts-plugin-yield/src/service.cjs b/packages/ts-plugin-yield/src/service.cjs
+index 54f9b12..e24d940 100644
+--- a/packages/ts-plugin-yield/src/service.cjs
++++ b/packages/ts-plugin-yield/src/service.cjs
+@@ -26,13 +26,17 @@ function diagnosticSpan(ts, file, diagnostic, sourceSpan) {
+   const starts = file.getLineStarts();
+   const line = diagnostic.line - 1,
+     column = diagnostic.column - 1;
++  const lineEnd =
++    Number.isInteger(line) && line >= 0 && line < starts.length
++      ? (starts[line + 1] ?? file.text.length)
++      : 0;
+   const valid =
+     Number.isInteger(line) &&
+     Number.isInteger(column) &&
+     line >= 0 &&
+     line < starts.length &&
+     column >= 0 &&
+-    column <= (starts[line + 1] ?? file.text.length) - starts[line];
++    column < lineEnd - starts[line];
+   const validSpan =
+     sourceSpan &&
+     Number.isInteger(sourceSpan.sourceStart) &&
+@@ -43,7 +47,10 @@ function diagnosticSpan(ts, file, diagnostic, sourceSpan) {
+   if (validSpan)
+     return {
+       start: sourceSpan.sourceStart,
+-      length: Math.max(1, sourceSpan.sourceEnd - sourceSpan.sourceStart),
++      length: Math.min(
++        file.text.length - sourceSpan.sourceStart,
++        Math.max(1, sourceSpan.sourceEnd - sourceSpan.sourceStart)
++      ),
+       generated: sourceSpan.generated
+     };
+   if (valid) return { start: starts[line] + column, length: 1, generated: false };
+@@ -54,10 +61,16 @@ function diagnosticSpan(ts, file, diagnostic, sourceSpan) {
+   });
+   return {
+     start: routine?.getStart(file) ?? 0,
+-    length: Math.max(1, routine?.getWidth(file) ?? file.text.length),
++    length: routine?.getWidth(file) ?? file.text.length,
+     generated: true
+   };
+ }
++function publicNames(text) {
++  return text.replace(
++    /import\("solid-yield"\)\.ChunkError|__nativeChunk|\bChunkError\b(?!\))/g,
++    "a transport failure (ChunkError)"
++  );
++}
+ function symbolKey(symbol) {
+   return symbol.declarations?.[0]?.name?.expression?.text;
+ }
+@@ -119,7 +132,7 @@ function colorsText(c) {
+       : ["false", "none"].includes(c.pending)
+         ? "does not suspend"
+         : "may suspend (pending)";
+-  const failures = c.fails.replace(/\b(any|unknown)\b/g, "an unknown error");
++  const failures = publicNames(c.fails).replace(/\b(any|unknown)\b/g, "an unknown error");
+   const contexts = c.requires
+     .replace(/\b(any|unknown)\b/g, "an unknown context")
+     .replace("an an unknown context context", "an unknown context");
+@@ -214,7 +227,7 @@ function createVirtualService(ts, host, config = {}) {
+                   : ts.DiagnosticCategory.Warning,
+               code: d.severity === "error" ? 95000 : 95001,
+               source: "solid-yield",
+-              messageText: `[${d.code}] ${d.message}`
++              messageText: `[${d.code}] ${publicNames(d.message)}`
+             });
+           }
+           break;
+@@ -240,7 +253,13 @@ function createVirtualService(ts, host, config = {}) {
+               code: 95000,
+               source: "solid-yield",
+               category: ts.DiagnosticCategory.Error,
+-              messageText: `${span.generated ? "[generated] " : ""}[${d.code}] ${catalog[d.code] ?? d.message.replace(/^\[[A-Z_]+\]\s*/, "").replace(/\s*\([^\n]*:\d+:\d+\)\.?$/, "")}`
++              messageText: `${span.generated ? "[generated] " : ""}[${d.code}] ${
++                catalog[d.code] ??
++                String(d.message)
++                  .split("\n")[0]
++                  .replace(/^\[[A-Z_]+\]\s*/, "")
++                  .replace(/\s*\([^\n]*:\d+:\d+\)\.?$/, "")
++              }`
+             });
+           }
+         }
+@@ -407,7 +426,7 @@ function createVirtualService(ts, host, config = {}) {
+             : code === "FOREIGN_HANDOFF"
+               ? catalog.failureAdvice(origin?.host ?? "view")
+               : catalog[code];
+-        message = `[${code}] ${action}${code === "FOREIGN_HANDOFF" && colors ? " Remaining: " + colors.fails + "." : ""}${colors?.requires !== "none" && code === "NO_PROVIDER" ? " Missing: " + colors.requires + "." : ""}`;
++        message = `[${code}] ${action}${code === "FOREIGN_HANDOFF" && colors ? " Remaining: " + publicNames(colors.fails) + "." : ""}${colors?.requires !== "none" && code === "NO_PROVIDER" ? " Missing: " + colors.requires + "." : ""}`;
+         let eventOwner;
+         if (code === "FOREIGN_HANDOFF" && origin?.file) {
+           const originalNode = leafAt(ts, origin.file, origin.sourceStart);
+@@ -535,7 +554,7 @@ function createVirtualService(ts, host, config = {}) {
+             code: 95000,
+             category: ts.DiagnosticCategory.Error,
+             source: "solid-yield",
+-            messageText: `[EVENT_REJECTS] This handler can fail with ${colors.fails} and nothing catches it; wrap the body in try/catch, or declare the failure.`
++            messageText: `[EVENT_REJECTS] This handler can fail with ${publicNames(colors.fails)} and nothing catches it; wrap the body in try/catch, or declare the failure.`
+           });
+         }
+       });
+@@ -619,7 +638,16 @@ function createVirtualService(ts, host, config = {}) {
+           const fn = report.functions.find(
+             fn => fn.name === node.getText(sf) && f.endsWith(fn.file)
+           );
+-          if (!fn || !/unknown|any/.test(c.fails)) continue;
++          if (!fn) continue;
++          if (fn.timerFails?.length) {
++            const failures = fn.timerFails.map(
++              id => report.classes.find(k => k.id === id)?.name ?? id
++            );
++            c.fails = [
++              ...new Set([...(c.fails === "none" ? [] : c.fails.split(" | ")), ...failures])
++            ].join(" | ");
++          }
++          if (!/unknown|any/.test(c.fails)) continue;
+           const reachable = new Set();
+           const visit = fn => {
+             if (!fn || reachable.has(fn.id)) return;
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/cases/01.json b/packages/ts-plugin-yield/test/fixtures/review3-app/cases/01.json
+new file mode 100644
+index 0000000..84612a5
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/cases/01.json
+@@ -0,0 +1,3 @@
++{
++  "Checkout.tsx": "import { createSignal } from \"solid-js\";\nimport { placeOrder } from \"./api\";\nimport { useContext } from \"solid-js\";\nimport { CartCtx } from \"./cart\";\nexport function Checkout() {\n  const [items, setItems] = useContext(CartCtx);\n  const [status, setStatus] = createSignal(\"\");\n  const submit = async (e: SubmitEvent & { currentTarget: HTMLFormElement }) => {\n    try {\n      e.preventDefault();\n      const email = String(new FormData(e.currentTarget).get(\"email\"));\n      await placeOrder(items().map(i => i.id), email);\n      setStatus(\"ordered\");\n      setItems([]);\n    } catch (err) {}\n  };\n  return (\n    <form onSubmit={submit}>\n      <p>Pay for your cart</p>\n      <input name=\"email\" /><button>Pay</button><span>{status()}</span>\n    </form>\n  );\n}\n"
++}
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/cases/02.json b/packages/ts-plugin-yield/test/fixtures/review3-app/cases/02.json
+new file mode 100644
+index 0000000..9b00759
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/cases/02.json
+@@ -0,0 +1,3 @@
++{
++  "Checkout.tsx": "import { createSignal } from \"solid-js\";\nimport { placeOrder } from \"./api\";\nimport { useContext } from \"solid-js\";\nimport { CartCtx } from \"./cart\";\nexport function Checkout() {\n  const [items, setItems] = useContext(CartCtx);\n  const [status, setStatus] = createSignal(\"\");\n  const submit = async (e: SubmitEvent & { currentTarget: HTMLFormElement }) => {\n    try {\n      e.preventDefault();\n      const email = String(new FormData(e.currentTarget).get(\"email\"));\n      await placeOrder(items().map(i => i.id), email);\n      setStatus(\"ordered\");\n      setItems([]);\n    } catch (err) {\n      console.error(err);\n    }\n  };\n  return (\n    <form onSubmit={submit}>\n      <p>Pay for your cart</p>\n      <input name=\"email\" /><button>Pay</button><span>{status()}</span>\n    </form>\n  );\n}\n"
++}
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/cases/03.json b/packages/ts-plugin-yield/test/fixtures/review3-app/cases/03.json
+new file mode 100644
+index 0000000..e00c035
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/cases/03.json
+@@ -0,0 +1,3 @@
++{
++  "ProductList.tsx": "import { createMemo, For, useContext } from \"solid-js\";\nimport { listProducts } from \"./api\";\nimport { ApiError } from \"./errors\";\nimport { money } from \"./format\";\nimport { CartCtx } from \"./cart\";\nexport function ProductList() {\n  const [items, setItems] = useContext(CartCtx);\n  const products = createMemo(async () => { try { return await listProducts(); } catch (e) { if (e instanceof ApiError) return []; throw e; } });\n  return (\n    <ul>\n      <For each={products()}>{p => <li>{p.name} {money(p.price)} <button onClick={() => setItems([...items(), p])}>add</button></li>}</For>\n    </ul>\n  );\n}\n"
++}
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/cases/04.json b/packages/ts-plugin-yield/test/fixtures/review3-app/cases/04.json
+new file mode 100644
+index 0000000..9884cfe
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/cases/04.json
+@@ -0,0 +1,3 @@
++{
++  "ProductList.tsx": "import { createMemo, For, useContext } from \"solid-js\";\nimport { listProducts } from \"./api\";\nimport { RateLimited } from \"./errors\";\nimport { money } from \"./format\";\nimport { CartCtx } from \"./cart\";\nexport function ProductList() {\n  const [items, setItems] = useContext(CartCtx);\n  const products = createMemo(async () => { try { return await listProducts(); } catch (e) { if (e instanceof RateLimited) return []; throw e; } });\n  return (\n    <ul>\n      <For each={products()}>{p => <li>{p.name} {money(p.price)} <button onClick={() => setItems([...items(), p])}>add</button></li>}</For>\n    </ul>\n  );\n}\n"
++}
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/cases/05.json b/packages/ts-plugin-yield/test/fixtures/review3-app/cases/05.json
+new file mode 100644
+index 0000000..3ef9b0a
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/cases/05.json
+@@ -0,0 +1,3 @@
++{
++  "ProductList.tsx": "import { createMemo, For, useContext } from \"solid-js\";\nimport { listProducts } from \"./api\";\nimport { RateLimited } from \"./errors\";\nimport { money } from \"./format\";\nimport { CartCtx } from \"./cart\";\nexport function ProductList() {\n  const [items, setItems] = useContext(CartCtx);\n  const products = createMemo(async () => { try { return await listProducts(); } catch (e) { if (e instanceof RateLimited) return []; } });\n  return (\n    <ul>\n      <For each={products()}>{p => <li>{p.name} {money(p.price)} <button onClick={() => setItems([...items(), p])}>add</button></li>}</For>\n    </ul>\n  );\n}\n"
++}
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/cases/06.json b/packages/ts-plugin-yield/test/fixtures/review3-app/cases/06.json
+new file mode 100644
+index 0000000..bc54e38
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/cases/06.json
+@@ -0,0 +1,3 @@
++{
++  "Clock.tsx": "import { createSignal, onCleanup } from \"solid-js\";\nimport { placeOrder, getProduct } from \"./api\";\nexport function Clock() {\n  const [t, setT] = createSignal(0);\n  const h = setInterval(() => setT(t() + 1), 1000);\n  onCleanup(() => clearInterval(h));\n  return <small>tick {t()} <button onClick={async () => { await placeOrder([], \"x@y\"); await getProduct(\"zzz\"); }}>go</button></small>;\n}\n"
++}
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/cases/07.json b/packages/ts-plugin-yield/test/fixtures/review3-app/cases/07.json
+new file mode 100644
+index 0000000..8f3da77
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/cases/07.json
+@@ -0,0 +1,3 @@
++{
++  "Checkout.tsx": "import { createSignal } from \"solid-js\";\nimport { placeOrder } from \"./api\";\nimport { useContext } from \"solid-js\";\nimport { CartCtx } from \"./cart\";\nexport function Checkout() {\n  const [items, setItems] = useContext(CartCtx);\n  const [status, setStatus] = createSignal(\"\");\n  const submit = async (e: SubmitEvent & { currentTarget: HTMLFormElement }) => {\n    try {\n      e.preventDefault();\n      const email = String(new FormData(e.currentTarget).get(\"email\"));\n      placeOrder(items().map(i => i.id), email).then(() => setStatus(\"ok\"));\n      setStatus(\"ordered\");\n      setItems([]);\n    } catch (err) {\n      setStatus(\"failed\");\n    }\n  };\n  return (\n    <form onSubmit={submit}>\n      <p>Pay for your cart</p>\n      <input name=\"email\" /><button>Pay</button><span>{status()}</span>\n    </form>\n  );\n}\n"
++}
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/cases/08.json b/packages/ts-plugin-yield/test/fixtures/review3-app/cases/08.json
+new file mode 100644
+index 0000000..4f5d601
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/cases/08.json
+@@ -0,0 +1,3 @@
++{
++  "api.ts": "\"use server\";\nimport { NotFound, RateLimited } from \"./errors\";\nexport type Product = { id: string; name: string; price: number };\nconst DB: Product[] = [\n  { id: \"1\", name: \"Mug\", price: 8 },\n  { id: \"2\", name: \"Shirt\", price: 20 }\n];\nlet calls = 0;\nexport async function listProducts(): Promise<Product[]> {\n  if (++calls % 5 === 0) throw \"slow down\";\n  return DB;\n}\nexport async function getProduct(id: string): Promise<Product> {\n  const p = DB.find(p => p.id === id);\n  if (!p) throw new NotFound(id);\n  return p;\n}\nexport async function placeOrder(ids: string[], email: string): Promise<{ ok: true }> {\n  if (!email.includes(\"@\")) throw new RateLimited(1);\n  return { ok: true };\n}\n"
++}
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/cases/09.json b/packages/ts-plugin-yield/test/fixtures/review3-app/cases/09.json
+new file mode 100644
+index 0000000..7b544b9
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/cases/09.json
+@@ -0,0 +1,3 @@
++{
++  "Clock.tsx": "import { createSignal, onCleanup } from \"solid-js\";\nexport function Clock() {\n  const [t, setT] = createSignal(0);\n  const h = setInterval(() => setT(t() + 1), 1000);\n  setTimeout(() => { throw new Error(\"late\"); }, 10);\n  onCleanup(() => clearInterval(h));\n  return <small>tick {t()}</small>;\n}\n"
++}
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/cases/10.json b/packages/ts-plugin-yield/test/fixtures/review3-app/cases/10.json
+new file mode 100644
+index 0000000..5001689
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/cases/10.json
+@@ -0,0 +1,3 @@
++{
++  "api.ts": "\"use server\";\nimport { NotFound, RateLimited, ApiError } from \"./errors\";\nexport class Banned extends ApiError {}\nexport type Product = { id: string; name: string; price: number };\nconst DB: Product[] = [\n  { id: \"1\", name: \"Mug\", price: 8 },\n  { id: \"2\", name: \"Shirt\", price: 20 }\n];\nlet calls = 0;\nexport async function listProducts(): Promise<Product[]> {\n  if (++calls % 5 === 0) throw new RateLimited(30);\n  return DB;\n}\nexport async function getProduct(id: string): Promise<Product> {\n  const p = DB.find(p => p.id === id);\n  if (id === \"3\") throw new Banned(\"banned\");\n  if (!p) throw new NotFound(id);\n  return p;\n}\nexport async function placeOrder(ids: string[], email: string): Promise<{ ok: true }> {\n  if (!email.includes(\"@\")) throw new RateLimited(1);\n  return { ok: true };\n}\n"
++}
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/cases/11.json b/packages/ts-plugin-yield/test/fixtures/review3-app/cases/11.json
+new file mode 100644
+index 0000000..06b5379
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/cases/11.json
+@@ -0,0 +1,3 @@
++{
++  "Details.tsx": "import { createMemo } from \"solid-js\";\nimport { getProduct } from \"./api\";\nimport { money } from \"./format\";\nexport function Details(props: { id: string }) {\n  const prod = createMemo(() => Promise.all([getProduct(props.id), getProduct(\"9\")]));\n  return <div><h2>{prod()[0].name}</h2><p>{prod()[1].price}</p></div>;\n}\n"
++}
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/cases/12.json b/packages/ts-plugin-yield/test/fixtures/review3-app/cases/12.json
+new file mode 100644
+index 0000000..859daa3
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/cases/12.json
+@@ -0,0 +1,3 @@
++{
++  "Checkout.tsx": "import { createSignal } from \"solid-js\";\nimport { placeOrder } from \"./api\";\nimport { useContext } from \"solid-js\";\nimport { CartCtx } from \"./cart\";\nexport function Checkout() {\n  const [items, setItems] = useContext(CartCtx);\n  const [status, setStatus] = createSignal(\"\");\n  const submit = async (e: SubmitEvent & { currentTarget: HTMLFormElement }) => {\n    try {\n      e.preventDefault();\n      const email = String(new FormData(e.currentTarget).get(\"email\"));\n      await placeOrder(items().map(i => i.id), email);\n      setStatus(\"ordered\");\n      setItems([]);\n    } finally {\n      setStatus(\"done\");\n    }\n  };\n  return (\n    <form onSubmit={submit}>\n      <p>Pay for your cart</p>\n      <input name=\"email\" /><button>Pay</button><span>{status()}</span>\n    </form>\n  );\n}\n"
++}
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/cases/13.json b/packages/ts-plugin-yield/test/fixtures/review3-app/cases/13.json
+new file mode 100644
+index 0000000..27140c6
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/cases/13.json
+@@ -0,0 +1,3 @@
++{
++  "Details.tsx": "import { createMemo } from \"solid-js\";\nimport { getProduct } from \"./api\";\nimport { money } from \"./format\";\nexport function Details(props: { id: string }) {\n  const prod = createMemo(async () => { const x = await getProduct(props.id); return x; });\n  return <div><h2>{prod().name}</h2><p>{prod().price}</p></div>;\n}\n"
++}
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/cases/14.json b/packages/ts-plugin-yield/test/fixtures/review3-app/cases/14.json
+new file mode 100644
+index 0000000..20c344c
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/cases/14.json
+@@ -0,0 +1,3 @@
++{
++  "index.tsx": "import { Loading, Errored } from \"solid-js\";\nimport { render } from \"@solidjs/web\";\nimport { CartCtx, makeCart } from \"./cart\";\nimport { ProductList } from \"./ProductList\";\nimport { Details } from \"./Details\";\nimport { Checkout } from \"./Checkout\";\nimport { Clock } from \"./Clock\";\nfunction App() {\n  const cart = makeCart();\n  return (\n    <>\n      <Clock />\n      <Errored fallback={(e: unknown) => <p>failed {`${e}`}</p>}>\n        <Loading fallback={<p>loading</p>}>\n          <ProductList />\n          <Details id=\"1\" />\n        </Loading>\n      </Errored>\n      <Loading fallback={<p>loading</p>}><Checkout /></Loading>\n    </>\n  );\n}\nrender(() => <App />, document.getElementById(\"root\")!);\n"
++}
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/cases/15.json b/packages/ts-plugin-yield/test/fixtures/review3-app/cases/15.json
+new file mode 100644
+index 0000000..2f9d731
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/cases/15.json
+@@ -0,0 +1,3 @@
++{
++  "index.tsx": "import { Loading, Errored } from \"solid-js\";\nimport { render } from \"@solidjs/web\";\nimport { CartCtx, makeCart } from \"./cart\";\nimport { ProductList } from \"./ProductList\";\nimport { Details } from \"./Details\";\nimport { Checkout } from \"./Checkout\";\nimport { Clock } from \"./Clock\";\nfunction App() {\n  const cart = makeCart();\n  return (\n    <CartCtx value={cart}>\n      <Clock />\n      \n        <Loading fallback={<p>loading</p>}>\n          <ProductList />\n          <Details id=\"1\" />\n        </Loading>\n      \n      <Loading fallback={<p>loading</p>}><Checkout /></Loading>\n    </CartCtx>\n  );\n}\nrender(() => <App />, document.getElementById(\"root\")!);\n"
++}
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/eslint.config.js b/packages/ts-plugin-yield/test/fixtures/review3-app/eslint.config.js
+new file mode 100644
+index 0000000..f335c9e
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/eslint.config.js
+@@ -0,0 +1,9 @@
++import parser from "@typescript-eslint/parser";
++import yieldLint from "eslint-plugin-solid-yield";
++export default [{
++  files: ["src/**/*.{ts,tsx}"],
++  languageOptions: { parser, parserOptions: { ecmaFeatures: { jsx: true } } },
++  plugins: { "solid-yield": yieldLint },
++  settings: { "solid-yield": { mode: "native" } },
++  rules: yieldLint.configs.recommended.rules
++}];
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/expectations.json b/packages/ts-plugin-yield/test/fixtures/review3-app/expectations.json
+new file mode 100644
+index 0000000..3c3f531
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/expectations.json
+@@ -0,0 +1,107 @@
++[
++  {
++    "case": "01.json",
++    "mistake": "swallow empty catch (Checkout)",
++    "code": "CATCH_SWALLOWS",
++    "file": "Checkout.tsx",
++    "line": 15
++  },
++  {
++    "case": "02.json",
++    "mistake": "log-only catch (Checkout)",
++    "code": "CATCH_SWALLOWS",
++    "file": "Checkout.tsx",
++    "line": 15
++  },
++  {
++    "case": "03.json",
++    "mistake": "catch base ApiError in ProductList memo, siblings thrown",
++    "code": null,
++    "file": null,
++    "line": null
++  },
++  {
++    "case": "04.json",
++    "mistake": "selective instanceof WITH rethrow (RateLimited)",
++    "code": null,
++    "file": null,
++    "line": null
++  },
++  {
++    "case": "05.json",
++    "mistake": "selective instanceof WITHOUT rethrow",
++    "code": "CATCH_SWALLOWS",
++    "file": "ProductList.tsx",
++    "line": 8
++  },
++  {
++    "case": "06.json",
++    "mistake": "async onClick that rejects",
++    "code": "EVENT_REJECTS",
++    "file": "Clock.tsx",
++    "line": 7
++  },
++  {
++    "case": "07.json",
++    "mistake": ".then without .catch in handler",
++    "code": "EVENT_REJECTS",
++    "file": "Checkout.tsx",
++    "line": 20
++  },
++  {
++    "case": "08.json",
++    "mistake": "throw a string (api)",
++    "code": "NATIVE_THROW",
++    "file": "api.ts",
++    "line": 10
++  },
++  {
++    "case": "09.json",
++    "mistake": "throw inside setTimeout",
++    "code": "NATIVE_CALLBACK_FAILURE",
++    "file": "Clock.tsx",
++    "line": 5
++  },
++  {
++    "case": "10.json",
++    "mistake": "server fn throws NEW class Banned (no client change)",
++    "code": null,
++    "file": null,
++    "line": null
++  },
++  {
++    "case": "11.json",
++    "mistake": "Promise.all with rejectable member",
++    "code": null,
++    "file": null,
++    "line": null
++  },
++  {
++    "case": "12.json",
++    "mistake": "try/finally with no catch",
++    "code": "EVENT_REJECTS",
++    "file": "Checkout.tsx",
++    "line": 20
++  },
++  {
++    "case": "13.json",
++    "mistake": "await inside async memo of throwing fn",
++    "code": null,
++    "file": null,
++    "line": null
++  },
++  {
++    "case": "14.json",
++    "mistake": "context read without provider",
++    "code": "NO_PROVIDER",
++    "file": "ProductList.tsx",
++    "line": 6
++  },
++  {
++    "case": "15.json",
++    "mistake": "remove Errored",
++    "code": "FOREIGN_HANDOFF",
++    "file": "ProductList.tsx",
++    "line": 10
++  }
++]
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/index.html b/packages/ts-plugin-yield/test/fixtures/review3-app/index.html
+new file mode 100644
+index 0000000..4196a5f
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/index.html
+@@ -0,0 +1 @@
++<!doctype html><html><body><div id="root"></div><script type="module" src="/src/index.tsx"></script></body></html>
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/package.json b/packages/ts-plugin-yield/test/fixtures/review3-app/package.json
+new file mode 100644
+index 0000000..36004d4
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/package.json
+@@ -0,0 +1 @@
++{"name":"app","private":true,"type":"module","dependencies":{"@solidjs/web":"2.0.0-rc.13","solid-js":"2.0.0-rc.13","solid-yield":"file:/private/tmp/sy-review3-out/packs/solid-yield-0.0.0.tgz"},"devDependencies":{"@solidjs/vite-plugin":"3.0.0-next.47","@typescript-eslint/parser":"^8.71.1","eslint":"^9.39.5","eslint-plugin-solid-yield":"file:/private/tmp/sy-review3-out/packs/eslint-plugin-solid-yield-0.0.0.tgz","ts-plugin-solid-yield":"file:/private/tmp/sy-review3-out/packs/ts-plugin-solid-yield-0.0.0.tgz","typescript":"6.0.3","vite":"^8.3.3","vite-plugin-solid-yield":"file:/private/tmp/sy-review3-out/packs/vite-plugin-solid-yield-0.0.0.tgz"}}
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/pnpm-workspace.yaml b/packages/ts-plugin-yield/test/fixtures/review3-app/pnpm-workspace.yaml
+new file mode 100644
+index 0000000..3f457aa
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/pnpm-workspace.yaml
+@@ -0,0 +1,7 @@
++allowBuilds:
++  esbuild: true
++overrides:
++  solid-yield: file:/private/tmp/sy-review3-out/packs/solid-yield-0.0.0.tgz
++  compiler-yield: file:/private/tmp/sy-review3-out/packs/compiler-yield-0.0.0.tgz
++  vite-plugin-solid-yield: file:/private/tmp/sy-review3-out/packs/vite-plugin-solid-yield-0.0.0.tgz
++  ts-plugin-solid-yield: file:/private/tmp/sy-review3-out/packs/ts-plugin-solid-yield-0.0.0.tgz
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/src/Checkout.tsx b/packages/ts-plugin-yield/test/fixtures/review3-app/src/Checkout.tsx
+new file mode 100644
+index 0000000..ae6af0a
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/src/Checkout.tsx
+@@ -0,0 +1,25 @@
++import { createSignal } from "solid-js";
++import { placeOrder } from "./api";
++import { useContext } from "solid-js";
++import { CartCtx } from "./cart";
++export function Checkout() {
++  const [items, setItems] = useContext(CartCtx);
++  const [status, setStatus] = createSignal("");
++  const submit = async (e: SubmitEvent & { currentTarget: HTMLFormElement }) => {
++    try {
++      e.preventDefault();
++      const email = String(new FormData(e.currentTarget).get("email"));
++      await placeOrder(items().map(i => i.id), email);
++      setStatus("ordered");
++      setItems([]);
++    } catch (err) {
++      setStatus("failed");
++    }
++  };
++  return (
++    <form onSubmit={submit}>
++      <p>Pay for your cart</p>
++      <input name="email" /><button>Pay</button><span>{status()}</span>
++    </form>
++  );
++}
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/src/Clock.tsx b/packages/ts-plugin-yield/test/fixtures/review3-app/src/Clock.tsx
+new file mode 100644
+index 0000000..8bfde26
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/src/Clock.tsx
+@@ -0,0 +1,7 @@
++import { createSignal, onCleanup } from "solid-js";
++export function Clock() {
++  const [t, setT] = createSignal(0);
++  const h = setInterval(() => setT(t() + 1), 1000);
++  onCleanup(() => clearInterval(h));
++  return <small>tick {t()}</small>;
++}
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/src/Details.tsx b/packages/ts-plugin-yield/test/fixtures/review3-app/src/Details.tsx
+new file mode 100644
+index 0000000..cc7bbb6
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/src/Details.tsx
+@@ -0,0 +1,7 @@
++import { createMemo } from "solid-js";
++import { getProduct } from "./api";
++import { money } from "./format";
++export function Details(props: { id: string }) {
++  const prod = createMemo(() => getProduct(props.id));
++  return <div><h2>{prod().name}</h2><p>{prod().price}</p></div>;
++}
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/src/ProductList.tsx b/packages/ts-plugin-yield/test/fixtures/review3-app/src/ProductList.tsx
+new file mode 100644
+index 0000000..9344be2
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/src/ProductList.tsx
+@@ -0,0 +1,13 @@
++import { createMemo, For, useContext } from "solid-js";
++import { listProducts } from "./api";
++import { money } from "./format";
++import { CartCtx } from "./cart";
++export function ProductList() {
++  const [items, setItems] = useContext(CartCtx);
++  const products = createMemo(() => listProducts());
++  return (
++    <ul>
++      <For each={products()}>{p => <li>{p.name} {money(p.price)} <button onClick={() => setItems([...items(), p])}>add</button></li>}</For>
++    </ul>
++  );
++}
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/src/api.ts b/packages/ts-plugin-yield/test/fixtures/review3-app/src/api.ts
+new file mode 100644
+index 0000000..ae70289
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/src/api.ts
+@@ -0,0 +1,21 @@
++"use server";
++import { NotFound, RateLimited } from "./errors";
++export type Product = { id: string; name: string; price: number };
++const DB: Product[] = [
++  { id: "1", name: "Mug", price: 8 },
++  { id: "2", name: "Shirt", price: 20 }
++];
++let calls = 0;
++export async function listProducts(): Promise<Product[]> {
++  if (++calls % 5 === 0) throw new RateLimited(30);
++  return DB;
++}
++export async function getProduct(id: string): Promise<Product> {
++  const p = DB.find(p => p.id === id);
++  if (!p) throw new NotFound(id);
++  return p;
++}
++export async function placeOrder(ids: string[], email: string): Promise<{ ok: true }> {
++  if (!email.includes("@")) throw new RateLimited(1);
++  return { ok: true };
++}
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/src/cart.tsx b/packages/ts-plugin-yield/test/fixtures/review3-app/src/cart.tsx
+new file mode 100644
+index 0000000..1038cc1
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/src/cart.tsx
+@@ -0,0 +1,4 @@
++import { createContext, createSignal } from "solid-js";
++import type { Product } from "./api";
++export const makeCart = () => createSignal<Product[]>([]);
++export const CartCtx = createContext<ReturnType<typeof makeCart>>();
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/src/errors.ts b/packages/ts-plugin-yield/test/fixtures/review3-app/src/errors.ts
+new file mode 100644
+index 0000000..5c9c544
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/src/errors.ts
+@@ -0,0 +1,7 @@
++export class ApiError extends Error {}
++export class NotFound extends ApiError {
++  constructor(public id: string) { super("not found " + id); }
++}
++export class RateLimited extends ApiError {
++  constructor(public retryAfter: number) { super("rate limited"); }
++}
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/src/format.ts b/packages/ts-plugin-yield/test/fixtures/review3-app/src/format.ts
+new file mode 100644
+index 0000000..33c56ff
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/src/format.ts
+@@ -0,0 +1,4 @@
++// third-party-ish helper, no directive
++export function money(n: number) { return "$" + Math.round(n * 100) / 100; }
++export function sum(xs: number[]) { let t = 0; for (const x of xs) t += x; return t; }
++export function parseId(s: string) { if (!s) throw new Error("empty id"); return s; }
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/src/index.tsx b/packages/ts-plugin-yield/test/fixtures/review3-app/src/index.tsx
+new file mode 100644
+index 0000000..5f5f54e
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/src/index.tsx
+@@ -0,0 +1,23 @@
++import { Loading, Errored } from "solid-js";
++import { render } from "@solidjs/web";
++import { CartCtx, makeCart } from "./cart";
++import { ProductList } from "./ProductList";
++import { Details } from "./Details";
++import { Checkout } from "./Checkout";
++import { Clock } from "./Clock";
++function App() {
++  const cart = makeCart();
++  return (
++    <CartCtx value={cart}>
++      <Clock />
++      <Errored fallback={(e: unknown) => <p>failed {`${e}`}</p>}>
++        <Loading fallback={<p>loading</p>}>
++          <ProductList />
++          <Details id="1" />
++        </Loading>
++      </Errored>
++      <Loading fallback={<p>loading</p>}><Checkout /></Loading>
++    </CartCtx>
++  );
++}
++render(() => <App />, document.getElementById("root")!);
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/tsconfig.json b/packages/ts-plugin-yield/test/fixtures/review3-app/tsconfig.json
+new file mode 100644
+index 0000000..9f8ad2e
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/tsconfig.json
+@@ -0,0 +1,9 @@
++{
++  "compilerOptions": {
++    "target": "ESNext","module": "ESNext","moduleResolution": "Bundler","lib": ["ESNext", "DOM"],
++    "strict": true,"skipLibCheck": true,"noEmit": true,
++    "jsx": "preserve","jsxImportSource": "@solidjs/web","types": ["vite/client"],
++    "plugins": [{ "name": "ts-plugin-solid-yield", "mode": "native", "include": ["src/**"] }]
++  },
++  "include": ["src"]
++}
+diff --git a/packages/ts-plugin-yield/test/fixtures/review3-app/vite.config.ts b/packages/ts-plugin-yield/test/fixtures/review3-app/vite.config.ts
+new file mode 100644
+index 0000000..4c8dbbc
+--- /dev/null
++++ b/packages/ts-plugin-yield/test/fixtures/review3-app/vite.config.ts
+@@ -0,0 +1,4 @@
++import { defineConfig } from "vite";
++import solid from "@solidjs/vite-plugin";
++import solidYield from "vite-plugin-solid-yield";
++export default defineConfig({ plugins: [solidYield({ mode: "native", include: ["src/**"] }), solid()] });
+diff --git a/packages/ts-plugin-yield/test/review2.test.cjs b/packages/ts-plugin-yield/test/review2.test.cjs
+index 0093894..6a94b3a 100644
+--- a/packages/ts-plugin-yield/test/review2.test.cjs
++++ b/packages/ts-plugin-yield/test/review2.test.cjs
+@@ -49,7 +49,8 @@ for (const c of require("./fixtures/review2-app/expectations.json"))
+         assert.match(d.messageText, /TypeError/);
+         assert.doesNotMatch(d.messageText, /FetchError/);
+       }
+-      if (c.case === "selective-unknown.tsx") assert.match(d.messageText, /unknown/);
++      if (c.case === "selective-unknown.tsx")
++        assert.match(d.messageText, /DOMException.*TypeError|TypeError.*DOMException/);
+       if (c.case === "readme.tsx") {
+         assert.equal(ds.length, 1);
+         assert.equal(d.relatedInformation.length, 1);
+@@ -63,7 +64,7 @@ for (const c of require("./fixtures/review2-app/expectations.json"))
+       service.dispose();
+     }
+   });
+-test("unknown hover identifies the opaque call and its authored line", () => {
++test("platform IO hover names its explicit rejection classes", () => {
+   const source = `import {createMemo, Loading, Errored} from "solid-js";
+ async function load(){ return await fetch('/api'); }
+ export function Page(){const value=createMemo(()=>load());return <Loading fallback='wait'>{value()}</Loading>;}`;
+@@ -73,7 +74,8 @@ export function Page(){const value=createMemo(()=>load());return <Loading fallba
+       .quickInfo(path.join(root, "api.tsx"), source.indexOf("function Page") + 9)
+       ?.displayParts.map(p => p.text)
+       .join("");
+-    assert.match(text, /an unknown error \(from fetch at api.tsx:2\)/);
++    assert.match(text, /DOMException.*TypeError|TypeError.*DOMException/);
++    assert.doesNotMatch(text, /unknown|__native/);
+   } finally {
+     service.dispose();
+   }
+diff --git a/packages/ts-plugin-yield/test/review3.test.cjs b/packages/ts-plugin-yield/test/review3.test.cjs
+index 9b499f4..40430e1 100644
+--- a/packages/ts-plugin-yield/test/review3.test.cjs
++++ b/packages/ts-plugin-yield/test/review3.test.cjs
+@@ -30,6 +30,16 @@ test("review 3: a lowercase JSX tag has no variable binding", () => {
+     service.dispose();
+   }
+ });
++test("review 3: refusal spans stay inside empty files and the end of a file", () => {
++  for (const source of ["", "function Clock() { return <p/>; }"]) {
++    const file = ts.createSourceFile("Clock.tsx", source, ts.ScriptTarget.Latest, true);
++    for (const origin of [undefined, { sourceStart: source.length, sourceEnd: source.length }]) {
++      const span = diagnosticSpan(ts, file, { line: 1, column: source.length + 1 }, origin);
++      assert.ok(span.start >= 0 && span.start + span.length <= source.length);
++      if (!origin) assert.equal(span.generated, true);
++    }
++  }
++});
+ test("review 3: parse error names its own file", () => {
+   const { service } = makeService({
+     "Checkout.tsx": "export function Checkout(){return <p/>}",
+@@ -44,3 +54,222 @@ test("review 3: parse error names its own file", () => {
+     service.dispose();
+   }
+ });
++
++const fs = require("node:fs");
++const fixture = join(root, "review3-app");
++const baseline = Object.fromEntries(
++  fs
++    .readdirSync(join(fixture, "src"))
++    .map(file => [file, fs.readFileSync(join(fixture, "src", file), "utf8")])
++);
++const allDiagnostics = (service, files) =>
++  Object.keys(files).flatMap(file => service.diagnostics(join(root, file)));
++const hover = (service, files, file, name) =>
++  service
++    .quickInfo(join(root, file), files[file].indexOf(`function ${name}`) + 9)
++    ?.displayParts.map(p => p.text)
++    .join("");
++for (const c of require("./fixtures/review3-app/expectations.json"))
++  test(`review 3 mistake ${c.case}: ${c.mistake}`, () => {
++    const files = { ...baseline, ...require(join(fixture, "cases", c.case)) };
++    const { service } = makeService(files);
++    try {
++      const ds = allDiagnostics(service, files);
++      if (c.code) {
++        const d = ds.find(d => d.messageText.startsWith(`[${c.code}]`));
++        assert.ok(d, JSON.stringify(ds.map(d => d.messageText)));
++        assert.equal(d.file.fileName, join(root, c.file));
++        assert.equal(d.file.getLineAndCharacterOfPosition(d.start).line + 1, c.line);
++      } else assert.deepEqual(ds, [], c.case);
++      for (const d of ds) assert.doesNotMatch(d.messageText, /__native|import\("solid-yield"\)/);
++      const details = hover(service, files, "Details.tsx", "Details");
++      const list = hover(service, files, "ProductList.tsx", "ProductList");
++      if (["03.json", "04.json"].includes(c.case)) {
++        assert.match(list, /transport failure/);
++        assert.doesNotMatch(list, /RateLimited|unknown/);
++      }
++      if (c.case === "05.json") {
++        assert.match(ds[0].messageText, /transport failure/);
++        assert.doesNotMatch(ds[0].messageText, /RateLimited/);
++      }
++      if (["11.json", "13.json"].includes(c.case)) {
++        assert.match(details, /NotFound/);
++        assert.doesNotMatch(details, /unknown/);
++      }
++      if (c.case === "10.json") assert.match(details, /Banned.*NotFound/);
++      if (c.case === "09.json")
++        assert.match(hover(service, files, "Clock.tsx", "Clock"), /can fail with Error/);
++      if (c.case === "08.json")
++        assert.match(hover(service, files, "Clock.tsx", "Clock"), /never fails/);
++    } finally {
++      service.dispose();
++    }
++  });
++test("review 3: helpers calling built-ins are clean; use pure removes an opaque helper failure", () => {
++  const files = {
++    ...baseline,
++    "Details.tsx": baseline["Details.tsx"].replace("{prod().price}", "{money(prod().price)}")
++  };
++  let { service } = makeService(files);
++  try {
++    assert.deepEqual(allDiagnostics(service, files), []);
++    assert.doesNotMatch(hover(service, files, "Details.tsx", "Details"), /unknown|can wait/);
++  } finally {
++    service.dispose();
++  }
++  files["format.ts"] =
++    "declare function opaque(): string;\nexport function money(n:number){ return opaque(); }";
++  ({ service } = makeService(files));
++  try {
++    assert.match(hover(service, files, "Details.tsx", "Details"), /unknown/);
++  } finally {
++    service.dispose();
++  }
++  files["format.ts"] = '"use pure";\n' + files["format.ts"];
++  ({ service } = makeService(files));
++  try {
++    assert.deepEqual(allDiagnostics(service, files), []);
++    assert.doesNotMatch(hover(service, files, "Details.tsx", "Details"), /unknown/);
++  } finally {
++    service.dispose();
++  }
++});
++test("review 3: removing use server removes only the transport failure", () => {
++  const files = { ...baseline };
++  for (const server of [true, false]) {
++    files["api.ts"] = server ? baseline["api.ts"] : baseline["api.ts"].replace('"use server";', "");
++    const { service } = makeService(files);
++    try {
++      const text = hover(service, files, "Details.tsx", "Details");
++      assert.match(text, /NotFound/);
++      assert.equal(text.includes("transport failure"), server);
++      assert.doesNotMatch(text, /__native|import\("solid-yield"\)/);
++    } finally {
++      service.dispose();
++    }
++  }
++});
++for (const form of ["solid2-jsx", "provider-member", "solid2-call"])
++  test(`review 3: provider wrapper ${form} discharges CartCtx`, () => {
++    const files = { ...baseline };
++    const returned =
++      form === "provider-member"
++        ? "<CartCtx.Provider value={cart}>{props.children}</CartCtx.Provider>"
++        : form === "solid2-call"
++          ? "CartCtx({value:cart,children:props.children})"
++          : "<CartCtx value={cart}>{props.children}</CartCtx>";
++    files["cart.tsx"] +=
++      `\nimport type {JSX} from '@solidjs/web';\nexport function CartProvider(props:{children:JSX.Element}) { const cart=makeCart(); return ${returned}; }`;
++    files["index.tsx"] = files["index.tsx"]
++      .replace("{ CartCtx, makeCart }", "{ CartCtx, makeCart, CartProvider }")
++      .replace("<CartCtx value={cart}>", "<CartProvider>")
++      .replace("</CartCtx>", "</CartProvider>");
++    const { service } = makeService(files);
++    try {
++      assert.deepEqual(allDiagnostics(service, files), []);
++      assert.doesNotMatch(hover(service, files, "index.tsx", "App"), /needs CartCtx/);
++      assert.ok(
++        service
++          .refresh()
++          .inference[0].functions.find(f => f.name === "CartProvider")
++          .provides.some(c => c.endsWith("#CartCtx"))
++      );
++    } finally {
++      service.dispose();
++    }
++  });
++test("review 3: provider wrapper retains other contexts and its children failures", () => {
++  const files = {
++    "cart.tsx": `import {createContext} from 'solid-js';import type {JSX} from '@solidjs/web';export const Ctx=createContext<string>();export const Other=createContext<string>();export function ThemeProvider(props:{children:JSX.Element}) {return <Ctx value='dark'>{props.children}</Ctx>}`,
++    "index.tsx": `import {createMemo,useContext,Loading} from 'solid-js';import {render} from '@solidjs/web';import {Ctx,Other,ThemeProvider} from './cart';class Missing extends Error{};function Child(){const a=useContext(Ctx),b=useContext(Other);const x=createMemo(()=>{throw new Missing()});return <p>{a}{b}{x()}</p>};export function App(){return <Loading fallback='wait'><ThemeProvider><Child/></ThemeProvider></Loading>};render(()=> <App/>,document.body);`
++  };
++  const { service } = makeService(files);
++  try {
++    const ds = allDiagnostics(service, files);
++    assert.ok(
++      ds.some(d => d.messageText.startsWith("[NO_PROVIDER]") && d.messageText.includes("Other"))
++    );
++    assert.ok(
++      ds.some(
++        d => d.messageText.startsWith("[FOREIGN_HANDOFF]") && d.messageText.includes("Missing")
++      )
++    );
++    assert.ok(
++      ds
++        .filter(d => d.messageText.startsWith("[NO_PROVIDER]"))
++        .every(d => !d.messageText.includes("Missing: Ctx"))
++    );
++  } finally {
++    service.dispose();
++  }
++});
++test("review 3: an unknown callback refusal points to the read and preserves unrelated hovers", () => {
++  const source = `import {createSignal} from 'solid-js';
++declare function opaque(callback:()=>number):void;
++export function Refused(){const [count]=createSignal(0);
++opaque(()=>count());
++return <p/>;}`;
++  const files = { ...baseline, "Refused.tsx": source };
++  const { service } = makeService(files);
++  try {
++    const ds = service.diagnostics(join(root, "Refused.tsx"));
++    const d = ds.find(d => d.messageText.includes("[SUGAR_CALLBACK]"));
++    assert.ok(d);
++    assert.equal(d.file.getLineAndCharacterOfPosition(d.start).line + 1, 4);
++    assert.equal(source.slice(d.start, d.start + d.length), "count()");
++    assert.match(hover(service, files, "Details.tsx", "Details"), /NotFound/);
++  } finally {
++    service.dispose();
++  }
++});
++for (const kind of ["event", "memo", "setup"])
++  test(`review 3: an ignored then chain reports on its ${kind} host`, () => {
++    const expression = "risk().then(()=>1);";
++    const body =
++      kind === "event"
++        ? `return <button onClick={()=>{${expression}}}/>`
++        : kind === "memo"
++          ? `const n=createMemo(()=>{${expression}return 1});return <Loading fallback='wait'>{n()}</Loading>`
++          : `${expression}return <p/>`;
++    const source = `import {createMemo,Loading} from 'solid-js';\nimport {render} from '@solidjs/web';\nclass Bad extends Error{};async function risk(){throw new Bad()}\nexport function App(){${body}}\nrender(()=> <App/>,document.body);`;
++    const { service } = makeService({ "app.tsx": source });
++    try {
++      const code =
++        kind === "event"
++          ? "EVENT_REJECTS"
++          : kind === "memo"
++            ? "FOREIGN_HANDOFF"
++            : "NATIVE_SETUP_FAILURE";
++      const ds = service.diagnostics(join(root, "app.tsx"));
++      const d = ds.find(d => d.messageText.includes(`[${code}]`));
++      assert.ok(d, JSON.stringify(ds.map(d => d.messageText)));
++      assert.equal(d.file.getLineAndCharacterOfPosition(d.start).line + 1, 4);
++      assert.ok(ds.every(d => !d.messageText.includes("SUGAR_")));
++      if (kind !== "setup") assert.match(d.messageText, /Bad/);
++    } finally {
++      service.dispose();
++    }
++  });
++test("review 3: a timer rejection belongs to its lexical event and requires an inner catch", () => {
++  const source = `import {render} from '@solidjs/web';\nclass Bad extends Error{};\nexport function App(){return <button onClick={()=>{try{setTimeout(()=>{throw new Bad()},0)}catch(e){return 1}}}/>}\nrender(()=> <App/>,document.body);`;
++  const { service } = makeService({ "app.tsx": source });
++  try {
++    const ds = service.diagnostics(join(root, "app.tsx"));
++    const d = ds.find(d => d.messageText.startsWith("[EVENT_REJECTS]"));
++    assert.ok(d);
++    assert.match(d.messageText, /timer.*Bad.*inside the timer callback/);
++    assert.equal(d.file.getLineAndCharacterOfPosition(d.start).line + 1, 3);
++  } finally {
++    service.dispose();
++  }
++});
++for (const kind of ["named", "inline"])
++  test(`review 3: ${kind} signal read and write in a JSX event`, () => {
++    const source = `import {createSignal} from 'solid-js';export function App(){const [n,set]=createSignal(0);${kind === "named" ? "const add=()=>set(n()+1);" : ""}return <button onClick={${kind === "named" ? "add" : "()=>set(n()+1)"}}/>}`;
++    const { service } = makeService({ "app.tsx": source });
++    try {
++      assert.deepEqual(service.diagnostics(join(root, "app.tsx")), []);
++    } finally {
++      service.dispose();
++    }
++  });
+diff --git a/packages/vite-plugin-yield/src/native-effects.js b/packages/vite-plugin-yield/src/native-effects.js
+index 1a57fba..d222b38 100644
+--- a/packages/vite-plugin-yield/src/native-effects.js
++++ b/packages/vite-plugin-yield/src/native-effects.js
+@@ -1,4 +1,4 @@
+-import { printMapped } from "./positions.js";
++import { printMapped, copyPosition } from "./positions.js";
+ // @ts-check
+ import babel from "@babel/core";
+ import { relative } from "node:path";
+@@ -25,6 +25,18 @@ export function lowerNativeEffects(files, report) {
+       },
+       CallExpression(q) {
+         const c = q.get("callee");
++        if (
++          c.isIdentifier() &&
++          !c.scope.getBinding(c.node.name) &&
++          /^(setTimeout|setInterval|requestAnimationFrame|requestIdleCallback)$/.test(c.node.name)
++        ) {
++          /** @type {Path | undefined} */ let callback = q.get("arguments.0");
++          if (callback?.isIdentifier()) {
++            const declaration = callback.scope.getBinding(callback.node.name)?.path;
++            callback = declaration?.isVariableDeclarator() ? declaration.get("init") : declaration;
++          }
++          if (callback?.isFunction()) routines.add(`${file}:${callback.node.start}`);
++        }
+         const b = c.isIdentifier() ? c.scope.getBinding(c.node.name)?.path : undefined;
+         const init = b?.isVariableDeclarator() ? b.get("init") : null;
+         const producer = init?.isCallExpression() ? init.get("callee") : null;
+@@ -39,6 +51,11 @@ export function lowerNativeEffects(files, report) {
+         ) {
+           const owner = q.getFunctionParent();
+           if (owner) routines.add(`${file}:${owner.node.start}`);
++          if (sourceApi?.name === "createMemo" || imported(b)?.name === "createMemo") {
++            const callback = q.get("arguments.0");
++            if (callback?.isFunction() && callback.node.async)
++              routines.add(`${file}:${callback.node.start}`);
++          }
+         }
+       }
+     });
+@@ -75,10 +92,17 @@ export function lowerNativeEffects(files, report) {
+     const p = parseProgram(code, file);
+     if (!p) continue;
+     const used = new Set();
++    let domException = false;
++    /** @type {Map<any, {id: import("@babel/core").types.Identifier, kinds: Set<string>}>} */
++    const detached = new Map();
+ 
+     /** @param {string[]} kinds @param {any} value */
+     const adapt = (kinds, value) => {
+       used.add("nativeFailure");
++      if (kinds.includes("global:DOMException")) {
++        used.add("registerNativeFailure");
++        domException = true;
++      }
+       if (kinds.includes("ChunkError")) used.add("ChunkError");
+       return t.callExpression(t.identifier("__nativeFailure"), [
+         t.arrayExpression(kinds.map(k => t.stringLiteral(k))),
+@@ -215,9 +239,12 @@ export function lowerNativeEffects(files, report) {
+         }
+         used.add("raise");
+         if (fn) fn.node.returnType = null;
+-        const raised = t.callExpression(t.identifier("__nativeRaise"), [
+-          adapt(report.throws(file, q.node.start ?? 0, q.node.end ?? 0), q.node.argument)
+-        ]);
++        const raised = copyPosition(
++          t.callExpression(t.identifier("__nativeRaise"), [
++            adapt(report.throws(file, q.node.start ?? 0, q.node.end ?? 0), q.node.argument)
++          ]),
++          q.node
++        );
+         // raise always throws at runtime; preserve that non-returning path in a
+         // component whose successful return must be a view.
+         q.replaceWith(
+@@ -259,8 +286,24 @@ export function lowerNativeEffects(files, report) {
+       "CallExpression|NewExpression": {
+         exit(q) {
+           const fn = q.getFunctionParent();
+-          if (!host(fn) || !q.node.start) return;
++          if (
++            !host(fn) ||
++            !q.node.start ||
++            p.node.directives.some(d => d.value.value === "use pure")
++          )
++            return;
+           const c = q.get("callee");
++          // Promise combinators own their member promises. Awaiting members one
++          // by one here would lose concurrency and the tuple result type.
++          const combinator = q.findParent(
++            a =>
++              a.isCallExpression() &&
++              t.isMemberExpression(a.node.callee) &&
++              t.isIdentifier(a.node.callee.object, { name: "Promise" }) &&
++              t.isIdentifier(a.node.callee.property) &&
++              ["all", "allSettled", "race", "any"].includes(a.node.callee.property.name)
++          );
++          if (combinator) return;
+           if (
+             c.isIdentifier() &&
+             imported(c.scope.getBinding(c.node.name)?.path)?.source.startsWith("solid-yield")
+@@ -275,10 +318,29 @@ export function lowerNativeEffects(files, report) {
+             chain = chain.parentPath;
+           }
+           const info = report.call(file, q.node.start, q.node.end ?? 0);
++          const kinds = info?.ownFails ?? info?.fails ?? [];
++          if (
++            c.isMemberExpression() &&
++            t.isIdentifier(c.node.property) &&
++            ["then", "catch", "finally"].includes(c.node.property.name)
++          ) {
++            for (const callback of q.get("arguments")) {
++              if (
++                callback.isFunction() &&
++                !callback.node.async &&
++                routines.has(`${file}:${callback.node.start}`)
++              ) {
++                used.add("$event");
++                callback.replaceWith(
++                  t.callExpression(t.identifier("__nativePromiseEvent"), [callback.node])
++                );
++              }
++            }
++          }
+           if (
+             !info ||
+             info.native ||
+-            (!info.fails.length && !info.promise) ||
++            (!kinds.length && !info.promise) ||
+             (info.target && asyncRoutines.has(info.target)) ||
+             (info.target &&
+               routines.has(info.target) &&
+@@ -287,6 +349,22 @@ export function lowerNativeEffects(files, report) {
+               !q.isNewExpression())
+           )
+             return;
++          const unawaited =
++            info.promise &&
++            c.isMemberExpression() &&
++            t.isIdentifier(c.node.property) &&
++            ["then", "catch", "finally"].includes(c.node.property.name) &&
++            q.parentPath?.isExpressionStatement();
++          /** @type {{id: import("@babel/core").types.Identifier, kinds: Set<string>} | undefined} */
++          let pending;
++          if (unawaited && fn) {
++            pending = detached.get(fn.node);
++            if (!pending) {
++              pending = { id: fn.scope.generateUidIdentifier("pendingChains"), kinds: new Set() };
++              detached.set(fn.node, pending);
++            }
++            for (const kind of kinds) pending.kinds.add(kind);
++          }
+           // Evaluate the call target and arguments in the current routine. A
+           // plain attempt producer must not capture delegated reactive reads.
+           // Retain receiver lookup before arguments, and invoke with that receiver.
+@@ -294,7 +372,9 @@ export function lowerNativeEffects(files, report) {
+             /** @type {import("@babel/core").types.CallExpression | import("@babel/core").types.NewExpression} */ (
+               q.node
+             );
+-          let readsArgument = false;
++          let readsArgument =
++            t.isMemberExpression(call.callee) &&
++            (t.isCallExpression(call.callee.object) || t.isMemberExpression(call.callee.object));
+           for (const arg of q.get("arguments")) {
+             if (arg.isFunction()) continue;
+             if (arg.isCallExpression() || arg.isMemberExpression()) readsArgument = true;
+@@ -321,14 +401,19 @@ export function lowerNativeEffects(files, report) {
+             };
+             let callee = /** @type {import("@babel/core").types.Expression} */ (call.callee);
+             let receiver;
+-            if (t.isMemberExpression(callee) && !t.isSuper(callee.object)) {
++            const platformPromise =
++              t.isMemberExpression(callee) &&
++              t.isIdentifier(callee.object, { name: "Promise" }) &&
++              t.isIdentifier(callee.property) &&
++              ["all", "allSettled", "race", "any"].includes(callee.property.name);
++            if (t.isMemberExpression(callee) && !t.isSuper(callee.object) && !platformPromise) {
+               receiver = save(callee.object, "receiver");
+               callee = save(
+-                attempt(t.memberExpression(receiver, callee.property, callee.computed), info.fails),
++                attempt(t.memberExpression(receiver, callee.property, callee.computed), kinds),
+                 "method"
+               );
+             }
+-            if (!receiver) callee = save(callee, "callee");
++            if (!receiver && !platformPromise) callee = save(callee, "callee");
+             const args = call.arguments.map(arg => save(arg, "argument"));
+             if (receiver) used.add("nativeInvoke");
+             const invoke = t.isNewExpression(call)
+@@ -340,18 +425,63 @@ export function lowerNativeEffects(files, report) {
+                     t.arrayExpression(args)
+                   ])
+                 : t.callExpression(callee, args);
+-            statements.push(t.returnStatement(attempt(invoke, info.fails)));
++            /** @type {any} */ let value = invoke;
++            if (
++              receiver &&
++              info.promise &&
++              t.isMemberExpression(call.callee) &&
++              t.isIdentifier(call.callee.property) &&
++              ["then", "catch", "finally"].includes(call.callee.property.name)
++            ) {
++              const annotation = parseProgram(`const result = null as ${info.resultType};`, file);
++              const cast = annotation?.node.body[0];
++              if (t.isVariableDeclaration(cast) && t.isTSAsExpression(cast.declarations[0].init))
++                value = t.tsAsExpression(invoke, cast.declarations[0].init.typeAnnotation);
++            }
++            statements.push(t.returnStatement(unawaited ? value : attempt(value, kinds)));
+             q.replaceWith(
+               t.callExpression(
+                 t.functionExpression(null, [], t.blockStatement(statements), true),
+                 []
+               )
+             );
+-          } else q.replaceWith(attempt(call, info.fails));
++          } else if (!unawaited) q.replaceWith(attempt(call, kinds));
++          if (pending)
++            q.replaceWith(
++              t.callExpression(t.memberExpression(pending.id, t.identifier("push")), [
++                /** @type {import("@babel/core").types.Expression} */ (q.node)
++              ])
++            );
+           q.skip();
+         }
+       }
+     });
++    // Drain ignored chains on the enclosing host after the authored body. A
++    // catch around creating a promise cannot catch its later rejection.
++    for (const [body, pending] of detached) {
++      const declaration = t.variableDeclaration("const", [
++        t.variableDeclarator(pending.id, t.arrayExpression([]))
++      ]);
++      pending.id.typeAnnotation = t.tsTypeAnnotation(
++        t.tsArrayType(
++          t.tsTypeReference(
++            t.identifier("Promise"),
++            t.tsTypeParameterInstantiation([t.tsUnknownKeyword()])
++          )
++        )
++      );
++      const finish = t.blockStatement([
++        t.expressionStatement(
++          attempt(
++            t.callExpression(t.memberExpression(t.identifier("Promise"), t.identifier("all")), [
++              t.identifier(pending.id.name)
++            ]),
++            [...pending.kinds]
++          )
++        )
++      ]);
++      body.body = t.blockStatement([declaration, t.tryStatement(body.body, null, finish)]);
++    }
+     // Server producers brand at the rejection boundary before serialization.
+     // Their bodies stay plain async JavaScript; only client calls use attempt.
+     p.traverse({
+@@ -477,6 +607,7 @@ export function lowerNativeEffects(files, report) {
+     });
+     /** @type {Record<string,string>} */
+     const aliases = {
++      $event: "__nativePromiseEvent",
+       ChunkError: "__nativeChunk",
+       attempt: "__nativeAttempt",
+       raise: "__nativeRaise",
+@@ -488,8 +619,8 @@ export function lowerNativeEffects(files, report) {
+     for (const module of ["solid-yield", "solid-yield/internal"]) {
+       const names = [...used].filter(n =>
+         module === "solid-yield"
+-          ? ["attempt", "raise", "ChunkError"].includes(n)
+-          : !["attempt", "raise", "ChunkError"].includes(n)
++          ? ["$event", "attempt", "raise", "ChunkError"].includes(n)
++          : !["$event", "attempt", "raise", "ChunkError"].includes(n)
+       );
+       for (const name of [...names]) {
+         const binding = p.scope.getBinding(aliases[name]);
+@@ -509,6 +640,22 @@ export function lowerNativeEffects(files, report) {
+           )
+         );
+     }
++    if (domException)
++      p.node.body.push(
++        t.ifStatement(
++          t.binaryExpression(
++            "!==",
++            t.unaryExpression("typeof", t.identifier("DOMException")),
++            t.stringLiteral("undefined")
++          ),
++          t.expressionStatement(
++            t.callExpression(t.identifier("__nativeRegister"), [
++              t.stringLiteral("global:DOMException"),
++              t.identifier("DOMException")
++            ])
++          )
++        )
++      );
+     result.set(file, printMapped(t.file(p.node)));
+   }
+   return result;
+diff --git a/packages/vite-plugin-yield/src/native-prelude.js b/packages/vite-plugin-yield/src/native-prelude.js
+index 0ca4a49..4b09aac 100644
+--- a/packages/vite-plugin-yield/src/native-prelude.js
++++ b/packages/vite-plugin-yield/src/native-prelude.js
+@@ -172,10 +172,16 @@ export function nativePrelude(files) {
+                 );
+               }
+             });
+-          const throwsThrough = [q.get("block"), q.get("handler.body")].every(block => {
+-            const ends = block.getCompletionRecords();
+-            return ends.length && ends.every(end => end.isThrowStatement());
+-          });
++          const endings = [q.get("block"), q.get("handler.body")].map(block =>
++            block.getCompletionRecords()
++          );
++          const throwsThrough = endings.every(
++            ends => ends.length && ends.every(end => end.isThrowStatement())
++          );
++          const exitsThrough = endings.every(
++            ends =>
++              ends.length && ends.every(end => end.isReturnStatement() || end.isThrowStatement())
++          );
+           const result = q.scope.generateUidIdentifier("completion");
+           const caught = q.scope.generateUidIdentifier("caught");
+           const body = q.node.block;
+@@ -248,7 +254,7 @@ export function nativePrelude(files) {
+             );
+           }
+           params.push(caught);
+-          if (returns)
++          if (returns && !exitsThrough)
+             for (const block of [body, handle])
+               block.body.push(
+                 t.returnStatement(
+@@ -274,10 +280,12 @@ export function nativePrelude(files) {
+             returns
+               ? [
+                   t.variableDeclaration("const", [t.variableDeclarator(result, call)]),
+-                  t.ifStatement(
+-                    t.memberExpression(result, t.identifier("returned")),
+-                    t.returnStatement(t.memberExpression(result, t.identifier("value")))
+-                  )
++                  exitsThrough
++                    ? t.returnStatement(t.memberExpression(result, t.identifier("value")))
++                    : t.ifStatement(
++                        t.memberExpression(result, t.identifier("returned")),
++                        t.returnStatement(t.memberExpression(result, t.identifier("value")))
++                      )
+                 ]
+               : [throwsThrough ? t.returnStatement(call) : t.expressionStatement(call)]
+           );
+diff --git a/packages/vite-plugin-yield/src/native-providers.js b/packages/vite-plugin-yield/src/native-providers.js
+new file mode 100644
+index 0000000..5a07562
+--- /dev/null
++++ b/packages/vite-plugin-yield/src/native-providers.js
+@@ -0,0 +1,75 @@
++// @ts-check
++import babel from "@babel/core";
++import { printMapped } from "./positions.js";
++import { parseProgram } from "./transform.js";
++const t = babel.types;
++const helper = `type __NativeProvided<C, D, Q> = C extends (...args: any[]) => import("solid-yield").ComponentView<infer P extends boolean, infer E, infer W extends boolean, infer R>
++ ? <A extends Omit<import("solid-yield").PropsInput<D, unknown>, "children"> & {children: () => Generator<import("solid-yield").ViewOp, import("solid-yield").Element, any>}>(props: A) => import("solid-yield").ComponentView<
++ P | import("solid-yield").ViewPending<import("solid-yield").ViewYield<A["children"]>, import("solid-yield").ViewReturn<A["children"]>>,
++ E | import("solid-yield").ViewFails<import("solid-yield").ViewYield<A["children"]>, import("solid-yield").ViewReturn<A["children"]>>,
++ W | import("solid-yield").ViewMayWait<import("solid-yield").ViewYield<A["children"]>, import("solid-yield").ViewReturn<A["children"]>>,
++ R | Exclude<import("solid-yield").ViewRequires<import("solid-yield").ViewYield<A["children"]>, import("solid-yield").ViewReturn<A["children"]>>, Q>>
++ : never;`;
++/** Preserve the library's four color projections, subtracting the contexts
++ * proved to surround children by the component-body summary. No runtime wrapper.
++ * @param {Map<string,string>} files
++ * @param {import('compiler-yield/failure-inference').FailureFunction[]} summaries */
++export function nativeProviders(files, summaries) {
++  return new Map(
++    [...files].map(([file, code]) => {
++      const providers = summaries.filter(f => file.endsWith(f.file) && f.provides?.length);
++      if (!providers.length) return [file, code];
++      const p = parseProgram(code, file);
++      if (!p) return [file, code];
++      let used = false;
++      p.traverse({
++        VariableDeclarator(q) {
++          if (!t.isIdentifier(q.node.id) || !t.isCallExpression(q.node.init)) return;
++          const name = q.node.id.name;
++          const summary = providers.find(f => f.name === name);
++          if (!summary) return;
++          const fn = q.node.init.arguments[0];
++          if (!t.isFunction(fn) || !t.isIdentifier(fn.params[0])) return;
++          const annotation = fn.params[0].typeAnnotation;
++          const props = annotation?.type === "TSTypeAnnotation" ? annotation.typeAnnotation : null;
++          if (!t.isTSTypeReference(props) || !props.typeParameters?.params[0]) return;
++          const base = q.scope.generateUidIdentifier(summary.name);
++          const statement = q.parentPath.parentPath?.isExportNamedDeclaration()
++            ? q.parentPath.parentPath
++            : q.parentPath;
++          statement.insertBefore(
++            t.variableDeclaration("const", [t.variableDeclarator(base, q.node.init)])
++          );
++          const provided = summary.provides.map(id =>
++            t.tsImportType(
++              t.stringLiteral("solid-yield"),
++              t.identifier("RequiredContext"),
++              t.tsTypeParameterInstantiation([
++                t.tsAnyKeyword(),
++                t.tsLiteralType(t.stringLiteral(id))
++              ])
++            )
++          );
++          q.node.init = t.tsAsExpression(
++            base,
++            t.tsTypeReference(
++              t.identifier("__NativeProvided"),
++              t.tsTypeParameterInstantiation([
++                t.tsTypeQuery(base),
++                props.typeParameters.params[0],
++                provided.length === 1 ? provided[0] : t.tsUnionType(provided)
++              ])
++            )
++          );
++          used = true;
++          q.skip();
++        }
++      });
++      if (used) {
++        const parsed = parseProgram(helper, file);
++        if (parsed) p.node.body.unshift(...parsed.node.body);
++      }
++      return [file, printMapped(t.file(p.node))];
++    })
++  );
++}
+diff --git a/packages/vite-plugin-yield/src/native.js b/packages/vite-plugin-yield/src/native.js
+index 511f315..4ff03e1 100644
+--- a/packages/vite-plugin-yield/src/native.js
++++ b/packages/vite-plugin-yield/src/native.js
+@@ -10,6 +10,7 @@ import { dirname, resolve } from "node:path";
+ import { parseProgram } from "./transform.js";
+ import { lowerSugarProject } from "./sugar.js";
+ import { inferFailures } from "compiler-yield/failure-inference";
++import { nativeProviders } from "./native-providers.js";
+ import { nativeEntry } from "./native-entry.js";
+ import { nativePrelude } from "./native-prelude.js";
+ import { lowerNativeEffects } from "./native-effects.js";
+@@ -249,12 +250,32 @@ export class NativeDiagnosticError extends Error {
+   }
+ }
+ /** Translate only known surface contracts, then use the existing routine inference.
+- * @param {string} code @param {string} filename @param {Map<string,string>} modules @param {ts.CompilerOptions} [options] */
+-function surface(code, filename, modules, options = {}) {
++ * @param {string} code @param {string} filename @param {Map<string,string>} modules @param {ts.CompilerOptions} [options] @param {import("compiler-yield/failure-inference").FailureFunction[]} [summaries] */
++function surface(code, filename, modules, options = {}, summaries = []) {
+   const p = parseProgram(code, filename);
+   if (!p) throw new Error(`Cannot parse ${filename}`);
+   const needed = new Set();
+   const contexts = new Set();
++  /** @param {Path} ref */
++  const contextReference = ref => {
++    if (!ref.isIdentifier() && !ref.isJSXIdentifier()) return false;
++    let declaration = ref.scope.getBinding(ref.node.name)?.path;
++    const api = imported(ref);
++    if (api?.module.startsWith(".")) {
++      const base = resolve(dirname(filename), api.module);
++      const target = [
++        base,
++        base + ".tsx",
++        base + ".ts",
++        base + "/index.tsx",
++        base + "/index.ts"
++      ].find(f => modules.has(f));
++      const module = target ? parseProgram(modules.get(target) ?? "", target) : null;
++      declaration = module?.scope.getBinding(api.name)?.path;
++    }
++    const init = declaration?.isVariableDeclarator() ? declaration.get("init") : null;
++    return !!(init?.isCallExpression() && imported(init.get("callee"))?.name === "createContext");
++  };
+   let needsReturned = false;
+   p.traverse({
+     TSTypeReference(q) {
+@@ -277,7 +298,9 @@ function surface(code, filename, modules, options = {}) {
+     for (const ref of binding?.referencePaths ?? []) {
+       if (ref.findParent(q => q.isTSType())) continue;
+       if (ref.parentPath?.isMemberExpression() && ref.key === "object") continue;
+-      ref.replaceWith(t.callExpression(t.identifier(name), []));
++      ref.replaceWith(
++        copyPosition(t.callExpression(copyPosition(t.identifier(name), ref.node), []), ref.node)
++      );
+     }
+   };
+   /** @param {Path} q @param {string} code @param {string} message @returns {never} */
+@@ -370,7 +393,9 @@ function surface(code, filename, modules, options = {}) {
+           jsx ||= t.isJSXElement(inner.node.argument) || t.isJSXFragment(inner.node.argument);
+         }
+       });
+-      if (!jsx) return;
++      const provider = summaries.find(f => f.name === name && filename.endsWith(f.file))?.provides
++        ?.length;
++      if (!jsx && !provider) return;
+       const param = q.node.params[0];
+       if (q.parentPath.isVariableDeclarator() && t.isIdentifier(q.parentPath.node.id)) {
+         const declared = q.parentPath.node.id.typeAnnotation;
+@@ -400,6 +425,24 @@ function surface(code, filename, modules, options = {}) {
+           "NATIVE_PROPS",
+           "Use a props parameter and read props.name where needed; destructuring loses reactive updates."
+         );
++      if (provider && t.isIdentifier(param) && param.typeAnnotation?.type === "TSTypeAnnotation") {
++        needed.add("Element");
++        param.typeAnnotation.typeAnnotation = t.tsIntersectionType([
++          t.tsTypeReference(
++            t.identifier("Omit"),
++            t.tsTypeParameterInstantiation([
++              param.typeAnnotation.typeAnnotation,
++              t.tsLiteralType(t.stringLiteral("children"))
++            ])
++          ),
++          t.tsTypeLiteral([
++            t.tsPropertySignature(
++              t.identifier("children"),
++              t.tsTypeAnnotation(t.tsTypeReference(t.identifier("Element")))
++            )
++          ])
++        ]);
++      }
+       if (param?.typeAnnotation?.type === "TSTypeAnnotation") {
+         needed.add("Props");
+         param.typeAnnotation.typeAnnotation = t.tsTypeReference(
+@@ -461,6 +504,36 @@ function surface(code, filename, modules, options = {}) {
+         }
+         return;
+       }
++      if (
++        t.isExpression(q.node.callee) &&
++        contextReference(q.get("callee")) &&
++        q.node.arguments.length === 1 &&
++        t.isObjectExpression(q.node.arguments[0])
++      ) {
++        const value = q.node.arguments[0];
++        for (const prop of value.properties)
++          if (
++            t.isObjectProperty(prop) &&
++            t.isIdentifier(prop.key, { name: "children" }) &&
++            !t.isFunction(prop.value) &&
++            t.isExpression(prop.value)
++          ) {
++            prop.value = t.arrowFunctionExpression(
++              [],
++              t.jsxFragment(t.jsxOpeningFragment(), t.jsxClosingFragment(), [
++                t.jsxExpressionContainer(prop.value)
++              ])
++            );
++          }
++        q.node.callee = t.memberExpression(q.node.callee, t.identifier("provide"));
++        if (q.parentPath.isReturnStatement())
++          q.replaceWith(
++            t.jsxFragment(t.jsxOpeningFragment(), t.jsxClosingFragment(), [
++              t.jsxExpressionContainer(q.node)
++            ])
++          );
++        return;
++      }
+       if (api?.module !== "solid-js") return;
+       if (
+         ["createOptimisticStore", "createProjection"].includes(api.name) &&
+@@ -492,7 +565,7 @@ function surface(code, filename, modules, options = {}) {
+           fail(q, "NATIVE_CONTEXT", "useContext requires one statically resolved context.");
+         if (q.parentPath.isVariableDeclarator() && t.isIdentifier(q.parentPath.node.id))
+           valueReads(q.parentPath, q.parentPath.node.id.name);
+-        q.replaceWith(t.callExpression(q.node.arguments[0], []));
++        q.replaceWith(copyPosition(t.callExpression(q.node.arguments[0], []), q.node));
+       } else if (api.name === "createContext") {
+         if (!q.parentPath.isVariableDeclarator() || !t.isIdentifier(q.parentPath.node.id))
+           fail(
+@@ -528,7 +601,18 @@ function surface(code, filename, modules, options = {}) {
+         // A member tag can have a getter. Preserve its lookup at the JSX
+         // position; hoisting an alias would run it before a conditional arm.
+         // The existing JSX tag contract is the foreign check at this edge.
+-        if (tag.isJSXMemberExpression()) return;
++        if (tag.isJSXMemberExpression()) {
++          if (
++            !t.isJSXIdentifier(tag.node.property, { name: "Provider" }) ||
++            !t.isJSXIdentifier(tag.node.object)
++          )
++            return;
++          const name = tag.node.object.name;
++          const api = imported(tag.get("object"));
++          if (!contextReference(tag.get("object"))) return;
++          tag.replaceWith(copyPosition(t.jsxIdentifier(name), tag.node.object));
++          if (q.node.closingElement) q.node.closingElement.name = t.jsxIdentifier(name);
++        }
+         if (!tag.isJSXIdentifier()) return;
+         const name = tag.node.name;
+         const nativeTag = imported(tag);
+@@ -704,7 +788,15 @@ function surface(code, filename, modules, options = {}) {
+                 jsx = true;
+               }
+             });
+-          if (!importedContext && !jsx) {
++          const declarationName = init?.isFunction() && "id" in init.node ? init.node.id?.name : "";
++          const provider = summaries.some(
++            f =>
++              f.provides?.length &&
++              typeof target === "string" &&
++              target.endsWith(f.file) &&
++              (f.name === api.name || f.name === declarationName)
++          );
++          if (!importedContext && !jsx && !provider) {
+             wrapForeign(q, t.identifier(name));
+             return;
+           }
+@@ -908,7 +1000,10 @@ function lowerNativeProjectImpl(input, options = {}) {
+   const lowered = lowerSugarProject(
+     new Map([
+       ...new Map(
+-        [...effects].map(([id, code]) => [id, surface(code, id, effects, options.compilerOptions)])
++        [...effects].map(([id, code]) => [
++          id,
++          surface(code, id, effects, options.compilerOptions, sourceFailures.functions)
++        ])
+       ),
+       ...entries
+     ]),
+@@ -937,10 +1032,11 @@ function lowerNativeProjectImpl(input, options = {}) {
+   );
+   return {
+     ...lowered,
++    files: nativeProviders(lowered.files, sourceFailures.functions),
+     inference: sourceFailures,
+     diagnostics: [
+       ...sourceFailures.diagnostics
+-        .filter(d => d.code !== "EVENT_REJECTS")
++        .filter(d => d.code !== "EVENT_REJECTS" || d.timer)
+         .map(d => ({ ...d, severity: /** @type {const} */ ("error") })),
+       ...nativeForeignDiagnostics(files, options.compilerOptions)
+     ]
+diff --git a/packages/vite-plugin-yield/src/positions.js b/packages/vite-plugin-yield/src/positions.js
+index d64944a..730fc69 100644
+--- a/packages/vite-plugin-yield/src/positions.js
++++ b/packages/vite-plugin-yield/src/positions.js
+@@ -196,7 +196,7 @@ export function withPositions(input, run) {
+         const offset =
+           lines.slice(0, error.loc.line - 1).reduce((n, s) => n + s.length + 1, 0) +
+           (error.loc.column ?? 0);
+-        const at = locate(table, offset);
++        const at = locate(table, offset, error.length ?? 0);
+         if (at) error.sourceSpan = at;
+       }
+     }
+diff --git a/packages/vite-plugin-yield/src/sugar.js b/packages/vite-plugin-yield/src/sugar.js
+index fb801c6..6114703 100644
+--- a/packages/vite-plugin-yield/src/sugar.js
++++ b/packages/vite-plugin-yield/src/sugar.js
+@@ -49,7 +49,12 @@ const control = p =>
+ function fail(p, code, message, filename) {
+   const at = p.node.loc?.start;
+   const e = new Error(`[${code}] ${message} (${filename}:${at?.line}:${(at?.column ?? 0) + 1})`);
+-  Object.assign(e, { code, id: filename, loc: { file: filename, ...at } });
++  Object.assign(e, {
++    code,
++    id: filename,
++    loc: { file: filename, ...at },
++    length: Math.max(0, (p.node.end ?? 0) - (p.node.start ?? 0))
++  });
+   throw e;
+ }
+ /** @param {string} code */
+@@ -350,7 +355,19 @@ function pass(code, filename, program, native = false) {
+             )
+           );
+         const binding = fnName(fn) ? fn.scope.parent?.getBinding(fnName(fn)) : undefined;
++        const promiseHost =
++          hostCall?.isCallExpression() &&
++          t.isMemberExpression(hostCall.node.callee) &&
++          ["then", "catch", "finally"].includes(key(hostCall.node.callee.property)) &&
++          (() => {
++            const receiver = type(hostCall.get("callee.object"));
++            return (
++              !!receiver &&
++              (receiver.symbol?.name === "Promise" || receiver.symbol?.name === "PromiseLike")
++            );
++          })();
+         const eventHost =
++          promiseHost ||
+           isScheduler(hostCall) ||
+           (hostCall?.parentPath.isExpressionStatement() &&
+             lib(hostCall.get("callee")) !== "attempt") ||
+@@ -373,14 +390,14 @@ function pass(code, filename, program, native = false) {
+                 )
+               ])
+             );
+-          } else
++          } else {
++            const event = t.callExpression(t.identifier("__nativeEvent"), [
++              /** @type {import("@babel/core").types.FunctionExpression} */ (fn.node)
++            ]);
+             fn.replaceWith(
+-              t.callExpression(t.identifier("__nativeCallback"), [
+-                t.callExpression(t.identifier("__nativeEvent"), [
+-                  /** @type {import("@babel/core").types.FunctionExpression} */ (fn.node)
+-                ])
+-              ])
++              promiseHost ? event : t.callExpression(t.identifier("__nativeCallback"), [event])
+             );
++          }
+           if (p && !p.scope.hasBinding("__nativeEvent")) {
+             p.node.body.unshift(
+               t.importDeclaration(
+@@ -390,7 +407,7 @@ function pass(code, filename, program, native = false) {
+             );
+             p.scope.crawl();
+           }
+-          if (p && !p.scope.hasBinding("__nativeCallback")) {
++          if (!promiseHost && p && !p.scope.hasBinding("__nativeCallback")) {
+             p.node.body.unshift(
+               t.importDeclaration(
+                 [
+@@ -757,10 +774,18 @@ function checkEscapes(files, active, options) {
+             ts.isCallExpression(parent) &&
+             ts.isIdentifier(parent.expression) &&
+             constructors.has(parent.expression.text);
+-          if (!direct && !callback)
+-            throw new Error(
+-              `[SUGAR_ESCAPE] Routine ${n.text} is handed to an unknown consumer; a plain callback cannot drive it (${id}:${n.getSourceFile().getLineAndCharacterOfPosition(n.getStart()).line + 1}).`
++          if (!direct && !callback) {
++            const at = n.getSourceFile().getLineAndCharacterOfPosition(n.getStart());
++            const error = new Error(
++              `[SUGAR_ESCAPE] Routine ${n.text} is handed to an unknown consumer; a plain callback cannot drive it.`
+             );
++            Object.assign(error, {
++              id,
++              code: "SUGAR_ESCAPE",
++              loc: { file: id, line: at.line + 1, column: at.character }
++            });
++            throw error;
++          }
+         }
+       }
+       ts.forEachChild(n, walk);

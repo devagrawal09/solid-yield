@@ -462,3 +462,82 @@ not follow from S1–S13 alone. P-ONCE/P-MEMO state the additional contracts;
 P-EVENT limits its delivery result to a created report computation.
 This is a missing-premise finding, **not an observed failure** of the mounted
 once/seed behavior, and not a claim about what disposed reports actually do.
+
+## D-116 follow-up — 2026-10-08
+
+F16–F21 audit main `4fb160d` and read-only sugar `5e03328`. They concern the
+native inference contract, not new failures of main's repaired library API.
+[inference.md](inference.md) contains all 52 obligation classifications, all
+15 paper-lemma restatements, full tiny witnesses and the Lean proof limits.
+
+## F16 — Native class identity needs a matching coverage relation
+
+**Rules:** O2/O20/O27/O52, T4; I1/I4 in the inference audit.
+`class Sub extends Base {}` means a Base catch handles Sub. Distinct IDs alone
+do not encode this. More seriously, `class A extends Error {}; class B extends
+Error {}; const e: A = new B();` is structurally accepted: throwing e and
+removing A for `instanceof A` loses the escaping B. Repeated evaluation of one
+class declaration also creates distinct constructors under one declaration ID.
+Require genuine class membership, sound subclass coverage and identity handling;
+otherwise widen to unknown or refuse the unsupported match. The wrapper brand
+does not prove its payload's native identity. The prototype documents structural
+and selective-matching limits as F-S18/F-S14; no general refinement is proved.
+
+## F17 — Unknown is top, not a universal wrapper-tag matcher
+
+**Rules:** O26/O27/O40/O42/O43, D-112(d), I3/I4/I6.
+`try { throw "offline"; } catch (e: unknown) { if (!(e instanceof Error)) throw e; }`
+still throws. Neither the annotation nor handling only unknown-tag wrappers
+discharges all of semantic top. A true catch-all consumes top and everything
+below it, only at its actual position, with its own failures still included.
+A selective catch usually leaves unknown. D-033 permits it at a library root;
+foreign handoffs must handle it. This is a rule counterexample, not a reported
+new main-runtime defect.
+
+## F18 — A catch must remove only what it definitely consumes
+
+**Rules:** O16/O26–O29/O38–O40; I3/I5.
+`try { throw new X(); } catch (e) { if (flag) throw e; }` retains X.
+`catch (e) { if (!(e instanceof X)) throw e; }` retains the non-X incoming part;
+keeping the whole input set is sound. Add guard/handler/finalizer failures.
+`try { return rejects(); } catch { return 0; }` does not absorb the returned
+promise's later rejection. The branch's direct-binding rethrow traversal keeps
+the full input for the conditional example, which is safe. Its short design
+rule is incomplete for general flow, aliases, promise timing and completion.
+The exact required rule is `Eout ⊇ (E \ G) ∪ H ∪ F`, with G a lower bound on
+definitely consumed values and H/F upper bounds on handler/finalizer failures.
+
+## F19 — Recursive inference needs sound inputs and a closed solution
+
+**Rules:** O2/O6/O17–O21/O35/O38/O41, I1/I2.
+`function a() { b(); } function b() { throw new X(); }` already defeats an
+unfinished traversal; mutual recursion has the same need for closure.
+`function f() { opaque(); }` requires unknown, not empty. All dynamic targets,
+constructors, getters, callbacks and producer reads need coverage or explicit
+contracts. Lean `call_postfix_sound` proves coverage for finite call derivations
+given sound local sets and closed call edges, including recursive graphs. It
+does not verify the prototype's call resolver or trusted pure/platform list.
+
+## F20 — Safe serialization does not preserve native catch matching
+
+**Rules:** O27/O37/O45, I4/I6; D-115 and D-116's pending wire question.
+For `class X extends Error {}`, a server throwing `new X("public")` may arrive
+with its label/message but without X's prototype. Client
+`catch (e) { if (!(e instanceof X)) throw e; }` then rethrows. Removing X on the
+strength of the wire label alone is unsafe. The prototype explicitly records
+this as F-S14/F-S15 and leaves selective native wrapper matching unfinished.
+Server bounds add ChunkError; matching still requires a checked wire/handler
+contract. This audit does not decide whether user-visible prototypes must be
+revived or assert end-to-end RPC parity.
+
+## F21 — Native source needs a completion proof, not just KindCheck
+
+**Rules:** O39/O40/O52, C2/C7, P-ATTEMPT/P-ENCODING; I3–I5.
+`function f() { try { throw 0; } catch { return new Error(); } }` returns a value;
+directly treating that catch body as a library attempt handler would raise it.
+`function g() { throw "offline"; }` contributes unknown despite having no
+Failure(kind) base. Generated nominal wrappers may pass KindCheck, but that
+checks neither the original catch completion nor the completeness of inference.
+O52 as an author-side native requirement is obsolete; its generated-wrapper
+check remains useful. These are translation obligations, not evidence that all
+bounded native forms are accepted or broken.

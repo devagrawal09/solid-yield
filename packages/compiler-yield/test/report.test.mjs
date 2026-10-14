@@ -43,3 +43,15 @@ test("CLI rejects an unknown example instead of reporting success with no graphs
   assert.equal(r.status, 2);
   assert(r.stderr.includes("Usage:"));
 });
+
+test("report lists every supplied use pure module and its trust limit", () => {
+  const r = {
+    twin: "fixture",
+    ...analyzeExample(new Map([...modules, ["/unused.ts", '"use pure"; export const f = x => x;']]))
+  };
+  assert.equal(r.provenance.trustedPureModules[0].at, "/unused.ts");
+  const text = markdown([r]);
+  assert(text.includes("Trusted pure module (author assertion) /unused.ts:"));
+  assert(text.includes("implementation is not checked"));
+  assert(text.includes("Finding: /unused.ts: Author asserts"));
+});

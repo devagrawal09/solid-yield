@@ -1,0 +1,48 @@
+##### 1: swallow empty catch (Checkout)
+Checkout.tsx:15:7 error TS95000: [CATCH_SWALLOWS] This catch discards ChunkError | RateLimited | unknown without handling; return a fallback value, rethrow, or mark the absorption intentional with @yield-absorb.
+solid-yield check: 9 files, 1 errors
+
+ProductList.tsx:ProductList => ProductList — can suspend (pending); can fail with __nativeChunk | RateLimited; does not wait; needs CartCtx
+Details.tsx:Details => Details — can suspend (pending); can fail with __nativeChunk | NotFound; does not wait; needs no context
+Checkout.tsx:Checkout => Checkout — does not suspend; never fails; does not wait; needs CartCtx
+Clock.tsx:Clock => Clock — does not suspend; never fails; does not wait; needs no context
+index.tsx:App => App — does not suspend; never fails; does not wait; needs no context
+
+##### 2: log-only catch (Checkout)
+Checkout.tsx:15:7 error TS95000: [CATCH_SWALLOWS] This catch discards ChunkError | RateLimited | unknown without handling; return a fallback value, rethrow, or mark the absorption intentional with @yield-absorb.
+solid-yield check: 9 files, 1 errors
+
+ProductList.tsx:ProductList => ProductList — can suspend (pending); can fail with __nativeChunk | RateLimited; does not wait; needs CartCtx
+Details.tsx:Details => Details — can suspend (pending); can fail with __nativeChunk | NotFound; does not wait; needs no context
+Checkout.tsx:Checkout => Checkout — does not suspend; never fails; does not wait; needs CartCtx
+Clock.tsx:Clock => Clock — does not suspend; never fails; does not wait; needs no context
+index.tsx:App => App — does not suspend; never fails; does not wait; needs no context
+
+##### 3: catch base ApiError in ProductList memo, siblings thrown
+solid-yield check: 9 files, 0 errors
+
+ProductList.tsx:ProductList => ProductList — can suspend (pending); can fail with __nativeChunk; does not wait; needs CartCtx
+Details.tsx:Details => Details — can suspend (pending); can fail with __nativeChunk | NotFound; does not wait; needs no context
+Checkout.tsx:Checkout => Checkout — does not suspend; never fails; does not wait; needs CartCtx
+Clock.tsx:Clock => Clock — does not suspend; never fails; does not wait; needs no context
+index.tsx:App => App — does not suspend; never fails; does not wait; needs no context
+
+##### 4: selective instanceof WITH rethrow (RateLimited)
+solid-yield check: 9 files, 0 errors
+
+ProductList.tsx:ProductList => ProductList — can suspend (pending); can fail with __nativeChunk; does not wait; needs CartCtx
+Details.tsx:Details => Details — can suspend (pending); can fail with __nativeChunk | NotFound; does not wait; needs no context
+Checkout.tsx:Checkout => Checkout — does not suspend; never fails; does not wait; needs CartCtx
+Clock.tsx:Clock => Clock — does not suspend; never fails; does not wait; needs no context
+index.tsx:App => App — does not suspend; never fails; does not wait; needs no context
+
+##### 5: selective instanceof WITHOUT rethrow
+ProductList.tsx:8:82 error TS95000: [CATCH_SWALLOWS] This catch discards ChunkError | RateLimited without handling; return a fallback value, rethrow, or mark the absorption intentional with @yield-absorb.
+solid-yield check: 9 files, 1 errors
+
+ProductList.tsx:ProductList => ProductList — can suspend (pending); never fails; does not wait; needs CartCtx
+Details.tsx:Details => Details — can suspend (pending); can fail with __nativeChunk | NotFound; does not wait; needs no context
+Checkout.tsx:Checkout => Checkout — does not suspend; never fails; does not wait; needs CartCtx
+Clock.tsx:Clock => Clock — does not suspend; never fails; does not wait; needs no context
+index.tsx:App => App — does not suspend; never fails; does not wait; needs no context
+

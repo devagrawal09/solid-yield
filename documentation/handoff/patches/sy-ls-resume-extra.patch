@@ -1,0 +1,92 @@
+diff --git a/packages/ts-plugin-yield/test/review3.test.cjs b/packages/ts-plugin-yield/test/review3.test.cjs
+index 9b499f4..aad00c2 100644
+--- a/packages/ts-plugin-yield/test/review3.test.cjs
++++ b/packages/ts-plugin-yield/test/review3.test.cjs
+@@ -44,3 +44,16 @@ test("review 3: parse error names its own file", () => {
+     service.dispose();
+   }
+ });
++test("review 3: an async memo without await still has a pending result", () => {
++  const source = `import {createMemo} from 'solid-js';import {render} from '@solidjs/web';export function App(){const n=createMemo(async()=>1);return <p>{n()}</p>};render(()=> <App/>,document.body)`;
++  const { service } = makeService({ "app.tsx": source });
++  try {
++    assert.ok(
++      service
++        .diagnostics(join(root, "app.tsx"))
++        .some(d => d.messageText.startsWith("[PENDING_ROOT]"))
++    );
++  } finally {
++    service.dispose();
++  }
++});
+diff --git a/packages/vite-plugin-yield/src/native-effects.js b/packages/vite-plugin-yield/src/native-effects.js
+index 1a57fba..b143cc7 100644
+--- a/packages/vite-plugin-yield/src/native-effects.js
++++ b/packages/vite-plugin-yield/src/native-effects.js
+@@ -147,10 +147,53 @@ export function lowerNativeEffects(files, report) {
+       },
+       Function(q) {
+         if (!asyncRoutines.has(`${file}:${q.node.start}`)) return;
++        const call = q.parentPath;
++        const callee = call.isCallExpression() ? call.get("callee") : null;
++        const api = callee?.isIdentifier()
++          ? imported(callee.scope.getBinding(callee.node.name)?.path)
++          : null;
++        const producer =
++          api?.source === "solid-js" &&
++          ["createMemo", "createProjection", "createOptimisticStore"].includes(api.name);
++        const kinds = [...(report.at(file, q.node.start ?? 0)?.fails ?? [])];
+         q.node.async = false;
+         if (q.isArrowFunctionExpression()) q.arrowFunctionToExpression();
+         q.node.generator = true;
+         q.node.returnType = null;
++        // An async producer still returns a promise when it has no await.
++        // Resolve the value after its authored reads, preserving that pending
++        // boundary without putting a delegated read inside a plain thunk.
++        if (producer && t.isBlockStatement(q.node.body)) {
++          const completion = value =>
++            attempt(
++              t.callExpression(
++                t.memberExpression(t.identifier("Promise"), t.identifier("resolve")),
++                [value]
++              ),
++              kinds
++            );
++          q.traverse({
++            Function(inner) {
++              inner.skip();
++            },
++            ReturnStatement(returned) {
++              const result = returned.scope.generateUidIdentifier("asyncResult");
++              returned.replaceWithMultiple([
++                t.variableDeclaration("const", [
++                  t.variableDeclarator(
++                    result,
++                    returned.node.argument ?? t.unaryExpression("void", t.numericLiteral(0))
++                  )
++                ]),
++                t.returnStatement(completion(t.identifier(result.name)))
++              ]);
++              returned.skip();
++            }
++          });
++          q.node.body.body.push(
++            t.returnStatement(completion(t.unaryExpression("void", t.numericLiteral(0))))
++          );
++        }
+       }
+     });
+     // Synchronous native throw sites are ordinary library raise operations.
+diff --git a/scripts/native-todos-events.mjs b/scripts/native-todos-events.mjs
+index 1c2ed01..c9e2010 100644
+--- a/scripts/native-todos-events.mjs
++++ b/scripts/native-todos-events.mjs
+@@ -65,7 +65,7 @@ if (step === "snapshot")
+       line,
+       code: 95000,
+       message:
+-        "[EVENT_REJECTS] This handler can fail with unknown and nothing catches it; wrap the body in try/catch, or declare the failure."
++        "[EVENT_REJECTS] This handler can fail with SyntaxError and nothing catches it; wrap the body in try/catch, or declare the failure."
+     }))
+   );
+ else {

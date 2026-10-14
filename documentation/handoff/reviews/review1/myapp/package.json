@@ -1,0 +1,16 @@
+{
+  "name": "myapp", "private": true, "type": "module",
+  "dependencies": {
+    "solid-yield": "link:../../sy-review/packages/yield",
+    "solid-js": "^2.0.0-rc.13",
+    "@solidjs/web": "^2.0.0-rc.13"
+  },
+  "devDependencies": {
+    "vite-plugin-solid-yield": "link:../../sy-review/packages/vite-plugin-yield",
+    "eslint-plugin-solid-yield": "link:../../sy-review/packages/eslint-plugin-yield",
+    "ts-plugin-solid-yield": "link:../../sy-review/packages/ts-plugin-yield",
+    "@solidjs/vite-plugin": "3.0.0-next.47",
+    "vite": "^8", "typescript": "~6.0", "eslint": "^10",
+    "@typescript-eslint/parser": "^8", "vitest": "^5", "jsdom": "^30"
+  }
+}

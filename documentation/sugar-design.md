@@ -2256,3 +2256,138 @@ form of the surface and a vitest case:
   attempt takes only what it throws before returning. Its rejection reaches
   the `await` on it and a continuation chained on it (`request.then(…)`).
 
+### Every path exercised; events as Solid types them; D-125 (2026-10-14)
+
+**Measuring what is exercised.** The surface check says every form is
+handled; it does not say every path of the checker is reached. Coverage
+was measured across the whole test system at once (each package's suite,
+the surface corpus, the example apps' native gate steps and the mutation
+run), with the checker's sources loaded as written so V8's counts map onto
+them line for line. Each unreached line was then probed with a program that
+should reach it: either the program found a gap (fixed, and the program
+became a test) or the line could not be reached (removed). What it found:
+
+- **Events.** A handler's parameter was `Event` beyond key, input and mouse
+  events: `e.pointerId`, `e.submitter`, `e.deltaY`, `e.relatedTarget`,
+  `e.dataTransfer`, `e.clipboardData` failed to type, and a destructured
+  parameter (`({ currentTarget }) => …`) was `unknown`. It is now the type
+  Solid gives that element's attribute, read from a table generated from
+  `@solidjs/web`'s own JSX types (`scripts/native-events.mjs` →
+  `src/native-events.js`) and written `NativeHandlerEvent<E, tag, kind>`,
+  which adds `currentTarget` and `target` as Solid does. A first version
+  looked each attribute up through `JSX.IntrinsicElements` and made
+  `solid-yield check` 50–80 % slower on apps with many handlers; the table
+  costs nothing measurable ("Measured", below). An attribute the table lacks takes the
+  lookup (`NativeEventOf`). `native-events.test.js` holds the table to the
+  installed Solid's and the type to Solid's handler parameter, for every
+  attribute of seven elements.
+- **Jumps across a catch.** `break` or `continue` leaving a `try` with a
+  `catch` inside a loop was refused (NATIVE_CONTROL_TRANSFER). It is a
+  completion record the try's helper returns, the jump made where the try
+  stood (`native-jumps.test.js`: the lowered functions compute what the
+  originals do). A jump out of `finally` stays refused.
+- **Components.** A component whose return was not a single JSX element
+  (`return n() > 1 ? <b/> : <i/>`, `cond && <p/>`, an array) was not
+  recognised as one and went unchecked: its body's reads were not
+  reported. See D-125 below.
+- **Callbacks.** A function of the file handed by name to an array method
+  (`items().map(scale)`) was refused (SUGAR_ESCAPE) where the inline
+  `items().map(x => scale(x))` was lowered. It is eta-expanded into an
+  inline callback (`(...args: Parameters<typeof scale>) => scale(...args)`,
+  the same calls) and lowered as one (S26). A generic, overloaded,
+  reassigned or `this`-taking function stays refused, as any routine handed
+  to an unknown consumer.
+- **Contexts.** The surface had no context in it; probing the one
+  unreached context path found that the common ways of reading one failed on
+  correct programs:
+  - a context's value read through its members without a guard
+    (`const s = useContext(Ctx); s.count()`) or destructured
+    (`const { count, bump } = useContext(Ctx)`, `const [count, { bump }]`)
+    failed to type (TS2349) where its slot is an accessor: the destructured
+    names were aliases the lowering read as sources before calling them. A
+    name destructured from a context's value is now that member, read where
+    the name is used (`count()` is `_context.count()`), as a value held
+    whole is; failure inference resolves a call through such a name, or
+    through a member chain off the value (`value[1].bump()`), to what each
+    provider put there;
+  - an action in a provider's value (`bump: () => setCount(…)`) was a write
+    in the provider's view (WRITE_IN_REACTIVE): its consumers call it, not the
+    provider's render, so a writing one is hosted by the event that calls it,
+    as a writing callback prop is (F-S40); the runtime checks the write where
+    it runs, as for every function handed to a child;
+  - `useContext(Ctx)` read in a hole (`<p>{useContext(Ctx).count()}</p>`,
+    a row's, a memo's) failed (GENERATED_TYPE): the requirement of a context
+    without a default is the component's and a view takes none. Such a read
+    is the component's: read once in the body and used where it was;
+  - a handler (`onClick={() => … useContext(Ctx) …}`) runs with no reactive
+    owner (Solid calls it from the DOM listener), where Solid 2's useContext
+    throws NoOwnerError, default or not: refused (NATIVE_CONTEXT), with the
+    fix;
+  - a handler read off a context (`onClick={clearCompleted}` once it is a
+    member) is called as it is: an action is an event call its handler waits
+    for (a prop's stays `?.`, an optional prop leaving no listener);
+  - a context called as a function (`Ctx({ value, children })`, review 3's
+    `solid2-call`) was lowered after failure inference had wrapped it, so its
+    component went unchecked (GENERATED_TYPE). The prelude now makes it its
+    JSX form before anything else reads it: what it provides is that form's.
+    The call evaluates its props before the context provides (an eager
+    `children: props.children` is created first) where the JSX form defers
+    them; the check reads them as the JSX form does, as review 3 asks. A key
+    with no JSX form (computed, a method, a getter) is refused
+    (NATIVE_CONTEXT). Solid 1's `<Ctx.Provider>` stays the context's
+    provider (review 3's `provider-member`).
+  - a provider's value holding a getter (`{ get count() { return n(); } }`)
+    or a store, against a slot declared as their values (`count: number`,
+    `[State, …]`), failed to type (LAZY_VIEW): the getter is a source over
+    its body (D-124) and the store is one. Facades (F-S52) retype such a slot
+    too, where the context names it (retyping the alias it names made the
+    alias circular), and an action's parameters take the slot's declared
+    types (they were `unknown`). Destructured, a getter-provided member is
+    read once in the body, as Solid's destructuring reads it: READ_IN_SETUP,
+    the lost-reactivity bug plain Solid has there; read through the value,
+    it is the hole's read.
+  The surface gains thirteen context constructs (a provider's accessor and
+  action read through each form, a getter read through the value and
+  destructured, a store, a default, the call form and its refused key);
+  `native-paths.test.js` the probes.
+- **Promise chains a body starts.** `fetch(url).then(setData)` in a
+  component's body, a chain that cannot fail, was taken as the body waiting
+  for it (NATIVE_SETUP_FAILURE), and its continuation as a bare event
+  `.then` could not take (TS2769). A chain that cannot fail runs on after its
+  host, as in Solid, and nothing waits for it (in any host); its continuation
+  is an event's, a plain callback to `.then`. One that may reject still has
+  no boundary in the body (NATIVE_SETUP_FAILURE, review 3).
+- **A braceless return** (`if (…) return n() > 9 ? <b/> : <i/>;`) was split
+  twice (D-125): wrapping it in a block revisited it, and the view itself was
+  hoisted as a value (SUGAR_ESCAPE). A return made a view is not revisited.
+- **Recursion.** A braceless early return (`if (d <= 0) return <i/>;`) is a
+  guard as a braced one is; a snapshot write may use pure `Math` calls.
+- **Positions.** A class expression's failure was named `__class`
+  (`const NotFound = class extends Error {}`); an impure snapshot write and
+  a reserved name were reported as TRANSFORM at line 1. Named by the
+  variable, and at the node, now.
+- **Lexical arrows.** An arrow component or row using `this` or
+  `arguments` was refused (SUGAR_LEXICAL); Babel's conversion keeps their
+  meaning, so it is lowered.
+- **Removed as unreachable.** A duplicate literal-throw refusal (the
+  inspection refuses first), raw-`await` checks in receiver and argument
+  lifting (awaits are attempts by then), the NATIVE_ACTION and NATIVE_HOST
+  guards, SUGAR_LEXICAL. `native-coverage.mjs` lists no unreachable code.
+- **Plumbing.** The Vite plugin's `ImportExpression` form of `lazy`, its
+  parse-error `id`s, its warnings under `emit: "lowered"` and its HMR cache
+  clearing; the ts-plugin's tsserver entry (`plugin.test.cjs`); the lint
+  plugin's autofix paths (a block-bodied child, a row's fix adding `view` to
+  the import, named and view-call children, spreads, `$` holes in an `h`
+  array, a row declared in a setup); each now tested.
+- **Proof S27** (`sugar.md`): a name destructured from a context's value is
+  the member Solid's destructuring holds; a getter's read stays at the
+  destructuring (`inline_getter_unsound` is why).
+
+**D-125 (Dev, 2026-10-14: "Keep D-041 in native").** JSX stays only a
+view's, a hole's or a row's return: a module-level JSX helper
+(SUGAR_COMPONENT), JSX held in a component's body and a local JSX arrow
+(`jsx-only-in-view`) stay refused, each now a construct of the surface. A
+function with JSX anywhere in what it returns (a ternary, a logical
+operator, an array, parentheses) is a component; what the return computes
+outside its JSX is computed in the body before the view, as in Solid (a
+read there is READ_IN_SETUP); `return null` and `return;` render nothing.

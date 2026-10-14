@@ -1444,6 +1444,62 @@ theorem plain_callback_unsound :
 
 end Callbacks
 
+/-! S27 Context members (2026-10-14). A name destructured from a context's
+value (`const { count, bump } = useContext(Ctx)`). Solid's provider sets the
+value once (P-CONTEXT): a data member (an accessor, an action, a store) is
+fixed then; a member given by a getter is an expression read when the
+property is. -/
+namespace Contexts
+
+open Insertion (Store Outcome)
+open Surface (Expr eval)
+
+/-- A member of a provided value. -/
+inductive Member where
+  | data (v : Nat)
+  | getter (e : Expr)
+
+/-- Reading the member in store `σ`. -/
+def readMember (σ : Store) : Member → Outcome × List Nat
+  | .data v => (.done v, [])
+  | .getter e => eval σ e
+
+/-- Solid's destructuring: the member is read once, in the body's store
+    `σ₀`; the name holds that outcome wherever it is used. -/
+def destructured (σ₀ : Store) (m : Member) : Outcome := (readMember σ₀ m).1
+
+/-- Read off the value where the name is used, in store `σ`. -/
+def inlined (σ : Store) (m : Member) : Outcome := (readMember σ m).1
+
+/-- A data member read where the name is used is the destructured value. -/
+theorem inline_data_sound (σ₀ σ : Store) (v : Nat) :
+    inlined σ (.data v) = destructured σ₀ (.data v) := rfl
+
+/-- The lowering: a data member is read where the name is used; a member a
+    provider gives by a getter keeps the body's read (the name is declared
+    from it there, READ_IN_SETUP where it reads a source). -/
+def lowerMember (σ₀ σ : Store) : Member → Outcome
+  | .data v => inlined σ (.data v)
+  | .getter e => destructured σ₀ (.getter e)
+
+theorem lowered_member_preserves (σ₀ σ : Store) (m : Member) :
+    lowerMember σ₀ σ m = destructured σ₀ m := by
+  cases m <;> rfl
+
+/-- The getter's read is the body's: what it reads is in the body's trace. -/
+theorem getter_read_in_body (σ₀ : Store) (s v : Nat) (h : σ₀ s = some v) :
+    readMember σ₀ (.getter (.read s)) = (.done v, [s]) := by
+  simp [readMember, eval, h]
+
+/-- Inlining a getter would read it where the name is used: not Solid's
+    value once the source has changed. -/
+theorem inline_getter_unsound :
+    ∃ (σ₀ σ : Store) (e : Expr), inlined σ (.getter e) ≠ destructured σ₀ (.getter e) :=
+  ⟨fun _ => some 0, fun _ => some 1, .read 0, by
+    simp [inlined, destructured, readMember, eval]⟩
+
+end Contexts
+
 #print axioms write_admitted_iff
 #print axioms event_phase_runs_in_caller
 #print axioms hook_requirement_provided
@@ -1510,5 +1566,9 @@ end Callbacks
 #print axioms Callbacks.each_preserves
 #print axioms Callbacks.callback_raise_fails_host
 #print axioms Callbacks.plain_callback_unsound
+#print axioms Contexts.inline_data_sound
+#print axioms Contexts.lowered_member_preserves
+#print axioms Contexts.getter_read_in_body
+#print axioms Contexts.inline_getter_unsound
 end Sugar
 end Yield

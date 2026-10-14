@@ -31,6 +31,31 @@ test("unselected source retains TypeScript errors and native selection is explic
   }
   assert.throws(() => makeService({}, { mode: "native" }), /NATIVE_INCLUDE/);
 });
+// an unselected file keeps TypeScript's message chain: reading it as a string
+// threw, and the file lost every diagnostic (the CLI crashed)
+test("TypeScript's errors with a message chain pass through, selected or not", () => {
+  const chained =
+    "function f(cb: (a: { k: number }) => void) { return cb; }\nf((a: { k: string }) => {});\n";
+  const plain = makeService({ "plain.ts": chained }, {});
+  const native = makeService({ "app.tsx": chained + "export function App() { return <p />; }" });
+  try {
+    for (const [service, file] of [
+      [plain.service, "plain.ts"],
+      [native.service, "app.tsx"]
+    ]) {
+      const [d, ...rest] = service.diagnostics(join(root, file));
+      assert.deepEqual(rest, []);
+      assert.equal(d.code, 2345);
+      assert.match(
+        plain.ts.flattenDiagnosticMessageText(d.messageText, "\n"),
+        /Types of parameters 'a' and 'a' are incompatible/
+      );
+    }
+  } finally {
+    plain.service.dispose();
+    native.service.dispose();
+  }
+});
 test("cross-file colors come from the generated imported component", () => {
   const { service } = makeService({
     "child.tsx":

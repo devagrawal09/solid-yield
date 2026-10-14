@@ -20,6 +20,8 @@ module.exports = Object.freeze({
     "Read this source in the effect's compute and pass the value; the effect phase runs once and does not wait for pending data.",
   NO_PROVIDER: "Add a context provider above this component; this context has no default value.",
   SETTLED_PROP: "Pass a ready value, or allow a pending source in this prop's type.",
+  PROP_TYPE:
+    "Declare this prop's type in the component's props; a bare `any` or `unknown` could hide a pending or failing value.",
   NATIVE_CALLBACK_FAILURE: "Catch the failure inside this callback.",
   NATIVE_SETUP_FAILURE:
     "Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.",

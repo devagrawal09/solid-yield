@@ -60,12 +60,6 @@
         {
           "line": 5,
           "column": 14,
-          "tsCode": 2345,
-          "message": "[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data."
-        },
-        {
-          "line": 5,
-          "column": 14,
           "tsCode": 1360,
           "message": "[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data."
         }
@@ -74,13 +68,13 @@
     {
       "slot": "T08",
       "file": "packages/ts-plugin-yield/test/fixtures/mistakes/colored-prop.tsx",
-      "source": "import { createMemo } from \"solid-js\";\nfunction TodoCount(props: { count: number }) {\n  return <p>{props.count}</p>;\n}\nexport function App() {\n  const count = createMemo(async () => 1);\n  return <TodoCount count={count()} />;\n}\n",
+      "source": "import { createMemo } from \"solid-js\";\nimport { render } from \"@solidjs/web\";\nfunction TodoCount(props: { count: number }) {\n  return <p>{props.count}</p>;\n}\nexport function App() {\n  const count = createMemo(async () => 1);\n  return <TodoCount count={count()} />;\n}\nrender(App, document.body);\n",
       "diagnostics": [
         {
-          "line": 7,
-          "column": 21,
-          "tsCode": 2322,
-          "message": "[SETTLED_PROP] Pass a ready value, or allow a pending source in this prop's type."
+          "line": 8,
+          "column": 28,
+          "tsCode": 1360,
+          "message": "[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data."
         }
       ]
     },
@@ -91,9 +85,9 @@
       "diagnostics": [
         {
           "line": 4,
-          "column": 21,
+          "column": 17,
           "tsCode": 2769,
-          "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
+          "message": "[JSX_IN_SETUP] Return this JSX from the component's view."
         }
       ]
     },
@@ -118,8 +112,8 @@
         {
           "line": 3,
           "column": 14,
-          "tsCode": 95000,
-          "message": "[SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event."
+          "tsCode": 2345,
+          "message": "[CREATE_OUTSIDE_SETUP] Create this state in the component body, before returning JSX."
         }
       ]
     },
@@ -130,15 +124,126 @@
       "diagnostics": [
         {
           "line": 5,
-          "column": 27,
-          "tsCode": 2345,
-          "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: Identity."
-        },
-        {
-          "line": 5,
-          "column": 27,
+          "column": 16,
           "tsCode": 1360,
           "message": "[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: Identity."
+        }
+      ]
+    },
+    {
+      "slot": "C01",
+      "file": "packages/ts-plugin-yield/test/fixtures/mistakes/event-create.tsx",
+      "source": "import { createSignal } from \"solid-js\";\nexport function Counter() {\n  const [count, setCount] = createSignal(0);\n  const add = () => {\n    const [step] = createSignal(1);\n    setCount(count() + step());\n  };\n  return <button onClick={add}>{count()}</button>;\n}\n",
+      "diagnostics": [
+        {
+          "line": 5,
+          "column": 20,
+          "tsCode": 2345,
+          "message": "[CREATE_OUTSIDE_SETUP] Create this state in the component body, before returning JSX."
+        }
+      ]
+    },
+    {
+      "slot": "C02",
+      "file": "packages/ts-plugin-yield/test/fixtures/mistakes/phase-create.tsx",
+      "source": "import { createEffect, createSignal } from \"solid-js\";\nexport function Mirror() {\n  const [count, setCount] = createSignal(0);\n  createEffect(\n    () => count(),\n    value => {\n      const [copy] = createSignal(value);\n      console.log(copy());\n    }\n  );\n  return <button onClick={() => setCount(count() + 1)}>{count()}</button>;\n}\n",
+      "diagnostics": [
+        {
+          "line": 7,
+          "column": 22,
+          "tsCode": 2345,
+          "message": "[CREATE_OUTSIDE_SETUP] Create this state in the component body, before returning JSX."
+        }
+      ]
+    },
+    {
+      "slot": "C03",
+      "file": "packages/ts-plugin-yield/test/fixtures/mistakes/when-write.tsx",
+      "source": "import { createSignal, Show } from \"solid-js\";\nexport function Banner() {\n  const [count, setCount] = createSignal(1);\n  return (\n    <Show when={(setCount(2), count() > 0)}>\n      <p>shown</p>\n    </Show>\n  );\n}\n",
+      "diagnostics": [
+        {
+          "line": 5,
+          "column": 18,
+          "tsCode": 2769,
+          "message": "[WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state."
+        }
+      ]
+    },
+    {
+      "slot": "C04",
+      "file": "packages/ts-plugin-yield/test/fixtures/mistakes/each-create.tsx",
+      "source": "import { createMemo, createSignal, For } from \"solid-js\";\nexport function Names() {\n  const [names] = createSignal([\"a\", \"b\"]);\n  return (\n    <ul>\n      <For each={createMemo(() => names().slice())()}>{name => <li>{name}</li>}</For>\n    </ul>\n  );\n}\n",
+      "diagnostics": [
+        {
+          "line": 6,
+          "column": 18,
+          "tsCode": 2769,
+          "message": "[CREATE_OUTSIDE_SETUP] Create this state in the component body, before returning JSX."
+        }
+      ]
+    },
+    {
+      "slot": "C05",
+      "file": "packages/ts-plugin-yield/test/fixtures/mistakes/prop-write.tsx",
+      "source": "import { createSignal } from \"solid-js\";\nfunction Label(props: { value: number }) {\n  return <p>{props.value}</p>;\n}\nexport function Counter() {\n  const [count, setCount] = createSignal(1);\n  return <Label value={(setCount(2), count())} />;\n}\n",
+      "diagnostics": [
+        {
+          "line": 7,
+          "column": 25,
+          "tsCode": 2322,
+          "message": "[WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state."
+        }
+      ]
+    },
+    {
+      "slot": "C06",
+      "file": "packages/ts-plugin-yield/test/fixtures/mistakes/call-create.tsx",
+      "source": "import { createMemo, createSignal, Errored } from \"solid-js\";\nconst money = (n: number) => \"$\" + n;\nexport function Price() {\n  const [cents] = createSignal(100);\n  return (\n    <Errored fallback={<p>error</p>}>\n      <p>{money(createMemo(() => cents() / 100)())}</p>\n    </Errored>\n  );\n}\n",
+      "diagnostics": [
+        {
+          "line": 7,
+          "column": 17,
+          "tsCode": 2769,
+          "message": "[CREATE_OUTSIDE_SETUP] Create this state in the component body, before returning JSX."
+        }
+      ]
+    },
+    {
+      "slot": "C07",
+      "file": "packages/ts-plugin-yield/test/fixtures/mistakes/phase-pending.tsx",
+      "source": "import { createMemo, createEffect } from \"solid-js\";\nexport function App() {\n  const id = createMemo(async () => 1);\n  const name = createMemo(async () => \"x\");\n  createEffect(\n    () => id(),\n    value => console.log(value, name())\n  );\n  return <p>x</p>;\n}\n",
+      "diagnostics": [
+        {
+          "line": 7,
+          "column": 33,
+          "tsCode": 2345,
+          "message": "[PENDING_IN_EFFECT] Read this source in the effect's compute and pass the value; the effect phase runs once and does not wait for pending data."
+        }
+      ]
+    },
+    {
+      "slot": "C08",
+      "file": "packages/ts-plugin-yield/test/fixtures/mistakes/setup-write.tsx",
+      "source": "import { createSignal } from \"solid-js\";\nexport function App() {\n  const [n, setN] = createSignal(1);\n  setN(2);\n  return <p>{n()}</p>;\n}\n",
+      "diagnostics": [
+        {
+          "line": 4,
+          "column": 3,
+          "tsCode": 2769,
+          "message": "[WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state."
+        }
+      ]
+    },
+    {
+      "slot": "C09",
+      "file": "packages/ts-plugin-yield/test/fixtures/mistakes/spread-rejects.tsx",
+      "source": "import { createSignal } from \"solid-js\";\nexport function App() {\n  const [text, setText] = createSignal(\"\");\n  const attrs = { onClick: async () => setText(await (await fetch(\"/x\")).text()) };\n  return <button {...attrs}>{text()}</button>;\n}\n",
+      "diagnostics": [
+        {
+          "line": 4,
+          "column": 28,
+          "tsCode": 95000,
+          "message": "[EVENT_REJECTS] This handler can fail with TypeError | DOMException and nothing catches it; wrap the body in try/catch, or declare the failure."
         }
       ]
     }

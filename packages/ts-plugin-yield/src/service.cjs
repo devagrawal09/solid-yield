@@ -112,10 +112,7 @@ function colorSummary(ts, checker, node, tuple) {
   function show(t) {
     if (!t || t.flags & ts.TypeFlags.Never) return "none";
     if (t.isUnion()) return [...new Set(t.types.map(show))].join(" | ");
-    if (t.aliasSymbol?.name === "NativeFailure") {
-      const args = t.aliasTypeArguments;
-      return args?.length ? failureName(args[0]) : "unknown";
-    }
+    // a class: its instances carry its symbol, never an alias's
     if (t.symbol?.name === "NativeFailure") {
       const args = checker.getTypeArguments(t);
       return args?.length ? failureName(args[0]) : "unknown";
@@ -334,6 +331,8 @@ function createVirtualService(ts, host, config = {}) {
       length = d.length ?? 0,
       message = ts.flattenDiagnosticMessageText(d.messageText, "\n");
     let code = Object.keys(catalog).find(k => message.includes(`[${k}]`));
+    // a prop of `any` or `unknown` (D-034's DeclareProp): its caller's error
+    if (!code && /\bDeclareProp</.test(message)) code = "PROP_TYPE";
     // TS rejects a host's generator at its wrapper. Find the inadmissible
     // operation in that rejected generator using its library operation type.
     const node = leafAt(ts, sf, start);
@@ -427,9 +426,14 @@ function createVirtualService(ts, host, config = {}) {
       const at = locate(s.positions.get(sf.fileName), span(culprit).start, span(culprit).length);
       const call = culprit.node.expression;
       if ((at && !at.generated) || !ts.isCallExpression(call)) break;
-      // a generated wrapper around an inline routine (`__nativeHole(function* () { … })`)
-      // or a call of a routine bound by name
-      const inline = call.arguments.find(a => ts.isFunctionExpression(a) && !!a.asteriskToken);
+      // a generated wrapper around an inline routine (`__nativeHole(function* () { … })`),
+      // one called where it stands (a foreign call's lifted arguments), or a
+      // call of a routine bound by name
+      const inline =
+        call.arguments.find(a => ts.isFunctionExpression(a) && !!a.asteriskToken) ??
+        (ts.isFunctionExpression(call.expression) && call.expression.asteriskToken
+          ? call.expression
+          : undefined);
       const declaration =
         !inline && ts.isIdentifier(call.expression)
           ? checker.getSymbolAtLocation(call.expression)?.valueDeclaration
@@ -443,6 +447,13 @@ function createVirtualService(ts, host, config = {}) {
       const inner = operationsOf(routine).find(y => kind.test(y.type));
       if (!inner) break;
       culprit = inner;
+    }
+    // a read in JSX the body builds: the JSX is what is out of place (D-041)
+    if (code === "READ_IN_SETUP" && culprit) {
+      let jsx;
+      for (let n = culprit.node.parent; n && !ts.isFunctionLike(n); n = n.parent)
+        if (ts.isJsxElement(n) || ts.isJsxSelfClosingElement(n) || ts.isJsxFragment(n)) jsx = n;
+      if (jsx) [code, culprit] = ["JSX_IN_SETUP", { node: jsx }];
     }
     if (culprit) ({ start, length } = span(culprit));
     let at =
@@ -752,14 +763,16 @@ function createVirtualService(ts, host, config = {}) {
     const result = s.diagnosticCache.get(kind).filter(d => resolve(d.file.fileName) === f);
     // Satisfies and the following call reject the same root. Keep one public
     // diagnostic, while preserving ordinary TypeScript errors at that span.
-    const rootCode = d => /^\[(PENDING_ROOT|NO_PROVIDER|FOREIGN_HANDOFF)\]/.test(d.messageText);
+    // TypeScript's own diagnostics may carry a message chain, not a string.
+    const text = d => ts.flattenDiagnosticMessageText(d.messageText, "\n");
+    const rootCode = d => /^\[(PENDING_ROOT|NO_PROVIDER|FOREIGN_HANDOFF)\]/.test(text(d));
     const moduleError = result.some(
-      d => d.category === ts.DiagnosticCategory.Error && d.messageText.startsWith("[MODULE_STATE]")
+      d => d.category === ts.DiagnosticCategory.Error && text(d).startsWith("[MODULE_STATE]")
     );
     const withoutCascades = result.filter(
       d =>
-        (!(moduleError && d.messageText.startsWith("[generated] [GENERATED_TYPE]")) &&
-          !d.messageText.includes("Fix the earlier errors")) ||
+        (!(moduleError && text(d).startsWith("[generated] [GENERATED_TYPE]")) &&
+          !text(d).includes("Fix the earlier errors")) ||
         !result.some(
           other => other !== d && other.category === ts.DiagnosticCategory.Error && !rootCode(other)
         )

@@ -90,11 +90,9 @@ module.exports = function origins(ts, state, target, code, locate) {
       }
       if (kinds.includes("bind")) host = "event";
       if (kinds.includes("create")) host = "effect";
+      // the lowering binds and creates by calls (`yield* $event(…)`, `yield* createSignal(…)`)
       if (ts.isCallExpression(expr)) {
         const found = declaration(expr.expression, host);
-        if (found) return found;
-      } else if (ts.isIdentifier(expr)) {
-        const found = declaration(expr, host);
         if (found) return found;
       }
       let found;

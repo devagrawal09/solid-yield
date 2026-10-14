@@ -19,9 +19,12 @@ counted as caught mistakes.
 
 Each source link is a complete native `.tsx` file. Lines below refer to authored
 source, not generated code. Every row is asserted by the package tests. R06 is
-still a transform refusal, now at its authored expression. R08 reports the context read whose provider is missing, with the root handoff
-as a related location. L05's reactive eager JSX is rejected
-for its setup read at the bad expression.
+the creation in a hole, at its authored expression (it was a transform refusal). R08 reports the context read whose provider is missing, with the root handoff
+as a related location. L05's eager JSX is rejected at the JSX the body
+builds: its hole is reactive in Solid, but the element is built once, in the
+setup, outside the view (D-041; until 2026-10-14 it was reported as the read in
+it, `READ_IN_SETUP`, whose advice did not fit). C01–C09 are the checker
+contract's own cases (`locality.test.cjs`), not review slots.
 
 | Review slot | Native source | Line:column | Actual diagnostic |
 | --- | --- | --- | --- |
@@ -29,12 +32,21 @@ for its setup read at the bad expression.
 | L02 | [setup-label.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/setup-label.tsx) | 5:25 | TS2769 `[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive.` |
 | R04 | [setup-branch.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/setup-branch.tsx) | 4:17 | TS2769 `[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive.` |
 | T05 | [effect-arity.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/effect-arity.tsx) | 4:3 | TS95000 `[NATIVE_EFFECT_PHASES] Pass a tracked compute function and an untracked effect function to createEffect.` |
-| T07 | [pending-root.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/pending-root.tsx) | 5:14 | TS2345 `[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.` |
+| T07 | [pending-root.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/pending-root.tsx) | 5:14 | TS1360 `[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.` |
 | T08 | [colored-prop.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/colored-prop.tsx) | 8:28 | TS1360 `[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data.` (D-119: the pending value flows through the plain-typed prop into the child; unhandled, it reports at its read) |
-| L05 | [eager-jsx.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/eager-jsx.tsx) | 4:21 | TS2769 `[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive.` |
+| L05 | [eager-jsx.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/eager-jsx.tsx) | 4:17 | TS2769 `[JSX_IN_SETUP] Return this JSX from the component's view.` |
 | R05 | [memo-write.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/memo-write.tsx) | 5:5 | TS2345 `[WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state.` |
-| R06 | [hole-create.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/hole-create.tsx) | 3:14 | TS95000 `[SUGAR_CALLBACK] Move this reactive read into JSX, a memo, an effect, or an event.` |
-| R08 | [missing-context.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/missing-context.tsx) | 5:27 | TS2345 `[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: Identity.` |
+| R06 | [hole-create.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/hole-create.tsx) | 3:14 | TS2345 `[CREATE_OUTSIDE_SETUP] Create this state in the component body, before returning JSX.` |
+| R08 | [missing-context.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/missing-context.tsx) | 5:16 | TS1360 `[NO_PROVIDER] Add a context provider above this component; this context has no default value. Missing: Identity.` |
+| C01 | [event-create.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/event-create.tsx) | 5:20 | TS2345 `[CREATE_OUTSIDE_SETUP] Create this state in the component body, before returning JSX.` |
+| C02 | [phase-create.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/phase-create.tsx) | 7:22 | TS2345 `[CREATE_OUTSIDE_SETUP] Create this state in the component body, before returning JSX.` |
+| C03 | [when-write.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/when-write.tsx) | 5:18 | TS2769 `[WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state.` |
+| C04 | [each-create.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/each-create.tsx) | 6:18 | TS2769 `[CREATE_OUTSIDE_SETUP] Create this state in the component body, before returning JSX.` |
+| C05 | [prop-write.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/prop-write.tsx) | 7:25 | TS2322 `[WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state.` |
+| C06 | [call-create.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/call-create.tsx) | 7:17 | TS2769 `[CREATE_OUTSIDE_SETUP] Create this state in the component body, before returning JSX.` |
+| C07 | [phase-pending.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/phase-pending.tsx) | 7:33 | TS2345 `[PENDING_IN_EFFECT] Read this source in the effect's compute and pass the value; the effect phase runs once and does not wait for pending data.` |
+| C08 | [setup-write.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/setup-write.tsx) | 4:3 | TS2769 `[WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state.` |
+| C09 | [spread-rejects.tsx](../packages/ts-plugin-yield/test/fixtures/mistakes/spread-rejects.tsx) | 4:28 | TS95000 `[EVENT_REJECTS] This handler can fail with TypeError | DOMException and nothing catches it; wrap the body in try/catch, or declare the failure.` |
 
 The [machine-readable evidence](sugar-typing-evidence.json) contains the full
 sources, every reported diagnostic and all three hovers. Reproduce it with

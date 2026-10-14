@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-solid-yield",
-  "description": "ESLint rules for solid-yield: the rules of its strict dialect that TypeScript cannot express (19 rules; `recommended`: 17 errors, 2 warnings). The type-aware rules need @typescript-eslint/parser.",
+  "description": "ESLint rules for solid-yield: the rules of its strict dialect that TypeScript cannot express (20 rules; `recommended`: 18 errors, 2 warnings). The type-aware rules need @typescript-eslint/parser.",
   "version": "0.0.0",
   "author": "Dev Agrawal <dev@codemod.com>",
   "license": "MIT",

@@ -76,7 +76,7 @@ The neighbours of a view, for completeness:
 
 ## Every code, by layer
 
-Counted against the code (2026-10-06): 4 transform codes (`REFUSALS` in `vite-plugin-solid-yield`), 23 development errors, 12 type-level messages, 19 lint rules (17 errors and 2 warnings in `recommended`).
+Counted against the code (2026-10-06): 4 transform codes (`REFUSALS` in `vite-plugin-solid-yield`), 23 development errors, 12 type-level messages, 20 lint rules (18 errors and 2 warnings in `recommended`; the lint count rechecked 2026-10-14, `no-read-in-setup` had been left out).
 
 **The transform** (`vite-plugin-solid-yield`). A compile error lists each refusal as `[CODE] message (line:column)`. The lint rule `yield-in-jsx-hole` reports the same list.
 

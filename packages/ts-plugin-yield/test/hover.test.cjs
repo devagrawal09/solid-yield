@@ -44,3 +44,19 @@ export function Counter(){
     service.dispose();
   }
 });
+
+test("a position only the generated program has a hover for points to the component's", () => {
+  const { service } = makeService({ "colors.tsx": source });
+  try {
+    // the `(` of a handler that is a generator in the generated program
+    const at = source.indexOf("onClick={() =>") + "onClick={".length;
+    const qi = service.quickInfo(join(root, "colors.tsx"), at);
+    assert.equal(
+      qi?.displayParts.map(p => p.text).join(""),
+      "See the component hover for its checks."
+    );
+    assert.equal(qi.textSpan.start, at);
+  } finally {
+    service.dispose();
+  }
+});

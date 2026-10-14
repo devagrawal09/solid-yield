@@ -947,6 +947,79 @@ export function App() {
 }`,
     ["EVENT_REJECTS"]
   ],
+  // a helper mapping over an array with a read in its callback: the read is
+  // its caller's (a memo's, a hole's; in the body it is read once)
+  ...[
+    ["helper-map-memo", "const m = createMemo(() => scaled([1, 2]).join());", "<p>{m()}</p>", []],
+    ["helper-map-hole", "", "<p>{scaled([3]).join()}</p>", []],
+    ["helper-map-body", "const once = scaled([4]);", "<p>{once.join()}</p>", ["READ_IN_SETUP"]]
+  ].map(([name, body, view, expected]) => [
+    name,
+    `import { createSignal, createMemo } from "solid-js";
+export function App() {
+  const [n] = createSignal(1);
+  function scaled(xs: number[]) {
+    return xs.map(x => x * n());
+  }
+  ${body}
+  return ${view};
+}`,
+    expected
+  ]),
+  // JSX built in a component's body: the JSX is out of place (D-041), also
+  // when it holds a read or is handed to a function there
+  [
+    "jsx-in-body-read",
+    `import { createSignal } from "solid-js";
+export function App() {
+  const [n] = createSignal(1);
+  const views = [<p>{n()}</p>, <b>{n()}</b>];
+  return <div>{views}</div>;
+}`,
+    ["JSX_IN_SETUP"]
+  ],
+  [
+    "jsx-in-body-argument",
+    `import { createSignal } from "solid-js";
+declare function keep(e: unknown): void;
+export function App() {
+  const [n] = createSignal(1);
+  keep(<p>{n()}</p>);
+  return <div>{n()}</div>;
+}`,
+    ["JSX_IN_SETUP"]
+  ],
+  // a prop of any or unknown is declared at the component, reported at both
+  [
+    "prop-any",
+    `function Child(props: { icon: any; label: unknown }) {
+  return <i>{props.icon}</i>;
+}
+export function App() {
+  return <Child icon={<svg />} label="x" />;
+}`,
+    ["PROP_TYPE"]
+  ],
+  // an effect reading a failing memo at the root: the failure is the memo's
+  [
+    "effect-reads-failing-memo-at-root",
+    `import { createSignal, createMemo, createEffect } from "solid-js";
+import { render } from "@solidjs/web";
+function App() {
+  const [n] = createSignal(1);
+  const checked = createMemo(() => {
+    if (n() > 5) throw new RangeError("big");
+    return n();
+  });
+  createEffect(
+    () => checked(),
+    v => console.log(v)
+  );
+  return <p>{n()}</p>;
+}
+render(() => <App />, document.body);`,
+    ["FOREIGN_HANDOFF"]
+  ],
   // a function expression handed by name to an array method
   [
     "named-function-expression-callback",
@@ -1210,6 +1283,71 @@ describe("native lowering paths, checked as plain Solid says", { timeout: 300_00
       r => r.includes("class-expression-error.tsx") && r.includes("FOREIGN_HANDOFF")
     );
     expect(row).toMatch(/Remaining: NotFound\./);
+  });
+
+  it("reports a failure an effect reads at the memo that throws", () => {
+    const rows = result.log.filter(
+      r => r.includes("effect-reads-failing-memo-at-root.tsx") && / error TS/.test(r)
+    );
+    expect(
+      rows.map(r =>
+        r
+          .match(/\.tsx:(\d+):(\d+)/)
+          ?.slice(1)
+          .join(":")
+      ),
+      rows.join("\n")
+    ).toEqual(["6:18"]);
+    expect(rows[0]).toMatch(/Remaining: RangeError\./);
+    // the root that renders it is the related location
+    expect(result.log.join("\n")).toMatch(
+      /related: \S*effect-reads-failing-memo-at-root\.tsx:15:15: The app is rendered here\./
+    );
+  });
+
+  it("a context from another module provides through its Provider", () => {
+    const files = [
+      [
+        "ctx",
+        'import { createContext } from "solid-js";\nexport const Theme = createContext("light");\nexport const Count = createContext<() => number>();'
+      ],
+      [
+        "app",
+        `import { createSignal, useContext } from "solid-js";
+import { Theme, Count } from "./ctx";
+function Show() {
+  const theme = useContext(Theme);
+  const count = useContext(Count);
+  return <p>{theme}{count()}</p>;
+}
+export function App() {
+  const [n] = createSignal(1);
+  return (
+    <Theme.Provider value="dark">
+      <Count.Provider value={n}>
+        <Show />
+      </Count.Provider>
+    </Theme.Provider>
+  );
+}`
+      ],
+      [
+        "main",
+        'import { render } from "@solidjs/web";\nimport { App } from "./app";\nrender(() => <App />, document.body);'
+      ]
+    ];
+    const provided = checkProject(`${base}-provider`, files);
+    expect([...provided.codes.values()].flat(), provided.log.join("\n")).toEqual([]);
+    // without its Count.Provider, the root lacks it
+    files[1][1] = files[1][1]
+      .replace("<Count.Provider value={n}>", "")
+      .replace("</Count.Provider>", "");
+    const missing = checkProject(`${base}-provider`, files);
+    rmSync(`${base}-provider`, { recursive: true, force: true });
+    expect([...new Set(missing.codes.get("app"))].sort(), missing.log.join("\n")).toEqual([
+      "FOREIGN_HANDOFF",
+      "NO_PROVIDER"
+    ]);
   });
 
   it("reserves the entry adapter's name", () => {

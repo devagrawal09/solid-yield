@@ -46,7 +46,8 @@ module.exports = [
   {
     slot: "L05",
     file: "eager-jsx",
-    code: "READ_IN_SETUP",
+    // the hole is reactive in Solid; the element is built once, outside the view (D-041)
+    code: "JSX_IN_SETUP",
     line: 4
   },
   {

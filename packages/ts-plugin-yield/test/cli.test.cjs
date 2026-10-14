@@ -46,3 +46,41 @@ test("CLI reads tsconfig selection and exits nonzero with an authored diagnostic
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });
+test("CLI: usage for another command or no directory; a stack and 1 when it cannot check", () => {
+  const cli = args =>
+    spawnSync(process.execPath, [path.join(__dirname, "../src/cli.cjs"), ...args], {
+      encoding: "utf8"
+    });
+  for (const args of [[], ["check"], ["lint", "."]]) {
+    const result = cli(args);
+    assert.equal(result.status, 2);
+    assert.match(result.stderr, /^Usage: solid-yield check <dir> \[--native <include-glob>\]/);
+  }
+  const nowhere = fs.mkdtempSync(path.join(require("node:os").tmpdir(), "sy-cli-"));
+  try {
+    const missing = cli(["check", nowhere]);
+    assert.equal(missing.status, 1);
+    assert.match(missing.stderr, /^Error: No tsconfig\.json found\.\n {4}at check/);
+    // a TypeScript error with a message chain is printed whole (it crashed the check)
+    fs.writeFileSync(
+      path.join(nowhere, "tsconfig.json"),
+      JSON.stringify({
+        compilerOptions: { strict: true, noEmit: true, types: [] },
+        include: ["*.ts"]
+      })
+    );
+    fs.writeFileSync(
+      path.join(nowhere, "a.ts"),
+      "function f(cb: (a: { k: number }) => void) { return cb; }\nf((a: { k: string }) => {});\n"
+    );
+    const chained = cli(["check", nowhere]);
+    assert.equal(chained.status, 1, chained.stderr);
+    assert.match(
+      chained.stdout,
+      /a\.ts:2:3 error TS2345: .*\n {2}Types of parameters 'a' and 'a' are incompatible\./
+    );
+    assert.match(chained.stdout, /1 files, 1 errors/);
+  } finally {
+    fs.rmSync(nowhere, { recursive: true, force: true });
+  }
+});

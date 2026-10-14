@@ -1271,14 +1271,18 @@ function surface(
                   local = spec.local.name;
           if (!local) {
             local = program.scope.generateUid("onCleanup");
-            const source = program.node.body.find(
-              /** @param {any} d */ d =>
-                t.isImportDeclaration(d) && d.source.value === "solid-js" && d.importKind !== "type"
+            // beside the effect's own import: it is Solid's (`api.module` above)
+            const source = /** @type {import("@babel/core").types.ImportDeclaration} */ (
+              program.node.body.find(
+                /** @param {any} d */ d =>
+                  t.isImportDeclaration(d) &&
+                  d.source.value === "solid-js" &&
+                  d.importKind !== "type"
+              )
             );
-            const spec = t.importSpecifier(t.identifier(local), t.identifier("onCleanup"));
-            if (source && t.isImportDeclaration(source)) source.specifiers.push(spec);
-            else
-              program.node.body.unshift(t.importDeclaration([spec], t.stringLiteral("solid-js")));
+            source.specifiers.push(
+              t.importSpecifier(t.identifier(local), t.identifier("onCleanup"))
+            );
             program.scope.crawl();
           }
           for (const ret of returns) {

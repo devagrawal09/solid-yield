@@ -29,7 +29,7 @@ for (const path of walk(join(root, "packages/vite-plugin-yield/src"))) {
     add(m[1], relative(root, path));
   for (const m of code.matchAll(/\bnativeRefusal\([^;]*?"([A-Z][A-Z0-9_]+)"/g))
     add(m[1], relative(root, path));
-  for (const m of code.matchAll(/`\[([A-Z][A-Z0-9_]+)\] /g)) add(m[1], relative(root, path));
+  for (const m of code.matchAll(/[`"]\[([A-Z][A-Z0-9_]+)\] /g)) add(m[1], relative(root, path));
 }
 const catalog = join(root, "packages/ts-plugin-yield/src/catalog.cjs");
 for (const m of read(catalog).matchAll(/^\s{2}([A-Z][A-Z_]+):/gm))

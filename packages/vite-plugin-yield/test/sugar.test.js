@@ -1,6 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { resolve } from "node:path";
-import { isSugar, lowerSugarProject } from "../src/sugar.js";
+import { isSugar, lowerSugarFile, lowerSugarProject } from "../src/sugar.js";
+import { lowerNativeFile } from "../src/native.js";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { transform } from "../src/transform.js";
 const id = resolve(import.meta.dirname, "fixtures/sugar.tsx");
 const lower = code => lowerSugarProject(new Map([[id, code]])).files.get(id);
@@ -45,6 +48,35 @@ describe("sugar: existing library semantics", { timeout: 30_000 }, () => {
     expect(out.get(helper)).toContain("function* read");
     expect(out.get(id)).toContain("yield* get(n)");
     expect(out.get(id)).toContain("yield* set((yield* get(n)) + 1)");
+  });
+  it("refuses a program whose routines do not settle within the fixpoint's bound", () => {
+    const helper = resolve(import.meta.dirname, "fixtures/sugar-helper.ts");
+    const files = new Map([
+      [helper, `${start} export function read(n: Source<number>) { return n(); }`],
+      [
+        id,
+        `${start} import { read } from "./sugar-helper";
+        function Counter() { const [n] = $signal(0); const x = $memo(() => read(n));
+          return <p>{x()}</p>; }`
+      ]
+    ]);
+    // a helper inferred as a routine changes its callers in the next round
+    expect(() => lowerSugarProject(files, { rounds: 1 })).toThrow(/\[SUGAR_FIXPOINT\]/);
+    expect(lowerSugarProject(files).files.get(id)).toContain("yield* read(n)");
+  });
+  it("needs the project's tsconfig.json, in sugar and native mode", () => {
+    const dir = mkdtempSync(resolve(tmpdir(), "no-config-"));
+    const file = resolve(dir, "app.tsx");
+    try {
+      expect(() => lowerSugarFile(`${start} export const a = 1;`, file)).toThrow(
+        /^\[SUGAR_PROJECT\] /
+      );
+      expect(() => lowerNativeFile("export const a = 1;", file, () => true, new Map())).toThrow(
+        /^\[NATIVE_PROJECT\] /
+      );
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
   it("keeps branch order, loops and early returns in an event", () => {
     const result = lower(`${start} function Counter() {

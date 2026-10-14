@@ -1304,10 +1304,113 @@ export function App() {
   );
 }`,
     ["TS2456"]
+  ],
+  // the bound form with an inline handler: its first parameter is the data
+  [
+    "handler-bound-inline",
+    `import { createSignal } from "solid-js";
+export function App() {
+  const [n, setN] = createSignal(0);
+  return <button onClick={[(step, e) => setN(n() + step + e.clientX * 0), 2]}>{n()}</button>;
+}`,
+    []
+  ],
+  // an event Solid's own table does not type (an SVG animation's) is looked up
+  [
+    "svg-event-outside-table",
+    `import { createSignal } from "solid-js";
+export function App() {
+  const [n, setN] = createSignal(0);
+  return (
+    <svg>
+      <animate onBegin={e => setN(n() + (e.timeStamp > 0 ? 1 : 0))} />
+      <text>{n()}</text>
+    </svg>
+  );
+}`,
+    []
+  ],
+  // a root rendered through a name for it, not its declaration
+  [
+    "render-alias",
+    `import { render } from "@solidjs/web";
+function Main() {
+  return <p>main</p>;
+}
+const Root = Main;
+render(Root, document.body);`,
+    []
+  ],
+  // accessors a helper takes in an object: written there, held by a constant
+  // of the routine or of the component's body, or taken first by the lowering
+  // (a member read beside them)
+  [
+    "object-literal-accessors",
+    `import { createMemo, createSignal } from "solid-js";
+function pick(o: { get: () => number; n?: () => number }) {
+  return o.get() + (o.n?.() ?? 0);
+}
+export function App() {
+  const [n] = createSignal(1);
+  const api = { n };
+  const held = { get: n };
+  const a = createMemo(() => {
+    try {
+      const local = { get: n };
+      return pick({ get: n }) + pick({ get: api.n, n }) + pick(held) + pick(local);
+    } catch {
+      return 0;
+    }
+  });
+  return <p>{a()}</p>;
+}`,
+    []
+  ],
+  // a computed accessor given in a try (its attempt runs a thunk): taken
+  // before the statement, whether its names are the body's or the try's
+  [
+    "accessor-compound-argument",
+    `import { createMemo, createSignal } from "solid-js";
+function sample(get: () => number) {
+  return get() * 2;
+}
+export function App() {
+  const [n] = createSignal(1);
+  const [m] = createSignal(2);
+  const flag = true;
+  const a = createMemo(() => {
+    try {
+      return sample(flag ? n : m);
+    } catch {
+      return 0;
+    }
+  });
+  const b = createMemo(() => {
+    try {
+      const pickOne = true;
+      return sample(pickOne ? n : m);
+    } catch {
+      return 0;
+    }
+  });
+  return <p>{a() + b()}</p>;
+}`,
+    []
   ]
 ];
 /** refusals stop a project's check: each on its own */
 const refusals = [
+  // a namespaced attribute on a component (Solid's props have no namespace)
+  [
+    "component-namespaced-attribute",
+    `function Child(props: { label: string }) {
+  return <p>{props.label}</p>;
+}
+export function App() {
+  return <Child label="x" xlink:href="#a" />;
+}`,
+    ["NATIVE_SPREAD"]
+  ],
   // throw an Error object (pinned refusal)
   [
     "throw-literal",

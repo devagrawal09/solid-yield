@@ -2551,25 +2551,69 @@ function accessorArguments(code, filename, program) {
       if (!call || !ts.isCallExpression(call)) return;
       const signature = checker.getResolvedSignature(call);
       if (!signature) return;
+      /** @type {[Path, ts.Type, Path | null][]} what each argument, or each member
+       * of an object one, is given for; and the routine holding that object */
+      const given = [];
       q.get("arguments").forEach((arg, i) => {
-        const node = nodes.get(`${arg.node.start}:${arg.node.end}`);
         const parameter = signature.parameters[i];
-        if (!node || !parameter || !arg.isExpression() || arg.isFunction()) return;
-        const type = checker.getTypeAtLocation(node);
+        if (!parameter || !arg.isExpression() || arg.isFunction()) return;
         const expected = checker.getTypeOfSymbolAtLocation(parameter, call);
+        // an object literal's members: a helper may take its accessors in one
+        // (`pick({ get: count })`), the literal written there or held by a
+        // constant of the routine (an argument the lowering took first)
+        let literal = arg.isObjectExpression() ? arg : null;
+        if (!literal && arg.isIdentifier()) {
+          const held = arg.scope.getBinding(arg.node.name);
+          const init =
+            held?.constant && held.path.isVariableDeclarator() ? held.path.get("init") : null;
+          const owner = init?.getFunctionParent();
+          // held by this routine or one around it (a component's body)
+          if (
+            init?.isObjectExpression() &&
+            owner?.node.generator &&
+            (owner === host || host.findParent(f => f === owner))
+          )
+            literal = init;
+        }
+        if (literal)
+          for (const member of literal.get("properties")) {
+            if (!member.isObjectProperty() || member.node.computed) continue;
+            const name = key(member.node.key);
+            const slot = name ? expected.getNonNullableType().getProperty(name) : undefined;
+            const value = member.get("value");
+            if (slot && value.isExpression() && !value.isFunction())
+              given.push([
+                value,
+                checker.getTypeOfSymbolAtLocation(slot, call),
+                literal === arg ? null : literal.getFunctionParent()
+              ]);
+          }
+        else given.push([arg, expected, null]);
+      });
+      for (const [arg, expected, owner] of given) {
+        const node = nodes.get(`${arg.node.start}:${arg.node.end}`);
+        if (!node) continue;
+        const type = checker.getTypeAtLocation(node);
         if (
           !isSource(type) ||
           isSource(expected) ||
-          !expected.getCallSignatures().length ||
+          !expected.getNonNullableType().getCallSignatures().length ||
           checker.isTypeAssignableTo(type, expected)
         )
-          return;
-        const bridge = setup ? "__nativeAccessorSetup" : "__nativeAccessor";
+          continue;
+        // `{ count }` becomes `{ count: … }`
+        if (arg.parentPath.isObjectProperty()) arg.parentPath.node.shorthand = false;
+        // a component's body hands it on later, as Solid's plain code does
+        const inSetup = owner
+          ? owner.parentPath?.isCallExpression() &&
+            lib(owner.parentPath.get("callee")) === "component"
+          : setup;
+        const bridge = inSetup ? "__nativeAccessorSetup" : "__nativeAccessor";
         const value = t.yieldExpression(
           t.callExpression(t.identifier(bridge), [t.cloneNode(arg.node)]),
           true
         );
-        if (!thunk) arg.replaceWith(value);
+        if (!thunk || owner) arg.replaceWith(value);
         else {
           // taken before the statement that runs the thunk, when it names
           // nothing the thunk binds
@@ -2581,16 +2625,16 @@ function accessorArguments(code, filename, program) {
             }
           });
           const binding = t.isIdentifier(arg.node) && arg.scope.getBinding(arg.node.name);
-          if (local || (binding && binding.path.findParent(a => a === thunk))) return;
+          if (local || (binding && binding.path.findParent(a => a === thunk))) continue;
           const statement = q.findParent(x => x.isStatement() && x.getFunctionParent() === host);
-          if (!statement) return;
+          if (!statement) continue;
           const id = host.scope.generateUidIdentifier("accessor");
           statement.insertBefore(t.variableDeclaration("const", [t.variableDeclarator(id, value)]));
           arg.replaceWith(id);
         }
         used.add(bridge);
         changed = true;
-      });
+      }
     }
   });
   if (!changed) return code;
@@ -2936,8 +2980,8 @@ function checkEscapes(files, active, options) {
 }
 /** Lower a closed set of sugar modules together. Import aliases/re-exports are
  * resolved by TypeScript; the existing analyzer consumes this same explicit IR. */
-/** @param {Map<string,string>} input @param {{compilerOptions?: ts.CompilerOptions, native?:boolean}} [options] */
-function lowerSugarProjectImpl(input, { compilerOptions = {}, native = false } = {}) {
+/** @param {Map<string,string>} input @param {{compilerOptions?: ts.CompilerOptions, native?:boolean, rounds?: number}} [options] `rounds`: the fixpoint's bound (tests lower it) */
+function lowerSugarProjectImpl(input, { compilerOptions = {}, native = false, rounds = 24 } = {}) {
   const options = {
     target: ts.ScriptTarget.ESNext,
     module: ts.ModuleKind.ESNext,
@@ -2953,7 +2997,7 @@ function lowerSugarProjectImpl(input, { compilerOptions = {}, native = false } =
   );
   const active = new Set([...input].filter(([, c]) => isSugar(c)).map(([id]) => resolve(id)));
   /** @type {ts.Program | undefined} */ let previous;
-  for (let i = 0; i < 24; i++) {
+  for (let i = 0; i < rounds; i++) {
     const program = programFor(files, options, previous);
     previous = program;
     const next = new Map(files);

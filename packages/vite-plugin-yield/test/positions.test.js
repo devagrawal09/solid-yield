@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import babel from "@babel/core";
 import { resolve } from "node:path";
 import { lowerNativeProject, locate } from "../src/virtual.js";
+import { printMapped, trackParsed, withPositions } from "../src/positions.js";
 describe("virtual positions", { timeout: 30_000 }, () => {
   it("keeps repeated reads distinct through every lowering pass and labels machinery", () => {
     const file = resolve(import.meta.dirname, "positions.tsx");
@@ -89,5 +90,31 @@ export function Show(){
     const at = locate(table, code.lastIndexOf("<p>"), 3);
     expect(at.generated).toBe(false);
     expect(at.sourceStart).toBe(source.lastIndexOf("<p>"));
+  });
+
+  it("a lowering that prints what does not parse names the file it came from", () => {
+    const file = resolve(import.meta.dirname, "positions-broken.tsx");
+    const code = "export const value = 1;";
+    const parserOpts = { plugins: ["typescript", "jsx"] };
+    let thrown;
+    withPositions(new Map([[file, code]]), () => {
+      const ast = babel.parseSync(code, {
+        filename: file,
+        configFile: false,
+        babelrc: false,
+        parserOpts
+      });
+      trackParsed(ast, code, file, parserOpts);
+      // a lowering bug: a name no parser takes
+      ast.program.body[0].declaration.declarations[0].id.name = "not a name";
+      try {
+        printMapped(ast);
+      } catch (error) {
+        thrown = error;
+      }
+      return { files: new Map() };
+    });
+    expect(thrown).toBeInstanceOf(SyntaxError);
+    expect(thrown.id).toBe(file);
   });
 });

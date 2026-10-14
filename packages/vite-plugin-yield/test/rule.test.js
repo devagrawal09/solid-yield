@@ -169,6 +169,17 @@ describe("transform()", () => {
     expect(thrown.loc).toEqual({ file: "/abs/a.tsx", line: 2, column: 17 });
   });
 
+  it("a module that does not parse: the parser's error, with Vite's id", () => {
+    let thrown;
+    try {
+      transform("function* v() {\n  return <p>{yield* n</p>;\n}", { filename: "/abs/b.tsx" });
+    } catch (e) {
+      thrown = e;
+    }
+    expect(thrown).toBeInstanceOf(SyntaxError);
+    expect(thrown.id).toBe("/abs/b.tsx");
+  });
+
   it("maps every hole back to its yield*", async () => {
     const { TraceMap, originalPositionFor } = await import("@jridgewell/trace-mapping");
     const source = "function* v() {\n  return <p title={yield* t}>\n    {yield* n}\n  </p>;\n}\n";

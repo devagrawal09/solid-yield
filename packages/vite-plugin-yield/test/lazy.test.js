@@ -81,6 +81,33 @@ describe("which calls are annotated (the compiler's lazy pass, for the yield mod
     expect(out.metadata.solidYield).toEqual({ holes: false, lazy: true });
     expect(out.code).toContain(`lazy(() => import("./A"), void 0, ${placeholder("./A")})`);
   });
+
+  it("a parser that builds ImportExpression nodes: the same annotation", () => {
+    const parse = code =>
+      babel.transformSync(code, {
+        babelrc: false,
+        configFile: false,
+        filename: "/src/a.tsx",
+        parserOpts: {
+          createImportExpressions: true,
+          plugins: ["jsx", "typescript", "sourcePhaseImports"]
+        },
+        plugins: [babelPluginYield]
+      });
+    expect(parse(IMPORT + 'const A = lazy(() => import("./A"));').code).toContain(
+      `lazy(() => import("./A"), void 0, ${placeholder("./A")})`
+    );
+    // import options, a phase import and a computed specifier are left alone
+    for (const code of [
+      IMPORT + 'lazy(() => import("./A", { with: { type: "js" } }));',
+      IMPORT + 'lazy(() => import.source("./A"));',
+      IMPORT + "lazy(() => import(name));"
+    ]) {
+      const out = parse(code);
+      expect(out.metadata.solidYield?.lazy ?? false, code).toBe(false);
+      expect(out.code, code).not.toContain(LAZY_PLACEHOLDER_PREFIX);
+    }
+  });
 });
 
 describe("solidYield() + solid(): the placeholder resolves to a module URL", () => {

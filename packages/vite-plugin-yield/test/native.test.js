@@ -191,3 +191,26 @@ it("evaluates reactive arguments in their host before an opaque call", () => {
   expect(out).toMatch(/const _argument = yield\* n/);
   expect(out).toContain("__nativeInvoke(_method, _receiver, [_argument])");
 }, 30_000);
+
+it("emit lowered: a reported diagnostic is a Vite warning, re-reported once a hot update clears the cache", () => {
+  const root = resolve(import.meta.dirname, "fixtures/native-app");
+  const file = resolve(root, "ModuleState.tsx");
+  const source = `import { createRoot, createSignal } from "solid-js";
+const counter = createRoot(() => createSignal(0));
+export function App() { return <p>{counter[0]()}</p>; }`;
+  const plugin = solidYield({ mode: "native", emit: "lowered", include: f => f === file });
+  const warnings = [];
+  const context = { warn: warning => warnings.push(warning) };
+  const out = plugin.transform.call(context, source, file);
+  expect(out.code).toContain("solid-yield");
+  expect(warnings).toHaveLength(1);
+  expect(warnings[0].message).toMatch(/^\[MODULE_STATE\] /);
+  expect(warnings[0].id).toBe(file);
+  expect(warnings[0].loc).toMatchObject({ file, line: 2 });
+  // the same project again: the cache answers, nothing re-reported
+  plugin.transform.call(context, source, file);
+  expect(warnings).toHaveLength(1);
+  plugin.handleHotUpdate();
+  plugin.transform.call(context, source, file);
+  expect(warnings).toHaveLength(2);
+}, 30_000);

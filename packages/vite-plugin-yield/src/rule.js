@@ -57,19 +57,17 @@ function attributeHole(name) {
  * @returns {Hole}
  */
 function holeOf(path) {
-  let parent = path.parentPath;
-  while (parent) {
+  // a `yield` sits in a generator: the walk meets a function before the root
+  for (let parent = path.parentPath; ; parent = parent.parentPath) {
+    if (!parent || parent.isFunction() || parent.isClass()) return "none";
     const node = parent.node;
-    if (parent.isFunction() || parent.isClass()) return "none";
     if (node.type === "JSXSpreadAttribute") return "YIELD_IN_SPREAD";
     if (node.type === "JSXSpreadChild") return "YIELD_IN_SPREAD_CHILD";
     if (node.type === "JSXExpressionContainer") {
       const owner = parent.parentPath?.node;
       return owner && owner.type === "JSXAttribute" ? attributeHole(owner.name) : "allowed";
     }
-    parent = parent.parentPath;
   }
-  return "none";
 }
 
 /**

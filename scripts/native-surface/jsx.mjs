@@ -181,6 +181,26 @@ export const jsxCases = [
     imports: "createContext, useContext"
   },
   {
+    id: "context-getter",
+    view: `<Ctx value={{ get count() { return n(); } }}><Consumer /></Ctx>`,
+    extra: "ctx-getter",
+    imports: "createContext, useContext"
+  },
+  {
+    // destructured, Solid reads the getter once in the body
+    id: "context-getter-destructured",
+    view: `<Ctx value={{ get count() { return n(); } }}><Consumer /></Ctx>`,
+    extra: "ctx-getter-destructured",
+    imports: "createContext, useContext",
+    expected: ["READ_IN_SETUP"]
+  },
+  {
+    id: "context-store",
+    view: `<Ctx value={[store, { rename: (name: string) => setStore(s => { s.user.name = name; }) }]}><Consumer /></Ctx>`,
+    extra: "ctx-store",
+    imports: "createContext, useContext"
+  },
+  {
     id: "context-default",
     view: `<div><Consumer /><Theme value="dark"><Consumer /></Theme></div>`,
     extra: "ctx-theme",

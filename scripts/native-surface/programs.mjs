@@ -164,6 +164,34 @@ function Consumer() {
 `,
     ""
   ],
+  "ctx-getter": [
+    `const Ctx = createContext<{ readonly count: number }>();
+function Consumer() {
+  const counter = useContext(Ctx);
+  return <p>{counter.count}</p>;
+}
+`,
+    ""
+  ],
+  "ctx-getter-destructured": [
+    `const Ctx = createContext<{ readonly count: number }>();
+function Consumer() {
+  const { count } = useContext(Ctx);
+  return <p>{count}</p>;
+}
+`,
+    ""
+  ],
+  "ctx-store": [
+    `type User = { user: { name: string } };
+const Ctx = createContext<[User, { rename: (name: string) => void }]>();
+function Consumer() {
+  const [state, { rename }] = useContext(Ctx);
+  return <button onClick={() => rename("b")}>{state.user.name}</button>;
+}
+`,
+    ""
+  ],
   "ctx-theme": [
     `const Theme = createContext("light");
 function Consumer() {

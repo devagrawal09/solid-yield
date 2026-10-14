@@ -1,5 +1,5 @@
 {
-  "programs": 1569,
+  "programs": 1572,
   "failed": 0,
   "outcome": [
     {
@@ -15818,6 +15818,34 @@
     },
     {
       "form": "context-tuple",
+      "host": "view",
+      "variant": "jsx",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "context-getter",
+      "host": "view",
+      "variant": "jsx",
+      "expected": [],
+      "reported": [],
+      "pass": true
+    },
+    {
+      "form": "context-getter-destructured",
+      "host": "view",
+      "variant": "jsx",
+      "expected": [
+        "READ_IN_SETUP"
+      ],
+      "reported": [
+        "READ_IN_SETUP"
+      ],
+      "pass": true
+    },
+    {
+      "form": "context-store",
       "host": "view",
       "variant": "jsx",
       "expected": [],

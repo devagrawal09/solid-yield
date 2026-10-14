@@ -617,6 +617,76 @@ function surface(
       );
     }
   };
+  /** @type {Map<string, any[]> | null} */ let providedValues = null;
+  /**
+   * The context a name refers to, as `file#name` (its declaration), or null.
+   * @param {Path} ref @param {string} file
+   */
+  const contextOrigin = (ref, file) => {
+    if (!ref.isIdentifier() && !ref.isJSXIdentifier()) return null;
+    const binding = ref.scope.getBinding(ref.node.name)?.path;
+    if (binding?.isVariableDeclarator()) return `${file}#${ref.node.name}`;
+    if (!binding?.isImportSpecifier() || !binding.parentPath.isImportDeclaration()) return null;
+    const from = binding.parentPath.node.source.value;
+    if (!from.startsWith(".")) return null;
+    const base = resolve(dirname(file), from);
+    const target = [
+      base,
+      `${base}.tsx`,
+      `${base}.ts`,
+      `${base}/index.tsx`,
+      `${base}/index.ts`
+    ].find(f => modules.has(f));
+    const imported = binding.node.imported;
+    return target ? `${target}#${t.isIdentifier(imported) ? imported.name : imported.value}` : null;
+  };
+  /** Every value a provider tag of the selected files gives each context. */
+  const providers = () => {
+    if (providedValues) return providedValues;
+    providedValues = new Map();
+    for (const [file, code] of modules) {
+      if (!/value=/.test(code)) continue;
+      parseProgram(code, file)?.traverse({
+        JSXOpeningElement(o) {
+          const origin = contextOrigin(o.get("name"), file);
+          /** @type {any} */ const value = o.node.attributes.find(
+            /** @param {any} a */ a =>
+              t.isJSXAttribute(a) && t.isJSXIdentifier(a.name, { name: "value" })
+          );
+          if (!origin || !t.isJSXExpressionContainer(value?.value)) return;
+          const list = providedValues?.get(origin) ?? [];
+          list.push(value.value.expression);
+          providedValues?.set(origin, list);
+        }
+      });
+    }
+    return providedValues;
+  };
+  /**
+   * Whether a provider of the context gives the member `steps` names with a
+   * getter (`value={{ get count() { … } }}`): destructured, it is read once,
+   * where the name is declared, as Solid's destructuring reads it.
+   * @param {string} origin @param {(string | number)[]} steps
+   */
+  const providedByGetter = (origin, steps) =>
+    (providers().get(origin) ?? []).some(value => {
+      let at = value;
+      for (const [i, step] of steps.entries()) {
+        const last = i === steps.length - 1;
+        if (typeof step === "number") {
+          if (!t.isArrayExpression(at)) return false;
+          at = at.elements[step];
+          continue;
+        }
+        if (!t.isObjectExpression(at)) return false;
+        const member = at.properties.find(
+          /** @param {any} m */ m => !m.computed && (m.key?.name ?? m.key?.value) === step
+        );
+        if (last) return t.isObjectMethod(member, { kind: "get" });
+        at = t.isObjectProperty(member) ? member.value : null;
+      }
+      return false;
+    });
   /**
    * A name declared from a member of a context's value (the prelude's split
    * of `const { count, bump } = useContext(Ctx)`: `count = _context.count`)
@@ -634,15 +704,21 @@ function surface(
     )
       return;
     const name = declarator.node.id.name;
+    const origin = contextOrigin(/** @type {Path} */ (q.get("arguments.0")), filename);
     for (const sibling of /** @type {Path[]} */ (declaration.get("declarations"))) {
       if (!t.isIdentifier(sibling.node.id)) continue;
       let root = sibling.node.init;
+      /** @type {(string | number)[]} */ const steps = [];
       while (
         t.isMemberExpression(root) &&
         (!root.computed || t.isNumericLiteral(root.property) || t.isStringLiteral(root.property))
-      )
+      ) {
+        const property = /** @type {any} */ (root.property);
+        steps.unshift(root.computed ? property.value : property.name);
         root = root.object;
+      }
       if (root === sibling.node.init || !t.isIdentifier(root, { name })) continue;
+      if (origin && providedByGetter(origin, steps)) continue;
       const binding = sibling.scope.getBinding(sibling.node.id.name);
       if (!binding?.constant) continue;
       for (const ref of binding.referencePaths)

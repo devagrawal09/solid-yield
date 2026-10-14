@@ -823,6 +823,7 @@ function pass(code, filename, program, native = false) {
     }
     changed = true;
   };
+  /** @type {Map<ts.Node, ts.TypeNode> | undefined} */ let providedSlots;
   /**
    * D-116: a callback prop a component's child calls (`<Button onClick={e =>
    * setN(e.detail)} />`, an F-S40 event) is typed by the child's declared
@@ -835,13 +836,24 @@ function pass(code, filename, program, native = false) {
     const callee = /** @type {Path} */ (call.get("callee"));
     if (!native || !callee.isIdentifier({ name: "__nativeLexicalCallback" })) return;
     const owner = ownerCall(call);
-    if (!owner || control(owner) || !/^[A-Z]/.test(key(owner.node.callee) ?? "")) return;
+    // a provider's value (`bump: (k: number) => …`) is typed by the context's
+    // declared slot, as a prop is by the child's
+    if (
+      !providedValue(call) &&
+      (!owner || control(owner) || !/^[A-Z]/.test(key(owner.node.callee) ?? ""))
+    )
+      return;
     const fn = /** @type {Path} */ (call.get("arguments.1"));
     const callNode = nodes.get(`${call.node.start}:${call.node.end}`);
     if (!fn?.isFunction() || !callNode) return;
     if (fn.node.params.every(/** @param {any} q */ q => q.typeAnnotation || t.isRestElement(q)))
       return;
-    const slot = checker.getContextualType(callNode)?.getNonNullableType();
+    const declared = providedValue(call)
+      ? (providedSlots ??= contextSlots(source, checker)).get(callNode)
+      : undefined;
+    const slot = declared
+      ? checker.getTypeFromTypeNode(declared)
+      : checker.getContextualType(callNode)?.getNonNullableType();
     if (!slot) return;
     const [signature] = (slot.isUnion() ? slot.types : [slot])
       .filter(member => !checker.getPropertiesOfType(member).some(m => m.name.startsWith("__@")))
@@ -2585,9 +2597,13 @@ function contextFacades(code, filename, program) {
   /** @type {{start: number, end: number, text: string}[]} */ const edits = [];
   const tsPrinter = ts.createPrinter();
   for (const [value, declared] of contextSlots(source, checker)) {
-    if (!ts.isFunctionTypeNode(declared)) continue;
-    const actual =
-      ts.isIdentifier(value) && ts.isShorthandPropertyAssignment(value.parent)
+    // a getter (D-124) hands back a source over its body, and a store is
+    // one: plain Solid types them as their values, the slot holds the source
+    const getter = ts.isGetAccessorDeclaration(value);
+    const property = getter ? checker.getSymbolAtLocation(value.name) : undefined;
+    const actual = property
+      ? checker.getTypeOfSymbolAtLocation(property, value)
+      : ts.isIdentifier(value) && ts.isShorthandPropertyAssignment(value.parent)
         ? checker.getTypeOfSymbolAtLocation(
             /** @type {ts.Symbol} */ (checker.getShorthandAssignmentValueSymbol(value.parent)),
             value
@@ -2675,18 +2691,30 @@ function contextSlots(source, checker) {
           : null;
       if (!members) return;
       for (const property of value.properties) {
-        if (!ts.isPropertyAssignment(property) && !ts.isShorthandPropertyAssignment(property))
+        if (
+          !ts.isPropertyAssignment(property) &&
+          !ts.isShorthandPropertyAssignment(property) &&
+          !ts.isGetAccessorDeclaration(property)
+        )
           continue;
         const name = property.name.getText(source);
         const member = members.find(
           m => ts.isPropertySignature(m) && m.name.getText(source) === name
         );
         if (!member || !ts.isPropertySignature(member) || !member.type) continue;
-        walk(ts.isPropertyAssignment(property) ? property.initializer : property.name, member.type);
+        if (ts.isGetAccessorDeclaration(property)) slots.set(property, member.type);
+        else
+          walk(
+            ts.isPropertyAssignment(property) ? property.initializer : property.name,
+            member.type
+          );
       }
       return;
     }
-    if (ts.isTypeNode(resolved)) slots.set(value, resolved);
+    // the slot is where the context names it (`State` in `[State, …]`), not
+    // the body of an alias it names, which retyping would make circular
+    if (ts.isTypeNode(resolved))
+      slots.set(value, declared && ts.isTypeNode(declared) ? declared : resolved);
   };
   /** @param {ts.Node} node */
   const visit = node => {

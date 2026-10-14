@@ -169,7 +169,6 @@ export function kindAt(node) {
  * `null` (not in JSX), `{ hole: "child" | "attribute" | "spread" | "spread-child", name }`.
  */
 export function jsxPosition(node) {
-  let child = node;
   let p = node.parent;
   while (p) {
     if (isFunction(p) || p.type === "ClassBody") return null;
@@ -184,10 +183,8 @@ export function jsxPosition(node) {
       }
       return { hole: "child" };
     }
-    child = p;
     p = p.parent;
   }
-  void child;
   return null;
 }
 

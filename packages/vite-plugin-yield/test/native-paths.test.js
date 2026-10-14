@@ -732,6 +732,64 @@ export function App() {
   return <div><p>{n()}</p><Child onBump={() => bumpTwice()} /></div>;
 }`,
     []
+  ],
+  // a provider's getter (D-124) is a source its slot holds: read where the member is
+  [
+    "context-getter-member",
+    `import { createContext, useContext, createSignal } from "solid-js";
+import type { JSX } from "@solidjs/web";
+const Ctx = createContext<{ readonly count: number }>();
+function Provider(props: { children: JSX.Element }) {
+  const [n] = createSignal(0);
+  return <Ctx value={{ get count() { return n(); } }}>{props.children}</Ctx>;
+}
+function Child() {
+  const value = useContext(Ctx);
+  return <p>{value.count}</p>;
+}
+export function App() {
+  return <Provider><Child /></Provider>;
+}`,
+    []
+  ],
+  // destructured, Solid reads it once in the body: a read in setup
+  [
+    "context-getter-destructured",
+    `import { createContext, useContext, createSignal } from "solid-js";
+import type { JSX } from "@solidjs/web";
+const Ctx = createContext<{ readonly count: number }>();
+function Provider(props: { children: JSX.Element }) {
+  const [n] = createSignal(0);
+  return <Ctx value={{ get count() { return n(); } }}>{props.children}</Ctx>;
+}
+function Child() {
+  const { count } = useContext(Ctx);
+  return <p>{count}</p>;
+}
+export function App() {
+  return <Provider><Child /></Provider>;
+}`,
+    ["READ_IN_SETUP"]
+  ],
+  // a store in a context's value, with an action typed by its declared slot
+  [
+    "context-store-tuple",
+    `import { createContext, useContext, createStore } from "solid-js";
+import type { JSX } from "@solidjs/web";
+type State = { items: string[] };
+const Ctx = createContext<[State, { add: (s: string) => void }]>();
+function Provider(props: { children: JSX.Element }) {
+  const [state, setState] = createStore<State>({ items: [] });
+  return <Ctx value={[state, { add: s => setState(st => { st.items.push(s); }) }]}>{props.children}</Ctx>;
+}
+function Child() {
+  const [state, { add }] = useContext(Ctx);
+  return <button onClick={() => add("x")}>{state.items.length}</button>;
+}
+export function App() {
+  return <Provider><Child /></Provider>;
+}`,
+    []
   ]
 ];
 /** refusals stop a project's check: each on its own */

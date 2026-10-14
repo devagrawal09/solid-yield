@@ -1,4 +1,4 @@
-// LENS PROP (D-116). The date range owns its
+// LENS PROP (D-125). The date range owns its
 // state shape, its initial value and its rules, as in ../after. It gets its
 // lens as a prop, so the dependency shows at each call site. The prop is
 // required: the module cannot choose between a given lens and a local
@@ -12,7 +12,7 @@ export const initDateRange = (): DateRangeS => ({ checkIn: null, checkOut: null 
 export const DateRange = component(function* DateRange(
   props: Props<{ state: Lens<DateRangeS> }>
 ) {
-  // a lens prop is given as it is, not as a path (D-116 amends D-042)
+  // a lens prop is given as it is, not as a path (D-125 amends D-042)
   const [range, setRange] = props.state;
   const clear = $event(function* () {
     yield* setRange(d => {

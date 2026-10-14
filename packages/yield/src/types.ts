@@ -377,7 +377,7 @@ export type TypedStore<T> = Path<T>;
 /** Phantom brand of a `Lens` (its state type, invariant). */
 export declare const LENS: unique symbol;
 /**
- * A lens on a store (D-116): a read path and a setter for one part of it.
+ * A lens on a store (D-125): a read path and a setter for one part of it.
  * `$store` and `$optimisticStore` give one; `focus(lens, "key")` narrows it
  * to a key; `$slot` gives the one a provider bound. Destructure it as a
  * store: `const [range, setRange] = lens`. The path reads as any path does,
@@ -444,7 +444,7 @@ export type PropsCheck<D> = {
 
 /**
  * The read a declared prop is: a path (a source with keys), `children` a
- * source. A prop declared `Lens<S>` is given as it is (D-116, amends D-042):
+ * source. A prop declared `Lens<S>` is given as it is (D-125, amends D-042):
  * a lens is a reference, not a value, so a setup that holds it reads nothing.
  */
 type PropRead<V, U, N> = [V] extends [AnyLens]

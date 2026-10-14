@@ -1,6 +1,6 @@
 {
   "name": "lenses-example",
-  "description": "One booking page written three ways: lifted state (without lenses), lens props, and state slots with compose (D-116, D-117)",
+  "description": "One booking page written three ways: lifted state (without lenses), lens props, and state slots with compose (D-125, D-126)",
   "version": "0.0.0",
   "private": true,
   "license": "MIT",

@@ -1,4 +1,4 @@
-// LENS PROP (D-116). The page holds one store
+// LENS PROP (D-125). The page holds one store
 // for the full booking, as in ../after. It gives each module a lens on its
 // part as a prop. Compare with ../after/booking.tsx:
 // - no providers: each call site shows the lens that the module gets;

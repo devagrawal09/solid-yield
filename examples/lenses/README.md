@@ -1,6 +1,6 @@
 # Lenses example
 
-This example shows the problem that lenses and state slots solve (D-116, D-117). It is the same booking page, written three times:
+This example shows the problem that lenses and state slots solve (D-125, D-126). It is the same booking page, written three times:
 
 - `src/before/`: without lenses. The page lifts the state of its modules.
 - `src/lens-prop/`: lens props. The page gives each module a lens on one store as a prop.

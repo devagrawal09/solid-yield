@@ -1,5 +1,5 @@
 /*
- * `compose` (D-117): one container store from a schema of modules. Each
+ * `compose` (D-126): one container store from a schema of modules. Each
  * entry is a module's state: its `init`, and the slot it is read through, if
  * it is. The composer makes the container in a setup (`$store()`), gives a
  * lens on each part for lens props (`lenses(lens)`), and binds each slot
@@ -44,7 +44,7 @@ type SchemaCheck<D> = {
     : unknown;
 };
 
-/** What `compose` gives (D-117). */
+/** What `compose` gives (D-126). */
 export interface Composer<D> {
   /** A new container state: each entry's `init()`. */
   init(): ComposedState<D>;
@@ -72,7 +72,7 @@ export interface Composer<D> {
 
 /**
  * `compose({ dates: { init: initDateRange, slot: DateRangeState }, guests: {
- * init: initGuests } })` (D-117): a container of modules. An entry with a
+ * init: initGuests } })` (D-126): a container of modules. An entry with a
  * slot is bound by `provide`; an entry without one is given as a lens prop,
  * from `lenses`. A composer's state can be an entry of a larger schema.
  */

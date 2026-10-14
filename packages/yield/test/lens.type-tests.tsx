@@ -1,5 +1,5 @@
 /**
- * Type tests for lenses, lens props, slots and `compose` (D-116, D-117). A
+ * Type tests for lenses, lens props, slots and `compose` (D-125, D-126). A
  * lens is a `$store`'s pair; `focus` narrows it to a key and keeps its
  * colors; a prop declared `Lens<S>` is the lens (not a path) and takes only
  * a lens; a required `$slot` adds the slot to the component's `R`, which
@@ -84,7 +84,7 @@ void Colored;
 // --- lens props --------------------------------------------------------------------------------
 
 const DateRange = component(function* DateRange(props: Props<{ state: Lens<Range> }>) {
-  // the lens as it is (D-116 amends D-042), not a path over it
+  // the lens as it is (D-125 amends D-042), not a path over it
   type _given = Expect<Equal<typeof props.state, Lens<Range>>>;
   const [range, setRange] = props.state;
   const clear = $event(function* () {

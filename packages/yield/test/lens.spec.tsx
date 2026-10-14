@@ -1,5 +1,5 @@
 /**
- * Lenses, lens props, slots and `compose` (D-116, D-117), at run time. The
+ * Lenses, lens props, slots and `compose` (D-125, D-126), at run time. The
  * type half is lens.type-tests.tsx.
  */
 import { createRoot, flush } from "solid-js";
@@ -101,7 +101,7 @@ const CounterOwn = component(function* CounterOwn() {
   });
 });
 
-describe("focus (D-116)", () => {
+describe("focus (D-125)", () => {
   it("a focused write changes its key only, and its receipt gives the focused part", () => {
     let got: unknown;
     let bump!: () => unknown;
@@ -179,7 +179,7 @@ describe("focus (D-116)", () => {
   });
 });
 
-describe("lens props (D-116, amends D-042)", () => {
+describe("lens props (D-125, amends D-042)", () => {
   it("a lens prop is given as it is: the module writes its part of the parent's store", () => {
     const App = component(function* App() {
       const page = yield* $store({ left: initCounter(), right: initCounter() });
@@ -223,7 +223,7 @@ describe("lens props (D-116, amends D-042)", () => {
   });
 });
 
-describe("slots (D-117)", () => {
+describe("slots (D-126)", () => {
   it("a provider binds the slot to a lens; the reader writes the parent's store", () => {
     const App = component(function* App() {
       const page = yield* $store({ counter: initCounter() });
@@ -318,7 +318,7 @@ describe("slots (D-117)", () => {
   });
 });
 
-describe("compose (D-117)", () => {
+describe("compose (D-126)", () => {
   const Page = compose({
     counter: { init: initCounter, slot: CounterState },
     other: { init: initCounter }

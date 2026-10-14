@@ -530,7 +530,7 @@ const Preferences = component(function* Preferences() {
 
 ### Share a part of a store: lenses and slots
 
-A page must often read the state of its modules, for example to show a total. Then the page must hold that state. A **lens** lets a module keep its state type and its write logic while the page holds the store (D-116). The result of `$store` is a lens. `focus(lens, "key")` makes a lens on one part. These examples are [type-checked and run](https://github.com/devagrawal09/solid-yield/blob/main/packages/yield/test/docs/lenses.tsx).
+A page must often read the state of its modules, for example to show a total. Then the page must hold that state. A **lens** lets a module keep its state type and its write logic while the page holds the store (D-125). The result of `$store` is a lens. `focus(lens, "key")` makes a lens on one part. These examples are [type-checked and run](https://github.com/devagrawal09/solid-yield/blob/main/packages/yield/test/docs/lenses.tsx).
 
 **A lens prop.** Declare the prop as `Lens<S>`. The module gets the lens itself, not a path, so the setup can destructure it:
 
@@ -571,7 +571,7 @@ const Party = component(function* Party() {
 
 A write through a focused lens is a write to the page's store: it obeys the same rules (only in an `$event` or an effect phase, and `yield*` each receipt), and an `$optimisticStore` reverts it when the event settles. `focus` takes a key whose value is an object. To write a scalar, use the lens of its parent.
 
-**A slot.** If the module is far below the store, or if it must also operate alone, read the lens from a slot (D-117). A slot is a required context whose value is a lens:
+**A slot.** If the module is far below the store, or if it must also operate alone, read the lens from a slot (D-126). A slot is a required context whose value is a lens:
 
 ```tsx
 import { $slot, compose, createSlot } from "solid-yield";

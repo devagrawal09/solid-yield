@@ -203,7 +203,7 @@ tester.run("no-path-object-use", rules["no-path-object-use"], {
       errors: [{ messageId: "compare" }, { messageId: "spread" }]
     },
     {
-      // a slot's path is a path (D-117)
+      // a slot's path is a path (D-126)
       code: component(
         "const [s] = yield* $slot(Slot, { init }); const m = yield* $memo(function* () { return s.a === 1; }); return view(function* () { return <p />; });"
       ),
@@ -610,7 +610,7 @@ tester.run("no-unyielded-write", rules["no-unyielded-write"], {
       errors: [{ messageId: "unyielded", data: { name: "setS" } }]
     },
     {
-      // a slot's lens writes as a store's does (D-117)
+      // a slot's lens writes as a store's does (D-126)
       code: component(
         "const [s, setS] = yield* $slot(Slot); const clear = $event(function* () { setS(d => { d.a = 2; }); }); return view(function* () { return <p onClick={yield* clear} />; });"
       ),

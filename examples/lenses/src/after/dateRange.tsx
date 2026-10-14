@@ -1,4 +1,4 @@
-// SLOTS (D-117). The date range owns its state shape, its initial
+// SLOTS (D-126). The date range owns its state shape, its initial
 // value and its rules. It reads its state from a slot. If a parent binds the
 // slot, the state is in the parent's store. If no parent binds it, the
 // component makes a local store and operates alone.

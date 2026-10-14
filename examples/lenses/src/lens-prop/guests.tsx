@@ -1,4 +1,4 @@
-// LENS PROP (D-116). The guest counts get their
+// LENS PROP (D-125). The guest counts get their
 // lens as a required prop. A call without it is a type error at the call
 // site; see tests/requirements.check.tsx.
 import { $event, component, view, type Lens, type Props } from "solid-yield";

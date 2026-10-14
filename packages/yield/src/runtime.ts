@@ -607,7 +607,7 @@ function readPath(t: PathTarget): unknown {
 
 /**
  * Props as reads: `props.x` is a path reader over the raw props. A lens is
- * given as it is (D-116, amends D-042): it is a reference, not a value, and
+ * given as it is (D-125, amends D-042): it is a reference, not a value, and
  * holding it reads nothing. Only a lens given as a plain value is: a getter
  * prop is not run here, in the setup.
  */
@@ -1033,7 +1033,7 @@ function receiptSetter(setter: string, set: (v: any) => any, value?: () => any):
   };
 }
 
-// --- lenses (D-116) ---------------------------------------------------------------------
+// --- lenses (D-125) ---------------------------------------------------------------------
 
 const LENS_MARK: unique symbol = Symbol.for("solid.yield.lens") as any;
 /** What a lens keeps besides its path and setter: the raw write and the value its receipt gives. */
@@ -1061,7 +1061,7 @@ export function newStoreLens(value: object): any {
 }
 
 /**
- * `focus(lens, "key")`: a lens on one key of a lens's state (D-116). Its path
+ * `focus(lens, "key")`: a lens on one key of a lens's state (D-125). Its path
  * is the parent's `path.key`; its setter hands the draft's `key` to the
  * write and puts back what the write returns, through the parent's setter,
  * so the write is the parent's (one transaction, one optimistic revert). Its
@@ -1532,7 +1532,7 @@ export function readContext(ctx: any): unknown {
 
 /**
  * `const [range, setRange] = yield* $slot(DateRangeState)` in a setup
- * (D-117): the lens the nearest `Slot.provide` above bound, as it is (a
+ * (D-126): the lens the nearest `Slot.provide` above bound, as it is (a
  * context's read gives a path over its value; a slot's gives the lens).
  * Without a provider the required form is `NO_PROVIDER`, and the type has
  * the slot in the component's `R`. With `{ init }`, no provider above makes

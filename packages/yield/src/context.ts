@@ -193,10 +193,10 @@ export function createContext(
   return ctx;
 }
 
-// --- slots (D-117) ----------------------------------------------------------------------
+// --- slots (D-126) ----------------------------------------------------------------------
 
 /**
- * A state slot (D-117): a named, required context whose value is a lens. A
+ * A state slot (D-126): a named, required context whose value is a lens. A
  * module reads its state with `yield* $slot(Slot)` and does not know where
  * the state is stored; a parent binds it with `Slot.provide({ value:
  * focus(store, "key"), children })`. The required read adds the slot to
@@ -231,7 +231,7 @@ export interface SlotProvide<S, Q> {
 
 /**
  * `createSlot<DateRangeS, "DateRangeState">({ name: "DateRangeState" })`
- * (D-117): a slot for a module's state. The name is its requirement's
+ * (D-126): a slot for a module's state. The name is its requirement's
  * identity and what the root's refusal prints, as for a required context;
  * it is passed at runtime too, because type arguments are erased.
  */

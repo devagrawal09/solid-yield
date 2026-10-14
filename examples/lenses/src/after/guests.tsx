@@ -1,4 +1,4 @@
-// SLOTS (D-117). The guest counts use the required slot form: a
+// SLOTS (D-126). The guest counts use the required slot form: a
 // parent must bind GuestsState. Without a provider, the root is a type
 // error ([NO_PROVIDER]); see tests/requirements.check.tsx.
 import { $event, $slot, component, createSlot, view } from "solid-yield";

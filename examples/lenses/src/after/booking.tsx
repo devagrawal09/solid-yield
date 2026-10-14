@@ -1,4 +1,4 @@
-// SLOTS (D-117). The page holds one store for the full booking, made by
+// SLOTS (D-126). The page holds one store for the full booking, made by
 // `compose` from the modules' own initial states. `provide` binds each
 // module's slot to a lens on its part, and the page reads the public state
 // of the modules for the total. Compare with ../before/booking.tsx:

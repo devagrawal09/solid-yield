@@ -194,7 +194,7 @@ describe("h: a context's provider (D-098)", () => {
   });
 });
 
-describe("h: a slot's provider (D-117)", () => {
+describe("h: a slot's provider (D-126)", () => {
   it("h(Slot.provide, { value: lens }, ...children) binds the lens for the components in its children", () => {
     const Count = createSlot<{ n: number }, "Count">({ name: "Count" });
     let inc!: () => unknown;

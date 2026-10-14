@@ -129,6 +129,35 @@ export const jsxCases = [
     view: `<input ref={input} onFocus={() => setN(input.value.length)} />`,
     extra: "ref"
   },
+  // D-125: a component's return beyond one element; what it computes outside
+  // its JSX is computed in the body (a read there is the body's)
+  {
+    id: "return-ternary",
+    view: `n() > 1 ? <b>big</b> : <i>small</i>`,
+    expected: ["READ_IN_SETUP"]
+  },
+  { id: "return-and", view: `n() > 1 && <b>big</b>`, expected: ["READ_IN_SETUP"] },
+  { id: "return-array", view: `[<b>{n()}</b>, <i>{obj().label}</i>]` },
+  { id: "return-string", view: `"plain text"` },
+  // D-125 keeps D-041: JSX only as a view's, a hole's or a row's return
+  {
+    id: "jsx-helper",
+    view: `<ul>{row("a")}</ul>`,
+    extra: "row",
+    expected: ["SUGAR_COMPONENT"]
+  },
+  {
+    id: "jsx-in-body",
+    view: `<div>{header}{n()}</div>`,
+    extra: "header",
+    expected: ["solid-yield/jsx-only-in-view"]
+  },
+  {
+    id: "jsx-local-arrow",
+    view: `<div>{badge()}</div>`,
+    extra: "badge",
+    expected: ["solid-yield/jsx-only-in-view"]
+  },
   // what a view still may not do
   { id: "write-in-hole", view: `<p>{String(setN(1))}</p>`, expected: ["WRITE_IN_REACTIVE"] },
   {

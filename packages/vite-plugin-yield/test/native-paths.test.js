@@ -376,6 +376,73 @@ export function App() {
 }
 render(App, document.body);`,
     []
+  ],
+  // D-125: a component is checked whatever it returns; what its return
+  // computes outside the JSX is computed in the body (READ_IN_SETUP)
+  [
+    "return-ternary",
+    `import { createSignal } from "solid-js";
+export function App() {
+  const [n] = createSignal(1);
+  return n() > 1 ? <b>big</b> : <i>small</i>;
+}`,
+    ["READ_IN_SETUP"]
+  ],
+  [
+    "return-ternary-pending",
+    `import { createMemo } from "solid-js";
+import { render } from "@solidjs/web";
+export function App() {
+  const n = createMemo(async () => 1);
+  return n() > 1 ? <b>big</b> : <i>small</i>;
+}
+render(App, document.body);`,
+    ["READ_IN_SETUP"]
+  ],
+  [
+    "return-and",
+    `import { createSignal } from "solid-js";
+export function App() {
+  const [n] = createSignal(1);
+  return n() > 1 && <b>big</b>;
+}`,
+    ["READ_IN_SETUP"]
+  ],
+  [
+    "return-string",
+    `import { createSignal } from "solid-js";
+export function App() {
+  return "plain text";
+}`,
+    []
+  ],
+  [
+    "return-array",
+    `import { createSignal } from "solid-js";
+export function App() {
+  return [<b>a</b>, <i>b</i>];
+}`,
+    []
+  ],
+  [
+    "return-bare",
+    `import { createSignal } from "solid-js";
+export function App(props: { show: boolean }) {
+  if (!props.show) return;
+  return <p>shown</p>;
+}`,
+    ["READ_IN_SETUP"]
+  ],
+  [
+    "return-null",
+    `import { createSignal, createMemo, createContext, useContext, Errored } from "solid-js";
+import { render } from "@solidjs/web";
+export function App() {
+  const [n] = createSignal(1);
+  if (Math.random() > 2) return null;
+  return <p>{n()}</p>;
+}`,
+    []
   ]
 ];
 /** refusals stop a project's check: each on its own */
@@ -450,6 +517,16 @@ export function App() {
   return <p>{m()}{__nativeTry}</p>;
 }`,
     ["NATIVE_NAME"]
+  ],
+  // D-125 keeps D-041: a helper that returns JSX is refused
+  [
+    "jsx-helper",
+    `import { createSignal } from "solid-js";
+function render2(label: string) { return <b>{label}</b>; }
+export function App() {
+  return render2("x");
+}`,
+    ["SUGAR_COMPONENT"]
   ]
 ];
 

@@ -125,7 +125,10 @@ export function jsxProgram(c) {
       ""
     ],
     increment: ["", "  const increment = () => setN(n() + 1);"],
-    ref: ["", "  let input!: HTMLInputElement;"]
+    ref: ["", "  let input!: HTMLInputElement;"],
+    row: ["function row(label: string) {\n  return <li>{label}</li>;\n}\n", ""],
+    header: ["", "  const header = <h1>title</h1>;"],
+    badge: ["", "  const badge = () => <b>{n()}</b>;"]
   };
   const [module, local] = c.extra ? extras[c.extra] : ["", ""];
   return `import { ${solid.join(", ")} } from "solid-js";

@@ -170,6 +170,22 @@ const writingCallbackProp = fn => {
   });
   return writes;
 };
+/** Whether a returned expression holds JSX of its own: an element, or one
+ * through a ternary, a logical operator, an array or parentheses (not inside a
+ * call's argument or a nested function). D-125.
+ * @param {any} e @returns {boolean} */
+const holdsJSX = e =>
+  t.isJSXElement(e) ||
+  t.isJSXFragment(e) ||
+  ((t.isParenthesizedExpression(e) ||
+    t.isTSAsExpression(e) ||
+    t.isTSSatisfiesExpression(e) ||
+    t.isTSNonNullExpression(e)) &&
+    holdsJSX(e.expression)) ||
+  (t.isConditionalExpression(e) && (holdsJSX(e.consequent) || holdsJSX(e.alternate))) ||
+  (t.isLogicalExpression(e) && (holdsJSX(e.left) || holdsJSX(e.right))) ||
+  (t.isSequenceExpression(e) && holdsJSX(e.expressions.at(-1))) ||
+  (t.isArrayExpression(e) && e.elements.some(holdsJSX));
 /** Leave ordinary value/IO callbacks unchanged. A later typed read can still
  * resolve its lexical host in delegate(). @param {Path} fn */
 function reactiveCallback(fn) {
@@ -340,13 +356,13 @@ function seed(code, filename, native = false) {
           (isControl && ["children", "when", "each", "fallback", "on"].includes(prop));
         // Errored's plain accessor fallback stays a Solid callback, not a row.
         const plainFallback = prop === "fallback" && lib(propCall?.get("callee")) === "Errored";
-        let returnsJSX = t.isJSXElement(n.body) || t.isJSXFragment(n.body);
+        let returnsJSX = holdsJSX(n.body);
         traverseOwned(path, {
           Function(q) {
             q.skip();
           },
           ReturnStatement(q) {
-            returnsJSX ||= t.isJSXElement(q.node.argument) || t.isJSXFragment(q.node.argument);
+            returnsJSX ||= holdsJSX(q.node.argument);
           }
         });
         // F-S51: a component a module-level factory returns is one too.
@@ -399,21 +415,53 @@ function seed(code, filename, native = false) {
                   lib(failureReturn.get("callee"), "solid-yield/internal") === "nativeContextGuard")
               )
                 return;
-              if (!t.isJSXElement(q.node.argument) && !t.isJSXFragment(q.node.argument))
+              const argument = q.node.argument;
+              const element = t.isJSXElement(argument) || t.isJSXFragment(argument);
+              if (!native && !element)
                 fail(
                   q,
                   "SUGAR_RETURN",
                   "A component or row must return JSX on every return path.",
                   filename
                 );
+              // D-125: in native mode a component returns what Solid renders:
+              // nothing (`return null`, `return;`), or JSX through a ternary,
+              // `&&`, an array. What the return computes outside its JSX is
+              // computed in the body, as in Solid (a read there is the
+              // body's); both arms' parts are, a may-check of either path.
+              /** @type {any[]} */ const before = [];
+              /** @param {any} e @returns {any} */
+              const split = e => {
+                if (!e || t.isJSXElement(e) || t.isJSXFragment(e)) return e;
+                if (t.isNullLiteral(e) || t.isIdentifier(e, { name: "undefined" })) return e;
+                if (t.isStringLiteral(e) || t.isNumericLiteral(e) || t.isBooleanLiteral(e))
+                  return e;
+                if (t.isParenthesizedExpression(e) && holdsJSX(e)) return split(e.expression);
+                if (t.isConditionalExpression(e) && holdsJSX(e))
+                  return t.conditionalExpression(
+                    split(e.test),
+                    split(e.consequent),
+                    split(e.alternate)
+                  );
+                if (t.isLogicalExpression(e) && holdsJSX(e))
+                  return t.logicalExpression(e.operator, split(e.left), split(e.right));
+                if (t.isArrayExpression(e) && holdsJSX(e))
+                  return t.arrayExpression(
+                    e.elements.map(x => (x && !t.isSpreadElement(x) ? split(x) : x))
+                  );
+                const id = q.scope.generateUidIdentifier("returned");
+                before.push(t.variableDeclaration("const", [t.variableDeclarator(id, e)]));
+                return id;
+              };
+              const shown = element ? argument : split(argument ?? t.identifier("undefined"));
               q.node.argument = t.callExpression(t.identifier("view"), [
-                t.functionExpression(
-                  null,
-                  [],
-                  t.blockStatement([t.returnStatement(q.node.argument)]),
-                  true
-                )
+                t.functionExpression(null, [], t.blockStatement([t.returnStatement(shown)]), true)
               ]);
+              if (before.length) {
+                if (q.parentPath.isBlockStatement() || q.parentPath.isProgram())
+                  q.insertBefore(before);
+                else q.replaceWith(t.blockStatement([...before, q.node]));
+              }
             }
           });
         }

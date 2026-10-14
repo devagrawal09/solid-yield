@@ -1641,3 +1641,10 @@ The second review’s ten-line summary, verbatim:
 ### D-121, reaffirmed — Room keeps waiting for islands
 
 **Decided (Dev, 2026-10-13), asked again once D-124 was in: "Keep waiting for islands".** D-121 stands: Room's panels are server components returned from `"use server"` functions; no checker work on Room until the islands line.
+
+### D-125 — Native mode keeps D-041: JSX only in a view, a hole or a row
+
+**Decided (Dev, 2026-10-14), asked once the surface's coverage found plain Solid code native mode refuses: "Keep D-041 in native".** Native mode checks what plain Solid says (D-124) except where D-041 already ruled: JSX appears only as the return of a component's view, of a hole, or of a row. These stay refused, each with its code and a pinned test: a module-level helper that returns JSX (`function row(x) { return <li>{x}</li> }`, `SUGAR_COMPONENT`), JSX held in a component body (`const header = <h1/>`, `jsx-only-in-view`), a local arrow that returns JSX (`const badge = () => <b>{n()}</b>`, `jsx-only-in-view`).
+
+1. **A component is checked whatever it returns.** A top-level PascalCase function that returns JSX on some path, inside a ternary, `&&`, `||`, `??`, an array or parentheses (`return n() > 1 ? <b/> : <i/>`), is a component. It was not recognised and went unchecked. What its return computes outside the JSX is computed in the body, as in Solid: a read there is `READ_IN_SETUP`.
+2. **`return null`, `return;` and `return undefined`** in a component render nothing, as in Solid; they were refused (`SUGAR_RETURN`).

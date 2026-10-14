@@ -37,11 +37,12 @@ compose these (S23), `untrack` and inline routines (IIFEs, local
 functions, getters, methods) keep Solid's outcome and tracked reads (S24),
 and statements (locals, branches, loops, `throw`, `try`/`catch`) leave
 Solid's locals, reads, suspensions and failures (S25), and an array method's
-callback is an inline routine of its host whose raise is the host's (S26); `sugar.md` maps every
+callback is an inline routine of its host whose raise is the host's (S26), and a name
+destructured from a context's value is the member Solid's destructuring holds (S27); `sugar.md` maps every
 form of the native surface check to these.
 [SugarProofs.lean](lean/SugarProofs.lean) proves them on top of `YieldProofs`,
 each with a counterexample for the rejected alternative. Both libraries are
-**machine-checked** by Lean 4.24.0 (2026-10-12; `lake build` in `lean/`, no
+**machine-checked** by Lean 4.24.0 (2026-10-14; `lake build` in `lean/`, no
 `sorryAx` in any `#print axioms`).
 
 **Result:** the abstract effect/owner calculus has checked preservation, discharge,

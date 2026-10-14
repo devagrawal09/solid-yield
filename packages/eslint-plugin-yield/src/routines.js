@@ -24,9 +24,6 @@ export const CONSTRUCTORS = {
   $scope: "row"
 };
 
-/** Kinds whose body is a reactive computation (reads, no writes). */
-export const REACTIVE = new Set(["memo", "view", "hole", "setup", "row"]);
-
 function isFunction(node) {
   return (
     node &&

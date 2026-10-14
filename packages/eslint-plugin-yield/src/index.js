@@ -649,10 +649,7 @@ const noDollarBlock = {
         if (!isLibraryBinding(context, callee)) return;
         const arg = node.arguments[0];
         const name = callee.name;
-        const isGen =
-          arg &&
-          (arg.type === "FunctionExpression" || arg.type === "FunctionDeclaration") &&
-          arg.generator;
+        const isGen = arg?.type === "FunctionExpression" && arg.generator;
         const argText = arg ? source.getText(arg) : "";
         // a row: `$(function* (item) …)`, `$scope(fn)`
         if (arg && (name === "$scope" || (isGen && arg.params.length > 0))) {

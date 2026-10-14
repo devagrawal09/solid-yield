@@ -11,14 +11,9 @@ export function inferFailures(
   modules,
   { program, ts, root = process.cwd(), opaqueGenerators = false }
 ) {
-  const resolve = (specifier, from) => {
-    if (!specifier.startsWith(".")) return null;
-    const base = new URL(specifier, `file://${from}`).pathname;
-    return [base, base + ".ts", base + ".tsx", base + "/index.ts", base + "/index.tsx"].find(f =>
-      modules.has(f)
-    );
-  };
-  const analysis = new Analysis(modules, resolve);
+  // Analysis parses and indexes the modules; nothing here evaluates through it
+  // (TypeScript resolves calls and imports), so it takes no import resolver
+  const analysis = new Analysis(modules, null);
   const opaque = path =>
     path.node.generator &&
     ((opaqueGenerators === true && authoredOpaqueGenerator(path)) ||
@@ -238,7 +233,6 @@ export function inferFailures(
             if (q.isJSXIdentifier() && q.parentPath.isJSXAttribute()) return;
             const ctx = contextId(q);
             if (!ctx) return;
-            if (q.parentPath.isJSXClosingElement()) return;
             let opening = q.parentPath;
             if (
               opening.isJSXMemberExpression() &&
@@ -246,6 +240,8 @@ export function inferFailures(
               name(opening.node.property) === "Provider"
             )
               opening = opening.parentPath;
+            // `</Ctx>` and `</Ctx.Provider>` close a provider the opening tag recorded
+            if (opening.isJSXClosingElement()) return;
             if (opening.isJSXOpeningElement()) {
               const attributes = opening.get("attributes");
               const attr = attributes.find(a => a.isJSXAttribute() && a.node.name.name === "value");
@@ -393,30 +389,37 @@ export function inferFailures(
     });
     return effects.every(Boolean) ? union(...effects) : null;
   };
-  /** F-S45: a call through a name destructured from a context's value
-   * (`const [, { setLocation }] = useRouter()`), or `null`. */
-  const destructuredMember = (callee, owner) => {
-    const binding = callee.scope.getBinding(callee.node.name);
-    const declarator = binding?.path;
-    if (!binding?.constant || !declarator?.isVariableDeclarator()) return null;
-    // a name declared from a member of the value (`bump = context[1].bump`)
-    const chain =
-      declarator.node.id === binding.identifier
-        ? chainSteps(declarator.get("init"))
-        : {
-            base: declarator.get("init"),
-            steps: patternPath(declarator.node.id, binding.identifier)
-          };
-    if (!chain?.steps?.length) return null;
-    return valuesCall(contextOfValue(chain.base), chain.steps, owner);
+  /** F-S45: the context an expression reaches into and the keys and indices
+   * from its value: through names destructured from it or declared from a
+   * member of it (`const [, { setLocation }] = useRouter()`, `bump =
+   * context[1].bump`) and member chains off either (`nested.parse`). */
+  const contextAt = (p, depth = 0) => {
+    if (!p?.node || depth > 8) return null;
+    if (p.isMemberExpression()) {
+      const chain = chainSteps(p);
+      const at = chain && contextAt(chain.base, depth + 1);
+      return at && { id: at.id, steps: [...at.steps, ...chain.steps] };
+    }
+    if (p.isIdentifier()) {
+      const binding = p.scope.getBinding(p.node.name);
+      const declarator = binding?.path;
+      if (binding?.constant && declarator?.isVariableDeclarator()) {
+        const steps =
+          declarator.node.id === binding.identifier
+            ? []
+            : patternPath(declarator.node.id, binding.identifier);
+        const at = steps && contextAt(declarator.get("init"), depth + 1);
+        if (at) return { id: at.id, steps: [...at.steps, ...steps] };
+      }
+    }
+    const id = contextOfValue(p);
+    return id ? { id, steps: [] } : null;
   };
-  /** F-S45: a call through a member of a context's value (`value[1].bump()`),
-   * or `null`. */
+  /** F-S45: a call through a member of a context's value (`value[1].bump()`,
+   * a destructured `bump()`, `nested.parse()`), or `null`. */
   const contextMember = (callee, owner) => {
-    if (callee.isIdentifier()) return destructuredMember(callee, owner);
-    const chain = callee.isMemberExpression() ? chainSteps(callee) : null;
-    if (!chain) return null;
-    return valuesCall(contextOfValue(chain.base), chain.steps, owner);
+    const at = contextAt(callee);
+    return at?.steps.length ? valuesCall(at.id, at.steps, owner) : null;
   };
   // A wrapper provides only what every returned subtree provides. An optional
   // provider in one branch cannot erase requirements in another branch.

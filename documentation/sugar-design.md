@@ -2256,7 +2256,7 @@ form of the surface and a vitest case:
   attempt takes only what it throws before returning. Its rejection reaches
   the `await` on it and a continuation chained on it (`request.then(…)`).
 
-### Every path exercised; events as Solid types them; D-125 (2026-10-14)
+### Unreached paths probed; events as Solid types them; D-125 (2026-10-14)
 
 **Measuring what is exercised.** The surface check says every form is
 handled; it does not say every path of the checker is reached. Coverage
@@ -2432,3 +2432,68 @@ callbacks, provider scans, facades across files) take under 0.1 s of the
 dashboard's 20 s in a CPU profile; TypeScript's checking of the lowered
 program dominates, as before. (This machine runs about twice as slow as the
 2026-10-13 measurements, old and new alike.)
+
+### The last unreached lines; provider values as TypeScript types them (2026-10-14)
+
+**Re-measured.** The section above reported the native checker at 98.9 %
+of its functions' own lines, two of its functions short of fully covered, 32
+functions over CRAP 30, and its claim that every path was exercised went
+further than that. The lines it left unreached were probed again, one
+program each, under the same rule: a program that reaches the line either
+finds a gap (fixed, and the program became a test) or the line is removed.
+What it found:
+
+- **A provider's value of the wrong type.** Three ways a correct check went
+  wrong at `<Ctx value={…}>`:
+  - a store or an accessor given for a slot it does not fit (`{ state }`
+    where the context declares `state: () => number`; an accessor of a
+    number for `() => string`) passed unreported. The facades (F-S52)
+    retyped a slot to the value's lowered type whenever the declared type
+    did not admit it. A slot is now retyped only when the value as plain
+    Solid types it fits (a source's value, or an accessor of it; a
+    routine's helper by its result): otherwise TypeScript's error stands;
+  - a wrong value (`value={{ n: "x" }}` for `{ n: number }`) was reported
+    as a generated `[LAZY_VIEW]` at the component's first line: TypeScript
+    tries both forms of `provide` and reports the call. It is now
+    TypeScript's TS2322 where plain TypeScript reports it, at the property
+    that does not fit, with the types as plain Solid shows them;
+  - a context typed through more than eight aliases was not followed, and a
+    correct accessor slot failed (`Type '() => number' is not assignable to
+    type '() => number'`). The chain is followed to its end; a circular one
+    (TypeScript's TS2456) stops where it repeats.
+- **An accessor an object literal holds.** `const api = { count }` and then
+  `sample(api.count)` handed the helper a number (a generated TS2345), and
+  `const get = api.count` read in the component's body: every source-typed
+  member was read where it was named. In Solid `api.count` is the accessor,
+  read only where it is called, and so it is now; a getter's member
+  (D-124) and a store's key are still read where they are named.
+- **Failure inference through contexts.** With Solid 1's `<Ctx.Provider>`,
+  the closing tag counted as the context escaping, so every value read
+  from it failed with `unknown`; a member called through a destructured
+  name (`const { nested } = useContext(Ctx); nested.parse(s)`) was not
+  followed. Both now name the failure (`Remaining: RangeError`).
+- **Diagnostics TypeScript chains.** A TypeScript error with a message chain
+  (TS2345 with its elaboration) crashed `solid-yield check`: the root and
+  cascade filters read the message as a string.
+- **Smaller.** JSX the body builds around a read is JSX_IN_SETUP at the JSX
+  (review slot L05), not READ_IN_SETUP; a prop declared `any` or `unknown`
+  is PROP_TYPE at its callers; a generator called where it stands is
+  searched for the operation as an inline routine is; an arrow component
+  handed to a foreign slot (`const Page = (props) => …` given to a router)
+  was SUGAR_COMPONENT.
+- **Removed as unreachable.** Failure inference's import resolver (it only
+  parses through the analyzer; TypeScript resolves imports), a branch for a
+  `NativeFailure` alias (it is a class), a declaration search by identifier
+  in the origin finder (the lowering binds by calls).
+- **The surface check** hashed its inputs by walking directories through
+  `node_modules` links, out of a stale scratch directory and around the
+  repository until it crashed. It now skips generated and installed
+  directories.
+- **The lint plugin** has 20 rules (18 errors, 2 warnings in `recommended`);
+  `refusals.md` and the library's rule table had left out
+  `no-read-in-setup`. Its shared helpers, metadata, docs table and each
+  rule's edge shapes are tested (`routines`, `calls`, `rules-edges`).
+
+The tests are in `native-paths.test.js` (25 more programs, and four checks of
+the messages and positions they get), the ts-plugin's `cli`, `service` and
+`hover` tests, and the lint plugin's three new files.

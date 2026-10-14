@@ -1835,6 +1835,25 @@ function pass(code, filename, program, native = false) {
           const call = prop.parentPath.parentPath;
           if (call?.isCallExpression() && (control(call) || brand(type(call), "COMPONENT"))) return;
         }
+        // A source an object literal holds (`const api = { count }`) is that
+        // source: Solid's `api.count` is the accessor, read only where it is
+        // called. A getter's member is read where it is (D-124), a store's key too.
+        if (native && !path.node.computed) {
+          const holder = path.get("object");
+          const binding = holder.isIdentifier() ? holder.scope.getBinding(holder.node.name) : null;
+          const literal =
+            binding?.constant && binding.path.isVariableDeclarator()
+              ? binding.path.get("init")
+              : null;
+          const name = key(path.node.property);
+          if (
+            literal?.isObjectExpression() &&
+            literal.node.properties.some(
+              field => t.isObjectProperty(field) && !field.computed && key(field.key) === name
+            )
+          )
+            return;
+        }
         delegate(path);
       }
     },
@@ -2607,6 +2626,32 @@ function contextFacades(code, filename, program) {
     type
       .getCallSignatures()
       .some(sig => checker.getReturnTypeOfSignature(sig).symbol?.name === "Generator");
+  /**
+   * Whether the value as plain Solid typed it fits the slot: a source's value
+   * (a store, a getter) or an accessor of it, a routine's helper by what it
+   * returns.
+   * @param {ts.Type} type @param {ts.Type} slot @param {ts.Node} at
+   */
+  const plainFits = (type, slot, at) => {
+    const returns = slot.getCallSignatures().map(sig => checker.getReturnTypeOfSignature(sig));
+    const brand = checker.getPropertiesOfType(type).find(s => s.name.startsWith("__@SOURCE@"));
+    if (brand) {
+      const value = checker.getTypeOfSymbolAtLocation(brand, at);
+      const accessor = slot
+        .getCallSignatures()
+        .some(
+          sig =>
+            sig.minArgumentCount === 0 &&
+            checker.isTypeAssignableTo(value, checker.getReturnTypeOfSignature(sig))
+        );
+      return accessor || checker.isTypeAssignableTo(value, slot);
+    }
+    return type.getCallSignatures().some(sig => {
+      const generator = checker.getReturnTypeOfSignature(sig);
+      const result = checker.getTypeArguments(/** @type {ts.TypeReference} */ (generator))[1];
+      return !!result && returns.some(r => checker.isTypeAssignableTo(result, r));
+    });
+  };
   /** @type {{start: number, end: number, text: string}[]} */ const edits = [];
   const tsPrinter = ts.createPrinter();
   for (const [value, declared] of contextSlots(program, checker)) {
@@ -2625,7 +2670,10 @@ function contextFacades(code, filename, program) {
           )
         : checker.getTypeAtLocation(value);
     if (!routineOrSource(actual)) continue;
-    if (checker.isTypeAssignableTo(actual, checker.getTypeFromTypeNode(declared))) continue;
+    const slot = checker.getTypeFromTypeNode(declared);
+    if (checker.isTypeAssignableTo(actual, slot)) continue;
+    // only a value plain Solid accepts there: a wrong one keeps TypeScript's error
+    if (!plainFits(actual, slot, value)) continue;
     const node = checker.typeToTypeNode(actual, value, ts.NodeBuilderFlags.NoTruncation);
     if (!node) continue;
     const text = tsPrinter.printNode(ts.EmitHint.Unspecified, node, source);
@@ -2680,7 +2728,10 @@ function contextSlots(program, checker) {
   const resolveType = node => {
     // aliases and interfaces of the file that declares the context's type
     const home = node?.getSourceFile();
-    for (let i = 0; node && i < 8; i++) {
+    // however long the chain; a circular one (TypeScript's error) stops where it repeats
+    const seen = new Set();
+    while (node && !seen.has(node)) {
+      seen.add(node);
       if (ts.isParenthesizedTypeNode(node)) {
         node = node.type;
         continue;

@@ -448,6 +448,110 @@ function createVirtualService(ts, host, config = {}) {
       if (!inner) break;
       culprit = inner;
     }
+    // A provider's value its context does not admit: TypeScript tries both
+    // forms of `provide` (an init routine, a value) and reports the call. The
+    // error is the value form's, at the leaf of the value that does not fit.
+    let tsCode = d.code;
+    // TypeScript reports it at `provide`, or at `value` when the whole value is wrong
+    let provide = d.code === 2769 && !code ? node : null;
+    while (provide && !ts.isCallExpression(provide) && !ts.isStatement(provide))
+      provide = provide.parent;
+    if (
+      !provide ||
+      !ts.isCallExpression(provide) ||
+      !ts.isPropertyAccessExpression(provide.expression) ||
+      provide.expression.name.text !== "provide"
+    )
+      provide = null;
+    const props = provide?.arguments[0];
+    const given =
+      props && ts.isObjectLiteralExpression(props)
+        ? props.properties.find(p => ts.isPropertyAssignment(p) && p.name.getText(sf) === "value")
+        : undefined;
+    const form =
+      given &&
+      checker
+        .getTypeAtLocation(provide.expression)
+        .getCallSignatures()
+        .map(sig => sig.parameters[0] && checker.getTypeOfSymbolAtLocation(sig.parameters[0], node))
+        .find(type => type?.getProperty("value"));
+    // only when it is the value that does not fit (not, say, the children)
+    const misfit =
+      form &&
+      !checker.isTypeAssignableTo(
+        checker.getTypeAtLocation(given.initializer),
+        checker.getTypeOfSymbolAtLocation(form.getProperty("value"), node)
+      );
+    if (misfit) {
+      // what plain Solid reads: a value, not the source or hole a slot also takes
+      const isSource = t => t.getProperties().some(p => p.name.startsWith("__@SOURCE@"));
+      const plain = t =>
+        (t.isUnion() ? t.types : [t]).filter(
+          m => !isSource(m) && !/^HoleProp$/.test(m.aliasSymbol?.name ?? "")
+        );
+      const member = (t, name) => {
+        for (const m of plain(t)) {
+          const symbol = m.getProperty(name);
+          if (symbol) return checker.getTypeOfSymbolAtLocation(symbol, node);
+        }
+      };
+      // reported, as TypeScript reports an object literal, at the name of the
+      // property that does not fit
+      let at = given.name;
+      let value = /** @type {ts.Expression} */ (given.initializer);
+      let want = checker.getTypeOfSymbolAtLocation(form.getProperty("value"), node);
+      let actual = checker.getTypeAtLocation(value);
+      for (let depth = 0; depth < 8 && ts.isObjectLiteralExpression(value); depth++) {
+        let next;
+        for (const p of value.properties) {
+          if (!ts.isPropertyAssignment(p) && !ts.isShorthandPropertyAssignment(p)) continue;
+          const expected = member(want, p.name.getText(sf));
+          const type = ts.isShorthandPropertyAssignment(p)
+            ? checker.getTypeOfSymbolAtLocation(checker.getShorthandAssignmentValueSymbol(p), p)
+            : checker.getTypeAtLocation(p.initializer);
+          if (expected && !checker.isTypeAssignableTo(type, expected)) {
+            next = [p, expected, type];
+            break;
+          }
+        }
+        if (!next) break;
+        const [p, expected, type] = next;
+        [at, value, want, actual] = [
+          p.name,
+          ts.isPropertyAssignment(p) ? p.initializer : p.name,
+          expected,
+          type
+        ];
+      }
+      const shown = t => {
+        // a lowered source as plain Solid typed it: a store as its value, an accessor as a function
+        const brand = t.getProperties().find(p => p.name.startsWith("__@SOURCE@"));
+        if (brand) {
+          const inner = checker.typeToString(checker.getTypeOfSymbolAtLocation(brand, node));
+          // made by a store's constructor, or a signal's (an accessor)
+          const symbol = ts.isIdentifier(value)
+            ? ts.isShorthandPropertyAssignment(value.parent)
+              ? checker.getShorthandAssignmentValueSymbol(value.parent)
+              : checker.getSymbolAtLocation(value)
+            : undefined;
+          let made = symbol?.valueDeclaration;
+          while (made && !ts.isVariableDeclaration(made)) made = made.parent;
+          let call = made?.initializer;
+          while (call && (ts.isYieldExpression(call) || ts.isParenthesizedExpression(call)))
+            call = call.expression;
+          const callee = call && ts.isCallExpression(call) ? call.expression.getText(sf) : "";
+          return /Store|Projection/.test(callee) ? inner : `() => ${inner}`;
+        }
+        const literal = plain(want).some(m => m.flags & ts.TypeFlags.Literal);
+        return checker.typeToString(literal ? t : checker.getBaseTypeOfLiteralType(t));
+      };
+      const expected = plain(want)
+        .map(m => checker.typeToString(m))
+        .join(" | ");
+      message = `Type '${shown(actual)}' is not assignable to type '${expected}'.`;
+      culprit = { node: at };
+      tsCode = 2322;
+    }
     // a read in JSX the body builds: the JSX is what is out of place (D-041)
     if (code === "READ_IN_SETUP" && culprit) {
       let jsx;
@@ -586,6 +690,7 @@ function createVirtualService(ts, host, config = {}) {
     }
     return {
       ...d,
+      code: tsCode,
       file: origin?.file ?? s.originals.get(sf.fileName),
       start: origin?.sourceStart ?? at?.sourceStart ?? 0,
       length: Math.max(

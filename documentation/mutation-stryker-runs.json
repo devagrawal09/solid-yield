@@ -28,5 +28,20 @@
       "Survived": 213,
       "Timeout": 5
     }
+  },
+  {
+    "package": "eslint-plugin-yield",
+    "command": "node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js run scripts/mutation/stryker-eslint.config.mjs",
+    "startedAt": "2026-10-14T17:28:23.827Z",
+    "finishedAt": "2026-10-14T18:01:00.883Z",
+    "durationSeconds": 1957,
+    "exitCode": 0,
+    "counts": {
+      "Killed": 3000,
+      "NoCoverage": 14,
+      "Survived": 203,
+      "Timeout": 18
+    },
+    "note": "whole suite (every test/*.test.js, 568 tests); routines, calls and rules-edges added"
   }
 ]

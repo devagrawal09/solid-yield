@@ -37,7 +37,7 @@ node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js ru
 node scripts/mutation/report.mjs
 ```
 
-`ts-tests.test.mjs` registers the unchanged node:test suites in Vitest. It clears
+`ts-tests.test.mjs` registers every node:test suite of the package in Vitest. It clears
 Node's test/module cache on each rerun. Assertions are not rewritten. Subprocess
 coverage from CLI/tsserver does not return to Vitest; those locations can be
 reported as NoCoverage despite executing in a child. This limitation is a finding.
@@ -50,8 +50,10 @@ node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js ru
 
 That full scope is deferred in this session. The report records complete runs
 of the two smallest checker packages; it does not substitute them for full-scope
-evidence. Static mutants and timeouts are retained. No checker fixes or new
-checker tests were added to improve scores.
+evidence. Static mutants and timeouts are retained. Since the first runs
+(2026-10-08), survivors have been read: some led to new tests, some to checker
+fixes, and the suites the runs use are the packages' whole suites; the
+history of each run is in `documentation/mutation-stryker-runs.json`.
 
 The local pinned package manager can run the required build/gate if the global
 pnpm does not start:

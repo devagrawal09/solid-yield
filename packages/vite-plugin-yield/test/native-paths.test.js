@@ -1032,6 +1032,278 @@ export function App() {
   return <p>{m()}</p>;
 }`,
     []
+  ],
+  // a context's value destructured two deep, provided by Solid 1's Provider
+  // member: the closing tag no longer hides the provider's value
+  [
+    "context-provider-member-nested",
+    `import { createContext, useContext, createMemo } from "solid-js";
+import { render } from "@solidjs/web";
+const Ctx = createContext<{ nested: { parse: (s: string) => number } }>();
+function parse(s: string): number {
+  if (!s) throw new RangeError("empty");
+  return s.length;
+}
+function Child() {
+  const {
+    nested: { parse: p }
+  } = useContext(Ctx);
+  const n = createMemo(() => p("x"));
+  return <p>{n()}</p>;
+}
+function App() {
+  return (
+    <Ctx.Provider value={{ nested: { parse } }}>
+      <Child />
+    </Ctx.Provider>
+  );
+}
+render(() => <App />, document.body);`,
+    ["FOREIGN_HANDOFF"]
+  ],
+  // a member called through a name destructured from a context's value
+  [
+    "context-destructured-member-call",
+    `import { createContext, useContext, createMemo } from "solid-js";
+import { render } from "@solidjs/web";
+const Ctx = createContext<{ nested: { parse: (s: string) => number } }>();
+function parse(s: string): number {
+  if (!s) throw new RangeError("empty");
+  return s.length;
+}
+function Child() {
+  const { nested } = useContext(Ctx);
+  const n = createMemo(() => nested.parse("x"));
+  return <p>{n()}</p>;
+}
+function App() {
+  return (
+    <Ctx value={{ nested: { parse } }}>
+      <Child />
+    </Ctx>
+  );
+}
+render(() => <App />, document.body);`,
+    ["FOREIGN_HANDOFF"]
+  ],
+  // a context guard by `=== null` or `=== undefined` fires only where the
+  // context's type admits that value
+  [
+    "context-guard-null",
+    `import { createContext, useContext } from "solid-js";
+const A = createContext<{ n: number } | null>();
+export function Child() {
+  const a = useContext(A);
+  if (a === null) throw new Error("no a");
+  return <p>{a.n}</p>;
+}`,
+    ["NATIVE_SETUP_FAILURE"]
+  ],
+  [
+    "context-guard-undefined",
+    `import { createContext, useContext } from "solid-js";
+const B = createContext<{ n: number } | undefined>();
+export function Child() {
+  const b = useContext(B);
+  if (b === undefined) throw new Error("no b");
+  return <p>{b.n}</p>;
+}`,
+    ["NATIVE_SETUP_FAILURE"]
+  ],
+  [
+    "context-guard-cannot-fire",
+    `import { createContext, useContext } from "solid-js";
+const A = createContext<{ n: number }>();
+const B = createContext<{ n: number }>();
+export function Child() {
+  const a = useContext(A);
+  if (a === null) throw new Error("no a");
+  const b = useContext(B);
+  if (b === undefined) throw new Error("no b");
+  return <p>{a.n + b.n}</p>;
+}`,
+    []
+  ],
+  // `Array(n)` throws RangeError only for a length that is not a literal
+  // valid one; several arguments, or none, make an array
+  [
+    "array-constructor",
+    `import { createMemo, createSignal } from "solid-js";
+import { render } from "@solidjs/web";
+function App() {
+  const [n] = createSignal(3);
+  const a = createMemo(() => Array(3).length);
+  const b = createMemo(() => Array(n()).length);
+  const c = createMemo(() => Array("x", "y").length);
+  const d = createMemo(() => Array().length);
+  return <p>{a() + b() + c() + d()}</p>;
+}
+render(() => <App />, document.body);`,
+    ["FOREIGN_HANDOFF"]
+  ],
+  // a provider's value its context does not admit: TypeScript's error, where
+  // plain TypeScript reports it (a store or an accessor of the wrong type was
+  // retyped into the slot and passed unreported; a wrong value was reported as
+  // a generated lazy-view error at the component)
+  [
+    "context-store-for-function",
+    `import { createContext, useContext, createMemo, createStore } from "solid-js";
+const Ctx = createContext<{ state: () => number }>();
+function Child() {
+  const { state: s } = useContext(Ctx);
+  const n = createMemo(() => s());
+  return <p>{n()}</p>;
+}
+export function App() {
+  const [state] = createStore({ n: 1 });
+  return (
+    <Ctx value={{ state }}>
+      <Child />
+    </Ctx>
+  );
+}`,
+    ["TS2322"]
+  ],
+  [
+    "context-accessor-wrong-type",
+    `import { createContext, useContext, createSignal } from "solid-js";
+const Ctx = createContext<{ n: () => string }>();
+function Child() {
+  const { n } = useContext(Ctx);
+  return <p>{n()}</p>;
+}
+export function App() {
+  const [count] = createSignal(0);
+  return (
+    <Ctx value={{ n: count }}>
+      <Child />
+    </Ctx>
+  );
+}`,
+    ["TS2322"]
+  ],
+  [
+    "context-value-wrong-member",
+    `import { createContext, useContext } from "solid-js";
+const Ctx = createContext<{ a: { n: number } }>();
+function Child() {
+  const { a } = useContext(Ctx);
+  return <p>{a.n}</p>;
+}
+export function App() {
+  return (
+    <Ctx value={{ a: { n: "x" } }}>
+      <Child />
+    </Ctx>
+  );
+}`,
+    ["TS2322"]
+  ],
+  [
+    "context-value-wrong",
+    `import { createContext, useContext } from "solid-js";
+const Ctx = createContext<{ n: number }>();
+function Child() {
+  const { n } = useContext(Ctx);
+  return <p>{n}</p>;
+}
+export function App() {
+  return (
+    <Ctx value={5}>
+      <Child />
+    </Ctx>
+  );
+}`,
+    ["TS2322"]
+  ],
+  // an accessor an object literal holds is that accessor: passed on, named
+  // again in the body, or called (it was read wherever it was named)
+  [
+    "object-held-accessor",
+    `import { createMemo, createSignal } from "solid-js";
+function sample(get: () => number) {
+  return get() * 2;
+}
+export function App() {
+  const [n] = createSignal(1);
+  const api = { n };
+  const g = api.n;
+  const a = createMemo(() => {
+    try {
+      return sample(api.n) + sample(g);
+    } catch {
+      return 0;
+    }
+  });
+  const c = createMemo(() => api.n() + 1);
+  return <p>{a() + c()}</p>;
+}`,
+    []
+  ],
+  // a getter's member is read where it is named (D-124)
+  [
+    "object-held-getter",
+    `import { createMemo, createSignal } from "solid-js";
+export function App() {
+  const [n] = createSignal(1);
+  const api = {
+    get twice() {
+      return n() * 2;
+    }
+  };
+  const m = createMemo(() => api.twice + 1);
+  return <p>{m()}</p>;
+}`,
+    []
+  ],
+  // a context's type through a chain of aliases, however long
+  [
+    "context-alias-chain",
+    `import { createContext, useContext, createSignal } from "solid-js";
+type A9 = { count: () => number };
+type A8 = A9;
+type A7 = A8;
+type A6 = A7;
+type A5 = A6;
+type A4 = A5;
+type A3 = A4;
+type A2 = A3;
+type A1 = A2;
+const Ctx = createContext<A1>();
+function Child() {
+  const { count } = useContext(Ctx);
+  return <p>{count()}</p>;
+}
+export function App() {
+  const [n] = createSignal(1);
+  return (
+    <Ctx value={{ count: n }}>
+      <Child />
+    </Ctx>
+  );
+}`,
+    []
+  ],
+  // a circular alias is TypeScript's error; the check stops where it repeats
+  [
+    "context-alias-circular",
+    `import { createContext, useContext, createSignal } from "solid-js";
+type A = B;
+type B = A;
+const Ctx = createContext<A>();
+function Child() {
+  const { count } = useContext(Ctx);
+  return <p>{count()}</p>;
+}
+export function App() {
+  const [n] = createSignal(1);
+  return (
+    <Ctx value={{ count: n }}>
+      <Child />
+    </Ctx>
+  );
+}`,
+    ["TS2456"]
   ]
 ];
 /** refusals stop a project's check: each on its own */
@@ -1146,7 +1418,7 @@ export function App() {
 }`,
     ["SUGAR_ESCAPE"]
   ],
-  // a \`function\` handed a \`this\` keeps it: handed on as written
+  // a `function` handed a `this` keeps it: handed on as written
   [
     "this-bound-named-callback",
     `import { createSignal, createMemo } from "solid-js";
@@ -1303,6 +1575,39 @@ describe("native lowering paths, checked as plain Solid says", { timeout: 300_00
     expect(result.log.join("\n")).toMatch(
       /related: \S*effect-reads-failing-memo-at-root\.tsx:15:15: The app is rendered here\./
     );
+  });
+
+  it("names what a context's value fails with, through Provider members and destructured members", () => {
+    for (const name of ["context-provider-member-nested", "context-destructured-member-call"]) {
+      const row = result.log.find(r => r.includes(`${name}.tsx`) && r.includes("FOREIGN_HANDOFF"));
+      expect(row, name).toMatch(/Remaining: RangeError\./);
+    }
+    const rows = result.log.filter(r => r.includes("array-constructor.tsx") && / error TS/.test(r));
+    // only `Array(n())`
+    expect(
+      rows.map(r => r.match(/\.tsx:(\d+):\d+/)?.[1]),
+      rows.join("\n")
+    ).toEqual(["9"]);
+    expect(rows[0]).toMatch(/Remaining: RangeError\./);
+  });
+
+  it("reports a provider's wrong value as TypeScript does", () => {
+    const at = name =>
+      result.log
+        .filter(r => r.includes(`/${name}.tsx`) && / error TS/.test(r))
+        .map(r => r.replace(/^.*\/[\w-]+\.tsx:/, ""));
+    expect(at("context-store-for-function")).toEqual([
+      "11:19 error TS2322: Type '{ n: number; }' is not assignable to type '() => number'."
+    ]);
+    expect(at("context-accessor-wrong-type")).toEqual([
+      "10:19 error TS2322: Type '() => number' is not assignable to type '() => string'."
+    ]);
+    expect(at("context-value-wrong-member")).toEqual([
+      "9:24 error TS2322: Type 'string' is not assignable to type 'number'."
+    ]);
+    expect(at("context-value-wrong")).toEqual([
+      "9:10 error TS2322: Type 'number' is not assignable to type '{ n: number; }'."
+    ]);
   });
 
   it("a context from another module provides through its Provider", () => {

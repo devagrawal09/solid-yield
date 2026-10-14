@@ -590,6 +590,12 @@ tester.run("no-component-tag (edges)", rules["no-component-tag"], {
       errors: [{ messageId: "tag", data: { name: "Card" } }]
     },
     {
+      // an empty attribute (`b={}`, a comment alone) passes nothing
+      code: tagImports + inRoutine("<p><Card a={} b={/* later */} c={1} /></p>"),
+      output: tagImports + inRoutine("<p>{yield* Card({ c: 1 })}</p>"),
+      errors: [{ messageId: "tag" }]
+    },
+    {
       // keys that are not identifiers are quoted
       code: tagImports + inRoutine('<p><Card data-x="1" on:click={f} /></p>'),
       output: tagImports + inRoutine('<p>{yield* Card({ "data-x": "1", "on:click": f })}</p>'),
@@ -1072,6 +1078,9 @@ const evtDecl = "const save = $event(function* () {});\n";
 const bound = attrs => `${evtDecl}function* v() { return <b ${attrs} />; }`;
 tester.run("no-unbound-event (edges)", rules["no-unbound-event"], {
   valid: [
+    // an empty handler attribute binds nothing
+    bound("onClick={}"),
+    bound("onClick={/* later */}"),
     // not an event attribute
     bound("on={save}"),
     bound("onclick={save}"),

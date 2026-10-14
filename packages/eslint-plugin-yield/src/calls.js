@@ -143,8 +143,7 @@ export function childrenFromFunction(source, fn) {
       return null;
     body = stmts[0].argument;
   }
-  while (body.type === "TSAsExpression" || body.type === "ParenthesizedExpression")
-    body = body.expression;
+  while (body.type === "TSAsExpression") body = body.expression;
   const jsx = isJsx(body)
     ? source.getText(body)
     : body.type === "CallExpression"

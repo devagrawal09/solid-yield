@@ -15,6 +15,19 @@ const root = resolve(import.meta.dirname, "../..");
 const generated = join(import.meta.dirname, ".native-generated");
 const scratch = join(generated, String(process.pid));
 
+/** The files under `dir`, relative to it; not into generated or installed
+ * directories, whose `node_modules` links lead back into the repository. */
+function sources(dir, prefix = "") {
+  return readdirSync(join(dir, prefix), { withFileTypes: true }).flatMap(entry =>
+    entry.isDirectory()
+      ? [".native-generated", "node_modules"].includes(entry.name)
+        ? []
+        : sources(dir, join(prefix, entry.name))
+      : entry.isFile()
+        ? [join(prefix, entry.name)]
+        : []
+  );
+}
 // `--cached`: a result for the same checker, library, pipeline and corpus
 // (by content) is reused, as the mutation program's is.
 const hash = createHash("sha256");
@@ -27,8 +40,8 @@ for (const dir of [
   "packages/yield/jsx",
   "scripts/native-surface"
 ])
-  for (const file of readdirSync(join(root, dir), { recursive: true })
-    .filter(f => /\.(?:[cm]?js|ts|json)$/.test(String(f)) && !/\.native-generated/.test(String(f)))
+  for (const file of sources(join(root, dir))
+    .filter(f => /\.(?:[cm]?js|ts|json)$/.test(f))
     .sort()) {
     hash.update(dir + "/" + file);
     hash.update(readFileSync(join(root, dir, String(file))));

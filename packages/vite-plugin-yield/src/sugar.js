@@ -2602,7 +2602,8 @@ function accessorArguments(code, filename, program) {
         )
           continue;
         // `{ count }` becomes `{ count: … }`
-        if (arg.parentPath.isObjectProperty()) arg.parentPath.node.shorthand = false;
+        const holder = arg.parentPath;
+        if (holder?.isObjectProperty()) holder.node.shorthand = false;
         // a component's body hands it on later, as Solid's plain code does
         const inSetup = owner
           ? owner.parentPath?.isCallExpression() &&
@@ -2685,7 +2686,7 @@ function contextFacades(code, filename, program) {
         .getCallSignatures()
         .some(
           sig =>
-            sig.minArgumentCount === 0 &&
+            !sig.getParameters().length &&
             checker.isTypeAssignableTo(value, checker.getReturnTypeOfSignature(sig))
         );
       return accessor || checker.isTypeAssignableTo(value, slot);

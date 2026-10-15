@@ -1396,6 +1396,18 @@ export function App() {
   return <p>{a() + b()}</p>;
 }`,
     []
+  ],
+  // a Solid import used for module state and inside a component: the module's
+  // use stays Solid's (MODULE_STATE), the component's is the library's
+  [
+    "module-state-beside-owned",
+    `import { createSignal } from "solid-js";
+const [shared] = createSignal(0);
+export function App() {
+  const [n] = createSignal(1);
+  return <p>{n() + shared()}</p>;
+}`,
+    ["MODULE_STATE"]
   ]
 ];
 /** refusals stop a project's check: each on its own */

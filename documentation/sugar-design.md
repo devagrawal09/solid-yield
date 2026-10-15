@@ -2435,10 +2435,10 @@ program dominates, as before. (This machine runs about twice as slow as the
 
 ### The last unreached lines; provider values as TypeScript types them (2026-10-14)
 
-**Re-measured.** The section above reported the native checker at 98.9 %
-of its functions' own lines, two of its functions short of fully covered, 32
-functions over CRAP 30, and its claim that every path was exercised went
-further than that. The lines it left unreached were probed again, one
+**Why again.** The section above reported the native checker at 98.9 % of
+its functions' own lines, two of its functions short of fully covered and 32
+functions over CRAP 30, under a title that said every path was exercised; its
+numbers did not show that. The lines it left unreached were probed again, one
 program each, under the same rule: a program that reaches the line either
 finds a gap (fixed, and the program became a test) or the line is removed.
 What it found:
@@ -2497,3 +2497,50 @@ What it found:
 The tests are in `native-paths.test.js` (25 more programs, and four checks of
 the messages and positions they get), the ts-plugin's `cli`, `service` and
 `hover` tests, and the lint plugin's three new files.
+
+**Measured** (2026-10-14/15). Two runs over the whole test system with the
+checker's sources loaded as written. At `5f71e44`: every step (each
+package's suite, the surface corpus, the native gate steps, the mutation
+run); 26 lines of the sugar-mode checker were not reached (the Vite, lint
+and TypeScript plugins, failure inference and its generator helper), down
+from 79 in the Vite and lint plugins alone. Each was probed; what that found
+is the second half of the list above (`eea31f3`). At `eea31f3`, the package
+suites, the surface corpus and 63 of the native gate steps (the mutation run
+and the rest were stopped to land Dev's 2026-10-15 rulings first):
+
+| Package | Functions | Own-line coverage | CRAP > 30 | of them under 100 % |
+| --- | --- | --- | --- | --- |
+| vite-plugin-yield | 618 | 99.9 % | 13 | 1 (`coloredPropSites`, 98 %) |
+| ts-plugin-yield | 152 | 99.9 % | 2 | 0 |
+| eslint-plugin-yield | 161 | 99.9 % | 1 | 0 |
+| compiler-yield | 528 | 89.5 % | 15 | (the islands experiments; failure inference 100 %) |
+
+Lines of the sugar-mode checker still not reached, each with why:
+
+- `service.cjs` `failureName`'s fallback for a failure kind that is not a
+  string literal: the lowering only ever writes literal kinds
+  (`nativeFailure(["RangeError"], …)`); the fallback keeps a hand-written
+  kind printable.
+- `sugar.js` `coloredPropSites`, a widened prop whose failure prints with
+  `any` or a symbol name (`unprintable`): native failures print as class
+  names or `NativeFailure` tags, so no program measured reaches it; it keeps
+  an `any` from being written into a widened prop's type.
+- (Tested since: `native.js`'s aliasing of a Solid import used both for
+  module state and inside a component, and `vite.js`'s `watchChange`, which
+  the mutation programs and a dev server had reached at `5f71e44`.)
+
+Of the 19 functions in the sugar-mode checker over CRAP 30, 18 are fully
+covered: their CRAP is their complexity (the lowering's and the mapper's
+largest visitors: `mapped` 136, `delegate` 111, the effects pass's `exit`
+102, `native.js`'s `exit` 100, failure inference's `evaluate` 94). Only
+splitting them lowers it; that is a refactor of the checker's core, left to
+Dev (HANDOFF).
+
+**Stryker over the lint plugin's sources** (its whole suite, 571 tests, on
+the final source): **93.69 %** (2997 killed, 18 timed out, 189 survived, 14
+without coverage); it was 66.04 % on 2026-10-08 with 238 tests. The
+survivors are mostly conditions TypeScript-ESLint's tree makes always true
+(a function is a property's value, never its key), cache and recursion
+guards, and null checks a guarded visit repeats. The TypeScript plugin and
+failure inference were last measured on 2026-10-08 (48.07 %, 59.57 %); their
+re-runs wait for the D-118 round, which changes both.

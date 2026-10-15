@@ -1,8 +1,8 @@
 {
-  "startedAt": "2026-10-14T12:47:25.190Z",
-  "finishedAt": "2026-10-14T13:28:48.756Z",
-  "durationMs": 2483566,
-  "digest": "4ec85d71ceda13bb1a015dc61ed732610a5a6ad77cbe9bcadced56733ae6a6c8",
+  "startedAt": "2026-10-15T00:49:04.298Z",
+  "finishedAt": "2026-10-15T01:21:07.442Z",
+  "durationMs": 1923144,
+  "digest": "e21c8b4db5d6b62a8ea7fbef2d261f4f42256f47ac0f34d40348568e6e9ffaac",
   "projects": [
     {
       "id": "sierpinski",
@@ -918,9 +918,9 @@
             "file": "App.tsx",
             "line": 4,
             "severity": "error",
-            "code": "READ_IN_SETUP",
+            "code": "JSX_IN_SETUP",
             "tsCode": "TS2769",
-            "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
+            "message": "[JSX_IN_SETUP] Return this JSX from the component's view."
           },
           {
             "stage": "lint",
@@ -940,7 +940,7 @@
           "lint": "diagnostics"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:4:21 error TS2769: [READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive.",
+          "<job>/source/App.tsx:4:17 error TS2769: [JSX_IN_SETUP] Return this JSX from the component's view.",
           "solid-yield check: 1 files, 1 errors"
         ]
       }
@@ -15147,11 +15147,11 @@
           {
             "stage": "cli",
             "file": "filters.tsx",
-            "line": 9,
+            "line": 11,
             "severity": "error",
-            "code": "LAZY_VIEW",
-            "tsCode": "TS2769",
-            "message": "[generated] [LAZY_VIEW] children is a lazy view: function* () { return <.../>; }"
+            "code": "TS2322",
+            "tsCode": "TS2322",
+            "message": "Type 'SourceAccessor<string>' is not assignable to type ''."
           },
           {
             "stage": "lint",
@@ -15173,7 +15173,7 @@
         "cliOutput": [
           "<job>/source/App.tsx:79:15 error TS2345: [FOREIGN_HANDOFF] Fix the earlier errors in this component before checking its render call. Remaining: any.",
           "<job>/source/filters.tsx:9:6 error TS95000: [MODULE_STATE] reactive state created at module level has no owner; create it inside a component and provide it via context, or keep it foreign and handle failures at its uses",
-          "<job>/source/filters.tsx:9:60 error TS2769: [generated] [LAZY_VIEW] children is a lazy view: function* () { return <.../>; }",
+          "<job>/source/filters.tsx:11:34 error TS2322: Type 'SourceAccessor<string>' is not assignable to type ''.",
           "solid-yield check: 4 files, 3 errors"
         ]
       },
@@ -16072,11 +16072,11 @@
           {
             "stage": "cli",
             "file": "router.tsx",
-            "line": 10,
+            "line": 17,
             "severity": "error",
-            "code": "LAZY_VIEW",
-            "tsCode": "TS2769",
-            "message": "[generated] [LAZY_VIEW] children is a lazy view: function* () { return <.../>; }"
+            "code": "GENERATED_TYPE",
+            "tsCode": "TS2322",
+            "message": "[GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host."
           },
           {
             "stage": "cli",
@@ -16104,7 +16104,7 @@
         },
         "cliOutput": [
           "<job>/source/main.tsx:8:5 error TS2345: [NO_PROVIDER] Fix the earlier errors in this component before checking its render call. Missing: any.",
-          "<job>/source/router.tsx:10:17 error TS2769: [generated] [LAZY_VIEW] children is a lazy view: function* () { return <.../>; }",
+          "<job>/source/router.tsx:17:22 error TS2322: [GENERATED_TYPE] Check this operation and the function containing it; the generated code cannot accept it. Check the operation and its enclosing host.",
           "<job>/source/router.tsx:13:37 error TS2345: Argument of type '0' is not assignable to parameter of type 'string | ((prev: string | undefined) => string | undefined) | undefined'.",
           "<job>/source/router.tsx:13:34 error TS2345: [WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state.",
           "solid-yield check: 5 files, 4 errors"

@@ -213,4 +213,8 @@ export function App() { return <p>{counter[0]()}</p>; }`;
   plugin.handleHotUpdate();
   plugin.transform.call(context, source, file);
   expect(warnings).toHaveLength(2);
+  // a watched file changing clears it too
+  plugin.watchChange();
+  plugin.transform.call(context, source, file);
+  expect(warnings).toHaveLength(3);
 }, 30_000);

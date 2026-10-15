@@ -15,7 +15,7 @@ const Saver = component(function* Saver() {
   const [saved, setSaved] = yield* h.$signal("saved", "none");
   const save = $event(function* () {
     h.run("save");
-    // a context's value is given as a prop is (D-118): a held constant
+    // a context's value is given as a prop is (D-126): a held constant
     const endpoint = api;
     const value = yield* attempt(
       () => h.task<string>("save", endpoint),

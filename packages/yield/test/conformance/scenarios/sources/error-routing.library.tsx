@@ -77,7 +77,7 @@ const Save = createContext<EventHandler<[], Forbidden, void, false, false>, "Sav
 
 /** Binds the handler it is given, under an Errored of its own: the bind site (D-085). */
 const Child = component(function* Child() {
-  // a context's value is given as a prop is (D-118): the handler itself, bound with one yield*
+  // a context's value is given as a prop is (D-126): the handler itself, bound with one yield*
   const save = yield* Save;
   return view(function* () {
     return (

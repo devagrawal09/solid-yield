@@ -40,7 +40,7 @@ it("four beginner mistakes lead with readable type messages", () => {
   expect(diagnostics.some(d => d.code === 2589)).toBe(false);
 });
 
-it("D-118's refusals lead with readable type messages", () => {
+it("D-126's refusals lead with readable type messages", () => {
   const configPath = resolve("tsconfig.json");
   const config = ts.readConfigFile(configPath, ts.sys.readFile);
   const { options } = ts.parseJsonConfigFileContent(config.config, ts.sys, resolve("."));

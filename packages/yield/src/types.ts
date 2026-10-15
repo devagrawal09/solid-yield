@@ -379,7 +379,7 @@ export type TypedStore<T> = Path<T>;
 // --- props ---------------------------------------------------------------------------
 
 /**
- * Props as a routine sees them (D-056, D-068, D-118). "The only things going
+ * Props as a routine sees them (D-056, D-068, D-126). "The only things going
  * through props are reactive values and events; everything else is a bag of
  * those two things": a declared type is literal.
  *
@@ -433,11 +433,11 @@ export type PropsCheck<D> = {
         : unknown;
 };
 
-/** An `$event` handler (D-118): an event, given as itself. A plain function type is not one. */
+/** An `$event` handler (D-126): an event, given as itself. A plain function type is not one. */
 type HandlerProp = { readonly [EVENT]: true };
 
 /**
- * What the child sees of a declared prop (D-118): a reactive one as a path,
+ * What the child sees of a declared prop (D-126): a reactive one as a path,
  * any other as it is declared; `children` a source, as before.
  */
 type PropRead<V, U, N> = 0 extends 1 & V
@@ -451,7 +451,7 @@ type PropRead<V, U, N> = 0 extends 1 & V
     : V | U;
 
 /**
- * What callers may pass for each prop (D-118): a reactive prop (`Source<T, E,
+ * What callers may pass for each prop (D-126): a reactive prop (`Source<T, E,
  * P>`) takes a source, a path or a hole within its colors (`[REACTIVE_PROP]`
  * for anything else); a handler prop an `$event` (`[HANDLER_PROP]`); any
  * other prop the value itself (`[HELD_PROP]` for a source or a hole).
@@ -485,13 +485,13 @@ type PropInput<V, U, N, Q> = unknown extends V
       : [V] extends [HandlerProp]
         ? V | U | SettledProp<HandlerMessage<N>>
         : V | U | SettledProp<HeldMessage<N>>;
-/** A handler prop takes an `$event` only (D-118): the message TypeScript prints beside it. */
+/** A handler prop takes an `$event` only (D-126): the message TypeScript prints beside it. */
 type HandlerMessage<N> =
   `[HANDLER_PROP] prop \`${N & string}\` is an event handler: pass an $event, not a source or a hole (an event does not vary per render: one $event chooses between handlers)`;
-/** A held prop takes its value only (D-118). */
+/** A held prop takes its value only (D-126). */
 type HeldMessage<N> =
   `[HELD_PROP] prop \`${N & string}\` is held as a value: declare it Source<…> to pass a live one`;
-/** A reactive prop takes a source, a path or a hole (D-118); a settled one, within its colors. */
+/** A reactive prop takes a source, a path or a hole (D-126); a settled one, within its colors. */
 type ReactiveMessage<N, P> = [P] extends [false]
   ? `[REACTIVE_PROP] prop \`${N & string}\` is reactive and settled: pass a settled source, path or hole (constant(v) for a fixed value), or declare it Source<T, E, true>`
   : `[REACTIVE_PROP] prop \`${N & string}\` is reactive: pass a source, a path or a hole (constant(v) for a fixed value)`;
@@ -528,7 +528,7 @@ type HoleRequiresOf<V> = V extends () => Generator<infer Y, any, any>
     : Settle<RequiresOf<Y>>
   : never;
 /**
- * A prop's call-site refusal (D-118): TypeScript prints the alias with its
+ * A prop's call-site refusal (D-126): TypeScript prints the alias with its
  * message in the expected type, `Todo | SettledProp<"[HELD_PROP] prop `todo`
  * is held as a value: …">`.
  */

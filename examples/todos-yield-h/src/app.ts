@@ -33,7 +33,7 @@ type Todos = Returned<typeof createTodos>;
  * The todos store and the actions, for the components below `App`. Created
  * without a default: a component that reads it requires it (D-098), and
  * `App` provides it around its call. Its value is a bag, held as it is
- * (D-118): `todos` is a path over the store, an action the handler itself,
+ * (D-126): `todos` is a path over the store, an action the handler itself,
  * called in an event as `yield* addTodo(todo)`.
  */
 const TodosContext = createContext<{ todos: Todos[0] } & Todos[1], "TodosContext">(undefined, {

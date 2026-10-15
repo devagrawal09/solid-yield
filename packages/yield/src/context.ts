@@ -10,14 +10,14 @@
  * one. `createContext(defaultValue)` makes a context that is always there to
  * read: no requirement.
  *
- * A provided value is given as a prop is (D-118): a context declared
+ * A provided value is given as a prop is (D-126): a context declared
  * `Source<T, E, P>` is reactive — `provide` takes a source, a path or a
  * hole, and `yield* Ctx` gives the setup a path over it, read in the view's
  * holes, a memo or an event; any other context's value — a constant, an
  * `$event` handler, a bag of those and of paths — is held: `provide` takes
  * the value, and `yield* Ctx` gives it as it is. A module that also works
  * without a provider gives its context a sentinel default and makes its own
- * value when it reads the sentinel (D-118: a userland pattern).
+ * value when it reads the sentinel (D-126: a userland pattern).
  */
 declare const __DEV__: boolean;
 
@@ -46,7 +46,7 @@ export declare const CONTEXT: unique symbol;
 export declare const PROVIDES: unique symbol;
 
 /**
- * What `yield* Ctx` gives a setup (D-118): the provided value as a prop is
+ * What `yield* Ctx` gives a setup (D-126): the provided value as a prop is
  * given. A context of sources is reactive and declares its colors as a prop
  * does (`createContext<Source<User, ApiError, true>>()` reads as a path that
  * may be pending and fail); any other value — a constant, a handler, a bag —
@@ -58,7 +58,7 @@ export type ContextValue<T> = 0 extends 1 & T
     ? Path<V, E, P>
     : T;
 /**
- * What `provide`'s `value` takes (D-118): what a prop declared `T` takes.
+ * What `provide`'s `value` takes (D-126): what a prop declared `T` takes.
  * A reactive context (`Source<V, E, P>`) takes a source, a path or a hole
  * within its colors, not a plain value (`constant(v)` for a fixed one:
  * `[REACTIVE_PROP]`); any other context takes the value itself, not a
@@ -103,7 +103,7 @@ type ProvideUndefined<T> = undefined extends T
  */
 export interface ContextOps<T, N extends string, Q> {
   readonly [CONTEXT]: { readonly value: (value: T) => T; readonly name: N };
-  /** `yield* Ctx` in a setup: the value, as a prop is given (D-118); a context without a default is required. */
+  /** `yield* Ctx` in a setup: the value, as a prop is given (D-126); a context without a default is required. */
   [Symbol.iterator](): Generator<ContextRead<Q>, ContextValue<T>, any>;
   /**
    * `{yield* Ctx.provide({ value, children: function* () { return <…/>; } })}`

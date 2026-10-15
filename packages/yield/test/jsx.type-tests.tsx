@@ -806,7 +806,7 @@ export const Declared = component(function* (
   });
 });
 declare const settledUser: Source<{ name: string }>;
-// callers pass any source within it (a settled one too), or a constant (D-118: not a plain value)
+// callers pass any source within it (a settled one too), or a constant (D-126: not a plain value)
 export const ok6 = Errored({
   fallback: "!",
   children: function* () {
@@ -1251,7 +1251,7 @@ declare const saveTodo: Source<Todo, SaveError, true>;
 declare const twinTodo: Source<Todo, FetchErrorTwin, true>;
 type ReadOf<S> = S extends { [Symbol.iterator](): Generator<infer Y, any, any> } ? Y : never;
 
-// a bare prop is held (D-118): the child sees the value as it is declared, no read
+// a bare prop is held (D-126): the child sees the value as it is declared, no read
 const TodoItem = component(function* TodoItem(props: Props<{ todo: Todo; label: string }>) {
   const held: [Is<typeof props.todo, Todo>, Is<typeof props.label, string>] = [true, true];
   void held;
@@ -1316,7 +1316,7 @@ export const heldView: View<false, never> = TodoItem({
   label: "a"
 });
 
-// call-site acceptance of a held prop: the value only (D-118)
+// call-site acceptance of a held prop: the value only (D-126)
 export const held1 = TodoItem({ todo: { title: "a", done: false }, label: "a" });
 // @ts-expect-error [HELD_PROP] prop `label` is held as a value: a source is refused
 export const heldBad1 = TodoItem({ todo: { title: "a", done: false }, label: constant("a") });
@@ -1493,7 +1493,7 @@ render(
   root
 );
 
-// an optional reactive prop takes a hole returning undefined, and is undefined left out (D-118);
+// an optional reactive prop takes a hole returning undefined, and is undefined left out (D-126);
 // with every prop optional the props object is optional too
 const Note = component(function* (props: Props<{ note?: Source<string>; children: Element }>) {
   return view(function* () {

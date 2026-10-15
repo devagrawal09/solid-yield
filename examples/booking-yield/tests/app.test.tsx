@@ -1,5 +1,5 @@
 // The booking page and its modules in jsdom, driven by DOM clicks only: an
-// event is called where a view binds it (D-118, EVENT_OUTSIDE_RUN).
+// event is called where a view binds it (D-126, EVENT_OUTSIDE_RUN).
 import { component, render, view } from "solid-yield";
 import { BookingPage } from "../src/app";
 import { DateRangePicker } from "../src/dateRange";

@@ -63,7 +63,7 @@ const ROOMS = ["lobby", "design", "infra", "random"];
 
 const Live = component(function* Live(props: Props<RouteSectionProps<undefined>>) {
   const room = yield* $memo(function* () {
-    // the router's location is held, a reactive object of its own (D-118): read in the memo
+    // the router's location is held, a reactive object of its own (D-126): read in the memo
     const q = String(props.location.query.room || "lobby");
     return ROOMS.includes(q) ? q : "lobby";
   });

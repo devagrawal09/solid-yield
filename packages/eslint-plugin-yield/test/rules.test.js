@@ -217,7 +217,7 @@ tester.run("no-path-object-use", rules["no-path-object-use"], {
     "const C = component(function* (props) { return view(function* () { return <Child {...props} user={props.user} />; }); });",
     // a plain object with the same shape is not a path
     "const s = { a: 1 }; const t = { ...s }; s.a === 1;",
-    // D-118: a prop is given as it is; without types a props key may be held (a constant, a bag),
+    // D-126: a prop is given as it is; without types a props key may be held (a constant, a bag),
     // so it is not reported (with types a reactive one is: below)
     "const C = component(function* (props) { const m = yield* $memo(function* () { return { ...props.user }; }); return view(function* () { return <p />; }); });",
     "const C = component(function* (props) { return view(function* () { return <p title={props.room === 'lobby' ? 'home' : ''} />; }); });"
@@ -1080,7 +1080,7 @@ declare function pick(v: string): EventHandler<[]>;
 declare const actions: { save: EventHandler<[]> };
 declare const plain: () => void;
 `;
-// D-118: a handler prop, and a handler in a bag prop, are the handlers themselves
+// D-126: a handler prop, and a handler in a bag prop, are the handlers themselves
 const propsDecls = `
 declare function component<T>(f: (props: T) => Generator<unknown, unknown, unknown>): unknown;
 declare function view(f: () => Generator<unknown, unknown, unknown>): unknown;
@@ -1125,7 +1125,7 @@ typedTester.run("no-unbound-event (with types)", rules["no-unbound-event"], {
   ]
 });
 
-// --- no-path-object-use (with types, D-118): a reactive prop is a path, a held one is not ----
+// --- no-path-object-use (with types, D-126): a reactive prop is a path, a held one is not ----
 const sourceDecls = `
 declare const SOURCE: unique symbol;
 interface Path<T> { readonly [SOURCE]: T; [Symbol.iterator](): Generator<unknown, T, any> }

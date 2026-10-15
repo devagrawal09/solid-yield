@@ -435,7 +435,7 @@ const noUnyieldedWrite = {
 };
 
 const ROUTE_PROPS =
-  "the route component's props (`props.location…`, `props.params…`: held, read where they are read, D-118)";
+  "the route component's props (`props.location…`, `props.params…`: held, read where they are read, D-126)";
 const SOLID_FOREIGN = {
   createSignal: "`$signal`",
   createMemo: "`$memo`",
@@ -831,7 +831,7 @@ const noPathObjectUse = {
       const t = context.sourceCode.getText(node);
       return t.length > 40 ? t.slice(0, 37) + "..." : t;
     };
-    // D-118: a prop is given as it is — a reactive one is a path, a held one
+    // D-126: a prop is given as it is — a reactive one is a path, a held one
     // (a constant, a bag) is not. Only its type tells them apart: without
     // type information a props key is not reported.
     const isPath = node => {
@@ -1126,7 +1126,7 @@ const noReadInProp = {
         "A component call's prop is a source, a hole (`function* () { … }`) or a settled value, never a read in the caller (D-065)."
     },
     messages: {
-      read: "read in a prop: pass the source (`{{key}}: src`), or a hole (`{{key}}: function* () { return …; }`) the component reads, to a prop declared Source<T> (D-065, D-118)."
+      read: "read in a prop: pass the source (`{{key}}: src`), or a hole (`{{key}}: function* () { return …; }`) the component reads, to a prop declared Source<T> (D-065, D-126)."
     },
     schema: []
   },

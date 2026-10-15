@@ -715,7 +715,7 @@ describe("setups inside a parent's first view run", () => {
 });
 
 describe("props", () => {
-  it("a reactive prop is a path; forwarding a source forwards the read; paths walk deep; a held prop is its value (D-118)", () => {
+  it("a reactive prop is a path; forwarding a source forwards the read; paths walk deep; a held prop is its value (D-126)", () => {
     let setName!: (v: string) => void;
     let childRuns = 0;
     const Card = component(function* (
@@ -1067,7 +1067,7 @@ describe("context", () => {
   });
 
   describe("D-098: a context without a default is required", () => {
-    // a reactive context (D-118): the reader holds a path over the provided source or hole
+    // a reactive context (D-126): the reader holds a path over the provided source or hole
     const UserCtx = createContext<Source<{ name: string }>, "UserCtx">(undefined, {
       name: "UserCtx"
     });
@@ -3353,7 +3353,7 @@ describe("binding an event is a hole (D-072)", () => {
   describe("D-085: a bound event's failure routes to the bind site", () => {
     /** Binds the handler it finds in context: the bind site. */
     const Child = component(function* Child() {
-      // a context's value is given as a prop is (D-118): the handler itself, bound with one yield*
+      // a context's value is given as a prop is (D-126): the handler itself, bound with one yield*
       const save = yield* SaveContext;
       return view(function* () {
         return <button onClick={yield* save}>save</button>;
@@ -3559,7 +3559,7 @@ describe("D-020: an event called from an event joins its transaction", () => {
   });
 });
 
-describe("D-118: an event is called by routine code or by the DOM (EVENT_OUTSIDE_RUN, D-028 for events)", () => {
+describe("D-126: an event is called by routine code or by the DOM (EVENT_OUTSIDE_RUN, D-028 for events)", () => {
   devIt("called from a timer: EVENT_OUTSIDE_RUN at the call", async () => {
     let save!: () => unknown;
     const App = component(function* App() {

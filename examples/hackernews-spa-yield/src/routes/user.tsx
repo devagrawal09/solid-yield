@@ -11,7 +11,7 @@ export const preload = ({ params }: RoutePreloadFuncArgs<RouteParams<Path>>) => 
 
 const User = component(function* User(props: Props<RouteProps<Path, void>>) {
   const user = yield* $memo(function* () {
-    // the router's params are held, a reactive object of its own (D-118): read in the memo
+    // the router's params are held, a reactive object of its own (D-126): read in the memo
     const id2 = props.params.id;
     return yield* attempt(
       () => getUser(id2),

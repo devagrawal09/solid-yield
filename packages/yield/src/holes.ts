@@ -143,7 +143,7 @@ function toAttribute(key: string, value: any, name?: string | null): any {
  * the values themselves: a prop holding an array or an object (a context
  * value, a store) is passed as it is.
  *
- * A component's props are passed as they are (D-118): the child's props
+ * A component's props are passed as they are (D-126): the child's props
  * give each as it is, a reactive one as a path. Solid's `h` turns a function
  * prop into a getter that calls it (a zero-arity one) or wraps it (one with
  * parameters) — a source would be read, a handler called, where the child

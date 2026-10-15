@@ -1,5 +1,5 @@
 /**
- * Type tests for D-118: declared prop types are literal. A `Source<T, E, P>`
+ * Type tests for D-126: declared prop types are literal. A `Source<T, E, P>`
  * is reactive (the child sees a path), a handler is itself, any other type
  * is held as declared — a bag's leaves too. A context's value follows the
  * same rule. The runtime half is held.spec.tsx; the printed messages are
@@ -152,7 +152,7 @@ type _liveContext = Expect<
   Equal<ContextValue<Source<string, never, true>>, Path<string, never, true>>
 >;
 // a required context's read is a requirement; a sentinel default adds none (a module that also
-// works alone, D-118)
+// works alone, D-126)
 const RequiredTools = createContext<Tools, "RequiredTools">(undefined, { name: "RequiredTools" });
 const NONE = Symbol("no provider");
 const DefaultedTools = createContext<Tools | typeof NONE>(NONE, { name: "DefaultedTools" });

@@ -653,7 +653,7 @@ function readPath(t: PathTarget): unknown {
 }
 
 /**
- * D-118: what a value given to a component (a prop) or provided to a context
+ * D-126: what a value given to a component (a prop) or provided to a context
  * is to its reader. "The only things going through props are reactive
  * values and events; everything else is a bag of those two things": a
  * reactive value — a path, a source, a hole (a zero-arity `function*`) — is
@@ -676,7 +676,7 @@ function heldOrPath(v: any, path: () => unknown): unknown {
 }
 
 /**
- * Props as they are (D-118): `props.x` is the value the caller passed, a
+ * Props as they are (D-126): `props.x` is the value the caller passed, a
  * reactive one given as a path over it (`heldOrPath`). `children` is a path,
  * as before: a lazy view built where the child reads it. A getter — a JSX
  * tag's, or one written in the props object — is a reactive value: a path
@@ -697,14 +697,14 @@ function typedProps(raw: any): any {
   });
 }
 
-/** @internal A context's provided value as its reader holds it (D-118): `heldOrPath`. */
+/** @internal A context's provided value as its reader holds it (D-126): `heldOrPath`. */
 export function heldValue(raw: unknown): unknown {
   return heldOrPath(raw, () => makePath(raw, false, []));
 }
 
 /**
  * @internal The keys of a props object whose getters return the value
- * unread (D-118): `h` hands a component's function-valued prop (a source, a
+ * unread (D-126): `h` hands a component's function-valued prop (a source, a
  * hole, a handler, a plain function) to Solid's `h` as a thunk returning
  * it, which Solid turns into a getter calling the thunk.
  */
@@ -1598,7 +1598,7 @@ export function $cleanup(fn: () => void): Yieldable<Cleanup, void> {
 // --- context ------------------------------------------------------------------------------
 
 /**
- * @internal `yield* Ctx` (D-036, D-098, D-118): a setup's read of a library
+ * @internal `yield* Ctx` (D-036, D-098, D-126): a setup's read of a library
  * context. The provided value is given as a prop is (`heldValue`): a
  * provided source or hole as a path, read where the setup's view, memo or
  * event reads it, never in the setup; a handler, a constant or a bag as it
@@ -1865,7 +1865,7 @@ export function nativeHostCallback(
  * a call from routine code (`yield* save(x)`, which handles it), the promise
  * rejects.
  *
- * It is called by routine code or by the DOM (D-118, D-028 for events):
+ * It is called by routine code or by the DOM (D-126, D-028 for events):
  * `yield* save(x)` in an `$event` or an `$effect`'s effect phase, or the DOM
  * through a bind. Called directly with no routine running — a timer, a
  * promise callback, plain or foreign code — it is `EVENT_OUTSIDE_RUN` in
@@ -1930,7 +1930,7 @@ export function $event<Args extends unknown[] = [], Y extends EventOp = never, R
     };
     return result;
   };
-  // D-118 (D-028 for events): a handler is called by routine code (`yield*
+  // D-126 (D-028 for events): a handler is called by routine code (`yield*
   // save(x)` in an `$event` or an effect phase) or by the DOM through a bind
   // (the bound wrapper calls `call` itself); called with no routine running
   // — a timer, a promise callback, plain or foreign code — it fails here

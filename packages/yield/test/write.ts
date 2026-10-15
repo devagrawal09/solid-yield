@@ -4,7 +4,7 @@
  * through a bind, as the DOM calls a handler a view binds. A setter called
  * with no routine running is a dev error (`SETTER_OUTSIDE_RUN`, D-028), so
  * the setter is called inside the event; an event called directly from
- * plain code is one too (`EVENT_OUTSIDE_RUN`, D-118), so it is bound.
+ * plain code is one too (`EVENT_OUTSIDE_RUN`, D-126), so it is bound.
  */
 import { createRoot } from "solid-js";
 import { $event } from "solid-yield";

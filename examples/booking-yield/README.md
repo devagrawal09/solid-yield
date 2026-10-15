@@ -1,6 +1,6 @@
 # Booking — issue #2's primitives, in userland
 
-Not a twin: issue #2's proposal written with `solid-yield`'s exports alone (D-118), and a booking page that uses it.
+Not a twin: issue #2's proposal written with `solid-yield`'s exports alone (D-126), and a booking page that uses it.
 
 ## Which file answers which proposal item
 

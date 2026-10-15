@@ -21,7 +21,7 @@ const Home = component(function* Home(_props: Props<RouteSectionProps<void>>) {
   });
 });
 const DocPage = component(function* DocPage(props: Props<RouteSectionProps<void>>) {
-  // the router's params are held, a reactive object of its own (D-118): a hole reads the slug
+  // the router's params are held, a reactive object of its own (D-126): a hole reads the slug
   // where the child reads it, so a navigation updates the article, not re-creates it
   const slug = function* () {
     return props.params.slug;

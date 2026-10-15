@@ -19,7 +19,7 @@ export const preload = ({ location }: RoutePreloadFuncArgs) => {
 // `$memo` over the query — pending until it lands, and it may fail.
 const Stories = component(function* Stories(props: Props<RouteSectionProps<void>>) {
   const page = yield* $memo(function* () {
-    // the router's location is held, a reactive object of its own (D-118): read in the memo
+    // the router's location is held, a reactive object of its own (D-126): read in the memo
     return Number(props.location.query.page) || 1;
   });
   const type = yield* $memo(function* () {

@@ -63,7 +63,7 @@ type _defaulted = Expect<Equal<typeof ThemeCtx, YieldContext<string, string>>>;
 type ReadOf<C> = C extends { [Symbol.iterator](): Generator<infer Y, any, any> } ? Y : never;
 type _read = Expect<Equal<ReadOf<typeof UserCtx>, ContextRead<typeof UserCtx>>>;
 type _readDefault = Expect<Equal<ReadOf<typeof ThemeCtx>, ContextRead<never>>>;
-// the value is given as a prop is (D-118): a held value as it is, a reactive one as a path
+// the value is given as a prop is (D-126): a held value as it is, a reactive one as a path
 type _value = Expect<Equal<ContextValue<User>, User>>;
 type _valueSource = Expect<Equal<ContextValue<Source<User, never, true>>, Path<User, never, true>>>;
 // Native TodoMVC provides a tuple: each numbered path keeps its own type.
@@ -188,7 +188,7 @@ render(App, root);
 render(() => App(), root);
 hydrate(App, document);
 
-// provide's value takes what a prop declared as the context's type takes (D-118): a held context
+// provide's value takes what a prop declared as the context's type takes (D-126): a held context
 // the value itself, a reactive one (`Source<T>`) a source, a path or a hole
 const LiveUserCtx = createContext<Source<User>, "LiveUserCtx">(undefined, { name: "LiveUserCtx" });
 const LiveAvatar = component(function* LiveAvatar() {
@@ -615,7 +615,7 @@ const WrongAroundCall = component(function* WrongAroundCall() {
   });
 });
 type _wrongAround = Expect<Equal<RequiresOfComponent<typeof WrongAroundCall>, typeof UserCtx>>;
-// any hole prop, not only children (a reactive one: D-118); each hole's requirements join the call's
+// any hole prop, not only children (a reactive one: D-126); each hole's requirements join the call's
 const Pair = component(function* Pair(
   props: Props<{ left: Source<Element>; right: Source<Element>; n: number }>
 ) {
@@ -906,7 +906,7 @@ const nobody = MaybeUserCtx.provide({
 });
 render(() => nobody, root);
 declare const maybeUser: Source<User | undefined>;
-// a held context takes no source, whatever it reads (D-118)
+// a held context takes no source, whatever it reads (D-126)
 MaybeUserCtx.provide({
   // @ts-expect-error [HELD_PROP]
   value: maybeUser,

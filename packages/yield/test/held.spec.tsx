@@ -1,5 +1,5 @@
 /**
- * D-118: "the only things going through props are reactive values and
+ * D-126: "the only things going through props are reactive values and
  * events; everything else is a bag of those two things." A prop (and a
  * context's provided value) is given to the child as it is: a reactive one
  * (a source, a path, a hole) as a path read where it is read, an `$event`
@@ -55,7 +55,7 @@ const click = (selector: string, at = 0) =>
 const texts = (selector: string) =>
   [...root.querySelectorAll(selector)].map(e => e.firstChild?.textContent ?? "");
 
-describe("D-118: props are given as they are", () => {
+describe("D-126: props are given as they are", () => {
   it("a held constant, a bag and a plain function arrive as themselves; a bag's leaves are what the caller put there", async () => {
     let seen: Record<string, unknown> = {};
     const calls: string[] = [];
@@ -245,7 +245,7 @@ describe("D-118: props are given as they are", () => {
   });
 });
 
-describe("D-118: a context's provided value is given as a prop is", () => {
+describe("D-126: a context's provided value is given as a prop is", () => {
   it("a held context gives its value as it is, a bag's handler callable; a reactive one a path", async () => {
     const calls: string[] = [];
     type Tools = { at: Path<{ n: number }>; bump: Handler };
@@ -436,7 +436,7 @@ const BookingPage = component(function* BookingPage() {
   });
 });
 
-describe("D-118: a lens is a convention — createBooking, a context for the deep module, props for the direct one", () => {
+describe("D-126: a lens is a convention — createBooking, a context for the deep module, props for the direct one", () => {
   it("the booking page: DateRange through its context, Guests through two props, a total memo in the page", async () => {
     mount(BookingPage);
     const text = (s: string) => root.querySelector(s)!.textContent;
@@ -493,7 +493,7 @@ describe("D-118: a lens is a convention — createBooking, a context for the dee
   });
 });
 
-describe("D-118: a module that also works alone — a sentinel default, compared in the setup", () => {
+describe("D-126: a module that also works alone — a sentinel default, compared in the setup", () => {
   /** No provider: the default, held as it is. A defaulted context adds nothing to R. */
   const NONE = Symbol("no provider");
   const PickerCtx = createContext<Slice<DateRangeS> | typeof NONE>(NONE, { name: "PickerCtx" });

@@ -38,7 +38,7 @@ const RouterContext = createContext<RouterValue, "RouterContext">(undefined, {
 function RouteHOC<P extends boolean, E, W extends boolean, R>(Comp: Component<{}, P, E, W, R>) {
   return component(function* Router(props: Props<{ url?: string }>) {
     // The location the router navigated to, or none yet: then the URL a
-    // server render starts from (a held prop, D-118), else the document's.
+    // server render starts from (a held prop, D-126), else the document's.
     const [navigated, setLocation] = yield* $signal<string | undefined>(undefined);
     const location = yield* $memo(function* () {
       const path = yield* navigated;
@@ -71,7 +71,7 @@ function RouteHOC<P extends boolean, E, W extends boolean, R>(Comp: Component<{}
 }
 
 /**
- * The router, read in a setup: its value is a bag, held as it is (D-118) —
+ * The router, read in a setup: its value is a bag, held as it is (D-126) —
  * the location (a source, read where it is read), the setter (called in the
  * event that writes), and `yield* matches("profile")`, whether that route is
  * current (read where it is delegated to).

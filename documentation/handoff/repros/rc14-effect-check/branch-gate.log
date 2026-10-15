@@ -1,0 +1,168 @@
+yield-gate: 9 twins: docs-yield, effect-yield, hackernews-spa-yield, rendering-yield, room-yield, sierpinski-yield, sierpinski-yield-h, todos-yield, todos-yield-h
+yield-gate: 46 steps, --jobs 3
+PASS  pkg:yield:dist-fresh                    0.1s
+PASS  twin:docs-yield:test                    4.6s
+PASS  twin:docs-yield:typecheck               5.0s
+PASS  twin:docs-yield:lint                    6.6s
+FAIL  twin:effect-yield:test                  6.3s
+PASS  twin:effect-yield:typecheck             5.9s
+PASS  twin:effect-yield:lint                  7.7s
+PASS  twin:hackernews-spa-yield:typecheck     6.0s
+PASS  twin:hackernews-spa-yield:test          8.4s
+PASS  twin:hackernews-spa-yield:lint          7.0s
+PASS  twin:rendering-yield:test               7.0s
+PASS  twin:rendering-yield:typecheck          6.6s
+PASS  twin:rendering-yield:lint              10.3s
+PASS  twin:room-yield:test                    9.2s
+PASS  twin:room-yield:typecheck               9.4s
+PASS  twin:sierpinski-yield:typecheck         5.3s
+PASS  twin:room-yield:lint                   10.6s
+PASS  twin:sierpinski-yield:lint              6.1s
+PASS  twin:sierpinski-yield-h:typecheck       9.1s
+PASS  twin:sierpinski-yield-h:lint           11.5s
+PASS  twin:sierpinski-yield:test             34.6s
+PASS  twin:todos-yield:typecheck              5.2s
+PASS  twin:todos-yield:test                   6.3s
+PASS  twin:sierpinski-yield-h:test           33.5s
+PASS  twin:todos-yield:lint                   6.0s
+PASS  twin:todos-yield-h:test                 5.7s
+PASS  original:docs:typecheck                 4.9s
+PASS  twin:todos-yield-h:typecheck            8.6s
+PASS  twin:todos-yield-h:lint                12.6s
+PASS  twins:ssr-smoke                        16.8s
+PASS  pkg:eslint-plugin-yield:test            8.1s
+PASS  pkg:vite-plugin-yield:test              5.6s
+PASS  pkg:vite-plugin-yield:typecheck         4.5s
+PASS  analyzer:test                           3.8s
+PASS  twins:hydrate-smoke                    40.5s
+PASS  proofs                                  2.8s
+PASS  analyzer:report                         6.1s
+PASS  twins:executed-bytes-test               0.2s
+PASS  pkg:yield:conformance                  19.1s
+FAIL  twins:executed-bytes                   21.3s
+PASS  pkg:yield:exports                       4.5s
+PASS  pkg:vite-plugin-yield:exports           2.8s
+PASS  pkg:eslint-plugin-yield:exports         2.7s
+PASS  repo:oxlint                             0.3s
+PASS  repo:prettier                          10.1s
+PASS  pkg:yield:test                         80.3s
+
+==================== FAIL twin:effect-yield:test ====================
+$ pnpm -C examples/effect-yield run test
+
+$ vitest run --maxWorkers=2
+
+ RUN  v4.1.11 /private/tmp/sy-docs/examples/effect-yield
+
+ ❯ tests/parity.test.tsx (1 test | 1 failed) 982ms
+     × renders the same DOM as the original after every step 981ms
+ ❯ tests/app.test.tsx (12 tests | 2 failed) 527ms
+     × searches, shows results sorted by downloads, and logs the fiber 54ms
+     × gives up after retries into the error boundary, and recovers on reset 21ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/app.test.tsx > effect typeahead with solid-yield > searches, shows results sorted by downloads, and logs the fiber
+TypeError: Cannot read properties of null (reading 'className')
+ ❯ tests/app.test.tsx:55:24
+     53|     // A fresh memo with no value yet: the results panel renders its o…
+     54|     // pending state (as the original does), not the <Loading> fallbac…
+     55|     expect($(".results")!.className).toBe("results stale");
+       |                        ^
+     56|     expect($(".results .empty")!.textContent).toBe("Searching…");
+     57|     expect(logLines()).toEqual(['start: search "vite" — fiber started'…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/app.test.tsx > effect typeahead with solid-yield > gives up after retries into the error boundary, and recovers on reset
+TypeError: Cannot read properties of null (reading 'textContent')
+ ❯ tests/app.test.tsx:109:28
+    107|     expect(logLines().filter(l => l.startsWith("retry")).length).toBeG…
+    108|     await advance(4000);
+    109|     expect($(".error-box p")!.textContent).toBe("Search gave up after …
+       |                            ^
+    110|     setRandom(0.9);
+    111|     await click(button("Try again"));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/parity.test.tsx > effect parity > renders the same DOM as the original after every step
+Error: click: no element
+ ❯ click tests/script.ts:49:18
+     47|
+     48| export async function click(el: Element | null | undefined) {
+     49|   if (!el) throw new Error("click: no element");
+       |                  ^
+     50|   (el as HTMLElement).click();
+     51|   await advance(0);
+ ❯ tests/script.ts:80:58
+ ❯ runScript tests/script.ts:125:11
+ ❯ tests/parity.test.tsx:15:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  2 failed | 1 skipped (3)
+      Tests  3 failed | 10 passed | 1 skipped (14)
+   Start at  14:39:46
+   Duration  3.34s (transform 987ms, setup 0ms, import 1.54s, tests 1.51s, environment 2.27s)
+
+[ELIFECYCLE] Test failed. See above for more details.
+
+==================== FAIL twins:executed-bytes ====================
+$ ../../../Users/devagr/.nvm/versions/node/v24.18.0/bin/node examples/harness/executed-bytes/measure.mjs --baseline documentation/executed-bytes.json
+
+docs-yield/original: 444434 load bytes, 24 parity steps
+docs-yield/twin: 469185 load bytes, 24 parity steps
+file:///private/tmp/sy-docs/examples/harness/executed-bytes/measure.mjs:86
+        if (run.status !== 0) throw new Error(`${twin}/${app}: ${run.stdout}\n${run.stderr}`);
+                                    ^
+
+Error: effect-yield/original: 
+ RUN  v4.1.11 /private/tmp/sy-docs/examples/effect-yield
+
+ ❯ .executed-bytes-AfKg55/probe.test.tsx (1 test | 1 failed) 2014ms
+   × runtime cost (twins.mjs) 1979ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  14:42:05
+   Duration  3.42s (transform 380ms, setup 0ms, import 562ms, tests 2.01s, environment 624ms)
+
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  .executed-bytes-AfKg55/probe.test.tsx > runtime cost (twins.mjs)
+Error: click: no element
+ ❯ click tests/script.ts:49:18
+     47|
+     48| export async function click(el: Element | null | undefined) {
+     49|   if (!el) throw new Error("click: no element");
+       |                  ^
+     50|   (el as HTMLElement).click();
+     51|   await advance(0);
+ ❯ tests/script.ts:80:58
+ ❯ runScript tests/script.ts:125:11
+ ❯ timed ../harness/src/index.ts:74:15
+ ❯ .executed-bytes-AfKg55/probe.test.tsx:24:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+    at file:///private/tmp/sy-docs/examples/harness/executed-bytes/measure.mjs:86:37
+    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+    at async node:internal/modules/esm/loader:643:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v24.18.0
+
+44 pass / 2 fail / 0 skip in 172s
+
+vs baseline documentation/yield-gate-baseline.json (5d50680f7a58):
+  new reds:  twin:effect-yield:test, twins:executed-bytes
+  fixed:     none
+  unchanged: 44
+RED (a step that passed in the baseline fails now)
+
+wrote ../rc14-effect-check/branch-gate.json

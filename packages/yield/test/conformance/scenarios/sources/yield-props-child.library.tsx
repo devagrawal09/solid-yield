@@ -1,10 +1,10 @@
-import { component, $event, view, type Props } from "solid-yield";
+import { component, $event, view, type Props, type Source } from "solid-yield";
 import { h } from "conformance";
 
 export let setLabel: (v: string) => unknown;
 export let setOther: (v: number) => unknown;
 
-const Child = component(function* Child(props: Props<{ label: string }>) {
+const Child = component(function* Child(props: Props<{ label: Source<string> }>) {
   h.run("child setup");
   return view(function* () {
     return <span class="child">{yield* props.label}</span>;

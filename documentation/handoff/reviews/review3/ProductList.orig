@@ -1,0 +1,13 @@
+import { createMemo, For } from "solid-js";
+import { listProducts } from "./api";
+import { money } from "./format";
+import { useCart } from "./cart";
+export function ProductList() {
+  const cart = useCart();
+  const products = createMemo(() => listProducts());
+  return (
+    <ul>
+      <For each={products()}>{p => <li>{p().name} {money(p().price)} <button onClick={() => cart.add(p())}>add</button></li>}</For>
+    </ul>
+  );
+}

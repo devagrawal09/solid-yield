@@ -502,13 +502,13 @@ describe("setup operations", () => {
 
   devIt("a setup does not read: READ_IN_SETUP", () => {
     // @ts-expect-error a setup does not read (Read is not a SetupOp)
-    const Bad = component(function* (props: Props<{ start: number }>) {
+    const Bad = component(function* (props: Props<{ start: Source<number> }>) {
       const v = yield* props.start;
       return view(function* () {
         return <i>{v}</i>;
       });
     });
-    expect(() => createRoot(() => Bad({ start: 1 }))).toThrow(/READ_IN_SETUP/);
+    expect(() => createRoot(() => Bad({ start: constant(1) }))).toThrow(/READ_IN_SETUP/);
   });
 
   devIt("creating outside a setup and writing in a memo are dev errors", () => {
@@ -694,7 +694,7 @@ describe("setups inside a parent's first view run", () => {
     let parentRuns = 0;
     const Leaf = component(function* (props: Props<{ n: number }>) {
       const n = yield* $memo(function* () {
-        return yield* props.n;
+        return props.n;
       });
       return view(function* () {
         return <i>{perform(n)}</i>;
@@ -715,15 +715,17 @@ describe("setups inside a parent's first view run", () => {
 });
 
 describe("props", () => {
-  it("props are reads; forwarding a source forwards the read; paths walk deep", () => {
+  it("a reactive prop is a path; forwarding a source forwards the read; paths walk deep; a held prop is its value (D-118)", () => {
     let setName!: (v: string) => void;
     let childRuns = 0;
-    const Card = component(function* (props: Props<{ user: { name: string }; tag: string }>) {
+    const Card = component(function* (
+      props: Props<{ user: Source<{ name: string }>; tag: string }>
+    ) {
       return view(function* () {
         childRuns++;
         return (
           <p>
-            {perform(props.tag)}:{perform(props.user.name)}
+            {props.tag}:{perform(props.user.name)}
           </p>
         );
       });
@@ -1057,7 +1059,7 @@ describe("context", () => {
     const Child = component(function* () {
       const theme = yield* Theme;
       return view(function* () {
-        return <i>{perform(theme)}</i>;
+        return <i>{theme}</i>;
       });
     });
     mount(() => <Theme value="dark">{Child()}</Theme>);
@@ -1065,7 +1067,10 @@ describe("context", () => {
   });
 
   describe("D-098: a context without a default is required", () => {
-    const UserCtx = createContext<{ name: string }, "UserCtx">(undefined, { name: "UserCtx" });
+    // a reactive context (D-118): the reader holds a path over the provided source or hole
+    const UserCtx = createContext<Source<{ name: string }>, "UserCtx">(undefined, {
+      name: "UserCtx"
+    });
     const Avatar = component(function* Avatar() {
       const user = yield* UserCtx;
       return view(function* () {
@@ -1103,7 +1108,7 @@ describe("context", () => {
             <>
               {
                 yield* UserCtx.provide({
-                  value: { name: "ada" },
+                  value: constant({ name: "ada" }),
                   children: function* () {
                     return (
                       <>
@@ -1135,7 +1140,7 @@ describe("context", () => {
             <>
               {
                 yield* UserCtx.provide({
-                  value: { name: "inner" },
+                  value: constant({ name: "inner" }),
                   children: function* () {
                     return <b>{yield* user.name}</b>;
                   }
@@ -1148,7 +1153,7 @@ describe("context", () => {
       expect(() => createRoot(() => SelfProvider())).toThrow("[NO_PROVIDER]");
     });
 
-    it("the provided value flows: a value, a source (live), a hole; the nearest provider wins", () => {
+    it("the provided value flows: a constant, a source (live), a hole; the nearest provider wins", () => {
       let set!: (name: string) => void;
       const App = component(function* App() {
         const [name, setName] = yield* $signal("ada");
@@ -1158,7 +1163,7 @@ describe("context", () => {
             <>
               {
                 yield* UserCtx.provide({
-                  value: { name: "plain" },
+                  value: constant({ name: "plain" }),
                   children: function* () {
                     return (
                       <>
@@ -1235,7 +1240,7 @@ describe("context", () => {
         return view(function* () {
           return (
             <i>
-              {yield* theme}/{String(yield* who)}
+              {theme}/{String(yield* who)}
             </i>
           );
         });
@@ -1751,6 +1756,52 @@ describe("row routines", () => {
     expect(views).toBe(2);
   });
 
+  it("keyed by a function: the row's item is the current item at its key, read through a path", () => {
+    let setItems!: (v: { id: number; text: string }[]) => void;
+    let setups = 0;
+    const List = component(function* List() {
+      const [items, set] = yield* $signal([
+        { id: 1, text: "a" },
+        { id: 2, text: "b" }
+      ]);
+      setItems = v => write(() => set(v));
+      return view(function* () {
+        return (
+          <ul>
+            {
+              yield* For({
+                each: items,
+                keyed: (item: { id: number }) => item.id,
+                children: function* (item) {
+                  setups++;
+                  return view(function* () {
+                    return (
+                      <li>
+                        {perform(item.id)}:{perform(item.text)}
+                      </li>
+                    );
+                  });
+                }
+              })
+            }
+          </ul>
+        );
+      });
+    });
+    mount(List);
+    const first = root.querySelector("li")!;
+    expect(root.textContent).toBe("1:a2:b");
+    // a new object at key 1: the same row, its path reads the new item
+    setItems([
+      { id: 1, text: "A" },
+      { id: 2, text: "b" }
+    ]);
+    flush();
+    expect(root.textContent).toBe("1:A2:b");
+    expect(root.querySelector("li")).toBe(first);
+    expect(setups).toBe(2);
+  });
+
   it("a row memo is created once per item", () => {
     let setItems!: (v: { id: number; text: string }[]) => void;
     let setText!: (v: string) => void;
@@ -1975,7 +2026,7 @@ describe("row routines", () => {
     const rows = [{ t: "a" }, { t: "b" }];
     let set!: (v: typeof rows) => void;
     let views = 0;
-    const Row = component(function* (props: Props<{ row: { t: string } }>) {
+    const Row = component(function* (props: Props<{ row: Source<{ t: string }> }>) {
       const [n] = yield* $signal(0);
       return view(function* () {
         views++;
@@ -2290,7 +2341,7 @@ describe("lazy", () => {
   it("a lazy yield component in call form is built once; its chunk and its state land in place", async () => {
     let setups = 0;
     let bump!: () => void;
-    const Inner = component(function* (props: Props<{ label: string }>) {
+    const Inner = component(function* (props: Props<{ label: Source<string> }>) {
       setups++;
       const [n, setN] = yield* $signal(1);
       bump = () => write(() => setN(v => v + 1));
@@ -2341,7 +2392,7 @@ describe("lazy", () => {
 describe("flow controls keep children lazy", () => {
   it("a hole prop is read in the child, as a source is: a change updates the hole, the child is not re-created (D-065)", () => {
     let setups = 0;
-    const Total = component(function* (props: Props<{ n: number }>) {
+    const Total = component(function* (props: Props<{ n: Source<number> }>) {
       setups++;
       return view(function* () {
         return <b>{yield* props.n}</b>;
@@ -2517,7 +2568,7 @@ describe("flow controls keep children lazy", () => {
 
 describe("computations created in a setup", () => {
   it("read sources in their own pass (their reads are theirs, not the setup's)", () => {
-    const Child = component(function* (props: Props<{ n: number }>) {
+    const Child = component(function* (props: Props<{ n: Source<number> }>) {
       const m = yield* $memo(function* () {
         return (yield* props.n) * 2;
       });
@@ -2541,13 +2592,13 @@ describe("computations created in a setup", () => {
   });
 
   devIt("the setup's own read is still an error", () => {
-    const Child = component(function* (props: Props<{ n: number }>) {
+    const Child = component(function* (props: Props<{ n: Source<number> }>) {
       yield* props.n as unknown as Iterable<never>;
       return view(function* () {
         return <b />;
       });
     });
-    expect(() => createRoot(() => Child({ n: 1 }))).toThrow("[READ_IN_SETUP]");
+    expect(() => createRoot(() => Child({ n: constant(1) }))).toThrow("[READ_IN_SETUP]");
   });
 });
 
@@ -2558,7 +2609,7 @@ describe("D-097: a component runs in its caller's computation (no untrack)", () 
     let effects = 0;
     const [n, setN] = plainSignal(1);
     const Foreign = (props: { value: number }) => <u>{props.value}</u>;
-    const Child = component(function* Child(props: Props<{ n: number; label: string }>) {
+    const Child = component(function* Child(props: Props<{ n: Source<number>; label: string }>) {
       setups++;
       const doubled = yield* $memo(function* () {
         return (yield* props.n) * 2;
@@ -2575,7 +2626,7 @@ describe("D-097: a component runs in its caller's computation (no untrack)", () 
       return view(function* () {
         return (
           <p>
-            {perform(props.label)}:{perform(doubled)}
+            {props.label}:{perform(doubled)}
             {perform(
               Show({
                 when: function* () {
@@ -2628,7 +2679,7 @@ describe("D-097: a component runs in its caller's computation (no untrack)", () 
   devIt(
     "a read in a setup called inside a hole is still READ_IN_SETUP (the hole's observer is the setup's)",
     () => {
-      const Bad = component(function* Bad(props: Props<{ n: number }>) {
+      const Bad = component(function* Bad(props: Props<{ n: Source<number> }>) {
         yield* props.n as unknown as Iterable<never>;
         return view(function* () {
           return <b />;
@@ -2636,7 +2687,7 @@ describe("D-097: a component runs in its caller's computation (no untrack)", () 
       });
       const Parent = component(function* Parent() {
         return view(function* () {
-          return <div>{perform(Bad({ n: 1 }))}</div>;
+          return <div>{perform(Bad({ n: constant(1) }))}</div>;
         });
       });
       expect(() => mount(Parent)).toThrow("[READ_IN_SETUP]");
@@ -3082,7 +3133,7 @@ describe("host state is per run (re-entrancy)", () => {
     const Card = component(function* Card(props: Props<{ name: string }>) {
       return view(function* () {
         cardViews++;
-        return <b>{perform(props.name)}</b>;
+        return <b>{props.name}</b>;
       });
     });
     const App = component(function* App() {
@@ -3302,10 +3353,10 @@ describe("binding an event is a hole (D-072)", () => {
   describe("D-085: a bound event's failure routes to the bind site", () => {
     /** Binds the handler it finds in context: the bind site. */
     const Child = component(function* Child() {
-      // a context's value is read like a prop (D-098): read the handler, then bind it
+      // a context's value is given as a prop is (D-118): the handler itself, bound with one yield*
       const save = yield* SaveContext;
       return view(function* () {
-        return <button onClick={yield* yield* save}>save</button>;
+        return <button onClick={yield* save}>save</button>;
       });
     });
     /** Creates the handler, and renders `Child` under an `Errored` of `Child`'s own. */
@@ -3409,7 +3460,7 @@ describe("binding an event is a hole (D-072)", () => {
       const Caller = component(function* Caller() {
         const save = yield* SaveContext;
         call = $event(function* () {
-          const handler = yield* save;
+          const handler = save;
           yield* attempt(
             () => handler(),
             e => {
@@ -3451,5 +3502,138 @@ describe("binding an event is a hole (D-072)", () => {
       expect(caught.map(e => (e as Error).message)).toEqual(["to the caller"]);
       expect(root.textContent).toBe("savecaller");
     });
+  });
+});
+
+describe("D-020: an event called from an event joins its transaction", () => {
+  it("an event called from an event joins its transaction (D-020): the inner write is held until the outer settles", async () => {
+    let resolve!: () => void;
+    const App = component(function* App() {
+      const [n, setN] = yield* $signal(0);
+      const inner = $event(function* () {
+        yield* setN(1);
+      });
+      const outer = $event(function* () {
+        yield* inner();
+        yield* attempt(() => new Promise<void>(r => (resolve = r)), toError);
+      });
+      return view(function* () {
+        return <button onClick={yield* outer}>{yield* n}</button>;
+      });
+    });
+    mount(App);
+    root.querySelector("button")!.click();
+    await settle();
+    // the inner call finished, but its write is the outer transaction's
+    expect(root.textContent).toBe("0");
+    resolve();
+    await settle();
+    expect(root.textContent).toBe("1");
+  });
+
+  it("an optimistic write the inner event makes shows at once and holds until the outer settles", async () => {
+    let resolve!: () => void;
+    const App = component(function* App() {
+      const [busy, setBusy] = yield* $optimisticStore({ saving: false });
+      const inner = $event(function* () {
+        yield* setBusy(d => {
+          d.saving = true;
+        });
+      });
+      const outer = $event(function* () {
+        yield* inner();
+        yield* attempt(() => new Promise<void>(r => (resolve = r)), toError);
+      });
+      return view(function* () {
+        return <button onClick={yield* outer}>{(yield* busy.saving) ? "saving" : "idle"}</button>;
+      });
+    });
+    mount(App);
+    root.querySelector("button")!.click();
+    await settle();
+    // the inner call is done; its optimistic write stays while the outer waits
+    expect(root.textContent).toBe("saving");
+    resolve();
+    await settle();
+    expect(root.textContent).toBe("idle");
+  });
+});
+
+describe("D-118: an event is called by routine code or by the DOM (EVENT_OUTSIDE_RUN, D-028 for events)", () => {
+  devIt("called from a timer: EVENT_OUTSIDE_RUN at the call", async () => {
+    let save!: () => unknown;
+    const App = component(function* App() {
+      save = $event(function* save() {});
+      return view(function* () {
+        return <i />;
+      });
+    });
+    mount(App);
+    const thrown = await new Promise<unknown>(done =>
+      setTimeout(() => {
+        try {
+          save();
+          done(null);
+        } catch (e) {
+          done(e);
+        }
+      }, 0)
+    );
+    expect(String(thrown)).toMatch(
+      /\[EVENT_OUTSIDE_RUN\] the \$event save of <App> called outside a routine: an event is called with yield\* save\(x\) in an \$event or an \$effect, or by the DOM where a view binds it/
+    );
+  });
+
+  devIt("called from a promise callback: EVENT_OUTSIDE_RUN rejects the chain", async () => {
+    let save!: () => unknown;
+    const App = component(function* App() {
+      save = $event(function* () {});
+      return view(function* () {
+        return <i />;
+      });
+    });
+    mount(App);
+    await expect(Promise.resolve().then(() => save())).rejects.toThrow(
+      /\[EVENT_OUTSIDE_RUN\] an \$event of <App> called outside a routine/
+    );
+  });
+
+  it("a DOM dispatch through a bind, a call from another event and an effect phase still call it", async () => {
+    const calls: string[] = [];
+    const App = component(function* App() {
+      const [go, setGo] = yield* $signal(false);
+      const save = $event(function* (from: string) {
+        calls.push(from);
+      });
+      const outer = $event(function* () {
+        yield* save("event");
+        yield* setGo(true);
+      });
+      yield* $effect(
+        function* () {
+          return yield* go;
+        },
+        function* (on) {
+          if (on) yield* save("effect");
+        }
+      );
+      return view(function* () {
+        return (
+          <>
+            <button class="bound" onClick={[yield* save, "dom"]}>
+              dom
+            </button>
+            <button class="outer" onClick={yield* outer}>
+              outer
+            </button>
+          </>
+        );
+      });
+    });
+    mount(App);
+    root.querySelector<HTMLElement>(".bound")!.click();
+    root.querySelector<HTMLElement>(".outer")!.click();
+    await settle();
+    expect(calls).toEqual(["dom", "event", "effect"]);
   });
 });

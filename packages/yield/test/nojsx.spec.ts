@@ -23,6 +23,7 @@ import {
   Show,
   type EventHandler,
   type Props,
+  type Source,
   view
 } from "solid-yield";
 import { h } from "solid-yield/h";
@@ -166,7 +167,7 @@ describe("h", () => {
 
 describe("h: a context's provider (D-098)", () => {
   it("h(Ctx.provide, { value }, ...children) gives the value to the components in its children", () => {
-    const Name = createContext<string, "Name">(undefined, { name: "Name" });
+    const Name = createContext<Source<string>, "Name">(undefined, { name: "Name" });
     const Reader = component(function* Reader() {
       const name = yield* Name;
       return view(function* () {
@@ -285,7 +286,7 @@ describe("h argument shapes", () => {
       yield* $effect(
         function* () {},
         function* () {
-          seen = yield* props.list;
+          seen = props.list;
         }
       );
       return view(function* () {

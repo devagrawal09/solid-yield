@@ -9,6 +9,10 @@
 //
 // The real transport (SSR, the document's answers adopted at hydration,
 // event streams, morphs) is covered by the browser check.
+import { requests } from "./request-context";
+
+// The real server aborts the request when a connection closes. Client-only
+// tests need that context too, or a watcher parked on await cannot finish.
 type Status = "connected" | "reconnecting" | "closed";
 interface Connection {
   drop(): void;
@@ -104,7 +108,9 @@ export function live<A extends unknown[], R>(fn: (...args: A) => R) {
 
 export function GET<A extends unknown[], R>(fn: (...args: A) => R) {
   return (...args: A): R => {
-    const answer = fn(...args);
+    const controller = new AbortController();
+    const event = { request: new Request("http://room.test/", { signal: controller.signal }) };
+    const answer = requests.run(event, () => fn(...args));
     if (!isAsyncIterable(answer)) return answer;
     // An undeclared stream: a death is an error.
     const source = answer;
@@ -112,21 +118,34 @@ export function GET<A extends unknown[], R>(fn: (...args: A) => R) {
       [Symbol.asyncIterator]() {
         const it = source[Symbol.asyncIterator]();
         let wake: (() => void) | undefined;
+        let stopped = false;
         const connection: Connection = { drop: () => wake?.() };
         return {
           async next() {
+            if (stopped) return { done: true, value: undefined };
             open.add(connection);
             const dropped = new Promise<typeof DROPPED>(r => (wake = () => r(DROPPED)));
-            const r = await Promise.race([it.next(), dropped]);
+            const r = await Promise.race([requests.run(event, () => it.next()), dropped]);
+            if (stopped) return { done: true, value: undefined };
             if (r === DROPPED) {
+              stopped = true;
+              open.delete(connection);
+              controller.abort();
               void it.return?.();
               throw new Error("The stream was cut off");
             }
-            if (r.done) open.delete(connection);
+            if (r.done) {
+              stopped = true;
+              open.delete(connection);
+              controller.abort();
+            }
             return r;
           },
           async return() {
+            stopped = true;
             open.delete(connection);
+            controller.abort();
+            wake?.();
             void it.return?.();
             return { done: true, value: undefined };
           }

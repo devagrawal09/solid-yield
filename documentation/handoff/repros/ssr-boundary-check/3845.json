@@ -1,0 +1,102 @@
+{
+  "url": "https://api.github.com/repos/solidjs/solid/issues/3845",
+  "repository_url": "https://api.github.com/repos/solidjs/solid",
+  "labels_url": "https://api.github.com/repos/solidjs/solid/issues/3845/labels{/name}",
+  "comments_url": "https://api.github.com/repos/solidjs/solid/issues/3845/comments",
+  "events_url": "https://api.github.com/repos/solidjs/solid/issues/3845/events",
+  "html_url": "https://github.com/solidjs/solid/issues/3845",
+  "id": 5734772995,
+  "node_id": "I_kwDOB80jds8AAAABVdGxAw",
+  "number": 3845,
+  "title": "[2.0.0-rc.13] A second hydrate() root after a timer turn replaces its server-rendered nodes instead of claiming them",
+  "user": {
+    "login": "devagrawal09",
+    "id": 19648701,
+    "node_id": "MDQ6VXNlcjE5NjQ4NzAx",
+    "avatar_url": "https://avatars.githubusercontent.com/u/19648701?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/devagrawal09",
+    "html_url": "https://github.com/devagrawal09",
+    "followers_url": "https://api.github.com/users/devagrawal09/followers",
+    "following_url": "https://api.github.com/users/devagrawal09/following{/other_user}",
+    "gists_url": "https://api.github.com/users/devagrawal09/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/devagrawal09/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/devagrawal09/subscriptions",
+    "organizations_url": "https://api.github.com/users/devagrawal09/orgs",
+    "repos_url": "https://api.github.com/users/devagrawal09/repos",
+    "events_url": "https://api.github.com/users/devagrawal09/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/devagrawal09/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "labels": [
+
+  ],
+  "state": "closed",
+  "locked": false,
+  "assignees": [
+
+  ],
+  "milestone": null,
+  "comments": 1,
+  "created_at": "2026-10-06T20:12:34Z",
+  "updated_at": "2026-10-06T21:49:30Z",
+  "closed_at": "2026-10-06T21:49:30Z",
+  "assignee": null,
+  "author_association": "NONE",
+  "issue_field_values": [
+
+  ],
+  "type": null,
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+    "total": 0,
+    "completed": 0,
+    "percent_completed": 0
+  },
+  "issue_dependencies_summary": {
+    "blocked_by": 0,
+    "total_blocked_by": 0,
+    "blocking": 0,
+    "total_blocking": 0
+  },
+  "body": "\n## Summary\n\nTwo independent `Hydration` scopes with IDs `a` and `b` contain counter buttons, with a `NoHydration` heading between them. Calling `hydrate()` for both roots synchronously keeps both server-rendered buttons. Hydrating A, waiting for one `setTimeout(0)`, then hydrating B replaces B's button. The old B node is disconnected, although the final page looks correct. Neither schedule produces a warning, including with the development build.\n\n## Reproduction\n\nSave as `repro.mjs`; the server uses `renderToString()` and the client uses matching `renderId` values. Each schedule runs in a fresh process.\n\n```js\nimport { spawnSync } from \"node:child_process\";\nimport { readFileSync } from \"node:fs\";\nimport assert from \"node:assert/strict\";\nconst mode = process.argv[2];\nconst run = args => {\n  const result = spawnSync(process.execPath, args, { input: html, encoding: \"utf8\" });\n  assert.equal(result.status, 0, result.stderr);\n  return result.stdout;\n};\nlet html;\nif (!mode) {\n  html = run([import.meta.filename, \"server\"]);\n  for (const schedule of [\"synchronous\", \"delayed\"])\n    process.stdout.write(run([\"--conditions=browser\", import.meta.filename, schedule]));\n} else if (mode === \"server\") {\n  const { Hydration, NoHydration, createSignal } = await import(\"solid-js\");\n  const { renderToString, HydrationScript, ssrElement } = await import(\"@solidjs/web\");\n  const Counter = () => {\n    const [count] = createSignal(0);\n    return ssrElement(\"button\", {}, count(), true);\n  };\n  const scope = id => ssrElement(\"section\", { id }, () =>\n    Hydration({ id, get children() { return Counter(); } }), false);\n  console.log(renderToString(() => [HydrationScript({}), NoHydration({\n    get children() { return [scope(\"a\"), ssrElement(\"h1\", {}, \"Heading\", false), scope(\"b\")]; }\n  })], { renderId: \"outer\" }));\n} else {\n  const { JSDOM } = await import(\"jsdom\");\n  const dom = new JSDOM(\"<!doctype html><body></body>\");\n  for (const key of [\"window\", \"document\", \"Node\", \"Element\", \"HTMLElement\"])\n    globalThis[key] = dom.window[key];\n  html = readFileSync(0, \"utf8\");\n  const scripts = /<script\\b[^>]*>([\\s\\S]*?)<\\/script>/g;\n  document.body.innerHTML = html.replace(scripts, \"\");\n  for (const match of html.matchAll(scripts)) (0, eval)(match[1]);\n  const { createSignal } = await import(\"solid-js\");\n  const { hydrate, template, getNextElement, insert } = await import(\"@solidjs/web\");\n  const button = template(\"<button></button>\");\n  const Counter = () => {\n    const [count, setCount] = createSignal(0);\n    const node = getNextElement(button);\n    node.onclick = () => setCount(n => n + 1);\n    insert(node, count);\n    return node;\n  };\n  const A = Counter, B = Counter;\n  const elA = document.getElementById(\"a\"), elB = document.getElementById(\"b\");\n  const oldA = elA.firstChild, oldB = elB.firstChild, warnings = [];\n  console.warn = (...args) => warnings.push(args.join(\" \"));\n  hydrate(A, elA, { renderId: \"a\" });\n  if (mode === \"delayed\") await new Promise(r => setTimeout(r, 0));\n  hydrate(B, elB, { renderId: \"b\" });\n  console.log(`${mode}: A claimed=${elA.firstChild === oldA}; B claimed=${elB.firstChild === oldB}; old B connected=${oldB.isConnected}; warnings=${warnings.length}`);\n  assert.equal(elA.firstChild, oldA);\n  assert.equal(elB.firstChild === oldB, mode === \"synchronous\");\n  assert.equal(oldB.isConnected, mode === \"synchronous\");\n  assert.deepEqual(warnings, []);\n  dom.window.close();\n}\n```\n\n```sh\nnpm install solid-js@2.0.0-rc.13 @solidjs/web@2.0.0-rc.13 jsdom@25.0.1\nnode repro.mjs\n```\n\n## Expected vs Actual\n\n| Schedule | Expected | Actual |\n| --- | --- | --- |\n| Synchronous | Both server buttons claimed | Both claimed; no warning |\n| Delayed by one timer turn | Both server buttons claimed | Second replaced; old node disconnected; no warning |\n\n## Cause\n\nAfter the first hydration completes, `drainHydrationCallbacks` schedules the page-wide `_$HY.done = true` (`node_modules/solid-js/dist/solid.js:91–104`; development: `dist/solid.dev.js:125–139`). Web's `hydrate` then takes its plain-render path for any later root (`node_modules/@solidjs/web/dist/web.js:1353–1356`; development: `dist/web.dev.js:1521–1524`).\n\n## Proposal\n\nTrack completion per hydration scope / `renderId`, or have `hydrate(..., { renderId })` avoid consulting the global completion flag.\n\n## Versions\n\n`solid-js`: 2.0.0-rc.13; `@solidjs/web`: 2.0.0-rc.13; jsdom: 25.0.1; Node: v24.18.0.\n",
+  "closed_by": {
+    "login": "devagrawal09",
+    "id": 19648701,
+    "node_id": "MDQ6VXNlcjE5NjQ4NzAx",
+    "avatar_url": "https://avatars.githubusercontent.com/u/19648701?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/devagrawal09",
+    "html_url": "https://github.com/devagrawal09",
+    "followers_url": "https://api.github.com/users/devagrawal09/followers",
+    "following_url": "https://api.github.com/users/devagrawal09/following{/other_user}",
+    "gists_url": "https://api.github.com/users/devagrawal09/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/devagrawal09/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/devagrawal09/subscriptions",
+    "organizations_url": "https://api.github.com/users/devagrawal09/orgs",
+    "repos_url": "https://api.github.com/users/devagrawal09/repos",
+    "events_url": "https://api.github.com/users/devagrawal09/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/devagrawal09/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "reactions": {
+    "url": "https://api.github.com/repos/solidjs/solid/issues/3845/reactions",
+    "total_count": 0,
+    "+1": 0,
+    "-1": 0,
+    "laugh": 0,
+    "hooray": 0,
+    "confused": 0,
+    "heart": 0,
+    "rocket": 0,
+    "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/solidjs/solid/issues/3845/timeline",
+  "performed_via_github_app": null,
+  "state_reason": "not_planned",
+  "pinned_comment": null
+}

@@ -27,7 +27,10 @@ import {
 } from "solid-js";
 import {
   BOUNDARY,
+  soakOwned,
   boundaryAbove,
+  restoreFailure,
+  matchesFailure,
   type Boundary,
   isGeneratorFunction,
   renderView,
@@ -295,13 +298,15 @@ function ForYield<W, C, F>(
   }
 ): FlowView<Ops<W> | Ops<F> | OpsOfHole<C>>;
 function ForYield(props: any): any {
-  const keyedFalse = props.keyed === false;
+  // Solid hands a row its item as an accessor when rows are by index or by a key
+  // function (the item at a key can be replaced), and as the value when by reference
+  const itemAccessor = props.keyed === false || typeof props.keyed === "function";
   return SolidFor(
     forward(props, children =>
       adapt(
         children,
         (item: any, index: any) => [
-          rowArg(item, keyedFalse),
+          rowArg(item, itemAccessor),
           rowArg(index, typeof index === "function")
         ],
         typeof children === "function" && children.length > 1 ? 2 : 1
@@ -431,6 +436,7 @@ function lazyView(body: any): unknown {
 // --- boundaries ---------------------------------------------------------------------------------
 
 declare const __DEV__: boolean;
+declare const __YIELD_SOAK__: boolean;
 
 /**
  * Whether a value is `solid-yield/h` / automatic-`jsx` output, an element
@@ -499,6 +505,7 @@ function LoadingYield<C, F, O = never>(props: {
   Settle<RequiresOf<Ops<C> | Ops<F> | Ops<O>>>
 >;
 function LoadingYield(props: any): any {
+  if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__) soakOwned("boundaries");
   const children = content(props, "Loading");
   // `on` may be a source: every other prop is read through where it is read
   const out: any = {};
@@ -592,6 +599,7 @@ function ErroredYield<C, F extends ErroredFallback<FailsOf<Ops<C>>> | Element>(p
   Settle<RequiresOf<Ops<C> | Ops<F>>>
 >;
 function ErroredYield(props: any): any {
+  if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__) soakOwned("boundaries");
   const children = content(props, "Errored");
   const fallback = props.fallback as any;
   const handles = props.catch as readonly ErrorClass[] | undefined;
@@ -617,12 +625,13 @@ function ErroredYield(props: any): any {
   return SolidErrored({
     get fallback() {
       const render = adapted || props.fallback;
-      if (!handles) return render;
-      // only the listed error types: any other goes to the boundary above
+      // Solid has no hydrate decode callback. Restore at our boundary's
+      // incoming error accessor, before selective matching or user fallback.
       return (err: Accessor<unknown>, reset: () => void) => {
-        const error = err();
-        if (!handles.some(C => error instanceof (C as any))) throw error;
-        return typeof render === "function" ? render(err, reset) : render;
+        const restored = () => restoreFailure(err());
+        const error = restored();
+        if (handles && !matchesFailure(error, handles)) throw error;
+        return typeof render === "function" ? render(restored, reset) : render;
       };
     },
     get children() {

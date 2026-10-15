@@ -1,0 +1,16 @@
+{
+  "name": "frames-links-check",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "solid-js": "2.0.0-rc.13",
+    "@solidjs/web": "2.0.0-rc.13",
+    "@solidjs/router": "2.0.0-next.29"
+  },
+  "devDependencies": {
+    "@solidjs/vite-plugin": "3.0.0-next.35",
+    "vite": "7.3.6",
+    "jsdom": "25.0.1",
+    "vitest": "4.1.11"
+  }
+}

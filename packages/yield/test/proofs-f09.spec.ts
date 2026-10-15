@@ -6,6 +6,7 @@ it("Failure creates a nominal Error instance with a serializable kind", () => {
   expect(error).toBeInstanceOf(Boom);
   expect(error.kind).toBe("boom");
   expect(JSON.parse(JSON.stringify(error))).toEqual({
+    $yieldFailure: "",
     name: "Error",
     message: "failed",
     kind: "boom",

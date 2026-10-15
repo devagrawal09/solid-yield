@@ -8,13 +8,7 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const external = [
-  "solid-js",
-  "@solidjs/web",
-  "@solidjs/h",
-  "solid-yield",
-  "solid-yield/internal"
-];
+const external = ["solid-js", "@solidjs/web", "@solidjs/h", "solid-yield", "solid-yield/internal"];
 
 /** Outside `internal.ts`, the runtime module is the `internal` entry, not a second copy. */
 const runtimeIsInternal = {
@@ -60,7 +54,11 @@ await Promise.all(
         plugins: [runtimeIsInternal],
         treeShaking: true,
         minifySyntax: !v.dev,
-        define: { __DEV__: String(v.dev), __SERVER__: String(v.server) },
+        define: {
+          __DEV__: String(v.dev),
+          __SERVER__: String(v.server),
+          __YIELD_SOAK__: String(process.env.YIELD_SOAK_DEBUG === "1")
+        },
         logLevel: "warning"
       })
     )

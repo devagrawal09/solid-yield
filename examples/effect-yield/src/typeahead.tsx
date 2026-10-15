@@ -37,7 +37,10 @@ function formatDownloads(n: number) {
 }
 
 const Results = component(function* Results(
-  props: Props<{ results: Source<Package[], SearchError | TransientError, true>; query: string }>
+  props: Props<{
+    results: Source<Package[], SearchError | TransientError, true>;
+    query: Source<string>;
+  }>
 ) {
   // Solid's `latest` / `isPending`, as sources: stale while revalidating.
   const list = latestOf(props.results);

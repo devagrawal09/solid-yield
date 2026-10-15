@@ -544,7 +544,7 @@ describe("O33: a requirement through a flow control, a row and h resolves as typ
   const Avatar = component(function* Avatar() {
     const user = yield* UserCtx;
     return view(function* () {
-      return <b>{perform(user.name)}</b>;
+      return <b>{user.name}</b>;
     });
   });
   const provided = (children: any) => () => UserCtx.provide({ value: { name: "ada" }, children });

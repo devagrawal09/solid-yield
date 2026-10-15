@@ -1,0 +1,13 @@
+Error: Debug Failure. False expression.
+    at computePositionOfLineAndCharacter (/private/tmp/sy-review3-out/app/node_modules/.pnpm/typescript@6.0.3/node_modules/typescript/lib/typescript.js:11703:11)
+    at SourceFileObject.getPositionOfLineAndCharacter (/private/tmp/sy-review3-out/app/node_modules/.pnpm/typescript@6.0.3/node_modules/typescript/lib/typescript.js:153000:12)
+    at Object.refresh (/private/tmp/sy-review3-out/app/node_modules/.pnpm/ts-plugin-solid-yield@file+..+packs+ts-plugin-solid-yield-0.0.0.tgz_@solidjs+web@2.0.0-_bb54556fe68d395fba79a18cbbb2613e/node_modules/ts-plugin-solid-yield/src/service.cjs:193:18)
+    at check (/private/tmp/sy-review3-out/app/node_modules/.pnpm/ts-plugin-solid-yield@file+..+packs+ts-plugin-solid-yield-0.0.0.tgz_@solidjs+web@2.0.0-_bb54556fe68d395fba79a18cbbb2613e/node_modules/ts-plugin-solid-yield/src/cli.cjs:31:27)
+    at Object.<anonymous> (/private/tmp/sy-review3-out/app/node_modules/.pnpm/ts-plugin-solid-yield@file+..+packs+ts-plugin-solid-yield-0.0.0.tgz_@solidjs+web@2.0.0-_bb54556fe68d395fba79a18cbbb2613e/node_modules/ts-plugin-solid-yield/src/cli.cjs:75:26)
+    at Module._compile (node:internal/modules/cjs/loader:1871:14)
+    at Object..js (node:internal/modules/cjs/loader:2002:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47

@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "target": "ESNext", "module": "ESNext", "moduleResolution": "Bundler",
+    "lib": ["ESNext", "DOM"], "noEmit": true, "strict": true, "skipLibCheck": true,
+    "jsx": "preserve", "jsxImportSource": "@solidjs/web",
+    "types": ["vite/client"],
+    "plugins": [{ "name": "ts-plugin-solid-yield", "mode": "native", "include": ["src/**"] }]
+  },
+  "include": ["src"]
+}

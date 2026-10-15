@@ -39,7 +39,7 @@ const ThemeCtx = createContext<Theme, "ThemeCtx">(undefined, { name: "ThemeCtx" 
 const Settings = component(function* Settings() {
   const theme = yield* ThemeCtx;
   return view(function* () {
-    return <p>theme: {perform(theme)}</p>;
+    return <p>theme: {theme}</p>;
   });
 });
 

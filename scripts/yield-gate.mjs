@@ -17,7 +17,8 @@
 //   --only <substring>  run only steps whose name contains the substring
 //                       (repeatable; a step matching any of them runs)
 //   --fast              run only the quick subset: pkg:yield:dist-fresh,
-//                       twin:*:typecheck, twin:*:lint,
+//                       twin:*:typecheck, twin:*:lint, example:*:typecheck,
+//                       example:*:lint,
 //                       pkg:yield:test, pkg:vite-plugin-yield:typecheck,
 //                       native:dashboard:type-contract, pkg:*:exports and
 //                       repo:prettier (skips twin tests, the
@@ -108,6 +109,9 @@ function fail(message) {
 
 const TWIN_SCRIPTS = ["test", "typecheck", "lint"];
 const EXPECTED_TWINS = 10;
+// Examples that are not twins of an original (no examples/originals counterpart, no
+// parity test): outside the twin count, gated as example:<name>:<script>.
+const NON_TWINS = ["booking-yield"];
 
 function readJson(path) {
   return JSON.parse(readFileSync(path, "utf8"));
@@ -119,6 +123,7 @@ function findTwins() {
   return readdirSync(examples, { withFileTypes: true })
     .filter(d => d.isDirectory() && /-(yield(-h)?|sugar)$/.test(d.name))
     .map(d => d.name)
+    .filter(name => !NON_TWINS.includes(name))
     .filter(name => {
       const pkg = join(examples, name, "package.json");
       if (!existsSync(pkg)) return false;
@@ -146,7 +151,8 @@ const LINT_DIRS = twins => [
   "packages/yield",
   "packages/eslint-plugin-yield",
   "packages/vite-plugin-yield",
-  ...twins.map(t => `examples/${t}`)
+  ...twins.map(t => `examples/${t}`),
+  ...NON_TWINS.map(t => `examples/${t}`)
 ];
 
 function buildSteps(twins) {
@@ -190,6 +196,14 @@ function buildSteps(twins) {
       steps.push(step);
     }
   }
+  for (const example of NON_TWINS)
+    for (const script of TWIN_SCRIPTS)
+      steps.push({
+        name: `example:${example}:${script}`,
+        cwd: root,
+        fast: script === "typecheck" || script === "lint",
+        ...pnpmRun(`examples/${example}`, script)
+      });
 
   steps.push({
     name: "twin:todos-sugar:generated-parity",
@@ -475,6 +489,14 @@ function buildSteps(twins) {
     env: { SMOKE_TIMEOUT_MS: "120000" }
   });
 
+  // D-117: separate production peers; streamed hydration precedes the real RPC.
+  steps.push({
+    name: "pkg:yield:failure-wire-smoke",
+    cwd: root,
+    cmd: process.execPath,
+    args: ["packages/yield/test/failure-wire-smoke.mjs"]
+  });
+
   steps.push(
     { name: "pkg:yield:test", cwd: root, fast: true, ...pnpmRun("packages/yield", "test") },
     {
@@ -518,6 +540,28 @@ function buildSteps(twins) {
     }
   );
 
+  // Soak is a manual report: even one minute per twin adds nine minutes and
+  // process-wide heap slopes vary by host. Keep a visible skip, never a blocker.
+  steps.push({
+    name: "twins:soak-analysis-test",
+    cwd: root,
+    fast: true,
+    cmd: process.execPath,
+    args: [
+      "--test",
+      "examples/harness/soak/analysis.test.mjs",
+      "examples/harness/soak/heap-diff.test.mjs",
+      "examples/harness/soak/sample-cleanup.test.mjs"
+    ]
+  });
+  steps.push({
+    name: "twins:soak-report",
+    cwd: root,
+    cmd: process.execPath,
+    args: ["examples/harness/soak/run.mjs", "--minutes", "1"],
+    skip: "manual REPORT-ONLY: pnpm soak (10 minutes/twin; --minutes 60 available); nine-minute short run is too slow per commit"
+  });
+
   // Like analyzer:report, this reports evidence without coverage thresholds.
   // Lean is optional: a missing Lake skips this step without failing the gate.
   steps.push({
@@ -540,6 +584,7 @@ function buildSteps(twins) {
 
   // D-105: source bytes in V8 executed ranges at load and each authored parity step.
   // The committed baseline permits 2% or 1024 bytes per phase (whichever is larger).
+  // A phase's optional measured tolerance adds only to that phase's limit.
   steps.push(
     {
       name: "twins:executed-bytes-test",
@@ -607,7 +652,8 @@ function buildSteps(twins) {
       "examples/harness/native-edges/app/*.[tj]s?(x)",
       "scripts/*.mjs",
       "scripts/native-insertion/*.mjs",
-      "scripts/native-surface/*.mjs"
+      "scripts/native-surface/*.mjs",
+      "examples/harness/soak/*.mjs"
     ]
   });
 

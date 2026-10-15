@@ -18,6 +18,7 @@ import {
   readStore,
   Show,
   type Props,
+  type Source,
   view
 } from "solid-yield";
 import { h } from "solid-yield/h";
@@ -31,9 +32,9 @@ type Todos = Returned<typeof createTodos>;
 /**
  * The todos store and the actions, for the components below `App`. Created
  * without a default: a component that reads it requires it (D-098), and
- * `App` provides it around its call. Its value is read like a prop (D-042):
- * `todos` is a path over the store, an action a source of the handler,
- * called in an event as `yield* (yield* addTodo)(todo)`.
+ * `App` provides it around its call. Its value is a bag, held as it is
+ * (D-118): `todos` is a path over the store, an action the handler itself,
+ * called in an event as `yield* addTodo(todo)`.
  */
 const TodosContext = createContext<{ todos: Todos[0] } & Todos[1], "TodosContext">(undefined, {
   name: "TodosContext"
@@ -57,7 +58,7 @@ const Header = component(function* Header() {
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     // the event is gone once the call waits: clear the input first
     input.value = "";
-    yield* (yield* addTodo)({ id, title, completed: false });
+    yield* addTodo({ id, title, completed: false });
   });
   return view(function* () {
     return h(
@@ -74,16 +75,16 @@ const Header = component(function* Header() {
   });
 });
 
-const TodoItem = component(function* TodoItem(props: Props<{ todo: Todo }>) {
+const TodoItem = component(function* TodoItem(props: Props<{ todo: Source<Todo> }>) {
   const { toggleTodo, removeTodo, retryTodo } = yield* useTodos();
   const toggle = $event(function* (e: Input) {
-    yield* (yield* toggleTodo)(yield* props.todo.id, e.currentTarget.checked);
+    yield* toggleTodo(yield* props.todo.id, e.currentTarget.checked);
   });
   const retry = $event(function* () {
-    yield* (yield* retryTodo)(yield* props.todo);
+    yield* retryTodo(yield* props.todo);
   });
   const remove = $event(function* () {
-    yield* (yield* removeTodo)(yield* props.todo.id);
+    yield* removeTodo(yield* props.todo.id);
   });
   const classes = yield* $memo(function* () {
     return [
@@ -129,7 +130,7 @@ const TodoItem = component(function* TodoItem(props: Props<{ todo: Todo }>) {
   });
 });
 
-const MainSection = component(function* MainSection(props: Props<{ filter: Filter }>) {
+const MainSection = component(function* MainSection(props: Props<{ filter: Source<Filter> }>) {
   const { todos, toggleAll } = yield* useTodos();
   const filtered = yield* $memo(function* () {
     const f = yield* props.filter;
@@ -148,7 +149,7 @@ const MainSection = component(function* MainSection(props: Props<{ filter: Filte
     return (yield* todos.length) > 0;
   });
   const toggle = $event(function* () {
-    yield* (yield* toggleAll)(!(yield* allCompleted));
+    yield* toggleAll(!(yield* allCompleted));
   });
   return view(function* () {
     return Show({
@@ -174,7 +175,7 @@ const MainSection = component(function* MainSection(props: Props<{ filter: Filte
   });
 });
 
-const Footer = component(function* Footer(props: Props<{ filter: Filter }>) {
+const Footer = component(function* Footer(props: Props<{ filter: Source<Filter> }>) {
   const { todos, clearCompleted } = yield* useTodos();
   const remaining = yield* $memo(function* () {
     return yield* readStore(todos, t => t.filter(x => !x.completed).length);
@@ -186,7 +187,7 @@ const Footer = component(function* Footer(props: Props<{ filter: Filter }>) {
     return (yield* todos.length) > 0;
   });
   const clear = $event(function* () {
-    yield* (yield* clearCompleted)();
+    yield* clearCompleted();
   });
   const link = (href: string, label: string, value: Filter) =>
     h(

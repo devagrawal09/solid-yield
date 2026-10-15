@@ -1,0 +1,30 @@
+ERROR VERDICT {
+  id: undefined,
+  config: 384,
+  flags: 2,
+  held: true,
+  value: [],
+  latestActive: true,
+  probing: false
+}
+HELD BEFORE ERROR CHECK
+ERROR VERDICT {
+  id: undefined,
+  config: 384,
+  flags: 2,
+  held: true,
+  value: [],
+  latestActive: false,
+  probing: true
+}
+HELD BEFORE ERROR CHECK
+ERROR VERDICT {
+  id: undefined,
+  config: 0,
+  flags: 2,
+  held: false,
+  value: [],
+  latestActive: false,
+  probing: true
+}
+{"text":"0","fallbackCalls":0}

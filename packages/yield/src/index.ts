@@ -33,7 +33,14 @@ export {
   until,
   view
 } from "./runtime.js";
-export { Failure } from "./failure.js";
+export {
+  Failure,
+  registerFailure,
+  failureClass,
+  rehydrateFailure,
+  prepareFailure
+} from "./runtime.js";
+export type { FailureClass } from "./runtime.js";
 export { createContext } from "./context.js";
 export type {
   ContextNames,

@@ -1,9 +1,42 @@
 import { render, type JSX } from "@solidjs/web";
+import { flush } from "solid-js";
 import { render as renderYield } from "solid-yield";
 import { firstDifference } from "yield-example-harness";
 import App from "../src/app";
 import { install, uninstall, root, runScript, steps } from "./script";
 afterEach(uninstall);
+it("holds avatar promises through the byte snapshot until their named release", async () => {
+  const realTimeout = globalThis.setTimeout;
+  const path = new URL("../../originals/docs/src/app.tsx", import.meta.url).pathname;
+  const Original: (props: {}) => JSX.Element = (await import(/* @vite-ignore */ path)).default;
+  vi.stubGlobal("__yieldExecutedBytes", () => {});
+  try {
+    for (const mount of [
+      () => render(() => Original({}), root()),
+      () => renderYield(() => App({}), root())
+    ]) {
+      install();
+      const dispose = mount();
+      try {
+        await vi.advanceTimersByTimeAsync(130);
+        flush();
+        expect(root().querySelectorAll(".avatar-pending")).toHaveLength(2);
+        // Even a late snapshot cannot let an avatar resolve ahead of its release.
+        await vi.advanceTimersByTimeAsync(1000);
+        flush();
+        expect(root().querySelectorAll(".avatar-pending")).toHaveLength(2);
+        await steps.find(([name]) => name === "avatars load")![1]();
+        expect(root().querySelectorAll(".avatar-pending")).toHaveLength(0);
+      } finally {
+        dispose();
+        uninstall();
+      }
+    }
+  } finally {
+    vi.unstubAllGlobals();
+  }
+  expect(globalThis.setTimeout).toBe(realTimeout);
+});
 it("matches the original DOM at every content and widget step", async () => {
   const path = new URL("../../originals/docs/src/app.tsx", import.meta.url).pathname;
   const Original: (props: {}) => JSX.Element = (await import(/* @vite-ignore */ path)).default;

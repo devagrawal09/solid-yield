@@ -63,8 +63,8 @@ type _defaulted = Expect<Equal<typeof ThemeCtx, YieldContext<string, string>>>;
 type ReadOf<C> = C extends { [Symbol.iterator](): Generator<infer Y, any, any> } ? Y : never;
 type _read = Expect<Equal<ReadOf<typeof UserCtx>, ContextRead<typeof UserCtx>>>;
 type _readDefault = Expect<Equal<ReadOf<typeof ThemeCtx>, ContextRead<never>>>;
-// the value is read like a prop (D-042): a path, never the value
-type _value = Expect<Equal<ContextValue<User>, Path<User>>>;
+// the value is given as a prop is (D-118): a held value as it is, a reactive one as a path
+type _value = Expect<Equal<ContextValue<User>, User>>;
 type _valueSource = Expect<Equal<ContextValue<Source<User, never, true>>, Path<User, never, true>>>;
 // Native TodoMVC provides a tuple: each numbered path keeps its own type.
 type _tupleFirst = Expect<Equal<ContextValue<readonly [User, string]>[0], Path<User>>>;
@@ -79,7 +79,7 @@ type _arrayNoMutators = Expect<
 const Avatar = component(function* Avatar() {
   const user = yield* UserCtx;
   return view(function* () {
-    return <b>{yield* user.name}</b>;
+    return <b>{user.name}</b>;
   });
 });
 type _in = Expect<Equal<RequiresOfComponent<typeof Avatar>, typeof UserCtx>>;
@@ -88,7 +88,7 @@ type _in = Expect<Equal<RequiresOfComponent<typeof Avatar>, typeof UserCtx>>;
 const Themed = component(function* Themed() {
   const theme = yield* ThemeCtx;
   return view(function* () {
-    return <i>{yield* theme}</i>;
+    return <i>{theme}</i>;
   });
 });
 type _defaultNone = Expect<Equal<RequiresOfComponent<typeof Themed>, never>>;
@@ -147,7 +147,7 @@ const Rows = component(function* Rows() {
               // a row's setup reads it: resolved under the list, so the list requires it
               const user = yield* UserCtx;
               return view(function* () {
-                return <li>{yield* user.name}</li>;
+                return <li>{user.name}</li>;
               });
             }
           })
@@ -168,13 +168,12 @@ type _h = Expect<Equal<RequiresOfComponent<typeof HCard>, typeof UserCtx>>;
 // --- discharged by provide around the call ----------------------------------------------------
 
 const App = component(function* App() {
-  const [user] = yield* $signal<User>({ name: "ada" });
   return view(function* () {
     return (
       <>
         {
           yield* UserCtx.provide({
-            value: user,
+            value: { name: "ada" },
             children: function* () {
               return <>{yield* Page()}</>;
             }
@@ -189,7 +188,16 @@ render(App, root);
 render(() => App(), root);
 hydrate(App, document);
 
-// provide's value takes what a prop takes (D-065): a value, a source, a hole
+// provide's value takes what a prop declared as the context's type takes (D-118): a held context
+// the value itself, a reactive one (`Source<T>`) a source, a path or a hole
+const LiveUserCtx = createContext<Source<User>, "LiveUserCtx">(undefined, { name: "LiveUserCtx" });
+const LiveAvatar = component(function* LiveAvatar() {
+  const user = yield* LiveUserCtx;
+  type _live = Expect<Equal<typeof user, Path<User>>>;
+  return view(function* () {
+    return <b>{yield* user.name}</b>;
+  });
+});
 const Values = component(function* Values() {
   const [user] = yield* $signal<User>({ name: "ada" });
   return view(function* () {
@@ -204,12 +212,20 @@ const Values = component(function* Values() {
           })
         }
         {
-          yield* UserCtx.provide({
+          yield* LiveUserCtx.provide({
+            value: user,
+            children: function* () {
+              return <>{yield* LiveAvatar()}</>;
+            }
+          })
+        }
+        {
+          yield* LiveUserCtx.provide({
             value: function* () {
               return { name: (yield* user).name.toUpperCase() };
             },
             children: function* () {
-              return <>{yield* Avatar()}</>;
+              return <>{yield* LiveAvatar()}</>;
             }
           })
         }
@@ -219,11 +235,32 @@ const Values = component(function* Values() {
 });
 type _values = Expect<Equal<RequiresOfComponent<typeof Values>, never>>;
 declare const pendingUser: Source<User, never, true>;
+declare const settledUser: Source<User>;
 UserCtx.provide({
-  // @ts-expect-error a context of settled values does not take a pending source
-  value: pendingUser,
+  // @ts-expect-error [HELD_PROP] a held context does not take a source
+  value: settledUser,
   children: function* () {
     return <>{yield* Avatar()}</>;
+  }
+});
+LiveUserCtx.provide({
+  // @ts-expect-error [REACTIVE_PROP] a context of settled sources does not take a pending one
+  value: pendingUser,
+  children: function* () {
+    return <>{yield* LiveAvatar()}</>;
+  }
+});
+LiveUserCtx.provide({
+  // @ts-expect-error [REACTIVE_PROP] a reactive context does not take a plain value: constant(v)
+  value: { name: "plain" },
+  children: function* () {
+    return <>{yield* LiveAvatar()}</>;
+  }
+});
+LiveUserCtx.provide({
+  value: constant({ name: "fixed" }),
+  children: function* () {
+    return <>{yield* LiveAvatar()}</>;
   }
 });
 
@@ -255,7 +292,7 @@ const Both = component(function* Both() {
   return view(function* () {
     return (
       <>
-        {yield* other.name}
+        {other.name}
         {yield* Avatar()}
       </>
     );
@@ -292,7 +329,7 @@ const SelfProvider = component(function* SelfProvider() {
           yield* UserCtx.provide({
             value: { name: "inner" },
             children: function* () {
-              return <b>{yield* user.name}</b>;
+              return <b>{user.name}</b>;
             }
           })
         }
@@ -331,7 +368,7 @@ const TwoReads = component(function* TwoReads() {
   return view(function* () {
     return (
       <b>
-        {yield* user.name} {yield* session.id}
+        {user.name} {session.id}
       </b>
     );
   });
@@ -358,7 +395,7 @@ const FailingReader = component(function* FailingReader() {
   return view(function* () {
     return (
       <b>
-        {yield* user.name}
+        {user.name}
         {yield* failing}
       </b>
     );
@@ -411,7 +448,7 @@ type _defaultedUnnamed = Expect<Equal<typeof Fallback, YieldContext<User, string
 const ReadsFallback = component(function* ReadsFallback() {
   const user = yield* Fallback;
   return view(function* () {
-    return <b>{yield* user.name}</b>;
+    return <b>{user.name}</b>;
   });
 });
 render(ReadsFallback, root);
@@ -423,7 +460,7 @@ const EditorCtx = createContext<User, "EditorCtx">(undefined, { name: "EditorCtx
 const Byline = component(function* Byline() {
   const author = yield* AuthorCtx;
   return view(function* () {
-    return <i>{yield* author.name}</i>;
+    return <i>{author.name}</i>;
   });
 });
 const EditorOnly = component(function* EditorOnly() {
@@ -473,7 +510,7 @@ render(AuthorProvided, root);
 const Greeting = component(function* Greeting() {
   const user = yield* UserCtx;
   return view(function* () {
-    return <p>hello {yield* user.name}</p>;
+    return <p>hello {user.name}</p>;
   });
 });
 const Layout = component(function* Layout(props: Props<{ children: Element }>) {
@@ -578,14 +615,16 @@ const WrongAroundCall = component(function* WrongAroundCall() {
   });
 });
 type _wrongAround = Expect<Equal<RequiresOfComponent<typeof WrongAroundCall>, typeof UserCtx>>;
-// any hole prop, not only children; each hole's requirements join the call's
-const Pair = component(function* Pair(props: Props<{ left: Element; right: Element; n: number }>) {
+// any hole prop, not only children (a reactive one: D-118); each hole's requirements join the call's
+const Pair = component(function* Pair(
+  props: Props<{ left: Source<Element>; right: Source<Element>; n: number }>
+) {
   return view(function* () {
     return (
       <div>
         {yield* props.left}
         {yield* props.right}
-        {yield* props.n}
+        {props.n}
       </div>
     );
   });
@@ -788,7 +827,7 @@ export const hPair = h(Pair, {
   left: function* () {
     return <>{yield* Greeting({})}</>;
   },
-  right: "r",
+  right: constant("r"),
   n: 1
 });
 const LazyLayout = lazy(() => Promise.resolve({ default: Layout }));
@@ -849,7 +888,7 @@ const MaybeUserCtx = createContext<User | null | undefined, "MaybeUserCtx">(unde
 const MaybeAvatar = component(function* MaybeAvatar() {
   const user = yield* MaybeUserCtx;
   return view(function* () {
-    return <i>{(yield* user)?.name ?? "nobody"}</i>;
+    return <i>{user?.name ?? "nobody"}</i>;
   });
 });
 MaybeUserCtx.provide({
@@ -867,8 +906,9 @@ const nobody = MaybeUserCtx.provide({
 });
 render(() => nobody, root);
 declare const maybeUser: Source<User | undefined>;
-// a source is provided whatever it reads
+// a held context takes no source, whatever it reads (D-118)
 MaybeUserCtx.provide({
+  // @ts-expect-error [HELD_PROP]
   value: maybeUser,
   children: function* () {
     return <>{yield* MaybeAvatar()}</>;
@@ -879,7 +919,7 @@ const MaybeSourceCtx = createContext<Source<User | undefined>, "MaybeSourceCtx">
   name: "MaybeSourceCtx"
 });
 MaybeSourceCtx.provide({
-  // @ts-expect-error [PROVIDE_UNDEFINED]
+  // @ts-expect-error a reactive context takes a source, not undefined ([REACTIVE_PROP])
   value: undefined,
   children: "x"
 });
@@ -890,7 +930,12 @@ export const hNobody = h(MaybeUserCtx.provide, { value: null }, h(MaybeAvatar, {
 // a context whose type does not admit undefined has no message to show
 export type NoMessage = Expect<
   Equal<
-    Extract<Parameters<typeof UserCtx.provide>[0]["value"], { readonly [k: string]: never }>,
+    Extract<
+      Parameters<typeof UserCtx.provide>[0]["value"],
+      {
+        readonly "[PROVIDE_UNDEFINED] a provided undefined reads as no provider: provide null, or a source": never;
+      }
+    >,
     never
   >
 >;

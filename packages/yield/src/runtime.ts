@@ -43,6 +43,27 @@ import {
   type Store
 } from "solid-js";
 import { isSafeError, markSafeError } from "@solidjs/web";
+import { FailureInstance, rehydrateFailure } from "./failure.js";
+export {
+  Failure,
+  registerFailure,
+  failureClass,
+  rehydrateFailure,
+  prepareFailure
+} from "./failure.js";
+export type { FailureClass } from "./failure.js";
+
+/** The library's stream-read and RPC rejection edge, before branding/matching. */
+export function restoreFailure(value: unknown): unknown {
+  if (value instanceof FailureInstance) return value;
+  const error = rehydrateFailure(value);
+  return isFailure(error) ? brand(error) : error;
+}
+
+/** Runtime class coverage includes subclasses and never compares kind strings. */
+export function matchesFailure(error: unknown, classes: readonly ErrorClass[]): boolean {
+  return classes.some(Class => error instanceof Class);
+}
 import type {
   Handled,
   StreamAttempt,
@@ -93,6 +114,33 @@ import type {
 
 declare const __DEV__: boolean;
 declare const __SERVER__: boolean;
+declare const __YIELD_SOAK__: boolean;
+
+/** @internal Opt-in soak instrumentation. Normal builds erase guarded calls. */
+export function soakOwned(kind: "roots" | "boundaries" | "routines"): void {
+  if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__) {
+    soakDelta(kind, 1);
+    onCleanup(() => soakDelta(kind, -1));
+  }
+}
+/** @internal Counts definitions with owners and suspended runtime attempts, not Solid internals. */
+export function soakDelta(
+  kind: "roots" | "boundaries" | "routines" | "pendingPromises" | "eventsInFlight",
+  delta: number
+): void {
+  if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__) {
+    const host = globalThis as any;
+    const counts = (host.__yieldSoakCounts ??= {
+      roots: 0,
+      boundaries: 0,
+      routines: 0,
+      pendingPromises: 0,
+      eventsInFlight: 0,
+      eventQueueDepth: 0
+    });
+    counts[kind] += delta;
+  }
+}
 
 // --- runtime marks -----------------------------------------------------------------
 
@@ -313,6 +361,7 @@ function runAs<T>(
     if (own !== null && own.length) checkReceipts(own, host, name);
     return result;
   } catch (e) {
+    e = restoreFailure(e);
     if (__DEV__) throw untyped(e, host, name);
     throw e;
   } finally {
@@ -603,14 +652,66 @@ function readPath(t: PathTarget): unknown {
   return throughHole(v);
 }
 
-/** Props as reads: `props.x` is a path reader over the raw props. */
+/**
+ * D-118: what a value given to a component (a prop) or provided to a context
+ * is to its reader. "The only things going through props are reactive
+ * values and events; everything else is a bag of those two things": a
+ * reactive value — a path, a source, a hole (a zero-arity `function*`) — is
+ * read where it is read, so it is given as a path (`path()`; a path stays
+ * itself), keyed reads included; an `$event` handler is itself; anything
+ * else — a primitive, a plain object or array (a bag), a plain function — is
+ * held as it is. Only the top level is looked at: a bag's leaves are what
+ * the caller put there.
+ */
+function heldOrPath(v: any, path: () => unknown): unknown {
+  if (v == null) return v;
+  if (typeof v === "function") {
+    if (v[EVENT_MARK] === true) return v;
+    return v[READ] !== undefined || (isGeneratorFunction(v) && v.length === 0) ? path() : v;
+  }
+  if (typeof v !== "object") return v;
+  // a store proxy tracks a user symbol's read: look untracked
+  const kind = untrack(() => (v[PATH_TARGET] !== undefined ? 2 : v[READ] !== undefined ? 1 : 0));
+  return kind === 2 ? v : kind === 1 ? path() : v;
+}
+
+/**
+ * Props as they are (D-118): `props.x` is the value the caller passed, a
+ * reactive one given as a path over it (`heldOrPath`). `children` is a path,
+ * as before: a lazy view built where the child reads it. A getter — a JSX
+ * tag's, or one written in the props object — is a reactive value: a path
+ * over it, read where the child reads it; never called to look, except one
+ * `h` made for a value it hands over unread (`REFS`).
+ */
 function typedProps(raw: any): any {
   return new Proxy(raw, {
     get(target, key) {
       if (typeof key === "symbol") return target[key];
-      return makePath(target, false, [key]);
+      const path = () => makePath(target, false, [key]);
+      if (key === "children") return path();
+      const d = Object.getOwnPropertyDescriptor(target, key);
+      if (d === undefined) return target[key];
+      if (d.get !== undefined && !isRefKey(target, key)) return path();
+      return heldOrPath(d.get !== undefined ? d.get.call(target) : d.value, path);
     }
   });
+}
+
+/** @internal A context's provided value as its reader holds it (D-118): `heldOrPath`. */
+export function heldValue(raw: unknown): unknown {
+  return heldOrPath(raw, () => makePath(raw, false, []));
+}
+
+/**
+ * @internal The keys of a props object whose getters return the value
+ * unread (D-118): `h` hands a component's function-valued prop (a source, a
+ * hole, a handler, a plain function) to Solid's `h` as a thunk returning
+ * it, which Solid turns into a getter calling the thunk.
+ */
+export const REFS: unique symbol = Symbol.for("solid.yield.refs") as any;
+function isRefKey(target: any, key: string): boolean {
+  const refs = target[REFS];
+  return Array.isArray(refs) && refs.includes(key);
 }
 
 /** A reader over a render argument (a row's item, a branch's value). */
@@ -693,15 +794,25 @@ function isThenable(v: any): v is PromiseLike<unknown> {
 class Attempt {
   constructor(
     readonly run: () => unknown,
-    readonly onError: (error: unknown) => unknown
+    readonly onError: (error: unknown) => unknown,
+    readonly catches?: readonly ErrorClass[]
   ) {}
+  handler(error: unknown): unknown {
+    error = restoreFailure(error);
+    // An attempted nominal rejection is already a declared failure. Brand it
+    // before forwarding an unmatched class; a plain throw from an event still
+    // passes the event-call crash filter above and is never relabeled here.
+    if (error instanceof FailureInstance) error = brand(error);
+    if (this.catches && !matchesFailure(error, this.catches)) throw error;
+    return this.onError(error);
+  }
   *[Symbol.iterator](): Generator<unknown, unknown, unknown> {
     let v: unknown;
     try {
       v = this.run();
     } catch (e) {
       if (e instanceof NotReadyError) throw e;
-      return yield* handle(this.onError, e);
+      return yield* handle(e => this.handler(e), e);
     }
     // an event call (D-077): delegated to as `yield* call` is — at once when
     // its body already finished (so an `$effect` may attempt a synchronous
@@ -715,11 +826,12 @@ class Attempt {
       try {
         return yield* (v as any)[Symbol.iterator]();
       } catch (e) {
+        e = restoreFailure(e);
         if (e instanceof NotReadyError || !isFailure(e)) throw e;
         failed = true;
         error = e;
       }
-      if (failed) return yield* handle(this.onError, error);
+      if (failed) return yield* handle(e => this.handler(e), error);
     }
     if (isThenable(v)) {
       let failed = false;
@@ -732,7 +844,7 @@ class Attempt {
       }
       // on rejection: inside the event's transaction, or as the memo's
       // resumption — the attempt's own host runs the handler (D-078)
-      if (failed) return yield* handle(this.onError, error);
+      if (failed) return yield* handle(e => this.handler(e), error);
     }
     // a stream (or a promise's stream) is not waited for. An event does not
     // attempt one (D-091): it does one thing and finishes; a $memo holds what
@@ -749,7 +861,7 @@ class Attempt {
       runAs(
         host,
         () => {
-          const r = this.onError(e);
+          const r = this.handler(e);
           if (isGeneratorObject(r)) {
             r.return(undefined);
             throw devError(
@@ -948,12 +1060,25 @@ type Attempted<T> =
  * (D-087). This is how a routine handles a failure — `try` /
  * `catch` is not a routine form (`no-try-catch`).
  */
+/** Selective handling: unmatched classes propagate, including unknown wire IDs. */
+export function attempt<T, K extends readonly ErrorClass<import("./failure.js").Failure>[], H>(
+  fn: () => T,
+  onError: (error: InstanceType<K[number]>) => H & HandlerCheck<H> & StreamHandlerCheck<T, H>,
+  options: { catch: K & KindCheck<InstanceType<K[number]>> }
+): Yieldable<
+  AttemptOps<T, H> | Raise<Exclude<Caught<T>, InstanceType<K[number]>>>,
+  AttemptResult<T, H>
+>;
 export function attempt<T, H>(
   fn: () => T,
   onError: (error: Caught<T>) => H & HandlerCheck<H> & StreamHandlerCheck<T, H>
 ): Yieldable<AttemptOps<T, H>, AttemptResult<T, H>>;
-export function attempt(fn: () => unknown, onError: (error: unknown) => unknown): unknown {
-  return new Attempt(fn, onError);
+export function attempt(
+  fn: () => unknown,
+  onError: (error: any) => unknown,
+  options?: { catch: readonly ErrorClass[] }
+): unknown {
+  return new Attempt(fn, onError, options?.catch);
 }
 
 class RaiseOp {
@@ -1047,6 +1172,12 @@ export class CreateOp<T> {
   ) {}
   *[Symbol.iterator](): Generator<never, T, unknown> {
     if (__DEV__) checkCreate(this.kind);
+    if (
+      typeof __YIELD_SOAK__ !== "undefined" &&
+      __YIELD_SOAK__ &&
+      ["memo", "effect", "projection", "optimisticStore"].includes(this.kind)
+    )
+      soakOwned("routines");
     return this.make();
   }
 }
@@ -1326,6 +1457,7 @@ function resume(
   as: Host,
   name: string | null
 ): Promise<unknown> {
+  if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__) soakDelta("pendingPromises", 1);
   return new Promise((resolve, reject) => {
     const step = (value: unknown, failed: boolean) => {
       let r: IteratorResult<unknown, unknown>;
@@ -1340,11 +1472,16 @@ function resume(
           name
         );
       } catch (e) {
+        if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__)
+          soakDelta("pendingPromises", -1);
         reject(e);
         return;
       }
-      if (r.done) resolve(r.value);
-      else wait(r.value);
+      if (r.done) {
+        if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__)
+          soakDelta("pendingPromises", -1);
+        resolve(r.value);
+      } else wait(r.value);
     };
     const wait = (next: unknown) => {
       if (!isWait(next)) {
@@ -1359,6 +1496,8 @@ function resume(
             name
           );
         } catch (e) {
+          if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__)
+            soakDelta("pendingPromises", -1);
           reject(e);
         }
         return;
@@ -1459,14 +1598,15 @@ export function $cleanup(fn: () => void): Yieldable<Cleanup, void> {
 // --- context ------------------------------------------------------------------------------
 
 /**
- * @internal `yield* Ctx` (D-036, D-098): a setup's read of a library context.
- * The value is read like a prop (D-042): a path over what the provider gave —
- * a value, a source or a hole — read where the setup's view, memo or event
- * reads it, never in the setup. A context created without a default that no
- * provider above gives is `NO_PROVIDER` here, at the read.
+ * @internal `yield* Ctx` (D-036, D-098, D-118): a setup's read of a library
+ * context. The provided value is given as a prop is (`heldValue`): a
+ * provided source or hole as a path, read where the setup's view, memo or
+ * event reads it, never in the setup; a handler, a constant or a bag as it
+ * is. A context created without a default that no provider above gives is
+ * `NO_PROVIDER` here, at the read.
  */
 export function readContext(ctx: any): unknown {
-  return makePath(contextValue(ctx), false, []);
+  return heldValue(contextValue(ctx));
 }
 /**
  * @internal Native `useContext` (F-S37): the value Solid's own `useContext`
@@ -1539,8 +1679,9 @@ export function boundaryAbove(): Boundary | null {
 
 /** Whether some `Errored` in the chain will take `error`: the first whose `catch` covers it. */
 export function takes(boundary: Boundary | null, error: unknown): boolean {
+  error = restoreFailure(error);
   for (let b = boundary; b; b = b.parent)
-    if (!b.catch || b.catch.some(C => error instanceof C)) return true;
+    if (!b.catch || matchesFailure(error, b.catch)) return true;
   return false;
 }
 
@@ -1564,8 +1705,9 @@ export function bindEvent<H>(handler: H): H {
   const boundary = boundaryAbove();
   const route: Route = boundary
     ? error => {
+        error = restoreFailure(error);
         let accepting: Boundary | null = boundary;
-        while (accepting && accepting.catch && !accepting.catch.some(C => error instanceof C))
+        while (accepting && accepting.catch && !matchesFailure(error, accepting.catch))
           accepting = accepting.parent;
         if (!accepting) return false;
         if (boundary.disposed || accepting.disposed) {
@@ -1650,12 +1792,15 @@ function* eventSteps(
         receipts
       );
     }
+    if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__) soakDelta("pendingPromises", 1);
     try {
       value = yield op.promise;
       failed = false;
     } catch (e) {
       value = e;
       failed = true;
+    } finally {
+      if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__) soakDelta("pendingPromises", -1);
     }
   }
 }
@@ -1717,15 +1862,24 @@ export function nativeHostCallback(
  * — goes to the nearest `Errored` above where the handler was bound that
  * takes it (D-085; the promise then resolves `undefined`); with no such
  * boundary there (none, or only ones whose `catch` excludes it, F-7), or for
- * a call of the unbound handler, the promise rejects.
- * Like any action it is called from an event or other imperative code, not
- * synchronously inside a computation (ACTION_CALLED_IN_OWNED_SCOPE).
+ * a call from routine code (`yield* save(x)`, which handles it), the promise
+ * rejects.
+ *
+ * It is called by routine code or by the DOM (D-118, D-028 for events):
+ * `yield* save(x)` in an `$event` or an `$effect`'s effect phase, or the DOM
+ * through a bind. Called directly with no routine running — a timer, a
+ * promise callback, plain or foreign code — it is `EVENT_OUTSIDE_RUN` in
+ * development. An event called from an event joins its transaction (D-020:
+ * Solid's action does). Like any action it is not called synchronously
+ * inside a computation (ACTION_CALLED_IN_OWNED_SCOPE).
  */
 export function $event<Args extends unknown[] = [], Y extends EventOp = never, R = void>(
   body: (...args: Args) => Generator<Y, R, any>
 ): EventHandler<Args, FailsOf<Y>, R, ReadsPendingOf<Y>, WaitsOf<Y>> {
+  if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__) soakOwned("routines");
   const name = state.name;
   const run = action(function* (rec: CallRecord, ...args: Args) {
+    if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__) soakDelta("eventsInFlight", 1);
     try {
       // one list for the whole call: a receipt minted before an async
       // attempt and delegated to after it is not unyielded
@@ -1741,6 +1895,8 @@ export function $event<Args extends unknown[] = [], Y extends EventOp = never, R
     } catch (error) {
       rec.done = { ok: false, value: error };
       throw error;
+    } finally {
+      if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__) soakDelta("eventsInFlight", -1);
     }
   });
   const call = (route: Route, args: Args) => {
@@ -1774,7 +1930,18 @@ export function $event<Args extends unknown[] = [], Y extends EventOp = never, R
     };
     return result;
   };
-  const handler: any = (...args: Args) => call(null, args);
+  // D-118 (D-028 for events): a handler is called by routine code (`yield*
+  // save(x)` in an `$event` or an effect phase) or by the DOM through a bind
+  // (the bound wrapper calls `call` itself); called with no routine running
+  // — a timer, a promise callback, plain or foreign code — it fails here
+  const handler: any = (...args: Args) => {
+    if (__DEV__ && state.host === NONE)
+      throw devError(
+        "EVENT_OUTSIDE_RUN",
+        `${body.name ? `the $event ${body.name}` : "an $event"}${name ? ` of <${name}>` : ""} called outside a routine: an event is called with yield* save(x) in an $event or an $effect, or by the DOM where a view binds it (onClick={yield* save}); handed to plain code it is not called.`
+      );
+    return call(null, args);
+  };
   handler[EVENT_MARK] = true;
   handler[CALL] = call;
   // `yield* save`: bind it (D-072, D-085) — a wrapper for the DOM, routing
@@ -1872,6 +2039,7 @@ function runSetup(
   args: unknown[],
   name: string
 ): unknown {
+  if (typeof __YIELD_SOAK__ !== "undefined" && __YIELD_SOAK__) soakOwned("routines");
   // a child's setup is not its parent view's top level, nor a JSX read
   return runAs(SETUP, () => drive(body(...args), SYNC_RUN), null, null, false, false, name);
 }

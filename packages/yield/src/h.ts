@@ -14,7 +14,7 @@
 import solidH from "@solidjs/h";
 import type { JSX } from "solid-yield/jsx-runtime";
 import { toHole, toHoleProps, type Hole, type HViewOf, type OpsOfHole } from "./holes.js";
-import { routineName, ELEMENT_MARK, READ } from "solid-yield/internal";
+import { routineName, ELEMENT_MARK, READ, isComponent } from "solid-yield/internal";
 import type {
   ChildView,
   Component,
@@ -175,7 +175,7 @@ function convert(args: any[], name: string | null): any[] {
       !Array.isArray(v) &&
       !(v instanceof Node) &&
       (v as any)[READ] === undefined
-        ? toHoleProps(v, name)
+        ? toHoleProps(v, name, isComponent(args[0]))
         : toHole(v, name);
   }
   return out;

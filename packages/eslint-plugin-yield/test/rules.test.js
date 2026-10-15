@@ -216,13 +216,13 @@ tester.run("no-path-object-use", rules["no-path-object-use"], {
     // passing a path on is fine; so is spreading the props object (not a path)
     "const C = component(function* (props) { return view(function* () { return <Child {...props} user={props.user} />; }); });",
     // a plain object with the same shape is not a path
-    "const s = { a: 1 }; const t = { ...s }; s.a === 1;"
+    "const s = { a: 1 }; const t = { ...s }; s.a === 1;",
+    // D-118: a prop is given as it is; without types a props key may be held (a constant, a bag),
+    // so it is not reported (with types a reactive one is: below)
+    "const C = component(function* (props) { const m = yield* $memo(function* () { return { ...props.user }; }); return view(function* () { return <p />; }); });",
+    "const C = component(function* (props) { return view(function* () { return <p title={props.room === 'lobby' ? 'home' : ''} />; }); });"
   ],
   invalid: [
-    {
-      code: "const C = component(function* (props) { const m = yield* $memo(function* () { return { ...props.user }; }); return view(function* () { return <p />; }); });",
-      errors: [{ messageId: "spread" }]
-    },
     {
       code: component(
         "const [s] = yield* $store({ a: 1 }); const m = yield* $memo(function* () { return s.a === 1; }); return view(function* () { return <p {...s} />; });"
@@ -1080,9 +1080,21 @@ declare function pick(v: string): EventHandler<[]>;
 declare const actions: { save: EventHandler<[]> };
 declare const plain: () => void;
 `;
+// D-118: a handler prop, and a handler in a bag prop, are the handlers themselves
+const propsDecls = `
+declare function component<T>(f: (props: T) => Generator<unknown, unknown, unknown>): unknown;
+declare function view(f: () => Generator<unknown, unknown, unknown>): unknown;
+`;
 typedTester.run("no-unbound-event (with types)", rules["no-unbound-event"], {
   valid: [
     { filename, code: eventDecls + "function* v() { return <b onClick={plain} />; }" },
+    {
+      filename,
+      code:
+        eventDecls +
+        propsDecls +
+        "component(function* (props: { onClear: EventHandler<[]>; tools: { clear: EventHandler<[]> } }) { return view(function* () { return <b onClick={yield* props.onClear} onInput={yield* props.tools.clear} />; }); });"
+    },
     { filename, code: eventDecls + 'function* v() { return <b onInput={yield* pick("a")} />; }' }
   ],
   invalid: [
@@ -1097,6 +1109,49 @@ typedTester.run("no-unbound-event (with types)", rules["no-unbound-event"], {
       code: eventDecls + "function* v() { return <b onClick={actions.save} />; }",
       output: eventDecls + "function* v() { return <b onClick={yield* actions.save} />; }",
       errors: [{ messageId: "unbound" }]
+    },
+    {
+      filename,
+      code:
+        eventDecls +
+        propsDecls +
+        "component(function* (props: { onClear: EventHandler<[]>; tools: { clear: EventHandler<[]> } }) { return view(function* () { return <b onClick={props.onClear} onInput={props.tools.clear} />; }); });",
+      output:
+        eventDecls +
+        propsDecls +
+        "component(function* (props: { onClear: EventHandler<[]>; tools: { clear: EventHandler<[]> } }) { return view(function* () { return <b onClick={yield* props.onClear} onInput={yield* props.tools.clear} />; }); });",
+      errors: [{ messageId: "unbound" }, { messageId: "unbound" }]
+    }
+  ]
+});
+
+// --- no-path-object-use (with types, D-118): a reactive prop is a path, a held one is not ----
+const sourceDecls = `
+declare const SOURCE: unique symbol;
+interface Path<T> { readonly [SOURCE]: T; [Symbol.iterator](): Generator<unknown, T, any> }
+declare function component<T>(f: (props: T) => Generator<unknown, unknown, unknown>): unknown;
+declare function view(f: () => Generator<unknown, unknown, unknown>): unknown;
+declare function $memo(f: () => Generator<unknown, unknown, unknown>): Generator<unknown, unknown, unknown>;
+type P = { room: string; user: Path<{ name: string }>; tools: { label: Path<string>; tag: string } };
+`;
+typedTester.run("no-path-object-use (with types)", rules["no-path-object-use"], {
+  valid: [
+    // a held constant compares; a held bag spreads; a bag's held leaf compares
+    {
+      filename,
+      code:
+        sourceDecls +
+        "component(function* (props: P) { const m = yield* $memo(function* () { return [props.room === 'lobby', { ...props.tools }, props.tools.tag === 't']; }); return view(function* () { return <p />; }); });"
+    }
+  ],
+  invalid: [
+    // a reactive prop, and a bag's path leaf, are paths
+    {
+      filename,
+      code:
+        sourceDecls +
+        "component(function* (props: P) { const m = yield* $memo(function* () { return [{ ...props.user }, props.tools.label === 'l']; }); return view(function* () { return <p />; }); });",
+      errors: [{ messageId: "spread" }, { messageId: "compare" }]
     }
   ]
 });

@@ -2178,20 +2178,49 @@ function coloredPropSites(program, active) {
   for (const id of active) {
     const source = program.getSourceFile(id);
     if (!source) continue;
+    /** @type {{ name: string, at: ts.Node, passedType: ts.Type, call: ts.CallExpression }[]} */
+    const sites = [];
     for (const d of program.getSemanticDiagnostics(source)) {
       if (d.start === undefined) continue;
       let node = innermost(source, d.start);
-      while (node && !ts.isPropertyAssignment(node) && !ts.isSourceFile(node)) node = node.parent;
-      if (!node || !ts.isPropertyAssignment(node)) continue;
-      const prop = node;
-      // TypeScript reports a prop's assignability at its name, not inside its value.
-      if (!(prop.name.getStart() <= d.start && d.start < prop.name.end)) continue;
-      const literal = prop.parent,
+      while (
+        node &&
+        !ts.isPropertyAssignment(node) &&
+        !ts.isObjectLiteralExpression(node) &&
+        !ts.isSourceFile(node)
+      )
+        node = node.parent;
+      if (!node || (!ts.isPropertyAssignment(node) && !ts.isObjectLiteralExpression(node)))
+        continue;
+      const literal = ts.isPropertyAssignment(node) ? node.parent : node,
         call = literal.parent;
       if (!ts.isCallExpression(call) || call.arguments[0] !== literal) continue;
-      const passedType = checker.getTypeAtLocation(prop.initializer);
-      const passedSource = !!member(passedType, "SOURCE", prop.initializer);
-      const isColored = colored(passedType, prop.initializer);
+      if (ts.isPropertyAssignment(node)) {
+        // TypeScript reports a prop's assignability at its name, not inside its value.
+        if (!(node.name.getStart() <= d.start && d.start < node.name.end)) continue;
+        sites.push({
+          name: checker.getSymbolAtLocation(node.name)?.name ?? node.name.getText(),
+          at: node.initializer,
+          passedType: checker.getTypeAtLocation(node.initializer),
+          call
+        });
+      } else if (node.getStart() === d.start) {
+        // Spread assignability is reported on the argument; use its final
+        // property types, including getters and later spread overrides.
+        for (const prop of checker.getTypeAtLocation(node).getProperties()) {
+          const passedType = checker.getTypeOfSymbolAtLocation(prop, node);
+          sites.push({
+            name: prop.name,
+            at: node,
+            passedType,
+            call
+          });
+        }
+      }
+    }
+    for (const { name, at, passedType, call } of sites) {
+      const passedSource = !!member(passedType, "SOURCE", at);
+      const isColored = colored(passedType, at);
       // D-126: a source or a hole for a held prop, settled or not (Dev,
       // 2026-10-15: native mode widens it, as Solid reads a prop lazily)
       const reactive = passedSource || hole(passedType);
@@ -2234,21 +2263,30 @@ function coloredPropSites(program, active) {
           ? inner.types.filter(ts.isTypeLiteralNode)
           : [inner].filter(ts.isTypeLiteralNode);
       if (!inner && !parent) continue;
-      const name = prop.name.getText();
       // `children` widens where it is declared directly (a literal, ParentProps):
       // in an intersection it is a form the lowering made (a provider's
       // wrapper, ParentComponent), whose children it types itself.
       if (name === "children" && inner && !ts.isTypeLiteralNode(inner)) continue;
       const declared = literals
         .flatMap(literal => [...literal.members])
-        .find(m => ts.isPropertySignature(m) && m.name.getText() === name && m.type);
+        .find(
+          m =>
+            ts.isPropertySignature(m) &&
+            (checker.getSymbolAtLocation(m.name)?.name ?? m.name.getText()) === name &&
+            m.type
+        );
       // one the props type has from elsewhere: an interface's, an alias's
       const elsewhere =
         declared || (parent && name === "children")
           ? undefined
           : checker.getTypeFromTypeNode(argument).getProperty(name);
       const elsewhereType =
-        elsewhere && checker.getNonNullableType(checker.getTypeOfSymbolAtLocation(elsewhere, prop));
+        elsewhere && checker.getNonNullableType(checker.getTypeOfSymbolAtLocation(elsewhere, at));
+      const declaredType =
+        declared && ts.isPropertySignature(declared) && declared.type
+          ? checker.getTypeFromTypeNode(declared.type)
+          : elsewhereType;
+      if (declaredType && checker.isTypeAssignableTo(passedType, declaredType)) continue;
       const getter = elsewhereType?.getCallSignatures();
       const accessor =
         passedSource &&
@@ -2268,7 +2306,7 @@ function coloredPropSites(program, active) {
         const byComponent = /** @type {Map<string, Set<string>>} */ (accessors.get(file));
         const component = /** @type {ts.Identifier} */ (declaration.name).text;
         if (!byComponent.has(component)) byComponent.set(component, new Set());
-        byComponent.get(component)?.add(prop.name.getText());
+        byComponent.get(component)?.add(name);
       }
       if (declared && !accessor) {
         if (!ts.isPropertySignature(declared) || !declared.type) continue;
@@ -2282,7 +2320,7 @@ function coloredPropSites(program, active) {
         if (!bare && member(checker.getTypeFromTypeNode(declared.type), "SOURCE", declared))
           continue;
       } else if (elsewhere && elsewhereType) {
-        if (!accessor && member(elsewhereType, "SOURCE", prop)) continue;
+        if (!accessor && member(elsewhereType, "SOURCE", at)) continue;
         if (!outside.has(file)) outside.set(file, new Map());
         const byComponent = /** @type {Map<string, Map<string, boolean>>} */ (outside.get(file));
         const component = declaration.name.text;
@@ -2303,11 +2341,7 @@ function coloredPropSites(program, active) {
         if (!props.has(component)) props.set(component, new Map());
         const colors = props.get(component);
         const seen = colors?.get(name) ?? { pending: false, fails: new Set() };
-        const passed = colorsOf(
-          checker.getTypeAtLocation(prop.initializer),
-          prop.initializer,
-          declaration
-        );
+        const passed = colorsOf(passedType, at, declaration);
         if (!passed) unprintable.add(`${file}#${component}`);
         else {
           seen.pending ||= passed.pending;
@@ -2404,7 +2438,10 @@ function widenColoredProps(code, filename, components, concrete, accessors, outs
             t.identifier("ReturnType"),
             t.tsTypeParameterInstantiation([type])
           );
-        const member = t.tsPropertySignature(t.identifier(name), t.tsTypeAnnotation(type));
+        const member = t.tsPropertySignature(
+          t.isValidIdentifier(name) ? t.identifier(name) : t.stringLiteral(name),
+          t.tsTypeAnnotation(type)
+        );
         member.optional = optional;
         made.add(member);
       }

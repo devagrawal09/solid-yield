@@ -64,6 +64,90 @@ export function App() { const [n] = createSignal('a'); return <Label text={n()}/
     expect(checked(code)).toEqual([]);
   });
 
+  it.each([
+    ["inline", "return <Body {...{ get value() { return n(); }, label: 'x' }} />;"],
+    [
+      "named",
+      "const props = { get value() { return n(); }, label: 'x' }; return <Body {...props} />;"
+    ]
+  ])("widens reactive getter props from %s spreads", (_, body) => {
+    const { result, code } = lower(`${head}
+function Body(props: {value: number; label: string}) { return <p>{props.value}{props.label}</p>; }
+export function App() { const [n] = createSignal(1); ${body} }`);
+    expect(result.diagnostics).toEqual([]);
+    expect(code).toContain("value: __NativeSource<number, _E_value, _P_value>;");
+    expect(code).toContain("label: string;");
+    expect(code).toContain("yield* props.value");
+    expect(checked(code)).toEqual([]);
+  });
+
+  it("keeps constant getters and overridden getter props held", () => {
+    const { code } = lower(`${head}
+function Body(props: {value: number}) { return <p>{props.value}</p>; }
+export function App() {
+  const [n] = createSignal(1);
+  return <>
+    <Body {...{ get value() { return 2; } }} />
+    <Body {...{ get value() { return n(); } }} value={3} />
+  </>;
+}`);
+    expect(code).not.toContain("__NativeSource");
+    expect(checked(code)).toEqual([]);
+  });
+
+  it("keeps compatible callbacks held while widening another spread prop", () => {
+    const { code } = lower(`${head}
+function Body(props: {value: number; iterate: () => unknown}) { return <p>{props.value}</p>; }
+export function App() { const [n] = createSignal(1); return <Body {...{ get iterate() { return function* () { return 'ok'; }; }, get value() { return n(); } }} />; }`);
+    expect(code).not.toContain("iterate: __NativeSource");
+    expect(checked(code)).toEqual([]);
+  });
+
+  it.each([
+    ["literal", "", '{ "data-value": number }'],
+    ["interface", 'interface Values { "data-value": number }', "Values"]
+  ])("preserves quoted getter keys in a props %s", (_, declaration, type) => {
+    const { code } = lower(`${head}
+${declaration}
+function Body(props: ${type}) { return <p>{props["data-value"]}</p>; }
+export function App() { const [n] = createSignal(1); return <Body {...{ get "data-value"() { return n(); } }} />; }`);
+    expect(code).toContain("__NativeSource<");
+    expect(checked(code)).toEqual([]);
+  });
+
+  it("keeps pending and failing getter spreads visible to boundaries and roots", () => {
+    const child = "<Body {...{ get item() { return item(); } }} />";
+    const source = `${head}
+import {render} from '@solidjs/web';
+function Body(props: {item: {title: string}}) { return <h2>{props.item.title}</h2>; }
+export function App() {
+  const item = createMemo(async () => {
+    if (Math.random() > 0.5) throw new RangeError('bad');
+    return {title: 'ok'};
+  });
+  return ${child};
+}
+render(() => <App/>, document.body);`;
+    const errors = checked(lower(source).code);
+    expect(errors.some(e => e.includes("HELD_PROP"))).toBe(false);
+    expect(errors.some(e => e.includes("PENDING_ROOT"))).toBe(true);
+    expect(errors.some(e => e.includes("RangeError"))).toBe(true);
+    const covered = source.replace(
+      child,
+      `<Errored fallback={() => <p>failed</p>}><Loading fallback={<p>loading</p>}>${child}</Loading></Errored>`
+    );
+    expect(checked(lower(covered).code)).toEqual([]);
+  });
+
+  it("does not hide an incompatible value supplied by a reactive getter", () => {
+    const { code } = lower(`${head}
+function Body(props: {value: number}) { return <p>{props.value}</p>; }
+export function App() { const [text] = createSignal('wrong'); return <Body {...{ get value() { return text(); } }} />; }`);
+    const errors = checked(code);
+    expect(errors.length).toBeGreaterThan(0);
+    expect(errors.some(e => e.includes("string") && e.includes("number"))).toBe(true);
+  });
+
   it("lets a wrapper's own boundaries cover pending children that bind events", () => {
     const { code } = lower(`${head}
 function Panel(props: {title: string; children: JSX.Element}) {

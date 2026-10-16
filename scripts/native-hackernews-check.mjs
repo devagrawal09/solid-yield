@@ -29,14 +29,8 @@ if (step === "typecheck") {
   process.exit(0);
 }
 const { result, program, generated } = generate(dir, step !== "diagnostics");
-const errors = ts.getPreEmitDiagnostics(program);
-const format = () =>
-  ts.formatDiagnostics(errors, {
-    getCurrentDirectory: () => root,
-    getCanonicalFileName: f => f,
-    getNewLine: () => "\n"
-  });
 if (step === "diagnostics") {
+  const errors = ts.getPreEmitDiagnostics(program);
   const snapshot = {
     boundaries: result.diagnostics.map(d => ({ ...d, file: d.file.replace(root + "/", "") })),
     errors: errors.map(d => {
@@ -68,7 +62,6 @@ if (step === "diagnostics") {
 } else {
   assert.equal(result.diagnostics.length, 1);
   assert.equal(result.diagnostics[0].code, "NATIVE_FOREIGN_BOUNDARY");
-  if (step === "typecheck") assert.equal(errors.length, 0, format());
   if (step === "lint") {
     const lintRequire = (await import("node:module")).createRequire(
       join(root, "examples/harness/package.json")

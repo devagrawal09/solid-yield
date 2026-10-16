@@ -749,6 +749,16 @@ if (twins.length !== EXPECTED_TWINS) {
 let steps = buildSteps(twins);
 if (opts.fast) steps = steps.filter(s => s.fast);
 if (opts.only.length) steps = steps.filter(s => opts.only.some(o => s.name.includes(o)));
+// Keep targeted runs available; omit repeated assertions only when their
+// stronger check is also selected.
+const coveredBy = {
+  "native:sierpinski:transform": "native:sierpinski:lint",
+  "native:todos:transform": "native:todos:lint",
+  "native:hackernews:transform": "native:hackernews:lint",
+  "native:dashboard:type-contract": "native:dashboard:diagnostics"
+};
+const selected = new Set(steps.filter(s => !s.skip).map(s => s.name));
+steps = steps.filter(s => !selected.has(coveredBy[s.name]));
 if (!steps.length) fail("no steps selected");
 for (const s of steps) s.command = commandString(s);
 

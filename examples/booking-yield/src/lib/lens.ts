@@ -1,19 +1,25 @@
 // A lens, as a convention: a path to read and the handler that writes it.
 import { $event, type EventHandler, type Path, type Read, type Source } from "solid-yield";
 
-/** `set` is a synchronous event (no wait, no async work): an effect's phase may call it. */
+/**
+ * `set` is a synchronous event (no wait, no async work): an effect's phase may
+ * call it. Its writer mutates the draft or returns the next value, as a
+ * `$store` setter's does: a primitive slice (`focus(range, "checkIn")`) is
+ * written by returning (`set(() => 7)`).
+ */
 export type Slice<S> = {
   readonly at: Path<S>;
-  readonly set: EventHandler<[write: (draft: S) => void], never, unknown, false, false>;
+  readonly set: EventHandler<[write: (draft: S) => S | void], never, unknown, false, false>;
 };
 
 /** Narrow a slice to one key: the path at the key, a setter event over the parent's. */
 export function focus<S, K extends keyof S & string>(part: Slice<S>, key: K): Slice<S[K]> {
   return {
     at: (part.at as unknown as Record<K, Path<S[K]>>)[key],
-    set: $event(function* (write: (draft: S[K]) => void) {
+    set: $event(function* (write: (draft: S[K]) => S[K] | void) {
       yield* part.set(draft => {
-        write(draft[key]);
+        const next = write(draft[key]);
+        if (next !== undefined) draft[key] = next;
       });
     })
   };

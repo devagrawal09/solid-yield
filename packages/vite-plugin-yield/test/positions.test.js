@@ -57,6 +57,10 @@ export function Counter(){
 export function Item(props: {id: string}){
  const [id] = createSignal(props.id);
  return <p>{id()}</p>;
+}
+export function List(){
+ const [first] = createSignal("a");
+ return <Item id={first()}/>;
 }`;
     const result = lowerNativeProject(new Map([[file, source]]));
     const code = result.files.get(file),

@@ -669,6 +669,24 @@ function pass(code, filename, program, native = false) {
     v && checker.getPropertiesOfType(v).some(s => s.name.startsWith(`__@${b}@`));
   /** @param {ts.Type | undefined} v */
   const sourceType = v => brand(v, "SOURCE") || brand(v, "CONTEXT");
+  /** D-126: a `provide` whose context holds its value (not a `Source<…>`
+   * context, whose value is reactive). @param {Path} call */
+  const heldContext = call => {
+    const provide = type(call.get("callee"));
+    const provides = provide
+      ?.getProperties()
+      .find(/** @param {ts.Symbol} s */ s => s.name.startsWith("__@PROVIDES@"));
+    const given = provides && checker.getTypeOfSymbolAtLocation(provides, source);
+    const value = given?.getProperty("value");
+    const held = value && checker.getTypeOfSymbolAtLocation(value, source);
+    return !!held && !(held.flags & ts.TypeFlags.Any) && !brand(held, "SOURCE");
+  };
+  /** D-126: a reactive prop a caller may leave out (`label?:`): a source or
+   * `undefined`. @param {ts.Type | undefined} v */
+  const optionalSource = v =>
+    !!v?.isUnion() &&
+    v.types.some(m => !!(m.flags & ts.TypeFlags.Undefined)) &&
+    v.types.every(m => !!(m.flags & ts.TypeFlags.Undefined) || brand(m, "SOURCE"));
   /** A call to a library setter (`set` of `const [v, set] = yield* $signal(…)`):
    * its receipt's type does not follow its callback's, so a setter given a
    * lexical callback is still delegated, and its write performed.
@@ -1816,6 +1834,33 @@ function pass(code, filename, program, native = false) {
           (path.parentPath.isCallExpression() && path.key === "callee")
         )
           return;
+        if (native && optionalSource(type(path))) {
+          if (
+            path.parentPath.isCallExpression() &&
+            path.parentPath.get("callee").isIdentifier({ name: "__nativeOptional" })
+          )
+            return;
+          // passed on as it is to a component's or a control's prop (D-065)
+          const field = path.parentPath;
+          const call = field.isObjectProperty() ? field.parentPath.parentPath : null;
+          if (call?.isCallExpression() && (control(call) || brand(type(call), "COMPONENT"))) return;
+          delegate(path, t.callExpression(t.identifier("__nativeOptional"), [path.node]));
+          if (p && !p.scope.hasBinding("__nativeOptional")) {
+            p.node.body.unshift(
+              t.importDeclaration(
+                [
+                  t.importSpecifier(
+                    t.identifier("__nativeOptional"),
+                    t.identifier("nativeOptional")
+                  )
+                ],
+                t.stringLiteral("solid-yield/internal")
+              )
+            );
+            p.scope.crawl();
+          }
+          return;
+        }
         if (!sourceType(type(path))) return;
         if (native && path.parentPath.isVariableDeclarator() && path.key === "init") {
           let root = path.get("object");
@@ -1951,16 +1996,23 @@ function pass(code, filename, program, native = false) {
           ["children", "fallback"].includes(key(path.node.key)) &&
           (value.isJSXElement() || value.isJSXFragment());
         if (!reads && !lazyJSX) return;
-        value.replaceWith(
-          t.functionExpression(
-            null,
-            [],
-            t.blockStatement([
-              t.returnStatement(/** @type {import("@babel/core").types.Expression} */ (value.node))
-            ]),
-            true
-          )
-        );
+        const body = t.blockStatement([
+          t.returnStatement(/** @type {import("@babel/core").types.Expression} */ (value.node))
+        ]);
+        // D-126: a held context's value that reads is read where the call
+        // is, in the view around it (a call's props are evaluated there; a
+        // provider reads its value once), as a bare read is (D-122 above):
+        // not a hole, which only a reactive (`Source<…>`) context takes.
+        if (
+          native &&
+          reads &&
+          key(path.node.key) === "value" &&
+          t.isMemberExpression(call.node.callee) &&
+          key(call.node.callee.property) === "provide" &&
+          heldContext(call)
+        )
+          return;
+        value.replaceWith(t.functionExpression(null, [], body, true));
         changed = true;
       }
     },
@@ -2008,9 +2060,11 @@ function pass(code, filename, program, native = false) {
  * failing value. Solid reads a prop lazily, inside the child, so that value's
  * colors are the child's: such a prop is widened to `Source<T, E, P>` with the
  * component's own type parameters (D-029), and each call carries what it passes.
- * Found where TypeScript refuses the call's prop; only a colored source or hole
- * counts, so a genuine type mismatch stays an error. An accessor prop (F-S54:
- * declared `() => T`, given a source) counts too, colored or not.
+ * Found where TypeScript refuses the call's prop; only a source or a hole
+ * counts, so a genuine type mismatch stays an error. Under D-126 a settled one
+ * counts too: a bare type is held and refuses any source or hole (`[HELD_PROP]`),
+ * while Solid reads every prop lazily (Dev, 2026-10-15: widen it). An accessor
+ * prop (F-S54: declared `() => T`, given a source) counts too.
  * @param {ts.Program} program @param {Set<string>} active
  * @returns {{wanted: Map<string, Map<string, Set<string>>>, concrete: Map<string, Map<string, Map<string, {pending: boolean, fails: Set<string>}>>>, accessors: Map<string, Map<string, Set<string>>>}} file → component → props
  */
@@ -2027,6 +2081,10 @@ function coloredPropSites(program, active) {
    * passes a memo or signal getter. They take the value's type, `T`.
    * @type {Map<string, Map<string, Set<string>>>} */
   const accessors = new Map();
+  /** Props declared outside a literal (an interface, an alias, a library's
+   * attributes), by whether each is optional: widened beside the type.
+   * @type {Map<string, Map<string, Map<string, boolean>>>} */
+  const outside = new Map();
   const printer = ts.createPrinter();
   /** @param {ts.VariableDeclaration} declaration @returns {ts.VariableDeclaration | undefined} */
   const lazyTarget = declaration => {
@@ -2102,6 +2160,16 @@ function coloredPropSites(program, active) {
       return !!yields && coloredOps(yields, at);
     });
   };
+  /** A hole: a routine with no parameters (`function* () { … }`).
+   * @param {ts.Type} type */
+  const hole = type =>
+    type
+      .getCallSignatures()
+      .some(
+        sig =>
+          !sig.getParameters().length &&
+          checker.getReturnTypeOfSignature(sig).symbol?.name === "Generator"
+      );
   /** @param {ts.Node} node @param {number} start @returns {ts.Node} */
   const innermost = (node, start) =>
     ts.forEachChild(node, c =>
@@ -2124,7 +2192,10 @@ function coloredPropSites(program, active) {
       const passedType = checker.getTypeAtLocation(prop.initializer);
       const passedSource = !!member(passedType, "SOURCE", prop.initializer);
       const isColored = colored(passedType, prop.initializer);
-      if (!passedSource && !isColored) continue;
+      // D-126: a source or a hole for a held prop, settled or not (Dev,
+      // 2026-10-15: native mode widens it, as Solid reads a prop lazily)
+      const reactive = passedSource || hole(passedType);
+      if (!reactive && !isColored) continue;
       let symbol = checker.getSymbolAtLocation(call.expression);
       if (symbol && symbol.flags & ts.SymbolFlags.Alias) symbol = checker.getAliasedSymbol(symbol);
       let declaration = symbol?.declarations?.find(ts.isVariableDeclaration);
@@ -2155,21 +2226,43 @@ function coloredPropSites(program, active) {
       const parent = alias?.name === "NativeParentProps";
       const inner =
         parent && ts.isTypeReferenceNode(argument) ? argument.typeArguments?.[0] : argument;
-      if (inner && !ts.isTypeLiteralNode(inner)) continue;
+      // The literal a prop is declared in: the props type's own, or one of an
+      // intersection's (`JSX.ButtonHTMLAttributes<…> & { label: string }`).
+      const literals = !inner
+        ? []
+        : ts.isIntersectionTypeNode(inner)
+          ? inner.types.filter(ts.isTypeLiteralNode)
+          : [inner].filter(ts.isTypeLiteralNode);
       if (!inner && !parent) continue;
       const name = prop.name.getText();
-      const declared = inner?.members.find(
-        m => ts.isPropertySignature(m) && m.name.getText() === name && m.type
-      );
+      // `children` widens where it is declared directly (a literal, ParentProps):
+      // in an intersection it is a form the lowering made (a provider's
+      // wrapper, ParentComponent), whose children it types itself.
+      if (name === "children" && inner && !ts.isTypeLiteralNode(inner)) continue;
+      const declared = literals
+        .flatMap(literal => [...literal.members])
+        .find(m => ts.isPropertySignature(m) && m.name.getText() === name && m.type);
+      // one the props type has from elsewhere: an interface's, an alias's
+      const elsewhere =
+        declared || (parent && name === "children")
+          ? undefined
+          : checker.getTypeFromTypeNode(argument).getProperty(name);
+      const elsewhereType =
+        elsewhere && checker.getNonNullableType(checker.getTypeOfSymbolAtLocation(elsewhere, prop));
+      const getter = elsewhereType?.getCallSignatures();
       const accessor =
         passedSource &&
-        !!declared &&
-        ts.isPropertySignature(declared) &&
-        !!declared.type &&
-        ts.isFunctionTypeNode(declared.type) &&
-        !declared.type.parameters.length &&
-        !declared.type.typeParameters;
-      if (!accessor && !isColored) continue;
+        (declared
+          ? ts.isPropertySignature(declared) &&
+            !!declared.type &&
+            ts.isFunctionTypeNode(declared.type) &&
+            !declared.type.parameters.length &&
+            !declared.type.typeParameters
+          : getter?.length === 1 &&
+            !getter[0].getParameters().length &&
+            !getter[0].getTypeParameters()?.length &&
+            checker.getReturnTypeOfSignature(getter[0]).symbol?.name !== "Generator");
+      if (!accessor && !isColored && !reactive) continue;
       if (accessor) {
         if (!accessors.has(file)) accessors.set(file, new Map());
         const byComponent = /** @type {Map<string, Set<string>>} */ (accessors.get(file));
@@ -2188,6 +2281,13 @@ function coloredPropSites(program, active) {
           declared.type.typeArguments?.[2]?.getText() === "false";
         if (!bare && member(checker.getTypeFromTypeNode(declared.type), "SOURCE", declared))
           continue;
+      } else if (elsewhere && elsewhereType) {
+        if (!accessor && member(elsewhereType, "SOURCE", prop)) continue;
+        if (!outside.has(file)) outside.set(file, new Map());
+        const byComponent = /** @type {Map<string, Map<string, boolean>>} */ (outside.get(file));
+        const component = declaration.name.text;
+        if (!byComponent.has(component)) byComponent.set(component, new Map());
+        byComponent.get(component)?.set(name, !!(elsewhere.flags & ts.SymbolFlags.Optional));
       } else if (!accessor && !(parent && name === "children")) continue;
       if (!wanted.has(file)) wanted.set(file, new Map());
       const components = /** @type {Map<string, Set<string>>} */ (wanted.get(file));
@@ -2221,14 +2321,17 @@ function coloredPropSites(program, active) {
     const [file, component] = [id.slice(0, id.lastIndexOf("#")), id.slice(id.lastIndexOf("#") + 1)];
     concrete.get(file)?.delete(component);
   }
-  return { wanted, concrete, accessors };
+  return { wanted, concrete, accessors, outside };
 }
 /** D-119: widen the recorded props, with the component's own type parameters,
  * or (a component reached through `lazy`) with the colors its callers pass.
  * @param {string} code @param {string} filename @param {Map<string, Set<string>>} components
  * @param {Map<string, Map<string, {pending: boolean, fails: Set<string>}>>} [concrete]
- * @param {Map<string, Set<string>>} [accessors] */
-function widenColoredProps(code, filename, components, concrete, accessors) {
+ * @param {Map<string, Set<string>>} [accessors]
+ * @param {Map<string, Map<string, boolean>>} [outside] props the type has from
+ * elsewhere (an interface's), by whether each is optional: the type becomes
+ * `Omit<P, k> & { k: Source<P["k"], …> }`. */
+function widenColoredProps(code, filename, components, concrete, accessors, outside) {
   const p = parseProgram(code, filename);
   if (!p) return code;
   let changed = false;
@@ -2275,12 +2378,41 @@ function widenColoredProps(code, filename, components, concrete, accessors) {
         if (annotation && t.isTSTypeReference(annotation) && annotation.typeParameters)
           annotation.typeParameters.params[0] = literal;
       }
-      if (!typed || !annotation || !t.isTSTypeLiteral(literal)) return;
+      const literals = t.isTSIntersectionType(literal)
+        ? literal.types.filter(part => t.isTSTypeLiteral(part))
+        : [literal].filter(part => t.isTSTypeLiteral(part));
+      const elsewhere = outside?.get(key(q.node.id));
+      if (!typed || !annotation || !literal || (!literals.length && !elsewhere?.size)) return;
+      // A prop the type has from elsewhere is declared beside it, as its own
+      // type (`P["k"]`, an accessor's result `ReturnType<…>`), and widened as
+      // a literal's is.
+      const whole = literal;
+      /** @type {Set<any>} */ const made = new Set();
+      for (const [name, optional] of elsewhere ?? []) {
+        /** @type {import("@babel/core").types.TSType} */
+        let type = t.tsIndexedAccessType(
+          t.cloneNode(whole, true),
+          t.tsLiteralType(t.stringLiteral(name))
+        );
+        if (optional)
+          type = t.tsTypeReference(
+            t.identifier("Exclude"),
+            t.tsTypeParameterInstantiation([type, t.tsUndefinedKeyword()])
+          );
+        if (accessors?.get(key(q.node.id))?.has(name))
+          type = t.tsTypeReference(
+            t.identifier("ReturnType"),
+            t.tsTypeParameterInstantiation([type])
+          );
+        const member = t.tsPropertySignature(t.identifier(name), t.tsTypeAnnotation(type));
+        member.optional = optional;
+        made.add(member);
+      }
       const parameters = t.isTSTypeParameterDeclaration(fn.typeParameters)
         ? fn.typeParameters.params
         : [];
       let widened = false;
-      for (const declared of literal.members) {
+      for (const declared of [...literals.flatMap(part => part.members), ...made]) {
         if (!t.isTSPropertySignature(declared) || !declared.typeAnnotation) continue;
         const name = key(declared.key);
         if (!props.has(name)) continue;
@@ -2292,11 +2424,13 @@ function widenColoredProps(code, filename, components, concrete, accessors) {
         const getterResult = getter.typeAnnotation ?? getter.returnType;
         if (
           accessors?.get(key(q.node.id))?.has(name) &&
-          t.isTSFunctionType(own) &&
-          !(getter.parameters ?? getter.params ?? []).length &&
-          t.isTSTypeAnnotation(getterResult)
+          (made.has(declared) ||
+            (t.isTSFunctionType(own) &&
+              !(getter.parameters ?? getter.params ?? []).length &&
+              t.isTSTypeAnnotation(getterResult)))
         ) {
-          declared.typeAnnotation.typeAnnotation = getterResult.typeAnnotation;
+          if (!made.has(declared))
+            declared.typeAnnotation.typeAnnotation = getterResult.typeAnnotation;
           const holder = t.isIdentifier(param) ? param.name : null;
           if (holder)
             q.get("init").traverse({
@@ -2356,6 +2490,19 @@ function widenColoredProps(code, filename, components, concrete, accessors) {
           t.tsTypeParameter(t.tsBooleanKeyword(), null, pending)
         );
         changed = widened = true;
+      }
+      if (made.size && t.isTSTypeReference(annotation) && annotation.typeParameters) {
+        annotation.typeParameters.params[0] = t.tsIntersectionType([
+          t.tsTypeReference(
+            t.identifier("Omit"),
+            t.tsTypeParameterInstantiation([
+              whole,
+              t.tsUnionType([...made].map(m => t.tsLiteralType(t.stringLiteral(key(m.key)))))
+            ])
+          ),
+          t.tsTypeLiteral([...made])
+        ]);
+        changed = true;
       }
       // F-S49: a generic setup takes the plain call, whose hole props would
       // require nothing; one requirement parameter, inferred per call from
@@ -2453,6 +2600,102 @@ function typedCreations(code, filename, program) {
     }
   });
   return changed ? printer(t.file(p.node)) : code;
+}
+/**
+ * D-126 in native mode: a prop a caller passes a source or a hole is reactive
+ * (widened to `Source<T, E, P>`, D-119), and a caller that passes a plain
+ * value gives Solid's plain value, which the library takes as `constant(v)`.
+ * Found where TypeScript refuses it (`[REACTIVE_PROP]`).
+ * @param {string} code @param {string} filename @param {ts.Program} program
+ */
+function constantProps(code, filename, program) {
+  const source = program.getSourceFile(filename);
+  if (!source || source.text !== code) return code;
+  /** @param {ts.Node} node @param {number} start @returns {ts.Node} */
+  const innermost = (node, start) =>
+    ts.forEachChild(node, c =>
+      c.getStart(source) <= start && start < c.end ? innermost(c, start) : undefined
+    ) ?? node;
+  /** @type {Set<number>} where each value to take as a constant starts */
+  const values = new Set();
+  for (const d of program.getSemanticDiagnostics(source)) {
+    if (d.start === undefined) continue;
+    if (!ts.flattenDiagnosticMessageText(d.messageText, "\n").includes("[REACTIVE_PROP]")) continue;
+    /** @type {ts.Node | undefined} */ let node = innermost(source, d.start);
+    while (node && !ts.isPropertyAssignment(node) && !ts.isShorthandPropertyAssignment(node))
+      node = ts.isSourceFile(node) ? undefined : node.parent;
+    if (!node || !ts.isObjectLiteralExpression(node.parent)) continue;
+    if (!ts.isCallExpression(node.parent.parent)) continue;
+    values.add((ts.isPropertyAssignment(node) ? node.initializer : node.name).getStart(source));
+  }
+  if (!values.size) return code;
+  const p = parseProgram(code, filename);
+  if (!p) return code;
+  let changed = false;
+  let constant = false;
+  p.traverse({
+    ObjectProperty(path) {
+      const value = path.node.value;
+      if (!t.isExpression(value) || !values.has(value.start ?? -1)) return;
+      // already a constant, or a hole (refused for what it does, as a
+      // write): what is left is the value's own error
+      if (
+        (t.isCallExpression(value) && t.isIdentifier(value.callee, { name: "__nativeConstant" })) ||
+        (t.isFunctionExpression(value) && value.generator)
+      )
+        return;
+      path.node.shorthand = false;
+      const [phase, body] = t.isCallExpression(value) ? value.arguments : [];
+      // A getter (`count={() => 2}` where another caller passes a signal):
+      // Solid calls it where the prop is read, as a hole runs. One that reads
+      // is lowered already, as a lexical callback of a hole: it is that hole.
+      if (
+        t.isCallExpression(value) &&
+        t.isIdentifier(value.callee, { name: "__nativeLexicalCallback" }) &&
+        value.arguments.length === 2 &&
+        t.isStringLiteral(phase, { value: "hole" }) &&
+        t.isFunctionExpression(body) &&
+        body.generator &&
+        !body.params.length
+      )
+        path.get("value").replaceWith(body);
+      else if (
+        (t.isArrowFunctionExpression(value) || t.isFunctionExpression(value)) &&
+        !value.params.length &&
+        !value.async &&
+        !value.generator
+      )
+        path
+          .get("value")
+          .replaceWith(
+            t.functionExpression(
+              null,
+              [],
+              t.isBlockStatement(value.body)
+                ? value.body
+                : t.blockStatement([t.returnStatement(value.body)]),
+              true
+            )
+          );
+      else {
+        path
+          .get("value")
+          .replaceWith(t.callExpression(t.identifier("__nativeConstant"), [t.cloneNode(value)]));
+        constant = true;
+      }
+      path.skip();
+      changed = true;
+    }
+  });
+  if (!changed) return code;
+  if (constant && !p.scope.hasBinding("__nativeConstant"))
+    p.node.body.unshift(
+      t.importDeclaration(
+        [t.importSpecifier(t.identifier("__nativeConstant"), t.identifier("constant"))],
+        t.stringLiteral("solid-yield")
+      )
+    );
+  return printer(t.file(p.node));
 }
 /**
  * D-116's capture rule: a source given where plain code takes an accessor (a
@@ -3016,14 +3259,15 @@ function lowerSugarProjectImpl(input, { compilerOptions = {}, native = false, ro
         files.set(id, code);
       }
     if (!changed && native) {
-      const { wanted, concrete, accessors } = coloredPropSites(program, active);
+      const { wanted, concrete, accessors, outside } = coloredPropSites(program, active);
       for (const [id, components] of wanted) {
         const code = widenColoredProps(
           files.get(id) ?? "",
           id,
           components,
           concrete.get(id),
-          accessors.get(id)
+          accessors.get(id),
+          outside.get(id)
         );
         changed ||= code !== files.get(id);
         files.set(id, code);
@@ -3032,6 +3276,12 @@ function lowerSugarProjectImpl(input, { compilerOptions = {}, native = false, ro
     if (!changed && native)
       for (const id of active) {
         const code = accessorArguments(files.get(id) ?? "", id, program);
+        changed ||= code !== files.get(id);
+        files.set(id, code);
+      }
+    if (!changed && native)
+      for (const id of active) {
+        const code = constantProps(files.get(id) ?? "", id, program);
         changed ||= code !== files.get(id);
         files.set(id, code);
       }

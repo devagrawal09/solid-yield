@@ -9,7 +9,8 @@ import {
   Loading,
   readStore,
   Show,
-  type Props
+  type Props,
+  type Source
 } from "solid-yield";
 import { createTodos, type Todo } from "./todos";
 import { hashFilter, type Filter } from "./filter";
@@ -56,7 +57,7 @@ const Header = function Header() {
 };
 const TodoItem = function TodoItem(
   props: Props<{
-    todo: Todo;
+    todo: Source<Todo>;
   }>
 ) {
   const { toggleTodo, removeTodo, retryTodo } = useTodos();
@@ -96,7 +97,7 @@ const TodoItem = function TodoItem(
 };
 const MainSection = function MainSection(
   props: Props<{
-    filter: Filter;
+    filter: Source<Filter>;
   }>
 ) {
   const { todos, toggleAll } = useTodos();
@@ -150,7 +151,7 @@ const MainSection = function MainSection(
 };
 const Footer = function Footer(
   props: Props<{
-    filter: Filter;
+    filter: Source<Filter>;
   }>
 ) {
   const { todos, clearCompleted } = useTodos();
@@ -213,7 +214,7 @@ const Footer = function Footer(
 };
 const TodoApp = function TodoApp(
   props: Props<{
-    filter: Filter;
+    filter: Source<Filter>;
   }>
 ) {
   return (

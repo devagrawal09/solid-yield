@@ -21,7 +21,8 @@ export default () => { const [n] = createSignal(1); return <p>{n()}</p>; };`);
   it("names an arrow with an expression body and props", () => {
     const code = lower(`export default (props: {label: string}) => <p>{props.label}</p>;`);
     expect(code).toContain("const Profile = component(function* Profile(props");
-    expect(code).toContain("yield* props.label");
+    // Held (D-126): no caller in the project passes it a live value.
+    expect(code).toContain("<p>{props.label}</p>");
   });
 
   it("names an anonymous function declaration", () => {

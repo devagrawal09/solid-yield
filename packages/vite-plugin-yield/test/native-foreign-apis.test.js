@@ -358,14 +358,36 @@ export function App() { return <p>{counter[0]()}</p>; }`
       expect(diagnostics.map(d => [d.code, d.line])).toEqual([["MODULE_STATE", 2]]);
     });
 
-    it("a DOM spread with sources or events goes through the bridge, read where Solid spreads", () => {
+    it("a DOM spread of held props is Solid's; one with a widened prop goes through the bridge", () => {
       const file = resolve(base, "../foreign-apis-spread.tsx");
-      const { files } = lowerNativeProject(
+      const held = lowerNativeProject(
         new Map([[file, programs.find(([name]) => name === "dom-spread-props")[1]]])
+      ).files.get(file);
+      expect(held).toContain("<div {...props}>box</div>");
+      expect(held).not.toContain("__nativeSpread");
+      const { files } = lowerNativeProject(
+        new Map([
+          [
+            file,
+            `import { createSignal, omit } from "solid-js";
+export function Box(props: { title: string; class?: string }) {
+  return <div {...props}>box</div>;
+}
+export function Button(props: { title: string; label: string }) {
+  return <button {...omit(props, "label")}>{props.label}</button>;
+}
+export function App() {
+  const [n] = createSignal(0);
+  return <><Box title={String(n())} /><Button title="t" label={String(n())} /></>;
+}`
+          ]
+        ])
       );
       const code = files.get(file);
+      // Box's title is live (a caller passes a read): its spread reads it.
       expect(code).toContain("yield* __nativeSpread(props)");
-      expect(code).toMatch(/yield\* __nativeSpread\(omit\(props, "label"\)\)/);
+      // Button's spread leaves the live label out: what is left is held.
+      expect(code).toContain('<button {...omit(props, "label")}>{yield* props.label}</button>');
     });
   }
 );

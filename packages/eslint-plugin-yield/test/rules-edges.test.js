@@ -47,36 +47,39 @@ describe("every rule's metadata", () => {
   it("names each rule's kind", () => {
     expect(Object.fromEntries(Object.entries(rules).map(([name, rule]) => [name, rule.meta.type])))
       .toMatchInlineSnapshot(`
-      {
-        "component-call-yielded": "problem",
-        "component-children-generator": "problem",
-        "jsx-only-in-view": "problem",
-        "no-component-tag": "problem",
-        "no-dollar-block": "problem",
-        "no-foreign-reactive": "problem",
-        "no-path-object-use": "problem",
-        "no-read-in-prop": "problem",
-        "no-read-in-setup": "problem",
-        "no-read-in-view-body": "problem",
-        "no-throw": "problem",
-        "no-try-catch": "problem",
-        "no-unbound-event": "problem",
-        "no-unchecked-foreign-handoff": "problem",
-        "no-unshown-wait": "suggestion",
-        "no-unyielded-write": "problem",
-        "read-before-attempt": "problem",
-        "require-jsx-factory": "suggestion",
-        "require-view-wrapper": "problem",
-        "yield-in-jsx-hole": "problem",
-      }
-    `);
+        {
+          "component-call-yielded": "problem",
+          "component-children-generator": "problem",
+          "jsx-only-in-view": "problem",
+          "no-component-tag": "problem",
+          "no-dollar-block": "problem",
+          "no-event-outside-routine": "suggestion",
+          "no-foreign-reactive": "problem",
+          "no-path-object-use": "problem",
+          "no-read-in-prop": "problem",
+          "no-read-in-setup": "problem",
+          "no-read-in-view-body": "problem",
+          "no-throw": "problem",
+          "no-try-catch": "problem",
+          "no-unbound-event": "problem",
+          "no-unchecked-foreign-handoff": "problem",
+          "no-unshown-wait": "suggestion",
+          "no-unyielded-write": "problem",
+          "read-before-attempt": "problem",
+          "require-jsx-factory": "suggestion",
+          "require-view-wrapper": "problem",
+          "yield-in-jsx-hole": "problem",
+        }
+      `);
   });
-  it("recommended turns every rule on, two as warnings", () => {
+  it("recommended turns every rule on, three as warnings", () => {
     expect(plugin.configs.recommended.rules).toEqual(
       Object.fromEntries(
         Object.keys(rules).map(name => [
           `solid-yield/${name}`,
-          ["no-unshown-wait", "require-jsx-factory"].includes(name) ? "warn" : "error"
+          ["no-unshown-wait", "require-jsx-factory", "no-event-outside-routine"].includes(name)
+            ? "warn"
+            : "error"
         ])
       )
     );
@@ -926,13 +929,16 @@ const advice = {
       "a plain `yield*` where the host does not track: an `$event`, or an `$effect`'s effect phase"
   },
   "@solidjs/router": {
-    useLocation: "the route component's props (`yield* props.location…`, `yield* props.params…`)",
-    useParams: "the route component's props (`yield* props.location…`, `yield* props.params…`)",
+    useLocation:
+      "the route component's props (`props.location…`, `props.params…`: held, read where they are read, D-126)",
+    useParams:
+      "the route component's props (`props.location…`, `props.params…`: held, read where they are read, D-126)",
     useSearchParams:
-      "the route component's props (`yield* props.location…`, `yield* props.params…`)",
-    useMatch: "the route component's props (`yield* props.location…`, `yield* props.params…`)",
+      "the route component's props (`props.location…`, `props.params…`: held, read where they are read, D-126)",
+    useMatch:
+      "the route component's props (`props.location…`, `props.params…`: held, read where they are read, D-126)",
     useCurrentMatches:
-      "the route component's props (`yield* props.location…`, `yield* props.params…`)",
+      "the route component's props (`props.location…`, `props.params…`: held, read where they are read, D-126)",
     useIsRouting: null,
     useSubmission: null,
     useSubmissions: null,
@@ -1166,6 +1172,8 @@ const memoOf = expr =>
   `const m = yield* $memo(function* () { return ${expr}; }); return view(function* () { return <p />; });`;
 tester.run("no-path-object-use (edges)", rules["no-path-object-use"], {
   valid: [
+    // D-126: without types a props key may be a held value (a constant, a bag): not reported
+    `const C = component(function* (props = {}) { ${memoOf("props.a == 1 || props.b != 2 || 1 === props.c")} });`,
     // not paths: another parameter of a setup, a memo's parameter, a plain function's
     `const C = component(function* (props, other) { ${memoOf("other.x === 1")} });`,
     `const m = $memo(function* (prev) { return prev.a === 1; });`,
@@ -1185,15 +1193,6 @@ tester.run("no-path-object-use (edges)", rules["no-path-object-use"], {
     `const C = component(function* () { const [s] = yield* $store({ a: 1 }); ${memoOf("obj.JSON.stringify(s)")} });`
   ],
   invalid: [
-    {
-      // a defaulted props parameter; == and != too; the path on the right
-      code: `const C = component(function* (props = {}) { ${memoOf("props.a == 1 || props.b != 2 || 1 === props.c")} });`,
-      errors: [
-        { messageId: "compare", data: { text: "props.a" } },
-        { messageId: "compare", data: { text: "props.b" } },
-        { messageId: "compare", data: { text: "props.c" } }
-      ]
-    },
     {
       // through TypeScript's wrappers and optional chaining; an optimistic store
       code: `const C = component(function* () { const [s] = yield* $optimisticStore({ a: 1 }); ${memoOf("s! === 1 || (s as any) === 1 || s?.a === 1 || s.a! === 1")} });`,
@@ -1586,6 +1585,50 @@ typedTester.run("no-unshown-wait (names)", rules["no-unshown-wait"], {
         waitDecls +
         "declare const anEventHandlerNameOfExactlyFortyChars123: typeof waits;\nfunction* v() { return <b onClick={yield* anEventHandlerNameOfExactlyFortyChars123} />; }",
       errors: [{ messageId: "wait", data: { name: "anEventHandlerNameOfExactlyFortyChars123" } }]
+    }
+  ]
+});
+
+const eventDecl =
+  'import { $event, $effect } from "solid-yield";\nconst save = $event(function* () {});\n';
+tester.run("no-event-outside-routine", rules["no-event-outside-routine"], {
+  valid: [
+    // routine code calls it, or a callback run at once inside one
+    eventDecl + "const e = $event(function* () { yield* save(); });",
+    eventDecl + "const e = $event(function* () { [1, 2].forEach(() => save()); });",
+    // a timer that calls something else, or hands the handler on uncalled
+    eventDecl + "setTimeout(() => other(), 0);",
+    eventDecl + "setTimeout(() => save, 0);",
+    // not an $event
+    "const save = make();\nsetTimeout(() => save(), 0);",
+    "let save;\nsave = $event(function* () {});\nsetTimeout(() => save(), 0);",
+    // a computed or unknown scheduler is not looked through
+    eventDecl + 'timers["setTimeout"](() => save(), 0);',
+    eventDecl + "make()(() => save());",
+    eventDecl + "schedule(() => save());"
+  ],
+  invalid: [
+    {
+      code: eventDecl + "setTimeout(() => save(), 0);",
+      errors: [{ messageId: "outside", data: { name: "save", where: "setTimeout" } }]
+    },
+    {
+      code: eventDecl + 'el.addEventListener("click", () => { [1].forEach(() => save()); });',
+      errors: [{ messageId: "outside", data: { name: "save", where: "addEventListener" } }]
+    },
+    {
+      code: eventDecl + "fetch(url).then(() => save());",
+      errors: [{ messageId: "outside", data: { name: "save", where: "then" } }]
+    },
+    {
+      // inside an event, a timer's callback still runs after it
+      code: eventDecl + "const e = $event(function* () { queueMicrotask(() => save()); });",
+      errors: [{ messageId: "outside", data: { name: "save", where: "queueMicrotask" } }]
+    },
+    {
+      // imported under another name
+      code: 'import { $event as ev } from "solid-yield";\nconst save = ev(function* () {});\nrequestAnimationFrame(function () { save(); });',
+      errors: [{ messageId: "outside", data: { name: "save", where: "requestAnimationFrame" } }]
     }
   ]
 });

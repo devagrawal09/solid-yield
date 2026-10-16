@@ -90,7 +90,7 @@ export function render(url: string) {
     // (D-119), so the root, not the Shell, reports them.
     expect(result.files.get(shell)).toMatch(/children\?: __NativeSource</);
     const errors = checked(result.files).join("\n");
-    expect(errors).not.toMatch(/SETTLED_PROP/);
+    expect(errors).not.toMatch(/SETTLED_PROP|HELD_PROP|REACTIVE_PROP/);
     expect(errors).toMatch(/PENDING_ROOT/);
     expect(errors).toMatch(/FOREIGN_HANDOFF[^]*chunk/);
   });

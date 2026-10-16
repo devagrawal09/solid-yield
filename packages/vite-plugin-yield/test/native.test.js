@@ -29,8 +29,17 @@ describe("native front end", { timeout: 30_000 }, () => {
     const out = lower(`function Child(p:{n:number}){return <p>{p.n}</p>;}
       export function App(){return <Child n={1}/>;}`);
     expect(out).toContain("Props<");
-    expect(out).toContain("yield* p.n");
+    expect(out).toContain("<p>{p.n}</p>");
     expect(out).toContain("yield* Child({");
+  });
+  it("widens a typed prop a caller gives a reactive value; its constants are held as constants", () => {
+    const out =
+      lower(`import {createSignal} from 'solid-js'; function Child(p:{n:number}){return <p>{p.n}</p>;}
+      export function App(){const [n]=createSignal(0); return <><Child n={n()}/><Child n={2}/></>;}`);
+    expect(out).toContain("n: __NativeSource<number, _E_n, _P_n>;");
+    expect(out).toContain("<p>{yield* p.n}</p>");
+    expect(out).toContain("n: __nativeConstant(2)");
+    expect(out).toContain('import { constant as __nativeConstant } from "solid-yield";');
   });
   it("leaves a capitalized plain helper's value contract alone", () => {
     const out = lower(`export function Value(p: {n: number}) { return p.n + 1; }`);
@@ -46,7 +55,7 @@ describe("native front end", { timeout: 30_000 }, () => {
       ])
     ).files;
     expect(out.get(id)).toContain("yield* Child({");
-    expect(out.get(child)).toContain("yield* p.n");
+    expect(out.get(child)).toContain("<p>{p.n}</p>");
   });
   it("refuses an event receiver whose binding would change", () => {
     expect(() =>

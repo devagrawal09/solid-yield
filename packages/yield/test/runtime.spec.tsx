@@ -3559,43 +3559,27 @@ describe("D-020: an event called from an event joins its transaction", () => {
   });
 });
 
-describe("D-126: an event is called by routine code or by the DOM (EVENT_OUTSIDE_RUN, D-028 for events)", () => {
-  devIt("called from a timer: EVENT_OUTSIDE_RUN at the call", async () => {
-    let save!: () => unknown;
+describe("D-126: an event called with no routine running runs, as Solid's action does (a lint warning, not an error)", () => {
+  it("called from a timer and from a promise callback, it runs", async () => {
+    const calls: string[] = [];
+    let save!: (from: string) => unknown;
     const App = component(function* App() {
-      save = $event(function* save() {});
+      save = $event(function* save(from: string) {
+        calls.push(from);
+      });
       return view(function* () {
         return <i />;
       });
     });
     mount(App);
-    const thrown = await new Promise<unknown>(done =>
+    await new Promise<void>(done =>
       setTimeout(() => {
-        try {
-          save();
-          done(null);
-        } catch (e) {
-          done(e);
-        }
+        save("timer");
+        done();
       }, 0)
     );
-    expect(String(thrown)).toMatch(
-      /\[EVENT_OUTSIDE_RUN\] the \$event save of <App> called outside a routine: an event is called with yield\* save\(x\) in an \$event or an \$effect, or by the DOM where a view binds it/
-    );
-  });
-
-  devIt("called from a promise callback: EVENT_OUTSIDE_RUN rejects the chain", async () => {
-    let save!: () => unknown;
-    const App = component(function* App() {
-      save = $event(function* () {});
-      return view(function* () {
-        return <i />;
-      });
-    });
-    mount(App);
-    await expect(Promise.resolve().then(() => save())).rejects.toThrow(
-      /\[EVENT_OUTSIDE_RUN\] an \$event of <App> called outside a routine/
-    );
+    await Promise.resolve().then(() => save("promise"));
+    expect(calls).toEqual(["timer", "promise"]);
   });
 
   it("a DOM dispatch through a bind, a call from another event and an effect phase still call it", async () => {

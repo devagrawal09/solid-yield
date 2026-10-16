@@ -365,29 +365,32 @@ export function inferFailures(
   const valuesCall = (id, steps, owner) => {
     const values = id && contextValues(id);
     if (!values?.length) return null;
-    const effects = values.map(root => {
-      let container = root;
-      for (const step of steps.slice(0, -1)) {
-        if (typeof step === "number") {
-          if (!container?.isArrayExpression()) return null;
-          container = container.get(`elements.${step}`);
-        } else {
-          const prop = container?.isObjectExpression()
-            ? container
-                .get("properties")
-                .find(p => p.isObjectProperty() && !p.node.computed && name(p.node.key) === step)
-            : null;
-          container = prop?.get("value") ?? null;
-        }
-      }
-      const last = steps.at(-1);
-      return typeof last === "number"
-        ? container?.isArrayExpression()
-          ? valueCall(container.get(`elements.${last}`), owner)
-          : null
-        : memberCall(container, last, owner);
-    });
+    const effects = values.map(root => callAt(root, steps, owner));
     return effects.every(Boolean) ? union(...effects) : null;
+  };
+  /** What calling the member `steps` names inside `root` (an object or array
+   * literal) fails with, or `null` when one is not known. */
+  const callAt = (root, steps, owner) => {
+    let container = root;
+    for (const step of steps.slice(0, -1)) {
+      if (typeof step === "number") {
+        if (!container?.isArrayExpression()) return null;
+        container = container.get(`elements.${step}`);
+      } else {
+        const prop = container?.isObjectExpression()
+          ? container
+              .get("properties")
+              .find(p => p.isObjectProperty() && !p.node.computed && name(p.node.key) === step)
+          : null;
+        container = prop?.get("value") ?? null;
+      }
+    }
+    const last = steps.at(-1);
+    return typeof last === "number"
+      ? container?.isArrayExpression()
+        ? valueCall(container.get(`elements.${last}`), owner)
+        : null
+      : memberCall(container, last, owner);
   };
   /** F-S45: the context an expression reaches into and the keys and indices
    * from its value: through names destructured from it or declared from a
@@ -420,6 +423,97 @@ export function inferFailures(
   const contextMember = (callee, owner) => {
     const at = contextAt(callee);
     return at?.steps.length ? valuesCall(at.id, at.steps, owner) : null;
+  };
+  /** D-126: the component whose props an expression reaches into, and the
+   * keys from its props: `props.onPick`, a name destructured in the
+   * parameter, or one declared from either (`const { onPick } = props`). */
+  const propsAt = (p, depth = 0) => {
+    if (!p?.node || depth > 8) return null;
+    if (p.isMemberExpression()) {
+      const chain = chainSteps(p);
+      const at = chain && propsAt(chain.base, depth + 1);
+      return at && { fn: at.fn, steps: [...at.steps, ...chain.steps] };
+    }
+    if (!p.isIdentifier()) return null;
+    const binding = p.scope.getBinding(p.node.name);
+    if (!binding?.constant) return null;
+    if (binding.path.isVariableDeclarator()) {
+      const declarator = binding.path;
+      const steps =
+        declarator.node.id === binding.identifier
+          ? []
+          : patternPath(declarator.node.id, binding.identifier);
+      const at = steps && propsAt(declarator.get("init"), depth + 1);
+      return at && { fn: at.fn, steps: [...at.steps, ...steps] };
+    }
+    if (binding.kind !== "param" || binding.path.listKey !== "params" || binding.path.key !== 0)
+      return null;
+    const fn = functions.find(f => f.path.node === binding.path.parentPath?.node);
+    const steps = patternPath(binding.path.node, binding.identifier);
+    return fn?.component && steps ? { fn, steps } : null;
+  };
+  /** D-126: each JSX element rendering a component, or `null` when the
+   * component is named anywhere but a tag (handed on: not every caller is seen). */
+  const renders = new Map();
+  const rendersOf = fn => {
+    if (renders.has(fn.id)) return renders.get(fn.id);
+    /** @type {any[] | null} */ let sites = [];
+    const names = [];
+    const own = fn.path.isFunctionDeclaration()
+      ? fn.path.node.id
+      : fn.path.parentPath.isVariableDeclarator() && fn.path.parentPath.node.init === fn.path.node
+        ? fn.path.parentPath.node.id
+        : null;
+    if (own?.type === "Identifier") names.push(fn.path.parentPath.scope.getBinding(own.name));
+    else if (!fn.path.parentPath.isExportDefaultDeclaration()) sites = null;
+    for (const [, record] of analysis.modules)
+      for (const statement of record.program.get("body")) {
+        if (!statement.isImportDeclaration()) continue;
+        for (const specifier of statement.get("specifiers"))
+          if (target(specifier.get("local")) === fn)
+            names.push(specifier.scope.getBinding(specifier.node.local.name));
+      }
+    for (const binding of names) {
+      if (!sites || !binding?.constant) {
+        sites = null;
+        break;
+      }
+      for (const ref of binding.referencePaths) {
+        const at = ref.parentPath;
+        if (at.isJSXOpeningElement() && at.node.name === ref.node) sites.push(at);
+        else if (!at.isJSXClosingElement() && !at.isExportSpecifier()) {
+          sites = null;
+          break;
+        }
+      }
+    }
+    if (sites && !sites.length) sites = null;
+    renders.set(fn.id, sites);
+    return sites;
+  };
+  /** D-126: a call through a held prop (`props.onPick(1)`): what each value
+   * the component's callers pass for it fails with when called, or `null`
+   * when one is not known (a spread, a value not followed, a caller not seen). */
+  const propMember = (callee, owner, depth = 0) => {
+    const at = depth < 8 && propsAt(callee);
+    const [prop, ...rest] = at?.steps ?? [];
+    if (typeof prop !== "string") return null;
+    const sites = rendersOf(at.fn);
+    if (!sites) return null;
+    const effects = sites.map(site => {
+      const attributes = site.get("attributes");
+      if (attributes.some(a => a.isJSXSpreadAttribute())) return null;
+      const attribute = attributes.find(a => name(a.node.name) === prop);
+      // Not passed: the prop is optional, and the call is guarded.
+      if (!attribute) return new Set();
+      const value = attribute.get("value");
+      if (!value.isJSXExpressionContainer()) return null;
+      const passed = value.get("expression");
+      return rest.length
+        ? callAt(passed, rest, owner)
+        : (valueCall(passed, owner) ?? propMember(passed, owner, depth + 1));
+    });
+    return effects.every(Boolean) ? union(...effects) : null;
   };
   // A wrapper provides only what every returned subtree provides. An optional
   // provider in one branch cannot erase requirements in another branch.
@@ -1225,7 +1319,7 @@ export function inferFailures(
         argEffects,
         resolved
           ? invoke(resolved, owner, p)
-          : (contextMember(callee, owner) ?? invoke(null, owner)),
+          : (contextMember(callee, owner) ?? propMember(callee, owner) ?? invoke(null, owner)),
         ...args
           .filter(a => a.isFunction())
           .map(a => invoke(byBody.get(`${owner.file}:${a.node.body.start}`), owner))
@@ -1381,7 +1475,7 @@ export function inferFailures(
               binding.get("init").isCallExpression() &&
               nativeCall(binding.get("init"))
             ? evaluate(binding.get("init"), ownerOf(p))
-            : new Set(["unknown"]);
+            : (propMember(value, ownerOf(p)) ?? new Set(["unknown"]));
         if (fails.size) {
           emit(
             value,
@@ -1408,7 +1502,8 @@ export function inferFailures(
         if (
           !nativeCall(p) &&
           !target(p) &&
-          !contextMember(p.get("callee"), { calls: new Set(), timerFails: null })
+          !contextMember(p.get("callee"), { calls: new Set(), timerFails: null }) &&
+          !propMember(p.get("callee"), { calls: new Set(), timerFails: null })
         )
           unknownOrigins.push({
             file,

@@ -96,7 +96,7 @@ describe("event-phase lexical callbacks (F-S40)", () => {
   it("runs a callback prop created in a view in the child's event", () => {
     const Row = component(function* Row(props: Props<{ reload: () => void }>) {
       const run = $event(function* () {
-        (yield* props.reload)();
+        props.reload();
       });
       return view(function* () {
         return <button onClick={yield* run}>go</button>;

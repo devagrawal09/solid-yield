@@ -261,3 +261,44 @@ test("a root renderer fails nothing of its own: its root is checked where it is 
   });
   assert.deepEqual(summary(report, "page"), []);
 });
+test("a call through a callback prop fails as what its callers pass (D-126)", () => {
+  const report = infer({
+    "props.tsx": `class Big extends Error {}
+function Child(props: { onBump: () => void }) {
+  function click() { props.onBump(); }
+  return <button onClick={click}>+</button>;
+}
+function Leaf(props: { onPick: (n: number) => void }) {
+  function pick() { const { onPick } = props; onPick(1); }
+  return <button onClick={pick}>leaf</button>;
+}
+function Middle(props: { onPick: (n: number) => void }) {
+  return <Leaf onPick={props.onPick} />;
+}
+function Handed(props: { onBump: () => void }) {
+  function go() { props.onBump(); }
+  return <button onClick={go}>+</button>;
+}
+function Spread(props: { onBump: () => void }) {
+  function go2() { props.onBump(); }
+  return <button onClick={go2}>+</button>;
+}
+export const registry = { Handed };
+export function App() {
+  const rest = { onBump: () => {} };
+  return <>
+    <Child onBump={() => { throw new Big(); }} />
+    <Middle onPick={n => console.log(n)} />
+    <Handed onBump={() => {}} />
+    <Spread {...rest} />
+  </>;
+}`
+  });
+  const big = report.classes.find(c => c.name === "Big").id;
+  assert.deepEqual(summary(report, "click"), [big]);
+  // passed on by Middle from App's callback, and destructured
+  assert.deepEqual(summary(report, "pick"), []);
+  // a component named elsewhere than as a tag, or given a spread: not every caller is seen
+  assert.deepEqual(summary(report, "go"), ["unknown"]);
+  assert.deepEqual(summary(report, "go2"), ["unknown"]);
+});

@@ -67,19 +67,21 @@ export type ContextValue<T> = 0 extends 1 & T
  * F-3, S11). A context that may carry nothing models it inside the value:
  * `null`, or a source of `T | null`.
  */
-export type ProvidedValue<T> = [T] extends [Source<infer V, infer E, infer P>]
-  ?
-      | Source<V, E, [P] extends [true] ? boolean : P>
-      | HoleProp<V, E, [P] extends [true] ? boolean : P>
-      | {
-          readonly "[REACTIVE_PROP] prop `value` is reactive: pass a source, a path or a hole (constant(v) for a fixed value)": never;
-        }
-  :
-      | (T & ({} | null))
-      | ProvideUndefined<T>
-      | {
-          readonly "[HELD_PROP] prop `value` is held as a value: declare the context Source<T> to provide a live one": never;
-        };
+export type ProvidedValue<T> = 0 extends 1 & T
+  ? any // a context of `any` takes anything, as in TypeScript
+  : [T] extends [Source<infer V, infer E, infer P>]
+    ?
+        | Source<V, E, [P] extends [true] ? boolean : P>
+        | HoleProp<V, E, [P] extends [true] ? boolean : P>
+        | {
+            readonly "[REACTIVE_PROP] prop `value` is reactive: pass a source, a path or a hole (constant(v) for a fixed value)": never;
+          }
+    :
+        | (T & ({} | null))
+        | ProvideUndefined<T>
+        | {
+            readonly "[HELD_PROP] prop `value` is held as a value: declare the context Source<T> to provide a live one": never;
+          };
 /**
  * The refusal's message, when the value type admits `undefined` (TypeScript
  * prints it in the expected type). Written inline so that it is printed

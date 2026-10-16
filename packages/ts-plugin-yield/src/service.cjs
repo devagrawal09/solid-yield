@@ -313,6 +313,7 @@ function createVirtualService(ts, host, config = {}) {
     }
     state = {
       originals,
+      native: new Set(native.keys()),
       generated,
       inference,
       positions,
@@ -336,6 +337,34 @@ function createVirtualService(ts, host, config = {}) {
     // TS rejects a host's generator at its wrapper. Find the inadmissible
     // operation in that rejected generator using its library operation type.
     const node = leafAt(ts, sf, start);
+    // A component whose own setup TypeScript refuses has no props type to
+    // check its callers against (a generic one, as widening makes it, least
+    // of all): the setup's error is the one to fix.
+    if (message.includes("[UNDECLARED_PROP]")) {
+      let call = node;
+      while (call && !ts.isCallExpression(call) && !ts.isStatement(call)) call = call.parent;
+      let callee =
+        call && ts.isCallExpression(call) && ts.isIdentifier(call.expression)
+          ? checker.getSymbolAtLocation(call.expression)
+          : undefined;
+      if (callee && callee.flags & ts.SymbolFlags.Alias) callee = checker.getAliasedSymbol(callee);
+      const setup = callee?.valueDeclaration;
+      const init = setup && ts.isVariableDeclaration(setup) ? setup.initializer : undefined;
+      if (
+        init &&
+        ts.isCallExpression(init) &&
+        s.ls
+          .getProgram()
+          .getSemanticDiagnostics(init.getSourceFile())
+          .some(
+            e =>
+              e.category === ts.DiagnosticCategory.Error &&
+              (e.start ?? -1) >= init.getStart() &&
+              (e.start ?? -1) < init.end
+          )
+      )
+        return null;
+    }
     let scope = node;
     while (scope.parent && !ts.isCallExpression(scope) && !ts.isFunctionLike(scope))
       scope = scope.parent;
@@ -389,7 +418,11 @@ function createVirtualService(ts, host, config = {}) {
     // A value prop given as a hole (a flow control's `each` or `when`, a
     // component's prop) runs where it is read, as a memo does: a write or a
     // creation in it is the error, though TypeScript reports the whole call.
-    if (!culprit && (!code || code === "SETTLED_PROP") && ts.isCallExpression(scope)) {
+    if (
+      !culprit &&
+      (!code || code === "HELD_PROP" || code === "REACTIVE_PROP") &&
+      ts.isCallExpression(scope)
+    ) {
       const holes = scope.arguments
         .filter(ts.isObjectLiteralExpression)
         .flatMap(o => o.properties)
@@ -453,7 +486,14 @@ function createVirtualService(ts, host, config = {}) {
     // error is the value form's, at the leaf of the value that does not fit.
     let tsCode = d.code;
     // TypeScript reports it at `provide`, or at `value` when the whole value is wrong
-    let provide = d.code === 2769 && !code ? node : null;
+    // (D-126: a provider's value for a held slot, or a plain value for a
+    // reactive one, is the prop refusal's; plain Solid's error is the type's)
+    const prop = code === "HELD_PROP" || code === "REACTIVE_PROP";
+    let provide =
+      (d.code === 2769 && !code) ||
+      (prop && s.native.has(sf.fileName) && (d.code === 2769 || d.code === 2322))
+        ? node
+        : null;
     while (provide && !ts.isCallExpression(provide) && !ts.isStatement(provide))
       provide = provide.parent;
     if (
@@ -485,9 +525,11 @@ function createVirtualService(ts, host, config = {}) {
     if (misfit) {
       // what plain Solid reads: a value, not the source or hole a slot also takes
       const isSource = t => t.getProperties().some(p => p.name.startsWith("__@SOURCE@"));
+      // a refusal's message (`{ "[HELD_PROP] …": never }`) is not a type plain Solid has
+      const refusal = t => t.getProperties().some(p => /^\[[A-Z_]+\] /.test(p.name));
       const plain = t =>
         (t.isUnion() ? t.types : [t]).filter(
-          m => !isSource(m) && !/^HoleProp$/.test(m.aliasSymbol?.name ?? "")
+          m => !isSource(m) && !refusal(m) && !/^HoleProp$/.test(m.aliasSymbol?.name ?? "")
         );
       const member = (t, name) => {
         for (const m of plain(t)) {
@@ -551,6 +593,7 @@ function createVirtualService(ts, host, config = {}) {
       message = `Type '${shown(actual)}' is not assignable to type '${expected}'.`;
       culprit = { node: at };
       tsCode = 2322;
+      code = undefined;
     }
     // a read in JSX the body builds: the JSX is what is out of place (D-041)
     if (code === "READ_IN_SETUP" && culprit) {

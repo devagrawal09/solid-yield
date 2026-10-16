@@ -66,9 +66,9 @@ type _readDefault = Expect<Equal<ReadOf<typeof ThemeCtx>, ContextRead<never>>>;
 // the value is given as a prop is (D-126): a held value as it is, a reactive one as a path
 type _value = Expect<Equal<ContextValue<User>, User>>;
 type _valueSource = Expect<Equal<ContextValue<Source<User, never, true>>, Path<User, never, true>>>;
-// Native TodoMVC provides a tuple: each numbered path keeps its own type.
-type _tupleFirst = Expect<Equal<ContextValue<readonly [User, string]>[0], Path<User>>>;
-type _tupleSecond = Expect<Equal<ContextValue<[User, string]>[1], Path<string>>>;
+// Native TodoMVC provides a tuple: held (D-126), each element keeps its own type.
+type _tupleFirst = Expect<Equal<ContextValue<readonly [User, string]>[0], User>>;
+type _tupleSecond = Expect<Equal<ContextValue<[User, string]>[1], string>>;
 // Tuple support must not expose array writes as readable function paths.
 type _arrayNoMutators = Expect<
   Equal<Extract<"push" | "pop" | "splice", keyof Path<User[]>>, never>
@@ -250,8 +250,8 @@ LiveUserCtx.provide({
     return <>{yield* LiveAvatar()}</>;
   }
 });
+// @ts-expect-error [REACTIVE_PROP] a reactive context does not take a plain value: constant(v)
 LiveUserCtx.provide({
-  // @ts-expect-error [REACTIVE_PROP] a reactive context does not take a plain value: constant(v)
   value: { name: "plain" },
   children: function* () {
     return <>{yield* LiveAvatar()}</>;

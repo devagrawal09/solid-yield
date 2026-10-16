@@ -32,8 +32,8 @@ const lower = source => {
 };
 
 describe("native method receivers (F-S39)", { timeout: 60_000 }, () => {
-  it("reads a prop, a row value and a number before calling their methods", () => {
-    const code = lower(`import {For, createMemo} from 'solid-js';
+  it("reads a live prop, a row value and a number before calling their methods", () => {
+    const code = lower(`import {For, createMemo, createSignal} from 'solid-js';
 export function Panel(props: {title: string; n: number}) {
   const points = createMemo(() => [{value: 1.5}]);
   return <section>
@@ -41,7 +41,8 @@ export function Panel(props: {title: string; n: number}) {
     <For each={points()}>{point => <i>{point.value.toFixed(0)}</i>}</For>
     <b>{props.n.toFixed(1)}</b>
   </section>;
-}`);
+}
+export function App() { const [t] = createSignal('A'); return <Panel title={t()} n={t().length}/>; }`);
     expect(code).toContain("(yield* props.title).toLowerCase()");
     expect(code).toContain("(yield* point.value).toFixed(0)");
     expect(code).toContain("(yield* props.n).toFixed(1)");
@@ -49,10 +50,14 @@ export function Panel(props: {title: string; n: number}) {
   });
 
   it("keeps a path key and an index-signature key as paths", () => {
-    const code =
-      lower(`export function Card(props: {item: {title: string}; tags: Record<string, string>}) {
+    const card = `export function Card(props: {item: {title: string}; tags: Record<string, string>}) {
   return <p>{props.item.title} {props.tags.main}</p>;
-}`);
+}`;
+    // Held (D-126): no caller passes a live value, so each is read where it is named.
+    expect(lower(card)).toContain("<p>{props.item.title} {props.tags.main}</p>");
+    const code = lower(`import {createSignal} from 'solid-js';
+${card}
+export function App() { const [t] = createSignal('A'); return <Card item={{title: t()}} tags={{main: t()}}/>; }`);
     expect(code).toContain("yield* props.item.title");
     expect(code).toContain("yield* props.tags.main");
     expect(code).not.toContain("(yield* props.item)");
@@ -61,7 +66,7 @@ export function Panel(props: {title: string; n: number}) {
   });
 
   it("keeps Solid's parameter types on an Errored fallback that reads", () => {
-    const code = lower(`import {Errored} from 'solid-js';
+    const code = lower(`import {Errored, createSignal} from 'solid-js';
 export function Panel(props: {title: string; children: any}) {
   return <Errored fallback={(error, reset) => (
     <div role="alert">
@@ -69,7 +74,8 @@ export function Panel(props: {title: string; children: any}) {
       <button onClick={reset}>Try again</button>
     </div>
   )}>{props.children}</Errored>;
-}`);
+}
+export function App() { const [t] = createSignal('A'); return <Panel title={t()}>x</Panel>; }`);
     expect(code).toContain("error: () => unknown");
     expect(code).toContain("reset: __NativeReset");
     expect(checked(code)).toEqual([]);

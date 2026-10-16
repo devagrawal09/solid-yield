@@ -230,6 +230,21 @@ export function nativeLexicalCallback(
   return callback;
 }
 
+/**
+ * D-126: a reactive prop a caller may leave out (`label?:`, as the native
+ * lowering widens one) is `undefined` in the child where it was left out;
+ * Solid reads it where it is named. Its path is read when there is one.
+ */
+export function nativeOptional<T, E, P extends boolean>(
+  source: Source<T, E, P> | undefined
+): Yieldable<Read<P, E>, T | undefined> {
+  return {
+    *[Symbol.iterator]() {
+      return source === undefined ? undefined : yield* source;
+    }
+  };
+}
+
 /** A hole callback's operations as its view sees them: a raise is a failure
  * of the hole's read; a stream attempt's failures arrive through its handler. */
 export type HoleViewOp<Y> =

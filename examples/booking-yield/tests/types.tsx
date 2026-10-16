@@ -6,6 +6,7 @@ import { BookingPage } from "../src/app";
 import { DateRangePicker, DateRangeSlot, emptyRange } from "../src/dateRange";
 import { GuestCount } from "../src/guests";
 import { compose } from "../src/lib/compose";
+import { createSlot } from "../src/lib/slot";
 
 declare const root: HTMLElement;
 
@@ -32,3 +33,8 @@ const WrongProvider = component(function* WrongProvider() {
 });
 // @ts-expect-error [NO_PROVIDER] a provider of DateRangeSlot discharges only DateRangeSlot
 render(WrongProvider, root);
+
+// a standalone slot makes a `$store` of its `init`: an object, never a primitive
+// @ts-expect-error Type 'number' does not satisfy the constraint 'object'
+createSlot<number, "Count">({ name: "Count", init: () => 0 });
+createSlot<{ count: number }, "Count">({ name: "Count", init: () => ({ count: 0 }) });

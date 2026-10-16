@@ -1865,13 +1865,14 @@ export function nativeHostCallback(
  * a call from routine code (`yield* save(x)`, which handles it), the promise
  * rejects.
  *
- * It is called by routine code or by the DOM (D-126, D-028 for events):
- * `yield* save(x)` in an `$event` or an `$effect`'s effect phase, or the DOM
- * through a bind. Called directly with no routine running — a timer, a
- * promise callback, plain or foreign code — it is `EVENT_OUTSIDE_RUN` in
- * development. An event called from an event joins its transaction (D-020:
- * Solid's action does). Like any action it is not called synchronously
- * inside a computation (ACTION_CALLED_IN_OWNED_SCOPE).
+ * It is called by routine code or by the DOM (D-126): `yield* save(x)` in an
+ * `$event` or an `$effect`'s effect phase, or the DOM through a bind. Called
+ * with no routine running (a timer, a promise callback, plain or foreign
+ * code) it runs, as Solid's action does, but its failures reach no `Errored`:
+ * the lint rule `no-event-outside-routine` warns there (Dev, 2026-10-15: a
+ * lint rule, not a runtime error). An event called from an event joins its
+ * transaction (D-020: Solid's action does). Like any action it is not called
+ * synchronously inside a computation (ACTION_CALLED_IN_OWNED_SCOPE).
  */
 export function $event<Args extends unknown[] = [], Y extends EventOp = never, R = void>(
   body: (...args: Args) => Generator<Y, R, any>
@@ -1930,18 +1931,7 @@ export function $event<Args extends unknown[] = [], Y extends EventOp = never, R
     };
     return result;
   };
-  // D-126 (D-028 for events): a handler is called by routine code (`yield*
-  // save(x)` in an `$event` or an effect phase) or by the DOM through a bind
-  // (the bound wrapper calls `call` itself); called with no routine running
-  // — a timer, a promise callback, plain or foreign code — it fails here
-  const handler: any = (...args: Args) => {
-    if (__DEV__ && state.host === NONE)
-      throw devError(
-        "EVENT_OUTSIDE_RUN",
-        `${body.name ? `the $event ${body.name}` : "an $event"}${name ? ` of <${name}>` : ""} called outside a routine: an event is called with yield* save(x) in an $event or an $effect, or by the DOM where a view binds it (onClick={yield* save}); handed to plain code it is not called.`
-      );
-    return call(null, args);
-  };
+  const handler: any = (...args: Args) => call(null, args);
   handler[EVENT_MARK] = true;
   handler[CALL] = call;
   // `yield* save`: bind it (D-072, D-085) — a wrapper for the DOM, routing

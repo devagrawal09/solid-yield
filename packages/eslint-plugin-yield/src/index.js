@@ -9,6 +9,7 @@
  *   yield-in-jsx-hole      every `yield*` in JSX is in a position the transform turns into a hole
  *   read-before-attempt    a $memo reads before its first `attempt`
  *   no-unyielded-write     an operation acts only as `yield* op` (setters; with types, event calls and any op)
+ *   no-event-outside-routine  (warning) an `$event` is not called from a timer, a listener or a promise callback (D-126)
  *   no-foreign-reactive    no reactive state from plain Solid, the router or another library
  *   no-component-tag       a yield component is called, never a JSX tag (autofix)
  *   no-read-in-prop        a component call's prop is a source, a hole or a value — never a read (autofix)
@@ -429,6 +430,90 @@ const noUnyieldedWrite = {
           context.report({ node, messageId: "eventCall", data: { name: nameOf(node) } });
         } else if (isDiscarded(node) && isOpType(type))
           context.report({ node, messageId: "discarded", data: { name: nameOf(node) } });
+      }
+    };
+  }
+};
+
+/** Calls that run the function they are given later, after the routine that made it. */
+const SCHEDULERS = new Set([
+  "setTimeout",
+  "setInterval",
+  "requestAnimationFrame",
+  "requestIdleCallback",
+  "queueMicrotask",
+  "addEventListener"
+]);
+const CONTINUATIONS = new Set(["then", "catch", "finally"]);
+/** The scheduler or promise continuation that runs `fn` later, or null. */
+function laterCaller(fn) {
+  const call = fn.parent;
+  if (!call || call.type !== "CallExpression" || !call.arguments.includes(fn)) return null;
+  const c = call.callee;
+  const name =
+    c.type === "Identifier"
+      ? c.name
+      : c.type === "MemberExpression" && !c.computed && c.property.type === "Identifier"
+        ? c.property.name
+        : null;
+  return name && (SCHEDULERS.has(name) || CONTINUATIONS.has(name)) ? name : null;
+}
+/** Whether `identifier` names an `$event` handler: `const save = $event(…)`. */
+function isEventBinding(context, identifier) {
+  let s = context.sourceCode.getScope(identifier);
+  let variable = null;
+  while (s && !variable) {
+    variable = s.set.get(identifier.name) || null;
+    s = s.upper;
+  }
+  const decl = variable?.defs[0]?.node;
+  if (!decl || decl.type !== "VariableDeclarator" || decl.id.type !== "Identifier") return false;
+  const init = decl.init;
+  if (!init || init.type !== "CallExpression") return false;
+  return (
+    isCallTo(init, ["$event"]) || importedName(context, init.callee, "solid-yield") === "$event"
+  );
+}
+
+const noEventOutsideRoutine = {
+  meta: {
+    type: "suggestion",
+    docs: {
+      description:
+        "An `$event` handler is called by routine code (`yield* save(x)` in an $event or an $effect's effect phase) or by the DOM through a bind. Called from a timer, a listener or a promise callback it runs with no routine: its failures reach no Errored (D-126: a warning, not a runtime error)."
+    },
+    messages: {
+      outside:
+        "`{{name}}(…)` is called from a {{where}} callback, with no routine running: its failures reach no Errored and reject a promise nothing awaits. Bind it in a view, or call it with `yield*` from an $event or an $effect's effect phase (D-126)."
+    },
+    schema: []
+  },
+  create(context) {
+    const services = context.sourceCode.parserServices;
+    const checker =
+      services && services.program && services.esTreeNodeToTSNodeMap
+        ? services.program.getTypeChecker()
+        : null;
+    return {
+      CallExpression(node) {
+        // the callback that runs it later, unless a routine runs it first
+        let later = null;
+        for (let fn = enclosingFunction(node); fn && !later; fn = enclosingFunction(fn)) {
+          if (routineKind(fn)) return;
+          later = laterCaller(fn);
+        }
+        if (!later) return;
+        const event =
+          (node.callee.type === "Identifier" && isEventBinding(context, node.callee)) ||
+          (!!checker &&
+            isEventCallType(checker.getTypeAtLocation(services.esTreeNodeToTSNodeMap.get(node))));
+        if (!event) return;
+        const text = context.sourceCode.getText(node.callee);
+        context.report({
+          node,
+          messageId: "outside",
+          data: { name: text.length > 40 ? text.slice(0, 37) + "..." : text, where: later }
+        });
       }
     };
   }
@@ -1818,6 +1903,7 @@ export const rules = {
   "yield-in-jsx-hole": yieldInJsxHole,
   "read-before-attempt": readBeforeAttempt,
   "no-unyielded-write": noUnyieldedWrite,
+  "no-event-outside-routine": noEventOutsideRoutine,
   "no-foreign-reactive": noForeignReactive,
   "no-dollar-block": noDollarBlock,
   "no-path-object-use": noPathObjectUse,
@@ -1840,7 +1926,7 @@ const plugin = {
 };
 
 /** Rules `recommended` sets to warn (a suggestion, not a rule of the model). */
-const WARNINGS = new Set(["no-unshown-wait", "require-jsx-factory"]);
+const WARNINGS = new Set(["no-unshown-wait", "require-jsx-factory", "no-event-outside-routine"]);
 /** `recommended`: every rule an error, but the suggestions (`WARNINGS`), which warn (flat config). */
 plugin.configs.recommended = {
   plugins: { "solid-yield": plugin },

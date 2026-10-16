@@ -430,7 +430,19 @@ export type PropsCheck<D> = {
         ? KindCheck<E> extends NeedsKind
           ? NeedsKind
           : unknown
-        : unknown;
+        : N extends "children"
+          ? unknown
+          : [Exclude<D[N], undefined>] extends [() => Generator<any, any, any>]
+            ? HoleTypedProp<N>
+            : unknown;
+};
+/**
+ * A prop typed as a `function*` with no parameters (D-126): what is passed
+ * for it is a hole, which the child's props give as a path, never the
+ * function; declared reactive, its reads are typed as they arrive.
+ */
+type HoleTypedProp<N> = {
+  readonly "[HOLE_TYPED_PROP] a prop typed as a function* with no parameters is a hole, given as a path: declare it Source<T, E, P>": N;
 };
 
 /** An `$event` handler (D-126): an event, given as itself. A plain function type is not one. */
@@ -443,12 +455,12 @@ type HandlerProp = { readonly [EVENT]: true };
 type PropRead<V, U, N> = 0 extends 1 & V
   ? any // refused at its callers ([PROP_TYPE]); its reads are not refused again
   : N extends "children"
-  ? [V] extends [Source<infer T, infer E, infer P>]
-    ? Source<T | U, E, P>
-    : Source<V | U>
-  : [V] extends [Source<infer T, infer E, infer P>]
-    ? Path<T, E, P> | U
-    : V | U;
+    ? [V] extends [Source<infer T, infer E, infer P>]
+      ? Source<T | U, E, P>
+      : Source<V | U>
+    : [V] extends [Source<infer T, infer E, infer P>]
+      ? Path<T, E, P> | U
+      : V | U;
 
 /**
  * What callers may pass for each prop (D-126): a reactive prop (`Source<T, E,

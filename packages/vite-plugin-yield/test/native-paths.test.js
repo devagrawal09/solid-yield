@@ -431,7 +431,132 @@ export function App(props: { show: boolean }) {
   if (!props.show) return;
   return <p>shown</p>;
 }`,
+    // held (D-126): no caller passes a live value, so the setup reads a value
+    []
+  ],
+  [
+    "return-bare-live",
+    `import { createSignal } from "solid-js";
+function Panel(props: { show: boolean }) {
+  if (!props.show) return;
+  return <p>shown</p>;
+}
+export function App() {
+  const [show] = createSignal(true);
+  return <Panel show={show()} />;
+}`,
     ["READ_IN_SETUP"]
+  ],
+  // D-126: props declared outside a literal widen too: an interface's, an alias's
+  [
+    "props-interface-live",
+    `import { createSignal } from "solid-js";
+interface CardProps { title: string; count: number }
+type RowProps = { label: string };
+function Card(props: CardProps) {
+  return <p>{props.title} {props.count.toFixed(0)}</p>;
+}
+function Row(props: RowProps & { extra?: string }) {
+  return <i>{props.label}{props.extra}</i>;
+}
+export function App() {
+  const [t] = createSignal("a");
+  return <><Card title={t()} count={1} /><Row label={t()} extra="x" /></>;
+}`,
+    []
+  ],
+  // an optional prop one caller gives a live value and another leaves out
+  [
+    "props-optional-live",
+    `import { createSignal } from "solid-js";
+interface LabelProps { text?: string }
+function Label(props: LabelProps) {
+  return <b>{props.text ?? "none"}</b>;
+}
+function Tag(props: { text?: string }) {
+  return <i>{props.text}</i>;
+}
+export function App() {
+  const [t] = createSignal("a");
+  return <><Label text={t()} /><Label /><Tag text={t()} /><Tag /></>;
+}`,
+    []
+  ],
+  // accessor props (F-S54) given a signal, a plain getter and a getter that reads
+  [
+    "props-accessor-callers",
+    `import { createSignal } from "solid-js";
+interface ViewProps { count: () => number }
+function View(props: ViewProps) {
+  return <p>{props.count()}</p>;
+}
+function Inline(props: { count: () => number }) {
+  return <p>{props.count()}</p>;
+}
+export function App() {
+  const [n] = createSignal(1);
+  return (
+    <>
+      <View count={n} />
+      <View count={() => 2} />
+      <View count={() => n() * 2} />
+      <Inline count={n} />
+      <Inline count={() => n() + 1} />
+    </>
+  );
+}`,
+    []
+  ],
+  // a callback prop fails as what its callers pass fails: here a RangeError
+  [
+    "callback-prop-throws",
+    `import { createSignal } from "solid-js";
+function Child(props: { onBump: () => void }) {
+  return <button onClick={() => props.onBump()}>+</button>;
+}
+export function App() {
+  const [n, setN] = createSignal(0);
+  return <Child onBump={() => { if (n() > 3) throw new RangeError("big"); setN(n() + 1); }} />;
+}`,
+    ["EVENT_REJECTS"]
+  ],
+  // passed on (a prop given a prop), destructured, and bound as the handler itself
+  [
+    "callback-prop-forwarded",
+    `import { createSignal } from "solid-js";
+function Leaf(props: { onPick: (v: number) => void }) {
+  return <button onClick={() => props.onPick(2)}>leaf</button>;
+}
+function Middle(props: { onPick: (v: number) => void }) {
+  const { onPick } = props;
+  return <><Leaf onPick={props.onPick} /><button onClick={() => onPick(1)}>mid</button></>;
+}
+function Direct(props: { onClick: () => void }) {
+  return <button onClick={props.onClick}>direct</button>;
+}
+export function App() {
+  const [n, setN] = createSignal(0);
+  return <><Middle onPick={v => setN(n() + v)} /><Direct onClick={() => setN(0)} /></>;
+}`,
+    []
+  ],
+  // not every caller is seen: a spread at a call, or the component handed on
+  [
+    "callback-prop-unseen",
+    `import { createSignal } from "solid-js";
+function Spread(props: { onBump: () => void }) {
+  return <button onClick={() => props.onBump()}>+</button>;
+}
+function Handed(props: { onBump: () => void }) {
+  return <button onClick={() => props.onBump()}>+</button>;
+}
+export const registry = { Handed };
+export function App() {
+  const [n, setN] = createSignal(0);
+  const rest = { onBump: () => console.log("bump") };
+  return <><Spread {...rest} /><Handed onBump={() => setN(n() + 1)} /></>;
+}`,
+    ["EVENT_REJECTS"]
   ],
   [
     "return-null",
@@ -1704,6 +1829,19 @@ describe("native lowering paths, checked as plain Solid says", { timeout: 300_00
       rows.join("\n")
     ).toEqual(["9"]);
     expect(rows[0]).toMatch(/Remaining: RangeError\./);
+  });
+
+  it("names what a callback prop's callers pass as its failure, and unknown where one is not seen", () => {
+    const rows = name => result.log.filter(r => r.includes(`/${name}.tsx`) && / error TS/.test(r));
+    expect(rows("callback-prop-throws").join("\n")).toMatch(
+      /3:\d+ error TS95000: \[EVENT_REJECTS\] This handler can fail with RangeError /
+    );
+    const unseen = rows("callback-prop-unseen");
+    expect(unseen.map(r => r.match(/\.tsx:(\d+):/)?.[1]).sort(), unseen.join("\n")).toEqual([
+      "3",
+      "6"
+    ]);
+    for (const row of unseen) expect(row).toMatch(/can fail with unknown/);
   });
 
   it("reports a provider's wrong value as TypeScript does", () => {

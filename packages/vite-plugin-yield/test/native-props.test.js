@@ -47,11 +47,20 @@ export function Detail(props: {id: string}) {
     expect(checked(code)).toEqual([]);
   });
 
-  it("leaves a prop that only ever receives ready values as declared", () => {
+  it("leaves a prop that only ever receives constants as declared; a live ready value widens it (D-126)", () => {
+    const held = lower(`${head}
+function Label(props: {text: string}) { return <b>{props.text}</b>; }
+export function App() { const label = 'a'; return <Label text={label}/>; }`).code;
+    expect(held).not.toContain("__NativeSource");
+    expect(held).toContain("<b>{props.text}</b>");
+    expect(checked(held)).toEqual([]);
+    // A signal read is live even when it never waits or fails: Solid reads the
+    // prop where it is named, so the prop is a source with no colors of its own.
     const { code } = lower(`${head}
 function Label(props: {text: string}) { return <b>{props.text}</b>; }
 export function App() { const [n] = createSignal('a'); return <Label text={n()}/>; }`);
-    expect(code).not.toContain("__NativeSource");
+    expect(code).toContain("text: __NativeSource<string, _E_text, _P_text>;");
+    expect(code).toContain("<b>{yield* props.text}</b>");
     expect(checked(code)).toEqual([]);
   });
 
@@ -89,7 +98,7 @@ function Body(props: {item: {title: string}}) { return <h2>{props.item.title}</h
 export function App() { const item = createMemo(() => load('a')); return <Body item={item()}/>; }
 render(() => <App/>, document.body);`);
     const errors = checked(code);
-    expect(errors.some(e => e.includes("SETTLED_PROP"))).toBe(false);
+    expect(errors.some(e => /SETTLED_PROP|HELD_PROP|REACTIVE_PROP/.test(e))).toBe(false);
     expect(errors.some(e => e.includes("PENDING_ROOT"))).toBe(true);
   });
 });

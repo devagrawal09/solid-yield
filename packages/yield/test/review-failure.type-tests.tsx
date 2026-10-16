@@ -47,8 +47,8 @@ const RoomPage = component(function* RoomPage(props: Props<{ roomId: string }>) 
             children: function* () {
               return (
                 <section>
-                  {yield* props.roomId}
-                  {yield* identity}
+                  {props.roomId}
+                  {identity}
                   {yield* LiveRoom()}
                 </section>
               );

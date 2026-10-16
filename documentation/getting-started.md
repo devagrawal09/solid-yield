@@ -390,7 +390,7 @@ export const ThemePicker = component(function* ThemePicker(
 - **A handler prop is held, never read** (D-126): `props.onPick` is the `$event` itself, not a path. Call it with one `yield*` in an event, `yield* props.onPick("dark")`, or bind it in the view, `onClick={[yield* props.onPick, "dark"]}`. It takes an `$event` only: a source or a hole is refused (`[HANDLER_PROP]`); an event does not vary per render, so a parent that chooses between two handlers writes one `$event` that chooses. An optional one is `undefined` when left out, checked without a read: `if (props.onPick) yield* props.onPick("dark");`.
 - **A plain function type** (`onPick: (t: Theme) => void`) is not a handler: the prop is the function, and `yield*` of its call fails with "Type 'void' must have a '[Symbol.iterator]()' method". Routine code calls events, not functions.
 - **In a context, or inside an object prop** (`props.log.clear`), a handler is the handler too: `createContext<Handler<[Theme]>, "SetThemeCtx">(undefined, { name: "SetThemeCtx" })`, read with `const setTheme = yield* SetThemeCtx` in the setup and called `yield* setTheme("dark")` in an event.
-- **Who calls an event**: routine code (`yield* save(x)` in an `$event` or an `$effect`'s effect phase) or the DOM, through a bind. Called from a timer, a promise callback or a listener added by hand, it is the development error `EVENT_OUTSIDE_RUN` (D-126; production calls it as before). D-126 leaves open how a timer or a listener the DOM does not bind through a view should reach an event.
+- **Who calls an event**: routine code (`yield* save(x)` in an `$event` or an `$effect`'s effect phase) or the DOM, through a bind. Called from a timer, a promise callback or a listener added by hand, it runs, as Solid's action does, but its failures reach no `Errored`: the lint warning `no-event-outside-routine` points there (D-126).
 
 ### Form inputs
 
@@ -872,7 +872,7 @@ it("renders the routed page under the app-wide context", async () => {
 
 Each rule is checked as early as the tools allow:
 
-1. **Types.** For example: a component tag, a read in a setup, a create or write in a view, a source called like a function, an unbound event handler, an unhandled pending at the root (`[PENDING_ROOT]`), `[SETTLED_PROP]`, `[FAILURE_KIND]`, `[HVIEW_READ]`.
+1. **Types.** For example: a component tag, a read in a setup, a create or write in a view, a source called like a function, an unbound event handler, an unhandled pending at the root (`[PENDING_ROOT]`), `[HELD_PROP]` / `[REACTIVE_PROP]`, `[FAILURE_KIND]`, `[HVIEW_READ]`.
 2. **The transform** (at build time). A `yield*` in a JSX position it cannot make a hole: `YIELD_IN_REF`, `…_SPREAD`, `…_SPREAD_CHILD`, `PLAIN_YIELD_IN_JSX`.
 3. **Development errors**, thrown where they happen and stripped from production builds. For example: `READ_IN_VIEW`, `READ_IN_SETUP`, `UNYIELDED_WRITE`, `UNTYPED_THROW`, `JSX_IN_SETUP`, `PATH_OBJECT`, `NOT_AN_OPERATION` (which names what it received).
 4. **Lint** (`eslint-plugin-solid-yield`), for what TypeScript cannot see. For example: `no-read-in-setup`, `no-read-in-view-body`, `no-read-in-prop`, `component-children-generator`, `component-call-yielded`, `no-unbound-event`, `no-throw`.

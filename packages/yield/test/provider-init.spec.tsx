@@ -24,7 +24,7 @@ function setup(fail: boolean) {
   const Reader = component(function* Reader() {
     const runtime = yield* Runtime;
     return view(function* () {
-      return <p class="reader">{String((yield* runtime)?.id)}</p>;
+      return <p class="reader">{String(runtime?.id)}</p>;
     });
   });
   const App = component(function* App() {

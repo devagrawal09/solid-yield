@@ -66,7 +66,7 @@ render(() => <Bare />, document.body);`);
     const errors = checked(code).join("\n");
     // Form's boundaries cover it; Bare's root is pending.
     expect(errors).toMatch(/PENDING_ROOT/);
-    expect(errors).not.toMatch(/SETTLED_PROP/);
+    expect(errors).not.toMatch(/SETTLED_PROP|HELD_PROP|REACTIVE_PROP/);
   });
 
   it("carries its children's requirements", () => {

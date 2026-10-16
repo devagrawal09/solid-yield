@@ -1,8 +1,10 @@
 // The booking page and its modules in jsdom, driven by DOM clicks only: an
-// event is called where a view binds it (D-126, EVENT_OUTSIDE_RUN).
-import { component, render, view } from "solid-yield";
+// event is called where a view binds it (D-126).
+import { $event, component, render, view } from "solid-yield";
 import { BookingPage } from "../src/app";
 import { DateRangePicker } from "../src/dateRange";
+import { compose } from "../src/lib/compose";
+import { focus } from "../src/lib/lens";
 import { GuestCount } from "../src/guests";
 
 let root: HTMLElement;
@@ -128,4 +130,43 @@ describe("the travellers list: a keyed row's own state and the page's entry for 
     await click(".add-traveller");
     expect(drafts()).toEqual(["", "vegetarian"]);
   });
+});
+
+it("a slice of a primitive or a null leaf is written by returning the next value", async () => {
+  const Page = component(function* Page() {
+    const s = yield* compose({
+      count: { init: () => 0 },
+      range: { init: () => ({ checkIn: null as number | null }) }
+    });
+    const checkIn = focus(s.parts.range, "checkIn");
+    const bump = $event(function* () {
+      yield* s.parts.count.set(n => n + 1);
+    });
+    const book = $event(function* () {
+      yield* checkIn.set(() => 7);
+    });
+    const clear = $event(function* () {
+      yield* checkIn.set(() => null);
+    });
+    return view(function* () {
+      return (
+        <p>
+          <output>
+            {yield* s.at.count}|{String(yield* s.at.range.checkIn)}
+          </output>
+          <button class="bump" onClick={yield* bump} />
+          <button class="book-in" onClick={yield* book} />
+          <button class="clear-in" onClick={yield* clear} />
+        </p>
+      );
+    });
+  });
+  dispose = render(Page, root);
+  const out = () => root.querySelector("output")!.textContent;
+  expect(out()).toBe("0|null");
+  await click(".bump");
+  await click(".book-in");
+  expect(out()).toBe("1|7");
+  await click(".clear-in");
+  expect(out()).toBe("1|null");
 });

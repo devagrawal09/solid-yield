@@ -166,7 +166,7 @@ explains and locates it. It does not independently decide host admission.
 
 [The message catalog](src/catalog.cjs) reuses `READ_IN_SETUP`,
 `WRITE_IN_REACTIVE`, `CREATE_OUTSIDE_SETUP`, `PENDING_ROOT`, `NO_PROVIDER`,
-`SETTLED_PROP`, `FOREIGN_HANDOFF` and `NATIVE_CALLBACK_FAILURE` where those
+`HELD_PROP`, `REACTIVE_PROP`, `FOREIGN_HANDOFF` and `NATIVE_CALLBACK_FAILURE` where those
 library/lint/runtime meanings overlap. Transform codes are retained. Original
 TypeScript numeric codes remain available. Unsupported internal error shapes
 use `GENERATED_TYPE`, never pretend to have a specific fix. Ordinary TypeScript

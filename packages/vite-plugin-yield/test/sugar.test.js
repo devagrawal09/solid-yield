@@ -92,10 +92,10 @@ describe("sugar: existing library semantics", { timeout: 30_000 }, () => {
       function Counter() { const [n] = $signal(0); return <>{Child({ n: n() + 1 })}</>; }`);
     expect(result).toMatch(/n: function\* \(\) \{\s*return \(yield\* n\) \+ 1/);
   });
-  it("binds a handler read from a prop with both operations", () => {
+  it("binds a handler read from a prop as a local event (D-126: the prop is the $event)", () => {
     const result = lower(`${start} import { type Props, type Handler } from "solid-yield";
       function Child(props: Props<{ save: Handler }>) { return <button onClick={props.save}/>; }`);
-    expect(result).toContain("onClick={yield* yield* props.save}");
+    expect(result).toContain("onClick={yield* props.save}");
   });
   it("handles arrow components and preserves a static early JSX return", () => {
     const result = lower(`${start} const Child = () => <p/>;

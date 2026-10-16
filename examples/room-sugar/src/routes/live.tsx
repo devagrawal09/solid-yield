@@ -62,7 +62,7 @@ const Live = function Live(props: Props<RouteSectionProps<undefined>>) {
 export default Live;
 const LivePage = function LivePage(
   props: Props<{
-    room: string;
+    room: Source<string>;
   }>
 ) {
   return (
@@ -82,7 +82,7 @@ const LivePage = function LivePage(
 };
 const Header = function Header(
   props: Props<{
-    room: string;
+    room: Source<string>;
   }>
 ) {
   const me = useIdentity();
@@ -131,7 +131,7 @@ const Header = function Header(
 const Joined = function Joined(
   props: Props<{
     joined: Source<boolean, LiveError, true>;
-    me: Identity | null;
+    me: Source<Identity | null>;
   }>
 ) {
   return (
@@ -153,7 +153,7 @@ const Joined = function Joined(
 const Members = function Members(
   props: Props<{
     who: Source<Presence, LiveError, true>;
-    me: Identity | null;
+    me: Source<Identity | null>;
   }>
 ) {
   return (
@@ -205,7 +205,7 @@ type Row = Message & {
 };
 const Chat = function Chat(
   props: Props<{
-    room: string;
+    room: Source<string>;
   }>
 ) {
   const me = useIdentity();
@@ -319,10 +319,10 @@ type Input = InputEvent & {
 };
 const Composer = function Composer(
   props: Props<{
-    room: string;
+    room: Source<string>;
     post: EventHandler<[text: string], never, void, boolean, true>;
-    sending: boolean;
-    error: string | undefined;
+    sending: Source<boolean>;
+    error: Source<string | undefined>;
   }>
 ) {
   const me = useIdentity();
@@ -371,7 +371,7 @@ const Composer = function Composer(
 };
 const Directory = function Directory(
   props: Props<{
-    current: string;
+    current: Source<string>;
   }>
 ) {
   return (
@@ -392,8 +392,8 @@ const Directory = function Directory(
 };
 const DirectoryEntry = function DirectoryEntry(
   props: Props<{
-    name: string;
-    current: string;
+    name: Source<string>;
+    current: Source<string>;
   }>
 ) {
   const wire = createWire();
@@ -428,7 +428,7 @@ const Count = function Count(
 };
 const Card = function Card(
   props: Props<{
-    room: string;
+    room: Source<string>;
   }>
 ) {
   const wire = createWire();
@@ -554,7 +554,7 @@ const ActivityLine = function ActivityLine<E, P extends boolean>(
 };
 const Summary = function Summary(
   props: Props<{
-    room: string;
+    room: Source<string>;
   }>
 ) {
   const [attemptNo, setAttempt] = $signal(1);
@@ -599,8 +599,8 @@ const Summary = function Summary(
 };
 const SummaryText = function SummaryText(
   props: Props<{
-    room: string;
-    attempt: number;
+    room: Source<string>;
+    attempt: Source<number>;
   }>
 ) {
   const text = $memo(
@@ -618,7 +618,7 @@ const SummaryText = function SummaryText(
 };
 const Archive = function Archive(
   props: Props<{
-    room: string;
+    room: Source<string>;
   }>
 ) {
   const stats = $memo(function () {

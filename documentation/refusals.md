@@ -76,14 +76,15 @@ The neighbours of a view, for completeness:
 | a handler read, then called — a prop, a bag's leaf or a context's value: `yield* (yield* props.onSave)()`, `yield* (yield* save)(x)` (D-126: a handler is given as itself) | `yield* props.onSave()`, `yield* props.log.clear()`, `yield* save(x)`; bind it `onClick={yield* props.onSave}` | `Bind` is not an `EventOp` (`yield* props.onSave` binds) | — | — |
 | a source or a hole for a handler prop: `Picker({ onPick: handlerSource })`, `onPick: function* () { return pick; }` | pass the `$event` itself; to choose between two handlers, one `$event` that chooses (an event does not vary per render) | `[HANDLER_PROP]` | — (forced past the types, the child gets a path: calling it fails) | — |
 | a source, a path or a hole for a held prop: `Room({ room })` where `room` is a signal and the prop is declared `room: string` (D-126: a bare type is held, not read) | declare it `Source<string>` (the child reads `yield* props.room`), or pass the value | `[HELD_PROP]` | — | — |
+| a prop declared as a `function*` with no parameters: `Props<{ load: () => Generator<…> }>` (what a caller passes for it is a hole, which the props give as a path; D-126) | declare it `Source<T, E, P>`, or pass the routine inside an object | `[HOLE_TYPED_PROP]` at the declaration | — | — |
 | a plain value for a reactive prop: `Count({ n: 1 })` where `n: Source<number>` (D-126: the child reads it with `yield*`) | `constant(1)`, a source, a path or a hole; or declare it `n: number` (held) | `[REACTIVE_PROP]` | — | — |
 | a reactive read of a held prop: `yield* props.room` where `room: string` | `props.room`: a held value is not read | `string` has no operation iterator | — | — |
 | a provided value of the wrong kind: `Ctx.provide({ value: source })` for `createContext<User, …>`, or `{ value: user }` for `createContext<Source<User>, …>` | the context's declared kind: the value itself for a held context, a source, a path or a hole (`constant(v)`) for a reactive one | `[HELD_PROP]` / `[REACTIVE_PROP]` (prop `value`) | — | — |
-| an `$event` called with no routine running: a timer, a promise callback, `addEventListener`, a transport hook, plain or foreign code, test code (`await save()`) | call it from routine code (`yield* save(x)` in an `$event` or an `$effect`'s effect phase), or let the DOM call it through a bind (`onClick={yield* save}`) | — | `EVENT_OUTSIDE_RUN` (at the call; D-126, D-028 for events) | — |
+| an `$event` called with no routine running: a timer, a promise callback, `addEventListener`, a transport hook, plain or foreign code, test code (`await save()`) | call it from routine code (`yield* save(x)` in an `$event` or an `$effect`'s effect phase), or let the DOM call it through a bind (`onClick={yield* save}`) | — | — (it runs, as Solid's action does; its failures reach no `Errored`) | `no-event-outside-routine` (warning; D-126, Dev 2026-10-15: a lint rule, not a runtime error) |
 
 ## Every code, by layer
 
-Counted against the code (2026-10-06): 4 transform codes (`REFUSALS` in `vite-plugin-solid-yield`), 23 development errors, 12 type-level messages, 20 lint rules (18 errors and 2 warnings in `recommended`; the lint count rechecked 2026-10-14, `no-read-in-setup` had been left out). D-126 (2026-10-13) adds 1 development error (`EVENT_OUTSIDE_RUN`) and 3 type-level messages (`[HANDLER_PROP]`, `[HELD_PROP]`, `[REACTIVE_PROP]`), and removes `[SETTLED_PROP]` (folded into `[REACTIVE_PROP]`).
+Counted against the code (2026-10-06): 4 transform codes (`REFUSALS` in `vite-plugin-solid-yield`), 23 development errors, 12 type-level messages, 21 lint rules (18 errors and 3 warnings in `recommended`; the lint count rechecked 2026-10-14, `no-read-in-setup` had been left out). D-126 (2026-10-13; on `proto/sugar-types` 2026-10-15) adds 4 type-level messages (`[HANDLER_PROP]`, `[HELD_PROP]`, `[REACTIVE_PROP]`, `[HOLE_TYPED_PROP]`) and the lint warning `no-event-outside-routine`, and removes `[SETTLED_PROP]` (folded into `[REACTIVE_PROP]`); its first form's development error `EVENT_OUTSIDE_RUN` became that warning (Dev, 2026-10-15).
 
 **The transform** (`vite-plugin-solid-yield`). A compile error lists each refusal as `[CODE] message (line:column)`. The lint rule `yield-in-jsx-hole` reports the same list.
 
@@ -121,7 +122,6 @@ Counted against the code (2026-10-06): 4 transform codes (`REFUSALS` in `vite-pl
 | `BOUNDARY_CONTENT_BUILT` | a boundary's content was built before the boundary                                                                                                                                                          |
 | `DUPLICATE_RUNTIME`      | a second copy of the runtime is loaded                                                                                                                                                                      |
 | `UNTYPED_THROW`          | a plain `throw` out of a routine (wraps the original as `cause`, naming the host and the component)                                                                                                         |
-| `EVENT_OUTSIDE_RUN`      | an `$event` handler is called directly with no routine running: a timer, a promise callback, plain or foreign code (D-126, D-028 for events). A bound handler the DOM calls, `yield* save(x)` in an `$event` and an effect phase's call are not |
 
 **Type-level messages** (in the expected type TypeScript prints):
 
@@ -149,7 +149,7 @@ Counted against the code (2026-10-06): 4 transform codes (`REFUSALS` in `vite-pl
 
 Every other type refusal is a plain assignability error. The common ones: an op that is not a `SetupOp` / `ViewOp` / `MemoOp` / `EffectOp` / `HoleOp` (reported at `view(` or `component(`); a pending view as a child; a source called as a function; a plain thunk as a child.
 
-**Lint rules** (`eslint-plugin-solid-yield`, `recommended`: every rule an error, `no-unshown-wait` and `require-jsx-factory` warnings):
+**Lint rules** (`eslint-plugin-solid-yield`, `recommended`: every rule an error, `no-unshown-wait`, `require-jsx-factory` and `no-event-outside-routine` warnings):
 
 | Rule                           | Reports                                                                                                                                                                                                        |
 | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -171,6 +171,7 @@ Every other type refusal is a plain assignability error. The common ones: an op 
 | `no-dollar-block`              | `$` / `$scope` (removed, D-013; autofix). The id keeps the pre-D-096 word: `$` made a "block"                                                                                                                  |
 | `require-view-wrapper`         | a view not wrapped in `view(…)` (D-089; autofix)                                                                                                                                                               |
 | `no-unshown-wait`              | a bound handler that may wait on pending data (warning, with types; D-075)                                                                                                                                     |
+| `no-event-outside-routine`     | an `$event` called from a timer, a listener or a promise callback, with no routine running (warning; D-126) |
 | `require-jsx-factory`          | a tsconfig without `"jsxFactory": "jsx"` / `"jsxFragmentFactory": "Fragment"`, so fragments are not type-checked (warning, once per project; D-093)                                                            |
 
 The component-tag refusal names the fix: `[COMPONENT_TAG] call a yield component in a hole: {yield* Comp(props)}`. The first row overload reports `[ROW_VIEW]` before the other overload details.

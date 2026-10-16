@@ -175,3 +175,13 @@ type _fold = Expect<Equal<RequiresOf<never>, never>>;
 render(ReadsDefaulted, root);
 // @ts-expect-error [NO_PROVIDER] the root requires "RequiredTools"
 render(ReadsRequired, root);
+
+// --- a prop typed as a hole ------------------------------------------------------------------
+
+// a `function*` with no parameters passed for a prop is a hole, given as a
+// path: declared as a plain function type it would be read as one it is not
+// @ts-expect-error [HOLE_TYPED_PROP]
+type _holeTyped = Props<{ load: () => Generator<never, number, unknown> }>;
+// a routine factory with parameters, or one inside a bag, is held as it is
+type _withParams = Props<{ make: (n: number) => Generator<never, number, unknown> }>;
+type _inBag = Props<{ tools: { load: () => Generator<never, number, unknown> } }>;

@@ -854,6 +854,15 @@ theorem settled_prop_untracked (σ : Store) (s v : Nat) (settled : σ s = some v
       eval σ (subst (fun _ => .read s) (.prop 0)) = (.done v, [s]) := by
   simp [lowerWith, run, subst, eval, settled]
 
+/-- D-126 in native mode: a prop every caller gives a constant is held, the
+    child reading the value itself, and that is what Solid computes with the
+    constant in place. A prop any caller gives a read is widened to a source
+    and read as a getter (`prop_reads_are_callers`): holding it would track
+    nothing (`settled_prop_untracked`). -/
+theorem held_prop_exact (σ : Store) (n : Nat → Nat) (e : Expr) :
+    run σ (lowerWith (fun i => .ret (n i)) e) = eval σ (subst (fun i => .lit (n i)) e) :=
+  prop_reads_are_callers σ (fun i => .lit (n i)) e
+
 /-! ### Events write; exactly the dependents rerun (S22)
 
 An event computes values and writes them, in order; its reads subscribe to
@@ -1543,6 +1552,7 @@ end Contexts
 #print axioms Insertion.lowerWith_subst
 #print axioms Insertion.prop_reads_are_callers
 #print axioms Insertion.settled_prop_untracked
+#print axioms Insertion.held_prop_exact
 #print axioms Insertion.event_preserves
 #print axioms Insertion.event_untouched
 #print axioms Insertion.untouched_keeps

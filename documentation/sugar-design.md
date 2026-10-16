@@ -2543,4 +2543,62 @@ survivors are mostly conditions TypeScript-ESLint's tree makes always true
 (a function is a property's value, never its key), cache and recursion
 guards, and null checks a guarded visit repeats. The TypeScript plugin and
 failure inference were last measured on 2026-10-08 (48.07 %, 59.57 %); their
-re-runs wait for the D-118 round, which changes both.
+re-runs wait for the D-126 round, which changes both.
+
+
+### Native mode under the holding rule (D-126; 2026-10-15)
+
+PR #3's holding rule (D-126) is merged into this line with Dev's rulings:
+props and context values are held as they are, a reactive one (`Source<T,
+E, P>`) given as a path; native mode keeps D-119 under it (a plain-typed
+prop a caller gives a reactive value is widened from its callers; one every
+caller gives a constant is held); `EVENT_OUTSIDE_RUN` is the lint warning
+`no-event-outside-routine`, not a runtime error. What the merge broke in
+native mode, each now a test:
+
+- **Held reads.** A held prop is read where it is named, without `yield*`
+  (`<p>{p.n}</p>`); reading it in a setup is no `READ_IN_SETUP`, and a prop
+  given a live value still is (`return-bare-live`). A spread of held props
+  is Solid's own; one with a widened prop goes through the bridge. A
+  handler prop is the `$event` itself (`onClick={yield* props.save}`).
+- **Widening reaches every props type.** Only a literal's members were
+  widened, so a prop declared in an interface, an alias or beside a
+  library's attributes got `[HELD_PROP]` on a correct program. It is
+  declared beside the type: `Omit<CardProps, "title"> & { title:
+  Source<CardProps["title"], E, P> }` (an accessor prop's
+  `ReturnType<…>`). `children` keeps its own forms: widening the provider
+  wrapper's `children` undid the wrapper's facade, and a wrapper stopped
+  discharging its context (ts-plugin's review 3 test caught it).
+- **Optional props.** A widened `label?:` is `Path | undefined` in the
+  child where a caller left it out; the child reads it through
+  `nativeOptional` (the path when there is one).
+- **Constants and getters for widened props.** A constant is
+  `constant(v)`; a plain getter for an accessor prop (`count={() => 2}`
+  beside `count={n}`) is a hole, and so is a getter that reads, which the
+  lowering had already made a lexical callback: it was wrapped in
+  `constant` once a round until the fixpoint gave up. A hole refused for a
+  write keeps its own refusal (review slot C05).
+- **Callback props.** Held, a callback prop's call was foreign and failed
+  with `unknown` (`[EVENT_REJECTS]` on correct code). Failure inference
+  follows a call through `props.x` (or a destructured `x`, or a name
+  declared from either) to what each JSX caller passes, through props
+  passed on; `unknown` stays where a caller spreads or the component is
+  named anywhere but as a tag. **Found:** a callback that throws was not
+  reported at all before; it is `[EVENT_REJECTS] … RangeError` at the
+  child's handler.
+- **Contexts.** `ProvidedValue<any>` took only sources (`[REACTIVE_PROP]`
+  for a context typed through a circular alias): it takes anything. A
+  provider's wrong value is TypeScript's TS2322 with plain Solid's types,
+  without the refusal's message in the expected type.
+- **Cascades.** A widened component is generic; when TypeScript refuses its
+  setup it cannot type the call either, and its callers got
+  `[UNDECLARED_PROP]`. That cascade is dropped; an undeclared prop is
+  still reported.
+
+The sugar twins follow PR #3's migration of the explicit ones:
+`todos-sugar` declares its live props `Source<…>` (the generated program
+still matches `todos-yield`); `room-sugar` follows `room-yield`. S21 gains
+`held_prop_exact`. Tests: `native-paths.test.js` (eight programs and one
+check of messages), `native.test.js`, `native-props`, `native-receivers`,
+`native-foreign-apis`, `native-default-components`, `positions`, `sugar`,
+and failure inference's prop-call test.

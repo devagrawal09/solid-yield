@@ -28,7 +28,8 @@ export {
   nativeSpread,
   nativeUntrack,
   nativeUntrackSetup,
-  nativeGetter
+  nativeGetter,
+  nativeOptional
 } from "./native-control.js";
 
 export type { NativeArguments, NativeEventOf, NativeHandlerEvent } from "./native-control.js";

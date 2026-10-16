@@ -22,10 +22,8 @@ export function* compose<C extends Schema>(schema: C) {
   const state = {} as StateOf<C>;
   for (const key of keys) state[key] = schema[key].init() as StateOf<C>[typeof key];
   const [at, setAt] = yield* $store(state);
-  const set = $event(function* (write: (draft: StateOf<C>) => void) {
-    yield* setAt(draft => {
-      write(draft as StateOf<C>);
-    });
+  const set = $event(function* (write: (draft: StateOf<C>) => StateOf<C> | void) {
+    yield* setAt(draft => write(draft as StateOf<C>));
   });
   const parts = {} as { [K in keyof C]: Slice<StateOf<C>[K]> };
   for (const key of keys) parts[key] = focus({ at, set } as Slice<StateOf<C>>, key);

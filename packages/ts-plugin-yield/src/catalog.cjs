@@ -19,7 +19,13 @@ module.exports = Object.freeze({
   PENDING_IN_EFFECT:
     "Read this source in the effect's compute and pass the value; the effect phase runs once and does not wait for pending data.",
   NO_PROVIDER: "Add a context provider above this component; this context has no default value.",
-  SETTLED_PROP: "Pass a ready value, or allow a pending source in this prop's type.",
+  HELD_PROP:
+    "This prop is held as a value: pass the value, or declare the prop reactive (Source<T>) to pass a live one.",
+  REACTIVE_PROP:
+    "This prop is reactive: pass a source or a computed read, or constant(v) for a fixed value.",
+  HANDLER_PROP: "This prop is an event handler: pass an $event, not a source or a computed read.",
+  HOLE_TYPED_PROP:
+    "A prop typed as a function* with no parameters is read as a computed value: declare it Source<T>.",
   PROP_TYPE:
     "Declare this prop's type in the component's props; a bare `any` or `unknown` could hide a pending or failing value.",
   NATIVE_CALLBACK_FAILURE: "Catch the failure inside this callback.",

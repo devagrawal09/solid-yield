@@ -22,6 +22,7 @@ describe("native front end", { timeout: 30_000 }, () => {
       return <button onClick={()=>set(n()+1)}>{twice()}</button>;}`);
     expect(out).toContain("$signal as createSignal");
     expect(out).toContain("component(function* Counter");
+    expect(out).not.toContain("use yield");
     expect(out).toContain("yield* set((yield* n) + 1)");
     expect(out).toContain("onClick={yield* $event(function*");
   });

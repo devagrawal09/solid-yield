@@ -1218,6 +1218,25 @@ const noReadInProp = {
   create(context) {
     const source = context.sourceCode;
     const reported = new WeakSet();
+    const services = source.parserServices;
+    const checker = services?.program?.getTypeChecker();
+    const heldContextValue = (call, prop) => {
+      const key = prop.key.type === "Identifier" && !prop.computed ? prop.key.name : prop.key.value;
+      if (key !== "value" || !checker || !services.esTreeNodeToTSNodeMap) return false;
+      const at = services.esTreeNodeToTSNodeMap.get(call);
+      if (!at || !phantomType(checker, checker.getTypeAtLocation(at.expression), "PROVIDES", at))
+        return false;
+      const parameter = checker.getResolvedSignature(at)?.getParameters()[0];
+      const value =
+        parameter && checker.getTypeOfSymbolAtLocation(parameter, at).getProperty("value");
+      if (!value) return false;
+      const provided = checker.getTypeOfSymbolAtLocation(value, at);
+      const types = provided.isUnion() ? provided.types : [provided];
+      // D-126: only a proven held provider takes an inline value, read once in its caller.
+      return types.some(t =>
+        t.getProperties().some(p => String(p.escapedName).startsWith("[HELD_PROP] prop `value`"))
+      );
+    };
     return {
       YieldExpression(node) {
         if (!node.delegate) return;
@@ -1233,6 +1252,7 @@ const noReadInProp = {
               call.type === "CallExpression" &&
               call.arguments[0] === obj &&
               isComponentCallee(context, call.callee) &&
+              !heldContextValue(call, p) &&
               !reported.has(p)
             ) {
               reported.add(p);

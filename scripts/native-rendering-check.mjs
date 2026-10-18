@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 // Native Rendering half A: the unchanged original (shared/src and the CSR
 // entry) lowers with the recorded notices and gives exactly the recorded,
-// correct diagnostics, at their authored positions: three setup reads
-// (READ_IN_SETUP, D-042) and a root that may fail with ChunkError (a lazy
-// route's chunk; nothing handles it) and may be pending (D-099). The author's
-// minimal fix (examples/harness/native-rendering/author-fix.json) type-checks
+// correct diagnostics, at their authored positions: roots that may fail
+// with ChunkError (a lazy route's chunk; nothing handles it) and may be
+// pending (D-099). Constant-only props are held, not setup reads (D-126).
+// The author fix (examples/harness/native-rendering/author-fix.json) type-checks
 // and lints clean. Half B is examples/harness/native-rendering/check.mjs.
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";

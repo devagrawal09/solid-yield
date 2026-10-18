@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "solidVersion": "2.0.0-rc.13",
-  "typing": "generated TypeScript + recommended generated lint; source mapping/editor not implemented",
+  "typing": "generated TypeScript + recommended generated lint; generated locations here; editor mapping checked separately",
   "historicalCorpus": "27 named categories reconstructed; seven original identities and all verbatim originals unavailable",
   "missingSlots": [
     "T12",
@@ -211,7 +211,7 @@
     {
       "id": "event-updater",
       "expected": "accepted",
-      "source": "import {createSignal,createEffect,createMemo,createStore} from 'solid-js';declare function consume<T>(callback:()=>T):T;export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});return <button onClick={()=>write(c=>{c.n=n()})}/>;}",
+      "source": "import {createSignal,createEffect,createMemo,createStore} from 'solid-js';function consume<T>(callback:()=>T):T{return callback();}export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});return <button onClick={()=>write(c=>{c.n=n()})}/>;}",
       "file": "packages/vite-plugin-yield/test/.native-generated/event-updater.tsx",
       "stage": "accepted",
       "diagnostics": []
@@ -219,7 +219,7 @@
     {
       "id": "event-array-nesting",
       "expected": "accepted",
-      "source": "import {createSignal,createEffect,createMemo,createStore} from 'solid-js';declare function consume<T>(callback:()=>T):T;export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});return <button onClick={()=>[1].filter(()=>n()).forEach(()=>set(n()+1))}/>;}",
+      "source": "import {createSignal,createEffect,createMemo,createStore} from 'solid-js';function consume<T>(callback:()=>T):T{return callback();}export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});return <button onClick={()=>[1].filter(()=>n()).forEach(()=>set(n()+1))}/>;}",
       "file": "packages/vite-plugin-yield/test/.native-generated/event-array-nesting.tsx",
       "stage": "accepted",
       "diagnostics": []
@@ -227,7 +227,7 @@
     {
       "id": "event-promise-nesting",
       "expected": "accepted",
-      "source": "import {createSignal,createEffect,createMemo,createStore} from 'solid-js';declare function consume<T>(callback:()=>T):T;export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});return <button onClick={()=>Promise.resolve().then(()=>set(n()+1))}/>;}",
+      "source": "import {createSignal,createEffect,createMemo,createStore} from 'solid-js';function consume<T>(callback:()=>T):T{return callback();}export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});return <button onClick={()=>Promise.resolve().then(()=>set(n()+1))}/>;}",
       "file": "packages/vite-plugin-yield/test/.native-generated/event-promise-nesting.tsx",
       "stage": "accepted",
       "diagnostics": []
@@ -235,34 +235,82 @@
     {
       "id": "event-deep-nesting",
       "expected": "accepted",
-      "source": "import {createSignal,createEffect,createMemo,createStore} from 'solid-js';declare function consume<T>(callback:()=>T):T;export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});return <button onClick={()=>consume(()=>consume(()=>n()))}/>;}",
+      "source": "import {createSignal,createEffect,createMemo,createStore} from 'solid-js';function consume<T>(callback:()=>T):T{return callback();}export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});return <button onClick={()=>consume(()=>consume(()=>n()))}/>;}",
       "file": "packages/vite-plugin-yield/test/.native-generated/event-deep-nesting.tsx",
       "stage": "accepted",
       "diagnostics": []
     },
     {
+      "id": "event-deep-nesting-ambient-consumer",
+      "expectedDiagnostic": "SUGAR_CALLBACK",
+      "source": "import {createSignal,createEffect,createMemo,createStore} from 'solid-js';declare function consume<T>(callback:()=>T):T;export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});return <button onClick={()=>consume(()=>consume(()=>n()))}/>;}",
+      "stage": "transform",
+      "diagnostics": [
+        {
+          "code": "SUGAR_CALLBACK",
+          "message": "[SUGAR_CALLBACK] This callback can be stored or passed elsewhere. A reactive callback needs a known invocation in its event, memo, or view. (<root>/packages/vite-plugin-yield/test/.native-generated/event-deep-nesting-ambient-consumer.tsx:1:137)"
+        }
+      ]
+    },
+    {
       "id": "effect-compute-nesting",
       "expected": "accepted",
-      "source": "import {createSignal,createEffect,createMemo,createStore} from 'solid-js';declare function consume<T>(callback:()=>T):T;export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});createEffect(()=>consume(()=>n()),value=>{});return <p/>;}",
+      "source": "import {createSignal,createEffect,createMemo,createStore} from 'solid-js';function consume<T>(callback:()=>T):T{return callback();}export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});createEffect(()=>consume(()=>n()),value=>{});return <p/>;}",
       "file": "packages/vite-plugin-yield/test/.native-generated/effect-compute-nesting.tsx",
       "stage": "accepted",
       "diagnostics": []
     },
     {
+      "id": "effect-compute-nesting-ambient-consumer",
+      "expectedDiagnostic": "SUGAR_CALLBACK",
+      "source": "import {createSignal,createEffect,createMemo,createStore} from 'solid-js';declare function consume<T>(callback:()=>T):T;export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});createEffect(()=>consume(()=>n()),value=>{});return <p/>;}",
+      "stage": "transform",
+      "diagnostics": [
+        {
+          "code": "SUGAR_CALLBACK",
+          "message": "[SUGAR_CALLBACK] This callback can be stored or passed elsewhere. A reactive callback needs a known invocation in its event, memo, or view. (<root>/packages/vite-plugin-yield/test/.native-generated/effect-compute-nesting-ambient-consumer.tsx:1:241)"
+        }
+      ]
+    },
+    {
       "id": "effect-phase-nesting",
       "expected": "accepted",
-      "source": "import {createSignal,createEffect,createMemo,createStore} from 'solid-js';declare function consume<T>(callback:()=>T):T;export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});createEffect(()=>n(),value=>{consume(()=>set(n()+value))});return <p/>;}",
+      "source": "import {createSignal,createEffect,createMemo,createStore} from 'solid-js';function consume<T>(callback:()=>T):T{return callback();}export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});createEffect(()=>n(),value=>{consume(()=>set(n()+value))});return <p/>;}",
       "file": "packages/vite-plugin-yield/test/.native-generated/effect-phase-nesting.tsx",
       "stage": "accepted",
       "diagnostics": []
     },
     {
+      "id": "effect-phase-nesting-ambient-consumer",
+      "expectedDiagnostic": "SUGAR_CALLBACK",
+      "source": "import {createSignal,createEffect,createMemo,createStore} from 'solid-js';declare function consume<T>(callback:()=>T):T;export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});createEffect(()=>n(),value=>{consume(()=>set(n()+value))});return <p/>;}",
+      "stage": "transform",
+      "diagnostics": [
+        {
+          "code": "SUGAR_CALLBACK",
+          "message": "[SUGAR_CALLBACK] This callback can be stored or passed elsewhere. A reactive callback needs a known invocation in its event, memo, or view. (<root>/packages/vite-plugin-yield/test/.native-generated/effect-phase-nesting-ambient-consumer.tsx:1:257)"
+        }
+      ]
+    },
+    {
       "id": "memo-opaque-nesting",
       "expected": "accepted",
-      "source": "import {createSignal,createEffect,createMemo,createStore} from 'solid-js';declare function consume<T>(callback:()=>T):T;export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});const value=createMemo(()=>consume(()=>n()));return <p>{value()}</p>;}",
+      "source": "import {createSignal,createEffect,createMemo,createStore} from 'solid-js';function consume<T>(callback:()=>T):T{return callback();}export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});const value=createMemo(()=>consume(()=>n()));return <p>{value()}</p>;}",
       "file": "packages/vite-plugin-yield/test/.native-generated/memo-opaque-nesting.tsx",
       "stage": "accepted",
       "diagnostics": []
+    },
+    {
+      "id": "memo-opaque-nesting-ambient-consumer",
+      "expectedDiagnostic": "SUGAR_CALLBACK",
+      "source": "import {createSignal,createEffect,createMemo,createStore} from 'solid-js';declare function consume<T>(callback:()=>T):T;export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});const value=createMemo(()=>consume(()=>n()));return <p>{value()}</p>;}",
+      "stage": "transform",
+      "diagnostics": [
+        {
+          "code": "SUGAR_CALLBACK",
+          "message": "[SUGAR_CALLBACK] This callback can be stored or passed elsewhere. A reactive callback needs a known invocation in its event, memo, or view. (<root>/packages/vite-plugin-yield/test/.native-generated/memo-opaque-nesting-ambient-consumer.tsx:1:251)"
+        }
+      ]
     },
     {
       "id": "event-chain-arguments",
@@ -807,10 +855,10 @@
       "status": "generated-unverified",
       "foreignBoundaries": [],
       "diagnostics": [],
-      "parity": "not run: no checked native program",
-      "ssr": "not run: no checked native program",
+      "parity": "not run by this evidence check",
+      "ssr": "not run by this evidence check",
       "differingStatements": null,
-      "diffReason": "Generated output still requires a checked app harness.",
+      "diffReason": "Runtime and parity evidence is collected by the separate native app harnesses.",
       "reasons": []
     },
     {
@@ -858,10 +906,10 @@
       "status": "generated-unverified",
       "foreignBoundaries": [],
       "diagnostics": [],
-      "parity": "not run: no checked native program",
-      "ssr": "not run: no checked native program",
+      "parity": "not run by this evidence check",
+      "ssr": "not run by this evidence check",
       "differingStatements": null,
-      "diffReason": "Generated output still requires a checked app harness.",
+      "diffReason": "Runtime and parity evidence is collected by the separate native app harnesses.",
       "reasons": []
     },
     {
@@ -951,7 +999,7 @@
           "code": "solid-yield/no-unshown-wait",
           "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* () {\n              r...`, D-075).",
           "file": "packages/vite-plugin-yield/test/.native-generated/originals/todos/app.tsx",
-          "line": 103,
+          "line": 105,
           "severity": 1
         },
         {
@@ -959,14 +1007,14 @@
           "code": "solid-yield/no-unshown-wait",
           "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* (...args: __NativeAr...`, D-075).",
           "file": "packages/vite-plugin-yield/test/.native-generated/originals/todos/app.tsx",
-          "line": 178,
+          "line": 180,
           "severity": 1
         }
       ],
-      "parity": "not run: no checked native program",
-      "ssr": "not run: no checked native program",
+      "parity": "not run by this evidence check",
+      "ssr": "not run by this evidence check",
       "differingStatements": null,
-      "diffReason": "Generated output still requires a checked app harness.",
+      "diffReason": "Runtime and parity evidence is collected by the separate native app harnesses.",
       "reasons": [
         "solid-yield/no-unshown-wait"
       ]
@@ -1058,7 +1106,7 @@
           "code": "solid-yield/no-unshown-wait",
           "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* () {\n              r...`, D-075).",
           "file": "packages/vite-plugin-yield/test/.native-generated/originals/todos-h/app.tsx",
-          "line": 103,
+          "line": 105,
           "severity": 1
         },
         {
@@ -1066,14 +1114,14 @@
           "code": "solid-yield/no-unshown-wait",
           "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* (...args: __NativeAr...`, D-075).",
           "file": "packages/vite-plugin-yield/test/.native-generated/originals/todos-h/app.tsx",
-          "line": 178,
+          "line": 180,
           "severity": 1
         }
       ],
-      "parity": "not run: no checked native program",
-      "ssr": "not run: no checked native program",
+      "parity": "not run by this evidence check",
+      "ssr": "not run by this evidence check",
       "differingStatements": null,
-      "diffReason": "Generated output still requires a checked app harness.",
+      "diffReason": "Runtime and parity evidence is collected by the separate native app harnesses.",
       "reasons": [
         "solid-yield/no-unshown-wait"
       ]
@@ -1303,10 +1351,10 @@
           "line": 22
         }
       ],
-      "parity": "not run: no checked native program",
-      "ssr": "not run: no checked native program",
+      "parity": "not run by this evidence check",
+      "ssr": "not run by this evidence check",
       "differingStatements": null,
-      "diffReason": "Generated output still requires a checked app harness.",
+      "diffReason": "Runtime and parity evidence is collected by the separate native app harnesses.",
       "reasons": [
         "TS2345"
       ]
@@ -1420,10 +1468,10 @@
           "column": 7
         }
       ],
-      "parity": "not run: no checked native program",
-      "ssr": "not run: no checked native program",
+      "parity": "not run by this evidence check",
+      "ssr": "not run by this evidence check",
       "differingStatements": null,
-      "diffReason": "Generated output still requires a checked app harness.",
+      "diffReason": "Runtime and parity evidence is collected by the separate native app harnesses.",
       "reasons": [
         "solid-yield/no-foreign-reactive",
         "MODULE_STATE"
@@ -1591,7 +1639,7 @@
         ],
         "serverRejections": []
       },
-      "status": "generated-with-diagnostics",
+      "status": "generated-unverified",
       "foreignBoundaries": [
         {
           "code": "NATIVE_FOREIGN_BOUNDARY",
@@ -1622,61 +1670,12 @@
           "column": 9
         }
       ],
-      "diagnostics": [
-        {
-          "stage": "type",
-          "code": "TS2769",
-          "message": "No overload matches this call.\n  Overload 1 of 2, '(body: (props: Props<{ id: string; }>) => Generator<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>, any>): HoleCall<...>', gave the following error.\n    Argument of type '(props: Props<{ id: string; }>) => Generator<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>, ViewFn<ChildView<false, never, false, never>, Element>, any>' is not assignable to parameter of type '(props: Props<{ id: string; }>) => Generator<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>, any>'.\n      Call signature return types 'Generator<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>, ViewFn<ChildView<false, never, false, never>, Element>, any>' and 'Generator<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>, any>' are incompatible.\n        The types returned by 'next(...)' are incompatible between these types.\n          Type 'IteratorResult<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>, ViewFn<ChildView<false, never, false, never>, Element>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>>'.\n            Type 'IteratorYieldResult<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>>'.\n              Type 'IteratorYieldResult<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>>' is not assignable to type 'IteratorYieldResult<SetupOp>'.\n                Type 'Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>' is not assignable to type 'SetupOp'.\n                  Type 'Read<false, never>' is not assignable to type 'SetupOp'.\n                    Property 'kind' is missing in type 'Read<false, never>' but required in type 'Create<string, any>'.\n  Overload 2 of 2, '(body: (props: Props<{ id: string; }>) => Generator<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>, any>): (props: PropsInput<...>) => ComponentView<...>', gave the following error.\n    Argument of type '(props: Props<{ id: string; }>) => Generator<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>, ViewFn<ChildView<false, never, false, never>, Element>, any>' is not assignable to parameter of type '(props: Props<{ id: string; }>) => Generator<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>, any>'.\n      Call signature return types 'Generator<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>, ViewFn<ChildView<false, never, false, never>, Element>, any>' and 'Generator<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>, any>' are incompatible.\n        The types returned by 'next(...)' are incompatible between these types.\n          Type 'IteratorResult<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>, ViewFn<ChildView<false, never, false, never>, Element>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>>'.\n            Type 'IteratorYieldResult<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>>'.\n              Type 'IteratorYieldResult<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>>' is not assignable to type 'IteratorYieldResult<SetupOp>'.\n                Type 'Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>' is not assignable to type 'SetupOp'.\n                  Type 'Read<false, never>' is not assignable to type 'SetupOp'.\n                    Property 'kind' is missing in type 'Read<false, never>' but required in type 'Create<string, any>'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/rendering/components/ErrorStream.tsx",
-          "line": 24
-        },
-        {
-          "stage": "type",
-          "code": "TS2769",
-          "message": "No overload matches this call.\n  Overload 1 of 2, '(body: (props: Props<{ id: string; }>) => Generator<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>, any>): HoleCall<...>', gave the following error.\n    Argument of type '(props: Props<{ id: string; }>) => Generator<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>, ViewFn<ChildView<false, never, false, never>, Element>, any>' is not assignable to parameter of type '(props: Props<{ id: string; }>) => Generator<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>, any>'.\n      Call signature return types 'Generator<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>, ViewFn<ChildView<false, never, false, never>, Element>, any>' and 'Generator<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>, any>' are incompatible.\n        The types returned by 'next(...)' are incompatible between these types.\n          Type 'IteratorResult<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>, ViewFn<ChildView<false, never, false, never>, Element>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>>'.\n            Type 'IteratorYieldResult<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>>'.\n              Type 'IteratorYieldResult<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>>' is not assignable to type 'IteratorYieldResult<SetupOp>'.\n                Type 'Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>' is not assignable to type 'SetupOp'.\n                  Type 'Read<false, never>' is not assignable to type 'SetupOp'.\n                    Property 'kind' is missing in type 'Read<false, never>' but required in type 'Create<string, any>'.\n  Overload 2 of 2, '(body: (props: Props<{ id: string; }>) => Generator<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>, any>): (props: PropsInput<...>) => ComponentView<...>', gave the following error.\n    Argument of type '(props: Props<{ id: string; }>) => Generator<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>, ViewFn<ChildView<false, never, false, never>, Element>, any>' is not assignable to parameter of type '(props: Props<{ id: string; }>) => Generator<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>, any>'.\n      Call signature return types 'Generator<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>, ViewFn<ChildView<false, never, false, never>, Element>, any>' and 'Generator<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>, any>' are incompatible.\n        The types returned by 'next(...)' are incompatible between these types.\n          Type 'IteratorResult<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>, ViewFn<ChildView<false, never, false, never>, Element>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>>'.\n            Type 'IteratorYieldResult<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<ChildView<false, never, false, never>, Element>>'.\n              Type 'IteratorYieldResult<Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>>' is not assignable to type 'IteratorYieldResult<SetupOp>'.\n                Type 'Read<false, never> | Create<\"signal\", never> | Create<\"memo\", never>' is not assignable to type 'SetupOp'.\n                  Type 'Read<false, never>' is not assignable to type 'SetupOp'.\n                    Property 'kind' is missing in type 'Read<false, never>' but required in type 'Create<string, any>'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/rendering/components/ErrorStream.tsx",
-          "line": 64
-        },
-        {
-          "stage": "type",
-          "code": "TS2769",
-          "message": "No overload matches this call.\n  Overload 1 of 2, '(body: (props: Props<{ url?: string | undefined; }>) => Generator<SetupOp, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<...>, Exclude<...>>, Element>, any>): HoleCall<...>', gave the following error.\n    Argument of type '(props: Props<{ url?: string; }>) => Generator<Read<false, never> | Create<\"signal\", never>, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<ChildView<_P0, _E0, _W0, _R0>>, Exclude<Settle<_R0>, RequiredContext<RouterValue, \"<root>/examples/originals/rendering/shared/src/router.tsx#RouterContext\">>>, Element>, any>' is not assignable to parameter of type '(props: Props<{ url?: string | undefined; }>) => Generator<SetupOp, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<ChildView<_P0, _E0, _W0, _R0>>, Exclude<Settle<_R0>, RequiredContext<RouterValue, \"<root>/examples/originals/rendering/shared/src/router.tsx#RouterContext\">>>, Element>, any>'.\n      Call signature return types 'Generator<Read<false, never> | Create<\"signal\", never>, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<ChildView<_P0, _E0, _W0, _R0>>, Exclude<Settle<_R0>, RequiredContext<RouterValue, \"<root>/examples/originals/rendering/shared/src/router.tsx#RouterContext\">>>, Element>, any>' and 'Generator<SetupOp, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<ChildView<_P0, _E0, _W0, _R0>>, Exclude<Settle<_R0>, RequiredContext<RouterValue, \"<root>/examples/originals/rendering/shared/src/router.tsx#RouterContext\">>>, Element>, any>' are incompatible.\n        The types returned by 'next(...)' are incompatible between these types.\n          Type 'IteratorResult<Read<false, never> | Create<\"signal\", never>, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<ChildView<_P0, _E0, _W0, _R0>>, Exclude<Settle<_R0>, RequiredContext<RouterValue, \"<root>/examples/originals/rendering/shared/src/router.tsx#RouterContext\">>>, Element>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<ChildView<_P0, _E0, _W0, _R0>>, Exclude<Settle<_R0>, RequiredContext<RouterValue, \"<root>/examples/originals/rendering/shared/src/router.tsx#RouterContext\">>>, Element>>'.\n            Type 'IteratorYieldResult<Read<false, never> | Create<\"signal\", never>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<ChildView<_P0, _E0, _W0, _R0>>, Exclude<Settle<_R0>, RequiredContext<RouterValue, \"<root>/examples/originals/rendering/shared/src/router.tsx#RouterContext\">>>, Element>>'.\n              Type 'IteratorYieldResult<Read<false, never> | Create<\"signal\", never>>' is not assignable to type 'IteratorYieldResult<SetupOp>'.\n                Type 'Read<false, never> | Create<\"signal\", never>' is not assignable to type 'SetupOp'.\n                  Type 'Read<false, never>' is not assignable to type 'SetupOp'.\n                    Property 'kind' is missing in type 'Read<false, never>' but required in type 'Create<string, any>'.\n  Overload 2 of 2, '(body: (props: Props<{ url?: string | undefined; }>) => Generator<SetupOp, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<...>, Exclude<...>>, Element>, any>): (props?: PropsInput<...> | undefined) => ComponentView<...>', gave the following error.\n    Argument of type '(props: Props<{ url?: string; }>) => Generator<Read<false, never> | Create<\"signal\", never>, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<ChildView<_P0, _E0, _W0, _R0>>, Exclude<Settle<_R0>, RequiredContext<RouterValue, \"<root>/examples/originals/rendering/shared/src/router.tsx#RouterContext\">>>, Element>, any>' is not assignable to parameter of type '(props: Props<{ url?: string | undefined; }>) => Generator<SetupOp, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<ChildView<_P0, _E0, _W0, _R0>>, Exclude<Settle<_R0>, RequiredContext<RouterValue, \"<root>/examples/originals/rendering/shared/src/router.tsx#RouterContext\">>>, Element>, any>'.\n      Call signature return types 'Generator<Read<false, never> | Create<\"signal\", never>, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<ChildView<_P0, _E0, _W0, _R0>>, Exclude<Settle<_R0>, RequiredContext<RouterValue, \"<root>/examples/originals/rendering/shared/src/router.tsx#RouterContext\">>>, Element>, any>' and 'Generator<SetupOp, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<ChildView<_P0, _E0, _W0, _R0>>, Exclude<Settle<_R0>, RequiredContext<RouterValue, \"<root>/examples/originals/rendering/shared/src/router.tsx#RouterContext\">>>, Element>, any>' are incompatible.\n        The types returned by 'next(...)' are incompatible between these types.\n          Type 'IteratorResult<Read<false, never> | Create<\"signal\", never>, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<ChildView<_P0, _E0, _W0, _R0>>, Exclude<Settle<_R0>, RequiredContext<RouterValue, \"<root>/examples/originals/rendering/shared/src/router.tsx#RouterContext\">>>, Element>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<ChildView<_P0, _E0, _W0, _R0>>, Exclude<Settle<_R0>, RequiredContext<RouterValue, \"<root>/examples/originals/rendering/shared/src/router.tsx#RouterContext\">>>, Element>>'.\n            Type 'IteratorYieldResult<Read<false, never> | Create<\"signal\", never>>' is not assignable to type 'IteratorResult<SetupOp, ViewFn<ChildView<PendingOf<ChildView<_P0, _E0, _W0, _R0>>, _E0, MayWaitOf<ChildView<_P0, _E0, _W0, _R0>>, Exclude<Settle<_R0>, RequiredContext<RouterValue, \"<root>/examples/originals/rendering/shared/src/router.tsx#RouterContext\">>>, Element>>'.\n              Type 'IteratorYieldResult<Read<false, never> | Create<\"signal\", never>>' is not assignable to type 'IteratorYieldResult<SetupOp>'.\n                Type 'Read<false, never> | Create<\"signal\", never>' is not assignable to type 'SetupOp'.\n                  Type 'Read<false, never>' is not assignable to type 'SetupOp'.\n                    Property 'kind' is missing in type 'Read<false, never>' but required in type 'Create<string, any>'.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/rendering/router.tsx",
-          "line": 20
-        },
-        {
-          "stage": "lint",
-          "code": "solid-yield/no-read-in-setup",
-          "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/rendering/components/ErrorStream.tsx",
-          "line": 27,
-          "severity": 2
-        },
-        {
-          "stage": "lint",
-          "code": "solid-yield/no-read-in-setup",
-          "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/rendering/components/ErrorStream.tsx",
-          "line": 67,
-          "severity": 2
-        },
-        {
-          "stage": "lint",
-          "code": "solid-yield/no-read-in-setup",
-          "message": "[READ_IN_SETUP] a setup creates; read this source in a view hole, a $memo, an $effect or an $event.",
-          "file": "packages/vite-plugin-yield/test/.native-generated/originals/rendering/router.tsx",
-          "line": 23,
-          "severity": 2
-        }
-      ],
-      "parity": "not run: no checked native program",
-      "ssr": "not run: no checked native program",
+      "diagnostics": [],
+      "parity": "not run by this evidence check",
+      "ssr": "not run by this evidence check",
       "differingStatements": null,
-      "diffReason": "Generated output still requires a checked app harness.",
-      "reasons": [
-        "TS2769",
-        "solid-yield/no-read-in-setup"
-      ]
+      "diffReason": "Runtime and parity evidence is collected by the separate native app harnesses.",
+      "reasons": []
     },
     {
       "twin": "room-yield",
@@ -2081,11 +2080,11 @@
       "diagnostics": [
         {
           "code": "SUGAR_CALLBACK",
-          "message": "[SUGAR_CALLBACK] A reactive read in an unknown callback has no routine host; use a memo, event, or hole. (<root>/examples/originals/room/src/routes/home.tsx:75:57)"
+          "message": "[SUGAR_CALLBACK] This callback can be stored or passed elsewhere. A reactive callback needs a known invocation in its event, memo, or view. (<root>/examples/originals/room/src/routes/live.tsx:180:25)"
         }
       ],
-      "parity": "not run: no checked native program",
-      "ssr": "not run: no checked native program",
+      "parity": "not run by this evidence check",
+      "ssr": "not run by this evidence check",
       "differingStatements": null,
       "diffReason": "No output emitted; a distance for a nonexistent transform is undefined.",
       "reasons": [
@@ -2374,15 +2373,15 @@
         {
           "stage": "type",
           "code": "TS2345",
-          "message": "Argument of type 'HoleCall<{ url?: string | undefined; }, false, ViewFails<Read<false, never> | ChildView<false, ChunkError, false, never> | ChildView<false, NativeFailure<\"global:URIError\">, false, never>, Element>, false, never>' is not assignable to parameter of type '(<A extends PropsInput<{ url?: string | undefined; }, unknown> = PropsInput<{ url?: string | undefined; }, never>>(props?: (A & NoInfer<Undeclared<A, { url?: string | undefined; }>>) | undefined) => ComponentView<false, ViewFails<Read<false, never> | ChildView<false, ChunkError, false, never> | ChildView<false, NativeFailure<\"global:URIError\">, false, never>, Element>, false, HoleRequires<A>>) & { readonly [DECLARED]?: ((props: { url?: string | undefined; }) => { url?: string | undefined; }) | undefined; } & { readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"chunk\" | \"global:URIError\"; }'.\n  Type 'HoleCall<{ url?: string | undefined; }, false, ViewFails<Read<false, never> | ChildView<false, ChunkError, false, never> | ChildView<false, NativeFailure<\"global:URIError\">, false, never>, Element>, false, never>' is not assignable to type '{ readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"chunk\" | \"global:URIError\"; }'.",
+          "message": "Argument of type 'HoleCall<{ url?: string | undefined; }, false, ViewFails<ChildView<false, ChunkError, false, never> | ChildView<false, NativeFailure<\"global:URIError\">, false, never>, Element>, false, never>' is not assignable to parameter of type '(<A extends PropsInput<{ url?: string | undefined; }, unknown> = PropsInput<{ url?: string | undefined; }, never>>(props?: (A & NoInfer<Undeclared<A, { url?: string | undefined; }>>) | undefined) => ComponentView<false, ViewFails<ChildView<false, ChunkError, false, never> | ChildView<false, NativeFailure<\"global:URIError\">, false, never>, Element>, false, HoleRequires<A>>) & { readonly [DECLARED]?: ((props: { url?: string | undefined; }) => { url?: string | undefined; }) | undefined; } & { readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"chunk\" | \"global:URIError\"; }'.\n  Type 'HoleCall<{ url?: string | undefined; }, false, ViewFails<ChildView<false, ChunkError, false, never> | ChildView<false, NativeFailure<\"global:URIError\">, false, never>, Element>, false, never>' is not assignable to type '{ readonly \"[FOREIGN_HANDOFF] a yield component handed to plain Solid may fail with the failure kinds this property lists: handle them inside, or wrap it in an Errored, first\": \"chunk\" | \"global:URIError\"; }'.",
           "file": "packages/vite-plugin-yield/test/.native-generated/originals/docs/main.tsx",
           "line": 4
         }
       ],
-      "parity": "not run: no checked native program",
-      "ssr": "not run: no checked native program",
+      "parity": "not run by this evidence check",
+      "ssr": "not run by this evidence check",
       "differingStatements": null,
-      "diffReason": "Generated output still requires a checked app harness.",
+      "diffReason": "Runtime and parity evidence is collected by the separate native app harnesses.",
       "reasons": [
         "TS2345"
       ]

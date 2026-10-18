@@ -4,6 +4,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 const { makeService, root, ts } = require("./helpers.cjs");
+const message = d => ts.flattenDiagnosticMessageText(d.messageText, "\n");
 const fixture = path.join(root, "review-app");
 function files(variant) {
   const input = Object.fromEntries(
@@ -31,7 +32,7 @@ test("hydrate also reports the pending read with the handoff as a related locati
   input["index.tsx"] = input["index.tsx"].replaceAll("render", "hydrate");
   const { service } = makeService(input);
   try {
-    const d = diagnostics(service).find(d => d.messageText.includes("[PENDING_ROOT]"));
+    const d = diagnostics(service).find(d => message(d).includes("[PENDING_ROOT]"));
     assert.equal(path.basename(d.file.fileName), "App.tsx");
     assert.equal(d.file.getLineAndCharacterOfPosition(d.start).line + 1, 17);
     assert.equal(
@@ -53,12 +54,13 @@ test("an effect failure uses handler advice at its throw site", () => {
     );
   const { service } = makeService(input);
   try {
-    const d = diagnostics(service).find(d => d.messageText.includes("[FOREIGN_HANDOFF]"));
+    const d = diagnostics(service).find(d => message(d).includes("[FOREIGN_HANDOFF]"));
     assert.ok(d);
     assert.equal(path.basename(d.file.fileName), "App.tsx");
     assert.equal(d.file.getLineAndCharacterOfPosition(d.start).line + 1, 8);
-    assert.match(d.messageText, /Catch.*handler.*fails contract/);
-    assert.doesNotMatch(d.messageText, /Errored/);
+    assert.match(message(d), /Catch and handle.*handler/);
+    assert.doesNotMatch(message(d), /declare|fails contract/);
+    assert.doesNotMatch(message(d), /Errored/);
   } finally {
     service.dispose();
   }
@@ -71,11 +73,11 @@ test("a component Error throw is a failure path rather than a missing JSX return
   const { service } = makeService(input);
   try {
     const ds = diagnostics(service);
-    assert.ok(ds.every(d => !d.messageText.includes("SUGAR_RETURN")));
-    const d = ds.find(d => d.messageText.includes("[NATIVE_SETUP_FAILURE]"));
-    assert.ok(d, JSON.stringify(ds.map(d => d.messageText)));
+    assert.ok(ds.every(d => !message(d).includes("SUGAR_RETURN")));
+    const d = ds.find(d => message(d).includes("[NATIVE_SETUP_FAILURE]"));
+    assert.ok(d, JSON.stringify(ds.map(d => message(d))));
     assert.equal(d.file.getLineAndCharacterOfPosition(d.start).line + 1, 8);
-    assert.match(d.messageText, /Move this throw.*memo.*attempt/);
+    assert.match(message(d), /Move this throw.*memo.*attempt/);
   } finally {
     service.dispose();
   }
@@ -87,10 +89,10 @@ test("a timer that really can fail reports its operation, not the component name
     .replace("console.log(count())", "risk(count())");
   const { service } = makeService(input);
   try {
-    const d = diagnostics(service).find(d => d.messageText.includes("[NATIVE_CALLBACK_FAILURE]"));
+    const d = diagnostics(service).find(d => message(d).includes("[NATIVE_CALLBACK_FAILURE]"));
     assert.ok(d);
     assert.equal(d.file.getLineAndCharacterOfPosition(d.start).line + 1, 9);
-    assert.doesNotMatch(d.messageText, /\[generated\]/);
+    assert.doesNotMatch(message(d), /\[generated\]/);
   } finally {
     service.dispose();
   }
@@ -121,20 +123,21 @@ for (const c of require("./fixtures/review-app/expectations.json"))
     try {
       const ds = diagnostics(service);
       if (!c.code) return assert.deepEqual(ds, []);
-      const d = ds.find(d => d.messageText.includes(`[${c.code}]`) && d.code === c.tsCode);
-      assert.ok(d, JSON.stringify(ds.map(d => d.messageText)));
+      const d = ds.find(d => message(d).includes(`[${c.code}]`) && d.code === c.tsCode);
+      assert.ok(d, JSON.stringify(ds.map(d => message(d))));
       assert.equal(d.code, c.tsCode);
       assert.equal(path.basename(d.file.fileName), c.file);
       assert.equal(d.file.getLineAndCharacterOfPosition(d.start).line + 1, c.line);
-      assert.doesNotMatch(d.messageText, /\[generated\]|provenance|may-wait|snapshot-versus-path/);
+      assert.doesNotMatch(message(d), /\[generated\]|provenance|may-wait|snapshot-versus-path/);
       if (["PENDING_ROOT", "NO_PROVIDER", "FOREIGN_HANDOFF"].includes(c.code)) {
         const r = d.relatedInformation.find(r => path.basename(r.file.fileName) === "index.tsx");
         assert.ok(r);
         assert.equal(r.file.getLineAndCharacterOfPosition(r.start).line + 1, 3);
       }
       if (["m03c_throw_in_handler.tsx", "m04_async_handler.tsx"].includes(c.variant)) {
-        assert.match(d.messageText, /handler.*try\/catch.*declare the failure/);
-        assert.doesNotMatch(d.messageText, /Errored/);
+        assert.match(message(d), /handler.*catch and handle/);
+        assert.doesNotMatch(message(d), /declare|fails contract/);
+        assert.doesNotMatch(message(d), /Errored/);
       }
     } finally {
       service.dispose();

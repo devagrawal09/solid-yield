@@ -1,13 +1,15 @@
 // Public codes stay stable; messages explain the next action in plain language.
-const failureAdvice = host =>
+const failureAdvice = (host, native = false) =>
   ["event", "effect"].includes(host)
-    ? "Catch the failure inside this handler, or declare it in the handler's fails contract."
+    ? native
+      ? "Catch and handle the failure inside this handler."
+      : "Catch the failure inside this handler, or declare it in the handler's fails contract."
     : "Wrap this rendered work in Errored, or handle the failure with attempt.";
 module.exports = Object.freeze({
   CATCH_SWALLOWS:
     "This catch discards a failure without handling; return a fallback value, rethrow, or mark the absorption intentional with @yield-absorb.",
   EVENT_REJECTS:
-    "This handler can fail and nothing catches it; wrap the body in try/catch, or declare the failure.",
+    "This handler can fail and nothing catches it; catch and handle the failure inside the handler.",
   MODULE_STATE:
     "Create this state inside a component or a state factory; module state is shared by every render.",
   READ_IN_SETUP: "Move this read into JSX, a memo, an effect, or an event so it stays reactive.",
@@ -31,15 +33,19 @@ module.exports = Object.freeze({
   NATIVE_CALLBACK_FAILURE: "Catch the failure inside this callback.",
   NATIVE_SETUP_FAILURE:
     "Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure.",
-  SUGAR_CALLBACK: "Move this reactive read into JSX, a memo, an effect, or an event.",
-  SUGAR_RETURN: "Return JSX on every component or row path.",
+  SUGAR_CALLBACK:
+    "The checker cannot prove when or where this callback runs. Check the function receiving it, or simplify the call; placing it inside a memo or event does not prove that it runs there.",
   SUGAR_ASYNC: "Keep this function synchronous and use attempt for async work.",
+  SUGAR_ESCAPE:
+    "The checker cannot track this function after it is passed here. Call it from a checked event, memo, or effect instead.",
   COLORED_CAPTURE:
     "Read this source in JSX or a memo and pass the value; plain code given it in setup reads it outside the check, where a pending or failing read cannot be handled.",
   NATIVE_EFFECT_PHASES:
     "Pass a tracked compute function and an untracked effect function to createEffect.",
   NATIVE_ASYNC_SETUP: "Move this async read into an event or memo.",
   FOREIGN_HANDOFF: failureAdvice("view"),
+  DEPENDENT_TYPE:
+    "This component's types could not be inferred, so its render call cannot be checked. Fix the component's errors first.",
   GENERATED_TYPE:
     "Check this operation and the function containing it; the generated code cannot accept it.",
   failureAdvice

@@ -24,7 +24,7 @@
   "errors": [
     {
       "code": "FOREIGN_HANDOFF",
-      "fails": "unknown",
+      "fails": "\"chunk\"",
       "at": "csr/client.tsx:4:15"
     },
     {
@@ -33,28 +33,13 @@
       "at": "csr/client.tsx:4:15"
     },
     {
-      "code": "TS2769",
-      "fails": null,
-      "at": "shared/src/components/ErrorStream.tsx:20:10"
-    },
-    {
-      "code": "TS2769",
-      "fails": null,
-      "at": "shared/src/components/ErrorStream.tsx:47:10"
-    },
-    {
-      "code": "TS2769",
-      "fails": null,
-      "at": "shared/src/router.tsx:20:10"
-    },
-    {
       "code": "PENDING_ROOT",
       "fails": "true",
       "at": "stream/client.tsx:7:5"
     },
     {
       "code": "FOREIGN_HANDOFF",
-      "fails": "unknown",
+      "fails": "\"chunk\"",
       "at": "stream/client.tsx:7:5"
     },
     {
@@ -69,7 +54,7 @@
     },
     {
       "code": "FOREIGN_HANDOFF",
-      "fails": "unknown",
+      "fails": "\"chunk\"",
       "at": "stream/entry-server.tsx:6:17"
     },
     {
@@ -79,27 +64,14 @@
     },
     {
       "code": "FOREIGN_HANDOFF",
-      "fails": "unknown",
+      "fails": "\"chunk\"",
       "at": "string/client.tsx:11:5"
     },
     {
       "code": "FOREIGN_HANDOFF",
-      "fails": "unknown",
+      "fails": "\"chunk\"",
       "at": "string/entry-server.tsx:12:17"
     }
   ],
-  "lint": [
-    {
-      "code": "solid-yield/no-read-in-setup",
-      "at": "shared/src/components/ErrorStream.tsx:21:36"
-    },
-    {
-      "code": "solid-yield/no-read-in-setup",
-      "at": "shared/src/components/ErrorStream.tsx:48:36"
-    },
-    {
-      "code": "solid-yield/no-read-in-setup",
-      "at": "shared/src/router.tsx:22:25"
-    }
-  ]
+  "lint": []
 }

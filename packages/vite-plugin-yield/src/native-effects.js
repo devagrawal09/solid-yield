@@ -1,4 +1,4 @@
-import { traverseOwned } from "./native-owned.js";
+import { traverseOwned, awaitDirective } from "./native-owned.js";
 import { printMapped, copyPosition, nativeRefusal } from "./positions.js";
 // @ts-check
 import babel from "@babel/core";
@@ -32,6 +32,42 @@ const flowRow = param => {
 const hostOf = (routines, file, fn) => {
   if (!fn || fn.node.async || fn.isClassMethod() || fn.isObjectMethod()) return false;
   if (routines.has(`${file}:${fn.node.start}`)) return true;
+  const field = fn.parentPath;
+  const name = field?.isObjectProperty()
+    ? t.isIdentifier(field.node.key)
+      ? field.node.key.name
+      : t.isStringLiteral(field.node.key)
+        ? field.node.key.value
+        : ""
+    : "";
+  if (
+    field?.isObjectProperty() &&
+    field.node.value === fn.node &&
+    !field.node.computed &&
+    /^on[A-Z]/.test(name)
+  ) {
+    const object = field.parentPath;
+    const declaration = object.parentPath;
+    const binding =
+      declaration?.isVariableDeclarator() && t.isIdentifier(declaration.node.id)
+        ? declaration.scope.getBinding(declaration.node.id.name)
+        : undefined;
+    // Match the surface's inline objects and constants used only in DOM spreads.
+    const uses = binding?.constant ? binding.referencePaths : [object];
+    if (
+      uses.length &&
+      uses.every(ref => {
+        const spread = ref.parentPath;
+        return (
+          spread?.isJSXSpreadAttribute() &&
+          t.isJSXOpeningElement(spread.parent) &&
+          t.isJSXIdentifier(spread.parent.name) &&
+          /^[a-z]/.test(spread.parent.name.name)
+        );
+      })
+    )
+      return true;
+  }
   const call = fn.parentPath;
   if (call?.isCallExpression()) {
     const callee = call.get("callee");
@@ -54,6 +90,7 @@ const hostOf = (routines, file, fn) => {
   // Function-valued JSX children and attributes are called by the renderer.
   // Parentheses, conditionals and functions returned from a hole keep that host.
   for (let outer = fn.parentPath; outer; outer = outer.parentPath) {
+    if (outer.isJSXSpreadAttribute()) return false;
     if (!outer.isJSXExpressionContainer()) continue;
     const attr = outer.parentPath;
     // These already have explicit callback bridges in the native surface.
@@ -81,7 +118,7 @@ export function lowerNativeEffects(files, report) {
   // An array's own method runs its callbacks at once, in its caller's host
   // (`items.every(x => …)`, `reduce`, `sort`). In a host, a callback that may
   // fail is a routine too: what it throws is a typed raise there, which the
-  // host takes as it takes a reading callback's (sugar.js delegates both).
+  // host takes as it takes a reading callback's (routines.js delegates both).
   /** @type {{ file: string, owner: Path, callback: string }[]} */
   const runAtOnce = [];
   for (const [file, code] of files) {
@@ -89,6 +126,23 @@ export function lowerNativeEffects(files, report) {
     traverseOwned(program, {
       Function(q) {
         if (report.at(file, q.node.start ?? 0)?.component) routines.add(`${file}:${q.node.start}`);
+        // Native DOM event callbacks own their await boundary even when the
+        // only reactive callee acquires its routine type in a later pass.
+        const expression = q.parentPath,
+          attribute = expression?.parentPath;
+        const opening = attribute?.parentPath;
+        if (
+          q.node.async &&
+          expression?.isJSXExpressionContainer() &&
+          expression.node.expression === q.node &&
+          attribute?.isJSXAttribute() &&
+          t.isJSXIdentifier(attribute.node.name) &&
+          /^on[A-Z]/.test(attribute.node.name.name) &&
+          opening?.isJSXOpeningElement() &&
+          t.isJSXIdentifier(opening.node.name) &&
+          /^[a-z]/.test(opening.node.name.name)
+        )
+          routines.add(`${file}:${q.node.start}`);
       },
       CallExpression(q) {
         const c = q.get("callee");
@@ -182,6 +236,58 @@ export function lowerNativeEffects(files, report) {
       }
   }
   const asyncRoutines = new Set();
+  /** Callbacks an owned helper invokes directly, without storing or handing
+   * them out. Their returned promises are values; the helper owns the await. */
+  /** @type {Map<string, Path>} */ const functions = new Map();
+  for (const [file, code] of files)
+    traverseOwned(parseProgram(code, file), {
+      Function(q) {
+        functions.set(`${file}:${q.node.start}`, q);
+      }
+    });
+  const invokedCallbacks = new Set();
+  for (const [file, code] of files)
+    traverseOwned(parseProgram(code, file), {
+      CallExpression(q) {
+        const target = report.call(file, q.node.start ?? 0, q.node.end ?? 0)?.target;
+        const helper = target && functions.get(target);
+        if (!helper || helper.node.generator) return;
+        q.get("arguments").forEach((argument, i) => {
+          if (!argument.isFunction() || argument.node.async || argument.node.generator) return;
+          const parameter = helper.node.params[i];
+          if (!t.isIdentifier(parameter)) return;
+          const binding = helper.scope.getBinding(parameter.name);
+          if (!binding?.constant || !binding.referencePaths.length) return;
+          if (
+            binding.referencePaths.every(ref => {
+              if (!ref.parentPath?.isCallExpression() || ref.parentPath.node.callee !== ref.node)
+                return false;
+              let owner = ref.getFunctionParent();
+              // The prelude puts try/catch/finally blocks in owned nativeTry
+              // routines. They are control flow of the helper, not an escape.
+              while (owner && owner !== helper) {
+                const call = owner.parentPath;
+                if (
+                  !call?.isCallExpression() ||
+                  !call.node.arguments.some(argument => argument === owner?.node)
+                )
+                  return false;
+                const callee = call.get("callee");
+                const spec = callee.isIdentifier()
+                  ? callee.scope.getBinding(callee.node.name)?.path
+                  : null;
+                const api = imported(spec ?? undefined);
+                if (api?.source !== "solid-yield/internal" || api.name !== "nativeTry")
+                  return false;
+                owner = call.getFunctionParent();
+              }
+              return owner === helper;
+            })
+          )
+            invokedCallbacks.add(`${file}:${argument.node.start}`);
+        });
+      }
+    });
   for (const [file, code] of files)
     parseProgram(code, file)?.traverse({
       Function(q) {
@@ -213,11 +319,12 @@ export function lowerNativeEffects(files, report) {
         const fn = q.getFunctionParent();
         if (
           fn &&
-          asyncRoutines.has(`${file}:${fn.node.start}`) &&
-          !q.parentPath?.isAwaitExpression() &&
-          !q.parentPath?.isReturnStatement() &&
-          !q.parentPath?.isExpressionStatement() &&
-          !(fn.isArrowFunctionExpression() && fn.node.body === q.node)
+          ((asyncRoutines.has(`${file}:${fn.node.start}`) &&
+            !q.parentPath?.isAwaitExpression() &&
+            !q.parentPath?.isExpressionStatement()) ||
+            (invokedCallbacks.has(`${file}:${fn.node.start}`) &&
+              (q.parentPath?.isReturnStatement() ||
+                (fn.isArrowFunctionExpression() && fn.node.body === q.node))))
         )
           keptSites.add(`${q.node.start}:${q.node.end}`);
       }
@@ -246,9 +353,14 @@ export function lowerNativeEffects(files, report) {
       return t.arrowFunctionExpression([e], adapt(kinds, t.identifier("error")));
     };
     /** @param {any} value @param {string[]} kinds @param {import("@babel/core").types.TSTypeAnnotation | null} [returnType] */
-    const attempt = (value, kinds, returnType = null) => {
+    const attempt = (value, kinds, returnType = null, awaited = false) => {
       used.add("attempt");
-      const thunk = t.arrowFunctionExpression([], value);
+      const thunk = t.arrowFunctionExpression(
+        [],
+        awaited ? t.blockStatement([t.returnStatement(value)]) : value
+      );
+      if (awaited && t.isBlockStatement(thunk.body))
+        thunk.body.directives.push(t.directive(t.directiveLiteral(awaitDirective)));
       if (returnType) thunk.returnType = returnType;
       return t.callExpression(t.identifier("__nativeAttempt"), [thunk, handler(kinds)]);
     };
@@ -301,13 +413,121 @@ export function lowerNativeEffects(files, report) {
     };
     /** @param {Path | null} fn */
     const host = fn => hostOf(routines, file, fn);
+    /** The owned helper attempts this ordinary callback at its invocation.
+     * Keep synchronous throws and returned promises there, not in a new
+     * generator the plain callback contract cannot drive. @param {Path | null} fn */
+    const plainInvokedCallback = fn =>
+      !!fn &&
+      invokedCallbacks.has(`${file}:${fn.node.start}`) &&
+      !routines.has(`${file}:${fn.node.start}`);
+    /** Every kept promise must reach an await or return through known value
+     * flows. Storing it in an unused alias is as detached as dropping the call.
+     * @param {Path} value @param {Path} owner @param {Set<import('@babel/core').types.Node>} seen
+     * @returns {boolean} */
+    const consumedPromise = (value, owner, seen) => {
+      if (seen.has(value.node) || value.getFunctionParent() !== owner) return false;
+      seen.add(value.node);
+      const parent = value.parentPath;
+      if (!parent) return false;
+      if (
+        (parent.isAwaitExpression() && parent.node.argument === value.node) ||
+        (parent.isReturnStatement() && parent.node.argument === value.node) ||
+        (parent.isArrowFunctionExpression() &&
+          parent.node === owner.node &&
+          parent.node.body === value.node)
+      )
+        return true;
+      if (
+        parent.isTSAsExpression() ||
+        parent.isTSNonNullExpression() ||
+        parent.isParenthesizedExpression()
+      )
+        return consumedPromise(parent, owner, seen);
+      if (
+        parent.isVariableDeclarator() &&
+        parent.node.init === value.node &&
+        t.isIdentifier(parent.node.id)
+      ) {
+        const binding = parent.scope.getBinding(parent.node.id.name);
+        return (
+          !!binding?.constant &&
+          binding.referencePaths.length > 0 &&
+          binding.referencePaths.every(ref => consumedPromise(ref, owner, new Set(seen)))
+        );
+      }
+      if (
+        parent.isMemberExpression() &&
+        parent.node.object === value.node &&
+        t.isIdentifier(parent.node.property) &&
+        ["then", "catch", "finally"].includes(parent.node.property.name)
+      ) {
+        const call = parent.parentPath;
+        return (
+          !!call?.isCallExpression() &&
+          call.node.callee === parent.node &&
+          consumedPromise(call, owner, seen)
+        );
+      }
+      const argument = parent.isArrayExpression() ? parent : value;
+      const call = argument.parentPath;
+      if (
+        call?.isCallExpression() &&
+        t.isMemberExpression(call.node.callee) &&
+        t.isIdentifier(call.node.callee.object, { name: "Promise" }) &&
+        !call.scope.getBinding("Promise") &&
+        t.isIdentifier(call.node.callee.property) &&
+        ["all", "allSettled", "race", "any", "resolve"].includes(call.node.callee.property.name) &&
+        call.node.arguments[0] === argument.node
+      )
+        return consumedPromise(call, owner, seen);
+      return false;
+    };
 
     // Async reactive helpers run on their caller's host. Await becomes an
     // attempt at its original position; setup cannot admit that read/wait.
     traverseOwned(p, {
-      CallExpression(q) {
+      "CallExpression|NewExpression"(q) {
+        if (!q.isCallExpression() && !q.isNewExpression()) return;
         const info = report.call(file, q.node.start ?? 0, q.node.end ?? 0);
         const owner = q.getFunctionParent();
+        const callee = /** @type {Path} */ (q.get("callee"));
+        const api = callee.isIdentifier()
+          ? imported(callee.scope.getBinding(callee.node.name)?.path)
+          : null;
+        if (
+          owner &&
+          asyncRoutines.has(`${file}:${owner.node.start}`) &&
+          info?.promise &&
+          q.parentPath?.isVariableDeclarator() &&
+          // Async producer completion creates its own local and immediately
+          // returns Promise.resolve(local). It is not an authored kept value.
+          q.parentPath.node.start != null &&
+          !consumedPromise(q, owner, new Set())
+        )
+          throw nativeRefusal(
+            file,
+            q.node,
+            "NATIVE_DETACHED_PROMISE",
+            "This kept promise has an unused or unknown use. Await or return it, or move detached work outside this reactive helper."
+          );
+        if (
+          owner &&
+          asyncRoutines.has(`${file}:${owner.node.start}`) &&
+          info?.promise &&
+          q.parentPath?.isExpressionStatement() &&
+          !(api?.source === "solid-js" && api.name === "refresh") &&
+          !(
+            t.isMemberExpression(q.node.callee) &&
+            t.isIdentifier(q.node.callee.property) &&
+            ["then", "catch", "finally"].includes(q.node.callee.property.name)
+          )
+        )
+          throw nativeRefusal(
+            file,
+            q.node,
+            "NATIVE_DETACHED_PROMISE",
+            "This promise is not awaited or returned. Await it, return it, or handle it outside this reactive helper."
+          );
         if (
           info?.target &&
           asyncRoutines.has(info.target) &&
@@ -348,8 +568,41 @@ export function lowerNativeEffects(files, report) {
             "An effect's phase returns its cleanup; an async function returns a promise, which Solid refuses."
           );
         const kinds = [...(report.at(file, q.node.start ?? 0)?.fails ?? [])];
-        q.node.async = false;
         if (q.isArrowFunctionExpression()) q.arrowFunctionToExpression();
+        // Keep the authored async payload contract while its implementation
+        // becomes a routine. `satisfies` retains literal discriminants and
+        // checks bad results without asserting them away. A direct returned
+        // promise remains a value until the caller settles it.
+        const declared = t.isTSTypeAnnotation(q.node.returnType)
+          ? q.node.returnType.typeAnnotation
+          : null;
+        const payload =
+          t.isTSTypeReference(declared) &&
+          t.isIdentifier(declared.typeName) &&
+          ["Promise", "PromiseLike"].includes(declared.typeName.name) &&
+          declared.typeParameters?.params.length === 1
+            ? declared.typeParameters.params[0]
+            : null;
+        if (payload)
+          q.traverse({
+            Function(inner) {
+              inner.skip();
+            },
+            ReturnStatement(returned) {
+              if (!returned.node.argument) return;
+              returned.node.argument = t.tsSatisfiesExpression(
+                returned.node.argument,
+                t.tsUnionType([
+                  t.cloneNode(payload, true),
+                  t.tsTypeReference(
+                    t.identifier("PromiseLike"),
+                    t.tsTypeParameterInstantiation([t.cloneNode(payload, true)])
+                  )
+                ])
+              );
+            }
+          });
+        q.node.async = false;
         q.node.generator = true;
         q.node.returnType = null;
         // An async producer still returns a promise when it has no await.
@@ -410,12 +663,23 @@ export function lowerNativeEffects(files, report) {
           const value = q.node.argument;
           const info = report.call(file, value.start ?? 0, value.end ?? 0);
           const binding = t.isIdentifier(value) ? q.scope.getBinding(value.name) : undefined;
+          // The child call's attempt already waits and carries its exact
+          // failures. Wrapping it again would replace known empty failures
+          // with unknown after its authored position has been rewritten.
+          if (
+            t.isCallExpression(value) &&
+            t.isIdentifier(value.callee, { name: "__nativeAttempt" })
+          ) {
+            q.replaceWith(value);
+            return;
+          }
           q.replaceWith(
-            (info?.target && asyncRoutines.has(info.target)) ||
-              (t.isCallExpression(value) &&
-                t.isIdentifier(value.callee, { name: "__nativeAttempt" }))
-              ? value
-              : attempt(value, info?.fails ?? keptFailures.get(binding?.path.node) ?? ["unknown"])
+            attempt(
+              value,
+              info?.fails ?? keptFailures.get(binding?.path.node) ?? ["unknown"],
+              null,
+              true
+            )
           );
         }
       },
@@ -466,6 +730,7 @@ export function lowerNativeEffects(files, report) {
       },
       ThrowStatement(q) {
         const fn = q.getFunctionParent();
+        if (plainInvokedCallback(fn)) return;
         if (!host(fn)) return;
         // F-S37: a context guard raises only what its value's narrowed type admits.
         const guard = report.guard(file, q.node.start ?? 0, q.node.end ?? 0);
@@ -522,6 +787,7 @@ export function lowerNativeEffects(files, report) {
       "CallExpression|NewExpression": {
         exit(q) {
           const fn = q.getFunctionParent();
+          if (plainInvokedCallback(fn)) return;
           if (
             !host(fn) ||
             !q.node.start ||
@@ -588,7 +854,7 @@ export function lowerNativeEffects(files, report) {
             q.skip();
             return;
           }
-          // A reactive Promise continuation keeps its lexical host (sugar.js
+          // A reactive Promise continuation keeps its lexical host (routines.js
           // wraps it as a lexical callback); it is not a separate event.
           if (
             !info ||

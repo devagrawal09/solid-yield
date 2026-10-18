@@ -315,6 +315,70 @@ describe("setup operations", () => {
     expect(root.textContent).toBe("30");
   });
 
+  it.each(["signal", "memo"])("readStore unwraps and tracks a %s source", kind => {
+    let update!: () => void;
+    const App = component(function* () {
+      const [items, setItems] = yield* $signal([1, 2, 3]);
+      const list =
+        kind === "memo"
+          ? yield* $memo(function* () {
+              return yield* items;
+            })
+          : items;
+      const remaining = readStore(list, values => values.filter(value => value % 2 !== 0).length);
+      update = () => write(() => setItems([2, 4, 5]));
+      return view(function* () {
+        return <p>{perform(remaining)}</p>;
+      });
+    });
+    mount(App);
+    expect(root.textContent).toBe("2");
+    update();
+    flush();
+    expect(root.textContent).toBe("1");
+  });
+
+  it.each(["resolve", "reject"])(
+    "readStore retains a source pending/failure boundary: %s",
+    async outcome => {
+      let resolve!: (values: number[]) => void;
+      let reject!: (error: Error) => void;
+      const App = component(function* () {
+        const items = yield* $memo(function* () {
+          return yield* attempt(
+            () =>
+              new Promise<number[]>((yes, no) => {
+                resolve = yes;
+                reject = no;
+              }),
+            toError
+          );
+        });
+        const count = readStore(items, values => values.length);
+        return view(function* () {
+          return <p>{perform(count)}</p>;
+        });
+      });
+      mount(() =>
+        Errored({
+          fallback: (error: () => unknown) => <p>failed {(error() as Error).message}</p>,
+          children: () =>
+            Loading({
+              fallback: function* () {
+                return <i>loading</i>;
+              },
+              children: () => App()
+            })
+        })
+      );
+      expect(root.textContent).toBe("loading");
+      if (outcome === "resolve") resolve([1, 2, 3]);
+      else reject(new Error("selection failed"));
+      await settle();
+      expect(root.textContent).toBe(outcome === "resolve" ? "3" : "failed selection failed");
+    }
+  );
+
   it("$store paths and readStore selections are tracked reads", () => {
     let toggle!: () => void;
     const App = component(function* () {

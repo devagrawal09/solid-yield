@@ -114,11 +114,22 @@ export const fixtures = [
       "createEffect(()=>n(),value=>{consume(()=>set(n()+value))});return <p/>;"
     ],
     ["memo-opaque-nesting", "const value=createMemo(()=>consume(()=>n()));return <p>{value()}</p>;"]
-  ].map(([id, body]) => ({
-    id,
-    expected: "accepted",
-    source: `import {createSignal,createEffect,createMemo,createStore} from 'solid-js';declare function consume<T>(callback:()=>T):T;export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});${body}}`
-  })),
+  ].flatMap(([id, body]) => [
+    {
+      id,
+      expected: "accepted",
+      source: `import {createSignal,createEffect,createMemo,createStore} from 'solid-js';function consume<T>(callback:()=>T):T{return callback();}export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});${body}}`
+    },
+    ...(body.includes("consume(")
+      ? [
+          {
+            id: `${id}-ambient-consumer`,
+            expectedDiagnostic: "SUGAR_CALLBACK",
+            source: `import {createSignal,createEffect,createMemo,createStore} from 'solid-js';declare function consume<T>(callback:()=>T):T;export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});${body}}`
+          }
+        ]
+      : [])
+  ]),
   ...[false, true].map(asyncEvent => ({
     id: asyncEvent ? "async-event-chain-arguments" : "event-chain-arguments",
     expected: "accepted",

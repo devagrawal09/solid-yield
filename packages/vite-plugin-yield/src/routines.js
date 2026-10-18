@@ -1,14 +1,14 @@
-import { traverseOwned, opaqueDirective } from "./native-owned.js";
+import { traverseOwned, opaqueDirective, awaitDirective } from "./native-owned.js";
 import { printMapped, withPositions, copyPosition } from "./positions.js";
-/** Experimental project transform. Types are queried on generated virtual files,
- * never asserted onto authored calls. See documentation/sugar-design.md. */
+/** Reconstruct routines by querying generated virtual files, never asserting
+ * types onto authored calls. */
 // @ts-check
 import ts from "typescript";
 import { cachedHost } from "./ts-host.js";
-import { readFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { resolve } from "node:path";
 import { parseProgram } from "./transform.js";
 import babel from "@babel/core";
+import { providerMemberObservation } from "compiler-yield/failure-inference";
 
 /** @typedef {import("@babel/core").NodePath<any>} Path */
 const t = babel.types;
@@ -64,15 +64,58 @@ const fnName = p => {
  * @param {Path} p
  */
 const returnedReader = p => {
-  const at = p.parentPath;
+  // Assertions change the declared view of a returned value, not its handoff.
+  // Follow only these identity wrappers, never calls, storage or aliases.
+  /** @param {Path | null | undefined} path */
+  const outer = path => {
+    let held = path;
+    while (held?.parentPath) {
+      const parent = held.parentPath;
+      if (
+        !(
+          parent.isTSAsExpression() ||
+          parent.isTSTypeAssertion() ||
+          parent.isTSSatisfiesExpression() ||
+          parent.isTSNonNullExpression() ||
+          parent.isParenthesizedExpression()
+        ) ||
+        parent.node.expression !== held.node
+      )
+        break;
+      held = parent;
+    }
+    return held;
+  };
+  const held = outer(p);
+  const at = held?.parentPath;
   if (at?.isReturnStatement()) return true;
-  if (at?.isArrowFunctionExpression() && at.node.body === p.node) return true;
-  const object = at?.isObjectProperty() && at.node.value === p.node ? at.parentPath : null;
+  if (at?.isArrowFunctionExpression() && at.node.body === held?.node) return true;
+  const object = at?.isObjectProperty() && at.node.value === held?.node ? at.parentPath : null;
+  const bag = object?.isObjectExpression() ? outer(object) : null;
+  // Returning a const bag is the same handoff as returning its literal. Do
+  // not classify a bag also passed to other consumers as a returned routine.
+  const declarator =
+    bag?.parentPath?.isVariableDeclarator() && bag.parentPath.node.init === bag.node
+      ? bag.parentPath
+      : null;
+  const name = declarator?.node.id;
+  if (t.isIdentifier(name)) {
+    const binding = declarator?.scope.getBinding(name.name);
+    if (
+      binding?.constant &&
+      binding.referencePaths.length &&
+      binding.referencePaths.every(
+        ref =>
+          outer(ref)?.parentPath?.isReturnStatement() &&
+          ref.getFunctionParent() === declarator?.getFunctionParent()
+      )
+    )
+      return true;
+  }
   return (
     !!object?.isObjectExpression() &&
-    (!!object.parentPath?.isReturnStatement() ||
-      (!!object.parentPath?.isArrowFunctionExpression() &&
-        object.parentPath.node.body === object.node))
+    (!!bag?.parentPath?.isReturnStatement() ||
+      (!!bag?.parentPath?.isArrowFunctionExpression() && bag.parentPath.node.body === bag.node))
   );
 };
 /**
@@ -119,6 +162,34 @@ const control = p =>
  * routine in a later pass; its read waits for it.
  * @param {Path | null} host */
 const anyHostReady = host => !host || !!host.node.generator || lexicalPhase(host) === null;
+/** A named handler used only by known event hosts keeps that phase for
+ * callbacks nested in its body, just as an inline handler does. @param {Path} fn */
+const boundPhase = fn => {
+  const name = fnName(fn);
+  const binding = name ? fn.scope.getBinding(name) : undefined;
+  if (!binding?.constant || !binding.referencePaths.length) return null;
+  const refs = binding.referencePaths.filter(ref => !ref.findParent(p => p.isTSType()));
+  return refs.length &&
+    refs.every(ref => {
+      const call = ref.parentPath;
+      if (!call?.isCallExpression()) return false;
+      // Native event binding forwards a named routine through a generator
+      // wrapper (`$event(function* (...args) { return yield* submit(...args) })`).
+      if (call.node.callee === ref.node) {
+        const host = call.getFunctionParent();
+        const owner = host?.parentPath;
+        if (
+          owner?.isCallExpression() &&
+          owner.node.arguments[0] === host?.node &&
+          lib(owner.get("callee")) === "$event"
+        )
+          return true;
+      }
+      return lib(call.get("callee")) === "$event" && call.node.arguments[0] === ref.node;
+    })
+    ? "event"
+    : null;
+};
 /** Resolve the enclosing phase through any number of plain callbacks.
  * @param {Path} fn @returns {string | null} */
 const lexicalPhase = fn => {
@@ -141,6 +212,8 @@ const lexicalPhase = fn => {
     if (call?.get("callee").isIdentifier({ name: "__nativeLexicalCallback" }))
       return t.isStringLiteral(call.node.arguments[0]) ? call.node.arguments[0].value : null;
     if (api === "component" || api === "view") return null;
+    const phase = boundPhase(outer);
+    if (phase) return phase;
   }
   return null;
 };
@@ -347,21 +420,10 @@ function fail(p, code, message, filename) {
   });
   throw e;
 }
-/** @param {string} code */
-export function isSugar(code) {
-  // Only a directive prologue opts in; a string elsewhere does not.
-  return /^\s*(?:(?:\/\/[^\n]*\n|\/\*[\s\S]*?\*\/)\s*)*["']use yield["']\s*;/.test(code);
-}
 /** @param {string} code @param {string} filename */
-function seed(code, filename, native = false) {
+function seed(code, filename) {
   const p = parseProgram(code, filename);
   if (!p) throw new Error(`Cannot parse ${filename}`);
-  traverseOwned(p, {
-    Function(path) {
-      if (path.node.generator && !native)
-        fail(path, "SUGAR_EXPLICIT", "A sugar file cannot contain authored generators.", filename);
-    }
-  });
   let needsView = false,
     needsComponent = false;
   const wrapped = new WeakSet();
@@ -379,13 +441,11 @@ function seed(code, filename, native = false) {
         const prop = path.parentPath.isObjectProperty() ? key(path.parentPath.node.key) : null;
         const isControl = propCall && control(propCall);
         const isCallback =
-          (native &&
-            call &&
+          (call &&
             t.isIdentifier(call.node.callee) &&
             ["__nativeTry", "__nativeMap"].includes(call.node.callee.name)) ||
           constructors.has(name) ||
-          (native &&
-            propCall &&
+          (propCall &&
             t.isIdentifier(propCall.node.callee) &&
             /^[A-Z]/.test(propCall.node.callee.name) &&
             prop === "children") ||
@@ -409,12 +469,7 @@ function seed(code, filename, native = false) {
           (!path.getFunctionParent() || factoryComponent) &&
           returnsJSX;
         if (returnsJSX && !path.getFunctionParent() && !isComponent)
-          fail(
-            path,
-            "SUGAR_COMPONENT",
-            "A sugar component needs a top-level PascalCase name.",
-            filename
-          );
+          fail(path, "SUGAR_COMPONENT", "A component needs a top-level PascalCase name.", filename);
         const row = isControl && prop === "children" && n.params.length > 0;
         if (!isComponent && (!isCallback || plainFallback)) return;
         if (n.async)
@@ -448,7 +503,6 @@ function seed(code, filename, native = false) {
                 : q.get("argument");
               // A context guard's raise (F-S37) is one too.
               if (
-                native &&
                 failureReturn.isCallExpression() &&
                 (lib(failureReturn.get("callee")) === "raise" ||
                   lib(failureReturn.get("callee"), "solid-yield/internal") === "nativeContextGuard")
@@ -456,14 +510,7 @@ function seed(code, filename, native = false) {
                 return;
               const argument = q.node.argument;
               const element = t.isJSXElement(argument) || t.isJSXFragment(argument);
-              if (!native && !element)
-                fail(
-                  q,
-                  "SUGAR_RETURN",
-                  "A component or row must return JSX on every return path.",
-                  filename
-                );
-              // D-125: in native mode a component returns what Solid renders:
+              // D-125: a component returns what Solid renders:
               // nothing (`return null`, `return;`), or JSX through a ternary,
               // `&&`, an array. What the return computes outside its JSX is
               // computed in the body, as in Solid (a read there is the
@@ -508,8 +555,7 @@ function seed(code, filename, native = false) {
         if (isComponent) {
           needsComponent = true;
           const expr = t.functionExpression(
-            native &&
-              path.parentPath.isVariableDeclarator() &&
+            path.parentPath.isVariableDeclarator() &&
               t.isIdentifier(path.parentPath.node.id) &&
               path.parentPath.node.id.typeAnnotation
               ? null
@@ -545,7 +591,6 @@ function seed(code, filename, native = false) {
     for (const name of [...(needsComponent ? ["component"] : []), ...(needsView ? ["view"] : [])]) {
       const binding = p.scope.getBinding(name)?.path;
       const generatedImport =
-        native &&
         binding?.isImportSpecifier() &&
         binding.parentPath.isImportDeclaration() &&
         binding.parentPath.node.source.value === "solid-yield";
@@ -588,11 +633,7 @@ function seed(code, filename, native = false) {
         if (fn.node.generator && !continuation) return;
         // a method or a getter is lowered where it reads (delegate), never
         // wrapped; so is a reader a function hands back: its caller reads it
-        if (
-          fn.isObjectMethod() ||
-          fn.isClassMethod() ||
-          (native && (returnedReader(fn) || calledOnly(fn)))
-        )
+        if (fn.isObjectMethod() || fn.isClassMethod() || returnedReader(fn) || calledOnly(fn))
           return;
         if (
           api === "attempt" ||
@@ -606,12 +647,14 @@ function seed(code, filename, native = false) {
         )
           return;
         const lexical = lexicalPhase(fn);
+        // Generic consumers need the typed invocation proof in pass(), not
+        // just a lexical event around the callback.
+        if (fnName(fn) || call?.node.arguments.some(argument => argument === fn.node)) return;
         const phase = lexical === "hole" && writingCallbackProp(fn) ? "event" : lexical;
         if (phase && reactiveCallback(fn)) wrapLexical(fn, phase, p);
       }
     }
   });
-  p.node.directives = p.node.directives.filter(d => d.value.value !== "use yield");
   return printer(t.file(p.node));
 }
 /** A pass's program: the previous one's unchanged files are reused (`ts-host.js`).
@@ -625,7 +668,7 @@ function programFor(files, options, oldProgram) {
   });
 }
 /** @param {string} code @param {string} filename @param {ts.Program} program */
-function pass(code, filename, program, native = false) {
+function pass(code, filename, program) {
   const source = program.getSourceFile(filename),
     checker = program.getTypeChecker();
   if (!source) throw new Error(`Missing source ${filename}`);
@@ -639,6 +682,8 @@ function pass(code, filename, program, native = false) {
   const p = parseProgram(code, filename);
   if (!p) throw new Error(`Cannot parse ${filename}`);
   let changed = false;
+  /** @type {Path | null} */ let pendingArrayRefusal = null;
+  /** @type {Path | null} */ let pendingDescriptorRefusal = null;
   /** @param {Path} p */
   const type = p => {
     const n = nodes.get(`${p.node.start}:${p.node.end}`);
@@ -672,7 +717,7 @@ function pass(code, filename, program, native = false) {
   /** D-126: a `provide` whose context holds its value (not a `Source<…>`
    * context, whose value is reactive). @param {Path} call */
   const heldContext = call => {
-    const provide = type(call.get("callee"));
+    const provide = type(/** @type {Path} */ (call.get("callee")));
     const provides = provide
       ?.getProperties()
       .find(/** @param {ts.Symbol} s */ s => s.name.startsWith("__@PROVIDES@"));
@@ -680,6 +725,48 @@ function pass(code, filename, program, native = false) {
     const value = given?.getProperty("value");
     const held = value && checker.getTypeOfSymbolAtLocation(value, source);
     return !!held && !(held.flags & ts.TypeFlags.Any) && !brand(held, "SOURCE");
+  };
+  /** A local bag used only as a known provider value owns its routine
+   * members, as a returned bag does. Unknown uses disqualify the bag.
+   * @param {Path} fn */
+  const providedRoutine = fn => {
+    const member = fn.parentPath;
+    const object = member?.isObjectProperty() ? member.parentPath : null;
+    const declarator =
+      object?.isObjectExpression() && object.parentPath?.isVariableDeclarator()
+        ? object.parentPath
+        : null;
+    const name = declarator?.node.id;
+    if (!t.isIdentifier(name)) return false;
+    const node = nodes.get(`${fn.node.start}:${fn.node.end}`);
+    if (!node || !contextSlots(program, checker).has(node)) return false;
+    /** @param {Path} ref @param {Set<import("@babel/core").types.Node>} seen @returns {boolean} */
+    const onlyProvided = (ref, seen) => {
+      if (ref.findParent(p => p.isTSType())) return true;
+      if (seen.has(ref.node)) return false;
+      seen.add(ref.node);
+      const call = ownerCall(ref);
+      if (propKey(ref) === "value" && call && heldContext(call)) return true;
+      const alias = ref.parentPath;
+      if (
+        !alias?.isVariableDeclarator() ||
+        alias.node.init !== ref.node ||
+        !t.isIdentifier(alias.node.id)
+      )
+        return false;
+      const binding = alias.scope.getBinding(alias.node.id.name);
+      return (
+        !!binding?.constant &&
+        binding.referencePaths.length > 0 &&
+        binding.referencePaths.every(use => onlyProvided(use, seen))
+      );
+    };
+    const binding = declarator?.scope.getBinding(name.name);
+    return (
+      !!binding?.constant &&
+      binding.referencePaths.length > 0 &&
+      binding.referencePaths.every(ref => onlyProvided(ref, new Set()))
+    );
   };
   /** D-126: a reactive prop a caller may leave out (`label?:`): a source or
    * `undefined`. @param {ts.Type | undefined} v */
@@ -704,6 +791,243 @@ function pass(code, filename, program, native = false) {
       ["$signal", "$store", "$optimistic", "$optimisticStore"].includes(
         lib(created.get("callee")) ?? ""
       )
+    );
+  };
+  /** A standard method's type is not proof after a visible override. Follow
+   * local aliases in both directions; no mutable method slot gains ownership.
+   * @param {Path} receiver @param {string} method */
+  const methodOverridden = (receiver, method) => {
+    /** @param {Path} value */
+    const constantKey = value => {
+      if (value.isStringLiteral()) return value.node.value;
+      const typed = type(value);
+      return typed?.isStringLiteral() ? typed.value : undefined;
+    };
+    /** @param {Path} object @returns {boolean} */
+    const assignsMethod = object => {
+      if (!object.isObjectExpression()) return !!type(object)?.getProperty(method);
+      return /** @type {Path[]} */ (object.get("properties")).some(property => {
+        if (property.isSpreadElement())
+          return assignsMethod(/** @type {Path} */ (property.get("argument")));
+        if (!property.isObjectProperty() && !property.isObjectMethod()) return false;
+        return (
+          (property.node.computed
+            ? constantKey(/** @type {Path} */ (property.get("key")))
+            : key(property.node.key)) === method
+        );
+      });
+    };
+    let root = receiver;
+    while (root.isMemberExpression() || root.isYieldExpression() || root.isCallExpression()) {
+      root = /** @type {Path} */ (
+        root.isMemberExpression()
+          ? root.get("object")
+          : root.isYieldExpression()
+            ? root.get("argument")
+            : root.get("callee")
+      );
+    }
+    if (!root.isIdentifier()) return false;
+    /** @type {Set<NonNullable<ReturnType<Path["scope"]["getBinding"]>>>} */ const seen = new Set();
+    /** @param {ReturnType<Path["scope"]["getBinding"]>} binding @returns {boolean} */
+    const inspect = binding => {
+      if (!binding || seen.has(binding)) return false;
+      seen.add(binding);
+      const declaration = binding.path;
+      if (declaration.isVariableDeclarator()) {
+        const init = declaration.get("init");
+        if (init.isIdentifier() && inspect(init.scope.getBinding(init.node.name))) return true;
+      }
+      return binding.referencePaths.some(ref => {
+        const alias = ref.parentPath;
+        if (
+          alias?.isVariableDeclarator() &&
+          alias.node.init === ref.node &&
+          t.isIdentifier(alias.node.id) &&
+          inspect(alias.scope.getBinding(alias.node.id.name))
+        )
+          return true;
+        if (alias?.isCallExpression() && alias.node.arguments[0] === ref.node) {
+          const target = alias.get("callee");
+          if (
+            target.isMemberExpression() &&
+            t.isIdentifier(target.node.object) &&
+            !target.scope.getBinding(target.node.object.name)
+          ) {
+            const api = key(target.node.property);
+            const args = /** @type {Path[]} */ (alias.get("arguments"));
+            if (target.node.object.name === "Object") {
+              if (api === "assign" && args.slice(1).some(assignsMethod)) return true;
+              if (api === "defineProperties" && args[1] && assignsMethod(args[1])) return true;
+              if (api === "defineProperty" && args[1] && constantKey(args[1]) === method)
+                return true;
+            }
+            if (
+              target.node.object.name === "Reflect" &&
+              ["set", "defineProperty"].includes(api) &&
+              args[1] &&
+              constantKey(args[1]) === method
+            )
+              return true;
+          }
+        }
+        let value = ref;
+        if (value.parentPath?.isCallExpression() && value.parentPath.node.callee === value.node)
+          value = value.parentPath;
+        while (
+          value.parentPath?.isMemberExpression() &&
+          value.parentPath.node.object === value.node
+        ) {
+          value = value.parentPath;
+          if (
+            t.isMemberExpression(value.node) &&
+            (value.node.computed
+              ? constantKey(/** @type {Path} */ (value.get("property")))
+              : key(value.node.property)) === method &&
+            ((value.parentPath?.isAssignmentExpression() &&
+              value.parentPath.node.left === value.node) ||
+              value.parentPath?.isUpdateExpression())
+          )
+            return true;
+        }
+        return false;
+      });
+    };
+    return inspect(root.scope.getBinding(root.node.name));
+  };
+  /** Whether this argument has a known invocation, rather than being stored,
+   * forwarded, reassigned, or captured by another function. @param {Path} call @param {number} index */
+  const callbackArgumentOwned = (call, index) => {
+    const callee = /** @type {Path} */ (call.get("callee"));
+    if (
+      callee.isMemberExpression() &&
+      (ARRAY_CALLBACKS.has(key(callee.node.property)) ||
+        ["then", "catch", "finally"].includes(key(callee.node.property))) &&
+      methodOverridden(/** @type {Path} */ (callee.get("object")), key(callee.node.property))
+    )
+      return false;
+    const api = lib(callee);
+    if (["attempt", "$event"].includes(api ?? "") || constructors.has(api) || setterCall(call))
+      return true;
+    if (callee.isIdentifier()) {
+      const spec = callee.scope.getBinding(callee.node.name)?.path;
+      if (
+        spec?.isImportSpecifier() &&
+        spec.parentPath.isImportDeclaration() &&
+        spec.parentPath.node.source.value === "solid-yield/internal" &&
+        t.isIdentifier(spec.node.imported, { name: "nativeTry" })
+      )
+        return true;
+    }
+    if (
+      callee.isIdentifier() &&
+      !callee.scope.getBinding(callee.node.name) &&
+      /^(setTimeout|setInterval|requestAnimationFrame|requestIdleCallback|queueMicrotask)$/.test(
+        callee.node.name
+      )
+    )
+      return true;
+    if (callee.isMemberExpression() && ARRAY_CALLBACKS.has(key(callee.node.property))) {
+      /** @type {ts.Type | undefined} */
+      let receiver = type(/** @type {Path} */ (callee.get("object")));
+      // Native paths and not-yet-delegated reads retain their value type,
+      // even while their generated method has no resolved TS signature.
+      const sourceBrand = receiver
+        ?.getProperties()
+        .find(symbol => symbol.name.startsWith("__@SOURCE@"));
+      if (sourceBrand) receiver = checker.getTypeOfSymbolAtLocation(sourceBrand, source);
+      else if (receiver?.symbol?.name === "Generator" && isOperation(receiver))
+        receiver = checker.getTypeArguments(/** @type {ts.TypeReference} */ (receiver))[1];
+      if (receiver && (checker.isArrayType(receiver) || checker.isTupleType(receiver))) return true;
+    }
+    const node = nodes.get(`${call.node.start}:${call.node.end}`);
+    if (!node || !ts.isCallExpression(node)) return false;
+    const declaration = /** @type {ts.FunctionLikeDeclaration | undefined} */ (
+      checker.getResolvedSignature(node)?.declaration
+    );
+    if (!declaration) return false;
+    const parent = declaration.parent;
+    if (
+      declaration.getSourceFile().isDeclarationFile &&
+      /[\\/]typescript[\\/]lib[\\/]lib\./.test(declaration.getSourceFile().fileName) &&
+      ts.isInterfaceDeclaration(parent) &&
+      ts.isPropertyAccessExpression(node.expression)
+    ) {
+      const method = node.expression.name.text;
+      if (["Array", "ReadonlyArray"].includes(parent.name.text) && ARRAY_CALLBACKS.has(method))
+        return true;
+      if (
+        ["Promise", "PromiseLike"].includes(parent.name.text) &&
+        ["then", "catch", "finally"].includes(method)
+      )
+        return true;
+    }
+    const parameter = declaration.parameters[index];
+    if (!parameter || !ts.isIdentifier(parameter.name) || !declaration.body) return false;
+    const symbol = checker.getSymbolAtLocation(parameter.name);
+    let valid = true,
+      calls = 0;
+    /** @param {ts.Node} n */
+    const visit = n => {
+      if (ts.isTypeNode(n)) return;
+      if (ts.isIdentifier(n) && checker.getSymbolAtLocation(n) === symbol) {
+        if (!ts.isCallExpression(n.parent) || n.parent.expression !== n) valid = false;
+        let owner = ts.findAncestor(n.parent, ts.isFunctionLike);
+        while (owner && owner !== declaration) {
+          const invocation = owner.parent;
+          if (ts.isCallExpression(invocation) && invocation.expression === owner) {
+            owner = ts.findAncestor(invocation.parent, ts.isFunctionLike);
+            continue;
+          }
+          if (
+            !ts.isCallExpression(invocation) ||
+            !invocation.arguments.some(argument => argument === owner) ||
+            !ts.isIdentifier(invocation.expression)
+          ) {
+            valid = false;
+            break;
+          }
+          const spec = checker.getSymbolAtLocation(invocation.expression)?.declarations?.[0];
+          if (
+            !spec ||
+            !ts.isImportSpecifier(spec) ||
+            !ts.isStringLiteral(spec.parent.parent.parent.moduleSpecifier) ||
+            !(
+              ((spec.propertyName ?? spec.name).text === "nativeTry" &&
+                spec.parent.parent.parent.moduleSpecifier.text === "solid-yield/internal") ||
+              ((spec.propertyName ?? spec.name).text === "attempt" &&
+                spec.parent.parent.parent.moduleSpecifier.text === "solid-yield" &&
+                invocation.arguments[0] === owner)
+            )
+          ) {
+            valid = false;
+            break;
+          }
+          owner = ts.findAncestor(invocation.parent, ts.isFunctionLike);
+        }
+        if (owner !== declaration) valid = false;
+        calls++;
+      }
+      ts.forEachChild(n, visit);
+    };
+    visit(declaration.body);
+    return valid && calls > 0;
+  };
+  /** @param {Path} fn */
+  const namedCallbackOwned = fn => {
+    const name = fnName(fn);
+    const binding = name ? fn.scope.getBinding(name) : undefined;
+    const refs = binding?.referencePaths.filter(ref => !ref.findParent(p => p.isTSType())) ?? [];
+    return (
+      !!binding?.constant &&
+      refs.length > 0 &&
+      refs.every(ref => {
+        const call = ref.parentPath;
+        const index = call?.isCallExpression()
+          ? call.node.arguments.findIndex(argument => argument === ref.node)
+          : -1;
+        return !!call?.isCallExpression() && index >= 0 && callbackArgumentOwned(call, index);
+      })
     );
   };
   /** A `then`/`catch`/`finally` receiver, or a const only ever one.
@@ -744,7 +1068,7 @@ function pass(code, filename, program, native = false) {
    * the promise and handles its rejection.
    * @param {Path} call */
   const keptEventCall = call => {
-    if (!native || !brand(type(call), "EVENT_CALL")) return false;
+    if (!brand(type(call), "EVENT_CALL")) return false;
     if (chained(call)) return true;
     const fn = call.getFunctionParent();
     const returned =
@@ -757,7 +1081,7 @@ function pass(code, filename, program, native = false) {
     if (!v) return false;
     if (brand(v, "EVENT_CALL") || brand(v, "COMPONENT")) return true;
     const kind = v.aliasSymbol?.name ?? v.symbol?.name;
-    if (native && kind === "Generator") {
+    if (kind === "Generator") {
       const yields = checker.getTypeArguments(/** @type {ts.TypeReference} */ (v))[0];
       // During reconstruction a routine's yield type can still be unknown.
       // Only a proven plain data yield is excluded from delegation here.
@@ -796,7 +1120,6 @@ function pass(code, filename, program, native = false) {
     )
       return;
     if (
-      !native ||
       !type(value)
         ?.getCallSignatures()
         .some(
@@ -829,7 +1152,7 @@ function pass(code, filename, program, native = false) {
    * @param {Path} value
    */
   const plainWriter = value => {
-    if (!native || !(value.isIdentifier() || value.isMemberExpression())) return;
+    if (!(value.isIdentifier() || value.isMemberExpression())) return;
     const node = nodes.get(`${value.node.start}:${value.node.end}`);
     if (!node) return;
     // A setter itself (not a function that returns its receipt: that is a
@@ -865,7 +1188,7 @@ function pass(code, filename, program, native = false) {
    */
   const callbackPropParams = call => {
     const callee = /** @type {Path} */ (call.get("callee"));
-    if (!native || !callee.isIdentifier({ name: "__nativeLexicalCallback" })) return;
+    if (!callee.isIdentifier({ name: "__nativeLexicalCallback" })) return;
     const owner = ownerCall(call);
     // a provider's value (`bump: (k: number) => …`) is typed by the context's
     // declared slot, as a prop is by the child's
@@ -929,7 +1252,7 @@ function pass(code, filename, program, native = false) {
    */
   const delegateLexical = call => {
     const callee = /** @type {Path} */ (call.get("callee"));
-    if (!native || !callee.isIdentifier({ name: "__nativeLexicalCallback" })) return;
+    if (!callee.isIdentifier({ name: "__nativeLexicalCallback" })) return;
     const [phaseArg, , deferred] = call.node.arguments;
     if (!t.isStringLiteral(phaseArg) || t.isBooleanLiteral(deferred, { value: true })) return;
     // An array method's callback runs synchronously in the host, and the
@@ -953,6 +1276,24 @@ function pass(code, filename, program, native = false) {
     /** @type {Path[]} */ const thunks = [];
     let host = /** @type {Path | null} */ (call.getFunctionParent());
     while (host && !host.node.generator) {
+      // A nested array callback needs its operations carried through the
+      // outer callback too. Bridge that outer callback only when its own
+      // consumer has a proven invocation; lexical phase alone is not proof.
+      const consumer = host.parentPath;
+      const index = consumer?.isCallExpression()
+        ? consumer.node.arguments.findIndex(argument => argument === host?.node)
+        : -1;
+      if (
+        arrayMethod &&
+        host.isArrowFunctionExpression() &&
+        consumer?.isCallExpression() &&
+        index >= 0 &&
+        callbackArgumentOwned(consumer, index)
+      ) {
+        wrapLexical(host, phaseArg.value, p);
+        changed = true;
+        return;
+      }
       if (arrayMethod || !host.isArrowFunctionExpression() || host.node.params.length) return;
       thunks.push(host);
       host = host.parentPath?.getFunctionParent() ?? null;
@@ -1185,7 +1526,7 @@ function pass(code, filename, program, native = false) {
       const member = fn.isObjectMethod() || fn.isClassMethod();
       // D-124: a getter that reads (`get total() { return count() * 2; }`)
       // hands back a source over its body, read where the property is.
-      if (native && member && fn.node.kind === "get" && !fn.node.async) {
+      if (member && fn.node.kind === "get" && !fn.node.async) {
         const self = fn.scope.generateUidIdentifier("self");
         let usesThis = false;
         /** @type {Path} */ (fn.get("body")).traverse({
@@ -1225,7 +1566,7 @@ function pass(code, filename, program, native = false) {
         return;
       }
       // a method that reads is a routine its callers delegate to (`yield* o.total()`)
-      const method = native && member && fn.node.kind === "method" && !fn.node.async;
+      const method = member && fn.node.kind === "method" && !fn.node.async;
       if (fn.node.async || (member && !method))
         fail(
           path,
@@ -1241,7 +1582,6 @@ function pass(code, filename, program, native = false) {
       // routine around it, its reads untracked (`nativeUntrack`); in a
       // component's body, where Solid reads once, settled reads only.
       const untrackCall =
-        native &&
         hostCall?.node.arguments[0] === fn.node &&
         lib(hostCall.get("callee"), "solid-js") === "untrack";
       if (untrackCall && hostCall) {
@@ -1268,7 +1608,6 @@ function pass(code, filename, program, native = false) {
       // delegates to (the call's type is a generator's: `yield*` follows),
       // so its reads and their colors are the host's.
       const iife =
-        native &&
         !untrackCall &&
         hostCall?.node.callee === fn.node &&
         !fn.node.async &&
@@ -1314,16 +1653,39 @@ function pass(code, filename, program, native = false) {
           }
       }
       // a method is a routine of its own (`*total()`), never a lexical callback
+      const provider = providedRoutine(fn);
       let phase =
-        untrackCall || iife || method || (native && (returnedReader(fn) || calledOnly(fn)))
+        untrackCall || iife || method || returnedReader(fn) || calledOnly(fn) || provider
           ? null
           : lexicalPhase(fn);
+      if (phase && fnName(fn) && !namedCallbackOwned(fn)) phase = null;
+      if (
+        phase &&
+        hostCall?.node.arguments.some(argument => argument === fn.node) &&
+        !callbackArgumentOwned(
+          hostCall,
+          hostCall.node.arguments.findIndex(argument => argument === fn.node)
+        )
+      ) {
+        const callee = hostCall.get("callee");
+        // A later statement can establish this receiver type. Wait until the
+        // whole pass is stable before refusing; this does not admit the callback.
+        if (callee.isMemberExpression() && ARRAY_CALLBACKS.has(key(callee.node.property))) {
+          pendingArrayRefusal ??= path;
+          return;
+        }
+        fail(
+          path,
+          "SUGAR_CALLBACK",
+          "This callback can be stored or passed elsewhere. A reactive callback needs a known invocation in its event, memo, or view.",
+          filename
+        );
+      }
       if (phase === "hole" && eventCallbackProp(fn)) phase = "event";
       // An array method's callback in a component's body runs there: its
       // operations are the body's (a read is READ_IN_SETUP, as one beside it).
       // Its receiver may be a read not lowered yet (`items().filter(…)`).
       if (
-        native &&
         !phase &&
         !nativeHost &&
         hostCall?.isCallExpression() &&
@@ -1348,7 +1710,7 @@ function pass(code, filename, program, native = false) {
         if (p) wrapLexical(fn, phase, p);
         nativeHost = true;
       }
-      if (native && !nativeHost) {
+      if (!nativeHost) {
         const scheduler =
           /^(setTimeout|setInterval|requestAnimationFrame|requestIdleCallback|addEventListener|removeEventListener)$/;
         /** @param {Path | null} call */
@@ -1469,7 +1831,14 @@ function pass(code, filename, program, native = false) {
           nativeHost = true;
         }
       }
-      if (!fnName(fn) && !method && !returnedReader(fn) && !attemptHandler && !nativeHost)
+      if (
+        !fnName(fn) &&
+        !method &&
+        !returnedReader(fn) &&
+        !attemptHandler &&
+        !nativeHost &&
+        !provider
+      )
         fail(
           path,
           "SUGAR_CALLBACK",
@@ -1479,10 +1848,8 @@ function pass(code, filename, program, native = false) {
       if (!nativeHost) {
         if (fn.isArrowFunctionExpression()) fn.arrowFunctionToExpression();
         fn.node.generator = true;
-        if (native) {
-          keepDeclaredResult(fn);
-          fn.node.returnType = null;
-        }
+        keepDeclaredResult(fn);
+        fn.node.returnType = null;
       }
     }
     path.replaceWith(t.yieldExpression(operand, true));
@@ -1491,106 +1858,116 @@ function pass(code, filename, program, native = false) {
   }
   // Select structural array operations on the store's value, never on its
   // reactive row paths. Keep the entire method chain in one tracked read.
-  if (native)
-    traverseOwned(p, {
-      CallExpression(path) {
-        const callee = path.get("callee");
-        if (!callee.isMemberExpression()) return;
-        // a store path's read this pass inserted first (`(yield* store.list).map(…)`)
-        const held = callee.get("object");
-        const object =
-            held.isYieldExpression({ delegate: true }) && held.get("argument").isMemberExpression()
-              ? held.get("argument")
-              : held,
-          ct = type(object);
-        if (!sourceType(ct)) return;
-        const symbol = checker.getPropertiesOfType(ct).find(s => s.name.startsWith("__@SOURCE@"));
-        const value = symbol && checker.getTypeOfSymbolAtLocation(symbol, source);
-        if (!value || (!checker.isArrayType(value) && !checker.isTupleType(value))) return;
-        if (
-          ![
-            "filter",
-            "map",
-            "every",
-            "some",
-            "find",
-            "findIndex",
-            "findLast",
-            "findLastIndex",
-            "slice",
-            "reduce",
-            "reduceRight",
-            "includes",
-            "indexOf",
-            "lastIndexOf",
-            "join",
-            "flatMap",
-            "flat",
-            "at",
-            "concat",
-            "toSorted",
-            "toReversed"
-          ].includes(key(callee.node.property))
-        )
-          return;
-        /** @type {Path} */ let chain = path;
-        while (
-          chain.parentPath?.isMemberExpression() &&
-          chain.parentPath.node.object === chain.node
-        ) {
+  traverseOwned(p, {
+    CallExpression(path) {
+      const callee = path.get("callee");
+      if (!callee.isMemberExpression()) return;
+      // a store path's read this pass inserted first (`(yield* store.list).map(…)`)
+      const held = callee.get("object");
+      const object =
+          held.isYieldExpression({ delegate: true }) && held.get("argument").isMemberExpression()
+            ? held.get("argument")
+            : held,
+        ct = type(object);
+      if (!sourceType(ct)) return;
+      const symbol = checker.getPropertiesOfType(ct).find(s => s.name.startsWith("__@SOURCE@"));
+      const value = symbol && checker.getTypeOfSymbolAtLocation(symbol, source);
+      if (!value || (!checker.isArrayType(value) && !checker.isTupleType(value))) return;
+      if (
+        ![
+          "filter",
+          "map",
+          "every",
+          "some",
+          "find",
+          "findIndex",
+          "findLast",
+          "findLastIndex",
+          "slice",
+          "reduce",
+          "reduceRight",
+          "includes",
+          "indexOf",
+          "lastIndexOf",
+          "join",
+          "flatMap",
+          "flat",
+          "at",
+          "concat",
+          "toSorted",
+          "toReversed"
+        ].includes(key(callee.node.property))
+      )
+        return;
+      /** @type {Path} */ let chain = path;
+      while (
+        chain.parentPath?.isMemberExpression() &&
+        chain.parentPath.node.object === chain.node
+      ) {
+        chain = chain.parentPath;
+        if (chain.parentPath?.isCallExpression() && chain.parentPath.node.callee === chain.node)
           chain = chain.parentPath;
-          if (chain.parentPath?.isCallExpression() && chain.parentPath.node.callee === chain.node)
-            chain = chain.parentPath;
-        }
-        // An argument that reads or calls (`reduce(add, n())`) stays in the
-        // routine: the selector is a plain function.
-        let reads = false;
-        for (let at = /** @type {Path | null} */ (path); at; at = at.parentPath) {
-          if (at.isCallExpression())
-            for (const arg of /** @type {Path[]} */ (at.get("arguments"))) {
-              if (arg.isFunction()) continue;
-              if (arg.isYieldExpression() || arg.isCallExpression()) reads = true;
+      }
+      // An argument that reads or calls (`reduce(add, n())`) stays in the
+      // routine: the selector is a plain function.
+      let reads = false;
+      for (let at = /** @type {Path | null} */ (path); at; at = at.parentPath) {
+        if (at.isCallExpression())
+          for (const arg of /** @type {Path[]} */ (at.get("arguments"))) {
+            if (arg.isFunction()) {
+              // A plain store selector cannot carry a callback's operations
+              // into its host. Keep effectful callbacks on the direct read
+              // path, where their lexical bridge can be delegated in place.
+              reads ||= reactiveCallback(arg);
               arg.traverse({
-                Function(q) {
-                  q.skip();
-                },
-                "YieldExpression|CallExpression"() {
-                  reads = true;
+                Function(inner) {
+                  reads ||= reactiveCallback(inner);
                 }
               });
+              continue;
             }
-          if (at === chain) break;
-        }
-        if (reads) {
-          // the path is read where it stands (`(yield* store.list).reduce(…)`)
-          if (held === object) delegate(object);
-          return;
-        }
-        const store = /** @type {any} */ (object.node),
-          state = path.scope.generateUidIdentifier("state");
-        held.replaceWith(state);
-        chain.replaceWith(
-          copyPosition(
-            t.callExpression(t.identifier("__nativeReadStore"), [
-              store,
-              t.arrowFunctionExpression([state], chain.node)
-            ]),
-            chain.node
+            if (arg.isYieldExpression() || arg.isCallExpression()) reads = true;
+            arg.traverse({
+              Function(q) {
+                q.skip();
+              },
+              "YieldExpression|CallExpression"() {
+                reads = true;
+              }
+            });
+          }
+        if (at === chain) break;
+      }
+      if (reads) {
+        // the path is read where it stands (`(yield* store.list).reduce(…)`)
+        if (held === object) delegate(object);
+        return;
+      }
+      const store = /** @type {any} */ (object.node),
+        state = path.scope.generateUidIdentifier("state");
+      held.replaceWith(state);
+      chain.replaceWith(
+        copyPosition(
+          t.callExpression(t.identifier("__nativeReadStore"), [
+            store,
+            t.arrowFunctionExpression([state], chain.node)
+          ]),
+          chain.node
+        )
+      );
+      if (!p.scope.hasBinding("__nativeReadStore")) {
+        p.node.body.unshift(
+          t.importDeclaration(
+            [t.importSpecifier(t.identifier("__nativeReadStore"), t.identifier("readStore"))],
+            t.stringLiteral("solid-yield")
           )
         );
-        if (!p.scope.hasBinding("__nativeReadStore")) {
-          p.node.body.unshift(
-            t.importDeclaration(
-              [t.importSpecifier(t.identifier("__nativeReadStore"), t.identifier("readStore"))],
-              t.stringLiteral("solid-yield")
-            )
-          );
-          p.scope.crawl();
-        }
-        chain.skip();
-        changed = true;
+        p.scope.crawl();
       }
-    });
+      chain.skip();
+      changed = true;
+    }
+  });
   /** A lexical callback, in place or hoisted into a binding (F-S47). @param {Path} arg */
   const lexicalArgument = arg => {
     if (
@@ -1613,19 +1990,50 @@ function pass(code, filename, program, native = false) {
   };
   /** A call given a lexical callback: until the callback's reads are lowered,
    * its result type follows the callback's provisional one. @param {Path} call */
-  const bridgedCall = call => /** @type {Path[]} */ (call.get("arguments")).some(lexicalArgument);
+  const bridgedCall = call => {
+    if (
+      !(
+        /** @type {Path[]} */ (call.get("arguments")).some(
+          (arg, index) =>
+            lexicalArgument(arg) ||
+            (arg.isFunction() && !arg.node.generator && callbackArgumentOwned(call, index))
+        )
+      )
+    )
+      return false;
+    // A concrete generator helper still needs driving. Only plain consumers
+    // can inherit a provisional callback return type.
+    return !type(/** @type {Path} */ (call.get("callee")))
+      ?.getCallSignatures()
+      .some(
+        /** @param {ts.Signature} sig */ sig => {
+          const declaration = sig.declaration;
+          return (
+            isOperation(checker.getReturnTypeOfSignature(sig)) ||
+            (declaration &&
+              (ts.isFunctionDeclaration(declaration) ||
+                ts.isFunctionExpression(declaration) ||
+                ts.isMethodDeclaration(declaration)) &&
+              !!declaration.asteriskToken)
+          );
+        }
+      );
+  };
   traverseOwned(p, {
     YieldExpression(path) {
       const value = path.get("argument");
-      if (!path.node.delegate || !value.isCallExpression()) return;
-      const bridged = bridgedCall(value);
+      if (!path.node.delegate || !value.node) return;
+      const bridged = value.isCallExpression() && bridgedCall(value);
+      const receiver = value.isMemberExpression() ? value.get("object") : null;
+      const nested = receiver?.isYieldExpression({ delegate: true });
+      if (!bridged && !nested) return;
       // A callback's return changes from a routine result to its driven value
       // once its reads are lowered. Remove only that provisional delegation.
       const result = type(value);
       if (
-        bridged &&
         result &&
         !(result.flags & (ts.TypeFlags.Any | ts.TypeFlags.Unknown)) &&
+        !sourceType(result) &&
         !isOperation(result)
       ) {
         path.replaceWith(value.node);
@@ -1635,7 +2043,7 @@ function pass(code, filename, program, native = false) {
     Identifier(path) {
       // Solid's Repeat index is a number; the library's is a source (D-055).
       // Each value use of it is a read (a key is the member rule's).
-      if (!native || !path.isReferencedIdentifier() || path.parentPath.isYieldExpression()) return;
+      if (!path.isReferencedIdentifier() || path.parentPath.isYieldExpression()) return;
       if (path.parentPath.isMemberExpression() && path.key === "property") return;
       const binding = path.scope.getBinding(path.node.name);
       const fn = binding?.kind === "param" ? binding.path.parentPath : null;
@@ -1648,7 +2056,6 @@ function pass(code, filename, program, native = false) {
       delegate(path);
     },
     ReturnStatement(path) {
-      if (!native) return;
       const value = path.get("argument");
       if (!value.isIdentifier() || !sourceType(type(value))) return;
       const binding = value.scope.getBinding(value.node.name)?.path;
@@ -1659,10 +2066,52 @@ function pass(code, filename, program, native = false) {
     },
     CallExpression: {
       enter(path) {
-        if (!native || lib(path.get("callee")) !== "attempt") return;
+        if (lib(path.get("callee")) !== "attempt") return;
         const producer = path.get("arguments.0");
         if (!producer?.isArrowFunctionExpression()) return;
-        const body = producer.get("body");
+        const block = producer.get("body");
+        const awaited =
+          block.isBlockStatement() &&
+          block.node.directives.some(d => d.value.value === awaitDirective);
+        // A kept promise is boxed so its producer is not awaited here. If
+        // that producer later becomes a routine, drive it outside the plain
+        // thunk and keep its returned value boxed (possibly still a promise).
+        const property =
+          block.isObjectExpression() && block.node.properties.length === 1
+            ? block.get("properties.0")
+            : null;
+        const boxed =
+          property?.isObjectProperty() && key(property.node.key) === "value"
+            ? /** @type {Path} */ (property.get("value"))
+            : null;
+        if (
+          boxed?.isCallExpression() &&
+          !opaqueCall(boxed) &&
+          (sourceType(type(boxed.get("callee"))) ||
+            (isOperation(type(boxed)) && !bridgedCall(boxed)))
+        ) {
+          path.replaceWith(
+            t.callExpression(
+              t.functionExpression(
+                null,
+                [],
+                t.blockStatement([
+                  t.returnStatement(
+                    t.objectExpression([
+                      t.objectProperty(t.identifier("value"), t.yieldExpression(boxed.node, true))
+                    ])
+                  )
+                ]),
+                true
+              ),
+              []
+            )
+          );
+          changed = true;
+          path.skip();
+          return;
+        }
+        const body = awaited ? producer.get("body.body.0.argument") : block;
         if (!body.isCallExpression()) return;
         // Native inference runs before context/prop accessors acquire their
         // library types. Once resolved as a source or routine, its own failure
@@ -1673,6 +2122,38 @@ function pass(code, filename, program, native = false) {
           !opaqueCall(body) &&
           (sourceType(type(body.get("callee"))) || (isOperation(type(body)) && !bridgedCall(body)))
         ) {
+          if (awaited) {
+            // Delegation drives the routine, but its return can still be a
+            // kept promise. Settle it at the original caller await, after
+            // the helper has completed its own catch/finally blocks.
+            const result = path.scope.generateUidIdentifier("awaitedResult");
+            const completion = t.blockStatement([t.returnStatement(t.cloneNode(result))]);
+            completion.directives.push(t.directive(t.directiveLiteral(awaitDirective)));
+            const producer = t.arrowFunctionExpression([], completion);
+            const settle = t.callExpression(t.cloneNode(path.node.callee), [
+              producer,
+              ...path.node.arguments.slice(1)
+            ]);
+            path.replaceWith(
+              t.callExpression(
+                t.functionExpression(
+                  null,
+                  [],
+                  t.blockStatement([
+                    t.variableDeclaration("const", [
+                      t.variableDeclarator(result, t.yieldExpression(body.node, true))
+                    ]),
+                    t.returnStatement(t.yieldExpression(settle, true))
+                  ]),
+                  true
+                ),
+                []
+              )
+            );
+            changed = true;
+            path.skip();
+            return;
+          }
           // A hole's attempt (`__nativeHole(attempt(…))`) goes with its wrapper;
           // the call put there is visited afresh, the detached attempt not at all.
           const hole = path.parentPath;
@@ -1691,11 +2172,7 @@ function pass(code, filename, program, native = false) {
         delegateLexical(path);
         if (path.isCallExpression()) callbackPropParams(path);
         if (!path.isCallExpression()) return;
-        if (
-          native &&
-          path.get("callee").isCallExpression() &&
-          lib(path.get("callee.callee")) === "foreign"
-        )
+        if (path.get("callee").isCallExpression() && lib(path.get("callee.callee")) === "foreign")
           return;
         if (opaqueCall(path)) return;
         const callee = path.get("callee"),
@@ -1708,7 +2185,6 @@ function pass(code, filename, program, native = false) {
             path.parentPath.get("callee").isIdentifier({ name: "__nativeHole" }));
         const fallback = path.getFunctionParent();
         if (
-          native &&
           fallback &&
           !fallback.node.generator &&
           fallback.parentPath.isObjectProperty() &&
@@ -1749,7 +2225,7 @@ function pass(code, filename, program, native = false) {
             (!bridgedCall(path) || setterCall(path)) &&
             !keptEventCall(path)) ||
             lib(callee) === "readStore" ||
-            (native && ["latestOf", "isPendingOf"].includes(lib(callee))))
+            ["latestOf", "isPendingOf"].includes(lib(callee)))
         )
           delegate(path);
       }
@@ -1783,7 +2259,7 @@ function pass(code, filename, program, native = false) {
         // a context's `state.rows`), is read where a routine uses it.
         const base = path.get("object");
         const baseKind = base.isIdentifier() ? base.scope.getBinding(base.node.name)?.kind : null;
-        if (native && baseKind && !path.node.computed) {
+        if (baseKind && !path.node.computed) {
           const own = type(base);
           const name = key(path.node.property);
           const brandSymbol = own
@@ -1834,7 +2310,7 @@ function pass(code, filename, program, native = false) {
           (path.parentPath.isCallExpression() && path.key === "callee")
         )
           return;
-        if (native && optionalSource(type(path))) {
+        if (optionalSource(type(path))) {
           if (
             path.parentPath.isCallExpression() &&
             path.parentPath.get("callee").isIdentifier({ name: "__nativeOptional" })
@@ -1862,7 +2338,7 @@ function pass(code, filename, program, native = false) {
           return;
         }
         if (!sourceType(type(path))) return;
-        if (native && path.parentPath.isVariableDeclarator() && path.key === "init") {
+        if (path.parentPath.isVariableDeclarator() && path.key === "init") {
           let root = path.get("object");
           while (root.isMemberExpression()) root = root.get("object");
           const binding = root.isIdentifier() ? root.scope.getBinding(root.node.name)?.path : null;
@@ -1883,7 +2359,245 @@ function pass(code, filename, program, native = false) {
         // A source an object literal holds (`const api = { count }`) is that
         // source: Solid's `api.count` is the accessor, read only where it is
         // called. A getter's member is read where it is (D-124), a store's key too.
-        if (native && !path.node.computed) {
+        if (!path.node.computed) {
+          /** Descriptor stability is separate from accessor-use safety. A
+           * leaf may escape (and must remain an accessor for contextSlots to
+           * refuse it), but the containing bag cannot reach unknown mutation.
+           * @param {ts.VariableDeclaration} declaration @param {Set<ts.Symbol>} seen
+           * @returns {boolean} */
+          const stableDescriptor = (declaration, seen) => {
+            const symbol = checker.getSymbolAtLocation(declaration.name);
+            if (!symbol || seen.has(symbol)) return false;
+            seen = new Set([...seen, symbol]);
+            let stable = true;
+            const initial = objectsAt(declaration.initializer, new Set(), false);
+            if (!initial?.length) return false;
+            /** @param {string} name @returns {ts.ObjectLiteralElementLike[] | null} */
+            const dataFields = name => {
+              /** @type {ts.ObjectLiteralElementLike[]} */ const fields = [];
+              for (const object of initial) {
+                if (
+                  object.properties.some(
+                    property =>
+                      ts.isSpreadAssignment(property) ||
+                      (property.name && ts.isComputedPropertyName(property.name))
+                  )
+                )
+                  return null;
+                const matching = object.properties.filter(
+                  property =>
+                    property.name &&
+                    (ts.isIdentifier(property.name) || ts.isStringLiteral(property.name)) &&
+                    property.name.text === name
+                );
+                if (
+                  matching.length !== 1 ||
+                  !(
+                    ts.isPropertyAssignment(matching[0]) ||
+                    ts.isShorthandPropertyAssignment(matching[0]) ||
+                    ts.isMethodDeclaration(matching[0])
+                  )
+                )
+                  return null;
+                fields.push(matching[0]);
+              }
+              return fields;
+            };
+            /** @type {ts.Node | undefined} */ let owner = declaration.parent;
+            while (owner && !ts.isFunctionLike(owner)) owner = owner.parent;
+            /** @param {ts.Node} reference */
+            const permitted = reference => {
+              let value = reference;
+              while (
+                value.parent &&
+                (ts.isAsExpression(value.parent) ||
+                  ts.isSatisfiesExpression(value.parent) ||
+                  ts.isParenthesizedExpression(value.parent) ||
+                  ts.isNonNullExpression(value.parent) ||
+                  ts.isTypeAssertionExpression(value.parent))
+              )
+                value = value.parent;
+              const parent = value.parent;
+              if (ts.isTypeNode(parent)) return true;
+              if (
+                ts.isVariableDeclaration(parent) &&
+                parent.initializer === value &&
+                ts.isIdentifier(parent.name) &&
+                parent.parent.flags & ts.NodeFlags.Const
+              )
+                return stableDescriptor(parent, seen);
+              if (
+                ts.isVariableDeclaration(parent) &&
+                parent.initializer === value &&
+                ts.isObjectBindingPattern(parent.name)
+              )
+                return parent.name.elements.every(element => {
+                  const name = element.propertyName ?? element.name;
+                  return (
+                    !element.dotDotDotToken &&
+                    !element.initializer &&
+                    (ts.isIdentifier(name) || ts.isStringLiteral(name)) &&
+                    !!dataFields(name.text)
+                  );
+                });
+              if (ts.isReturnStatement(parent)) {
+                let returnedBy = parent.parent;
+                while (returnedBy && !ts.isFunctionLike(returnedBy)) returnedBy = returnedBy.parent;
+                return returnedBy === owner;
+              }
+              if (
+                (ts.isPropertyAccessExpression(parent) || ts.isElementAccessExpression(parent)) &&
+                parent.expression === value
+              ) {
+                if (ts.isDeleteExpression(parent.parent)) return false;
+                const name = ts.isPropertyAccessExpression(parent)
+                  ? parent.name
+                  : parent.argumentExpression;
+                const fields =
+                  (ts.isIdentifier(name) && ts.isPropertyAccessExpression(parent)) ||
+                  ts.isStringLiteral(name)
+                    ? dataFields(name.text)
+                    : null;
+                if (!fields) return false;
+                if (!ts.isCallExpression(parent.parent) || parent.parent.expression !== parent)
+                  return true;
+                return providerMemberObservation(ts, checker, declaration, value, true);
+              }
+              /** @type {ts.Expression | ts.JsxTagNameExpression | undefined} */ let tag;
+              if (
+                ts.isPropertyAssignment(parent) &&
+                parent.initializer === value &&
+                parent.name.getText() === "value" &&
+                ts.isObjectLiteralExpression(parent.parent) &&
+                ts.isCallExpression(parent.parent.parent)
+              )
+                tag = parent.parent.parent.expression;
+              if (
+                ts.isJsxExpression(parent) &&
+                ts.isJsxAttribute(parent.parent) &&
+                parent.parent.name.getText() === "value"
+              )
+                tag = parent.parent.parent.parent.tagName;
+              if (tag && ts.isPropertyAccessExpression(tag) && tag.name.text === "provide")
+                tag = tag.expression;
+              return (
+                !!tag &&
+                checker
+                  .getTypeAtLocation(tag)
+                  .getProperties()
+                  .some(property => property.name.startsWith("__@CONTEXT@"))
+              );
+            };
+            /** @param {ts.Node} node */
+            const references = node => {
+              if (!stable || ts.isTypeNode(node)) return;
+              if (
+                ts.isIdentifier(node) &&
+                node !== declaration.name &&
+                (checker.getSymbolAtLocation(node) === symbol ||
+                  (ts.isShorthandPropertyAssignment(node.parent) &&
+                    checker.getShorthandAssignmentValueSymbol(node.parent) === symbol)) &&
+                !permitted(node)
+              )
+                stable = false;
+              ts.forEachChild(node, references);
+            };
+            references(declaration.getSourceFile());
+            return stable;
+          };
+          /** Own data properties also survive an immutable alias or a
+           * factory's returned literal. This is identity, not an ownership
+           * proof: unsafe uses must remain visible to contextSlots.
+           * @param {ts.Expression | undefined} value @param {Set<ts.Node>} seen @param {boolean} [descriptors]
+           * @returns {ts.ObjectLiteralExpression[] | null} */
+          const objectsAt = (value, seen, descriptors = true) => {
+            if (!value || seen.has(value) || seen.size > 32) return null;
+            seen = new Set([...seen, value]);
+            if (
+              ts.isParenthesizedExpression(value) ||
+              ts.isAsExpression(value) ||
+              ts.isTypeAssertionExpression(value) ||
+              ts.isSatisfiesExpression(value) ||
+              ts.isNonNullExpression(value) ||
+              ts.isYieldExpression(value)
+            )
+              return objectsAt(value.expression, seen, descriptors);
+            if (ts.isObjectLiteralExpression(value)) return [value];
+            if (ts.isIdentifier(value)) {
+              let symbol = checker.getSymbolAtLocation(value);
+              if (symbol && symbol.flags & ts.SymbolFlags.Alias)
+                symbol = checker.getAliasedSymbol(symbol);
+              const declaration = symbol?.valueDeclaration;
+              return declaration &&
+                ts.isVariableDeclaration(declaration) &&
+                ts.isIdentifier(declaration.name) &&
+                declaration.parent.flags & ts.NodeFlags.Const &&
+                (!descriptors || stableDescriptor(declaration, new Set()))
+                ? objectsAt(declaration.initializer, seen, descriptors)
+                : null;
+            }
+            if (!ts.isCallExpression(value)) return null;
+            const declaration = checker.getResolvedSignature(value)?.declaration;
+            const body = declaration && "body" in declaration ? declaration.body : undefined;
+            if (
+              !body ||
+              !ts.isBlock(body) ||
+              body.statements.some(
+                statement =>
+                  ts.isExpressionStatement(statement) &&
+                  ts.isStringLiteral(statement.expression) &&
+                  statement.expression.text === opaqueDirective
+              )
+            )
+              return null;
+            /** @type {(ts.Expression | undefined)[]} */ const returns = [];
+            /** @param {ts.Node} node */
+            const collect = node => {
+              if (ts.isFunctionLike(node)) return;
+              if (ts.isReturnStatement(node)) returns.push(node.expression);
+              else ts.forEachChild(node, collect);
+            };
+            collect(body);
+            const objects = returns.map(result => objectsAt(result, seen, descriptors));
+            return objects.length && objects.every(values => values !== null)
+              ? objects.flatMap(values => values ?? [])
+              : null;
+          };
+          const member = nodes.get(`${path.node.start}:${path.node.end}`);
+          const objects =
+            member && ts.isPropertyAccessExpression(member)
+              ? objectsAt(member.expression, new Set(), false)
+              : null;
+          if (
+            objects?.every(object => {
+              if (
+                object.properties.some(
+                  property =>
+                    ts.isSpreadAssignment(property) ||
+                    (property.name && ts.isComputedPropertyName(property.name))
+                )
+              )
+                return false;
+              const fields = object.properties.filter(
+                property =>
+                  property.name &&
+                  (ts.isIdentifier(property.name) || ts.isStringLiteral(property.name)) &&
+                  property.name.text === key(path.node.property)
+              );
+              return (
+                fields.length === 1 &&
+                (ts.isPropertyAssignment(fields[0]) || ts.isShorthandPropertyAssignment(fields[0]))
+              );
+            })
+          ) {
+            if (
+              member &&
+              ts.isPropertyAccessExpression(member) &&
+              !objectsAt(member.expression, new Set())
+            )
+              pendingDescriptorRefusal ??= path;
+            return;
+          }
           const holder = path.get("object");
           const binding = holder.isIdentifier() ? holder.scope.getBinding(holder.node.name) : null;
           const literal =
@@ -1911,7 +2625,6 @@ function pass(code, filename, program, native = false) {
         const value = path.get("value");
         if (value.isFunction()) return;
         if (
-          native &&
           key(path.node.key) === "value" &&
           t.isMemberExpression(call.node.callee) &&
           key(call.node.callee.property) === "provide" &&
@@ -2004,7 +2717,6 @@ function pass(code, filename, program, native = false) {
         // provider reads its value once), as a bare read is (D-122 above):
         // not a hole, which only a reactive (`Source<…>`) context takes.
         if (
-          native &&
           reads &&
           key(path.node.key) === "value" &&
           t.isMemberExpression(call.node.callee) &&
@@ -2022,7 +2734,6 @@ function pass(code, filename, program, native = false) {
         handoff(e);
       const owner = path.getFunctionParent();
       if (
-        native &&
         owner &&
         !owner.node.generator &&
         owner.parentPath.isObjectProperty() &&
@@ -2053,6 +2764,43 @@ function pass(code, filename, program, native = false) {
         delegate(first);
     }
   });
+  // Async continuations are already generators when this pass starts.
+  // Bridge them only after the receiver is proven to be a real Promise.
+  traverseOwned(p, {
+    Function: {
+      exit(fn) {
+        if (!fn.node.generator || fn.node.async) return;
+        const call = fn.parentPath;
+        if (!call?.isCallExpression()) return;
+        const callee = call.get("callee");
+        if (
+          !callee.isMemberExpression() ||
+          !["then", "catch", "finally"].includes(key(callee.node.property))
+        )
+          return;
+        const index = call.node.arguments.findIndex(argument => argument === fn.node);
+        const phase = lexicalPhase(fn);
+        if (index >= 0 && phase && callbackArgumentOwned(call, index)) {
+          wrapLexical(fn, phase, p);
+          changed = true;
+        }
+      }
+    }
+  });
+  if (!changed && pendingDescriptorRefusal)
+    fail(
+      pendingDescriptorRefusal,
+      "NATIVE_ACCESSOR_DESCRIPTOR",
+      "This accessor member may have changed into a getter; its descriptor is not proven stable.",
+      filename
+    );
+  if (!changed && pendingArrayRefusal)
+    fail(
+      pendingArrayRefusal,
+      "SUGAR_CALLBACK",
+      "This callback can be stored or passed elsewhere. A reactive callback needs a known invocation in its event, memo, or view.",
+      filename
+    );
   return changed ? printer(t.file(p.node)) : code;
 }
 /**
@@ -2066,7 +2814,7 @@ function pass(code, filename, program, native = false) {
  * while Solid reads every prop lazily (Dev, 2026-10-15: widen it). An accessor
  * prop (F-S54: declared `() => T`, given a source) counts too.
  * @param {ts.Program} program @param {Set<string>} active
- * @returns {{wanted: Map<string, Map<string, Set<string>>>, concrete: Map<string, Map<string, Map<string, {pending: boolean, fails: Set<string>}>>>, accessors: Map<string, Map<string, Set<string>>>}} file → component → props
+ * @returns {{wanted: Map<string, Map<string, Set<string>>>, concrete: Map<string, Map<string, Map<string, {pending: boolean, fails: Set<string>}>>>, accessors: Map<string, Map<string, Set<string>>>, outside: Map<string, Map<string, Map<string, boolean>>>, calls: Map<string, Map<string, string[]>>}} file -> component -> props
  */
 function coloredPropSites(program, active) {
   const checker = program.getTypeChecker();
@@ -2085,6 +2833,7 @@ function coloredPropSites(program, active) {
    * attributes), by whether each is optional: widened beside the type.
    * @type {Map<string, Map<string, Map<string, boolean>>>} */
   const outside = new Map();
+  /** @type {Map<string, Map<string, string[]>>} */ const calls = new Map();
   const printer = ts.createPrinter();
   /** @param {ts.VariableDeclaration} declaration @returns {ts.VariableDeclaration | undefined} */
   const lazyTarget = declaration => {
@@ -2317,8 +3066,79 @@ function coloredPropSites(program, active) {
           declared.type.typeName.getText() === "__NativeSource" &&
           declared.type.typeArguments?.[1]?.kind === ts.SyntaxKind.NeverKeyword &&
           declared.type.typeArguments?.[2]?.getText() === "false";
-        if (!bare && member(checker.getTypeFromTypeNode(declared.type), "SOURCE", declared))
+        const recursive =
+          declaration.type &&
+          ts.isTypeReferenceNode(declaration.type) &&
+          declaration.type.typeName.getText() === "__NativeComponent";
+        if (
+          !bare &&
+          !recursive &&
+          member(checker.getTypeFromTypeNode(declared.type), "SOURCE", declared)
+        ) {
+          // A conditional pending bit (a memo inside a generic component)
+          // cannot be inferred through PropsInput's Widen<P>. Preserve the
+          // forwarded source's exact colors instead of inferring false.
+          let forwarded = at;
+          if (ts.isFunctionExpression(forwarded) && forwarded.body.statements.length === 1) {
+            const returned = forwarded.body.statements[0];
+            if (
+              ts.isReturnStatement(returned) &&
+              returned.expression &&
+              ts.isYieldExpression(returned.expression) &&
+              returned.expression.asteriskToken &&
+              returned.expression.expression
+            )
+              forwarded = returned.expression.expression;
+          }
+          /** @param {ts.Node} node @returns {boolean} */
+          const qualified = node =>
+            ts.isIdentifier(node) ||
+            (ts.isPropertyAccessExpression(node) && qualified(node.expression));
+          const signature = checker.getResolvedSignature(call);
+          const inferred = signature && checker.getTypeArgumentsForResolvedSignature(signature);
+          if (
+            !call.typeArguments?.length &&
+            qualified(forwarded) &&
+            member(checker.getTypeAtLocation(forwarded), "SOURCE", forwarded) &&
+            ts.isTypeReferenceNode(declared.type) &&
+            inferred?.length &&
+            fn &&
+            ts.isFunctionExpression(fn) &&
+            fn.typeParameters?.length &&
+            inferred.length === fn.typeParameters.length
+          ) {
+            const span = `${call.getStart(source)}:${call.end}`;
+            const types = [
+              ...(calls.get(id)?.get(span) ??
+                inferred.map(type => {
+                  const node = checker.typeToTypeNode(type, at, ts.NodeBuilderFlags.NoTruncation);
+                  return node && printer.printNode(ts.EmitHint.Unspecified, node, source);
+                }))
+            ];
+            let explicit = false;
+            for (const [offset, kind] of [
+              [1, "E"],
+              [2, "P"]
+            ]) {
+              /** @type {ts.TypeNode | undefined} */
+              const argument = declared.type.typeArguments?.[Number(offset)];
+              const index =
+                argument && fn.typeParameters.findIndex(p => p.name.text === argument.getText());
+              if (index === undefined || index < 0) continue;
+              const color =
+                kind === "E" ? "infer E, boolean> ? E" : "unknown, infer P extends boolean> ? P";
+              types[index] =
+                `typeof ${forwarded.getText()} extends import("solid-yield").Source<unknown, ${color} : never`;
+              explicit = true;
+            }
+            if (explicit && types.every(type => type && !/\bany\b|__@/.test(type))) {
+              if (!calls.has(id)) calls.set(id, new Map());
+              calls.get(id)?.set(span, /** @type {string[]} */ (types));
+              if (!wanted.has(id)) wanted.set(id, new Map());
+            }
+          }
           continue;
+        }
       } else if (elsewhere && elsewhereType) {
         if (!accessor && member(elsewhereType, "SOURCE", at)) continue;
         if (!outside.has(file)) outside.set(file, new Map());
@@ -2355,7 +3175,7 @@ function coloredPropSites(program, active) {
     const [file, component] = [id.slice(0, id.lastIndexOf("#")), id.slice(id.lastIndexOf("#") + 1)];
     concrete.get(file)?.delete(component);
   }
-  return { wanted, concrete, accessors, outside };
+  return { wanted, concrete, accessors, outside, calls };
 }
 /** D-119: widen the recorded props, with the component's own type parameters,
  * or (a component reached through `lazy`) with the colors its callers pass.
@@ -2364,12 +3184,45 @@ function coloredPropSites(program, active) {
  * @param {Map<string, Set<string>>} [accessors]
  * @param {Map<string, Map<string, boolean>>} [outside] props the type has from
  * elsewhere (an interface's), by whether each is optional: the type becomes
- * `Omit<P, k> & { k: Source<P["k"], …> }`. */
-function widenColoredProps(code, filename, components, concrete, accessors, outside) {
+ * `Omit<P, k> & { k: Source<P["k"], …> }`.
+ * @param {Map<string, string[]>} [calls] explicit colors at failed inference sites
+ * @param {Set<string>} [generated] @param {boolean} [reset] */
+function widenColoredProps(
+  code,
+  filename,
+  components,
+  concrete,
+  accessors,
+  outside,
+  calls,
+  generated = new Set(),
+  reset = false
+) {
   const p = parseProgram(code, filename);
   if (!p) return code;
   let changed = false;
+  /** @type {Map<string, number>} */ const counts = new Map();
   traverseOwned(p, {
+    CallExpression(q) {
+      const callee = t.isIdentifier(q.node.callee) ? q.node.callee.name : "";
+      const count = counts.get(callee) ?? 0;
+      counts.set(callee, count + 1);
+      const site = `${callee}:${count}`;
+      // Only our inferred arguments are invalidated by a later signature
+      // widening; authored type arguments stay exactly as written.
+      if (reset && generated.has(site) && q.node.typeParameters) {
+        q.node.typeParameters = null;
+        changed = true;
+      }
+      const types = calls?.get(`${q.node.start}:${q.node.end}`);
+      if (!types) return;
+      const parsed = parseProgram(`__call<${types.join(", ")}>(0);`, filename);
+      const statement = parsed?.node.body[0];
+      if (!t.isExpressionStatement(statement) || !t.isCallExpression(statement.expression)) return;
+      q.node.typeParameters = statement.expression.typeParameters;
+      generated.add(site);
+      changed = true;
+    },
     VariableDeclarator(q) {
       const props = components.get(key(q.node.id));
       const init = q.node.init;
@@ -2561,6 +3414,72 @@ function widenColoredProps(code, filename, components, concrete, accessors, outs
           ...parameters.filter(param => !param.default),
           ...parameters.filter(param => param.default)
         ]);
+      const retainedAnnotation = t.isIdentifier(q.node.id) ? q.node.id.typeAnnotation : null;
+      const retained = t.isTSTypeAnnotation(retainedAnnotation)
+        ? retainedAnnotation.typeAnnotation
+        : null;
+      const returned = t.isTSFunctionType(retained)
+        ? retained.typeAnnotation?.typeAnnotation
+        : null;
+      const colors =
+        t.isTSTypeReference(retained) &&
+        lib(q.get("id.typeAnnotation.typeAnnotation.typeName"), "solid-yield") === "Component"
+          ? retained.typeParameters?.params.slice(1)
+          : t.isTSImportType(returned) &&
+              returned.argument.value === "solid-yield" &&
+              t.isIdentifier(returned.qualifier, { name: "ComponentView" })
+            ? returned.typeParameters?.params
+            : null;
+      if (
+        colors &&
+        colors.length >= 3 &&
+        t.isIdentifier(q.node.id) &&
+        t.isTSTypeParameterDeclaration(fn.typeParameters) &&
+        t.isTSTypeReference(annotation) &&
+        annotation.typeParameters
+      ) {
+        // Keep the recursive cycle checked. Its output is inferred from the
+        // widened implementation once the ordinary reconstruction is stable.
+        const requiringType = t.isTSIntersectionType(typed.typeAnnotation)
+          ? typed.typeAnnotation.types.find(
+              type =>
+                t.isTSTypeReference(type) &&
+                t.isIdentifier(type.typeName, { name: "__NativeRequiring" })
+            )
+          : null;
+        const requirement =
+          (t.isTSTypeReference(requiringType) && requiringType.typeParameters?.params[0]) ||
+          t.tsNeverKeyword();
+        const argument = t.restElement(t.identifier("props"));
+        argument.typeAnnotation = t.tsTypeAnnotation(
+          t.tsImportType(
+            t.stringLiteral("solid-yield"),
+            t.identifier("PropsArgs"),
+            t.tsTypeParameterInstantiation([
+              t.cloneNode(annotation.typeParameters.params[0], true),
+              t.cloneNode(requirement, true)
+            ])
+          )
+        );
+        q.node.id.typeAnnotation = t.tsTypeAnnotation(
+          t.tsFunctionType(
+            t.cloneNode(fn.typeParameters, true),
+            [argument],
+            t.tsTypeAnnotation(
+              t.tsImportType(
+                t.stringLiteral("solid-yield"),
+                t.identifier("ComponentView"),
+                t.tsTypeParameterInstantiation([
+                  colors[0],
+                  colors[1],
+                  colors[2],
+                  t.tsUnionType([colors[3] ?? t.tsNeverKeyword(), t.cloneNode(requirement, true)])
+                ])
+              )
+            )
+          )
+        );
+      }
     }
   });
   if (!changed) return code;
@@ -2578,6 +3497,228 @@ function widenColoredProps(code, filename, components, concrete, accessors, outs
   }
   return printer(t.file(p.node));
 }
+/** Infer the recursive facade from its widened implementation. Boolean probes
+ * fold pending/may-wait without leaking private conditional aliases, while
+ * failures and requirements retain their inferred types and boundary masks.
+ * @param {string} code @param {string} filename @param {ts.Program} program */
+function recursiveFacades(code, filename, program) {
+  const p = parseProgram(code, filename);
+  if (!p || program.getSourceFile(filename)?.text !== code) return code;
+  /** @type {Map<string, {inferred: string, probes: string[], pending: string[], errors: Map<string, import("@babel/core").types.TSType>}>} */
+  const plans = new Map();
+  /** @type {import("@babel/core").types.Statement[]} */ const additions = [];
+  traverseOwned(p, {
+    VariableDeclarator(q) {
+      const id = q.node.id;
+      const facade =
+        t.isIdentifier(id) && t.isTSTypeAnnotation(id.typeAnnotation)
+          ? id.typeAnnotation.typeAnnotation
+          : null;
+      const output = t.isTSFunctionType(facade) ? facade.typeAnnotation?.typeAnnotation : null;
+      const init = q.node.init;
+      const fn = t.isCallExpression(init) ? init.arguments[0] : null;
+      if (
+        !t.isIdentifier(id) ||
+        !t.isTSFunctionType(facade) ||
+        !t.isTSImportType(output) ||
+        output.argument.value !== "solid-yield" ||
+        !t.isIdentifier(output.qualifier, { name: "ComponentView" }) ||
+        !t.isCallExpression(init) ||
+        !t.isFunctionExpression(fn) ||
+        !t.isTSTypeParameterDeclaration(fn.typeParameters)
+      )
+        return;
+      const parameters = fn.typeParameters.params;
+      const pending = parameters
+        .filter(param => t.isTSBooleanKeyword(param.constraint))
+        .map(param => param.name);
+      const inferred = q.scope.generateUidIdentifier("nativeInferred");
+      additions.push(
+        t.variableDeclaration("const", [t.variableDeclarator(inferred, t.cloneNode(init, true))])
+      );
+      /** @type {string[]} */ const probes = [];
+      for (const selected of [null, ...pending]) {
+        const probe = q.scope.generateUidIdentifier("nativeProbe");
+        probes.push(probe.name);
+        const type = t.tsTypeQuery(t.cloneNode(inferred));
+        type.typeParameters = t.tsTypeParameterInstantiation(
+          parameters.map(param =>
+            pending.includes(param.name)
+              ? t.tsLiteralType(t.booleanLiteral(param.name === selected))
+              : t.tsNeverKeyword()
+          )
+        );
+        additions.push(
+          t.tsTypeAliasDeclaration(
+            probe,
+            null,
+            t.tsTypeReference(t.identifier("ReturnType"), t.tsTypeParameterInstantiation([type]))
+          )
+        );
+      }
+      /** @type {Map<string, import("@babel/core").types.TSType>} */ const errors = new Map();
+      q.traverse({
+        TSTypeReference(type) {
+          if (!t.isIdentifier(type.node.typeName, { name: "__NativeSource" })) return;
+          const args = type.node.typeParameters?.params;
+          if (args && t.isTSTypeReference(args[2]) && t.isIdentifier(args[2].typeName))
+            errors.set(args[2].typeName.name, args[1]);
+        }
+      });
+      plans.set(id.name, { inferred: inferred.name, probes, pending, errors });
+    }
+  });
+  if (!plans.size) return code;
+  const synthetic = babel.transformFromAstSync(
+    t.file(t.program([...p.node.body, ...additions])),
+    undefined,
+    { configFile: false, babelrc: false, comments: false, cloneInputAst: false }
+  )?.code;
+  if (!synthetic) return code;
+  const files = new Map(
+    program.getRootFileNames().map(id => [id, program.getSourceFile(id)?.text ?? ""])
+  );
+  files.set(filename, synthetic);
+  const options = program.getCompilerOptions();
+  const jsx = `${options.jsxImportSource ?? "solid-yield"}/jsx-runtime`;
+  const runtime = ts.resolveModuleName(jsx, import.meta.filename, options, ts.sys).resolvedModule;
+  const checked = programFor(
+    files,
+    runtime
+      ? {
+          ...options,
+          paths: {
+            [jsx]: [runtime.resolvedFileName],
+            ...options.paths
+          }
+        }
+      : options,
+    program
+  );
+  const source = checked.getSourceFile(filename);
+  if (!source) return code;
+  const checker = checked.getTypeChecker(),
+    print = ts.createPrinter();
+  /** @type {Map<string, ts.Node>} */ const declarations = new Map();
+  for (const statement of source.statements) {
+    if (ts.isTypeAliasDeclaration(statement)) declarations.set(statement.name.text, statement);
+    if (ts.isVariableStatement(statement))
+      for (const declaration of statement.declarationList.declarations)
+        if (ts.isIdentifier(declaration.name)) declarations.set(declaration.name.text, declaration);
+  }
+  /** @param {ts.Type} type @param {string} name */
+  const member = (type, name) => {
+    const symbol = type.getProperties().find(symbol => symbol.name.startsWith(`__@${name}@`));
+    return symbol && checker.getTypeOfSymbolAtLocation(symbol, source);
+  };
+  traverseOwned(p, {
+    VariableDeclarator(q) {
+      if (!t.isIdentifier(q.node.id) || !t.isTSTypeAnnotation(q.node.id.typeAnnotation)) return;
+      const plan = plans.get(q.node.id.name);
+      const facade = q.node.id.typeAnnotation.typeAnnotation;
+      if (!plan || !t.isTSFunctionType(facade)) return;
+      const output = facade.typeAnnotation?.typeAnnotation;
+      const declaration = declarations.get(plan.inferred);
+      if (
+        !t.isTSImportType(output) ||
+        !declaration ||
+        !ts.isVariableDeclaration(declaration) ||
+        !declaration.initializer
+      )
+        return;
+      const signature = checker.getTypeAtLocation(declaration.initializer).getCallSignatures()[0];
+      if (!signature) return;
+      const result = checker.getReturnTypeOfSignature(signature);
+      const probes = plan.probes.map(name => {
+        const declaration = declarations.get(name);
+        return declaration && ts.isTypeAliasDeclaration(declaration)
+          ? checker.getTypeFromTypeNode(declaration.type)
+          : undefined;
+      });
+      if (probes.some(type => !type)) return;
+      /** @type {import("@babel/core").types.TSType[]} */ const colors = [];
+      for (const name of ["PENDING", "FAILS", "MAY_WAIT", "REQUIRES"]) {
+        if (name === "PENDING" || name === "MAY_WAIT") {
+          const bits = probes.flatMap(type => {
+            const bit = type && member(type, name);
+            return bit ? [bit] : [];
+          });
+          if (bits.length !== probes.length) return;
+          if (checker.typeToString(bits[0]) !== "false") colors.push(t.tsBooleanKeyword());
+          else {
+            const reads = plan.pending.flatMap((param, index) =>
+              checker.typeToString(bits[index + 1]) === "false"
+                ? []
+                : [
+                    t.tsImportType(
+                      t.stringLiteral("solid-yield"),
+                      t.identifier("Read"),
+                      t.tsTypeParameterInstantiation([
+                        t.tsTypeReference(t.identifier(param)),
+                        t.cloneNode(plan.errors.get(param) ?? t.tsNeverKeyword(), true)
+                      ])
+                    )
+                  ]
+            );
+            colors.push(
+              reads.length
+                ? t.tsImportType(
+                    t.stringLiteral("solid-yield"),
+                    t.identifier("PendingOf"),
+                    t.tsTypeParameterInstantiation([
+                      reads.length === 1 ? reads[0] : t.tsUnionType(reads)
+                    ])
+                  )
+                : t.tsLiteralType(t.booleanLiteral(false))
+            );
+          }
+        } else {
+          const type = member(result, name);
+          if (!type) return;
+          const node = checker.typeToTypeNode(
+            type,
+            declaration,
+            ts.NodeBuilderFlags.NoTruncation | ts.NodeBuilderFlags.UseFullyQualifiedType
+          );
+          const text = node && print.printNode(ts.EmitHint.Unspecified, node, source);
+          if (!text || /\bany\b|__@/.test(text)) return;
+          const parsed = parseProgram(`let __type: ${text};`, filename);
+          const statement = parsed?.node.body[0];
+          const id = t.isVariableDeclaration(statement) ? statement.declarations[0]?.id : null;
+          if (!t.isIdentifier(id) || !t.isTSTypeAnnotation(id.typeAnnotation)) return;
+          colors.push(id.typeAnnotation.typeAnnotation);
+        }
+      }
+      const pending = colors[0];
+      if (
+        t.isTSImportType(pending) &&
+        t.isIdentifier(pending.qualifier, { name: "PendingOf" }) &&
+        pending.typeParameters
+      ) {
+        // Keep the fold closed under component propagation. Dropping the
+        // ChildView shape makes an Errored-only recursive view look
+        // incompatible even though it preserves exactly the same pending bit.
+        const child = t.tsImportType(
+          t.stringLiteral("solid-yield"),
+          t.identifier("ChildView"),
+          t.tsTypeParameterInstantiation([
+            t.cloneNode(pending, true),
+            t.tsUnionType([
+              t.cloneNode(colors[1], true),
+              ...[...plan.errors.values()].map(type => t.cloneNode(type, true))
+            ]),
+            t.cloneNode(colors[2], true),
+            t.cloneNode(colors[3], true)
+          ])
+        );
+        pending.typeParameters.params[0] = t.tsUnionType([pending.typeParameters.params[0], child]);
+      }
+      output.typeParameters = t.tsTypeParameterInstantiation(colors);
+    }
+  });
+  return printer(t.file(p.node));
+}
+
 /**
  * An authored value type on a memo or an effect's compute (`createMemo<T>(…)`).
  * The library's `$memo<Y, R>` and `$effect<YC, V, YE>` take their operations
@@ -2941,6 +4082,177 @@ function accessorArguments(code, filename, program) {
  * prop. Run once the bodies are settled.
  * @param {string} code @param {string} filename @param {ts.Program} program
  */
+/** Keep a factory's declared arguments and async result payloads without
+ * pretending its owned routine methods are still JavaScript promises. This
+ * is local to the returned object: it never rewrites an interface shared by
+ * unknown or mixed providers. @param {string} code @param {string} filename
+ * @param {ts.Program} program */
+function factoryResultContracts(code, filename, program) {
+  const source = program.getSourceFile(filename);
+  if (!source || source.text !== code) return code;
+  const checker = program.getTypeChecker(),
+    print = ts.createPrinter();
+  /** @type {Map<number, {end: number, text: string}>} */ const contracts = new Map();
+  /** @param {ts.Node} node */
+  const visit = node => {
+    if (
+      ts.isAsExpression(node) &&
+      ts.isObjectLiteralExpression(node.expression) &&
+      ts.isReturnStatement(node.parent)
+    ) {
+      let owner = node.parent.parent;
+      while (owner && !ts.isFunctionLike(owner)) owner = owner.parent;
+      const body = owner && "body" in owner ? owner.body : undefined;
+      if (
+        !owner ||
+        !("asteriskToken" in owner) ||
+        !owner.asteriskToken ||
+        (body &&
+          ts.isBlock(body) &&
+          body.statements.some(
+            statement =>
+              ts.isExpressionStatement(statement) &&
+              ts.isStringLiteral(statement.expression) &&
+              statement.expression.text === opaqueDirective
+          ))
+      )
+        return;
+      const actual = checker.getTypeAtLocation(node.expression),
+        declared = checker.getTypeFromTypeNode(node.type);
+      /** @type {string[]} */ const names = [],
+        members = [];
+      for (const property of checker.getPropertiesOfType(actual)) {
+        const slot = declared.getProperty(property.name);
+        if (!slot) continue;
+        const implementation = checker.getTypeOfSymbolAtLocation(property, node.expression);
+        const expected = checker.getTypeOfSymbolAtLocation(slot, node.type);
+        const signatures = implementation.getCallSignatures(),
+          requiredSignatures = expected.getCallSignatures();
+        const [signature] = signatures,
+          [required] = requiredSignatures;
+        if (
+          signatures.length !== 1 ||
+          requiredSignatures.length !== 1 ||
+          !signature ||
+          !required ||
+          signature.typeParameters?.length ||
+          required.typeParameters?.length
+        )
+          continue;
+        const implementationDeclaration = signature.declaration;
+        const implementationBody =
+          implementationDeclaration && "body" in implementationDeclaration
+            ? implementationDeclaration.body
+            : undefined;
+        if (
+          !implementationDeclaration ||
+          !implementationBody ||
+          !ts.isBlock(implementationBody) ||
+          !("asteriskToken" in implementationDeclaration) ||
+          !implementationDeclaration.asteriskToken ||
+          implementationBody.statements.some(
+            statement =>
+              ts.isExpressionStatement(statement) &&
+              ts.isStringLiteral(statement.expression) &&
+              statement.expression.text === opaqueDirective
+          )
+        )
+          continue;
+        const result = checker.getReturnTypeOfSignature(signature),
+          output = checker.getReturnTypeOfSignature(required);
+        if (
+          result.symbol?.name !== "Generator" ||
+          !["Promise", "PromiseLike"].includes(output.symbol?.name ?? "")
+        )
+          continue;
+        const callable = checker.signatureToSignatureDeclaration(
+          required,
+          ts.SyntaxKind.FunctionType,
+          node.type,
+          ts.NodeBuilderFlags.NoTruncation
+        );
+        const generator = checker.typeToTypeNode(
+          result,
+          node.type,
+          ts.NodeBuilderFlags.NoTruncation
+        );
+        const payload = checker.typeToTypeNode(
+          checker.getAwaitedType(output) ?? output,
+          node.type,
+          ts.NodeBuilderFlags.NoTruncation
+        );
+        if (
+          !callable ||
+          !ts.isFunctionTypeNode(callable) ||
+          !generator ||
+          !ts.isTypeReferenceNode(generator) ||
+          generator.typeArguments?.length !== 3 ||
+          !payload
+        )
+          continue;
+        const modeled = ts.factory.updateFunctionTypeNode(
+          callable,
+          callable.typeParameters,
+          callable.parameters,
+          ts.factory.updateTypeReferenceNode(
+            generator,
+            generator.typeName,
+            ts.factory.createNodeArray([
+              generator.typeArguments[0],
+              payload,
+              generator.typeArguments[2]
+            ])
+          )
+        );
+        names.push(JSON.stringify(property.name));
+        members.push(
+          `${JSON.stringify(property.name)}: ${print.printNode(ts.EmitHint.Unspecified, modeled, source)}`
+        );
+      }
+      if (names.length) {
+        let key = "__NativeResultKey";
+        while (code.includes(key)) key += "_";
+        const original = node.type.getText(source),
+          overrides = `{ ${members.join("; ")} }`;
+        // Mapping over the original keys also preserves readonly/optional
+        // modifiers introduced through mapped contracts such as Readonly<T>.
+        contracts.set(node.getStart(source), {
+          end: node.end,
+          text: `{ [${key} in keyof (${original})]: ${key} extends keyof ${overrides} ? ${overrides}[${key}] : (${original})[${key}] }`
+        });
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(source);
+  if (!contracts.size) return code;
+  const p = parseProgram(code, filename);
+  if (!p) return code;
+  p.traverse({
+    TSAsExpression(path) {
+      const contract = contracts.get(path.node.start ?? -1);
+      if (!contract || path.node.end !== contract.end) return;
+      const holder = parseProgram(`let __t: ${contract.text};`, filename);
+      const statement = holder?.node.body[0];
+      if (!t.isVariableDeclaration(statement)) return;
+      const id = statement.declarations[0]?.id;
+      if (!t.isIdentifier(id) || !t.isTSTypeAnnotation(id.typeAnnotation)) return;
+      const contractType = id.typeAnnotation.typeAnnotation;
+      // First check the implementation, then expose the declared breadth and
+      // modifiers to callers. An assertion alone would hide bad payloads.
+      path.replaceWith(
+        t.tsAsExpression(
+          t.tsSatisfiesExpression(path.node.expression, t.cloneNode(contractType, true)),
+          contractType
+        )
+      );
+      path.skip();
+    }
+  });
+  return printer(t.file(p.node));
+}
+
+/** @param {string} code @param {string} filename @param {ts.Program} program */
 function contextFacades(code, filename, program) {
   const source = program.getSourceFile(filename);
   if (!source || source.text !== code) return code;
@@ -2948,9 +4260,22 @@ function contextFacades(code, filename, program) {
   /** @param {ts.Type} type */
   const routineOrSource = type =>
     checker.getPropertiesOfType(type).some(s => s.name.startsWith("__@SOURCE@")) ||
-    type
-      .getCallSignatures()
-      .some(sig => checker.getReturnTypeOfSignature(sig).symbol?.name === "Generator");
+    type.getCallSignatures().some(sig => {
+      const declaration = sig.declaration;
+      const body = declaration && "body" in declaration ? declaration.body : undefined;
+      if (
+        body &&
+        ts.isBlock(body) &&
+        body.statements.some(
+          statement =>
+            ts.isExpressionStatement(statement) &&
+            ts.isStringLiteral(statement.expression) &&
+            statement.expression.text === opaqueDirective
+        )
+      )
+        return false;
+      return checker.getReturnTypeOfSignature(sig).symbol?.name === "Generator";
+    });
   /**
    * Whether the value as plain Solid typed it fits the slot: a source's value
    * (a store, a getter) or an accessor of it, a routine's helper by what it
@@ -2958,10 +4283,14 @@ function contextFacades(code, filename, program) {
    * @param {ts.Type} type @param {ts.Type} slot @param {ts.Node} at
    */
   const plainFits = (type, slot, at) => {
-    const returns = slot.getCallSignatures().map(sig => checker.getReturnTypeOfSignature(sig));
     const brand = checker.getPropertiesOfType(type).find(s => s.name.startsWith("__@SOURCE@"));
     if (brand) {
       const value = checker.getTypeOfSymbolAtLocation(brand, at);
+      const slotBrand = checker
+        .getPropertiesOfType(slot)
+        .find(s => s.name.startsWith("__@SOURCE@"));
+      if (slotBrand)
+        return checker.isTypeAssignableTo(value, checker.getTypeOfSymbolAtLocation(slotBrand, at));
       const accessor = slot
         .getCallSignatures()
         .some(
@@ -2974,14 +4303,68 @@ function contextFacades(code, filename, program) {
     return type.getCallSignatures().some(sig => {
       const generator = checker.getReturnTypeOfSignature(sig);
       const result = checker.getTypeArguments(/** @type {ts.TypeReference} */ (generator))[1];
-      return !!result && returns.some(r => checker.isTypeAssignableTo(result, r));
+      return (
+        !!result &&
+        slot.getCallSignatures().some(expected => {
+          const compatible = sig.parameters.every((parameter, index) => {
+            const input = expected.parameters[index];
+            if (!input) {
+              const declaration = parameter.valueDeclaration;
+              return (
+                !!declaration &&
+                ts.isParameter(declaration) &&
+                !!(
+                  declaration.questionToken ||
+                  declaration.initializer ||
+                  declaration.dotDotDotToken
+                )
+              );
+            }
+            return checker.isTypeAssignableTo(
+              checker.getTypeOfSymbolAtLocation(input, at),
+              checker.getTypeOfSymbolAtLocation(parameter, at)
+            );
+          });
+          const declaredOutput = checker.getReturnTypeOfSignature(expected);
+          const output = checker.getAwaitedType(declaredOutput) ?? declaredOutput;
+          return (
+            compatible &&
+            (!!(output.flags & ts.TypeFlags.Void) || checker.isTypeAssignableTo(result, output))
+          );
+        })
+      );
     });
   };
   /** @type {{start: number, end: number, text: string}[]} */ const edits = [];
+  /** @type {Map<ts.Node, {declared: ts.TypeNode, text: string}>} */ const returnFacades =
+    new Map();
   const tsPrinter = ts.createPrinter();
-  for (const [value, declared] of contextSlots(program, checker)) {
-    // a slot is retyped in the file that declares it
-    if (declared.getSourceFile() !== source) continue;
+  const provided = contextSlots(program, checker);
+  const blocked = new Set(blockedSlotsOf.get(program));
+  /** An authored Accessor is not proof that an opaque provider holds a native
+   * source. Leaving its mapped Source type in place would invent safe effects.
+   * @param {ts.Node} node @returns {never} */
+  const refuse = node => {
+    const at = node.getSourceFile().getLineAndCharacterOfPosition(node.getStart());
+    const error = new Error(
+      "[NATIVE_CONTEXT] The checker cannot preserve this context member's implementation contract through every provider use. Check how the provided bag is accessed, aliased, or passed on."
+    );
+    Object.assign(error, {
+      code: "NATIVE_CONTEXT",
+      id: node.getSourceFile().fileName,
+      loc: { file: node.getSourceFile().fileName, line: at.line + 1, column: at.character }
+    });
+    throw error;
+  };
+  for (const declared of blockedSlotsOf.get(program) ?? [])
+    if (
+      declared.getSourceFile() === source &&
+      checker
+        .getPropertiesOfType(checker.getTypeFromTypeNode(declared))
+        .some(symbol => symbol.name.startsWith("__@SOURCE@"))
+    )
+      refuse(declared);
+  for (const [value, declared] of provided) {
     // a getter (D-124) hands back a source over its body, and a store is
     // one: plain Solid types them as their values, the slot holds the source
     const getter = ts.isGetAccessorDeclaration(value);
@@ -2994,23 +4377,127 @@ function contextFacades(code, filename, program) {
             value
           )
         : checker.getTypeAtLocation(value);
-    if (!routineOrSource(actual)) continue;
+    if (!routineOrSource(actual)) {
+      blocked.add(declared);
+      continue;
+    }
+    if (blockedSlotsOf.get(program)?.has(declared)) {
+      if (ts.isMethodDeclaration(value)) refuse(value);
+      continue;
+    }
     const slot = checker.getTypeFromTypeNode(declared);
-    if (checker.isTypeAssignableTo(actual, slot)) continue;
+    if (routineOrSource(slot) && checker.isTypeAssignableTo(actual, slot)) continue;
     // only a value plain Solid accepts there: a wrong one keeps TypeScript's error
-    if (!plainFits(actual, slot, value)) continue;
-    const node = checker.typeToTypeNode(actual, value, ts.NodeBuilderFlags.NoTruncation);
-    if (!node) continue;
+    if (!plainFits(actual, slot, value)) {
+      blocked.add(declared);
+      continue;
+    }
+    let node = checker.typeToTypeNode(actual, declared, ts.NodeBuilderFlags.NoTruncation);
+    if (!node) {
+      blocked.add(declared);
+      continue;
+    }
+    const [expected] = slot.getCallSignatures();
+    if (
+      checker.getPropertiesOfType(actual).some(s => s.name.startsWith("__@SOURCE@")) &&
+      (ts.isImportTypeNode(node) || ts.isTypeReferenceNode(node)) &&
+      node.typeArguments?.length === 3
+    ) {
+      const slotBrand = checker
+        .getPropertiesOfType(slot)
+        .find(s => s.name.startsWith("__@SOURCE@"));
+      const output = slotBrand
+        ? checker.getTypeOfSymbolAtLocation(slotBrand, declared)
+        : expected
+          ? checker.getReturnTypeOfSignature(expected)
+          : slot;
+      const outputNode = checker.typeToTypeNode(output, declared, ts.NodeBuilderFlags.NoTruncation);
+      if (outputNode) {
+        const args = ts.factory.createNodeArray([
+          outputNode,
+          node.typeArguments[1],
+          node.typeArguments[2]
+        ]);
+        node = ts.isImportTypeNode(node)
+          ? ts.factory.updateImportTypeNode(
+              node,
+              node.argument,
+              node.attributes,
+              node.qualifier,
+              args,
+              node.isTypeOf
+            )
+          : ts.factory.updateTypeReferenceNode(node, node.typeName, args);
+      }
+    }
+    if (expected && ts.isFunctionTypeNode(node) && ts.isTypeReferenceNode(node.type)) {
+      const signature = checker.signatureToSignatureDeclaration(
+        expected,
+        ts.SyntaxKind.FunctionType,
+        declared,
+        ts.NodeBuilderFlags.NoTruncation
+      );
+      const declaredOutput = checker.getReturnTypeOfSignature(expected);
+      const output = checker.getAwaitedType(declaredOutput) ?? declaredOutput;
+      const outputNode = checker.typeToTypeNode(output, declared, ts.NodeBuilderFlags.NoTruncation);
+      const args = node.type.typeArguments;
+      if (signature && ts.isFunctionTypeNode(signature) && outputNode && args?.length === 3) {
+        node = ts.factory.updateFunctionTypeNode(
+          signature,
+          signature.typeParameters,
+          signature.parameters,
+          ts.factory.updateTypeReferenceNode(
+            node.type,
+            node.type.typeName,
+            ts.factory.createNodeArray([args[0], outputNode, args[2]])
+          )
+        );
+        const actualOutput = checker.getTypeArguments(
+          /** @type {ts.TypeReference} */ (
+            checker.getReturnTypeOfSignature(actual.getCallSignatures()[0])
+          )
+        )[1];
+        // The special void callback rule does not extend to Generator returns.
+        // Hide only that value, after checking inputs and all effects.
+        if (
+          actualOutput &&
+          output.flags & ts.TypeFlags.Void &&
+          !checker.isTypeAssignableTo(actualOutput, output)
+        )
+          returnFacades.set(value, {
+            declared,
+            text: tsPrinter.printNode(ts.EmitHint.Unspecified, node, value.getSourceFile())
+          });
+      }
+    }
     const text = tsPrinter.printNode(ts.EmitHint.Unspecified, node, source);
-    // Not settled yet (a generator's own `any` next type aside): leave it.
-    if (/__@|\bany\b|\bunknown\b/.test(text.replace(/,\s*any>/g, ">"))) continue;
-    edits.push({ start: declared.getStart(source), end: declared.end, text: `(${text})` });
+    // Unknown failure values are real effects, not unsettled inference. Only
+    // an unknown operation row (or any outside the generator next slot) waits.
+    const unsettled = actual.getCallSignatures().some(signature => {
+      const result = checker.getReturnTypeOfSignature(signature);
+      const [operation] = checker.getTypeArguments(/** @type {ts.TypeReference} */ (result));
+      return operation && !!(operation.flags & (ts.TypeFlags.Any | ts.TypeFlags.Unknown));
+    });
+    if (unsettled || /__@|\bany\b/.test(text.replace(/,\s*any>/g, ">"))) {
+      blocked.add(declared);
+      continue;
+    }
+    // A slot is retyped in its own file; a void return facade in its provider.
+    if (declared.getSourceFile() === source)
+      edits.push({ start: declared.getStart(source), end: declared.end, text: `(${text})` });
   }
-  if (!edits.length) return code;
+  if (!edits.length && ![...returnFacades.keys()].some(value => value.getSourceFile() === source))
+    return code;
   // Several providers of one slot: the slot holds any of their values.
   /** @type {Map<number, {start: number, end: number, texts: Set<string>}>} */
   const slots = new Map();
   for (const edit of edits) {
+    if (
+      [...blocked].some(
+        node => node.getSourceFile() === source && node.getStart(source) === edit.start
+      )
+    )
+      continue;
     const slot = slots.get(edit.start) ?? { start: edit.start, end: edit.end, texts: new Set() };
     slot.texts.add(edit.text);
     slots.set(edit.start, slot);
@@ -3020,6 +4507,48 @@ function contextFacades(code, filename, program) {
   if (!p) return code;
   let replaced = 0;
   p.traverse({
+    Expression(path) {
+      const entry = [...returnFacades].find(
+        ([value, facade]) =>
+          value.getSourceFile() === source &&
+          !blocked.has(facade.declared) &&
+          value.getStart(source) === path.node.start &&
+          value.end === path.node.end
+      );
+      if (!entry) return;
+      const holder = parseProgram(`let __t: ${entry[1].text};`, filename);
+      const statement = holder?.node.body[0];
+      if (!t.isVariableDeclaration(statement)) return;
+      const id = statement.declarations[0]?.id;
+      if (!t.isIdentifier(id) || !t.isTSTypeAnnotation(id.typeAnnotation)) return;
+      const annotation = id.typeAnnotation.typeAnnotation;
+      if (!annotation) return;
+      // The assertion removes contextual typing from a function initializer.
+      // Keep its already-checked parameter types before hiding a void result.
+      if (path.isFunctionExpression() || path.isArrowFunctionExpression()) {
+        if (t.isTSFunctionType(annotation))
+          path.node.params.forEach((parameter, index) => {
+            const declared = annotation.parameters[index];
+            const target = t.isAssignmentPattern(parameter) ? parameter.left : parameter;
+            if (
+              declared &&
+              "typeAnnotation" in declared &&
+              declared.typeAnnotation &&
+              (t.isIdentifier(target) ||
+                t.isObjectPattern(target) ||
+                t.isArrayPattern(target) ||
+                t.isRestElement(target)) &&
+              !target.typeAnnotation
+            )
+              target.typeAnnotation = t.cloneNode(declared.typeAnnotation, true);
+          });
+      }
+      path.replaceWith(
+        t.tsAsExpression(t.tsAsExpression(path.node, t.tsUnknownKeyword()), annotation)
+      );
+      path.skip();
+      replaced++;
+    },
     TSType(path) {
       const slot = slots.get(path.node.start ?? -1);
       if (!slot || path.node.end !== slot.end) return;
@@ -3036,6 +4565,8 @@ function contextFacades(code, filename, program) {
 }
 /** @type {WeakMap<ts.Program, Map<ts.Node, ts.TypeNode>>} */
 const slotsOf = new WeakMap();
+/** @type {WeakMap<ts.Program, Set<ts.TypeNode>>} */
+const blockedSlotsOf = new WeakMap();
 /**
  * F-S52: each provided value's leaves paired with the context's declared type
  * nodes (`Ctx.provide({ value })`): tuples by position, objects by member,
@@ -3049,10 +4580,11 @@ function contextSlots(program, checker) {
   if (cached) return cached;
   /** @type {Map<ts.Node, ts.TypeNode>} */ const slots = new Map();
   slotsOf.set(program, slots);
+  /** @type {Set<ts.TypeNode>} */ const blocked = new Set();
+  blockedSlotsOf.set(program, blocked);
   /** @param {ts.Node | undefined} node @returns {ts.Node | undefined} */
   const resolveType = node => {
     // aliases and interfaces of the file that declares the context's type
-    const home = node?.getSourceFile();
     // however long the chain; a circular one (TypeScript's error) stops where it repeats
     const seen = new Set();
     while (node && !seen.has(node)) {
@@ -3065,21 +4597,281 @@ function contextSlots(program, checker) {
       let symbol = checker.getSymbolAtLocation(node.typeName);
       if (symbol && symbol.flags & ts.SymbolFlags.Alias) symbol = checker.getAliasedSymbol(symbol);
       const declaration = symbol?.declarations?.[0];
-      if (!declaration || declaration.getSourceFile() !== home) return node;
+      if (!declaration || declaration.getSourceFile().isDeclarationFile) return node;
       if (ts.isTypeAliasDeclaration(declaration)) node = declaration.type;
       else if (ts.isInterfaceDeclaration(declaration)) return declaration;
       else return node;
     }
     return node;
   };
-  /** @param {ts.Expression} value @param {ts.Node | undefined} declared */
-  const walk = (value, declared) => {
+  /** Only compiler imports have transparent call/value wrappers.
+   * @param {ts.Expression} expression */
+  const helperName = expression => {
+    if (!ts.isIdentifier(expression)) return undefined;
+    const declaration = checker
+      .getSymbolAtLocation(expression)
+      ?.declarations?.find(ts.isImportSpecifier);
+    const module = declaration?.parent.parent.parent;
+    return declaration &&
+      module &&
+      ts.isImportDeclaration(module) &&
+      ts.isStringLiteral(module.moduleSpecifier) &&
+      module.moduleSpecifier.text === "solid-yield/internal"
+      ? (declaration.propertyName ?? declaration.name).text
+      : undefined;
+  };
+  /** @param {ts.Symbol | undefined} symbol */
+  const contextType = symbol => {
+    if (symbol && symbol.flags & ts.SymbolFlags.Alias) symbol = checker.getAliasedSymbol(symbol);
+    const declaration = symbol?.valueDeclaration;
+    const init =
+      declaration && ts.isVariableDeclaration(declaration) ? declaration.initializer : undefined;
+    if (!init || !ts.isCallExpression(init)) return undefined;
+    const imported = checker
+      .getSymbolAtLocation(init.expression)
+      ?.declarations?.find(ts.isImportSpecifier);
+    const module = imported?.parent.parent.parent;
+    return imported &&
+      (imported.propertyName ?? imported.name).text === "createContext" &&
+      module &&
+      ts.isImportDeclaration(module) &&
+      ts.isStringLiteral(module.moduleSpecifier) &&
+      ["solid-js", "solid-yield"].includes(module.moduleSpecifier.text)
+      ? init.typeArguments?.[0]
+      : undefined;
+  };
+  /** The implementation behind a captured compiler invocation.
+   * @param {ts.Node | undefined} expression @param {Set<ts.Node>} [seen]
+   * @returns {ts.FunctionLikeDeclaration | undefined} */
+  const factory = (expression, seen = new Set()) => {
+    if (!expression || seen.has(expression)) return undefined;
+    seen = new Set([...seen, expression]);
+    if (
+      ts.isParenthesizedExpression(expression) ||
+      ts.isAsExpression(expression) ||
+      ts.isNonNullExpression(expression) ||
+      ts.isSatisfiesExpression(expression)
+    )
+      return factory(expression.expression, seen);
+    if (
+      ts.isFunctionDeclaration(expression) ||
+      ts.isFunctionExpression(expression) ||
+      ts.isArrowFunction(expression)
+    ) {
+      if (
+        !expression.body ||
+        (ts.isBlock(expression.body) &&
+          expression.body.statements.some(
+            statement =>
+              ts.isExpressionStatement(statement) &&
+              ts.isStringLiteral(statement.expression) &&
+              statement.expression.text === opaqueDirective
+          ))
+      )
+        return undefined;
+      return expression;
+    }
+    if (ts.isIdentifier(expression)) {
+      let symbol = checker.getSymbolAtLocation(expression);
+      if (symbol && symbol.flags & ts.SymbolFlags.Alias) symbol = checker.getAliasedSymbol(symbol);
+      const declaration = symbol?.valueDeclaration;
+      if (declaration && ts.isVariableDeclaration(declaration))
+        return declaration.parent.flags & ts.NodeFlags.Const
+          ? factory(declaration.initializer, seen)
+          : undefined;
+      return declaration && ts.isFunctionDeclaration(declaration)
+        ? factory(declaration, seen)
+        : undefined;
+    }
+    if (ts.isCallExpression(expression)) {
+      const helper = helperName(expression.expression);
+      if (helper === "nativeArgument") return factory(expression.arguments[0], seen);
+      if (helper === "nativeLexicalCallback") return factory(expression.arguments[1], seen);
+    }
+    return undefined;
+  };
+  /** An unresolved provider keeps every affected leaf conservative.
+   * @param {ts.Node | undefined} declared @param {Set<ts.Node>} [seen] */
+  const block = (declared, seen = new Set()) => {
+    if (!declared || seen.has(declared)) return;
+    seen = new Set([...seen, declared]);
     const resolved = resolveType(declared);
     if (!resolved) return;
+    if (ts.isInterfaceDeclaration(resolved) || ts.isTypeLiteralNode(resolved)) {
+      for (const member of resolved.members)
+        if (ts.isPropertySignature(member)) block(member.type, seen);
+    } else if (ts.isTupleTypeNode(resolved)) {
+      for (const member of resolved.elements)
+        block(ts.isNamedTupleMember(member) ? member.type : member, seen);
+    } else if (ts.isTypeNode(declared)) blocked.add(declared);
+  };
+  /** Follow only bags whose uses stay on the checked provider path.
+   * Unknown storage or calls can mutate a member behind the declared type.
+   * @param {ts.VariableDeclaration} declaration @param {Set<ts.Node>} allowed
+   * @param {Set<ts.Symbol>} [seen] */
+  const stable = (declaration, allowed, seen = new Set()) => {
+    if (!ts.isIdentifier(declaration.name) || !(declaration.parent.flags & ts.NodeFlags.Const))
+      return false;
+    const symbol = checker.getSymbolAtLocation(declaration.name);
+    if (!symbol || seen.has(symbol)) return false;
+    seen = new Set([...seen, symbol]);
+    let safe = true;
+    /** @param {ts.Node} node */
+    const visit = node => {
+      if (!safe || ts.isTypeNode(node)) return;
+      if (ts.isIdentifier(node) && node !== declaration.name) {
+        let reference = ts.isShorthandPropertyAssignment(node.parent)
+          ? checker.getShorthandAssignmentValueSymbol(node.parent)
+          : checker.getSymbolAtLocation(node);
+        if (reference && reference.flags & ts.SymbolFlags.Alias)
+          reference = checker.getAliasedSymbol(reference);
+        if (reference === symbol) {
+          /** @type {ts.Node} */ let use = node;
+          while (
+            ts.isParenthesizedExpression(use.parent) ||
+            ts.isAsExpression(use.parent) ||
+            ts.isNonNullExpression(use.parent) ||
+            ts.isSatisfiesExpression(use.parent)
+          )
+            use = use.parent;
+          const parent = use.parent;
+          if (ts.isVariableDeclaration(parent) && parent.initializer === use)
+            safe = stable(parent, allowed, seen);
+          else if (ts.isReturnStatement(parent))
+            safe =
+              allowed.has(use) &&
+              ts.findAncestor(parent, ts.isFunctionLike) ===
+                ts.findAncestor(declaration, ts.isFunctionLike);
+          else if (
+            ts.isCallExpression(parent) &&
+            parent.arguments[0] === use &&
+            ts.isVariableDeclaration(parent.parent) &&
+            parent.parent.initializer === parent &&
+            ts.isIdentifier(parent.parent.name) &&
+            contextType(checker.getSymbolAtLocation(parent.parent.name))
+          )
+            safe = allowed.has(use);
+          else if (ts.isJsxExpression(parent) && ts.isJsxAttribute(parent.parent))
+            safe = allowed.has(use) && parent.parent.name.getText() === "value";
+          else if (ts.isPropertyAssignment(parent) && parent.initializer === use) {
+            const call = parent.parent.parent;
+            safe =
+              allowed.has(use) &&
+              parent.name.getText() === "value" &&
+              ts.isCallExpression(call) &&
+              ts.isPropertyAccessExpression(call.expression) &&
+              call.expression.name.text === "provide";
+          } else safe = providerMemberObservation(ts, checker, declaration, use, true);
+        }
+      }
+      ts.forEachChild(node, visit);
+    };
+    visit(declaration.getSourceFile());
+    const statement = declaration.parent.parent;
+    if (
+      ts.isVariableStatement(statement) &&
+      statement.modifiers?.some(m => m.kind === ts.SyntaxKind.ExportKeyword)
+    )
+      return false;
+    return safe;
+  };
+  /** @param {ts.Expression} value @param {ts.Node | undefined} declared
+   * @param {Set<ts.Node>} [seen] */
+  const walk = (value, declared, seen = new Set()) => {
+    if (seen.has(value)) {
+      block(declared);
+      return;
+    }
+    seen = new Set([...seen, value]);
+    const resolved = resolveType(declared);
+    if (!resolved) return;
+    // Providers are commonly held in a local or returned by a factory. Follow
+    // their implementations, not an annotation that hides the checked effects.
+    const shorthand =
+      ts.isIdentifier(value) && ts.isShorthandPropertyAssignment(value.parent)
+        ? checker.getShorthandAssignmentValueSymbol(value.parent)
+        : undefined;
+    const provided = shorthand
+      ? checker.getTypeOfSymbolAtLocation(shorthand, value)
+      : checker.getTypeAtLocation(value);
+    if (
+      declared &&
+      ts.isTypeNode(declared) &&
+      checker.getPropertiesOfType(provided).some(symbol => symbol.name.startsWith("__@SOURCE@"))
+    ) {
+      slots.set(value, declared);
+      return;
+    }
+    if (
+      ts.isParenthesizedExpression(value) ||
+      ts.isAsExpression(value) ||
+      ts.isNonNullExpression(value) ||
+      ts.isSatisfiesExpression(value)
+    ) {
+      walk(value.expression, declared, seen);
+      return;
+    }
+    if (ts.isYieldExpression(value) && value.expression) {
+      walk(value.expression, declared, seen);
+      return;
+    }
+    if (
+      (ts.isInterfaceDeclaration(resolved) ||
+        ts.isTypeLiteralNode(resolved) ||
+        ts.isTupleTypeNode(resolved)) &&
+      ts.isIdentifier(value)
+    ) {
+      let symbol = checker.getSymbolAtLocation(value);
+      if (symbol && symbol.flags & ts.SymbolFlags.Alias) symbol = checker.getAliasedSymbol(symbol);
+      const declaration = symbol?.valueDeclaration;
+      if (declaration && ts.isVariableDeclaration(declaration) && declaration.initializer) {
+        if (!stable(declaration, seen)) {
+          block(declared);
+          return;
+        }
+        walk(declaration.initializer, declared, seen);
+        return;
+      }
+    }
+    if (
+      (ts.isInterfaceDeclaration(resolved) ||
+        ts.isTypeLiteralNode(resolved) ||
+        ts.isTupleTypeNode(resolved)) &&
+      ts.isCallExpression(value)
+    ) {
+      const helper = helperName(value.expression);
+      if (helper === "nativeArgument" && value.arguments[0]) {
+        walk(value.arguments[0], declared, seen);
+        return;
+      }
+      const declaration = factory(
+        helper === "nativeInvoke" ? value.arguments[0] : value.expression
+      );
+      if (declaration && "body" in declaration && declaration.body) {
+        const body = /** @type {ts.ConciseBody} */ (declaration.body);
+        if (!ts.isBlock(body)) walk(body, declared, seen);
+        else {
+          /** @param {ts.Node} node */
+          const returns = node => {
+            if (ts.isReturnStatement(node) && node.expression)
+              walk(node.expression, declared, seen);
+            else if (!ts.isFunctionLike(node)) ts.forEachChild(node, returns);
+          };
+          ts.forEachChild(body, returns);
+        }
+        return;
+      }
+    }
     if (ts.isArrayLiteralExpression(value) && ts.isTupleTypeNode(resolved)) {
+      if (value.elements.some(element => ts.isSpreadElement(element))) {
+        block(declared);
+        return;
+      }
+      for (const member of resolved.elements.slice(value.elements.length))
+        block(ts.isNamedTupleMember(member) ? member.type : member);
       value.elements.forEach((element, i) => {
         const slot = resolved.elements[i];
-        walk(element, slot && ts.isNamedTupleMember(slot) ? slot.type : slot);
+        walk(element, slot && ts.isNamedTupleMember(slot) ? slot.type : slot, seen);
       });
       return;
     }
@@ -3089,7 +4881,29 @@ function contextSlots(program, checker) {
           ? resolved.members
           : null;
       if (!members) return;
+      if (value.properties.some(property => ts.isSpreadAssignment(property))) block(declared);
+      for (const member of members)
+        if (
+          ts.isPropertySignature(member) &&
+          !value.properties.some(
+            property =>
+              property.name?.getText() === member.name.getText() &&
+              (ts.isPropertyAssignment(property) ||
+                ts.isShorthandPropertyAssignment(property) ||
+                ts.isGetAccessorDeclaration(property))
+          )
+        )
+          block(member.type);
       for (const property of value.properties) {
+        if (ts.isMethodDeclaration(property)) {
+          const member = members.find(
+            member =>
+              ts.isPropertySignature(member) && member.name.getText() === property.name.getText()
+          );
+          if (member && ts.isPropertySignature(member) && member.type)
+            slots.set(property, member.type);
+          continue;
+        }
         if (
           !ts.isPropertyAssignment(property) &&
           !ts.isShorthandPropertyAssignment(property) &&
@@ -3103,9 +4917,18 @@ function contextSlots(program, checker) {
         else
           walk(
             ts.isPropertyAssignment(property) ? property.initializer : property.name,
-            member.type
+            member.type,
+            seen
           );
       }
+      return;
+    }
+    if (
+      ts.isInterfaceDeclaration(resolved) ||
+      ts.isTypeLiteralNode(resolved) ||
+      ts.isTupleTypeNode(resolved)
+    ) {
+      block(declared);
       return;
     }
     // the slot is where the context names it (`State` in `[State, …]`), not
@@ -3115,6 +4938,32 @@ function contextSlots(program, checker) {
   };
   /** @param {ts.Node} node */
   const visit = node => {
+    if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
+      const declared = contextType(checker.getSymbolAtLocation(node.tagName));
+      const value = node.attributes.properties.find(
+        property => ts.isJsxAttribute(property) && property.name.getText() === "value"
+      );
+      if (
+        declared &&
+        value &&
+        ts.isJsxAttribute(value) &&
+        value.initializer &&
+        ts.isJsxExpression(value.initializer) &&
+        value.initializer.expression
+      )
+        walk(value.initializer.expression, declared);
+    }
+    if (
+      ts.isCallExpression(node) &&
+      ts.isVariableDeclaration(node.parent) &&
+      node.parent.initializer === node &&
+      ts.isIdentifier(node.parent.name) &&
+      node.arguments[0] &&
+      !(ts.isIdentifier(node.arguments[0]) && node.arguments[0].text === "undefined")
+    ) {
+      const declared = contextType(checker.getSymbolAtLocation(node.parent.name));
+      if (declared) walk(node.arguments[0], declared);
+    }
     if (
       ts.isCallExpression(node) &&
       ts.isPropertyAccessExpression(node.expression) &&
@@ -3122,12 +4971,7 @@ function contextSlots(program, checker) {
       node.arguments[0] &&
       ts.isObjectLiteralExpression(node.arguments[0])
     ) {
-      let symbol = checker.getSymbolAtLocation(node.expression.expression);
-      if (symbol && symbol.flags & ts.SymbolFlags.Alias) symbol = checker.getAliasedSymbol(symbol);
-      const declaration = symbol?.valueDeclaration;
-      const init =
-        declaration && ts.isVariableDeclaration(declaration) ? declaration.initializer : undefined;
-      const declared = init && ts.isCallExpression(init) ? init.typeArguments?.[0] : undefined;
+      const declared = contextType(checker.getSymbolAtLocation(node.expression.expression));
       const value = node.arguments[0].properties.find(
         p => ts.isPropertyAssignment(p) && p.name.getText() === "value"
       );
@@ -3138,6 +4982,19 @@ function contextSlots(program, checker) {
   for (const file of program.getSourceFiles())
     if (!file.isDeclarationFile && !/[\\/]node_modules[\\/]/.test(file.fileName)) visit(file);
   return slots;
+}
+/** Proven provider leaves shared with source failure inference.
+ * A single opaque or escaping provider blocks the whole declared slot.
+ * @param {ts.Program} program */
+export function contextInferenceSlots(program) {
+  const slots = contextSlots(program, program.getTypeChecker());
+  const blocked = blockedSlotsOf.get(program);
+  /** @type {Map<ts.TypeNode, ts.Node[]>} */ const grouped = new Map();
+  for (const [value, declared] of slots) {
+    if (blocked?.has(declared)) continue;
+    grouped.set(declared, [...(grouped.get(declared) ?? []), value]);
+  }
+  return grouped;
 }
 /** Refuse generator helpers handed to an unknown consumer. The library's
  * callback hosts are the only allowed consumers besides direct delegation.
@@ -3193,7 +5050,7 @@ function checkEscapes(files, active, options) {
     };
     /** @param {ts.Node} n */
     function walk(n) {
-      if (ts.isTypeNode(n)) return;
+      if (ts.isTypeNode(n) || ts.isInterfaceDeclaration(n) || ts.isTypeAliasDeclaration(n)) return;
       if (ts.isIdentifier(n)) {
         const parent = n.parent;
         const declarationName =
@@ -3240,10 +5097,35 @@ function checkEscapes(files, active, options) {
             ts.isCallExpression(parent) &&
             ts.isIdentifier(parent.expression) &&
             constructors.has(parent.expression.text);
-          if (!direct && !member && !callback && !capturedCallee(n) && !routineSlot(n)) {
+          // The method capture preserves its receiver and argument order.
+          // nativeInvoke returns the method result unchanged; only a delegated
+          // invocation drives a captured routine (an arbitrary consumer does not).
+          const invoked =
+            ts.isCallExpression(parent) &&
+            parent.arguments[0] === n &&
+            ts.isIdentifier(parent.expression) &&
+            checker
+              .getSymbolAtLocation(parent.expression)
+              ?.declarations?.some(
+                declaration =>
+                  ts.isImportSpecifier(declaration) &&
+                  (declaration.propertyName ?? declaration.name).text === "nativeInvoke" &&
+                  ts.isStringLiteral(declaration.parent.parent.parent.moduleSpecifier) &&
+                  declaration.parent.parent.parent.moduleSpecifier.text === "solid-yield/internal"
+              ) &&
+            ts.isYieldExpression(parent.parent) &&
+            parent.parent.asteriskToken;
+          if (
+            !direct &&
+            !member &&
+            !callback &&
+            !invoked &&
+            !capturedCallee(n) &&
+            !routineSlot(n)
+          ) {
             const at = n.getSourceFile().getLineAndCharacterOfPosition(n.getStart());
             const error = new Error(
-              `[SUGAR_ESCAPE] Routine ${n.text} is handed to an unknown consumer; a plain callback cannot drive it.`
+              "[SUGAR_ESCAPE] A reactive helper is passed to code the checker cannot follow. Call it inside an event, memo, or JSX expression instead of handing it to that code."
             );
             Object.assign(error, {
               id,
@@ -3259,10 +5141,15 @@ function checkEscapes(files, active, options) {
     walk(source);
   }
 }
-/** Lower a closed set of sugar modules together. Import aliases/re-exports are
- * resolved by TypeScript; the existing analyzer consumes this same explicit IR. */
-/** @param {Map<string,string>} input @param {{compilerOptions?: ts.CompilerOptions, native?:boolean, rounds?: number}} [options] `rounds`: the fixpoint's bound (tests lower it) */
-function lowerSugarProjectImpl(input, { compilerOptions = {}, native = false, rounds = 24 } = {}) {
+/** Reconstruct a closed set of modules together. Import aliases/re-exports are
+ * resolved by TypeScript; the analyzer consumes this same explicit IR.
+ * @param {Map<string,string>} input
+ * @param {{compilerOptions?: ts.CompilerOptions, rounds?: number, active?: Iterable<string>}} [settings]
+ * `rounds` bounds the fixpoint; `active` selects modules to reconstruct. */
+function reconstructProjectImpl(
+  input,
+  { compilerOptions = {}, rounds = 24, active = input.keys() } = {}
+) {
   const options = {
     target: ts.ScriptTarget.ESNext,
     module: ts.ModuleKind.ESNext,
@@ -3273,57 +5160,82 @@ function lowerSugarProjectImpl(input, { compilerOptions = {}, native = false, ro
     jsxImportSource: "solid-yield",
     ...compilerOptions
   };
+  const selected = new Set([...active].map(id => resolve(id)));
   let files = new Map(
-    [...input].map(([id, code]) => [resolve(id), isSugar(code) ? seed(code, id, native) : code])
+    [...input].map(([id, code]) => {
+      const filename = resolve(id);
+      return [filename, selected.has(filename) ? seed(code, filename) : code];
+    })
   );
-  const active = new Set([...input].filter(([, c]) => isSugar(c)).map(([id]) => resolve(id)));
   /** @type {ts.Program | undefined} */ let previous;
+  /** @type {Map<string, Set<string>>} */ const generatedCalls = new Map();
   for (let i = 0; i < rounds; i++) {
     const program = programFor(files, options, previous);
     previous = program;
     const next = new Map(files);
     let changed = false;
-    for (const id of active) {
-      const code = pass(files.get(id) ?? "", id, program, native);
+    for (const id of selected) {
+      const code = pass(files.get(id) ?? "", id, program);
       next.set(id, code);
       changed ||= code !== files.get(id);
     }
     files = next;
-    if (!changed && native)
-      for (const id of active) {
-        const code = contextFacades(typedCreations(files.get(id) ?? "", id, program), id, program);
+    if (!changed)
+      for (const id of selected) {
+        const code = settledAwaits(files.get(id) ?? "", id, program);
         changed ||= code !== files.get(id);
         files.set(id, code);
       }
-    if (!changed && native) {
-      const { wanted, concrete, accessors, outside } = coloredPropSites(program, active);
-      for (const [id, components] of wanted) {
+    if (!changed)
+      for (const id of selected) {
+        const code = factoryResultContracts(
+          contextFacades(typedCreations(files.get(id) ?? "", id, program), id, program),
+          id,
+          program
+        );
+        changed ||= code !== files.get(id);
+        files.set(id, code);
+      }
+    if (!changed) {
+      const { wanted, concrete, accessors, outside, calls } = coloredPropSites(program, selected);
+      const widening = [...wanted.values()].some(components => components.size);
+      for (const id of widening ? selected : wanted.keys()) {
+        if (!generatedCalls.has(id)) generatedCalls.set(id, new Set());
         const code = widenColoredProps(
           files.get(id) ?? "",
           id,
-          components,
+          wanted.get(id) ?? new Map(),
           concrete.get(id),
           accessors.get(id),
-          outside.get(id)
+          outside.get(id),
+          widening ? undefined : calls.get(id),
+          generatedCalls.get(id),
+          widening
         );
         changed ||= code !== files.get(id);
         files.set(id, code);
       }
     }
-    if (!changed && native)
-      for (const id of active) {
+    if (!changed)
+      for (const id of selected) {
+        const code = recursiveFacades(files.get(id) ?? "", id, program);
+        changed ||= code !== files.get(id);
+        files.set(id, code);
+      }
+    if (!changed)
+      for (const id of selected) {
         const code = accessorArguments(files.get(id) ?? "", id, program);
         changed ||= code !== files.get(id);
         files.set(id, code);
       }
-    if (!changed && native)
-      for (const id of active) {
+    if (!changed)
+      for (const id of selected) {
         const code = constantProps(files.get(id) ?? "", id, program);
         changed ||= code !== files.get(id);
         files.set(id, code);
       }
     if (!changed) {
-      checkEscapes(files, active, options);
+      checkEscapes(files, selected, options);
       return { files, iterations: i + 1 };
     }
   }
@@ -3331,34 +5243,57 @@ function lowerSugarProjectImpl(input, { compilerOptions = {}, native = false, ro
     "[SUGAR_FIXPOINT] Routine inference did not converge; recursive routines need an explicit signature (F-S3)."
   );
 }
-/** The Vite adapter loads the project's source files before lowering any module.
- * File contents key the cache; Vite also clears it on watched changes. */
-/** @param {string} code @param {string} filename @param {Map<string, {signature: string, files: Map<string,string>}>} [cache] */
-export function lowerSugarFile(code, filename, cache = new Map()) {
-  const configPath = ts.findConfigFile(dirname(filename), ts.sys.fileExists);
-  if (!configPath) throw new Error("[SUGAR_PROJECT] Sugar requires a tsconfig.json.");
-  const config = ts.readConfigFile(configPath, ts.sys.readFile);
-  const parsed = ts.parseJsonConfigFileContent(config.config, ts.sys, dirname(configPath));
-  const files = new Map(
-    parsed.fileNames
-      .filter(f => !f.includes("node_modules") && !f.includes("/.generated/"))
-      .map(f => [f, readFileSync(f, "utf8")])
-  );
-  files.set(filename, code);
-  const signature = JSON.stringify([parsed.options, [...files]]);
-  let entry = cache.get(configPath);
-  if (entry?.signature !== signature) {
-    entry = {
-      signature,
-      files: lowerSugarProject(files, { compilerOptions: parsed.options }).files
-    };
-    cache.set(configPath, entry);
-  }
-  return entry.files.get(filename) ?? code;
+
+/** Remove only redundant await bridges, after routine result types settle.
+ * A kept promise must still be attempted at its caller, not inside its helper.
+ * @param {string} code @param {string} file @param {ts.Program} program */
+function settledAwaits(code, file, program) {
+  const source = program.getSourceFile(file);
+  if (!source) return code;
+  const checker = program.getTypeChecker();
+  /** @type {Map<string, ts.Node>} */ const nodes = new Map();
+  /** @param {ts.Node} node */
+  const collect = node => {
+    nodes.set(`${node.getStart()}:${node.getEnd()}`, node);
+    ts.forEachChild(node, collect);
+  };
+  collect(source);
+  const p = parseProgram(code, file);
+  if (!p) return code;
+  let changed = false;
+  /** @param {ts.Type} type @returns {boolean} */
+  const settled = type =>
+    type.isUnion()
+      ? type.types.every(settled)
+      : !(type.flags & (ts.TypeFlags.Any | ts.TypeFlags.Unknown)) &&
+        !checker.getPropertyOfType(type, "then");
+  traverseOwned(p, {
+    CallExpression(q) {
+      if (lib(q.get("callee")) !== "attempt" || !q.parentPath.isYieldExpression({ delegate: true }))
+        return;
+      const producer = q.get("arguments.0");
+      if (
+        !producer?.isArrowFunctionExpression() ||
+        !t.isBlockStatement(producer.node.body) ||
+        !producer.node.body.directives.some(d => d.value.value === awaitDirective)
+      )
+        return;
+      const returned = producer.node.body.body[0];
+      if (!t.isReturnStatement(returned) || !t.isIdentifier(returned.argument)) return;
+      const value = returned.argument;
+      const node = nodes.get(`${value.start}:${value.end}`);
+      if (node && settled(checker.getTypeAtLocation(node))) {
+        q.parentPath.replaceWith(value);
+        changed = true;
+      }
+    }
+  });
+  return changed ? printer(t.file(p.node)) : code;
 }
 
-/** Shared lowering, including generated-to-author position tables.
- * @param {Map<string,string>} input @param {{compilerOptions?: ts.CompilerOptions, native?:boolean}} [options] */
-export function lowerSugarProject(input, options = {}) {
-  return withPositions(input, () => lowerSugarProjectImpl(input, options));
+/** Shared reconstruction, including generated-to-author position tables.
+ * @param {Map<string,string>} input
+ * @param {{compilerOptions?: ts.CompilerOptions, rounds?: number, active?: Iterable<string>}} [options] */
+export function reconstructProject(input, options = {}) {
+  return withPositions(input, () => reconstructProjectImpl(input, options));
 }

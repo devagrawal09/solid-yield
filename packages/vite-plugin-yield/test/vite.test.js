@@ -21,6 +21,22 @@ describe("solidYield()", () => {
     expect(plugin.name).toBe("vite-plugin-solid-yield");
   });
 
+  it("ignores legacy directives and retains explicit JSX generators in every mode", () => {
+    const code = `"use yield";
+import { $signal } from "solid-yield";
+export function Counter() { const [n] = $signal(0); return <p>{n()}</p>; }`;
+    for (const options of [
+      {},
+      { mode: "explicit" },
+      { mode: "native", include: () => false, emit: "lowered" }
+    ]) {
+      const plugin = solidYield(options);
+      expect(plugin.transform.call({}, code, "/src/legacy.tsx")).toBeNull();
+      const explicit = "function* View() { return <p>{yield* x}</p>; }";
+      expect(plugin.transform.call({}, explicit, "/src/view.tsx").code).toContain("_$perform(x)");
+    }
+  });
+
   it("skips a module with no yield without parsing it", () => {
     // not even valid syntax: a parse would throw
     expect(run("const a = <p>{x</p>", "/src/a.tsx")).toBeNull();

@@ -7,6 +7,312 @@ const union = (...sets) => new Set(sets.flatMap(s => [...s]));
 const name = n => n?.name ?? n?.value;
 /** `@solidjs/web` components that render no author code that can fail (F-S45). */
 const SAFE_WEB_COMPONENTS = ["HydrationScript", "NoHydration"];
+/** A member observation cannot expose the provider bag or mutate its slots.
+ * Resolve own data members, not getters or an annotation hiding an unknown
+ * implementation. Callable aliases may only be called or handed to DOM events.
+ * @param {typeof import('typescript')} ts
+ * @param {import('typescript').TypeChecker} checker
+ * @param {import('typescript').VariableDeclaration} declaration
+ * @param {import('typescript').Node} use
+ * @param {boolean} [allowGenerators]
+ */
+export function providerMemberObservation(ts, checker, declaration, use, allowGenerators = false) {
+  const unwrap = node => {
+    while (
+      node &&
+      (ts.isParenthesizedExpression(node) ||
+        ts.isAsExpression(node) ||
+        ts.isTypeAssertionExpression(node) ||
+        ts.isNonNullExpression(node) ||
+        ts.isSatisfiesExpression(node) ||
+        ts.isYieldExpression(node))
+    )
+      node = node.expression;
+    return node;
+  };
+  const api = node => {
+    const imported = checker.getSymbolAtLocation(node)?.declarations?.find(ts.isImportSpecifier);
+    const module = imported?.parent.parent.parent;
+    return imported &&
+      module &&
+      ts.isImportDeclaration(module) &&
+      ts.isStringLiteral(module.moduleSpecifier)
+      ? { module: module.moduleSpecifier.text, name: (imported.propertyName ?? imported.name).text }
+      : null;
+  };
+  const symbolAt = node => {
+    let symbol =
+      ts.isIdentifier(node) && ts.isShorthandPropertyAssignment(node.parent)
+        ? checker.getShorthandAssignmentValueSymbol(node.parent)
+        : checker.getSymbolAtLocation(node);
+    if (symbol?.flags & ts.SymbolFlags.Alias) symbol = checker.getAliasedSymbol(symbol);
+    return symbol;
+  };
+  const origin = (node, seen = new Set()) => {
+    node = unwrap(node);
+    if (!node || seen.has(node)) return undefined;
+    seen = new Set([...seen, node]);
+    if (ts.isIdentifier(node)) {
+      const binding = symbolAt(node)?.valueDeclaration;
+      if (binding && ts.isVariableDeclaration(binding) && binding.parent.flags & ts.NodeFlags.Const)
+        return origin(binding.initializer, seen);
+      if (binding && ts.isFunctionDeclaration(binding)) return binding;
+    }
+    if (ts.isCallExpression(node)) {
+      const helper = api(node.expression);
+      if (helper?.module === "solid-yield/internal") {
+        if (helper.name === "nativeArgument") return origin(node.arguments[0], seen);
+        if (helper.name === "nativeLexicalCallback") return origin(node.arguments[1], seen);
+      }
+    }
+    return node;
+  };
+  const implementation = node => {
+    node = origin(node);
+    if (
+      !node ||
+      !(
+        ts.isArrowFunction(node) ||
+        ts.isFunctionExpression(node) ||
+        ts.isFunctionDeclaration(node) ||
+        ts.isMethodDeclaration(node)
+      ) ||
+      !node.body ||
+      node.getSourceFile().isDeclarationFile ||
+      (!allowGenerators && node.asteriskToken)
+    )
+      return undefined;
+    if (
+      ts.isBlock(node.body) &&
+      node.body.statements.some(
+        statement =>
+          ts.isExpressionStatement(statement) &&
+          ts.isStringLiteral(statement.expression) &&
+          statement.expression.text === "use native opaque"
+      )
+    )
+      return undefined;
+    return node;
+  };
+  const memberName = node => {
+    if (ts.isPropertyAccessExpression(node)) return node.name.text;
+    if (
+      ts.isElementAccessExpression(node) &&
+      node.argumentExpression &&
+      (ts.isStringLiteral(node.argumentExpression) || ts.isNumericLiteral(node.argumentExpression))
+    )
+      return node.argumentExpression.text;
+    return undefined;
+  };
+  const valuesOf = (node, name, seen = new Set()) => {
+    node = origin(node);
+    if (!node || seen.has(node)) return undefined;
+    seen = new Set([...seen, node]);
+    if (ts.isObjectLiteralExpression(node)) {
+      // An unknown computed key can overwrite the named data slot (including
+      // with a getter). Do not silently ignore that possible collision.
+      if (
+        node.properties.some(
+          property =>
+            ts.isSpreadAssignment(property) ||
+            (property.name && ts.isComputedPropertyName(property.name))
+        )
+      )
+        return undefined;
+      if (name === "__proto__") return undefined;
+      const properties = node.properties.filter(
+        property =>
+          property.name &&
+          !ts.isComputedPropertyName(property.name) &&
+          (ts.isIdentifier(property.name) ||
+            ts.isStringLiteral(property.name) ||
+            ts.isNumericLiteral(property.name)) &&
+          property.name.text === name
+      );
+      if (properties.length !== 1) return undefined;
+      const property = properties[0];
+      if (ts.isPropertyAssignment(property)) return [property.initializer];
+      if (ts.isShorthandPropertyAssignment(property)) return [property.name];
+      if (ts.isMethodDeclaration(property)) return [property];
+      return undefined;
+    }
+    if (!ts.isCallExpression(node)) return undefined;
+    const helper = api(node.expression);
+    const fn =
+      helper?.module === "solid-yield/internal" && helper.name === "nativeInvoke"
+        ? implementation(node.arguments[0])
+        : implementation(node.expression);
+    if (!fn) return undefined;
+    const returns = [];
+    const visit = child => {
+      if (ts.isFunctionLike(child)) return;
+      if (ts.isReturnStatement(child)) returns.push(child.expression);
+      else ts.forEachChild(child, visit);
+    };
+    if (ts.isBlock(fn.body)) ts.forEachChild(fn.body, visit);
+    else returns.push(fn.body);
+    const values = returns.map(value => valuesOf(value, name, seen));
+    return values.length && values.every(Boolean) ? values.flat() : undefined;
+  };
+  const sourceCall = node => {
+    node = unwrap(node);
+    if (!node || !ts.isCallExpression(node)) return false;
+    const imported = api(node.expression);
+    return (
+      imported &&
+      ["solid-js", "solid-yield"].includes(imported.module) &&
+      [
+        "createSignal",
+        "createMemo",
+        "createOptimistic",
+        "createStore",
+        "createOptimisticStore",
+        "createProjection",
+        "$signal",
+        "$memo",
+        "$optimistic",
+        "$store",
+        "$optimisticStore",
+        "$projection",
+        "constant"
+      ].includes(imported.name)
+    );
+  };
+  const receiverFree = node => {
+    const resolved = origin(node);
+    if (!resolved) return false;
+    if (sourceCall(resolved)) return true;
+    if (ts.isIdentifier(resolved)) {
+      const binding = symbolAt(resolved)?.valueDeclaration;
+      if (
+        binding &&
+        ts.isBindingElement(binding) &&
+        !binding.dotDotDotToken &&
+        ts.isArrayBindingPattern(binding.parent) &&
+        binding.parent.elements.indexOf(binding) < 2 &&
+        ts.isVariableDeclaration(binding.parent.parent) &&
+        sourceCall(binding.parent.parent.initializer)
+      )
+        return true;
+    }
+    const fn = implementation(resolved);
+    if (!fn) return false;
+    let safe = true;
+    const visit = child => {
+      if (
+        child.kind === ts.SyntaxKind.ThisKeyword ||
+        child.kind === ts.SyntaxKind.SuperKeyword ||
+        (ts.isCallExpression(child) &&
+          ts.isIdentifier(child.expression) &&
+          child.expression.text === "eval")
+      )
+        safe = false;
+      if (safe) ts.forEachChild(child, visit);
+    };
+    visit(fn.body);
+    for (const parameter of fn.parameters) {
+      if (parameter.initializer) visit(parameter.initializer);
+      if (ts.isBindingPattern(parameter.name)) visit(parameter.name);
+    }
+    return safe;
+  };
+  const outer = node => {
+    while (
+      node.parent &&
+      (ts.isParenthesizedExpression(node.parent) ||
+        ts.isAsExpression(node.parent) ||
+        ts.isTypeAssertionExpression(node.parent) ||
+        ts.isNonNullExpression(node.parent) ||
+        ts.isSatisfiesExpression(node.parent))
+    )
+      node = node.parent;
+    return node;
+  };
+  const leafUse = (node, seen = new Set()) => {
+    node = outer(node);
+    const parent = node.parent;
+    if (ts.isYieldExpression(parent) && parent.asteriskToken) return true;
+    if (ts.isCallExpression(parent) && parent.expression === node) return true;
+    if (ts.isCallExpression(parent)) {
+      const helper = api(parent.expression);
+      if (helper?.module === "solid-yield/internal" && helper.name === "nativeArgument")
+        return leafUse(parent, seen);
+      if (
+        helper?.module === "solid-yield" &&
+        helper.name === "$event" &&
+        parent.arguments[0] === node
+      )
+        return true;
+      if (
+        helper?.module === "solid-yield/internal" &&
+        helper.name === "nativeInvoke" &&
+        parent.arguments[0] === node
+      )
+        return origin(parent.arguments[1]) === origin(declaration.initializer);
+    }
+    if (ts.isJsxExpression(parent) && ts.isJsxAttribute(parent.parent)) {
+      const attribute = parent.parent;
+      const opening = attribute.parent.parent;
+      return (
+        ts.isIdentifier(attribute.name) &&
+        /^on[A-Z]/.test(attribute.name.text) &&
+        ts.isIdentifier(opening.tagName) &&
+        /^[a-z]/.test(opening.tagName.text)
+      );
+    }
+    if (
+      !ts.isVariableDeclaration(parent) ||
+      parent.initializer !== node ||
+      !ts.isIdentifier(parent.name) ||
+      !(parent.parent.flags & ts.NodeFlags.Const)
+    )
+      return false;
+    if (
+      ts.isVariableStatement(parent.parent.parent) &&
+      parent.parent.parent.modifiers?.some(
+        modifier => modifier.kind === ts.SyntaxKind.ExportKeyword
+      )
+    )
+      return false;
+    const symbol = checker.getSymbolAtLocation(parent.name);
+    if (!symbol || seen.has(symbol)) return false;
+    seen = new Set([...seen, symbol]);
+    let safe = true;
+    const visit = child => {
+      if (!safe || ts.isTypeNode(child)) return;
+      if (ts.isIdentifier(child) && child !== parent.name && symbolAt(child) === symbol)
+        safe = leafUse(child, seen);
+      ts.forEachChild(child, visit);
+    };
+    visit(parent.getSourceFile());
+    return safe;
+  };
+  use = outer(use);
+  let member = use.parent;
+  if (
+    ts.isCallExpression(member) &&
+    member.arguments[1] === use &&
+    api(member.expression)?.module === "solid-yield/internal" &&
+    api(member.expression)?.name === "nativeInvoke"
+  ) {
+    const callee = origin(member.arguments[0]);
+    if (
+      !callee ||
+      !(ts.isPropertyAccessExpression(callee) || ts.isElementAccessExpression(callee)) ||
+      origin(callee.expression) !== origin(declaration.initializer)
+    )
+      return false;
+    member = callee;
+  }
+  if (
+    !(ts.isPropertyAccessExpression(member) || ts.isElementAccessExpression(member)) ||
+    (member.expression !== use && origin(member.expression) !== origin(declaration.initializer))
+  )
+    return false;
+  const name = memberName(member);
+  const values = name === undefined ? undefined : valuesOf(declaration.initializer, name);
+  return !!values?.length && values.every(receiverFree) && leafUse(member);
+}
 export function inferFailures(
   modules,
   { program, ts, root = process.cwd(), opaqueGenerators = false }
@@ -132,8 +438,93 @@ export function inferFailures(
     }
     let symbol = checker.getSymbolAtLocation(node);
     if (symbol?.flags & ts.SymbolFlags.Alias) symbol = checker.getAliasedSymbol(symbol);
-    return symbol?.declarations?.map(functionFor).find(Boolean) ?? null;
+    return symbol?.declarations?.map(functionFor).find(Boolean) ?? localMemberTarget(p);
   };
+  // A local provider member can be called before useContext (including a
+  // callback extracted for a DOM event). Use the actual implementation only
+  // after the complete bag path passes the same immutability proof.
+  function localMemberTarget(path) {
+    const seen = new Set();
+    const follow = value => {
+      if (!value?.node || seen.has(value.node)) return null;
+      seen.add(value.node);
+      if (
+        value.isTSAsExpression() ||
+        value.isTSNonNullExpression() ||
+        value.isTSSatisfiesExpression() ||
+        value.isParenthesizedExpression()
+      )
+        return follow(value.get("expression"));
+      if (value.isIdentifier()) {
+        const binding = value.scope.getBinding(value.node.name);
+        if (binding?.constant && binding.path.isVariableDeclarator())
+          return follow(binding.path.get("init"));
+      }
+      return value;
+    };
+    const member = follow(path.isCallExpression() ? path.get("callee") : path);
+    if (!member?.isMemberExpression()) return null;
+    const key = member.node.computed
+      ? member.get("property").isStringLiteral()
+        ? member.node.property.value
+        : null
+      : name(member.node.property);
+    const object = member.get("object");
+    if (key == null || !object.isIdentifier()) return null;
+    const binding = object.scope.getBinding(object.node.name);
+    if (!binding?.constant || !binding.path.isVariableDeclarator()) return null;
+    const allowed = new Set();
+    for (let reference of binding.referencePaths) {
+      while (
+        reference.parentPath?.isTSAsExpression() ||
+        reference.parentPath?.isTSNonNullExpression() ||
+        reference.parentPath?.isTSSatisfiesExpression() ||
+        reference.parentPath?.isParenthesizedExpression()
+      )
+        reference = reference.parentPath;
+      const expression = reference.parentPath;
+      const attribute = expression?.isJSXExpressionContainer() ? expression.parentPath : null;
+      const opening = attribute?.isJSXAttribute() ? attribute.parentPath : null;
+      if (
+        opening?.isJSXOpeningElement() &&
+        name(attribute.node.name) === "value" &&
+        contextId(opening.get("name")) &&
+        !opening.node.attributes.some(a => a.type === "JSXSpreadAttribute")
+      )
+        allowed.add(reference.node);
+    }
+    if (!stableProvider(binding, allowed)) return null;
+    const values = providerValues(binding.path.get("init"));
+    if (!values?.length) return null;
+    const routine = (value, visited = new Set()) => {
+      if (!value?.node || visited.has(value.node)) return null;
+      visited = new Set([...visited, value.node]);
+      if (value.isFunction())
+        return byBody.get(analysis.moduleOf.get(value.node)?.id + ":" + value.node.body.start);
+      if (!value.isIdentifier()) return null;
+      const held = value.scope.getBinding(value.node.name);
+      if (!held?.constant) return null;
+      if (held.path.isFunctionDeclaration()) return routine(held.path, visited);
+      return held.path.isVariableDeclarator() ? routine(held.path.get("init"), visited) : null;
+    };
+    const targets = values.map(value => {
+      if (!value.isObjectExpression()) return null;
+      const property = value
+        .get("properties")
+        .find(
+          p =>
+            (p.isObjectProperty() || p.isObjectMethod()) &&
+            !p.node.computed &&
+            name(p.node.key) === key
+        );
+      return property?.isObjectMethod()
+        ? routine(property)
+        : property?.isObjectProperty()
+          ? routine(property.get("value"))
+          : null;
+    });
+    return targets[0] && targets.every(fn => fn === targets[0]) ? targets[0] : null;
+  }
   const contextId = path => {
     const node = nodeFor(path);
     let symbol = node && checker.getSymbolAtLocation(node);
@@ -171,6 +562,13 @@ export function inferFailures(
    */
   const contextOfValue = (p, depth = 0) => {
     if (!p?.node || depth > 4) return null;
+    while (
+      p.isTSNonNullExpression() ||
+      p.isTSAsExpression() ||
+      p.isTSSatisfiesExpression() ||
+      p.isParenthesizedExpression()
+    )
+      p = p.get("expression");
     if (p.isIdentifier()) {
       const binding = p.scope.getBinding(p.node.name);
       if (
@@ -207,16 +605,116 @@ export function inferFailures(
    * escapes (is used other than as a provider tag or a `useContext` argument).
    */
   let contextValueMap = null;
+  // Follow only immutable bags on the provider path. A reference stored in an
+  // unknown container/callback can be changed without assigning the binding.
+  const stableProvider = (binding, allowed, seen = new Set()) => {
+    if (
+      !binding?.constant ||
+      binding.kind !== "const" ||
+      !binding.path.isVariableDeclarator() ||
+      !binding.path.get("id").isIdentifier() ||
+      seen.has(binding)
+    )
+      return false;
+    if (binding.path.parentPath.parentPath?.isExportNamedDeclaration()) return false;
+    seen = new Set([...seen, binding]);
+    return binding.referencePaths.every(reference => {
+      if (reference.findParent(path => path.isTSType())) return true;
+      let use = reference;
+      while (
+        use.parentPath?.isTSAsExpression() ||
+        use.parentPath?.isTSNonNullExpression() ||
+        use.parentPath?.isTSSatisfiesExpression() ||
+        use.parentPath?.isParenthesizedExpression()
+      )
+        use = use.parentPath;
+      const parent = use.parentPath;
+      if (
+        parent?.isVariableDeclarator() &&
+        parent.get("init").node === use.node &&
+        parent.get("id").isIdentifier()
+      )
+        return stableProvider(parent.scope.getBinding(parent.node.id.name), allowed, seen);
+      if (!allowed.has(use.node)) {
+        const declaration = nodeFor(binding.path);
+        const reference = nodeFor(use);
+        return declaration && ts.isVariableDeclaration(declaration) && reference
+          ? providerMemberObservation(ts, checker, declaration, reference)
+          : false;
+      }
+      if (parent?.isReturnStatement())
+        return parent.getFunctionParent() === binding.path.getFunctionParent();
+      if (parent?.isJSXExpressionContainer())
+        return parent.parentPath.isJSXAttribute() && name(parent.parentPath.node.name) === "value";
+      if (parent?.isCallExpression()) {
+        const api = imported(parent.get("callee"));
+        return (
+          api?.source === "solid-js" &&
+          api.name === "createContext" &&
+          parent.node.arguments[0] === use.node
+        );
+      }
+      return false;
+    });
+  };
+  const providerValues = (value, allowed = new Set(), seen = new Set()) => {
+    if (!value?.node || seen.has(value.node)) return null;
+    seen = new Set([...seen, value.node]);
+    allowed = new Set([...allowed, value.node]);
+    if (
+      value.isTSAsExpression() ||
+      value.isTSNonNullExpression() ||
+      value.isTSSatisfiesExpression() ||
+      value.isParenthesizedExpression()
+    )
+      return providerValues(value.get("expression"), allowed, seen);
+    if (value.isObjectExpression())
+      return value.node.properties.some(property => property.type === "SpreadElement")
+        ? null
+        : [value];
+    if (value.isArrayExpression())
+      return value.node.elements.some(element => element?.type === "SpreadElement")
+        ? null
+        : [value];
+    if (value.isIdentifier()) {
+      const binding = value.scope.getBinding(value.node.name);
+      return stableProvider(binding, allowed)
+        ? providerValues(binding.path.get("init"), allowed, seen)
+        : null;
+    }
+    if (!value.isCallExpression()) return null;
+    const callee = value.get("callee");
+    if (!callee.isIdentifier() || !callee.scope.getBinding(callee.node.name)?.constant) return null;
+    const fn = target(value)?.path;
+    // An authored iterator is a value, not a factory invocation to drive here.
+    if (!fn || fn.node.async || fn.node.generator) return null;
+    const declaration = fn.isFunctionDeclaration() ? fn : fn.parentPath;
+    const id = declaration.isVariableDeclarator() ? declaration.node.id : fn.node.id;
+    if (id?.type === "Identifier" && !declaration.scope.getBinding(id.name)?.constant) return null;
+    const body = fn.get("body");
+    if (!body.isBlockStatement()) return providerValues(body, allowed, seen);
+    const returns = [];
+    body.traverse({
+      Function(path) {
+        path.skip();
+      },
+      ReturnStatement(path) {
+        if (path.node.argument) returns.push(path.get("argument"));
+      }
+    });
+    if (!returns.length) return null;
+    const values = returns.map(result => providerValues(result, allowed, seen));
+    return values.every(Boolean) ? values.flat() : null;
+  };
   const contextValues = id => {
     if (!contextValueMap) {
       contextValueMap = new Map();
       const add = (ctx, value) => {
         const values = contextValueMap.has(ctx) ? contextValueMap.get(ctx) : [];
-        if (values)
-          contextValueMap.set(
-            ctx,
-            value?.isObjectExpression() || value?.isArrayExpression() ? [...values, value] : null
-          );
+        if (values) {
+          const provided = providerValues(value);
+          contextValueMap.set(ctx, provided ? [...values, ...provided] : null);
+        }
       };
       for (const [, record] of analysis.modules)
         record.program.traverse({
@@ -268,9 +766,8 @@ export function inferFailures(
     if (!values || !init?.isCallExpression()) return null;
     const [fallback] = init.get("arguments");
     if (!fallback || fallback.isIdentifier({ name: "undefined" })) return values;
-    return fallback.isObjectExpression() || fallback.isArrayExpression()
-      ? [...values, fallback]
-      : null;
+    const defaults = providerValues(fallback);
+    return defaults ? [...values, ...defaults] : null;
   };
   const SETTER_PRODUCERS = [
     "createSignal",
@@ -398,6 +895,13 @@ export function inferFailures(
    * context[1].bump`) and member chains off either (`nested.parse`). */
   const contextAt = (p, depth = 0) => {
     if (!p?.node || depth > 8) return null;
+    while (
+      p.isTSNonNullExpression() ||
+      p.isTSAsExpression() ||
+      p.isTSSatisfiesExpression() ||
+      p.isParenthesizedExpression()
+    )
+      p = p.get("expression");
     if (p.isMemberExpression()) {
       const chain = chainSteps(p);
       const at = chain && contextAt(chain.base, depth + 1);
@@ -459,6 +963,16 @@ export function inferFailures(
     if (renders.has(fn.id)) return renders.get(fn.id);
     /** @type {any[] | null} */ let sites = [];
     const names = [];
+    const namespaces = [];
+    const containsComponent = (symbol, seen = new Set()) => {
+      if (symbol.flags & ts.SymbolFlags.Alias) symbol = checker.getAliasedSymbol(symbol);
+      if (symbol.declarations?.some(declaration => functionFor(declaration) === fn)) return true;
+      if (!(symbol.flags & ts.SymbolFlags.Module) || seen.has(symbol)) return false;
+      // An unresolved deep namespace stays conservative; cycles alone expose no new members.
+      if (seen.size >= 32) return true;
+      seen = new Set([...seen, symbol]);
+      return checker.getExportsOfModule(symbol).some(exported => containsComponent(exported, seen));
+    };
     const own = fn.path.isFunctionDeclaration()
       ? fn.path.node.id
       : fn.path.parentPath.isVariableDeclarator() && fn.path.parentPath.node.init === fn.path.node
@@ -469,9 +983,22 @@ export function inferFailures(
     for (const [, record] of analysis.modules)
       for (const statement of record.program.get("body")) {
         if (!statement.isImportDeclaration()) continue;
-        for (const specifier of statement.get("specifiers"))
+        for (const specifier of statement.get("specifiers")) {
+          // Resolve exported aliases before deciding which namespace uses expose this component.
+          const local = specifier.get("local"),
+            node = nodeFor(local);
+          let symbol = node && checker.getSymbolAtLocation(node);
+          if (symbol?.flags & ts.SymbolFlags.Alias) symbol = checker.getAliasedSymbol(symbol);
+          const exports =
+            symbol?.flags & ts.SymbolFlags.Module ? checker.getExportsOfModule(symbol) : [];
+          const members = new Set(
+            exports.filter(exported => containsComponent(exported)).map(exported => exported.name)
+          );
+          if (members.size)
+            namespaces.push({ binding: specifier.scope.getBinding(local.node.name), members });
           if (target(specifier.get("local")) === fn)
             names.push(specifier.scope.getBinding(specifier.node.local.name));
+        }
       }
     for (const binding of names) {
       if (!sites || !binding?.constant) {
@@ -481,7 +1008,47 @@ export function inferFailures(
       for (const ref of binding.referencePaths) {
         const at = ref.parentPath;
         if (at.isJSXOpeningElement() && at.node.name === ref.node) sites.push(at);
+        // Babel counts an exported declaration as a reference to itself.
+        // It is not a runtime handoff; imports below still have to be used
+        // only as JSX tags, and a component with no known render stays unknown.
+        else if (ref.isExportNamedDeclaration() && ref.node.declaration === binding.path.node)
+          continue;
         else if (!at.isJSXClosingElement() && !at.isExportSpecifier()) {
+          sites = null;
+          break;
+        }
+      }
+    }
+    for (const { binding, members } of namespaces) {
+      if (!sites || !binding?.constant) {
+        sites = null;
+        break;
+      }
+      for (const ref of binding.referencePaths) {
+        if (ref.findParent(path => path.isTSType())) continue;
+        // A whole namespace or a dynamic key can expose any of its components.
+        const member = ref.parentPath;
+        if (
+          !(member.isMemberExpression() || member.isJSXMemberExpression()) ||
+          member.node.object !== ref.node
+        ) {
+          sites = null;
+          break;
+        }
+        const property = member.node.property;
+        const key = !member.node.computed
+          ? property.name
+          : property.type === "StringLiteral" || property.type === "NumericLiteral"
+            ? String(property.value)
+            : null;
+        if (key === null) {
+          sites = null;
+          break;
+        }
+        if (!members.has(key)) continue;
+        const at = member.parentPath;
+        if (at.isJSXOpeningElement() && at.node.name === member.node) sites.push(at);
+        else if (!at.isJSXClosingElement()) {
           sites = null;
           break;
         }
@@ -963,6 +1530,51 @@ export function inferFailures(
   }
   // An opaque generator's own body's failures, for the loops that drive it.
   const bodyFails = new Map();
+  // Substitute only callback parameters whose complete use is a direct call
+  // in this helper. Storage, forwarding and nested callbacks keep the unknown
+  // contract; their invocation timing cannot be proved here.
+  let callbackBindings = new Map();
+  const specializing = new Set();
+  const callbackArguments = (fn, site) => {
+    const bindings = new Map();
+    if (!fn || !site?.isCallExpression() || opaque(fn.path)) return bindings;
+    const args = site.get("arguments");
+    for (const [index, param] of fn.path.get("params").entries()) {
+      const arg = args[index];
+      if (!param.isIdentifier() || !arg?.isFunction()) continue;
+      const binding = fn.path.scope.getBinding(param.node.name);
+      const callback = byBody.get(`${analysis.moduleOf.get(arg.node)?.id}:${arg.node.body.start}`);
+      // TypeScript permits an async function in a void callback slot. That
+      // erased Promise must not turn a detached rejection into a caught throw.
+      const promised = path => {
+        const node = nodeFor(path);
+        return (
+          node &&
+          checker
+            .getTypeAtLocation(node)
+            .getCallSignatures()
+            .some(
+              signature =>
+                !!checker.getPromisedTypeOfPromise(checker.getReturnTypeOfSignature(signature))
+            )
+        );
+      };
+      if (promised(arg) && !promised(param)) continue;
+      if (
+        !callback ||
+        !binding?.constant ||
+        !binding.referencePaths.every(
+          ref =>
+            ref.parentPath.isCallExpression() &&
+            ref.key === "callee" &&
+            ref.getFunctionParent() === fn.path
+        )
+      )
+        continue;
+      bindings.set(binding, { callback, argument: arg.node });
+    }
+    return bindings;
+  };
   const invoke = (fn, owner, site = null) => {
     if (!fn) return new Set(["unknown"]);
     if (opaque(fn.path)) {
@@ -975,6 +1587,23 @@ export function inferFailures(
       return bodyFails.get(fn) ?? new Set();
     }
     owner.calls.add(fn.id);
+    const argumentsHere = callbackArguments(fn, site);
+    if (argumentsHere.size) {
+      if (specializing.has(fn)) return new Set(["unknown"]);
+      const previous = callbackBindings;
+      callbackBindings = new Map([...previous, ...argumentsHere]);
+      specializing.add(fn);
+      const specialized = { ...fn, calls: new Set(), timerFails: new Set() };
+      try {
+        const fails = evaluate(fn.path.get("body"), specialized, new Map());
+        for (const call of specialized.calls) owner.calls.add(call);
+        if (owner.timerFails) owner.timerFails = union(owner.timerFails, specialized.timerFails);
+        return union(fails, fn.server ? new Set(["ChunkError"]) : []);
+      } finally {
+        callbackBindings = previous;
+        specializing.delete(fn);
+      }
+    }
     if (owner.timerFails) owner.timerFails = union(owner.timerFails, fn.timerFails);
     return union(fn.fails, fn.server ? new Set(["ChunkError"]) : []);
   };
@@ -1315,13 +1944,23 @@ export function inferFailures(
         return union(argEffects, constructorEffects(declaration));
       }
       const resolved = target(p);
+      const substituted = callee.isIdentifier()
+        ? callbackBindings.get(callee.scope.getBinding(callee.node.name))
+        : null;
+      const handledArguments = callbackArguments(resolved, p);
       return union(
         argEffects,
-        resolved
-          ? invoke(resolved, owner, p)
-          : (contextMember(callee, owner) ?? propMember(callee, owner) ?? invoke(null, owner)),
+        substituted
+          ? invoke(substituted.callback, owner, p)
+          : resolved
+            ? invoke(resolved, owner, p)
+            : (contextMember(callee, owner) ?? propMember(callee, owner) ?? invoke(null, owner)),
         ...args
-          .filter(a => a.isFunction())
+          .filter(
+            a =>
+              a.isFunction() &&
+              ![...handledArguments.values()].some(value => value.argument === a.node)
+          )
           .map(a => invoke(byBody.get(`${owner.file}:${a.node.body.start}`), owner))
       );
     }

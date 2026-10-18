@@ -18,7 +18,6 @@
  */
 import { nativeInclude } from "./selection.js";
 import { lowerNativeFile } from "./native.js";
-import { isSugar, lowerSugarFile } from "./sugar.js";
 import { DEFAULT_YIELD_MODULE } from "./rule.js";
 import { mayTransform, transform } from "./transform.js";
 
@@ -50,7 +49,7 @@ export default function solidYield(options = {}) {
   const yieldModule = options.yieldModule ?? DEFAULT_YIELD_MODULE;
   const lazy = options.lazy ?? true;
   const filter = options.filter ?? defaultFilter;
-  const sugarCache = new Map();
+  const nativeCache = new Map();
   let include = typeof options.include === "function" ? options.include : undefined;
   return {
     configResolved(config) {
@@ -58,13 +57,13 @@ export default function solidYield(options = {}) {
         include = nativeInclude(config.root, options.include);
     },
     buildStart() {
-      sugarCache.clear();
+      nativeCache.clear();
     },
     watchChange() {
-      sugarCache.clear();
+      nativeCache.clear();
     },
     handleHotUpdate() {
-      sugarCache.clear();
+      nativeCache.clear();
     },
     name: "vite-plugin-solid-yield",
     enforce: "pre",
@@ -79,18 +78,13 @@ export default function solidYield(options = {}) {
         // optimized output; it ships only on request, as the parity harnesses
         // run it against the original.
         if (options.emit !== "lowered") return null;
-        code = lowerNativeFile(code, file, include, sugarCache, diagnostic =>
+        code = lowerNativeFile(code, file, include, nativeCache, diagnostic =>
           this.warn({
             message: `[${diagnostic.code}] ${diagnostic.message}`,
             id: diagnostic.file,
             loc: { file: diagnostic.file, line: diagnostic.line, column: diagnostic.column - 1 }
           })
         );
-        const result = transform(code, { filename: file, yieldModule, lazy });
-        return { code: result?.code ?? code, map: null };
-      }
-      if (isSugar(code)) {
-        code = lowerSugarFile(code, file, sugarCache);
         const result = transform(code, { filename: file, yieldModule, lazy });
         return { code: result?.code ?? code, map: null };
       }

@@ -1,6 +1,38 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import { copyFileSync, mkdirSync, mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { executedBytes, phaseLimit } from "./coverage.mjs";
+
+test("discovery excludes non-twins but rejects a twin without its cost driver", () => {
+  const repo = mkdtempSync(join(tmpdir(), "yield-discovery-"));
+  try {
+    const harness = join(repo, "examples/harness/executed-bytes");
+    mkdirSync(harness, { recursive: true });
+    for (const file of ["measure.mjs", "coverage.mjs"])
+      copyFileSync(new URL(file, import.meta.url), join(harness, file));
+    mkdirSync(join(repo, "examples/booking-yield"));
+    mkdirSync(join(repo, "examples/real-yield/tests"), { recursive: true });
+
+    const excluded = spawnSync(
+      process.execPath,
+      [join(harness, "measure.mjs"), "--only", "booking-yield"],
+      { encoding: "utf8" }
+    );
+    assert.equal(excluded.status, 1);
+    assert.match(excluded.stderr, /No matching twin/);
+
+    const missing = spawnSync(process.execPath, [join(harness, "measure.mjs")], {
+      encoding: "utf8"
+    });
+    assert.equal(missing.status, 1);
+    assert.match(missing.stderr, /real-yield: missing runtime-cost\.test\.ts or \.tsx driver/);
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
+});
 
 test("measured tolerance applies only to its own phase and preserves the threshold", () => {
   const deterministic = { maxBytes: 137926 };

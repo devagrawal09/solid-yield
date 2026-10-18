@@ -8,7 +8,7 @@ import {
 } from "./native-owned.js";
 import { printMapped, withPositions, copyPosition } from "./positions.js";
 /** Native Solid front end. Refuse unsupported contracts before emitting any file.
- * The existing sugar engine and library checker remain the only color machinery. */
+ * Routine reconstruction and the library checker remain the only color machinery. */
 // @ts-check
 import babel from "@babel/core";
 import ts from "typescript";
@@ -23,7 +23,7 @@ import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, resolve } from "node:path";
 import { parseProgram } from "./transform.js";
-import { lowerSugarProject } from "./sugar.js";
+import { reconstructProject, contextInferenceSlots } from "./routines.js";
 import { inferFailures } from "compiler-yield/failure-inference";
 import { nativeProviders } from "./native-providers.js";
 import { nativeEntry } from "./native-entry.js";
@@ -237,6 +237,133 @@ export function nativeFailures(files, options = {}, opaqueGenerators = true) {
     ts,
     opaqueGenerators
   });
+}
+/** Materialize context method contracts as callable properties before the
+ * effect facade is inferred. Runtime member dispatch is unchanged.
+ * @param {Map<string, string>} files @param {ts.Program} program */
+function nativeContextMethods(files, program) {
+  const checker = program.getTypeChecker();
+  /** @type {Map<string, Set<number>>} */ const methods = new Map();
+  /** @type {Set<ts.Type>} */ const seen = new Set();
+  /** @param {ts.Type} type */
+  const collect = type => {
+    type = type.getNonNullableType();
+    if (seen.has(type)) return;
+    seen.add(type);
+    for (const property of checker.getPropertiesOfType(type)) {
+      const declarations = property.declarations ?? [];
+      for (const declaration of declarations) {
+        const file = declaration.getSourceFile().fileName;
+        if (!files.has(file)) continue;
+        if (ts.isMethodSignature(declaration)) {
+          // Overloads need an intersection, not duplicate property declarations.
+          if (declarations.filter(ts.isMethodSignature).length !== 1) continue;
+          const starts = methods.get(file) ?? new Set();
+          starts.add(declaration.getStart());
+          methods.set(file, starts);
+        } else if (ts.isPropertySignature(declaration) && declaration.type) {
+          collect(checker.getTypeFromTypeNode(declaration.type));
+        }
+      }
+    }
+  };
+  for (const file of files.keys()) {
+    const source = program.getSourceFile(file);
+    /** @param {ts.Node} node */
+    const visit = node => {
+      if (ts.isCallExpression(node) && node.typeArguments?.[0]) {
+        const api = checker.getResolvedSignature(node)?.declaration;
+        if (
+          api &&
+          "name" in api &&
+          api.name?.getText() === "createContext" &&
+          /(?:solid-js|@solidjs)[/\\]/.test(api.getSourceFile().fileName)
+        )
+          collect(checker.getTypeFromTypeNode(node.typeArguments[0]));
+      }
+      ts.forEachChild(node, visit);
+    };
+    if (source) visit(source);
+  }
+  return new Map(
+    [...files].map(([file, code]) => {
+      const starts = methods.get(file);
+      if (!starts?.size) return [file, code];
+      const p = parseProgram(code, file);
+      if (!p) return [file, code];
+      p.traverse({
+        TSMethodSignature(path) {
+          if (!starts.has(path.node.start ?? -1)) return;
+          const method = path.node;
+          const signature = t.tsFunctionType(
+            method.typeParameters,
+            method.parameters,
+            method.typeAnnotation
+          );
+          const property = t.tsPropertySignature(method.key, t.tsTypeAnnotation(signature));
+          property.optional = method.optional;
+          property.computed = method.computed;
+          path.replaceWith(copyPosition(property, method));
+        }
+      });
+      return [file, printMapped(t.file(p.node))];
+    })
+  );
+}
+/** Keep contextual provider parameters before routine conversion changes the
+ * surrounding interface. Inference must not turn an authored string into any.
+ * @param {Map<string,string>} files @param {ts.Program} program */
+function nativeContextParams(files, program) {
+  const checker = program.getTypeChecker();
+  /** @type {Map<string, Map<number, string>>} */ const parameters = new Map();
+  const typePrinter = ts.createPrinter();
+  for (const values of contextInferenceSlots(program).values())
+    for (let value of values) {
+      if (ts.isIdentifier(value)) {
+        let symbol = checker.getSymbolAtLocation(value);
+        if (ts.isShorthandPropertyAssignment(value.parent))
+          symbol = checker.getShorthandAssignmentValueSymbol(value.parent);
+        const declaration = symbol?.valueDeclaration;
+        if (declaration && ts.isVariableDeclaration(declaration) && declaration.initializer)
+          value = declaration.initializer;
+      }
+      if (!ts.isArrowFunction(value) && !ts.isFunctionExpression(value)) continue;
+      for (const parameter of value.parameters) {
+        if (parameter.type || !ts.isIdentifier(parameter.name)) continue;
+        const type = checker.getTypeAtLocation(parameter.name);
+        if (type.flags & ts.TypeFlags.Any) continue;
+        const node = checker.typeToTypeNode(type, parameter, ts.NodeBuilderFlags.NoTruncation);
+        if (!node) continue;
+        const source = value.getSourceFile();
+        const byStart = parameters.get(source.fileName) ?? new Map();
+        byStart.set(
+          parameter.name.getStart(source),
+          typePrinter.printNode(ts.EmitHint.Unspecified, node, source)
+        );
+        parameters.set(source.fileName, byStart);
+      }
+    }
+  return new Map(
+    [...files].map(([file, code]) => {
+      const annotations = parameters.get(file);
+      if (!annotations?.size) return [file, code];
+      const p = parseProgram(code, file);
+      if (!p) return [file, code];
+      p.traverse({
+        Identifier(path) {
+          const text = annotations.get(path.node.start ?? -1);
+          if (!text || path.node.typeAnnotation) return;
+          const holder = parseProgram(`let __t: ${text};`, file);
+          const statement = holder?.node.body[0];
+          if (!t.isVariableDeclaration(statement)) return;
+          const name = statement.declarations[0]?.id;
+          if (t.isIdentifier(name) && t.isTSTypeAnnotation(name.typeAnnotation))
+            path.node.typeAnnotation = name.typeAnnotation;
+        }
+      });
+      return [file, printMapped(t.file(p.node))];
+    })
+  );
 }
 /** Inspect all selected files, accumulating refusals instead of stopping at the first one.
  * @param {Map<string,string>} files */
@@ -2033,7 +2160,6 @@ function surface(
         t.stringLiteral("solid-yield")
       )
     );
-  p.node.directives.unshift(t.directive(t.directiveLiteral("use yield")));
   return print(p);
 }
 /** @param {Map<string,string>} input @param {{compilerOptions?: ts.CompilerOptions}} [options] */
@@ -2115,8 +2241,18 @@ function lowerNativeProjectImpl(input, options = {}) {
     if (source) visit(source);
   }
   const sourceFailures = nativeFailures(files, options.compilerOptions);
+  const methodContracts = nativeContextMethods(
+    selected,
+    nativeProgram(selected, options.compilerOptions)
+  );
+  const contextual = nativeContextParams(
+    methodContracts,
+    nativeProgram(methodContracts, options.compilerOptions)
+  );
   // D-121: a saga its driver steps only inside an action writes there.
-  const driven = lowerDrivenSagas(selected, () => nativeProgram(selected, options.compilerOptions));
+  const driven = lowerDrivenSagas(contextual, () =>
+    nativeProgram(contextual, options.compilerOptions)
+  );
   const prepared = nativePrelude(markOpaqueGenerators(driven));
   const failures = nativeFailures(prepared, options.compilerOptions, "marked");
   const effects = new Map(
@@ -2125,7 +2261,7 @@ function lowerNativeProjectImpl(input, options = {}) {
       lowerNativeRecursion(code, id)
     ])
   );
-  const lowered = lowerSugarProject(
+  const lowered = reconstructProject(
     new Map([
       ...new Map(
         [...effects].map(([id, code]) => [
@@ -2143,7 +2279,7 @@ function lowerNativeProjectImpl(input, options = {}) {
       ...entries
     ]),
     {
-      native: true,
+      active: effects.keys(),
       compilerOptions: {
         ...options.compilerOptions,
         jsxImportSource: "solid-yield",
@@ -2271,7 +2407,49 @@ export function lowerNativeFile(code, filename, include, cache, report) {
 }
 
 /** Shared lowering, including generated-to-author position tables.
- * @param {Map<string,string>} input @param {{compilerOptions?: ts.CompilerOptions, native?:boolean}} [options] */
+ * @param {Map<string,string>} input @param {{compilerOptions?: ts.CompilerOptions}} [options] */
 export function lowerNativeProject(input, options = {}) {
-  return withPositions(input, () => lowerNativeProjectImpl(input, options));
+  try {
+    return withPositions(input, () => lowerNativeProjectImpl(input, options));
+  } catch (caught) {
+    if (!(caught instanceof Error)) throw caught;
+    const error =
+      /** @type {Error & {code?:string,id?:string,loc?:{line:number,column?:number},diagnostics?:Diagnostic[]}} */ (
+        caught
+      );
+    const diagnostics =
+      error.diagnostics ??
+      (error.code && error.id && error.loc
+        ? [
+            {
+              code: error.code,
+              message: error.message,
+              file: error.id,
+              line: error.loc.line,
+              column: (error.loc.column ?? 0) + 1
+            }
+          ]
+        : []);
+    if (diagnostics.length) {
+      const selected = new Map(
+        [...input]
+          .filter(([id, code]) => nativeEntry(code, resolve(id)) === null)
+          .map(([id, code]) => [resolve(id), code])
+      );
+      // Lifecycle errors do not depend on successfully reconstructing another host.
+      const modules = inspectNativeProject(selected).filter(
+        d =>
+          d.code === "MODULE_STATE" &&
+          !diagnostics.some(
+            known => known.code === d.code && known.file === d.file && known.line === d.line
+          )
+      );
+      if (modules.length)
+        error.diagnostics = [
+          ...diagnostics,
+          ...modules.map(d => ({ ...d, severity: /** @type {const} */ ("error") }))
+        ];
+    }
+    throw error;
+  }
 }

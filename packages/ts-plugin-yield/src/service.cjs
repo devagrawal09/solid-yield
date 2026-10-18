@@ -1,11 +1,5 @@
 const { resolve, dirname, join } = require("node:path");
-const {
-  lowerNativeProject,
-  lowerSugarProject,
-  isSugar,
-  locate,
-  nativeInclude
-} = require("vite-plugin-solid-yield/virtual");
+const { lowerNativeProject, locate, nativeInclude } = require("vite-plugin-solid-yield/virtual");
 const catalog = require("./catalog.cjs");
 const findOrigin = require("./origins.cjs");
 const routineColors = require("./hover.cjs");
@@ -80,6 +74,13 @@ function publicNames(text) {
     /import\("solid-yield"\)\.ChunkError|__nativeChunk|\bChunkError\b(?!\))/g,
     "a transport failure (ChunkError)"
   );
+}
+function nativeMessage(code, message) {
+  if (code === "SUGAR_ESCAPE") return catalog.SUGAR_ESCAPE;
+  // Plain Solid has no authored fails contract to declare here.
+  return code === "EVENT_REJECTS"
+    ? publicNames(message).replace(/, or declare (?:the failure|it)\.?/g, ".")
+    : publicNames(message);
 }
 function symbolKey(symbol) {
   return symbol.declarations?.[0]?.name?.expression?.text;
@@ -182,8 +183,7 @@ function createVirtualService(ts, host, config = {}) {
       [...input].map(([f, c]) => [f, ts.createSourceFile(f, c, ts.ScriptTarget.Latest, true)])
     );
     const native = new Map([...input].filter(([f]) => include(f)));
-    const sugar = new Map([...input].filter(([f, c]) => !native.has(f) && isSugar(c)));
-    const selected = new Set([...native.keys(), ...sugar.keys()]);
+    const selected = new Set(native.keys());
     const generated = new Map(input),
       positions = new Map(),
       failures = [];
@@ -202,78 +202,70 @@ function createVirtualService(ts, host, config = {}) {
       "solid-yield/internal": [join(lib, "dist/types/internal.d.ts")],
       "solid-yield/jsx-runtime": [join(lib, "jsx/jsx-runtime.d.ts")]
     };
-    for (const [files, lower] of [
-      [native, lowerNativeProject],
-      [sugar, lowerSugarProject]
-    ]) {
-      if (!files.size) continue;
-      const pending = new Map(files);
-      while (pending.size) {
-        try {
-          const result = lower(pending, { compilerOptions: options });
-          if (result.inference) inference.push(result.inference);
-          for (const [f, code] of result.files) {
-            const prefix = "/** @jsxImportSource solid-yield */\n";
-            generated.set(f, prefix + code);
-            positions.set(
-              f,
-              result.positions
-                .get(f)
-                .map(r => ({ ...r, start: r.start + prefix.length, end: r.end + prefix.length }))
-            );
-          }
-          for (const d of result.diagnostics ?? []) {
-            const file = originals.get(d.file);
-            if (!file) continue;
-            failures.push({
-              file,
-              ...diagnosticSpan(ts, file, d),
-              category:
-                d.severity === "error"
-                  ? ts.DiagnosticCategory.Error
-                  : ts.DiagnosticCategory.Warning,
-              code: d.severity === "error" ? 95000 : 95001,
-              source: "solid-yield",
-              messageText: `[${d.code}] ${publicNames(d.message)}`
-            });
-          }
-          break;
-        } catch (e) {
-          const before = pending.size;
-          // an error naming no file is the first pending file's: each retry
-          // drops a file, so the loop ends
-          const ds = e.diagnostics ?? [
-            {
-              file: e.id ?? e.loc?.file ?? [...pending.keys()][0],
-              line: e.loc?.line ?? 1,
-              column: (e.loc?.column ?? 0) + 1,
-              code: e.code ?? "TRANSFORM",
-              message: e.message
-            }
-          ];
-          for (const d of ds) {
-            const refused = resolve(d.file ?? [...pending.keys()][0]);
-            const file = originals.get(refused) ?? originals.get([...pending.keys()][0]);
-            pending.delete(file.fileName);
-            const span = diagnosticSpan(ts, file, d, e.sourceSpan);
-            failures.push({
-              file,
-              start: span.start,
-              length: span.length,
-              code: 95000,
-              source: "solid-yield",
-              category: ts.DiagnosticCategory.Error,
-              messageText: `${span.generated ? "[generated] " : ""}[${d.code}] ${
-                catalog[d.code] ??
-                String(d.message)
-                  .split("\n")[0]
-                  .replace(/^\[[A-Z_]+\]\s*/, "")
-                  .replace(/\s*\([^\n]*:\d+:\d+\)\.?$/, "")
-              }`
-            });
-          }
-          if (pending.size === before) pending.delete([...pending.keys()][0]);
+    const pending = new Map(native);
+    while (pending.size) {
+      try {
+        const result = lowerNativeProject(pending, { compilerOptions: options });
+        if (result.inference) inference.push(result.inference);
+        for (const [f, code] of result.files) {
+          const prefix = "/** @jsxImportSource solid-yield */\n";
+          generated.set(f, prefix + code);
+          positions.set(
+            f,
+            result.positions
+              .get(f)
+              .map(r => ({ ...r, start: r.start + prefix.length, end: r.end + prefix.length }))
+          );
         }
+        for (const d of result.diagnostics ?? []) {
+          const file = originals.get(d.file);
+          if (!file) continue;
+          failures.push({
+            file,
+            ...diagnosticSpan(ts, file, d),
+            category:
+              d.severity === "error" ? ts.DiagnosticCategory.Error : ts.DiagnosticCategory.Warning,
+            code: d.severity === "error" ? 95000 : 95001,
+            source: "solid-yield",
+            messageText: `[${d.code}] ${nativeMessage(d.code, d.message)}`
+          });
+        }
+        break;
+      } catch (e) {
+        const before = pending.size;
+        // an error naming no file is the first pending file's: each retry
+        // drops a file, so the loop ends
+        const ds = e.diagnostics ?? [
+          {
+            file: e.id ?? e.loc?.file ?? [...pending.keys()][0],
+            line: e.loc?.line ?? 1,
+            column: (e.loc?.column ?? 0) + 1,
+            code: e.code ?? "TRANSFORM",
+            message: e.message
+          }
+        ];
+        for (const d of ds) {
+          const refused = resolve(d.file ?? [...pending.keys()][0]);
+          const file = originals.get(refused) ?? originals.get([...pending.keys()][0]);
+          pending.delete(file.fileName);
+          const span = diagnosticSpan(ts, file, d, e.sourceSpan);
+          failures.push({
+            file,
+            start: span.start,
+            length: span.length,
+            code: 95000,
+            source: "solid-yield",
+            category: ts.DiagnosticCategory.Error,
+            messageText: `${span.generated ? "[generated] " : ""}[${d.code}] ${
+              catalog[d.code] ??
+              String(d.message)
+                .split("\n")[0]
+                .replace(/^\[[A-Z_]+\]\s*/, "")
+                .replace(/\s*\([^\n]*:\d+:\d+\)\.?$/, "")
+            }`
+          });
+        }
+        if (pending.size === before) pending.delete([...pending.keys()][0]);
       }
     }
     const overrides = {
@@ -323,6 +315,43 @@ function createVirtualService(ts, host, config = {}) {
       ls: ts.createLanguageService(virtualHost, registryFor(ts))
     };
     return state;
+  }
+  // Native lowering models some imports and removes others. Check module
+  // declarations against the installed packages too: emitted plain Solid
+  // still needs those imports to exist. Do not merge original expression
+  // errors, whose types intentionally differ in the checked model.
+  function originalService(s) {
+    return (s.originalLs ??= ts.createLanguageService(
+      {
+        ...s.virtualHost,
+        getCompilationSettings: () => host.getCompilationSettings(),
+        getScriptVersion: f =>
+          s.selected.has(resolve(f))
+            ? `original:${host.getScriptVersion(f)}`
+            : host.getScriptVersion(f),
+        getScriptSnapshot: f => host.getScriptSnapshot(f),
+        readFile: f => host.readFile?.(f) ?? ts.sys.readFile(f),
+        fileExists: f => host.fileExists?.(f) ?? ts.sys.fileExists(f)
+      },
+      registryFor(ts)
+    ));
+  }
+  function originalImports(s, file) {
+    return originalService(s)
+      .getSemanticDiagnostics(file)
+      .filter(d => {
+        if (d.category !== ts.DiagnosticCategory.Error || !d.file) return false;
+        let node = leafAt(ts, d.file, d.start ?? 0);
+        for (; node; node = node.parent)
+          if (
+            ts.isImportDeclaration(node) ||
+            ts.isImportEqualsDeclaration(node) ||
+            ts.isImportTypeNode(node) ||
+            (ts.isExportDeclaration(node) && node.moduleSpecifier)
+          )
+            return true;
+        return false;
+      });
   }
   function mapped(d, s) {
     if (!d.file || !s.positions.has(d.file.fileName)) return d;
@@ -485,6 +514,50 @@ function createVirtualService(ts, host, config = {}) {
     // forms of `provide` (an init routine, a value) and reports the call. The
     // error is the value form's, at the leaf of the value that does not fit.
     let tsCode = d.code;
+    // The refusal brand is one member of a prop's union, not proof
+    // that the representation is wrong. A correctly formed read can simply
+    // return the wrong value. Compare values before offering source advice.
+    if ((code === "REACTIVE_PROP" || code === "HELD_PROP") && s.native.has(sf.fileName)) {
+      let property = node;
+      while (property && !ts.isPropertyAssignment(property) && !ts.isStatement(property))
+        property = property.parent;
+      if (property && ts.isPropertyAssignment(property)) {
+        const value = property.initializer,
+          expected = checker.getContextualType(value);
+        const readValue = type => {
+          const brand = type.getProperties().find(p => p.name.startsWith("__@SOURCE@"));
+          if (brand) return checker.getTypeOfSymbolAtLocation(brand, value);
+          const signature = type.getCallSignatures()[0];
+          const result = signature && checker.getReturnTypeOfSignature(signature);
+          return result?.symbol?.name === "Generator"
+            ? checker.getTypeArguments(result)[1]
+            : undefined;
+        };
+        const members = expected?.isUnion() ? expected.types : expected ? [expected] : [];
+        const wants =
+          code === "REACTIVE_PROP"
+            ? members.map(readValue).filter(Boolean)
+            : members.filter(type => !type.getProperties().some(p => /^\[[A-Z_]+\] /.test(p.name)));
+        const actualType = checker.getTypeAtLocation(value);
+        const actual = readValue(actualType) ?? actualType;
+        // A plain callback can itself be the representation mistake. Leave
+        // that advice alone; native holes and sources have a known read value.
+        if (
+          wants.length &&
+          (readValue(actualType) || !actualType.getCallSignatures().length) &&
+          !wants.some(want => checker.isTypeAssignableTo(actual, want))
+        ) {
+          const literal = wants.some(type => type.flags & ts.TypeFlags.Literal);
+          const shown = checker.typeToString(
+            literal ? actual : checker.getBaseTypeOfLiteralType(actual)
+          );
+          const wanted = [...new Set(wants.map(want => checker.typeToString(want)))].join(" | ");
+          message = `Type '${shown}' is not assignable to type '${wanted}'.`;
+          tsCode = 2322;
+          code = undefined;
+        }
+      }
+    }
     // TypeScript reports it at `provide`, or at `value` when the whole value is wrong
     // (D-126: a provider's value for a held slot, or a plain value for a
     // reactive one, is the prop refusal's; plain Solid's error is the type's)
@@ -606,8 +679,11 @@ function createVirtualService(ts, host, config = {}) {
     let at =
       locate(s.positions.get(sf.fileName), start, length) ??
       locate(s.positions.get(sf.fileName), start);
-    if (code) message = `[${code}] ${catalog[code]}`;
-    else if (
+    if (code) {
+      message = `[${code}] ${catalog[code]}`;
+      if (code === "NATIVE_SETUP_FAILURE" && /\bunknown\b/.test(culprit?.type ?? ""))
+        message = `[${code}] This call has an unknown failure contract; the component body cannot let a failure escape. Catch and handle the failure here, or move the call into an event or rendered work.`;
+    } else if (
       /\[\w+\]|__@|\b(Generator|HoleCall|ComponentView|NativeFailure|SetupOp|ViewOp|MemoOp)\b/.test(
         message
       )
@@ -655,12 +731,24 @@ function createVirtualService(ts, host, config = {}) {
       if (ts.isIdentifier(target)) {
         at = locate(s.positions.get(sf.fileName), target.getStart(), target.getWidth()) ?? at;
         const colors = colorSummary(ts, checker, target);
-        origin = findOrigin(ts, s, target, code, locate);
+        const rejected =
+          code === "NO_PROVIDER"
+            ? colors?.requires
+            : code === "PENDING_ROOT"
+              ? colors?.pending
+              : colors?.fails;
+        if (rejected === "any") {
+          // A poisoned type can erase a sibling's real obligations too.
+          // Keep an incomplete-check error rather than silently accepting
+          // the render tree, but do not invent a provider or failure type.
+          code = "DEPENDENT_TYPE";
+        }
+        origin = code === "DEPENDENT_TYPE" ? undefined : findOrigin(ts, s, target, code, locate);
         const action =
-          colors && [colors.fails, colors.requires].includes("any")
-            ? "Fix the earlier errors in this component before checking its render call."
+          code === "DEPENDENT_TYPE"
+            ? catalog.DEPENDENT_TYPE
             : code === "FOREIGN_HANDOFF"
-              ? catalog.failureAdvice(origin?.host ?? "view")
+              ? catalog.failureAdvice(origin?.host ?? "view", s.native.has(sf.fileName))
               : catalog[code];
         message = `[${code}] ${action}${code === "FOREIGN_HANDOFF" && colors ? " Remaining: " + publicNames(colors.fails) + "." : ""}${colors?.requires !== "none" && code === "NO_PROVIDER" ? " Missing: " + colors.requires + "." : ""}`;
         let eventOwner;
@@ -718,7 +806,9 @@ function createVirtualService(ts, host, config = {}) {
             length: Math.max(1, origin.handler.sourceEnd - origin.handler.sourceStart),
             category: ts.DiagnosticCategory.Message,
             code: d.code,
-            messageText: "Catch or declare the failure in this handler."
+            messageText: s.native.has(sf.fileName)
+              ? "Catch and handle the failure inside this handler."
+              : "Catch or declare the failure in this handler."
           });
         if (origin)
           related.push({
@@ -768,7 +858,10 @@ function createVirtualService(ts, host, config = {}) {
         return (operations.isUnion() ? operations.types : [operations]).flatMap(op => {
           const property = op.getProperties().find(p => p.name.startsWith("__@FAILS@"));
           const fails = property && checker.getTypeOfSymbolAtLocation(property, expr);
-          return !fails || fails.flags & (ts.TypeFlags.Never | ts.TypeFlags.Any) ? [] : [fails];
+          return !fails ||
+            fails.flags & (ts.TypeFlags.Never | ts.TypeFlags.Any | ts.TypeFlags.TypeParameter)
+            ? []
+            : [fails];
         });
       };
       const rejects = (fails, node) =>
@@ -779,7 +872,7 @@ function createVirtualService(ts, host, config = {}) {
             checker.getNeverType(),
             checker.getNeverType()
           ]).fails
-        )} and nothing catches it; wrap the body in try/catch, or declare the failure.`;
+        )} and nothing catches it; catch and handle the failure inside the handler.`;
       walk(ts, sf, n => {
         // D-124: an `$event` a DOM spread binds (`{...{ onClick: async () => … }}`)
         // is an event attribute too; reported at its authored handler.
@@ -849,7 +942,12 @@ function createVirtualService(ts, host, config = {}) {
         for (const op of operations.isUnion() ? operations.types : [operations]) {
           const property = op.getProperties().find(p => p.name.startsWith("__@FAILS@"));
           const fails = property && checker.getTypeOfSymbolAtLocation(property, expr);
-          if (!fails || fails.flags & (ts.TypeFlags.Never | ts.TypeFlags.Any)) continue;
+          // Generic failures remain in Bind's colors for the component's callers.
+          if (
+            !fails ||
+            fails.flags & (ts.TypeFlags.Never | ts.TypeFlags.Any | ts.TypeFlags.TypeParameter)
+          )
+            continue;
           const colors = colorSummary(ts, checker, expr, [
             checker.getNeverType(),
             fails,
@@ -876,7 +974,7 @@ function createVirtualService(ts, host, config = {}) {
             code: 95000,
             category: ts.DiagnosticCategory.Error,
             source: "solid-yield",
-            messageText: `[EVENT_REJECTS] This handler can fail with ${publicNames(colors.fails)} and nothing catches it; wrap the body in try/catch, or declare the failure.`
+            messageText: `[EVENT_REJECTS] This handler can fail with ${publicNames(colors.fails)} and nothing catches it; catch and handle the failure inside the handler.`
           });
         }
       });
@@ -895,14 +993,22 @@ function createVirtualService(ts, host, config = {}) {
       const all = [...s.failures];
       for (const name of host.getScriptFileNames()) {
         const source = resolve(name);
-        if (s.selected.has(source) && !s.positions.has(source)) continue;
+        const modeled = s.selected.has(source) && s.positions.has(source);
+        if (kind === "semantic" && modeled) all.push(...originalImports(s, source));
+        // Unselected consumers must see the authored exports of selected
+        // dependencies, not the private generator contracts used to check them.
+        // A refused native file has no model either: retain ordinary authored
+        // errors alongside the refusal that marks its checking incomplete.
+        const language = modeled ? s.ls : originalService(s);
         const ds =
           kind === "suggestion"
-            ? s.ls.getSuggestionDiagnostics(source)
+            ? language.getSuggestionDiagnostics(source)
             : kind === "syntactic"
-              ? s.ls.getSyntacticDiagnostics(source)
-              : s.ls.getSemanticDiagnostics(source);
-        all.push(...ds.map(d => mapped(d, s)).filter(Boolean));
+              ? language.getSyntacticDiagnostics(source)
+              : language.getSemanticDiagnostics(source);
+        // Original diagnostics and their related spans already use authored
+        // positions, even when related information points into a selected file.
+        all.push(...(modeled ? ds.map(d => mapped(d, s)).filter(Boolean) : ds));
       }
       s.diagnosticCache.set(kind, all);
     }
@@ -913,7 +1019,8 @@ function createVirtualService(ts, host, config = {}) {
     // diagnostic, while preserving ordinary TypeScript errors at that span.
     // TypeScript's own diagnostics may carry a message chain, not a string.
     const text = d => ts.flattenDiagnosticMessageText(d.messageText, "\n");
-    const rootCode = d => /^\[(PENDING_ROOT|NO_PROVIDER|FOREIGN_HANDOFF)\]/.test(text(d));
+    const rootCode = d =>
+      /^\[(PENDING_ROOT|NO_PROVIDER|FOREIGN_HANDOFF|DEPENDENT_TYPE)\]/.test(text(d));
     const moduleError = result.some(
       d => d.category === ts.DiagnosticCategory.Error && text(d).startsWith("[MODULE_STATE]")
     );
@@ -944,7 +1051,7 @@ function createVirtualService(ts, host, config = {}) {
     const s = refresh(),
       f = resolve(file),
       table = s.positions.get(f);
-    if (!table) return s.ls.getQuickInfoAtPosition(f, pos);
+    if (!s.selected.has(f) || !table) return originalService(s).getQuickInfoAtPosition(f, pos);
     const candidates = table
       .filter(r => !r.generated && r.sourceStart <= pos && r.sourceEnd > pos)
       .sort(
@@ -1021,16 +1128,7 @@ function createVirtualService(ts, host, config = {}) {
         qi.displayParts.map(p => p.text).join("")
       )
     ) {
-      s.originalLs ??= ts.createLanguageService(
-        {
-          ...s.virtualHost,
-          getCompilationSettings: () => host.getCompilationSettings(),
-          getScriptSnapshot: name => host.getScriptSnapshot(name),
-          getScriptVersion: name => host.getScriptVersion(name)
-        },
-        registryFor(ts)
-      );
-      const original = s.originalLs.getQuickInfoAtPosition(f, pos);
+      const original = originalService(s).getQuickInfoAtPosition(f, pos);
       if (original) return original;
       qi = {
         ...qi,

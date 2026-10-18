@@ -397,7 +397,7 @@ export function App() {
   return n() > 1 ? <b>big</b> : <i>small</i>;
 }
 render(App, document.body);`,
-    ["READ_IN_SETUP"]
+    ["DEPENDENT_TYPE", "READ_IN_SETUP"]
   ],
   [
     "return-and",
@@ -1546,7 +1546,7 @@ const refusals = [
 export function App() {
   return <Child label="x" xlink:href="#a" />;
 }`,
-    ["NATIVE_SPREAD"]
+    ["NATIVE_SPREAD", "TS2322"]
   ],
   // throw an Error object (pinned refusal)
   [
@@ -1682,7 +1682,7 @@ function Show() {
 export function App() {
   return Ctx({ ["value"]: 1, children: () => <Show /> });
 }`,
-    ["NATIVE_CONTEXT"]
+    ["NATIVE_CONTEXT", "TS2322"]
   ],
   // called with its children as a value, it is checked as its JSX form (review 3)
   [
@@ -1710,7 +1710,7 @@ export function App() {
   const [n] = createSignal(1);
   return <Ctx value={{ count: n }}><Child /></Ctx>;
 }`,
-    ["NATIVE_CONTEXT"]
+    ["NATIVE_CONTEXT", "UNBOUND_EVENT"]
   ],
   // Solid 1's `Ctx.Provider` is the context's provider (review 3)
   [
@@ -1734,7 +1734,7 @@ export function App() {
   const make = (k: number) => () => setN(n() + k);
   return <button onClick={make(2)}>{n()}</button>;
 }`,
-    ["NATIVE_HANDLER"]
+    ["NATIVE_HANDLER", "UNBOUND_EVENT"]
   ],
   [
     "handler-ternary",
@@ -1745,7 +1745,7 @@ export function App() {
   const down = () => setN(n() - 1);
   return <button onClick={n() > 3 ? down : up}>{n()}</button>;
 }`,
-    ["NATIVE_HANDLER"]
+    ["NATIVE_HANDLER", "UNBOUND_EVENT"]
   ]
 ];
 

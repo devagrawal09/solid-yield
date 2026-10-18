@@ -223,7 +223,9 @@ export const jsxCases = [
     view: `<div>{Theme({ ["value"]: "dark", children: () => <Consumer /> })}</div>`,
     extra: "ctx-theme",
     imports: "createContext, useContext",
-    expected: ["NATIVE_CONTEXT"]
+    // The unsupported key refuses modeling. Ordinary Solid also rejects a
+    // function-valued child here: children must be an Element, not a thunk.
+    expected: ["NATIVE_CONTEXT", "TS2322"]
   },
   // what a view still may not do
   { id: "write-in-hole", view: `<p>{String(setN(1))}</p>`, expected: ["WRITE_IN_REACTIVE"] },

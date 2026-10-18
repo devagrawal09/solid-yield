@@ -18,7 +18,7 @@ const api = p => {
 };
 /**
  * F-S48: `export default () => <…/>` (or an anonymous `function`) is a
- * component without a name, and a sugar component needs one. It becomes
+ * component without a name, and reconstruction needs one. It becomes
  * `export default function Profile() {…}`, named after its file (`index`
  * takes its directory's name), with a suffix if that name is taken.
  * @param {Path} p @param {string} file

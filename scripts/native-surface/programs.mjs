@@ -43,10 +43,10 @@ const slots = variant => ({
 /**
  * What plain Solid says: a read is reactive anywhere but the component body;
  * a write belongs in an event or an effect's phase.
- * @param {string} form @param {string} host @param {"read" | "write"} variant
+ * @param {string} form @param {string} host @param {"read" | "write" | "pending"} variant
  * @returns {string[]}
  */
-export function expected(form, host, variant) {
+function hostExpected(form, host, variant) {
   const spec = [...forms, ...eventOnly].find(f => f.id === form);
   if (variant === "pending") {
     const pending = !!spec && readsPending(spec);
@@ -75,6 +75,95 @@ export function expected(form, host, variant) {
   const rejects = host === "event" && spec?.throws ? ["EVENT_REJECTS"] : [];
   if (variant === "read" || ["event", "phase"].includes(host)) return rejects;
   return ["WRITE_IN_REACTIVE"];
+}
+
+// These exact rejected pending generators also leave the component's render
+// contract unresolved. Keep the primary error and require the neutral error
+// that other render obligations cannot yet be checked; this is not a general
+// allowance for extra diagnostics, and does not change the mutation programs.
+const incompletePending = new Map([
+  ["plain", ["phase", "setup"]],
+  ["ternary", ["phase", "setup"]],
+  ["logical-and", ["phase", "setup"]],
+  ["logical-or", ["phase", "setup"]],
+  ["nullish", ["phase", "setup"]],
+  ["optional-chain", ["phase", "setup"]],
+  ["template", ["phase", "setup"]],
+  ["tagged-template", ["phase", "setup"]],
+  ["array-literal", ["phase", "setup"]],
+  ["object-literal", ["phase", "setup"]],
+  ["array-spread", ["phase", "setup"]],
+  ["object-spread", ["phase", "setup"]],
+  ["destructure-object", ["phase", "setup"]],
+  ["destructure-array", ["phase", "setup"]],
+  ["destructure-default", ["phase", "setup"]],
+  ["map", ["phase", "setup"]],
+  ["filter", ["phase", "setup"]],
+  ["reduce", ["phase", "setup"]],
+  ["find", ["phase", "setup"]],
+  ["some-every", ["phase", "setup"]],
+  ["sort-copy", ["phase", "setup"]],
+  ["callback-throw", ["phase", "setup"]],
+  ["callback-reads-throw", ["phase", "setup"]],
+  ["reduce-throw", ["phase", "setup"]],
+  ["callback-failing-call", ["phase", "setup"]],
+  ["comparator-throw", ["phase", "setup"]],
+  ["store-callback-throw", ["phase", "setup"]],
+  ["for-each", ["phase", "setup"]],
+  ["for-of", ["phase", "setup"]],
+  ["for-in", ["phase", "setup"]],
+  ["for-index", ["phase", "setup"]],
+  ["while", ["phase", "setup"]],
+  ["do-while", ["phase", "setup"]],
+  ["labeled-continue", ["phase", "setup"]],
+  ["switch", ["phase", "setup"]],
+  ["if-else", ["phase", "setup"]],
+  ["try-catch", ["phase", "setup"]],
+  ["try-finally", ["phase", "setup"]],
+  ["iife", ["phase", "setup"]],
+  ["local-arrow", ["phase", "setup"]],
+  ["local-function", ["phase", "setup"]],
+  ["closure-read", ["phase", "setup"]],
+  ["typeof-instanceof", ["phase", "setup"]],
+  ["in-operator", ["phase", "setup"]],
+  ["casts", ["phase", "setup"]],
+  ["string-methods", ["phase", "setup"]],
+  ["math", ["phase", "setup"]],
+  ["object-statics", ["phase", "setup"]],
+  ["map-set", ["phase", "setup"]],
+  ["date", ["phase", "setup"]],
+  ["regex", ["phase", "setup"]],
+  ["optional-call", ["phase", "setup"]],
+  ["compound-assign", ["phase", "setup"]],
+  ["increment", ["phase", "setup"]],
+  ["exponent-bitwise", ["phase", "setup"]],
+  ["bigint", ["phase", "setup"]],
+  ["string-concat", ["phase", "setup"]],
+  ["array-from", ["phase", "setup"]],
+  ["store-path", ["setup"]],
+  ["store-list", ["setup"]],
+  ["json-stringify", ["phase", "setup"]],
+  ["class-instance", ["phase", "setup"]],
+  ["getter-object", ["phase", "setup"]],
+  ["user-generator", ["phase", "setup"]],
+  ["object-method", ["phase", "setup"]],
+  ["getter-this", ["phase", "setup"]],
+  ["class-method", ["phase", "setup"]],
+  ["reader-helper", ["phase", "setup"]],
+  ["untrack", ["phase"]],
+  ["comma-sequence", ["phase", "setup"]],
+  ["nested-ternary-template", ["phase", "setup"]]
+]);
+
+/** @param {string} form @param {string} host @param {"read" | "write" | "pending"} variant */
+export function expected(form, host, variant) {
+  const primary = hostExpected(form, host, variant);
+  if (variant === "pending" && incompletePending.get(form)?.includes(host)) {
+    if (!primary.some(code => ["READ_IN_SETUP", "PENDING_IN_EFFECT"].includes(code)))
+      throw new Error(`Incomplete-check expectation needs a primary refusal: ${host}/${form}`);
+    return [...primary, "DEPENDENT_TYPE"];
+  }
+  return primary;
 }
 
 /**

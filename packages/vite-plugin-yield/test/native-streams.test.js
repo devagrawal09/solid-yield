@@ -120,12 +120,13 @@ export function Status() {
     expect(checked(code)).toEqual([]);
   });
 
-  it("leaves a thunk that computes", () => {
-    const code = lower(`import {createSignal, isPending} from 'solid-js';
+  it("refuses a computing observer thunk instead of emitting an invalid source argument", () => {
+    expect(() =>
+      lower(`import {createSignal, isPending} from 'solid-js';
 export function Status() {
   const [a] = createSignal(1);
   return <p>{String(isPending(() => a() + 1))}</p>;
-}`);
-    expect(code).not.toContain("isPending(a)");
+}`)
+    ).toThrow(/SUGAR_CALLBACK/);
   });
 });

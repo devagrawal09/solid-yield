@@ -335,12 +335,12 @@ for (const twin of twins) {
       : "refused",
     foreignBoundaries: nativeForeignDiagnostics(input, sourceOptions),
     diagnostics: errors,
-    parity: "not run: no checked native program",
-    ssr: "not run: no checked native program",
+    parity: "not run by this evidence check",
+    ssr: "not run by this evidence check",
     differingStatements: null,
     diffReason: !output
       ? "No output emitted; a distance for a nonexistent transform is undefined."
-      : "Generated output still requires a checked app harness.",
+      : "Runtime and parity evidence is collected by the separate native app harnesses.",
     reasons: [...new Set(errors.map(d => d.code))]
   });
   console.log(`native original ${twin}: ${originals.at(-1).status} (${errors.length} diagnostics)`);
@@ -364,7 +364,7 @@ const report = {
     readFileSync(join(root, "examples/originals/todos/node_modules/solid-js/package.json"))
   ).version,
   typing:
-    "generated TypeScript + recommended generated lint; source mapping/editor not implemented",
+    "generated TypeScript + recommended generated lint; generated locations here; editor mapping checked separately",
   historicalCorpus:
     "27 named categories reconstructed; seven original identities and all verbatim originals unavailable",
   missingSlots,

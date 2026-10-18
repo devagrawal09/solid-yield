@@ -135,7 +135,9 @@ export function Total() {
 
   it("delegates a nested callback through a binding before its statement", () => {
     const code = lower(`import {createSignal} from 'solid-js';
-declare function consume<T>(callback: () => T): T;
+function consume<T>(callback: () => T): T {
+  const value = callback(); if (!value) throw new Error('empty'); return value;
+}
 export function App() {
   const [n] = createSignal(1);
   return <button onClick={() => consume(() => consume(() => n()))}/>;
@@ -146,6 +148,27 @@ export function App() {
     expect(code).toContain("__nativeAttempt(() => consume(_callback2)");
     expect(code).toContain("__nativeAttempt(() => consume(_callback)");
     expect(checked(code)).toEqual([]);
+  });
+
+  it.each([false, true])("keeps nested helpers own failures (caught: %s)", caught => {
+    const handler = caught
+      ? "{try{return outer(() => consume(() => n()))}catch{return 0}}"
+      : "outer(() => consume(() => n()))";
+    const code = lower(`import {createSignal} from "solid-js";
+import {render} from "@solidjs/web";
+function consume<T>(callback: () => T): T {
+  const value = callback(); if (!value) throw new TypeError("inner"); return value;
+}
+function outer<T>(callback: () => T): T { callback(); throw new RangeError("outer"); }
+function App() { const [n] = createSignal(1); return <button onClick={() => ${handler}}/>; }
+render(() => <App/>, document.body);`);
+    const diagnostics = checked(code);
+    if (caught) expect(diagnostics).toEqual([]);
+    else {
+      expect(diagnostics.join(" ")).toMatch(/FOREIGN_HANDOFF/);
+      expect(diagnostics.join(" ")).toContain("global:TypeError");
+      expect(diagnostics.join(" ")).toContain("global:RangeError");
+    }
   });
 
   it("a pending read in a callback given to a function makes its host pending", () => {
@@ -181,7 +204,7 @@ render(() => <Root/>, document.body);`
 
   it("leaves a callback that uses a thunk's own binding in place", () => {
     const code = lower(`import {createSignal} from 'solid-js';
-declare function consume<T>(callback: () => T): T;
+function consume<T>(callback: () => T): T { return callback(); }
 export function App() {
   const [n] = createSignal(1);
   return <button onClick={() => [1].forEach(k => { const m = k; consume(() => n() + m); })}/>;
@@ -191,7 +214,7 @@ export function App() {
 
   it("delegates an array-named method on a value that is not an array, like any call", () => {
     const code = lower(`import {createSignal} from 'solid-js';
-declare const tree: { map<T>(f: (n: number) => T): T[] };
+const tree = { map<T>(f: (n: number) => T): T[] { return [f(1)]; } };
 export function List() {
   const [n] = createSignal(1);
   return <ul>{tree.map(x => <li>{x + n()}</li>)}</ul>;
@@ -199,6 +222,21 @@ export function List() {
     expect(code).toMatch(
       /const _callback = yield\* __nativeHoleColors\(__nativeLexicalCallback\("hole"/
     );
+  });
+
+  it.each([
+    "consume(() => consume(() => n()))",
+    "[1].forEach(k => { const m = k; consume(() => n() + m); })",
+    "tree.map(x => x + n())"
+  ])("refuses an ambient consumer without invocation proof: %s", body => {
+    expect(() =>
+      lower(`import { createSignal } from 'solid-js';
+      declare function consume<T>(callback: () => T): T;
+      declare const tree: { map<T>(f: (n: number) => T): T[] };
+      export function App() { const [n] = createSignal(1);
+        return <button onClick={() => { ${body}; }}/>;
+      }`)
+    ).toThrow(/SUGAR_CALLBACK/);
   });
 
   it("still delegates a setter given a hoisted callback: its receipt writes", () => {

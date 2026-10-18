@@ -3,7 +3,8 @@ import { resolve } from "node:path";
 import { lowerNativeProject } from "../src/native.js";
 const file = resolve(import.meta.dirname, "fixtures/lexical.tsx");
 const source = body => `import {createSignal,createEffect,createMemo,createStore} from 'solid-js';
-declare function consume<T>(callback:()=>T):T;
+function consume<T>(callback:()=>T):T { return callback(); }
+declare function unknownConsume<T>(callback:()=>T):T;
 export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});
 ${body}}`;
 describe("native-lexical compiler fixtures", { timeout: 30_000 }, () => {
@@ -34,7 +35,9 @@ describe("native-lexical compiler fixtures", { timeout: 30_000 }, () => {
   });
   it("reports an opaque setup callback at the original read", () => {
     expect(() =>
-      lowerNativeProject(new Map([[file, source(`const value=consume(()=>n());return <p/>;`)]]))
-    ).toThrow(/SUGAR_CALLBACK.*:4:25/);
+      lowerNativeProject(
+        new Map([[file, source(`const value=unknownConsume(()=>n());return <p/>;`)]])
+      )
+    ).toThrow(/SUGAR_CALLBACK.*:5:32/);
   });
 });

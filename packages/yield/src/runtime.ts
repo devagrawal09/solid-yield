@@ -725,8 +725,7 @@ class Selection {
     readonly select: (state: any) => unknown
   ) {}
   [READ](): unknown {
-    const s = this.store;
-    return this.select(s != null && s[PATH_TARGET] ? readPath(s[PATH_TARGET]) : s);
+    return this.select(through(this.store));
   }
   *[Symbol.iterator](): Generator<unknown, unknown, unknown> {
     return state.host === EVENT ? yield* eventRead(this) : readOf(this);

@@ -2,22 +2,74 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const { makeService, root } = require("./helpers.cjs");
 const { join } = require("node:path");
-test("directive sugar shares the service and updates positions after edits", () => {
-  const name = "sugar.tsx",
+test("native selection updates positions after edits", () => {
+  const name = "counter.tsx",
     file = join(root, name);
   const source =
-    '"use yield";\nimport {$signal} from "solid-yield";\nexport function Counter(){\n const [n]=$signal(0);\n const x=n();\n return <p>{x}</p>;\n}';
-  const { service, input } = makeService({ [name]: source }, {});
+    'import {createSignal} from "solid-js";\nexport function Counter(){\n const [n]=createSignal(0);\n const x=n();\n return <p>{x}</p>;\n}';
+  const { service, input } = makeService({ [name]: source });
   try {
     let ds = service.diagnostics(file);
     assert.equal(ds.length, 1);
     assert.match(ds[0].messageText, /READ_IN_SETUP/);
-    assert.equal(ds[0].file.getLineAndCharacterOfPosition(ds[0].start).line + 1, 5);
+    assert.equal(ds[0].file.getLineAndCharacterOfPosition(ds[0].start).line + 1, 4);
     input.set(file, "\n\n" + source);
     ds = service.diagnostics(file);
-    assert.equal(ds[0].file.getLineAndCharacterOfPosition(ds[0].start).line + 1, 7);
+    assert.equal(ds[0].file.getLineAndCharacterOfPosition(ds[0].start).line + 1, 6);
     input.set(file, source.replace("const x=n();", "const x=1;"));
     assert.equal(service.diagnostics(file).length, 0);
+  } finally {
+    service.dispose();
+  }
+});
+test("a legacy directive does not select an unconfigured file", () => {
+  const file = join(root, "legacy.tsx");
+  const source = `"use yield";
+import {$signal} from "solid-yield";
+export function Counter() { const [n] = $signal(0); return <p>{n()}</p>; }`;
+  const { service } = makeService({ "legacy.tsx": source }, {});
+  try {
+    const state = service.refresh();
+    assert.equal(state.selected.has(file), false);
+    assert.equal(state.generated.get(file), source);
+  } finally {
+    service.dispose();
+  }
+});
+test("native refusal recovery preserves selected diagnostics and unselected legacy files", () => {
+  const refused = `import {createSignal} from "solid-js";
+declare function opaque(callback: () => number): void;
+export function Refused() { const [n] = createSignal(0); opaque(() => n()); return <p />; }`;
+  const valid = `import {createSignal} from "solid-js";
+export function Valid() { const [n] = createSignal(0); const value = n(); return <p>{value}</p>; }`;
+  const legacy =
+    '/** @jsxImportSource @solidjs/web */ "use yield"; const value: number = "wrong"; export function Legacy() { return <p>{value}</p>; }';
+  const { service, input } = makeService(
+    { "refused.tsx": refused, "valid.tsx": valid, "legacy.tsx": legacy },
+    { mode: "native", include: ["refused.tsx", "valid.tsx"] }
+  );
+  const bad = join(root, "refused.tsx");
+  const good = join(root, "valid.tsx");
+  const plain = join(root, "legacy.tsx");
+  try {
+    assert.ok(service.diagnostics(bad).some(d => d.messageText.includes("[SUGAR_CALLBACK]")));
+    const checkNeighbors = () => {
+      const diagnostics = service.diagnostics(good);
+      assert.equal(diagnostics.length, 1);
+      assert.match(diagnostics[0].messageText, /READ_IN_SETUP/);
+      assert.equal(diagnostics[0].start, valid.lastIndexOf("n()"));
+      assert.deepEqual(
+        service.diagnostics(plain).map(d => d.code),
+        [2322]
+      );
+      const state = service.refresh();
+      assert.equal(state.selected.has(plain), false);
+      assert.equal(state.generated.get(plain), legacy);
+    };
+    checkNeighbors();
+    input.set(bad, refused.replace("opaque(() => n());", ""));
+    assert.equal(service.diagnostics(bad).length, 0);
+    checkNeighbors();
   } finally {
     service.dispose();
   }

@@ -972,6 +972,93 @@ declare const Card: (props: { title: string }) => ComponentView<false, never>;
 declare const Through: <E, P extends boolean>(props: { todo: E }) => ComponentView<P, E>;
 declare const Foreign: (props: { title: string }) => Node | string | null;
 `;
+const contextPropDecls = `
+import { component, createContext, view, type Source } from "../../../yield/src/index.js";
+declare const n: Source<number>;
+const Theme = createContext("light");
+const Live = createContext<Source<number>>(n);
+const Card = component(function* (props: { value: string }) {
+  return view(function* () { return <i />; });
+});
+`;
+typedTester.run("no-read-in-prop (context values)", rules["no-read-in-prop"], {
+  valid: [
+    {
+      filename,
+      code:
+        contextPropDecls +
+        'function* v() { return Theme.provide({ value: (yield* n) > 1 ? "dark" : "light", children: function* () { return <i />; } }); }'
+    },
+    {
+      filename,
+      code:
+        contextPropDecls +
+        "const Held = Theme.provide; function* v() { return Held({ value: String((yield* n) + (yield* n)), children: function* () { return <i />; } }); }"
+    },
+    {
+      filename,
+      code:
+        contextPropDecls +
+        'function* v() { return Theme.provide({ "value": String(yield* n), children: function* () { return <i />; } }); }'
+    },
+    {
+      filename,
+      code:
+        contextPropDecls +
+        "function* v() { return Live.provide({ value: n, children: function* () { return <i />; } }); }"
+    },
+    {
+      filename,
+      code:
+        contextPropDecls +
+        "function* v() { return Live.provide({ value: function* () { return (yield* n) + 1; }, children: function* () { return <i />; } }); }"
+    }
+  ],
+  invalid: [
+    {
+      filename,
+      code: contextPropDecls + "function* v() { return Live.provide({ value: yield* n }); }",
+      output: contextPropDecls + "function* v() { return Live.provide({ value: n }); }",
+      errors: [{ messageId: "read" }]
+    },
+    {
+      filename,
+      code: contextPropDecls + "function* v() { return Live.provide({ value: (yield* n) + 1 }); }",
+      output:
+        contextPropDecls +
+        "function* v() { return Live.provide({ value: function* () {\nreturn (yield* n) + 1;\n} }); }",
+      errors: [{ messageId: "read" }]
+    },
+    {
+      filename,
+      code: contextPropDecls + "function* v() { return Card({ value: String(yield* n) }); }",
+      output:
+        contextPropDecls +
+        "function* v() { return Card({ value: function* () {\nreturn String(yield* n);\n} }); }",
+      errors: [{ messageId: "read" }]
+    },
+    {
+      filename,
+      code:
+        contextPropDecls +
+        "const Other = { provide: Card }; function* v() { return Other.provide({ value: String(yield* n) }); }",
+      output:
+        contextPropDecls +
+        "const Other = { provide: Card }; function* v() { return Other.provide({ value: function* () {\nreturn String(yield* n);\n} }); }",
+      errors: [{ messageId: "read" }]
+    },
+    {
+      filename,
+      code:
+        contextPropDecls +
+        'function* v() { return Theme.provide({ value: "dark", children: yield* n }); }',
+      output:
+        contextPropDecls +
+        'function* v() { return Theme.provide({ value: "dark", children: n }); }',
+      errors: [{ messageId: "read" }]
+    }
+  ]
+});
 typedTester.run("no-component-tag (with types)", rules["no-component-tag"], {
   valid: [
     { filename, code: componentDecls + 'const a = <Foreign title="t" />;' },

@@ -8,8 +8,11 @@ import { phaseLimit } from "./coverage.mjs";
 
 const repo = resolve(fileURLToPath(new URL("../../..", import.meta.url)));
 const args = process.argv.slice(2);
+// Keep non-twin examples aligned with scripts/yield-gate.mjs.
+const NON_TWINS = ["booking-yield"];
 const twins = readdirSync(join(repo, "examples"))
   .filter(x => /-yield(-h)?$/.test(x))
+  .filter(x => !NON_TWINS.includes(x))
   .filter(x => !args.includes("--only") || x === args[args.indexOf("--only") + 1])
   .sort();
 if (!twins.length) throw new Error("No matching twin");
@@ -23,6 +26,7 @@ try {
       const costFile = readdirSync(join(dir, "tests")).find(x =>
         /^runtime-cost.test.tsx?$/.test(x)
       );
+      if (!costFile) throw new Error(`${twin}: missing runtime-cost.test.ts or .tsx driver`);
       const cost = readFileSync(join(dir, "tests", costFile), "utf8");
       // The authored parity driver remains the source of the mount and interactions.
       // Move a static Twin import into the selected branch, so originals never evaluate it.

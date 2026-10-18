@@ -68,6 +68,13 @@ export interface FailureReport {
   ): { fails: Set<string>; server: boolean; component: boolean } | undefined;
   throws(file: string, start: number, end: number): string[];
 }
+export function providerMemberObservation(
+  ts: typeof import("typescript"),
+  checker: import("typescript").TypeChecker,
+  declaration: import("typescript").VariableDeclaration,
+  use: import("typescript").Node,
+  allowGenerators?: boolean
+): boolean;
 export function inferFailures(
   modules: Map<string, string>,
   options: {

@@ -1,4 +1,4 @@
-// Compiler metadata survives printing between native and sugar passes.
+// Compiler metadata survives printing between native and reconstruction passes.
 // Only generator callbacks passed directly to core APIs belong to lowering.
 import babel from "@babel/core";
 import { parseProgram } from "./transform.js";
@@ -11,6 +11,7 @@ export {
   authoredOpaqueGenerator
 } from "compiler-yield/native-generator";
 export const opaqueDirective = "use native opaque";
+export const awaitDirective = "use native await";
 /** @param {any} node */
 export const opaqueGenerator = node =>
   !!node?.generator &&
@@ -70,6 +71,17 @@ export function unmarkOpaqueGenerators(files) {
       let changed = false;
       p?.traverse({
         Function(q) {
+          if (
+            t.isArrowFunctionExpression(q.node) &&
+            t.isBlockStatement(q.node.body) &&
+            q.node.body.directives.some(d => d.value.value === awaitDirective) &&
+            q.node.body.body.length === 1 &&
+            t.isReturnStatement(q.node.body.body[0]) &&
+            q.node.body.body[0].argument
+          ) {
+            q.node.body = q.node.body.body[0].argument;
+            changed = true;
+          }
           if (!opaqueGenerator(q.node) || !t.isBlockStatement(q.node.body)) return;
           q.node.body.directives = q.node.body.directives.filter(
             d => d.value.value !== opaqueDirective

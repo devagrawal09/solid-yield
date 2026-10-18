@@ -108,7 +108,7 @@ function fail(message) {
 // Steps
 
 const TWIN_SCRIPTS = ["test", "typecheck", "lint"];
-const EXPECTED_TWINS = 10;
+const EXPECTED_TWINS = 9;
 // Examples that are not twins of an original (no examples/originals counterpart, no
 // parity test): outside the twin count, gated as example:<name>:<script>.
 const NON_TWINS = ["booking-yield"];
@@ -121,7 +121,7 @@ function findTwins() {
   const examples = join(root, "examples");
   if (!existsSync(examples)) return [];
   return readdirSync(examples, { withFileTypes: true })
-    .filter(d => d.isDirectory() && /-(yield(-h)?|sugar)$/.test(d.name))
+    .filter(d => d.isDirectory() && /-yield(-h)?$/.test(d.name))
     .map(d => d.name)
     .filter(name => !NON_TWINS.includes(name))
     .filter(name => {
@@ -204,13 +204,6 @@ function buildSteps(twins) {
         fast: script === "typecheck" || script === "lint",
         ...pnpmRun(`examples/${example}`, script)
       });
-
-  steps.push({
-    name: "twin:todos-sugar:generated-parity",
-    cwd: root,
-    cmd: process.execPath,
-    args: ["scripts/sugar-check.mjs"]
-  });
 
   steps.push({
     name: "mutation",
@@ -366,8 +359,8 @@ function buildSteps(twins) {
     });
   }
 
-  // Rendering: half A is its exact findings (three setup reads, a root that
-  // may fail with ChunkError and may be pending) and the author fix
+  // Rendering: half A is its exact findings (roots that may fail with
+  // ChunkError and may be pending) and the author fix
   // type-checking and linting clean; half B compares the original, the fix
   // and its native lowering (client script, streamed SSR, hydration).
   for (const stage of ["diagnostics", "typecheck"]) {
@@ -472,8 +465,8 @@ function buildSteps(twins) {
     env: { SMOKE_TIMEOUT_MS: "120000" }
   });
 
-  // Twin-hydration smoke (examples/harness/hydrate-smoke/hydrate.mjs): each of those 16
-  // server renders is hydrated in jsdom by the twin's own client entry, compiled for the
+  // Twin-hydration smoke (examples/harness/hydrate-smoke/hydrate.mjs): each server
+  // render is hydrated in jsdom by the twin's own client entry, compiled for the
   // DOM by the same Vite server, each case in its own process with a 30 s timeout (120 s
   // on GitHub Actions). A hydration mismatch (Solid's dev diagnostics), a development
   // error, an unhandled rejection, a replaced server root or a failed interaction

@@ -629,8 +629,11 @@ function ErroredYield(props: any): any {
       // incoming error accessor, before selective matching or user fallback.
       return (err: Accessor<unknown>, reset: () => void) => {
         const restored = () => restoreFailure(err());
-        const error = restored();
-        if (handles && !matchesFailure(error, handles)) throw error;
+        // Nonselective fallbacks must not subscribe their owner to the error.
+        if (handles) {
+          const error = restored();
+          if (!matchesFailure(error, handles)) throw error;
+        }
         return typeof render === "function" ? render(restored, reset) : render;
       };
     },

@@ -33,10 +33,12 @@ import {
   attempt,
   createContext,
   Errored,
+  Failure,
   For,
   lazy,
   Loading,
   perform,
+  registerFailure,
   Show,
   type Props,
   type Element as YieldElement,
@@ -52,6 +54,32 @@ const strip = (html: string) =>
     .replace(/<!--[^>]*-->/g, "");
 
 describe("server rendering", () => {
+  it.each([false, true])(
+    "restores a decoded failure in an Errored fallback (selective: %s)",
+    selective => {
+      class Missing extends Failure("ssr-missing") {}
+      registerFailure(Missing, `ssr-boundary/Missing/${selective}`);
+      const incoming = Object.assign(
+        new Error("decoded on server"),
+        JSON.parse(JSON.stringify(new Missing("decoded on server")))
+      );
+      const props = {
+        fallback: (error: () => unknown) => {
+          const restored = error();
+          expect(restored).toBeInstanceOf(Missing);
+          return (restored as Missing).message;
+        },
+        children: () => {
+          throw incoming;
+        }
+      };
+      const html = yieldRenderToString(() =>
+        selective ? Errored({ ...props, catch: [Missing] }) : Errored(props)
+      );
+      expect(strip(html).split("<script>")[0]).toBe("decoded on server");
+    }
+  );
+
   it("renders setup state, props, row routines and context", () => {
     const Theme = createContext("light");
     const Item = component(function* (props: Props<{ text: Source<string> }>) {

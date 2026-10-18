@@ -24,11 +24,6 @@ export function lowerNativeProject(
   input: Map<string, string>,
   options?: { compilerOptions?: ts.CompilerOptions }
 ): Lowered;
-export function lowerSugarProject(
-  input: Map<string, string>,
-  options?: { compilerOptions?: ts.CompilerOptions }
-): Lowered;
-export function isSugar(code: string): boolean;
 export function locate(
   table: Position[] | undefined,
   start: number,

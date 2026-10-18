@@ -1,5 +1,14 @@
 # Sugar mode: a spelling of the library route
 
+**Historical directive dialect, removed 2026-10-16:** `"use yield"` no longer
+selects or transforms files. The `todos-sugar` and `room-sugar` examples and
+`scripts/sugar-check.mjs` have been removed. Use explicitly selected native mode
+or the explicit generator dialect; see the current [Vite plugin](../packages/vite-plugin-yield/README.md)
+and [TS plugin](../packages/ts-plugin-yield/README.md) setup instructions. The
+directive design, commands, measurements and findings below are historical
+evidence, not current usage instructions. Native typing evidence and the native
+`sugar-edges` mutation corpus remain active.
+
 **Current direction (2026-10-08): see [Native mode](#native-mode).** Native source uses Solid APIs; virtual-code typing is decided.
 
 **What ships (D-120, 2026-10-10):** native files ship as written, as plain Solid. The lowering is the checker's model (`solid-yield check`, the editor plugin); the Vite plugin emits it only with `emit: "lowered"`, which the parity harnesses use to run the model against the original. Rewriting returns when it lowers all the way to an optimized output. The earlier sections record the directive-sugar experiment.
@@ -54,7 +63,7 @@ can be plain Solid code, and a router owns its own callback contract.
 
 ### Todos, in full
 
-The complete source is in [todos-sugar/src](../examples/todos-sugar/src), paired
+The historical source was in `examples/todos-sugar/src`, paired
 with [todos-yield/src](../examples/todos-yield/src) and
 [the original](../examples/originals/todos/src). Its mock API, markup, optimistic
 layer, error side-channel, retries, bulk writes, filter effect, and boundaries
@@ -101,7 +110,7 @@ solved by suppressing the source's errors.
 
 ### Harder example: room
 
-[room-sugar/src](../examples/room-sugar/src) spells the complete UI modules from
+The historical `examples/room-sugar/src` spelled the complete UI modules from
 [room-yield](../examples/room-yield/src) in sugar: the app, document, identity
 provider, live room route and wire-status component. It retains required identity,
 router `foreign(…, { provided: [IdentityCtx] })`, live sources, optimistic sending,
@@ -538,10 +547,14 @@ unresolved reactive hosts, including setup-time async reads.
 A selected component handed to an opaque package's `component` slot receives
 plain Solid props with provenance C. The generated `NativeProps` facade makes
 those values settled paths, retaining unknown value types and the original plain
-call signature through the `nativeC` identity adapter. Its return type keeps the
+call signature through the `nativeC` adapter. Its return type keeps the
 component's pending, failure and context types unchanged; `foreign()` still
 checks every handoff. Unknown route data is neither changed to `void` nor allowed
 to hide a colored library source at a core call.
+
+In the lowered checker/parity model, `nativeC` lazily adapts foreign prop values
+to paths while leaving protocol fields raw. It is not part of default native
+output, which stays plain Solid under D-120.
 
 **F-S29 — native mode finds an unhandled failure in originals/hackernews-spa.**
 In `examples/originals/hackernews-spa/src/lib/hn.ts:31–38`, the fetch and body read

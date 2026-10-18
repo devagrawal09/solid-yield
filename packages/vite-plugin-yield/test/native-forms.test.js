@@ -204,6 +204,35 @@ render(App, document.body);`,
     ["FOREIGN_HANDOFF"]
   ],
   [
+    "store-callback-throw-under-errored",
+    `${head}
+import { Errored } from "solid-js";
+export function App() {
+  const [store] = createStore({ list: [{ title: "t" }] });
+  const titles = createMemo(() => store.list.map(t => {
+    if (!t.title) throw new TypeError("untitled");
+    return t.title;
+  }).join());
+  return <Errored fallback={() => <p>failed</p>}><p>{titles()}</p></Errored>;
+}
+render(App, document.body);`,
+    []
+  ],
+  [
+    "nested-store-array-callback-throw",
+    `${head}
+export function App() {
+  const [store] = createStore({ groups: [{ titles: ["t"] }] });
+  const titles = createMemo(() => store.groups.flatMap(group => group.titles.map(title => {
+    if (!title) throw new TypeError("untitled");
+    return title;
+  })).join());
+  return <p>{titles()}</p>;
+}
+render(App, document.body);`,
+    ["FOREIGN_HANDOFF"]
+  ],
+  [
     "plain-callback-throw-under-errored",
     `${head}
 import { Errored } from "solid-js";
@@ -270,7 +299,8 @@ export function App() {
     }
   }}>{n()}</button>;
 }`,
-    ["TS2339"]
+    // The malformed property stays a TS error; its unhandled request also refuses.
+    ["NATIVE_DETACHED_PROMISE", "TS2339"]
   ],
   [
     "kept-promise-rejects-at-its-await",

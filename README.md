@@ -2,9 +2,9 @@
 
 `solid-yield` is a library for writing Solid 2 components as **yield components**: generator functions in which every read is a `yield*`, so that a component's type says whether it may be pending, which errors it may fail with, and which contexts it requires.
 
-## Sugar mode / native mode
+## Native mode
 
-Native mode checks and transforms a tested subset of selected plain Solid 2 code before Vite compiles JSX. Ordinary patterns outside that subset can still be refused. Sugar mode opts files in with `"use yield"` and uses the library's APIs with ordinary calls. Both are experimental: unsupported forms, generated-location fallbacks and missing runtime source maps remain.
+Native mode checks a tested subset of selected plain Solid 2 code using a generated library-code model. Vite emits plain Solid by default; `emit: "lowered"` runs the generated model for parity checks. Ordinary patterns outside that subset can still be refused. This mode is experimental: unsupported forms, generated-location fallbacks and missing runtime source maps remain. The legacy `"use yield"` directive dialect has been removed; use selected native files or the explicit generator dialect below.
 
 Build this clone with `pnpm install && pnpm build`, create `/tmp/solid-yield-packs`, then pack `yield`, `compiler-yield`, `vite-plugin-yield`, `ts-plugin-yield` and `eslint-plugin-yield` from their `packages/` directories with `pnpm pack --pack-destination /tmp/solid-yield-packs`. Install the runtime and both plugins from those tarballs; the [TS plugin README](packages/ts-plugin-yield/README.md#install-and-select-files) gives the complete local install, overrides and tsconfig. There is no npm release yet; the overrides select the local `0.0.0` dependencies instead of searching npm.
 
@@ -223,14 +223,14 @@ Public roadmap: https://github.com/devagrawal09/solid-yield/issues/1
 [HANDOFF.md](HANDOFF.md#roadmap-and-compiler-checkpoint-2026-10-08-d-116) has the current order (D-116).
 
 - **v0.1, the library** (now): the runtime, the transform and the lint described here. It is waiting to be published to npm.
-- **v0.2:** bounded native sugar, the TS plugin and matching CLI check, including serialization-safe typed failures (D-115).
+- **v0.2:** bounded native mode, the TS plugin and matching CLI check, including serialization-safe typed failures (D-115).
 - **Then:** a dashboard twin written as plain Solid.
 - **Then:** islands (server components with client slots) productized, subject to DOM parity and the purity trust model (D-114).
 - **Then:** the lazy builder, with descriptors that become live on first interaction, a step toward resumability without a new runtime.
 
 ## Status
 
-- **This is a design lab.** The examples below use the explicit dialect; the sugar/native section above describes the experimental plain-code route. Explicit reads and writes help expose the model's rules and limitations.
+- **This is a design lab.** The examples below use the explicit dialect; the native section above describes the experimental plain-code route. Explicit reads and writes help expose the model's rules and limitations.
 - **What is stated:** [calculus.md](documentation/calculus.md) is a core calculus for the dialect. It states the soundness theorem the types claim ("the types say exactly what the runtime does"), and it traces each of its 52 proof obligations to the code and the tests that support it. The whole-dialect theorem is stated and supported by tests; the abstract core has the partial formal proofs described below.
 - **What is tested:** every commit is gated. The gate runs nine example twins (docs-yield, effect-yield, hackernews-spa-yield, rendering-yield, room-yield, sierpinski-yield, sierpinski-yield-h, todos-yield and todos-yield-h), which are real Solid apps rewritten in this dialect, checked for DOM parity against the originals step by step. It also renders the twins on the server and hydrates that output, runs a conformance suite against handwritten Solid, and runs the packages' type, runtime and lint tests.
 - **Decisions:** each rule comes with its alternatives and its reasoning in [DECISIONS.md](documentation/DECISIONS.md). Where the work stands, and how to work on the repository and run the gate, is in [HANDOFF.md](HANDOFF.md).
@@ -259,7 +259,7 @@ MIT, copyright (c) 2026 Dev Agrawal ([LICENSE](./LICENSE)). The vendored Solid o
 
 ## Examples
 
-- [dashboard — original only; for sugar/native mode](examples/originals/dashboard/README.md)
+- [dashboard — original only; for native mode](examples/originals/dashboard/README.md)
 
 ## Analyzer
 

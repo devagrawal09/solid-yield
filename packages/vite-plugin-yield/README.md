@@ -2,7 +2,7 @@
 
 The JSX transform's one rule for [`solid-yield`](https://github.com/devagrawal09/solid-yield/tree/main/packages/yield) (D-003): inside a JSX expression or attribute value, `yield* e` becomes `perform(e)`, imported from `solid-yield`. Each read is then its own hole, and the view generator runs once. Nothing else is lowered. Published as `vite-plugin-solid-yield` (D-011; `@solidjs/vite-plugin-yield` in the Solid fork).
 
-**The default is the explicit dialect** (D-002): this plugin also has experimental sugar/native modes. By default it is the strict dialect's transform, and Solid's `experiment/iterable-signals` branch bakes the model into its compiler and core. Its four refusal codes are listed with the matching lint rule and development errors in [`documentation/refusals.md`](https://github.com/devagrawal09/solid-yield/blob/main/documentation/refusals.md).
+**The default is the explicit dialect** (D-002): this plugin also has an experimental native mode. By default it is the strict dialect's transform, and Solid's `experiment/iterable-signals` branch bakes the model into its compiler and core. Its four refusal codes are listed with the matching lint rule and development errors in [`documentation/refusals.md`](https://github.com/devagrawal09/solid-yield/blob/main/documentation/refusals.md).
 
 Codes such as D-074 here and in the messages cite the design's decision log, [`DECISIONS.md`](https://github.com/devagrawal09/solid-yield/blob/main/documentation/DECISIONS.md) (each rule, its alternatives and its reasoning).
 
@@ -33,6 +33,11 @@ file installs are tested without workspace links. `emit: "lowered"` ships the
 lowered library code instead (the parity harnesses use it); it has no composed
 runtime source map yet.
 
+Native `isPending` and `latest` queries currently support a source or an
+identity thunk such as `() => value()`. A computing observer thunk such as
+`() => value() + 1` is not modeled and is refused, rather than emitted as an
+invalid source argument.
+
 `solidYield()` runs `enforce: "pre"`, before the JSX compiler. It skips a module whose source has no `yield` (and no `lazy` from the yield module) without parsing it (every spelling of a generator, `function *f`, `*method()`, `async *gen`, is a candidate; the parse decides), and returns `null` (no change) for a module with no hole. Its source map is chained by Vite with the compiler's, so a runtime error maps back to the authored line and column. Options: `yieldModule`, `lazy`, and `filter(file)` (by default `.js`/`.jsx`/`.ts`/`.tsx` and their `m`/`c` forms, outside `node_modules`).
 
 ## `lazy()` module URLs (D-047)
@@ -62,10 +67,10 @@ Option `lazy: false` turns the pass off.
 | a yield-component call in a hole, `{yield* Card({ todo })}` (D-062)                                             | one hole: `perform(Card({ todo }))`; the argument is left as written  |
 | a `yield*` inside a nested function in JSX                                                                      | that function's own; not a hole of this JSX                           |
 | an event prop (`onClick`, `on:click`, `oncapture:…`): `onClick={yield* save}` binds an `$event` handler (D-072) | `perform(save)`, which returns the handler; the types check it is one |
-| `ref`                                                                                                           | refused: `YIELD_IN_REF`                                        |
-| a spread attribute                                                                                              | refused: `YIELD_IN_SPREAD`                                     |
-| a spread child                                                                                                  | refused: `YIELD_IN_SPREAD_CHILD`                               |
-| a plain `yield` in JSX                                                                                          | refused: `PLAIN_YIELD_IN_JSX`                                  |
+| `ref`                                                                                                           | refused: `YIELD_IN_REF`                                               |
+| a spread attribute                                                                                              | refused: `YIELD_IN_SPREAD`                                            |
+| a spread child                                                                                                  | refused: `YIELD_IN_SPREAD_CHILD`                                      |
+| a plain `yield` in JSX                                                                                          | refused: `PLAIN_YIELD_IN_JSX`                                         |
 
 A refusal throws a `YieldRuleError` whose message lists each refusal as `[CODE] message (line:column)`, the compiler's format. The rule does not know hosts. A hole performed while a setup runs is the runtime's `[JSX_IN_SETUP]` (D-041).
 
@@ -89,7 +94,7 @@ They were generated once from the fork's Rust compiler while it carried the rule
 
 ## Status
 
-In-repo package, `0.0.0`, unreleased. Its runtime dependencies are `compiler-yield`, `@babel/core`, `magic-string`, and `typescript` (the experimental sugar front end). Its peers are `solid-yield` (the module the rewritten code imports `perform` from) and, optionally, `vite`.
+In-repo package, `0.0.0`, unreleased. Its runtime dependencies are `compiler-yield`, `@babel/core`, `magic-string`, and `typescript` (the experimental native front end). Its peers are `solid-yield` (the module the rewritten code imports `perform` from) and, optionally, `vite`.
 
 The tests also use, as devDependencies:
 
@@ -105,19 +110,18 @@ The annotated `moduleUrl` is the key the server render looks up in the **client 
 
 Use a separate server JSX config, `solid({ ssr: true, hydratable: true })`, and import `generateHydrationScript` from the server build of `@solidjs/web`. The client build returns an empty string. The [SSR and hydration recipe](https://github.com/devagrawal09/solid-yield/blob/main/documentation/getting-started.md#ssr-and-hydration) includes both configs, the manifest, an awaited stream and the non-test-mode Vitest setup. [Lazy/ChunkError retry](https://github.com/devagrawal09/solid-yield/blob/main/documentation/getting-started.md#lazy-pages-and-chunk-retry) uses an `Errored` catching the import failure.
 
+## Experimental native mode
 
-## Experimental sugar directive
+Select plain Solid files explicitly with
+`solidYield({ mode: "native", include: ["src/**"] })` before `solid()` in Vite.
+Keep the same `mode` and `include` in the
+[TS plugin and CLI configuration](../ts-plugin-yield/README.md), which check the
+generated library-code model and map diagnostics to source. Genuinely synthetic
+locations retain a marked fallback. Vite emits plain Solid by default;
+`emit: "lowered"` emits the model for parity checks. Unsupported forms can be
+refused, and the lowering has no composed runtime source map.
 
-On `proto/sugar`, a file beginning with `"use yield";` opts into a project-aware
-front end. Top-level PascalCase functions returning JSX become yield components;
-plain source calls, path reads, events and known callbacks reconstruct the
-library's generator code before the existing JSX rule runs. Unmarked files keep
-the explicit behavior above. The Vite plugin requires a tsconfig for sugar.
-
-This is a prototype: it reparses project snapshots and has no composed runtime
-source map. The [TS plugin and CLI](../ts-plugin-yield/README.md) check generated
-code and map diagnostics to source; genuinely synthetic locations retain a
-marked fallback. The plain
-`transform()` and Babel plugin remain the explicit one-rule API; sugar is wired
-into the Vite adapter. See [the design and findings](../../documentation/sugar-design.md)
-for unsupported forms and the unresolved typing choice.
+The plain `transform()` and Babel plugin remain the explicit one-rule API.
+The legacy `"use yield"` directive dialect has been removed.
+[The historical design and findings](../../documentation/sugar-design.md) preserve
+that experiment's evidence; they are not current setup instructions.

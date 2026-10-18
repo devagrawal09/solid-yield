@@ -1,5 +1,5 @@
-import { flush } from "solid-js";
-import { isSafeError } from "@solidjs/web";
+import * as Solid from "solid-js";
+import { isSafeError, type JSX } from "@solidjs/web";
 import {
   Failure,
   registerFailure,
@@ -16,6 +16,11 @@ import {
   render,
   view
 } from "solid-yield";
+
+// Clone the ESM namespace so the regression can observe the real boundary.
+vi.mock("solid-js", async importOriginal => ({
+  ...(await importOriginal<typeof import("solid-js")>())
+}));
 
 class Missing extends Failure("missing") {
   detail = "public detail";
@@ -37,7 +42,7 @@ const decode = (error: Error) =>
 const settle = async () => {
   for (let i = 0; i < 4; i++) {
     await new Promise(r => setTimeout(r, 0));
-    flush();
+    Solid.flush();
   }
 };
 
@@ -186,6 +191,60 @@ describe("failure wire identity (D-117)", () => {
     });
     await expect(event()).rejects.toBe(sibling);
     expect(calls).toBe(0);
+  });
+
+  it("does not subscribe a nonselective fallback lifetime to its error accessor", () => {
+    let mounts = 0;
+    let cleanups = 0;
+    let reads = 0;
+    let readsAtMount = -1;
+    const errored = Solid.Errored;
+    const boundary = vi.spyOn(Solid, "Errored").mockImplementation(props =>
+      errored({
+        get fallback() {
+          const fallback = props.fallback as (
+            error: () => unknown,
+            reset: () => void
+          ) => JSX.Element;
+          return (error: () => unknown, reset: () => void) =>
+            fallback(() => {
+              reads++;
+              return error();
+            }, reset);
+        },
+        get children() {
+          return props.children;
+        }
+      })
+    );
+    const incoming = decode(new DeepMissing("decoded fallback"));
+    const root = document.createElement("div");
+    const dispose = render(
+      () =>
+        Errored({
+          fallback: error => {
+            readsAtMount = reads;
+            mounts++;
+            Solid.onCleanup(() => cleanups++);
+            return <p>{(error() as Missing).describe()}</p>;
+          },
+          children: () => {
+            throw incoming;
+          }
+        }),
+      root
+    );
+    try {
+      Solid.flush();
+      expect(root.textContent).toBe("public detail");
+      expect(readsAtMount).toBe(0);
+      expect(mounts).toBe(1);
+      expect(cleanups).toBe(0);
+    } finally {
+      dispose();
+      boundary.mockRestore();
+    }
+    expect(cleanups).toBe(1);
   });
 
   it.each(["subclass", "sibling", "unknown"])(

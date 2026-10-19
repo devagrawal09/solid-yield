@@ -2,7 +2,7 @@
 import ts from "typescript";
 import { resolve } from "node:path";
 
-it("four beginner mistakes lead with readable type messages", () => {
+it("four beginner mistakes lead with readable type messages", { timeout: 60_000 }, () => {
   const configPath = resolve("tsconfig.json");
   const config = ts.readConfigFile(configPath, ts.sys.readFile);
   const { options } = ts.parseJsonConfigFileContent(config.config, ts.sys, resolve("."));

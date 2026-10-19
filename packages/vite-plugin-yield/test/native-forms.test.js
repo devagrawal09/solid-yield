@@ -299,8 +299,8 @@ export function App() {
     }
   }}>{n()}</button>;
 }`,
-    // The malformed property stays a TS error; its unhandled request also refuses.
-    ["NATIVE_DETACHED_PROMISE", "TS2339"]
+    // The malformed property stays a TS error; the kept request is a promise, as written.
+    ["TS2339"]
   ],
   [
     "kept-promise-rejects-at-its-await",

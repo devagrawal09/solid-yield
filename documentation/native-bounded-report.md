@@ -21,7 +21,7 @@ contracts. Counts are detected JSX boundaries, not a claim that all package
 value boundaries have been extracted. Entry handoffs are separate. A transform
 failure can leave a detected boundary unemitted. All native app parity and SSR
 runs are blocked by their generated checks; the gate still runs the existing
-handwritten twins and directive-sugar todos.
+handwritten twins.
 
 | Target | Status | Native parity / SSR | Detected JSX boundaries | Inferred failures per component | Diagnostics |
 | --- | --- | --- | ---: | --- | --- |

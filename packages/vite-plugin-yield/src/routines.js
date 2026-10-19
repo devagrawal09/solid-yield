@@ -2858,14 +2858,15 @@ function coloredPropSites(program, active) {
    * @param {ts.Type} type @param {ts.Node} at @param {ts.Node} place */
   const colorsOf = (type, at, place) => {
     /** @type {ts.Type[]} */ const parts = [];
-    if (member(type, "SOURCE", at)) parts.push(type);
-    else
-      for (const sig of type.getCallSignatures()) {
-        const result = checker.getReturnTypeOfSignature(sig);
-        if (result.symbol?.name !== "Generator") continue;
-        const [yields] = checker.getTypeArguments(/** @type {ts.TypeReference} */ (result));
-        if (yields) parts.push(...(yields.isUnion() ? yields.types : [yields]));
-      }
+    for (const passed of type.isUnion() ? type.types : [type])
+      if (member(passed, "SOURCE", at)) parts.push(passed);
+      else
+        for (const sig of passed.getCallSignatures()) {
+          const result = checker.getReturnTypeOfSignature(sig);
+          if (result.symbol?.name !== "Generator") continue;
+          const [yields] = checker.getTypeArguments(/** @type {ts.TypeReference} */ (result));
+          if (yields) parts.push(...(yields.isUnion() ? yields.types : [yields]));
+        }
     let pending = false;
     /** @type {Set<string>} */ const fails = new Set();
     for (const part of parts) {
@@ -2968,11 +2969,14 @@ function coloredPropSites(program, active) {
       }
     }
     for (const { name, at, passedType, call } of sites) {
-      const passedSource = !!member(passedType, "SOURCE", at);
-      const isColored = colored(passedType, at);
+      // A conditional spread (`{...(cond ? { get value() {…} } : {})}`)
+      // passes a union: the prop is reactive where any part is.
+      const parts = passedType.isUnion() ? passedType.types : [passedType];
+      const passedSource = parts.some(part => !!member(part, "SOURCE", at));
+      const isColored = parts.some(part => colored(part, at));
       // D-126: a source or a hole for a held prop, settled or not (Dev,
       // 2026-10-15: native mode widens it, as Solid reads a prop lazily)
-      const reactive = passedSource || hole(passedType);
+      const reactive = passedSource || parts.some(hole);
       if (!reactive && !isColored) continue;
       let symbol = checker.getSymbolAtLocation(call.expression);
       if (symbol && symbol.flags & ts.SymbolFlags.Alias) symbol = checker.getAliasedSymbol(symbol);
@@ -3796,73 +3800,157 @@ function constantProps(code, filename, program) {
     ) ?? node;
   /** @type {Set<number>} where each value to take as a constant starts */
   const values = new Set();
+  /** A spread's assignability is reported on the argument (`Body(o)`): the
+   * prop named in the message is taken as a constant in each literal the
+   * argument may be (`const o = cond ? { value: 3 } : {…}`).
+   * @type {Map<number, Set<string>>} prop names by argument start */
+  const spreads = new Map();
   for (const d of program.getSemanticDiagnostics(source)) {
     if (d.start === undefined) continue;
-    if (!ts.flattenDiagnosticMessageText(d.messageText, "\n").includes("[REACTIVE_PROP]")) continue;
+    const message = ts.flattenDiagnosticMessageText(d.messageText, "\n");
+    if (!message.includes("[REACTIVE_PROP]")) continue;
     /** @type {ts.Node | undefined} */ let node = innermost(source, d.start);
+    const argument = node;
     while (node && !ts.isPropertyAssignment(node) && !ts.isShorthandPropertyAssignment(node))
       node = ts.isSourceFile(node) ? undefined : node.parent;
-    if (!node || !ts.isObjectLiteralExpression(node.parent)) continue;
-    if (!ts.isCallExpression(node.parent.parent)) continue;
-    values.add((ts.isPropertyAssignment(node) ? node.initializer : node.name).getStart(source));
+    if (
+      node &&
+      ts.isObjectLiteralExpression(node.parent) &&
+      ts.isCallExpression(node.parent.parent)
+    ) {
+      values.add((ts.isPropertyAssignment(node) ? node.initializer : node.name).getStart(source));
+      continue;
+    }
+    const name = /\[REACTIVE_PROP\] prop `([^`]+)`/.exec(message)?.[1];
+    if (
+      name &&
+      (ts.isIdentifier(argument) || ts.isObjectLiteralExpression(argument)) &&
+      ts.isCallExpression(argument.parent) &&
+      argument.parent.arguments.includes(argument)
+    ) {
+      const start = argument.getStart(source);
+      spreads.set(start, (spreads.get(start) ?? new Set()).add(name));
+    }
   }
-  if (!values.size) return code;
+  if (!values.size && !spreads.size) return code;
   const p = parseProgram(code, filename);
   if (!p) return code;
   let changed = false;
   let constant = false;
+  /** @param {import("@babel/core").NodePath<import("@babel/core").types.ObjectProperty>} path */
+  const widen = path => {
+    const value = path.node.value;
+    if (!t.isExpression(value)) return;
+    // already a constant, or a hole (refused for what it does, as a
+    // write): what is left is the value's own error
+    if (
+      (t.isCallExpression(value) && t.isIdentifier(value.callee, { name: "__nativeConstant" })) ||
+      (t.isFunctionExpression(value) && value.generator)
+    )
+      return;
+    path.node.shorthand = false;
+    const [phase, body] = t.isCallExpression(value) ? value.arguments : [];
+    // A getter (`count={() => 2}` where another caller passes a signal):
+    // Solid calls it where the prop is read, as a hole runs. One that reads
+    // is lowered already, as a lexical callback of a hole: it is that hole.
+    if (
+      t.isCallExpression(value) &&
+      t.isIdentifier(value.callee, { name: "__nativeLexicalCallback" }) &&
+      value.arguments.length === 2 &&
+      t.isStringLiteral(phase, { value: "hole" }) &&
+      t.isFunctionExpression(body) &&
+      body.generator &&
+      !body.params.length
+    )
+      path.get("value").replaceWith(body);
+    else if (
+      (t.isArrowFunctionExpression(value) || t.isFunctionExpression(value)) &&
+      !value.params.length &&
+      !value.async &&
+      !value.generator
+    )
+      path
+        .get("value")
+        .replaceWith(
+          t.functionExpression(
+            null,
+            [],
+            t.isBlockStatement(value.body)
+              ? value.body
+              : t.blockStatement([t.returnStatement(value.body)]),
+            true
+          )
+        );
+    else {
+      path
+        .get("value")
+        .replaceWith(t.callExpression(t.identifier("__nativeConstant"), [t.cloneNode(value)]));
+      constant = true;
+    }
+    path.skip();
+    changed = true;
+  };
+  /** The object literals an expression may be: through parentheses, `as`, a
+   * conditional, `||`, `??`, `&&`, and a `const` it names.
+   * @param {Path} expression @param {Set<any>} [seen] @returns {Path[]} */
+  const literalsOf = (expression, seen = new Set()) => {
+    while (
+      expression.isParenthesizedExpression() ||
+      expression.isTSAsExpression() ||
+      expression.isTSNonNullExpression() ||
+      expression.isTSSatisfiesExpression()
+    )
+      expression = /** @type {Path} */ (expression.get("expression"));
+    if (expression.isObjectExpression()) return [expression];
+    if (expression.isConditionalExpression())
+      return [
+        ...literalsOf(expression.get("consequent"), seen),
+        ...literalsOf(expression.get("alternate"), seen)
+      ];
+    if (expression.isLogicalExpression())
+      return [
+        ...literalsOf(expression.get("left"), seen),
+        ...literalsOf(expression.get("right"), seen)
+      ];
+    if (!expression.isIdentifier()) return [];
+    const binding = expression.scope.getBinding(expression.node.name);
+    if (!binding?.constant || !binding.path.isVariableDeclarator() || seen.has(binding)) return [];
+    seen.add(binding);
+    // the object is the caller's alone: every use is a spread into a tag
+    const spread = binding.referencePaths.every(
+      ref =>
+        (ref.parentPath?.isCallExpression() && ref.listKey === "arguments") ||
+        ref.parentPath?.isSpreadElement()
+    );
+    const init = binding.path.get("init");
+    return spread && init.node ? literalsOf(/** @type {Path} */ (init), seen) : [];
+  };
   p.traverse({
     ObjectProperty(path) {
       const value = path.node.value;
       if (!t.isExpression(value) || !values.has(value.start ?? -1)) return;
-      // already a constant, or a hole (refused for what it does, as a
-      // write): what is left is the value's own error
-      if (
-        (t.isCallExpression(value) && t.isIdentifier(value.callee, { name: "__nativeConstant" })) ||
-        (t.isFunctionExpression(value) && value.generator)
-      )
-        return;
-      path.node.shorthand = false;
-      const [phase, body] = t.isCallExpression(value) ? value.arguments : [];
-      // A getter (`count={() => 2}` where another caller passes a signal):
-      // Solid calls it where the prop is read, as a hole runs. One that reads
-      // is lowered already, as a lexical callback of a hole: it is that hole.
-      if (
-        t.isCallExpression(value) &&
-        t.isIdentifier(value.callee, { name: "__nativeLexicalCallback" }) &&
-        value.arguments.length === 2 &&
-        t.isStringLiteral(phase, { value: "hole" }) &&
-        t.isFunctionExpression(body) &&
-        body.generator &&
-        !body.params.length
-      )
-        path.get("value").replaceWith(body);
-      else if (
-        (t.isArrowFunctionExpression(value) || t.isFunctionExpression(value)) &&
-        !value.params.length &&
-        !value.async &&
-        !value.generator
-      )
-        path
-          .get("value")
-          .replaceWith(
-            t.functionExpression(
-              null,
-              [],
-              t.isBlockStatement(value.body)
-                ? value.body
-                : t.blockStatement([t.returnStatement(value.body)]),
-              true
-            )
-          );
-      else {
-        path
-          .get("value")
-          .replaceWith(t.callExpression(t.identifier("__nativeConstant"), [t.cloneNode(value)]));
-        constant = true;
+      widen(path);
+    },
+    CallExpression(path) {
+      for (const argument of path.get("arguments")) {
+        const names = spreads.get(argument.node.start ?? -1);
+        if (!names) continue;
+        // the argument itself (`Body(o)`), or what it spreads (`Body({ ...o })`)
+        /** @type {Path[]} */
+        const sources = argument.isObjectExpression()
+          ? argument
+              .get("properties")
+              .filter(property => property.isSpreadElement())
+              .map(spread => /** @type {Path} */ (spread.get("argument")))
+          : [argument];
+        for (const literal of sources.flatMap(expression => literalsOf(expression)))
+          for (const property of /** @type {Path[]} */ (literal.get("properties"))) {
+            if (!property.isObjectProperty() || property.node.computed) continue;
+            const key = property.node.key;
+            const name = t.isIdentifier(key) ? key.name : t.isStringLiteral(key) ? key.value : null;
+            if (name !== null && names.has(name)) widen(property);
+          }
       }
-      path.skip();
-      changed = true;
     }
   });
   if (!changed) return code;
@@ -4890,7 +4978,8 @@ function contextSlots(program, checker) {
               property.name?.getText() === member.name.getText() &&
               (ts.isPropertyAssignment(property) ||
                 ts.isShorthandPropertyAssignment(property) ||
-                ts.isGetAccessorDeclaration(property))
+                ts.isGetAccessorDeclaration(property) ||
+                ts.isMethodDeclaration(property))
           )
         )
           block(member.type);

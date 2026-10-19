@@ -42,7 +42,7 @@ Node's test/module cache on each rerun. Assertions are not rewritten. Subprocess
 coverage from CLI/tsserver does not return to Vitest; those locations can be
 reported as NoCoverage despite executing in a child. This limitation is a finding.
 The full command-runner configuration avoids test selection and can run all
-requested Vite/native/sugar/position, inference and TypeScript-plugin targets:
+requested Vite/native/position, inference and TypeScript-plugin targets:
 
 ```sh
 node scripts/mutation/tools/node_modules/@stryker-mutator/core/bin/stryker.js run scripts/mutation/stryker-core.config.mjs

@@ -101,7 +101,7 @@ The protocol test spawns the installed **real tsserver**, loads the plugin throu
 `tsconfig.plugins`, opens a native file, requests `semanticDiagnosticsSync` and
 `quickinfo`, checks line/column/text, then applies an unsaved edit and checks that
 the error disappears. Other tests cover imported component calls, ordinary TS
-errors, directive sugar, source and declaration edits, routine hovers, failure
+errors, source and declaration edits, routine hovers, failure
 messages and CLI failure/success exit codes. This is protocol evidence, not an
 editor screenshot or a claim that a particular editor loaded the plugin.
 

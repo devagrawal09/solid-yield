@@ -202,7 +202,8 @@ It is not the eager-islands or R emitter. Vite then runs the unchanged rule
 No runtime code or failure branding was changed.
 
 The implementation is in
-[packages/vite-plugin-yield/src/sugar.js](../packages/vite-plugin-yield/src/sugar.js).
+[packages/vite-plugin-yield/src/routines.js](../packages/vite-plugin-yield/src/routines.js)
+(then `src/sugar.js`; sugar mode itself is removed, D-127).
 It builds virtual project snapshots, asks TypeScript about **generated** signatures,
 and repeats delegation insertion until stable. This TypeScript query is for
 operation recognition, not a decision that source files should use typing route 1.
@@ -875,7 +876,8 @@ PascalCase JSX-returning functions; native tags become calls, unlike historical
 §1. No callback becomes a routine merely because it is nested in a component.
 
 The front end changes native imports, component props, context/value reads,
-event bindings and JSX contracts before reusing `lowerSugarProject`. Its
+event bindings and JSX contracts before reusing `reconstructProject` (then
+`lowerSugarProject`). Its
 cross-module TS fixed point inserts operations into the reconstructed files.
 The **existing** compiler analyzer consumes that explicit IR through
 `sugarFacts` for provenance/reach; no second ownership or color checker was
@@ -1802,12 +1804,16 @@ Both were real gaps, and fixing them exposed a third.
   where the original reads `undefined`, and TypeScript's error (no `title` on a
   Promise) was lost.
 
-  A call to an `async` function whose promise is kept as a value (assigned or
-  passed on; not awaited, returned or discarded) now stays a plain call. An
-  `async` callee cannot throw synchronously, so the attempt lost nothing but
-  the waiting. The promise is attempted where the code awaits it. A call to a
-  non-`async` function that returns a promise can throw before returning it,
-  so it keeps its attempt.
+  A call to an `async` function whose promise is kept as a value (assigned,
+  passed on, dropped as a statement or with `void`; not awaited or returned)
+  now stays a plain call. An `async` callee cannot throw synchronously, so
+  the attempt lost nothing but the waiting. The promise is attempted where
+  the code awaits it. A call to a non-`async` function that returns a promise
+  can throw before returning it, so it keeps its attempt, boxed: the value is
+  the promise. An async reactive helper (a routine) runs where it is called,
+  in a sync event as in an async one; its promise kept as a value (a local
+  awaited later, an argument, a `.then` receiver) is refused
+  (`NATIVE_DETACHED_PROMISE`), since what the lowering holds is its result.
 
   Tests: `native-promises.test.js`. The mutation catalog's `remove-await` now
   also expects TS2339. Proof obligation: S15 (`calculus-proofs/sugar.md`).

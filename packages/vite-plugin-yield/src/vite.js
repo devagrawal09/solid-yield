@@ -22,6 +22,10 @@ import { DEFAULT_YIELD_MODULE } from "./rule.js";
 import { mayTransform, transform } from "./transform.js";
 
 const SCRIPT = /\.[mc]?[jt]sx?$/i;
+/** A file that opens with the retired `"use yield"` directive (its prologue,
+ * after comments): the sugar mode it selected is gone, so the file ships as
+ * written. */
+const LEGACY_DIRECTIVE = /^(?:\s|\/\/[^\n]*\n|\/\*[\s\S]*?\*\/)*(["'])use yield\1\s*;?/;
 
 /**
  * @typedef {object} YieldPluginOptions
@@ -71,6 +75,16 @@ export default function solidYield(options = {}) {
       if (id.startsWith("\0")) return null;
       const file = id.replace(/[?#].*$/, "");
       if (!filter(file)) return null;
+      // Not transformed, and not silently: in native mode the file is checked
+      // and shipped as plain Solid only when it is selected; elsewhere its
+      // explicit generators are the only thing the plugin sees.
+      if (LEGACY_DIRECTIVE.test(code))
+        this.warn?.({
+          message:
+            '[LEGACY_DIRECTIVE] "use yield" selects nothing: sugar mode is gone. The file is checked as plain Solid where native mode selects it, and shipped as written. Remove the directive.',
+          id: file,
+          loc: { file, line: 1, column: 0 }
+        });
       if (options.mode === "native" && include?.(file)) {
         // D-120: native mode checks plain Solid (`solid-yield check`, the
         // editor plugin) and ships it as written. The lowered code would add

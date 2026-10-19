@@ -36,7 +36,7 @@ const start = `import { createMemo, createSignal } from "solid-js";
 async function load(n: number): Promise<{ title: string }> { return { title: \`t\${n}\` }; }`;
 
 describe("native kept promises", { timeout: 60_000 }, () => {
-  it("keeps an invalid promise property a TS error and refuses the detached request", () => {
+  it("keeps an invalid promise property a TS error: the kept promise is not awaited", () => {
     const source = `${start}
 export function View() {
   const [n] = createSignal(1);
@@ -47,7 +47,28 @@ export function View() {
   return <p>{title()}</p>;
 }`;
     expect(checked(source).join("\n")).toMatch(/'title' does not exist on type 'Promise/);
-    expect(() => lower(source)).toThrow(/NATIVE_DETACHED_PROMISE/);
+    const code = lower(source);
+    // The call stays plain (its argument's read lifts it into a routine); nothing awaits it.
+    expect(code).toMatch(/return _callee\(_argument\);/);
+    expect(code).not.toMatch(/__nativeAttempt\(\(\) => _callee\(_argument\)/);
+    expect(checked(code).join("\n")).toMatch(/'title' does not exist on type 'Promise/);
+  });
+
+  it("keeps a dropped promise a promise, as `void` does (D-124)", () => {
+    for (const drop of ["load(99);", "void load(99);"]) {
+      const code = lower(`${start}
+export function View() {
+  const [n] = createSignal(1);
+  const title = createMemo(async () => {
+    ${drop}
+    return (await load(n())).title;
+  });
+  return <p>{title()}</p>;
+}`);
+      expect(code).toContain(drop);
+      expect(code).not.toMatch(/__nativeAttempt\(\(\) => load\(99\)/);
+      expect(checked(code)).toEqual([]);
+    }
   });
 
   it("awaits a kept promise where the code awaits it", () => {

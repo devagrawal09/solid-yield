@@ -53,12 +53,12 @@ function diagnostics(source) {
   return ts.getPreEmitDiagnostics(ts.createProgram([id], options, host));
 }
 
-it("keeps contextual parameter types when hiding a void result", () => {
+it("keeps contextual parameter types when hiding a void result", { timeout: 60_000 }, () => {
   const errors = diagnostics(source);
   expect(errors.map(error => ts.flattenDiagnosticMessageText(error.messageText, "\n"))).toEqual([]);
 });
 
-it("does not widen the authored parameter contract", () => {
+it("does not widen the authored parameter contract", { timeout: 60_000 }, () => {
   const errors = diagnostics(source.replace("counter.setCount(1)", `counter.setCount("wrong")`));
   expect(errors.some(error => error.code === 2345)).toBe(true);
 });

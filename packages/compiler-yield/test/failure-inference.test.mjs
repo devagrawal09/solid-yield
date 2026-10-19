@@ -302,3 +302,20 @@ export function App() {
   assert.deepEqual(summary(report, "go"), ["unknown"]);
   assert.deepEqual(summary(report, "go2"), ["unknown"]);
 });
+
+test("a spread argument unpairs the callbacks after it", () => {
+  const report = infer({
+    "spread.ts": `class Big extends Error {}
+      function helper(first: () => void, second: () => void) { first(); }
+      function paired() { helper(() => {}, () => { throw new Big(); }); }
+      function spreadFirst(fs: (() => void)[]) { helper(...fs, () => { throw new Big(); }); }
+      function spreadLast(fs: (() => void)[]) { helper(() => { throw new Big(); }, ...fs); }`
+  });
+  const big = report.classes.find(c => c.name === "Big").id;
+  // paired by position: the throwing callback is \`second\`, which the helper never calls
+  assert.deepEqual(summary(report, "paired"), []);
+  // after a spread its position is unknown: it may be \`first\`, so its failure stays
+  assert.deepEqual(summary(report, "spreadFirst").sort(), [big, "unknown"].sort());
+  // before the spread it keeps its position
+  assert.deepEqual(summary(report, "spreadLast").sort(), [big]);
+});

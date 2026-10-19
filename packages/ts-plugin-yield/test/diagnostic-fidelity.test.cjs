@@ -78,8 +78,9 @@ test("a refused native file retains authored Promise errors alongside its safety
 import {createSignal} from "solid-js";
 export function App(){
   const [n,setN]=createSignal(0);
+  const save=async()=>{setN(1);await Promise.resolve();return fetch("/x");};
   return <button onClick={async()=>{
-    try {const r=fetch("/x");setN(r.status);}
+    try {const r=save();setN(r.status);}
     catch(e){/* @yield-absorb: logged */console.error(e);}
   }}>{n()}</button>;
 }`;

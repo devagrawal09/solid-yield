@@ -319,9 +319,7 @@ export function lowerNativeEffects(files, report) {
         const fn = q.getFunctionParent();
         if (
           fn &&
-          ((asyncRoutines.has(`${file}:${fn.node.start}`) &&
-            !q.parentPath?.isAwaitExpression() &&
-            !q.parentPath?.isExpressionStatement()) ||
+          ((asyncRoutines.has(`${file}:${fn.node.start}`) && !q.parentPath?.isAwaitExpression()) ||
             (invokedCallbacks.has(`${file}:${fn.node.start}`) &&
               (q.parentPath?.isReturnStatement() ||
                 (fn.isArrowFunctionExpression() && fn.node.body === q.node))))
@@ -420,69 +418,27 @@ export function lowerNativeEffects(files, report) {
       !!fn &&
       invokedCallbacks.has(`${file}:${fn.node.start}`) &&
       !routines.has(`${file}:${fn.node.start}`);
-    /** Every kept promise must reach an await or return through known value
-     * flows. Storing it in an unused alias is as detached as dropping the call.
-     * @param {Path} value @param {Path} owner @param {Set<import('@babel/core').types.Node>} seen
-     * @returns {boolean} */
-    const consumedPromise = (value, owner, seen) => {
-      if (seen.has(value.node) || value.getFunctionParent() !== owner) return false;
-      seen.add(value.node);
-      const parent = value.parentPath;
-      if (!parent) return false;
-      if (
-        (parent.isAwaitExpression() && parent.node.argument === value.node) ||
-        (parent.isReturnStatement() && parent.node.argument === value.node) ||
-        (parent.isArrowFunctionExpression() &&
-          parent.node === owner.node &&
-          parent.node.body === value.node)
+    /** A call whose promise is used as a value: neither awaited, returned
+     * nor dropped (a statement, `void`) where it is made. @param {Path} q */
+    const keptAsValue = q => {
+      let use = q;
+      while (
+        use.parentPath?.isParenthesizedExpression() ||
+        use.parentPath?.isTSAsExpression() ||
+        use.parentPath?.isTSNonNullExpression() ||
+        use.parentPath?.isTSSatisfiesExpression()
       )
-        return true;
-      if (
-        parent.isTSAsExpression() ||
-        parent.isTSNonNullExpression() ||
-        parent.isParenthesizedExpression()
-      )
-        return consumedPromise(parent, owner, seen);
-      if (
-        parent.isVariableDeclarator() &&
-        parent.node.init === value.node &&
-        t.isIdentifier(parent.node.id)
-      ) {
-        const binding = parent.scope.getBinding(parent.node.id.name);
-        return (
-          !!binding?.constant &&
-          binding.referencePaths.length > 0 &&
-          binding.referencePaths.every(ref => consumedPromise(ref, owner, new Set(seen)))
-        );
-      }
-      if (
-        parent.isMemberExpression() &&
-        parent.node.object === value.node &&
-        t.isIdentifier(parent.node.property) &&
-        ["then", "catch", "finally"].includes(parent.node.property.name)
-      ) {
-        const call = parent.parentPath;
-        return (
-          !!call?.isCallExpression() &&
-          call.node.callee === parent.node &&
-          consumedPromise(call, owner, seen)
-        );
-      }
-      const argument = parent.isArrayExpression() ? parent : value;
-      const call = argument.parentPath;
-      if (
-        call?.isCallExpression() &&
-        t.isMemberExpression(call.node.callee) &&
-        t.isIdentifier(call.node.callee.object, { name: "Promise" }) &&
-        !call.scope.getBinding("Promise") &&
-        t.isIdentifier(call.node.callee.property) &&
-        ["all", "allSettled", "race", "any", "resolve"].includes(call.node.callee.property.name) &&
-        call.node.arguments[0] === argument.node
-      )
-        return consumedPromise(call, owner, seen);
-      return false;
+        use = use.parentPath;
+      const parent = use.parentPath;
+      return (
+        !!parent &&
+        !parent.isAwaitExpression() &&
+        !parent.isExpressionStatement() &&
+        !parent.isUnaryExpression({ operator: "void" }) &&
+        !parent.isReturnStatement() &&
+        !(parent.isArrowFunctionExpression() && parent.node.body === use.node)
+      );
     };
-
     // Async reactive helpers run on their caller's host. Await becomes an
     // attempt at its original position; setup cannot admit that read/wait.
     traverseOwned(p, {
@@ -494,39 +450,26 @@ export function lowerNativeEffects(files, report) {
         const api = callee.isIdentifier()
           ? imported(callee.scope.getBinding(callee.node.name)?.path)
           : null;
+        // Plain Solid may keep or drop any promise, and a plain callee's
+        // (an async function's, the platform's, a callback's) stays one: the
+        // call is lowered as written, dropped or held. An async reactive
+        // helper is run where it is called (`yield* save(1)`, in a sync
+        // event as in an async one), so what the lowering holds is its
+        // result, not a promise: kept as a value (a local, an argument, a
+        // receiver), it would be read as one where the code is checked.
         if (
           owner &&
-          asyncRoutines.has(`${file}:${owner.node.start}`) &&
+          routines.has(`${file}:${owner.node.start}`) &&
           info?.promise &&
-          q.parentPath?.isVariableDeclarator() &&
-          // Async producer completion creates its own local and immediately
-          // returns Promise.resolve(local). It is not an authored kept value.
-          q.parentPath.node.start != null &&
-          !consumedPromise(q, owner, new Set())
+          info.target &&
+          asyncRoutines.has(info.target) &&
+          keptAsValue(q)
         )
           throw nativeRefusal(
             file,
             q.node,
             "NATIVE_DETACHED_PROMISE",
-            "This kept promise has an unused or unknown use. Await or return it, or move detached work outside this reactive helper."
-          );
-        if (
-          owner &&
-          asyncRoutines.has(`${file}:${owner.node.start}`) &&
-          info?.promise &&
-          q.parentPath?.isExpressionStatement() &&
-          !(api?.source === "solid-js" && api.name === "refresh") &&
-          !(
-            t.isMemberExpression(q.node.callee) &&
-            t.isIdentifier(q.node.callee.property) &&
-            ["then", "catch", "finally"].includes(q.node.callee.property.name)
-          )
-        )
-          throw nativeRefusal(
-            file,
-            q.node,
-            "NATIVE_DETACHED_PROMISE",
-            "This promise is not awaited or returned. Await it, return it, or handle it outside this reactive helper."
+            "This async reactive helper runs where it is called, so its promise cannot be kept as a value. Await it or return it here, or drop the call."
           );
         if (
           info?.target &&

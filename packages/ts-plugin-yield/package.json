@@ -1,7 +1,7 @@
 {
   "name": "ts-plugin-solid-yield",
   "version": "0.0.0",
-  "description": "TypeScript virtual-code typing for solid-yield sugar and native mode",
+  "description": "TypeScript virtual-code typing for solid-yield native mode",
   "type": "commonjs",
   "main": "./src/plugin.cjs",
   "bin": {

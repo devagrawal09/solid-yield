@@ -223,6 +223,42 @@ describe("method-shaped native context contracts", { timeout: 60_000 }, () => {
       );
     }
   });
+  it.each([
+    ["a method signature", "inc(): void"],
+    ["a function property", "inc: () => void"]
+  ])("provides a literal with a getter and a method beside %s", (_, contract) => {
+    const source = `import {createContext, createSignal, useContext} from "solid-js";
+      const Ctx = createContext<{ count: number; ${contract} }>();
+      function Child() { const c = useContext(Ctx)!; return <button onClick={() => c.inc()}>{c.count}</button>; }
+      export function App() { const [count, setCount] = createSignal(0);
+        return <Ctx value={{ get count() { return count(); }, inc() { setCount(count() + 1); } }}><Child/></Ctx>; }`;
+    const result = check({ "provider-method.tsx": source });
+    expect(result.diagnostics, result.diagnostics.join("\n")).toEqual([]);
+    expect([...result.lowered.values()].join("\n")).toMatch(/\*inc\(\) \{/);
+  });
+  it("keeps a method signature's parameters bivariant, as TypeScript checks a method", () => {
+    const source = `import {createContext, useContext} from "solid-js";
+      interface Animal { name: string } interface Dog extends Animal { bark(): void }
+      interface Ctx { pick(a: Animal): void }
+      const C = createContext<Ctx>();
+      const dogPicker = { pick(d: Dog) { d.bark(); } };
+      function Child() { const c = useContext(C)!; return <button onClick={() => c.pick({ name: "x" })}>go</button>; }
+      export function App() { return <C value={dogPicker}><Child/></C>; }`;
+    // The provider type-checks as plain TypeScript checks it (the plain
+    // callback's unknown failures are reported at the handler as before).
+    const result = check({ "method-bivariance.tsx": source });
+    expect(result.typeDiagnostics.join("\n")).not.toMatch(
+      /'bark' is missing|not assignable to type 'Ctx'/
+    );
+    // A function-typed property refuses it under strictFunctionTypes, as TypeScript does.
+    const property = check({
+      "property-contravariance.tsx": source.replace(
+        "pick(a: Animal): void",
+        "pick: (a: Animal) => void"
+      )
+    });
+    expect(property.typeDiagnostics.join("\n")).toMatch(/'bark' is missing/);
+  });
   it.each(["object", "class"])("keeps plain %s source getters supported", kind => {
     const receiver =
       kind === "object"

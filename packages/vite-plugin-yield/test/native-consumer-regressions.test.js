@@ -148,24 +148,103 @@ describe("native consumer regressions", { timeout: 30_000 }, () => {
           return <form onSubmit={() => { mutate(() => busy()); }}/>; }`)
     ).toThrow(/SUGAR_(CALLBACK|ESCAPE)/);
   });
+  // D-124: plain Solid may keep or drop a promise; a plain callee's stays one.
   it.each([
     "run();",
+    "void run();",
     "const pending = run();",
     "const pending = run(); const alias = pending;",
-    "const pending = run(); void pending;",
-    "const pending = Promise.reject(new Error());",
-    "const pending = new Promise<boolean>((resolve, reject) => reject(new Error()));"
-  ])("refuses a detached callback promise rather than making it an await: %s", dropped => {
-    expect(() =>
-      lower(`import { createSignal } from "solid-js";
+    "const pending = run(); void pending;"
+  ])("keeps a dropped or held callback promise a promise, as written: %s", dropped => {
+    const code = lower(`import { createSignal } from "solid-js";
       export function Form() { const [busy, setBusy] = createSignal(false);
         const mutate = async (run: () => Promise<boolean>) => {
           ${dropped} setBusy(false); return true;
         };
         return <form onSubmit={async () => { await mutate(() => Promise.resolve(true)); }}/>;
+      }`);
+    // Nothing awaits the dropped promise: no attempt of a `run()` whose value is waited for.
+    expect(code).not.toMatch(/yield\* __nativeAttempt\(\(\) => run\(\)/);
+    expect(code).not.toMatch(
+      /yield\* __nativeAttempt\(\(\) => (?:pending|Promise\.reject|new Promise)/
+    );
+    expect(checked(code)).toEqual([]);
+  });
+  it.each([
+    "const pending = Promise.reject(new Error());",
+    "const pending = new Promise<boolean>((resolve, reject) => reject(new Error()));",
+    "Promise.reject(new Error());"
+  ])("keeps a held or dropped platform promise a promise, as written: %s", dropped => {
+    const code = lower(`import { createSignal } from "solid-js";
+      export function Form() { const [busy, setBusy] = createSignal(false);
+        return <form onSubmit={async () => { ${dropped} setBusy(false); }}/>;
+      }`);
+    expect(code).not.toMatch(/__nativeAttempt\(\(\) => (?:pending|Promise\.reject|new Promise)/);
+    expect(checked(code)).toEqual([]);
+  });
+  // An async reactive helper runs where it is called (`yield* save(1)`): its
+  // promise cannot be a value the code goes on to use.
+  it.each([
+    [
+      "a local awaited later",
+      "const p = save(1); const q = save(2); return (await p) + (await q);"
+    ],
+    ["an argument", "track(save(1)); return 0;"],
+    ["a receiver", "return save(1).then(n => n);"],
+    ["a sync event's local", "const p = save(1); track(p);", false]
+  ])("refuses an async helper's promise kept as a value: %s", (_, body, async = true) => {
+    expect(() =>
+      lower(`import { createSignal } from "solid-js";
+      declare function track(p: Promise<unknown>): void;
+      export function Form() { const [busy, setBusy] = createSignal(false);
+        const save = async (n: number) => { setBusy(true); await Promise.resolve(n); setBusy(false); return n; };
+        return <form onSubmit={${async ? "async " : ""}() => { ${body} }}/>;
       }`)
     ).toThrow(/NATIVE_DETACHED_PROMISE/);
   });
+  it.each([
+    ["dropped", "save(1); setBusy(true);"],
+    ["voided", "void save(1); setBusy(true);"],
+    ["awaited", "await save(1); setBusy(true);"],
+    ["returned", "return save(1);"]
+  ])("runs an async helper where it is called when its promise is %s", (_, body) => {
+    const code = lower(`import { createSignal } from "solid-js";
+      export function Form() { const [busy, setBusy] = createSignal(false);
+        const save = async (n: number) => { setBusy(true); await Promise.resolve(n); setBusy(false); return n; };
+        return <form onSubmit={async () => { ${body} }}/>;
+      }`);
+    expect(code).toMatch(/yield\* save\(1\)/);
+    expect(checked(code)).toEqual([]);
+  });
+  // A member called on a local literal bag has the literal's implementation
+  // only while nothing can change the bag: a write to a member or an escape
+  // leaves its failures unknown.
+  it.each([
+    ["kept as made", "", /RangeError/, /unknown/],
+    [
+      "a member written",
+      'api.save = () => { throw new TypeError("y"); };',
+      /unknown/,
+      /RangeError/
+    ],
+    ["escaped", "register(api);", /unknown/, /RangeError/]
+  ])(
+    "a local bag's member call fails as its literal says only while the bag is %s",
+    (_, use, expected, absent) => {
+      const source = `import { createSignal } from "solid-js";
+      import { render } from "@solidjs/web";
+      declare function register(x: unknown): void;
+      export function App() { const [n, setN] = createSignal(1);
+        const api = { save() { setN(2); throw new RangeError("x"); } };
+        ${use}
+        return <button onClick={() => api.save()}>{n()}</button>; }
+      render(() => <App/>, document.body);`;
+      const result = lowerNativeProject(new Map([[id, source]]));
+      const rejects = result.inference.diagnostics.filter(d => d.code === "EVENT_REJECTS");
+      expect(rejects.map(d => d.message).join("\n")).toMatch(expected);
+      expect(rejects.map(d => d.message).join("\n")).not.toMatch(absent);
+    }
+  );
   it.each([false, true])(
     "only admits a typed local provider bag with no foreign use (foreign=%s)",
     foreign => {

@@ -437,7 +437,7 @@ function buildSteps(twins) {
     ...pnpmRun("examples/originals/docs", "typecheck")
   });
 
-  // D-116: plain-Solid originals are first-class inputs for native sugar.
+  // D-116: plain-Solid originals are first-class inputs for native mode.
   // Dashboard has a 30-step original self-check and its own SSR/hydrate cases;
   // it does not need a hand-written yield twin to enter the gate.
   for (const script of ["test", "typecheck", "ssr-smoke", "hydrate-smoke"]) {

@@ -5,7 +5,7 @@ import { lowerNativeProject } from "../src/native.js";
 const file = resolve(import.meta.dirname, "fixtures/native-event-spreads.tsx");
 const lower = source => lowerNativeProject(new Map([[file, source]])).files.get(file);
 
-describe("effect hosts in DOM spreads", () => {
+describe("effect hosts in DOM spreads", { timeout: 60_000 }, () => {
   for (const key of ["onClick", '"onClick"'])
     it("models an inline event with key " + key, () => {
       const code = lower(

@@ -429,9 +429,38 @@ export function inferFailures(
     while (body && ts.isParenthesizedExpression(body)) body = body.expression;
     return body && byBody.get(`${declaration.getSourceFile().fileName}:${body.getStart()}`);
   };
+  /** `api.save()` on a bag held in a local `const api = { … }`: its member's
+   * implementation is what the literal says only while every use of the bag
+   * keeps it as it was made (no write to a member, no escape to code that
+   * could), which `localMemberTarget` proves. @param {Path} p */
+  const literalBag = p => {
+    let member = p.isCallExpression() ? p.get("callee") : p;
+    while (
+      member.isTSAsExpression() ||
+      member.isTSNonNullExpression() ||
+      member.isTSSatisfiesExpression() ||
+      member.isParenthesizedExpression()
+    )
+      member = member.get("expression");
+    if (!member.isMemberExpression()) return false;
+    const object = member.get("object");
+    if (!object.isIdentifier()) return false;
+    const binding = object.scope.getBinding(object.node.name);
+    if (!binding?.constant || !binding.path.isVariableDeclarator()) return false;
+    let init = binding.path.get("init");
+    while (
+      init.isTSAsExpression() ||
+      init.isTSNonNullExpression() ||
+      init.isTSSatisfiesExpression() ||
+      init.isParenthesizedExpression()
+    )
+      init = init.get("expression");
+    return init.isObjectExpression();
+  };
   const target = p => {
     const node = nodeFor(p);
     if (!node) return null;
+    if (literalBag(p)) return localMemberTarget(p);
     if (ts.isCallExpression(node) || ts.isNewExpression(node)) {
       const direct = functionFor(checker.getResolvedSignature(node)?.declaration);
       if (direct) return direct;
@@ -1539,7 +1568,11 @@ export function inferFailures(
     const bindings = new Map();
     if (!fn || !site?.isCallExpression() || opaque(fn.path)) return bindings;
     const args = site.get("arguments");
+    // A spread argument (`helper(...fs, () => …)`) shifts every later
+    // position by an unknown count: the callbacks after it are not paired.
+    const spreadAt = args.findIndex(arg => arg.isSpreadElement());
     for (const [index, param] of fn.path.get("params").entries()) {
+      if (spreadAt !== -1 && index >= spreadAt) break;
       const arg = args[index];
       if (!param.isIdentifier() || !arg?.isFunction()) continue;
       const binding = fn.path.scope.getBinding(param.node.name);

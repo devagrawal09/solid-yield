@@ -32,6 +32,10 @@ import { lowerNativeEffects } from "./native-effects.js";
 import { lowerDrivenSagas } from "./native-sagas.js";
 import { lowerNativeRecursion } from "./native-recursion.js";
 const t = babel.types;
+/** A props key for a JSX attribute's name: `data-value` is not an identifier.
+ * @param {string} name */
+const propertyKey = name =>
+  t.isValidIdentifier(name) ? t.identifier(name) : t.stringLiteral(name);
 /** @typedef {import('@babel/core').NodePath<any>} Path */
 /** @typedef {{code:string,message:string,file:string,line:number,column:number,severity?:"error"|"warning"}} Diagnostic */
 /** @type {Readonly<Record<string,string|null>>} */
@@ -295,10 +299,21 @@ function nativeContextMethods(files, program) {
         TSMethodSignature(path) {
           if (!starts.has(path.node.start ?? -1)) return;
           const method = path.node;
-          const signature = t.tsFunctionType(
+          // A method signature's parameters are bivariant under
+          // strictFunctionTypes; a function-typed property's are not. The
+          // property keeps the method's checking through the usual
+          // `{ m(…): R }["m"]` form, so a plain Solid program's provider
+          // still type-checks as plain Solid checks it.
+          const hack = t.tsMethodSignature(
+            t.identifier("bivarianceHack"),
             method.typeParameters,
             method.parameters,
             method.typeAnnotation
+          );
+          hack.kind = "method";
+          const signature = t.tsIndexedAccessType(
+            t.tsTypeLiteral([hack]),
+            t.tsLiteralType(t.stringLiteral("bivarianceHack"))
           );
           const property = t.tsPropertySignature(method.key, t.tsTypeAnnotation(signature));
           property.optional = method.optional;
@@ -1249,7 +1264,7 @@ function surface(
                 const value = t.isStringLiteral(attribute.value)
                   ? attribute.value
                   : attribute.value.expression;
-                return t.objectProperty(t.identifier(attribute.name.name), value);
+                return t.objectProperty(propertyKey(attribute.name.name), value);
               })
             );
             // Bound first, so the root is checked as a bare one is: RootCheck
@@ -1933,7 +1948,7 @@ function surface(
             value = t.arrowFunctionExpression([], value);
           props.push(
             copyPosition(
-              t.objectProperty(copyPosition(t.identifier(attr.name.name), attr.name), value),
+              t.objectProperty(copyPosition(propertyKey(attr.name.name), attr.name), value),
               attr
             )
           );

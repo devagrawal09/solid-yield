@@ -267,6 +267,32 @@ export function App() { const [n] = createSignal(1); return <Body {...{ get "dat
     expect(checked(code)).toEqual([]);
   });
 
+  it.each([
+    ["reactive", "data-value={n()}", "__NativeSource<"],
+    ["constant", "data-value={2}", '"data-value": 2']
+  ])("keys a hyphenated attribute as a string on a component: %s", (_, attribute, expected) => {
+    const { code } = lower(`${head}
+function Body(props: { "data-value": number; "aria-label": string }) { return <p>{props["data-value"]}</p>; }
+export function App() { const [n] = createSignal(1); return <Body ${attribute} aria-label="n" />; }`);
+    expect(code).toContain(expected);
+    expect(code).toContain('"aria-label": "n"');
+    expect(checked(code)).toEqual([]);
+  });
+
+  it.each([
+    "cond ? { get value() { return n(); } } : {}",
+    "cond ? { get value() { return n(); } } : { value: 3 }",
+    "cond ? { value: n } : {}"
+  ])("widens a prop a conditional spread may pass: %s", object => {
+    const { code } = lower(`${head}
+function Body(props: { value?: number }) { return <p>{props.value}</p>; }
+export function App() { const [n] = createSignal(1); const cond = Math.random() > 0.5;
+  const o = ${object};
+  return <Body {...o} />; }`);
+    expect(code).toContain("__NativeSource<");
+    expect(checked(code)).toEqual([]);
+  });
+
   it("keeps pending and failing getter spreads visible to boundaries and roots", () => {
     const child = "<Body {...{ get item() { return item(); } }} />";
     const source = `${head}

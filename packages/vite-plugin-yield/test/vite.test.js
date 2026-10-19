@@ -21,8 +21,9 @@ describe("solidYield()", () => {
     expect(plugin.name).toBe("vite-plugin-solid-yield");
   });
 
-  it("ignores legacy directives and retains explicit JSX generators in every mode", () => {
-    const code = `"use yield";
+  it("warns at a legacy directive, ships the file as written, and retains explicit JSX generators in every mode", () => {
+    const code = `// a comment first
+"use yield";
 import { $signal } from "solid-yield";
 export function Counter() { const [n] = $signal(0); return <p>{n()}</p>; }`;
     for (const options of [
@@ -31,9 +32,20 @@ export function Counter() { const [n] = $signal(0); return <p>{n()}</p>; }`;
       { mode: "native", include: () => false, emit: "lowered" }
     ]) {
       const plugin = solidYield(options);
+      const warnings = [];
+      const context = { warn: warning => warnings.push(warning) };
+      expect(plugin.transform.call(context, code, "/src/legacy.tsx")).toBeNull();
+      expect(warnings.map(w => w.message)).toEqual([
+        expect.stringMatching(/^\[LEGACY_DIRECTIVE\] "use yield" selects nothing/)
+      ]);
+      expect(warnings[0].id).toBe("/src/legacy.tsx");
+      // Vite's own rollup context is not required (the plugin is called bare in tests).
       expect(plugin.transform.call({}, code, "/src/legacy.tsx")).toBeNull();
       const explicit = "function* View() { return <p>{yield* x}</p>; }";
-      expect(plugin.transform.call({}, explicit, "/src/view.tsx").code).toContain("_$perform(x)");
+      expect(plugin.transform.call(context, explicit, "/src/view.tsx").code).toContain(
+        "_$perform(x)"
+      );
+      expect(warnings).toHaveLength(1);
     }
   });
 

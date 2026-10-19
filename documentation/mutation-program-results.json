@@ -1,8 +1,8 @@
 {
-  "startedAt": "2026-10-17T09:11:22.160Z",
-  "finishedAt": "2026-10-17T09:18:18.415Z",
-  "durationMs": 416255,
-  "digest": "a59a906ef884af23496cae572ba3819341fceb35eac9e8426fc48bb7c4979466",
+  "startedAt": "2026-10-19T09:41:28.201Z",
+  "finishedAt": "2026-10-19T10:19:06.228Z",
+  "durationMs": 2258027,
+  "digest": "f2a539b4a5f78eb9d02d6d550064ec0bcd7492dda354e5da0be52d10a50660a5",
   "projects": [
     {
       "id": "sierpinski",
@@ -15892,66 +15892,14 @@
       "file": "App.tsx",
       "original": "import { createSignal, createMemo, createEffect, createContext, useContext, Loading, Errored } from 'solid-js';\nimport { render } from '@solidjs/web';\nimport { readServer } from './server';\nconst Identity = createContext<number>();\nclass Problem extends Error {}\nfunction fail() { throw new Problem('failure'); }\nfunction Child(props: { value: number }) {\n  const identity = useContext(Identity);\n  return <p>{props.value}{identity}</p>;\n}\nfunction App() {\n  const [count, setCount] = createSignal(1);\n  const value = createMemo(async () => {\n    try { return await readServer(); } catch (e) { throw e; }\n  });\n  const twice = createMemo(() => count() * 2);\n  createEffect(() => count(), n => { setCount(n); });\n  setTimeout(() => setCount(2), 1);\n  const save = async () => {\n    await Promise.resolve();\n    setCount(count() + 1);\n  };\n  return <Identity value={1}><Errored fallback={() => <p>failed</p>}><Loading fallback=\"wait\">\n    <button onClick={async () => { await save(); }}>{twice()}</button>\n    <button onClick={() => { try { fail(); } catch (e) { /* @yield-absorb: logged */ console.error(e); } }}>Fail</button>\n    <Child value={count()} /><p>{value()}</p>\n  </Loading></Errored></Identity>;\n}\nrender(() => <App />, document.body);\n",
       "result": {
-        "diagnostics": [
-          {
-            "stage": "transform",
-            "file": "App.tsx",
-            "line": 20,
-            "code": "NATIVE_DETACHED_PROMISE",
-            "message": "[NATIVE_DETACHED_PROMISE] This promise is not awaited or returned. Await it, return it, or handle it outside this reactive helper. (<job>/source/App.tsx:20:5)"
-          },
-          {
-            "stage": "cli",
-            "file": "App.tsx",
-            "line": 20,
-            "severity": "error",
-            "code": "NATIVE_DETACHED_PROMISE",
-            "tsCode": "TS95000",
-            "message": "[NATIVE_DETACHED_PROMISE] This promise is not awaited or returned. Await it, return it, or handle it outside this reactive helper."
-          },
-          {
-            "stage": "cli",
-            "file": "App.tsx",
-            "line": 25,
-            "severity": "error",
-            "code": "UNBOUND_EVENT",
-            "tsCode": "TS2322",
-            "message": "Type '() => void' is not assignable to type 'EventHandlerUnion<HTMLButtonElement, MouseEvent, EventHandler<HTMLButtonElement, MouseEvent>> | undefined'.\n  Type '() => void' is not assignable to type 'Bound<EventHandler<HTMLButtonElement, MouseEvent>>'.\n    Type '() => void' is not assignable to type '{ readonly \"[UNBOUND_EVENT] bind the event in the view: onClick={yield* handler}\": never; }'.",
-            "related": [
-              {
-                "file": "../../../../../../packages/yield/jsx/jsx.d.ts",
-                "line": 768
-              }
-            ]
-          },
-          {
-            "stage": "cli",
-            "file": "App.tsx",
-            "line": 24,
-            "severity": "error",
-            "code": "UNBOUND_EVENT",
-            "tsCode": "TS2322",
-            "message": "Type '() => Promise<void>' is not assignable to type 'EventHandlerUnion<HTMLButtonElement, MouseEvent, EventHandler<HTMLButtonElement, MouseEvent>> | undefined'.\n  Type '() => Promise<void>' is not assignable to type 'Bound<EventHandler<HTMLButtonElement, MouseEvent>>'.\n    Type '() => Promise<void>' is not assignable to type '{ readonly \"[UNBOUND_EVENT] bind the event in the view: onClick={yield* handler}\": never; }'.",
-            "related": [
-              {
-                "file": "../../../../../../packages/yield/jsx/jsx.d.ts",
-                "line": 768
-              }
-            ]
-          }
-        ],
+        "diagnostics": [],
         "stages": {
-          "transform": "refused",
-          "cli": "diagnostics",
-          "lint": "blocked-by-transform"
+          "transform": "completed",
+          "cli": "passed",
+          "lint": "passed"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:20:5 error TS95000: [NATIVE_DETACHED_PROMISE] This promise is not awaited or returned. Await it, return it, or handle it outside this reactive helper.",
-          "<job>/source/App.tsx:25:13 error TS2322: Type '() => void' is not assignable to type 'EventHandlerUnion<HTMLButtonElement, MouseEvent, EventHandler<HTMLButtonElement, MouseEvent>> | undefined'.\n  Type '() => void' is not assignable to type 'Bound<EventHandler<HTMLButtonElement, MouseEvent>>'.\n    Type '() => void' is not assignable to type '{ readonly \"[UNBOUND_EVENT] bind the event in the view: onClick={yield* handler}\": never; }'.",
-          "  related: <root>/packages/yield/jsx/jsx.d.ts:768:5: The expected type comes from property 'onClick' which is declared here on type 'ButtonHTMLAttributes<HTMLButtonElement> & Properties<HTMLButtonElement>'",
-          "<job>/source/App.tsx:24:13 error TS2322: Type '() => Promise<void>' is not assignable to type 'EventHandlerUnion<HTMLButtonElement, MouseEvent, EventHandler<HTMLButtonElement, MouseEvent>> | undefined'.\n  Type '() => Promise<void>' is not assignable to type 'Bound<EventHandler<HTMLButtonElement, MouseEvent>>'.\n    Type '() => Promise<void>' is not assignable to type '{ readonly \"[UNBOUND_EVENT] bind the event in the view: onClick={yield* handler}\": never; }'.",
-          "  related: <root>/packages/yield/jsx/jsx.d.ts:768:5: The expected type comes from property 'onClick' which is declared here on type 'ButtonHTMLAttributes<HTMLButtonElement> & Properties<HTMLButtonElement>'",
-          "solid-yield check: 2 files, 3 errors"
+          "solid-yield check: 2 files, 0 errors"
         ]
       },
       "preExistingMatch": false,
@@ -16154,66 +16102,14 @@
       "file": "App.tsx",
       "original": "import { createSignal, createMemo, createEffect, createContext, useContext, Loading, Errored } from 'solid-js';\nimport { render } from '@solidjs/web';\nimport { readServer } from './server';\nconst Identity = createContext<number>();\nclass Problem extends Error {}\nfunction fail() { throw new Problem('failure'); }\nfunction Child(props: { value: number }) {\n  const identity = useContext(Identity);\n  return <p>{props.value}{identity}</p>;\n}\nfunction App() {\n  const [count, setCount] = createSignal(1);\n  const value = createMemo(async () => {\n    try { return await readServer(); } catch (e) { throw e; }\n  });\n  const twice = createMemo(() => count() * 2);\n  createEffect(() => count(), n => { setCount(n); });\n  setTimeout(() => setCount(2), 1);\n  const save = async () => {\n    await Promise.resolve();\n    setCount(count() + 1);\n  };\n  return <Identity value={1}><Errored fallback={() => <p>failed</p>}><Loading fallback=\"wait\">\n    <button onClick={async () => { await save(); }}>{twice()}</button>\n    <button onClick={() => { try { fail(); } catch (e) { /* @yield-absorb: logged */ console.error(e); } }}>Fail</button>\n    <Child value={count()} /><p>{value()}</p>\n  </Loading></Errored></Identity>;\n}\nrender(() => <App />, document.body);\n",
       "result": {
-        "diagnostics": [
-          {
-            "stage": "transform",
-            "file": "App.tsx",
-            "line": 24,
-            "code": "NATIVE_DETACHED_PROMISE",
-            "message": "[NATIVE_DETACHED_PROMISE] This promise is not awaited or returned. Await it, return it, or handle it outside this reactive helper. (<job>/source/App.tsx:24:36)"
-          },
-          {
-            "stage": "cli",
-            "file": "App.tsx",
-            "line": 24,
-            "severity": "error",
-            "code": "NATIVE_DETACHED_PROMISE",
-            "tsCode": "TS95000",
-            "message": "[NATIVE_DETACHED_PROMISE] This promise is not awaited or returned. Await it, return it, or handle it outside this reactive helper."
-          },
-          {
-            "stage": "cli",
-            "file": "App.tsx",
-            "line": 25,
-            "severity": "error",
-            "code": "UNBOUND_EVENT",
-            "tsCode": "TS2322",
-            "message": "Type '() => void' is not assignable to type 'EventHandlerUnion<HTMLButtonElement, MouseEvent, EventHandler<HTMLButtonElement, MouseEvent>> | undefined'.\n  Type '() => void' is not assignable to type 'Bound<EventHandler<HTMLButtonElement, MouseEvent>>'.\n    Type '() => void' is not assignable to type '{ readonly \"[UNBOUND_EVENT] bind the event in the view: onClick={yield* handler}\": never; }'.",
-            "related": [
-              {
-                "file": "../../../../../../packages/yield/jsx/jsx.d.ts",
-                "line": 768
-              }
-            ]
-          },
-          {
-            "stage": "cli",
-            "file": "App.tsx",
-            "line": 24,
-            "severity": "error",
-            "code": "UNBOUND_EVENT",
-            "tsCode": "TS2322",
-            "message": "Type '() => Promise<void>' is not assignable to type 'EventHandlerUnion<HTMLButtonElement, MouseEvent, EventHandler<HTMLButtonElement, MouseEvent>> | undefined'.\n  Type '() => Promise<void>' is not assignable to type 'Bound<EventHandler<HTMLButtonElement, MouseEvent>>'.\n    Type '() => Promise<void>' is not assignable to type '{ readonly \"[UNBOUND_EVENT] bind the event in the view: onClick={yield* handler}\": never; }'.",
-            "related": [
-              {
-                "file": "../../../../../../packages/yield/jsx/jsx.d.ts",
-                "line": 768
-              }
-            ]
-          }
-        ],
+        "diagnostics": [],
         "stages": {
-          "transform": "refused",
-          "cli": "diagnostics",
-          "lint": "blocked-by-transform"
+          "transform": "completed",
+          "cli": "passed",
+          "lint": "passed"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:24:36 error TS95000: [NATIVE_DETACHED_PROMISE] This promise is not awaited or returned. Await it, return it, or handle it outside this reactive helper.",
-          "<job>/source/App.tsx:25:13 error TS2322: Type '() => void' is not assignable to type 'EventHandlerUnion<HTMLButtonElement, MouseEvent, EventHandler<HTMLButtonElement, MouseEvent>> | undefined'.\n  Type '() => void' is not assignable to type 'Bound<EventHandler<HTMLButtonElement, MouseEvent>>'.\n    Type '() => void' is not assignable to type '{ readonly \"[UNBOUND_EVENT] bind the event in the view: onClick={yield* handler}\": never; }'.",
-          "  related: <root>/packages/yield/jsx/jsx.d.ts:768:5: The expected type comes from property 'onClick' which is declared here on type 'ButtonHTMLAttributes<HTMLButtonElement> & Properties<HTMLButtonElement>'",
-          "<job>/source/App.tsx:24:13 error TS2322: Type '() => Promise<void>' is not assignable to type 'EventHandlerUnion<HTMLButtonElement, MouseEvent, EventHandler<HTMLButtonElement, MouseEvent>> | undefined'.\n  Type '() => Promise<void>' is not assignable to type 'Bound<EventHandler<HTMLButtonElement, MouseEvent>>'.\n    Type '() => Promise<void>' is not assignable to type '{ readonly \"[UNBOUND_EVENT] bind the event in the view: onClick={yield* handler}\": never; }'.",
-          "  related: <root>/packages/yield/jsx/jsx.d.ts:768:5: The expected type comes from property 'onClick' which is declared here on type 'ButtonHTMLAttributes<HTMLButtonElement> & Properties<HTMLButtonElement>'",
-          "solid-yield check: 2 files, 3 errors"
+          "solid-yield check: 2 files, 0 errors"
         ]
       },
       "preExistingMatch": false,
@@ -19050,64 +18946,6 @@
       "result": {
         "diagnostics": [
           {
-            "stage": "transform",
-            "file": "Feed.tsx",
-            "line": 34,
-            "code": "NATIVE_DETACHED_PROMISE",
-            "message": "[NATIVE_DETACHED_PROMISE] This kept promise has an unused or unknown use. Await or return it, or move detached work outside this reactive helper. (<job>/source/Feed.tsx:34:20)"
-          },
-          {
-            "stage": "cli",
-            "file": "App.tsx",
-            "line": 17,
-            "severity": "warning",
-            "code": "NATIVE_FOREIGN_BOUNDARY",
-            "tsCode": "TS95001",
-            "message": "[NATIVE_FOREIGN_BOUNDARY] Handle failures inside Feed or its callbacks; this imported component (lazy from solid-js) is outside the native check."
-          },
-          {
-            "stage": "cli",
-            "file": "App.tsx",
-            "line": 1,
-            "severity": "error",
-            "code": "COMPONENT_TAG",
-            "tsCode": "TS2786",
-            "message": "[generated] [COMPONENT_TAG] call a yield component in a hole: {yield* Comp(props)}"
-          },
-          {
-            "stage": "cli",
-            "file": "App.tsx",
-            "line": 1,
-            "severity": "error",
-            "code": "FOREIGN_HANDOFF",
-            "tsCode": "TS2345",
-            "message": "[generated] [FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: a transport failure (ChunkError)."
-          },
-          {
-            "stage": "cli",
-            "file": "Feed.tsx",
-            "line": 34,
-            "severity": "error",
-            "code": "NATIVE_DETACHED_PROMISE",
-            "tsCode": "TS95000",
-            "message": "[NATIVE_DETACHED_PROMISE] This kept promise has an unused or unknown use. Await or return it, or move detached work outside this reactive helper."
-          },
-          {
-            "stage": "cli",
-            "file": "Feed.tsx",
-            "line": 55,
-            "severity": "error",
-            "code": "UNBOUND_EVENT",
-            "tsCode": "TS2322",
-            "message": "Type '() => number' is not assignable to type 'EventHandlerUnion<HTMLButtonElement, MouseEvent, EventHandler<HTMLButtonElement, MouseEvent>> | undefined'.\n  Type '() => number' is not assignable to type 'Bound<EventHandler<HTMLButtonElement, MouseEvent>>'.\n    Type '() => number' is not assignable to type '{ readonly \"[UNBOUND_EVENT] bind the event in the view: onClick={yield* handler}\": never; }'.",
-            "related": [
-              {
-                "file": "../../../../../../packages/yield/jsx/jsx.d.ts",
-                "line": 768
-              }
-            ]
-          },
-          {
             "stage": "cli",
             "file": "Feed.tsx",
             "line": 36,
@@ -19139,22 +18977,16 @@
           }
         ],
         "stages": {
-          "transform": "refused",
+          "transform": "completed",
           "cli": "diagnostics",
-          "lint": "blocked-by-transform"
+          "lint": "passed"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:17:9 warning TS95001: [NATIVE_FOREIGN_BOUNDARY] Handle failures inside Feed or its callbacks; this imported component (lazy from solid-js) is outside the native check.",
-          "<job>/source/App.tsx:1:1 error TS2786: [generated] [COMPONENT_TAG] call a yield component in a hole: {yield* Comp(props)}",
-          "<job>/source/App.tsx:1:1 error TS2345: [generated] [FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: a transport failure (ChunkError).",
-          "<job>/source/Feed.tsx:34:20 error TS95000: [NATIVE_DETACHED_PROMISE] This kept promise has an unused or unknown use. Await or return it, or move detached work outside this reactive helper.",
-          "<job>/source/Feed.tsx:55:15 error TS2322: Type '() => number' is not assignable to type 'EventHandlerUnion<HTMLButtonElement, MouseEvent, EventHandler<HTMLButtonElement, MouseEvent>> | undefined'.\n  Type '() => number' is not assignable to type 'Bound<EventHandler<HTMLButtonElement, MouseEvent>>'.\n    Type '() => number' is not assignable to type '{ readonly \"[UNBOUND_EVENT] bind the event in the view: onClick={yield* handler}\": never; }'.",
-          "  related: <root>/packages/yield/jsx/jsx.d.ts:768:5: The expected type comes from property 'onClick' which is declared here on type 'ButtonHTMLAttributes<HTMLButtonElement> & Properties<HTMLButtonElement>'",
           "<job>/source/Feed.tsx:36:26 error TS2339: Property 'items' does not exist on type 'Promise<{ title: string; items: Item[]; }>'.",
           "  related: <job>/source/Feed.tsx:36:26: Did you forget to use 'await'?",
           "<job>/source/Feed.tsx:35:26 error TS2339: Property 'title' does not exist on type 'Promise<{ title: string; items: Item[]; }>'.",
           "  related: <job>/source/Feed.tsx:35:26: Did you forget to use 'await'?",
-          "solid-yield check: 5 files, 6 errors"
+          "solid-yield check: 5 files, 2 errors"
         ]
       },
       "preExistingMatch": false,
@@ -46340,20 +46172,13 @@
       "result": {
         "diagnostics": [
           {
-            "stage": "transform",
-            "file": "App.tsx",
-            "line": 15,
-            "code": "NATIVE_DETACHED_PROMISE",
-            "message": "[NATIVE_DETACHED_PROMISE] This kept promise has an unused or unknown use. Await or return it, or move detached work outside this reactive helper. (<job>/source/App.tsx:15:11)"
-          },
-          {
             "stage": "cli",
             "file": "App.tsx",
-            "line": 15,
+            "line": 28,
             "severity": "error",
-            "code": "NATIVE_DETACHED_PROMISE",
-            "tsCode": "TS95000",
-            "message": "[NATIVE_DETACHED_PROMISE] This kept promise has an unused or unknown use. Await or return it, or move detached work outside this reactive helper."
+            "code": "DEPENDENT_TYPE",
+            "tsCode": "TS2345",
+            "message": "[DEPENDENT_TYPE] This component's types could not be inferred, so its render call cannot be checked. Fix the component's errors first."
           },
           {
             "stage": "cli",
@@ -46371,33 +46196,27 @@
             ]
           },
           {
-            "stage": "cli",
+            "stage": "lint",
             "file": "App.tsx",
-            "line": 12,
-            "severity": "error",
-            "code": "UNBOUND_EVENT",
-            "tsCode": "TS2322",
-            "message": "Type '() => Promise<void>' is not assignable to type 'EventHandlerUnion<HTMLButtonElement, MouseEvent, EventHandler<HTMLButtonElement, MouseEvent>> | undefined'.\n  Type '() => Promise<void>' is not assignable to type 'Bound<EventHandler<HTMLButtonElement, MouseEvent>>'.\n    Type '() => Promise<void>' is not assignable to type '{ readonly \"[UNBOUND_EVENT] bind the event in the view: onClick={yield* handler}\": never; }'.",
-            "related": [
-              {
-                "file": "../../../../../../packages/yield/jsx/jsx.d.ts",
-                "line": 768
-              }
-            ]
+            "line": 3,
+            "generatedLine": 51,
+            "generated": true,
+            "severity": "warning",
+            "code": "solid-yield/no-unshown-wait",
+            "ruleId": "solid-yield/no-unshown-wait",
+            "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* () {\n      const see...`, D-075)."
           }
         ],
         "stages": {
-          "transform": "refused",
+          "transform": "completed",
           "cli": "diagnostics",
-          "lint": "blocked-by-transform"
+          "lint": "diagnostics"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:15:11 error TS95000: [NATIVE_DETACHED_PROMISE] This kept promise has an unused or unknown use. Await or return it, or move detached work outside this reactive helper.",
+          "<job>/source/App.tsx:28:8 error TS2345: [DEPENDENT_TYPE] This component's types could not be inferred, so its render call cannot be checked. Fix the component's errors first.",
           "<job>/source/App.tsx:16:19 error TS2339: Property 'text' does not exist on type 'Promise<Response>'.",
           "  related: <job>/source/App.tsx:16:19: Did you forget to use 'await'?",
-          "<job>/source/App.tsx:12:7 error TS2322: Type '() => Promise<void>' is not assignable to type 'EventHandlerUnion<HTMLButtonElement, MouseEvent, EventHandler<HTMLButtonElement, MouseEvent>> | undefined'.\n  Type '() => Promise<void>' is not assignable to type 'Bound<EventHandler<HTMLButtonElement, MouseEvent>>'.\n    Type '() => Promise<void>' is not assignable to type '{ readonly \"[UNBOUND_EVENT] bind the event in the view: onClick={yield* handler}\": never; }'.",
-          "  related: <root>/packages/yield/jsx/jsx.d.ts:768:5: The expected type comes from property 'onClick' which is declared here on type 'ButtonHTMLAttributes<HTMLButtonElement> & Properties<HTMLButtonElement>'",
-          "solid-yield check: 1 files, 3 errors"
+          "solid-yield check: 1 files, 2 errors"
         ]
       },
       "preExistingMatch": false,
@@ -47076,20 +46895,13 @@
       "result": {
         "diagnostics": [
           {
-            "stage": "transform",
-            "file": "App.tsx",
-            "line": 15,
-            "code": "NATIVE_DETACHED_PROMISE",
-            "message": "[NATIVE_DETACHED_PROMISE] This kept promise has an unused or unknown use. Await or return it, or move detached work outside this reactive helper. (<job>/source/App.tsx:15:11)"
-          },
-          {
             "stage": "cli",
             "file": "App.tsx",
-            "line": 15,
+            "line": 29,
             "severity": "error",
-            "code": "NATIVE_DETACHED_PROMISE",
-            "tsCode": "TS95000",
-            "message": "[NATIVE_DETACHED_PROMISE] This kept promise has an unused or unknown use. Await or return it, or move detached work outside this reactive helper."
+            "code": "DEPENDENT_TYPE",
+            "tsCode": "TS2345",
+            "message": "[DEPENDENT_TYPE] This component's types could not be inferred, so its render call cannot be checked. Fix the component's errors first."
           },
           {
             "stage": "cli",
@@ -47107,33 +46919,27 @@
             ]
           },
           {
-            "stage": "cli",
+            "stage": "lint",
             "file": "App.tsx",
-            "line": 12,
-            "severity": "error",
-            "code": "UNBOUND_EVENT",
-            "tsCode": "TS2322",
-            "message": "Type '() => Promise<void>' is not assignable to type 'EventHandlerUnion<HTMLButtonElement, MouseEvent, EventHandler<HTMLButtonElement, MouseEvent>> | undefined'.\n  Type '() => Promise<void>' is not assignable to type 'Bound<EventHandler<HTMLButtonElement, MouseEvent>>'.\n    Type '() => Promise<void>' is not assignable to type '{ readonly \"[UNBOUND_EVENT] bind the event in the view: onClick={yield* handler}\": never; }'.",
-            "related": [
-              {
-                "file": "../../../../../../packages/yield/jsx/jsx.d.ts",
-                "line": 768
-              }
-            ]
+            "line": 3,
+            "generatedLine": 51,
+            "generated": true,
+            "severity": "warning",
+            "code": "solid-yield/no-unshown-wait",
+            "ruleId": "solid-yield/no-unshown-wait",
+            "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* () {\n      const see...`, D-075)."
           }
         ],
         "stages": {
-          "transform": "refused",
+          "transform": "completed",
           "cli": "diagnostics",
-          "lint": "blocked-by-transform"
+          "lint": "diagnostics"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:15:11 error TS95000: [NATIVE_DETACHED_PROMISE] This kept promise has an unused or unknown use. Await or return it, or move detached work outside this reactive helper.",
+          "<job>/source/App.tsx:29:8 error TS2345: [DEPENDENT_TYPE] This component's types could not be inferred, so its render call cannot be checked. Fix the component's errors first.",
           "<job>/source/App.tsx:16:31 error TS2339: Property 'json' does not exist on type 'Promise<Response>'.",
           "  related: <job>/source/App.tsx:16:31: Did you forget to use 'await'?",
-          "<job>/source/App.tsx:12:7 error TS2322: Type '() => Promise<void>' is not assignable to type 'EventHandlerUnion<HTMLButtonElement, MouseEvent, EventHandler<HTMLButtonElement, MouseEvent>> | undefined'.\n  Type '() => Promise<void>' is not assignable to type 'Bound<EventHandler<HTMLButtonElement, MouseEvent>>'.\n    Type '() => Promise<void>' is not assignable to type '{ readonly \"[UNBOUND_EVENT] bind the event in the view: onClick={yield* handler}\": never; }'.",
-          "  related: <root>/packages/yield/jsx/jsx.d.ts:768:5: The expected type comes from property 'onClick' which is declared here on type 'ButtonHTMLAttributes<HTMLButtonElement> & Properties<HTMLButtonElement>'",
-          "solid-yield check: 1 files, 3 errors"
+          "solid-yield check: 1 files, 2 errors"
         ]
       },
       "preExistingMatch": false,
@@ -47198,47 +47004,24 @@
       "result": {
         "diagnostics": [
           {
-            "stage": "transform",
+            "stage": "lint",
             "file": "App.tsx",
-            "line": 16,
-            "code": "NATIVE_DETACHED_PROMISE",
-            "message": "[NATIVE_DETACHED_PROMISE] This kept promise has an unused or unknown use. Await or return it, or move detached work outside this reactive helper. (<job>/source/App.tsx:16:23)"
-          },
-          {
-            "stage": "cli",
-            "file": "App.tsx",
-            "line": 16,
-            "severity": "error",
-            "code": "NATIVE_DETACHED_PROMISE",
-            "tsCode": "TS95000",
-            "message": "[NATIVE_DETACHED_PROMISE] This kept promise has an unused or unknown use. Await or return it, or move detached work outside this reactive helper."
-          },
-          {
-            "stage": "cli",
-            "file": "App.tsx",
-            "line": 12,
-            "severity": "error",
-            "code": "UNBOUND_EVENT",
-            "tsCode": "TS2322",
-            "message": "Type '() => Promise<void>' is not assignable to type 'EventHandlerUnion<HTMLButtonElement, MouseEvent, EventHandler<HTMLButtonElement, MouseEvent>> | undefined'.\n  Type '() => Promise<void>' is not assignable to type 'Bound<EventHandler<HTMLButtonElement, MouseEvent>>'.\n    Type '() => Promise<void>' is not assignable to type '{ readonly \"[UNBOUND_EVENT] bind the event in the view: onClick={yield* handler}\": never; }'.",
-            "related": [
-              {
-                "file": "../../../../../../packages/yield/jsx/jsx.d.ts",
-                "line": 768
-              }
-            ]
+            "line": 3,
+            "generatedLine": 51,
+            "generated": true,
+            "severity": "warning",
+            "code": "solid-yield/no-unshown-wait",
+            "ruleId": "solid-yield/no-unshown-wait",
+            "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* () {\n      const see...`, D-075)."
           }
         ],
         "stages": {
-          "transform": "refused",
-          "cli": "diagnostics",
-          "lint": "blocked-by-transform"
+          "transform": "completed",
+          "cli": "passed",
+          "lint": "diagnostics"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:16:23 error TS95000: [NATIVE_DETACHED_PROMISE] This kept promise has an unused or unknown use. Await or return it, or move detached work outside this reactive helper.",
-          "<job>/source/App.tsx:12:7 error TS2322: Type '() => Promise<void>' is not assignable to type 'EventHandlerUnion<HTMLButtonElement, MouseEvent, EventHandler<HTMLButtonElement, MouseEvent>> | undefined'.\n  Type '() => Promise<void>' is not assignable to type 'Bound<EventHandler<HTMLButtonElement, MouseEvent>>'.\n    Type '() => Promise<void>' is not assignable to type '{ readonly \"[UNBOUND_EVENT] bind the event in the view: onClick={yield* handler}\": never; }'.",
-          "  related: <root>/packages/yield/jsx/jsx.d.ts:768:5: The expected type comes from property 'onClick' which is declared here on type 'ButtonHTMLAttributes<HTMLButtonElement> & Properties<HTMLButtonElement>'",
-          "solid-yield check: 1 files, 2 errors"
+          "solid-yield check: 1 files, 0 errors"
         ]
       },
       "preExistingMatch": false,
@@ -47688,47 +47471,24 @@
       "result": {
         "diagnostics": [
           {
-            "stage": "transform",
+            "stage": "lint",
             "file": "App.tsx",
-            "line": 15,
-            "code": "NATIVE_DETACHED_PROMISE",
-            "message": "[NATIVE_DETACHED_PROMISE] This kept promise has an unused or unknown use. Await or return it, or move detached work outside this reactive helper. (<job>/source/App.tsx:15:17)"
-          },
-          {
-            "stage": "cli",
-            "file": "App.tsx",
-            "line": 15,
-            "severity": "error",
-            "code": "NATIVE_DETACHED_PROMISE",
-            "tsCode": "TS95000",
-            "message": "[NATIVE_DETACHED_PROMISE] This kept promise has an unused or unknown use. Await or return it, or move detached work outside this reactive helper."
-          },
-          {
-            "stage": "cli",
-            "file": "App.tsx",
-            "line": 12,
-            "severity": "error",
-            "code": "UNBOUND_EVENT",
-            "tsCode": "TS2322",
-            "message": "Type '() => Promise<void>' is not assignable to type 'EventHandlerUnion<HTMLButtonElement, MouseEvent, EventHandler<HTMLButtonElement, MouseEvent>> | undefined'.\n  Type '() => Promise<void>' is not assignable to type 'Bound<EventHandler<HTMLButtonElement, MouseEvent>>'.\n    Type '() => Promise<void>' is not assignable to type '{ readonly \"[UNBOUND_EVENT] bind the event in the view: onClick={yield* handler}\": never; }'.",
-            "related": [
-              {
-                "file": "../../../../../../packages/yield/jsx/jsx.d.ts",
-                "line": 768
-              }
-            ]
+            "line": 3,
+            "generatedLine": 51,
+            "generated": true,
+            "severity": "warning",
+            "code": "solid-yield/no-unshown-wait",
+            "ruleId": "solid-yield/no-unshown-wait",
+            "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* () {\n      const see...`, D-075)."
           }
         ],
         "stages": {
-          "transform": "refused",
-          "cli": "diagnostics",
-          "lint": "blocked-by-transform"
+          "transform": "completed",
+          "cli": "passed",
+          "lint": "diagnostics"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:15:17 error TS95000: [NATIVE_DETACHED_PROMISE] This kept promise has an unused or unknown use. Await or return it, or move detached work outside this reactive helper.",
-          "<job>/source/App.tsx:12:7 error TS2322: Type '() => Promise<void>' is not assignable to type 'EventHandlerUnion<HTMLButtonElement, MouseEvent, EventHandler<HTMLButtonElement, MouseEvent>> | undefined'.\n  Type '() => Promise<void>' is not assignable to type 'Bound<EventHandler<HTMLButtonElement, MouseEvent>>'.\n    Type '() => Promise<void>' is not assignable to type '{ readonly \"[UNBOUND_EVENT] bind the event in the view: onClick={yield* handler}\": never; }'.",
-          "  related: <root>/packages/yield/jsx/jsx.d.ts:768:5: The expected type comes from property 'onClick' which is declared here on type 'ButtonHTMLAttributes<HTMLButtonElement> & Properties<HTMLButtonElement>'",
-          "solid-yield check: 1 files, 2 errors"
+          "solid-yield check: 1 files, 0 errors"
         ]
       },
       "preExistingMatch": false,
@@ -47923,22 +47683,6 @@
       "result": {
         "diagnostics": [
           {
-            "stage": "transform",
-            "file": "App.tsx",
-            "line": 15,
-            "code": "NATIVE_DETACHED_PROMISE",
-            "message": "[NATIVE_DETACHED_PROMISE] This kept promise has an unused or unknown use. Await or return it, or move detached work outside this reactive helper. (<job>/source/App.tsx:15:11)"
-          },
-          {
-            "stage": "cli",
-            "file": "App.tsx",
-            "line": 15,
-            "severity": "error",
-            "code": "NATIVE_DETACHED_PROMISE",
-            "tsCode": "TS95000",
-            "message": "[NATIVE_DETACHED_PROMISE] This kept promise has an unused or unknown use. Await or return it, or move detached work outside this reactive helper."
-          },
-          {
             "stage": "cli",
             "file": "App.tsx",
             "line": 16,
@@ -47954,33 +47698,26 @@
             ]
           },
           {
-            "stage": "cli",
+            "stage": "lint",
             "file": "App.tsx",
-            "line": 12,
-            "severity": "error",
-            "code": "UNBOUND_EVENT",
-            "tsCode": "TS2322",
-            "message": "Type '() => Promise<void>' is not assignable to type 'EventHandlerUnion<HTMLButtonElement, MouseEvent, EventHandler<HTMLButtonElement, MouseEvent>> | undefined'.\n  Type '() => Promise<void>' is not assignable to type 'Bound<EventHandler<HTMLButtonElement, MouseEvent>>'.\n    Type '() => Promise<void>' is not assignable to type '{ readonly \"[UNBOUND_EVENT] bind the event in the view: onClick={yield* handler}\": never; }'.",
-            "related": [
-              {
-                "file": "../../../../../../packages/yield/jsx/jsx.d.ts",
-                "line": 768
-              }
-            ]
+            "line": 3,
+            "generatedLine": 51,
+            "generated": true,
+            "severity": "warning",
+            "code": "solid-yield/no-unshown-wait",
+            "ruleId": "solid-yield/no-unshown-wait",
+            "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* () {\n      const see...`, D-075)."
           }
         ],
         "stages": {
-          "transform": "refused",
+          "transform": "completed",
           "cli": "diagnostics",
-          "lint": "blocked-by-transform"
+          "lint": "diagnostics"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:15:11 error TS95000: [NATIVE_DETACHED_PROMISE] This kept promise has an unused or unknown use. Await or return it, or move detached work outside this reactive helper.",
           "<job>/source/App.tsx:16:13 error TS2339: Property 'status' does not exist on type 'Promise<Response>'.",
           "  related: <job>/source/App.tsx:16:13: Did you forget to use 'await'?",
-          "<job>/source/App.tsx:12:7 error TS2322: Type '() => Promise<void>' is not assignable to type 'EventHandlerUnion<HTMLButtonElement, MouseEvent, EventHandler<HTMLButtonElement, MouseEvent>> | undefined'.\n  Type '() => Promise<void>' is not assignable to type 'Bound<EventHandler<HTMLButtonElement, MouseEvent>>'.\n    Type '() => Promise<void>' is not assignable to type '{ readonly \"[UNBOUND_EVENT] bind the event in the view: onClick={yield* handler}\": never; }'.",
-          "  related: <root>/packages/yield/jsx/jsx.d.ts:768:5: The expected type comes from property 'onClick' which is declared here on type 'ButtonHTMLAttributes<HTMLButtonElement> & Properties<HTMLButtonElement>'",
-          "solid-yield check: 1 files, 3 errors"
+          "solid-yield check: 1 files, 1 errors"
         ]
       },
       "preExistingMatch": false,
@@ -48297,22 +48034,6 @@
       "result": {
         "diagnostics": [
           {
-            "stage": "transform",
-            "file": "App.tsx",
-            "line": 16,
-            "code": "NATIVE_DETACHED_PROMISE",
-            "message": "[NATIVE_DETACHED_PROMISE] This kept promise has an unused or unknown use. Await or return it, or move detached work outside this reactive helper. (<job>/source/App.tsx:16:11)"
-          },
-          {
-            "stage": "cli",
-            "file": "App.tsx",
-            "line": 16,
-            "severity": "error",
-            "code": "NATIVE_DETACHED_PROMISE",
-            "tsCode": "TS95000",
-            "message": "[NATIVE_DETACHED_PROMISE] This kept promise has an unused or unknown use. Await or return it, or move detached work outside this reactive helper."
-          },
-          {
             "stage": "cli",
             "file": "App.tsx",
             "line": 17,
@@ -48328,33 +48049,26 @@
             ]
           },
           {
-            "stage": "cli",
+            "stage": "lint",
             "file": "App.tsx",
-            "line": 12,
-            "severity": "error",
-            "code": "UNBOUND_EVENT",
-            "tsCode": "TS2322",
-            "message": "Type '() => Promise<void>' is not assignable to type 'EventHandlerUnion<HTMLButtonElement, MouseEvent, EventHandler<HTMLButtonElement, MouseEvent>> | undefined'.\n  Type '() => Promise<void>' is not assignable to type 'Bound<EventHandler<HTMLButtonElement, MouseEvent>>'.\n    Type '() => Promise<void>' is not assignable to type '{ readonly \"[UNBOUND_EVENT] bind the event in the view: onClick={yield* handler}\": never; }'.",
-            "related": [
-              {
-                "file": "../../../../../../packages/yield/jsx/jsx.d.ts",
-                "line": 768
-              }
-            ]
+            "line": 3,
+            "generatedLine": 51,
+            "generated": true,
+            "severity": "warning",
+            "code": "solid-yield/no-unshown-wait",
+            "ruleId": "solid-yield/no-unshown-wait",
+            "message": "this view binds a handler that may wait on pending data; show its in-flight state (`$event(function* () {\n      const see...`, D-075)."
           }
         ],
         "stages": {
-          "transform": "refused",
+          "transform": "completed",
           "cli": "diagnostics",
-          "lint": "blocked-by-transform"
+          "lint": "diagnostics"
         },
         "cliOutput": [
-          "<job>/source/App.tsx:16:11 error TS95000: [NATIVE_DETACHED_PROMISE] This kept promise has an unused or unknown use. Await or return it, or move detached work outside this reactive helper.",
           "<job>/source/App.tsx:17:13 error TS2339: Property 'status' does not exist on type 'Promise<Response>'.",
           "  related: <job>/source/App.tsx:17:13: Did you forget to use 'await'?",
-          "<job>/source/App.tsx:12:7 error TS2322: Type '() => Promise<void>' is not assignable to type 'EventHandlerUnion<HTMLButtonElement, MouseEvent, EventHandler<HTMLButtonElement, MouseEvent>> | undefined'.\n  Type '() => Promise<void>' is not assignable to type 'Bound<EventHandler<HTMLButtonElement, MouseEvent>>'.\n    Type '() => Promise<void>' is not assignable to type '{ readonly \"[UNBOUND_EVENT] bind the event in the view: onClick={yield* handler}\": never; }'.",
-          "  related: <root>/packages/yield/jsx/jsx.d.ts:768:5: The expected type comes from property 'onClick' which is declared here on type 'ButtonHTMLAttributes<HTMLButtonElement> & Properties<HTMLButtonElement>'",
-          "solid-yield check: 1 files, 3 errors"
+          "solid-yield check: 1 files, 1 errors"
         ]
       },
       "preExistingMatch": false,

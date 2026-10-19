@@ -450,6 +450,18 @@ export function lowerNativeEffects(files, report) {
         const api = callee.isIdentifier()
           ? imported(callee.scope.getBinding(callee.node.name)?.path)
           : null;
+        if (
+          info?.target &&
+          asyncRoutines.has(info.target) &&
+          owner &&
+          report.at(file, owner.node.start ?? 0)?.component
+        )
+          throw nativeRefusal(
+            file,
+            q.node,
+            "NATIVE_ASYNC_SETUP",
+            "An async reactive read has setup as its host; call it from an event or memo."
+          );
         // Plain Solid may keep or drop any promise, and a plain callee's
         // (an async function's, the platform's, a callback's) stays one: the
         // call is lowered as written, dropped or held. An async reactive
@@ -470,18 +482,6 @@ export function lowerNativeEffects(files, report) {
             q.node,
             "NATIVE_DETACHED_PROMISE",
             "This async reactive helper runs where it is called, so its promise cannot be kept as a value. Await it or return it here, or drop the call."
-          );
-        if (
-          info?.target &&
-          asyncRoutines.has(info.target) &&
-          owner &&
-          report.at(file, owner.node.start ?? 0)?.component
-        )
-          throw nativeRefusal(
-            file,
-            q.node,
-            "NATIVE_ASYNC_SETUP",
-            "An async reactive read has setup as its host; call it from an event or memo."
           );
       },
       Function(q) {

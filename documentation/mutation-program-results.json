@@ -1,8 +1,8 @@
 {
-  "startedAt": "2026-10-19T09:41:28.201Z",
-  "finishedAt": "2026-10-19T10:19:06.228Z",
-  "durationMs": 2258027,
-  "digest": "f2a539b4a5f78eb9d02d6d550064ec0bcd7492dda354e5da0be52d10a50660a5",
+  "startedAt": "2026-10-19T12:33:40.762Z",
+  "finishedAt": "2026-10-19T13:11:34.459Z",
+  "durationMs": 2273697,
+  "digest": "83f7aa4a047152f21dc65b7692c77b8ff563d4cf48ff5e34610e5a55935b9212",
   "projects": [
     {
       "id": "sierpinski",
@@ -16102,14 +16102,66 @@
       "file": "App.tsx",
       "original": "import { createSignal, createMemo, createEffect, createContext, useContext, Loading, Errored } from 'solid-js';\nimport { render } from '@solidjs/web';\nimport { readServer } from './server';\nconst Identity = createContext<number>();\nclass Problem extends Error {}\nfunction fail() { throw new Problem('failure'); }\nfunction Child(props: { value: number }) {\n  const identity = useContext(Identity);\n  return <p>{props.value}{identity}</p>;\n}\nfunction App() {\n  const [count, setCount] = createSignal(1);\n  const value = createMemo(async () => {\n    try { return await readServer(); } catch (e) { throw e; }\n  });\n  const twice = createMemo(() => count() * 2);\n  createEffect(() => count(), n => { setCount(n); });\n  setTimeout(() => setCount(2), 1);\n  const save = async () => {\n    await Promise.resolve();\n    setCount(count() + 1);\n  };\n  return <Identity value={1}><Errored fallback={() => <p>failed</p>}><Loading fallback=\"wait\">\n    <button onClick={async () => { await save(); }}>{twice()}</button>\n    <button onClick={() => { try { fail(); } catch (e) { /* @yield-absorb: logged */ console.error(e); } }}>Fail</button>\n    <Child value={count()} /><p>{value()}</p>\n  </Loading></Errored></Identity>;\n}\nrender(() => <App />, document.body);\n",
       "result": {
-        "diagnostics": [],
+        "diagnostics": [
+          {
+            "stage": "transform",
+            "file": "App.tsx",
+            "line": 24,
+            "code": "NATIVE_DETACHED_PROMISE",
+            "message": "[NATIVE_DETACHED_PROMISE] This async reactive helper runs where it is called, so its promise cannot be dropped or kept as a value. Await it or return it here, or move the detached work into a plain async function. (<job>/source/App.tsx:24:36)"
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 24,
+            "severity": "error",
+            "code": "NATIVE_DETACHED_PROMISE",
+            "tsCode": "TS95000",
+            "message": "[NATIVE_DETACHED_PROMISE] This async reactive helper runs where it is called, so its promise cannot be dropped or kept as a value. Await it or return it here, or move the detached work into a plain async function."
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 25,
+            "severity": "error",
+            "code": "UNBOUND_EVENT",
+            "tsCode": "TS2322",
+            "message": "Type '() => void' is not assignable to type 'EventHandlerUnion<HTMLButtonElement, MouseEvent, EventHandler<HTMLButtonElement, MouseEvent>> | undefined'.\n  Type '() => void' is not assignable to type 'Bound<EventHandler<HTMLButtonElement, MouseEvent>>'.\n    Type '() => void' is not assignable to type '{ readonly \"[UNBOUND_EVENT] bind the event in the view: onClick={yield* handler}\": never; }'.",
+            "related": [
+              {
+                "file": "../../../../../../packages/yield/jsx/jsx.d.ts",
+                "line": 768
+              }
+            ]
+          },
+          {
+            "stage": "cli",
+            "file": "App.tsx",
+            "line": 24,
+            "severity": "error",
+            "code": "UNBOUND_EVENT",
+            "tsCode": "TS2322",
+            "message": "Type '() => Promise<void>' is not assignable to type 'EventHandlerUnion<HTMLButtonElement, MouseEvent, EventHandler<HTMLButtonElement, MouseEvent>> | undefined'.\n  Type '() => Promise<void>' is not assignable to type 'Bound<EventHandler<HTMLButtonElement, MouseEvent>>'.\n    Type '() => Promise<void>' is not assignable to type '{ readonly \"[UNBOUND_EVENT] bind the event in the view: onClick={yield* handler}\": never; }'.",
+            "related": [
+              {
+                "file": "../../../../../../packages/yield/jsx/jsx.d.ts",
+                "line": 768
+              }
+            ]
+          }
+        ],
         "stages": {
-          "transform": "completed",
-          "cli": "passed",
-          "lint": "passed"
+          "transform": "refused",
+          "cli": "diagnostics",
+          "lint": "blocked-by-transform"
         },
         "cliOutput": [
-          "solid-yield check: 2 files, 0 errors"
+          "<job>/source/App.tsx:24:36 error TS95000: [NATIVE_DETACHED_PROMISE] This async reactive helper runs where it is called, so its promise cannot be dropped or kept as a value. Await it or return it here, or move the detached work into a plain async function.",
+          "<job>/source/App.tsx:25:13 error TS2322: Type '() => void' is not assignable to type 'EventHandlerUnion<HTMLButtonElement, MouseEvent, EventHandler<HTMLButtonElement, MouseEvent>> | undefined'.\n  Type '() => void' is not assignable to type 'Bound<EventHandler<HTMLButtonElement, MouseEvent>>'.\n    Type '() => void' is not assignable to type '{ readonly \"[UNBOUND_EVENT] bind the event in the view: onClick={yield* handler}\": never; }'.",
+          "  related: <root>/packages/yield/jsx/jsx.d.ts:768:5: The expected type comes from property 'onClick' which is declared here on type 'ButtonHTMLAttributes<HTMLButtonElement> & Properties<HTMLButtonElement>'",
+          "<job>/source/App.tsx:24:13 error TS2322: Type '() => Promise<void>' is not assignable to type 'EventHandlerUnion<HTMLButtonElement, MouseEvent, EventHandler<HTMLButtonElement, MouseEvent>> | undefined'.\n  Type '() => Promise<void>' is not assignable to type 'Bound<EventHandler<HTMLButtonElement, MouseEvent>>'.\n    Type '() => Promise<void>' is not assignable to type '{ readonly \"[UNBOUND_EVENT] bind the event in the view: onClick={yield* handler}\": never; }'.",
+          "  related: <root>/packages/yield/jsx/jsx.d.ts:768:5: The expected type comes from property 'onClick' which is declared here on type 'ButtonHTMLAttributes<HTMLButtonElement> & Properties<HTMLButtonElement>'",
+          "solid-yield check: 2 files, 3 errors"
         ]
       },
       "preExistingMatch": false,

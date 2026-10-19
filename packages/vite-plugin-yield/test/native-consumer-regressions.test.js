@@ -183,7 +183,9 @@ describe("native consumer regressions", { timeout: 30_000 }, () => {
     expect(checked(code)).toEqual([]);
   });
   // An async reactive helper runs where it is called (`yield* save(1)`): its
-  // promise cannot be a value the code goes on to use.
+  // promise cannot be a value the code goes on to use, nor dropped (D-127 §5,
+  // Dev: report it): the statements after it would run after the helper,
+  // where Solid runs them at its first await.
   it.each([
     [
       "a local awaited later",
@@ -191,27 +193,34 @@ describe("native consumer regressions", { timeout: 30_000 }, () => {
     ],
     ["an argument", "track(save(1)); return 0;"],
     ["a receiver", "return save(1).then(n => n);"],
-    ["a sync event's local", "const p = save(1); track(p);", false]
-  ])("refuses an async helper's promise kept as a value: %s", (_, body, async = true) => {
-    expect(() =>
-      lower(`import { createSignal } from "solid-js";
+    ["a sync event's local", "const p = save(1); track(p);", false],
+    ["dropped", "save(1); setBusy(true);"],
+    ["voided", "void save(1); setBusy(true);"],
+    ["dropped in a sync event", "save(1); setBusy(true);", false],
+    ["dropped last in a sync event", "save(1);", false]
+  ])(
+    "refuses an async helper's promise not awaited or returned where it is made: %s",
+    (_, body, async = true) => {
+      expect(() =>
+        lower(`import { createSignal } from "solid-js";
       declare function track(p: Promise<unknown>): void;
       export function Form() { const [busy, setBusy] = createSignal(false);
         const save = async (n: number) => { setBusy(true); await Promise.resolve(n); setBusy(false); return n; };
         return <form onSubmit={${async ? "async " : ""}() => { ${body} }}/>;
       }`)
-    ).toThrow(/NATIVE_DETACHED_PROMISE/);
-  });
+      ).toThrow(/NATIVE_DETACHED_PROMISE/);
+    }
+  );
   it.each([
-    ["dropped", "save(1); setBusy(true);"],
-    ["voided", "void save(1); setBusy(true);"],
-    ["awaited", "await save(1); setBusy(true);"],
-    ["returned", "return save(1);"]
-  ])("runs an async helper where it is called when its promise is %s", (_, body) => {
+    ["awaited", "async () => { await save(1); setBusy(true); }"],
+    ["returned", "async () => { return save(1); }"],
+    ["returned by a sync event", "() => { return save(1); }"],
+    ["a sync event's expression body", "() => save(1)"]
+  ])("runs an async helper where it is called when its promise is %s", (_, handler) => {
     const code = lower(`import { createSignal } from "solid-js";
       export function Form() { const [busy, setBusy] = createSignal(false);
         const save = async (n: number) => { setBusy(true); await Promise.resolve(n); setBusy(false); return n; };
-        return <form onSubmit={async () => { ${body} }}/>;
+        return <form onSubmit={${handler}}/>;
       }`);
     expect(code).toMatch(/yield\* save\(1\)/);
     expect(checked(code)).toEqual([]);

@@ -418,9 +418,9 @@ export function lowerNativeEffects(files, report) {
       !!fn &&
       invokedCallbacks.has(`${file}:${fn.node.start}`) &&
       !routines.has(`${file}:${fn.node.start}`);
-    /** A call whose promise is used as a value: neither awaited, returned
-     * nor dropped (a statement, `void`) where it is made. @param {Path} q */
-    const keptAsValue = q => {
+    /** A call whose promise is awaited or returned where it is made.
+     * @param {Path} q */
+    const settledHere = q => {
       let use = q;
       while (
         use.parentPath?.isParenthesizedExpression() ||
@@ -432,11 +432,9 @@ export function lowerNativeEffects(files, report) {
       const parent = use.parentPath;
       return (
         !!parent &&
-        !parent.isAwaitExpression() &&
-        !parent.isExpressionStatement() &&
-        !parent.isUnaryExpression({ operator: "void" }) &&
-        !parent.isReturnStatement() &&
-        !(parent.isArrowFunctionExpression() && parent.node.body === use.node)
+        (parent.isAwaitExpression() ||
+          parent.isReturnStatement() ||
+          (parent.isArrowFunctionExpression() && parent.node.body === use.node))
       );
     };
     // Async reactive helpers run on their caller's host. Await becomes an
@@ -465,23 +463,24 @@ export function lowerNativeEffects(files, report) {
         // Plain Solid may keep or drop any promise, and a plain callee's
         // (an async function's, the platform's, a callback's) stays one: the
         // call is lowered as written, dropped or held. An async reactive
-        // helper is run where it is called (`yield* save(1)`, in a sync
-        // event as in an async one), so what the lowering holds is its
-        // result, not a promise: kept as a value (a local, an argument, a
-        // receiver), it would be read as one where the code is checked.
+        // helper is run where it is called (`yield* save(1)`), in a sync
+        // event as in an async one: dropped, the statements after it would
+        // run after the helper where Solid runs them at its first await
+        // (D-127 §5, Dev: report it); kept as a value (a local, an argument,
+        // a receiver), what the lowering holds is its result, not a promise.
         if (
           owner &&
           routines.has(`${file}:${owner.node.start}`) &&
           info?.promise &&
           info.target &&
           asyncRoutines.has(info.target) &&
-          keptAsValue(q)
+          !settledHere(q)
         )
           throw nativeRefusal(
             file,
             q.node,
             "NATIVE_DETACHED_PROMISE",
-            "This async reactive helper runs where it is called, so its promise cannot be kept as a value. Await it or return it here, or drop the call."
+            "This async reactive helper runs where it is called, so its promise cannot be dropped or kept as a value. Await it or return it here, or move the detached work into a plain async function."
           );
       },
       Function(q) {

@@ -1811,9 +1811,11 @@ Both were real gaps, and fixing them exposed a third.
   the code awaits it. A call to a non-`async` function that returns a promise
   can throw before returning it, so it keeps its attempt, boxed: the value is
   the promise. An async reactive helper (a routine) runs where it is called,
-  in a sync event as in an async one; its promise kept as a value (a local
-  awaited later, an argument, a `.then` receiver) is refused
-  (`NATIVE_DETACHED_PROMISE`), since what the lowering holds is its result.
+  in a sync event as in an async one; its promise dropped (the statements
+  after it would run after the helper, where Solid runs them at its first
+  await; D-127 §5) or kept as a value (a local awaited later, an argument, a
+  `.then` receiver; what the lowering holds is its result) is refused
+  (`NATIVE_DETACHED_PROMISE`): it is awaited or returned where it is made.
 
   Tests: `native-promises.test.js`. The mutation catalog's `remove-await` now
   also expects TS2339. Proof obligation: S15 (`calculus-proofs/sugar.md`).

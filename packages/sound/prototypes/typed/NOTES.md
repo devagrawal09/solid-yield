@@ -47,6 +47,13 @@ symbol/alias provenance, dependency expressions and failures (TS has no throw
  types). Pending/failure composition, service-member substitution, provider
 shadowing, prop substitution, recursion and boundary discharge happen in types.
 
+## Code sources
+
+The existing typed pre-pass and declaration-resolution helpers in
+`../dataflow/solid.mjs` are reused; the dataflow analysis engine is not called.
+No code was imported or copied from packages/yield, packages/compiler-yield,
+packages/vite-plugin-yield or packages/ts-plugin-yield.
+
 ## Rules and assumptions
 
 - Diagnostic codes/severities come from src/codes.mjs (D-130). Proven findings are
@@ -79,6 +86,17 @@ Virtual-program errors that cannot be classified remain explicit analysis
 warnings; none occur in the shared fixture set. They are not evidence that an
 unsupported program is safe. No fixture-name/path/text tests or suppressions were
 added. Shared files, fixtures and the other prototype are unchanged.
+
+## Cost
+
+The old 11.3 s case total covered 52 cases; the current roughly 20 s total
+covers 81 (56% more cases). RESULTS-context.md separates the measured original
+and added case costs. This is not a controlled same-machine before/after test.
+Both TS programs are still held and checked. The virtual types now carry read
+unions, service-member and lazy-prop substitutions, and recursive references;
+the checker also reads structured finding properties. Provenance/alias discovery
+and the recursive-edge pass rerun on edits. These add work, but the runs do not
+isolate their individual shares. There is no per-component cache.
 
 ## Results
 

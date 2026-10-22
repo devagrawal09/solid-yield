@@ -518,26 +518,13 @@
       "misses": [],
       "warningHits": 0,
       "warningMisses": [],
-      "extraErrors": [
-        {
-          "code": "UNHANDLED_HANDLER_FAILURE",
-          "severity": "error",
-          "message": "A handler — an event handler, a callback prop, a promise continuation, a timer or ref callback — may throw or reject and nothing in it catches the failure. A rendered Errored boundary does not catch a handler's rejection. Calls with no failure information (an injected API typed () => Promise<T>, a context method, a platform call) count as possibly failing with unknown. Catch and handle the failure inside the handler (try/catch around the await, or .catch on the promise).",
-          "loc": {
-            "file": "openclaw-precision/op-loading-url.tsx",
-            "line": 3,
-            "col": 19,
-            "endLine": 3,
-            "endCol": 33
-          }
-        }
-      ],
+      "extraErrors": [],
       "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
       "soundnessFailure": false,
-      "total": 1
+      "total": 0
     },
     "op-loading-url-mutant": {
       "hits": [
@@ -551,26 +538,13 @@
       "misses": [],
       "warningHits": 0,
       "warningMisses": [],
-      "extraErrors": [
-        {
-          "code": "UNHANDLED_HANDLER_FAILURE",
-          "severity": "error",
-          "message": "A handler — an event handler, a callback prop, a promise continuation, a timer or ref callback — may throw or reject and nothing in it catches the failure. A rendered Errored boundary does not catch a handler's rejection. Calls with no failure information (an injected API typed () => Promise<T>, a context method, a platform call) count as possibly failing with unknown. Catch and handle the failure inside the handler (try/catch around the await, or .catch on the promise).",
-          "loc": {
-            "file": "openclaw-precision/op-loading-url-mutant.tsx",
-            "line": 3,
-            "col": 19,
-            "endLine": 3,
-            "endCol": 33
-          }
-        }
-      ],
+      "extraErrors": [],
       "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
       "soundnessFailure": false,
-      "total": 2
+      "total": 1
     },
     "op-loading-reactive-key": {
       "hits": [],
@@ -578,26 +552,13 @@
       "misses": [],
       "warningHits": 0,
       "warningMisses": [],
-      "extraErrors": [
-        {
-          "code": "UNHANDLED_HANDLER_FAILURE",
-          "severity": "error",
-          "message": "A handler — an event handler, a callback prop, a promise continuation, a timer or ref callback — may throw or reject and nothing in it catches the failure. A rendered Errored boundary does not catch a handler's rejection. Calls with no failure information (an injected API typed () => Promise<T>, a context method, a platform call) count as possibly failing with unknown. Catch and handle the failure inside the handler (try/catch around the await, or .catch on the promise).",
-          "loc": {
-            "file": "openclaw-precision/op-loading-reactive-key.tsx",
-            "line": 5,
-            "col": 19,
-            "endLine": 5,
-            "endCol": 29
-          }
-        }
-      ],
+      "extraErrors": [],
       "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
       "soundnessFailure": false,
-      "total": 1
+      "total": 0
     },
     "op-loading-reactive-key-mutant": {
       "hits": [],
@@ -611,26 +572,13 @@
       ],
       "warningHits": 0,
       "warningMisses": [],
-      "extraErrors": [
-        {
-          "code": "UNHANDLED_HANDLER_FAILURE",
-          "severity": "error",
-          "message": "A handler — an event handler, a callback prop, a promise continuation, a timer or ref callback — may throw or reject and nothing in it catches the failure. A rendered Errored boundary does not catch a handler's rejection. Calls with no failure information (an injected API typed () => Promise<T>, a context method, a platform call) count as possibly failing with unknown. Catch and handle the failure inside the handler (try/catch around the await, or .catch on the promise).",
-          "loc": {
-            "file": "openclaw-precision/op-loading-reactive-key-mutant.tsx",
-            "line": 5,
-            "col": 21,
-            "endLine": 5,
-            "endCol": 31
-          }
-        }
-      ],
+      "extraErrors": [],
       "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 1,
       "soundnessFailure": true,
-      "total": 2
+      "total": 1
     },
     "op-focus-repair": {
       "hits": [],
@@ -638,26 +586,13 @@
       "misses": [],
       "warningHits": 0,
       "warningMisses": [],
-      "extraErrors": [
-        {
-          "code": "UNHANDLED_HANDLER_FAILURE",
-          "severity": "error",
-          "message": "A handler — an event handler, a callback prop, a promise continuation, a timer or ref callback — may throw or reject and nothing in it catches the failure. A rendered Errored boundary does not catch a handler's rejection. Calls with no failure information (an injected API typed () => Promise<T>, a context method, a platform call) count as possibly failing with unknown. Catch and handle the failure inside the handler (try/catch around the await, or .catch on the promise).",
-          "loc": {
-            "file": "openclaw-precision/op-focus-repair.tsx",
-            "line": 9,
-            "col": 5,
-            "endLine": 13,
-            "endCol": 7
-          }
-        }
-      ],
+      "extraErrors": [],
       "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
       "soundnessFailure": false,
-      "total": 1
+      "total": 0
     },
     "op-focus-repair-mutant": {
       "hits": [
@@ -685,133 +620,33 @@
       "misses": [],
       "warningHits": 0,
       "warningMisses": [],
-      "extraErrors": [
-        {
-          "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
-          "severity": "error",
-          "message": "A possibly pending value is read in a scope that serves the committed value and throws while uninitialized: an effect's effect function (createEffect's second argument), createTrackedEffect or onSettled. Read the source in the effect's compute function and pass the value to the effect function.",
-          "loc": {
-            "file": "openclaw-precision/op-machine-class.tsx",
-            "line": 10,
-            "col": 5,
-            "endLine": 10,
-            "endCol": 32
-          }
-        },
-        {
-          "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
-          "severity": "error",
-          "message": "A possibly pending value is read in a scope that serves the committed value and throws while uninitialized: an effect's effect function (createEffect's second argument), createTrackedEffect or onSettled. Read the source in the effect's compute function and pass the value to the effect function.",
-          "loc": {
-            "file": "openclaw-precision/op-machine-class.tsx",
-            "line": 11,
-            "col": 5,
-            "endLine": 11,
-            "endCol": 20
-          }
-        }
-      ],
-      "extraWarnings": [
-        {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "This code is outside the checked subset. The checker did not refuse the file: values flowing from here are treated as the worst case (possibly pending, possibly failing with unknown), so obligations still surface downstream. Nothing here is trusted and nothing is silently green. No action required for soundness; to narrow the worst case, move the work into a supported form (the message names the construct).",
-          "loc": {
-            "file": "openclaw-precision/op-machine-class.tsx",
-            "line": 4,
-            "col": 3,
-            "endLine": 7,
-            "endCol": 4
-          }
-        },
-        {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "This code is outside the checked subset. The checker did not refuse the file: values flowing from here are treated as the worst case (possibly pending, possibly failing with unknown), so obligations still surface downstream. Nothing here is trusted and nothing is silently green. No action required for soundness; to narrow the worst case, move the work into a supported form (the message names the construct).",
-          "loc": {
-            "file": "openclaw-precision/op-machine-class.tsx",
-            "line": 8,
-            "col": 19,
-            "endLine": 8,
-            "endCol": 32
-          }
-        }
-      ],
+      "extraErrors": [],
+      "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
-      "infos": 1,
+      "infos": 0,
       "soundnessFailure": false,
-      "total": 5
+      "total": 0
     },
     "op-machine-class-mutant": {
-      "hits": [],
-      "imprecise": [],
-      "misses": [
+      "hits": [
         {
           "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
           "file": "op-machine-class-mutant.tsx",
-          "at": "\"pending()\""
+          "count": 1
         }
       ],
+      "imprecise": [],
+      "misses": [],
       "warningHits": 0,
       "warningMisses": [],
-      "extraErrors": [
-        {
-          "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
-          "severity": "error",
-          "message": "A possibly pending value is read in a scope that serves the committed value and throws while uninitialized: an effect's effect function (createEffect's second argument), createTrackedEffect or onSettled. Read the source in the effect's compute function and pass the value to the effect function.",
-          "loc": {
-            "file": "openclaw-precision/op-machine-class-mutant.tsx",
-            "line": 10,
-            "col": 5,
-            "endLine": 10,
-            "endCol": 32
-          }
-        },
-        {
-          "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
-          "severity": "error",
-          "message": "A possibly pending value is read in a scope that serves the committed value and throws while uninitialized: an effect's effect function (createEffect's second argument), createTrackedEffect or onSettled. Read the source in the effect's compute function and pass the value to the effect function.",
-          "loc": {
-            "file": "openclaw-precision/op-machine-class-mutant.tsx",
-            "line": 11,
-            "col": 5,
-            "endLine": 11,
-            "endCol": 20
-          }
-        }
-      ],
-      "extraWarnings": [
-        {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "This code is outside the checked subset. The checker did not refuse the file: values flowing from here are treated as the worst case (possibly pending, possibly failing with unknown), so obligations still surface downstream. Nothing here is trusted and nothing is silently green. No action required for soundness; to narrow the worst case, move the work into a supported form (the message names the construct).",
-          "loc": {
-            "file": "openclaw-precision/op-machine-class-mutant.tsx",
-            "line": 4,
-            "col": 3,
-            "endLine": 7,
-            "endCol": 4
-          }
-        },
-        {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "This code is outside the checked subset. The checker did not refuse the file: values flowing from here are treated as the worst case (possibly pending, possibly failing with unknown), so obligations still surface downstream. Nothing here is trusted and nothing is silently green. No action required for soundness; to narrow the worst case, move the work into a supported form (the message names the construct).",
-          "loc": {
-            "file": "openclaw-precision/op-machine-class-mutant.tsx",
-            "line": 8,
-            "col": 19,
-            "endLine": 8,
-            "endCol": 32
-          }
-        }
-      ],
+      "extraErrors": [],
+      "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
-      "infos": 1,
+      "infos": 0,
       "soundnessFailure": false,
-      "total": 5
+      "total": 1
     },
     "op-machine-members": {
       "hits": [],
@@ -921,26 +756,13 @@
       "misses": [],
       "warningHits": 0,
       "warningMisses": [],
-      "extraErrors": [
-        {
-          "code": "UNHANDLED_HANDLER_FAILURE",
-          "severity": "error",
-          "message": "A handler — an event handler, a callback prop, a promise continuation, a timer or ref callback — may throw or reject and nothing in it catches the failure. A rendered Errored boundary does not catch a handler's rejection. Calls with no failure information (an injected API typed () => Promise<T>, a context method, a platform call) count as possibly failing with unknown. Catch and handle the failure inside the handler (try/catch around the await, or .catch on the promise).",
-          "loc": {
-            "file": "openclaw-precision/op-native-listener.tsx",
-            "line": 4,
-            "col": 18,
-            "endLine": 4,
-            "endCol": 79
-          }
-        }
-      ],
+      "extraErrors": [],
       "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
       "soundnessFailure": false,
-      "total": 1
+      "total": 0
     },
     "op-native-listener-mutant": {
       "hits": [
@@ -1002,87 +824,13 @@
       "misses": [],
       "warningHits": 0,
       "warningMisses": [],
-      "extraErrors": [
-        {
-          "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
-          "severity": "error",
-          "message": "A possibly pending value is read in a scope that serves the committed value and throws while uninitialized: an effect's effect function (createEffect's second argument), createTrackedEffect or onSettled. Read the source in the effect's compute function and pass the value to the effect function.",
-          "loc": {
-            "file": "openclaw-precision/node_modules/@precision/machine/dist/diagnostic-probe.tsx",
-            "line": 13,
-            "col": 5,
-            "endLine": 13,
-            "endCol": 25
-          }
-        },
-        {
-          "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
-          "severity": "error",
-          "message": "A possibly pending value is read in a scope that serves the committed value and throws while uninitialized: an effect's effect function (createEffect's second argument), createTrackedEffect or onSettled. Read the source in the effect's compute function and pass the value to the effect function.",
-          "loc": {
-            "file": "openclaw-precision/node_modules/@precision/machine/dist/diagnostic-probe.tsx",
-            "line": 14,
-            "col": 5,
-            "endLine": 14,
-            "endCol": 27
-          }
-        },
-        {
-          "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
-          "severity": "error",
-          "message": "A possibly pending value is read in a scope that serves the committed value and throws while uninitialized: an effect's effect function (createEffect's second argument), createTrackedEffect or onSettled. Read the source in the effect's compute function and pass the value to the effect function.",
-          "loc": {
-            "file": "openclaw-precision/node_modules/@precision/machine/dist/diagnostic-probe.tsx",
-            "line": 15,
-            "col": 5,
-            "endLine": 15,
-            "endCol": 34
-          }
-        },
-        {
-          "code": "UNHANDLED_HANDLER_FAILURE",
-          "severity": "error",
-          "message": "A handler — an event handler, a callback prop, a promise continuation, a timer or ref callback — may throw or reject and nothing in it catches the failure. A rendered Errored boundary does not catch a handler's rejection. Calls with no failure information (an injected API typed () => Promise<T>, a context method, a platform call) count as possibly failing with unknown. Catch and handle the failure inside the handler (try/catch around the await, or .catch on the promise).",
-          "loc": {
-            "file": "openclaw-precision/node_modules/@precision/machine/dist/diagnostic-probe.tsx",
-            "line": 17,
-            "col": 18,
-            "endLine": 17,
-            "endCol": 50
-          }
-        }
-      ],
-      "extraWarnings": [
-        {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "This code is outside the checked subset. The checker did not refuse the file: values flowing from here are treated as the worst case (possibly pending, possibly failing with unknown), so obligations still surface downstream. Nothing here is trusted and nothing is silently green. No action required for soundness; to narrow the worst case, move the work into a supported form (the message names the construct).",
-          "loc": {
-            "file": "openclaw-precision/node_modules/@precision/machine/dist/diagnostic-probe.tsx",
-            "line": 5,
-            "col": 1,
-            "endLine": 9,
-            "endCol": 2
-          }
-        },
-        {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "This code is outside the checked subset. The checker did not refuse the file: values flowing from here are treated as the worst case (possibly pending, possibly failing with unknown), so obligations still surface downstream. Nothing here is trusted and nothing is silently green. No action required for soundness; to narrow the worst case, move the work into a supported form (the message names the construct).",
-          "loc": {
-            "file": "openclaw-precision/node_modules/@precision/machine/dist/diagnostic-probe.tsx",
-            "line": 11,
-            "col": 19,
-            "endLine": 11,
-            "endCol": 32
-          }
-        }
-      ],
+      "extraErrors": [],
+      "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
-      "infos": 1,
+      "infos": 0,
       "soundnessFailure": false,
-      "total": 7
+      "total": 0
     },
     "op-dependency-machine-mutant": {
       "hits": [
@@ -1096,87 +844,13 @@
       "misses": [],
       "warningHits": 0,
       "warningMisses": [],
-      "extraErrors": [
-        {
-          "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
-          "severity": "error",
-          "message": "A possibly pending value is read in a scope that serves the committed value and throws while uninitialized: an effect's effect function (createEffect's second argument), createTrackedEffect or onSettled. Read the source in the effect's compute function and pass the value to the effect function.",
-          "loc": {
-            "file": "openclaw-precision/node_modules/@precision/machine/dist/diagnostic-probe.tsx",
-            "line": 13,
-            "col": 5,
-            "endLine": 13,
-            "endCol": 25
-          }
-        },
-        {
-          "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
-          "severity": "error",
-          "message": "A possibly pending value is read in a scope that serves the committed value and throws while uninitialized: an effect's effect function (createEffect's second argument), createTrackedEffect or onSettled. Read the source in the effect's compute function and pass the value to the effect function.",
-          "loc": {
-            "file": "openclaw-precision/node_modules/@precision/machine/dist/diagnostic-probe.tsx",
-            "line": 14,
-            "col": 5,
-            "endLine": 14,
-            "endCol": 27
-          }
-        },
-        {
-          "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
-          "severity": "error",
-          "message": "A possibly pending value is read in a scope that serves the committed value and throws while uninitialized: an effect's effect function (createEffect's second argument), createTrackedEffect or onSettled. Read the source in the effect's compute function and pass the value to the effect function.",
-          "loc": {
-            "file": "openclaw-precision/node_modules/@precision/machine/dist/diagnostic-probe.tsx",
-            "line": 15,
-            "col": 5,
-            "endLine": 15,
-            "endCol": 34
-          }
-        },
-        {
-          "code": "UNHANDLED_HANDLER_FAILURE",
-          "severity": "error",
-          "message": "A handler — an event handler, a callback prop, a promise continuation, a timer or ref callback — may throw or reject and nothing in it catches the failure. A rendered Errored boundary does not catch a handler's rejection. Calls with no failure information (an injected API typed () => Promise<T>, a context method, a platform call) count as possibly failing with unknown. Catch and handle the failure inside the handler (try/catch around the await, or .catch on the promise).",
-          "loc": {
-            "file": "openclaw-precision/node_modules/@precision/machine/dist/diagnostic-probe.tsx",
-            "line": 17,
-            "col": 18,
-            "endLine": 17,
-            "endCol": 50
-          }
-        }
-      ],
-      "extraWarnings": [
-        {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "This code is outside the checked subset. The checker did not refuse the file: values flowing from here are treated as the worst case (possibly pending, possibly failing with unknown), so obligations still surface downstream. Nothing here is trusted and nothing is silently green. No action required for soundness; to narrow the worst case, move the work into a supported form (the message names the construct).",
-          "loc": {
-            "file": "openclaw-precision/node_modules/@precision/machine/dist/diagnostic-probe.tsx",
-            "line": 5,
-            "col": 1,
-            "endLine": 9,
-            "endCol": 2
-          }
-        },
-        {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "This code is outside the checked subset. The checker did not refuse the file: values flowing from here are treated as the worst case (possibly pending, possibly failing with unknown), so obligations still surface downstream. Nothing here is trusted and nothing is silently green. No action required for soundness; to narrow the worst case, move the work into a supported form (the message names the construct).",
-          "loc": {
-            "file": "openclaw-precision/node_modules/@precision/machine/dist/diagnostic-probe.tsx",
-            "line": 11,
-            "col": 19,
-            "endLine": 11,
-            "endCol": 32
-          }
-        }
-      ],
+      "extraErrors": [],
+      "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
-      "infos": 1,
+      "infos": 0,
       "soundnessFailure": false,
-      "total": 8
+      "total": 1
     },
     "op-dependency-string": {
       "hits": [],
@@ -1218,51 +892,13 @@
       "misses": [],
       "warningHits": 0,
       "warningMisses": [],
-      "extraErrors": [
-        {
-          "code": "UNHANDLED_HANDLER_FAILURE",
-          "severity": "error",
-          "message": "A handler — an event handler, a callback prop, a promise continuation, a timer or ref callback — may throw or reject and nothing in it catches the failure. A rendered Errored boundary does not catch a handler's rejection. Calls with no failure information (an injected API typed () => Promise<T>, a context method, a platform call) count as possibly failing with unknown. Catch and handle the failure inside the handler (try/catch around the await, or .catch on the promise).",
-          "loc": {
-            "file": "openclaw-precision/op-e24-remove.tsx",
-            "line": 5,
-            "col": 18,
-            "endLine": 5,
-            "endCol": 45
-          }
-        }
-      ],
-      "extraWarnings": [
-        {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "This code is outside the checked subset. The checker did not refuse the file: values flowing from here are treated as the worst case (possibly pending, possibly failing with unknown), so obligations still surface downstream. Nothing here is trusted and nothing is silently green. No action required for soundness; to narrow the worst case, move the work into a supported form (the message names the construct).",
-          "loc": {
-            "file": "openclaw-precision/op-e24-remove.tsx",
-            "line": 3,
-            "col": 17,
-            "endLine": 3,
-            "endCol": 72
-          }
-        },
-        {
-          "code": "PENDING_ASYNC_IN_HANDLER",
-          "severity": "warn",
-          "message": "A possibly pending value is read in an event handler. An uninitialized read can throw or suspend even though a stale value can be served during refresh. Loading does not protect handlers. Avoid the pending read in the handler, or explicitly handle its uninitialized state and any failure.",
-          "loc": {
-            "file": "openclaw-precision/op-e24-remove.tsx",
-            "line": 4,
-            "col": 39,
-            "endLine": 4,
-            "endCol": 72
-          }
-        }
-      ],
+      "extraErrors": [],
+      "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
       "soundnessFailure": false,
-      "total": 3
+      "total": 0
     },
     "op-e24-remove-mutant": {
       "hits": [
@@ -1277,37 +913,12 @@
       "warningHits": 0,
       "warningMisses": [],
       "extraErrors": [],
-      "extraWarnings": [
-        {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "This code is outside the checked subset. The checker did not refuse the file: values flowing from here are treated as the worst case (possibly pending, possibly failing with unknown), so obligations still surface downstream. Nothing here is trusted and nothing is silently green. No action required for soundness; to narrow the worst case, move the work into a supported form (the message names the construct).",
-          "loc": {
-            "file": "openclaw-precision/op-e24-remove-mutant.tsx",
-            "line": 3,
-            "col": 17,
-            "endLine": 3,
-            "endCol": 72
-          }
-        },
-        {
-          "code": "PENDING_ASYNC_IN_HANDLER",
-          "severity": "warn",
-          "message": "A possibly pending value is read in an event handler. An uninitialized read can throw or suspend even though a stale value can be served during refresh. Loading does not protect handlers. Avoid the pending read in the handler, or explicitly handle its uninitialized state and any failure.",
-          "loc": {
-            "file": "openclaw-precision/op-e24-remove-mutant.tsx",
-            "line": 4,
-            "col": 39,
-            "endLine": 4,
-            "endCol": 72
-          }
-        }
-      ],
+      "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
       "soundnessFailure": false,
-      "total": 3
+      "total": 1
     },
     "op-e28-keydown": {
       "hits": [],
@@ -1315,51 +926,13 @@
       "misses": [],
       "warningHits": 0,
       "warningMisses": [],
-      "extraErrors": [
-        {
-          "code": "UNHANDLED_HANDLER_FAILURE",
-          "severity": "error",
-          "message": "A handler — an event handler, a callback prop, a promise continuation, a timer or ref callback — may throw or reject and nothing in it catches the failure. A rendered Errored boundary does not catch a handler's rejection. Calls with no failure information (an injected API typed () => Promise<T>, a context method, a platform call) count as possibly failing with unknown. Catch and handle the failure inside the handler (try/catch around the await, or .catch on the promise).",
-          "loc": {
-            "file": "openclaw-precision/op-e28-keydown.tsx",
-            "line": 6,
-            "col": 17,
-            "endLine": 6,
-            "endCol": 42
-          }
-        }
-      ],
-      "extraWarnings": [
-        {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "This code is outside the checked subset. The checker did not refuse the file: values flowing from here are treated as the worst case (possibly pending, possibly failing with unknown), so obligations still surface downstream. Nothing here is trusted and nothing is silently green. No action required for soundness; to narrow the worst case, move the work into a supported form (the message names the construct).",
-          "loc": {
-            "file": "openclaw-precision/op-e28-keydown.tsx",
-            "line": 3,
-            "col": 17,
-            "endLine": 3,
-            "endCol": 72
-          }
-        },
-        {
-          "code": "PENDING_ASYNC_IN_HANDLER",
-          "severity": "warn",
-          "message": "A possibly pending value is read in an event handler. An uninitialized read can throw or suspend even though a stale value can be served during refresh. Loading does not protect handlers. Avoid the pending read in the handler, or explicitly handle its uninitialized state and any failure.",
-          "loc": {
-            "file": "openclaw-precision/op-e28-keydown.tsx",
-            "line": 4,
-            "col": 39,
-            "endLine": 4,
-            "endCol": 72
-          }
-        }
-      ],
+      "extraErrors": [],
+      "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
       "soundnessFailure": false,
-      "total": 3
+      "total": 0
     },
     "op-e28-keydown-mutant": {
       "hits": [
@@ -1374,37 +947,12 @@
       "warningHits": 0,
       "warningMisses": [],
       "extraErrors": [],
-      "extraWarnings": [
-        {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "This code is outside the checked subset. The checker did not refuse the file: values flowing from here are treated as the worst case (possibly pending, possibly failing with unknown), so obligations still surface downstream. Nothing here is trusted and nothing is silently green. No action required for soundness; to narrow the worst case, move the work into a supported form (the message names the construct).",
-          "loc": {
-            "file": "openclaw-precision/op-e28-keydown-mutant.tsx",
-            "line": 3,
-            "col": 17,
-            "endLine": 3,
-            "endCol": 72
-          }
-        },
-        {
-          "code": "PENDING_ASYNC_IN_HANDLER",
-          "severity": "warn",
-          "message": "A possibly pending value is read in an event handler. An uninitialized read can throw or suspend even though a stale value can be served during refresh. Loading does not protect handlers. Avoid the pending read in the handler, or explicitly handle its uninitialized state and any failure.",
-          "loc": {
-            "file": "openclaw-precision/op-e28-keydown-mutant.tsx",
-            "line": 4,
-            "col": 39,
-            "endLine": 4,
-            "endCol": 72
-          }
-        }
-      ],
+      "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
       "soundnessFailure": false,
-      "total": 3
+      "total": 1
     },
     "op-e30-select": {
       "hits": [],
@@ -1412,51 +960,13 @@
       "misses": [],
       "warningHits": 0,
       "warningMisses": [],
-      "extraErrors": [
-        {
-          "code": "UNHANDLED_HANDLER_FAILURE",
-          "severity": "error",
-          "message": "A handler — an event handler, a callback prop, a promise continuation, a timer or ref callback — may throw or reject and nothing in it catches the failure. A rendered Errored boundary does not catch a handler's rejection. Calls with no failure information (an injected API typed () => Promise<T>, a context method, a platform call) count as possibly failing with unknown. Catch and handle the failure inside the handler (try/catch around the await, or .catch on the promise).",
-          "loc": {
-            "file": "openclaw-precision/op-e30-select.tsx",
-            "line": 6,
-            "col": 18,
-            "endLine": 6,
-            "endCol": 47
-          }
-        }
-      ],
-      "extraWarnings": [
-        {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "This code is outside the checked subset. The checker did not refuse the file: values flowing from here are treated as the worst case (possibly pending, possibly failing with unknown), so obligations still surface downstream. Nothing here is trusted and nothing is silently green. No action required for soundness; to narrow the worst case, move the work into a supported form (the message names the construct).",
-          "loc": {
-            "file": "openclaw-precision/op-e30-select.tsx",
-            "line": 3,
-            "col": 17,
-            "endLine": 3,
-            "endCol": 72
-          }
-        },
-        {
-          "code": "PENDING_ASYNC_IN_HANDLER",
-          "severity": "warn",
-          "message": "A possibly pending value is read in an event handler. An uninitialized read can throw or suspend even though a stale value can be served during refresh. Loading does not protect handlers. Avoid the pending read in the handler, or explicitly handle its uninitialized state and any failure.",
-          "loc": {
-            "file": "openclaw-precision/op-e30-select.tsx",
-            "line": 4,
-            "col": 37,
-            "endLine": 4,
-            "endCol": 62
-          }
-        }
-      ],
+      "extraErrors": [],
+      "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
       "soundnessFailure": false,
-      "total": 3
+      "total": 0
     },
     "op-e30-select-mutant": {
       "hits": [
@@ -1471,37 +981,12 @@
       "warningHits": 0,
       "warningMisses": [],
       "extraErrors": [],
-      "extraWarnings": [
-        {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "This code is outside the checked subset. The checker did not refuse the file: values flowing from here are treated as the worst case (possibly pending, possibly failing with unknown), so obligations still surface downstream. Nothing here is trusted and nothing is silently green. No action required for soundness; to narrow the worst case, move the work into a supported form (the message names the construct).",
-          "loc": {
-            "file": "openclaw-precision/op-e30-select-mutant.tsx",
-            "line": 3,
-            "col": 17,
-            "endLine": 3,
-            "endCol": 72
-          }
-        },
-        {
-          "code": "PENDING_ASYNC_IN_HANDLER",
-          "severity": "warn",
-          "message": "A possibly pending value is read in an event handler. An uninitialized read can throw or suspend even though a stale value can be served during refresh. Loading does not protect handlers. Avoid the pending read in the handler, or explicitly handle its uninitialized state and any failure.",
-          "loc": {
-            "file": "openclaw-precision/op-e30-select-mutant.tsx",
-            "line": 4,
-            "col": 37,
-            "endLine": 4,
-            "endCol": 62
-          }
-        }
-      ],
+      "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
       "soundnessFailure": false,
-      "total": 3
+      "total": 1
     },
     "op-e40-reselect": {
       "hits": [],
@@ -1509,51 +994,13 @@
       "misses": [],
       "warningHits": 0,
       "warningMisses": [],
-      "extraErrors": [
-        {
-          "code": "UNHANDLED_HANDLER_FAILURE",
-          "severity": "error",
-          "message": "A handler — an event handler, a callback prop, a promise continuation, a timer or ref callback — may throw or reject and nothing in it catches the failure. A rendered Errored boundary does not catch a handler's rejection. Calls with no failure information (an injected API typed () => Promise<T>, a context method, a platform call) count as possibly failing with unknown. Catch and handle the failure inside the handler (try/catch around the await, or .catch on the promise).",
-          "loc": {
-            "file": "openclaw-precision/op-e40-reselect.tsx",
-            "line": 4,
-            "col": 38,
-            "endLine": 4,
-            "endCol": 79
-          }
-        }
-      ],
-      "extraWarnings": [
-        {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "This code is outside the checked subset. The checker did not refuse the file: values flowing from here are treated as the worst case (possibly pending, possibly failing with unknown), so obligations still surface downstream. Nothing here is trusted and nothing is silently green. No action required for soundness; to narrow the worst case, move the work into a supported form (the message names the construct).",
-          "loc": {
-            "file": "openclaw-precision/op-e40-reselect.tsx",
-            "line": 3,
-            "col": 17,
-            "endLine": 3,
-            "endCol": 57
-          }
-        },
-        {
-          "code": "PENDING_ASYNC_IN_HANDLER",
-          "severity": "warn",
-          "message": "A possibly pending value is read in an event handler. An uninitialized read can throw or suspend even though a stale value can be served during refresh. Loading does not protect handlers. Avoid the pending read in the handler, or explicitly handle its uninitialized state and any failure.",
-          "loc": {
-            "file": "openclaw-precision/op-e40-reselect.tsx",
-            "line": 4,
-            "col": 55,
-            "endLine": 4,
-            "endCol": 75
-          }
-        }
-      ],
+      "extraErrors": [],
+      "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
       "soundnessFailure": false,
-      "total": 3
+      "total": 0
     },
     "op-e40-reselect-mutant": {
       "hits": [
@@ -1568,37 +1015,12 @@
       "warningHits": 0,
       "warningMisses": [],
       "extraErrors": [],
-      "extraWarnings": [
-        {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "This code is outside the checked subset. The checker did not refuse the file: values flowing from here are treated as the worst case (possibly pending, possibly failing with unknown), so obligations still surface downstream. Nothing here is trusted and nothing is silently green. No action required for soundness; to narrow the worst case, move the work into a supported form (the message names the construct).",
-          "loc": {
-            "file": "openclaw-precision/op-e40-reselect-mutant.tsx",
-            "line": 3,
-            "col": 17,
-            "endLine": 3,
-            "endCol": 57
-          }
-        },
-        {
-          "code": "PENDING_ASYNC_IN_HANDLER",
-          "severity": "warn",
-          "message": "A possibly pending value is read in an event handler. An uninitialized read can throw or suspend even though a stale value can be served during refresh. Loading does not protect handlers. Avoid the pending read in the handler, or explicitly handle its uninitialized state and any failure.",
-          "loc": {
-            "file": "openclaw-precision/op-e40-reselect-mutant.tsx",
-            "line": 4,
-            "col": 55,
-            "endLine": 4,
-            "endCol": 75
-          }
-        }
-      ],
+      "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
       "soundnessFailure": false,
-      "total": 3
+      "total": 1
     }
   },
   "null": {

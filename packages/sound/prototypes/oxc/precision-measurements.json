@@ -1,0 +1,6278 @@
+{
+  "generatedAt": "2026-10-22T21:00:54.882Z",
+  "runs": 5,
+  "groups": {
+    "all": {
+      "fixtures": 173,
+      "hits": 102,
+      "misses": 1,
+      "warningHits": 11,
+      "warningMisses": 0,
+      "infoHits": 5,
+      "infoMisses": 0,
+      "extraErrors": 0,
+      "extraWarnings": 0,
+      "soundnessFailures": 1,
+      "mutants": 58,
+      "missedMutants": 1,
+      "inferenceRequests": 62,
+      "inferenceSites": 58,
+      "worstCaseSites": 59,
+      "partialSites": 8,
+      "coldMedianMs": 0.30637500000000273,
+      "coldSumMs": 59.672332
+    },
+    "cases": {
+      "fixtures": 81,
+      "hits": 41,
+      "misses": 0,
+      "warningHits": 8,
+      "warningMisses": 0,
+      "infoHits": 5,
+      "infoMisses": 0,
+      "extraErrors": 0,
+      "extraWarnings": 0,
+      "soundnessFailures": 0,
+      "mutants": 0,
+      "missedMutants": 0,
+      "inferenceRequests": 21,
+      "inferenceSites": 18,
+      "worstCaseSites": 18,
+      "partialSites": 8,
+      "coldMedianMs": 0.32012500000000443,
+      "coldSumMs": 26.157082999999986
+    },
+    "equipment": {
+      "fixtures": 1,
+      "hits": 3,
+      "misses": 0,
+      "warningHits": 2,
+      "warningMisses": 0,
+      "infoHits": 0,
+      "infoMisses": 0,
+      "extraErrors": 0,
+      "extraWarnings": 0,
+      "soundnessFailures": 0,
+      "mutants": 0,
+      "missedMutants": 0,
+      "inferenceRequests": 13,
+      "inferenceSites": 13,
+      "worstCaseSites": 12,
+      "partialSites": 0,
+      "coldMedianMs": 7.460333999999989,
+      "coldSumMs": 7.460333999999989
+    },
+    "mutants": {
+      "fixtures": 27,
+      "hits": 27,
+      "misses": 0,
+      "warningHits": 1,
+      "warningMisses": 0,
+      "infoHits": 0,
+      "infoMisses": 0,
+      "extraErrors": 0,
+      "extraWarnings": 0,
+      "soundnessFailures": 0,
+      "mutants": 27,
+      "missedMutants": 0,
+      "inferenceRequests": 13,
+      "inferenceSites": 12,
+      "worstCaseSites": 12,
+      "partialSites": 0,
+      "coldMedianMs": 0.3559579999999869,
+      "coldSumMs": 9.361459999999965
+    },
+    "openclaw": {
+      "fixtures": 34,
+      "hits": 17,
+      "misses": 0,
+      "warningHits": 0,
+      "warningMisses": 0,
+      "infoHits": 0,
+      "infoMisses": 0,
+      "extraErrors": 0,
+      "extraWarnings": 0,
+      "soundnessFailures": 0,
+      "mutants": 16,
+      "missedMutants": 0,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "worstCaseSites": 0,
+      "partialSites": 0,
+      "coldMedianMs": 0.31937499999997954,
+      "coldSumMs": 10.711707999999788
+    },
+    "openclaw-precision": {
+      "fixtures": 30,
+      "hits": 14,
+      "misses": 1,
+      "warningHits": 0,
+      "warningMisses": 0,
+      "infoHits": 0,
+      "infoMisses": 0,
+      "extraErrors": 0,
+      "extraWarnings": 0,
+      "soundnessFailures": 1,
+      "mutants": 15,
+      "missedMutants": 1,
+      "inferenceRequests": 15,
+      "inferenceSites": 15,
+      "worstCaseSites": 17,
+      "partialSites": 0,
+      "coldMedianMs": 0.21366699999998673,
+      "coldSumMs": 5.981747000000269
+    }
+  },
+  "fixtures": [
+    {
+      "id": "context-plain-object",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.6977079999999987,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "context-default",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.3984999999999985,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "context-missing-provider",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "CONTEXT_PROVIDER_MISSING",
+          "file": "context-missing-provider.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.383541000000001,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "context-provider-over-default",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+          "file": "context-provider-over-default.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.4450000000000003,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "context-signal-view",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.42891700000000554,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "context-signal-setup",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "context-signal-setup.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.4479159999999993,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "context-factory-memo",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.44362499999999727,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "context-helper-alias",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.40508299999999764,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "context-method-view",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.42345799999999656,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "context-method-setup",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "context-method-setup.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.4508340000000004,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "context-async-covered",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.5574999999999974,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "context-async-uncovered",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+          "file": "context-async-uncovered.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.4571669999999983,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "context-async-setup",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "PENDING_ASYNC_UNTRACKED_READ",
+          "file": "context-async-setup.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.4730419999999995,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "context-pending-handler",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 1,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.39620800000000145,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "context-failing-memo-covered",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.4474170000000015,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "context-failing-handler",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "context-failing-handler.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.42004199999999514,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "context-promise-caught",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.4257089999999977,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "context-promise-uncaught",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "context-promise-uncaught.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.4098330000000061,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "context-optional-api-caught",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.47637500000000443,
+      "inferenceRequests": 2,
+      "inferenceSites": 1,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "cases/context-optional-api-caught.tsx",
+            "line": 5,
+            "col": 104,
+            "endLine": 5,
+            "endCol": 117
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "cases/context-optional-api-caught.tsx",
+            "line": 5,
+            "col": 104,
+            "endLine": 5,
+            "endCol": 117
+          },
+          "reason": "call needs inference or an analyzable body"
+        }
+      ],
+      "worstCaseSites": [
+        {
+          "loc": {
+            "file": "cases/context-optional-api-caught.tsx",
+            "line": 5,
+            "col": 104,
+            "endLine": 5,
+            "endCol": 117
+          },
+          "reasons": [
+            "unknown declared failures",
+            "unknown callable"
+          ]
+        }
+      ],
+      "worstCaseSiteCount": 1,
+      "partialSites": 0
+    },
+    {
+      "id": "context-optional-api-uncaught",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "context-optional-api-uncaught.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.4607920000000121,
+      "inferenceRequests": 2,
+      "inferenceSites": 1,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "cases/context-optional-api-uncaught.tsx",
+            "line": 5,
+            "col": 104,
+            "endLine": 5,
+            "endCol": 117
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "cases/context-optional-api-uncaught.tsx",
+            "line": 5,
+            "col": 104,
+            "endLine": 5,
+            "endCol": 117
+          },
+          "reason": "call needs inference or an analyzable body"
+        }
+      ],
+      "worstCaseSites": [
+        {
+          "loc": {
+            "file": "cases/context-optional-api-uncaught.tsx",
+            "line": 5,
+            "col": 104,
+            "endLine": 5,
+            "endCol": 117
+          },
+          "reasons": [
+            "unknown declared failures",
+            "unknown callable"
+          ]
+        }
+      ],
+      "worstCaseSiteCount": 1,
+      "partialSites": 0
+    },
+    {
+      "id": "context-injected-sync",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "context-injected-sync.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.3891670000000005,
+      "inferenceRequests": 1,
+      "inferenceSites": 1,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "cases/context-injected-sync.tsx",
+            "line": 7,
+            "col": 71,
+            "endLine": 7,
+            "endCol": 84
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "worstCaseSites": [
+        {
+          "loc": {
+            "file": "cases/context-injected-sync.tsx",
+            "line": 7,
+            "col": 71,
+            "endLine": 7,
+            "endCol": 84
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        }
+      ],
+      "worstCaseSiteCount": 1,
+      "partialSites": 0
+    },
+    {
+      "id": "context-nested-shadow",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.39441700000000424,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "context-provider-identity",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.40920799999999247,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "context-module-escape",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+          "file": "context-module-escape.tsx",
+          "count": 1
+        },
+        {
+          "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+          "file": "context-module-escape.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 1,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 3,
+      "coldMs": 0.4784169999999932,
+      "inferenceRequests": 2,
+      "inferenceSites": 2,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "cases/context-module-escape.tsx",
+            "line": 7,
+            "col": 45,
+            "endLine": 7,
+            "endCol": 56
+          },
+          "reason": "context stored in module state"
+        },
+        {
+          "loc": {
+            "file": "cases/context-module-escape.tsx",
+            "line": 7,
+            "col": 69,
+            "endLine": 7,
+            "endCol": 83
+          },
+          "reason": "unknown method has no failure or result facts"
+        }
+      ],
+      "worstCaseSites": [
+        {
+          "loc": {
+            "file": "cases/context-module-escape.tsx",
+            "line": 7,
+            "col": 45,
+            "endLine": 7,
+            "endCol": 56
+          },
+          "reasons": [
+            "context stored in module state"
+          ]
+        },
+        {
+          "loc": {
+            "file": "cases/context-module-escape.tsx",
+            "line": 7,
+            "col": 69,
+            "endLine": 7,
+            "endCol": 83
+          },
+          "reasons": [
+            "escaped context member"
+          ]
+        }
+      ],
+      "worstCaseSiteCount": 2,
+      "partialSites": 1
+    },
+    {
+      "id": "context-unknown-escape",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+          "file": "context-unknown-escape.tsx",
+          "count": 1
+        },
+        {
+          "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+          "file": "context-unknown-escape.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 1,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 3,
+      "coldMs": 0.47512499999999136,
+      "inferenceRequests": 3,
+      "inferenceSites": 2,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "cases/context-unknown-escape.tsx",
+            "line": 7,
+            "col": 51,
+            "endLine": 7,
+            "endCol": 59
+          },
+          "reason": "context passed to unknown code"
+        },
+        {
+          "loc": {
+            "file": "cases/context-unknown-escape.tsx",
+            "line": 7,
+            "col": 51,
+            "endLine": 7,
+            "endCol": 59
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "cases/context-unknown-escape.tsx",
+            "line": 7,
+            "col": 108,
+            "endLine": 7,
+            "endCol": 116
+          },
+          "reason": "unknown method has no failure or result facts"
+        }
+      ],
+      "worstCaseSites": [
+        {
+          "loc": {
+            "file": "cases/context-unknown-escape.tsx",
+            "line": 7,
+            "col": 51,
+            "endLine": 7,
+            "endCol": 59
+          },
+          "reasons": [
+            "context passed to unknown code",
+            "unknown declared failures"
+          ]
+        },
+        {
+          "loc": {
+            "file": "cases/context-unknown-escape.tsx",
+            "line": 7,
+            "col": 108,
+            "endLine": 7,
+            "endCol": 116
+          },
+          "reasons": [
+            "escaped context member"
+          ]
+        }
+      ],
+      "worstCaseSiteCount": 2,
+      "partialSites": 1
+    },
+    {
+      "id": "context-prop-child-boundaries",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.42129099999999653,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "context-prop-caller-boundaries",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.46033400000000313,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "context-prop-uncovered",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+          "file": "context-prop-uncovered.tsx",
+          "count": 1
+        },
+        {
+          "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+          "file": "context-prop-uncovered.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 2,
+      "coldMs": 0.40287499999999454,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "context-method-write-handler",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.4086250000000007,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "counter",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.2314580000000035,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "props",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.07995800000000486,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "inline-event",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.20324999999999704,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "named-event",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.2047500000000042,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "catch",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.2115829999999903,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "callback-read",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.21487500000000637,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "setup-read",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "setup-read.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.1925420000000031,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "return-ternary",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "return-ternary.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.18320900000000506,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "return-and",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "return-and.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.18079099999999926,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "return-null",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.3206250000000068,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "named-callback-in-setup",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "named-callback-in-setup.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.2239579999999961,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "array-callback-in-setup",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "array-callback-in-setup.tsx",
+          "count": 2
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 2,
+      "coldMs": 0.32012500000000443,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "getter-read-in-setup",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "getter-read-in-setup.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.33066699999999116,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "memo-write",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "REACTIVE_WRITE_IN_OWNED_SCOPE",
+          "file": "memo-write.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.24254200000000026,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "untrack-in-every-host",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.424082999999996,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "reader-helpers",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.2955830000000077,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "props-interface-live",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.2526670000000024,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "props-accessor-callers",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.30637500000000273,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "callback-prop-forwarded",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.3071249999999992,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "recursion-failing-prop",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.43737499999998875,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "async-memo-reads",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.20300000000000296,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "async-memo-nested-function",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.3692909999999898,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "async-event-reads",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.20862499999999784,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "async-read",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 1,
+      "infoMisses": 0,
+      "infos": 1,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.2064579999999978,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "colored-prop",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 1,
+      "infoMisses": 0,
+      "infos": 1,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.22358400000001666,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "promise-catch",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 1,
+      "infoMisses": 0,
+      "infos": 1,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.20629200000001902,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "pending-root",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+          "file": "pending-root.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.31679099999999494,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "iife-pending-root",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+          "file": "iife-pending-root.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.293124999999975,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "async-setup-reads",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "async-setup-reads.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.18645799999998758,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "native-latest-pending",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 1,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 1,
+      "soundnessFailure": false,
+      "total": 3,
+      "coldMs": 0.19308300000000145,
+      "inferenceRequests": 2,
+      "inferenceSites": 2,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "cases/native-latest-pending.tsx",
+            "line": 1,
+            "col": 115,
+            "endLine": 1,
+            "endCol": 124
+          },
+          "reason": "Solid latest is outside the modeled subset"
+        },
+        {
+          "loc": {
+            "file": "cases/native-latest-pending.tsx",
+            "line": 1,
+            "col": 126,
+            "endLine": 1,
+            "endCol": 138
+          },
+          "reason": "Solid isPending is outside the modeled subset"
+        }
+      ],
+      "worstCaseSites": [
+        {
+          "loc": {
+            "file": "cases/native-latest-pending.tsx",
+            "line": 1,
+            "col": 115,
+            "endLine": 1,
+            "endCol": 124
+          },
+          "reasons": [
+            "Solid latest is outside the modeled subset"
+          ]
+        },
+        {
+          "loc": {
+            "file": "cases/native-latest-pending.tsx",
+            "line": 1,
+            "col": 126,
+            "endLine": 1,
+            "endCol": 138
+          },
+          "reasons": [
+            "Solid isPending is outside the modeled subset"
+          ]
+        }
+      ],
+      "worstCaseSiteCount": 2,
+      "partialSites": 2
+    },
+    {
+      "id": "native-for-indexed",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.20120799999997985,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "throw-error",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "throw-error.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.18799999999998818,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "promise-event",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "promise-event.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.19916700000001697,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "handled-catch",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.19220799999999372,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "rethrow-catch",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 1,
+      "infoMisses": 0,
+      "infos": 1,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.20079200000000696,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "unknown-rethrow-catch",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 1,
+      "infoMisses": 0,
+      "infos": 1,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.200333999999998,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "finally-nested-function",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.37758300000001555,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "plain-callback-throw-under-errored",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.49279200000000856,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "plain-callback-throw-in-memo",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+          "file": "plain-callback-throw-in-memo.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.38120899999998414,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "effect-reads-failing-memo-at-root",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+          "file": "effect-reads-failing-memo-at-root.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.35325000000000273,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "foreign-route-failure",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+          "file": "foreign-route-failure.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.19958300000001827,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "setup-promise-caught",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.21487500000000637,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "setup-promise-rejects",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "SETUP_MAY_THROW",
+          "file": "setup-promise-rejects.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.23066600000001358,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "callback-prop-throws",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "callback-prop-throws.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.2162919999999815,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "callback-prop-unseen",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "callback-prop-unseen.tsx",
+          "count": 1
+        },
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "callback-prop-unseen.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 1,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 3,
+      "coldMs": 0.2586250000000234,
+      "inferenceRequests": 3,
+      "inferenceSites": 3,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "cases/callback-prop-unseen.tsx",
+            "line": 6,
+            "col": 33,
+            "endLine": 6,
+            "endCol": 47
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "cases/callback-prop-unseen.tsx",
+            "line": 12,
+            "col": 20,
+            "endLine": 12,
+            "endCol": 29
+          },
+          "reason": "JSX spread"
+        },
+        {
+          "loc": {
+            "file": "cases/callback-prop-unseen.tsx",
+            "line": 3,
+            "col": 33,
+            "endLine": 3,
+            "endCol": 47
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "worstCaseSites": [
+        {
+          "loc": {
+            "file": "cases/callback-prop-unseen.tsx",
+            "line": 6,
+            "col": 33,
+            "endLine": 6,
+            "endCol": 47
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        },
+        {
+          "loc": {
+            "file": "cases/callback-prop-unseen.tsx",
+            "line": 12,
+            "col": 20,
+            "endLine": 12,
+            "endCol": 29
+          },
+          "reasons": [
+            "JSX spread"
+          ]
+        },
+        {
+          "loc": {
+            "file": "cases/callback-prop-unseen.tsx",
+            "line": 3,
+            "col": 33,
+            "endLine": 3,
+            "endCol": 47
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        }
+      ],
+      "worstCaseSiteCount": 3,
+      "partialSites": 1
+    },
+    {
+      "id": "async-handler-destructured-uncaught",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "async-handler-destructured-uncaught.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.20508399999999938,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "kept-promise-rejects-at-its-await",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "kept-promise-rejects-at-its-await.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.32279199999999264,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "kept-promise-caught-by-its-chain",
+      "group": "cases",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.32116599999997675,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "timer-callback-failure",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "timer-callback-failure.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.2372919999999965,
+      "inferenceRequests": 1,
+      "inferenceSites": 1,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "cases/timer-callback-failure.tsx",
+            "line": 1,
+            "col": 174,
+            "endLine": 1,
+            "endCol": 180
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "worstCaseSites": [
+        {
+          "loc": {
+            "file": "cases/timer-callback-failure.tsx",
+            "line": 1,
+            "col": 174,
+            "endLine": 1,
+            "endCol": 180
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        }
+      ],
+      "worstCaseSiteCount": 1,
+      "partialSites": 0
+    },
+    {
+      "id": "native-optimistic-store-basic",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "native-optimistic-store-basic.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 1,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 2,
+      "coldMs": 0.23158300000000054,
+      "inferenceRequests": 2,
+      "inferenceSites": 2,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "cases/native-optimistic-store-basic.tsx",
+            "line": 1,
+            "col": 88,
+            "endLine": 1,
+            "endCol": 116
+          },
+          "reason": "Solid createOptimisticStore is outside the modeled subset"
+        },
+        {
+          "loc": {
+            "file": "cases/native-optimistic-store-basic.tsx",
+            "line": 1,
+            "col": 145,
+            "endLine": 1,
+            "endCol": 160
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "worstCaseSites": [
+        {
+          "loc": {
+            "file": "cases/native-optimistic-store-basic.tsx",
+            "line": 1,
+            "col": 88,
+            "endLine": 1,
+            "endCol": 116
+          },
+          "reasons": [
+            "Solid createOptimisticStore is outside the modeled subset"
+          ]
+        },
+        {
+          "loc": {
+            "file": "cases/native-optimistic-store-basic.tsx",
+            "line": 1,
+            "col": 145,
+            "endLine": 1,
+            "endCol": 160
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        }
+      ],
+      "worstCaseSiteCount": 2,
+      "partialSites": 1
+    },
+    {
+      "id": "event-updater",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "event-updater.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 1,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 2,
+      "coldMs": 0.25070800000000304,
+      "inferenceRequests": 2,
+      "inferenceSites": 2,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "cases/event-updater.tsx",
+            "line": 1,
+            "col": 204,
+            "endLine": 1,
+            "endCol": 222
+          },
+          "reason": "Solid createStore is outside the modeled subset"
+        },
+        {
+          "loc": {
+            "file": "cases/event-updater.tsx",
+            "line": 1,
+            "col": 251,
+            "endLine": 1,
+            "endCol": 270
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "worstCaseSites": [
+        {
+          "loc": {
+            "file": "cases/event-updater.tsx",
+            "line": 1,
+            "col": 204,
+            "endLine": 1,
+            "endCol": 222
+          },
+          "reasons": [
+            "Solid createStore is outside the modeled subset"
+          ]
+        },
+        {
+          "loc": {
+            "file": "cases/event-updater.tsx",
+            "line": 1,
+            "col": 251,
+            "endLine": 1,
+            "endCol": 270
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        }
+      ],
+      "worstCaseSiteCount": 2,
+      "partialSites": 1
+    },
+    {
+      "id": "ref-event-reads",
+      "group": "cases",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "ref-event-reads.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 1,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 2,
+      "coldMs": 0.22350000000000136,
+      "inferenceRequests": 1,
+      "inferenceSites": 1,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "cases/ref-event-reads.tsx",
+            "line": 1,
+            "col": 103,
+            "endLine": 1,
+            "endCol": 144
+          },
+          "reason": "reactive write in ref: ownership is not modeled"
+        }
+      ],
+      "worstCaseSites": [
+        {
+          "loc": {
+            "file": "cases/ref-event-reads.tsx",
+            "line": 1,
+            "col": 103,
+            "endLine": 1,
+            "endCol": 144
+          },
+          "reasons": [
+            "reactive write in ref: ownership is not modeled"
+          ]
+        }
+      ],
+      "worstCaseSiteCount": 1,
+      "partialSites": 1
+    },
+    {
+      "id": "equipment-checkout",
+      "group": "equipment",
+      "mutant": false,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "src/components/EquipmentRow.tsx",
+          "count": 1
+        },
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "src/components/EquipmentRow.tsx",
+          "count": 1
+        },
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "src/components/FailureControls.tsx",
+          "count": 8
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 2,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 12,
+      "coldMs": 7.460333999999989,
+      "inferenceRequests": 13,
+      "inferenceSites": 13,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "equipment/src/service.ts",
+            "line": 21,
+            "col": 54,
+            "endLine": 21,
+            "endCol": 64
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "equipment/src/components/FailureControls.tsx",
+            "line": 7,
+            "col": 46,
+            "endLine": 7,
+            "endCol": 77
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "equipment/src/components/FailureControls.tsx",
+            "line": 9,
+            "col": 549,
+            "endLine": 9,
+            "endCol": 576
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "equipment/src/components/FailureControls.tsx",
+            "line": 9,
+            "col": 646,
+            "endLine": 9,
+            "endCol": 673
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "equipment/src/components/Inventory.tsx",
+            "line": 11,
+            "col": 57,
+            "endLine": 11,
+            "endCol": 134
+          },
+          "reason": "call needs inference or an analyzable body"
+        },
+        {
+          "loc": {
+            "file": "equipment/src/service.ts",
+            "line": 38,
+            "col": 42,
+            "endLine": 38,
+            "endCol": 64
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "equipment/src/model.ts",
+            "line": 8,
+            "col": 83,
+            "endLine": 8,
+            "endCol": 96
+          },
+          "reason": "member shape needs inference"
+        },
+        {
+          "loc": {
+            "file": "equipment/src/service.ts",
+            "line": 39,
+            "col": 32,
+            "endLine": 39,
+            "endCol": 46
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "equipment/src/service.ts",
+            "line": 37,
+            "col": 41,
+            "endLine": 37,
+            "endCol": 62
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "equipment/src/api.ts",
+            "line": 32,
+            "col": 10,
+            "endLine": 32,
+            "endCol": 27
+          },
+          "reason": "call needs inference or an analyzable body"
+        },
+        {
+          "loc": {
+            "file": "equipment/src/api.ts",
+            "line": 32,
+            "col": 32,
+            "endLine": 32,
+            "endCol": 53
+          },
+          "reason": "call needs inference or an analyzable body"
+        },
+        {
+          "loc": {
+            "file": "equipment/src/components/Detail.tsx",
+            "line": 6,
+            "col": 62,
+            "endLine": 6,
+            "endCol": 90
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "equipment/src/service.ts",
+            "line": 36,
+            "col": 35,
+            "endLine": 36,
+            "endCol": 52
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "worstCaseSites": [
+        {
+          "loc": {
+            "file": "equipment/src/service.ts",
+            "line": 21,
+            "col": 54,
+            "endLine": 21,
+            "endCol": 64
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        },
+        {
+          "loc": {
+            "file": "equipment/src/components/FailureControls.tsx",
+            "line": 7,
+            "col": 46,
+            "endLine": 7,
+            "endCol": 77
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        },
+        {
+          "loc": {
+            "file": "equipment/src/components/FailureControls.tsx",
+            "line": 9,
+            "col": 549,
+            "endLine": 9,
+            "endCol": 576
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        },
+        {
+          "loc": {
+            "file": "equipment/src/components/FailureControls.tsx",
+            "line": 9,
+            "col": 646,
+            "endLine": 9,
+            "endCol": 673
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        },
+        {
+          "loc": {
+            "file": "equipment/src/components/Inventory.tsx",
+            "line": 11,
+            "col": 57,
+            "endLine": 11,
+            "endCol": 134
+          },
+          "reasons": [
+            "unknown callable"
+          ]
+        },
+        {
+          "loc": {
+            "file": "equipment/src/service.ts",
+            "line": 38,
+            "col": 42,
+            "endLine": 38,
+            "endCol": 64
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        },
+        {
+          "loc": {
+            "file": "equipment/src/service.ts",
+            "line": 39,
+            "col": 32,
+            "endLine": 39,
+            "endCol": 46
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        },
+        {
+          "loc": {
+            "file": "equipment/src/service.ts",
+            "line": 37,
+            "col": 41,
+            "endLine": 37,
+            "endCol": 62
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        },
+        {
+          "loc": {
+            "file": "equipment/src/api.ts",
+            "line": 32,
+            "col": 10,
+            "endLine": 32,
+            "endCol": 27
+          },
+          "reasons": [
+            "unknown callable"
+          ]
+        },
+        {
+          "loc": {
+            "file": "equipment/src/api.ts",
+            "line": 32,
+            "col": 32,
+            "endLine": 32,
+            "endCol": 53
+          },
+          "reasons": [
+            "unknown callable"
+          ]
+        },
+        {
+          "loc": {
+            "file": "equipment/src/components/Detail.tsx",
+            "line": 6,
+            "col": 62,
+            "endLine": 6,
+            "endCol": 90
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        },
+        {
+          "loc": {
+            "file": "equipment/src/service.ts",
+            "line": 36,
+            "col": 35,
+            "endLine": 36,
+            "endCol": 52
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        }
+      ],
+      "worstCaseSiteCount": 12,
+      "partialSites": 0
+    },
+    {
+      "id": "m-context-loading-removed",
+      "group": "mutants",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+          "file": "m-context-loading-removed.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.3982499999999902,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "m-context-errored-removed",
+      "group": "mutants",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+          "file": "m-context-errored-removed.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.3927500000000066,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "m-context-catch-removed",
+      "group": "mutants",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "m-context-catch-removed.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.4039589999999862,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "m-context-optional-catch-removed",
+      "group": "mutants",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "m-context-optional-catch-removed.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.40795899999997687,
+      "inferenceRequests": 2,
+      "inferenceSites": 1,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "mutants/m-context-optional-catch-removed.tsx",
+            "line": 5,
+            "col": 104,
+            "endLine": 5,
+            "endCol": 117
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "mutants/m-context-optional-catch-removed.tsx",
+            "line": 5,
+            "col": 104,
+            "endLine": 5,
+            "endCol": 117
+          },
+          "reason": "call needs inference or an analyzable body"
+        }
+      ],
+      "worstCaseSites": [
+        {
+          "loc": {
+            "file": "mutants/m-context-optional-catch-removed.tsx",
+            "line": 5,
+            "col": 104,
+            "endLine": 5,
+            "endCol": 117
+          },
+          "reasons": [
+            "unknown declared failures",
+            "unknown callable"
+          ]
+        }
+      ],
+      "worstCaseSiteCount": 1,
+      "partialSites": 0
+    },
+    {
+      "id": "m-context-provider-removed",
+      "group": "mutants",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "CONTEXT_PROVIDER_MISSING",
+          "file": "m-context-provider-removed.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.3274159999999995,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "m-context-default-removed",
+      "group": "mutants",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "CONTEXT_PROVIDER_MISSING",
+          "file": "m-context-default-removed.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.3377499999999998,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "m-context-shadow-removed",
+      "group": "mutants",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+          "file": "m-context-shadow-removed.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.3806249999999807,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "m-context-alias-setup",
+      "group": "mutants",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "m-context-alias-setup.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.3844579999999951,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "m-context-method-write-memo",
+      "group": "mutants",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "REACTIVE_WRITE_IN_OWNED_SCOPE",
+          "file": "m-context-method-write-memo.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.38579200000000924,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "m-context-prop-child-loading-removed",
+      "group": "mutants",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+          "file": "m-context-prop-child-loading-removed.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.4329999999999927,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "m-context-prop-child-errored-removed",
+      "group": "mutants",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+          "file": "m-context-prop-child-errored-removed.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.3925410000000227,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "m-context-read-to-handler",
+      "group": "mutants",
+      "mutant": true,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 1,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.3888340000000028,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "m-loading-removed",
+      "group": "mutants",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+          "file": "m-loading-removed.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.3218339999999955,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "m-errored-removed",
+      "group": "mutants",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+          "file": "m-errored-removed.tsx",
+          "count": 1
+        },
+        {
+          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+          "file": "m-errored-removed.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 2,
+      "coldMs": 0.479959000000008,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "m-catch-removed",
+      "group": "mutants",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "m-catch-removed.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.3128340000000094,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "m-read-moved-to-setup",
+      "group": "mutants",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "m-read-moved-to-setup.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.2094579999999837,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "m-write-in-memo",
+      "group": "mutants",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "REACTIVE_WRITE_IN_OWNED_SCOPE",
+          "file": "m-write-in-memo.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.23345800000001304,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "m-reactive-prop-read-in-setup",
+      "group": "mutants",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "m-reactive-prop-read-in-setup.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.25483299999999076,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "m-handled-catch-rethrows",
+      "group": "mutants",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+          "file": "m-handled-catch-rethrows.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.3025829999999985,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "m-async-helper-rejects",
+      "group": "mutants",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "m-async-helper-rejects.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.232167000000004,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "m-pending-through-prop",
+      "group": "mutants",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+          "file": "m-pending-through-prop.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.31887499999999136,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "m-pending-read-in-setup",
+      "group": "mutants",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "PENDING_ASYNC_UNTRACKED_READ",
+          "file": "m-pending-read-in-setup.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.22212500000000546,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "m-callback-prop-throws-forwarded",
+      "group": "mutants",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "m-callback-prop-throws-forwarded.tsx",
+          "count": 2
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 2,
+      "coldMs": 0.30108300000000554,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "m-effect-phase-pending",
+      "group": "mutants",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
+          "file": "m-effect-phase-pending.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.3559579999999869,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "m-injected-api-ambient",
+      "group": "mutants",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "m-injected-api-ambient.tsx",
+          "count": 6
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 6,
+      "coldMs": 0.3489580000000103,
+      "inferenceRequests": 6,
+      "inferenceSites": 6,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "mutants/m-injected-api-ambient.tsx",
+            "line": 7,
+            "col": 45,
+            "endLine": 7,
+            "endCol": 57
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "mutants/m-injected-api-ambient.tsx",
+            "line": 8,
+            "col": 28,
+            "endLine": 8,
+            "endCol": 45
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "mutants/m-injected-api-ambient.tsx",
+            "line": 9,
+            "col": 28,
+            "endLine": 9,
+            "endCol": 40
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "mutants/m-injected-api-ambient.tsx",
+            "line": 10,
+            "col": 33,
+            "endLine": 10,
+            "endCol": 48
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "mutants/m-injected-api-ambient.tsx",
+            "line": 11,
+            "col": 34,
+            "endLine": 11,
+            "endCol": 46
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "mutants/m-injected-api-ambient.tsx",
+            "line": 12,
+            "col": 33,
+            "endLine": 12,
+            "endCol": 46
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "worstCaseSites": [
+        {
+          "loc": {
+            "file": "mutants/m-injected-api-ambient.tsx",
+            "line": 7,
+            "col": 45,
+            "endLine": 7,
+            "endCol": 57
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        },
+        {
+          "loc": {
+            "file": "mutants/m-injected-api-ambient.tsx",
+            "line": 8,
+            "col": 28,
+            "endLine": 8,
+            "endCol": 45
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        },
+        {
+          "loc": {
+            "file": "mutants/m-injected-api-ambient.tsx",
+            "line": 9,
+            "col": 28,
+            "endLine": 9,
+            "endCol": 40
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        },
+        {
+          "loc": {
+            "file": "mutants/m-injected-api-ambient.tsx",
+            "line": 10,
+            "col": 33,
+            "endLine": 10,
+            "endCol": 48
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        },
+        {
+          "loc": {
+            "file": "mutants/m-injected-api-ambient.tsx",
+            "line": 11,
+            "col": 34,
+            "endLine": 11,
+            "endCol": 46
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        },
+        {
+          "loc": {
+            "file": "mutants/m-injected-api-ambient.tsx",
+            "line": 12,
+            "col": 33,
+            "endLine": 12,
+            "endCol": 46
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        }
+      ],
+      "worstCaseSiteCount": 6,
+      "partialSites": 0
+    },
+    {
+      "id": "m-injected-api-prop",
+      "group": "mutants",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "m-injected-api-prop.tsx",
+          "count": 3
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 3,
+      "coldMs": 0.41320899999999483,
+      "inferenceRequests": 4,
+      "inferenceSites": 4,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "mutants/m-injected-api-prop.tsx",
+            "line": 15,
+            "col": 22,
+            "endLine": 15,
+            "endCol": 33
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "mutants/m-injected-api-prop.tsx",
+            "line": 8,
+            "col": 45,
+            "endLine": 8,
+            "endCol": 63
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "mutants/m-injected-api-prop.tsx",
+            "line": 9,
+            "col": 28,
+            "endLine": 9,
+            "endCol": 51
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "mutants/m-injected-api-prop.tsx",
+            "line": 10,
+            "col": 33,
+            "endLine": 10,
+            "endCol": 51
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "worstCaseSites": [
+        {
+          "loc": {
+            "file": "mutants/m-injected-api-prop.tsx",
+            "line": 15,
+            "col": 22,
+            "endLine": 15,
+            "endCol": 33
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        },
+        {
+          "loc": {
+            "file": "mutants/m-injected-api-prop.tsx",
+            "line": 8,
+            "col": 45,
+            "endLine": 8,
+            "endCol": 63
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        },
+        {
+          "loc": {
+            "file": "mutants/m-injected-api-prop.tsx",
+            "line": 9,
+            "col": 28,
+            "endLine": 9,
+            "endCol": 51
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        },
+        {
+          "loc": {
+            "file": "mutants/m-injected-api-prop.tsx",
+            "line": 10,
+            "col": 33,
+            "endLine": 10,
+            "endCol": 51
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        }
+      ],
+      "worstCaseSiteCount": 4,
+      "partialSites": 0
+    },
+    {
+      "id": "m-equipment-row-loading-removed",
+      "group": "mutants",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+          "file": "m-equipment-row-loading-removed.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.42079200000000583,
+      "inferenceRequests": 1,
+      "inferenceSites": 1,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "mutants/m-equipment-row-loading-removed.tsx",
+            "line": 13,
+            "col": 54,
+            "endLine": 13,
+            "endCol": 65
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "worstCaseSites": [
+        {
+          "loc": {
+            "file": "mutants/m-equipment-row-loading-removed.tsx",
+            "line": 13,
+            "col": 54,
+            "endLine": 13,
+            "endCol": 65
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        }
+      ],
+      "worstCaseSiteCount": 1,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-01-factory-reader",
+      "group": "openclaw",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.31175000000001774,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-01-factory-reader-mutant",
+      "group": "openclaw",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-01-factory-reader-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.30870799999999576,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-02-effect-prop-phase",
+      "group": "openclaw",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.33600000000001273,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-02-effect-prop-phase-mutant",
+      "group": "openclaw",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-02-effect-prop-phase-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.3290829999999687,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-03-optional-context",
+      "group": "openclaw",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.29820899999998574,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-03-optional-context-mutant",
+      "group": "openclaw",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "CONTEXT_PROVIDER_MISSING",
+          "file": "oc-03-optional-context-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.3020840000000362,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-04-default-accessor",
+      "group": "openclaw",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.3326250000000073,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-04-default-accessor-mutant",
+      "group": "openclaw",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-04-default-accessor-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.3301660000000197,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-05-project-get-method",
+      "group": "openclaw",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.3351669999999558,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-05-project-get-method-mutant",
+      "group": "openclaw",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "oc-05-project-get-method-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.33512499999994816,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-06-promise-forks",
+      "group": "openclaw",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.2573749999999677,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-06-promise-forks-mutant",
+      "group": "openclaw",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "oc-06-promise-forks-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.2400000000000091,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-07-scoped-outcome",
+      "group": "openclaw",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.3779999999999859,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-07-scoped-outcome-mutant",
+      "group": "openclaw",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+          "file": "oc-07-scoped-outcome-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.36025000000000773,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-08-lazy-unused-prop",
+      "group": "openclaw",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.3041249999999991,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-08-lazy-unused-prop-mutant",
+      "group": "openclaw",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+          "file": "oc-08-lazy-unused-prop-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.31666699999999537,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-09-forwarded-pending-setup",
+      "group": "openclaw",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.32929200000000947,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-09-forwarded-pending-setup-mutant",
+      "group": "openclaw",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "PENDING_ASYNC_UNTRACKED_READ",
+          "file": "oc-09-forwarded-pending-setup-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.33441699999997354,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-10-untrack-not-a-catch",
+      "group": "openclaw",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.3338749999999777,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-10-untrack-not-a-catch-mutant",
+      "group": "openclaw",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "SETUP_MAY_THROW",
+          "file": "oc-10-untrack-not-a-catch-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.3246249999999691,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-12-keyed-row-snapshot",
+      "group": "openclaw",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.3318329999999605,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-12-keyed-row-snapshot-mutant",
+      "group": "openclaw",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-12-keyed-row-snapshot-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.31937499999997954,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-12-row-pending",
+      "group": "openclaw",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.31966600000004064,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-12-row-pending-mutant",
+      "group": "openclaw",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "PENDING_ASYNC_UNTRACKED_READ",
+          "file": "oc-12-row-pending-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.31458400000002484,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-12-row-held",
+      "group": "openclaw",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.27533299999998917,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-12-index-row",
+      "group": "openclaw",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.28016700000000583,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-12-index-row-mutant",
+      "group": "openclaw",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-12-index-row-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.3023750000000405,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-23-ref-read",
+      "group": "openclaw",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.2878329999999778,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-23-ref-read-mutant",
+      "group": "openclaw",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-23-ref-read-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.2932910000000106,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-23-ref-pending",
+      "group": "openclaw",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.30374999999997954,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-23-ref-pending-mutant",
+      "group": "openclaw",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "PENDING_ASYNC_UNTRACKED_READ",
+          "file": "oc-23-ref-pending-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.30937499999998863,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-04-default-without-provider",
+      "group": "openclaw",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.2955000000000041,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-01-translation-reader",
+      "group": "openclaw",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.34258299999999053,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "oc-01-translation-reader-mutant",
+      "group": "openclaw",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-01-translation-reader-mutant.tsx",
+          "count": 1
+        },
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-01-translation-reader-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 2,
+      "coldMs": 0.3384999999999536,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "op-loading-url",
+      "group": "openclaw-precision",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.19520800000003646,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "op-loading-url-mutant",
+      "group": "openclaw-precision",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "op-loading-url-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.20224999999999227,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "op-loading-reactive-key",
+      "group": "openclaw-precision",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.22183300000000372,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "op-loading-reactive-key-mutant",
+      "group": "openclaw-precision",
+      "mutant": true,
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+          "file": "op-loading-reactive-key-mutant.tsx",
+          "at": "\"read()\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 1,
+      "soundnessFailure": true,
+      "total": 1,
+      "coldMs": 0.22225000000003092,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "op-focus-repair",
+      "group": "openclaw-precision",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.22429199999999128,
+      "inferenceRequests": 2,
+      "inferenceSites": 2,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "openclaw-precision/op-focus-repair.tsx",
+            "line": 6,
+            "col": 28,
+            "endLine": 6,
+            "endCol": 42
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "openclaw-precision/op-focus-repair.tsx",
+            "line": 7,
+            "col": 46,
+            "endLine": 7,
+            "endCol": 66
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "worstCaseSites": [
+        {
+          "loc": {
+            "file": "openclaw-precision/op-focus-repair.tsx",
+            "line": 6,
+            "col": 28,
+            "endLine": 6,
+            "endCol": 42
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        },
+        {
+          "loc": {
+            "file": "openclaw-precision/op-focus-repair.tsx",
+            "line": 7,
+            "col": 46,
+            "endLine": 7,
+            "endCol": 66
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        }
+      ],
+      "worstCaseSiteCount": 2,
+      "partialSites": 0
+    },
+    {
+      "id": "op-focus-repair-mutant",
+      "group": "openclaw-precision",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "op-focus-repair-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.21366699999998673,
+      "inferenceRequests": 3,
+      "inferenceSites": 3,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "openclaw-precision/op-focus-repair-mutant.tsx",
+            "line": 6,
+            "col": 28,
+            "endLine": 6,
+            "endCol": 42
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "openclaw-precision/op-focus-repair-mutant.tsx",
+            "line": 7,
+            "col": 46,
+            "endLine": 7,
+            "endCol": 66
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "openclaw-precision/op-focus-repair-mutant.tsx",
+            "line": 11,
+            "col": 45,
+            "endLine": 11,
+            "endCol": 67
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "worstCaseSites": [
+        {
+          "loc": {
+            "file": "openclaw-precision/op-focus-repair-mutant.tsx",
+            "line": 6,
+            "col": 28,
+            "endLine": 6,
+            "endCol": 42
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        },
+        {
+          "loc": {
+            "file": "openclaw-precision/op-focus-repair-mutant.tsx",
+            "line": 7,
+            "col": 46,
+            "endLine": 7,
+            "endCol": 66
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        },
+        {
+          "loc": {
+            "file": "openclaw-precision/op-focus-repair-mutant.tsx",
+            "line": 11,
+            "col": 45,
+            "endLine": 11,
+            "endCol": 67
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        }
+      ],
+      "worstCaseSiteCount": 3,
+      "partialSites": 0
+    },
+    {
+      "id": "op-machine-class",
+      "group": "openclaw-precision",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.24895900000001348,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "op-machine-class-mutant",
+      "group": "openclaw-precision",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
+          "file": "op-machine-class-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.2439160000000129,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "op-machine-members",
+      "group": "openclaw-precision",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.24908300000004147,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "op-machine-members-mutant",
+      "group": "openclaw-precision",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
+          "file": "op-machine-members-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.2652500000000373,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "op-held-callback",
+      "group": "openclaw-precision",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.12083300000000463,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "op-held-callback-mutant",
+      "group": "openclaw-precision",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "op-held-callback-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.11995899999999438,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "op-held-ref",
+      "group": "openclaw-precision",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.13637500000004366,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "op-held-ref-mutant",
+      "group": "openclaw-precision",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "op-held-ref-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.13641599999999698,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "op-native-listener",
+      "group": "openclaw-precision",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.10412500000001046,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "op-native-listener-mutant",
+      "group": "openclaw-precision",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "op-native-listener-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.11183299999999008,
+      "inferenceRequests": 1,
+      "inferenceSites": 1,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "openclaw-precision/op-native-listener-mutant.tsx",
+            "line": 4,
+            "col": 33,
+            "endLine": 4,
+            "endCol": 78
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "worstCaseSites": [
+        {
+          "loc": {
+            "file": "openclaw-precision/op-native-listener-mutant.tsx",
+            "line": 4,
+            "col": 33,
+            "endLine": 4,
+            "endCol": 78
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        }
+      ],
+      "worstCaseSiteCount": 1,
+      "partialSites": 0
+    },
+    {
+      "id": "op-set-add",
+      "group": "openclaw-precision",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.0992909999999938,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "op-set-add-mutant",
+      "group": "openclaw-precision",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "op-set-add-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.10379199999999855,
+      "inferenceRequests": 1,
+      "inferenceSites": 1,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "openclaw-precision/op-set-add-mutant.tsx",
+            "line": 3,
+            "col": 35,
+            "endLine": 3,
+            "endCol": 58
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "worstCaseSites": [
+        {
+          "loc": {
+            "file": "openclaw-precision/op-set-add-mutant.tsx",
+            "line": 3,
+            "col": 35,
+            "endLine": 3,
+            "endCol": 58
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        }
+      ],
+      "worstCaseSiteCount": 1,
+      "partialSites": 0
+    },
+    {
+      "id": "op-dependency-machine",
+      "group": "openclaw-precision",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.20870800000000145,
+      "inferenceRequests": 1,
+      "inferenceSites": 1,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "openclaw-precision/op-dependency-machine.tsx",
+            "line": 3,
+            "col": 41,
+            "endLine": 3,
+            "endCol": 63
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "worstCaseSites": [
+        {
+          "loc": {
+            "file": "openclaw-precision/op-dependency-machine.tsx",
+            "line": 3,
+            "col": 41,
+            "endLine": 3,
+            "endCol": 50
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        },
+        {
+          "loc": {
+            "file": "openclaw-precision/op-dependency-machine.tsx",
+            "line": 3,
+            "col": 41,
+            "endLine": 3,
+            "endCol": 63
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        }
+      ],
+      "worstCaseSiteCount": 2,
+      "partialSites": 0
+    },
+    {
+      "id": "op-dependency-machine-mutant",
+      "group": "openclaw-precision",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "op-dependency-machine-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.19991600000003018,
+      "inferenceRequests": 1,
+      "inferenceSites": 1,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "openclaw-precision/op-dependency-machine-mutant.tsx",
+            "line": 3,
+            "col": 35,
+            "endLine": 3,
+            "endCol": 57
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "worstCaseSites": [
+        {
+          "loc": {
+            "file": "openclaw-precision/op-dependency-machine-mutant.tsx",
+            "line": 3,
+            "col": 35,
+            "endLine": 3,
+            "endCol": 44
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        },
+        {
+          "loc": {
+            "file": "openclaw-precision/op-dependency-machine-mutant.tsx",
+            "line": 3,
+            "col": 35,
+            "endLine": 3,
+            "endCol": 57
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        }
+      ],
+      "worstCaseSiteCount": 2,
+      "partialSites": 0
+    },
+    {
+      "id": "op-dependency-string",
+      "group": "openclaw-precision",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.20549999999997226,
+      "inferenceRequests": 1,
+      "inferenceSites": 1,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "openclaw-precision/op-dependency-string.tsx",
+            "line": 3,
+            "col": 41,
+            "endLine": 3,
+            "endCol": 66
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "worstCaseSites": [
+        {
+          "loc": {
+            "file": "openclaw-precision/op-dependency-string.tsx",
+            "line": 3,
+            "col": 41,
+            "endLine": 3,
+            "endCol": 66
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        }
+      ],
+      "worstCaseSiteCount": 1,
+      "partialSites": 0
+    },
+    {
+      "id": "op-dependency-string-mutant",
+      "group": "openclaw-precision",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "op-dependency-string-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.20791600000001154,
+      "inferenceRequests": 1,
+      "inferenceSites": 1,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "openclaw-precision/op-dependency-string-mutant.tsx",
+            "line": 3,
+            "col": 35,
+            "endLine": 3,
+            "endCol": 60
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "worstCaseSites": [
+        {
+          "loc": {
+            "file": "openclaw-precision/op-dependency-string-mutant.tsx",
+            "line": 3,
+            "col": 35,
+            "endLine": 3,
+            "endCol": 60
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        }
+      ],
+      "worstCaseSiteCount": 1,
+      "partialSites": 0
+    },
+    {
+      "id": "op-e24-remove",
+      "group": "openclaw-precision",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.2597499999999968,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "op-e24-remove-mutant",
+      "group": "openclaw-precision",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "op-e24-remove-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.24300000000005184,
+      "inferenceRequests": 1,
+      "inferenceSites": 1,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "openclaw-precision/op-e24-remove-mutant.tsx",
+            "line": 4,
+            "col": 39,
+            "endLine": 4,
+            "endCol": 72
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "worstCaseSites": [
+        {
+          "loc": {
+            "file": "openclaw-precision/op-e24-remove-mutant.tsx",
+            "line": 4,
+            "col": 39,
+            "endLine": 4,
+            "endCol": 72
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        }
+      ],
+      "worstCaseSiteCount": 1,
+      "partialSites": 0
+    },
+    {
+      "id": "op-e28-keydown",
+      "group": "openclaw-precision",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.2508330000000001,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "op-e28-keydown-mutant",
+      "group": "openclaw-precision",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "op-e28-keydown-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.25883299999998144,
+      "inferenceRequests": 1,
+      "inferenceSites": 1,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "openclaw-precision/op-e28-keydown-mutant.tsx",
+            "line": 4,
+            "col": 39,
+            "endLine": 4,
+            "endCol": 72
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "worstCaseSites": [
+        {
+          "loc": {
+            "file": "openclaw-precision/op-e28-keydown-mutant.tsx",
+            "line": 4,
+            "col": 39,
+            "endLine": 4,
+            "endCol": 72
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        }
+      ],
+      "worstCaseSiteCount": 1,
+      "partialSites": 0
+    },
+    {
+      "id": "op-e30-select",
+      "group": "openclaw-precision",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.245666999999969,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "op-e30-select-mutant",
+      "group": "openclaw-precision",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "op-e30-select-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.24329199999999673,
+      "inferenceRequests": 1,
+      "inferenceSites": 1,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "openclaw-precision/op-e30-select-mutant.tsx",
+            "line": 4,
+            "col": 37,
+            "endLine": 4,
+            "endCol": 62
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "worstCaseSites": [
+        {
+          "loc": {
+            "file": "openclaw-precision/op-e30-select-mutant.tsx",
+            "line": 4,
+            "col": 37,
+            "endLine": 4,
+            "endCol": 62
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        }
+      ],
+      "worstCaseSiteCount": 1,
+      "partialSites": 0
+    },
+    {
+      "id": "op-e40-reselect",
+      "group": "openclaw-precision",
+      "mutant": false,
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0,
+      "coldMs": 0.21287500000005366,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "inferenceNeeded": [],
+      "worstCaseSites": [],
+      "worstCaseSiteCount": 0,
+      "partialSites": 0
+    },
+    {
+      "id": "op-e40-reselect-mutant",
+      "group": "openclaw-precision",
+      "mutant": true,
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "op-e40-reselect-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1,
+      "coldMs": 0.22612500000002456,
+      "inferenceRequests": 1,
+      "inferenceSites": 1,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "openclaw-precision/op-e40-reselect-mutant.tsx",
+            "line": 4,
+            "col": 55,
+            "endLine": 4,
+            "endCol": 75
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "worstCaseSites": [
+        {
+          "loc": {
+            "file": "openclaw-precision/op-e40-reselect-mutant.tsx",
+            "line": 4,
+            "col": 55,
+            "endLine": 4,
+            "endCol": 75
+          },
+          "reasons": [
+            "unknown declared failures"
+          ]
+        }
+      ],
+      "worstCaseSiteCount": 1,
+      "partialSites": 0
+    }
+  ]
+}

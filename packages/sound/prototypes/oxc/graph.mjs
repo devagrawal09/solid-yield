@@ -1,8 +1,11 @@
 // @ts-check
-import { readFileSync, existsSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { readFileSync, existsSync, realpathSync } from "node:fs";
+import { dirname, resolve, isAbsolute, relative } from "node:path";
 import { parseSync } from "oxc-parser";
 import { ResolverFactory } from "oxc-resolver";
+
+export const installedPath = path => /(?:^|[\\/])node_modules(?:[\\/]|$)/.test(path);
+const declarationPath = path => /[.]d[.](?:ts|mts|cts)$/.test(path);
 
 export const plain = value => ({ tag: "plain", value });
 export const unknown = (reason = "no body or annotation") => ({ tag: "unknown", reason });
@@ -117,6 +120,8 @@ export class Modules {
   constructor(options) {
     this.options = options;
     this.modules = new Map();
+    this.dependencies = new Set();
+    this.dependencyRoots = new Set();
     this.locations = new WeakMap();
     this.resolver = new ResolverFactory({
       extensions: [".ts", ".tsx", ".mts", ".js", ".mjs", ".jsx", ".d.ts"],
@@ -141,7 +146,37 @@ export class Modules {
           pkg = JSON.parse(readFileSync(result.packageJsonPath, "utf8")).name;
         } catch {}
       }
-      return { ...result, pkg };
+      const dependency =
+        this.isDependency(from) ||
+        installedPath(result.path) ||
+        (!spec.startsWith(".") && !isAbsolute(spec));
+      if (dependency) {
+        this.dependencies.add(result.path);
+        if (result.packageJsonPath) {
+          this.dependencyRoots.add(dirname(result.packageJsonPath));
+          try {
+            this.dependencyRoots.add(dirname(realpathSync(result.packageJsonPath)));
+          } catch {}
+        }
+      }
+      // An implementation entry may have an adjacent declaration even without
+      // a package-level types field. Never use that implementation as a fallback.
+      const sidecar =
+        dependency && !declarationPath(result.path)
+          ? result.path.replace(
+              /[.](?:[cm]?js|tsx?|jsx)$/,
+              result.path.endsWith(".mjs")
+                ? ".d.mts"
+                : result.path.endsWith(".cjs")
+                  ? ".d.cts"
+                  : ".d.ts"
+            )
+          : null;
+      if (sidecar && sidecar !== result.path && existsSync(sidecar)) {
+        this.dependencies.add(sidecar);
+        return { ...result, path: sidecar, pkg, dependency };
+      }
+      return { ...result, pkg, dependency };
     }
     if (spec.startsWith("."))
       for (const ext of ["", ".ts", ".tsx", ".d.ts", "/index.ts", "/index.tsx"]) {
@@ -150,13 +185,42 @@ export class Modules {
       }
     return result;
   }
+  isDependency(path) {
+    return (
+      installedPath(path) ||
+      this.dependencies.has(path) ||
+      [...this.dependencyRoots].some(root => {
+        const subpath = relative(root, path);
+        return !subpath.startsWith("..") && !isAbsolute(subpath);
+      })
+    );
+  }
+  prepare() {
+    const visited = new Set();
+    const visit = path => {
+      if (!path || visited.has(path) || this.isDependency(path)) return;
+      visited.add(path);
+      const mod = this.load(path);
+      for (const link of [...mod.imported.values(), ...mod.exports.values()]) visit(link.path);
+    };
+    // Resolve application imports before considering over-inclusive linked roots.
+    for (const path of this.options.files)
+      if (!relative(this.options.rootDir, path).startsWith("..")) visit(path);
+    for (const path of this.options.files) visit(path);
+  }
   load(path) {
     if (this.modules.has(path)) return this.modules.get(path);
-    const text = this.text(path) ?? "";
+    // Installed bodies are not even parsed, including over-inclusive roots.
+    const dependency = this.isDependency(path);
+    const blocked = dependency && !declarationPath(path);
+    const text = blocked ? "" : (this.text(path) ?? "");
     const parsed = parseSync(path, text, { sourceType: "module" });
     const mod = {
       path,
       text,
+      dependency,
+      blocked,
+      declarationOnly: blocked || declarationPath(path),
       ast: parsed.program,
       errors: parsed.errors,
       exports: new Map(),
@@ -173,12 +237,7 @@ export class Modules {
         mod.types.set(n.id.name, n);
       if (statement.type === "ImportDeclaration") {
         const resolution = this.resolve(path, statement.source.value);
-        let pkg;
-        if (resolution.packageJsonPath) {
-          try {
-            pkg = JSON.parse(readFileSync(resolution.packageJsonPath, "utf8")).name;
-          } catch {}
-        }
+        const pkg = resolution.pkg;
         for (const s of statement.specifiers) {
           const imported =
             s.type === "ImportNamespaceSpecifier"
@@ -189,6 +248,7 @@ export class Modules {
           const link = {
             tag: "link",
             path: resolution.path,
+            dependency: resolution.dependency,
             name: imported,
             pkg,
             spec: statement.source.value
@@ -239,12 +299,9 @@ export class Modules {
       return this.shape(node.typeAnnotation, env, seen);
     if (node.type === "TSUnionType" || node.type === "TSIntersectionType")
       return join(...node.types.map(n => this.shape(n, env, seen)));
-    if (
-      node.type === "TSUndefinedKeyword" ||
-      node.type === "TSVoidKeyword" ||
-      node.type === "TSNullKeyword"
-    )
-      return plain();
+    if (node.type === "TSUndefinedKeyword") return { ...plain(), undefinedValue: true };
+    if (node.type === "TSNullKeyword") return plain(null);
+    if (node.type === "TSVoidKeyword") return plain();
     if (node.type === "TSStringKeyword") return { tag: "platformInstance", path: "String" };
     if (
       ["TSNumberKeyword", "TSBooleanKeyword", "TSNeverKeyword", "TSLiteralType"].includes(node.type)
@@ -256,7 +313,8 @@ export class Modules {
       node.type === "TSFunctionType" ||
       node.type === "TSMethodSignature" ||
       node.type === "TSCallSignatureDeclaration" ||
-      node.type === "TSDeclareFunction"
+      node.type === "TSDeclareFunction" ||
+      node.type === "FunctionDeclaration"
     )
       return {
         tag: "declared",
@@ -267,13 +325,13 @@ export class Modules {
       const members = new Map();
       for (const member of node.members ?? node.body ?? []) {
         const key = keyName(member.key);
-        if (key)
-          members.set(
-            key,
+        if (key) {
+          const shape =
             member.type === "TSMethodSignature"
               ? this.shape(member, env, seen)
-              : this.shape(member.typeAnnotation, env, seen)
-          );
+              : this.shape(member.typeAnnotation, env, seen);
+          members.set(key, shape);
+        }
       }
       return object(members);
     }

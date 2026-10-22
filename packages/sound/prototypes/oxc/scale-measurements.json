@@ -1,0 +1,253 @@
+{
+  "platform": {
+    "node": "v24.18.0",
+    "arch": "arm64",
+    "system": "Darwin",
+    "cpu": "Apple M4 Pro"
+  },
+  "roots": 2669,
+  "excluded": 3413,
+  "loc": 524547,
+  "oldSpaceMiB": 2048,
+  "cold": {
+    "createMs": 55.030542,
+    "checkMs": 27679.899833,
+    "processWallMs": 28042.590666,
+    "peakRSSKiB": 2303312,
+    "combinedPeakRSSKiB": 2375904,
+    "resourcePeakRSSKiB": 2303552,
+    "memory": {
+      "rss": 2122940416,
+      "heapTotal": 1842937856,
+      "heapUsed": 1572195488,
+      "external": 2413532,
+      "arrayBuffers": 143611
+    },
+    "counts": {
+      "UNANALYZED_BOUNDARY:warn": 10737,
+      "UNHANDLED_HANDLER_FAILURE:error": 1443,
+      "PENDING_ASYNC_IN_HANDLER:warn": 2288,
+      "ERROR_OUTSIDE_ERRORED_BOUNDARY:error": 1195,
+      "PENDING_ASYNC_FORBIDDEN_SCOPE:error": 1292,
+      "SETUP_MAY_THROW:error": 621,
+      "ASYNC_OUTSIDE_LOADING_BOUNDARY:error": 557,
+      "CONTEXT_PROVIDER_MISSING:error": 5,
+      "PENDING_ASYNC_UNTRACKED_READ:error": 410,
+      "REACTIVE_WRITE_IN_OWNED_SCOPE:error": 2,
+      "STRICT_READ_UNTRACKED:error": 74,
+      "COMPONENT_OBLIGATIONS_EXPORTED:info": 516
+    },
+    "partial": {
+      "unsupported class shape": 189,
+      "unmodeled statement TSModuleDeclaration": 147,
+      "Solid lazy is outside the modeled subset": 59,
+      "class construction": 161,
+      "unmodeled expression ImportExpression": 37,
+      "loop state needs a fixed-point analysis": 776,
+      "module reactive state": 2,
+      "Solid getOwner is outside the modeled subset": 5,
+      "unmodeled statement TSEnumDeclaration": 1,
+      "Solid template is outside the modeled subset": 1,
+      "Solid runWithOwner is outside the modeled subset": 2,
+      "unmodeled expression SpreadElement": 1,
+      "value alternatives exceed summary budget": 109,
+      "installed dependency has no declaration": 51,
+      "file work budget exhausted": 5435,
+      "function work budget exhausted": 2239,
+      "recursive call needs a wider summary": 53,
+      "unmodeled expression MetaProperty": 5,
+      "derived signal": 45,
+      "Solid getObserver is outside the modeled subset": 1,
+      "Solid createComponent is outside the modeled subset": 1,
+      "JSX spread": 403,
+      "Solid dynamic is outside the modeled subset": 17,
+      "dynamic or unmodeled JSX": 150,
+      "Solid createOptimistic is outside the modeled subset": 109,
+      "Solid action is outside the modeled subset": 89,
+      "Solid children is outside the modeled subset": 9,
+      "Solid omit is outside the modeled subset": 4,
+      "Solid createUniqueId is outside the modeled subset": 42,
+      "Solid createStore is outside the modeled subset": 42,
+      "Solid isPending is outside the modeled subset": 78,
+      "Solid latest is outside the modeled subset": 66,
+      "Solid createErrorBoundary is outside the modeled subset": 1,
+      "merge source shape needs inference": 344,
+      "Solid flush is outside the modeled subset": 1,
+      "reactive write in ref: ownership is not modeled": 21,
+      "Solid createOptimisticStore is outside the modeled subset": 10,
+      "unmodeled expression YieldExpression": 3,
+      "Solid createProjection is outside the modeled subset": 5,
+      "Solid mapArray is outside the modeled subset": 3,
+      "Solid createDeferred is outside the modeled subset": 15,
+      "Solid spread is outside the modeled subset": 1,
+      "Solid refresh is outside the modeled subset": 1,
+      "Solid reconcile is outside the modeled subset": 1,
+      "Solid createLoadingBoundary is outside the modeled subset": 2
+    },
+    "errors": 5599,
+    "warnings": 13025,
+    "info": 516,
+    "inferenceRequests": 57346,
+    "inferenceLocations": 41289,
+    "worstCaseSites": 30760,
+    "modules": 8511,
+    "summaryHits": 23757,
+    "summaryMisses": 930582,
+    "boundedSites": 7909,
+    "installedPathDiagnostics": 0
+  },
+  "updates": [
+    {
+      "file": "components/theme-brand-icon.tsx",
+      "kind": "trivial",
+      "edit": "append newline",
+      "ms": 1.7813330000026326,
+      "restoreMs": 1.1801670000022568,
+      "invalidatedModules": 1,
+      "checkedJobs": 0,
+      "reusedJobs": 3649
+    },
+    {
+      "file": "components/theme-brand-icon.tsx",
+      "kind": "semantic",
+      "edit": {
+        "before": "branding",
+        "after": "branding-scale",
+        "start": 794
+      },
+      "ms": 19419.803333,
+      "restoreMs": 17650.013708000006,
+      "invalidatedModules": 5422,
+      "checkedJobs": 2746,
+      "reusedJobs": 901
+    },
+    {
+      "file": "lib/reactive/i18n.ts",
+      "kind": "trivial",
+      "edit": "append newline",
+      "ms": 1.1012919999993755,
+      "restoreMs": 0.7511250000025029,
+      "invalidatedModules": 1,
+      "checkedJobs": 0,
+      "reusedJobs": 3647
+    },
+    {
+      "file": "lib/reactive/i18n.ts",
+      "kind": "semantic",
+      "edit": {
+        "before": true,
+        "after": false,
+        "start": 473
+      },
+      "ms": 17855.670208000003,
+      "restoreMs": 17992.878958,
+      "invalidatedModules": 5422,
+      "checkedJobs": 2746,
+      "reusedJobs": 901
+    },
+    {
+      "file": "app/app-root.tsx",
+      "kind": "trivial",
+      "edit": "append newline",
+      "ms": 6.027124999993248,
+      "restoreMs": 4.490333000008832,
+      "invalidatedModules": 1,
+      "checkedJobs": 0,
+      "reusedJobs": 3647
+    },
+    {
+      "file": "app/app-root.tsx",
+      "kind": "semantic",
+      "edit": {
+        "before": true,
+        "after": false,
+        "start": 4486
+      },
+      "ms": 18322.608292000004,
+      "restoreMs": 17940.102708000006,
+      "invalidatedModules": 5422,
+      "checkedJobs": 2746,
+      "reusedJobs": 901
+    }
+  ],
+  "singles": [
+    {
+      "label": "sidebar",
+      "coldMs": 5395.4944590000005,
+      "peakRSSKiB": 1172736,
+      "stage": "complete",
+      "partial": {
+        "unsupported class shape": 1,
+        "class construction": 1,
+        "module reactive state": 1,
+        "Solid getOwner is outside the modeled subset": 1,
+        "unmodeled statement TSModuleDeclaration": 1,
+        "unmodeled expression SpreadElement": 1,
+        "installed dependency has no declaration": 1,
+        "JSX spread": 8,
+        "Solid getObserver is outside the modeled subset": 1,
+        "Solid dynamic is outside the modeled subset": 1,
+        "dynamic or unmodeled JSX": 3,
+        "recursive call needs a wider summary": 2,
+        "Solid createOptimistic is outside the modeled subset": 2,
+        "Solid action is outside the modeled subset": 1,
+        "derived signal": 1,
+        "Solid latest is outside the modeled subset": 2,
+        "loop state needs a fixed-point analysis": 5,
+        "file work budget exhausted": 9
+      }
+    },
+    {
+      "label": "select",
+      "coldMs": 3923.8922079999998,
+      "peakRSSKiB": 1055984,
+      "stage": "complete",
+      "partial": {
+        "unmodeled statement TSModuleDeclaration": 3,
+        "loop state needs a fixed-point analysis": 16,
+        "unsupported class shape": 1,
+        "class construction": 4,
+        "module reactive state": 1,
+        "Solid getOwner is outside the modeled subset": 2,
+        "merge source shape needs inference": 39,
+        "recursive call needs a wider summary": 3,
+        "file work budget exhausted": 18,
+        "function work budget exhausted": 15,
+        "installed dependency has no declaration": 4,
+        "Solid getObserver is outside the modeled subset": 1,
+        "JSX spread": 5,
+        "Solid dynamic is outside the modeled subset": 1,
+        "dynamic or unmodeled JSX": 1
+      }
+    }
+  ],
+  "updateSession": {
+    "wallMs": 135198.19520800002,
+    "peakRSSKiB": 2500256,
+    "combinedPeakRSSKiB": 2572416
+  },
+  "profiledSession": {
+    "exit": 0,
+    "signal": null,
+    "wallMs": 142686.815292,
+    "peakRSSKiB": 10410880,
+    "peakCombinedRSSKiB": 10472240,
+    "driverMaxRSSKiB": 73120,
+    "stdout": "",
+    "stderr": ""
+  },
+  "boundaryOnlyBaseline": {
+    "timeoutSeconds": 90,
+    "peakRSSKiB": 2420128
+  },
+  "frozen": {
+    "fixtures": 173,
+    "errorGroups": 103,
+    "warnings": 11,
+    "info": 5,
+    "soundnessFailures": 0,
+    "missedMutants": 0,
+    "extraErrors": 0,
+    "extraWarnings": 0
+  }
+}

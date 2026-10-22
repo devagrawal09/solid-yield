@@ -1,5 +1,7 @@
 // @ts-check
 import { BY_CODE } from "../../src/codes.mjs";
+import { Summaries, copyReturn, appendUnique } from "./summaries.mjs";
+import { Jobs } from "./jobs.mjs";
 import {
   Env,
   plain,
@@ -58,8 +60,10 @@ const scalarMethods = new Set([
   "test"
 ]);
 export class Analysis {
-  constructor(graph) {
+  constructor(graph, previousJobs, dirty) {
     this.graph = graph;
+    this.jobs = new Jobs(previousJobs, dirty);
+    this.currentJob = null;
     this.diagnostics = [];
     this.keys = new Set();
     this.inference = new Map();
@@ -71,6 +75,14 @@ export class Analysis {
     this.active = new Map();
     this.roots = [];
     this.escapes = [];
+    this.summaries = new Summaries();
+    this.epoch = 0;
+    this.work = new Map();
+    this.bounded = new Set();
+    this.eventKeys = new WeakMap();
+    this.readKeys = new WeakMap();
+    this.boundWrites = new WeakMap();
+    this.jsxCache = new WeakMap();
   }
   context(extra = {}) {
     return {
@@ -86,6 +98,12 @@ export class Analysis {
     };
   }
   event(kind, node, data = {}) {
+    if (!node) return;
+    let keys = this.eventKeys.get(node);
+    if (!keys) this.eventKeys.set(node, (keys = new Set()));
+    const key = kind + JSON.stringify(data);
+    if (keys.has(key)) return;
+    keys.add(key);
     this.nodes.push({ kind, loc: this.graph.loc(node), ...data });
   }
   needed(node, reason) {
@@ -142,7 +160,7 @@ export class Analysis {
       return;
     }
     if (c.capture) {
-      c.capture.failures.push(...failures);
+      appendUnique(c.capture.failures, failures);
       return;
     }
     if (c.asyncRejections) {
@@ -164,11 +182,19 @@ export class Analysis {
     this.event("read", node, { scope, pending: !!value.pending });
     if (c.owner) {
       const fact = this.facts.get(c.owner + "@" + this.graph.loc(node).file);
-      fact?.reads.push({
-        loc: this.graph.loc(node),
-        scope: scope === "module" ? "setup" : scope,
-        source: "accessor"
-      });
+      if (fact) {
+        let keys = this.readKeys.get(fact);
+        if (!keys) this.readKeys.set(fact, (keys = new Set()));
+        const key = node.start + ":" + scope;
+        if (!keys.has(key)) {
+          keys.add(key);
+          fact.reads.push({
+            loc: this.graph.loc(node),
+            scope: scope === "module" ? "setup" : scope,
+            source: "accessor"
+          });
+        }
+      }
       if (fact) {
         fact.pending ||= !!value.pending;
         fact.failures = uniq([...fact.failures, ...(value.failures ?? [])]);
@@ -177,8 +203,8 @@ export class Analysis {
     if (c.capture) {
       c.capture.reactive = true;
       c.capture.pending ||= value.pending;
-      c.capture.failures.push(...(value.failures ?? []));
-      c.capture.related.push(...related);
+      appendUnique(c.capture.failures, value.failures);
+      appendUnique(c.capture.related, related);
       return;
     }
     const next = { ...c, related: [...(c.related ?? []), ...related] };
@@ -216,6 +242,7 @@ export class Analysis {
         ? { tag: "namespace", link: v }
         : { tag: "solid", name: v.name, pkg: v.pkg };
     if (!v.path) return unknown("unresolved import " + v.spec);
+    this.currentJob?.dependencies.add(v.path);
     const mod = this.graph.load(v.path);
     if (mod.blocked)
       return { tag: "dependencyUnknown", reason: "installed dependency has no declaration" };
@@ -259,7 +286,12 @@ export class Analysis {
   }
   initialize(mod) {
     if (mod.state !== "new") return;
+    this.jobs.run(this, "module:" + mod.path, mod.path, () => this.initializeBody(mod));
+  }
+  initializeBody(mod) {
     mod.state = "loading";
+    mod.roots = [];
+    mod.escapes = [];
     if (mod.declarationOnly) {
       for (const s of mod.ast.body) {
         const n = s.declaration ?? s;
@@ -281,11 +313,7 @@ export class Analysis {
   }
   closure(node, env) {
     const value = { tag: "function", node, env, name: node.id?.name ?? "", component: false };
-    let jsx = false;
-    walk(node.body, n => {
-      if (n.type === "JSXElement" || n.type === "JSXFragment") jsx = true;
-    });
-    value.component = jsx && /^[A-Z]/.test(value.name);
+    value.component = /^[A-Z]/.test(value.name) && this.containsJSX(node);
     if (value.component) this.components.add(value);
     return value;
   }
@@ -332,7 +360,29 @@ export class Analysis {
   }
   functionCall(fn, args, node, c) {
     if (fn.tag !== "function") return this.call(fn, args, node, c);
-    this.called.add(fn);
+    if (!this.spend(fn.node)) return this.boundFunction(fn, args, node, c);
+    const key = this.summaries.key(fn, args, c, this.epoch);
+    const cached = this.summaries.get(fn, key);
+    if (cached) {
+      this.summaries.replay(cached.effects, c);
+      return copyReturn(cached.value);
+    }
+    const before = this.epoch;
+    const next = this.summaries.capture(c);
+    const value = this.expandFunction(fn, args, node, next);
+    const effects = this.summaries.effects(next);
+    this.summaries.replay(effects, c);
+    const copied = copyReturn(value);
+    if (before === this.epoch && copied) this.summaries.set(fn, key, { value: copied, effects });
+    return value;
+  }
+  expandFunction(fn, args, node, c) {
+    // Only components participate in the exported-vs-rendered decision.
+    // Keeping every helper activation here would retain all of its local cells.
+    if (fn.component) {
+      this.called.add(fn);
+      this.currentJob?.called.add(fn);
+    }
     const count = this.active.get(fn.node) ?? 0;
     if (count > 8) return this.partial(node, c, "recursive call needs a wider summary");
     this.active.set(fn.node, count + 1);
@@ -408,6 +458,7 @@ export class Analysis {
   member(value, key, node, env, c) {
     return each(this.deref(value), v => {
       if (v.tainted) {
+        if (v.bounded) return { tag: "worst", bounded: true, reason: "bounded object mutation" };
         const previous = v.members?.get(key);
         if (previous?.tag === "source")
           return {
@@ -454,7 +505,7 @@ export class Analysis {
       if (v.tag === "platform" || v.tag === "platformInstance")
         return { tag: "platform", path: v.path + "." + key, receiver: v };
       if (v.tag === "promise") return { tag: "method", receiver: v, key };
-      if (v.tag === "worst") return { tag: "unknownMethod", reason: v.reason };
+      if (v.tag === "worst") return v.bounded ? v : { tag: "unknownMethod", reason: v.reason };
       if (v.tag === "unknownMethod" || v.tag === "dependencyUnknown") return v;
       if (v.tag === "plain" && typeof v.value === "string")
         return { tag: "method", receiver: { tag: "platformInstance", path: "String" }, key };
@@ -508,6 +559,7 @@ export class Analysis {
       if (fn.tag === "function") return this.functionCall(fn, args, node, c);
       if (fn.tag === "solid") return this.solid(fn.name, args, node, c);
       if (fn.tag === "setter") {
+        this.epoch++;
         if (c.scope === "ref")
           return this.partial(
             c.refNode ?? node,
@@ -522,6 +574,8 @@ export class Analysis {
         return plain();
       }
       if (fn.tag === "source") {
+        const wasPending = fn.pending;
+        const failuresBefore = fn.failures?.length ?? 0;
         if (fn.compute && !fn.evaluating) {
           fn.evaluating = true;
           const { value: out, cap } = this.capture(c, cc =>
@@ -538,6 +592,7 @@ export class Analysis {
           });
           fn.evaluating = false;
         }
+        if (fn.pending !== wasPending || fn.failures.length !== failuresBefore) this.epoch++;
         this.read(fn, node, c);
         return fn.result ?? plain();
       }
@@ -551,6 +606,8 @@ export class Analysis {
           if (arg.tag === "object" && arg.service) {
             this.partial(node, c, "context passed to unknown code");
             arg.tainted = true;
+            this.epoch++;
+            this.sharedWrite(arg);
           }
         this.needed(node, "function annotation supplies no failure facts");
         this.worstSite(node, "unknown declared failures");
@@ -586,6 +643,8 @@ export class Analysis {
         if (arg.tag === "object" && arg.service) {
           this.partial(node, c, "context passed to unknown code");
           arg.tainted = true;
+          this.epoch++;
+          this.sharedWrite(arg);
         }
       this.needed(node, "call needs inference or an analyzable body");
       this.worstSite(node, "unknown callable");
@@ -595,7 +654,7 @@ export class Analysis {
   }
   solid(name, args, node, c) {
     if (name === "render") {
-      this.roots.push({ fn: args[0], node });
+      this.recordRoot({ fn: args[0], node });
       return plain();
     }
     if (name === "createContext") return { tag: "context", defaultValue: args[0], node };
@@ -609,7 +668,10 @@ export class Analysis {
           this.emit("CONTEXT_PROVIDER_MISSING", node, c);
           return object();
         }
-        if (v.tag === "object") v.service = true;
+        if (v.tag === "object" && !v.service) {
+          v.service = true;
+          this.epoch++;
+        }
         return v;
       });
     }
@@ -809,6 +871,7 @@ export class Analysis {
     const { receiver: r, key } = fn;
     if (r.tag === "promise") {
       if (key === "catch") {
+        if (!r.handled) this.epoch++;
         r.handled = true;
         const caught = [];
         const value = this.call(args[0], [{ tag: "caught", failures: r.rejects }], node, {
@@ -822,6 +885,7 @@ export class Analysis {
         };
       }
       if (key === "then" || key === "finally") {
+        if (!r.handled) this.epoch++;
         r.handled = true;
         const caught = [];
         const value = args[0]
@@ -860,7 +924,74 @@ export class Analysis {
       return key === "split" ? { tag: "array", elements: [plain("")] } : plain();
     return this.call(unknown("unmodeled receiver method"), args, node, c);
   }
+  boundFunction(fn, args, node, c, reason = "function work budget exhausted") {
+    let names = this.boundWrites.get(fn.node);
+    if (!names) {
+      names = new Set();
+      walk(fn.node.body ?? fn.node, part => {
+        if (["AssignmentExpression", "UpdateExpression"].includes(part.type)) {
+          let target = part.left ?? part.argument;
+          while (target?.type === "MemberExpression") target = target.object;
+          if (target?.type === "Identifier") names.add(target.name);
+        }
+      });
+      this.boundWrites.set(fn.node, names);
+    }
+    const worst = { tag: "worst", bounded: true, reason: "bounded function mutation" };
+    for (const name of names) {
+      const cell = fn.env.cell(name);
+      if (cell) {
+        this.weaken(cell.value);
+        cell.value = worst;
+        this.currentJob?.writes.add(cell.env.module.path);
+      }
+    }
+    for (const arg of args) this.weaken(arg);
+    this.epoch++;
+    return this.widen(node, c, reason);
+  }
+  weaken(value, seen = new Set()) {
+    if (!value || seen.has(value)) return;
+    seen.add(value);
+    if (["object", "props"].includes(value.tag)) {
+      value.tainted = true;
+      value.bounded = true;
+      this.sharedWrite(value);
+    } else if (value.tag === "source") {
+      value.pending = true;
+      value.failures = uniq([...(value.failures ?? []), "unknown"]);
+      value.result = { tag: "worst", bounded: true, reason: "bounded source mutation" };
+    } else if (value.tag === "array") {
+      value.elements.forEach(v => this.weaken(v, seen));
+      value.elements = [{ tag: "worst", bounded: true, reason: "bounded array mutation" }];
+    } else if (value.tag === "union") value.arms.forEach(v => this.weaken(v, seen));
+  }
+  spend(node) {
+    const mod = this.graph.locations.get(node);
+    if (!mod) return true;
+    this.currentJob?.dependencies.add(mod.path);
+    const count = (this.work.get(mod.path) ?? 0) + 1;
+    this.work.set(mod.path, count);
+    return count <= 5000;
+  }
+  widen(node, c, reason) {
+    this.bounded.add(node);
+    const value = this.partial(node, c, reason);
+    // A widened body can read and fail, even when its return is unused.
+    this.read({ pending: true, failures: ["unknown"] }, node, c);
+    return { ...value, bounded: true };
+  }
   eval(input, env, c) {
+    if (input && !this.spend(input))
+      return this.boundFunction({ node: input, env }, [], input, c, "file work budget exhausted");
+    const value = this.evaluate(input, env, c);
+    if (value?.tag === "worst" && value.bounded)
+      this.read({ pending: true, failures: ["unknown"] }, input, c);
+    if (value?.tag === "union" && value.arms.length > 64)
+      return this.widen(input, c, "value alternatives exceed summary budget");
+    return value;
+  }
+  evaluate(input, env, c) {
     const n = unwrap(input);
     if (!n) return { ...plain(), undefinedValue: true };
     if (fnTypes.has(n.type)) return this.closure(n, env);
@@ -888,9 +1019,9 @@ export class Analysis {
             if (value.component) this.components.add(value);
           }
           members.set(key, value);
-          if (c.scope === "module" && value.component) this.escapes.push({ fn: value, node: p });
+          if (c.scope === "module" && value.component) this.recordEscape({ fn: value, node: p });
         }
-        return object(members);
+        return { ...object(members), originModule: c.scope === "module" ? env.module.path : null };
       }
       case "ArrayExpression":
         return {
@@ -914,7 +1045,7 @@ export class Analysis {
       case "CallExpression": {
         const fn = this.eval(n.callee, env, c);
         if (fn.tag === "solid" && fn.name === "render") {
-          this.roots.push({ node: n, expression: n.arguments[0], env });
+          this.recordRoot({ node: n, expression: n.arguments[0], env });
           return plain();
         }
         const args = n.arguments.map(a =>
@@ -926,7 +1057,10 @@ export class Analysis {
         const callee = this.eval(n.callee, env, c);
         const args = n.arguments.map(a => this.eval(a, env, c));
         if (callee.tag === "class") {
-          const instance = object();
+          const instance = {
+            ...object(),
+            originModule: c.scope === "module" ? env.module.path : null
+          };
           const fields = new Env(callee.env);
           fields.define("this", instance, n);
           let constructor;
@@ -966,6 +1100,7 @@ export class Analysis {
         const value = this.eval(n.argument, env, c);
         return each(value, v => {
           if (v.tag === "promise") {
+            if (!v.handled) this.epoch++;
             v.handled = true;
             this.fail(v.rejects, n, c);
             return v.result;
@@ -1070,16 +1205,20 @@ export class Analysis {
     }
   }
   containsJSX(node) {
+    if (this.jsxCache.has(node)) return this.jsxCache.get(node);
     let result = false;
     walk(node.body, n => {
       if (n.type === "JSXElement" || n.type === "JSXFragment") result = true;
     });
+    this.jsxCache.set(node, result);
     return result;
   }
   assign(left, value, env, c, node) {
+    this.epoch++;
     if (left.type === "Identifier") {
       const cell = env.cell(left.name);
       if (cell) {
+        if (cell.env.parent === null) this.currentJob?.writes.add(cell.env.module.path);
         if (
           cell.env.parent === null &&
           c.scope !== "module" &&
@@ -1094,9 +1233,11 @@ export class Analysis {
     } else if (left.type === "MemberExpression") {
       const target = this.eval(left.object, env, c);
       if (target.tag === "object") {
+        this.sharedWrite(target);
         if (target.service) {
           this.partial(node, c, "context member mutation");
           target.tainted = true;
+          this.sharedWrite(target);
         } else target.members.set(keyName(left.property), value);
       }
     } else this.bind(left, value, env, c);
@@ -1260,8 +1401,11 @@ export class Analysis {
   }
   merge(env, a, b) {
     if (!env || !env.parent) return;
-    for (const [name, cell] of env.cells)
-      cell.value = join(a.cells.get(name)?.value, b.cells.get(name)?.value);
+    for (const [name, cell] of env.cells) {
+      const value = join(a.cells.get(name)?.value, b.cells.get(name)?.value);
+      if (value !== cell.value) this.epoch++;
+      cell.value = value;
+    }
     this.merge(env.parent, a.parent, b.parent);
   }
   jsxValue(n, env, c) {
@@ -1446,48 +1590,76 @@ export class Analysis {
     );
     return plain();
   }
+  sharedWrite(value) {
+    if (value?.originModule) this.currentJob?.writes.add(value.originModule);
+  }
+  recordRoot(root) {
+    this.epoch++;
+    const mod = this.graph.locations.get(root.node);
+    (mod.roots ??= []).push(root);
+  }
+  recordEscape(escape) {
+    this.epoch++;
+    const mod = this.graph.locations.get(escape.node);
+    (mod.escapes ??= []).push(escape);
+  }
   run() {
     this.graph.prepare();
     for (const path of this.graph.options.files)
       if (!this.graph.isDependency(path)) this.initialize(this.graph.load(path));
-    for (const root of this.roots) {
-      const c = this.context({ scope: "tracking", related: [root.node] });
-      const fn = root.expression ? this.eval(root.expression, root.env, c) : root.fn;
-      if (fn?.component) {
-        const p = fn.node.params[0];
-        const shape = p?.typeAnnotation ? this.annotation(p, fn.env) : undefined;
-        this.component(fn, { tag: "props", members: new Map(), shape }, root.node, c);
-      } else this.call(fn, [], root.node, c);
-    }
-    for (const escape of this.escapes) {
-      const c = this.context({ scope: "tracking", related: [escape.node] });
-      const p = escape.fn.node.params[0];
-      const shape = p?.typeAnnotation ? this.annotation(p, escape.fn.env) : undefined;
-      this.component(escape.fn, { tag: "props", members: new Map(), shape }, escape.node, c);
-    }
     for (const mod of this.graph.modules.values()) {
-      if (!this.graph.options.files.includes(mod.path)) continue;
+      const key = "module:" + mod.path;
+      if (!mod.blocked && !this.jobs.results.has(key)) this.jobs.reuse(this, key);
+    }
+    const modules = [...this.graph.modules.values()];
+    for (const root of modules.flatMap(mod => mod.roots ?? [])) {
+      const file = this.graph.loc(root.node).file;
+      this.jobs.run(this, "root:" + file + ":" + root.node.start, file, () => {
+        const c = this.context({ scope: "tracking", related: [root.node] });
+        const fn = root.expression ? this.eval(root.expression, root.env, c) : root.fn;
+        if (fn?.component) {
+          const p = fn.node.params[0];
+          const shape = p?.typeAnnotation ? this.annotation(p, fn.env) : undefined;
+          this.component(fn, { tag: "props", members: new Map(), shape }, root.node, c);
+        } else this.call(fn, [], root.node, c);
+      });
+    }
+    for (const escape of modules.flatMap(mod => mod.escapes ?? [])) {
+      const file = this.graph.loc(escape.node).file;
+      this.jobs.run(this, "escape:" + file + ":" + escape.node.start, file, () => {
+        const c = this.context({ scope: "tracking", related: [escape.node] });
+        const p = escape.fn.node.params[0];
+        const shape = p?.typeAnnotation ? this.annotation(p, escape.fn.env) : undefined;
+        this.component(escape.fn, { tag: "props", members: new Map(), shape }, escape.node, c);
+      });
+    }
+    const checked = new Set(this.graph.options.files);
+    for (const mod of this.graph.modules.values()) {
+      if (!checked.has(mod.path)) continue;
       for (const [name] of mod.exports) {
         const fn = this.exportValue(mod, name, new Set());
         if (fn.tag !== "function" || !fn.component || this.called.has(fn)) continue;
-        const exported = [];
-        const c = this.context({ scope: "tracking", mode: "export", exported });
-        const p = fn.node.params[0];
-        const shape = p?.typeAnnotation ? this.annotation(p, fn.env) : undefined;
-        this.component(fn, { tag: "props", members: new Map(), shape }, fn.node, c);
-        if (exported.length)
-          this.emit(
-            "COMPONENT_OBLIGATIONS_EXPORTED",
-            fn.node.id ?? fn.node,
-            { ...c, mode: null },
-            [],
-            {
-              pending: exported.some(e => e.code === "ASYNC_OUTSIDE_LOADING_BOUNDARY"),
-              failures: uniq(exported.flatMap(e => e.data.failures ?? []))
-            }
-          );
+        this.jobs.run(this, "export:" + mod.path + ":" + name, mod.path, () => {
+          const exported = [];
+          const c = this.context({ scope: "tracking", mode: "export", exported });
+          const p = fn.node.params[0];
+          const shape = p?.typeAnnotation ? this.annotation(p, fn.env) : undefined;
+          this.component(fn, { tag: "props", members: new Map(), shape }, fn.node, c);
+          if (exported.length)
+            this.emit(
+              "COMPONENT_OBLIGATIONS_EXPORTED",
+              fn.node.id ?? fn.node,
+              { ...c, mode: null },
+              [],
+              {
+                pending: exported.some(e => e.code === "ASYNC_OUTSIDE_LOADING_BOUNDARY"),
+                failures: uniq(exported.flatMap(e => e.data.failures ?? []))
+              }
+            );
+        });
       }
     }
+    this.jobs.collect(this);
     return {
       diagnostics: this.diagnostics,
       facts: [...this.facts.values()],
@@ -1495,7 +1667,13 @@ export class Analysis {
       inferenceNeededCount: this.inference.size,
       worstCaseSites: [...this.worstSites.values()],
       worstCaseSiteCount: this.worstSites.size,
-      graph: { nodes: this.nodes.length }
+      graph: { nodes: this.nodes.length },
+      scale: {
+        ...this.jobs.stats(),
+        modules: this.graph.modules.size,
+        boundedSites: this.bounded.size,
+        work: [...this.work].sort((a, b) => b[1] - a[1]).slice(0, 20)
+      }
     };
   }
 }

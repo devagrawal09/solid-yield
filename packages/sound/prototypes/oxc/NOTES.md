@@ -26,7 +26,7 @@ The earlier ref-read dispute was resolved in the shared expectations before this
 
 ## Precision / D-133
 
-The 30 precision fixtures improve from 13/15 error hits, 22 extra errors and 24 extra warnings to 14/15, zero extra errors and zero extra warnings. The remaining frozen miss is an exported component with no renderer: SLICE.md requires an informational obligation, not an uncovered-root error. DISPUTES.md records passing rc.17 evidence and static checks for export, direct root, and caller-provided Loading. The miss stays visible in the pin and score; no expectation was changed. All other frozen groups retain every hit with no extras. See RESULTS-precision.md.
+The historical precision pass improved the 30 fixtures from 13/15 error hits, 22 extra errors and 24 extra warnings to 14/15, zero extra errors and zero extra warnings. RESULTS-precision.md and DISPUTES.md record the then-unmounted reactive-key mutant and the export/root distinction. Parent commit 05df715 mounted that pair before this scale branch: the current suite now has all 15 precision hits and all 173 fixtures without soundness failures, missed mutants or extra errors/warnings. This scale pass changes no expectation or pin.
 
 - Loading.on evaluates its reset input in tracking scope; it never invokes a held function as an event callback. Reset ordering remains deferred.
 - Simple imperative classes have invocation-specific instances, receiver-bound methods/getters, fields and constructors. Methods follow their real bodies and preserve actual accessor reads. Unsupported class features still warn and widen. An unknown member call carries unknown failures/results, not an invented pending-accessor read.
@@ -35,6 +35,51 @@ The 30 precision fixtures improve from 13/15 error hits, 22 extra errors and 24 
 - Installed implementations are never read or parsed. This includes checked roots, package dist, and linked package real paths. Resolution uses declarations and adjacent declaration sidecars; unknown package calls warn at app sites and keep unknown failures/returned values. Package source is not a fallback. Tests verify declarations/no-declarations, linked/unlinked packages, extra roots, and updates.
 - Public optional inputs retain their injectable arm when a local root omits them. Known supplied callback bodies remain precise. Closed local merge inputs can use an actually absent override to select a default; a public/unknown override cannot be assumed absent.
 - Results expose distinct worstCaseSites as well as inferenceNeeded requests. The precision measurement script reports unique locations, location/reason requests, worst-case call/boundary sites, and partial-warning sites per group. Annotation-only calls still need failure inference under D-129.
+
+## Scale pass (OpenClaw)
+
+See RESULTS-scale.md for measurements, including missed targets. The old precision
+report above predates parent commit 05df715, which mounted the reactive-key pair;
+the current frozen suite has 173 fixtures and C meets all their requirements.
+No fixture, pin, shared harness, shared code or decision was changed in this pass.
+
+- Source locations are cached, with a line-start index rather than repeatedly
+  splitting each source prefix. Import resolution and package metadata are cached.
+  Equal scalar alternatives join once; allocated objects keep separate identities.
+- Functions have bounded context caches (32 entries, eviction means re-analysis,
+  not omission). Keys include lexical cells, state revision, arguments, scope,
+  boundaries, render path and providers. Only copyable return facts are cached;
+  services, contexts, source allocations and closures remain invocation-specific.
+  Cached failure/capture effects are replayed into the current caller, and promise
+  handled flags are copied rather than shared. State writes invalidate call caches.
+- Interpreter work is bounded at 5,000 steps per source file per analysis job,
+  and 64 value alternatives. A job is a module initializer, render entry, hand-off
+  or exported component. Existing recursive-call limits remain. Exhaustion emits
+  UNANALYZED_BOUNDARY, returns worst case and routes possible reads/failures through
+  the actual scope even when the return is unused. Captured assignment targets and
+  mutable arguments are widened. These warnings mean incomplete coverage, not an
+  application bug or a proof that the skipped body actually reads a Solid source.
+- Initializer/render/component results are retained separately, including their
+  dependencies and shared-state writes. Updates use a finite dependency worklist;
+  invalidated activations are discarded before replacements are built. Unrelated
+  jobs retain their diagnostics. Prop facts flow through render jobs in both
+  directions, so changing a caller can change diagnostics at a child's read.
+- Stable per-file hashes omit source positions. A comment/newline-only update is
+  parsed and compared, then existing locations are moved without re-expansion.
+  Semantic changes conservatively invalidate transitive importers plus jobs that
+  consumed their components; shared module mutations add reverse dependencies.
+  **This is not yet the requested output-summary-only propagation:** a changed
+  function body still changes the conservative summary hash even when its final
+  pending/failure facts would be identical. Widely imported semantic edits remain
+  expensive. The cached jobs are not general parametric function summaries.
+
+The interface is unchanged. Additive result fields are invalidatedFiles,
+summaryChangedFiles and summaryHash on updates, and scale counters (checked/reused
+jobs, cache hits/misses, bounded sites, loaded modules and slow jobs). A check with
+no update reuses its current result. invalidatedFiles names the conservative
+invalidated module set, not a claim that every function in those modules ran.
+Cached source locations move in place; callers needing historical snapshots
+should copy results. dispose releases jobs, modules and resolver lookup tables.
 
 ## Limits and assumptions
 

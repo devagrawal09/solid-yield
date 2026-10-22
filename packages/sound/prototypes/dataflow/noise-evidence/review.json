@@ -1,0 +1,1830 @@
+{
+  "selection": {
+    "errors": "Fixed code quotas: handler 10, setup 5, strict 5, forbidden 4, writes 3, pending-setup 4, pending-root 6, error-root 6, context 2. Sort each by file/line/col; take up to floor(quota/3), minimum one, changed/new entries evenly spaced (rounded index), then evenly spaced unchanged entries. Not random; correlated sites remain visible.",
+    "silences": "The 15 pre-existing S01-S15 sites from the read-only trial PRECISION.md, all verified to have no final error beginning on that line. This is a site review, not proof surrounding code was analyzed.",
+    "errorVerdicts": "TP = justified finding under current contract, which can be an unknown obligation rather than an observed failure. FP = contradicted by supported source facts. UNSURE = upstream coverage, phase or instance not proven.",
+    "silenceVerdicts": "TP = locally justified silence (possibly with a warning); FP = missing required partial warning; UNSURE = unresolved."
+  },
+  "errors": [
+    {
+      "id": "E01",
+      "change": "new",
+      "diagnostic": {
+        "code": "UNHANDLED_HANDLER_FAILURE",
+        "kind": "error",
+        "severity": "error",
+        "message": "This callback can fail with unknown (reading \"revision\" may fail) and nothing catches it; a rendered Errored does not catch a handler's failure. Catch and handle it inside the handler.",
+        "loc": {
+          "file": "src/app/app-root.tsx",
+          "line": 520,
+          "col": 55,
+          "endLine": 520,
+          "endCol": 64
+        },
+        "ownerName": "render",
+        "ownerPath": [
+          "render"
+        ],
+        "data": {
+          "failures": [
+            "unknown"
+          ]
+        }
+      },
+      "excerpt": "518:         {(request) => {\n519:           try {\n520:             readiness = request.create(host, runtime, trackRoot, () => ({\n521:               login,\n522:               shell,",
+      "verdict": "UNSURE",
+      "contractObligation": "required unknown; origin incomplete",
+      "reason": "request.create receives trackRoot; its projection revision was widened through module state. Callback lifetime and the exact instance are not retained.",
+      "sourceSha256": "6387a1d8c7ed115a0587ec1deae2e7e9a6303c0be0868a002fcd8109975b7588"
+    },
+    {
+      "id": "E02",
+      "change": "changed",
+      "diagnostic": {
+        "code": "UNHANDLED_HANDLER_FAILURE",
+        "kind": "error",
+        "severity": "error",
+        "message": "This callback can fail with unknown (normalizeLowercaseStringOrEmpty(sessionKey) has no failure information) and nothing catches it; a rendered Errored does not catch a handler's failure. Catch and handle it inside the handler.",
+        "loc": {
+          "file": "src/pages/activity/current-work.ts",
+          "line": 93,
+          "col": 25,
+          "endLine": 93,
+          "endCol": 93
+        },
+        "ownerName": "<ActivityPage>",
+        "data": {
+          "failures": [
+            "unknown"
+          ]
+        }
+      },
+      "excerpt": "91: } {\n92:   const rows = new Map(\n93:     result.sessions.map((row) => [currentWorkIdentity(row), { row, requiresRefresh: false }]),\n94:   );\n95:   let requiresAncestorRefresh = false;",
+      "verdict": "UNSURE",
+      "contractObligation": "required unknown import; callback placement unsure",
+      "reason": "currentWorkIdentity -> resolveUiConversationIdentity reaches unchecked normalization imports. The map callback is synchronous in the source; the emitted handler attribution needs a fuller receiver/caller trace.",
+      "sourceSha256": "3b3377755cbd12720a10faa3c34a0e9d65d1960d753f6026f7b41e67c5c881ee"
+    },
+    {
+      "id": "E03",
+      "change": "new",
+      "diagnostic": {
+        "code": "UNHANDLED_HANDLER_FAILURE",
+        "kind": "error",
+        "severity": "error",
+        "message": "This callback can fail with unknown (contract.equality(value, next) has no failure information) and nothing catches it; a rendered Errored does not catch a handler's failure. Catch and handle it inside the handler.",
+        "loc": {
+          "file": "src/plugins/control-ui-session-summary.tsx",
+          "line": 257,
+          "col": 36,
+          "endLine": 260,
+          "endCol": 14
+        },
+        "ownerName": "memo \"observation\"",
+        "data": {
+          "failures": [
+            "unknown"
+          ]
+        }
+      },
+      "excerpt": "255:           subscribe: (owner, notify) => {\n256:             onSettled(hydrateIdentities);\n257:             return owner.subscribe(() => {\n258:               notify();\n259:               onSettled(hydrateIdentities);\n260:             });\n261:           },\n262:           equality: \"revision\",",
+      "verdict": "UNSURE",
+      "contractObligation": "required unknown callback; branch precision unresolved",
+      "reason": "owner.subscribe -> projectSource callback. This caller supplies equality:\"revision\", but the interpreter still visits contract.equality(value,next). notify and deferred onSettled remain independent unknowns; the displayed equality reason alone is not proof of a failure.",
+      "sourceSha256": "c7443b266a5bd8e008f40711cad7fc5e50c7713cfccd2b62a5c341dea9932108"
+    },
+    {
+      "id": "E04",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "UNHANDLED_HANDLER_FAILURE",
+        "kind": "error",
+        "severity": "error",
+        "message": "This onModal-cancel handler can fail with unknown (props.onClose(\u2026) has no caller in this program has no failure information) and nothing catches it; a rendered Errored does not catch a handler's failure. Catch and handle it inside the handler.",
+        "loc": {
+          "file": "src/app/app-shell-command-palette-loading-view.tsx",
+          "line": 21,
+          "col": 9,
+          "endLine": 21,
+          "endCol": 23
+        },
+        "ownerName": "<CommandPaletteLoading>",
+        "ownerPath": [
+          "<CommandPaletteLoading>"
+        ],
+        "data": {
+          "failures": [
+            "unknown"
+          ]
+        }
+      },
+      "excerpt": "19:         label={t(\"palette.placeholder\")}\n20:         style={COMMAND_PALETTE_DIALOG_STYLE}\n21:         onModal-cancel={() => props.onClose()}\n22:       >\n23:         <div",
+      "verdict": "TP",
+      "contractObligation": "required D-129 unknown callback",
+      "reason": "The onModal-cancel body directly calls props.onClose without a catch, and the summary has no known caller body. A function type is not a failure guarantee.",
+      "sourceSha256": "dac29f48552a22c3921715470b399bdf5f55a5f478e6d3ad91c7a4149aa3111f"
+    },
+    {
+      "id": "E05",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "UNHANDLED_HANDLER_FAILURE",
+        "kind": "error",
+        "severity": "error",
+        "message": "This onClick handler can fail with unknown (row().server has no failure information) and nothing catches it; a rendered Errored does not catch a handler's failure. Catch and handle it inside the handler.",
+        "loc": {
+          "file": "src/components/mcp-app-catalog.tsx",
+          "line": 369,
+          "col": 17,
+          "endLine": 369,
+          "endCol": 24
+        },
+        "ownerName": "<McpAppCatalog>",
+        "ownerPath": [
+          "<McpAppCatalog>"
+        ],
+        "data": {
+          "failures": [
+            "unknown"
+          ]
+        }
+      },
+      "excerpt": "367:                 class=\"nav-item\"\n368:                 disabled={!catalog.available()}\n369:                 onClick={() => open(row().server, row().entry)}\n370:                 title={row().server.label}\n371:               >",
+      "verdict": "UNSURE",
+      "contractObligation": "required worst-case return; provenance incomplete",
+      "reason": "row().server feeds open; the surrounding memo/action/catalog path is partial. The error is a conservative obligation, not evidence that a settled row field can suspend or throw.",
+      "sourceSha256": "724e1bf8c771359223b34d9a9d57db74376028bcd2bf8fc3d9f3154dec9b1fb1"
+    },
+    {
+      "id": "E06",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "UNHANDLED_HANDLER_FAILURE",
+        "kind": "error",
+        "severity": "error",
+        "message": "This callback can fail with unknown (stopEvents?.() has no failure information) and nothing catches it; a rendered Errored does not catch a handler's failure. Catch and handle it inside the handler.",
+        "loc": {
+          "file": "src/lib/gateway-page-binding.ts",
+          "line": 82,
+          "col": 42,
+          "endLine": 86,
+          "endCol": 6
+        },
+        "ownerName": "effect",
+        "data": {
+          "failures": [
+            "unknown"
+          ]
+        }
+      },
+      "excerpt": "80:     this.applySnapshot(gateway.snapshot, { initial, sourceChanged });\n81:     // Source replacements and same-client reconnects retire stale requests before notifying consumers.\n82:     this.stopGateway = gateway.subscribe((snapshot) => {\n83:       if (this.currentGateway === gateway && this.options.getGateway() === gateway) {\n84:         this.applySnapshot(snapshot, { initial: false, sourceChanged: false });\n85:       }\n86:     });\n87:   }\n88: ",
+      "verdict": "UNSURE",
+      "contractObligation": "unknown disposer obligation; lifetime unresolved",
+      "reason": "gateway.subscribe calls applySnapshot, which may run stopEvents. A supplied disposer can fail; the concrete subscription/cleanup path is not captured by this diagnostic.",
+      "sourceSha256": "114149456840b7fb3ae76bb34999cc190cb1e08f3d874da348aa1ef9c54f091d"
+    },
+    {
+      "id": "E07",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "UNHANDLED_HANDLER_FAILURE",
+        "kind": "error",
+        "severity": "error",
+        "message": "This callback can fail with unknown (el.matches(\".agent-chat__composer-combobox > textarea\") has no failure information) and nothing catches it; a rendered Errored does not catch a handler's failure. Catch and handle it inside the handler.",
+        "loc": {
+          "file": "src/pages/chat/components/chat-composer-dom.ts",
+          "line": 153,
+          "col": 47,
+          "endLine": 158,
+          "endCol": 4
+        },
+        "ownerName": "effect",
+        "data": {
+          "failures": [
+            "unknown"
+          ]
+        }
+      },
+      "excerpt": "151:     return;\n152:   }\n153:   state.overflowFrame = requestAnimationFrame(() => {\n154:     state.overflowFrame = null;\n155:     if (el.isConnected && composerTextareaResizeObservers.get(el) === state) {\n156:       updateTextareaOverflow(el, false);\n157:     }\n158:   });\n159: }\n160: ",
+      "verdict": "TP",
+      "contractObligation": "required unknown platform failure under current contracts",
+      "reason": "The scheduled callback reaches updateTextareaOverflow -> Element.matches. matches is not in the frozen DOM safe-operation contract; the fixed literal selector looks safe, but no failure-free signature/body is modeled. This is not a demonstrated app bug.",
+      "sourceSha256": "c347e8ff35c0b264ea8023af33f01e33071176aa4080940cb7375841c2211974"
+    },
+    {
+      "id": "E08",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "UNHANDLED_HANDLER_FAILURE",
+        "kind": "error",
+        "severity": "error",
+        "message": "This onClick handler can fail with unknown (props.workspace.onSetFilter(filter().filter) has no failure information) and nothing catches it; a rendered Errored does not catch a handler's failure. Catch and handle it inside the handler.",
+        "loc": {
+          "file": "src/pages/chat/components/chat-session-workspace-rail-solid.tsx",
+          "line": 457,
+          "col": 19,
+          "endLine": 457,
+          "endCol": 26
+        },
+        "ownerName": "<WorkspaceContents>",
+        "ownerPath": [
+          "<WorkspaceContents>"
+        ],
+        "data": {
+          "failures": [
+            "unknown"
+          ]
+        }
+      },
+      "excerpt": "455:                   class=\"chat-workspace-rail__chip\"\n456:                   aria-pressed={data().activeFilter === filter().filter ? \"true\" : \"false\"}\n457:                   onClick={() => props.workspace.onSetFilter(filter().filter)}\n458:                 >\n459:                   {filter().label}",
+      "verdict": "TP",
+      "contractObligation": "required D-129 unknown callback",
+      "reason": "Click directly invokes props.workspace.onSetFilter. No catch or resolved supplied implementation discharges the callback obligation.",
+      "sourceSha256": "b082e00a8e940e1ebeb671013995c9c79a98462a909bb93117054b40ea1c9859"
+    },
+    {
+      "id": "E09",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "UNHANDLED_HANDLER_FAILURE",
+        "kind": "error",
+        "severity": "error",
+        "message": "This callback can fail with unknown (reading \"props.manualProviderId\" may fail) and nothing catches it; a rendered Errored does not catch a handler's failure. Catch and handle it inside the handler.",
+        "loc": {
+          "file": "src/pages/model-setup/view.tsx",
+          "line": 204,
+          "col": 28,
+          "endLine": 204,
+          "endCol": 74
+        },
+        "ownerName": "memo \"provider\"",
+        "data": {
+          "failures": [
+            "unknown"
+          ]
+        }
+      },
+      "excerpt": "202:   );\n203:   const provider = createMemo(() =>\n204:     manualProviders().find((entry) => entry.id === props.manualProviderId),\n205:   );\n206:   const targetId = () => `manual:${props.manualProviderId}`;",
+      "verdict": "UNSURE",
+      "contractObligation": "required worst-case props; phase unresolved",
+      "reason": "manualProviders().find reads props.manualProviderId in its callback. JSX spreads elsewhere make the prop worst case; treating the callback as a detached handler is not independently justified by this source.",
+      "sourceSha256": "7b55a7d087ad14abf2b2d1da11510eeb7d266b285e60b4dd000e6344b67b1ebd"
+    },
+    {
+      "id": "E10",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "UNHANDLED_HANDLER_FAILURE",
+        "kind": "error",
+        "severity": "error",
+        "message": "This onClick handler can fail with unknown (context().navigate(\"labs\") has no failure information) and nothing catches it; a rendered Errored does not catch a handler's failure. Catch and handle it inside the handler.",
+        "loc": {
+          "file": "src/plugins/control-ui-disabled.solid.tsx",
+          "line": 37,
+          "col": 13,
+          "endLine": 37,
+          "endCol": 20
+        },
+        "ownerName": "<CustomPluginUiDisabled>",
+        "ownerPath": [
+          "<CustomPluginUiDisabled>"
+        ],
+        "data": {
+          "failures": [
+            "unknown"
+          ]
+        }
+      },
+      "excerpt": "35:             class=\"btn btn--sm\"\n36:             href={pathForRoute(\"labs\", context().basePath)}\n37:             onClick={(event) => {\n38:               if (shouldHandleNavigationClick(event)) {\n39:                 event.preventDefault();",
+      "verdict": "TP",
+      "contractObligation": "required D-129 unknown callback",
+      "reason": "The event body reaches context().navigate(\"labs\") without a catch. No resolved failure-free implementation is attached to that context member.",
+      "sourceSha256": "d3d1430fce4dc2302e482a6e80110ec68d1ee3c1e9b1b9d0c5528760fa80dd2c"
+    },
+    {
+      "id": "E11",
+      "change": "new",
+      "diagnostic": {
+        "code": "SETUP_MAY_THROW",
+        "kind": "error",
+        "severity": "error",
+        "message": "<renderSidebarRail>'s setup may fail with unknown (entry.type has no failure information); a component body only creates state. Move this work into a memo or rendered work under an Errored boundary, or into a handler, or handle the failure where it is produced.",
+        "loc": {
+          "file": "src/app-navigation.ts",
+          "line": 110,
+          "col": 7,
+          "endLine": 110,
+          "endCol": 17
+        },
+        "ownerName": "<renderSidebarRail>",
+        "data": {
+          "failures": [
+            "unknown"
+          ]
+        }
+      },
+      "excerpt": "108: \n109: export function serializeSidebarEntry(entry: SidebarZoneEntry): string {\n110:   if (entry.type === \"route\") {\n111:     return `route:${entry.route}`;\n112:   }",
+      "verdict": "UNSURE",
+      "contractObligation": "required worst-case argument; source summary incomplete",
+      "reason": "serializeSidebarEntry reads entry.type. The call originates in renderSidebarRail with widened data; this is not evidence that an ordinary discriminant property throws.",
+      "sourceSha256": "10ca6ac43c2cb92ab67f1119511aef824beffef65f2f15a181ef81f2cea60faa"
+    },
+    {
+      "id": "E12",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "SETUP_MAY_THROW",
+        "kind": "error",
+        "severity": "error",
+        "message": "<IdentityAvatar>'s setup may fail with unknown (analysis work limit); a component body only creates state. Move this work into a memo or rendered work under an Errored boundary, or into a handler, or handle the failure where it is produced.",
+        "loc": {
+          "file": "src/app/gateway-presentation-scope.ts",
+          "line": 67,
+          "col": 24,
+          "endLine": 67,
+          "endCol": 41
+        },
+        "ownerName": "<IdentityAvatar>",
+        "data": {
+          "failures": [
+            "unknown"
+          ]
+        }
+      },
+      "excerpt": "65:     snapshot.phase !== \"connected\" &&\n66:     snapshot.phase !== \"reconnecting\" &&\n67:     snapshot.phase !== \"reload-required\"\n68:   ) {\n69:     previous.scope.displayUser = null;",
+      "verdict": "UNSURE",
+      "contractObligation": "required work-cutoff obligation",
+      "reason": "The first unknown is an analysis work limit, not a throw in this condition. The activation is partial; unvisited work must remain worst case.",
+      "sourceSha256": "d0dc80f0bed15ae8044447741f7074d4cfc8a3c5d914ad1055936a83ac806f20"
+    },
+    {
+      "id": "E13",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "SETUP_MAY_THROW",
+        "kind": "error",
+        "severity": "error",
+        "message": "<renderClawTrustWarning>'s setup may fail with unknown (warning.trim() has no failure information); a component body only creates state. Move this work into a memo or rendered work under an Errored boundary, or into a handler, or handle the failure where it is produced.",
+        "loc": {
+          "file": "src/pages/agents-home/claws-trust-warning.tsx",
+          "line": 12,
+          "col": 17,
+          "endLine": 12,
+          "endCol": 31
+        },
+        "ownerName": "<renderClawTrustWarning>",
+        "data": {
+          "failures": [
+            "unknown"
+          ]
+        }
+      },
+      "excerpt": "10: \n11: function parseClawHubAudit(warning: string): ClawHubAudit | null {\n12:   const lines = warning.trim().split(/\\r?\\n/u);\n13:   if (\n14:     !/^\u256d\u2500 ClawHub Security Audit \u2500+\u256e$/u.test(lines[0] ?? \"\") ||",
+      "verdict": "FP",
+      "contractObligation": "not required for this native string operation",
+      "reason": "parseClawHubAudit has a string parameter and calls native trim. The exported JSX helper renderClawTrustWarning(warning:string) is separately analyzed as a component with a props-object parameter, losing the scalar argument. Direct helper calls are now checked, but that standalone summary still reports this false setup reason.",
+      "sourceSha256": "e7aa7eae686148df972226d7c3b86cecccefc30576b9dad39e5a679489d27e3c"
+    },
+    {
+      "id": "E14",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "SETUP_MAY_THROW",
+        "kind": "error",
+        "severity": "error",
+        "message": "<CloudWorkersPage>'s setup may fail with unknown (Promise.withResolvers<void>() has no failure information); a component body only creates state. Move this work into a memo or rendered work under an Errored boundary, or into a handler, or handle the failure where it is produced.",
+        "loc": {
+          "file": "src/pages/cloud-workers/cloud-workers-page.tsx",
+          "line": 63,
+          "col": 22,
+          "endLine": 63,
+          "endCol": 51
+        },
+        "ownerName": "<CloudWorkersPage>",
+        "data": {
+          "failures": [
+            "unknown"
+          ]
+        }
+      },
+      "excerpt": "61:   const saveProjection = projectMutableSource(configSave, (owner) => owner.state);\n62:   const saveState = saveProjection.read;\n63:   let saveLifetime = Promise.withResolvers<void>();\n64:   function retireSavePresentation() {\n65:     saveLifetime.resolve();",
+      "verdict": "TP",
+      "contractObligation": "required unknown declaration gap",
+      "reason": "Promise.withResolvers is absent from the fixed ES2023 declaration set. B cannot resolve the signature; it correctly keeps unknown failure under that input. Adding newer libs to silence it is outside this round.",
+      "sourceSha256": "9a93b1a3d9c8e2f869244845cef2f3c10bbef23a1c6c231dd78111e696cb8fd5"
+    },
+    {
+      "id": "E15",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "SETUP_MAY_THROW",
+        "kind": "error",
+        "severity": "error",
+        "message": "<PluginViewContent>'s setup may fail with Error | unknown (runtime?.selectedReplacement(host.surface) has no failure information); a component body only creates state. Move this work into a memo or rendered work under an Errored boundary, or into a handler, or handle the failure where it is produced.",
+        "loc": {
+          "file": "src/plugins/control-ui-view.solid.tsx",
+          "line": 78,
+          "col": 11,
+          "endLine": 78,
+          "endCol": 53
+        },
+        "ownerName": "<PluginViewContent>",
+        "data": {
+          "failures": [
+            "unknown",
+            "Error"
+          ]
+        }
+      },
+      "excerpt": "76:     const entry =\n77:       host.kind === \"replacements\"\n78:         ? runtime?.selectedReplacement(host.surface)\n79:         : runtime\n80:             ?.registrations(host.kind)",
+      "verdict": "TP",
+      "contractObligation": "required unknown injected method",
+      "reason": "runtime?.selectedReplacement(host.surface) is an injected/runtime method with no retained failure body. Optional access does not promise failure-free execution.",
+      "sourceSha256": "665df8edb8b60d7656a107a5351b4e6ecae9424433e087c55ba29d5791b88bad"
+    },
+    {
+      "id": "E16",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "STRICT_READ_UNTRACKED",
+        "kind": "strict-read",
+        "severity": "error",
+        "message": "Reactive value \"host\" is read directly in <renderSidebarSessionSectionHeader>'s setup and will not update. Move it into a tracking scope (JSX, a memo, or an effect's compute function), or into the handler that needs it.",
+        "loc": {
+          "file": "src/components/app-sidebar-session-section-render.tsx",
+          "line": 300,
+          "col": 23,
+          "endLine": 300,
+          "endCol": 29
+        },
+        "ownerName": "<renderSidebarSessionSectionHeader>",
+        "data": {
+          "source": "host"
+        }
+      },
+      "excerpt": "298:                     ref={(element) => {\n299:                       personHeader = element;\n300:                       host().presencePeople?.set(section().id, element);\n301:                     }}\n302:                     type=\"button\"",
+      "verdict": "TP",
+      "contractObligation": "supported D-131 ref read",
+      "reason": "The ref callback reads the settled host accessor and section accessor. A ref body is setup-like even though it appears inside JSX; copying the node alone would be clean.",
+      "sourceSha256": "5355ce5cd31f043130e25507f43ede4914c1897eefd86d7e285c57245840be84"
+    },
+    {
+      "id": "E17",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "STRICT_READ_UNTRACKED",
+        "kind": "strict-read",
+        "severity": "error",
+        "message": "Reactive value \"props.state\" is read directly in <SessionMenu>'s setup and will not update. Move it into a tracking scope (JSX, a memo, or an effect's compute function), or into the handler that needs it.",
+        "loc": {
+          "file": "src/components/terminal/terminal-panel-view-chrome.tsx",
+          "line": 89,
+          "col": 33,
+          "endLine": 89,
+          "endCol": 44
+        },
+        "ownerName": "<SessionMenu>",
+        "related": [
+          {
+            "message": "caller prop expression",
+            "loc": {
+              "file": "src/components/terminal/terminal-panel-view.tsx",
+              "line": 213,
+              "col": 29,
+              "endLine": 213,
+              "endCol": 41
+            }
+          },
+          {
+            "message": "caller prop expression",
+            "loc": {
+              "file": "src/components/terminal/terminal-panel-view-chrome.tsx",
+              "line": 306,
+              "col": 22,
+              "endLine": 306,
+              "endCol": 40
+            }
+          }
+        ],
+        "data": {
+          "source": "props.state"
+        }
+      },
+      "excerpt": "87:           <div class={props.inline && !props.mobile ? \"session-panel-rail__group\" : undefined}>\n88:             <button\n89:               ref={(element) => props.state.refreshRef(element)}\n90:               disabled={!props.state.connected}\n91:               class={[",
+      "verdict": "TP",
+      "contractObligation": "supported D-131 reactive prop read",
+      "reason": "The ref body reads props.state before refreshRef. Related locations identify reactive caller expressions. Forwarding a callback does not make that prop read tracked.",
+      "sourceSha256": "1972113825f5656c4c2931dba64f8261da6a4ba6768fae8cd242123142650991"
+    },
+    {
+      "id": "E18",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "STRICT_READ_UNTRACKED",
+        "kind": "strict-read",
+        "severity": "error",
+        "message": "Reactive value \"wideEnough\" is read in an effect's apply function and will not update. Read it in compute and pass the value to apply.",
+        "loc": {
+          "file": "src/pages/chat/components/chat-details.tsx",
+          "line": 123,
+          "col": 66,
+          "endLine": 123,
+          "endCol": 78
+        },
+        "ownerName": "effect"
+      },
+      "excerpt": "121:   };\n122:   const [wideEnough, setWideEnough] = createSignal(false);\n123:   const canDock = () => !isMobile() && isConversationAnchor() && wideEnough();\n124:   const opened = () =>\n125:     isPresented() &&",
+      "verdict": "TP",
+      "contractObligation": "supported D-131 apply/helper read",
+      "reason": "wideEnough is a settled createSignal accessor. The effect apply path calls position -> docked -> canDock, which rereads it instead of only using compute inputs.",
+      "sourceSha256": "6d8a4f5d0dc371dcc4160c865cddd7371be4f33312550c7ef462a279aab6810e"
+    },
+    {
+      "id": "E19",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "STRICT_READ_UNTRACKED",
+        "kind": "strict-read",
+        "severity": "error",
+        "message": "Reactive value \"value\" is read in an effect's apply function and will not update. Read it in compute and pass the value to apply.",
+        "loc": {
+          "file": "src/pages/chat/components/session-diff-panel.tsx",
+          "line": 263,
+          "col": 24,
+          "endLine": 263,
+          "endCol": 31
+        },
+        "ownerName": "effect"
+      },
+      "excerpt": "261:         return;\n262:       }\n263:       const previous = value();\n264:       const reusable =\n265:         previous?.owner === owner &&",
+      "verdict": "UNSURE",
+      "contractObligation": "async/after-await phase deferred",
+      "reason": "value() is read after await inside the refresh helper. B carries the calling effect phase into it; FUTURE 26 defers reads after await, so this is not a proven current-slice app defect.",
+      "sourceSha256": "8357d1f61b914217b827ede18826638846e10959e5891edaa985f92711fd3a1b"
+    },
+    {
+      "id": "E20",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "STRICT_READ_UNTRACKED",
+        "kind": "strict-read",
+        "severity": "error",
+        "message": "Reactive value \"props.controller\" is read directly in <SystemsBackups>'s setup and will not update. Move it into a tracking scope (JSX, a memo, or an effect's compute function), or into the handler that needs it.",
+        "loc": {
+          "file": "src/pages/systems/systems-backups.tsx",
+          "line": 95,
+          "col": 24,
+          "endLine": 95,
+          "endCol": 40
+        },
+        "ownerName": "<SystemsBackups>",
+        "related": [
+          {
+            "message": "caller prop expression",
+            "loc": {
+              "file": "src/pages/systems/systems-page.tsx",
+              "line": 250,
+              "col": 23,
+              "endLine": 250,
+              "endCol": 35
+            }
+          },
+          {
+            "message": "caller prop expression",
+            "loc": {
+              "file": "src/pages/systems/systems-page.tsx",
+              "line": 582,
+              "col": 37,
+              "endLine": 582,
+              "endCol": 49
+            }
+          }
+        ],
+        "data": {
+          "source": "props.controller"
+        }
+      },
+      "excerpt": "93: \n94: export function SystemsBackups(props: { controller: Systems }) {\n95:   const status = () => props.controller.state.backups;\n96:   const read = createSystemsRead(() => props.controller.backupsRead);\n97:   const readStatus = () => {",
+      "verdict": "UNSURE",
+      "contractObligation": "prop-flow obligation; phase/instance unresolved",
+      "reason": "status reads props.controller.state.backups through a controller/projection path with latest and spread callers. The snapshot phase and concrete caller facts need further tracing.",
+      "sourceSha256": "595424a4ef5d560abe4b0d37d9393f48b6ef2750a243becefef437ee9058803c"
+    },
+    {
+      "id": "E21",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
+        "kind": "async",
+        "severity": "error",
+        "message": "Async value \"props.onClose\" is read in an effect function, which serves the committed value and throws while uninitialized. Read it in the effect's compute function and pass the value.",
+        "loc": {
+          "file": "src/components/app-sidebar-nav-menus.tsx",
+          "line": 132,
+          "col": 11,
+          "endLine": 132,
+          "endCol": 25
+        },
+        "ownerName": "effect",
+        "related": [
+          {
+            "message": "caller prop expression",
+            "loc": {
+              "file": "src/components/app-sidebar-agent-menu.tsx",
+              "line": 149,
+              "col": 16,
+              "endLine": 149,
+              "endCol": 30
+            }
+          }
+        ],
+        "data": {
+          "source": "props.onClose"
+        }
+      },
+      "excerpt": "130:         params.onOpenChange?.(open);\n131:         if (!open) {\n132:           params.onClose(false);\n133:         }\n134:       }}",
+      "verdict": "UNSURE",
+      "contractObligation": "required spread/unknown-prop worst case",
+      "reason": "params.onClose is an imperative callback, but the caller prop chain is widened by unsupported inputs. The pending fact comes from that worst-case chain, not a proven async accessor.",
+      "sourceSha256": "f7fc60dc54a5a82144f954d2cb951415cbf666d960a123b9ac63fb034dba002f"
+    },
+    {
+      "id": "E22",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
+        "kind": "async",
+        "severity": "error",
+        "message": "Async value \"revision\" is read in an effect function, which serves the committed value and throws while uninitialized. Read it in the effect's compute function and pass the value.",
+        "loc": {
+          "file": "src/lib/reactive/projection.ts",
+          "line": 126,
+          "col": 21,
+          "endLine": 126,
+          "endCol": 31
+        },
+        "ownerName": "effect",
+        "data": {
+          "source": "revision"
+        }
+      },
+      "excerpt": "124:   );\n125:   const observe = () => {\n126:     const current = revision();\n127:     if (!disposed && getObserver()) {\n128:       observation();",
+      "verdict": "UNSURE",
+      "contractObligation": "required module-state worst case",
+      "reason": "projectSource creates revision outside a component on the i18n module path. Its warning at projection.ts:79 explains this pending effect read; the underlying signal itself is initialized synchronously.",
+      "sourceSha256": "290da78837c6e51550211a60637d0bd85507c4e0fdfd374db0f12eb7e5715bc5"
+    },
+    {
+      "id": "E23",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
+        "kind": "async",
+        "severity": "error",
+        "message": "Async value \"props.host\" is read in an effect function, which serves the committed value and throws while uninitialized. Read it in the effect's compute function and pass the value.",
+        "loc": {
+          "file": "src/pages/model-setup/model-setup-owner.ts",
+          "line": 439,
+          "col": 22,
+          "endLine": 439,
+          "endCol": 32
+        },
+        "ownerName": "effect",
+        "data": {
+          "source": "props.host"
+        }
+      },
+      "excerpt": "437:     if (wizard.state.phase === \"idle\") {\n438:       // Disabling the initiating control can blur it before the modal opens.\n439:       const active = props.host.ownerDocument.activeElement;\n440:       wizardReturnFocus =\n441:         active instanceof HTMLElement && props.host.contains(active) ? active : null;",
+      "verdict": "UNSURE",
+      "contractObligation": "required unknown prop chain; phase unresolved",
+      "reason": "runWizardMutation reads props.host before its try. The partial prop path carries pending facts, and this async helper inherits an effect caller. A real pending host is not proven.",
+      "sourceSha256": "f89d87034ed05447117d77d154d01bcc28f6ee74da4fef2676024b91b333138e"
+    },
+    {
+      "id": "E24",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
+        "kind": "async",
+        "severity": "error",
+        "message": "Async value \"props.options\" is read in an effect function, which serves the committed value and throws while uninitialized. Read it in the effect's compute function and pass the value.",
+        "loc": {
+          "file": "src/pages/new-session/palette-session-settings-view.tsx",
+          "line": 477,
+          "col": 63,
+          "endLine": 477,
+          "endCol": 81
+        },
+        "ownerName": "effect",
+        "data": {
+          "source": "props.options"
+        }
+      },
+      "excerpt": "475:       placement=\"bottom-end\"\n476:       open={open()}\n477:       onOpenChange={(value) => (value ? setOpen(true) : close(properties.options.preferences))}\n478:     >\n479:       <div class=\"palette-session-settings__content\" ref={keydown}>",
+      "verdict": "UNSURE",
+      "contractObligation": "required widened prop obligation",
+      "reason": "onOpenChange forwards properties.options.preferences into close. The options path is widened and may be invoked from overlay apply; the report does not establish a concrete async options value.",
+      "sourceSha256": "05c51d90d6b9532bdc2897ee2aea43c3171edf1b1af082ae7d1e87babd662d37"
+    },
+    {
+      "id": "E25",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "REACTIVE_WRITE_IN_OWNED_SCOPE",
+        "kind": "write",
+        "severity": "error",
+        "message": "Setter \"setOwner\" is called inside <ProgressCardMarkdown>'s setup, an owned scope (component body or computation). Move the write into an event handler or an effect function.",
+        "loc": {
+          "file": "src/components/markdown-dom-ref.ts",
+          "line": 45,
+          "col": 5,
+          "endLine": 45,
+          "endCol": 22
+        },
+        "ownerName": "<ProgressCardMarkdown>",
+        "data": {
+          "setter": "setOwner"
+        }
+      },
+      "excerpt": "43:     // Create the boundary synchronously so a fragment caller can return its markers.\n44:     current = new MarkdownDomReconciler(element, registerSessionTitleTarget);\n45:     setOwner(current);\n46:   };\n47: }",
+      "verdict": "UNSURE",
+      "contractObligation": "ref ownership/fragment execution deferred",
+      "reason": "setOwner occurs in the returned Markdown ref. Some callers invoke it during fragment construction; ref write ownership and ownedWrite are deferred. The setup label is not enough to prove this write is invalid.",
+      "sourceSha256": "6076f134a94cd00c15aeeb7c5b5ffbc30547e93cae2240b6956e0370eae4e9a5"
+    },
+    {
+      "id": "E26",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "REACTIVE_WRITE_IN_OWNED_SCOPE",
+        "kind": "write",
+        "severity": "error",
+        "message": "Setter \"setRevision\" is called inside memo \"observation\", an owned scope (component body or computation). Move the write into an event handler or an effect function.",
+        "loc": {
+          "file": "src/lib/reactive/projection.ts",
+          "line": 83,
+          "col": 5,
+          "endLine": 83,
+          "endCol": 44
+        },
+        "ownerName": "memo \"observation\"",
+        "data": {
+          "setter": "setRevision"
+        }
+      },
+      "excerpt": "81:   });\n82:   const publish = () => {\n83:     setRevision((previous) => previous + 1);\n84:     const snapshot = Array.from(listeners);\n85:     for (const listener of snapshot) {",
+      "verdict": "UNSURE",
+      "contractObligation": "subscription/memo callback phase unresolved",
+      "reason": "observation memo -> connect -> contract.subscribe -> publish can reach setRevision. Whether the concrete subscribe replays synchronously is not retained; this is not a proven failing runtime write.",
+      "sourceSha256": "290da78837c6e51550211a60637d0bd85507c4e0fdfd374db0f12eb7e5715bc5"
+    },
+    {
+      "id": "E27",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "REACTIVE_WRITE_IN_OWNED_SCOPE",
+        "kind": "write",
+        "severity": "error",
+        "message": "Setter \"setFeedback\" is called inside memo \"snapshot\", an owned scope (component body or computation). Move the write into an event handler or an effect function.",
+        "loc": {
+          "file": "src/pages/chat/components/chat-file-copy.ts",
+          "line": 29,
+          "col": 7,
+          "endLine": 29,
+          "endCol": 22
+        },
+        "ownerName": "memo \"snapshot\"",
+        "data": {
+          "setter": "setFeedback"
+        }
+      },
+      "excerpt": "27:     reset() {\n28:       clear();\n29:       setFeedback({});\n30:     },\n31:     copy: (action: FileCopyAction) => {",
+      "verdict": "UNSURE",
+      "contractObligation": "caller memo/write path incomplete",
+      "reason": "createFileCopy.reset calls setFeedback, reported from memo snapshot. The local setter fact is real, but concrete call/branch provenance is absent; do not infer that every reset is an owned write.",
+      "sourceSha256": "dcde2740cfa1e8b6ef6a01f0c2c4aed3f4999e5bf873d281143a0cd7a3ff125e"
+    },
+    {
+      "id": "E28",
+      "change": "new",
+      "diagnostic": {
+        "code": "PENDING_ASYNC_UNTRACKED_READ",
+        "kind": "async",
+        "severity": "error",
+        "message": "Async value \"props.host\" is read in <ShellLazyOverlays>'s setup; while it is pending there is nothing to read. Read it in a tracking scope (JSX, a memo, or an effect's compute function) under a Loading boundary.",
+        "loc": {
+          "file": "src/app/app-shell-lazy-view.tsx",
+          "line": 125,
+          "col": 30,
+          "endLine": 125,
+          "endCol": 40
+        },
+        "ownerName": "<ShellLazyOverlays>",
+        "related": [
+          {
+            "message": "caller prop expression",
+            "loc": {
+              "file": "src/app/app-host.tsx",
+              "line": 682,
+              "col": 40,
+              "endLine": 682,
+              "endCol": 45
+            }
+          },
+          {
+            "message": "caller prop expression",
+            "loc": {
+              "file": "src/app/app-shell-view.tsx",
+              "line": 91,
+              "col": 15,
+              "endLine": 91,
+              "endCol": 25
+            }
+          }
+        ],
+        "data": {
+          "source": "props.host"
+        }
+      },
+      "excerpt": "123:       <Show when={state().paletteDefined}>\n124:         <openclaw-command-palette\n125:           ref={(element) => (props.host.elements.commandPalette = element)}\n126:           prop:desktopAvailable={props.desktopPanelAvailable}\n127:           prop:custodianAvailable={props.custodianPanelAvailable}",
+      "verdict": "UNSURE",
+      "contractObligation": "required worst-case forwarded prop",
+      "reason": "The ref reads props.host from app-host -> shell-view forwarding. The newly visited direct root exposes the path, but pending derives from partial props rather than a proven async DOM host.",
+      "sourceSha256": "1d02af618a70e67a528afef37216ae3262069961c37440f7a6412a5568aaeee5"
+    },
+    {
+      "id": "E29",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "PENDING_ASYNC_UNTRACKED_READ",
+        "kind": "async",
+        "severity": "error",
+        "message": "Async value \"props.twin\" is read in <Sprite>'s setup; while it is pending there is nothing to read. Read it in a tracking scope (JSX, a memo, or an effect's compute function) under a Loading boundary.",
+        "loc": {
+          "file": "src/components/lobster-pet-scene-view.tsx",
+          "line": 126,
+          "col": 16,
+          "endLine": 126,
+          "endCol": 26
+        },
+        "ownerName": "<Sprite>",
+        "data": {
+          "source": "props.twin"
+        }
+      },
+      "excerpt": "124:       <div\n125:         ref={(element) => {\n126:           if (!props.twin) {\n127:             props.onSprite?.(element);\n128:           }",
+      "verdict": "UNSURE",
+      "contractObligation": "required spread-prop worst case",
+      "reason": "Sprite is reached with an unsupported spread. Its ref reads props.twin, hence worst-case pending. There is no proof that this boolean is an actual async source.",
+      "sourceSha256": "3c4f1aa94912c035786ef0807d866bcb255f99bda398709f820ad655c0cba842"
+    },
+    {
+      "id": "E30",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "PENDING_ASYNC_UNTRACKED_READ",
+        "kind": "async",
+        "severity": "error",
+        "message": "Async value \"props.controls\" is read in <ChatCiAutomationView>'s setup; while it is pending there is nothing to read. Read it in a tracking scope (JSX, a memo, or an effect's compute function) under a Loading boundary.",
+        "loc": {
+          "file": "src/pages/chat/components/chat-ci-automation.tsx",
+          "line": 74,
+          "col": 20,
+          "endLine": 74,
+          "endCol": 34
+        },
+        "ownerName": "<ChatCiAutomationView>",
+        "data": {
+          "source": "props.controls"
+        }
+      },
+      "excerpt": "72: \n73: export function ChatCiAutomationView(props: ChatCiAutomationProps) {\n74:   const retryRef = props.controls?.ref();\n75:   return (\n76:     <div class=\"chat-ci__automation\">",
+      "verdict": "UNSURE",
+      "contractObligation": "required unknown controls prop",
+      "reason": "retryRef snapshots props.controls?.ref() during setup. Partial callers supply worst-case controls; optional access only skips absence. The actual control instance is not proven pending.",
+      "sourceSha256": "618498364885bc177beb264867d9d767f2ec5d9f2d5b1bc1f1ca3d83dc56c211"
+    },
+    {
+      "id": "E31",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "PENDING_ASYNC_UNTRACKED_READ",
+        "kind": "async",
+        "severity": "error",
+        "message": "Async value \"action\" is read in <AttachmentActionRow>'s setup; while it is pending there is nothing to read. Read it in a tracking scope (JSX, a memo, or an effect's compute function) under a Loading boundary.",
+        "loc": {
+          "file": "src/pages/chat/components/chat-session-workspace-attachments.tsx",
+          "line": 178,
+          "col": 27,
+          "endLine": 178,
+          "endCol": 41
+        },
+        "ownerName": "<AttachmentActionRow>",
+        "related": [
+          {
+            "message": "caller prop expression",
+            "loc": {
+              "file": "src/pages/chat/components/chat-session-workspace-attachments.tsx",
+              "line": 134,
+              "col": 15,
+              "endLine": 134,
+              "endCol": 21
+            }
+          }
+        ],
+        "data": {
+          "source": "action"
+        }
+      },
+      "excerpt": "176:         type=\"button\"\n177:         class={mobile() ? \"chat-workspace-mobile__row\" : \"workspace-desktop__row\"}\n178:         ref={(element) => props.action().observeElement?.(element)}\n179:         onFocus={() => props.action().onFocus?.()}\n180:         onClick={() => (props.action().onOpen ?? props.action().onFocus)?.()}",
+      "verdict": "UNSURE",
+      "contractObligation": "required widened accessor result",
+      "reason": "AttachmentActionRow reads props.action() inside a ref; forwarding from line 134 carries an opaque projection result. Ref scope is correct, but the pending origin is conservative.",
+      "sourceSha256": "1592026321a514154dc334279adf5c6d9a2ecbfe765160ba5b0bede90379dee1"
+    },
+    {
+      "id": "E32",
+      "change": "new",
+      "diagnostic": {
+        "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+        "kind": "async",
+        "severity": "error",
+        "message": "\"startupPending\" may be pending here and no Loading boundary is above this read, up to the render root at app-root.tsx:73; the root mount would be deferred with no fallback. Wrap the read in <Loading fallback={\u2026}>, here or in a caller.",
+        "loc": {
+          "file": "src/app/app-root.tsx",
+          "line": 149,
+          "col": 7,
+          "endLine": 149,
+          "endCol": 57
+        },
+        "ownerName": "render",
+        "ownerPath": [
+          "render"
+        ],
+        "related": [
+          {
+            "message": "the render root",
+            "loc": {
+              "file": "src/app/app-root.tsx",
+              "line": 73,
+              "col": 10,
+              "endLine": 73,
+              "endCol": 56
+            }
+          }
+        ],
+        "data": {
+          "source": "startupPending"
+        }
+      },
+      "excerpt": "147:     runtime.documentMode === null &&\n148:     snapshot().lastError === null &&\n149:     ((startupPending() && snapshot().phase === \"stopped\") ||\n150:       snapshot().phase === \"starting\" ||\n151:       (snapshot().phase === \"connecting\" && !loginGatePinned()));",
+      "verdict": "UNSURE",
+      "contractObligation": "required module/root-shape boundary",
+      "reason": "The newly analyzed direct OpenClawApp invocation reaches startupPending, whose creation is warned as outside a component at app-root.tsx:122. This models a root/factory scope incompletely; it is not proof of a runtime pending boolean.",
+      "sourceSha256": "6387a1d8c7ed115a0587ec1deae2e7e9a6303c0be0868a002fcd8109975b7588"
+    },
+    {
+      "id": "E33",
+      "change": "new",
+      "diagnostic": {
+        "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+        "kind": "async",
+        "severity": "error",
+        "message": "\"formatUiExternalText(title())\" may be pending here and no Loading boundary is above this read, up to the hand-off at custodian-surface.tsx:589; the root mount would be deferred with no fallback. Wrap the read in <Loading fallback={\u2026}>, here or in a caller.",
+        "loc": {
+          "file": "src/pages/custodian/custodian-setup-card.tsx",
+          "line": 40,
+          "col": 32,
+          "endLine": 40,
+          "endCol": 61
+        },
+        "ownerName": "<SignInWizard>",
+        "ownerPath": [
+          "<CustodianSurfaceView>",
+          "<CustodianSetupCard>",
+          "<SignInWizard>"
+        ],
+        "related": [
+          {
+            "message": "the hand-off",
+            "loc": {
+              "file": "src/pages/custodian/custodian-surface.tsx",
+              "line": 589,
+              "col": 3,
+              "endLine": 589,
+              "endCol": 23
+            }
+          }
+        ],
+        "data": {
+          "source": "formatUiExternalText(title())"
+        }
+      },
+      "excerpt": "38:           <div class=\"custodian-setup__wizard\">\n39:             <Show when={current().step.title}>\n40:               {(title) => <h3>{formatUiExternalText(title())}</h3>}\n41:             </Show>\n42:             <Show when={current().validationError}>",
+      "verdict": "UNSURE",
+      "contractObligation": "required opaque call result",
+      "reason": "formatUiExternalText is reached through an unchecked normalization implementation. Its returned shape is opaque; using it in JSX retains pending worst case. No concrete asynchronous formatter is proven.",
+      "sourceSha256": "17738bf8f8dad21f5d4637f4ab7940bdcb6e2febc1bccff024d676dcc20f6c40"
+    },
+    {
+      "id": "E34",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+        "kind": "async",
+        "severity": "error",
+        "message": "\"NAVIGATION_PRESENTATION[routeId]\" may be pending here and no Loading boundary is above this read, up to the hand-off at portals-page.tsx:629; the root mount would be deferred with no fallback. Wrap the read in <Loading fallback={\u2026}>, here or in a caller.",
+        "loc": {
+          "file": "src/app-navigation.ts",
+          "line": 362,
+          "col": 24,
+          "endLine": 362,
+          "endCol": 56
+        },
+        "ownerName": "<ShellLayoutBoundary>",
+        "ownerPath": [
+          "<PortalsPageContent>",
+          "<PortalContent>",
+          "<HubPageHeader>",
+          "<ShellLayoutBoundary>"
+        ],
+        "related": [
+          {
+            "message": "the hand-off",
+            "loc": {
+              "file": "src/pages/portals/portals-page.tsx",
+              "line": 629,
+              "col": 3,
+              "endLine": 629,
+              "endCol": 21
+            }
+          }
+        ],
+        "data": {
+          "source": "NAVIGATION_PRESENTATION[routeId]"
+        }
+      },
+      "excerpt": "360: \n361: export function titleForRoute(routeId: NavigationRouteId, translate = t): string {\n362:   const [, titleKey] = NAVIGATION_PRESENTATION[routeId];\n363:   return translate(titleKey);\n364: }",
+      "verdict": "UNSURE",
+      "contractObligation": "required dynamic member boundary",
+      "reason": "NAVIGATION_PRESENTATION[routeId] has the explicit dynamic-service-member warning at this exact site. Pending is the contract-required unknown result of unmodeled indexing, not proof the constant table suspends.",
+      "sourceSha256": "10ca6ac43c2cb92ab67f1119511aef824beffef65f2f15a181ef81f2cea60faa"
+    },
+    {
+      "id": "E35",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+        "kind": "async",
+        "severity": "error",
+        "message": "\"the effect's compute\" may be pending here and no Loading boundary is above this read, up to the hand-off at chat-composer-controls.tsx:416; the root mount would be deferred with no fallback. Wrap the read in <Loading fallback={\u2026}>, here or in a caller.",
+        "loc": {
+          "file": "src/components/solid/overlay-control.ts",
+          "line": 51,
+          "col": 37,
+          "endLine": 51,
+          "endCol": 47
+        },
+        "ownerName": "<Menu>",
+        "ownerPath": [
+          "<renderMicrophonePickerSolid>",
+          "<Menu>"
+        ],
+        "related": [
+          {
+            "message": "the hand-off",
+            "loc": {
+              "file": "src/pages/chat/components/chat-composer-controls.tsx",
+              "line": 416,
+              "col": 28,
+              "endLine": 416,
+              "endCol": 55
+            }
+          }
+        ],
+        "data": {
+          "source": "the effect's compute"
+        }
+      },
+      "excerpt": "49:   };\n50:   createEffect(\n51:     () => (props.disabled ? false : props.open),\n52:     (open) => {\n53:       if (mounted && open !== undefined) {",
+      "verdict": "UNSURE",
+      "contractObligation": "required worst-case prop/effect obligation",
+      "reason": "Effect compute reads props.disabled/props.open after partial component-prop forwarding. The effect boundary rule applies, but the concrete pending source is not retained.",
+      "sourceSha256": "cd687a0e47d488e3e8d74735ac63b8f6adb17397849ff203ce1295d4e9eb097b"
+    },
+    {
+      "id": "E36",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+        "kind": "async",
+        "severity": "error",
+        "message": "\"props.downloadHref\" may be pending here and no Loading boundary is above this read, up to the hand-off at chat-audio-player.tsx:642; the root mount would be deferred with no fallback. Wrap the read in <Loading fallback={\u2026}>, here or in a caller.",
+        "loc": {
+          "file": "src/pages/chat/components/chat-attachment-card-solid.tsx",
+          "line": 181,
+          "col": 55,
+          "endLine": 181,
+          "endCol": 73
+        },
+        "ownerName": "<AttachmentCardHeader>",
+        "ownerPath": [
+          "<ChatAudioPlayerContent>",
+          "<CompactAttachmentCard>",
+          "<AttachmentCardHeader>"
+        ],
+        "related": [
+          {
+            "message": "the hand-off",
+            "loc": {
+              "file": "src/pages/chat/components/chat-audio-player.tsx",
+              "line": 642,
+              "col": 49,
+              "endLine": 642,
+              "endCol": 71
+            }
+          }
+        ],
+        "data": {
+          "source": "props.downloadHref"
+        }
+      },
+      "excerpt": "179:           <a\n180:             class={view().downloadClass}\n181:             href={props.downloadPending ? undefined : props.downloadHref}\n182:             aria-disabled={props.downloadPending ? \"true\" : undefined}\n183:             tabindex={props.downloadPending && props.downloadPendingFocusable ? 0 : undefined}",
+      "verdict": "UNSURE",
+      "contractObligation": "required spread/prop-flow obligation",
+      "reason": "ChatAttachmentCard.downloadHref is lazy forwarded data with widened caller props and spreads. Loading covers only selected branches elsewhere; a real pending URL is not established by this output.",
+      "sourceSha256": "823720940b518d51444497c38722ff42608585de0c5f7bdf874597e34611df57"
+    },
+    {
+      "id": "E37",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+        "kind": "async",
+        "severity": "error",
+        "message": "\"presentation.initialized\" may be pending here and no Loading boundary is above this read, up to the hand-off at control-ui-dashboard.tsx:227; the root mount would be deferred with no fallback. Wrap the read in <Loading fallback={\u2026}>, here or in a caller.",
+        "loc": {
+          "file": "src/plugins/control-ui-dashboard.tsx",
+          "line": 218,
+          "col": 45,
+          "endLine": 218,
+          "endCol": 69
+        },
+        "ownerName": "<PluginSessionDashboardContent>",
+        "ownerPath": [
+          "<PluginSessionDashboardContent>"
+        ],
+        "related": [
+          {
+            "message": "the hand-off",
+            "loc": {
+              "file": "src/plugins/control-ui-dashboard.tsx",
+              "line": 227,
+              "col": 3,
+              "endLine": 227,
+              "endCol": 32
+            }
+          }
+        ],
+        "data": {
+          "source": "presentation.initialized"
+        }
+      },
+      "excerpt": "216:         </Errored>\n217:       </div>\n218:       <Show when={!presentation.expanded && presentation.initialized && !board()}>\n219:         <p class=\"plugin-session-dashboard__collapsed-empty\">{t(\"pluginUi.dashboardEmpty\")}</p>\n220:       </Show>",
+      "verdict": "UNSURE",
+      "contractObligation": "required store boundary",
+      "reason": "presentation originates in createStore at control-ui-dashboard.tsx:137. Accessing initialized outside the Errored block retains worst-case pending; this is an unsupported-store cascade.",
+      "sourceSha256": "552976228196b98f45e9b60decf64c39fe5279392fb4cf8b7d43ec3685b879d0"
+    },
+    {
+      "id": "E38",
+      "change": "new",
+      "diagnostic": {
+        "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+        "kind": "error",
+        "severity": "error",
+        "message": "\"matchControlUiCatalogSharePath({\n    pathname: normalized\u2026\" may fail with unknown here and no Errored boundary is above this read, up to the hand-off at chat-transcript-rows.ts:22; the failure would reach the root and halt reactivity. Wrap the work in <Errored fallback={\u2026}>, here or in a caller.",
+        "loc": {
+          "file": "src/app-route-paths.ts",
+          "line": 413,
+          "col": 24,
+          "endLine": 416,
+          "endCol": 5
+        },
+        "ownerName": "<SystemAgentAvatar>",
+        "ownerPath": [
+          "<UnplacedSubagentWait>",
+          "<StreamGroup>",
+          "<ChatAvatar>",
+          "<AgentAvatar>",
+          "<AgentIdentityAvatar>",
+          "<SystemAgentAvatar>"
+        ],
+        "related": [
+          {
+            "message": "the hand-off",
+            "loc": {
+              "file": "src/pages/chat/components/chat-transcript-rows.ts",
+              "line": 22,
+              "col": 9,
+              "endLine": 22,
+              "endCol": 29
+            }
+          }
+        ],
+        "data": {
+          "failures": [
+            "unknown"
+          ],
+          "source": "matchControlUiCatalogSharePath({\n    pathname: normalized\u2026"
+        }
+      },
+      "excerpt": "411:   }\n412:   // The shared matcher reserves every built-in route and document namespace.\n413:   const catalogShare = matchControlUiCatalogSharePath({\n414:     pathname: normalizedPath,\n415:     basePath: normalizedBasePath,\n416:   });\n417:   return catalogShare ? \"chat\" : null;\n418: }",
+      "verdict": "TP",
+      "contractObligation": "required unknown implementation import",
+      "reason": "matchControlUiCatalogSharePath comes from an unchecked source package import. Its call at :413 has no failure body, and the hand-off at chat-transcript-rows.ts:22 has no Errored boundary. This is a valid unknown obligation, not proof the matcher throws.",
+      "sourceSha256": "d7a9b9ffb865b4f830c1586f5a041180454c413faebf71a0185fbc64fcac2cfa"
+    },
+    {
+      "id": "E39",
+      "change": "new",
+      "diagnostic": {
+        "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+        "kind": "error",
+        "severity": "error",
+        "message": "\"progress.read()\" may fail with unknown here and no Errored boundary is above this read, up to the hand-off at control-ui-session-summary.tsx:446; the failure would reach the root and halt reactivity. Wrap the work in <Errored fallback={\u2026}>, here or in a caller.",
+        "loc": {
+          "file": "src/plugins/control-ui-session-summary.tsx",
+          "line": 349,
+          "col": 15,
+          "endLine": 353,
+          "endCol": 16
+        },
+        "ownerName": "<PluginSessionSummaryContent>",
+        "ownerPath": [
+          "<PluginSessionSummaryContent>"
+        ],
+        "related": [
+          {
+            "message": "the hand-off",
+            "loc": {
+              "file": "src/plugins/control-ui-session-summary.tsx",
+              "line": 446,
+              "col": 3,
+              "endLine": 446,
+              "endCol": 30
+            }
+          }
+        ],
+        "data": {
+          "failures": [
+            "unknown"
+          ],
+          "source": "progress.read()"
+        }
+      },
+      "excerpt": "347:             on={progressReceipt()}\n348:             fallback={\n349:               progress.read().card === undefined ? (\n350:                 <p>{t(\"sessionProgressCard.widgetLoading\")}</p>\n351:               ) : (\n352:                 <ProgressView />\n353:               )\n354:             }\n355:           >",
+      "verdict": "UNSURE",
+      "contractObligation": "required partial projection obligation",
+      "reason": "The fallback reads progress.read().card. Fallback work uses the outer boundaries; projectSource and module/callback facts remain partial, so unknown failure must survive.",
+      "sourceSha256": "c7443b266a5bd8e008f40711cad7fc5e50c7713cfccd2b62a5c341dea9932108"
+    },
+    {
+      "id": "E40",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+        "kind": "error",
+        "severity": "error",
+        "message": "\"NAVIGATION_PRESENTATION[routeId]\" may fail with unknown here and no Errored boundary is above this read, up to the hand-off at portals-page.tsx:629; the failure would reach the root and halt reactivity. Wrap the work in <Errored fallback={\u2026}>, here or in a caller.",
+        "loc": {
+          "file": "src/app-navigation.ts",
+          "line": 362,
+          "col": 24,
+          "endLine": 362,
+          "endCol": 56
+        },
+        "ownerName": "<ShellLayoutBoundary>",
+        "ownerPath": [
+          "<PortalsPageContent>",
+          "<PortalContent>",
+          "<HubPageHeader>",
+          "<ShellLayoutBoundary>"
+        ],
+        "related": [
+          {
+            "message": "the hand-off",
+            "loc": {
+              "file": "src/pages/portals/portals-page.tsx",
+              "line": 629,
+              "col": 3,
+              "endLine": 629,
+              "endCol": 21
+            }
+          }
+        ],
+        "data": {
+          "failures": [
+            "unknown"
+          ],
+          "source": "NAVIGATION_PRESENTATION[routeId]"
+        }
+      },
+      "excerpt": "360: \n361: export function titleForRoute(routeId: NavigationRouteId, translate = t): string {\n362:   const [, titleKey] = NAVIGATION_PRESENTATION[routeId];\n363:   return translate(titleKey);\n364: }",
+      "verdict": "UNSURE",
+      "contractObligation": "required dynamic member boundary",
+      "reason": "Same root cause as E34: unmodeled dynamic indexing of NAVIGATION_PRESENTATION. Errored and Loading are distinct obligations at this site, not duplicate reports to delete.",
+      "sourceSha256": "10ca6ac43c2cb92ab67f1119511aef824beffef65f2f15a181ef81f2cea60faa"
+    },
+    {
+      "id": "E41",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+        "kind": "error",
+        "severity": "error",
+        "message": "\"props.class\" may fail with unknown here and no Errored boundary is above this read, up to the hand-off at new-session-link.tsx:71; the failure would reach the root and halt reactivity. Wrap the work in <Errored fallback={\u2026}>, here or in a caller.",
+        "loc": {
+          "file": "src/components/solid/kbd.tsx",
+          "line": 66,
+          "col": 31,
+          "endLine": 66,
+          "endCol": 42
+        },
+        "ownerName": "<Kbd>",
+        "ownerPath": [
+          "<renderNewSessionLink>",
+          "<ShortcutHint>",
+          "<KeyboardShortcut>",
+          "<Kbd>"
+        ],
+        "related": [
+          {
+            "message": "the hand-off",
+            "loc": {
+              "file": "src/components/solid/new-session-link.tsx",
+              "line": 71,
+              "col": 24,
+              "endLine": 71,
+              "endCol": 44
+            }
+          }
+        ],
+        "data": {
+          "failures": [
+            "unknown"
+          ],
+          "source": "props.class"
+        }
+      },
+      "excerpt": "64:   return (\n65:     <kbd\n66:       class={[\"shortcut-kbd\", props.class]}\n67:       style={props.inline ? { font: \"inherit\" } : undefined}\n68:       slot={props.slot}",
+      "verdict": "UNSURE",
+      "contractObligation": "required spread-prop obligation",
+      "reason": "Kbd.class inherits worst-case props through spread wrappers. The hand-off relates to NewSessionLink; the report does not prove a class string itself fails.",
+      "sourceSha256": "cbb20641e89bccfb74cfd4828c1e8cfc9a8246270ebe64f3d429970493db72a1"
+    },
+    {
+      "id": "E42",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+        "kind": "error",
+        "severity": "error",
+        "message": "\"failedImages[data()!.image!]\" may fail with unknown here and no Errored boundary is above this read, up to the hand-off at chat-transcript-rows.ts:20; the failure would reach the root and halt reactivity. Wrap the work in <Errored fallback={\u2026}>, here or in a caller.",
+        "loc": {
+          "file": "src/pages/chat/components/browser-tab-card.tsx",
+          "line": 257,
+          "col": 30,
+          "endLine": 257,
+          "endCol": 58
+        },
+        "ownerName": "<BrowserTabCardHost>",
+        "ownerPath": [
+          "<WorkGroupSummary>",
+          "<WorkGroupSummaryBody>",
+          "<BrowserTabPreviews>",
+          "<BrowserTabCardHost>"
+        ],
+        "related": [
+          {
+            "message": "the hand-off",
+            "loc": {
+              "file": "src/pages/chat/components/chat-transcript-rows.ts",
+              "line": 20,
+              "col": 9,
+              "endLine": 20,
+              "endCol": 25
+            }
+          }
+        ],
+        "data": {
+          "failures": [
+            "unknown"
+          ],
+          "source": "failedImages[data()!.image!]"
+        }
+      },
+      "excerpt": "255:             </>\n256:           )}\n257:           {data()!.image && !failedImages[data()!.image!] && (\n258:             <button\n259:               type=\"button\"",
+      "verdict": "UNSURE",
+      "contractObligation": "required unsupported store member",
+      "reason": "failedImages is initialized by createStore at browser-tab-card.tsx:80. Dynamic keyed reads are outside the model and carry unknown failure; the actual false-image table is not a demonstrated bug.",
+      "sourceSha256": "52236d8d97d40ce91a2d4a7e57feef86cfa3f6fbecc6658f26283b29d7e473dd"
+    },
+    {
+      "id": "E43",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+        "kind": "error",
+        "severity": "error",
+        "message": "\"props.contributionKey\" may fail with unknown here and no Errored boundary is above this read, up to the hand-off at plugin-page.tsx:225; the failure would reach the root and halt reactivity. Wrap the work in <Errored fallback={\u2026}>, here or in a caller.",
+        "loc": {
+          "file": "src/plugins/control-ui-view.solid.tsx",
+          "line": 420,
+          "col": 24,
+          "endLine": 420,
+          "endCol": 45
+        },
+        "ownerName": "<PluginContribution>",
+        "ownerPath": [
+          "<PluginPageContent>",
+          "<PluginContribution>"
+        ],
+        "related": [
+          {
+            "message": "caller prop expression",
+            "loc": {
+              "file": "src/pages/plugin/plugin-page.tsx",
+              "line": 165,
+              "col": 59,
+              "endLine": 165,
+              "endCol": 69
+            }
+          },
+          {
+            "message": "the hand-off",
+            "loc": {
+              "file": "src/pages/plugin/plugin-page.tsx",
+              "line": 225,
+              "col": 3,
+              "endLine": 225,
+              "endCol": 20
+            }
+          }
+        ],
+        "data": {
+          "failures": [
+            "unknown"
+          ],
+          "source": "props.contributionKey"
+        }
+      },
+      "excerpt": "418:     <PluginView\n419:       kind={props.kind}\n420:       contributionKey={props.contributionKey}\n421:       props={props.props}\n422:       presented={props.presented ?? true}",
+      "verdict": "UNSURE",
+      "contractObligation": "required forwarded prop obligation",
+      "reason": "PluginView is reached through dynamic registrations/hand-offs and widened props. contributionKey inherits unknown failure; the missing renderer contract is not proof of a failing string.",
+      "sourceSha256": "665df8edb8b60d7656a107a5351b4e6ecae9424433e087c55ba29d5791b88bad"
+    },
+    {
+      "id": "E44",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "CONTEXT_PROVIDER_MISSING",
+        "kind": "owner",
+        "severity": "error",
+        "message": "This context has neither a provider on this render path nor a default. Add a provider or a usable default.",
+        "loc": {
+          "file": "src/components/image-lightbox-content.tsx",
+          "line": 40,
+          "col": 16,
+          "endLine": 40,
+          "endCol": 45
+        },
+        "ownerName": "<ImageLightboxContent>"
+      },
+      "excerpt": "38: \n39: export function ImageLightboxContent(props: ImageLightboxProps) {\n40:   const host = useContext(ImageLightboxHost);\n41:   const gallery = createImageLightboxGallery();\n42:   const galleryState = gallery.state;",
+      "verdict": "UNSURE",
+      "contractObligation": "modeled missing provider; real path unresolved",
+      "reason": "ImageLightboxHost has no default, but image-lightbox.tsx:13 supplies it around lazy Content. The lazy/bridge hand-off is not resolved. Do not claim the production provider is missing.",
+      "sourceSha256": "55013cd6034e1315ec52cb2043eecf64dce2187e8cfb5b88d3f7b401413f184d"
+    },
+    {
+      "id": "E45",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "CONTEXT_PROVIDER_MISSING",
+        "kind": "owner",
+        "severity": "error",
+        "message": "This context has neither a provider on this render path nor a default. Add a provider or a usable default.",
+        "loc": {
+          "file": "src/pages/new-session/composer.tsx",
+          "line": 371,
+          "col": 20,
+          "endLine": 371,
+          "endCol": 65
+        },
+        "ownerName": "<NewSessionComposer>"
+      },
+      "excerpt": "369:   surroundings?: () => Pick<LobsterComposerElements, \"root\" | \"obstacles\"> | undefined;\n370: }) {\n371:   const textarea = useContext(NewSessionComposerTextareaContext);\n372:   const footerControl = createFooterControlRef();\n373:   const inputHandle = createChatAttachmentInputHandle();",
+      "verdict": "UNSURE",
+      "contractObligation": "modeled missing provider; real path unresolved",
+      "reason": "NewSessionComposerTextareaContext has a provider in new-session-page.tsx:330 around DraftBlock. Higher-order/nested view paths are incomplete; this diagnostic alone does not establish an app defect.",
+      "sourceSha256": "126090de8ffb31278337887723ddbbd8552eacbc183f9720961c4df43e6cb578"
+    }
+  ],
+  "silences": [
+    {
+      "id": "S01",
+      "loc": {
+        "file": "src/components/native-chrome-setup.tsx",
+        "line": 93
+      },
+      "verdict": "TP",
+      "contractObligation": "no current-slice read obligation",
+      "reason": "The ref only captures host. Primitive ownership/cleanup is not certified.",
+      "diagnosticsAtLine": [],
+      "excerpt": "92:   return (\n93:     <openclaw-native-chrome-setup ref={(element) => (host = element)}>\n94:       <Show when={browser()}>\n95:         <div class=\"native-chrome-setup\">\n96:           <p>{t(\"configPage.deviceSettings.chromeExtensionHint\")}</p>\n97:           <div class=\"native-chrome-setup__actions\">",
+      "sourceSha256": "d241b2aba5ed027b94b6d4eb37628493bc5a5396b1a606b616f9c2f3e307cea0"
+    },
+    {
+      "id": "S02",
+      "loc": {
+        "file": "src/components/session-menu-snooze.tsx",
+        "line": 83
+      },
+      "verdict": "TP",
+      "contractObligation": "no current-slice read obligation",
+      "reason": "The callback only assigns anchor; node capture is allowed.",
+      "diagnosticsAtLine": [],
+      "excerpt": "82:       class=\"session-menu__text\"\n83:       ref={(node) => {\n84:         anchor = node;\n85:       }}\n86:     >\n87:       {t(\"sessionsView.snoozeChooseTime\")}",
+      "sourceSha256": "1782e8e7e16ffc0dab2400a454048addd5c82df03def3396b6f1d02d1315747a"
+    },
+    {
+      "id": "S03",
+      "loc": {
+        "file": "src/components/session-menu-snooze.tsx",
+        "line": 97
+      },
+      "verdict": "TP",
+      "contractObligation": "no current-slice read obligation",
+      "reason": "The callback only captures the Popover handle. This says nothing about its lifetime.",
+      "diagnosticsAtLine": [],
+      "excerpt": "96:       placement=\"bottom-start\"\n97:       ref={(handle) => {\n98:         popover = handle;\n99:       }}\n100:       onOpenChange={(isOpen) => {\n101:         if (isOpen) {",
+      "sourceSha256": "1782e8e7e16ffc0dab2400a454048addd5c82df03def3396b6f1d02d1315747a"
+    },
+    {
+      "id": "S04",
+      "loc": {
+        "file": "src/components/link-reader-preview-root.tsx",
+        "line": 28
+      },
+      "verdict": "FP",
+      "contractObligation": "missing required partial warning",
+      "reason": "onSettled is in a returned higher-order renderer. This entire file has no diagnostics; the factory path is unvisited. FUTURE 11 is not supported.",
+      "diagnosticsAtLine": [],
+      "excerpt": "27:     const afterUpdate = () =>\n28:       onSettled(() => {\n29:         if (active) {\n30:           afterCommit();\n31:         }\n32:       });",
+      "sourceSha256": "83775c9b7cb6bb5b53a16a83c2a3b1e04858df32e78f95886344477153a3b777"
+    },
+    {
+      "id": "S05",
+      "loc": {
+        "file": "src/components/native-chrome-setup.tsx",
+        "line": 23
+      },
+      "verdict": "TP",
+      "contractObligation": "explicit partial boundary",
+      "reason": "onSettled is deferred and warned at the site. Its returned cleanup only sets disposed; no extra current-slice read error is due.",
+      "diagnosticsAtLine": [
+        {
+          "code": "UNANALYZED_BOUNDARY",
+          "kind": "analysis",
+          "severity": "warn",
+          "message": "onSettled(\u2026) is outside the checked subset; this Solid API is not modeled in the slice; its value is treated as possibly pending and possibly failing with unknown. Nothing here is trusted: downstream obligations still surface.",
+          "loc": {
+            "file": "src/components/native-chrome-setup.tsx",
+            "line": 23,
+            "col": 3,
+            "endLine": 25,
+            "endCol": 5
+          },
+          "ownerName": "<NativeChromeSetup>",
+          "data": {
+            "construct": "onSettled(\u2026)"
+          }
+        }
+      ],
+      "excerpt": "22:   let pending = false;\n23:   onSettled(() => () => {\n24:     disposed = true;\n25:   });\n26:   const actions = createMemo<readonly NativeChromeExtensionSetupAction[]>(() => {\n27:     const available = browser();",
+      "sourceSha256": "d241b2aba5ed027b94b6d4eb37628493bc5a5396b1a606b616f9c2f3e307cea0"
+    },
+    {
+      "id": "S06",
+      "loc": {
+        "file": "src/components/multi-select.tsx",
+        "line": 156
+      },
+      "verdict": "TP",
+      "contractObligation": "explicit partial boundary",
+      "reason": "onSettled installs overlay surfaces/listeners and is warned. Absence of an extra error is not proof of ownership safety.",
+      "diagnosticsAtLine": [
+        {
+          "code": "UNANALYZED_BOUNDARY",
+          "kind": "analysis",
+          "severity": "warn",
+          "message": "onSettled(\u2026) is outside the checked subset; this Solid API is not modeled in the slice; its value is treated as possibly pending and possibly failing with unknown. Nothing here is trusted: downstream obligations still surface.",
+          "loc": {
+            "file": "src/components/multi-select.tsx",
+            "line": 156,
+            "col": 3,
+            "endLine": 167,
+            "endCol": 5
+          },
+          "ownerName": "<MultiSelect>",
+          "data": {
+            "construct": "onSettled(\u2026)"
+          }
+        }
+      ],
+      "excerpt": "155:   });\n156:   onSettled(() => {\n157:     overlay.bindSurface(surface);\n158:     overlay.bindTrigger(input);\n159:     overlay.setParent(findOverlayParent(field));\n160:     const anchor = createOverlayAnchor(surface);",
+      "sourceSha256": "1e07a6f4d4a4d044b1f16dace4554eabb7c55207daef4120698ddcab2ac75121"
+    },
+    {
+      "id": "S07",
+      "loc": {
+        "file": "src/components/native-chrome-setup.tsx",
+        "line": 15
+      },
+      "verdict": "TP",
+      "contractObligation": "explicit partial boundary",
+      "reason": "createStore warns at the constructor; returned store facts stay worst case. This is a partial-check silence.",
+      "diagnosticsAtLine": [
+        {
+          "code": "UNANALYZED_BOUNDARY",
+          "kind": "analysis",
+          "severity": "warn",
+          "message": "createStore(\u2026) is outside the checked subset; stores are not modeled; the store and its setter are treated as possibly pending and possibly failing with unknown. Nothing here is trusted: downstream obligations still surface.",
+          "loc": {
+            "file": "src/components/native-chrome-setup.tsx",
+            "line": 15,
+            "col": 29,
+            "endLine": 20,
+            "endCol": 5
+          },
+          "ownerName": "<NativeChromeSetup>",
+          "data": {
+            "construct": "createStore(\u2026)"
+          }
+        }
+      ],
+      "excerpt": "14:   const browser = () => projection?.read()?.browser;\n15:   const [state, setState] = createStore<ChromeSetupStatusProps>({\n16:     running: false,\n17:     failed: null,\n18:     result: null,\n19:     legacyResult: null,",
+      "sourceSha256": "d241b2aba5ed027b94b6d4eb37628493bc5a5396b1a606b616f9c2f3e307cea0"
+    },
+    {
+      "id": "S08",
+      "loc": {
+        "file": "src/components/theme-brand-icon.tsx",
+        "line": 18
+      },
+      "verdict": "TP",
+      "contractObligation": "explicit partial boundaries",
+      "reason": "Both the intrinsic spread and omit call warn. Neither is certified as supported prop flow.",
+      "diagnosticsAtLine": [
+        {
+          "code": "UNANALYZED_BOUNDARY",
+          "kind": "analysis",
+          "severity": "warn",
+          "message": "a spread on an element is outside the checked subset; its attributes and handlers are not checked. Nothing here is trusted: downstream obligations still surface.",
+          "loc": {
+            "file": "src/components/theme-brand-icon.tsx",
+            "line": 18,
+            "col": 32,
+            "endLine": 18,
+            "endCol": 72
+          },
+          "ownerName": "<ThemeBrandIcon>",
+          "data": {
+            "construct": "a spread on an element"
+          }
+        },
+        {
+          "code": "UNANALYZED_BOUNDARY",
+          "kind": "analysis",
+          "severity": "warn",
+          "message": "omit(\u2026) is outside the checked subset; this Solid API is not modeled in the slice; its value is treated as possibly pending and possibly failing with unknown. Nothing here is trusted: downstream obligations still surface.",
+          "loc": {
+            "file": "src/components/theme-brand-icon.tsx",
+            "line": 18,
+            "col": 36,
+            "endLine": 18,
+            "endCol": 71
+          },
+          "ownerName": "<ThemeBrandIcon>",
+          "data": {
+            "construct": "omit(\u2026)"
+          }
+        }
+      ],
+      "excerpt": "17:   return (\n18:     <openclaw-theme-brand-icon {...omit(props, \"branding\", \"children\")}>\n19:       <Show when={artwork()} fallback={<Icon name=\"mark\" />}>\n20:         {(icon) => (\n21:           <PluginThemeArtwork url={icon().url} class=\"brand-icon\" fallback={<Icon name=\"mark\" />} />\n22:         )}",
+      "sourceSha256": "6d5036660f7cdd96410e9be08e9ab694aab5340fd7803be5ed1404a2395aa602"
+    },
+    {
+      "id": "S09",
+      "loc": {
+        "file": "src/components/multi-select.tsx",
+        "line": 36
+      },
+      "verdict": "TP",
+      "contractObligation": "unknown override obligations retained",
+      "reason": "merge holds its layers lazily. No error is due merely from holding callbacks. The uncaught onChange/onReselect uses still have handler failures elsewhere.",
+      "diagnosticsAtLine": [],
+      "excerpt": "35:   };\n36:   const props = merge(defaults, initial);\n37:   const id = `openclaw-multi-select-${++instanceCounter}`;\n38:   let field!: HTMLDivElement;\n39:   let input!: HTMLInputElement;\n40:   let surface!: HTMLDivElement;",
+      "sourceSha256": "1e07a6f4d4a4d044b1f16dace4554eabb7c55207daef4120698ddcab2ac75121"
+    },
+    {
+      "id": "S10",
+      "loc": {
+        "file": "src/components/session-menu-snooze.tsx",
+        "line": 108
+      },
+      "verdict": "FP",
+      "contractObligation": "missing required ref-array boundary",
+      "reason": "The array contains listener/disposer refs. B returns early for a noncallable ref value without warning. Dispatch/cleanup are unmodeled; onCleanup at :72 does not cover this construct.",
+      "diagnosticsAtLine": [],
+      "excerpt": "107:         novalidate\n108:         ref={[stopClick, stopKeydown]}\n109:         onSubmit={(event) => {\n110:           event.preventDefault();\n111:           const snoozedUntil = parseCustomSnooze(input.value);\n112:           if (snoozedUntil === null) {",
+      "sourceSha256": "1782e8e7e16ffc0dab2400a454048addd5c82df03def3396b6f1d02d1315747a"
+    },
+    {
+      "id": "S11",
+      "loc": {
+        "file": "src/components/session-menu-snooze.tsx",
+        "line": 127
+      },
+      "verdict": "TP",
+      "contractObligation": "no current-slice read obligation",
+      "reason": "The ref only captures input; error() is read in JSX later.",
+      "diagnosticsAtLine": [],
+      "excerpt": "126:           <input\n127:             ref={(node) => {\n128:               input = node;\n129:             }}\n130:             type=\"datetime-local\"\n131:             required",
+      "sourceSha256": "1782e8e7e16ffc0dab2400a454048addd5c82df03def3396b6f1d02d1315747a"
+    },
+    {
+      "id": "S12",
+      "loc": {
+        "file": "src/components/session-menu-snooze.tsx",
+        "line": 147
+      },
+      "verdict": "FP",
+      "contractObligation": "missing required ref-array boundary",
+      "reason": "The first arm captures cancelButton; the second installs a native listener. The ref-array dispatch/cleanup path has no local partial warning.",
+      "diagnosticsAtLine": [],
+      "excerpt": "146:         <div class=\"session-menu__snooze-buttons\">\n147:           <button type=\"button\" class=\"btn\" ref={[(node) => (cancelButton = node), cancel]}>\n148:             {t(\"common.cancel\")}\n149:           </button>\n150:           <button\n151:             type=\"submit\"",
+      "sourceSha256": "1782e8e7e16ffc0dab2400a454048addd5c82df03def3396b6f1d02d1315747a"
+    },
+    {
+      "id": "S13",
+      "loc": {
+        "file": "src/components/session-menu-snooze.tsx",
+        "line": 153
+      },
+      "verdict": "TP",
+      "contractObligation": "no current-slice read obligation",
+      "reason": "The ref captures submitButton. disabled() is read separately in the JSX prop.",
+      "diagnosticsAtLine": [],
+      "excerpt": "152:             class=\"btn primary\"\n153:             ref={(node) => (submitButton = node)}\n154:             disabled={disabled()}\n155:           >\n156:             {t(\"sessionsView.snooze\")}\n157:           </button>",
+      "sourceSha256": "1782e8e7e16ffc0dab2400a454048addd5c82df03def3396b6f1d02d1315747a"
+    },
+    {
+      "id": "S14",
+      "loc": {
+        "file": "src/components/link-reader-preview-root.tsx",
+        "line": 34
+      },
+      "verdict": "FP",
+      "contractObligation": "missing required unsupported-signal/root warning",
+      "reason": "A returned renderer uses compute-form createSignal with ownedWrite inside render. The higher-order factory is unvisited and the whole file is silent; FUTURE 18/13 are not checked.",
+      "diagnosticsAtLine": [],
+      "excerpt": "33:     const dispose = render(() => {\n34:       const [current, setCurrent] = createSignal<T>(() => value, { ownedWrite: true });\n35:       const attributes = createMemo(() => ({ \"aria-label\": label(current()) }));\n36:       spread(card, attributes, true);\n37:       createResizeObserver(() => [card], afterCommit);\n38:       updates.set(card, (next) => {",
+      "sourceSha256": "83775c9b7cb6bb5b53a16a83c2a3b1e04858df32e78f95886344477153a3b777"
+    },
+    {
+      "id": "S15",
+      "loc": {
+        "file": "src/lib/reactive/i18n.ts",
+        "line": 47
+      },
+      "verdict": "TP",
+      "contractObligation": "explicit module-state boundaries on callee path",
+      "reason": "projectI18n -> projectSource creates module state. projection.ts:79/111 warn and :126/128 plus i18n.ts:42 retain downstream obligations. No duplicate warning at this caller is needed.",
+      "diagnosticsAtLine": [],
+      "excerpt": "46: /** Solid consumers retain t(\"key\") without loading signals in the existing Lit entry. */\n47: const translation = projectI18n(i18n);\n48: export const t = translation.t;\n49: export const getLocale = translation.locale;\n50: export const i18nRevision = translation.revision;\n51: /** Plain owners observe both locale changes and newly registered lazy English catalogs. */",
+      "sourceSha256": "f5bb2aefc9f842b0f53f749af03714f44cced71a37c2365e5d266f7f7072bc45"
+    }
+  ],
+  "errorVerdicts": {
+    "UNSURE": 34,
+    "TP": 10,
+    "FP": 1
+  },
+  "silenceVerdicts": {
+    "TP": 11,
+    "FP": 4
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "baseCommit": "f38b2bc760e9a1dd07283ed4fa9564139304f5f8",
+  "branch": "solid-sound-dataflow-noise",
+  "baselineSourceSha256": {
+    "project.mjs": "d58a83d1a84ef049ab88d15ff25487ac2c3bcc52f3d24239113b7f5821d5fc23",
+    "solid.mjs": "6fdf4e380701f0628b0e36706f20324640b0e264c8c832cd45a95d4a6956a7a7",
+    "incremental.mjs": "0252e77253b37c3f2b321c38d156ffa268e483f8f6880175430c8cee8a051703",
+    "analyze.mjs": "d5a6d3c6f5f81b0891742bb3151eb2fa32f9eb75564c0280bfead87f113bf458",
+    "values.mjs": "5de7a007686ff33bb90b76b428d8e9d6540bd3a3f7a9299fb483724948763b38",
+    "index.mjs": "1f73e8a3fe164c4c0d23a989a39d08b1189776de48e3c49082e98d8444128298",
+    "imports.mjs": "8738455d4dd5d42473cbc9c84993c6fd0fe9345b9384d99be191d206a55c04c9"
+  },
+  "trialSolid": "2.0.0-rc.16",
+  "fixtureSolid": "2.0.0-rc.17",
+  "typescript": "6.0.3",
+  "runtime": "/Users/devagr/.nvm/versions/node/v24.18.0/bin/node",
+  "inputHash": "359caa625bdc4f6402e8b441594626d79814fdc288e837a0d83eb2fd1edf42dd",
+  "rules": "Unchanged scale/input.mjs, compiler-options.json, exclusions, heap cap, work/depth bounds. Input parsed only.",
+  "checks": {
+    "rawAfterRows": 11569,
+    "reviewedErrors": 45,
+    "reviewedSilences": 15,
+    "changedReviewed": {
+      "new": 8,
+      "changed": 1,
+      "unchanged": 36
+    }
+  },
+  "exploratory": "Node22 before/after raw diagnostics were byte-for-byte equivalent as parsed JSON; duplicate artifacts removed. after-alias retains the intermediate alias-only run under Node22."
+}

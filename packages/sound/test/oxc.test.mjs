@@ -6,6 +6,7 @@ import { execFileSync } from "node:child_process";
 import { createChecker } from "../prototypes/oxc/index.mjs";
 import { byGroup, fixturesDir } from "../fixtures/index.mjs";
 import { score } from "../harness/score.mjs";
+import { assertKnownOpenclaw } from "../harness/openclaw-known.mjs";
 const packageDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const implementation = resolve(packageDir, "prototypes/oxc");
 function sources(dir) {
@@ -53,11 +54,15 @@ describe("oxc shared fixtures", () => {
       const result = checker.check();
       const s = score(fixture, fixturesDir, result.diagnostics, result.elapsedMs);
       checker.dispose();
-      expect(s.misses).toEqual([]);
-      expect(s.warningMisses).toEqual([]);
-      expect(s.infoMisses).toBe(0);
-      expect(s.extraErrors).toEqual([]);
-      expect(s.extraWarnings).toEqual([]);
+      if (fixture.group === "openclaw") {
+        assertKnownOpenclaw("oxc", fixture, s);
+      } else {
+        expect(s.misses).toEqual([]);
+        expect(s.warningMisses).toEqual([]);
+        expect(s.infoMisses).toBe(0);
+        expect(s.extraErrors).toEqual([]);
+        expect(s.extraWarnings).toEqual([]);
+      }
       expect(s.leakage).toEqual([]);
       expect(s.unmapped).toBe(0);
     });

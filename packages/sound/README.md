@@ -18,9 +18,11 @@ harness that compares them. Nothing here depends on the generator runtime or low
 
 ## Run
 
-The context/services fixtures are shared requirements, not implemented analysis
-yet. Both prototype test checks currently fail as expected; contract and fixture
-checks pass. See COMPARISON.md, “context/services baseline”.
+A (typed), B (dataflow) and C (oxc) pass the original 109 fixtures. The new
+`openclaw` group freezes 34 more requirements under D-131; unchanged prototypes
+have known gaps. Tests run those checkers and pin their measured new-group
+scores, so regressions or improvements require review rather than going silently
+green. See results/openclaw-baseline.md, results/openclaw-runtime.md and FUTURE.md.
 
 ```sh
 pnpm install                                  # once, at the repo root
@@ -31,7 +33,8 @@ node harness/vite-measure.mjs dataflow --runs 5   # vite build (strict / report-
 node harness/vite-measure.mjs typed
 node fixtures/legacy-run.mjs                  # re-measure today's checker's output (writes fixtures/legacy-actual.json)
 node fixtures/extract.mjs --write             # re-derive the cases from their origins
-pnpm test                                     # vitest: fixture integrity, code table vs solid-js/diagnostics.json, both prototypes on the slice
+pnpm test                                     # integrity, strict fixture types, runtime scopes, old slice + pinned new-group scores
+node harness/openclaw-baseline.mjs             # deliberate baseline refresh; review before accepting
 ```
 
 ## Scoring

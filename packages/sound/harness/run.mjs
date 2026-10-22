@@ -3,7 +3,7 @@
 // prototype) over the shared fixtures, scores against the slice expectation,
 // measures cold and incremental check time, and writes results/latest.{md,json}.
 //
-//   node harness/run.mjs [--prototype all|typed|dataflow|null] [--group all|cases|equipment|mutants]
+//   node harness/run.mjs [--prototype all|typed|dataflow|null] [--group all|cases|equipment|mutants|openclaw]
 //                        [--runs N] [--json path] [--verbose]
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -145,7 +145,8 @@ function summary(r) {
   const hits = scored.reduce((n, s) => n + s.hits.length, 0);
   const imprecise = scored.reduce((n, s) => n + s.imprecise.length, 0);
   const inSubsetMisses = scored.filter(s => s.soundnessFailure);
-  const mutantMisses = inSubsetMisses.filter(s => s.group === "mutants");
+  // New labeled groups may contain mutants too; do not hide their misses.
+  const mutantMisses = inSubsetMisses.filter(s => fixtures.some(f => f.id === s.fixture && f.mutation));
   const extraErrors = scored.reduce((n, s) => n + s.extraErrors.length, 0);
   const extraErrorsInSubsetClean = scored.filter(s => s.inSubset).reduce((n, s) => n + s.extraErrors.length, 0);
   const warningHits = scored.reduce((n, s) => n + s.warningHits, 0);

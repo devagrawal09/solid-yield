@@ -9,6 +9,7 @@ import { CODES, BY_CODE } from "../src/codes.mjs";
 import { score } from "../harness/score.mjs";
 import { createCheckerFor, loadPrototypes } from "../harness/load.mjs";
 import { nullPrototype } from "../harness/null-prototype.mjs";
+import { assertKnownOpenclaw } from "../harness/openclaw-known.mjs";
 
 const require = createRequire(import.meta.url);
 // solid-js's package exports do not expose diagnostics.json; read it from the resolved package directory.
@@ -78,6 +79,7 @@ describe("the harness", () => {
     for (const fx of fixtures) {
       const s = score(fx, fixturesDir, [], 0);
       expect(s.soundnessFailure).toBe(fx.inSubset && (fx.expected.length > 0 || (fx.expectedWarnings?.length ?? 0) > 0));
+      if (fx.group === "openclaw") assertKnownOpenclaw("null", fx, s);
     }
     expect(nullPrototype.createChecker({ rootDir: fixturesDir, files: [] }).check().diagnostics).toEqual([]);
   });
@@ -91,8 +93,13 @@ describe("the prototypes on the slice", { timeout: 120_000 }, async () => {
         const checker = createCheckerFor(prototype, fx);
         const s = score(fx, fixturesDir, checker.check().diagnostics, 0);
         checker.dispose();
-        expect(s.misses, `${prototype.name} / ${fx.id}`).toEqual([]);
-        expect(s.warningMisses, `${prototype.name} / ${fx.id} warnings`).toEqual([]);
+        if (fx.group === "openclaw") {
+          // Frozen measured gaps, not a blanket expected failure. Any change fails.
+          assertKnownOpenclaw(prototype.name, fx, s);
+        } else {
+          expect(s.misses, `${prototype.name} / ${fx.id}`).toEqual([]);
+          expect(s.warningMisses, `${prototype.name} / ${fx.id} warnings`).toEqual([]);
+        }
         expect(s.leakage, `${prototype.name} / ${fx.id}`).toEqual([]);
         expect(s.codeTableViolations, `${prototype.name} / ${fx.id}`).toEqual([]);
         expect(s.unmapped, `${prototype.name} / ${fx.id}`).toBe(0);

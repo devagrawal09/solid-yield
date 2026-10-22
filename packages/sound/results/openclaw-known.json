@@ -1,0 +1,2686 @@
+{
+  "typed": {
+    "oc-01-factory-reader": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-01-factory-reader-mutant": {
+      "hits": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-01-factory-reader-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1
+    },
+    "oc-02-effect-prop-phase": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-02-effect-prop-phase-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-02-effect-prop-phase-mutant.tsx",
+          "at": "\"props.value\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 0
+    },
+    "oc-03-optional-context": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-03-optional-context-mutant": {
+      "hits": [
+        {
+          "code": "CONTEXT_PROVIDER_MISSING",
+          "file": "oc-03-optional-context-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1
+    },
+    "oc-04-default-accessor": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-04-default-accessor-mutant": {
+      "hits": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-04-default-accessor-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1
+    },
+    "oc-05-project-get-method": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-05-project-get-method-mutant": {
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "oc-05-project-get-method-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1
+    },
+    "oc-06-promise-forks": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-06-promise-forks-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "oc-06-promise-forks-mutant.tsx",
+          "at": "\"onClick={() =>\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 0
+    },
+    "oc-07-scoped-outcome": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-07-scoped-outcome-mutant": {
+      "hits": [
+        {
+          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+          "file": "oc-07-scoped-outcome-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1
+    },
+    "oc-08-lazy-unused-prop": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-08-lazy-unused-prop-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+          "file": "oc-08-lazy-unused-prop-mutant.tsx",
+          "at": "\"props.value\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [
+        {
+          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+          "severity": "error",
+          "message": "Rendered work may fail (a throw in a memo or JSX expression, or a rejected async memo) and no Errored boundary is above it within this component or its callers up to the render root. At runtime the failure reaches the root and halts reactivity. Wrap the rendered work in <Errored fallback={…}>, or handle the failure where it is produced.",
+          "loc": {
+            "file": "openclaw/oc-08-lazy-unused-prop-mutant.tsx",
+            "line": 5,
+            "col": 55,
+            "endLine": 5,
+            "endCol": 66
+          }
+        }
+      ],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 1
+    },
+    "oc-09-forwarded-pending-setup": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-09-forwarded-pending-setup-mutant": {
+      "hits": [
+        {
+          "code": "PENDING_ASYNC_UNTRACKED_READ",
+          "file": "oc-09-forwarded-pending-setup-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1
+    },
+    "oc-10-untrack-not-a-catch": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-10-untrack-not-a-catch-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "SETUP_MAY_THROW",
+          "file": "oc-10-untrack-not-a-catch-mutant.tsx",
+          "at": "\"untrack(sample)\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 0
+    },
+    "oc-12-keyed-row-snapshot": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-12-keyed-row-snapshot-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-12-keyed-row-snapshot-mutant.tsx",
+          "at": "\"row().label\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 0
+    },
+    "oc-12-row-pending": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-12-row-pending-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "PENDING_ASYNC_UNTRACKED_READ",
+          "file": "oc-12-row-pending-mutant.tsx",
+          "at": "\"read()\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 0
+    },
+    "oc-12-row-held": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-12-index-row": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-12-index-row-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-12-index-row-mutant.tsx",
+          "at": "\"row()\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 0
+    },
+    "oc-23-ref-read": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [
+        {
+          "code": "UNANALYZED_BOUNDARY",
+          "severity": "warn",
+          "message": "a ref is outside the checked subset; the ref callback runs as a handler; its reads are not tracked and its failures are unhandled. Nothing here is trusted: downstream obligations still surface.",
+          "loc": {
+            "file": "openclaw/oc-23-ref-read.tsx",
+            "line": 6,
+            "col": 13,
+            "endLine": 6,
+            "endCol": 60
+          }
+        }
+      ],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1
+    },
+    "oc-23-ref-read-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-23-ref-read-mutant.tsx",
+          "at": "\"element.title = value()\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [
+        {
+          "code": "UNANALYZED_BOUNDARY",
+          "severity": "warn",
+          "message": "a ref is outside the checked subset; the ref callback runs as a handler; its reads are not tracked and its failures are unhandled. Nothing here is trusted: downstream obligations still surface.",
+          "loc": {
+            "file": "openclaw/oc-23-ref-read-mutant.tsx",
+            "line": 6,
+            "col": 13,
+            "endLine": 6,
+            "endCol": 58
+          }
+        }
+      ],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 1
+    },
+    "oc-23-ref-pending": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [
+        {
+          "code": "UNANALYZED_BOUNDARY",
+          "severity": "warn",
+          "message": "a ref is outside the checked subset; the ref callback runs as a handler; its reads are not tracked and its failures are unhandled. Nothing here is trusted: downstream obligations still surface.",
+          "loc": {
+            "file": "openclaw/oc-23-ref-pending.tsx",
+            "line": 6,
+            "col": 22,
+            "endLine": 6,
+            "endCol": 69
+          }
+        }
+      ],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1
+    },
+    "oc-23-ref-pending-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "PENDING_ASYNC_UNTRACKED_READ",
+          "file": "oc-23-ref-pending-mutant.tsx",
+          "at": "\"element.title = read()\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [
+        {
+          "code": "UNANALYZED_BOUNDARY",
+          "severity": "warn",
+          "message": "a ref is outside the checked subset; the ref callback runs as a handler; its reads are not tracked and its failures are unhandled. Nothing here is trusted: downstream obligations still surface.",
+          "loc": {
+            "file": "openclaw/oc-23-ref-pending-mutant.tsx",
+            "line": 6,
+            "col": 22,
+            "endLine": 6,
+            "endCol": 66
+          }
+        },
+        {
+          "code": "PENDING_ASYNC_IN_HANDLER",
+          "severity": "warn",
+          "message": "A possibly pending value is read in an event handler. An uninitialized read can throw or suspend even though a stale value can be served during refresh. Loading does not protect handlers. Avoid the pending read in the handler, or explicitly handle its uninitialized state and any failure.",
+          "loc": {
+            "file": "openclaw/oc-23-ref-pending-mutant.tsx",
+            "line": 6,
+            "col": 56,
+            "endLine": 6,
+            "endCol": 62
+          }
+        }
+      ],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 2
+    },
+    "oc-04-default-without-provider": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [
+        {
+          "code": "SETUP_MAY_THROW",
+          "severity": "error",
+          "message": "A component's setup body (outside any memo, JSX or handler) may throw synchronously, or drops a promise that may reject (`risk().then(…)` with no catch); a component body only creates state. Move the failing work into a memo or rendered work under an Errored boundary, or handle it where it is produced.",
+          "loc": {
+            "file": "openclaw/oc-04-default-without-provider.tsx",
+            "line": 7,
+            "col": 19,
+            "endLine": 7,
+            "endCol": 25
+          }
+        }
+      ],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1
+    },
+    "oc-01-translation-reader": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-01-translation-reader-mutant": {
+      "hits": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-01-translation-reader-mutant.tsx",
+          "count": 1
+        },
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-01-translation-reader-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 2
+    }
+  },
+  "dataflow": {
+    "oc-01-factory-reader": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-01-factory-reader-mutant": {
+      "hits": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-01-factory-reader-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1
+    },
+    "oc-02-effect-prop-phase": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-02-effect-prop-phase-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-02-effect-prop-phase-mutant.tsx",
+          "at": "\"props.value\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 0
+    },
+    "oc-03-optional-context": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-03-optional-context-mutant": {
+      "hits": [
+        {
+          "code": "CONTEXT_PROVIDER_MISSING",
+          "file": "oc-03-optional-context-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1
+    },
+    "oc-04-default-accessor": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-04-default-accessor-mutant": {
+      "hits": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-04-default-accessor-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1
+    },
+    "oc-05-project-get-method": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-05-project-get-method-mutant": {
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "oc-05-project-get-method-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1
+    },
+    "oc-06-promise-forks": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-06-promise-forks-mutant": {
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "oc-06-promise-forks-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1
+    },
+    "oc-07-scoped-outcome": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-07-scoped-outcome-mutant": {
+      "hits": [
+        {
+          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+          "file": "oc-07-scoped-outcome-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1
+    },
+    "oc-08-lazy-unused-prop": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-08-lazy-unused-prop-mutant": {
+      "hits": [
+        {
+          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+          "file": "oc-08-lazy-unused-prop-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1
+    },
+    "oc-09-forwarded-pending-setup": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-09-forwarded-pending-setup-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "PENDING_ASYNC_UNTRACKED_READ",
+          "file": "oc-09-forwarded-pending-setup-mutant.tsx",
+          "at": "\"props.value\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [
+        {
+          "code": "PENDING_ASYNC_UNTRACKED_READ",
+          "severity": "error",
+          "message": "Async value \"props.value\" is read in <Child>'s setup; while it is pending there is nothing to read. Read it in a tracking scope (JSX, a memo, or an effect's compute function) under a Loading boundary.",
+          "loc": {
+            "file": "openclaw/oc-09-forwarded-pending-setup-mutant.tsx",
+            "line": 6,
+            "col": 66,
+            "endLine": 6,
+            "endCol": 77
+          }
+        }
+      ],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 1
+    },
+    "oc-10-untrack-not-a-catch": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-10-untrack-not-a-catch-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "SETUP_MAY_THROW",
+          "file": "oc-10-untrack-not-a-catch-mutant.tsx",
+          "at": "\"untrack(sample)\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 0
+    },
+    "oc-12-keyed-row-snapshot": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-12-keyed-row-snapshot-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-12-keyed-row-snapshot-mutant.tsx",
+          "at": "\"row().label\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 0
+    },
+    "oc-12-row-pending": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-12-row-pending-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "PENDING_ASYNC_UNTRACKED_READ",
+          "file": "oc-12-row-pending-mutant.tsx",
+          "at": "\"read()\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 0
+    },
+    "oc-12-row-held": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-12-index-row": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-12-index-row-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-12-index-row-mutant.tsx",
+          "at": "\"row()\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 0
+    },
+    "oc-23-ref-read": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [
+        {
+          "code": "UNANALYZED_BOUNDARY",
+          "severity": "warn",
+          "message": "a ref is outside the checked subset; the ref callback runs as a handler; its reads are not tracked and its failures are unhandled. Nothing here is trusted: downstream obligations still surface.",
+          "loc": {
+            "file": "openclaw/oc-23-ref-read.tsx",
+            "line": 6,
+            "col": 13,
+            "endLine": 6,
+            "endCol": 60
+          }
+        }
+      ],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1
+    },
+    "oc-23-ref-read-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-23-ref-read-mutant.tsx",
+          "at": "\"element.title = value()\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [
+        {
+          "code": "UNANALYZED_BOUNDARY",
+          "severity": "warn",
+          "message": "a ref is outside the checked subset; the ref callback runs as a handler; its reads are not tracked and its failures are unhandled. Nothing here is trusted: downstream obligations still surface.",
+          "loc": {
+            "file": "openclaw/oc-23-ref-read-mutant.tsx",
+            "line": 6,
+            "col": 13,
+            "endLine": 6,
+            "endCol": 58
+          }
+        }
+      ],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 1
+    },
+    "oc-23-ref-pending": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [
+        {
+          "code": "UNANALYZED_BOUNDARY",
+          "severity": "warn",
+          "message": "a ref is outside the checked subset; the ref callback runs as a handler; its reads are not tracked and its failures are unhandled. Nothing here is trusted: downstream obligations still surface.",
+          "loc": {
+            "file": "openclaw/oc-23-ref-pending.tsx",
+            "line": 6,
+            "col": 22,
+            "endLine": 6,
+            "endCol": 69
+          }
+        }
+      ],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1
+    },
+    "oc-23-ref-pending-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "PENDING_ASYNC_UNTRACKED_READ",
+          "file": "oc-23-ref-pending-mutant.tsx",
+          "at": "\"element.title = read()\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [
+        {
+          "code": "UNANALYZED_BOUNDARY",
+          "severity": "warn",
+          "message": "a ref is outside the checked subset; the ref callback runs as a handler; its reads are not tracked and its failures are unhandled. Nothing here is trusted: downstream obligations still surface.",
+          "loc": {
+            "file": "openclaw/oc-23-ref-pending-mutant.tsx",
+            "line": 6,
+            "col": 22,
+            "endLine": 6,
+            "endCol": 66
+          }
+        },
+        {
+          "code": "PENDING_ASYNC_IN_HANDLER",
+          "severity": "warn",
+          "message": "This handler may read a value before it is initialized. Loading and try/catch do not make a pending handler read ready.",
+          "loc": {
+            "file": "openclaw/oc-23-ref-pending-mutant.tsx",
+            "line": 6,
+            "col": 56,
+            "endLine": 6,
+            "endCol": 62
+          }
+        }
+      ],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 2
+    },
+    "oc-04-default-without-provider": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-01-translation-reader": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-01-translation-reader-mutant": {
+      "hits": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-01-translation-reader-mutant.tsx",
+          "count": 1
+        },
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-01-translation-reader-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 2
+    }
+  },
+  "oxc": {
+    "oc-01-factory-reader": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-01-factory-reader-mutant": {
+      "hits": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-01-factory-reader-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1
+    },
+    "oc-02-effect-prop-phase": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-02-effect-prop-phase-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-02-effect-prop-phase-mutant.tsx",
+          "at": "\"props.value\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 0
+    },
+    "oc-03-optional-context": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-03-optional-context-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "CONTEXT_PROVIDER_MISSING",
+          "file": "oc-03-optional-context-mutant.tsx",
+          "at": "\"useContext(Optional)\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 0
+    },
+    "oc-04-default-accessor": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-04-default-accessor-mutant": {
+      "hits": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-04-default-accessor-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1
+    },
+    "oc-05-project-get-method": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-05-project-get-method-mutant": {
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "oc-05-project-get-method-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1
+    },
+    "oc-06-promise-forks": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-06-promise-forks-mutant": {
+      "hits": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "oc-06-promise-forks-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1
+    },
+    "oc-07-scoped-outcome": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-07-scoped-outcome-mutant": {
+      "hits": [
+        {
+          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+          "file": "oc-07-scoped-outcome-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1
+    },
+    "oc-08-lazy-unused-prop": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-08-lazy-unused-prop-mutant": {
+      "hits": [
+        {
+          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+          "file": "oc-08-lazy-unused-prop-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1
+    },
+    "oc-09-forwarded-pending-setup": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-09-forwarded-pending-setup-mutant": {
+      "hits": [
+        {
+          "code": "PENDING_ASYNC_UNTRACKED_READ",
+          "file": "oc-09-forwarded-pending-setup-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1
+    },
+    "oc-10-untrack-not-a-catch": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-10-untrack-not-a-catch-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "SETUP_MAY_THROW",
+          "file": "oc-10-untrack-not-a-catch-mutant.tsx",
+          "at": "\"untrack(sample)\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [
+        {
+          "code": "SETUP_MAY_THROW",
+          "severity": "error",
+          "message": "A component's setup body (outside any memo, JSX or handler) may throw synchronously, or drops a promise that may reject (`risk().then(…)` with no catch); a component body only creates state. Move the failing work into a memo or rendered work under an Errored boundary, or handle it where it is produced.",
+          "loc": {
+            "file": "openclaw/oc-10-untrack-not-a-catch-mutant.tsx",
+            "line": 7,
+            "col": 58,
+            "endLine": 7,
+            "endCol": 81
+          }
+        }
+      ],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 1
+    },
+    "oc-12-keyed-row-snapshot": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [
+        {
+          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+          "severity": "error",
+          "message": "Rendered work may fail (a throw in a memo or JSX expression, or a rejected async memo) and no Errored boundary is above it within this component or its callers up to the render root. At runtime the failure reaches the root and halts reactivity. Wrap the rendered work in <Errored fallback={…}>, or handle the failure where it is produced.",
+          "loc": {
+            "file": "openclaw/oc-12-keyed-row-snapshot.tsx",
+            "line": 6,
+            "col": 63,
+            "endLine": 6,
+            "endCol": 68
+          }
+        },
+        {
+          "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+          "severity": "error",
+          "message": "A possibly pending value is rendered (read in JSX or in a memo the JSX reads) with no Loading boundary above it, within this component or its callers up to the render root. The root mount would be deferred with no fallback shown. Wrap the rendered read in <Loading fallback={…}>, in this component or in a caller.",
+          "loc": {
+            "file": "openclaw/oc-12-keyed-row-snapshot.tsx",
+            "line": 6,
+            "col": 63,
+            "endLine": 6,
+            "endCol": 74
+          }
+        }
+      ],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 2
+    },
+    "oc-12-keyed-row-snapshot-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-12-keyed-row-snapshot-mutant.tsx",
+          "at": "\"row().label\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [
+        {
+          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+          "severity": "error",
+          "message": "Rendered work may fail (a throw in a memo or JSX expression, or a rejected async memo) and no Errored boundary is above it within this component or its callers up to the render root. At runtime the failure reaches the root and halts reactivity. Wrap the rendered work in <Errored fallback={…}>, or handle the failure where it is produced.",
+          "loc": {
+            "file": "openclaw/oc-12-keyed-row-snapshot-mutant.tsx",
+            "line": 7,
+            "col": 21,
+            "endLine": 7,
+            "endCol": 26
+          }
+        },
+        {
+          "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+          "severity": "error",
+          "message": "A possibly pending value is rendered (read in JSX or in a memo the JSX reads) with no Loading boundary above it, within this component or its callers up to the render root. The root mount would be deferred with no fallback shown. Wrap the rendered read in <Loading fallback={…}>, in this component or in a caller.",
+          "loc": {
+            "file": "openclaw/oc-12-keyed-row-snapshot-mutant.tsx",
+            "line": 8,
+            "col": 16,
+            "endLine": 8,
+            "endCol": 23
+          }
+        },
+        {
+          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+          "severity": "error",
+          "message": "Rendered work may fail (a throw in a memo or JSX expression, or a rejected async memo) and no Errored boundary is above it within this component or its callers up to the render root. At runtime the failure reaches the root and halts reactivity. Wrap the rendered work in <Errored fallback={…}>, or handle the failure where it is produced.",
+          "loc": {
+            "file": "openclaw/oc-12-keyed-row-snapshot-mutant.tsx",
+            "line": 8,
+            "col": 16,
+            "endLine": 8,
+            "endCol": 23
+          }
+        }
+      ],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 3
+    },
+    "oc-12-row-pending": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-12-row-pending-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "PENDING_ASYNC_UNTRACKED_READ",
+          "file": "oc-12-row-pending-mutant.tsx",
+          "at": "\"read()\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 0
+    },
+    "oc-12-row-held": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-12-index-row": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [
+        {
+          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+          "severity": "error",
+          "message": "Rendered work may fail (a throw in a memo or JSX expression, or a rejected async memo) and no Errored boundary is above it within this component or its callers up to the render root. At runtime the failure reaches the root and halts reactivity. Wrap the rendered work in <Errored fallback={…}>, or handle the failure where it is produced.",
+          "loc": {
+            "file": "openclaw/oc-12-index-row.tsx",
+            "line": 6,
+            "col": 55,
+            "endLine": 6,
+            "endCol": 60
+          }
+        },
+        {
+          "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+          "severity": "error",
+          "message": "A possibly pending value is rendered (read in JSX or in a memo the JSX reads) with no Loading boundary above it, within this component or its callers up to the render root. The root mount would be deferred with no fallback shown. Wrap the rendered read in <Loading fallback={…}>, in this component or in a caller.",
+          "loc": {
+            "file": "openclaw/oc-12-index-row.tsx",
+            "line": 6,
+            "col": 55,
+            "endLine": 6,
+            "endCol": 60
+          }
+        }
+      ],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 2
+    },
+    "oc-12-index-row-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-12-index-row-mutant.tsx",
+          "at": "\"row()\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [
+        {
+          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+          "severity": "error",
+          "message": "Rendered work may fail (a throw in a memo or JSX expression, or a rejected async memo) and no Errored boundary is above it within this component or its callers up to the render root. At runtime the failure reaches the root and halts reactivity. Wrap the rendered work in <Errored fallback={…}>, or handle the failure where it is produced.",
+          "loc": {
+            "file": "openclaw/oc-12-index-row-mutant.tsx",
+            "line": 7,
+            "col": 21,
+            "endLine": 7,
+            "endCol": 26
+          }
+        },
+        {
+          "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+          "severity": "error",
+          "message": "A possibly pending value is rendered (read in JSX or in a memo the JSX reads) with no Loading boundary above it, within this component or its callers up to the render root. The root mount would be deferred with no fallback shown. Wrap the rendered read in <Loading fallback={…}>, in this component or in a caller.",
+          "loc": {
+            "file": "openclaw/oc-12-index-row-mutant.tsx",
+            "line": 8,
+            "col": 16,
+            "endLine": 8,
+            "endCol": 23
+          }
+        },
+        {
+          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+          "severity": "error",
+          "message": "Rendered work may fail (a throw in a memo or JSX expression, or a rejected async memo) and no Errored boundary is above it within this component or its callers up to the render root. At runtime the failure reaches the root and halts reactivity. Wrap the rendered work in <Errored fallback={…}>, or handle the failure where it is produced.",
+          "loc": {
+            "file": "openclaw/oc-12-index-row-mutant.tsx",
+            "line": 8,
+            "col": 16,
+            "endLine": 8,
+            "endCol": 23
+          }
+        }
+      ],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 3
+    },
+    "oc-23-ref-read": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [
+        {
+          "code": "UNANALYZED_BOUNDARY",
+          "severity": "warn",
+          "message": "This code is outside the checked subset. The checker did not refuse the file: values flowing from here are treated as the worst case (possibly pending, possibly failing with unknown), so obligations still surface downstream. Nothing here is trusted and nothing is silently green. No action required for soundness; to narrow the worst case, move the work into a supported form (the message names the construct).",
+          "loc": {
+            "file": "openclaw/oc-23-ref-read.tsx",
+            "line": 6,
+            "col": 13,
+            "endLine": 6,
+            "endCol": 60
+          }
+        }
+      ],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1
+    },
+    "oc-23-ref-read-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-23-ref-read-mutant.tsx",
+          "at": "\"element.title = value()\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [
+        {
+          "code": "UNANALYZED_BOUNDARY",
+          "severity": "warn",
+          "message": "This code is outside the checked subset. The checker did not refuse the file: values flowing from here are treated as the worst case (possibly pending, possibly failing with unknown), so obligations still surface downstream. Nothing here is trusted and nothing is silently green. No action required for soundness; to narrow the worst case, move the work into a supported form (the message names the construct).",
+          "loc": {
+            "file": "openclaw/oc-23-ref-read-mutant.tsx",
+            "line": 6,
+            "col": 13,
+            "endLine": 6,
+            "endCol": 58
+          }
+        }
+      ],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 1
+    },
+    "oc-23-ref-pending": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [
+        {
+          "code": "UNANALYZED_BOUNDARY",
+          "severity": "warn",
+          "message": "This code is outside the checked subset. The checker did not refuse the file: values flowing from here are treated as the worst case (possibly pending, possibly failing with unknown), so obligations still surface downstream. Nothing here is trusted and nothing is silently green. No action required for soundness; to narrow the worst case, move the work into a supported form (the message names the construct).",
+          "loc": {
+            "file": "openclaw/oc-23-ref-pending.tsx",
+            "line": 6,
+            "col": 22,
+            "endLine": 6,
+            "endCol": 69
+          }
+        }
+      ],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 1
+    },
+    "oc-23-ref-pending-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "PENDING_ASYNC_UNTRACKED_READ",
+          "file": "oc-23-ref-pending-mutant.tsx",
+          "at": "\"element.title = read()\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [
+        {
+          "code": "UNANALYZED_BOUNDARY",
+          "severity": "warn",
+          "message": "This code is outside the checked subset. The checker did not refuse the file: values flowing from here are treated as the worst case (possibly pending, possibly failing with unknown), so obligations still surface downstream. Nothing here is trusted and nothing is silently green. No action required for soundness; to narrow the worst case, move the work into a supported form (the message names the construct).",
+          "loc": {
+            "file": "openclaw/oc-23-ref-pending-mutant.tsx",
+            "line": 6,
+            "col": 22,
+            "endLine": 6,
+            "endCol": 66
+          }
+        },
+        {
+          "code": "PENDING_ASYNC_IN_HANDLER",
+          "severity": "warn",
+          "message": "A possibly pending value is read in an event handler. An uninitialized read can throw or suspend even though a stale value can be served during refresh. Loading does not protect handlers. Avoid the pending read in the handler, or explicitly handle its uninitialized state and any failure.",
+          "loc": {
+            "file": "openclaw/oc-23-ref-pending-mutant.tsx",
+            "line": 6,
+            "col": 56,
+            "endLine": 6,
+            "endCol": 62
+          }
+        }
+      ],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 2
+    },
+    "oc-04-default-without-provider": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-01-translation-reader": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-01-translation-reader-mutant": {
+      "hits": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-01-translation-reader-mutant.tsx",
+          "count": 1
+        },
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-01-translation-reader-mutant.tsx",
+          "count": 1
+        }
+      ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 2
+    }
+  },
+  "null": {
+    "oc-01-factory-reader": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-01-factory-reader-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-01-factory-reader-mutant.tsx",
+          "at": "\"count()\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 0
+    },
+    "oc-02-effect-prop-phase": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-02-effect-prop-phase-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-02-effect-prop-phase-mutant.tsx",
+          "at": "\"props.value\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 0
+    },
+    "oc-03-optional-context": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-03-optional-context-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "CONTEXT_PROVIDER_MISSING",
+          "file": "oc-03-optional-context-mutant.tsx",
+          "at": "\"useContext(Optional)\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 0
+    },
+    "oc-04-default-accessor": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-04-default-accessor-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-04-default-accessor-mutant.tsx",
+          "at": "\"read()\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 0
+    },
+    "oc-05-project-get-method": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-05-project-get-method-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "oc-05-project-get-method-mutant.tsx",
+          "at": "\"onClick={() =>\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 0
+    },
+    "oc-06-promise-forks": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-06-promise-forks-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "UNHANDLED_HANDLER_FAILURE",
+          "file": "oc-06-promise-forks-mutant.tsx",
+          "at": "\"onClick={() =>\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 0
+    },
+    "oc-07-scoped-outcome": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-07-scoped-outcome-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+          "file": "oc-07-scoped-outcome-mutant.tsx",
+          "at": "\"props.value\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 0
+    },
+    "oc-08-lazy-unused-prop": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-08-lazy-unused-prop-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+          "file": "oc-08-lazy-unused-prop-mutant.tsx",
+          "at": "\"props.value\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 0
+    },
+    "oc-09-forwarded-pending-setup": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-09-forwarded-pending-setup-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "PENDING_ASYNC_UNTRACKED_READ",
+          "file": "oc-09-forwarded-pending-setup-mutant.tsx",
+          "at": "\"props.value\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 0
+    },
+    "oc-10-untrack-not-a-catch": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-10-untrack-not-a-catch-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "SETUP_MAY_THROW",
+          "file": "oc-10-untrack-not-a-catch-mutant.tsx",
+          "at": "\"untrack(sample)\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 0
+    },
+    "oc-12-keyed-row-snapshot": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-12-keyed-row-snapshot-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-12-keyed-row-snapshot-mutant.tsx",
+          "at": "\"row().label\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 0
+    },
+    "oc-12-row-pending": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-12-row-pending-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "PENDING_ASYNC_UNTRACKED_READ",
+          "file": "oc-12-row-pending-mutant.tsx",
+          "at": "\"read()\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 0
+    },
+    "oc-12-row-held": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-12-index-row": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-12-index-row-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-12-index-row-mutant.tsx",
+          "at": "\"row()\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 0
+    },
+    "oc-23-ref-read": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-23-ref-read-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-23-ref-read-mutant.tsx",
+          "at": "\"element.title = value()\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 0
+    },
+    "oc-23-ref-pending": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-23-ref-pending-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "PENDING_ASYNC_UNTRACKED_READ",
+          "file": "oc-23-ref-pending-mutant.tsx",
+          "at": "\"element.title = read()\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 0
+    },
+    "oc-04-default-without-provider": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-01-translation-reader": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-01-translation-reader-mutant": {
+      "hits": [],
+      "imprecise": [],
+      "misses": [
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-01-translation-reader-mutant.tsx",
+          "at": "\"language()\""
+        },
+        {
+          "code": "STRICT_READ_UNTRACKED",
+          "file": "oc-01-translation-reader-mutant.tsx",
+          "at": "\"count()\""
+        }
+      ],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": true,
+      "total": 0
+    }
+  }
+}

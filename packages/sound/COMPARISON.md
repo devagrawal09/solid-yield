@@ -171,3 +171,30 @@ boundary and pending-handler findings remain warnings. No analysis changed.
 m-pending-through-prop also tightens its primary location to Child’s {p.n}; n={n()} is required as related. Root/caller primary anchors no longer count (D-129d).
 
 Equipment is intentionally promoted to the context subset. Its eight removed worst-case errors, seven removed partial warnings, retained ten real handler errors and two new pending-handler warnings are justified individually in fixtures/equipment/CONTEXT-EXPECTATION.md. Its old notice pending error remains absent under precise context analysis, not downgraded by D-130. No other old expectation changes.
+
+## OpenClaw current-slice baseline (D-131)
+
+The 34 new shared requirements are measured against unchanged A/B/C. No IR
+choice or implementation change is made. Ref read scopes are included; ref
+ownership and all FUTURE.md areas are deferred.
+
+| Prototype | Hit | Miss | Extra | Soundness failures | Mutants missed | Info misses |
+|---|---:|---:|---:|---:|---:|---:|
+| typed | 8 | 9 | 7 | 9 | 9 | 0 |
+| dataflow | 9 | 8 | 6 | 8 | 8 | 0 |
+| oxc | 9 | 8 | 16 | 8 | 8 | 0 |
+| null | 0 | 17 | 0 | 16 | 16 | 0 |
+
+Entire suite (143 fixtures):
+
+| Prototype | Hit | Miss | Extra | Soundness failures | Mutants missed | Info misses |
+|---|---:|---:|---:|---:|---:|---:|
+| typed | 89 | 9 | 9 | 9 | 9 | 0 |
+| dataflow | 90 | 8 | 6 | 8 | 8 | 0 |
+| oxc | 90 | 8 | 16 | 8 | 8 | 0 |
+| null | 0 | 98 | 0 | 78 | 43 | 5 |
+
+Failing fixture IDs and missed mutants, including null, are listed in
+[results/openclaw-baseline.md](results/openclaw-baseline.md).
+New-group tests pin known scores (not skip/expected-failure tests); old tests
+remain strict. Runtime evidence: results/openclaw-runtime.md.

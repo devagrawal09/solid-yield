@@ -2,7 +2,7 @@
 
 ## Independence
 
-C was written from the shared rules and fixture sources, not copied from A or B. No code is imported from either prototype or the generator packages. The only shared runtime dependency in the checker is the diagnostic table. The standalone Vite wrapper is also independent of TypeScript. The comparison harness itself still loads TypeScript to configure A/B; that is not a C dependency. A child-process test blocks TypeScript resolution while loading C, its Vite wrapper, and checking all 109 fixtures. A source scan also rejects TypeScript imports.
+C was written from the shared rules and fixture sources, not copied from A or B. No code is imported from either prototype or the generator packages. The only shared runtime dependency in the checker is the diagnostic table. The standalone Vite wrapper is also independent of TypeScript. The comparison harness itself still loads TypeScript to configure A/B; that is not a C dependency. A child-process test blocks TypeScript resolution while loading C, its Vite wrapper, and checking all 143 fixtures. A source scan also rejects TypeScript imports.
 
 Oxc packages installed without a minimum-release-age exception. The existing shared TypeScript dependency remains for A/B. C ignores compilerOptions rather than loading their implementation or library files.
 
@@ -15,6 +15,14 @@ Oxc packages installed without a minimum-release-age exception. The existing sha
 - Module paths are real paths, so macOS /var aliases and pnpm links do not create duplicate contexts or components. Updates and read overrides use the same identity.
 - Promise rejections are separate from synchronous throws. Dropping a rejection does not let an enclosing synchronous catch handle it. Pending handler reads still warn under catches and rendered boundaries.
 - Inference-needed counts are distinct location/reason pairs per check, not dynamic invocation counts. Annotation-only functions always count as needing failure inference and use unknown failures. Repeated calls at the same site count once. Partial-check widenings are included.
+
+## OpenClaw / D-131
+
+All 34 OpenClaw fixtures now meet every requirement without extra errors or warnings. For bodies run in setup-like read scopes; returned JSX tracks normally. Default For rows are plain with an accessor index; key-function rows use accessors; position mode uses an accessor row and numeric index. Array element facts are joined without needing type inference. Unknown key functions retain unknown failures, and unknown key modes warn and widen.
+
+Ref reads use setup rules while failures remain detached-handler failures. DOM capture/assignment is supported; reactive writes and primitive creation in refs remain partial-check boundaries because their ownership rules are deferred. Effect apply/helper reads are untracked, but forwarded compute values are plain. Explicit undefined context defaults are missing (also inside an alternative); null and copied accessors are usable. Untrack forwards project failures at its call site and never acts as a catch. Promise branch handling and lazy unused props already worked and have regression checks.
+
+One original out-of-subset fixture has a stale ref-read expectation. The checker retains its required partial warning and adds the real untracked read required by D-131. DISPUTES.md records runtime evidence. This causes one strict no-extra test failure; there are no required misses or in-subset extras. See RESULTS-openclaw.md. No frozen expectation or non-oxc pin changed.
 
 ## Limits and assumptions
 

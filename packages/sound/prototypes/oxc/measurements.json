@@ -1,21 +1,54 @@
 {
-  "generatedAt": "2026-10-22T14:14:00.735Z",
+  "generatedAt": "2026-10-22T15:51:25.994Z",
   "runs": 5,
   "groups": {
     "all": {
-      "fixtures": 109,
-      "hits": 70,
+      "fixtures": 143,
+      "hits": 87,
       "misses": 0,
       "warningHits": 11,
       "warningMisses": 0,
-      "extraErrors": 0,
+      "extraErrors": 1,
       "extraWarnings": 0,
       "infoHits": 5,
       "infoMisses": 0,
       "soundnessFailures": 0,
-      "coldSumMs": 45.93249699999963,
-      "coldMedianMs": 0.3647500000000008,
-      "inferenceNeeded": 46
+      "coldSumMs": 52.988665999999945,
+      "coldMedianMs": 0.3220829999999921,
+      "inferenceNeeded": 45,
+      "worstCaseBoundaries": 8
+    },
+    "openclaw": {
+      "fixtures": 34,
+      "hits": 17,
+      "misses": 0,
+      "warningHits": 0,
+      "warningMisses": 0,
+      "extraErrors": 0,
+      "extraWarnings": 0,
+      "infoHits": 0,
+      "infoMisses": 0,
+      "soundnessFailures": 0,
+      "coldSumMs": 10.715498000000025,
+      "coldMedianMs": 0.3155409999999961,
+      "inferenceNeeded": 0,
+      "worstCaseBoundaries": 0
+    },
+    "original": {
+      "fixtures": 52,
+      "hits": 24,
+      "misses": 0,
+      "warningHits": 5,
+      "warningMisses": 0,
+      "extraErrors": 1,
+      "extraWarnings": 0,
+      "infoHits": 5,
+      "infoMisses": 0,
+      "soundnessFailures": 0,
+      "coldSumMs": 12.637291999999945,
+      "coldMedianMs": 0.2119169999999997,
+      "inferenceNeeded": 11,
+      "worstCaseBoundaries": 6
     },
     "context": {
       "fixtures": 41,
@@ -28,9 +61,10 @@
       "infoHits": 0,
       "infoMisses": 0,
       "soundnessFailures": 0,
-      "coldSumMs": 18.404910999999952,
-      "coldMedianMs": 0.4377499999999941,
-      "inferenceNeeded": 10
+      "coldSumMs": 17.50366800000004,
+      "coldMedianMs": 0.40566599999999653,
+      "inferenceNeeded": 10,
+      "worstCaseBoundaries": 2
     },
     "cases": {
       "fixtures": 81,
@@ -38,14 +72,15 @@
       "misses": 0,
       "warningHits": 8,
       "warningMisses": 0,
-      "extraErrors": 0,
+      "extraErrors": 1,
       "extraWarnings": 0,
       "infoHits": 5,
       "infoMisses": 0,
       "soundnessFailures": 0,
-      "coldSumMs": 27.25503999999985,
-      "coldMedianMs": 0.3491249999999866,
-      "inferenceNeeded": 20
+      "coldSumMs": 25.351544999999966,
+      "coldMedianMs": 0.2955000000000041,
+      "inferenceNeeded": 19,
+      "worstCaseBoundaries": 8
     },
     "contextCases": {
       "fixtures": 29,
@@ -58,9 +93,10 @@
       "infoHits": 0,
       "infoMisses": 0,
       "soundnessFailures": 0,
-      "coldSumMs": 13.124870999999995,
-      "coldMedianMs": 0.4385419999999982,
-      "inferenceNeeded": 8
+      "coldSumMs": 12.71425300000002,
+      "coldMedianMs": 0.40800000000000125,
+      "inferenceNeeded": 8,
+      "worstCaseBoundaries": 2
     },
     "mutants": {
       "fixtures": 27,
@@ -73,9 +109,10 @@
       "infoHits": 0,
       "infoMisses": 0,
       "soundnessFailures": 0,
-      "coldSumMs": 10.32958199999976,
-      "coldMedianMs": 0.4003749999999968,
-      "inferenceNeeded": 13
+      "coldSumMs": 9.518081999999964,
+      "coldMedianMs": 0.3669170000000008,
+      "inferenceNeeded": 13,
+      "worstCaseBoundaries": 0
     },
     "contextMutants": {
       "fixtures": 12,
@@ -88,9 +125,10 @@
       "infoHits": 0,
       "infoMisses": 0,
       "soundnessFailures": 0,
-      "coldSumMs": 5.280039999999957,
-      "coldMedianMs": 0.4319580000000087,
-      "inferenceNeeded": 2
+      "coldSumMs": 4.7894150000000195,
+      "coldMedianMs": 0.40566599999999653,
+      "inferenceNeeded": 2,
+      "worstCaseBoundaries": 0
     },
     "equipment": {
       "fixtures": 1,
@@ -103,9 +141,10 @@
       "infoHits": 0,
       "infoMisses": 0,
       "soundnessFailures": 0,
-      "coldSumMs": 8.347875000000016,
-      "coldMedianMs": 8.347875000000016,
-      "inferenceNeeded": 13
+      "coldSumMs": 7.40354099999999,
+      "coldMedianMs": 7.40354099999999,
+      "inferenceNeeded": 13,
+      "worstCaseBoundaries": 0
     }
   },
   "fixtures": [
@@ -114,126 +153,144 @@
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.7538750000000007
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.9835829999999994
     },
     {
       "id": "context-default",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.460208999999999
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.41683300000000045
     },
     {
       "id": "context-missing-provider",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.4048339999999975
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.3792919999999995
     },
     {
       "id": "context-provider-over-default",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.4838750000000047
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.43841700000000117
     },
     {
       "id": "context-signal-view",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.42616600000000204
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.563167
     },
     {
       "id": "context-signal-setup",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.39741599999999977
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.48654200000000003
     },
     {
       "id": "context-factory-memo",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.453792
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.4293750000000003
     },
     {
       "id": "context-helper-alias",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.4164999999999992
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.40800000000000125
     },
     {
       "id": "context-method-view",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.42241599999999835
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.3952910000000003
     },
     {
       "id": "context-method-setup",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.41141700000000014
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.38904200000000344
     },
     {
       "id": "context-async-covered",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.4556249999999977
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.40099999999999625
     },
     {
       "id": "context-async-uncovered",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.4037079999999946
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.4294580000000039
     },
     {
       "id": "context-async-setup",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.43154099999999573
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.37845899999999943
     },
     {
       "id": "context-pending-handler",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.4245829999999984
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.4092910000000032
     },
     {
       "id": "context-failing-memo-covered",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.44737500000000097
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.4120840000000001
     },
     {
       "id": "context-failing-handler",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.43991599999999664
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.39775000000000205
     },
     {
       "id": "context-promise-caught",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.42125000000000057
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.5537500000000009
     },
     {
       "id": "context-promise-uncaught",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.40637499999999704
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.3800419999999889
     },
     {
       "id": "context-optional-api-caught",
@@ -242,7 +299,7 @@
       "inferenceNeeded": [
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/context-optional-api-caught.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/cases/context-optional-api-caught.tsx",
             "line": 5,
             "col": 104,
             "endLine": 5,
@@ -252,7 +309,7 @@
         },
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/context-optional-api-caught.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/cases/context-optional-api-caught.tsx",
             "line": 5,
             "col": 104,
             "endLine": 5,
@@ -261,7 +318,8 @@
           "reason": "call needs inference or an analyzable body"
         }
       ],
-      "coldMs": 0.4817910000000012
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.4906250000000085
     },
     {
       "id": "context-optional-api-uncaught",
@@ -270,7 +328,7 @@
       "inferenceNeeded": [
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/context-optional-api-uncaught.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/cases/context-optional-api-uncaught.tsx",
             "line": 5,
             "col": 104,
             "endLine": 5,
@@ -280,7 +338,7 @@
         },
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/context-optional-api-uncaught.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/cases/context-optional-api-uncaught.tsx",
             "line": 5,
             "col": 104,
             "endLine": 5,
@@ -289,7 +347,8 @@
           "reason": "call needs inference or an analyzable body"
         }
       ],
-      "coldMs": 0.457540999999992
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.3989169999999973
     },
     {
       "id": "context-injected-sync",
@@ -298,7 +357,7 @@
       "inferenceNeeded": [
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/context-injected-sync.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/cases/context-injected-sync.tsx",
             "line": 7,
             "col": 71,
             "endLine": 7,
@@ -307,21 +366,24 @@
           "reason": "function annotation supplies no failure facts"
         }
       ],
-      "coldMs": 0.4227080000000001
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.37854099999999846
     },
     {
       "id": "context-nested-shadow",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.438083000000006
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.3777079999999984
     },
     {
       "id": "context-provider-identity",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.4854580000000084
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.3944580000000002
     },
     {
       "id": "context-module-escape",
@@ -330,7 +392,7 @@
       "inferenceNeeded": [
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/context-module-escape.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/cases/context-module-escape.tsx",
             "line": 7,
             "col": 45,
             "endLine": 7,
@@ -339,7 +401,8 @@
           "reason": "context stored in module state"
         }
       ],
-      "coldMs": 0.5181249999999977
+      "worstCaseBoundaries": 1,
+      "coldMs": 0.42754200000000253
     },
     {
       "id": "context-unknown-escape",
@@ -348,7 +411,7 @@
       "inferenceNeeded": [
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/context-unknown-escape.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/cases/context-unknown-escape.tsx",
             "line": 7,
             "col": 51,
             "endLine": 7,
@@ -358,7 +421,7 @@
         },
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/context-unknown-escape.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/cases/context-unknown-escape.tsx",
             "line": 7,
             "col": 51,
             "endLine": 7,
@@ -367,238 +430,272 @@
           "reason": "function annotation supplies no failure facts"
         }
       ],
-      "coldMs": 0.44333300000000975
+      "worstCaseBoundaries": 1,
+      "coldMs": 0.38766700000000753
     },
     {
       "id": "context-prop-child-boundaries",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.4689589999999981
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.4100839999999977
     },
     {
       "id": "context-prop-caller-boundaries",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.47245800000000315
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.40270900000000154
     },
     {
       "id": "context-prop-uncovered",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.4369999999999976
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.3832919999999973
     },
     {
       "id": "context-method-write-handler",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.4385419999999982
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.41133400000001075
     },
     {
       "id": "counter",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.2396659999999997
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.22541600000000983
     },
     {
       "id": "props",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.0797500000000042
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.07258300000000872
     },
     {
       "id": "inline-event",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.19383299999999792
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.1919589999999971
     },
     {
       "id": "named-event",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.19149999999999068
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.20029200000000458
     },
     {
       "id": "catch",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.2127919999999932
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.20833300000001032
     },
     {
       "id": "callback-read",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.22358400000000245
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.1926249999999925
     },
     {
       "id": "setup-read",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.19566700000000026
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.17762499999999193
     },
     {
       "id": "return-ternary",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.19024999999999181
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.19116699999999298
     },
     {
       "id": "return-and",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.17908299999999144
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.1703329999999994
     },
     {
       "id": "return-null",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.3165000000000049
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.3049579999999992
     },
     {
       "id": "named-callback-in-setup",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.22470799999999258
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.2049999999999983
     },
     {
       "id": "array-callback-in-setup",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.3647500000000008
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.2955000000000041
     },
     {
       "id": "getter-read-in-setup",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.38075000000000614
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.29162499999999625
     },
     {
       "id": "memo-write",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.2470830000000035
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.21470899999999915
     },
     {
       "id": "untrack-in-every-host",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.44879100000001415
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.4078750000000042
     },
     {
       "id": "reader-helpers",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.3554589999999962
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.325333999999998
     },
     {
       "id": "props-interface-live",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.26983300000000554
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.2570830000000086
     },
     {
       "id": "props-accessor-callers",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.3083340000000021
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.2668330000000054
     },
     {
       "id": "callback-prop-forwarded",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.35779200000000344
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.2813330000000036
     },
     {
       "id": "recursion-failing-prop",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.5108749999999986
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.4435000000000002
     },
     {
       "id": "async-memo-reads",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.22674999999999557
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.2131249999999909
     },
     {
       "id": "async-memo-nested-function",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.38749999999998863
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.3512500000000074
     },
     {
       "id": "async-event-reads",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.23541599999998652
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.2119169999999997
     },
     {
       "id": "async-read",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.2221670000000131
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.21750000000000114
     },
     {
       "id": "colored-prop",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.30229199999999423
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.203708000000006
     },
     {
       "id": "promise-catch",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.2506659999999954
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.19037500000000307
     },
     {
       "id": "pending-root",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.31416699999999764
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.2859160000000003
     },
     {
       "id": "iife-pending-root",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.33287500000000136
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.2945830000000029
     },
     {
       "id": "async-setup-reads",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.19470899999998892
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.18912499999999
     },
     {
       "id": "native-latest-pending",
@@ -607,7 +704,7 @@
       "inferenceNeeded": [
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/native-latest-pending.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/cases/native-latest-pending.tsx",
             "line": 1,
             "col": 115,
             "endLine": 1,
@@ -617,7 +714,7 @@
         },
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/native-latest-pending.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/cases/native-latest-pending.tsx",
             "line": 1,
             "col": 126,
             "endLine": 1,
@@ -626,116 +723,120 @@
           "reason": "Solid isPending is outside the modeled subset"
         }
       ],
-      "coldMs": 0.1862090000000194
+      "worstCaseBoundaries": 2,
+      "coldMs": 0.18695799999997575
     },
     {
       "id": "native-for-indexed",
       "group": "cases",
-      "inferenceNeededCount": 1,
-      "inferenceNeeded": [
-        {
-          "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/native-for-indexed.tsx",
-            "line": 1,
-            "col": 167,
-            "endLine": 1,
-            "endCol": 173
-          },
-          "reason": "callable shape needs inference"
-        }
-      ],
-      "coldMs": 0.20916699999997945
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.20383300000000304
     },
     {
       "id": "throw-error",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.24616599999998812
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.18533399999998323
     },
     {
       "id": "promise-event",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.20125000000001592
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.18662499999999227
     },
     {
       "id": "handled-catch",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.2708340000000078
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.18279200000000628
     },
     {
       "id": "rethrow-catch",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.21875
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.17916699999997832
     },
     {
       "id": "unknown-rethrow-catch",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.2074169999999924
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.1826250000000016
     },
     {
       "id": "finally-nested-function",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.4205419999999833
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.34983300000001805
     },
     {
       "id": "plain-callback-throw-under-errored",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.47516600000000153
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.4720829999999978
     },
     {
       "id": "plain-callback-throw-in-memo",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.3757090000000005
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.3801250000000209
     },
     {
       "id": "effect-reads-failing-memo-at-root",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.3823329999999885
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.36795799999998735
     },
     {
       "id": "foreign-route-failure",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.1875829999999894
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.1650419999999997
     },
     {
       "id": "setup-promise-caught",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.22295800000000554
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.19145900000000893
     },
     {
       "id": "setup-promise-rejects",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.24750000000000227
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.19833399999998846
     },
     {
       "id": "callback-prop-throws",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.2285839999999837
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.2197089999999946
     },
     {
       "id": "callback-prop-unseen",
@@ -744,7 +845,7 @@
       "inferenceNeeded": [
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/callback-prop-unseen.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/cases/callback-prop-unseen.tsx",
             "line": 6,
             "col": 33,
             "endLine": 6,
@@ -754,7 +855,7 @@
         },
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/callback-prop-unseen.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/cases/callback-prop-unseen.tsx",
             "line": 12,
             "col": 20,
             "endLine": 12,
@@ -764,7 +865,7 @@
         },
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/callback-prop-unseen.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/cases/callback-prop-unseen.tsx",
             "line": 3,
             "col": 33,
             "endLine": 3,
@@ -773,28 +874,32 @@
           "reason": "function annotation supplies no failure facts"
         }
       ],
-      "coldMs": 0.282291999999984
+      "worstCaseBoundaries": 1,
+      "coldMs": 0.2610830000000135
     },
     {
       "id": "async-handler-destructured-uncaught",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.22270799999998303
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.20241599999999949
     },
     {
       "id": "kept-promise-rejects-at-its-await",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.3491249999999866
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.3099579999999946
     },
     {
       "id": "kept-promise-caught-by-its-chain",
       "group": "cases",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.32220899999998664
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.3231670000000122
     },
     {
       "id": "timer-callback-failure",
@@ -803,7 +908,7 @@
       "inferenceNeeded": [
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/timer-callback-failure.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/cases/timer-callback-failure.tsx",
             "line": 1,
             "col": 174,
             "endLine": 1,
@@ -812,7 +917,8 @@
           "reason": "function annotation supplies no failure facts"
         }
       ],
-      "coldMs": 0.22395800000001032
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.20062499999997385
     },
     {
       "id": "native-optimistic-store-basic",
@@ -821,7 +927,7 @@
       "inferenceNeeded": [
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/native-optimistic-store-basic.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/cases/native-optimistic-store-basic.tsx",
             "line": 1,
             "col": 88,
             "endLine": 1,
@@ -831,7 +937,7 @@
         },
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/native-optimistic-store-basic.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/cases/native-optimistic-store-basic.tsx",
             "line": 1,
             "col": 145,
             "endLine": 1,
@@ -840,7 +946,8 @@
           "reason": "function annotation supplies no failure facts"
         }
       ],
-      "coldMs": 0.22637499999999022
+      "worstCaseBoundaries": 1,
+      "coldMs": 0.1959579999999903
     },
     {
       "id": "event-updater",
@@ -849,7 +956,7 @@
       "inferenceNeeded": [
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/event-updater.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/cases/event-updater.tsx",
             "line": 1,
             "col": 204,
             "endLine": 1,
@@ -859,7 +966,7 @@
         },
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/event-updater.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/cases/event-updater.tsx",
             "line": 1,
             "col": 251,
             "endLine": 1,
@@ -868,7 +975,8 @@
           "reason": "function annotation supplies no failure facts"
         }
       ],
-      "coldMs": 0.25695899999999483
+      "worstCaseBoundaries": 1,
+      "coldMs": 0.2246669999999824
     },
     {
       "id": "ref-event-reads",
@@ -877,16 +985,17 @@
       "inferenceNeeded": [
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/ref-event-reads.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/cases/ref-event-reads.tsx",
             "line": 1,
             "col": 103,
             "endLine": 1,
             "endCol": 144
           },
-          "reason": "ref callback"
+          "reason": "reactive write in ref: ownership is not modeled"
         }
       ],
-      "coldMs": 0.2088329999999985
+      "worstCaseBoundaries": 1,
+      "coldMs": 0.18595899999999688
     },
     {
       "id": "equipment-checkout",
@@ -895,7 +1004,7 @@
       "inferenceNeeded": [
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/equipment/src/service.ts",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/equipment/src/service.ts",
             "line": 21,
             "col": 54,
             "endLine": 21,
@@ -905,7 +1014,7 @@
         },
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/equipment/src/components/FailureControls.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/equipment/src/components/FailureControls.tsx",
             "line": 7,
             "col": 46,
             "endLine": 7,
@@ -915,7 +1024,7 @@
         },
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/equipment/src/components/FailureControls.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/equipment/src/components/FailureControls.tsx",
             "line": 9,
             "col": 549,
             "endLine": 9,
@@ -925,7 +1034,7 @@
         },
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/equipment/src/components/FailureControls.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/equipment/src/components/FailureControls.tsx",
             "line": 9,
             "col": 646,
             "endLine": 9,
@@ -935,7 +1044,7 @@
         },
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/equipment/src/components/Inventory.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/equipment/src/components/Inventory.tsx",
             "line": 11,
             "col": 57,
             "endLine": 11,
@@ -945,7 +1054,7 @@
         },
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/equipment/src/service.ts",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/equipment/src/service.ts",
             "line": 38,
             "col": 42,
             "endLine": 38,
@@ -955,7 +1064,7 @@
         },
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/equipment/src/model.ts",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/equipment/src/model.ts",
             "line": 8,
             "col": 83,
             "endLine": 8,
@@ -965,7 +1074,7 @@
         },
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/equipment/src/service.ts",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/equipment/src/service.ts",
             "line": 39,
             "col": 32,
             "endLine": 39,
@@ -975,7 +1084,7 @@
         },
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/equipment/src/service.ts",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/equipment/src/service.ts",
             "line": 37,
             "col": 41,
             "endLine": 37,
@@ -985,7 +1094,7 @@
         },
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/equipment/src/api.ts",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/equipment/src/api.ts",
             "line": 32,
             "col": 10,
             "endLine": 32,
@@ -995,7 +1104,7 @@
         },
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/equipment/src/api.ts",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/equipment/src/api.ts",
             "line": 32,
             "col": 32,
             "endLine": 32,
@@ -1005,7 +1114,7 @@
         },
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/equipment/src/components/Detail.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/equipment/src/components/Detail.tsx",
             "line": 6,
             "col": 62,
             "endLine": 6,
@@ -1015,7 +1124,7 @@
         },
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/equipment/src/service.ts",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/equipment/src/service.ts",
             "line": 36,
             "col": 35,
             "endLine": 36,
@@ -1024,28 +1133,32 @@
           "reason": "function annotation supplies no failure facts"
         }
       ],
-      "coldMs": 8.347875000000016
+      "worstCaseBoundaries": 0,
+      "coldMs": 7.40354099999999
     },
     {
       "id": "m-context-loading-removed",
       "group": "mutants",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.6117080000000215
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.40566599999999653
     },
     {
       "id": "m-context-errored-removed",
       "group": "mutants",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.4651660000000106
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.40450000000001296
     },
     {
       "id": "m-context-catch-removed",
       "group": "mutants",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.4319580000000087
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.4191669999999874
     },
     {
       "id": "m-context-optional-catch-removed",
@@ -1054,7 +1167,7 @@
       "inferenceNeeded": [
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/mutants/m-context-optional-catch-removed.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/mutants/m-context-optional-catch-removed.tsx",
             "line": 5,
             "col": 104,
             "endLine": 5,
@@ -1064,7 +1177,7 @@
         },
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/mutants/m-context-optional-catch-removed.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/mutants/m-context-optional-catch-removed.tsx",
             "line": 5,
             "col": 104,
             "endLine": 5,
@@ -1073,147 +1186,168 @@
           "reason": "call needs inference or an analyzable body"
         }
       ],
-      "coldMs": 0.4900829999999985
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.438083000000006
     },
     {
       "id": "m-context-provider-removed",
       "group": "mutants",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.39220799999998235
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.3467500000000143
     },
     {
       "id": "m-context-default-removed",
       "group": "mutants",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.3564580000000035
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.34429099999999835
     },
     {
       "id": "m-context-shadow-removed",
       "group": "mutants",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.4003749999999968
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.3724579999999946
     },
     {
       "id": "m-context-alias-setup",
       "group": "mutants",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.42399999999997817
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.39441700000000424
     },
     {
       "id": "m-context-method-write-memo",
       "group": "mutants",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.4016670000000033
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.39099999999999113
     },
     {
       "id": "m-context-prop-child-loading-removed",
       "group": "mutants",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.45412499999997635
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.42975000000001273
     },
     {
       "id": "m-context-prop-child-errored-removed",
       "group": "mutants",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.4377499999999941
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.4252079999999978
     },
     {
       "id": "m-context-read-to-handler",
       "group": "mutants",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.4145419999999831
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.4181250000000034
     },
     {
       "id": "m-loading-removed",
       "group": "mutants",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.339917000000014
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.3182499999999777
     },
     {
       "id": "m-errored-removed",
       "group": "mutants",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.5178749999999752
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.4859170000000006
     },
     {
       "id": "m-catch-removed",
       "group": "mutants",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.39374999999998295
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.31887499999999136
     },
     {
       "id": "m-read-moved-to-setup",
       "group": "mutants",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.25695799999999736
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.2174579999999935
     },
     {
       "id": "m-write-in-memo",
       "group": "mutants",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.27054099999998016
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.21975000000000477
     },
     {
       "id": "m-reactive-prop-read-in-setup",
       "group": "mutants",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.2511249999999734
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.23995899999999892
     },
     {
       "id": "m-handled-catch-rethrows",
       "group": "mutants",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.31937499999997954
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.30562499999999204
     },
     {
       "id": "m-async-helper-rejects",
       "group": "mutants",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.22770899999997596
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.22287499999998772
     },
     {
       "id": "m-pending-through-prop",
       "group": "mutants",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.3333329999999819
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.3220829999999921
     },
     {
       "id": "m-pending-read-in-setup",
       "group": "mutants",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.20720899999997755
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.20666700000001015
     },
     {
       "id": "m-callback-prop-throws-forwarded",
       "group": "mutants",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.3039999999999736
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.29650000000000887
     },
     {
       "id": "m-effect-phase-pending",
       "group": "mutants",
       "inferenceNeededCount": 0,
       "inferenceNeeded": [],
-      "coldMs": 0.4550420000000486
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.3669170000000008
     },
     {
       "id": "m-injected-api-ambient",
@@ -1222,7 +1356,7 @@
       "inferenceNeeded": [
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/mutants/m-injected-api-ambient.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/mutants/m-injected-api-ambient.tsx",
             "line": 7,
             "col": 45,
             "endLine": 7,
@@ -1232,7 +1366,7 @@
         },
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/mutants/m-injected-api-ambient.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/mutants/m-injected-api-ambient.tsx",
             "line": 8,
             "col": 28,
             "endLine": 8,
@@ -1242,7 +1376,7 @@
         },
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/mutants/m-injected-api-ambient.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/mutants/m-injected-api-ambient.tsx",
             "line": 9,
             "col": 28,
             "endLine": 9,
@@ -1252,7 +1386,7 @@
         },
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/mutants/m-injected-api-ambient.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/mutants/m-injected-api-ambient.tsx",
             "line": 10,
             "col": 33,
             "endLine": 10,
@@ -1262,7 +1396,7 @@
         },
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/mutants/m-injected-api-ambient.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/mutants/m-injected-api-ambient.tsx",
             "line": 11,
             "col": 34,
             "endLine": 11,
@@ -1272,7 +1406,7 @@
         },
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/mutants/m-injected-api-ambient.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/mutants/m-injected-api-ambient.tsx",
             "line": 12,
             "col": 33,
             "endLine": 12,
@@ -1281,7 +1415,8 @@
           "reason": "function annotation supplies no failure facts"
         }
       ],
-      "coldMs": 0.34924999999998363
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.3425409999999829
     },
     {
       "id": "m-injected-api-prop",
@@ -1290,7 +1425,7 @@
       "inferenceNeeded": [
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/mutants/m-injected-api-prop.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/mutants/m-injected-api-prop.tsx",
             "line": 15,
             "col": 22,
             "endLine": 15,
@@ -1300,7 +1435,7 @@
         },
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/mutants/m-injected-api-prop.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/mutants/m-injected-api-prop.tsx",
             "line": 8,
             "col": 45,
             "endLine": 8,
@@ -1310,7 +1445,7 @@
         },
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/mutants/m-injected-api-prop.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/mutants/m-injected-api-prop.tsx",
             "line": 9,
             "col": 28,
             "endLine": 9,
@@ -1320,7 +1455,7 @@
         },
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/mutants/m-injected-api-prop.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/mutants/m-injected-api-prop.tsx",
             "line": 10,
             "col": 33,
             "endLine": 10,
@@ -1329,7 +1464,8 @@
           "reason": "function annotation supplies no failure facts"
         }
       ],
-      "coldMs": 0.40220799999997325
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.41925000000000523
     },
     {
       "id": "m-equipment-row-loading-removed",
@@ -1338,7 +1474,7 @@
       "inferenceNeeded": [
         {
           "loc": {
-            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/mutants/m-equipment-row-loading-removed.tsx",
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc-oc/packages/sound/fixtures/mutants/m-equipment-row-loading-removed.tsx",
             "line": 13,
             "col": 54,
             "endLine": 13,
@@ -1347,7 +1483,280 @@
           "reason": "function annotation supplies no failure facts"
         }
       ],
-      "coldMs": 0.42124999999998636
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.44599999999999795
+    },
+    {
+      "id": "oc-01-factory-reader",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.30608399999999847
+    },
+    {
+      "id": "oc-01-factory-reader-mutant",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.29812499999999886
+    },
+    {
+      "id": "oc-02-effect-prop-phase",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.3298330000000078
+    },
+    {
+      "id": "oc-02-effect-prop-phase-mutant",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.3231659999999863
+    },
+    {
+      "id": "oc-03-optional-context",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.2926249999999868
+    },
+    {
+      "id": "oc-03-optional-context-mutant",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.28437499999998295
+    },
+    {
+      "id": "oc-04-default-accessor",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.3282079999999894
+    },
+    {
+      "id": "oc-04-default-accessor-mutant",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.3293750000000273
+    },
+    {
+      "id": "oc-05-project-get-method",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.32774999999998045
+    },
+    {
+      "id": "oc-05-project-get-method-mutant",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.3418750000000159
+    },
+    {
+      "id": "oc-06-promise-forks",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.2515409999999747
+    },
+    {
+      "id": "oc-06-promise-forks-mutant",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.24629199999998264
+    },
+    {
+      "id": "oc-07-scoped-outcome",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.4162910000000011
+    },
+    {
+      "id": "oc-07-scoped-outcome-mutant",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.3832919999999831
+    },
+    {
+      "id": "oc-08-lazy-unused-prop",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.309833000000026
+    },
+    {
+      "id": "oc-08-lazy-unused-prop-mutant",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.30762499999997317
+    },
+    {
+      "id": "oc-09-forwarded-pending-setup",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.33825000000001637
+    },
+    {
+      "id": "oc-09-forwarded-pending-setup-mutant",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.34554199999996627
+    },
+    {
+      "id": "oc-10-untrack-not-a-catch",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.3434169999999881
+    },
+    {
+      "id": "oc-10-untrack-not-a-catch-mutant",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.30437500000005
+    },
+    {
+      "id": "oc-12-keyed-row-snapshot",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.3260420000000295
+    },
+    {
+      "id": "oc-12-keyed-row-snapshot-mutant",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.3155409999999961
+    },
+    {
+      "id": "oc-12-row-pending",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.30529200000000856
+    },
+    {
+      "id": "oc-12-row-pending-mutant",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.32620800000000827
+    },
+    {
+      "id": "oc-12-row-held",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.28870900000003985
+    },
+    {
+      "id": "oc-12-index-row",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.27387499999997544
+    },
+    {
+      "id": "oc-12-index-row-mutant",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.2989160000000197
+    },
+    {
+      "id": "oc-23-ref-read",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.30370800000002873
+    },
+    {
+      "id": "oc-23-ref-read-mutant",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.2887920000000008
+    },
+    {
+      "id": "oc-23-ref-pending",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.306583000000046
+    },
+    {
+      "id": "oc-23-ref-pending-mutant",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.3170419999999581
+    },
+    {
+      "id": "oc-04-default-without-provider",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.2930830000000242
+    },
+    {
+      "id": "oc-01-translation-reader",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.3372079999999755
+    },
+    {
+      "id": "oc-01-translation-reader-mutant",
+      "group": "openclaw",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "worstCaseBoundaries": 0,
+      "coldMs": 0.3266249999999786
     }
   ]
 }

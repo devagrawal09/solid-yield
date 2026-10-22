@@ -30,7 +30,8 @@ const rows = fixtures.map(fixture => {
     context: fixture.id.startsWith("context-") || fixture.id.startsWith("m-context-"),
     ...scored,
     inferenceNeededCount: first.inferenceNeededCount,
-    inferenceNeeded: first.inferenceNeeded
+    inferenceNeeded: first.inferenceNeeded,
+    worstCaseBoundaries: first.diagnostics.filter(d => d.code === "UNANALYZED_BOUNDARY").length
   };
 });
 const totals = rows => ({
@@ -46,10 +47,13 @@ const totals = rows => ({
   soundnessFailures: rows.filter(r => r.soundnessFailure).length,
   coldSumMs: rows.reduce((n, r) => n + r.elapsedMs, 0),
   coldMedianMs: median(rows.map(r => r.elapsedMs)),
-  inferenceNeeded: rows.reduce((n, r) => n + r.inferenceNeededCount, 0)
+  inferenceNeeded: rows.reduce((n, r) => n + r.inferenceNeededCount, 0),
+  worstCaseBoundaries: rows.reduce((n, r) => n + r.worstCaseBoundaries, 0)
 });
 const groups = {
   all: totals(rows),
+  openclaw: totals(rows.filter(r => r.group === "openclaw")),
+  original: totals(rows.filter(r => r.group === "cases" && !r.context)),
   context: totals(rows.filter(r => r.context)),
   cases: totals(rows.filter(r => r.group === "cases")),
   contextCases: totals(rows.filter(r => r.group === "cases" && r.context)),
@@ -69,6 +73,7 @@ writeFileSync(
         group: r.group,
         inferenceNeededCount: r.inferenceNeededCount,
         inferenceNeeded: r.inferenceNeeded,
+        worstCaseBoundaries: r.worstCaseBoundaries,
         coldMs: r.elapsedMs
       }))
     },

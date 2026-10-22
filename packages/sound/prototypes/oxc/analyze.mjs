@@ -141,7 +141,7 @@ export class Analysis {
       c.asyncRejections.push(...failures);
       return;
     }
-    if (c.scope === "handler") {
+    if (c.scope === "handler" || c.scope === "ref") {
       c.sink.push(...failures);
       return;
     }
@@ -151,12 +151,14 @@ export class Analysis {
       this.emit("ERROR_OUTSIDE_ERRORED_BOUNDARY", node, c, [], { failures: uniq(failures) });
   }
   read(value, node, c, related = []) {
-    this.event("read", node, { scope: c.scope, pending: !!value.pending });
+    // Ref failure/write rules stay detached; only its read scope is setup-like.
+    const scope = c.scope === "ref" ? "setup" : c.scope;
+    this.event("read", node, { scope, pending: !!value.pending });
     if (c.owner) {
       const fact = this.facts.get(c.owner + "@" + this.graph.loc(node).file);
       fact?.reads.push({
         loc: this.graph.loc(node),
-        scope: c.scope === "module" ? "setup" : c.scope,
+        scope: scope === "module" ? "setup" : scope,
         source: "accessor"
       });
       if (fact) {
@@ -173,16 +175,16 @@ export class Analysis {
     }
     const next = { ...c, related: [...(c.related ?? []), ...related] };
     if (!c.untracked) {
-      if (c.scope === "setup")
+      if (scope === "setup" || (scope === "effect" && !value.pending))
         this.emit(
           value.pending ? "PENDING_ASYNC_UNTRACKED_READ" : "STRICT_READ_UNTRACKED",
           node,
           next
         );
-      if (value.pending && c.scope === "effect")
+      if (value.pending && scope === "effect")
         this.emit("PENDING_ASYNC_FORBIDDEN_SCOPE", node, next);
-      if (value.pending && c.scope === "handler") this.emit("PENDING_ASYNC_IN_HANDLER", node, next);
-      if (value.pending && c.scope === "tracking" && !c.loading)
+      if (value.pending && scope === "handler") this.emit("PENDING_ASYNC_IN_HANDLER", node, next);
+      if (value.pending && scope === "tracking" && !c.loading)
         this.emit("ASYNC_OUTSIDE_LOADING_BOUNDARY", node, next);
     }
     this.fail(value.failures, node, next);
@@ -355,9 +357,9 @@ export class Analysis {
     this.active.set(fn.node, count);
     return result;
   }
-  runHandler(fn, node, c, args = []) {
+  runHandler(fn, node, c, args = [], scope = "handler") {
     const sink = [];
-    const next = { ...c, scope: "handler", capture: null, caught: null, sink };
+    const next = { ...c, scope, capture: null, caught: null, sink };
     const value = this.call(fn, args, node, next);
     this.dropped(value, node, next);
     if (sink.length) this.emit("UNHANDLED_HANDLER_FAILURE", node, c, [], { failures: uniq(sink) });
@@ -445,6 +447,12 @@ export class Analysis {
       if (fn.tag === "function") return this.functionCall(fn, args, node, c);
       if (fn.tag === "solid") return this.solid(fn.name, args, node, c);
       if (fn.tag === "setter") {
+        if (c.scope === "ref")
+          return this.partial(
+            c.refNode ?? node,
+            c,
+            "reactive write in ref: ownership is not modeled"
+          );
         if (["setup", "tracking"].includes(c.scope))
           this.emit("REACTIVE_WRITE_IN_OWNED_SCOPE", node, c);
         this.event("write", node);
@@ -519,16 +527,17 @@ export class Analysis {
       const context = args[0];
       const provider = [...c.providers].reverse().find(p => p.context === context);
       const value = provider?.value ?? context.defaultValue;
-      if (!value) {
-        this.emit("CONTEXT_PROVIDER_MISSING", node, c);
-        return object();
-      }
-      each(value, v => {
+      return each(value ?? { ...plain(), undefinedValue: true }, v => {
+        if (v.undefinedValue) {
+          this.emit("CONTEXT_PROVIDER_MISSING", node, c);
+          return object();
+        }
         if (v.tag === "object") v.service = true;
         return v;
       });
-      return value;
     }
+    if (c.scope === "ref" && ["createSignal", "createMemo", "createAsync"].includes(name))
+      return this.partial(node, c, "primitive creation in ref: ownership is not modeled");
     if (name === "createSignal") {
       if (c.scope === "module" || args[0]?.tag === "function") {
         const worst = this.partial(
@@ -587,7 +596,13 @@ export class Analysis {
         context: c
       };
     }
-    if (name === "untrack") return this.call(args[0], [], node, { ...c, untracked: true });
+    if (name === "untrack") {
+      // Untracking changes subscriptions, not the caller's failure obligations.
+      const failures = [];
+      const result = this.call(args[0], [], node, { ...c, untracked: true, caught: failures });
+      this.fail(uniq(failures), node, c);
+      return result;
+    }
     if (name === "createEffect" && args.length >= 2) {
       const first = this.call(args[0], [], node, { ...c, scope: "tracking" });
       return this.call(args[1], [first], node, { ...c, scope: "effect" });
@@ -1129,11 +1144,16 @@ export class Analysis {
       return this.member(this.jsxValue(n.object, env, c), keyName(n.property), n, env, c);
     return unknown("dynamic JSX");
   }
-  child(n, env, c, args = []) {
+  child(n, env, c, args = [], callbackScope = "tracking") {
     if (n.type === "JSXText") return plain(n.value);
     if (n.type === "JSXExpressionContainer") {
       const value = this.eval(n.expression, env, { ...c, scope: "tracking" });
-      if (value.tag === "function") return this.call(value, args, n, { ...c, scope: "tracking" });
+      if (value.tag === "function")
+        return this.call(value, args, n, {
+          ...c,
+          scope: callbackScope,
+          capture: callbackScope === "setup" ? null : c.capture
+        });
       if (value.tag === "worst" || value.tag === "unknown")
         this.read({ pending: true, failures: ["unknown"] }, n.expression, {
           ...c,
@@ -1209,6 +1229,7 @@ export class Analysis {
       this.read({ pending: true, failures: ["unknown"] }, tag, cc);
     }
     let eachValue = plain();
+    let keyed = plain(true);
     for (const a of attrs) {
       if (a.type === "JSXSpreadAttribute") {
         this.partial(a, c, "JSX spread");
@@ -1217,12 +1238,24 @@ export class Analysis {
       const name = keyName(a.name);
       const expression = a.value?.type === "JSXExpressionContainer" ? a.value.expression : a.value;
       if (!expression) continue;
-      if (/^on/i.test(name) || name === "ref") {
-        if (name === "ref") this.partial(a, c, "ref callback");
+      if (name === "ref") {
         const fn = this.eval(expression, env, next);
-        this.runHandler(fn, a, c, [
-          { tag: "platformInstance", path: name === "ref" ? "Element" : "Event" }
-        ]);
+        each(fn, arm => {
+          // A DOM capture is not a call. Callback reads run once, outside tracking.
+          if (["function", "declared", "unknown", "worst"].includes(arm.tag)) {
+            this.runHandler(
+              arm,
+              a,
+              { ...c, refNode: a },
+              [{ tag: "platformInstance", path: "Element" }],
+              "ref"
+            );
+          }
+          return arm;
+        });
+      } else if (/^on/i.test(name)) {
+        const fn = this.eval(expression, env, next);
+        this.runHandler(fn, a, c, [{ tag: "platformInstance", path: "Event" }]);
       } else if (name === "fallback" && boundary) {
         const fn = this.eval(expression, env, next);
         if (fn.tag === "function")
@@ -1230,16 +1263,50 @@ export class Analysis {
       } else {
         const out = this.eval(expression, env, cc);
         if (name === "each") eachValue = out;
+        if (name === "keyed") keyed = out;
       }
     }
-    const row = eachValue.tag === "array" ? (eachValue.elements[0] ?? plain()) : plain();
+    const row = eachValue.tag === "array" ? join(...eachValue.elements) : plain();
+    const accessor = result => ({ tag: "source", pending: false, failures: [], result });
+    const rowArgs = each(keyed, mode => {
+      const callable = [
+        "function",
+        "declared",
+        "platform",
+        "safe",
+        "source",
+        "setter",
+        "method",
+        "solid"
+      ].includes(mode.tag);
+      if (solidName === "For" && callable) this.call(mode, [row], n, cc);
+      const fixedMode =
+        mode.tag === "plain" && (typeof mode.value === "boolean" || mode.undefinedValue);
+      if (solidName === "For" && !callable && !fixedMode) {
+        const worst = this.partial(n, cc, "unknown For key mode");
+        this.read({ pending: true, failures: ["unknown"] }, n, cc);
+        return {
+          tag: "array",
+          elements: [join(row, accessor(row), worst), join(plain(), accessor(plain()))]
+        };
+      }
+      return {
+        tag: "array",
+        elements: [
+          callable || mode.value === false ? accessor(row) : row,
+          mode.value === false ? { ...plain(), primitive: "number" } : accessor(plain())
+        ]
+      };
+    });
     const args =
       solidName === "For"
-        ? [row, { tag: "safe", result: plain(0) }]
+        ? [0, 1].map(i => each(rowArgs, arm => arm.elements[i]))
         : solidName === "Show"
           ? [{ tag: "safe", result: plain() }]
           : [];
-    n.children.forEach(ch => this.child(ch, env, cc, args));
+    n.children.forEach(ch =>
+      this.child(ch, env, cc, args, solidName === "For" ? "setup" : "tracking")
+    );
     return plain();
   }
   run() {

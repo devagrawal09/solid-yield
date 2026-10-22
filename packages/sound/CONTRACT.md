@@ -72,7 +72,7 @@ Rules:
 Vite surface: `harness/vite.mjs` exports `soundVitePlugin(prototype, options)`
 which wraps any conforming checker: `buildStart` runs `check()` (cold), and in
 serve mode sends errors to the overlay while serving; in build mode fails the
-build on errors; `handleHotUpdate` runs `update(file, text)` and re-sends. Each
-prototype also ships `prototypes/<name>/vite-demo.mjs` that builds the Equipment
-fixture with that plugin and prints cold-build and single-file HMR re-check
-times for `EquipmentRow.tsx`.
+build on errors; `handleHotUpdate` runs `update(file, text)` and re-sends. The
+shared `harness/vite-measure.mjs <prototype>` builds the Equipment fixture with
+that plugin (strict and report-only) and prints cold-build and single-file HMR
+re-check times for `EquipmentRow.tsx`.

@@ -7,14 +7,14 @@
 //      single-file edit and the plugin's handleHotUpdate re-check is timed (median of N).
 //
 //   node harness/vite-measure.mjs <dataflow|typed|null> [--runs 5] [--json out.json]
-import { mkdtempSync, cpSync, writeFileSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, cpSync, writeFileSync, readFileSync, rmSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { performance } from "node:perf_hooks";
 import { build, createServer } from "vite";
 import solid from "@solidjs/vite-plugin";
 import { fixturesDir, equipment } from "../fixtures/index.mjs";
-import { loadPrototypes } from "./load.mjs";
+import { loadPrototypes, packageDir } from "./load.mjs";
 import { soundVitePlugin } from "./vite.mjs";
 
 const which = process.argv[2] ?? "dataflow";
@@ -32,6 +32,9 @@ const median = xs => { const s = [...xs].sort((a, b) => a - b); return s[Math.fl
 const scratch = mkdtempSync(resolve(tmpdir(), "sound-vite-"));
 cpSync(resolve(fixturesDir, "equipment"), scratch, { recursive: true });
 writeFileSync(resolve(scratch, "vite.config.mjs"), "export default {};\n");
+symlinkSync(resolve(packageDir, "node_modules"), resolve(scratch, "node_modules")); // rc.17 resolves from the package, for Vite and for the checkers
+writeFileSync(resolve(scratch, "index.html"), '<!doctype html><html><body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body></html>\n');
+writeFileSync(resolve(scratch, "src/style.css"), "/* the app's stylesheet is not part of the byte-identical source set; an empty one lets Vite build */\n");
 const files = equipment.files.map(f => resolve(scratch, f));
 const rowFile = resolve(scratch, "src/components/EquipmentRow.tsx");
 const rowText = readFileSync(rowFile, "utf8");
@@ -50,6 +53,7 @@ async function coldBuild(withPlugin, errorsFailBuild) {
     await build({ root: scratch, configFile: false, logLevel: "silent", plugins, build: { outDir: resolve(scratch, "dist-" + (withPlugin ? (errorsFailBuild ? "strict" : "report") : "plain")), write: true } });
   } catch (error) {
     failed = true;
+    if (!withPlugin || !errorsFailBuild) console.error(`[${prototype.name}] vite build failed: ${error instanceof Error ? error.message.split("\n").slice(0, 6).join(" | ") : String(error)}`);
   }
   return { wallMs: performance.now() - t0, failed, check };
 }

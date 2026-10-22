@@ -3,6 +3,7 @@
 // `run()` follows render paths with invocation-local props and provider values,
 // then reports undischarged read obligations at roots and hand-offs.
 import ts from "typescript";
+import { ProjectBoundary } from "./project.mjs";
 import { BY_CODE } from "../../src/codes.mjs";
 import { callable, constant, derived, describeFailures, join, joinAll, promiseOf, worst } from "./values.mjs";
 import {
@@ -78,8 +79,10 @@ export class Analysis {
    */
   constructor(program, files) {
     this.program = program;
+    this.project = new ProjectBoundary(program, files);
     this.checker = program.getTypeChecker();
-    this.files = new Set(files.map(f => f.replaceAll("\\", "/")));
+    /** @type {Value} */
+    this.thisValue = constant();
     /** @type {Map<ts.Symbol, Binding>} */
     this.bindings = new Map();
     /** @type {Map<ts.Node, Component>} */
@@ -134,7 +137,7 @@ export class Analysis {
    * @param {Partial<SoundDiagnostic>} [more]
    */
   report(code, kind, severity, message, node, more) {
-    if (this.iteration !== this.finalIteration) return;
+    if (this.iteration !== this.finalIteration || !this.isProjectFile(node.getSourceFile())) return;
     const loc = this.loc(node);
     const key = `${code}@${loc.file}:${loc.line}:${loc.col}`;
     if (this.reported.has(key)) return;
@@ -165,7 +168,10 @@ export class Analysis {
     if (b) return b;
     if (declaration && this.isProjectFile(declaration.getSourceFile())) {
       // Module-level declarations are bound on demand.
-      if (ts.isFunctionDeclaration(declaration) && declaration.body) {
+      if (ts.isClassDeclaration(declaration)) {
+        b = { kind: "value", value: { ...constant(), classes: [{ node: declaration, environment: this.bindings }] } };
+        this.bindings.set(symbol, b);
+      } else if (ts.isFunctionDeclaration(declaration) && declaration.body) {
         b = this.bindFunction(symbol, declaration);
       } else if (ts.isVariableDeclaration(declaration) && declaration.initializer && ts.isSourceFile(declaration.parent.parent.parent)) {
         const init = stripParens(declaration.initializer);
@@ -198,7 +204,7 @@ export class Analysis {
 
   /** @param {ts.SourceFile} sf */
   isProjectFile(sf) {
-    return this.files.has(sf.fileName.replaceAll("\\", "/"));
+    return this.project.isAuthored(sf);
   }
 
   /**
@@ -217,6 +223,7 @@ export class Analysis {
   // ---- components ----------------------------------------------------------
   /** @param {ts.FunctionLikeDeclaration} node */
   componentOf(node) {
+    if (!this.isProjectFile(node.getSourceFile())) return null;
     const existing = this.components.get(node);
     if (existing) return existing;
     if (!this.returnsJsx(node)) return null;
@@ -695,7 +702,7 @@ export class Analysis {
       if (v.promise) this.raise(ctx, v.promise, `${this.text(x.expression)} may reject`, x);
       return { ...derived(v), pending: false, reactive: false };
     }
-    if (isFunctionLike(x)) return callable({ kind: "function", node: x, environment: this.bindings });
+    if (isFunctionLike(x)) return callable({ kind: "function", node: x, environment: this.bindings, receiver: ts.isArrowFunction(x) ? this.thisValue : undefined });
     if (ts.isJsxElement(x) || ts.isJsxSelfClosingElement(x) || ts.isJsxFragment(x)) {
       // JSX outside the view position: evaluated as a view under the current boundaries.
       this.evalView(x, ctx, ctx.view ?? { loading: false, errored: false, path: [ctx.ownerName] });
@@ -724,8 +731,13 @@ export class Analysis {
           if (ts.isPropertyAccessExpression(x.left) || ts.isElementAccessExpression(x.left)) {
             const base = this.evalExpr(x.left.expression, ctx);
             if (base.objects?.length) {
-              this.unanalyzed(x, "a mutation of an object member", "the shared object and its aliases now have worst-case member facts.", ctx);
-              for (const object of base.objects) object.escaped = true;
+              const name = ts.isPropertyAccessExpression(x.left) ? x.left.name.text : ts.isStringLiteral(x.left.argumentExpression) ? x.left.argumentExpression.text : null;
+              if (name !== null && base.objects.every(object => object.instance && !object.escaped)) {
+                for (const object of base.objects) object.members.set(name, v);
+              } else {
+                this.unanalyzed(x, "a mutation of an object member", "the shared object and its aliases now have worst-case member facts.", ctx);
+                for (const object of base.objects) object.escaped = true;
+              }
             }
           } else this.evalExpr(x.left, ctx);
         }
@@ -737,7 +749,7 @@ export class Analysis {
     if (ts.isVoidExpression(x)) {
       const v = this.evalExpr(x.expression, ctx);
       this.dropped(v, x.expression, ctx); // void p drops the promise: its rejection escapes
-      return constant();
+      return { ...constant(), undefined: "always" };
     }
     if (ts.isPrefixUnaryExpression(x) || ts.isPostfixUnaryExpression(x) || ts.isTypeOfExpression(x) || ts.isSpreadElement(x)) {
       const operand = ts.isSpreadElement(x) || ts.isTypeOfExpression(x) ? x.expression : x.operand;
@@ -745,7 +757,9 @@ export class Analysis {
     }
     if (ts.isTemplateExpression(x)) return joinAll(x.templateSpans.map(s => derived(this.evalExpr(s.expression, ctx))));
     if (ts.isNewExpression(x)) {
-      for (const a of x.arguments ?? []) this.evalExpr(a, ctx);
+      const constructor = this.evalExpr(x.expression, ctx);
+      const args = (x.arguments ?? []).map(a => this.evalExpr(a, ctx));
+      if (constructor.classes?.length) return joinAll(constructor.classes.map(facts => this.constructClass(facts, args, x, ctx)));
       const name = x.expression.getText();
       if (name === "Promise" && ts.isIdentifier(x.expression) && this.isLibGlobal(x.expression) && x.arguments?.[0]) {
         // new Promise(executor): the executor runs now; a throw inside rejects.
@@ -756,14 +770,83 @@ export class Analysis {
           return promiseOf(acc.throws);
         }
       }
+      const declaration = this.checker.getResolvedSignature(x)?.getDeclaration();
+      if (!declaration || !this.program.isSourceFileDefaultLibrary(declaration.getSourceFile())) {
+        this.raise(ctx, ["unknown"], `${this.text(x)} has no constructor failure information`, x);
+        return this.dependencyResult(x, ctx) ?? { ...constant(), opaque: true };
+      }
       return constant();
     }
     if (ts.isTaggedTemplateExpression(x)) { this.evalExpr(x.template, ctx); return constant(); }
-    if (ts.isClassExpression(x)) { this.unanalyzed(x, "a class expression", "its members are not analyzed; its value is treated as possibly pending and possibly failing.", ctx); return worst(); }
+    if (ts.isClassExpression(x)) return { ...constant(), classes: [{ node: x, environment: this.bindings }] };
+    if (x.kind === ts.SyntaxKind.ThisKeyword) return this.thisValue ?? constant();
     if (ts.isDeleteExpression(x)) { this.evalExpr(x.expression, ctx); return constant(); }
     if (ts.isYieldExpression(x)) { if (x.expression) this.evalExpr(x.expression, ctx); return worst(); }
     if (ts.isCommaListExpression(x)) return joinAll(x.elements.map(el => this.evalExpr(el, ctx)));
     return constant(); // literals, this, super, regex, …
+  }
+
+  /** Instantiate supported imperative classes; methods keep their own closure and receiver.
+   * @param {import("./values.mjs").ClassFacts} facts @param {Value[]} args
+   * @param {ts.NewExpression} at @param {Ctx} ctx @returns {Value}
+   */
+  constructClass(facts, args, at, ctx) {
+    const node = facts.node;
+    const base = node.heritageClauses?.[0]?.types[0]?.expression;
+    const nativeErrorBase = base && ts.isIdentifier(base) && this.isLibGlobal(base) &&
+      ["Error", "TypeError", "RangeError", "ReferenceError", "SyntaxError", "EvalError", "URIError", "AggregateError"].includes(base.text) &&
+      !node.members.some(ts.isConstructorDeclaration);
+    let replacementReturn = false;
+    /** @param {ts.Node} part */
+    const inspectReturn = part => {
+      if (isFunctionLike(part)) return;
+      if (ts.isReturnStatement(part) && part.expression && part.expression.kind !== ts.SyntaxKind.ThisKeyword) {
+        const type = this.checker.getTypeAtLocation(part.expression);
+        if ((type.isUnion() ? type.types : [type]).some(t => t.flags & (ts.TypeFlags.Object | ts.TypeFlags.Any | ts.TypeFlags.Unknown))) replacementReturn = true;
+      }
+      ts.forEachChild(part, inspectReturn);
+    };
+    const body = node.members.find(ts.isConstructorDeclaration)?.body;
+    if (body) inspectReturn(body);
+    const unsupported = replacementReturn || (ts.canHaveDecorators(node) && ts.getDecorators(node)?.length) ||
+      node.modifiers?.some(m => m.kind === ts.SyntaxKind.DeclareKeyword) ||
+      (node.heritageClauses?.length && !nativeErrorBase) || node.members.some(m =>
+      ((ts.isMethodDeclaration(m) || ts.isGetAccessorDeclaration(m) || ts.isConstructorDeclaration(m)) && !m.body) ||
+      (ts.canHaveModifiers(m) && ts.getModifiers(m)?.some(mod => [ts.SyntaxKind.StaticKeyword, ts.SyntaxKind.AbstractKeyword, ts.SyntaxKind.AccessorKeyword].includes(mod.kind))) ||
+      (ts.canHaveDecorators(m) && ts.getDecorators(m)?.length) ||
+      (m.name && !ts.isIdentifier(m.name) && !ts.isStringLiteral(m.name) && !ts.isNumericLiteral(m.name)) ||
+      (!ts.isConstructorDeclaration(m) && !ts.isMethodDeclaration(m) && !ts.isPropertyDeclaration(m) && !ts.isGetAccessorDeclaration(m)));
+    if (unsupported) {
+      this.unanalyzed(at, "a class with inheritance or unsupported members", "the constructor may fail and the instance has worst-case member facts.", ctx);
+      this.raise(ctx, ["unknown"], `${this.text(at)} has no constructor failure information`, at);
+      return { ...worst(), opaqueResult: true };
+    }
+    /** @type {import("./values.mjs").ObjectFacts} */
+    const object = { members: new Map(), getters: new Map(), escaped: false, service: false, instance: true };
+    const value = { ...constant(), objects: [object] };
+    const savedBindings = this.bindings;
+    const savedThis = this.thisValue;
+    this.bindings = facts.environment;
+    this.thisValue = value;
+    try {
+      for (const member of node.members) {
+        const name = member.name?.getText().replace(/^["']|["']$/g, "");
+        if (name && ts.isMethodDeclaration(member)) object.members.set(name, callable({ kind: "function", node: member, environment: this.bindings, method: true }));
+        else if (name && ts.isGetAccessorDeclaration(member)) object.getters.set(name, { kind: "function", node: member, environment: this.bindings, receiver: value });
+        else if (name && ts.isPropertyDeclaration(member)) object.members.set(name, member.initializer ? this.evalExpr(member.initializer, ctx) : { ...constant(), undefined: "always" });
+      }
+      const constructor = node.members.find(ts.isConstructorDeclaration);
+      if (constructor) {
+        constructor.parameters.forEach((p, i) => {
+          if (ts.isIdentifier(p.name) && p.modifiers?.length) object.members.set(p.name.text, args[i] ?? (p.initializer ? this.evalExpr(p.initializer, ctx) : { ...constant(), undefined: "always" }));
+        });
+        this.analyzeFunction(constructor, ctx, args, this.bindings, value);
+      }
+      return value;
+    } finally {
+      this.bindings = savedBindings;
+      this.thisValue = savedThis;
+    }
   }
 
   /** @param {ts.Identifier} id @param {Ctx} ctx */
@@ -773,14 +856,16 @@ export class Analysis {
     return this.bindingValue(b, id, ctx);
   }
 
-  /** An identifier with no binding of ours: a parameter, a global, a package import. @param {ts.Identifier} id @param {Ctx} ctx */
+  /** An identifier with no binding of ours: a parameter, a global, a package import. @param {ts.Identifier} id @param {Ctx} ctx @returns {Value} */
   foreignIdentifier(id, ctx) {
     void ctx;
+    const type = this.checker.getTypeAtLocation(id);
+    if (type.flags & (ts.TypeFlags.Undefined | ts.TypeFlags.Void)) return { ...constant(), undefined: "always" };
     const symbol = this.symbolOf(id);
     const decl = symbol?.declarations?.[0];
     const api = solidApiOf(id, this.checker);
     if (api) return callable({ kind: "solid", node: id, api: api.api });
-    if (decl && !this.program.isSourceFileDefaultLibrary(decl.getSourceFile()) && (ts.isParameter(decl) || ts.isVariableDeclaration(decl))) return { ...constant(), opaque: true };
+    if (decl && !this.program.isSourceFileDefaultLibrary(decl.getSourceFile()) && (ts.isParameter(decl) || ts.isVariableDeclaration(decl))) return { ...constant(), opaque: true, undefined: type.isUnion() && type.types.some(t => t.flags & ts.TypeFlags.Undefined) ? "maybe" : undefined };
     if (decl && ts.isImportSpecifier(decl)) return constant();
     if (decl && this.program.isSourceFileDefaultLibrary(decl.getSourceFile())) return constant(); // Math, Promise, console, document, …
     const pkg = packageOf(decl);
@@ -805,7 +890,7 @@ export class Analysis {
         if (!this.inRenderArgument) b.component.handedOff.push(this.loc(node));
         return callable({ kind: "component", node, component: b.component });
       }
-      case "props": return constant();
+      case "props": return { ...constant(), props: [b.component] };
       case "object": return b.value;
       case "caught": return { ...constant(), caught: new Set(b.failures) };
     }
@@ -821,7 +906,7 @@ export class Analysis {
       else if (ts.isShorthandPropertyAssignment(p)) {
         const b = this.bindingOf(resolveAlias(this.checker.getShorthandAssignmentValueSymbol(p), this.checker));
         object.members.set(p.name.text, b ? this.bindingValue(b, p.name, ctx) : this.foreignIdentifier(p.name, ctx));
-      } else if (ts.isMethodDeclaration(p) && name !== null) object.members.set(name, callable({ kind: "function", node: p, environment: this.bindings }));
+      } else if (ts.isMethodDeclaration(p) && name !== null) object.members.set(name, callable({ kind: "function", node: p, environment: this.bindings, method: true }));
       else if (ts.isGetAccessorDeclaration(p) && name !== null) object.getters.set(name, { kind: "function", node: p, environment: this.bindings });
       else if (ts.isSpreadAssignment(p)) {
         const v = this.evalExpr(p.expression, ctx);
@@ -842,19 +927,31 @@ export class Analysis {
    */
   memberValue(base, name, at, ctx) {
     if (base.unreachable) return base;
+    /** @type {Value[]} */
     const results = [];
+    for (const component of base.props ?? []) {
+      const entry = name === null ? undefined : component.props.get(name);
+      if (name !== null && !entry && component.callers > 0 && !component.propsWorst) results.push({ ...constant(), undefined: /** @type {const} */ ("always") });
+      else if (name !== null) results.push(this.readProp(component, name, at, ctx));
+      else results.push(worst());
+    }
     for (const object of base.objects ?? []) {
       if (object.escaped) { results.push(worst()); continue; }
       if (name === null) {
         this.unanalyzed(at, "a dynamic service member", "its value is possibly pending and failing with unknown.", ctx);
         results.push(worst()); continue;
       }
+      if (object.layers) { results.push(this.readMergedMember(object.layers, name, at, ctx)); continue; }
       const getter = object.getters.get(name);
-      if (getter?.node) results.push(this.analyzeFunction(/** @type {ts.FunctionLikeDeclaration} */ (getter.node), ctx, [], getter.environment));
-      else results.push(object.members.get(name) ?? object.members.get("*") ?? constant());
+      if (getter?.node) results.push(this.analyzeFunction(/** @type {ts.FunctionLikeDeclaration} */ (getter.node), ctx, [], getter.environment, getter.receiver));
+      else {
+        const member = object.members.get(name) ?? object.members.get("*") ?? { ...constant(), undefined: /** @type {const} */ ("always") };
+        const directCall = ts.isCallExpression(at.parent) && at.parent.expression === at;
+        results.push({ ...member, callables: member.callables.map(cb => cb.method ? { ...cb, receiver: directCall ? { ...constant(), objects: [object] } : constant() } : cb) });
+      }
     }
-    if (base.worst) results.push(worst());
-    if (base.opaque) results.push({ ...constant(), opaque: true });
+    if (base.worst) results.push({ ...worst(), opaqueResult: base.opaqueResult });
+    if (base.opaque) results.push({ ...constant(), opaque: true, undefined: "maybe" });
     if (!results.length) return derived(base);
     const v = joinAll(results);
     if (v.worst && (!ts.isCallExpression(at.parent) || at.parent.expression !== at)) {
@@ -862,6 +959,21 @@ export class Analysis {
       this.raise(ctx, ["unknown"], this.text(at) + " has no failure information", at);
     }
     return v;
+  }
+
+  /** Solid merge reads right-to-left, skipping undefined, without calling held functions.
+   * @param {Value[]} layers @param {string} name @param {ts.Node} at @param {Ctx} ctx @returns {Value}
+   */
+  readMergedMember(layers, name, at, ctx) {
+    const values = [];
+    let mayBeUndefined = true;
+    for (const layer of [...layers].reverse()) {
+      const value = this.memberValue(layer, name, at, ctx);
+      if (value.undefined === "always") continue;
+      values.push(value);
+      if (!value.undefined) { mayBeUndefined = false; break; }
+    }
+    return { ...joinAll(values), undefined: values.length ? mayBeUndefined ? "maybe" : undefined : "always" };
   }
 
   /** Unknown code can mutate a shared service, but not independent instances.
@@ -922,11 +1034,11 @@ export class Analysis {
     }
     const base = this.evalExpr(m.expression, ctx);
     if (ts.isElementAccessExpression(m)) this.evalExpr(m.argumentExpression, ctx);
-    if (base.objects?.length || base.opaque || base.unreachable) return this.memberValue(base, name, m, ctx);
+    if (base.objects?.length || base.props?.length || base.opaque || base.unreachable) return this.memberValue(base, name, m, ctx);
     if (base.worst) {
       // A member of a worst-case value is a worst-case value; reading it at a JSX position obligates a Loading / Errored boundary.
       /** @type {Value} */
-      const w = { ...worst(), callables: [{ kind: "function", node: null, reasonText: this.text(m) }] };
+      const w = { ...worst(), opaqueResult: base.opaqueResult, callables: [{ kind: "function", node: null, reasonText: this.text(m) }] };
       if (!ts.isCallExpression(m.parent) || m.parent.expression !== m) { this.obligateValue(w, m, ctx, this.text(m)); this.raise(ctx, ["unknown"], `${this.text(m)} has no failure information`, m); }
       return w;
     }
@@ -965,7 +1077,7 @@ export class Analysis {
         }
       }
       const receiver = this.evalExpr(callee.expression, ctx);
-      if (receiver.objects?.length || (receiver.opaque && !this.isLibMethod(call)) || receiver.unreachable) return this.callValue(this.memberValue(receiver, name, callee, ctx), call, ctx, this.text(call));
+      if (receiver.objects?.length || receiver.props?.length || (receiver.opaque && !this.isLibMethod(call)) || receiver.unreachable) return this.callValue(this.memberValue(receiver, name, callee, ctx), call, ctx, this.text(call));
       if (PROMISE_METHODS.has(name) && (receiver.promise || isPromiseType(this.checker.getTypeAtLocation(callee.expression), this.checker)) && this.isLibMethod(call)) return this.callPromiseMethod(name, receiver, call, ctx);
       if (receiver.worst || receiver.callables.some(cb => cb.kind === "function" && cb.node === null)) return this.callUnknownValue(call, receiver, ctx);
       return this.callPlatform(call, name, ctx, receiver);
@@ -1011,6 +1123,10 @@ export class Analysis {
         } else if (effect) this.unanalyzed(effect, "an effect function that is not a function literal", "its failures are treated as unknown.", ctx);
         if (failures.size) this.current.failures.push({ loc: failureLoc, path: [...(ctx.view?.path ?? [])], source: "the effect", failures, uncoverable: true });
         return constant();
+      }
+      case "merge": {
+        const layers = args.map(a => this.evalExpr(a, ctx));
+        return { ...constant(), objects: [{ members: new Map(), getters: new Map(), layers, escaped: false, service: false }] };
       }
       case "untrack": {
         if (!args[0]) return constant();
@@ -1164,6 +1280,7 @@ export class Analysis {
    */
   callValue(v, call, ctx, reason) {
     if (v.unreachable) return v;
+    if (call.questionDotToken && v.undefined === "always") return constant();
     if (v.worst) return this.callUnknownValue(call, v, ctx);
     if (!v.callables.length) {
       // Calling something we did not track (a plain function value from a computation, a DOM method): unknown.
@@ -1179,7 +1296,7 @@ export class Analysis {
         case "setter": results.push(this.callBinding({ kind: "setter", name: cb.node ? this.text(cb.node) : "setter" }, call, ctx)); break;
         case "safe": results.push(constant()); break;
         case "function":
-          if (cb.node) results.push(this.analyzeFunction(/** @type {ts.FunctionLikeDeclaration} */ (cb.node), ctx, args, cb.environment));
+          if (cb.node) results.push(this.analyzeFunction(/** @type {ts.FunctionLikeDeclaration} */ (cb.node), ctx, args, cb.environment, cb.receiver));
           else results.push(this.callUnknownValue(call, v, ctx, cb.reasonText ?? reason));
           break;
         case "solid": results.push(this.evalSolidCall(cb.api ?? "", call, ctx)); break;
@@ -1196,13 +1313,30 @@ export class Analysis {
     const text = reason ?? this.text(call);
     if (isPromiseType(type, this.checker)) {
       // Rejection carried by the promise; the value it resolves to is worst case when the receiver is.
-      const v = { ...(receiver.worst ? worst() : constant()), pending: receiver.worst, promise: new Set(["unknown"]), callables: [], reactive: receiver.worst };
+      const pending = receiver.worst && !receiver.opaqueResult;
+      const v = { ...(pending ? worst() : constant()), pending, promise: new Set(["unknown"]), callables: [], reactive: pending };
       this.obligateValue(v, call, ctx, text);
       return v;
     }
     this.raise(ctx, ["unknown"], `${text} has no failure information`, call);
-    if (receiver.worst) { const w = worst(); this.obligateValue(w, call, ctx, text); return w; }
-    return constant();
+    if (receiver.worst && !receiver.opaqueResult) { const w = worst(); this.obligateValue(w, call, ctx, text); return w; }
+    return this.dependencyResult(call, ctx, !!receiver.opaqueResult) ?? constant();
+  }
+
+  /** An installed declaration can describe held results, but an untyped result
+   * stays worst case. Producing or calling through it is not itself a Solid read.
+   * @param {ts.CallExpression | ts.NewExpression} at @param {Ctx} ctx
+   * @param {boolean} [opaqueReceiver] @returns {Value | null}
+   */
+  dependencyResult(at, ctx, opaqueReceiver = false) {
+    const declaration = this.checker.getResolvedSignature(at)?.getDeclaration();
+    if (!opaqueReceiver && (!declaration || !this.project.isInstalled(declaration.getSourceFile()))) return null;
+    const type = this.checker.getTypeAtLocation(at);
+    if (type.flags & (ts.TypeFlags.Any | ts.TypeFlags.Unknown)) {
+      this.unanalyzed(at, "a call without a declared result shape", "its returned value has worst-case facts; the call itself is not a Solid pending read.", ctx);
+      return { ...worst(), opaqueResult: true, opaque: true };
+    }
+    return { ...constant(), opaque: type.getCallSignatures().length > 0 || !!(type.flags & ts.TypeFlags.Object) };
   }
 
   /**
@@ -1243,7 +1377,7 @@ export class Analysis {
       const type = this.checker.getTypeAtLocation(call);
       if (isPromiseType(type, this.checker)) return { ...derived(joinAll([receiver ?? constant(), ...args])), promise: new Set(["unknown"]) };
       this.raise(ctx, ["unknown"], `${this.text(call)} has no failure information`, call);
-      return derived(joinAll([receiver ?? constant(), ...args]));
+      return this.dependencyResult(call, ctx) ?? derived(joinAll([receiver ?? constant(), ...args]));
     }
     if (DETACHED_CALLBACKS.has(name)) {
       for (const a of call.arguments) this.evalCallbackArgument(a, ctx, "detached");
@@ -1265,7 +1399,9 @@ export class Analysis {
       const v = joinAll(call.arguments.map(a => this.evalExpr(a, ctx)));
       return promiseOf(v.promise ?? new Set());
     }
-    const args = call.arguments.map(a => this.evalCallbackArgument(a, ctx, "unknown"));
+    // Safe receiver operations hold their arguments; removing a listener or
+    // adding a callback to a Set does not execute that callback.
+    const args = call.arguments.map(a => SAFE_PLATFORM.has(name) && !["stringify", "from"].includes(name) ? this.evalExpr(a, ctx) : this.evalCallbackArgument(a, ctx, "unknown"));
     const known = PLATFORM_THROWS.get(name);
     if (known && calleeText === "JSON") { this.raise(ctx, [known], `${this.text(call)} may throw`, call); return constant(); }
     const type = this.checker.getTypeAtLocation(call);
@@ -1334,12 +1470,14 @@ export class Analysis {
    * @param {Value[]} args
    * @returns {Value}
    */
-  analyzeFunction(fn, ctx, args, environment = this.bindings) {
+  analyzeFunction(fn, ctx, args, environment = this.bindings, receiver = this.thisValue) {
     if (this.activeFunctions.has(fn) || ctx.depth > MAX_DEPTH) return constant(); // recursion: the first activation's facts stand
     const isAsync = !!(ts.canHaveModifiers(fn) && ts.getModifiers(fn)?.some(m => m.kind === ts.SyntaxKind.AsyncKeyword));
     const isGenerator = !!fn.asteriskToken;
     if (isGenerator) { this.unanalyzed(fn, "a generator function", "its body is not analyzed; its value is treated as possibly pending and possibly failing.", ctx); return worst(); }
     const savedBindings = this.bindings;
+    const savedThis = this.thisValue;
+    this.thisValue = receiver;
     this.bindings = new Map(environment);
     // Each invocation owns its locals; returned methods capture this map.
     fn.parameters.forEach((p, i) => {
@@ -1370,6 +1508,7 @@ export class Analysis {
     } finally {
       this.activeFunctions.delete(fn);
       this.bindings = savedBindings;
+      this.thisValue = savedThis;
     }
   }
 
@@ -1420,7 +1559,7 @@ export class Analysis {
     const results = [];
     if (v.opaque) this.raise(hctx, ["unknown"], this.text(at) + " has no failure information", at);
     for (const cb of v.callables) {
-      if (cb.kind === "function" && cb.node) results.push(this.analyzeFunction(/** @type {ts.FunctionLikeDeclaration} */ (cb.node), hctx, args, cb.environment));
+      if (cb.kind === "function" && cb.node) results.push(this.analyzeFunction(/** @type {ts.FunctionLikeDeclaration} */ (cb.node), hctx, args, cb.environment, cb.receiver));
       else if (cb.kind === "function") { this.raise(hctx, ["unknown"], `${cb.reasonText ?? this.text(at)} has no failure information`, at); results.push(constant()); }
       else if (cb.kind === "source") results.push(this.read(/** @type {Source} */ (cb.source), at, hctx));
       else if (cb.kind === "setter") results.push(this.write(cb.node ? this.text(cb.node) : "setter", at, hctx));
@@ -1469,7 +1608,9 @@ export class Analysis {
       if (!ch.expression) return;
       const x = stripParens(ch.expression);
       if (isFunctionLike(x)) { this.unanalyzed(x, "a function child of an element", "it is not a Show/For render callback; it is treated as a view under the current boundaries.", ctx); this.analyzeFunction(/** @type {ts.FunctionLikeDeclaration} */ (x), { ...ctx, scope: "tracking", comp: null, view }, []); return; }
-      this.evalExpr(ch.expression, { ...ctx, scope: "tracking", comp: null, view });
+      const tctx = { ...ctx, scope: /** @type {Scope} */ ("tracking"), comp: null, view };
+      const value = this.evalExpr(ch.expression, tctx);
+      if (value.opaqueResult) this.obligateValue(value, ch.expression, tctx, this.text(ch.expression));
       return;
     }
     this.evalView(ch, ctx, view);
@@ -1509,6 +1650,7 @@ export class Analysis {
     if (api) {
       switch (api.api) {
         case "Loading": {
+          const key = attrExpr("on"); if (key) this.evalExpr(key, tctx);
           const fb = attrExpr("fallback"); if (fb) this.evalExprAsView(fb, ctx, view);
           ctx.component?.facts.boundaries.push({ kind: "Loading", loc: this.loc(whole) });
           const inner = { ...view, loading: true };

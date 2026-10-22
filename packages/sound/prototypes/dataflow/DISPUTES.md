@@ -1,4 +1,47 @@
-# Dataflow expectation dispute
+# Dataflow expectation disputes
+
+## D-133 reset-key mutant has no render root
+
+`fixtures/openclaw-precision/op-loading-reactive-key-mutant.tsx` exports App,
+which returns a pending read beside a Loading boundary. It never renders App
+or hands it off. Its frozen expectation asks for ASYNC_OUTSIDE_LOADING_BOUNDARY.
+
+SLICE.md, **Roots and hand-offs**, explicitly says an export that is never
+rendered or handed off is **not an error**. It requires
+COMPONENT_OBLIGATIONS_EXPORTED instead. The fixture entry field is not a render
+root in CONTRACT.md; the checker receives rootDir/files, not entry metadata.
+Treating every exported component as a root would also break the existing
+export-only controls. Testing a component through an implicit harness renderer
+would change the contract rather than fix the analysis.
+
+B therefore keeps the info finding and the pending component fact. The raw
+frozen score remains **one miss / one soundness failure / one missed mutant**.
+It is not filtered or called a pass. No expectation or shared file was edited.
+The old ref dispute below is historical; the current frozen ref expectation
+already includes its setup-like read error.
+
+### rc.17 runtime evidence
+
+`prototypes/dataflow/precision-runtime.test.tsx` uses installed
+Solid/@solidjs/web 2.0.0-rc.17, the shared Solid compiler plugin, development
+browser exports and jsdom. The same exported pending-view shape:
+
+- never rendered: no work, DOM, or root-pending warning;
+- rendered under an outer Loading: resolves to ready with no
+  ASYNC_OUTSIDE_LOADING_BOUNDARY warning;
+- rendered without an outer Loading: emits that warning.
+
+`precision.test.mjs` checks the matching static distinction: unrendered export
+gives only COMPONENT_OBLIGATIONS_EXPORTED; adding a real renderer reports
+ASYNC_OUTSIDE_LOADING_BOUNDARY at the pending read.
+
+```sh
+pnpm exec vitest run prototypes/dataflow/precision-runtime.test.tsx prototypes/dataflow/precision.test.mjs
+```
+
+Both runtime probes pass. Reaching the requested raw 15/15 requires a reviewed
+expectation change or an explicit change to the root contract.
+
 
 ## Legacy ref read versus D-131
 

@@ -17,6 +17,8 @@
  *   kind: "function" | "source" | "setter" | "component" | "safe" | "solid",
  *   environment?: Map<import("typescript").Symbol, import("./analyze.mjs").Binding>,
  *   api?: string,
+ *   receiver?: Value,
+ *   method?: boolean,
  *   node: Node | null,
  *   source?: Source,
  *   component?: import("./analyze.mjs").Component,
@@ -30,16 +32,21 @@
  */
 
 /** @typedef {{ node: Node, defaultValue: Value | null }} ContextBinding */
-/** @typedef {{ members: Map<string, Value>, getters: Map<string, Callable>, escaped: boolean, service: boolean }} ObjectFacts */
+/** @typedef {{ members: Map<string, Value>, getters: Map<string, Callable>, escaped: boolean, service: boolean, instance?: boolean, layers?: Value[] }} ObjectFacts */
+/** @typedef {{ node: import("typescript").ClassLikeDeclaration, environment: Map<import("typescript").Symbol, import("./analyze.mjs").Binding> }} ClassFacts */
 /** @typedef {{ expression: import("typescript").Expression, environment: Map<import("typescript").Symbol, import("./analyze.mjs").Binding>, providers: Map<ContextBinding, Value> }} Deferred */
 
 /**
  * @typedef {{
  *   objects?: ObjectFacts[],
+ *   classes?: ClassFacts[],
+ *   props?: import("./analyze.mjs").Component[],
+ *   undefined?: "always" | "maybe",
  *   contexts?: ContextBinding[],
  *   deferred?: Deferred[],
  *   related?: import("../../src/types.d.ts").Loc[],
  *   opaque?: boolean,
+ *   opaqueResult?: boolean,
  *   unreachable?: boolean,
  *   reactive: boolean,
  *   pending: boolean,
@@ -79,10 +86,14 @@ export function promiseOf(rejects) {
 export function join(a, b) {
   return {
     objects: [...(a.objects ?? []), ...(b.objects ?? [])],
+    classes: [...(a.classes ?? []), ...(b.classes ?? [])],
+    props: [...(a.props ?? []), ...(b.props ?? [])],
+    undefined: a.undefined === "always" && b.undefined === "always" ? "always" : a.undefined || b.undefined ? "maybe" : undefined,
     contexts: [...new Set([...(a.contexts ?? []), ...(b.contexts ?? [])])],
     deferred: [...(a.deferred ?? []), ...(b.deferred ?? [])],
     related: [...(a.related ?? []), ...(b.related ?? [])],
     opaque: a.opaque || b.opaque,
+    opaqueResult: !!(a.opaqueResult || b.opaqueResult) && (!a.worst || !!a.opaqueResult) && (!b.worst || !!b.opaqueResult),
     unreachable: a.unreachable && b.unreachable,
     reactive: a.reactive || b.reactive,
     pending: a.pending || b.pending,
@@ -101,7 +112,7 @@ export function joinAll(values) {
 
 /** A value derived from another (a property of it, an arithmetic result): keeps the facts, drops the shape. @param {Value} v @returns {Value} */
 export function derived(v) {
-  return { reactive: v.reactive, pending: v.pending, failures: new Set(v.failures), promise: null, callables: [], worst: v.worst, caught: null, related: v.related };
+  return { reactive: v.reactive, pending: v.pending, failures: new Set(v.failures), promise: null, callables: [], worst: v.worst, opaqueResult: v.opaqueResult, caught: null, related: v.related };
 }
 
 /** @param {Set<string>} s */

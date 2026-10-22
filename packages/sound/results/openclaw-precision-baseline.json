@@ -1,21 +1,21 @@
 [
   {
     "prototype": "dataflow",
-    "hits": 13,
-    "misses": 2,
-    "extraErrors": 7,
-    "extraWarnings": 8,
-    "negativeErrors": 6,
-    "dependencyErrors": 2
+    "hits": 15,
+    "misses": 0,
+    "extraErrors": 0,
+    "extraWarnings": 0,
+    "negativeErrors": 0,
+    "dependencyErrors": 0
   },
   {
     "prototype": "oxc",
-    "hits": 13,
-    "misses": 2,
-    "extraErrors": 22,
-    "extraWarnings": 24,
-    "negativeErrors": 14,
-    "dependencyErrors": 8
+    "hits": 15,
+    "misses": 0,
+    "extraErrors": 0,
+    "extraWarnings": 0,
+    "negativeErrors": 0,
+    "dependencyErrors": 0
   },
   {
     "prototype": "null",

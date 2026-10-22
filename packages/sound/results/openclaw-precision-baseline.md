@@ -7,8 +7,8 @@ errors on negative controls, not merely successful expected hits.
 
 | Prototype | Hits | Misses | Extra errors | Extra warnings | Errors on negatives | Errors inside dependency |
 |---|---:|---:|---:|---:|---:|---:|
-| dataflow | 13 | 2 | 7 | 8 | 6 | 2 |
-| oxc | 13 | 2 | 22 | 24 | 14 | 8 |
+| dataflow | 15 | 0 | 0 | 0 | 0 | 0 |
+| oxc | 15 | 0 | 0 | 0 | 0 | 0 |
 | null | 0 | 15 | 0 | 0 | 0 | 0 |
 
 ## dataflow: every fixture
@@ -18,68 +18,68 @@ errors on negative controls, not merely successful expected hits.
 | op-loading-url | 0 | 0 | 0 | 0 |
 | op-loading-url-mutant | 1 | 0 | 0 | 0 |
 | op-loading-reactive-key | 0 | 0 | 0 | 0 |
-| op-loading-reactive-key-mutant | 0 | 1 | 0 | 0 |
+| op-loading-reactive-key-mutant | 1 | 0 | 0 | 0 |
 | op-focus-repair | 0 | 0 | 0 | 0 |
 | op-focus-repair-mutant | 1 | 0 | 0 | 0 |
 | op-machine-class | 0 | 0 | 0 | 0 |
-| op-machine-class-mutant | 0 | 1 | 0 | 0 |
+| op-machine-class-mutant | 1 | 0 | 0 | 0 |
 | op-machine-members | 0 | 0 | 0 | 0 |
 | op-machine-members-mutant | 1 | 0 | 0 | 0 |
 | op-held-callback | 0 | 0 | 0 | 0 |
 | op-held-callback-mutant | 1 | 0 | 0 | 0 |
 | op-held-ref | 0 | 0 | 0 | 0 |
 | op-held-ref-mutant | 1 | 0 | 0 | 0 |
-| op-native-listener | 0 | 0 | 1 | 0 |
+| op-native-listener | 0 | 0 | 0 | 0 |
 | op-native-listener-mutant | 1 | 0 | 0 | 0 |
 | op-set-add | 0 | 0 | 0 | 0 |
 | op-set-add-mutant | 1 | 0 | 0 | 0 |
-| op-dependency-machine | 0 | 0 | 1 | 0 |
-| op-dependency-machine-mutant | 1 | 0 | 1 | 0 |
+| op-dependency-machine | 0 | 0 | 0 | 0 |
+| op-dependency-machine-mutant | 1 | 0 | 0 | 0 |
 | op-dependency-string | 0 | 0 | 0 | 0 |
 | op-dependency-string-mutant | 1 | 0 | 0 | 0 |
-| op-e24-remove | 0 | 0 | 1 | 1 |
-| op-e24-remove-mutant | 1 | 0 | 0 | 1 |
-| op-e28-keydown | 0 | 0 | 1 | 1 |
-| op-e28-keydown-mutant | 1 | 0 | 0 | 1 |
-| op-e30-select | 0 | 0 | 1 | 1 |
-| op-e30-select-mutant | 1 | 0 | 0 | 1 |
-| op-e40-reselect | 0 | 0 | 1 | 1 |
-| op-e40-reselect-mutant | 1 | 0 | 0 | 1 |
+| op-e24-remove | 0 | 0 | 0 | 0 |
+| op-e24-remove-mutant | 1 | 0 | 0 | 0 |
+| op-e28-keydown | 0 | 0 | 0 | 0 |
+| op-e28-keydown-mutant | 1 | 0 | 0 | 0 |
+| op-e30-select | 0 | 0 | 0 | 0 |
+| op-e30-select-mutant | 1 | 0 | 0 | 0 |
+| op-e40-reselect | 0 | 0 | 0 | 0 |
+| op-e40-reselect-mutant | 1 | 0 | 0 | 0 |
 
 ## oxc: every fixture
 
 | Fixture | Hit | Miss | Extra errors | Extra warnings |
 |---|---:|---:|---:|---:|
-| op-loading-url | 0 | 0 | 1 | 0 |
-| op-loading-url-mutant | 1 | 0 | 1 | 0 |
-| op-loading-reactive-key | 0 | 0 | 1 | 0 |
-| op-loading-reactive-key-mutant | 0 | 1 | 1 | 0 |
-| op-focus-repair | 0 | 0 | 1 | 0 |
+| op-loading-url | 0 | 0 | 0 | 0 |
+| op-loading-url-mutant | 1 | 0 | 0 | 0 |
+| op-loading-reactive-key | 0 | 0 | 0 | 0 |
+| op-loading-reactive-key-mutant | 1 | 0 | 0 | 0 |
+| op-focus-repair | 0 | 0 | 0 | 0 |
 | op-focus-repair-mutant | 1 | 0 | 0 | 0 |
-| op-machine-class | 0 | 0 | 2 | 2 |
-| op-machine-class-mutant | 0 | 1 | 2 | 2 |
+| op-machine-class | 0 | 0 | 0 | 0 |
+| op-machine-class-mutant | 1 | 0 | 0 | 0 |
 | op-machine-members | 0 | 0 | 0 | 0 |
 | op-machine-members-mutant | 1 | 0 | 0 | 0 |
 | op-held-callback | 0 | 0 | 0 | 0 |
 | op-held-callback-mutant | 1 | 0 | 0 | 0 |
 | op-held-ref | 0 | 0 | 0 | 0 |
 | op-held-ref-mutant | 1 | 0 | 0 | 0 |
-| op-native-listener | 0 | 0 | 1 | 0 |
+| op-native-listener | 0 | 0 | 0 | 0 |
 | op-native-listener-mutant | 1 | 0 | 0 | 0 |
 | op-set-add | 0 | 0 | 0 | 0 |
 | op-set-add-mutant | 1 | 0 | 0 | 0 |
-| op-dependency-machine | 0 | 0 | 4 | 2 |
-| op-dependency-machine-mutant | 1 | 0 | 4 | 2 |
+| op-dependency-machine | 0 | 0 | 0 | 0 |
+| op-dependency-machine-mutant | 1 | 0 | 0 | 0 |
 | op-dependency-string | 0 | 0 | 0 | 0 |
 | op-dependency-string-mutant | 1 | 0 | 0 | 0 |
-| op-e24-remove | 0 | 0 | 1 | 2 |
-| op-e24-remove-mutant | 1 | 0 | 0 | 2 |
-| op-e28-keydown | 0 | 0 | 1 | 2 |
-| op-e28-keydown-mutant | 1 | 0 | 0 | 2 |
-| op-e30-select | 0 | 0 | 1 | 2 |
-| op-e30-select-mutant | 1 | 0 | 0 | 2 |
-| op-e40-reselect | 0 | 0 | 1 | 2 |
-| op-e40-reselect-mutant | 1 | 0 | 0 | 2 |
+| op-e24-remove | 0 | 0 | 0 | 0 |
+| op-e24-remove-mutant | 1 | 0 | 0 | 0 |
+| op-e28-keydown | 0 | 0 | 0 | 0 |
+| op-e28-keydown-mutant | 1 | 0 | 0 | 0 |
+| op-e30-select | 0 | 0 | 0 | 0 |
+| op-e30-select-mutant | 1 | 0 | 0 | 0 |
+| op-e40-reselect | 0 | 0 | 0 | 0 |
+| op-e40-reselect-mutant | 1 | 0 | 0 | 0 |
 
 ## null: every fixture
 
@@ -126,3 +126,14 @@ Both regressions and improvements fail the suite until reviewed. Partial class a
 dependency fixtures still count missed expectations in the table even where the
 legacy scorer does not mark their whole fixture as an in-subset soundness failure.
 Runtime evidence: openclaw-precision-runtime.md.
+
+## op-loading-reactive-key / -mutant (post-merge correction, D-133)
+
+As frozen, both programs only exported App without rendering it, so under the
+existing SLICE rule an exported-but-unrendered component's obligations are an
+info finding (COMPONENT_OBLIGATIONS_EXPORTED), not ASYNC_OUTSIDE_LOADING_BOUNDARY.
+Prototypes B and C both disputed the mutant's error expectation with rc.17
+evidence. Fix: both programs now mount App with render(() => <App />, document.body),
+so the mutant's uncovered read() genuinely reaches a root (error expected, as
+intended) while the control keeps read() under its Loading boundary (clean).
+Expectations unchanged; only the missing render root was added.

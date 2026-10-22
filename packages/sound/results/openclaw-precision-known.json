@@ -49,23 +49,23 @@
       "total": 0
     },
     "op-loading-reactive-key-mutant": {
-      "hits": [],
-      "imprecise": [],
-      "misses": [
+      "hits": [
         {
           "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
           "file": "op-loading-reactive-key-mutant.tsx",
-          "at": "\"read()\""
+          "count": 1
         }
       ],
+      "imprecise": [],
+      "misses": [],
       "warningHits": 0,
       "warningMisses": [],
       "extraErrors": [],
       "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
-      "infos": 1,
-      "soundnessFailure": true,
+      "infos": 0,
+      "soundnessFailure": false,
       "total": 1
     },
     "op-focus-repair": {
@@ -561,23 +561,23 @@
       "total": 0
     },
     "op-loading-reactive-key-mutant": {
-      "hits": [],
-      "imprecise": [],
-      "misses": [
+      "hits": [
         {
           "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
           "file": "op-loading-reactive-key-mutant.tsx",
-          "at": "\"read()\""
+          "count": 1
         }
       ],
+      "imprecise": [],
+      "misses": [],
       "warningHits": 0,
       "warningMisses": [],
       "extraErrors": [],
       "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
-      "infos": 1,
-      "soundnessFailure": true,
+      "infos": 0,
+      "soundnessFailure": false,
       "total": 1
     },
     "op-focus-repair": {

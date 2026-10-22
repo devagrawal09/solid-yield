@@ -81,6 +81,23 @@ describe("typed context encoding", () => {
     expect(ds.map(d => d.code)).toEqual(["ASYNC_OUTSIDE_LOADING_BOUNDARY"]);
     expect(ds[0].related?.length).toBeGreaterThan(0);
   });
+  it("preserves worst-case facts through destructured partial values", () => {
+    const ds = check([
+      'function App() {const value = Solid.createRoot(() => ({read: () => 1})); const {read: alias} = value; return <b>{alias()}</b>;}',
+      'render(App, document.body);'
+    ]);
+    expect(ds.map(d => d.code).sort()).toEqual(["ASYNC_OUTSIDE_LOADING_BOUNDARY", "ERROR_OUTSIDE_ERRORED_BOUNDARY", "UNANALYZED_BOUNDARY"]);
+  });
+  it("keeps source facts passed into a factory", () => {
+    const ds = check([
+      'function factory(read: () => number) { const value = Solid.createMemo(() => read()); return {value}; }',
+      'const C = Solid.createContext<ReturnType<typeof factory>>();',
+      'function Read() { const s = Solid.useContext(C); return <b>{s.value()}</b>; }',
+      'function App() { const read = Solid.createMemo(async () => 1); const s = factory(read); return <C value={s}><Read /></C>; }',
+      'render(App, document.body);'
+    ]);
+    expect(ds.map(d => d.code)).toEqual(["ASYNC_OUTSIDE_LOADING_BOUNDARY"]);
+  });
   it("keeps factory setup reads in setup", () => {
     const ds = check([
       'function factory() { const [count] = Solid.createSignal(0); const held = count(); return {held}; }',

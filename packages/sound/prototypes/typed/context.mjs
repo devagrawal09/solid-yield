@@ -20,6 +20,9 @@ export class ContextTransformer extends Transformer {
     /** @type {Set<ts.ParameterDeclaration>} */
     this.safeParameters = new Set();
     super.prepare();
+    for (const b of this.bindings.values()) if (b.kind === "helper" && b.factory) for (const p of b.node.parameters) {
+      if (ts.isIdentifier(p.name)) { const s = this.symbolOf(p.name); if (s) this.services.add(s); }
+    }
     /** @type {Map<ts.Node, Set<ts.Node>>} */
     const graph = new Map();
     /** @type {{ opening: ts.Node, from: ts.Node, to: ts.Node }[]} */
@@ -132,6 +135,8 @@ export class ContextTransformer extends Transformer {
       const b = this.bindingOf(n);
       if (b?.kind === "object") return b.node.properties.some(p => ts.isShorthandPropertyAssignment(p) && ["signal", "memo"].includes(this.shorthandBinding(p)?.kind ?? ""));
     }
+    if (ts.isBinaryExpression(n) && [ts.SyntaxKind.QuestionQuestionToken, ts.SyntaxKind.BarBarToken, ts.SyntaxKind.AmpersandAmpersandToken].includes(n.operatorToken.kind)) return this.serviceExpr(n.left, seen) || this.serviceExpr(n.right, seen);
+    if (ts.isConditionalExpression(n)) return this.serviceExpr(n.whenTrue, seen) || this.serviceExpr(n.whenFalse, seen);
     if (ts.isPropertyAccessExpression(n) || ts.isElementAccessExpression(n)) return this.serviceExpr(n.expression, seen);
     if (ts.isCallExpression(n)) {
       if (solidApiOf(n.expression, this.checker)?.api === "useContext") return true;
@@ -146,6 +151,17 @@ export class ContextTransformer extends Transformer {
       }
     }
     return false;
+  }
+
+  /** Preserve partial-boundary colors through aliases and destructuring.
+   * @param {ts.VariableDeclaration} d */
+  bindVariable(d) {
+    super.bindVariable(d);
+    if (!d.initializer) return;
+    const init = stripParens(d.initializer);
+    if (this.rootBinding(init)?.kind !== "worst") return;
+    const names = ts.isIdentifier(d.name) ? [d.name] : d.name.elements.filter(e => !ts.isOmittedExpression(e)).map(e => /** @type {ts.BindingElement} */ (e).name);
+    for (const name of names) if (ts.isIdentifier(name)) { const s = this.symbolOf(name); if (s) this.bindings.set(s, {kind: "worst"}); }
   }
 
   /** @param {ts.CallExpression} call */
@@ -301,7 +317,16 @@ export class ContextTransformer extends Transformer {
         const body = /** @type {ts.FunctionLikeDeclaration} */ (node).body;
         if (!body) return;
         const fn = /** @type {ts.FunctionLikeDeclaration} */ (node);
-        if (fn.type) {
+        if (fn.parameters.length && fn.parameters.every(p => ts.isIdentifier(p.name) && !p.initializer)) {
+          const types = fn.parameters.map((p, i) => "__A" + i + " extends " + (p.type?.getText() ?? this.checker.typeToString(this.checker.getTypeAtLocation(p.name), p, ts.TypeFormatFlags.NoTruncation | ts.TypeFormatFlags.UseFullyQualifiedType)));
+          const generics = [...(fn.typeParameters?.map(p => p.getText()) ?? []), ...types].join(", ");
+          const args = fn.parameters.map((p, i) => (p.dotDotDotToken ? "..." : "") + p.name.getText() + (p.questionToken ? "?" : "") + ": __A" + i).join(", ");
+          if (ts.isArrowFunction(fn)) out.insert((this.isAsyncFn(fn) ? "async " : "") + "<" + generics + ",>(" + args + ") => ", fn.getStart());
+          else {
+            const end = fn.typeParameters ? fn.typeParameters.pos - 1 : fn.getSourceFile().text.indexOf("(", fn.getStart());
+            out.copy(fn.getStart(), end); out.insert("<" + generics + ">(" + args + ") ", fn.getStart());
+          }
+        } else if (fn.type) {
           const colon = node.getSourceFile().text.lastIndexOf(":", fn.type.getStart());
           out.copy(node.getStart(), colon); out.copy(fn.type.getEnd(), body.getStart());
         } else out.copy(node.getStart(), body.getStart());
@@ -350,7 +375,7 @@ export class ContextTransformer extends Transformer {
         const reads = this.serviceExpr(callee) || b && ["signal", "memo", "accessor", "worst"].includes(b.kind) || isFunctionLike(callee) || this.isLibCall(node) && ts.isPropertyAccessExpression(callee) && SYNC_CALLBACK_METHODS.has(callee.name.text);
         const deps = b?.kind === "helper" ? this.depsOf(b.node, 0) : reads ? this.depsOf(node, 0) : [];
         if (deps.length && this.effects) this.effects.push("__s.scope([" + deps.join(", ") + "], __s.fails(), "+ JSON.stringify("setup") + ", " + this.site(node) + ")");
-        if (deps.length) return null;
+        if (deps.length) return this.rootBinding(callee)?.kind === "worst" ? this.rewriteCall(node, "setup") : null;
       }
     }
     if (mode === "setup" && ts.isPropertyAccessExpression(node) && !(ts.isCallExpression(node.parent) && node.parent.expression === node)) {
@@ -388,6 +413,11 @@ export class ContextTransformer extends Transformer {
 
   /** @param {ts.CallExpression} call @param {"setup" | "tracking" | "handler"} mode */
   rewriteCall(call, mode) {
+    if (this.rootBinding(call.expression)?.kind === "worst") return () => {
+      const out = /** @type {import("./transform.mjs").Output} */ (this.out);
+      out.insert("__s.worst(", call.getStart()); out.copy(call.getStart(), call.expression.getEnd());
+      out.cursor = call.expression.getEnd(); this.walkArgs(call, mode); out.insert("))", call.getEnd());
+    };
     const b = this.bindingOf(call.expression);
     if (b?.kind === "helper" && b.factory) return null;
     return super.rewriteCall(call, mode);

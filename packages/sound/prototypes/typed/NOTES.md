@@ -69,6 +69,12 @@ inside detached callbacks do not yet share taint facts with sibling consumers;
 local aliases still become worst case and the escape warns. Recursive environment
 comparison uses member palettes rather than object identity.
 
+Partial values keep their worst-case facts through members, aliases,
+destructuring and call results. This also produces two additional pending-handler
+warnings on the shared store examples, which are outside the supported subset.
+Factory parameters retain the concrete argument types in the virtual program,
+so a passed accessor keeps its pending/failure facts at each invocation.
+
 Virtual-program errors that cannot be classified remain explicit analysis
 warnings; none occur in the shared fixture set. They are not evidence that an
 unsupported program is safe. No fixture-name/path/text tests or suppressions were

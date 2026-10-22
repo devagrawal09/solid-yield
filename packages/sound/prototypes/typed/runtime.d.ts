@@ -44,7 +44,7 @@ type Member<V, P extends readonly string[]> =
     : never
     : V;
 type Replace<S, K extends string, V> =
-  S extends Tainted<infer U>
+  S extends WorstFlag ? S : S extends Tainted<infer U>
     ? Tainted<Replace<U, K, V>>
     : S extends PropValue<infer U>
     ? PropValue<Replace<U, K, V>>
@@ -76,7 +76,7 @@ type Provide<Q, K extends string, V> =
     ? Read<Replace<S, K, V>, M, I, L, B>
     : never;
 type Default<S> =
-  S extends Tainted<infer U>
+  S extends WorstFlag ? S : S extends Tainted<infer U>
     ? Tainted<Default<U>>
     : S extends PropValue<infer U>
     ? PropValue<Default<U>>
@@ -113,7 +113,11 @@ export declare function signal<T>(value?: T, options?: unknown): [Src<T>, (value
 type Settle<T> = T extends PromiseLike<infer U> ? U : T;
 type Async<T> = [T] extends [never] ? false : T extends PromiseLike<unknown> ? true : false;
 export declare function memo<T, D extends readonly unknown[], E>(compute: () => T, deps: D, fails: Fails<E>): Src<Settle<T>, D, E, Async<T>>;
-export declare function worst<T>(value: T): T & Color<[], unknown, true>;
+interface WorstFlag { readonly __worst: true }
+type Worst<T> = T extends Fn ? T & WorstFlag
+  : T extends object ? { [K in keyof T]: Worst<T[K]> } & WorstFlag
+  : T & WorstFlag;
+export declare function worst<T>(value: T): Worst<T>;
 export declare function worstDep(): Color<[], unknown, true>;
 export declare function service<T, Q extends readonly unknown[]>(value: T, setup: Q): T & { readonly __setup: View<Qs<Q>> };
 export declare function factoryView<T>(value: T): T extends { readonly __setup: infer V } ? V : View;
@@ -126,7 +130,7 @@ export declare function own<C extends readonly unknown[]>(children: C): View<Qs<
 interface Prop<T, D extends readonly unknown[], E> { readonly __value: T; readonly __color: [D, E, false, false, never] }
 export declare function prop<T, D extends readonly unknown[], E>(value: () => T, deps: D, fails: Fails<E>): Prop<T, D, E>;
 type ResolveProp<S, K extends string, P> =
-  S extends Tainted<infer U>
+  S extends WorstFlag ? S : S extends Tainted<infer U>
     ? Tainted<ResolveProp<U, K, P>>
     : S extends PropValue<infer U>
     ? PropValue<ResolveProp<U, K, P>>
@@ -189,7 +193,7 @@ type Issue<P extends boolean, E, R extends boolean, W extends string, M extends 
 type Pending<S, D extends unknown[] =
   []> = D["length"] extends 16
     ? true
-    : S extends Tainted<infer U>
+    : S extends WorstFlag ? true : S extends Tainted<infer U>
     ? U extends Missing<string>
     ? false
     : true
@@ -203,7 +207,7 @@ type Pending<S, D extends unknown[] =
 type Failure<S, D extends unknown[] =
   []> = D["length"] extends 16
     ? unknown
-    : S extends Tainted<infer U>
+    : S extends WorstFlag ? unknown : S extends Tainted<infer U>
     ? U extends Missing<string>
     ? never
     : unknown
@@ -225,7 +229,7 @@ type Writes<S, D extends unknown[] =
     ? W | Writes<A[number], [...D, 0]>
     : never;
 type Reactive<S, D extends unknown[] = []> = D["length"] extends 16 ? true
-  : S extends Tainted<infer U> ? U extends Missing<string> ? false : true
+  : S extends WorstFlag ? true : S extends Tainted<infer U> ? U extends Missing<string> ? false : true
   : S extends At<infer U, string> | Caught<infer U> | PropValue<infer U> ? Reactive<U, [...D, 0]>
   : S extends Color<infer A, unknown, boolean, infer R, string> ? true extends R | Reactive<A[number], [...D, 0]> ? true : false
   : false;
@@ -247,7 +251,7 @@ type Inspect<S, M extends Mode, I extends string, L extends boolean, B extends b
     ? Finding<"UNANALYZED_BOUNDARY", I> | Issue<true, C extends true
     ? never
     : unknown, true, never, M, I, L, B>
-    : S extends Tainted<infer U>
+    : S extends WorstFlag ? Issue<true, C extends true ? never : unknown, true, never, M, I, L, B> : S extends Tainted<infer U>
     ? U extends Missing<infer J>
     ? Finding<"CONTEXT_PROVIDER_MISSING", J>
     : Issue<true, C extends true

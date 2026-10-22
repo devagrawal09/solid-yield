@@ -221,7 +221,8 @@ export const cases = [
     legacyExpected: [],
     inSubset: false,
     warnings: [x(WARN, "ref-event-reads.tsx", [f("ref={")])],
-    notes: "ref callbacks are not modeled as a construct; the callback body is handler-like (its reads are fine, its setter calls never fail)"
+    expected: [x(STRICT, "ref-event-reads.tsx", [f("n()")], { note: "D-131: a ref callback is a setup-like scope that runs once at mount, untracked; n() there is a one-time snapshot" })],
+    notes: "ref write ownership/lifetime is still deferred (warning kept); its reads follow D-131 setup rules (updated 2026-10-22 after both B and C disputed the stale expectation with rc.17 runtime evidence)"
   })
 ];
 

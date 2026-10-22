@@ -26,3 +26,14 @@ Prototypes are unchanged.
 
 All static proven findings are errors per D-130. No warning/error downgrade,
 root-as-primary relaxation, suppression or any cast was used.
+
+## ref-event-reads (post-merge correction, D-131)
+
+The legacy ref-event-reads fixture predated D-131 and expected no read finding
+inside its ref callback. D-131 (verified on rc.17: ref callbacks run once per
+mount, untracked) requires STRICT_READ_UNTRACKED at the n() read in
+`ref={el => { set(n() + el.childElementCount) }}`. Both prototypes B and C
+independently reported this read and disputed the stale expectation with
+runtime evidence (prototypes/dataflow/DISPUTES.md, prototypes/oxc/DISPUTES.md).
+The expectation now requires the error; the deferred ref-ownership warning is
+unchanged.

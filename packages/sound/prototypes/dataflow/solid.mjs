@@ -49,6 +49,18 @@ export function isSolidPackage(pkg) {
  * @returns {{ api: string, pkg: string } | null}
  */
 export function solidApiOf(node, checker) {
+  let cache = apiCaches.get(checker);
+  if (!cache) apiCaches.set(checker, cache = new WeakMap());
+  if (cache.has(node)) return cache.get(node);
+  const result = lookupSolidApi(node, checker);
+  cache.set(node, result);
+  return result;
+}
+
+/** @type {WeakMap<ts.TypeChecker, WeakMap<ts.Node, { api: string, pkg: string } | null>>} */
+const apiCaches = new WeakMap();
+/** @param {ts.Node} node @param {ts.TypeChecker} checker */
+function lookupSolidApi(node, checker) {
   const symbol = resolveAlias(checker.getSymbolAtLocation(node), checker);
   const declaration = symbol?.declarations?.[0];
   const pkg = packageOf(declaration);

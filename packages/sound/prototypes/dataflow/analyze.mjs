@@ -39,6 +39,8 @@ import {
  */
 
 /**
+ * @typedef {{ file: string, kind: string, component?: string, ms: number, steps: number, partial: boolean }} WorkTiming
+ * @typedef {{ opaqueImports?: Map<string, Set<string>>, onProgress?: (row: WorkTiming) => void, onPhase?: (stage: string) => void }} RuntimeConfig
  * @typedef {{ throws: Set<string>, reasons: Map<string, string> }} FnAcc
  * @typedef {{ pending: boolean, failures: Set<string>, reads: number, pendingAt?: ts.Node, failureAt?: ts.Node }} CompAcc
  * @typedef {{ loading: boolean, errored: boolean, path: string[] }} View
@@ -76,8 +78,28 @@ export class Analysis {
   /**
    * @param {ts.Program} program
    * @param {readonly string[]} files absolute paths of the checked files
+   * @param {RuntimeConfig} [runtime]
    */
-  constructor(program, files) {
+  constructor(program, files, runtime = {}) {
+    this.runtime = runtime;
+    this.steps = 0;
+    this.deadline = Infinity;
+    /** @type {ts.Node | null} */
+    this.limitNode = null;
+    this.limitReported = false;
+    /** @type {WorkTiming[]} */
+    this.timings = [];
+    /** @type {WeakMap<LocNode, Loc>} */
+    this.locations = new WeakMap();
+    /** @type {WeakMap<ts.Node, string>} */
+    this.texts = new WeakMap();
+    /** @type {WeakMap<ts.Node, ts.Symbol | undefined>} */
+    this.symbols = new WeakMap();
+    /** @type {WeakMap<object, Set<string>>} */
+    this.factKeys = new WeakMap();
+    this.mutationVersion = 0;
+    /** @type {Map<Component, { signature: Map<string, (Source | string)[]> | null, providers: Map<import("./values.mjs").ContextBinding, Value>, globalsSize: number, mutationVersion: number }>} */
+    this.componentActivations = new Map();
     this.program = program;
     this.project = new ProjectBoundary(program, files);
     this.checker = program.getTypeChecker();
@@ -113,19 +135,62 @@ export class Analysis {
     this.setupFailureNode = null;
   }
 
+  // A budget belongs to an outer activation, including all calls/render paths.
+  // A cut-off is an unknown read/failure, never an empty/safe summary.
+  /** @param {ts.Node} node */
+  beginWork(node) {
+    this.steps = 0;
+    this.deadline = performance.now() + 1000;
+    this.limitNode = node;
+    this.limitReported = false;
+  }
+
+  exhausted() { return ++this.steps > 20000 || performance.now() > this.deadline; }
+
+  /** @param {ts.Node} node @param {Ctx} ctx @param {string} [construct] */
+  limitValue(node, ctx, construct = "analysis work limit") {
+    if (!this.limitReported) {
+      this.unanalyzed(this.limitNode ?? node, construct, "the remaining activation has worst-case reads, results and failures.", ctx);
+      this.limitReported = true;
+    }
+    const value = worst();
+    this.obligateValue(value, node, ctx, construct);
+    this.raise(ctx, ["unknown"], construct, node);
+    return value;
+  }
+
+  /** @template T @param {T[] | undefined} list @param {T} value */
+  recordFact(list, value) {
+    if (!list) return;
+    let keys = this.factKeys.get(list);
+    if (!keys) this.factKeys.set(list, keys = new Set());
+    const key = JSON.stringify(value) ?? "undefined";
+    if (keys.has(key)) return;
+    keys.add(key);
+    list.push(value);
+  }
+
   // ---- locations & reporting -----------------------------------------------
   /** @param {LocNode} node @returns {Loc} */
   loc(node) {
+    const cached = this.locations.get(node);
+    if (cached) return cached;
     const sf = node.getSourceFile();
     const start = sf.getLineAndCharacterOfPosition(node.getStart(sf));
     const end = sf.getLineAndCharacterOfPosition(node.getEnd());
-    return { file: sf.fileName, line: start.line + 1, col: start.character + 1, endLine: end.line + 1, endCol: end.character + 1 };
+    const loc = { file: sf.fileName, line: start.line + 1, col: start.character + 1, endLine: end.line + 1, endCol: end.character + 1 };
+    this.locations.set(node, loc);
+    return loc;
   }
 
   /** @param {ts.Node} node */
   text(node) {
+    const cached = this.texts.get(node);
+    if (cached !== undefined) return cached;
     const t = node.getText();
-    return t.length > 60 ? t.slice(0, 57) + "…" : t;
+    const text = t.length > 60 ? t.slice(0, 57) + "…" : t;
+    this.texts.set(node, text);
+    return text;
   }
 
   /**
@@ -150,13 +215,16 @@ export class Analysis {
     this.report("UNANALYZED_BOUNDARY", "analysis", "warn",
       `${construct} is outside the checked subset; ${assumption} Nothing here is trusted: downstream obligations still surface.`,
       node, { ownerName: ctx.ownerName, data: { construct } });
-    ctx.component?.facts.unanalyzed.push({ loc: this.loc(node), construct });
+    this.recordFact(ctx.component?.facts.unanalyzed, { loc: this.loc(node), construct });
   }
 
   // ---- symbols -------------------------------------------------------------
   /** @param {ts.Node} node */
   symbolOf(node) {
-    return resolveAlias(this.checker.getSymbolAtLocation(node), this.checker);
+    if (this.symbols.has(node)) return this.symbols.get(node);
+    const symbol = resolveAlias(this.checker.getSymbolAtLocation(node), this.checker);
+    this.symbols.set(node, symbol);
+    return symbol;
   }
 
   /** @param {ts.Symbol | undefined} symbol */
@@ -297,17 +365,33 @@ export class Analysis {
     this.current = { pending: [], failures: [] };
     this.setupFailureNode = null;
     for (const sf of this.program.getSourceFiles()) if (this.isProjectFile(sf)) this.collectComponents(sf);
-    for (const sf of this.program.getSourceFiles()) if (this.isProjectFile(sf)) this.analyzeModuleTopLevel(sf);
+    this.runtime.onPhase?.("collected");
+    for (const sf of this.program.getSourceFiles()) if (this.isProjectFile(sf)) {
+      this.beginWork(sf);
+      const start = performance.now();
+      this.analyzeModuleTopLevel(sf);
+      const row = { file: sf.fileName, kind: "module", ms: performance.now() - start, steps: this.steps, partial: this.limitReported };
+      this.timings.push(row);
+      this.runtime.onProgress?.(row);
+    }
+    this.runtime.onPhase?.("modules");
     // Exported components and hand-offs still need a summary when no render
     // path reaches them. Rendered components are checked separately per path.
     for (const c of this.components.values()) {
       if (!this.visitedComponents.has(c) && (c.exported || c.handedOff.length)) {
         const saved = this.current;
+        this.beginWork(c.node);
+        const start = performance.now();
         c.summary = this.analyzeComponent(c);
+        const row = { file: c.file.fileName, component: c.name, kind: "component", ms: performance.now() - start, steps: this.steps, partial: this.limitReported };
+        this.timings.push(row);
+        this.runtime.onProgress?.(row);
         this.current = saved;
       }
     }
+    this.runtime.onPhase?.("components");
     this.reportRoots();
+    this.runtime.onPhase?.("roots");
     return this.diagnostics;
   }
 
@@ -331,6 +415,18 @@ export class Analysis {
 
   /** @param {ts.SourceFile} sf */
   analyzeModuleTopLevel(sf) {
+    for (const statement of sf.statements) {
+      if (ts.isImportEqualsDeclaration(statement) && ts.isExternalModuleReference(statement.moduleReference)) {
+        const expression = statement.moduleReference.expression;
+        if (expression && ts.isStringLiteral(expression) && this.runtime.opaqueImports?.get(sf.fileName)?.has(expression.text)) this.report("UNANALYZED_BOUNDARY", "analysis", "warn", "This import resolves to unchecked source; its values retain worst-case facts until consumed.", expression, { data: { construct: "unchecked source import" } });
+      }
+      if (ts.isExportDeclaration(statement) && statement.moduleSpecifier && ts.isStringLiteral(statement.moduleSpecifier) && this.runtime.opaqueImports?.get(sf.fileName)?.has(statement.moduleSpecifier.text)) {
+        this.report("UNANALYZED_BOUNDARY", "analysis", "warn", "This re-export resolves to unchecked source. Its exported values and result shapes remain worst case.", statement.moduleSpecifier, { data: { construct: "unchecked source re-export" } });
+      }
+      if (ts.isImportDeclaration(statement) && ts.isStringLiteral(statement.moduleSpecifier) && !statement.importClause?.isTypeOnly && this.runtime.opaqueImports?.get(sf.fileName)?.has(statement.moduleSpecifier.text)) {
+        this.report("UNANALYZED_BOUNDARY", "analysis", "warn", "This import resolves to an unchecked source file. Its implementation and types are opaque; imported values keep worst-case reads, results and failures. Include the file among checked roots for full analysis.", statement.moduleSpecifier, { data: { construct: "unchecked source import" } });
+      }
+    }
     /** @type {Ctx} */
     const ctx = { component: null, scope: "setup", fn: this.newFnAcc(), comp: null, view: null, depth: 0, ownerName: sf.fileName.split("/").pop() ?? "" };
     for (const statement of sf.statements) {
@@ -352,21 +448,95 @@ export class Analysis {
   /** @returns {FnAcc} */
   newFnAcc() { return { throws: new Set(), reasons: new Map() }; }
 
+  // Build a cycle key without evaluating lazy props. Only primitive held facts
+  // and forwarded signal/memo reads have a supported key. Capture it BEFORE
+  // setup can change bindings, rather than reading old lazy inputs again later.
+  /** @param {Component["props"]} props @returns {Map<string, (Source | string)[]> | null} */
+  recursiveSignature(props) {
+    if (props.size > 128) return null;
+    /** @param {Value} value @param {Set<Value>} seen @returns {(Source | string)[] | null} */
+    const normalize = (value, seen) => {
+      if (seen.size > MAX_DEPTH || seen.has(value) || value.objects?.length || value.classes?.length || value.contexts?.length || value.props?.length || value.callables.length) return null;
+      const plain = !value.reactive && !value.pending && !value.failures.size && !value.promise && !value.worst && !value.opaque && !value.opaqueResult && !value.caught && !value.unreachable;
+      if (!value.deferred?.length) return plain ? ["held:" + value.undefined] : null;
+      if (!plain || value.deferred.length !== 1) return null;
+      const nextSeen = new Set(seen); nextSeen.add(value);
+      const deferred = value.deferred[0], expression = stripParens(deferred.expression);
+      if (ts.isNumericLiteral(expression) || ts.isStringLiteral(expression) || expression.kind === ts.SyntaxKind.TrueKeyword || expression.kind === ts.SyntaxKind.FalseKeyword || expression.kind === ts.SyntaxKind.NullKeyword) return ["held:undefined"];
+      /** @param {ts.Node} node */
+      const binding = node => { const symbol = this.symbolOf(node); return symbol ? deferred.environment.get(symbol) ?? this.moduleBindings.get(symbol) : undefined; };
+      if (ts.isIdentifier(expression)) {
+        const b = binding(expression);
+        return b?.kind === "value" ? normalize(b.value, nextSeen) : null;
+      }
+      if (ts.isPropertyAccessExpression(expression) && ts.isIdentifier(expression.expression)) {
+        const b = binding(expression.expression);
+        if (b?.kind !== "props" || b.component.propsWorst) return null;
+        const entry = b.component.props.get(expression.name.text);
+        if (!entry || entry.worst) return null;
+        const parts = entry.values.map(v => normalize(v, nextSeen));
+        return parts.some(part => part === null) ? null : parts.flatMap(part => part ?? []);
+      }
+      if (ts.isCallExpression(expression) && !expression.arguments.length && ts.isIdentifier(expression.expression)) {
+        const b = binding(expression.expression);
+        if (b && (b.kind === "signal" || b.kind === "memo" || b.kind === "accessor")) {
+          const source = b.source;
+          return [source, JSON.stringify([source.reactive, source.pending, source.worst, [...source.failures].sort()])];
+        }
+      }
+      return null;
+    };
+    /** @type {Map<string, (Source | string)[]>} */
+    const signature = new Map();
+    for (const [name, entry] of props) {
+      if (entry.worst) return null;
+      const parts = entry.values.map(v => normalize(v, new Set()));
+      if (parts.some(part => part === null)) return null;
+      signature.set(name, parts.flatMap(part => part ?? []));
+    }
+    return signature;
+  }
+
+  /** @param {Component} base @param {Component["props"]} props */
+  sameRecursiveInputs(base, props) {
+    const active = this.componentActivations.get(base);
+    if (!active || base.propsWorst || active.globalsSize !== this.moduleBindings.size || active.mutationVersion !== this.mutationVersion || this.thisValue.objects?.length || this.providers.size !== active.providers.size) return false;
+    for (const [context, value] of this.providers) {
+      if (active.providers.get(context) !== value || value.objects?.length || value.classes?.length || value.callables.length || value.deferred?.length || value.contexts?.length || value.props?.length) return false;
+    }
+    const signature = this.recursiveSignature(props);
+    if (!signature || !active.signature || signature.size !== active.signature.size) return false;
+    for (const [name, values] of signature) {
+      const previous = active.signature.get(name);
+      if (!previous || values.length !== previous.length || values.some((v, i) => v !== previous[i])) return false;
+    }
+    return true;
+  }
+
   /**
    * @param {Component} base
    * @param {Map<string, { values: Value[], worst: boolean }>} [props]
    */
   analyzeComponent(base, props = base.props) {
-    // Recursive views reuse the first activation: its own reads remain in the
-    // enclosing summary. Do not enter an endless chain of the same AST body.
-    if (this.activeComponents.has(base)) return { pending: [], failures: [] };
+    const exhausted = this.exhausted();
+    if (!exhausted && this.activeComponents.has(base) && this.sameRecursiveInputs(base, props)) return { pending: [], failures: [] };
+    if (this.activeComponents.has(base) || exhausted) {
+      const construct = "recursive or bounded component";
+      this.unanalyzed(base.node, construct, "unvisited setup, handlers and views retain unknown failures and pending reads.", { component: base, scope: "setup", fn: this.newFnAcc(), comp: null, view: null, depth: 0, ownerName: "<" + base.name + ">" });
+      this.report("SETUP_MAY_THROW", "error", "error", "This component activation is only partially checked; its setup may fail with unknown.", base.node, { data: { failures: ["unknown"] } });
+      base.facts.pending = "unknown";
+      base.facts.failures = [...new Set([...base.facts.failures, "unknown"])];
+      const obligation = { loc: this.loc(base.node), path: ["<" + base.name + ">"], source: construct };
+      return { pending: [obligation], failures: [{ ...obligation, failures: new Set(["unknown"]) }] };
+    }
     this.activeComponents.add(base);
     this.visitedComponents.add(base);
     const c = { ...base, props, propsWorst: props.get("*")?.worst ?? base.propsWorst };
+    this.componentActivations.set(base, { signature: this.recursiveSignature(props), providers: new Map(this.providers), globalsSize: this.moduleBindings.size, mutationVersion: this.mutationVersion });
     const savedBindings = this.bindings;
     const savedFailure = this.setupFailureNode;
     this.setupFailureNode = null;
-    this.bindings = new Map(this.bindings);
+    this.bindings = this.bindings === this.moduleBindings ? new Map() : new Map(this.bindings);
     /** @type {Ctx} */
     const ctx = { component: c, scope: "setup", fn: this.newFnAcc(), comp: null, view: { loading: false, errored: false, path: [`<${c.name}>`] }, depth: 0, ownerName: `<${c.name}>` };
     this.current = { pending: /** @type {Obligation[]} */ ([]), failures: /** @type {Obligation[]} */ ([]) };
@@ -390,6 +560,7 @@ export class Analysis {
     c.facts.failures = [...new Set([...c.facts.failures, ...summary.failures.flatMap(o => [...(o.failures ?? [])])])];
     base.summary = { pending: [...base.summary.pending, ...summary.pending], failures: [...base.summary.failures, ...summary.failures] };
     this.activeComponents.delete(base);
+    this.componentActivations.delete(base);
     this.bindings = savedBindings;
     this.setupFailureNode = savedFailure;
     return summary;
@@ -633,7 +804,7 @@ export class Analysis {
     const loc = this.loc(node);
     const readScope = ctx.scope === "ref" ? "setup" : ctx.scope;
     const scope = readScope === "untracked" ? "setup" : readScope;
-    c?.facts.reads.push({ loc, scope, source: source.name });
+    this.recordFact(c?.facts.reads, { loc, scope, source: source.name });
     switch (readScope) {
       case "setup":
         if (source.reactive && !ctx.untracked) {
@@ -692,7 +863,7 @@ export class Analysis {
    * @returns {Value}
    */
   evalExpr(e, ctx) {
-    if (ctx.depth > MAX_DEPTH) return worst();
+    if (ctx.depth > MAX_DEPTH || this.exhausted()) return this.limitValue(e, ctx);
     const x = stripParens(e);
     if (ts.isIdentifier(x)) return this.evalIdentifier(x, ctx);
     if (ts.isCallExpression(x)) return this.evalCall(x, ctx);
@@ -721,7 +892,7 @@ export class Analysis {
           const sym = this.symbolOf(x.left);
           const decl = sym?.declarations?.[0];
           const moduleVariable = decl && ts.isVariableDeclaration(decl) && ts.isSourceFile(decl.parent.parent.parent);
-          if (moduleVariable) this.escapeValue(v, x, ctx, "storing a context service in module state");
+          if (moduleVariable) { this.mutationVersion++; this.escapeValue(v, x, ctx, "storing a context service in module state"); }
           if (sym) {
             this.bindings.set(sym, { kind: "value", value: v });
             if (moduleVariable) this.moduleBindings.set(sym, { kind: "value", value: v });
@@ -729,6 +900,7 @@ export class Analysis {
         }
         else {
           if (ts.isPropertyAccessExpression(x.left) || ts.isElementAccessExpression(x.left)) {
+            this.mutationVersion++;
             const base = this.evalExpr(x.left.expression, ctx);
             if (base.objects?.length) {
               const name = ts.isPropertyAccessExpression(x.left) ? x.left.name.text : ts.isStringLiteral(x.left.argumentExpression) ? x.left.argumentExpression.text : null;
@@ -773,7 +945,7 @@ export class Analysis {
       const declaration = this.checker.getResolvedSignature(x)?.getDeclaration();
       if (!declaration || !this.program.isSourceFileDefaultLibrary(declaration.getSourceFile())) {
         this.raise(ctx, ["unknown"], `${this.text(x)} has no constructor failure information`, x);
-        return this.dependencyResult(x, ctx) ?? { ...constant(), opaque: true };
+        return this.dependencyResult(x, ctx, !!constructor.opaqueResult) ?? { ...constant(), opaque: true };
       }
       return constant();
     }
@@ -858,7 +1030,20 @@ export class Analysis {
 
   /** An identifier with no binding of ours: a parameter, a global, a package import. @param {ts.Identifier} id @param {Ctx} ctx @returns {Value} */
   foreignIdentifier(id, ctx) {
-    void ctx;
+    const raw = this.checker.getSymbolAtLocation(id);
+    for (let declaration of raw?.declarations ?? []) {
+      while (declaration && !ts.isImportDeclaration(declaration) && !ts.isSourceFile(declaration)) declaration = declaration.parent;
+      if (declaration && ts.isImportDeclaration(declaration) && ts.isStringLiteral(declaration.moduleSpecifier) && this.runtime.opaqueImports?.get(id.getSourceFile().fileName)?.has(declaration.moduleSpecifier.text)) {
+        // Hold an unknown imported value until consumed. Calling a method is
+        // not itself evidence of a Solid accessor read (D-133).
+        return { ...worst(), opaque: true, opaqueResult: true };
+      }
+    }
+    const resolved = this.symbolOf(id);
+    if (raw && (raw.flags & ts.SymbolFlags.Alias) && !resolved?.declarations?.length) {
+      this.unanalyzed(id, "an import without declarations", "its value and returned shape remain worst case until consumed.", ctx);
+      return { ...worst(), opaque: true, opaqueResult: true };
+    }
     const type = this.checker.getTypeAtLocation(id);
     if (type.flags & (ts.TypeFlags.Undefined | ts.TypeFlags.Void)) return { ...constant(), undefined: "always" };
     const symbol = this.symbolOf(id);
@@ -980,6 +1165,7 @@ export class Analysis {
    * @param {Value} v @param {ts.Node} at @param {Ctx} ctx @param {string} what
    */
   escapeValue(v, at, ctx, what) {
+    if (v.objects?.length) this.mutationVersion++;
     const objects = (v.objects ?? []).filter(o => o.service);
     if (!objects.length) return;
     this.unanalyzed(at, what, "the shared object and its aliases now have worst-case member facts.", ctx);
@@ -1022,6 +1208,13 @@ export class Analysis {
       if (api) return callable({ kind: "solid", node: m, api: api.api });
       const symbol = this.symbolOf(m.name);
       const decl = symbol?.declarations?.[0];
+      if (!decl && ts.isIdentifier(target)) {
+        const raw = this.checker.getSymbolAtLocation(target);
+        if (raw?.declarations?.some(d => ts.isNamespaceImport(d) || ts.isImportEqualsDeclaration(d))) {
+          this.unanalyzed(m, "an import without declarations", "this namespace member retains worst-case facts until consumed.", ctx);
+          return { ...worst(), opaque: true, opaqueResult: true };
+        }
+      }
       if (decl && ts.isVariableDeclaration(decl) && ts.isSourceFile(decl.parent.parent.parent)) {
         const binding = this.bindingOf(symbol);
         if (binding) return this.bindingValue(binding, m, ctx);
@@ -1471,14 +1664,14 @@ export class Analysis {
    * @returns {Value}
    */
   analyzeFunction(fn, ctx, args, environment = this.bindings, receiver = this.thisValue) {
-    if (this.activeFunctions.has(fn) || ctx.depth > MAX_DEPTH) return constant(); // recursion: the first activation's facts stand
+    if (this.activeFunctions.has(fn) || ctx.depth > MAX_DEPTH || this.exhausted()) return this.limitValue(fn, ctx, "recursive/deep or bounded function call");
     const isAsync = !!(ts.canHaveModifiers(fn) && ts.getModifiers(fn)?.some(m => m.kind === ts.SyntaxKind.AsyncKeyword));
     const isGenerator = !!fn.asteriskToken;
     if (isGenerator) { this.unanalyzed(fn, "a generator function", "its body is not analyzed; its value is treated as possibly pending and possibly failing.", ctx); return worst(); }
     const savedBindings = this.bindings;
     const savedThis = this.thisValue;
     this.thisValue = receiver;
-    this.bindings = new Map(environment);
+    this.bindings = environment === this.moduleBindings ? new Map() : new Map(environment);
     // Each invocation owns its locals; returned methods capture this map.
     fn.parameters.forEach((p, i) => {
       if (ts.isIdentifier(p.name)) { const sym = this.symbolOf(p.name); if (sym) this.bindings.set(sym, { kind: "value", value: args[i] ?? { ...constant(), opaque: true } }); }
@@ -1583,6 +1776,7 @@ export class Analysis {
    * @param {View} view
    */
   evalView(e, ctx, view) {
+    if (this.exhausted()) { this.limitValue(e, { ...ctx, scope: "tracking", view }); return; }
     const x = stripParens(e);
     if (ts.isJsxElement(x)) { this.evalJsxElement(x.openingElement, x.children, ctx, view, x); return; }
     if (ts.isJsxSelfClosingElement(x)) { this.evalJsxElement(x, [], ctx, view, x); return; }
@@ -1652,7 +1846,7 @@ export class Analysis {
         case "Loading": {
           const key = attrExpr("on"); if (key) this.evalExpr(key, tctx);
           const fb = attrExpr("fallback"); if (fb) this.evalExprAsView(fb, ctx, view);
-          ctx.component?.facts.boundaries.push({ kind: "Loading", loc: this.loc(whole) });
+          this.recordFact(ctx.component?.facts.boundaries, { kind: "Loading", loc: this.loc(whole) });
           const inner = { ...view, loading: true };
           for (const ch of children) this.evalJsxChild(ch, ctx, inner);
           return;
@@ -1667,7 +1861,7 @@ export class Analysis {
               this.analyzeFunction(fnode, { ...tctx, view }, [callable({ kind: "source", node: f, source: error }), callable({ kind: "safe", node: f })]);
             } else this.evalExprAsView(fb, ctx, view);
           }
-          ctx.component?.facts.boundaries.push({ kind: "Errored", loc: this.loc(whole) });
+          this.recordFact(ctx.component?.facts.boundaries, { kind: "Errored", loc: this.loc(whole) });
           const inner = { ...view, errored: true };
           for (const ch of children) this.evalJsxChild(ch, ctx, inner);
           return;
@@ -1874,6 +2068,11 @@ export class Analysis {
   reportRoots() {
     /** @param {Obligation} o @param {"pending" | "failure"} kind @param {Loc} rootLoc @param {string} rootWhat */
     const emit = (o, kind, rootLoc, rootWhat) => {
+      // Multiple render paths can carry the same obligation. report() already
+      // keeps the first diagnostic at a site; avoid rebuilding its AST lookup
+      // and message for every duplicate path.
+      const code = kind === "pending" ? "ASYNC_OUTSIDE_LOADING_BOUNDARY" : "ERROR_OUTSIDE_ERRORED_BOUNDARY";
+      if (this.reported.has(code + "@" + o.loc.file + ":" + o.loc.line + ":" + o.loc.col)) return;
       const node = this.nodeAt(o.loc);
       if (!node) return;
       const where = `${rootWhat} at ${rootLoc.file.split("/").pop()}:${rootLoc.line}`;

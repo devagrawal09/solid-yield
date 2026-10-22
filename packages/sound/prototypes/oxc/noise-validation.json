@@ -1,0 +1,67 @@
+{
+  "harness": {
+    "command": "node",
+    "args": ["harness/run.mjs"],
+    "exit": 0,
+    "signal": null,
+    "timedOut": false,
+    "wallMs": 64023.352917
+  },
+  "packageTests": {
+    "command": "pnpm",
+    "args": ["test", "--maxWorkers=1", "--no-file-parallelism"],
+    "exit": 0,
+    "signal": null,
+    "timedOut": false,
+    "wallMs": 44028.897291999994
+  },
+  "frozen": {
+    "fixtures": 173,
+    "expectations": 103,
+    "hits": 103,
+    "imprecise": 0,
+    "agreement": 1,
+    "inSubsetMisses": [],
+    "mutantMisses": [],
+    "extraErrors": 0,
+    "extraErrorsInSubsetClean": 0,
+    "warningHits": 11,
+    "warningExpect": 11,
+    "extraWarnings": 0,
+    "leakage": 0,
+    "unmapped": 0,
+    "violations": [],
+    "infoHits": 5,
+    "infoExpect": 5,
+    "crashes": 0
+  },
+  "tests": {
+    "files": 21,
+    "passed": 335,
+    "newNoiseTests": 15
+  },
+  "noApplicationExecution": true,
+  "baselineWithoutOrigins": {
+    "coldMs": 29533.472917,
+    "coldPeakRSSKiB": 2374064,
+    "resourceUsage": {
+      "userCPUTime": 39590299,
+      "systemCPUTime": 1523508,
+      "maxRSS": 2657424,
+      "sharedMemorySize": 0,
+      "unsharedDataSize": 0,
+      "unsharedStackSize": 0,
+      "minorPageFault": 238433,
+      "majorPageFault": 80,
+      "swappedOut": 0,
+      "fsRead": 0,
+      "fsWrite": 0,
+      "ipcSent": 0,
+      "ipcReceived": 0,
+      "signalsCount": 0,
+      "voluntaryContextSwitches": 7510,
+      "involuntaryContextSwitches": 24837
+    }
+  },
+  "knownIntermediateFailure": "First full package test run had 330 pass / 1 fail: string-encoded origin locations did not move on comment-only updates. Fixed with interned origin objects sharing the source-location cache; original scale.test.mjs unchanged."
+}

@@ -95,3 +95,40 @@ The shared 109-fixture result is evidence for this slice, not a proof for arbitr
 - Facts expose reads and coarse component summaries; they are a starting point for an optimized emitter, not a production lowering plan.
 
 The remaining production work is broader declaration coverage, heap/path correlation, more complete escapes and hand-offs, and explicit persistent graph invalidation. No fixture-specific rules, failure contracts, suppressions or TypeScript calls are used.
+
+## Whole-app noise round
+
+See RESULTS-noise.md and noise-measurements.json. Same 2,669 roots: 5,599 →
+4,862 errors, 13,025 → 12,169 warnings, 516 → 532 infos. This is a count
+change, not a whole-app precision rate. The 42-error review has 7 contract/slice
+TPs and 35 uncertain findings; 15 inspected silence operations remain clean.
+Budget fallbacks, unresolved receiver/callable facts and opaque declarations
+still dominate. A cold check took 35.52 s; check-through peak RSS was 2328.94
+MiB. The process peak including large evidence export was 2804.66 MiB.
+
+- Logical and conditional expressions now follow known branch decisions and
+  fork/join local cells for unknown decisions. Abstract scalar values remain
+  unknown; interpolated templates no longer masquerade as known empty strings.
+- Native array copies/extraction and Array.from preserve element/callback facts.
+  Native string chains keep their result shapes. Injected lookalikes retain
+  unknown failures. Pop/shift retain possible old receiver elements conservatively.
+- A lazy prop expression's failure alone no longer invents a reactive read.
+  Its failure still lands at the child consumption with caller expressions related;
+  a genuine signal read still has the original scope obligation.
+- Diagnostic data.origins records source locations/reasons through memo captures
+  and synchronous handler summaries. Origin objects share the source-location cache
+  and relocate on comment edits. This is partial causal evidence, not a complete
+  failure graph; async/caught propagation can remain untraced. It never discharges
+  obligations or changes severity.
+- Fifteen prototype-local tests pair safe controls with throwing/reactive/injected
+  mutants. All 173 frozen fixtures remain exact; package tests pass 335/335.
+  New trusted drivers are only under scale/oxc/noise*.mjs; shared scale files remain
+  unchanged. Raw diagnostics and inference/worst-case sites are preserved in the
+  compact noise-before/after.json.gz files, with source review JSON beside them.
+
+Whole-app precision, complete origin/alias/declaration provenance, budget-induced
+cascades and deferred onSettled phases remain unresolved. In particular, the
+existing effect-scope treatment of onSettled is not proof of its deferred rule.
+No installed package implementations, TypeScript checker, failure contracts,
+severity changes, suppressions, name/path/fixture exceptions or dropped roots
+were introduced. Semantic-update performance was outside this round.

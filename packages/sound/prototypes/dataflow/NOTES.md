@@ -3,20 +3,28 @@
 ## Whole-app noise round
 
 See RESULTS-noise.md and noise-evidence/. All 2,669 roots are retained. The final
-Node 24 run reports 11,569 diagnostics versus 11,214 before; counts are not a
-precision rate. Two fixes use existing bodies and declarations: keep local
+Node 24 run reports 11,926 diagnostics versus 11,214 before (11,569 in the first
+noise commit); counts are not a precision rate. The first round's fixes use
+existing bodies and declarations: keep local
 runtime declarations distinct from type imports and TypeScript's shared unknown
 alias symbol; analyze direct/aliased JSX helpers in their caller's scope.
 Unresolved imports still warn and return worst-case values. Their calls now
 retain missing failure/result facts instead of inheriting an unrelated component.
-Seven local tests pair clean controls with pending, throwing and injected mutants.
+Thirteen local tests pair clean controls with pending, throwing and injected mutants.
 Frozen fixtures/pins and other prototypes are unchanged. All 173 fixtures pass.
 
-The 45-error review has 10 contract-valid findings, one confirmed FP and 34
-unsure cases; the separate 15-site silence review finds four missing partial
-warnings. Returned higher-order renderers and ref-array ownership remain coverage
-gaps. Exported scalar-argument JSX helpers still get an imprecise standalone
-component summary. Most downstream diagnostics lack retained causal provenance;
+The follow-up fixes the confirmed scalar-helper FP generically: a declared scalar
+parameter in a standalone JSX summary is an already evaluated value, not a props
+bag. JSX callers, widened/object props, callback/unknown types, explicit throws
+and reactive argument reads keep their obligations. A lexical coverage scan also
+exposes the four reviewed missing onSettled/compute-signal/ref-array warnings in
+unvisited bodies. It does not analyze their execution. Reached compute-form
+signal tuple members retain worst-case facts; ordinary signal setup stays clean.
+The refreshed 53-error review has 10 contract-valid findings and 43 unsure cases;
+all 16 silence sites are locally justified, with the former gaps now explicit
+boundaries. The resolved FP and original review remain archived. Returned
+higher-order execution, derived signals and ref-array ownership remain unsupported.
+Most downstream diagnostics lack retained causal provenance;
 the aggregate classification labels those origins unresolved. No whole-app
 soundness or noise-reduction claim is made.
 

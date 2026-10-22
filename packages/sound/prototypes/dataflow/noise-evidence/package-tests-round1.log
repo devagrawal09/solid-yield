@@ -1,0 +1,9 @@
+$ vitest run --maxWorkers 1
+
+ RUN  v4.1.11 /Users/devagr/solid-yield-wt/sound-dataflow-noise/packages/sound
+
+
+ Test Files  21 passed (21)
+      Tests  327 passed (327)
+   Start at  04:32:06
+   Duration  48.08s (transform 302ms, setup 0ms, import 1.70s, tests 43.82s, environment 1.12s)

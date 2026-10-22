@@ -114,6 +114,146 @@
     "activationsAtLeastOneSecond": 0
   },
   "after": {
+    "total": 11926,
+    "byCause": {
+      "downstream: unknown failure (exact origin unretained)": 3559,
+      "direct: missing declaration/result shape": 1445,
+      "direct: Solid API/ownership semantics outside model": 1406,
+      "direct: unchecked implementation import/re-export": 1294,
+      "direct: object/prop/escape semantics outside model": 1105,
+      "downstream: source read (known/unknown provenance unretained)": 1075,
+      "downstream: prop-flow obligation (exact origin unretained)": 480,
+      "summary: exported obligations (origins may overlap)": 451,
+      "direct: recursion/depth/work cutoff": 310,
+      "direct: unresolved render/provider/call shape": 257,
+      "direct: other unsupported syntax/callback shape": 188,
+      "downstream at explicit boundary: missing declaration/result shape": 148,
+      "downstream: work cutoff": 110,
+      "downstream at explicit boundary: object/prop/escape semantics outside model": 34,
+      "candidate supported scope/write error (manual review required)": 33,
+      "downstream at explicit boundary: Solid API/ownership semantics outside model": 12,
+      "downstream at explicit boundary: recursion/depth/work cutoff": 7,
+      "candidate missing provider on modeled path (manual review required)": 5,
+      "downstream at explicit boundary: other unsupported syntax/callback shape": 5,
+      "downstream: known failure set (path/body proof requires review)": 2
+    },
+    "codesByCause": {
+      "direct: unchecked implementation import/re-export": {
+        "warn:UNANALYZED_BOUNDARY": 1294
+      },
+      "direct: object/prop/escape semantics outside model": {
+        "warn:UNANALYZED_BOUNDARY": 1105
+      },
+      "direct: missing declaration/result shape": {
+        "warn:UNANALYZED_BOUNDARY": 1445
+      },
+      "downstream: unknown failure (exact origin unretained)": {
+        "error:UNHANDLED_HANDLER_FAILURE": 1961,
+        "error:SETUP_MAY_THROW": 92,
+        "error:ERROR_OUTSIDE_ERRORED_BOUNDARY": 1506
+      },
+      "direct: Solid API/ownership semantics outside model": {
+        "warn:UNANALYZED_BOUNDARY": 1406
+      },
+      "direct: other unsupported syntax/callback shape": {
+        "warn:UNANALYZED_BOUNDARY": 188
+      },
+      "direct: recursion/depth/work cutoff": {
+        "warn:UNANALYZED_BOUNDARY": 310
+      },
+      "direct: unresolved render/provider/call shape": {
+        "warn:UNANALYZED_BOUNDARY": 257
+      },
+      "downstream: source read (known/unknown provenance unretained)": {
+        "warn:PENDING_ASYNC_IN_HANDLER": 442,
+        "error:PENDING_ASYNC_FORBIDDEN_SCOPE": 6,
+        "error:PENDING_ASYNC_UNTRACKED_READ": 3,
+        "error:ASYNC_OUTSIDE_LOADING_BOUNDARY": 624
+      },
+      "candidate missing provider on modeled path (manual review required)": {
+        "error:CONTEXT_PROVIDER_MISSING": 5
+      },
+      "downstream at explicit boundary: recursion/depth/work cutoff": {
+        "error:SETUP_MAY_THROW": 5,
+        "error:ASYNC_OUTSIDE_LOADING_BOUNDARY": 1,
+        "error:ERROR_OUTSIDE_ERRORED_BOUNDARY": 1
+      },
+      "downstream at explicit boundary: missing declaration/result shape": {
+        "error:SETUP_MAY_THROW": 12,
+        "error:ERROR_OUTSIDE_ERRORED_BOUNDARY": 128,
+        "error:ASYNC_OUTSIDE_LOADING_BOUNDARY": 8
+      },
+      "downstream at explicit boundary: other unsupported syntax/callback shape": {
+        "error:UNHANDLED_HANDLER_FAILURE": 3,
+        "error:SETUP_MAY_THROW": 2
+      },
+      "candidate supported scope/write error (manual review required)": {
+        "error:STRICT_READ_UNTRACKED": 30,
+        "error:REACTIVE_WRITE_IN_OWNED_SCOPE": 3
+      },
+      "downstream at explicit boundary: Solid API/ownership semantics outside model": {
+        "error:SETUP_MAY_THROW": 5,
+        "error:ERROR_OUTSIDE_ERRORED_BOUNDARY": 7
+      },
+      "downstream: prop-flow obligation (exact origin unretained)": {
+        "error:PENDING_ASYNC_FORBIDDEN_SCOPE": 7,
+        "error:PENDING_ASYNC_UNTRACKED_READ": 12,
+        "error:STRICT_READ_UNTRACKED": 5,
+        "error:ASYNC_OUTSIDE_LOADING_BOUNDARY": 456
+      },
+      "downstream: known failure set (path/body proof requires review)": {
+        "error:SETUP_MAY_THROW": 1,
+        "error:ERROR_OUTSIDE_ERRORED_BOUNDARY": 1
+      },
+      "downstream at explicit boundary: object/prop/escape semantics outside model": {
+        "error:SETUP_MAY_THROW": 5,
+        "error:ASYNC_OUTSIDE_LOADING_BOUNDARY": 14,
+        "error:ERROR_OUTSIDE_ERRORED_BOUNDARY": 15
+      },
+      "summary: exported obligations (origins may overlap)": {
+        "info:COMPONENT_OBLIGATIONS_EXPORTED": 451
+      },
+      "downstream: work cutoff": {
+        "error:ASYNC_OUTSIDE_LOADING_BOUNDARY": 110
+      }
+    },
+    "exactDuplicateCodeLocations": 0,
+    "pendingAndFailureSites": 1199,
+    "boundaryAndErrorSites": 183,
+    "cutoffActivations": 307,
+    "activationsPastStepBudget": 232,
+    "activationsAtLeastOneSecond": 0
+  },
+  "removedByCode": {
+    "UNANALYZED_BOUNDARY": 177,
+    "SETUP_MAY_THROW": 11,
+    "UNHANDLED_HANDLER_FAILURE": 34,
+    "PENDING_ASYNC_IN_HANDLER": 9,
+    "STRICT_READ_UNTRACKED": 2,
+    "COMPONENT_OBLIGATIONS_EXPORTED": 3,
+    "ASYNC_OUTSIDE_LOADING_BOUNDARY": 68,
+    "ERROR_OUTSIDE_ERRORED_BOUNDARY": 51
+  },
+  "addedByCode": {
+    "UNHANDLED_HANDLER_FAILURE": 139,
+    "UNANALYZED_BOUNDARY": 616,
+    "PENDING_ASYNC_IN_HANDLER": 48,
+    "SETUP_MAY_THROW": 19,
+    "PENDING_ASYNC_FORBIDDEN_SCOPE": 2,
+    "PENDING_ASYNC_UNTRACKED_READ": 6,
+    "ASYNC_OUTSIDE_LOADING_BOUNDARY": 65,
+    "ERROR_OUTSIDE_ERRORED_BOUNDARY": 161,
+    "COMPONENT_OBLIGATIONS_EXPORTED": 11
+  },
+  "changedMessageByCode": {
+    "UNANALYZED_BOUNDARY": 1245,
+    "UNHANDLED_HANDLER_FAILURE": 105,
+    "SETUP_MAY_THROW": 1,
+    "ASYNC_OUTSIDE_LOADING_BOUNDARY": 21,
+    "ERROR_OUTSIDE_ERRORED_BOUNDARY": 47,
+    "COMPONENT_OBLIGATIONS_EXPORTED": 205
+  },
+  "round1": {
     "total": 11569,
     "byCause": {
       "downstream: unknown failure (exact origin unretained)": 3542,
@@ -224,30 +364,17 @@
     "activationsPastStepBudget": 232,
     "activationsAtLeastOneSecond": 0
   },
-  "removedByCode": {
-    "UNANALYZED_BOUNDARY": 177,
-    "SETUP_MAY_THROW": 8,
-    "UNHANDLED_HANDLER_FAILURE": 35,
-    "PENDING_ASYNC_IN_HANDLER": 9,
-    "ASYNC_OUTSIDE_LOADING_BOUNDARY": 68,
-    "ERROR_OUTSIDE_ERRORED_BOUNDARY": 51,
-    "COMPONENT_OBLIGATIONS_EXPORTED": 2
+  "followupRemovedByCode": {
+    "SETUP_MAY_THROW": 3,
+    "STRICT_READ_UNTRACKED": 2,
+    "COMPONENT_OBLIGATIONS_EXPORTED": 1
   },
-  "addedByCode": {
-    "UNHANDLED_HANDLER_FAILURE": 124,
-    "UNANALYZED_BOUNDARY": 301,
-    "PENDING_ASYNC_IN_HANDLER": 29,
-    "SETUP_MAY_THROW": 19,
-    "PENDING_ASYNC_UNTRACKED_READ": 6,
-    "ASYNC_OUTSIDE_LOADING_BOUNDARY": 59,
-    "ERROR_OUTSIDE_ERRORED_BOUNDARY": 156,
-    "COMPONENT_OBLIGATIONS_EXPORTED": 11
-  },
-  "changedMessageByCode": {
-    "UNANALYZED_BOUNDARY": 1246,
-    "UNHANDLED_HANDLER_FAILURE": 96,
-    "ASYNC_OUTSIDE_LOADING_BOUNDARY": 21,
-    "ERROR_OUTSIDE_ERRORED_BOUNDARY": 47,
-    "COMPONENT_OBLIGATIONS_EXPORTED": 195
+  "followupAddedByCode": {
+    "UNANALYZED_BOUNDARY": 315,
+    "UNHANDLED_HANDLER_FAILURE": 16,
+    "PENDING_ASYNC_IN_HANDLER": 19,
+    "PENDING_ASYNC_FORBIDDEN_SCOPE": 2,
+    "ASYNC_OUTSIDE_LOADING_BOUNDARY": 6,
+    "ERROR_OUTSIDE_ERRORED_BOUNDARY": 5
   }
 }

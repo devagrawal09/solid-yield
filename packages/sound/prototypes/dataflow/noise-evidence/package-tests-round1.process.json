@@ -1,0 +1,11 @@
+{
+  "command": [
+    "pnpm",
+    "test",
+    "--maxWorkers",
+    "1"
+  ],
+  "code": 0,
+  "timedOut": false,
+  "wallSeconds": 48.69678875000682
+}

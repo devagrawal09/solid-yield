@@ -10,6 +10,8 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "oxc-parser": "0.155.0",
+    "oxc-resolver": "11.24.2",
     "typescript": "^6.0.3"
   },
   "devDependencies": {

@@ -1,0 +1,1518 @@
+{
+  "selection": "Per error code: SHA256(code:trial-relative-file:line:col), first two changed findings plus first unchanged findings, up to five. Changed means new site or changed normalized origin set/data. No verdict influenced selection.",
+  "interpretation": "Verdicts judge the emitted obligation under the frozen contract. TP with required-unknown-failure is not a confirmed production bug. UNSURE retains worst-case requirements while withholding a proof of actual failure. No general precision rate follows from this stratified audit.",
+  "counts": {
+    "UNSURE": 35,
+    "TP": 7
+  },
+  "findings": [
+    {
+      "id": "E01",
+      "key": "ASYNC_OUTSIDE_LOADING_BOUNDARY:app/src/pages/chat/components/chat-reply-attribution.tsx:25:35",
+      "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/pages/chat/components/chat-reply-attribution.tsx",
+        "line": 25,
+        "col": 35,
+        "endLine": 25,
+        "endCol": 48
+      },
+      "ownerName": "<ReplyLineView>",
+      "ownerPath": [
+        "<MessageGroup>",
+        "<SessionActivityGroup>",
+        "<ChatSessionActivity>",
+        "<PreparedMessage>",
+        "<GroupedMessage>",
+        "<ReplyLineView>"
+      ],
+      "related": [
+        {
+          "message": "Related caller or root.",
+          "loc": {
+            "file": "app/src/pages/chat/components/chat-transcript-rows.ts",
+            "line": 17,
+            "col": 3,
+            "endLine": 17,
+            "endCol": 22
+          }
+        },
+        {
+          "message": "Related caller or root.",
+          "loc": {
+            "file": "app/src/pages/chat/components/chat-message-bubble-view.tsx",
+            "line": 143,
+            "col": 77,
+            "endLine": 143,
+            "endCol": 90
+          }
+        },
+        {
+          "message": "Related caller or root.",
+          "loc": {
+            "file": "app/src/pages/chat/components/chat-message-group-view.tsx",
+            "line": 145,
+            "col": 18,
+            "endLine": 145,
+            "endCol": 27
+          }
+        }
+      ],
+      "data": {},
+      "origins": [2212, 2407],
+      "rootCause": "work or alternatives budget fallback",
+      "kind": "downstream obligation",
+      "changed": true,
+      "verdict": "UNSURE",
+      "contractStatus": "required-worst-case",
+      "reason": "Boolean/prop comparison itself does not establish pending. Its origins include exhausted interpreter work; this is a downstream fallback obligation, not a supported async proof.",
+      "source": "Boolean(props.line.openId) && props.actions.replyNavigationId === props.line.openId;",
+      "sourceSHA256": "3a04380d447bc8299aabefe5b4f7b502d1d6beeb76b5a71565fb4a89142179fb"
+    },
+    {
+      "id": "E02",
+      "key": "ASYNC_OUTSIDE_LOADING_BOUNDARY:app/src/pages/chat/components/chat-forwarded-attribution.tsx:150:39",
+      "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/pages/chat/components/chat-forwarded-attribution.tsx",
+        "line": 150,
+        "col": 39,
+        "endLine": 150,
+        "endCol": 53
+      },
+      "ownerName": "<ForwardedLink>",
+      "ownerPath": [
+        "<MessageGroup>",
+        "<SessionActivityGroup>",
+        "<ChatSessionActivity>",
+        "<ForwardedAttribution>",
+        "<ForwardedLink>"
+      ],
+      "related": [
+        {
+          "message": "Related caller or root.",
+          "loc": {
+            "file": "app/src/pages/chat/components/chat-transcript-rows.ts",
+            "line": 17,
+            "col": 3,
+            "endLine": 17,
+            "endCol": 22
+          }
+        },
+        {
+          "message": "Related caller or root.",
+          "loc": {
+            "file": "app/src/pages/chat/components/chat-forwarded-attribution.tsx",
+            "line": 240,
+            "col": 64,
+            "endLine": 240,
+            "endCol": 86
+          }
+        },
+        {
+          "message": "Related caller or root.",
+          "loc": {
+            "file": "app/src/pages/chat/components/chat-session-activity.solid.tsx",
+            "line": 71,
+            "col": 24,
+            "endLine": 74,
+            "endCol": 16
+          }
+        },
+        {
+          "message": "Related caller or root.",
+          "loc": {
+            "file": "app/src/pages/chat/components/chat-message-group-view.tsx",
+            "line": 544,
+            "col": 16,
+            "endLine": 544,
+            "endCol": 25
+          }
+        }
+      ],
+      "data": {},
+      "origins": [380],
+      "rootCause": "pending memo result without traced fallback",
+      "kind": "downstream obligation",
+      "changed": true,
+      "verdict": "UNSURE",
+      "contractStatus": "required-worst-case",
+      "reason": "Route URL construction observes upstream memo/prop facts. A memo is marked possibly pending, but its original opaque-result source is not fully resolved.",
+      "source": "href={`${pathForRoute(\"cron\", props.basePath)}?${new URLSearchParams({ job: props.source.cronJobId!, run: props.source.cronRunSessionId! })}`}",
+      "sourceSHA256": "3e286b12e8345bc71b9e47ab81a38aed489dd9f73b228735e006159505e00000"
+    },
+    {
+      "id": "E03",
+      "key": "ASYNC_OUTSIDE_LOADING_BOUNDARY:src/media/parse-output.ts:617:9",
+      "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+      "severity": "error",
+      "loc": {
+        "file": "src/media/parse-output.ts",
+        "line": 617,
+        "col": 9,
+        "endLine": 617,
+        "endCol": 32
+      },
+      "ownerName": "<StreamGroup>",
+      "ownerPath": ["<StreamGroup>"],
+      "related": [
+        {
+          "message": "Related caller or root.",
+          "loc": {
+            "file": "app/src/pages/chat/components/chat-transcript-rows.ts",
+            "line": 19,
+            "col": 3,
+            "endLine": 19,
+            "endCol": 22
+          }
+        }
+      ],
+      "data": {},
+      "origins": [982],
+      "rootCause": "work or alternatives budget fallback",
+      "kind": "direct or untraced obligation",
+      "changed": false,
+      "verdict": "UNSURE",
+      "contractStatus": "required-worst-case",
+      "reason": "The primary site increments a rejection counter in media parsing. A work-budget fallback at this ordinary statement supplies pending facts; no actual Solid accessor is shown here.",
+      "source": "rejectedMediaCount += 1;",
+      "sourceSHA256": "82ef7417919df04fa72542f2f85934d5c26fcbed13ebe3b31f36fccd78b242d3"
+    },
+    {
+      "id": "E04",
+      "key": "ASYNC_OUTSIDE_LOADING_BOUNDARY:src/shared/chat-envelope.ts:36:12",
+      "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+      "severity": "error",
+      "loc": {
+        "file": "src/shared/chat-envelope.ts",
+        "line": 36,
+        "col": 12,
+        "endLine": 36,
+        "endCol": 16
+      },
+      "ownerName": "<StreamGroup>",
+      "ownerPath": ["<StreamGroup>"],
+      "related": [
+        {
+          "message": "Related caller or root.",
+          "loc": {
+            "file": "app/src/pages/chat/components/chat-transcript-rows.ts",
+            "line": 19,
+            "col": 3,
+            "endLine": 19,
+            "endCol": 22
+          }
+        }
+      ],
+      "data": {},
+      "origins": [782],
+      "rootCause": "pending source origin not further traced",
+      "kind": "direct or untraced obligation",
+      "changed": false,
+      "verdict": "UNSURE",
+      "contractStatus": "required-worst-case",
+      "reason": "The helper returns its text parameter; pending originates in propagated unknown input facts. This location alone proves no pending read by the application.",
+      "source": "return text;",
+      "sourceSHA256": "8969ddb63bc81caa32b426974858906eda9504865857b476cad99feff7ddbb66"
+    },
+    {
+      "id": "E05",
+      "key": "ASYNC_OUTSIDE_LOADING_BOUNDARY:app/src/pages/chat/components/browser-tab-card.tsx:269:11",
+      "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/pages/chat/components/browser-tab-card.tsx",
+        "line": 269,
+        "col": 11,
+        "endLine": 308,
+        "endCol": 17
+      },
+      "ownerName": "<BrowserTabCardHost>",
+      "ownerPath": [
+        "<ActivityGroup>",
+        "<ActivityGroupContent>",
+        "<ActivityGroupBody>",
+        "<BrowserTabPreviews>",
+        "<BrowserTabCardHost>"
+      ],
+      "related": [
+        {
+          "message": "Related caller or root.",
+          "loc": {
+            "file": "app/src/pages/chat/components/chat-transcript-rows.ts",
+            "line": 18,
+            "col": 3,
+            "endLine": 18,
+            "endCol": 26
+          }
+        }
+      ],
+      "data": {},
+      "origins": [3238],
+      "rootCause": "work or alternatives budget fallback",
+      "kind": "direct or untraced obligation",
+      "changed": false,
+      "verdict": "UNSURE",
+      "contractStatus": "required-worst-case",
+      "reason": "The JSX container is a file-budget boundary. Independent nested data/image reads exist, but this finding does not distinguish them from skipped work.",
+      "source": "<div class=\"bar\">",
+      "sourceSHA256": "52236d8d97d40ce91a2d4a7e57feef86cfa3f6fbecc6658f26283b29d7e473dd"
+    },
+    {
+      "id": "E06",
+      "key": "CONTEXT_PROVIDER_MISSING:app/src/pages/new-session/composer-capability-controls.tsx:99:20",
+      "code": "CONTEXT_PROVIDER_MISSING",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/pages/new-session/composer-capability-controls.tsx",
+        "line": 99,
+        "col": 20,
+        "endLine": 99,
+        "endCol": 65
+      },
+      "ownerName": "<NewSessionSelectionStatus>",
+      "ownerPath": ["<NewSessionSelectionStatus>"],
+      "related": [],
+      "data": {},
+      "origins": [],
+      "rootCause": "missing provider in analyzed render path",
+      "kind": "direct or untraced obligation",
+      "changed": false,
+      "verdict": "UNSURE",
+      "contractStatus": "provider-path-unresolved",
+      "reason": "useContext has no usable default in this analyzed path. The component is exported and providers are composed elsewhere; the run does not establish a missing provider on a production path.",
+      "source": "const textarea = useContext(NewSessionComposerTextareaContext);",
+      "sourceSHA256": "f7a77929e99626a5ce0b042f3003fa218aa9abf70d3d958cbc6f25e4cf47b453"
+    },
+    {
+      "id": "E07",
+      "key": "CONTEXT_PROVIDER_MISSING:app/src/pages/new-session/composer-capability-controls.tsx:57:20",
+      "code": "CONTEXT_PROVIDER_MISSING",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/pages/new-session/composer-capability-controls.tsx",
+        "line": 57,
+        "col": 20,
+        "endLine": 57,
+        "endCol": 65
+      },
+      "ownerName": "<NewSessionPlusMenu>",
+      "ownerPath": ["<NewSessionPlusMenu>"],
+      "related": [],
+      "data": {},
+      "origins": [],
+      "rootCause": "missing provider in analyzed render path",
+      "kind": "direct or untraced obligation",
+      "changed": false,
+      "verdict": "UNSURE",
+      "contractStatus": "provider-path-unresolved",
+      "reason": "The composer menu reads the textarea context. Provider reachability through the surrounding composer/render handoffs remains incomplete.",
+      "source": "const textarea = useContext(NewSessionComposerTextareaContext);",
+      "sourceSHA256": "f7a77929e99626a5ce0b042f3003fa218aa9abf70d3d958cbc6f25e4cf47b453"
+    },
+    {
+      "id": "E08",
+      "key": "CONTEXT_PROVIDER_MISSING:app/src/pages/new-session/composer.tsx:371:20",
+      "code": "CONTEXT_PROVIDER_MISSING",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/pages/new-session/composer.tsx",
+        "line": 371,
+        "col": 20,
+        "endLine": 371,
+        "endCol": 65
+      },
+      "ownerName": "<NewSessionComposer>",
+      "ownerPath": ["<NewSessionComposer>"],
+      "related": [],
+      "data": {},
+      "origins": [],
+      "rootCause": "missing provider in analyzed render path",
+      "kind": "direct or untraced obligation",
+      "changed": false,
+      "verdict": "UNSURE",
+      "contractStatus": "provider-path-unresolved",
+      "reason": "The composer consumes its textarea context directly. Dynamic/provider construction elsewhere prevents a claim that a real mount lacks it.",
+      "source": "const textarea = useContext(NewSessionComposerTextareaContext);",
+      "sourceSHA256": "126090de8ffb31278337887723ddbbd8552eacbc183f9720961c4df43e6cb578"
+    },
+    {
+      "id": "E09",
+      "key": "CONTEXT_PROVIDER_MISSING:app/src/lib/reactive/context.ts:107:10",
+      "code": "CONTEXT_PROVIDER_MISSING",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/lib/reactive/context.ts",
+        "line": 107,
+        "col": 10,
+        "endLine": 107,
+        "endCol": 40
+      },
+      "ownerName": "<ChatPermissionCard>",
+      "ownerPath": ["<ChatSystemEvents>", "<SystemEvent>", "<ChatNotice>", "<ChatPermissionCard>"],
+      "related": [
+        {
+          "message": "Related caller or root.",
+          "loc": {
+            "file": "app/src/pages/chat/components/chat-transcript-rows.ts",
+            "line": 16,
+            "col": 3,
+            "endLine": 16,
+            "endCol": 36
+          }
+        }
+      ],
+      "data": {},
+      "origins": [],
+      "rootCause": "missing provider in analyzed render path",
+      "kind": "direct or untraced obligation",
+      "changed": false,
+      "verdict": "UNSURE",
+      "contractStatus": "provider-path-unresolved",
+      "reason": "useApplication calls useContext, while useOptionalApplication below catches ContextNotFoundError. The diagnostic does not record which uncaught runtime path establishes this error; caught lookup precision remains unresolved.",
+      "source": "return useContext(ApplicationContext);",
+      "sourceSHA256": "505aeceebdc8450df7a0fc118234b4270318f6385a52b43b046617c16c947eec"
+    },
+    {
+      "id": "E10",
+      "key": "CONTEXT_PROVIDER_MISSING:app/src/components/image-lightbox-content.tsx:40:16",
+      "code": "CONTEXT_PROVIDER_MISSING",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/components/image-lightbox-content.tsx",
+        "line": 40,
+        "col": 16,
+        "endLine": 40,
+        "endCol": 45
+      },
+      "ownerName": "<ImageLightboxContent>",
+      "ownerPath": ["<ImageLightboxContent>"],
+      "related": [],
+      "data": {},
+      "origins": [],
+      "rootCause": "missing provider in analyzed render path",
+      "kind": "direct or untraced obligation",
+      "changed": false,
+      "verdict": "UNSURE",
+      "contractStatus": "provider-path-unresolved",
+      "reason": "ImageLightboxContent reads a host context without a local default. External mount/provider ownership is incomplete, so absence on a real mounted path is unproven.",
+      "source": "const host = useContext(ImageLightboxHost);",
+      "sourceSHA256": "55013cd6034e1315ec52cb2043eecf64dce2187e8cfb5b88d3f7b401413f184d"
+    },
+    {
+      "id": "E11",
+      "key": "ERROR_OUTSIDE_ERRORED_BOUNDARY:app/src/pages/chat/components/chat-source-previews.tsx:127:24",
+      "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/pages/chat/components/chat-source-previews.tsx",
+        "line": 127,
+        "col": 24,
+        "endLine": 127,
+        "endCol": 37
+      },
+      "ownerName": "<ChatSourcePreviews>",
+      "ownerPath": ["<AgentRunFrame>", "<RunFrame>", "<ChatSourcePreviews>"],
+      "related": [
+        {
+          "message": "Related caller or root.",
+          "loc": {
+            "file": "app/src/pages/chat/components/chat-transcript-rows.ts",
+            "line": 21,
+            "col": 3,
+            "endLine": 21,
+            "endCol": 23
+          }
+        },
+        {
+          "message": "Related caller or root.",
+          "loc": {
+            "file": "app/src/pages/chat/components/chat-agent-run-frame.tsx",
+            "line": 347,
+            "col": 16,
+            "endLine": 347,
+            "endCol": 38
+          }
+        }
+      ],
+      "data": {
+        "failures": ["unknown"]
+      },
+      "origins": [
+        3432, 3433, 3434, 3012, 3013, 3435, 3436, 3437, 3438, 3439, 3440, 425, 426, 427, 428, 429,
+        430, 431, 432, 433, 434, 435, 436, 437, 438, 439, 440, 441, 442, 443, 444, 445, 446, 447,
+        448, 449, 450, 451, 452, 453, 454, 455, 456, 457, 458, 459, 271, 272, 273, 274, 275, 276,
+        277, 278, 279, 280, 281, 282, 283, 460, 461, 462, 463, 464, 465, 466, 467, 468, 469, 470,
+        471, 472, 473, 474, 475, 476, 477, 478, 479, 480, 481, 482, 483, 484, 485, 486, 487, 488,
+        489, 490, 491, 492, 493, 494, 495, 496, 497, 498, 499, 500, 501, 502, 503, 504, 505, 506,
+        507, 508, 509, 510, 511, 512, 513, 514, 515, 516, 517, 518, 519, 520, 521, 522, 523, 524,
+        525, 526, 527, 528, 529, 530, 531, 532, 533, 534, 535, 536, 537, 538, 539, 540, 541, 542,
+        543, 544, 545, 546, 547, 548, 549, 550, 551, 552, 553, 554, 555, 556, 557, 558, 559, 560,
+        561, 562, 563, 564, 565, 566, 567, 568, 569, 570, 571, 572, 573, 574, 575, 576, 577, 578,
+        579, 580, 581, 582, 583, 584, 585, 586, 587, 588, 589, 590, 591, 592, 593, 594, 595, 596,
+        597, 598, 599, 600, 601, 602, 603, 604, 605, 606, 607, 608, 609, 610, 611, 612, 613, 614,
+        615, 616, 617, 618, 619, 620, 621, 622, 623, 3256, 624, 625, 626, 627, 628, 629, 630, 631,
+        632, 633, 634, 635, 636, 637, 638, 639, 640, 641, 642, 643, 644, 645, 646, 647, 648, 649,
+        650, 651, 652, 653, 654, 655, 656, 657, 658, 659, 660, 661, 662, 663, 664, 665, 666, 667,
+        668, 669, 670, 671, 672, 673, 674, 675, 676, 677, 678, 679, 680, 681, 682, 683, 684, 685,
+        686, 687, 688, 689, 690, 691, 692, 693, 694, 695, 696, 697, 698, 699, 700, 701, 702, 703,
+        704, 705, 706, 707, 708, 709, 710, 711, 712, 713, 714, 715, 716, 717, 718, 719, 720, 721,
+        722, 723, 724, 725, 726, 727, 728, 729, 730, 731, 732, 733, 734, 735, 736, 737, 738, 739,
+        740, 741, 742, 743, 744, 745, 746, 747, 748, 749, 750, 751, 752, 753, 754, 755, 756, 757,
+        758, 759, 760, 761, 762, 763, 764, 765, 766, 767, 768, 769, 770, 771, 772, 773, 774, 775,
+        776, 777, 778, 779, 780, 781, 782, 783, 784, 785, 786, 787, 788, 789, 790, 791, 792, 793,
+        794, 795, 796, 797, 798, 799, 800, 801, 802, 803, 804, 805, 806, 807, 808, 809, 810, 811,
+        812, 813, 814, 815, 816, 817, 818, 819, 820, 821, 822, 823, 824, 825, 826, 827, 828, 829,
+        830, 831, 832, 833, 834, 835, 836, 837, 838, 839, 840, 841, 842, 843, 844, 845, 846, 847,
+        848, 849, 850, 851, 852, 853, 854, 855, 856, 857, 858, 859, 860, 861, 862, 863, 864, 865,
+        3441, 953, 954, 955, 956, 957, 958, 959, 960, 961, 962, 963, 964, 965, 966, 967, 968, 969,
+        970, 971, 972, 973, 974, 975, 976, 977, 978, 979, 980, 981, 982, 983, 984, 985, 986, 987,
+        988, 989, 990, 991, 992, 993, 994, 995, 996, 997, 998, 999, 1000, 1001, 1002, 1003, 1004,
+        1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019,
+        1020, 1021, 1022, 1023, 1024, 3257, 3258, 3442, 3259, 3443, 3260, 3261, 3262, 3444, 3445,
+        3446, 3447, 3263, 3448, 3449, 3450, 3264, 3451, 3452, 3265, 3453, 3454, 3266, 3455, 3456,
+        3457, 3267, 945, 946, 947, 948, 3268, 949, 1025, 1101, 1102, 1103, 1104, 1105, 1106, 1107,
+        1108, 1109, 1110, 1111, 1112, 1113, 1114, 1115, 1116, 1117, 3458, 3459, 3460, 3461, 3462,
+        3463, 1193, 1194, 1195, 1079, 1080, 1081, 1082, 1083, 1084, 1093, 1094, 1095, 1096, 1097,
+        1098, 3464, 3465, 3466, 3467, 3468, 3469, 3470, 1157, 1158, 1159, 1160, 1161, 1162, 1163,
+        1164, 1165, 1166, 1167, 1168, 1169, 1170, 1171, 1172, 1173, 1174, 1175, 1176, 1177, 1178,
+        1179, 1198, 3471, 3472, 3473, 3474, 3475, 3476, 3125, 3126, 3127, 3128, 3477, 3036, 3037,
+        3038, 3039, 3040, 884, 885, 886, 887, 888, 889, 900, 901, 902, 903, 1118, 1119, 1120, 1121,
+        1122, 871, 1123, 1124, 292, 3478, 293, 3479, 294, 3480, 295, 3481, 3482, 3483, 2593, 2594,
+        2595, 2596, 2597, 2598, 2599, 2716, 2600, 2601, 2602, 417, 2603, 2604, 2605, 2606, 2607,
+        2608, 2609, 2610, 2611, 2612, 2613, 2614, 2615, 2616, 2617, 2618, 2619, 2620, 3484, 3485,
+        3486, 3487, 3488, 1409, 3489, 3490, 3491, 1412, 3492, 3493, 1400, 1401, 1402, 1403, 1404,
+        1405, 1406, 1407, 1408, 1410, 1411, 1413, 1414, 1415, 1416, 1417, 1418, 1419, 1420, 1421,
+        1422, 1423, 1424, 1425, 1426, 1427, 1428, 1429, 1430, 1431, 1432, 1433, 1434, 1435, 1436,
+        1437, 1438, 1439, 1440, 1441, 1442, 1443, 1444, 1445, 1446, 1447, 1448, 1449, 1450, 1451,
+        1452, 1453, 1454, 1455, 1456, 1457, 1458, 1459, 1460, 1461, 1462, 1463, 1464, 1465, 1466,
+        1467, 1468, 1469, 1470, 1471, 1472, 1473, 1474, 1475, 1476, 1477, 1478, 1479, 1480, 1481,
+        1482, 1483, 1484, 1485, 1486, 1487, 1488, 1489, 1490, 1491, 1492, 1493, 1494, 1495, 1496,
+        1497, 1498, 1499, 1500, 1501, 1502, 1503, 1504, 1505, 1506, 1507, 1508, 1509, 1510, 1511,
+        1512, 1513, 1514, 1515, 1516, 1589, 1590, 1591, 1592, 1593, 1594, 1595, 1596, 1597, 3494,
+        3495, 3496, 3497, 3498, 3499, 3500, 3501, 3502, 3503, 3504, 3505, 3506, 3507, 3508, 3509,
+        3510, 3511, 3512, 3513, 3514, 3515, 3516, 3517, 3518, 3519, 3520, 3521, 3522, 1301, 1302,
+        1303, 1304, 1180, 1181, 1182, 1183, 1184, 1185, 1186, 1187, 1188, 1189, 1190, 1191, 1192,
+        1305, 1306, 1196, 1197, 3523, 3524, 3525, 3526, 3527, 3528, 3529, 3530, 3531, 3532, 3533,
+        2148, 2149, 2150, 2151, 2152, 2153, 2154, 2155, 2156, 2157, 2158, 2159, 2160, 2161, 2162,
+        2163, 2164, 2165, 2166, 2167, 2168, 2169, 2170, 2171, 2172, 2173, 2174, 2175, 2176, 2177,
+        3534, 3343, 3344, 3345, 3346, 3347, 3348, 3349, 3350, 2718, 2719, 2720, 2721, 2722, 2723,
+        2724, 2725, 2726, 2727, 2728, 2729, 2730, 2731, 2732, 2733, 8, 9, 3545
+      ],
+      "rootCause": "work or alternatives budget fallback",
+      "kind": "downstream obligation",
+      "changed": true,
+      "verdict": "UNSURE",
+      "contractStatus": "required-worst-case",
+      "reason": "For forwards sources into SourceCard; origins contain upstream projection and work-budget fallbacks. The original callback/source contract is not a proven application throw.",
+      "source": "<For each={props.sources} keyed={(source) => source.url}>",
+      "sourceSHA256": "100864d988a12c97a3b246a9b4da17cbf69c870cf417378d20cc8e057acfeff0"
+    },
+    {
+      "id": "E12",
+      "key": "ERROR_OUTSIDE_ERRORED_BOUNDARY:src/auto-reply/reply/strip-inbound-meta.ts:179:19",
+      "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+      "severity": "error",
+      "loc": {
+        "file": "src/auto-reply/reply/strip-inbound-meta.ts",
+        "line": 179,
+        "col": 19,
+        "endLine": 179,
+        "endCol": 60
+      },
+      "ownerName": "<StreamGroup>",
+      "ownerPath": ["<StreamGroup>"],
+      "related": [
+        {
+          "message": "Related caller or root.",
+          "loc": {
+            "file": "app/src/pages/chat/components/chat-transcript-rows.ts",
+            "line": 19,
+            "col": 3,
+            "endLine": 19,
+            "endCol": 22
+          }
+        }
+      ],
+      "data": {
+        "failures": ["unknown"]
+      },
+      "origins": [693],
+      "rootCause": "work or alternatives budget fallback",
+      "kind": "direct or untraced obligation",
+      "changed": true,
+      "verdict": "UNSURE",
+      "contractStatus": "required-worst-case",
+      "reason": "A string lastIndexOf inside a metadata scanning loop is reached after exhausted work. Its failure obligation derives from fallback facts rather than a modeled native failure.",
+      "source": "const start = source.lastIndexOf(\"\\n\", match.index - 1) + 1;",
+      "sourceSHA256": "37a4593897461a2e114330c7157a0624b65d76f37f883ed55b83fc1aeaba46d0"
+    },
+    {
+      "id": "E13",
+      "key": "ERROR_OUTSIDE_ERRORED_BOUNDARY:app/src/lib/chat/message-normalizer.ts:194:27",
+      "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/lib/chat/message-normalizer.ts",
+        "line": 194,
+        "col": 27,
+        "endLine": 194,
+        "endCol": 66
+      },
+      "ownerName": "<StreamGroup>",
+      "ownerPath": ["<StreamGroup>"],
+      "related": [
+        {
+          "message": "Related caller or root.",
+          "loc": {
+            "file": "app/src/pages/chat/components/chat-transcript-rows.ts",
+            "line": 19,
+            "col": 3,
+            "endLine": 19,
+            "endCol": 22
+          }
+        }
+      ],
+      "data": {
+        "failures": ["unknown"]
+      },
+      "origins": [449],
+      "rootCause": "unresolved callable or receiver facts",
+      "kind": "direct or untraced obligation",
+      "changed": false,
+      "verdict": "TP",
+      "contractStatus": "required-unknown-failure",
+      "reason": "asFiniteNumber is imported from an installed normalization package. Its implementation is outside authored input and this call has unresolved failure facts. D-129 requires the escaping obligation; its name does not prove safety.",
+      "source": "const preferredHeight = asFiniteNumber(preview.preferredHeight);",
+      "sourceSHA256": "8f6da983eb7117f24ebde1a029ec2d8ba31e6f9aa3af72f34d86462161ef05c1"
+    },
+    {
+      "id": "E14",
+      "key": "ERROR_OUTSIDE_ERRORED_BOUNDARY:app/src/lib/chat/message-normalizer.ts:280:18",
+      "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/lib/chat/message-normalizer.ts",
+        "line": 280,
+        "col": 18,
+        "endLine": 280,
+        "endCol": 36
+      },
+      "ownerName": "<StreamGroup>",
+      "ownerPath": ["<StreamGroup>"],
+      "related": [
+        {
+          "message": "Related caller or root.",
+          "loc": {
+            "file": "app/src/pages/chat/components/chat-transcript-rows.ts",
+            "line": 19,
+            "col": 3,
+            "endLine": 19,
+            "endCol": 22
+          }
+        }
+      ],
+      "data": {
+        "failures": ["unknown"]
+      },
+      "origins": [583],
+      "rootCause": "unresolved callable or receiver facts",
+      "kind": "direct or untraced obligation",
+      "changed": false,
+      "verdict": "UNSURE",
+      "contractStatus": "required-unknown-failure",
+      "reason": "The source operation is url.split(...).pop()?.trim() on a string parameter. Literal/known receiver chains are fixed, but this invocation still has opaque input/receiver facts. A possible lost declaration shape remains; replacing all opaque values with annotations would erase worst-case facts.",
+      "source": "const name = url.split(/[\\\\/]/).pop()?.trim();",
+      "sourceSHA256": "8f6da983eb7117f24ebde1a029ec2d8ba31e6f9aa3af72f34d86462161ef05c1"
+    },
+    {
+      "id": "E15",
+      "key": "ERROR_OUTSIDE_ERRORED_BOUNDARY:app/src/app/user-identity.ts:22:7",
+      "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/app/user-identity.ts",
+        "line": 22,
+        "col": 7,
+        "endLine": 22,
+        "endCol": 29
+      },
+      "ownerName": "<StreamGroup>",
+      "ownerPath": ["<StreamGroup>"],
+      "related": [
+        {
+          "message": "Related caller or root.",
+          "loc": {
+            "file": "app/src/pages/chat/components/chat-transcript-rows.ts",
+            "line": 19,
+            "col": 3,
+            "endLine": 19,
+            "endCol": 22
+          }
+        }
+      ],
+      "data": {
+        "failures": ["unknown"]
+      },
+      "origins": [1084],
+      "rootCause": "unresolved callable or receiver facts",
+      "kind": "direct or untraced obligation",
+      "changed": false,
+      "verdict": "UNSURE",
+      "contractStatus": "required-unknown-failure",
+      "reason": "The receiver is a native regexp literal, but trimmed comes from an installed normalizeOptionalString call whose declaration/result is unavailable here. Literal-regexp provenance is also lost. This is a candidate false positive, not a confirmed application throw or a justified exemption based on the imported name.",
+      "source": "if (/[\\r\\n]/.test(trimmed)) {",
+      "sourceSHA256": "c8f785d7947d4473e6f7d33c5f0cdef85ac25614f9a0bc6260311de346e52047"
+    },
+    {
+      "id": "E16",
+      "key": "PENDING_ASYNC_FORBIDDEN_SCOPE:app/src/pages/sessions/sessions-page.tsx:44:23",
+      "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/pages/sessions/sessions-page.tsx",
+        "line": 44,
+        "col": 23,
+        "endLine": 44,
+        "endCol": 29
+      },
+      "ownerName": "<SessionManagementMenu>",
+      "ownerPath": ["<SessionsPageContent>", "<SessionManagementMenu>"],
+      "related": [],
+      "data": {},
+      "origins": [
+        252, 253, 404, 405, 406, 407, 408, 4488, 5959, 5960, 6127, 6128, 6129, 4282, 6130, 6131,
+        7155, 7156, 7157, 7158, 8609, 7653, 7654, 8610, 8611, 8612, 8613, 8614, 8615, 8616, 10722,
+        10723, 10724, 10718, 7171, 10969, 10970, 7652, 7655, 10971, 10972
+      ],
+      "rootCause": "work or alternatives budget fallback",
+      "kind": "downstream obligation",
+      "changed": true,
+      "verdict": "UNSURE",
+      "contractStatus": "required-worst-case-and-deferred-phase",
+      "reason": "The read is inside onSettled; that phase is deferred in FUTURE. Work-budget facts independently require worst-case obligations. The effect-phase label is not proof of a supported-scope app bug.",
+      "source": "if (active && view().commandEpoch === epoch) {",
+      "sourceSHA256": "bfca44d1a63e5f069519d770278d4d612faf401b4d0f31716eb730d50dd0eeb6"
+    },
+    {
+      "id": "E17",
+      "key": "PENDING_ASYNC_FORBIDDEN_SCOPE:app/src/features/github-connections/github-identity.ts:203:7",
+      "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/features/github-connections/github-identity.ts",
+        "line": 203,
+        "col": 7,
+        "endLine": 203,
+        "endCol": 39
+      },
+      "ownerName": "<AgentsPage>",
+      "ownerPath": ["<AgentsPage>"],
+      "related": [],
+      "data": {},
+      "origins": [7436],
+      "rootCause": "work or alternatives budget fallback",
+      "kind": "direct or untraced obligation",
+      "changed": true,
+      "verdict": "UNSURE",
+      "contractStatus": "required-worst-case",
+      "reason": "deviceAuthorization.retire(true) is an imperative operation. The pending classification comes from exhausted work, not from a proved Solid accessor body.",
+      "source": "deviceAuthorization.retire(true);",
+      "sourceSHA256": "714ea89b8d4cfa7a2c47876d681c58c96ba937cb0c021942fc95047fab9c119d"
+    },
+    {
+      "id": "E18",
+      "key": "PENDING_ASYNC_FORBIDDEN_SCOPE:app/src/pages/config/appearance-background-state.ts:214:22",
+      "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/pages/config/appearance-background-state.ts",
+        "line": 214,
+        "col": 22,
+        "endLine": 214,
+        "endCol": 84
+      },
+      "ownerName": "<AppearanceBackground>",
+      "ownerPath": ["<AppearanceBackground>"],
+      "related": [],
+      "data": {},
+      "origins": [10070],
+      "rootCause": "work or alternatives budget fallback",
+      "kind": "direct or untraced obligation",
+      "changed": false,
+      "verdict": "UNSURE",
+      "contractStatus": "required-worst-case",
+      "reason": "The conditional builds an image-read identity inside preview work. The budget origin prevents separating an actual accessor read from fallback pending.",
+      "source": "const identity = assetId ? backgroundImageReadIdentity(context, assetId) : null;",
+      "sourceSHA256": "3f6edcec14e62dcfdc6492498e5f20b510a91541032e4a155352748810925318"
+    },
+    {
+      "id": "E19",
+      "key": "PENDING_ASYNC_FORBIDDEN_SCOPE:app/src/lib/system-info.ts:31:10",
+      "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/lib/system-info.ts",
+        "line": 31,
+        "col": 10,
+        "endLine": 31,
+        "endCol": 72
+      },
+      "ownerName": "<DevicesPage>",
+      "ownerPath": ["<DevicesPage>"],
+      "related": [],
+      "data": {},
+      "origins": [10392],
+      "rootCause": "work or alternatives budget fallback",
+      "kind": "direct or untraced obligation",
+      "changed": false,
+      "verdict": "UNSURE",
+      "contractStatus": "required-worst-case",
+      "reason": "canCallGatewayMethod is a synchronous capability check. Exhausted work makes this call worst case; the source does not itself establish a pending accessor.",
+      "source": "return canCallGatewayMethod(snapshot, \"system.info\", \"operator.read\");",
+      "sourceSHA256": "cb1b911072a5d109d6b42b681683990da1315299a44a9539f2ee070e441ac01a"
+    },
+    {
+      "id": "E20",
+      "key": "PENDING_ASYNC_FORBIDDEN_SCOPE:app/src/pages/skills/skills-page.tsx:385:5",
+      "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/pages/skills/skills-page.tsx",
+        "line": 385,
+        "col": 5,
+        "endLine": 385,
+        "endCol": 82
+      },
+      "ownerName": "<SkillsPage>",
+      "ownerPath": ["<SkillsPage>"],
+      "related": [],
+      "data": {},
+      "origins": [11100],
+      "rootCause": "work or alternatives budget fallback",
+      "kind": "direct or untraced obligation",
+      "changed": false,
+      "verdict": "UNSURE",
+      "contractStatus": "required-worst-case",
+      "reason": "setSkillsAgentId receives agentSelection().state. Both real reactive inputs and exhausted helper work are possible causes; the complete original read chain is unresolved.",
+      "source": "setSkillsAgentId(data, agentSelection().state.selectedId, retirePresentation);",
+      "sourceSHA256": "029b2117cc8d9d75c65a9e5525b332655bc9605f42163ef75bbb2cbf0299947a"
+    },
+    {
+      "id": "E21",
+      "key": "PENDING_ASYNC_UNTRACKED_READ:app/src/pages/chat/chat-page-pane-render.tsx:362:13",
+      "code": "PENDING_ASYNC_UNTRACKED_READ",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/pages/chat/chat-page-pane-render.tsx",
+        "line": 362,
+        "col": 13,
+        "endLine": 364,
+        "endCol": 20
+      },
+      "ownerName": "<SplitLayout>",
+      "ownerPath": ["<ChatPageBody>", "<SplitLayout>"],
+      "related": [],
+      "data": {},
+      "origins": [7702],
+      "rootCause": "work or alternatives budget fallback",
+      "kind": "direct or untraced obligation",
+      "changed": true,
+      "verdict": "UNSURE",
+      "contractStatus": "required-worst-case",
+      "reason": "This Show occurs in a keyed row JSX expression, which normally tracks. The current finding comes from function/file-budget widening in the row path, not an established misplaced read.",
+      "source": "<Show when={!options().pane.narrow && columnIndex() < layout().columns.length - 1}>",
+      "sourceSHA256": "f99335b666f6bb0b77507e0015d2b074fcf6759aa5b32d9482e6e99bf2a14054"
+    },
+    {
+      "id": "E22",
+      "key": "PENDING_ASYNC_UNTRACKED_READ:app/src/components/panel-tab-strip-solid.tsx:140:19",
+      "code": "PENDING_ASYNC_UNTRACKED_READ",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/components/panel-tab-strip-solid.tsx",
+        "line": 140,
+        "col": 19,
+        "endLine": 140,
+        "endCol": 35
+      },
+      "ownerName": "<TabGroupView>",
+      "ownerPath": ["<SidebarRegionHeader>", "<PanelTabStrip>", "<TabGroupView>"],
+      "related": [
+        {
+          "message": "Related caller or root.",
+          "loc": {
+            "file": "app/src/components/panel-tab-strip-solid.tsx",
+            "line": 388,
+            "col": 44,
+            "endLine": 388,
+            "endCol": 74
+          }
+        },
+        {
+          "message": "Related caller or root.",
+          "loc": {
+            "file": "app/src/pages/chat/components/chat-sidebar-region-header.tsx",
+            "line": 589,
+            "col": 23,
+            "endLine": 589,
+            "endCol": 37
+          }
+        }
+      ],
+      "data": {},
+      "origins": [8931, 8932],
+      "rootCause": "work or alternatives budget fallback",
+      "kind": "downstream obligation",
+      "changed": true,
+      "verdict": "UNSURE",
+      "contractStatus": "required-worst-case",
+      "reason": "groupRef runs as a ref, so real pending prop reads would violate D-131. Here focusOwner originates in a caller budget fallback; the native attachment is not itself proof of pending.",
+      "source": "detachFocus = props.focusOwner.attach({",
+      "sourceSHA256": "53e4d789536764573286b41e742f7590e88a0dc43a2cdc7f8a8a12e898af7ea6"
+    },
+    {
+      "id": "E23",
+      "key": "PENDING_ASYNC_UNTRACKED_READ:app/src/components/app-sidebar-session-filter-summary.tsx:160:12",
+      "code": "PENDING_ASYNC_UNTRACKED_READ",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/components/app-sidebar-session-filter-summary.tsx",
+        "line": 160,
+        "col": 12,
+        "endLine": 160,
+        "endCol": 16
+      },
+      "ownerName": "<Icon>",
+      "ownerPath": ["<SidebarAgentRoster>", "<Icon>"],
+      "related": [],
+      "data": {},
+      "origins": [4546],
+      "rootCause": "work or alternatives budget fallback",
+      "kind": "direct or untraced obligation",
+      "changed": false,
+      "verdict": "UNSURE",
+      "contractStatus": "required-worst-case",
+      "reason": "An Icon element is a bounded component invocation. No actual setup pending source is established by its name or JSX alone.",
+      "source": "<Icon name=\"x\" />",
+      "sourceSHA256": "795ed86a20b099249d77801ec5fe332292ca7b986d10ae235df46e498b39bb30"
+    },
+    {
+      "id": "E24",
+      "key": "PENDING_ASYNC_UNTRACKED_READ:app/src/components/solid/identity-avatar.tsx:36:20",
+      "code": "PENDING_ASYNC_UNTRACKED_READ",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/components/solid/identity-avatar.tsx",
+        "line": 36,
+        "col": 20,
+        "endLine": 40,
+        "endCol": 5
+      },
+      "ownerName": "<AgentIdentityAvatar>",
+      "ownerPath": [
+        "<MessageGroup>",
+        "<SessionActivityGroup>",
+        "<ChatSessionActivity>",
+        "<PreparedMessage>",
+        "<GroupedMessage>",
+        "<ReplyLineView>",
+        "<ChatAuthorAvatar>",
+        "<AgentIdentityAvatar>"
+      ],
+      "related": [
+        {
+          "message": "Related caller or root.",
+          "loc": {
+            "file": "app/src/pages/chat/components/chat-transcript-rows.ts",
+            "line": 17,
+            "col": 3,
+            "endLine": 17,
+            "endCol": 22
+          }
+        }
+      ],
+      "data": {},
+      "origins": [2552],
+      "rootCause": "work or alternatives budget fallback",
+      "kind": "direct or untraced obligation",
+      "changed": false,
+      "verdict": "UNSURE",
+      "contractStatus": "required-worst-case",
+      "reason": "projectSource creates the branding projection. Exhaustion in the service/project factory analysis supplies pending facts; the precise read invocation remains incomplete.",
+      "source": "const branding = projectSource(null, {",
+      "sourceSHA256": "7c69cd9f4bd5fedba37c3fb1b68c8ceb4d113cb145523990662647eb7e0e402c"
+    },
+    {
+      "id": "E25",
+      "key": "PENDING_ASYNC_UNTRACKED_READ:app/src/pages/chat/chat-avatar-view.tsx:221:20",
+      "code": "PENDING_ASYNC_UNTRACKED_READ",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/pages/chat/chat-avatar-view.tsx",
+        "line": 221,
+        "col": 20,
+        "endLine": 225,
+        "endCol": 5
+      },
+      "ownerName": "<AgentAvatar>",
+      "ownerPath": ["<ForwardedAvatar>", "<ChatAvatar>", "<AgentAvatar>"],
+      "related": [],
+      "data": {},
+      "origins": [5156],
+      "rootCause": "work or alternatives budget fallback",
+      "kind": "direct or untraced obligation",
+      "changed": false,
+      "verdict": "UNSURE",
+      "contractStatus": "required-worst-case",
+      "reason": "The same projection pattern is instantiated for a local avatar. Its distinct invocation is retained; it is not merged with E24, and its fallback obligation remains unresolved.",
+      "source": "const branding = projectSource(null, {",
+      "sourceSHA256": "81ff5964f4518844401b5826d294571d56b5b1fbd5aaeb99c5a727342fdf2159"
+    },
+    {
+      "id": "E26",
+      "key": "REACTIVE_WRITE_IN_OWNED_SCOPE:app/src/components/markdown-dom-ref.ts:45:5",
+      "code": "REACTIVE_WRITE_IN_OWNED_SCOPE",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/components/markdown-dom-ref.ts",
+        "line": 45,
+        "col": 5,
+        "endLine": 45,
+        "endCol": 22
+      },
+      "ownerName": "<MarkdownContent>",
+      "ownerPath": [
+        "<MessageGroup>",
+        "<SessionActivityGroup>",
+        "<ChatSessionActivity>",
+        "<PreparedMessage>",
+        "<GroupedMessage>",
+        "<ChatBubbleActivity>",
+        "<BubbleContents>",
+        "<MessageReasoning>",
+        "<MarkdownText>",
+        "<MarkdownContent>"
+      ],
+      "related": [
+        {
+          "message": "Related caller or root.",
+          "loc": {
+            "file": "app/src/pages/chat/components/chat-transcript-rows.ts",
+            "line": 17,
+            "col": 3,
+            "endLine": 17,
+            "endCol": 22
+          }
+        }
+      ],
+      "data": {},
+      "origins": [],
+      "rootCause": "setter invoked in owned scope",
+      "kind": "direct or untraced obligation",
+      "changed": false,
+      "verdict": "TP",
+      "contractStatus": "supported-rule-with-ownedWrite-deferred",
+      "reason": "MarkdownContent calls markdown(fragment) synchronously in setup (chat-message-text-view.tsx:286). That closure calls setOwner at this site. The frozen slice forbids setup setters; the ownedWrite option is deferred and does not discharge this rule. This is not a claim about the future ownership policy.",
+      "source": "setOwner(current);",
+      "sourceSHA256": "6076f134a94cd00c15aeeb7c5b5ffbc30547e93cae2240b6956e0370eae4e9a5"
+    },
+    {
+      "id": "E27",
+      "key": "REACTIVE_WRITE_IN_OWNED_SCOPE:app/src/lib/reactive/projection.ts:83:5",
+      "code": "REACTIVE_WRITE_IN_OWNED_SCOPE",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/lib/reactive/projection.ts",
+        "line": 83,
+        "col": 5,
+        "endLine": 83,
+        "endCol": 44
+      },
+      "ownerName": "<SessionHovercardAutomations>",
+      "ownerPath": ["<SessionHovercardAutomations>"],
+      "related": [],
+      "data": {},
+      "origins": [],
+      "rootCause": "setter invoked in owned scope",
+      "kind": "direct or untraced obligation",
+      "changed": false,
+      "verdict": "TP",
+      "contractStatus": "supported-rule-with-ownedWrite-deferred",
+      "reason": "SessionHovercardAutomations source memo creates projectSource; its subscribe body calls reset synchronously, reset calls notify, and projection.publish calls setRevision here. This is an owned-compute setter under the frozen rule; ownedWrite re-entrancy policy remains deferred.",
+      "source": "setRevision((previous) => previous + 1);",
+      "sourceSHA256": "290da78837c6e51550211a60637d0bd85507c4e0fdfd374db0f12eb7e5715bc5"
+    },
+    {
+      "id": "E28",
+      "key": "SETUP_MAY_THROW:app/src/pages/chat/components/chat-sidebar-file-view.tsx:226:16",
+      "code": "SETUP_MAY_THROW",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/pages/chat/components/chat-sidebar-file-view.tsx",
+        "line": 226,
+        "col": 16,
+        "endLine": 226,
+        "endCol": 20
+      },
+      "ownerName": "<Icon>",
+      "ownerPath": ["<SidebarPanel>", "<SidebarFile>", "<Icon>"],
+      "related": [],
+      "data": {
+        "failures": ["unknown"]
+      },
+      "origins": [7883],
+      "rootCause": "work or alternatives budget fallback",
+      "kind": "direct or untraced obligation",
+      "changed": true,
+      "verdict": "UNSURE",
+      "contractStatus": "required-worst-case",
+      "reason": "The Icon invocation reaches its function budget during setup expansion. This does not prove that the icon implementation actually throws at this call.",
+      "source": "<Icon name=\"chevronDown\" />",
+      "sourceSHA256": "a8a24a938714a5bb0ae2980fd4eac2ace6e06757d29ad21121fbe69e8fd40aff"
+    },
+    {
+      "id": "E29",
+      "key": "SETUP_MAY_THROW:app/src/app/shell-assistant-toggles.tsx:11:10",
+      "code": "SETUP_MAY_THROW",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/app/shell-assistant-toggles.tsx",
+        "line": 11,
+        "col": 10,
+        "endLine": 11,
+        "endCol": 22
+      },
+      "ownerName": "<ShortcutHint>",
+      "ownerPath": [
+        "<OpenClawShell>",
+        "<ApplicationShell>",
+        "<CollapsedHomeToggle>",
+        "<ShortcutHint>"
+      ],
+      "related": [],
+      "data": {
+        "failures": ["unknown"]
+      },
+      "origins": [3987],
+      "rootCause": "work or alternatives budget fallback",
+      "kind": "direct or untraced obligation",
+      "changed": true,
+      "verdict": "UNSURE",
+      "contractStatus": "required-worst-case",
+      "reason": "ShortcutHint is bounded while consuming label/combo props. Independent lazy obligations remain possible, but the emitted setup failure is not a fully analyzed body proof.",
+      "source": "<ShortcutHint",
+      "sourceSHA256": "b46c44a22407388e2455684d40e243aec9fc79a5ba1bab47dc1b6d9d3cd4ffd9"
+    },
+    {
+      "id": "E30",
+      "key": "SETUP_MAY_THROW:app/src/components/solid/mcp-app-panel.tsx:42:19",
+      "code": "SETUP_MAY_THROW",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/components/solid/mcp-app-panel.tsx",
+        "line": 42,
+        "col": 19,
+        "endLine": 42,
+        "endCol": 50
+      },
+      "ownerName": "<McpAppPanel>",
+      "ownerPath": ["<SidebarPanel>", "<McpAppPanel>"],
+      "related": [],
+      "data": {
+        "failures": ["unknown"]
+      },
+      "origins": [7795],
+      "rootCause": "pending source origin not further traced",
+      "kind": "direct or untraced obligation",
+      "changed": false,
+      "verdict": "UNSURE",
+      "contractStatus": "required-worst-case",
+      "reason": "projectGateway forwards through projectOwner/projectSource. Its pending-origin record is incomplete; possible unknown source failures must remain, without claiming the factory always throws.",
+      "source": "const gateway = projectGateway(context.gateway);",
+      "sourceSHA256": "911f74898f2f34eef6c3f5aee2b6327959496e9318df2ff503236fd313fdab1f"
+    },
+    {
+      "id": "E31",
+      "key": "SETUP_MAY_THROW:app/src/pages/chat/components/session-diff-render.tsx:34:25",
+      "code": "SETUP_MAY_THROW",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/pages/chat/components/session-diff-render.tsx",
+        "line": 34,
+        "col": 25,
+        "endLine": 34,
+        "endCol": 39
+      },
+      "ownerName": "<DiffFoldToggle>",
+      "ownerPath": [
+        "<SidebarPanel>",
+        "<SessionDiffPanel>",
+        "<Panel>",
+        "<Result>",
+        "<ResultBody>",
+        "<File>",
+        "<SessionDiffFileBody>",
+        "<SessionSplitDiff>",
+        "<SplitSide>",
+        "<DiffFoldToggle>"
+      ],
+      "related": [],
+      "data": {
+        "failures": ["unknown"]
+      },
+      "origins": [8113],
+      "rootCause": "work or alternatives budget fallback",
+      "kind": "direct or untraced obligation",
+      "changed": false,
+      "verdict": "UNSURE",
+      "contractStatus": "required-worst-case",
+      "reason": "A conditional DiffFoldToggle invocation is widened at its function budget. The condition and complete invoked body are not enough analyzed to establish an app setup failure.",
+      "source": "{props.line && <DiffFoldToggle line={props.line} presentation={props.presentation} />}",
+      "sourceSHA256": "9c3596a862260d2d7703f8d34cb168bb5427aa6407fd1b52191a2a97f38e8d29"
+    },
+    {
+      "id": "E32",
+      "key": "SETUP_MAY_THROW:app/src/pages/usage/view-query-filter.tsx:53:6",
+      "code": "SETUP_MAY_THROW",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/pages/usage/view-query-filter.tsx",
+        "line": 53,
+        "col": 6,
+        "endLine": 53,
+        "endCol": 10
+      },
+      "ownerName": "<Menu>",
+      "ownerPath": [
+        "<UsagePage>",
+        "<UsagePageContent>",
+        "<UsagePageShell>",
+        "<SettingsWorkspace>",
+        "<ShellLayoutBoundary>",
+        "<renderUsage>",
+        "<UsagePending>",
+        "<UsageView>",
+        "<SettingsPage>",
+        "<ShellLayoutBoundary>",
+        "<UsageQueryFilter>",
+        "<Menu>"
+      ],
+      "related": [],
+      "data": {
+        "failures": ["unknown"]
+      },
+      "origins": [11256],
+      "rootCause": "work or alternatives budget fallback",
+      "kind": "direct or untraced obligation",
+      "changed": false,
+      "verdict": "UNSURE",
+      "contractStatus": "required-worst-case",
+      "reason": "Menu props/spreads lead into bounded component analysis. The emitted error is a fallback obligation at the invocation, not a proven independent throwing statement.",
+      "source": "<Menu",
+      "sourceSHA256": "628d6b092ed74e37c9a7cf1dd781fe79a27c008ca4992d939fac3a1c0543c6bb"
+    },
+    {
+      "id": "E33",
+      "key": "STRICT_READ_UNTRACKED:app/src/pages/chat/components/chat-pull-request-checks.tsx:57:10",
+      "code": "STRICT_READ_UNTRACKED",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/pages/chat/components/chat-pull-request-checks.tsx",
+        "line": 57,
+        "col": 10,
+        "endLine": 57,
+        "endCol": 25
+      },
+      "ownerName": "<ChatPullRequestChecks>",
+      "ownerPath": [
+        "<ChatPullRequestsContent>",
+        "<PullRequestRow>",
+        "<Checks>",
+        "<ChatPullRequestChecks>"
+      ],
+      "related": [
+        {
+          "message": "Related caller or root.",
+          "loc": {
+            "file": "app/src/pages/chat/components/chat-pull-requests-content.tsx",
+            "line": 111,
+            "col": 18,
+            "endLine": 111,
+            "endCol": 29
+          }
+        }
+      ],
+      "data": {},
+      "origins": [211, 252, 3167],
+      "rootCause": "unsupported construct or missing dependency declaration",
+      "kind": "downstream obligation",
+      "changed": true,
+      "verdict": "UNSURE",
+      "contractStatus": "deferred-phase-plus-unsupported-source",
+      "reason": "sync(props.presented, props.dismissed) is called from onSettled. Its origins also include module reactive state and unknown listener calls. The source crosses deferred ownership/phase rules, so no supported strict-read proof is established.",
+      "source": "sync(props.presented, props.dismissed);",
+      "sourceSHA256": "646062e7b5323d745d6a38dceb47af6131b388edbb4692d0c6a64e11d3f86dbc"
+    },
+    {
+      "id": "E34",
+      "key": "STRICT_READ_UNTRACKED:app/src/pages/model-providers/profiles-view.tsx:505:25",
+      "code": "STRICT_READ_UNTRACKED",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/pages/model-providers/profiles-view.tsx",
+        "line": 505,
+        "col": 25,
+        "endLine": 505,
+        "endCol": 34
+      },
+      "ownerName": "<ProviderProfileRow>",
+      "ownerPath": ["<ProviderProfiles>", "<ProviderProfileRow>"],
+      "related": [
+        {
+          "message": "Related caller or root.",
+          "loc": {
+            "file": "app/src/pages/model-providers/profiles-view.tsx",
+            "line": 481,
+            "col": 22,
+            "endLine": 481,
+            "endCol": 27
+          }
+        }
+      ],
+      "data": {},
+      "origins": [10612],
+      "rootCause": "settled reactive source read",
+      "kind": "downstream obligation",
+      "changed": true,
+      "verdict": "UNSURE",
+      "contractStatus": "deferred-phase",
+      "reason": "profile() reads a row prop derived from a reactive row (origin profiles-view.tsx:481), but this consumption is in onSettled. The row source is real; the committed callback phase is not frozen as effect apply.",
+      "source": "const profile = () => props.row.profile;",
+      "sourceSHA256": "325aeb27b265ecede81c7b2ea75261324275e49023e56c403c8fb44e8e917293"
+    },
+    {
+      "id": "E35",
+      "key": "STRICT_READ_UNTRACKED:app/src/pages/channels/channels-page.tsx:208:23",
+      "code": "STRICT_READ_UNTRACKED",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/pages/channels/channels-page.tsx",
+        "line": 208,
+        "col": 23,
+        "endLine": 208,
+        "endCol": 45
+      },
+      "ownerName": "<ChannelsPage>",
+      "ownerPath": ["<ChannelsPage>"],
+      "related": [],
+      "data": {},
+      "origins": [7659],
+      "rootCause": "settled reactive source read",
+      "kind": "direct or untraced obligation",
+      "changed": false,
+      "verdict": "UNSURE",
+      "contractStatus": "deferred-phase",
+      "reason": "pairingChannelFilter is a real settled signal. Its helper is called by applyChannels inside onSettled and subscriptions; the deferred callback phase prevents calling this a frozen effect/setup violation.",
+      "source": "if (!snapshot || !pairingChannelFilter()) {",
+      "sourceSHA256": "adcbb2c700e9937f15a15206902e6a34075e02e9024f338ba0bf5df67ae6dbe7"
+    },
+    {
+      "id": "E36",
+      "key": "STRICT_READ_UNTRACKED:app/src/components/config-form.node.collection-map.tsx:237:42",
+      "code": "STRICT_READ_UNTRACKED",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/components/config-form.node.collection-map.tsx",
+        "line": 237,
+        "col": 42,
+        "endLine": 237,
+        "endCol": 49
+      },
+      "ownerName": "<CollectionRemoveButton>",
+      "ownerPath": ["<ConfigMapField>", "<ConfigMapRow>", "<CollectionRemoveButton>"],
+      "related": [],
+      "data": {},
+      "origins": [6609],
+      "rootCause": "settled reactive source read",
+      "kind": "direct or untraced obligation",
+      "changed": false,
+      "verdict": "UNSURE",
+      "contractStatus": "deferred-phase",
+      "reason": "The keyed entry accessor flows through focus.row and focus.register. CollectionRemoveButton calls register from onSettled (config-form.node.shared.tsx:161); future focus/ownership phase semantics are unresolved.",
+      "source": "focus={focus.row(() => entry()[0])}",
+      "sourceSHA256": "a7f36a3462c4d45a78262ce1ad95e9e8e28866b29538eed41504983510da3516"
+    },
+    {
+      "id": "E37",
+      "key": "STRICT_READ_UNTRACKED:app/src/components/desktop/desktop-panel-rail.tsx:94:28",
+      "code": "STRICT_READ_UNTRACKED",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/components/desktop/desktop-panel-rail.tsx",
+        "line": 94,
+        "col": 28,
+        "endLine": 94,
+        "endCol": 36
+      },
+      "ownerName": "<DesktopConnectionRail>",
+      "ownerPath": ["<DesktopPanelView>", "<DesktopPanelContent>", "<DesktopConnectionRail>"],
+      "related": [],
+      "data": {},
+      "origins": [],
+      "rootCause": "obligation without recorded origin",
+      "kind": "direct or untraced obligation",
+      "changed": false,
+      "verdict": "UNSURE",
+      "contractStatus": "deferred-phase",
+      "reason": "mobile() is read inside onSettled in DesktopConnectionRail. The checker currently treats that callback as effect scope, while FUTURE explicitly defers its phase. Keep this visible as a scope-model limitation.",
+      "source": "if (!props.recovery || mobile()) {",
+      "sourceSHA256": "1e7b5e844527a0037738db778e4af8ff0967be7b0cc4ce6417887d972eb81fac"
+    },
+    {
+      "id": "E38",
+      "key": "UNHANDLED_HANDLER_FAILURE:app/src/pages/chat/components/chat-details-mobile-content.tsx:317:13",
+      "code": "UNHANDLED_HANDLER_FAILURE",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/pages/chat/components/chat-details-mobile-content.tsx",
+        "line": 317,
+        "col": 13,
+        "endLine": 322,
+        "endCol": 14
+      },
+      "ownerName": "<ChatDetailsMobileRoot>",
+      "ownerPath": ["<ChatDetailsMobileContent>", "<MobileRoot>", "<ChatDetailsMobileRoot>"],
+      "related": [],
+      "data": {
+        "failures": ["unknown"]
+      },
+      "origins": [5725, 5726],
+      "rootCause": "unresolved callable or receiver facts",
+      "kind": "downstream obligation",
+      "changed": true,
+      "verdict": "TP",
+      "contractStatus": "required-unknown-failure",
+      "reason": "The handler calls props.content.entries.onNavigate without a catch. This callable has no analyzed failure-free body for the recorded path. D-129 requires unknown failure even though the action is ordinary navigation.",
+      "source": "onClick={(event) =>",
+      "sourceSHA256": "0ee3b90b001a4593089e601beb23f63de5d42ec4148054cf5a2c3dc0af4d0e7c"
+    },
+    {
+      "id": "E39",
+      "key": "UNHANDLED_HANDLER_FAILURE:app/src/pages/cron/scratch-editor.tsx:260:13",
+      "code": "UNHANDLED_HANDLER_FAILURE",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/pages/cron/scratch-editor.tsx",
+        "line": 260,
+        "col": 13,
+        "endLine": 260,
+        "endCol": 34
+      },
+      "ownerName": "<ScratchFields>",
+      "ownerPath": ["<CronScratchEditor>", "<ScratchFields>"],
+      "related": [],
+      "data": {
+        "failures": ["unknown"]
+      },
+      "origins": [
+        3888, 3890, 357, 358, 3892, 3894, 3896, 3898, 3900, 364, 3902, 10324, 10325, 10326, 10327,
+        3932, 3933, 3934, 3935, 3936, 3937, 3938, 3939, 3940, 3941, 3942, 10328
+      ],
+      "rootCause": "work or alternatives budget fallback",
+      "kind": "downstream obligation",
+      "changed": true,
+      "verdict": "UNSURE",
+      "contractStatus": "required-worst-case",
+      "reason": "loadScratch is an async handler. Its origin set includes exhausted helper work as well as unknown operations; that is insufficient to establish an uncaught concrete rejection after source catches.",
+      "source": "onClick={loadScratch}",
+      "sourceSHA256": "76c32d863007879e494cf4d278dd8ae753684544dcd5b21b878adc3fa92bfc6b"
+    },
+    {
+      "id": "E40",
+      "key": "UNHANDLED_HANDLER_FAILURE:app/src/app/router-outlet.tsx:472:7",
+      "code": "UNHANDLED_HANDLER_FAILURE",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/app/router-outlet.tsx",
+        "line": 472,
+        "col": 7,
+        "endLine": 488,
+        "endCol": 9
+      },
+      "ownerName": "<RouterOutlet>",
+      "ownerPath": ["<OpenClawShell>", "<ApplicationShell>", "<RouterOutlet>"],
+      "related": [],
+      "data": {
+        "failures": ["unknown"]
+      },
+      "origins": [4007, 4008],
+      "rootCause": "unresolved callable or receiver facts",
+      "kind": "downstream obligation",
+      "changed": false,
+      "verdict": "TP",
+      "contractStatus": "required-unknown-failure",
+      "reason": "The ref eventually invokes props.ref?.(readinessHost) (router-outlet.tsx:483). The optional injected callback can throw and is uncaught. Object descriptor construction and method bind also have unresolved facts; they do not erase this independent callback obligation.",
+      "source": "ref={(element) => {",
+      "sourceSHA256": "9a259ab8c8af3ccf5aef4bc27188326f963e9646dc223f082fe2c37abc8b7de7"
+    },
+    {
+      "id": "E41",
+      "key": "UNHANDLED_HANDLER_FAILURE:app/src/pages/chat/components/chat-composer-pasted-text.tsx:75:7",
+      "code": "UNHANDLED_HANDLER_FAILURE",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/pages/chat/components/chat-composer-pasted-text.tsx",
+        "line": 75,
+        "col": 7,
+        "endLine": 80,
+        "endCol": 9
+      },
+      "ownerName": "<ComposerPastedText>",
+      "ownerPath": ["<ComposerPastedText>"],
+      "related": [],
+      "data": {
+        "failures": ["unknown"]
+      },
+      "origins": [5579, 7769, 7770, 7771, 7772, 7773, 7774],
+      "rootCause": "annotation-only failure obligation",
+      "kind": "downstream obligation",
+      "changed": false,
+      "verdict": "TP",
+      "contractStatus": "required-unknown-failure",
+      "reason": "showPastedTextInComposer invokes removeDraftAttachment and optional onDraftChange/getDraft APIs without a handler catch. Declared callback types supply no failure promise, so this is a contract-required handler obligation, not evidence of an observed rejection.",
+      "source": "onClick={() => {",
+      "sourceSHA256": "d1c675ed37e2b38d21736fef87ff8601513b2fde17eff1be84937c8bef9aa6e3"
+    },
+    {
+      "id": "E42",
+      "key": "UNHANDLED_HANDLER_FAILURE:app/src/pages/chat/components/chat-sidebar-desktop-frame-controls.tsx:189:11",
+      "code": "UNHANDLED_HANDLER_FAILURE",
+      "severity": "error",
+      "loc": {
+        "file": "app/src/pages/chat/components/chat-sidebar-desktop-frame-controls.tsx",
+        "line": 189,
+        "col": 11,
+        "endLine": 189,
+        "endCol": 58
+      },
+      "ownerName": "<DesktopFrameControls>",
+      "ownerPath": ["<DesktopFrameControls>"],
+      "related": [],
+      "data": {
+        "failures": ["unknown"]
+      },
+      "origins": [8920],
+      "rootCause": "unresolved callable or receiver facts",
+      "kind": "downstream obligation",
+      "changed": false,
+      "verdict": "TP",
+      "contractStatus": "required-unknown-failure",
+      "reason": "The optional callbacks.setOpen(false) call is uncaught. Optional chaining only skips the absent arm. With no resolved safe body for the supplied arm, D-129 requires the failure obligation.",
+      "source": "onClick={() => props.callbacks?.setOpen(false)}",
+      "sourceSHA256": "776d1d64472bb14f2faea1c75591b79f3b79cd9c9e97d06839361b96c2291669"
+    }
+  ]
+}

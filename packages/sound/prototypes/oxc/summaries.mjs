@@ -95,15 +95,19 @@ export class Summaries {
     return {
       ...c,
       sink: [],
+      failureOrigins: c.failureOrigins ? [] : c.failureOrigins,
       caught: c.caught ? [] : c.caught,
       asyncRejections: c.asyncRejections ? [] : c.asyncRejections,
       exported: c.exported ? [] : c.exported,
-      capture: c.capture ? { reactive: false, pending: false, failures: [], related: [] } : null
+      capture: c.capture
+        ? { reactive: false, pending: false, failures: [], related: [], origins: [] }
+        : null
     };
   }
   effects(c) {
     return {
       sink: c.sink,
+      failureOrigins: c.failureOrigins,
       caught: c.caught,
       asyncRejections: c.asyncRejections,
       exported: c.exported,
@@ -111,13 +115,14 @@ export class Summaries {
     };
   }
   replay(effects, c) {
-    for (const field of ["sink", "caught", "asyncRejections", "exported"])
+    for (const field of ["sink", "failureOrigins", "caught", "asyncRejections", "exported"])
       appendUnique(c[field], effects[field]);
     if (c.capture && effects.capture) {
       c.capture.pending ||= effects.capture.pending;
       c.capture.reactive ||= effects.capture.reactive;
       appendUnique(c.capture.failures, effects.capture.failures);
       appendUnique(c.capture.related, effects.capture.related);
+      appendUnique(c.capture.origins, effects.capture.origins);
     }
   }
 }

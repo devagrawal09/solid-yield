@@ -1,0 +1,1299 @@
+[
+  {
+    "id": "E01",
+    "key": "ASYNC_OUTSIDE_LOADING_BOUNDARY:app/src/pages/chat/components/chat-reply-attribution.tsx:25:35",
+    "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/pages/chat/components/chat-reply-attribution.tsx",
+      "line": 25,
+      "col": 35,
+      "endLine": 25,
+      "endCol": 48
+    },
+    "ownerName": "<ReplyLineView>",
+    "ownerPath": [
+      "<MessageGroup>",
+      "<SessionActivityGroup>",
+      "<ChatSessionActivity>",
+      "<PreparedMessage>",
+      "<GroupedMessage>",
+      "<ReplyLineView>"
+    ],
+    "related": [
+      {
+        "message": "Related caller or root.",
+        "loc": {
+          "file": "app/src/pages/chat/components/chat-transcript-rows.ts",
+          "line": 17,
+          "col": 3,
+          "endLine": 17,
+          "endCol": 22
+        }
+      },
+      {
+        "message": "Related caller or root.",
+        "loc": {
+          "file": "app/src/pages/chat/components/chat-message-bubble-view.tsx",
+          "line": 143,
+          "col": 77,
+          "endLine": 143,
+          "endCol": 90
+        }
+      },
+      {
+        "message": "Related caller or root.",
+        "loc": {
+          "file": "app/src/pages/chat/components/chat-message-group-view.tsx",
+          "line": 145,
+          "col": 18,
+          "endLine": 145,
+          "endCol": 27
+        }
+      }
+    ],
+    "data": {},
+    "origins": [2212, 2407],
+    "rootCause": "work or alternatives budget fallback",
+    "kind": "downstream obligation",
+    "changed": true
+  },
+  {
+    "id": "E02",
+    "key": "ASYNC_OUTSIDE_LOADING_BOUNDARY:app/src/pages/chat/components/chat-forwarded-attribution.tsx:150:39",
+    "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/pages/chat/components/chat-forwarded-attribution.tsx",
+      "line": 150,
+      "col": 39,
+      "endLine": 150,
+      "endCol": 53
+    },
+    "ownerName": "<ForwardedLink>",
+    "ownerPath": [
+      "<MessageGroup>",
+      "<SessionActivityGroup>",
+      "<ChatSessionActivity>",
+      "<ForwardedAttribution>",
+      "<ForwardedLink>"
+    ],
+    "related": [
+      {
+        "message": "Related caller or root.",
+        "loc": {
+          "file": "app/src/pages/chat/components/chat-transcript-rows.ts",
+          "line": 17,
+          "col": 3,
+          "endLine": 17,
+          "endCol": 22
+        }
+      },
+      {
+        "message": "Related caller or root.",
+        "loc": {
+          "file": "app/src/pages/chat/components/chat-forwarded-attribution.tsx",
+          "line": 240,
+          "col": 64,
+          "endLine": 240,
+          "endCol": 86
+        }
+      },
+      {
+        "message": "Related caller or root.",
+        "loc": {
+          "file": "app/src/pages/chat/components/chat-session-activity.solid.tsx",
+          "line": 71,
+          "col": 24,
+          "endLine": 74,
+          "endCol": 16
+        }
+      },
+      {
+        "message": "Related caller or root.",
+        "loc": {
+          "file": "app/src/pages/chat/components/chat-message-group-view.tsx",
+          "line": 544,
+          "col": 16,
+          "endLine": 544,
+          "endCol": 25
+        }
+      }
+    ],
+    "data": {},
+    "origins": [380],
+    "rootCause": "pending memo result without traced fallback",
+    "kind": "downstream obligation",
+    "changed": true
+  },
+  {
+    "id": "E03",
+    "key": "ASYNC_OUTSIDE_LOADING_BOUNDARY:src/media/parse-output.ts:617:9",
+    "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+    "severity": "error",
+    "loc": {
+      "file": "src/media/parse-output.ts",
+      "line": 617,
+      "col": 9,
+      "endLine": 617,
+      "endCol": 32
+    },
+    "ownerName": "<StreamGroup>",
+    "ownerPath": ["<StreamGroup>"],
+    "related": [
+      {
+        "message": "Related caller or root.",
+        "loc": {
+          "file": "app/src/pages/chat/components/chat-transcript-rows.ts",
+          "line": 19,
+          "col": 3,
+          "endLine": 19,
+          "endCol": 22
+        }
+      }
+    ],
+    "data": {},
+    "origins": [982],
+    "rootCause": "work or alternatives budget fallback",
+    "kind": "direct or untraced obligation",
+    "changed": false
+  },
+  {
+    "id": "E04",
+    "key": "ASYNC_OUTSIDE_LOADING_BOUNDARY:src/shared/chat-envelope.ts:36:12",
+    "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+    "severity": "error",
+    "loc": {
+      "file": "src/shared/chat-envelope.ts",
+      "line": 36,
+      "col": 12,
+      "endLine": 36,
+      "endCol": 16
+    },
+    "ownerName": "<StreamGroup>",
+    "ownerPath": ["<StreamGroup>"],
+    "related": [
+      {
+        "message": "Related caller or root.",
+        "loc": {
+          "file": "app/src/pages/chat/components/chat-transcript-rows.ts",
+          "line": 19,
+          "col": 3,
+          "endLine": 19,
+          "endCol": 22
+        }
+      }
+    ],
+    "data": {},
+    "origins": [782],
+    "rootCause": "pending source origin not further traced",
+    "kind": "direct or untraced obligation",
+    "changed": false
+  },
+  {
+    "id": "E05",
+    "key": "ASYNC_OUTSIDE_LOADING_BOUNDARY:app/src/pages/chat/components/browser-tab-card.tsx:269:11",
+    "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/pages/chat/components/browser-tab-card.tsx",
+      "line": 269,
+      "col": 11,
+      "endLine": 308,
+      "endCol": 17
+    },
+    "ownerName": "<BrowserTabCardHost>",
+    "ownerPath": [
+      "<ActivityGroup>",
+      "<ActivityGroupContent>",
+      "<ActivityGroupBody>",
+      "<BrowserTabPreviews>",
+      "<BrowserTabCardHost>"
+    ],
+    "related": [
+      {
+        "message": "Related caller or root.",
+        "loc": {
+          "file": "app/src/pages/chat/components/chat-transcript-rows.ts",
+          "line": 18,
+          "col": 3,
+          "endLine": 18,
+          "endCol": 26
+        }
+      }
+    ],
+    "data": {},
+    "origins": [3238],
+    "rootCause": "work or alternatives budget fallback",
+    "kind": "direct or untraced obligation",
+    "changed": false
+  },
+  {
+    "id": "E06",
+    "key": "CONTEXT_PROVIDER_MISSING:app/src/pages/new-session/composer-capability-controls.tsx:99:20",
+    "code": "CONTEXT_PROVIDER_MISSING",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/pages/new-session/composer-capability-controls.tsx",
+      "line": 99,
+      "col": 20,
+      "endLine": 99,
+      "endCol": 65
+    },
+    "ownerName": "<NewSessionSelectionStatus>",
+    "ownerPath": ["<NewSessionSelectionStatus>"],
+    "related": [],
+    "data": {},
+    "origins": [],
+    "rootCause": "missing provider in analyzed render path",
+    "kind": "direct or untraced obligation",
+    "changed": false
+  },
+  {
+    "id": "E07",
+    "key": "CONTEXT_PROVIDER_MISSING:app/src/pages/new-session/composer-capability-controls.tsx:57:20",
+    "code": "CONTEXT_PROVIDER_MISSING",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/pages/new-session/composer-capability-controls.tsx",
+      "line": 57,
+      "col": 20,
+      "endLine": 57,
+      "endCol": 65
+    },
+    "ownerName": "<NewSessionPlusMenu>",
+    "ownerPath": ["<NewSessionPlusMenu>"],
+    "related": [],
+    "data": {},
+    "origins": [],
+    "rootCause": "missing provider in analyzed render path",
+    "kind": "direct or untraced obligation",
+    "changed": false
+  },
+  {
+    "id": "E08",
+    "key": "CONTEXT_PROVIDER_MISSING:app/src/pages/new-session/composer.tsx:371:20",
+    "code": "CONTEXT_PROVIDER_MISSING",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/pages/new-session/composer.tsx",
+      "line": 371,
+      "col": 20,
+      "endLine": 371,
+      "endCol": 65
+    },
+    "ownerName": "<NewSessionComposer>",
+    "ownerPath": ["<NewSessionComposer>"],
+    "related": [],
+    "data": {},
+    "origins": [],
+    "rootCause": "missing provider in analyzed render path",
+    "kind": "direct or untraced obligation",
+    "changed": false
+  },
+  {
+    "id": "E09",
+    "key": "CONTEXT_PROVIDER_MISSING:app/src/lib/reactive/context.ts:107:10",
+    "code": "CONTEXT_PROVIDER_MISSING",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/lib/reactive/context.ts",
+      "line": 107,
+      "col": 10,
+      "endLine": 107,
+      "endCol": 40
+    },
+    "ownerName": "<ChatPermissionCard>",
+    "ownerPath": ["<ChatSystemEvents>", "<SystemEvent>", "<ChatNotice>", "<ChatPermissionCard>"],
+    "related": [
+      {
+        "message": "Related caller or root.",
+        "loc": {
+          "file": "app/src/pages/chat/components/chat-transcript-rows.ts",
+          "line": 16,
+          "col": 3,
+          "endLine": 16,
+          "endCol": 36
+        }
+      }
+    ],
+    "data": {},
+    "origins": [],
+    "rootCause": "missing provider in analyzed render path",
+    "kind": "direct or untraced obligation",
+    "changed": false
+  },
+  {
+    "id": "E10",
+    "key": "CONTEXT_PROVIDER_MISSING:app/src/components/image-lightbox-content.tsx:40:16",
+    "code": "CONTEXT_PROVIDER_MISSING",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/components/image-lightbox-content.tsx",
+      "line": 40,
+      "col": 16,
+      "endLine": 40,
+      "endCol": 45
+    },
+    "ownerName": "<ImageLightboxContent>",
+    "ownerPath": ["<ImageLightboxContent>"],
+    "related": [],
+    "data": {},
+    "origins": [],
+    "rootCause": "missing provider in analyzed render path",
+    "kind": "direct or untraced obligation",
+    "changed": false
+  },
+  {
+    "id": "E11",
+    "key": "ERROR_OUTSIDE_ERRORED_BOUNDARY:app/src/pages/chat/components/chat-source-previews.tsx:127:24",
+    "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/pages/chat/components/chat-source-previews.tsx",
+      "line": 127,
+      "col": 24,
+      "endLine": 127,
+      "endCol": 37
+    },
+    "ownerName": "<ChatSourcePreviews>",
+    "ownerPath": ["<AgentRunFrame>", "<RunFrame>", "<ChatSourcePreviews>"],
+    "related": [
+      {
+        "message": "Related caller or root.",
+        "loc": {
+          "file": "app/src/pages/chat/components/chat-transcript-rows.ts",
+          "line": 21,
+          "col": 3,
+          "endLine": 21,
+          "endCol": 23
+        }
+      },
+      {
+        "message": "Related caller or root.",
+        "loc": {
+          "file": "app/src/pages/chat/components/chat-agent-run-frame.tsx",
+          "line": 347,
+          "col": 16,
+          "endLine": 347,
+          "endCol": 38
+        }
+      }
+    ],
+    "data": {
+      "failures": ["unknown"]
+    },
+    "origins": [
+      3432, 3433, 3434, 3012, 3013, 3435, 3436, 3437, 3438, 3439, 3440, 425, 426, 427, 428, 429,
+      430, 431, 432, 433, 434, 435, 436, 437, 438, 439, 440, 441, 442, 443, 444, 445, 446, 447, 448,
+      449, 450, 451, 452, 453, 454, 455, 456, 457, 458, 459, 271, 272, 273, 274, 275, 276, 277, 278,
+      279, 280, 281, 282, 283, 460, 461, 462, 463, 464, 465, 466, 467, 468, 469, 470, 471, 472, 473,
+      474, 475, 476, 477, 478, 479, 480, 481, 482, 483, 484, 485, 486, 487, 488, 489, 490, 491, 492,
+      493, 494, 495, 496, 497, 498, 499, 500, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511,
+      512, 513, 514, 515, 516, 517, 518, 519, 520, 521, 522, 523, 524, 525, 526, 527, 528, 529, 530,
+      531, 532, 533, 534, 535, 536, 537, 538, 539, 540, 541, 542, 543, 544, 545, 546, 547, 548, 549,
+      550, 551, 552, 553, 554, 555, 556, 557, 558, 559, 560, 561, 562, 563, 564, 565, 566, 567, 568,
+      569, 570, 571, 572, 573, 574, 575, 576, 577, 578, 579, 580, 581, 582, 583, 584, 585, 586, 587,
+      588, 589, 590, 591, 592, 593, 594, 595, 596, 597, 598, 599, 600, 601, 602, 603, 604, 605, 606,
+      607, 608, 609, 610, 611, 612, 613, 614, 615, 616, 617, 618, 619, 620, 621, 622, 623, 3256,
+      624, 625, 626, 627, 628, 629, 630, 631, 632, 633, 634, 635, 636, 637, 638, 639, 640, 641, 642,
+      643, 644, 645, 646, 647, 648, 649, 650, 651, 652, 653, 654, 655, 656, 657, 658, 659, 660, 661,
+      662, 663, 664, 665, 666, 667, 668, 669, 670, 671, 672, 673, 674, 675, 676, 677, 678, 679, 680,
+      681, 682, 683, 684, 685, 686, 687, 688, 689, 690, 691, 692, 693, 694, 695, 696, 697, 698, 699,
+      700, 701, 702, 703, 704, 705, 706, 707, 708, 709, 710, 711, 712, 713, 714, 715, 716, 717, 718,
+      719, 720, 721, 722, 723, 724, 725, 726, 727, 728, 729, 730, 731, 732, 733, 734, 735, 736, 737,
+      738, 739, 740, 741, 742, 743, 744, 745, 746, 747, 748, 749, 750, 751, 752, 753, 754, 755, 756,
+      757, 758, 759, 760, 761, 762, 763, 764, 765, 766, 767, 768, 769, 770, 771, 772, 773, 774, 775,
+      776, 777, 778, 779, 780, 781, 782, 783, 784, 785, 786, 787, 788, 789, 790, 791, 792, 793, 794,
+      795, 796, 797, 798, 799, 800, 801, 802, 803, 804, 805, 806, 807, 808, 809, 810, 811, 812, 813,
+      814, 815, 816, 817, 818, 819, 820, 821, 822, 823, 824, 825, 826, 827, 828, 829, 830, 831, 832,
+      833, 834, 835, 836, 837, 838, 839, 840, 841, 842, 843, 844, 845, 846, 847, 848, 849, 850, 851,
+      852, 853, 854, 855, 856, 857, 858, 859, 860, 861, 862, 863, 864, 865, 3441, 953, 954, 955,
+      956, 957, 958, 959, 960, 961, 962, 963, 964, 965, 966, 967, 968, 969, 970, 971, 972, 973, 974,
+      975, 976, 977, 978, 979, 980, 981, 982, 983, 984, 985, 986, 987, 988, 989, 990, 991, 992, 993,
+      994, 995, 996, 997, 998, 999, 1000, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009,
+      1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024,
+      3257, 3258, 3442, 3259, 3443, 3260, 3261, 3262, 3444, 3445, 3446, 3447, 3263, 3448, 3449,
+      3450, 3264, 3451, 3452, 3265, 3453, 3454, 3266, 3455, 3456, 3457, 3267, 945, 946, 947, 948,
+      3268, 949, 1025, 1101, 1102, 1103, 1104, 1105, 1106, 1107, 1108, 1109, 1110, 1111, 1112, 1113,
+      1114, 1115, 1116, 1117, 3458, 3459, 3460, 3461, 3462, 3463, 1193, 1194, 1195, 1079, 1080,
+      1081, 1082, 1083, 1084, 1093, 1094, 1095, 1096, 1097, 1098, 3464, 3465, 3466, 3467, 3468,
+      3469, 3470, 1157, 1158, 1159, 1160, 1161, 1162, 1163, 1164, 1165, 1166, 1167, 1168, 1169,
+      1170, 1171, 1172, 1173, 1174, 1175, 1176, 1177, 1178, 1179, 1198, 3471, 3472, 3473, 3474,
+      3475, 3476, 3125, 3126, 3127, 3128, 3477, 3036, 3037, 3038, 3039, 3040, 884, 885, 886, 887,
+      888, 889, 900, 901, 902, 903, 1118, 1119, 1120, 1121, 1122, 871, 1123, 1124, 292, 3478, 293,
+      3479, 294, 3480, 295, 3481, 3482, 3483, 2593, 2594, 2595, 2596, 2597, 2598, 2599, 2716, 2600,
+      2601, 2602, 417, 2603, 2604, 2605, 2606, 2607, 2608, 2609, 2610, 2611, 2612, 2613, 2614, 2615,
+      2616, 2617, 2618, 2619, 2620, 3484, 3485, 3486, 3487, 3488, 1409, 3489, 3490, 3491, 1412,
+      3492, 3493, 1400, 1401, 1402, 1403, 1404, 1405, 1406, 1407, 1408, 1410, 1411, 1413, 1414,
+      1415, 1416, 1417, 1418, 1419, 1420, 1421, 1422, 1423, 1424, 1425, 1426, 1427, 1428, 1429,
+      1430, 1431, 1432, 1433, 1434, 1435, 1436, 1437, 1438, 1439, 1440, 1441, 1442, 1443, 1444,
+      1445, 1446, 1447, 1448, 1449, 1450, 1451, 1452, 1453, 1454, 1455, 1456, 1457, 1458, 1459,
+      1460, 1461, 1462, 1463, 1464, 1465, 1466, 1467, 1468, 1469, 1470, 1471, 1472, 1473, 1474,
+      1475, 1476, 1477, 1478, 1479, 1480, 1481, 1482, 1483, 1484, 1485, 1486, 1487, 1488, 1489,
+      1490, 1491, 1492, 1493, 1494, 1495, 1496, 1497, 1498, 1499, 1500, 1501, 1502, 1503, 1504,
+      1505, 1506, 1507, 1508, 1509, 1510, 1511, 1512, 1513, 1514, 1515, 1516, 1589, 1590, 1591,
+      1592, 1593, 1594, 1595, 1596, 1597, 3494, 3495, 3496, 3497, 3498, 3499, 3500, 3501, 3502,
+      3503, 3504, 3505, 3506, 3507, 3508, 3509, 3510, 3511, 3512, 3513, 3514, 3515, 3516, 3517,
+      3518, 3519, 3520, 3521, 3522, 1301, 1302, 1303, 1304, 1180, 1181, 1182, 1183, 1184, 1185,
+      1186, 1187, 1188, 1189, 1190, 1191, 1192, 1305, 1306, 1196, 1197, 3523, 3524, 3525, 3526,
+      3527, 3528, 3529, 3530, 3531, 3532, 3533, 2148, 2149, 2150, 2151, 2152, 2153, 2154, 2155,
+      2156, 2157, 2158, 2159, 2160, 2161, 2162, 2163, 2164, 2165, 2166, 2167, 2168, 2169, 2170,
+      2171, 2172, 2173, 2174, 2175, 2176, 2177, 3534, 3343, 3344, 3345, 3346, 3347, 3348, 3349,
+      3350, 2718, 2719, 2720, 2721, 2722, 2723, 2724, 2725, 2726, 2727, 2728, 2729, 2730, 2731,
+      2732, 2733, 8, 9, 3545
+    ],
+    "rootCause": "work or alternatives budget fallback",
+    "kind": "downstream obligation",
+    "changed": true
+  },
+  {
+    "id": "E12",
+    "key": "ERROR_OUTSIDE_ERRORED_BOUNDARY:src/auto-reply/reply/strip-inbound-meta.ts:179:19",
+    "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+    "severity": "error",
+    "loc": {
+      "file": "src/auto-reply/reply/strip-inbound-meta.ts",
+      "line": 179,
+      "col": 19,
+      "endLine": 179,
+      "endCol": 60
+    },
+    "ownerName": "<StreamGroup>",
+    "ownerPath": ["<StreamGroup>"],
+    "related": [
+      {
+        "message": "Related caller or root.",
+        "loc": {
+          "file": "app/src/pages/chat/components/chat-transcript-rows.ts",
+          "line": 19,
+          "col": 3,
+          "endLine": 19,
+          "endCol": 22
+        }
+      }
+    ],
+    "data": {
+      "failures": ["unknown"]
+    },
+    "origins": [693],
+    "rootCause": "work or alternatives budget fallback",
+    "kind": "direct or untraced obligation",
+    "changed": true
+  },
+  {
+    "id": "E13",
+    "key": "ERROR_OUTSIDE_ERRORED_BOUNDARY:app/src/lib/chat/message-normalizer.ts:194:27",
+    "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/lib/chat/message-normalizer.ts",
+      "line": 194,
+      "col": 27,
+      "endLine": 194,
+      "endCol": 66
+    },
+    "ownerName": "<StreamGroup>",
+    "ownerPath": ["<StreamGroup>"],
+    "related": [
+      {
+        "message": "Related caller or root.",
+        "loc": {
+          "file": "app/src/pages/chat/components/chat-transcript-rows.ts",
+          "line": 19,
+          "col": 3,
+          "endLine": 19,
+          "endCol": 22
+        }
+      }
+    ],
+    "data": {
+      "failures": ["unknown"]
+    },
+    "origins": [449],
+    "rootCause": "unresolved callable or receiver facts",
+    "kind": "direct or untraced obligation",
+    "changed": false
+  },
+  {
+    "id": "E14",
+    "key": "ERROR_OUTSIDE_ERRORED_BOUNDARY:app/src/lib/chat/message-normalizer.ts:280:18",
+    "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/lib/chat/message-normalizer.ts",
+      "line": 280,
+      "col": 18,
+      "endLine": 280,
+      "endCol": 36
+    },
+    "ownerName": "<StreamGroup>",
+    "ownerPath": ["<StreamGroup>"],
+    "related": [
+      {
+        "message": "Related caller or root.",
+        "loc": {
+          "file": "app/src/pages/chat/components/chat-transcript-rows.ts",
+          "line": 19,
+          "col": 3,
+          "endLine": 19,
+          "endCol": 22
+        }
+      }
+    ],
+    "data": {
+      "failures": ["unknown"]
+    },
+    "origins": [583],
+    "rootCause": "unresolved callable or receiver facts",
+    "kind": "direct or untraced obligation",
+    "changed": false
+  },
+  {
+    "id": "E15",
+    "key": "ERROR_OUTSIDE_ERRORED_BOUNDARY:app/src/app/user-identity.ts:22:7",
+    "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/app/user-identity.ts",
+      "line": 22,
+      "col": 7,
+      "endLine": 22,
+      "endCol": 29
+    },
+    "ownerName": "<StreamGroup>",
+    "ownerPath": ["<StreamGroup>"],
+    "related": [
+      {
+        "message": "Related caller or root.",
+        "loc": {
+          "file": "app/src/pages/chat/components/chat-transcript-rows.ts",
+          "line": 19,
+          "col": 3,
+          "endLine": 19,
+          "endCol": 22
+        }
+      }
+    ],
+    "data": {
+      "failures": ["unknown"]
+    },
+    "origins": [1084],
+    "rootCause": "unresolved callable or receiver facts",
+    "kind": "direct or untraced obligation",
+    "changed": false
+  },
+  {
+    "id": "E16",
+    "key": "PENDING_ASYNC_FORBIDDEN_SCOPE:app/src/pages/sessions/sessions-page.tsx:44:23",
+    "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/pages/sessions/sessions-page.tsx",
+      "line": 44,
+      "col": 23,
+      "endLine": 44,
+      "endCol": 29
+    },
+    "ownerName": "<SessionManagementMenu>",
+    "ownerPath": ["<SessionsPageContent>", "<SessionManagementMenu>"],
+    "related": [],
+    "data": {},
+    "origins": [
+      252, 253, 404, 405, 406, 407, 408, 4488, 5959, 5960, 6127, 6128, 6129, 4282, 6130, 6131, 7155,
+      7156, 7157, 7158, 8609, 7653, 7654, 8610, 8611, 8612, 8613, 8614, 8615, 8616, 10722, 10723,
+      10724, 10718, 7171, 10969, 10970, 7652, 7655, 10971, 10972
+    ],
+    "rootCause": "work or alternatives budget fallback",
+    "kind": "downstream obligation",
+    "changed": true
+  },
+  {
+    "id": "E17",
+    "key": "PENDING_ASYNC_FORBIDDEN_SCOPE:app/src/features/github-connections/github-identity.ts:203:7",
+    "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/features/github-connections/github-identity.ts",
+      "line": 203,
+      "col": 7,
+      "endLine": 203,
+      "endCol": 39
+    },
+    "ownerName": "<AgentsPage>",
+    "ownerPath": ["<AgentsPage>"],
+    "related": [],
+    "data": {},
+    "origins": [7436],
+    "rootCause": "work or alternatives budget fallback",
+    "kind": "direct or untraced obligation",
+    "changed": true
+  },
+  {
+    "id": "E18",
+    "key": "PENDING_ASYNC_FORBIDDEN_SCOPE:app/src/pages/config/appearance-background-state.ts:214:22",
+    "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/pages/config/appearance-background-state.ts",
+      "line": 214,
+      "col": 22,
+      "endLine": 214,
+      "endCol": 84
+    },
+    "ownerName": "<AppearanceBackground>",
+    "ownerPath": ["<AppearanceBackground>"],
+    "related": [],
+    "data": {},
+    "origins": [10070],
+    "rootCause": "work or alternatives budget fallback",
+    "kind": "direct or untraced obligation",
+    "changed": false
+  },
+  {
+    "id": "E19",
+    "key": "PENDING_ASYNC_FORBIDDEN_SCOPE:app/src/lib/system-info.ts:31:10",
+    "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/lib/system-info.ts",
+      "line": 31,
+      "col": 10,
+      "endLine": 31,
+      "endCol": 72
+    },
+    "ownerName": "<DevicesPage>",
+    "ownerPath": ["<DevicesPage>"],
+    "related": [],
+    "data": {},
+    "origins": [10392],
+    "rootCause": "work or alternatives budget fallback",
+    "kind": "direct or untraced obligation",
+    "changed": false
+  },
+  {
+    "id": "E20",
+    "key": "PENDING_ASYNC_FORBIDDEN_SCOPE:app/src/pages/skills/skills-page.tsx:385:5",
+    "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/pages/skills/skills-page.tsx",
+      "line": 385,
+      "col": 5,
+      "endLine": 385,
+      "endCol": 82
+    },
+    "ownerName": "<SkillsPage>",
+    "ownerPath": ["<SkillsPage>"],
+    "related": [],
+    "data": {},
+    "origins": [11100],
+    "rootCause": "work or alternatives budget fallback",
+    "kind": "direct or untraced obligation",
+    "changed": false
+  },
+  {
+    "id": "E21",
+    "key": "PENDING_ASYNC_UNTRACKED_READ:app/src/pages/chat/chat-page-pane-render.tsx:362:13",
+    "code": "PENDING_ASYNC_UNTRACKED_READ",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/pages/chat/chat-page-pane-render.tsx",
+      "line": 362,
+      "col": 13,
+      "endLine": 364,
+      "endCol": 20
+    },
+    "ownerName": "<SplitLayout>",
+    "ownerPath": ["<ChatPageBody>", "<SplitLayout>"],
+    "related": [],
+    "data": {},
+    "origins": [7702],
+    "rootCause": "work or alternatives budget fallback",
+    "kind": "direct or untraced obligation",
+    "changed": true
+  },
+  {
+    "id": "E22",
+    "key": "PENDING_ASYNC_UNTRACKED_READ:app/src/components/panel-tab-strip-solid.tsx:140:19",
+    "code": "PENDING_ASYNC_UNTRACKED_READ",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/components/panel-tab-strip-solid.tsx",
+      "line": 140,
+      "col": 19,
+      "endLine": 140,
+      "endCol": 35
+    },
+    "ownerName": "<TabGroupView>",
+    "ownerPath": ["<SidebarRegionHeader>", "<PanelTabStrip>", "<TabGroupView>"],
+    "related": [
+      {
+        "message": "Related caller or root.",
+        "loc": {
+          "file": "app/src/components/panel-tab-strip-solid.tsx",
+          "line": 388,
+          "col": 44,
+          "endLine": 388,
+          "endCol": 74
+        }
+      },
+      {
+        "message": "Related caller or root.",
+        "loc": {
+          "file": "app/src/pages/chat/components/chat-sidebar-region-header.tsx",
+          "line": 589,
+          "col": 23,
+          "endLine": 589,
+          "endCol": 37
+        }
+      }
+    ],
+    "data": {},
+    "origins": [8931, 8932],
+    "rootCause": "work or alternatives budget fallback",
+    "kind": "downstream obligation",
+    "changed": true
+  },
+  {
+    "id": "E23",
+    "key": "PENDING_ASYNC_UNTRACKED_READ:app/src/components/app-sidebar-session-filter-summary.tsx:160:12",
+    "code": "PENDING_ASYNC_UNTRACKED_READ",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/components/app-sidebar-session-filter-summary.tsx",
+      "line": 160,
+      "col": 12,
+      "endLine": 160,
+      "endCol": 16
+    },
+    "ownerName": "<Icon>",
+    "ownerPath": ["<SidebarAgentRoster>", "<Icon>"],
+    "related": [],
+    "data": {},
+    "origins": [4546],
+    "rootCause": "work or alternatives budget fallback",
+    "kind": "direct or untraced obligation",
+    "changed": false
+  },
+  {
+    "id": "E24",
+    "key": "PENDING_ASYNC_UNTRACKED_READ:app/src/components/solid/identity-avatar.tsx:36:20",
+    "code": "PENDING_ASYNC_UNTRACKED_READ",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/components/solid/identity-avatar.tsx",
+      "line": 36,
+      "col": 20,
+      "endLine": 40,
+      "endCol": 5
+    },
+    "ownerName": "<AgentIdentityAvatar>",
+    "ownerPath": [
+      "<MessageGroup>",
+      "<SessionActivityGroup>",
+      "<ChatSessionActivity>",
+      "<PreparedMessage>",
+      "<GroupedMessage>",
+      "<ReplyLineView>",
+      "<ChatAuthorAvatar>",
+      "<AgentIdentityAvatar>"
+    ],
+    "related": [
+      {
+        "message": "Related caller or root.",
+        "loc": {
+          "file": "app/src/pages/chat/components/chat-transcript-rows.ts",
+          "line": 17,
+          "col": 3,
+          "endLine": 17,
+          "endCol": 22
+        }
+      }
+    ],
+    "data": {},
+    "origins": [2552],
+    "rootCause": "work or alternatives budget fallback",
+    "kind": "direct or untraced obligation",
+    "changed": false
+  },
+  {
+    "id": "E25",
+    "key": "PENDING_ASYNC_UNTRACKED_READ:app/src/pages/chat/chat-avatar-view.tsx:221:20",
+    "code": "PENDING_ASYNC_UNTRACKED_READ",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/pages/chat/chat-avatar-view.tsx",
+      "line": 221,
+      "col": 20,
+      "endLine": 225,
+      "endCol": 5
+    },
+    "ownerName": "<AgentAvatar>",
+    "ownerPath": ["<ForwardedAvatar>", "<ChatAvatar>", "<AgentAvatar>"],
+    "related": [],
+    "data": {},
+    "origins": [5156],
+    "rootCause": "work or alternatives budget fallback",
+    "kind": "direct or untraced obligation",
+    "changed": false
+  },
+  {
+    "id": "E26",
+    "key": "REACTIVE_WRITE_IN_OWNED_SCOPE:app/src/components/markdown-dom-ref.ts:45:5",
+    "code": "REACTIVE_WRITE_IN_OWNED_SCOPE",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/components/markdown-dom-ref.ts",
+      "line": 45,
+      "col": 5,
+      "endLine": 45,
+      "endCol": 22
+    },
+    "ownerName": "<MarkdownContent>",
+    "ownerPath": [
+      "<MessageGroup>",
+      "<SessionActivityGroup>",
+      "<ChatSessionActivity>",
+      "<PreparedMessage>",
+      "<GroupedMessage>",
+      "<ChatBubbleActivity>",
+      "<BubbleContents>",
+      "<MessageReasoning>",
+      "<MarkdownText>",
+      "<MarkdownContent>"
+    ],
+    "related": [
+      {
+        "message": "Related caller or root.",
+        "loc": {
+          "file": "app/src/pages/chat/components/chat-transcript-rows.ts",
+          "line": 17,
+          "col": 3,
+          "endLine": 17,
+          "endCol": 22
+        }
+      }
+    ],
+    "data": {},
+    "origins": [],
+    "rootCause": "setter invoked in owned scope",
+    "kind": "direct or untraced obligation",
+    "changed": false
+  },
+  {
+    "id": "E27",
+    "key": "REACTIVE_WRITE_IN_OWNED_SCOPE:app/src/lib/reactive/projection.ts:83:5",
+    "code": "REACTIVE_WRITE_IN_OWNED_SCOPE",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/lib/reactive/projection.ts",
+      "line": 83,
+      "col": 5,
+      "endLine": 83,
+      "endCol": 44
+    },
+    "ownerName": "<SessionHovercardAutomations>",
+    "ownerPath": ["<SessionHovercardAutomations>"],
+    "related": [],
+    "data": {},
+    "origins": [],
+    "rootCause": "setter invoked in owned scope",
+    "kind": "direct or untraced obligation",
+    "changed": false
+  },
+  {
+    "id": "E28",
+    "key": "SETUP_MAY_THROW:app/src/pages/chat/components/chat-sidebar-file-view.tsx:226:16",
+    "code": "SETUP_MAY_THROW",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/pages/chat/components/chat-sidebar-file-view.tsx",
+      "line": 226,
+      "col": 16,
+      "endLine": 226,
+      "endCol": 20
+    },
+    "ownerName": "<Icon>",
+    "ownerPath": ["<SidebarPanel>", "<SidebarFile>", "<Icon>"],
+    "related": [],
+    "data": {
+      "failures": ["unknown"]
+    },
+    "origins": [7883],
+    "rootCause": "work or alternatives budget fallback",
+    "kind": "direct or untraced obligation",
+    "changed": true
+  },
+  {
+    "id": "E29",
+    "key": "SETUP_MAY_THROW:app/src/app/shell-assistant-toggles.tsx:11:10",
+    "code": "SETUP_MAY_THROW",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/app/shell-assistant-toggles.tsx",
+      "line": 11,
+      "col": 10,
+      "endLine": 11,
+      "endCol": 22
+    },
+    "ownerName": "<ShortcutHint>",
+    "ownerPath": [
+      "<OpenClawShell>",
+      "<ApplicationShell>",
+      "<CollapsedHomeToggle>",
+      "<ShortcutHint>"
+    ],
+    "related": [],
+    "data": {
+      "failures": ["unknown"]
+    },
+    "origins": [3987],
+    "rootCause": "work or alternatives budget fallback",
+    "kind": "direct or untraced obligation",
+    "changed": true
+  },
+  {
+    "id": "E30",
+    "key": "SETUP_MAY_THROW:app/src/components/solid/mcp-app-panel.tsx:42:19",
+    "code": "SETUP_MAY_THROW",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/components/solid/mcp-app-panel.tsx",
+      "line": 42,
+      "col": 19,
+      "endLine": 42,
+      "endCol": 50
+    },
+    "ownerName": "<McpAppPanel>",
+    "ownerPath": ["<SidebarPanel>", "<McpAppPanel>"],
+    "related": [],
+    "data": {
+      "failures": ["unknown"]
+    },
+    "origins": [7795],
+    "rootCause": "pending source origin not further traced",
+    "kind": "direct or untraced obligation",
+    "changed": false
+  },
+  {
+    "id": "E31",
+    "key": "SETUP_MAY_THROW:app/src/pages/chat/components/session-diff-render.tsx:34:25",
+    "code": "SETUP_MAY_THROW",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/pages/chat/components/session-diff-render.tsx",
+      "line": 34,
+      "col": 25,
+      "endLine": 34,
+      "endCol": 39
+    },
+    "ownerName": "<DiffFoldToggle>",
+    "ownerPath": [
+      "<SidebarPanel>",
+      "<SessionDiffPanel>",
+      "<Panel>",
+      "<Result>",
+      "<ResultBody>",
+      "<File>",
+      "<SessionDiffFileBody>",
+      "<SessionSplitDiff>",
+      "<SplitSide>",
+      "<DiffFoldToggle>"
+    ],
+    "related": [],
+    "data": {
+      "failures": ["unknown"]
+    },
+    "origins": [8113],
+    "rootCause": "work or alternatives budget fallback",
+    "kind": "direct or untraced obligation",
+    "changed": false
+  },
+  {
+    "id": "E32",
+    "key": "SETUP_MAY_THROW:app/src/pages/usage/view-query-filter.tsx:53:6",
+    "code": "SETUP_MAY_THROW",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/pages/usage/view-query-filter.tsx",
+      "line": 53,
+      "col": 6,
+      "endLine": 53,
+      "endCol": 10
+    },
+    "ownerName": "<Menu>",
+    "ownerPath": [
+      "<UsagePage>",
+      "<UsagePageContent>",
+      "<UsagePageShell>",
+      "<SettingsWorkspace>",
+      "<ShellLayoutBoundary>",
+      "<renderUsage>",
+      "<UsagePending>",
+      "<UsageView>",
+      "<SettingsPage>",
+      "<ShellLayoutBoundary>",
+      "<UsageQueryFilter>",
+      "<Menu>"
+    ],
+    "related": [],
+    "data": {
+      "failures": ["unknown"]
+    },
+    "origins": [11256],
+    "rootCause": "work or alternatives budget fallback",
+    "kind": "direct or untraced obligation",
+    "changed": false
+  },
+  {
+    "id": "E33",
+    "key": "STRICT_READ_UNTRACKED:app/src/pages/chat/components/chat-pull-request-checks.tsx:57:10",
+    "code": "STRICT_READ_UNTRACKED",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/pages/chat/components/chat-pull-request-checks.tsx",
+      "line": 57,
+      "col": 10,
+      "endLine": 57,
+      "endCol": 25
+    },
+    "ownerName": "<ChatPullRequestChecks>",
+    "ownerPath": [
+      "<ChatPullRequestsContent>",
+      "<PullRequestRow>",
+      "<Checks>",
+      "<ChatPullRequestChecks>"
+    ],
+    "related": [
+      {
+        "message": "Related caller or root.",
+        "loc": {
+          "file": "app/src/pages/chat/components/chat-pull-requests-content.tsx",
+          "line": 111,
+          "col": 18,
+          "endLine": 111,
+          "endCol": 29
+        }
+      }
+    ],
+    "data": {},
+    "origins": [211, 252, 3167],
+    "rootCause": "unsupported construct or missing dependency declaration",
+    "kind": "downstream obligation",
+    "changed": true
+  },
+  {
+    "id": "E34",
+    "key": "STRICT_READ_UNTRACKED:app/src/pages/model-providers/profiles-view.tsx:505:25",
+    "code": "STRICT_READ_UNTRACKED",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/pages/model-providers/profiles-view.tsx",
+      "line": 505,
+      "col": 25,
+      "endLine": 505,
+      "endCol": 34
+    },
+    "ownerName": "<ProviderProfileRow>",
+    "ownerPath": ["<ProviderProfiles>", "<ProviderProfileRow>"],
+    "related": [
+      {
+        "message": "Related caller or root.",
+        "loc": {
+          "file": "app/src/pages/model-providers/profiles-view.tsx",
+          "line": 481,
+          "col": 22,
+          "endLine": 481,
+          "endCol": 27
+        }
+      }
+    ],
+    "data": {},
+    "origins": [10612],
+    "rootCause": "settled reactive source read",
+    "kind": "downstream obligation",
+    "changed": true
+  },
+  {
+    "id": "E35",
+    "key": "STRICT_READ_UNTRACKED:app/src/pages/channels/channels-page.tsx:208:23",
+    "code": "STRICT_READ_UNTRACKED",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/pages/channels/channels-page.tsx",
+      "line": 208,
+      "col": 23,
+      "endLine": 208,
+      "endCol": 45
+    },
+    "ownerName": "<ChannelsPage>",
+    "ownerPath": ["<ChannelsPage>"],
+    "related": [],
+    "data": {},
+    "origins": [7659],
+    "rootCause": "settled reactive source read",
+    "kind": "direct or untraced obligation",
+    "changed": false
+  },
+  {
+    "id": "E36",
+    "key": "STRICT_READ_UNTRACKED:app/src/components/config-form.node.collection-map.tsx:237:42",
+    "code": "STRICT_READ_UNTRACKED",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/components/config-form.node.collection-map.tsx",
+      "line": 237,
+      "col": 42,
+      "endLine": 237,
+      "endCol": 49
+    },
+    "ownerName": "<CollectionRemoveButton>",
+    "ownerPath": ["<ConfigMapField>", "<ConfigMapRow>", "<CollectionRemoveButton>"],
+    "related": [],
+    "data": {},
+    "origins": [6609],
+    "rootCause": "settled reactive source read",
+    "kind": "direct or untraced obligation",
+    "changed": false
+  },
+  {
+    "id": "E37",
+    "key": "STRICT_READ_UNTRACKED:app/src/components/desktop/desktop-panel-rail.tsx:94:28",
+    "code": "STRICT_READ_UNTRACKED",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/components/desktop/desktop-panel-rail.tsx",
+      "line": 94,
+      "col": 28,
+      "endLine": 94,
+      "endCol": 36
+    },
+    "ownerName": "<DesktopConnectionRail>",
+    "ownerPath": ["<DesktopPanelView>", "<DesktopPanelContent>", "<DesktopConnectionRail>"],
+    "related": [],
+    "data": {},
+    "origins": [],
+    "rootCause": "obligation without recorded origin",
+    "kind": "direct or untraced obligation",
+    "changed": false
+  },
+  {
+    "id": "E38",
+    "key": "UNHANDLED_HANDLER_FAILURE:app/src/pages/chat/components/chat-details-mobile-content.tsx:317:13",
+    "code": "UNHANDLED_HANDLER_FAILURE",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/pages/chat/components/chat-details-mobile-content.tsx",
+      "line": 317,
+      "col": 13,
+      "endLine": 322,
+      "endCol": 14
+    },
+    "ownerName": "<ChatDetailsMobileRoot>",
+    "ownerPath": ["<ChatDetailsMobileContent>", "<MobileRoot>", "<ChatDetailsMobileRoot>"],
+    "related": [],
+    "data": {
+      "failures": ["unknown"]
+    },
+    "origins": [5725, 5726],
+    "rootCause": "unresolved callable or receiver facts",
+    "kind": "downstream obligation",
+    "changed": true
+  },
+  {
+    "id": "E39",
+    "key": "UNHANDLED_HANDLER_FAILURE:app/src/pages/cron/scratch-editor.tsx:260:13",
+    "code": "UNHANDLED_HANDLER_FAILURE",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/pages/cron/scratch-editor.tsx",
+      "line": 260,
+      "col": 13,
+      "endLine": 260,
+      "endCol": 34
+    },
+    "ownerName": "<ScratchFields>",
+    "ownerPath": ["<CronScratchEditor>", "<ScratchFields>"],
+    "related": [],
+    "data": {
+      "failures": ["unknown"]
+    },
+    "origins": [
+      3888, 3890, 357, 358, 3892, 3894, 3896, 3898, 3900, 364, 3902, 10324, 10325, 10326, 10327,
+      3932, 3933, 3934, 3935, 3936, 3937, 3938, 3939, 3940, 3941, 3942, 10328
+    ],
+    "rootCause": "work or alternatives budget fallback",
+    "kind": "downstream obligation",
+    "changed": true
+  },
+  {
+    "id": "E40",
+    "key": "UNHANDLED_HANDLER_FAILURE:app/src/app/router-outlet.tsx:472:7",
+    "code": "UNHANDLED_HANDLER_FAILURE",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/app/router-outlet.tsx",
+      "line": 472,
+      "col": 7,
+      "endLine": 488,
+      "endCol": 9
+    },
+    "ownerName": "<RouterOutlet>",
+    "ownerPath": ["<OpenClawShell>", "<ApplicationShell>", "<RouterOutlet>"],
+    "related": [],
+    "data": {
+      "failures": ["unknown"]
+    },
+    "origins": [4007, 4008],
+    "rootCause": "unresolved callable or receiver facts",
+    "kind": "downstream obligation",
+    "changed": false
+  },
+  {
+    "id": "E41",
+    "key": "UNHANDLED_HANDLER_FAILURE:app/src/pages/chat/components/chat-composer-pasted-text.tsx:75:7",
+    "code": "UNHANDLED_HANDLER_FAILURE",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/pages/chat/components/chat-composer-pasted-text.tsx",
+      "line": 75,
+      "col": 7,
+      "endLine": 80,
+      "endCol": 9
+    },
+    "ownerName": "<ComposerPastedText>",
+    "ownerPath": ["<ComposerPastedText>"],
+    "related": [],
+    "data": {
+      "failures": ["unknown"]
+    },
+    "origins": [5579, 7769, 7770, 7771, 7772, 7773, 7774],
+    "rootCause": "annotation-only failure obligation",
+    "kind": "downstream obligation",
+    "changed": false
+  },
+  {
+    "id": "E42",
+    "key": "UNHANDLED_HANDLER_FAILURE:app/src/pages/chat/components/chat-sidebar-desktop-frame-controls.tsx:189:11",
+    "code": "UNHANDLED_HANDLER_FAILURE",
+    "severity": "error",
+    "loc": {
+      "file": "app/src/pages/chat/components/chat-sidebar-desktop-frame-controls.tsx",
+      "line": 189,
+      "col": 11,
+      "endLine": 189,
+      "endCol": 58
+    },
+    "ownerName": "<DesktopFrameControls>",
+    "ownerPath": ["<DesktopFrameControls>"],
+    "related": [],
+    "data": {
+      "failures": ["unknown"]
+    },
+    "origins": [8920],
+    "rootCause": "unresolved callable or receiver facts",
+    "kind": "downstream obligation",
+    "changed": false
+  }
+]

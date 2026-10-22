@@ -1,0 +1,186 @@
+{
+  "meaning": "TP means correct silence at this operation, FP means missed required finding, UNSURE means unresolved. It does not certify the enclosing function or file.",
+  "selection": "Eleven changed native-string/array operations chosen from removed-error locations, plus four unchanged import/catch/reset/boundary controls. Sites were fixed before the last rerun; all require zero AFTER error starts on their source line. Multiple controls in one component exercise different obligations. This is a risk-based audit, not a random sample.",
+  "sites": [
+    {
+      "id": "S01",
+      "loc": {
+        "file": "app/src/app-route-paths.ts",
+        "line": 554
+      },
+      "source": "if (normalizedPath.toLowerCase().endsWith(\"/index.html\")) {",
+      "sourceSHA256": "d7a9b9ffb865b4f830c1586f5a041180454c413faebf71a0185fbc64fcac2cfa",
+      "verdict": "TP",
+      "contractStatus": "no-independent-obligation",
+      "reason": "Native lower-case/endsWith chain on normalized path; the previous unknown call came from losing the string result."
+    },
+    {
+      "id": "S02",
+      "loc": {
+        "file": "app/src/app-route-paths.ts",
+        "line": 560
+      },
+      "source": "const segments = normalizedPath.split(\"/\").filter(Boolean);",
+      "sourceSHA256": "d7a9b9ffb865b4f830c1586f5a041180454c413faebf71a0185fbc64fcac2cfa",
+      "verdict": "TP",
+      "contractStatus": "no-independent-obligation",
+      "reason": "Native split/filter with Boolean predicate; no injected callback is called here."
+    },
+    {
+      "id": "S03",
+      "loc": {
+        "file": "app/src/app-route-paths.ts",
+        "line": 562
+      },
+      "source": "const candidate = `/${segments.slice(index).join(\"/\")}`;",
+      "sourceSHA256": "d7a9b9ffb865b4f830c1586f5a041180454c413faebf71a0185fbc64fcac2cfa",
+      "verdict": "TP",
+      "contractStatus": "no-independent-obligation",
+      "reason": "Native slice/join on the local segments array; loop coverage warnings remain separate."
+    },
+    {
+      "id": "S04",
+      "loc": {
+        "file": "app/src/pages/usage/helpers.ts",
+        "line": 7
+      },
+      "source": "return `${year}-${String(month).padStart(2, \"0\")}-${String(day).padStart(2, \"0\")}`;",
+      "sourceSHA256": "752ca02fb2f3df581d46c871fc2c696e92c8d26ffd1b96d7530b6dc732b69d0b",
+      "verdict": "TP",
+      "contractStatus": "no-independent-obligation",
+      "reason": "String conversion and padStart format numeric date fields; no callback or reactive getter is invoked."
+    },
+    {
+      "id": "S05",
+      "loc": {
+        "file": "app/src/pages/plugin/logbook-state.ts",
+        "line": 15
+      },
+      "source": "const month = String(date.getMonth() + 1).padStart(2, \"0\");",
+      "sourceSHA256": "b9ab38ceac26bad3671506d5613320c40a81243afbac28488ea1d319175cce29",
+      "verdict": "TP",
+      "contractStatus": "no-independent-obligation",
+      "reason": "Native Date.getMonth followed by String/padStart; native return shape remains distinct from injected methods."
+    },
+    {
+      "id": "S06",
+      "loc": {
+        "file": "app/src/pages/plugin/logbook-state.ts",
+        "line": 16
+      },
+      "source": "const day = String(date.getDate()).padStart(2, \"0\");",
+      "sourceSHA256": "b9ab38ceac26bad3671506d5613320c40a81243afbac28488ea1d319175cce29",
+      "verdict": "TP",
+      "contractStatus": "no-independent-obligation",
+      "reason": "Native Date.getDate followed by String/padStart; no failure obligation under the slice platform model."
+    },
+    {
+      "id": "S07",
+      "loc": {
+        "file": "src/media/parse-output.ts",
+        "line": 325
+      },
+      "source": "const gap = line.slice(end, next.start);",
+      "sourceSHA256": "82ef7417919df04fa72542f2f85934d5c26fcbed13ebe3b31f36fccd78b242d3",
+      "verdict": "TP",
+      "contractStatus": "no-independent-obligation",
+      "reason": "String.slice extracts a gap from a string parameter. Surrounding loop/call obligations are independent."
+    },
+    {
+      "id": "S08",
+      "loc": {
+        "file": "app/src/lib/browser-redact.ts",
+        "line": 64
+      },
+      "source": "return `${match.slice(0, tokenOffset)}${masked}${match.slice(tokenOffset + token.length)}`;",
+      "sourceSHA256": "7ce1e1a0b9706b8d89c51d893ae3d23ffd7ec5544e3a15753138c684377d3453",
+      "verdict": "TP",
+      "contractStatus": "no-independent-obligation",
+      "reason": "Native slices and a template construct the masked text; no callback invocation at this site."
+    },
+    {
+      "id": "S09",
+      "loc": {
+        "file": "app/src/lib/browser-redact.ts",
+        "line": 46
+      },
+      "source": "const followingText = offset < 0 ? \"\" : input.slice(offset + match.length);",
+      "sourceSHA256": "7ce1e1a0b9706b8d89c51d893ae3d23ffd7ec5544e3a15753138c684377d3453",
+      "verdict": "TP",
+      "contractStatus": "no-independent-obligation",
+      "reason": "Conditional string.slice uses a known string input; unknown numeric offset changes only the chosen substring."
+    },
+    {
+      "id": "S10",
+      "loc": {
+        "file": "app/src/lib/browser-redact.ts",
+        "line": 60
+      },
+      "source": "const tokenOffset = match.lastIndexOf(token);",
+      "sourceSHA256": "7ce1e1a0b9706b8d89c51d893ae3d23ffd7ec5544e3a15753138c684377d3453",
+      "verdict": "TP",
+      "contractStatus": "no-independent-obligation",
+      "reason": "Native lastIndexOf on the matched string; no failure-producing operation in this expression."
+    },
+    {
+      "id": "S11",
+      "loc": {
+        "file": "app/src/lib/browser-redact.ts",
+        "line": 53
+      },
+      "source": "if (token === \"$\" && followingText.startsWith(\"`\")) {",
+      "sourceSHA256": "7ce1e1a0b9706b8d89c51d893ae3d23ffd7ec5544e3a15753138c684377d3453",
+      "verdict": "TP",
+      "contractStatus": "no-independent-obligation",
+      "reason": "String startsWith under a token comparison; neither native test can throw under the string receiver model."
+    },
+    {
+      "id": "S12",
+      "loc": {
+        "file": "app/src/components/plugin-theme-artwork.tsx",
+        "line": 7
+      },
+      "source": "try {",
+      "sourceSHA256": "f321ddb7ad1137f9918ed888358ddbee4f043732cfbf1911692228e83843dd87",
+      "verdict": "TP",
+      "contractStatus": "discharged-by-catch",
+      "reason": "Dynamic import stays a partial-check warning, and the enclosing try/catch handles its failure. No application import was executed in this review."
+    },
+    {
+      "id": "S13",
+      "loc": {
+        "file": "app/src/components/plugin-theme-artwork.tsx",
+        "line": 9
+      },
+      "source": "return await fetchPluginThemeArtworkBlobUrl({ url });",
+      "sourceSHA256": "f321ddb7ad1137f9918ed888358ddbee4f043732cfbf1911692228e83843dd87",
+      "verdict": "TP",
+      "contractStatus": "discharged-by-catch",
+      "reason": "Awaited opaque loader call is inside try/catch, which returns null on failure; the unknown failure contract is discharged."
+    },
+    {
+      "id": "S14",
+      "loc": {
+        "file": "app/src/components/plugin-theme-artwork.tsx",
+        "line": 15
+      },
+      "source": "<Loading on={props.url} fallback={props.fallback}>",
+      "sourceSHA256": "f321ddb7ad1137f9918ed888358ddbee4f043732cfbf1911692228e83843dd87",
+      "verdict": "TP",
+      "contractStatus": "no-independent-obligation",
+      "reason": "Loading.on is a reset input, not an event binding; a URL does not create a handler obligation."
+    },
+    {
+      "id": "S15",
+      "loc": {
+        "file": "app/src/components/plugin-theme-artwork.tsx",
+        "line": 16
+      },
+      "source": "<Show when={source()} fallback={props.fallback}>",
+      "sourceSHA256": "f321ddb7ad1137f9918ed888358ddbee4f043732cfbf1911692228e83843dd87",
+      "verdict": "TP",
+      "contractStatus": "discharged-by-Loading",
+      "reason": "Async memo source is consumed beneath Loading; its body catches loader failures, so this read needs no escaping error."
+    }
+  ]
+}

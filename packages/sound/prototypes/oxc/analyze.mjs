@@ -29,6 +29,19 @@ const callbackMethods = new Set([
   "flatMap",
   "sort"
 ]);
+// Undefined plain() means an abstract scalar, not a known undefined value.
+const truth = value => {
+  if (value.tag !== "plain") return undefined;
+  if (value.undefinedValue) return false;
+  if (value.value !== undefined) return Boolean(value.value);
+  return undefined;
+};
+const nullish = value => {
+  if (value.tag !== "plain") return undefined;
+  if (value.undefinedValue || value.value === null) return true;
+  if (value.value !== undefined) return false;
+  return undefined;
+};
 const scalarMethods = new Set([
   "trim",
   "toUpperCase",
@@ -153,14 +166,35 @@ export class Analysis {
     this.event("boundary", node, { reason });
     return { tag: "worst", reason };
   }
+  origins(node, label) {
+    const loc = this.graph.loc(node);
+    const site = this.worstSites.get(loc.file + ":" + node?.start + ":" + node?.end);
+    const reason = site?.reasons.join("; ") ?? label;
+    const cache = (this.graph.originCache ??= new WeakMap());
+    let reasons = cache.get(node);
+    if (!reasons) cache.set(node, (reasons = new Map()));
+    if (!reasons.has(reason)) reasons.set(reason, { loc, reason });
+    return [reasons.get(reason)];
+  }
   fail(failures, node, c) {
     if (!failures?.length || c.scope === "module") return;
+    const origins = c.origins?.length
+      ? c.origins
+      : this.origins(
+          node,
+          node?.type === "ThrowStatement"
+            ? "project throw"
+            : failures.includes("unknown")
+              ? "unknown failure facts"
+              : "modeled failure"
+        );
     if (c.caught) {
       c.caught.push(...failures);
       return;
     }
     if (c.capture) {
       appendUnique(c.capture.failures, failures);
+      appendUnique(c.capture.origins, origins);
       return;
     }
     if (c.asyncRejections) {
@@ -169,12 +203,16 @@ export class Analysis {
     }
     if (c.scope === "handler" || c.scope === "ref") {
       c.sink.push(...failures);
+      appendUnique(c.failureOrigins, origins);
       return;
     }
     if (c.scope === "setup")
-      this.emit("SETUP_MAY_THROW", node, c, [], { failures: uniq(failures) });
+      this.emit("SETUP_MAY_THROW", node, c, [], { failures: uniq(failures), origins });
     else if (!c.errored)
-      this.emit("ERROR_OUTSIDE_ERRORED_BOUNDARY", node, c, [], { failures: uniq(failures) });
+      this.emit("ERROR_OUTSIDE_ERRORED_BOUNDARY", node, c, [], {
+        failures: uniq(failures),
+        origins
+      });
   }
   read(value, node, c, related = []) {
     // Ref failure/write rules stay detached; only its read scope is setup-like.
@@ -205,32 +243,45 @@ export class Analysis {
       c.capture.pending ||= value.pending;
       appendUnique(c.capture.failures, value.failures);
       appendUnique(c.capture.related, related);
+      appendUnique(
+        c.capture.origins,
+        value.origins ?? this.origins(node, value.pending ? "pending source" : "reactive source")
+      );
       return;
     }
-    const next = { ...c, related: [...(c.related ?? []), ...related] };
+    const next = {
+      ...c,
+      origins:
+        value.origins ?? this.origins(node, value.pending ? "pending source" : "reactive source"),
+      related: [...(c.related ?? []), ...related]
+    };
     if (!c.untracked) {
       if (scope === "setup" || (scope === "effect" && !value.pending))
         this.emit(
           value.pending ? "PENDING_ASYNC_UNTRACKED_READ" : "STRICT_READ_UNTRACKED",
           node,
-          next
+          next,
+          [],
+          { origins: next.origins }
         );
       if (value.pending && scope === "effect")
-        this.emit("PENDING_ASYNC_FORBIDDEN_SCOPE", node, next);
-      if (value.pending && scope === "handler") this.emit("PENDING_ASYNC_IN_HANDLER", node, next);
+        this.emit("PENDING_ASYNC_FORBIDDEN_SCOPE", node, next, [], { origins: next.origins });
+      if (value.pending && scope === "handler")
+        this.emit("PENDING_ASYNC_IN_HANDLER", node, next, [], { origins: next.origins });
       if (value.pending && scope === "tracking" && !c.loading)
-        this.emit("ASYNC_OUTSIDE_LOADING_BOUNDARY", node, next);
+        this.emit("ASYNC_OUTSIDE_LOADING_BOUNDARY", node, next, [], { origins: next.origins });
     }
     this.fail(value.failures, node, next);
   }
   dropped(value, node, c) {
     each(value, v => {
-      if (v.tag === "promise" && !v.handled) this.fail(v.rejects, node, { ...c, caught: null });
+      if (v.tag === "promise" && !v.handled)
+        this.fail(v.rejects, node, { ...c, caught: null, origins: v.origins });
       return v;
     });
   }
   capture(c, fn) {
-    const cap = { reactive: false, pending: false, failures: [], related: [] };
+    const cap = { reactive: false, pending: false, failures: [], related: [], origins: [] };
     const value = fn({ ...c, scope: "tracking", capture: cap, caught: null });
     return { value, cap };
   }
@@ -393,6 +444,7 @@ export class Analysis {
     const next = {
       ...c,
       returns,
+      origins: null,
       sink: fn.node.async ? sink : c.sink,
       asyncRejections: fn.node.async ? sink : c.asyncRejections
     };
@@ -426,10 +478,15 @@ export class Analysis {
   }
   runHandler(fn, node, c, args = [], scope = "handler") {
     const sink = [];
-    const next = { ...c, scope, capture: null, caught: null, sink };
+    const failureOrigins = [];
+    const next = { ...c, scope, capture: null, caught: null, sink, failureOrigins, origins: null };
     const value = this.call(fn, args, node, next);
     this.dropped(value, node, next);
-    if (sink.length) this.emit("UNHANDLED_HANDLER_FAILURE", node, c, [], { failures: uniq(sink) });
+    if (sink.length)
+      this.emit("UNHANDLED_HANDLER_FAILURE", node, c, [], {
+        failures: uniq(sink),
+        origins: failureOrigins
+      });
   }
   component(fn, props, node, c) {
     if (fn.tag !== "function") {
@@ -480,11 +537,19 @@ export class Analysis {
               providers: entry.context.providers
             })
           );
-          if (cap.reactive || cap.pending || cap.failures.length)
-            this.read({ pending: cap.pending, failures: uniq(cap.failures) }, node, c, [
-              entry.node,
-              ...cap.related
-            ]);
+          if (cap.reactive || cap.pending)
+            this.read(
+              { pending: cap.pending, failures: uniq(cap.failures), origins: cap.origins },
+              node,
+              c,
+              [entry.node, ...cap.related]
+            );
+          else if (cap.failures.length)
+            this.fail(uniq(cap.failures), node, {
+              ...c,
+              origins: cap.origins,
+              related: [...(c.related ?? []), entry.node, ...cap.related]
+            });
           return out.tag === "function" ? { ...out, callbackProp: true } : out;
         }
         if (entry?.tag === "getter") return this.functionCall(entry.fn, [], node, c);
@@ -583,6 +648,7 @@ export class Analysis {
           );
           fn.pending ||= cap.pending;
           fn.failures = uniq([...fn.failures, ...cap.failures]);
+          fn.origins = uniq([...(fn.origins ?? []), ...cap.origins]);
           each(out, v => {
             if (v.tag === "promise") {
               fn.pending = true;
@@ -737,7 +803,11 @@ export class Analysis {
         failures: uniq(failures),
         result,
         compute: args[0],
-        context: c
+        context: c,
+        origins: uniq([
+          ...cap.origins,
+          ...(pending ? this.origins(node, "pending memo result") : [])
+        ])
       };
     }
     if (name === "untrack") {
@@ -784,6 +854,16 @@ export class Analysis {
       };
     if (/^Response[.](json|text|blob|arrayBuffer)$/.test(path))
       return { tag: "promise", rejects: ["unknown"], result: plain() };
+    if (
+      path === "String" ||
+      (/^String[.](trim|trimStart|trimEnd|toUpperCase|toLowerCase|slice|substring|charAt|concat|toString)$/.test(
+        path
+      ) &&
+        fn.receiver?.tag === "platformInstance")
+    )
+      return { tag: "platformInstance", path: "String" };
+    if (path === "String.split" && fn.receiver?.tag === "platformInstance")
+      return { tag: "array", elements: [{ tag: "platformInstance", path: "String" }] };
     if (path === "JSON.parse") {
       this.fail(["SyntaxError"], node, c);
       return plain();
@@ -802,7 +882,9 @@ export class Analysis {
       return plain();
     }
     if (path === "Array.from") {
-      const value = args[1] ? this.call(args[1], [plain(), plain()], node, c) : plain();
+      const input = args[0];
+      const element = input?.tag === "array" ? join(...input.elements) : plain();
+      const value = args[1] ? this.call(args[1], [element, plain()], node, c) : element;
       return { tag: "array", elements: [value] };
     }
     if (path.startsWith("document.") || path.startsWith("window.document.")) {
@@ -869,6 +951,8 @@ export class Analysis {
   }
   method(fn, args, node, c) {
     const { receiver: r, key } = fn;
+    if (r.tag === "platformInstance" && r.path === "String")
+      return this.platform({ tag: "platform", path: "String." + key, receiver: r }, args, node, c);
     if (r.tag === "promise") {
       if (key === "catch") {
         if (!r.handled) this.epoch++;
@@ -908,6 +992,16 @@ export class Analysis {
         return { tag: "promise", rejects: uniq(rejects), result: value.result ?? value };
       }
     }
+    if (r.tag === "array") {
+      if (key === "slice") return { tag: "array", elements: [...r.elements] };
+      if (key === "concat")
+        return {
+          tag: "array",
+          elements: [...r.elements, ...args.flatMap(v => (v.tag === "array" ? v.elements : [v]))]
+        };
+      if (["at", "pop", "shift"].includes(key))
+        return join(...r.elements, { ...plain(), undefinedValue: true });
+    }
     if (callbackMethods.has(key) && r.tag === "array") {
       const element = join(...(r.elements ?? []));
       const value = args[0] ? this.call(args[0], [element, plain(), r], node, c) : plain();
@@ -917,6 +1011,23 @@ export class Analysis {
       if (key === "reduce") return value;
       return plain();
     }
+    if (r.tag === "array" && key === "join") return { tag: "platformInstance", path: "String" };
+    if (
+      r.tag === "plain" &&
+      [
+        "slice",
+        "substring",
+        "trim",
+        "toUpperCase",
+        "toLowerCase",
+        "charAt",
+        "concat",
+        "toString",
+        "toFixed",
+        "toLocaleString"
+      ].includes(key)
+    )
+      return { tag: "platformInstance", path: "String" };
     if (
       scalarMethods.has(key) &&
       ["array", "plain", "sourceValue", "platformInstance"].includes(r.tag)
@@ -1102,7 +1213,7 @@ export class Analysis {
           if (v.tag === "promise") {
             if (!v.handled) this.epoch++;
             v.handled = true;
-            this.fail(v.rejects, n, c);
+            this.fail(v.rejects, n, { ...c, origins: v.origins });
             return v.result;
           }
           return v;
@@ -1167,13 +1278,28 @@ export class Analysis {
       }
       case "LogicalExpression": {
         const left = this.eval(n.left, env, c);
-        const right = this.eval(n.right, env, c);
-        if (n.operator === "??" && left.tag === "plain" && left.value === undefined) return right;
+        const decision = n.operator === "??" ? nullish(left) : truth(left);
+        if (decision !== undefined) {
+          const takeRight = n.operator === "&&" ? decision : !decision;
+          // ?? evaluates its right side precisely when the left is nullish.
+          return (n.operator === "??" ? decision : takeRight) ? this.eval(n.right, env, c) : left;
+        }
+        // Unknown conditions keep both paths, including effects on local cells.
+        const skipped = this.fork(env);
+        const taken = this.fork(env);
+        const right = this.eval(n.right, taken, c);
+        this.merge(env, skipped, taken);
         return join(left, right);
       }
-      case "ConditionalExpression":
-        this.eval(n.test, env, c);
-        return join(this.eval(n.consequent, env, c), this.eval(n.alternate, env, c));
+      case "ConditionalExpression": {
+        const decision = truth(this.eval(n.test, env, c));
+        if (decision !== undefined) return this.eval(decision ? n.consequent : n.alternate, env, c);
+        const a = this.fork(env);
+        const b = this.fork(env);
+        const value = join(this.eval(n.consequent, a, c), this.eval(n.alternate, b, c));
+        this.merge(env, a, b);
+        return value;
+      }
       case "SequenceExpression": {
         let v = plain();
         for (const e of n.expressions) v = this.eval(e, env, c);
@@ -1181,7 +1307,9 @@ export class Analysis {
       }
       case "TemplateLiteral":
         n.expressions.forEach(e => this.eval(e, env, c));
-        return plain("");
+        return n.expressions.length
+          ? { ...plain(), primitive: "string" }
+          : plain(n.quasis[0]?.value.cooked ?? "");
       case "TaggedTemplateExpression":
         return this.call(
           this.eval(n.tag, env, c),

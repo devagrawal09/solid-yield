@@ -75,6 +75,14 @@ describe("the shared code table", () => {
 });
 
 describe("the harness", () => {
+  it("runs B and C by default and keeps retired A available explicitly (D-132)", async () => {
+    const active = await loadPrototypes("all");
+    expect(active.missing).toEqual([]);
+    expect(active.prototypes.map(prototype => prototype.name)).toEqual(["dataflow", "oxc"]);
+    const retired = await loadPrototypes("typed");
+    expect(retired.missing).toEqual([]);
+    expect(retired.prototypes.map(prototype => prototype.name)).toEqual(["typed"]);
+  });
   it("flags every in-subset expectation as a soundness failure against the null prototype", () => {
     for (const fx of fixtures) {
       const s = score(fx, fixturesDir, [], 0);

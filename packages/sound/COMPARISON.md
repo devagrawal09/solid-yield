@@ -1,4 +1,26 @@
-# Typed annotations (A) vs own dataflow analysis (B) — the evidence
+# Prototype comparison — the evidence
+
+## Current decision (D-132, 2026-10-22)
+
+**A (typed, TypeScript as checker) is retired.** B (dataflow) and C (oxc,
+no TypeScript) continue and are being extended to the OpenClaw group. The three
+reached correctness parity on the original 109 fixtures, but A was 2–3× slower
+than B and about 60× slower than C. Cold Equipment checks were 417 / 172 / 6.5 ms
+(A / B / C); incremental checks were about 200 / 60 / 3.5 ms. A took the Vite
+build from 29 to 463 ms. Context support added 784 lines for A versus 139 for B,
+and A requires TypeScript by construction.
+
+Keep A’s code in `prototypes/typed/` and its results in history. It is no longer
+in the harness default run set; `node harness/run.mjs --prototype typed` still
+runs it explicitly. Earlier measurements below remain historical evidence, not
+a recommendation to continue A.
+
+Precision is a first-class selection criterion alongside soundness and speed:
+track and weigh extra errors and warnings **per group**, plus C’s
+inference-needed and worst-case site counts. Passing the required findings
+alone does not settle the choice between B and C.
+
+## Historical measurements
 
 Measured on 2026-10-22 with `node harness/run.mjs --runs 3` and
 `node harness/vite-measure.mjs <p> --runs 3` (Node 24, TypeScript 6.0.3, solid-js /

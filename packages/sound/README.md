@@ -1,7 +1,7 @@
 # solid-sound (prototypes)
 
 solid-sound checks plain Solid 2 code (solid-js / @solidjs/web **2.0.0-rc.17**) and
-ships it as written. This package holds the two prototype checking IRs that replace
+ships it as written. This package holds the prototype checkers that replace
 solid-yield's generator model, the shared vertical slice they are compared on, and the
 harness that compares them. Nothing here depends on the generator runtime or lowering.
 
@@ -13,12 +13,16 @@ harness that compares them. Nothing here depends on the generator runtime or low
 | `fixtures/` | 52 byte-identical legacy cases, 29 native context cases, Equipment Checkout `src/` (byte-identical), 27 mutants; `index.mjs` holds the slice expectation and today's measured output (`legacy-actual.json`, from `legacy-run.mjs`) |
 | `harness/` | `run.mjs` (scoring + timing), `vite.mjs` (the Vite plugin wrapper), `vite-measure.mjs` (cold build + HMR re-check), `dump-virtual.mjs` (debug aid for A) |
 | `prototypes/dataflow/` | prototype B — own dataflow analysis, diagnostics produced directly |
-| `prototypes/typed/` | prototype A — typed annotations: a syntactic transform + a phantom-typed virtual module, TypeScript as the checker |
+| `prototypes/oxc/` | prototype C — own analysis with Oxc, no TypeScript |
+| `prototypes/typed/` | retired prototype A — TypeScript as the checker; code and historical results kept (D-132) |
 | `COMPARISON.md` | the per-criterion comparison with the measured numbers |
 
 ## Run
 
-A (typed), B (dataflow) and C (oxc) pass the original 109 fixtures. The new
+B (dataflow) and C (oxc, no TypeScript) continue and are being extended to the
+OpenClaw group. A (typed) is **retired** under D-132: all three pass the original
+109 fixtures, but A costs more time and code and requires TypeScript. Its code
+and historical results remain; run it explicitly with `--prototype typed`. The new
 `openclaw` group freezes 34 more requirements under D-131; unchanged prototypes
 have known gaps. Tests run those checkers and pin their measured new-group
 scores, so regressions or improvements require review rather than going silently
@@ -27,7 +31,8 @@ green. See results/openclaw-baseline.md, results/openclaw-runtime.md and FUTURE.
 ```sh
 pnpm install                                  # once, at the repo root
 cd packages/sound
-node harness/run.mjs                          # both prototypes + the null prototype, all groups → results/latest.{md,json}
+node harness/run.mjs                          # B + C + null, all groups → results/latest.{md,json}
+node harness/run.mjs --prototype typed        # retired A, explicit historical comparison
 node harness/run.mjs --prototype dataflow --group mutants --verbose
 node harness/vite-measure.mjs dataflow --runs 5   # vite build (strict / report-only) + dev-server HMR re-check timing
 node harness/vite-measure.mjs typed
@@ -48,6 +53,10 @@ and is printed in a banner. An anchor marked
 Extra errors, warnings, info, generated-code leakage in messages (`_E_`, `yield`,
 `Generator`, …), unmapped locations and codes outside the table are counted. The null
 prototype always runs to show the harness flags misses.
+
+Precision is a first-class selection criterion alongside soundness and speed
+(D-132). Track and weigh extra errors and warnings per group; for C, also track
+inference-needed and worst-case site counts.
 
 ## Severity policy (Vite)
 

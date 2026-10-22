@@ -1946,3 +1946,11 @@ Tests: native-context-methods ("provides a literal with a getter and a method", 
 **Decided (Dev, 2026-10-22), recorded on `solid-sound`.** This amends D-129(b): a problem proven within the checked subset is an **error**, even when its reused runtime code is a warning. `STRICT_READ_UNTRACKED`, `ASYNC_OUTSIDE_LOADING_BOUNDARY` and `PENDING_ASYNC_FORBIDDEN_SCOPE` therefore return to static `error`; their rc.17 runtime severity remains `warn` (`dist/dev-shared.js` / `dist/dev.js`). The shared code table records static `severity` and runtime `runtime.severity` separately.
 
 Partial-check findings at unanalyzed/worst-case boundaries remain `warn`. `PENDING_ASYNC_IN_HANDLER` remains `warn` under D-129(a); new codes keep their table severity. No analysis or location rule changes. The Vite policy is unchanged: errors fail `vite build`, warnings never do.
+
+### D-132 — solid-sound: retire A, continue B and C, weigh precision
+
+**Decided (Dev, 2026-10-22).** Prototype A (`typed`, TypeScript as checker) is retired. Keep its code in `packages/sound/prototypes/typed/` and its results in history. Remove A from the harness default run set; retain explicit runs with `--prototype typed`. B (`dataflow`) and C (`oxc`, no TypeScript) continue and are being extended to the OpenClaw group.
+
+Precision is a first-class selection criterion alongside soundness and speed. Track and weigh extra errors and warnings per group, plus C’s inference-needed and worst-case site counts.
+_Alternatives:_ Continue all three prototypes; choose between B and C on soundness and speed alone.
+_Reasoning:_ A reached correctness parity with B and C on the 109-fixture suite but was 2–3× slower than B and about 60× slower than C: cold Equipment checks were 417 / 172 / 6.5 ms, incremental checks about 200 / 60 / 3.5 ms (A / B / C). A took the Vite build from 29 to 463 ms. Context support added 784 lines for A versus 139 for B, and A requires TypeScript by construction. Correctness parity does not justify that cost; extra findings and conservative inference also matter when selecting between B and C.

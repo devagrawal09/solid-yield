@@ -12,6 +12,7 @@ import { fileURLToPath } from "node:url";
 import { ORIGINS } from "./origins.mjs";
 import { contextCases, contextMutants } from "./context.mjs";
 import { openclawFixtures } from "./openclaw.mjs";
+import { openclawPrecisionFixtures } from "./openclaw-precision.mjs";
 import { BY_CODE } from "../src/codes.mjs";
 
 /** @typedef {import("./schema.d.ts").Fixture} Fixture */
@@ -347,7 +348,7 @@ export const mutants = [
 ];
 
 /** @type {Fixture[]} */
-export const fixtures = [...cases, equipment, ...mutants, ...openclawFixtures];
+export const fixtures = [...cases, equipment, ...mutants, ...openclawFixtures, ...openclawPrecisionFixtures];
 
 /** @param {string} group */
 export function byGroup(group) {

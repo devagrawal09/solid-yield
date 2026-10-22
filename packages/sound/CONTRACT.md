@@ -51,6 +51,14 @@ interface ComponentFacts {
 ```
 
 Rules:
+- **Project boundary (D-133):** installed dependency code (`node_modules`,
+  including linked packages and package `dist`) is never authored input. Do not
+  analyze its implementation bodies or place diagnostics inside them, even when
+  import resolution reaches those files. Use declarations only for calls into
+  dependencies. Missing failure information means `unknown` under D-129; keep
+  the obligation at the application call site, with an explicit partial-check
+  warning where needed. Excluding a package must not make its calls safe. An
+  unknown method call alone is not proof of a Solid pending-accessor read.
 - D-130 amends D-129: proven in-subset findings are errors, even for runtime
   warn codes. Runtime severity is recorded separately; partial-check and
   pending-handler findings remain warnings. Prop-expression obligations

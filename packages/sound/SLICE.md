@@ -13,6 +13,26 @@ Both prototypes check exactly this subset of plain Solid 2 (solid-js / @solidjs/
 is the worst case (possibly pending, possibly failing with `unknown`). Never trust
 it, never go silently green.
 
+## Precision and project boundary (D-133)
+
+Precision fixes come before scalability work. `Loading on={key}` is a reset/key
+input, not an event handler. Synchronous imperative machine methods do not become
+Solid pending reads just because their receiver is partly unknown. Native
+Array/DOM/Set operations keep their receiver facts; lookalike injected methods
+do not get a name-only exemption. Known safe held/ref callbacks keep their bodies
+through forwarding. Unknown optional callbacks still may fail: optional chaining
+and no-op defaults do not discharge D-129.
+
+Installed dependency code (`node_modules`, linked installed packages, package
+`dist`) is never analyzed as authored code and never receives diagnostics inside
+its implementation. Calls into it use declarations only; missing failure facts
+remain `unknown`, with obligations and partial-check warnings at the application
+call site. Unknown returned values keep worst-case facts, but an unknown method
+call is not itself evidence of a Solid pending accessor. This boundary is not a
+blanket exemption for application calls. See CONTRACT.md and the paired
+`openclaw-precision` fixtures. Reset ordering, onSettled ownership, and ref cleanup
+remain deferred; the precision rules do not silently claim those are supported.
+
 ## Inside the subset
 
 **Components.** A function (declaration, const arrow, or `Component<P>`-typed

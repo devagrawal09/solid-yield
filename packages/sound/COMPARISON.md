@@ -1,5 +1,45 @@
 # Prototype comparison — the evidence
 
+## D-133: precision before scalability (2026-10-23)
+
+The new **openclaw-precision** group has 30 fixtures: 15 clean controls and 15
+paired positive mutants. This expands the full default run to 173 fixtures.
+No prototype analysis was changed. The frozen expectations are the target;
+the table is the unchanged implementation's measured output, not a clean bill.
+
+| Prototype | Hits | Misses | Extra errors | Extra warnings | Errors on negatives | Errors inside dependency |
+|---|---:|---:|---:|---:|---:|---:|
+| B / dataflow | 13 | 2 | 7 | 8 | 6 | 2 |
+| C / oxc | 13 | 2 | 22 | 24 | 14 | 8 |
+| null | 0 | 15 | 0 | 0 | 0 | 0 |
+
+**Extras per fixture are the key metric now.** See the complete per-fixture tables
+in [results/openclaw-precision-baseline.md](results/openclaw-precision-baseline.md).
+The 16 installed-dependency findings in the trial are one interop cluster, not 16
+independent authored errors. Our fake installed package includes an unrendered
+checked-root probe: neither prototype yet keeps all of those diagnostics out of
+the app report. The app's uncaught dependency call still has its own required
+D-129 error. No findings are removed from scoring.
+
+The controls cover Loading reset keys, focus-repair Array/DOM microtasks,
+synchronous imperative machine methods, safe held/ref forwarding, native
+EventTarget/Set receivers and installed package boundaries. E24/E28/E30/E40 are
+**true positives under D-129**: optional injected callbacks retain unknown failure,
+even with a no-op merge default. Their safe-body controls must remain distinct.
+Seven fresh rc.17 runtime tests confirm the tested semantics; no agreed reviewer FP
+verdict was overturned. Both prototypes miss the pending read moved to a sibling
+outside Loading and the actual async read inside class start; runtime tests
+confirm both obligations.
+
+The suite pins the **whole per-fixture score**, including every extra, in
+results/openclaw-precision-known.json. Improvements and regressions both fail until
+reviewed. This is not blanket expected failure or diagnostic filtering; old groups
+keep their existing checks. The package's strict TypeScript check includes every
+new fixture and uses the installed rc.17 declarations. See also
+[fixtures/openclaw-precision/README.md](fixtures/openclaw-precision/README.md) and
+[results/openclaw-precision-runtime.md](results/openclaw-precision-runtime.md).
+
+
 ## Current decision (D-132, 2026-10-22)
 
 **A (typed, TypeScript as checker) is retired.** B (dataflow) and C (oxc,

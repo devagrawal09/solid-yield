@@ -28,6 +28,13 @@ have known gaps. Tests run those checkers and pin their measured new-group
 scores, so regressions or improvements require review rather than going silently
 green. See results/openclaw-baseline.md, results/openclaw-runtime.md and FUTURE.md.
 
+D-133 adds 30 `openclaw-precision` fixtures (15 clean controls, 15 paired mutants).
+Precision fixes come before scalability work. Extras per fixture are the main
+metric; installed package bodies are never authored diagnostic locations. D-129
+stays strict for unknown optional callback failures, including E24/E28/E30/E40.
+The unchanged B/C failures are pinned exactly, not filtered. See
+results/openclaw-precision-baseline.md and results/openclaw-precision-runtime.md.
+
 ```sh
 pnpm install                                  # once, at the repo root
 cd packages/sound
@@ -40,6 +47,7 @@ node fixtures/legacy-run.mjs                  # re-measure today's checker's out
 node fixtures/extract.mjs --write             # re-derive the cases from their origins
 pnpm test                                     # integrity, strict fixture types, runtime scopes, old slice + pinned new-group scores
 node harness/openclaw-baseline.mjs             # deliberate baseline refresh; review before accepting
+node harness/openclaw-precision-baseline.mjs   # D-133 group only; review every extra/miss change
 ```
 
 ## Scoring

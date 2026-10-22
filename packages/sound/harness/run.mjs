@@ -3,7 +3,7 @@
 // prototype) over the shared fixtures, scores against the slice expectation,
 // measures cold and incremental check time, and writes results/latest.{md,json}.
 //
-//   node harness/run.mjs [--prototype all|typed|dataflow|null] [--group all|cases|equipment|mutants|openclaw]
+//   node harness/run.mjs [--prototype all|typed|dataflow|null] [--group all|cases|equipment|mutants|openclaw|openclaw-precision]
 //                        [--runs N] [--json path] [--verbose]
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";

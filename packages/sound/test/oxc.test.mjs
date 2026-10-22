@@ -7,6 +7,7 @@ import { createChecker } from "../prototypes/oxc/index.mjs";
 import { byGroup, fixturesDir } from "../fixtures/index.mjs";
 import { score } from "../harness/score.mjs";
 import { assertKnownOpenclaw } from "../harness/openclaw-known.mjs";
+import { assertKnownPrecision } from "../harness/openclaw-precision-known.mjs";
 const packageDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const implementation = resolve(packageDir, "prototypes/oxc");
 function sources(dir) {
@@ -54,7 +55,9 @@ describe("oxc shared fixtures", () => {
       const result = checker.check();
       const s = score(fixture, fixturesDir, result.diagnostics, result.elapsedMs);
       checker.dispose();
-      if (fixture.group === "openclaw") {
+      if (fixture.group === "openclaw-precision") {
+        assertKnownPrecision("oxc", fixture, s);
+      } else if (fixture.group === "openclaw") {
         assertKnownOpenclaw("oxc", fixture, s);
       } else {
         expect(s.misses).toEqual([]);

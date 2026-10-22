@@ -34,6 +34,161 @@ export const ORIGINS = Object.freeze([
   ].map(row => /** @type {TableOrigin} */ ({ id: row, kind: "table", file: "packages/vite-plugin-yield/test/native-forms.test.js", table: "programs", row }))
 ]);
 
+// Precision reductions from the two OpenClaw reviews; synthetic mutants are not upstream bugs.
+/** @type {readonly { id: string, source: string, notes: string }[]} */
+export const OPENCLAW_PRECISION_ORIGINS = Object.freeze([
+  {
+    "id": "op-loading-url",
+    "source": "ui/src/components/plugin-theme-artwork.tsx:4–20 (E02) @09e09dcdf71",
+    "notes": "Loading.on is a reset key, not an event binding. Source review: openclaw-trial/REPORT.md and PRECISION.md. rc.17 reduction; not a byte-identical copy."
+  },
+  {
+    "id": "op-loading-url-mutant",
+    "source": "ui/src/components/plugin-theme-artwork.tsx:4–20 (E02) @09e09dcdf71",
+    "notes": "Loading.on is a reset key, not an event binding. Source review: openclaw-trial/REPORT.md and PRECISION.md. rc.17 reduction; not a byte-identical copy."
+  },
+  {
+    "id": "op-loading-reactive-key",
+    "source": "ui/src/components/plugin-theme-artwork.tsx:15 (E02) @09e09dcdf71",
+    "notes": "A settled reactive reset input is not an untracked read. Promise values are read in Loading children, not inferred from the key. Source review: openclaw-trial/REPORT.md and PRECISION.md. rc.17 reduction; not a byte-identical copy."
+  },
+  {
+    "id": "op-loading-reactive-key-mutant",
+    "source": "ui/src/components/plugin-theme-artwork.tsx:15 (E02) @09e09dcdf71",
+    "notes": "A settled reactive reset input is not an untracked read. Promise values are read in Loading children, not inferred from the key. Source review: openclaw-trial/REPORT.md and PRECISION.md. rc.17 reduction; not a byte-identical copy."
+  },
+  {
+    "id": "op-focus-repair",
+    "source": "ui/src/components/config-form.node.shared.tsx:179–198 (E36; E38 companion) @09e09dcdf71",
+    "notes": "The queued task only sees captured destinations. Earlier remove/destinations injection is not part of this callback. Source review: openclaw-trial/REPORT.md and PRECISION.md. rc.17 reduction; not a byte-identical copy."
+  },
+  {
+    "id": "op-focus-repair-mutant",
+    "source": "ui/src/components/config-form.node.shared.tsx:179–198 (E36; E38 companion) @09e09dcdf71",
+    "notes": "The queued task only sees captured destinations. Earlier remove/destinations injection is not part of this callback. Source review: openclaw-trial/REPORT.md and PRECISION.md. rc.17 reduction; not a byte-identical copy."
+  },
+  {
+    "id": "op-machine-class",
+    "source": "ui/src/components/solid/menu-machine.ts:294–329 (E05, E08) @09e09dcdf71",
+    "notes": "A synchronous class subscription/start is not a pending Solid accessor. Unsupported class facts may warrant a warning, not a proven pending error. Source review: openclaw-trial/REPORT.md and PRECISION.md. rc.17 reduction; not a byte-identical copy."
+  },
+  {
+    "id": "op-machine-class-mutant",
+    "source": "ui/src/components/solid/menu-machine.ts:294–329 (E05, E08) @09e09dcdf71",
+    "notes": "A synchronous class subscription/start is not a pending Solid accessor. Unsupported class facts may warrant a warning, not a proven pending error. Source review: openclaw-trial/REPORT.md and PRECISION.md. rc.17 reduction; not a byte-identical copy."
+  },
+  {
+    "id": "op-machine-members",
+    "source": "deps/node_modules/.pnpm/@zag-js+menu@2.0.0-next.3/node_modules/@zag-js/menu/dist/menu.connect.mjs:27–42; deps/node_modules/.pnpm/@zag-js+popper@2.0.0-next.3/node_modules/@zag-js/popper/dist/placement.mjs:10 (E11/E13/E15/E17/E19/E21/E23/E25/E27/E29/E31/E33/E35/E37/E39/E41) @09e09dcdf71",
+    "notes": "Authored minimal synchronous get/hasTag/computed model. Names alone do not mark Solid accessors; the mutant really reads a pending memo. Source review: openclaw-trial/REPORT.md and PRECISION.md. rc.17 reduction; not a byte-identical copy."
+  },
+  {
+    "id": "op-machine-members-mutant",
+    "source": "deps/node_modules/.pnpm/@zag-js+menu@2.0.0-next.3/node_modules/@zag-js/menu/dist/menu.connect.mjs:27–42; deps/node_modules/.pnpm/@zag-js+popper@2.0.0-next.3/node_modules/@zag-js/popper/dist/placement.mjs:10 (E11/E13/E15/E17/E19/E21/E23/E25/E27/E29/E31/E33/E35/E37/E39/E41) @09e09dcdf71",
+    "notes": "Authored minimal synchronous get/hasTag/computed model. Names alone do not mark Solid accessors; the mutant really reads a pending memo. Source review: openclaw-trial/REPORT.md and PRECISION.md. rc.17 reduction; not a byte-identical copy."
+  },
+  {
+    "id": "op-held-callback",
+    "source": "ui/src/components/multi-select.tsx:36,220,250,279 (E24/E28/E30 safe-body control) @09e09dcdf71",
+    "notes": "Known safe held callbacks keep their bodies through two forwarding steps; a real throwing callback must not be silenced. Source review: openclaw-trial/REPORT.md and PRECISION.md. rc.17 reduction; not a byte-identical copy."
+  },
+  {
+    "id": "op-held-callback-mutant",
+    "source": "ui/src/components/multi-select.tsx:36,220,250,279 (E24/E28/E30 safe-body control) @09e09dcdf71",
+    "notes": "Known safe held callbacks keep their bodies through two forwarding steps; a real throwing callback must not be silenced. Source review: openclaw-trial/REPORT.md and PRECISION.md. rc.17 reduction; not a byte-identical copy."
+  },
+  {
+    "id": "op-held-ref",
+    "source": "ui/src/components/config-form.node.shared.tsx:108 (E34 safe-body control); ui/src/components/native-chrome-setup.tsx:93 (S01) @09e09dcdf71",
+    "notes": "Forwarded known node capture is safe. Unknown or throwing ref callbacks are not made safe by the ref exemption. Source review: openclaw-trial/REPORT.md and PRECISION.md. rc.17 reduction; not a byte-identical copy."
+  },
+  {
+    "id": "op-held-ref-mutant",
+    "source": "ui/src/components/config-form.node.shared.tsx:108 (E34 safe-body control); ui/src/components/native-chrome-setup.tsx:93 (S01) @09e09dcdf71",
+    "notes": "Forwarded known node capture is safe. Unknown or throwing ref callbacks are not made safe by the ref exemption. Source review: openclaw-trial/REPORT.md and PRECISION.md. rc.17 reduction; not a byte-identical copy."
+  },
+  {
+    "id": "op-native-listener",
+    "source": "ui/src/lib/reactive/listener.ts:26 (E18, unsure; recommendation 4) @09e09dcdf71",
+    "notes": "Valid native EventTarget teardown keeps receiver identity. An injected removeEventListener lookalike has no safe body. Source review: openclaw-trial/REPORT.md and PRECISION.md. rc.17 reduction; not a byte-identical copy."
+  },
+  {
+    "id": "op-native-listener-mutant",
+    "source": "ui/src/lib/reactive/listener.ts:26 (E18, unsure; recommendation 4) @09e09dcdf71",
+    "notes": "Valid native EventTarget teardown keeps receiver identity. An injected removeEventListener lookalike has no safe body. Source review: openclaw-trial/REPORT.md and PRECISION.md. rc.17 reduction; not a byte-identical copy."
+  },
+  {
+    "id": "op-set-add",
+    "source": "ui/src/components/overlay-lifecycle.ts:610 (E04, unsure; recommendation 4) @09e09dcdf71",
+    "notes": "A native Set.add with valid arguments is not an unknown injected add method. Source review: openclaw-trial/REPORT.md and PRECISION.md. rc.17 reduction; not a byte-identical copy."
+  },
+  {
+    "id": "op-set-add-mutant",
+    "source": "ui/src/components/overlay-lifecycle.ts:610 (E04, unsure; recommendation 4) @09e09dcdf71",
+    "notes": "A native Set.add with valid arguments is not an unknown injected add method. Source review: openclaw-trial/REPORT.md and PRECISION.md. rc.17 reduction; not a byte-identical copy."
+  },
+  {
+    "id": "op-dependency-machine",
+    "source": "deps/node_modules/.pnpm/@zag-js+menu@2.0.0-next.3/node_modules/@zag-js/menu/dist/menu.connect.mjs:27–42 (E11/E13/E15/E17/E19/E21/E23/E25/E27/E29/E31/E33/E37/E39/E41) @09e09dcdf71",
+    "notes": "Installed dist is not authored source. The declaration supplies no failure guarantee: catch at the app call site; never report inside the package. An extra installed checked-root probe forces the boundary to be tested even when package resolution already selects declarations. The app never imports/renders that component. Source review: openclaw-trial/REPORT.md and PRECISION.md. rc.17 reduction; not a byte-identical copy."
+  },
+  {
+    "id": "op-dependency-machine-mutant",
+    "source": "deps/node_modules/.pnpm/@zag-js+menu@2.0.0-next.3/node_modules/@zag-js/menu/dist/menu.connect.mjs:27–42 (E11/E13/E15/E17/E19/E21/E23/E25/E27/E29/E31/E33/E37/E39/E41) @09e09dcdf71",
+    "notes": "Installed dist is not authored source. The declaration supplies no failure guarantee: catch at the app call site; never report inside the package. An extra installed checked-root probe forces the boundary to be tested even when package resolution already selects declarations. The app never imports/renders that component. Source review: openclaw-trial/REPORT.md and PRECISION.md. rc.17 reduction; not a byte-identical copy."
+  },
+  {
+    "id": "op-dependency-string",
+    "source": "deps/node_modules/.pnpm/@zag-js+popper@2.0.0-next.3/node_modules/@zag-js/popper/dist/placement.mjs:10 (E35) @09e09dcdf71",
+    "notes": "Installed string-processing implementation is not app source. Catch unknown failure at the declared API call, not inside dist. Source review: openclaw-trial/REPORT.md and PRECISION.md. rc.17 reduction; not a byte-identical copy."
+  },
+  {
+    "id": "op-dependency-string-mutant",
+    "source": "deps/node_modules/.pnpm/@zag-js+popper@2.0.0-next.3/node_modules/@zag-js/popper/dist/placement.mjs:10 (E35) @09e09dcdf71",
+    "notes": "Installed string-processing implementation is not app source. Catch unknown failure at the declared API call, not inside dist. Source review: openclaw-trial/REPORT.md and PRECISION.md. rc.17 reduction; not a byte-identical copy."
+  },
+  {
+    "id": "op-e24-remove",
+    "source": "ui/src/components/multi-select.tsx:36,220 (E24) @09e09dcdf71",
+    "notes": "D-133 keeps D-129 strict. A no-op default does not remove the unknown injected override. The safe-body control is closed-world; the mutant supplies a function with no failure information. Source review: openclaw-trial/REPORT.md and PRECISION.md. rc.17 reduction; not a byte-identical copy."
+  },
+  {
+    "id": "op-e24-remove-mutant",
+    "source": "ui/src/components/multi-select.tsx:36,220 (E24) @09e09dcdf71",
+    "notes": "D-133 keeps D-129 strict. A no-op default does not remove the unknown injected override. The safe-body control is closed-world; the mutant supplies a function with no failure information. Source review: openclaw-trial/REPORT.md and PRECISION.md. rc.17 reduction; not a byte-identical copy."
+  },
+  {
+    "id": "op-e28-keydown",
+    "source": "ui/src/components/multi-select.tsx:36,250 (E28) @09e09dcdf71",
+    "notes": "D-133 keeps D-129 strict. A no-op default does not remove the unknown injected override. The safe-body control is closed-world; the mutant supplies a function with no failure information. Source review: openclaw-trial/REPORT.md and PRECISION.md. rc.17 reduction; not a byte-identical copy."
+  },
+  {
+    "id": "op-e28-keydown-mutant",
+    "source": "ui/src/components/multi-select.tsx:36,250 (E28) @09e09dcdf71",
+    "notes": "D-133 keeps D-129 strict. A no-op default does not remove the unknown injected override. The safe-body control is closed-world; the mutant supplies a function with no failure information. Source review: openclaw-trial/REPORT.md and PRECISION.md. rc.17 reduction; not a byte-identical copy."
+  },
+  {
+    "id": "op-e30-select",
+    "source": "ui/src/components/multi-select.tsx:36,279 (E30) @09e09dcdf71",
+    "notes": "D-133 keeps D-129 strict. A no-op default does not remove the unknown injected override. The safe-body control is closed-world; the mutant supplies a function with no failure information. Source review: openclaw-trial/REPORT.md and PRECISION.md. rc.17 reduction; not a byte-identical copy."
+  },
+  {
+    "id": "op-e30-select-mutant",
+    "source": "ui/src/components/multi-select.tsx:36,279 (E30) @09e09dcdf71",
+    "notes": "D-133 keeps D-129 strict. A no-op default does not remove the unknown injected override. The safe-body control is closed-world; the mutant supplies a function with no failure information. Source review: openclaw-trial/REPORT.md and PRECISION.md. rc.17 reduction; not a byte-identical copy."
+  },
+  {
+    "id": "op-e40-reselect",
+    "source": "ui/src/components/solid/settings-ui.tsx:459–474 (E40) @09e09dcdf71",
+    "notes": "D-133 keeps D-129 strict. A no-op default does not remove the unknown injected override. The safe-body control is closed-world; the mutant supplies a function with no failure information. Source review: openclaw-trial/REPORT.md and PRECISION.md. rc.17 reduction; not a byte-identical copy."
+  },
+  {
+    "id": "op-e40-reselect-mutant",
+    "source": "ui/src/components/solid/settings-ui.tsx:459–474 (E40) @09e09dcdf71",
+    "notes": "D-133 keeps D-129 strict. A no-op default does not remove the unknown injected override. The safe-body control is closed-world; the mutant supplies a function with no failure information. Source review: openclaw-trial/REPORT.md and PRECISION.md. rc.17 reduction; not a byte-identical copy."
+  }
+]);
+
 // Reduced/ported OpenClaw evidence, not byte-identical extraction inputs.
 /** @type {readonly { id: string, source: string, notes: string }[]} */
 export const OPENCLAW_ORIGINS = Object.freeze([

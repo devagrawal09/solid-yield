@@ -8,6 +8,9 @@ allowBuilds:
 
 minimumReleaseAgeExclude:
   - "@solidjs/vite-plugin"
+  - '@solidjs/signals@2.0.0-rc.17'
+  - '@solidjs/web@2.0.0-rc.17'
+  - solid-js@2.0.0-rc.17
 
 # Published dependencies use real ranges; link those ranges inside this workspace.
 linkWorkspacePackages: true

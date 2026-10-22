@@ -1,0 +1,24 @@
+{
+  "name": "solid-sound",
+  "version": "0.0.0",
+  "private": true,
+  "description": "solid-sound prototypes: two checking IRs for plain Solid 2 (typed annotations, own dataflow analysis), a shared fixture slice and a comparison harness",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "compare": "node harness/run.mjs",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "typescript": "^6.0.3"
+  },
+  "devDependencies": {
+    "@solidjs/web": "2.0.0-rc.17",
+    "solid-js": "2.0.0-rc.17",
+    "@solidjs/vite-plugin": "3.0.0-next.35",
+    "@types/node": "^25.0.8",
+    "vite": "^7.0.0",
+    "vitest": "^4.1.6"
+  },
+  "engines": { "node": ">=24" }
+}

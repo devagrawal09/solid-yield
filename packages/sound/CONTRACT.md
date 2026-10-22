@@ -51,6 +51,10 @@ interface ComponentFacts {
 ```
 
 Rules:
+- D-129: reused runtime codes keep runtime severity. Prop-expression obligations
+  use the child’s consuming read as `loc`, the caller’s expression in `related`;
+  apply child read boundaries, then caller element boundaries, outward to roots.
+  Required warning misses are soundness failures too. See CONTEXT.md.
 - Emission is pass-through: a prototype never rewrites the user's code on disk; it
   may build virtual code in memory (prototype A) or tables (prototype B).
 - The prototype must not import from packages/yield, packages/compiler-yield,

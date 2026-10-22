@@ -7,6 +7,7 @@ import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { ORIGINS } from "./origins.mjs";
+import { contextSources } from "./context-sources.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 export const repoRoot = resolve(here, "../../..");
@@ -78,6 +79,7 @@ export async function deriveSources() {
       out.set(origin.id, source);
     }
   }
+  for (const source of contextSources.filter(s => !s.id.startsWith("m-"))) out.set(source.id, source.source);
   return out;
 }
 

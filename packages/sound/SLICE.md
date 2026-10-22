@@ -1,5 +1,9 @@
 # The shared vertical slice
 
+D-129 updates this starting slice: reused runtime codes keep runtime severity;
+pending event-handler reads warn; prop obligations belong to the child read with
+the caller expression related. CONTEXT.md extends it for both prototypes.
+
 Both prototypes check exactly this subset of plain Solid 2 (solid-js / @solidjs/web
 2.0.0-rc.17), on the same fixtures (`fixtures/`), emitting the codes in
 `src/codes.mjs`. Everything outside the subset is a partial-check boundary: a
@@ -113,10 +117,8 @@ with the component (its renderers are checked where they are).
 
 ## Outside the subset (warn + worst case)
 
-`useContext` / context providers (next area: "context/services"), reactive
-state created outside a component (state factories such as
-`createEquipmentService(api)` — warned at the call site, its result worst case;
-module state), stores
+Context/providers and setup-invoked project state factories are now covered by
+CONTEXT.md. Other reactive state outside components (including module state), stores
 (`createStore`, `createOptimisticStore`), `createEffect` beyond the two-argument
 form, `createResource`-era APIs, JSX spreads (`{...props}`), dynamic components
 (`<Dynamic>`, `props.children` calls), `lazy`, `Portal`, refs, generics on
@@ -126,10 +128,9 @@ and what is assumed of it.
 
 ## Not decided here (prototypes make a call and record it in their NOTES.md)
 
-- Whether a read of a possibly-pending value inside an **event handler** is
-  reported. rc.17 serves the stale value while refreshing and throws only while
-  uninitialized; the slice does **not** report it (an "initialized" fact is
-  needed). Record if your prototype differs.
+- Decided by D-129: a possibly-pending read inside an event handler is
+  PENDING_ASYNC_IN_HANDLER (warn), regardless of rendered boundaries. This
+  supersedes the prototypes’ original decision not to report it.
 - How a component's pending / failing summary is attached (phantom type on the
   return type vs. a side table) — that is what the prototypes differ on.
 - Reads inside an async helper after an `await` (runtime

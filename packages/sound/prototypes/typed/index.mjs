@@ -11,6 +11,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { performance } from "node:perf_hooks";
 import { Transformer } from "./transform.mjs";
+import { BY_CODE } from "../../src/codes.mjs";
 
 export const name = "typed";
 
@@ -117,7 +118,7 @@ export function createChecker(options) {
             if (seen.has(key)) continue;
             seen.add(key);
             const spec = CODES[code];
-            diagnostics.push({ code, kind: spec.kind, severity: "error", message: spec.message(`\`${contextText}\``, { failures }), loc, ownerName: ownerAt(osf, opos), data: { tsMessage: text, failures } });
+            diagnostics.push({ code, kind: spec.kind, severity: BY_CODE[code].severity, message: spec.message(`\`${contextText}\``, { failures }), loc, ownerName: ownerAt(osf, opos), data: { tsMessage: text, failures } });
           }
         } else {
           const key = `ts${d.code}@${loc.line}:${loc.col}`;

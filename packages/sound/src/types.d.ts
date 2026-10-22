@@ -21,6 +21,7 @@ export interface SoundDiagnostic {
   ownerName?: string;
   ownerPath?: string[];
   loc: Loc;
+  /** Prop obligations: loc is the child’s consuming read; related includes the caller’s prop expression. */
   related?: { message: string; loc: Loc }[];
   data?: Record<string, unknown>;
 }

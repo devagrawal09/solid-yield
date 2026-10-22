@@ -53,6 +53,7 @@ describe("the shared code table", () => {
       expect(runtime, entry.code).toBeDefined();
       expect(runtime?.kind, entry.code).toContain(entry.kind);
       expect(runtime?.severity, entry.code).toContain(entry.runtime.severity);
+      expect(entry.severity, entry.code).toBe(entry.runtime.severity);
     }
   });
   it("invents no code that collides with a runtime code of a different meaning", () => {
@@ -67,7 +68,7 @@ describe("the harness", () => {
   it("flags every in-subset expectation as a soundness failure against the null prototype", () => {
     for (const fx of fixtures) {
       const s = score(fx, fixturesDir, [], 0);
-      expect(s.soundnessFailure).toBe(fx.inSubset && fx.expected.length > 0);
+      expect(s.soundnessFailure).toBe(fx.inSubset && (fx.expected.length > 0 || (fx.expectedWarnings?.length ?? 0) > 0));
     }
     expect(nullPrototype.createChecker({ rootDir: fixturesDir, files: [] }).check().diagnostics).toEqual([]);
   });
@@ -82,6 +83,7 @@ describe("the prototypes on the slice", { timeout: 120_000 }, async () => {
         const s = score(fx, fixturesDir, checker.check().diagnostics, 0);
         checker.dispose();
         expect(s.misses, `${prototype.name} / ${fx.id}`).toEqual([]);
+        expect(s.warningMisses, `${prototype.name} / ${fx.id} warnings`).toEqual([]);
         expect(s.leakage, `${prototype.name} / ${fx.id}`).toEqual([]);
         expect(s.codeTableViolations, `${prototype.name} / ${fx.id}`).toEqual([]);
         expect(s.unmapped, `${prototype.name} / ${fx.id}`).toBe(0);

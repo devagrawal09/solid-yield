@@ -3,6 +3,7 @@
 // `run()` analyzes every component to a fixpoint over prop tables and
 // component summaries, then reports at roots and hand-offs.
 import ts from "typescript";
+import { BY_CODE } from "../../src/codes.mjs";
 import { callable, constant, derived, describeFailures, join, joinAll, promiseOf, worst } from "./values.mjs";
 import {
   DETACHED_CALLBACKS, PLATFORM_THROWS, PROMISE_METHODS, SAFE_PLATFORM, SYNC_CALLBACK_METHODS,
@@ -125,7 +126,7 @@ export class Analysis {
     const key = `${code}@${loc.file}:${loc.line}:${loc.col}`;
     if (this.reported.has(key)) return;
     this.reported.add(key);
-    this.diagnostics.push({ code, kind, severity, message, loc, ...more });
+    this.diagnostics.push({ code, kind, severity: BY_CODE[code].severity, message, loc, ...more });
   }
 
   /** @param {ts.Node} node @param {string} construct @param {string} assumption @param {Ctx} ctx */

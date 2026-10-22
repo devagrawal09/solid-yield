@@ -10,6 +10,8 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { ORIGINS } from "./origins.mjs";
+import { contextCases, contextMutants } from "./context.mjs";
+import { BY_CODE } from "../src/codes.mjs";
 
 /** @typedef {import("./schema.d.ts").Fixture} Fixture */
 /** @typedef {import("./schema.d.ts").Expectation} Expectation */
@@ -42,6 +44,17 @@ const SETUP_THROW = "SETUP_MAY_THROW";
 const WARN = "UNANALYZED_BOUNDARY";
 const EXPORTED = "COMPONENT_OBLIGATIONS_EXPORTED";
 
+/** Preserve every obligation while putting reused runtime codes at their D-129 severity.
+ * @param {Expectation[]} [expected]
+ * @param {Expectation[]} [warnings]
+ */
+function levels(expected = [], warnings = []) {
+  return {
+    expected: expected.filter(e => BY_CODE[e.code].severity === "error"),
+    expectedWarnings: [...warnings, ...expected.filter(e => BY_CODE[e.code].severity === "warn")]
+  };
+}
+
 /**
  * @param {string} id
  * @param {{ legacyExpected?: string[], expected?: Expectation[], warnings?: Expectation[], info?: Expectation[], inSubset?: boolean, entry?: boolean, notes?: string }} spec
@@ -59,8 +72,7 @@ function kase(id, spec) {
     entry: spec.entry ? file : undefined,
     origin: origin.kind === "script" ? `${origin.file} #${origin.id}` : `${origin.file} ${origin.table}[${origin.row}]`,
     inSubset: spec.inSubset ?? true,
-    expected: spec.expected ?? [],
-    expectedWarnings: spec.warnings,
+    ...levels(spec.expected, spec.warnings),
     expectedInfo: spec.info,
     legacyExpected: spec.legacyExpected ?? [],
     legacyActual: legacy.cases[id]?.diagnostics ?? [],
@@ -73,6 +85,7 @@ void C;
 
 /** @type {Fixture[]} */
 export const cases = [
+  ...contextCases,
   // ---- signals / memos / props --------------------------------------------
   kase("counter", { legacyExpected: [] }),
   kase("props", { legacyExpected: [] }),
@@ -224,33 +237,15 @@ export const equipment = {
   ],
   entry: "src/main.tsx",
   origin: "Equipment Checkout app src/ (read-only reference), byte-identical; env.d.ts is the harness's CSS module shim",
-  inSubset: false,
+  inSubset: true,
   expected: [
-    // App.tsx: the service is a state factory (out of subset) → its members are worst case.
-    x(HANDLER, "src/App.tsx", [f("onClick={service.reload}")], { note: "service.reload has no analyzable body: unknown" }),
-    x(LOADING, "src/App.tsx", [f("service.notice()"), root("src/main.tsx", "() => <App />")], { note: "worst-case value rendered outside any Loading (root: main.tsx)" }),
-    x(ERRORED, "src/App.tsx", [f("service.notice()"), root("src/main.tsx", "() => <App />")], { note: "worst-case value rendered outside any Errored" }),
-    x(HANDLER, "src/App.tsx", [f("onClick={() => { service.reload(); reset(); }}")], { note: "the Errored fallback's retry handler calls the unknown service.reload" }),
-    // CreateForm: the context's create() is unknown; try/finally catches nothing.
-    x(HANDLER, `${EQ}CreateForm.tsx`, [f("onSubmit={submit}")]),
-    // EquipmentRow: save / changeStatus / remove await unknown service methods under try/finally.
-    x(HANDLER, `${EQ}EquipmentRow.tsx`, [f("onSubmit={save}")]),
-    x(HANDLER, `${EQ}EquipmentRow.tsx`, [f("onChange={changeStatus}")]),
-    x(HANDLER, `${EQ}EquipmentRow.tsx`, [f("onClick={remove}")]),
-    x(HANDLER, `${EQ}EquipmentRow.tsx`, [f("onClick={edit}")], { note: "edit() reads item(), a memo over the worst-case service.list(): reading a possibly failing memo in a handler throws. Today's checker misses this." }),
-    // Detail: the retry handler calls the unknown service.reload (reset never fails).
-    x(HANDLER, `${EQ}Detail.tsx`, [f("onClick={() => { service.reload(); reset(); }}")]),
-    // FailureControls: eight buttons call service.api.* (unknown) directly or through arm().
-    x(HANDLER, `${EQ}FailureControls.tsx`, [l(9)], { minCount: 8 })
+    x(HANDLER, `${EQ}EquipmentRow.tsx`, [f("onClick={edit}")], { note: "edit reads item(), derived from the possibly failing async list memo; Loading/Errored do not catch handlers" }),
+    x(HANDLER, `${EQ}EquipmentRow.tsx`, [f("onChange={changeStatus}")], { note: "the item()?.status read precedes try/finally and can throw; service.status itself catches through commit" }),
+    x(HANDLER, `${EQ}FailureControls.tsx`, [l(9)], { minCount: 8, note: "the optional injected EquipmentApi supplies plain functions without failure information" })
   ],
   expectedWarnings: [
-    x(WARN, "src/App.tsx", [f("createEquipmentService(props.api ?? createApi())")], { note: "state factory: reactive state created outside a component" }),
-    x(WARN, "src/App.tsx", [f("<EquipmentContext value={service}>")], { note: "context provider: next area" }),
-    x(WARN, `${EQ}CreateForm.tsx`, [f("useContext(EquipmentContext)")]),
-    x(WARN, `${EQ}Detail.tsx`, [f("useContext(EquipmentContext)")]),
-    x(WARN, `${EQ}EquipmentRow.tsx`, [f("useContext(EquipmentContext)")]),
-    x(WARN, `${EQ}FailureControls.tsx`, [f("useContext(EquipmentContext)")]),
-    x(WARN, `${EQ}Inventory.tsx`, [f("useContext(EquipmentContext)")])
+    x("PENDING_ASYNC_IN_HANDLER", `${EQ}EquipmentRow.tsx`, [f("item()", 1)], { note: "edit reads a possibly uninitialized async-derived memo" }),
+    x("PENDING_ASYNC_IN_HANDLER", `${EQ}EquipmentRow.tsx`, [f("item()?.status")], { note: "changeStatus reads the same pending memo before awaiting the handled mutation" })
   ],
   legacyExpected: ["EVENT_REJECTS × 10 (2 in EquipmentRow, 8 in FailureControls)"],
   legacyActual: legacy.equipment.diagnostics,
@@ -272,8 +267,7 @@ function mutant(id, spec) {
     entry: spec.entry ? file : undefined,
     origin: `derived from ${spec.parent}: ${spec.edit}`,
     inSubset: spec.inSubset ?? true,
-    expected: spec.expected,
-    expectedWarnings: spec.warnings,
+    ...levels(spec.expected, spec.warnings),
     legacyExpected: [],
     legacyActual: [],
     mutation: { parent: spec.parent, edit: spec.edit },
@@ -283,6 +277,7 @@ function mutant(id, spec) {
 
 /** @type {Fixture[]} */
 export const mutants = [
+  ...contextMutants,
   mutant("m-loading-removed", {
     parent: "cases/async-memo-nested-function", edit: "removed the <Loading> around {m()}", entry: true,
     expected: [x(LOADING, "m-loading-removed.tsx", [f("{m()}"), atRoot("render(App")])]
@@ -320,7 +315,7 @@ export const mutants = [
   }),
   mutant("m-pending-through-prop", {
     parent: "cases/colored-prop", edit: "App is rendered at a root; Child's read of the pending prop has no Loading above it", entry: true,
-    expected: [x(LOADING, "m-pending-through-prop.tsx", [f("{p.n}"), f("n={n()}"), atRoot("render(")])]
+    expected: [{ ...x(LOADING, "m-pending-through-prop.tsx", [f("{p.n}")]), related: [{ file: "m-pending-through-prop.tsx", at: [f("n={n()}")] }] }]
   }),
   mutant("m-pending-read-in-setup", {
     parent: "cases/async-memo-reads", edit: "value() is read in setup (const v = value())",

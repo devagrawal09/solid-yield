@@ -44,11 +44,27 @@ export function resolveAnchor(text, anchor) {
  */
 function matches(d, fixtureDir, e, spans) {
   if (d.code !== e.code) return false;
-  const file = d.loc.file.replaceAll("\\", "/");
+  for (const related of e.related ?? []) {
+    const anchors = related.at.map(a => resolveAnchor(readFileSync(resolve(fixtureDir, a.file ?? related.file), "utf8"), a)).filter(/** @returns {s is Span} */ s => s !== null);
+    if (!anchors.length) throw new Error(`related anchor not found for ${e.code}: ${related.file}`);
+    if (!(d.related ?? []).some(r => atLocation(r.loc, fixtureDir, related.file, anchors))) return false;
+  }
+  return atLocation(d.loc, fixtureDir, e.file, spans);
+}
+
+/**
+ * @param {SoundDiagnostic["loc"]} loc
+ * @param {string} fixtureDir
+ * @param {string} expected
+ * @param {Span[]} spans
+ * @returns {false | "precise" | "imprecise"}
+ */
+function atLocation(loc, fixtureDir, expected, spans) {
+  const file = loc.file.replaceAll("\\", "/");
   for (const s of spans) {
-    const expectedFile = resolve(fixtureDir, s.file ?? e.file).replaceAll("\\", "/");
-    if (file !== expectedFile && !file.endsWith("/" + (s.file ?? e.file))) continue;
-    if (d.loc.line === s.line && d.loc.col >= s.startCol && d.loc.col <= s.endCol) return s.imprecise ? "imprecise" : "precise";
+    const expectedFile = resolve(fixtureDir, s.file ?? expected).replaceAll("\\", "/");
+    if (file !== expectedFile && !file.endsWith("/" + (s.file ?? expected))) continue;
+    if (loc.line === s.line && loc.col >= s.startCol && loc.col <= s.endCol) return s.imprecise ? "imprecise" : "precise";
   }
   return false;
 }
@@ -134,7 +150,7 @@ export function score(fixture, fixturesDir, diagnostics, elapsedMs) {
   const codeTableViolations = [...new Set(diagnostics.filter(d => !(d.code in BY_CODE)).map(d => d.code))];
   const leakage = diagnostics.filter(d => LEAKAGE.test(d.message) || (d.related ?? []).some(r => LEAKAGE.test(r.message)));
   const unmapped = diagnostics.filter(d => d.data?.unmapped === true).length;
-  const soundnessFailure = fixture.inSubset && e.misses.length > 0;
+  const soundnessFailure = fixture.inSubset && (e.misses.length > 0 || w.misses.length > 0);
   return {
     fixture: fixture.id,
     group: fixture.group,

@@ -16,10 +16,8 @@
 // for findings about the checker's own coverage (no runtime counterpart can
 // exist for those).
 //
-// severity: the static severity. Where it differs from the runtime's, the
-// runtime's is recorded in `runtime.severity`: a static checker reports an
-// obligation before it is discharged, so e.g. ASYNC_OUTSIDE_LOADING_BOUNDARY
-// is a runtime FYI (warn) but a static error.
+// severity: reused runtime codes keep their runtime severity (D-129). New
+// codes keep the severity set here. Only errors fail a Vite build.
 
 /**
  * @typedef {"strict-read" | "async" | "write" | "lifecycle" | "owner" | "error" | "analysis"} SoundKind
@@ -40,7 +38,7 @@ export const CODES = Object.freeze([
   {
     code: "STRICT_READ_UNTRACKED",
     kind: "strict-read",
-    severity: "error",
+    severity: "warn",
     meaning:
       "A reactive value (a signal or memo getter, a reactive prop, a store or context accessor) is read in a component's setup or another untracked scope: the read runs once and will not update.",
     fix: "Move the read into a tracking scope (JSX, a memo, or an effect's compute function), or into the event handler that needs the value.",
@@ -60,7 +58,7 @@ export const CODES = Object.freeze([
   {
     code: "ASYNC_OUTSIDE_LOADING_BOUNDARY",
     kind: "async",
-    severity: "error",
+    severity: "warn",
     meaning:
       "A possibly pending value is rendered (read in JSX or in a memo the JSX reads) with no Loading boundary above it, within this component or its callers up to the render root. The root mount would be deferred with no fallback shown.",
     fix: "Wrap the rendered read in <Loading fallback={…}>, in this component or in a caller.",
@@ -70,12 +68,30 @@ export const CODES = Object.freeze([
   {
     code: "PENDING_ASYNC_FORBIDDEN_SCOPE",
     kind: "async",
-    severity: "error",
+    severity: "warn",
     meaning:
       "A possibly pending value is read in a scope that serves the committed value and throws while uninitialized: an effect's effect function (createEffect's second argument), createTrackedEffect or onSettled.",
     fix: "Read the source in the effect's compute function and pass the value to the effect function.",
     runtime: { code: "PENDING_ASYNC_FORBIDDEN_SCOPE", severity: "warn" },
     legacy: ["PENDING_IN_EFFECT"]
+  },
+  {
+    code: "PENDING_ASYNC_IN_HANDLER",
+    kind: "async",
+    severity: "warn",
+    meaning: "A possibly pending value is read in an event handler. An uninitialized read can throw or suspend even though a stale value can be served during refresh. Loading does not protect handlers.",
+    fix: "Avoid the pending read in the handler, or explicitly handle its uninitialized state and any failure.",
+    runtime: null,
+    legacy: []
+  },
+  {
+    code: "CONTEXT_PROVIDER_MISSING",
+    kind: "owner",
+    severity: "error",
+    meaning: "A useContext call has neither an enclosing provider for that context nor a supplied default. Solid throws when this consumer runs.",
+    fix: "Put the consumer under that context’s provider, or supply a default to createContext.",
+    runtime: null,
+    legacy: []
   },
   {
     code: "REACTIVE_WRITE_IN_OWNED_SCOPE",

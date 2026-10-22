@@ -21,6 +21,8 @@ export interface Expectation {
   at: readonly Anchor[];
   /** At least this many diagnostics must match (default 1). */
   minCount?: number;
+  /** Each required related location must occur on the matching diagnostic. */
+  related?: readonly { file: string; at: readonly Anchor[] }[];
   note?: string;
 }
 
@@ -48,7 +50,7 @@ export interface Fixture {
   inSubset: boolean;
   /** Errors (and only errors) the slice expects. Empty = must be clean of errors. */
   expected: readonly Expectation[];
-  /** Partial-check warnings the slice requires (UNANALYZED_BOUNDARY). */
+  /** Warnings required by the slice, including reused runtime codes and pending handler reads. */
   expectedWarnings?: readonly Expectation[];
   /** Info-level findings the slice expects (reported, not scored). */
   expectedInfo?: readonly Expectation[];

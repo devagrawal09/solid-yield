@@ -1,7 +1,7 @@
 # Context and services sub-slice (rc.17)
 
 This extends SLICE.md for **both** prototypes; it does not choose an IR. D-129
-sets the rules. Native code ships unchanged. Fixtures are in context-sources.mjs
+sets the rules, with D-130 severity and D-131 scope clarifications. Native code ships unchanged. Fixtures are in context-sources.mjs
 and context.mjs; their generated .tsx files are ordinary strict TypeScript.
 
 ## Values and providers
@@ -12,7 +12,8 @@ and context.mjs; their generated .tsx files are ordinary strict TypeScript.
   spelling. A consumer uses the nearest enclosing provider on its render path.
 - Without a provider, use the default when supplied. With neither provider nor
   default, report CONTEXT_PROVIDER_MISSING at useContext (runtime throws). A
-  default must supply a usable value; the cases here use non-undefined defaults.
+  default must supply a usable value: explicit `undefined` still means missing,
+  while `null` is usable for an optional context (D-131).
   Do not invent pending/failure obligations from a definitely missing value.
 - A plain object remains plain. A provider object containing signal accessors,
   memos (including promise-returning memos), and methods keeps each member’s
@@ -37,12 +38,12 @@ and context.mjs; their generated .tsx files are ordinary strict TypeScript.
   `const n = read()` is an actual read. Plain member snapshots stay plain.
 - Calling a method follows its body in the caller’s scope, including signal or
   memo reads. A setup call reading a settled signal is STRICT_READ_UNTRACKED
-  (warn); a pending setup read is PENDING_ASYNC_UNTRACKED_READ (error). A
+  (error); a pending setup read is PENDING_ASYNC_UNTRACKED_READ (error). A
   setter in owned setup/memo/JSX is REACTIVE_WRITE_IN_OWNED_SCOPE (error).
 - A pending JSX read needs Loading; an escaping rendered failure needs Errored.
-  At a root, uncovered pending is ASYNC_OUTSIDE_LOADING_BOUNDARY (warn), and
+  At a root, uncovered pending is ASYNC_OUTSIDE_LOADING_BOUNDARY (error), and
   uncovered failure is ERROR_OUTSIDE_ERRORED_BOUNDARY (error). A pending effect
-  phase read is PENDING_ASYNC_FORBIDDEN_SCOPE (warn).
+  phase read is PENDING_ASYNC_FORBIDDEN_SCOPE (error).
 - A pending read in an event handler is PENDING_ASYNC_IN_HANDLER (warn), even
   under Loading or try/catch: uninitialized reads can suspend/throw; stale reads
   can succeed. A failing read also requires a handler catch (independent error).

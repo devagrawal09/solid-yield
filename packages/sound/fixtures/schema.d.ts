@@ -37,7 +37,7 @@ export interface LegacyDiagnostic {
 
 export interface Fixture {
   id: string;
-  group: "cases" | "equipment" | "mutants";
+  group: "cases" | "equipment" | "mutants" | "openclaw";
   /** Directory holding the files, relative to fixtures/. */
   dir: string;
   /** Files of the program, relative to `dir`. */

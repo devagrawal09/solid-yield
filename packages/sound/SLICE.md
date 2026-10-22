@@ -22,9 +22,10 @@ project. Its *setup* is the body before the return; its *view* is the returned
 JSX. `render(() => <App />, el)` / `render(App, el)` from @solidjs/web is the
 render root.
 
-**Signals and memos.** `createSignal`, `createMemo`, `createAsync` (rc.17's
-`createAsync` and an async memo `createMemo(async () => …)` are both "async
-sources"). A getter call is a *reactive read*; a setter call is a *write*.
+**Signals and memos.** `createSignal`, `createMemo`. A promise-returning memo
+(`createMemo(() => Promise.resolve(value))` or `createMemo(async () => …)`)
+is an async source. rc.17 does not export `createAsync`; legacy fixtures using
+that name are retained as historical syntax, not as examples of its public API. A getter call is a *reactive read*; a setter call is a *write*.
 `untrack(fn)` makes reads inside untracked and is not reported.
 
 **Props.** `props.x` where `props` is the component's parameter. A prop is
@@ -45,22 +46,30 @@ when any caller is unanalyzable (a spread, a component handed out as a value, no
 caller in the program) the set is `unknown`.
 
 **Scopes.**
-- *setup*: the component body outside memos/JSX/handlers; also the body of a
-  sync helper function that is called from setup.
-- *tracking*: a JSX expression container, a memo / createAsync compute, an
+- *setup*: the component body outside memos/JSX/handlers; also a sync helper
+  called from setup. D-131 adds each For row callback body outside its returned
+  JSX, and ref callbacks, as separate setup-like read scopes. Settled reactive
+  reads are STRICT_READ_UNTRACKED; pending reads are
+  PENDING_ASYNC_UNTRACKED_READ instead (both errors under D-130). A plain row
+  field is not an accessor read. Ref capture/DOM assignment alone is allowed;
+  ref ownership, cleanup and primitive creation remain outside this slice.
+- *tracking*: a JSX expression container, a memo compute (sync or async), an
   effect's compute (`createEffect(compute, effect)` first argument), the
-  render-prop callbacks of `Show` (`when` / children-as-function) and `For`
-  (`each` / row callback), and a sync helper called from one of those.
+  render-prop callbacks of `Show` (`when` / children-as-function), For `each`,
+  the JSX returned by For rows, and sync helpers called from those scopes.
+  A For row body is not tracking merely because it occurs inside JSX.
 - *handler*: a function passed to a JSX `on*` attribute (lower- or camel-case),
-  or passed as a callback prop, or an async helper called from a handler; also
-  the handler-like callbacks that run on their own later — a promise
-  continuation (`.then`/`.catch`/`.finally` callback), a timer callback
-  (`setTimeout`, `setInterval`, `queueMicrotask`, `requestAnimationFrame`), a
-  `ref` callback. Reads there are not reported as untracked; failures escaping
-  them are `UNHANDLED_HANDLER_FAILURE`.
+  a callback prop, or an async helper called from a handler; also a promise
+  continuation (`.then`/`.catch`/`.finally`) or timer callback (`setTimeout`,
+  `setInterval`, `queueMicrotask`, `requestAnimationFrame`). Reads there are not
+  reported as untracked; failures escaping them are UNHANDLED_HANDLER_FAILURE.
+  Ref callbacks use the setup-like read rules above, not handler read rules.
 - An object literal's getter is a sync helper: reading `o.double` runs the getter
   in the reader's scope.
 - *effect*: an effect's effect function (`createEffect`'s second argument).
+  Compute inputs forwarded to apply/helpers are plain values. Reading a settled
+  reactive prop directly in apply or its sync helper is STRICT_READ_UNTRACKED
+  (D-131); a pending read is PENDING_ASYNC_FORBIDDEN_SCOPE.
 - Nested functions: a sync local helper runs in the scope it is called from; an
   async helper runs as a handler-like scope (its reads are not reported as
   untracked in this slice — see "Not decided" below).
@@ -123,7 +132,7 @@ Context/providers and setup-invoked project state factories are now covered by
 CONTEXT.md. Other reactive state outside components (including module state), stores
 (`createStore`, `createOptimisticStore`), `createEffect` beyond the two-argument
 form, `createResource`-era APIs, JSX spreads (`{...props}`), dynamic components
-(`<Dynamic>`, `props.children` calls), `lazy`, `Portal`, refs, generics on
+(`<Dynamic>`, `props.children` calls), `lazy`, `Portal`, ref ownership/cleanup, generics on
 components, class components, recursion through unanalyzable calls, any
 construct a prototype does not model. The warning's message names the construct
 and what is assumed of it.
@@ -140,7 +149,7 @@ and what is assumed of it.
 
 ## Fixtures (see fixtures/index.mjs)
 
-Three groups, identical for both prototypes:
+Four groups, identical for all three prototypes:
 1. `cases/` — single-file cases from `scripts/native/fixtures.mjs` and the
    native test suites, copied byte-identically; each has today's legacy
    expectation (code + line) and the slice expectation (sound codes + line).
@@ -149,6 +158,10 @@ Three groups, identical for both prototypes:
 3. `mutants/` — negative controls derived from in-subset positives by deleting a
    boundary or a catch, or moving a read into setup. **Each must be reported**;
    a miss is a soundness failure the harness prints prominently.
+4. `openclaw/` — 34 reduced/ported rc.17 programs (18 clean controls and
+   16 diagnostic-bearing mutants), frozen by D-131. Registry: openclaw.mjs;
+   origin notes: origins.mjs. New-group scores are pinned as known prototype
+   gaps, not omitted from tests. See results/openclaw-baseline.md.
 
 Severity policy (Vite): errors show the dev overlay but the server keeps
 serving; `vite build` fails on errors; warnings (including

@@ -75,3 +75,93 @@ six handlers, `m-injected-api-prop`: three). On the pre-fix b2dfebf code,
 from an unknown-bodied `createApi()`); after the fix both report 6/6 and 3/3. The
 Equipment Checkout count did not change (18 before, 18 after): its service is the
 worst case through `useContext`, which never reached the name tables.
+
+
+## context/services baseline
+
+Measured on 2026-10-22 with `node harness/run.mjs` (3 runs), followed by
+`pnpm test`. **No IR has been chosen.** Both checkers remain at the old analysis
+slice. The only prototype edits are mechanical: `typed/index.mjs` and
+`dataflow/analyze.mjs` import BY_CODE and read its severity when emitting a
+finding. No context analysis, inference, scope logic or location mapping changed.
+
+109 fixtures: the original 68, plus **29 context cases and 12 in-subset mutants**.
+The full list is in `results/context-manifest.md`. Canonical sources and strict
+TS-clean native copies are shared; the Equipment src/ files are unchanged.
+New rules: `CONTEXT.md`, D-129; raw measurements: `results/context-baseline.json`
+and `.md`; group totals and old-fixture details: `results/context-summary.*`.
+
+### Measured baseline (hits / misses)
+
+Counts below are expectation entries, not individual diagnostics. A grouped
+entry can require several reports (e.g. eight FailureControls handlers). Extras
+count individual diagnostics. Every new mutant has a required error or warning;
+missing a required warning now counts as a soundness failure too.
+
+| scope | A errors | B errors | A warnings | B warnings | A extra errors/warnings | B extra errors/warnings |
+|---|---:|---:|---:|---:|---:|---:|
+| all 109 | 34 / 11 | 38 / 7 | 21 / 15 | 24 / 12 | 41 / 117 | 33 / 111 |
+| 29 context cases | 4 / 6 | 7 / 3 | 2 / 7 | 3 / 6 | 23 / 77 | 18 / 74 |
+| 12 context mutants | 2 / 5 | 3 / 4 | 0 / 5 | 2 / 3 | 10 / 30 | 8 / 28 |
+| Equipment | 3 / 0 | 3 / 0 | 0 / 2 | 0 / 2 | 7 / 8 | 7 / 8 |
+| old 67, excluding Equipment | 25 / 0 | 25 / 0 | 19 / 1 | 19 / 1 | 1 / 2 | 0 / 1 |
+
+A misses **10/12** new mutants; B misses **7/12**. Overall failing fixtures:
+A 22, B 17. Both have 5/5 expected info entries, zero crashes, zero message
+leakage, zero unmapped locations, and zero codes outside the table. Null has
+0/45 error and 0/36 warning hits; all 12 new mutants fail against it.
+
+`node harness/run.mjs` exits 0: this is a comparison report, not a green test
+gate. `pnpm test` exits 1 as expected: **9 pass, 2 fail**, one failure per
+prototype at `context-missing-provider`. All three new contract tests pass,
+including strict TypeScript on all 41 new sources, canonical-source/mutation
+integrity, and primary/related-location scoring. Existing byte-identity and
+runtime-table tests pass. No tests or expectations were skipped or weakened.
+
+### What changed in the old slice
+
+Old error obligations still have 25/25 hits outside Equipment. The one new old-
+slice miss in both is `m-pending-through-prop`: its read remains required, but
+now needs the caller expression as related and no longer accepts a caller/root
+as primary. This is D-129d, not a changed inference result. A’s former two
+extra errors become one error and one warning under runtime severities; the
+prop-location miss also leaves its unmatched warning as an extra. B’s sole
+extra warning is that same unmatched prop obligation.
+
+Equipment deliberately advances to the context specification: **10 genuine
+handler errors and two pending-handler warnings**, replacing the old 18 errors
+and seven partial warnings. The unchanged prototypes still over-report seven
+errors plus the notice pending warning, and all seven partial warnings; neither
+reports the new handler-pending warnings. Each retained and removed diagnostic
+is justified against source in `fixtures/equipment/CONTEXT-EXPECTATION.md`,
+including the retained `onClick={edit}` failing-memo hole and `changeStatus`’s
+pre-try item read. No user-declared failure contracts are introduced.
+
+The complete old expectation migration list follows (also generated separately
+as `results/context-expectation-changes.md`). No old sources changed.
+
+#### Old expectation migration list (D-129)
+
+Every entry below keeps its old code, anchors and count, but moves from error to warning to match rc.17.
+
+| fixture | code | anchors |
+|---|---|---|
+| setup-read | STRICT_READ_UNTRACKED | count() |
+| return-ternary | STRICT_READ_UNTRACKED | n() |
+| return-and | STRICT_READ_UNTRACKED | n() |
+| named-callback-in-setup | STRICT_READ_UNTRACKED | n(); map(scale); [1, 2].map(scale) |
+| array-callback-in-setup | STRICT_READ_UNTRACKED | items().filter; n()) |
+| getter-read-in-setup | STRICT_READ_UNTRACKED | o.double; n() * 2 |
+| pending-root | ASYNC_OUTSIDE_LOADING_BOUNDARY | {n()}; render(App |
+| iife-pending-root | ASYNC_OUTSIDE_LOADING_BOUNDARY | p() * 2; (() => p() * 2)(); render(App |
+| async-setup-reads | STRICT_READ_UNTRACKED | return n(); load() |
+| m-loading-removed | ASYNC_OUTSIDE_LOADING_BOUNDARY | {m()}; render(App |
+| m-read-moved-to-setup | STRICT_READ_UNTRACKED | count() |
+| m-reactive-prop-read-in-setup | STRICT_READ_UNTRACKED | const title = props.title |
+| m-pending-through-prop | ASYNC_OUTSIDE_LOADING_BOUNDARY | {p.n} |
+| m-effect-phase-pending | PENDING_ASYNC_FORBIDDEN_SCOPE | m() + 1; () => console.log(m() + 1) |
+| m-equipment-row-loading-removed | ASYNC_OUTSIDE_LOADING_BOUNDARY | props.list(); <Inventory list={list} />; render( |
+
+m-pending-through-prop also tightens its primary location to Child’s {p.n}; n={n()} is required as related. Root/caller primary anchors no longer count (D-129d).
+
+Equipment is intentionally promoted to the context subset. Its eight removed worst-case errors, seven removed partial warnings, retained ten real handler errors and two new pending-handler warnings are justified individually in fixtures/equipment/CONTEXT-EXPECTATION.md. Its old notice pending error first becomes a warning under D-129b, then disappears through precise context analysis. No other old expectation changes.

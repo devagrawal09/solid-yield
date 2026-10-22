@@ -1,0 +1,2845 @@
+[
+  {
+    "prototype": "typed",
+    "crashes": [],
+    "all": {
+      "fixtures": 109,
+      "errorHits": 34,
+      "errorMisses": 11,
+      "warningHits": 21,
+      "warningMisses": 15,
+      "extraErrors": 41,
+      "extraWarnings": 117,
+      "infoHits": 5,
+      "infoMisses": 0,
+      "soundnessFailures": 22,
+      "missedMutants": [
+        "m-context-loading-removed",
+        "m-context-errored-removed",
+        "m-context-provider-removed",
+        "m-context-default-removed",
+        "m-context-shadow-removed",
+        "m-context-alias-setup",
+        "m-context-method-write-memo",
+        "m-context-prop-child-loading-removed",
+        "m-context-prop-child-errored-removed",
+        "m-context-read-to-handler",
+        "m-pending-through-prop"
+      ],
+      "imprecise": 10,
+      "leakage": 0,
+      "unmapped": 0
+    },
+    "contextCases": {
+      "fixtures": 29,
+      "errorHits": 4,
+      "errorMisses": 6,
+      "warningHits": 2,
+      "warningMisses": 7,
+      "extraErrors": 23,
+      "extraWarnings": 77,
+      "infoHits": 0,
+      "infoMisses": 0,
+      "soundnessFailures": 10,
+      "missedMutants": [],
+      "imprecise": 0,
+      "leakage": 0,
+      "unmapped": 0
+    },
+    "contextMutants": {
+      "fixtures": 12,
+      "errorHits": 2,
+      "errorMisses": 5,
+      "warningHits": 0,
+      "warningMisses": 5,
+      "extraErrors": 10,
+      "extraWarnings": 30,
+      "infoHits": 0,
+      "infoMisses": 0,
+      "soundnessFailures": 10,
+      "missedMutants": [
+        "m-context-loading-removed",
+        "m-context-errored-removed",
+        "m-context-provider-removed",
+        "m-context-default-removed",
+        "m-context-shadow-removed",
+        "m-context-alias-setup",
+        "m-context-method-write-memo",
+        "m-context-prop-child-loading-removed",
+        "m-context-prop-child-errored-removed",
+        "m-context-read-to-handler"
+      ],
+      "imprecise": 0,
+      "leakage": 0,
+      "unmapped": 0
+    },
+    "equipment": {
+      "fixtures": 1,
+      "errorHits": 3,
+      "errorMisses": 0,
+      "warningHits": 0,
+      "warningMisses": 2,
+      "extraErrors": 7,
+      "extraWarnings": 8,
+      "infoHits": 0,
+      "infoMisses": 0,
+      "soundnessFailures": 1,
+      "missedMutants": [],
+      "imprecise": 0,
+      "leakage": 0,
+      "unmapped": 0
+    },
+    "oldWithoutEquipment": {
+      "fixtures": 67,
+      "errorHits": 25,
+      "errorMisses": 0,
+      "warningHits": 19,
+      "warningMisses": 1,
+      "extraErrors": 1,
+      "extraWarnings": 2,
+      "infoHits": 5,
+      "infoMisses": 0,
+      "soundnessFailures": 1,
+      "missedMutants": [
+        "m-pending-through-prop"
+      ],
+      "imprecise": 10,
+      "leakage": 0,
+      "unmapped": 0
+    },
+    "oldScores": [
+      {
+        "fixture": "counter",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "props",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "inline-event",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "named-event",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "catch",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "callback-read",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "setup-read",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "return-ternary",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "return-and",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "return-null",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "named-callback-in-setup",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "array-callback-in-setup",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "getter-read-in-setup",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "memo-write",
+        "errors": [
+          {
+            "code": "REACTIVE_WRITE_IN_OWNED_SCOPE",
+            "file": "memo-write.tsx",
+            "count": 2
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "untrack-in-every-host",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "reader-helpers",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "props-interface-live",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "props-accessor-callers",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "callback-prop-forwarded",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "recursion-failing-prop",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": [
+          {
+            "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+            "kind": "async",
+            "severity": "warn",
+            "message": "The view rendered by `App, document.body);` may be pending and no Loading boundary covers it before the root; the root mount would be deferred with no fallback. Wrap the pending read in <Loading fallback={…}>, in the component or in a caller.",
+            "loc": {
+              "file": "/Users/devagr/solid-yield/packages/sound/fixtures/cases/recursion-failing-prop.tsx",
+              "line": 15,
+              "col": 8
+            },
+            "data": {
+              "tsMessage": "Argument of type '() => View<true, never>' is not assignable to parameter of type '((props: never) => View<true, never>) & __ASYNC_OUTSIDE_LOADING_BOUNDARY__'.\n  Type '() => View<true, never>' is not assignable to type '__ASYNC_OUTSIDE_LOADING_BOUNDARY__'."
+            }
+          }
+        ]
+      },
+      {
+        "fixture": "async-memo-reads",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "async-memo-nested-function",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "async-event-reads",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "async-read",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "colored-prop",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "promise-catch",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "pending-root",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "iife-pending-root",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "async-setup-reads",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "native-latest-pending",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "native-for-indexed",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "throw-error",
+        "errors": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "throw-error.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "promise-event",
+        "errors": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "promise-event.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "handled-catch",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "rethrow-catch",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "unknown-rethrow-catch",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "finally-nested-function",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "plain-callback-throw-under-errored",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "plain-callback-throw-in-memo",
+        "errors": [
+          {
+            "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+            "file": "plain-callback-throw-in-memo.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "effect-reads-failing-memo-at-root",
+        "errors": [
+          {
+            "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+            "file": "effect-reads-failing-memo-at-root.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "foreign-route-failure",
+        "errors": [
+          {
+            "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+            "file": "foreign-route-failure.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "setup-promise-caught",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "setup-promise-rejects",
+        "errors": [
+          {
+            "code": "SETUP_MAY_THROW",
+            "file": "setup-promise-rejects.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "callback-prop-throws",
+        "errors": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "callback-prop-throws.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "callback-prop-unseen",
+        "errors": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "callback-prop-unseen.tsx",
+            "count": 1
+          },
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "callback-prop-unseen.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "async-handler-destructured-uncaught",
+        "errors": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "async-handler-destructured-uncaught.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "kept-promise-rejects-at-its-await",
+        "errors": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "kept-promise-rejects-at-its-await.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "kept-promise-caught-by-its-chain",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "timer-callback-failure",
+        "errors": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "timer-callback-failure.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "native-optimistic-store-basic",
+        "errors": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "native-optimistic-store-basic.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "event-updater",
+        "errors": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "event-updater.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "ref-event-reads",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-loading-removed",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-errored-removed",
+        "errors": [
+          {
+            "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+            "file": "m-errored-removed.tsx",
+            "count": 1
+          },
+          {
+            "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+            "file": "m-errored-removed.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-catch-removed",
+        "errors": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "m-catch-removed.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-read-moved-to-setup",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-write-in-memo",
+        "errors": [
+          {
+            "code": "REACTIVE_WRITE_IN_OWNED_SCOPE",
+            "file": "m-write-in-memo.tsx",
+            "count": 2
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-reactive-prop-read-in-setup",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-handled-catch-rethrows",
+        "errors": [
+          {
+            "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+            "file": "m-handled-catch-rethrows.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-async-helper-rejects",
+        "errors": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "m-async-helper-rejects.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-pending-through-prop",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [
+          {
+            "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+            "file": "m-pending-through-prop.tsx",
+            "at": "\"{p.n}\""
+          }
+        ],
+        "extraErrors": [],
+        "extraWarnings": [
+          {
+            "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+            "kind": "async",
+            "severity": "warn",
+            "message": "The view rendered by `App,document.body);` may be pending and no Loading boundary covers it before the root; the root mount would be deferred with no fallback. Wrap the pending read in <Loading fallback={…}>, in the component or in a caller.",
+            "loc": {
+              "file": "/Users/devagr/solid-yield/packages/sound/fixtures/mutants/m-pending-through-prop.tsx",
+              "line": 1,
+              "col": 277
+            },
+            "data": {
+              "tsMessage": "Argument of type '() => View<true, never>' is not assignable to parameter of type '((props: never) => View<true, never>) & __ASYNC_OUTSIDE_LOADING_BOUNDARY__'.\n  Type '() => View<true, never>' is not assignable to type '__ASYNC_OUTSIDE_LOADING_BOUNDARY__'."
+            }
+          }
+        ]
+      },
+      {
+        "fixture": "m-pending-read-in-setup",
+        "errors": [
+          {
+            "code": "PENDING_ASYNC_UNTRACKED_READ",
+            "file": "m-pending-read-in-setup.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-callback-prop-throws-forwarded",
+        "errors": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "m-callback-prop-throws-forwarded.tsx",
+            "count": 2
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-effect-phase-pending",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-injected-api-ambient",
+        "errors": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "m-injected-api-ambient.tsx",
+            "count": 6
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-injected-api-prop",
+        "errors": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "m-injected-api-prop.tsx",
+            "count": 3
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [
+          {
+            "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+            "kind": "error",
+            "severity": "error",
+            "message": "The view rendered by `() => <App />, document.body);` may fail and no Errored boundary covers it before the root; the failure would reach the root and halt reactivity. Wrap the failing work in <Errored fallback={…}>, in the component or in a caller.",
+            "loc": {
+              "file": "/Users/devagr/solid-yield/packages/sound/fixtures/mutants/m-injected-api-prop.tsx",
+              "line": 17,
+              "col": 8
+            },
+            "data": {
+              "tsMessage": "Argument of type '() => __s.View<false, \"unknown\">' is not assignable to parameter of type '(() => View<false, \"unknown\">) & __ERROR_OUTSIDE_ERRORED_BOUNDARY__'.\n  Type '() => __s.View<false, \"unknown\">' is not assignable to type '__ERROR_OUTSIDE_ERRORED_BOUNDARY__'."
+            }
+          }
+        ],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-equipment-row-loading-removed",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      }
+    ]
+  },
+  {
+    "prototype": "dataflow",
+    "crashes": [],
+    "all": {
+      "fixtures": 109,
+      "errorHits": 38,
+      "errorMisses": 7,
+      "warningHits": 24,
+      "warningMisses": 12,
+      "extraErrors": 33,
+      "extraWarnings": 111,
+      "infoHits": 5,
+      "infoMisses": 0,
+      "soundnessFailures": 17,
+      "missedMutants": [
+        "m-context-provider-removed",
+        "m-context-default-removed",
+        "m-context-alias-setup",
+        "m-context-method-write-memo",
+        "m-context-prop-child-loading-removed",
+        "m-context-prop-child-errored-removed",
+        "m-context-read-to-handler",
+        "m-pending-through-prop"
+      ],
+      "imprecise": 0,
+      "leakage": 0,
+      "unmapped": 0
+    },
+    "contextCases": {
+      "fixtures": 29,
+      "errorHits": 7,
+      "errorMisses": 3,
+      "warningHits": 3,
+      "warningMisses": 6,
+      "extraErrors": 18,
+      "extraWarnings": 74,
+      "infoHits": 0,
+      "infoMisses": 0,
+      "soundnessFailures": 8,
+      "missedMutants": [],
+      "imprecise": 0,
+      "leakage": 0,
+      "unmapped": 0
+    },
+    "contextMutants": {
+      "fixtures": 12,
+      "errorHits": 3,
+      "errorMisses": 4,
+      "warningHits": 2,
+      "warningMisses": 3,
+      "extraErrors": 8,
+      "extraWarnings": 28,
+      "infoHits": 0,
+      "infoMisses": 0,
+      "soundnessFailures": 7,
+      "missedMutants": [
+        "m-context-provider-removed",
+        "m-context-default-removed",
+        "m-context-alias-setup",
+        "m-context-method-write-memo",
+        "m-context-prop-child-loading-removed",
+        "m-context-prop-child-errored-removed",
+        "m-context-read-to-handler"
+      ],
+      "imprecise": 0,
+      "leakage": 0,
+      "unmapped": 0
+    },
+    "equipment": {
+      "fixtures": 1,
+      "errorHits": 3,
+      "errorMisses": 0,
+      "warningHits": 0,
+      "warningMisses": 2,
+      "extraErrors": 7,
+      "extraWarnings": 8,
+      "infoHits": 0,
+      "infoMisses": 0,
+      "soundnessFailures": 1,
+      "missedMutants": [],
+      "imprecise": 0,
+      "leakage": 0,
+      "unmapped": 0
+    },
+    "oldWithoutEquipment": {
+      "fixtures": 67,
+      "errorHits": 25,
+      "errorMisses": 0,
+      "warningHits": 19,
+      "warningMisses": 1,
+      "extraErrors": 0,
+      "extraWarnings": 1,
+      "infoHits": 5,
+      "infoMisses": 0,
+      "soundnessFailures": 1,
+      "missedMutants": [
+        "m-pending-through-prop"
+      ],
+      "imprecise": 0,
+      "leakage": 0,
+      "unmapped": 0
+    },
+    "oldScores": [
+      {
+        "fixture": "counter",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "props",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "inline-event",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "named-event",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "catch",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "callback-read",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "setup-read",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "return-ternary",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "return-and",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "return-null",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "named-callback-in-setup",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "array-callback-in-setup",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "getter-read-in-setup",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "memo-write",
+        "errors": [
+          {
+            "code": "REACTIVE_WRITE_IN_OWNED_SCOPE",
+            "file": "memo-write.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "untrack-in-every-host",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "reader-helpers",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "props-interface-live",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "props-accessor-callers",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "callback-prop-forwarded",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "recursion-failing-prop",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "async-memo-reads",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "async-memo-nested-function",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "async-event-reads",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "async-read",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "colored-prop",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "promise-catch",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "pending-root",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "iife-pending-root",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "async-setup-reads",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "native-latest-pending",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "native-for-indexed",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "throw-error",
+        "errors": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "throw-error.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "promise-event",
+        "errors": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "promise-event.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "handled-catch",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "rethrow-catch",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "unknown-rethrow-catch",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "finally-nested-function",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "plain-callback-throw-under-errored",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "plain-callback-throw-in-memo",
+        "errors": [
+          {
+            "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+            "file": "plain-callback-throw-in-memo.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "effect-reads-failing-memo-at-root",
+        "errors": [
+          {
+            "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+            "file": "effect-reads-failing-memo-at-root.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "foreign-route-failure",
+        "errors": [
+          {
+            "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+            "file": "foreign-route-failure.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "setup-promise-caught",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "setup-promise-rejects",
+        "errors": [
+          {
+            "code": "SETUP_MAY_THROW",
+            "file": "setup-promise-rejects.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "callback-prop-throws",
+        "errors": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "callback-prop-throws.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "callback-prop-unseen",
+        "errors": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "callback-prop-unseen.tsx",
+            "count": 1
+          },
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "callback-prop-unseen.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "async-handler-destructured-uncaught",
+        "errors": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "async-handler-destructured-uncaught.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "kept-promise-rejects-at-its-await",
+        "errors": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "kept-promise-rejects-at-its-await.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "kept-promise-caught-by-its-chain",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "timer-callback-failure",
+        "errors": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "timer-callback-failure.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "native-optimistic-store-basic",
+        "errors": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "native-optimistic-store-basic.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "event-updater",
+        "errors": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "event-updater.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "ref-event-reads",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-loading-removed",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-errored-removed",
+        "errors": [
+          {
+            "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+            "file": "m-errored-removed.tsx",
+            "count": 1
+          },
+          {
+            "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+            "file": "m-errored-removed.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-catch-removed",
+        "errors": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "m-catch-removed.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-read-moved-to-setup",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-write-in-memo",
+        "errors": [
+          {
+            "code": "REACTIVE_WRITE_IN_OWNED_SCOPE",
+            "file": "m-write-in-memo.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-reactive-prop-read-in-setup",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-handled-catch-rethrows",
+        "errors": [
+          {
+            "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+            "file": "m-handled-catch-rethrows.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-async-helper-rejects",
+        "errors": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "m-async-helper-rejects.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-pending-through-prop",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [
+          {
+            "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+            "file": "m-pending-through-prop.tsx",
+            "at": "\"{p.n}\""
+          }
+        ],
+        "extraErrors": [],
+        "extraWarnings": [
+          {
+            "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+            "kind": "async",
+            "severity": "warn",
+            "message": "\"props.n\" may be pending here and no Loading boundary is above this read, up to the render root at m-pending-through-prop.tsx:1; the root mount would be deferred with no fallback. Wrap the read in <Loading fallback={…}>, here or in a caller.",
+            "loc": {
+              "file": "/Users/devagr/solid-yield/packages/sound/fixtures/mutants/m-pending-through-prop.tsx",
+              "line": 1,
+              "col": 182,
+              "endLine": 1,
+              "endCol": 185
+            },
+            "ownerName": "<Child>",
+            "ownerPath": [
+              "<App>",
+              "<Child>"
+            ],
+            "related": [
+              {
+                "message": "the render root",
+                "loc": {
+                  "file": "/Users/devagr/solid-yield/packages/sound/fixtures/mutants/m-pending-through-prop.tsx",
+                  "line": 1,
+                  "col": 270,
+                  "endLine": 1,
+                  "endCol": 295
+                }
+              }
+            ],
+            "data": {
+              "source": "props.n"
+            }
+          }
+        ]
+      },
+      {
+        "fixture": "m-pending-read-in-setup",
+        "errors": [
+          {
+            "code": "PENDING_ASYNC_UNTRACKED_READ",
+            "file": "m-pending-read-in-setup.tsx",
+            "count": 1
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-callback-prop-throws-forwarded",
+        "errors": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "m-callback-prop-throws-forwarded.tsx",
+            "count": 2
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-effect-phase-pending",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-injected-api-ambient",
+        "errors": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "m-injected-api-ambient.tsx",
+            "count": 6
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-injected-api-prop",
+        "errors": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "m-injected-api-prop.tsx",
+            "count": 3
+          }
+        ],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-equipment-row-loading-removed",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 1,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      }
+    ]
+  },
+  {
+    "prototype": "null",
+    "crashes": [],
+    "all": {
+      "fixtures": 109,
+      "errorHits": 0,
+      "errorMisses": 45,
+      "warningHits": 0,
+      "warningMisses": 36,
+      "extraErrors": 0,
+      "extraWarnings": 0,
+      "infoHits": 0,
+      "infoMisses": 5,
+      "soundnessFailures": 62,
+      "missedMutants": [
+        "m-context-loading-removed",
+        "m-context-errored-removed",
+        "m-context-catch-removed",
+        "m-context-optional-catch-removed",
+        "m-context-provider-removed",
+        "m-context-default-removed",
+        "m-context-shadow-removed",
+        "m-context-alias-setup",
+        "m-context-method-write-memo",
+        "m-context-prop-child-loading-removed",
+        "m-context-prop-child-errored-removed",
+        "m-context-read-to-handler",
+        "m-loading-removed",
+        "m-errored-removed",
+        "m-catch-removed",
+        "m-read-moved-to-setup",
+        "m-write-in-memo",
+        "m-reactive-prop-read-in-setup",
+        "m-handled-catch-rethrows",
+        "m-async-helper-rejects",
+        "m-pending-through-prop",
+        "m-pending-read-in-setup",
+        "m-callback-prop-throws-forwarded",
+        "m-effect-phase-pending",
+        "m-injected-api-ambient",
+        "m-injected-api-prop",
+        "m-equipment-row-loading-removed"
+      ],
+      "imprecise": 0,
+      "leakage": 0,
+      "unmapped": 0
+    },
+    "contextCases": {
+      "fixtures": 29,
+      "errorHits": 0,
+      "errorMisses": 10,
+      "warningHits": 0,
+      "warningMisses": 9,
+      "extraErrors": 0,
+      "extraWarnings": 0,
+      "infoHits": 0,
+      "infoMisses": 0,
+      "soundnessFailures": 14,
+      "missedMutants": [],
+      "imprecise": 0,
+      "leakage": 0,
+      "unmapped": 0
+    },
+    "contextMutants": {
+      "fixtures": 12,
+      "errorHits": 0,
+      "errorMisses": 7,
+      "warningHits": 0,
+      "warningMisses": 5,
+      "extraErrors": 0,
+      "extraWarnings": 0,
+      "infoHits": 0,
+      "infoMisses": 0,
+      "soundnessFailures": 12,
+      "missedMutants": [
+        "m-context-loading-removed",
+        "m-context-errored-removed",
+        "m-context-catch-removed",
+        "m-context-optional-catch-removed",
+        "m-context-provider-removed",
+        "m-context-default-removed",
+        "m-context-shadow-removed",
+        "m-context-alias-setup",
+        "m-context-method-write-memo",
+        "m-context-prop-child-loading-removed",
+        "m-context-prop-child-errored-removed",
+        "m-context-read-to-handler"
+      ],
+      "imprecise": 0,
+      "leakage": 0,
+      "unmapped": 0
+    },
+    "equipment": {
+      "fixtures": 1,
+      "errorHits": 0,
+      "errorMisses": 3,
+      "warningHits": 0,
+      "warningMisses": 2,
+      "extraErrors": 0,
+      "extraWarnings": 0,
+      "infoHits": 0,
+      "infoMisses": 0,
+      "soundnessFailures": 1,
+      "missedMutants": [],
+      "imprecise": 0,
+      "leakage": 0,
+      "unmapped": 0
+    },
+    "oldWithoutEquipment": {
+      "fixtures": 67,
+      "errorHits": 0,
+      "errorMisses": 25,
+      "warningHits": 0,
+      "warningMisses": 20,
+      "extraErrors": 0,
+      "extraWarnings": 0,
+      "infoHits": 0,
+      "infoMisses": 5,
+      "soundnessFailures": 35,
+      "missedMutants": [
+        "m-loading-removed",
+        "m-errored-removed",
+        "m-catch-removed",
+        "m-read-moved-to-setup",
+        "m-write-in-memo",
+        "m-reactive-prop-read-in-setup",
+        "m-handled-catch-rethrows",
+        "m-async-helper-rejects",
+        "m-pending-through-prop",
+        "m-pending-read-in-setup",
+        "m-callback-prop-throws-forwarded",
+        "m-effect-phase-pending",
+        "m-injected-api-ambient",
+        "m-injected-api-prop",
+        "m-equipment-row-loading-removed"
+      ],
+      "imprecise": 0,
+      "leakage": 0,
+      "unmapped": 0
+    },
+    "oldScores": [
+      {
+        "fixture": "counter",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "props",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "inline-event",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "named-event",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "catch",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "callback-read",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "setup-read",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [
+          {
+            "code": "STRICT_READ_UNTRACKED",
+            "file": "setup-read.tsx",
+            "at": "\"count()\" #1"
+          }
+        ],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "return-ternary",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [
+          {
+            "code": "STRICT_READ_UNTRACKED",
+            "file": "return-ternary.tsx",
+            "at": "\"n()\" #1"
+          }
+        ],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "return-and",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [
+          {
+            "code": "STRICT_READ_UNTRACKED",
+            "file": "return-and.tsx",
+            "at": "\"n()\" #1"
+          }
+        ],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "return-null",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "named-callback-in-setup",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [
+          {
+            "code": "STRICT_READ_UNTRACKED",
+            "file": "named-callback-in-setup.tsx",
+            "at": "\"n()\" #1 | \"map(scale)\" | \"[1, 2].map(scale)\"",
+            "note": "the read inside scale, called from setup through map; either the read or the call"
+          }
+        ],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "array-callback-in-setup",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [
+          {
+            "code": "STRICT_READ_UNTRACKED",
+            "file": "array-callback-in-setup.tsx",
+            "at": "\"items().filter\" | \"n())\"",
+            "note": "items() and n() are both setup reads on line 6; one expectation covers both"
+          }
+        ],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "getter-read-in-setup",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [
+          {
+            "code": "STRICT_READ_UNTRACKED",
+            "file": "getter-read-in-setup.tsx",
+            "at": "\"o.double\" | \"n() * 2\"",
+            "note": "an object getter is a sync helper; reading it in setup is a setup read"
+          }
+        ],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "memo-write",
+        "errors": [],
+        "errorMisses": [
+          {
+            "code": "REACTIVE_WRITE_IN_OWNED_SCOPE",
+            "file": "memo-write.tsx",
+            "at": "\"set(1)\""
+          }
+        ],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "untrack-in-every-host",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "reader-helpers",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "props-interface-live",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "props-accessor-callers",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "callback-prop-forwarded",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "recursion-failing-prop",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "async-memo-reads",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "async-memo-nested-function",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "async-event-reads",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "async-read",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "colored-prop",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "promise-catch",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "pending-root",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [
+          {
+            "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+            "file": "pending-root.tsx",
+            "at": "\"{n()}\" | \"render(App\"",
+            "note": "at the read, with the root as a related location; the root is accepted as an imprecise location"
+          }
+        ],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "iife-pending-root",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [
+          {
+            "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+            "file": "iife-pending-root.tsx",
+            "at": "\"p() * 2\" | \"(() => p() * 2)()\" | \"render(App\""
+          }
+        ],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "async-setup-reads",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [
+          {
+            "code": "STRICT_READ_UNTRACKED",
+            "file": "async-setup-reads.tsx",
+            "at": "\"return n()\" | \"load()\" #2",
+            "note": "the read inside the async helper called from setup, or the call"
+          }
+        ],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "native-latest-pending",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [
+          {
+            "code": "UNANALYZED_BOUNDARY",
+            "file": "native-latest-pending.tsx",
+            "at": "\"latest(n)\" | \"isPending(n)\""
+          }
+        ],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "native-for-indexed",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "throw-error",
+        "errors": [],
+        "errorMisses": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "throw-error.tsx",
+            "at": "\"onClick\""
+          }
+        ],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "promise-event",
+        "errors": [],
+        "errorMisses": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "promise-event.tsx",
+            "at": "\"onClick\""
+          }
+        ],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "handled-catch",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "rethrow-catch",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "unknown-rethrow-catch",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "finally-nested-function",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "plain-callback-throw-under-errored",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "plain-callback-throw-in-memo",
+        "errors": [],
+        "errorMisses": [
+          {
+            "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+            "file": "plain-callback-throw-in-memo.tsx",
+            "at": "\"{total()}\" | \"throw new RangeError\" | \"render(App\""
+          }
+        ],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "effect-reads-failing-memo-at-root",
+        "errors": [],
+        "errorMisses": [
+          {
+            "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+            "file": "effect-reads-failing-memo-at-root.tsx",
+            "at": "\"() => checked()\" | \"throw new RangeError\" | \"render(\"",
+            "note": "an effect's compute reads a failing memo; the failure reaches the root"
+          }
+        ],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "foreign-route-failure",
+        "errors": [],
+        "errorMisses": [
+          {
+            "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+            "file": "foreign-route-failure.tsx",
+            "at": "\"{n()}\" | \"throw new Error\" | \"component:Page\"",
+            "note": "the component is handed off as a value: a root"
+          }
+        ],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "setup-promise-caught",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "setup-promise-rejects",
+        "errors": [],
+        "errorMisses": [
+          {
+            "code": "SETUP_MAY_THROW",
+            "file": "setup-promise-rejects.tsx",
+            "at": "\"risk().then\" | \"throw new Bad()\"",
+            "note": "a dropped rejecting promise in setup"
+          }
+        ],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "callback-prop-throws",
+        "errors": [],
+        "errorMisses": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "callback-prop-throws.tsx",
+            "at": "\"onClick\" | \"onBump={\"",
+            "note": "the caller's handler throws RangeError through the callback prop"
+          }
+        ],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "callback-prop-unseen",
+        "errors": [],
+        "errorMisses": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "callback-prop-unseen.tsx",
+            "at": "\"onClick\" #1",
+            "note": "Spread's onBump comes from a spread: unknown"
+          },
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "callback-prop-unseen.tsx",
+            "at": "\"onClick\" #2",
+            "note": "Handed is exported in a registry: unknown"
+          }
+        ],
+        "warningHits": 0,
+        "warningMisses": [
+          {
+            "code": "UNANALYZED_BOUNDARY",
+            "file": "callback-prop-unseen.tsx",
+            "at": "\"{...rest}\""
+          }
+        ],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "async-handler-destructured-uncaught",
+        "errors": [],
+        "errorMisses": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "async-handler-destructured-uncaught.tsx",
+            "at": "\"onClick\"",
+            "note": "Errored does not catch a handler's rejection"
+          }
+        ],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "kept-promise-rejects-at-its-await",
+        "errors": [],
+        "errorMisses": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "kept-promise-rejects-at-its-await.tsx",
+            "at": "\"onClick\"",
+            "note": "fetch's rejection, awaited with no catch"
+          }
+        ],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "kept-promise-caught-by-its-chain",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "timer-callback-failure",
+        "errors": [],
+        "errorMisses": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "timer-callback-failure.tsx",
+            "at": "\"setTimeout(\" | \"risk()\" #2",
+            "note": "a timer callback is handler-like; risk() has no body: unknown"
+          }
+        ],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "native-optimistic-store-basic",
+        "errors": [],
+        "errorMisses": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "native-optimistic-store-basic.tsx",
+            "at": "\"onClick\"",
+            "note": "the store setter comes from an unanalyzed construct: worst case, possibly failing"
+          }
+        ],
+        "warningHits": 0,
+        "warningMisses": [
+          {
+            "code": "UNANALYZED_BOUNDARY",
+            "file": "native-optimistic-store-basic.tsx",
+            "at": "\"createOptimisticStore({n:1})\""
+          }
+        ],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "event-updater",
+        "errors": [],
+        "errorMisses": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "event-updater.tsx",
+            "at": "\"onClick\"",
+            "note": "write() is a store setter from an unanalyzed construct: worst case"
+          }
+        ],
+        "warningHits": 0,
+        "warningMisses": [
+          {
+            "code": "UNANALYZED_BOUNDARY",
+            "file": "event-updater.tsx",
+            "at": "\"createStore({n:0})\""
+          }
+        ],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "ref-event-reads",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [
+          {
+            "code": "UNANALYZED_BOUNDARY",
+            "file": "ref-event-reads.tsx",
+            "at": "\"ref={\""
+          }
+        ],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-loading-removed",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [
+          {
+            "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+            "file": "m-loading-removed.tsx",
+            "at": "\"{m()}\" | \"render(App\""
+          }
+        ],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-errored-removed",
+        "errors": [],
+        "errorMisses": [
+          {
+            "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+            "file": "m-errored-removed.tsx",
+            "at": "\"{total()}\" | \"throw new RangeError\" | \"render(App\""
+          },
+          {
+            "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+            "file": "m-errored-removed.tsx",
+            "at": "\"JSON.parse(String(x))\" | \"render(App\"",
+            "note": "the second failing read the removed Errored covered"
+          }
+        ],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-catch-removed",
+        "errors": [],
+        "errorMisses": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "m-catch-removed.tsx",
+            "at": "\"onClick\""
+          }
+        ],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-read-moved-to-setup",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [
+          {
+            "code": "STRICT_READ_UNTRACKED",
+            "file": "m-read-moved-to-setup.tsx",
+            "at": "\"count()\" #1"
+          }
+        ],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-write-in-memo",
+        "errors": [],
+        "errorMisses": [
+          {
+            "code": "REACTIVE_WRITE_IN_OWNED_SCOPE",
+            "file": "m-write-in-memo.tsx",
+            "at": "\"set(0)\""
+          }
+        ],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-reactive-prop-read-in-setup",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [
+          {
+            "code": "STRICT_READ_UNTRACKED",
+            "file": "m-reactive-prop-read-in-setup.tsx",
+            "at": "\"const title = props.title\"",
+            "note": "title is reactive: App passes t()"
+          }
+        ],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-handled-catch-rethrows",
+        "errors": [],
+        "errorMisses": [
+          {
+            "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+            "file": "m-handled-catch-rethrows.tsx",
+            "at": "\"{n()}\" | \"throw new Error\" | \"render(\""
+          }
+        ],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-async-helper-rejects",
+        "errors": [],
+        "errorMisses": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "m-async-helper-rejects.tsx",
+            "at": "\"onClick\""
+          }
+        ],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-pending-through-prop",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [
+          {
+            "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+            "file": "m-pending-through-prop.tsx",
+            "at": "\"{p.n}\""
+          }
+        ],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-pending-read-in-setup",
+        "errors": [],
+        "errorMisses": [
+          {
+            "code": "PENDING_ASYNC_UNTRACKED_READ",
+            "file": "m-pending-read-in-setup.tsx",
+            "at": "\"value()\" #1"
+          }
+        ],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-callback-prop-throws-forwarded",
+        "errors": [],
+        "errorMisses": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "m-callback-prop-throws-forwarded.tsx",
+            "at": "\"onClick\" #1 | \"onClick\" #2",
+            "note": "both Leaf's and Middle's bindings call the throwing callback"
+          }
+        ],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-effect-phase-pending",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [
+          {
+            "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
+            "file": "m-effect-phase-pending.tsx",
+            "at": "\"m() + 1\" | \"() => console.log(m() + 1)\""
+          }
+        ],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-injected-api-ambient",
+        "errors": [],
+        "errorMisses": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "m-injected-api-ambient.tsx",
+            "at": "line 7 | line 8 | line 9 | line 10 | line 11 | line 12",
+            "note": "a name-only safe list would call these failure-free; they have no failure information"
+          }
+        ],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-injected-api-prop",
+        "errors": [],
+        "errorMisses": [
+          {
+            "code": "UNHANDLED_HANDLER_FAILURE",
+            "file": "m-injected-api-prop.tsx",
+            "at": "line 8 | line 9 | line 10"
+          }
+        ],
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [],
+        "extraWarnings": []
+      },
+      {
+        "fixture": "m-equipment-row-loading-removed",
+        "errors": [],
+        "errorMisses": [],
+        "warningHits": 0,
+        "warningMisses": [
+          {
+            "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+            "file": "m-equipment-row-loading-removed.tsx",
+            "at": "\"props.list()\" | \"<Inventory list={list} />\" | \"render(\""
+          }
+        ],
+        "extraErrors": [],
+        "extraWarnings": []
+      }
+    ]
+  }
+]

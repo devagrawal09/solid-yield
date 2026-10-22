@@ -18,6 +18,10 @@ harness that compares them. Nothing here depends on the generator runtime or low
 
 ## Run
 
+The context/services fixtures are shared requirements, not implemented analysis
+yet. Both prototype test checks currently fail as expected; contract and fixture
+checks pass. See COMPARISON.md, “context/services baseline”.
+
 ```sh
 pnpm install                                  # once, at the repo root
 cd packages/sound

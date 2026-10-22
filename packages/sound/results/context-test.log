@@ -1,0 +1,77 @@
+$ vitest run
+
+ RUN  v4.1.11 /Users/devagr/solid-yield/packages/sound
+
+ ❯ test/harness.test.mjs (8 tests | 2 failed) 1292ms
+     ✓ has every file, and every expected code is in the shared table 2ms
+     ✓ copies the cases byte-identically from their origins 25ms
+     ✓ copies the Equipment Checkout sources byte-identically (when the reference app is present) 2ms
+     ✓ reuses Solid's runtime codes with the runtime's kind and documents the runtime severity 1ms
+     ✓ invents no code that collides with a runtime code of a different meaning 0ms
+     ✓ flags every in-subset expectation as a soundness failure against the null prototype 3ms
+     × typed: no soundness failure, no leakage, only table codes 889ms
+     × dataflow: no soundness failure, no leakage, only table codes 369ms
+ ✓ test/context-contract.test.mjs (3 tests) 5258ms
+     ✓ has strict TypeScript-clean native cases and mutants  5254ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/harness.test.mjs > the prototypes on the slice > typed: no soundness failure, no leakage, only table codes
+AssertionError: typed / context-missing-provider: expected [ { …(4) } ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "at": "\"useContext(C)\"",
++     "code": "CONTEXT_PROVIDER_MISSING",
++     "file": "context-missing-provider.tsx",
++     "note": undefined,
++   },
++ ]
+
+ ❯ test/harness.test.mjs:85:58
+     83|         const s = score(fx, fixturesDir, checker.check().diagnostics, …
+     84|         checker.dispose();
+     85|         expect(s.misses, `${prototype.name} / ${fx.id}`).toEqual([]);
+       |                                                          ^
+     86|         expect(s.warningMisses, `${prototype.name} / ${fx.id} warnings…
+     87|         expect(s.leakage, `${prototype.name} / ${fx.id}`).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  test/harness.test.mjs > the prototypes on the slice > dataflow: no soundness failure, no leakage, only table codes
+AssertionError: dataflow / context-missing-provider: expected [ { …(4) } ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "at": "\"useContext(C)\"",
++     "code": "CONTEXT_PROVIDER_MISSING",
++     "file": "context-missing-provider.tsx",
++     "note": undefined,
++   },
++ ]
+
+ ❯ test/harness.test.mjs:85:58
+     83|         const s = score(fx, fixturesDir, checker.check().diagnostics, …
+     84|         checker.dispose();
+     85|         expect(s.misses, `${prototype.name} / ${fx.id}`).toEqual([]);
+       |                                                          ^
+     86|         expect(s.warningMisses, `${prototype.name} / ${fx.id} warnings…
+     87|         expect(s.leakage, `${prototype.name} / ${fx.id}`).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 9 passed (11)
+   Start at  17:53:51
+   Duration  5.47s (transform 111ms, setup 0ms, import 356ms, tests 6.55s, environment 0ms)
+
+[ELIFECYCLE] Test failed. See above for more details.

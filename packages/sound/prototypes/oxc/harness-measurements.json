@@ -1,0 +1,87 @@
+{
+  "comparisons": [
+    {
+      "name": "typed",
+      "soundness": 22
+    },
+    {
+      "name": "dataflow",
+      "soundness": 17
+    },
+    {
+      "name": "oxc",
+      "soundness": 0
+    },
+    {
+      "name": "null",
+      "soundness": 62
+    }
+  ],
+  "incremental": {
+    "trivialMs": 3.5786669999943115,
+    "semanticMs": 3.7632080000039423,
+    "before": 10,
+    "afterTrivial": 10,
+    "afterSemantic": 10
+  },
+  "summary": {
+    "hits": 70,
+    "findings": 86,
+    "warnings": 11,
+    "extraInfo": 3
+  },
+  "equipment": {
+    "fixture": "equipment-checkout",
+    "group": "equipment",
+    "inSubset": true,
+    "hits": [
+      {
+        "code": "UNHANDLED_HANDLER_FAILURE",
+        "file": "src/components/EquipmentRow.tsx",
+        "count": 1
+      },
+      {
+        "code": "UNHANDLED_HANDLER_FAILURE",
+        "file": "src/components/EquipmentRow.tsx",
+        "count": 1
+      },
+      {
+        "code": "UNHANDLED_HANDLER_FAILURE",
+        "file": "src/components/FailureControls.tsx",
+        "count": 8
+      }
+    ],
+    "imprecise": [],
+    "misses": [],
+    "extraErrors": [],
+    "warningHits": 2,
+    "warningMisses": [],
+    "extraWarnings": [],
+    "infos": 0,
+    "infoHits": 0,
+    "infoMisses": 0,
+    "leakage": [],
+    "unmapped": 0,
+    "codeTableViolations": [],
+    "soundnessFailure": false,
+    "elapsedMs": 6.967959000001429,
+    "total": 12
+  },
+  "vite": {
+    "runs": 5,
+    "coldBuild": {
+      "plainMs": 26.961291999999958,
+      "withPluginMs": 13.541084000000012,
+      "checkMs": 8.889958000000036,
+      "errors": 10,
+      "warnings": 2,
+      "strictFailed": true,
+      "reportOnlyMs": 33.589084000000014
+    },
+    "devServer": {
+      "entryTransformMs": 28.125375000000076,
+      "hmrRecheckMs": 3.748874999999998,
+      "hmrErrors": 10
+    }
+  }
+}

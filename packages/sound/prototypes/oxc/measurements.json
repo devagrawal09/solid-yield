@@ -1,0 +1,1353 @@
+{
+  "generatedAt": "2026-10-22T14:14:00.735Z",
+  "runs": 5,
+  "groups": {
+    "all": {
+      "fixtures": 109,
+      "hits": 70,
+      "misses": 0,
+      "warningHits": 11,
+      "warningMisses": 0,
+      "extraErrors": 0,
+      "extraWarnings": 0,
+      "infoHits": 5,
+      "infoMisses": 0,
+      "soundnessFailures": 0,
+      "coldSumMs": 45.93249699999963,
+      "coldMedianMs": 0.3647500000000008,
+      "inferenceNeeded": 46
+    },
+    "context": {
+      "fixtures": 41,
+      "hits": 27,
+      "misses": 0,
+      "warningHits": 4,
+      "warningMisses": 0,
+      "extraErrors": 0,
+      "extraWarnings": 0,
+      "infoHits": 0,
+      "infoMisses": 0,
+      "soundnessFailures": 0,
+      "coldSumMs": 18.404910999999952,
+      "coldMedianMs": 0.4377499999999941,
+      "inferenceNeeded": 10
+    },
+    "cases": {
+      "fixtures": 81,
+      "hits": 40,
+      "misses": 0,
+      "warningHits": 8,
+      "warningMisses": 0,
+      "extraErrors": 0,
+      "extraWarnings": 0,
+      "infoHits": 5,
+      "infoMisses": 0,
+      "soundnessFailures": 0,
+      "coldSumMs": 27.25503999999985,
+      "coldMedianMs": 0.3491249999999866,
+      "inferenceNeeded": 20
+    },
+    "contextCases": {
+      "fixtures": 29,
+      "hits": 16,
+      "misses": 0,
+      "warningHits": 3,
+      "warningMisses": 0,
+      "extraErrors": 0,
+      "extraWarnings": 0,
+      "infoHits": 0,
+      "infoMisses": 0,
+      "soundnessFailures": 0,
+      "coldSumMs": 13.124870999999995,
+      "coldMedianMs": 0.4385419999999982,
+      "inferenceNeeded": 8
+    },
+    "mutants": {
+      "fixtures": 27,
+      "hits": 27,
+      "misses": 0,
+      "warningHits": 1,
+      "warningMisses": 0,
+      "extraErrors": 0,
+      "extraWarnings": 0,
+      "infoHits": 0,
+      "infoMisses": 0,
+      "soundnessFailures": 0,
+      "coldSumMs": 10.32958199999976,
+      "coldMedianMs": 0.4003749999999968,
+      "inferenceNeeded": 13
+    },
+    "contextMutants": {
+      "fixtures": 12,
+      "hits": 11,
+      "misses": 0,
+      "warningHits": 1,
+      "warningMisses": 0,
+      "extraErrors": 0,
+      "extraWarnings": 0,
+      "infoHits": 0,
+      "infoMisses": 0,
+      "soundnessFailures": 0,
+      "coldSumMs": 5.280039999999957,
+      "coldMedianMs": 0.4319580000000087,
+      "inferenceNeeded": 2
+    },
+    "equipment": {
+      "fixtures": 1,
+      "hits": 3,
+      "misses": 0,
+      "warningHits": 2,
+      "warningMisses": 0,
+      "extraErrors": 0,
+      "extraWarnings": 0,
+      "infoHits": 0,
+      "infoMisses": 0,
+      "soundnessFailures": 0,
+      "coldSumMs": 8.347875000000016,
+      "coldMedianMs": 8.347875000000016,
+      "inferenceNeeded": 13
+    }
+  },
+  "fixtures": [
+    {
+      "id": "context-plain-object",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.7538750000000007
+    },
+    {
+      "id": "context-default",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.460208999999999
+    },
+    {
+      "id": "context-missing-provider",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.4048339999999975
+    },
+    {
+      "id": "context-provider-over-default",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.4838750000000047
+    },
+    {
+      "id": "context-signal-view",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.42616600000000204
+    },
+    {
+      "id": "context-signal-setup",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.39741599999999977
+    },
+    {
+      "id": "context-factory-memo",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.453792
+    },
+    {
+      "id": "context-helper-alias",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.4164999999999992
+    },
+    {
+      "id": "context-method-view",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.42241599999999835
+    },
+    {
+      "id": "context-method-setup",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.41141700000000014
+    },
+    {
+      "id": "context-async-covered",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.4556249999999977
+    },
+    {
+      "id": "context-async-uncovered",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.4037079999999946
+    },
+    {
+      "id": "context-async-setup",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.43154099999999573
+    },
+    {
+      "id": "context-pending-handler",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.4245829999999984
+    },
+    {
+      "id": "context-failing-memo-covered",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.44737500000000097
+    },
+    {
+      "id": "context-failing-handler",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.43991599999999664
+    },
+    {
+      "id": "context-promise-caught",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.42125000000000057
+    },
+    {
+      "id": "context-promise-uncaught",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.40637499999999704
+    },
+    {
+      "id": "context-optional-api-caught",
+      "group": "cases",
+      "inferenceNeededCount": 2,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/context-optional-api-caught.tsx",
+            "line": 5,
+            "col": 104,
+            "endLine": 5,
+            "endCol": 117
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/context-optional-api-caught.tsx",
+            "line": 5,
+            "col": 104,
+            "endLine": 5,
+            "endCol": 117
+          },
+          "reason": "call needs inference or an analyzable body"
+        }
+      ],
+      "coldMs": 0.4817910000000012
+    },
+    {
+      "id": "context-optional-api-uncaught",
+      "group": "cases",
+      "inferenceNeededCount": 2,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/context-optional-api-uncaught.tsx",
+            "line": 5,
+            "col": 104,
+            "endLine": 5,
+            "endCol": 117
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/context-optional-api-uncaught.tsx",
+            "line": 5,
+            "col": 104,
+            "endLine": 5,
+            "endCol": 117
+          },
+          "reason": "call needs inference or an analyzable body"
+        }
+      ],
+      "coldMs": 0.457540999999992
+    },
+    {
+      "id": "context-injected-sync",
+      "group": "cases",
+      "inferenceNeededCount": 1,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/context-injected-sync.tsx",
+            "line": 7,
+            "col": 71,
+            "endLine": 7,
+            "endCol": 84
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "coldMs": 0.4227080000000001
+    },
+    {
+      "id": "context-nested-shadow",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.438083000000006
+    },
+    {
+      "id": "context-provider-identity",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.4854580000000084
+    },
+    {
+      "id": "context-module-escape",
+      "group": "cases",
+      "inferenceNeededCount": 1,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/context-module-escape.tsx",
+            "line": 7,
+            "col": 45,
+            "endLine": 7,
+            "endCol": 56
+          },
+          "reason": "context stored in module state"
+        }
+      ],
+      "coldMs": 0.5181249999999977
+    },
+    {
+      "id": "context-unknown-escape",
+      "group": "cases",
+      "inferenceNeededCount": 2,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/context-unknown-escape.tsx",
+            "line": 7,
+            "col": 51,
+            "endLine": 7,
+            "endCol": 59
+          },
+          "reason": "context passed to unknown code"
+        },
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/context-unknown-escape.tsx",
+            "line": 7,
+            "col": 51,
+            "endLine": 7,
+            "endCol": 59
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "coldMs": 0.44333300000000975
+    },
+    {
+      "id": "context-prop-child-boundaries",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.4689589999999981
+    },
+    {
+      "id": "context-prop-caller-boundaries",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.47245800000000315
+    },
+    {
+      "id": "context-prop-uncovered",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.4369999999999976
+    },
+    {
+      "id": "context-method-write-handler",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.4385419999999982
+    },
+    {
+      "id": "counter",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.2396659999999997
+    },
+    {
+      "id": "props",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.0797500000000042
+    },
+    {
+      "id": "inline-event",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.19383299999999792
+    },
+    {
+      "id": "named-event",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.19149999999999068
+    },
+    {
+      "id": "catch",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.2127919999999932
+    },
+    {
+      "id": "callback-read",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.22358400000000245
+    },
+    {
+      "id": "setup-read",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.19566700000000026
+    },
+    {
+      "id": "return-ternary",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.19024999999999181
+    },
+    {
+      "id": "return-and",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.17908299999999144
+    },
+    {
+      "id": "return-null",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.3165000000000049
+    },
+    {
+      "id": "named-callback-in-setup",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.22470799999999258
+    },
+    {
+      "id": "array-callback-in-setup",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.3647500000000008
+    },
+    {
+      "id": "getter-read-in-setup",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.38075000000000614
+    },
+    {
+      "id": "memo-write",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.2470830000000035
+    },
+    {
+      "id": "untrack-in-every-host",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.44879100000001415
+    },
+    {
+      "id": "reader-helpers",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.3554589999999962
+    },
+    {
+      "id": "props-interface-live",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.26983300000000554
+    },
+    {
+      "id": "props-accessor-callers",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.3083340000000021
+    },
+    {
+      "id": "callback-prop-forwarded",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.35779200000000344
+    },
+    {
+      "id": "recursion-failing-prop",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.5108749999999986
+    },
+    {
+      "id": "async-memo-reads",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.22674999999999557
+    },
+    {
+      "id": "async-memo-nested-function",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.38749999999998863
+    },
+    {
+      "id": "async-event-reads",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.23541599999998652
+    },
+    {
+      "id": "async-read",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.2221670000000131
+    },
+    {
+      "id": "colored-prop",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.30229199999999423
+    },
+    {
+      "id": "promise-catch",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.2506659999999954
+    },
+    {
+      "id": "pending-root",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.31416699999999764
+    },
+    {
+      "id": "iife-pending-root",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.33287500000000136
+    },
+    {
+      "id": "async-setup-reads",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.19470899999998892
+    },
+    {
+      "id": "native-latest-pending",
+      "group": "cases",
+      "inferenceNeededCount": 2,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/native-latest-pending.tsx",
+            "line": 1,
+            "col": 115,
+            "endLine": 1,
+            "endCol": 124
+          },
+          "reason": "Solid latest is outside the modeled subset"
+        },
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/native-latest-pending.tsx",
+            "line": 1,
+            "col": 126,
+            "endLine": 1,
+            "endCol": 138
+          },
+          "reason": "Solid isPending is outside the modeled subset"
+        }
+      ],
+      "coldMs": 0.1862090000000194
+    },
+    {
+      "id": "native-for-indexed",
+      "group": "cases",
+      "inferenceNeededCount": 1,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/native-for-indexed.tsx",
+            "line": 1,
+            "col": 167,
+            "endLine": 1,
+            "endCol": 173
+          },
+          "reason": "callable shape needs inference"
+        }
+      ],
+      "coldMs": 0.20916699999997945
+    },
+    {
+      "id": "throw-error",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.24616599999998812
+    },
+    {
+      "id": "promise-event",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.20125000000001592
+    },
+    {
+      "id": "handled-catch",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.2708340000000078
+    },
+    {
+      "id": "rethrow-catch",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.21875
+    },
+    {
+      "id": "unknown-rethrow-catch",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.2074169999999924
+    },
+    {
+      "id": "finally-nested-function",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.4205419999999833
+    },
+    {
+      "id": "plain-callback-throw-under-errored",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.47516600000000153
+    },
+    {
+      "id": "plain-callback-throw-in-memo",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.3757090000000005
+    },
+    {
+      "id": "effect-reads-failing-memo-at-root",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.3823329999999885
+    },
+    {
+      "id": "foreign-route-failure",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.1875829999999894
+    },
+    {
+      "id": "setup-promise-caught",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.22295800000000554
+    },
+    {
+      "id": "setup-promise-rejects",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.24750000000000227
+    },
+    {
+      "id": "callback-prop-throws",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.2285839999999837
+    },
+    {
+      "id": "callback-prop-unseen",
+      "group": "cases",
+      "inferenceNeededCount": 3,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/callback-prop-unseen.tsx",
+            "line": 6,
+            "col": 33,
+            "endLine": 6,
+            "endCol": 47
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/callback-prop-unseen.tsx",
+            "line": 12,
+            "col": 20,
+            "endLine": 12,
+            "endCol": 29
+          },
+          "reason": "JSX spread"
+        },
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/callback-prop-unseen.tsx",
+            "line": 3,
+            "col": 33,
+            "endLine": 3,
+            "endCol": 47
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "coldMs": 0.282291999999984
+    },
+    {
+      "id": "async-handler-destructured-uncaught",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.22270799999998303
+    },
+    {
+      "id": "kept-promise-rejects-at-its-await",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.3491249999999866
+    },
+    {
+      "id": "kept-promise-caught-by-its-chain",
+      "group": "cases",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.32220899999998664
+    },
+    {
+      "id": "timer-callback-failure",
+      "group": "cases",
+      "inferenceNeededCount": 1,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/timer-callback-failure.tsx",
+            "line": 1,
+            "col": 174,
+            "endLine": 1,
+            "endCol": 180
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "coldMs": 0.22395800000001032
+    },
+    {
+      "id": "native-optimistic-store-basic",
+      "group": "cases",
+      "inferenceNeededCount": 2,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/native-optimistic-store-basic.tsx",
+            "line": 1,
+            "col": 88,
+            "endLine": 1,
+            "endCol": 116
+          },
+          "reason": "Solid createOptimisticStore is outside the modeled subset"
+        },
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/native-optimistic-store-basic.tsx",
+            "line": 1,
+            "col": 145,
+            "endLine": 1,
+            "endCol": 160
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "coldMs": 0.22637499999999022
+    },
+    {
+      "id": "event-updater",
+      "group": "cases",
+      "inferenceNeededCount": 2,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/event-updater.tsx",
+            "line": 1,
+            "col": 204,
+            "endLine": 1,
+            "endCol": 222
+          },
+          "reason": "Solid createStore is outside the modeled subset"
+        },
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/event-updater.tsx",
+            "line": 1,
+            "col": 251,
+            "endLine": 1,
+            "endCol": 270
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "coldMs": 0.25695899999999483
+    },
+    {
+      "id": "ref-event-reads",
+      "group": "cases",
+      "inferenceNeededCount": 1,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/cases/ref-event-reads.tsx",
+            "line": 1,
+            "col": 103,
+            "endLine": 1,
+            "endCol": 144
+          },
+          "reason": "ref callback"
+        }
+      ],
+      "coldMs": 0.2088329999999985
+    },
+    {
+      "id": "equipment-checkout",
+      "group": "equipment",
+      "inferenceNeededCount": 13,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/equipment/src/service.ts",
+            "line": 21,
+            "col": 54,
+            "endLine": 21,
+            "endCol": 64
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/equipment/src/components/FailureControls.tsx",
+            "line": 7,
+            "col": 46,
+            "endLine": 7,
+            "endCol": 77
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/equipment/src/components/FailureControls.tsx",
+            "line": 9,
+            "col": 549,
+            "endLine": 9,
+            "endCol": 576
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/equipment/src/components/FailureControls.tsx",
+            "line": 9,
+            "col": 646,
+            "endLine": 9,
+            "endCol": 673
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/equipment/src/components/Inventory.tsx",
+            "line": 11,
+            "col": 57,
+            "endLine": 11,
+            "endCol": 134
+          },
+          "reason": "call needs inference or an analyzable body"
+        },
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/equipment/src/service.ts",
+            "line": 38,
+            "col": 42,
+            "endLine": 38,
+            "endCol": 64
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/equipment/src/model.ts",
+            "line": 8,
+            "col": 83,
+            "endLine": 8,
+            "endCol": 96
+          },
+          "reason": "member shape needs inference"
+        },
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/equipment/src/service.ts",
+            "line": 39,
+            "col": 32,
+            "endLine": 39,
+            "endCol": 46
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/equipment/src/service.ts",
+            "line": 37,
+            "col": 41,
+            "endLine": 37,
+            "endCol": 62
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/equipment/src/api.ts",
+            "line": 32,
+            "col": 10,
+            "endLine": 32,
+            "endCol": 27
+          },
+          "reason": "call needs inference or an analyzable body"
+        },
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/equipment/src/api.ts",
+            "line": 32,
+            "col": 32,
+            "endLine": 32,
+            "endCol": 53
+          },
+          "reason": "call needs inference or an analyzable body"
+        },
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/equipment/src/components/Detail.tsx",
+            "line": 6,
+            "col": 62,
+            "endLine": 6,
+            "endCol": 90
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/equipment/src/service.ts",
+            "line": 36,
+            "col": 35,
+            "endLine": 36,
+            "endCol": 52
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "coldMs": 8.347875000000016
+    },
+    {
+      "id": "m-context-loading-removed",
+      "group": "mutants",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.6117080000000215
+    },
+    {
+      "id": "m-context-errored-removed",
+      "group": "mutants",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.4651660000000106
+    },
+    {
+      "id": "m-context-catch-removed",
+      "group": "mutants",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.4319580000000087
+    },
+    {
+      "id": "m-context-optional-catch-removed",
+      "group": "mutants",
+      "inferenceNeededCount": 2,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/mutants/m-context-optional-catch-removed.tsx",
+            "line": 5,
+            "col": 104,
+            "endLine": 5,
+            "endCol": 117
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/mutants/m-context-optional-catch-removed.tsx",
+            "line": 5,
+            "col": 104,
+            "endLine": 5,
+            "endCol": 117
+          },
+          "reason": "call needs inference or an analyzable body"
+        }
+      ],
+      "coldMs": 0.4900829999999985
+    },
+    {
+      "id": "m-context-provider-removed",
+      "group": "mutants",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.39220799999998235
+    },
+    {
+      "id": "m-context-default-removed",
+      "group": "mutants",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.3564580000000035
+    },
+    {
+      "id": "m-context-shadow-removed",
+      "group": "mutants",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.4003749999999968
+    },
+    {
+      "id": "m-context-alias-setup",
+      "group": "mutants",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.42399999999997817
+    },
+    {
+      "id": "m-context-method-write-memo",
+      "group": "mutants",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.4016670000000033
+    },
+    {
+      "id": "m-context-prop-child-loading-removed",
+      "group": "mutants",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.45412499999997635
+    },
+    {
+      "id": "m-context-prop-child-errored-removed",
+      "group": "mutants",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.4377499999999941
+    },
+    {
+      "id": "m-context-read-to-handler",
+      "group": "mutants",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.4145419999999831
+    },
+    {
+      "id": "m-loading-removed",
+      "group": "mutants",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.339917000000014
+    },
+    {
+      "id": "m-errored-removed",
+      "group": "mutants",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.5178749999999752
+    },
+    {
+      "id": "m-catch-removed",
+      "group": "mutants",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.39374999999998295
+    },
+    {
+      "id": "m-read-moved-to-setup",
+      "group": "mutants",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.25695799999999736
+    },
+    {
+      "id": "m-write-in-memo",
+      "group": "mutants",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.27054099999998016
+    },
+    {
+      "id": "m-reactive-prop-read-in-setup",
+      "group": "mutants",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.2511249999999734
+    },
+    {
+      "id": "m-handled-catch-rethrows",
+      "group": "mutants",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.31937499999997954
+    },
+    {
+      "id": "m-async-helper-rejects",
+      "group": "mutants",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.22770899999997596
+    },
+    {
+      "id": "m-pending-through-prop",
+      "group": "mutants",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.3333329999999819
+    },
+    {
+      "id": "m-pending-read-in-setup",
+      "group": "mutants",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.20720899999997755
+    },
+    {
+      "id": "m-callback-prop-throws-forwarded",
+      "group": "mutants",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.3039999999999736
+    },
+    {
+      "id": "m-effect-phase-pending",
+      "group": "mutants",
+      "inferenceNeededCount": 0,
+      "inferenceNeeded": [],
+      "coldMs": 0.4550420000000486
+    },
+    {
+      "id": "m-injected-api-ambient",
+      "group": "mutants",
+      "inferenceNeededCount": 6,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/mutants/m-injected-api-ambient.tsx",
+            "line": 7,
+            "col": 45,
+            "endLine": 7,
+            "endCol": 57
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/mutants/m-injected-api-ambient.tsx",
+            "line": 8,
+            "col": 28,
+            "endLine": 8,
+            "endCol": 45
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/mutants/m-injected-api-ambient.tsx",
+            "line": 9,
+            "col": 28,
+            "endLine": 9,
+            "endCol": 40
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/mutants/m-injected-api-ambient.tsx",
+            "line": 10,
+            "col": 33,
+            "endLine": 10,
+            "endCol": 48
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/mutants/m-injected-api-ambient.tsx",
+            "line": 11,
+            "col": 34,
+            "endLine": 11,
+            "endCol": 46
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/mutants/m-injected-api-ambient.tsx",
+            "line": 12,
+            "col": 33,
+            "endLine": 12,
+            "endCol": 46
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "coldMs": 0.34924999999998363
+    },
+    {
+      "id": "m-injected-api-prop",
+      "group": "mutants",
+      "inferenceNeededCount": 4,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/mutants/m-injected-api-prop.tsx",
+            "line": 15,
+            "col": 22,
+            "endLine": 15,
+            "endCol": 33
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/mutants/m-injected-api-prop.tsx",
+            "line": 8,
+            "col": 45,
+            "endLine": 8,
+            "endCol": 63
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/mutants/m-injected-api-prop.tsx",
+            "line": 9,
+            "col": 28,
+            "endLine": 9,
+            "endCol": 51
+          },
+          "reason": "function annotation supplies no failure facts"
+        },
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/mutants/m-injected-api-prop.tsx",
+            "line": 10,
+            "col": 33,
+            "endLine": 10,
+            "endCol": 51
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "coldMs": 0.40220799999997325
+    },
+    {
+      "id": "m-equipment-row-loading-removed",
+      "group": "mutants",
+      "inferenceNeededCount": 1,
+      "inferenceNeeded": [
+        {
+          "loc": {
+            "file": "/Users/devagr/solid-yield-wt/sound-oxc/packages/sound/fixtures/mutants/m-equipment-row-loading-removed.tsx",
+            "line": 13,
+            "col": 54,
+            "endLine": 13,
+            "endCol": 65
+          },
+          "reason": "function annotation supplies no failure facts"
+        }
+      ],
+      "coldMs": 0.42124999999998636
+    }
+  ]
+}

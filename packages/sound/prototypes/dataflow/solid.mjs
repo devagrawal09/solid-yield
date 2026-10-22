@@ -56,7 +56,7 @@ export function solidApiOf(node, checker) {
   return { api: symbol.name, pkg: pkg ?? "" };
 }
 
-/** JSX attribute names that bind event handlers (Solid: on*, on:*, oncapture:*). */
+/** JSX attribute names that bind event handlers (Solid: on*, on:*, oncapture:*). @param {string} name */
 export function isEventAttribute(name) {
   return /^on(?:[A-Z]|:|capture:)/.test(name);
 }
@@ -66,8 +66,11 @@ export function isEventAttribute(name) {
  * @param {ts.TypeChecker} checker
  */
 export function isPromiseType(type, checker) {
-  if (checker.getPromisedTypeOfPromise(type)) return true;
-  if (type.isUnion()) return type.types.some(t => checker.getPromisedTypeOfPromise(t) !== undefined);
+  // TypeScript exposes this oracle at runtime (including PromiseLike); keep
+  // its internal signature local rather than matching a printed type name.
+  const oracle = /** @type {ts.TypeChecker & { getPromisedTypeOfPromise(type: ts.Type): ts.Type | undefined }} */ (checker);
+  if (oracle.getPromisedTypeOfPromise(type)) return true;
+  if (type.isUnion()) return type.types.some(t => oracle.getPromisedTypeOfPromise(t) !== undefined);
   return false;
 }
 

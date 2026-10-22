@@ -1062,13 +1062,14 @@ export class Transformer {
     }
     const b = ts.isIdentifier(tag) ? this.bindingOf(tag) : undefined;
     if (!b || b.kind !== "component") {
-      const isContext = ts.isIdentifier(tag) && /Context/.test(this.checker.typeToString(this.checker.getTypeAtLocation(tag)));
+      // Context providers are resolved by createContext provenance in context.mjs.
+      const isContext = false;
       this.warn(opening, api ? `<${tag.getText()}>` : isContext ? `<${tag.getText()} value={…}> (a context provider)` : `<${tag.getText()}>`,
         api ? "this Solid component is not modeled in the slice; its children are checked under the current boundaries and its own value is treated as the worst case."
           : isContext ? "context is the next area; the provided value is not followed into consumers (each useContext is treated as the worst case) and the children are checked under the current boundaries."
           : "its component cannot be resolved to a project function; its children are checked under the current boundaries.", this.owner);
-      out.insert("__s.views([", start);
-      let first = true;
+      out.insert(`__s.views([__s.track(() => undefined, [__s.worstDep()], __s.fails(), ${JSON.stringify(this.sf.fileName + ":" + start)})`, start);
+      let first = false;
       for (const a of attrs) { if (ts.isJsxAttribute(a) && a.initializer && ts.isJsxExpression(a.initializer) && a.initializer.expression) { out.insert(first ? "" : ", ", a.getStart(this.sf)); first = false; this.emitTrack(a.initializer.expression); } }
       if (children.length) { out.insert(first ? "" : ", ", start); this.emitChildren(children, start); }
       out.insert("])", node.getEnd());

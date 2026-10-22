@@ -10,7 +10,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { performance } from "node:perf_hooks";
-import { Transformer } from "./transform.mjs";
+import { ContextTransformer as Transformer } from "./context.mjs";
 import { BY_CODE } from "../../src/codes.mjs";
 
 export const name = "typed";
@@ -112,6 +112,7 @@ export function createChecker(options) {
         const loc = { file: f, line: lc.line + 1, col: lc.character + 1 };
         const contextText = osf.getFullText().slice(opos, opos + 48).split("\n")[0].trim();
         const failures = /Fails<"([^>]+)">/.exec(text)?.[1]?.replaceAll('"', "");
+        if (text.includes("__SOUND_FINDINGS__")) continue;
         if (codes.length) {
           for (const code of codes) {
             const key = `${code}@${loc.line}:${loc.col}`;
@@ -128,22 +129,51 @@ export function createChecker(options) {
           diagnostics.push({ code: "UNANALYZED_BOUNDARY", kind: "analysis", severity: "warn", message: `The typed encoding could not accept this construct (an unclassified TypeScript error in the virtual program); it is not checked here and values from it are treated as the worst case.`, loc, ownerName: ownerAt(osf, opos), data: { unclassified: true, tsMessage: text, construct: contextText } });
         }
       }
-      // Exported, never-rendered components: their colors are informational.
-      const checker = vprogram.getTypeChecker();
-      for (const [node, info] of transformer.components) {
-        if (node.getSourceFile() !== osf || !info.exported || info.rendered || info.handedOff || info.callers > 0) continue;
-        const vnode = nodeAt(vsf, out, node.getStart(osf));
-        if (!vnode) continue;
-        const type = checker.getTypeAtLocation(vnode);
-        const sig = checker.getSignaturesOfType(type, ts.SignatureKind.Call)[0];
-        const ret = sig ? checker.typeToString(sig.getReturnType(), undefined, ts.TypeFormatFlags.NoTruncation) : "";
-        const m = /View<(true|false|boolean), (.+)>$/.exec(ret);
-        if (m && (m[1] !== "false" || m[2] !== "never")) {
-          const nameNode = node.name ?? (ts.isVariableDeclaration(node.parent) ? node.parent.name : node);
-          const lc = osf.getLineAndCharacterOfPosition(nameNode.getStart(osf));
-          diagnostics.push({ code: "COMPONENT_OBLIGATIONS_EXPORTED", kind: "analysis", severity: "info", message: `<${info.name}> is exported and nothing in this program renders it; its view is ${ret}: it may be ${[m[1] !== "false" ? "pending" : "", m[2] !== "never" ? `failing (${m[2]})` : ""].filter(Boolean).join(" and ")}. Its renderers must provide the Loading / Errored boundary.`, loc: { file: f, line: lc.line + 1, col: lc.character + 1 }, ownerName: `<${info.name}>`, data: { view: ret } });
+      // Read the type-level marker payload, not a printed type name. The
+      // __SOUND_FINDINGS__ argument error is the obligation; __findings on
+      // the call result preserves all its sites even when TS abbreviates it.
+      const colorChecker = vprogram.getTypeChecker();
+      /** @param {ts.Node} n */
+      const collectFindings = n => {
+        if (ts.isCallExpression(n)) {
+          const t = colorChecker.getTypeAtLocation(n);
+          const exportedPayload = t.getProperty("__exported");
+          if (exportedPayload && !(colorChecker.getTypeOfSymbolAtLocation(exportedPayload, n).flags & ts.TypeFlags.Never)) {
+            const arg = n.arguments[0];
+            const entry = [...transformer.components].find(([node, info]) => node.getSourceFile() === osf && info.name === arg?.getText(vsf));
+            if (entry) {
+              const [node, info] = entry;
+              const name = node.name ?? (ts.isVariableDeclaration(node.parent) ? node.parent.name : node);
+              const spec = BY_CODE.COMPONENT_OBLIGATIONS_EXPORTED;
+              diagnostics.push({ code: spec.code, kind: spec.kind, severity: spec.severity, message: spec.meaning + " " + spec.fix, loc: transformer.loc(name), ownerName: "<" + info.name + ">" });
+            }
+          }
+          const payload = t.getProperty("__findings");
+          if (payload) {
+            const ft = colorChecker.getTypeOfSymbolAtLocation(payload, n);
+            for (const finding of ft.isUnion() ? ft.types : [ft]) {
+              const cp = finding.getProperty("code"), sp = finding.getProperty("site");
+              if (!cp || !sp) continue;
+              const ct = colorChecker.getTypeOfSymbolAtLocation(cp, n);
+              const st = colorChecker.getTypeOfSymbolAtLocation(sp, n);
+              if (!ct.isStringLiteral() || !st.isStringLiteral()) continue;
+              const code = ct.value;
+              if (!(code in BY_CODE)) continue;
+              const original = transformer.sites.get(st.value);
+              if (!original) continue;
+              const loc = transformer.loc(original);
+              const key = code + "@" + loc.file + ":" + loc.line + ":" + loc.col;
+              if (seen.has(key)) continue;
+              seen.add(key);
+              const spec = BY_CODE[code];
+              const related = (transformer.relatedSites.get(st.value) ?? []).map(e => ({ message: "Caller prop expression", loc: transformer.loc(e) }));
+              diagnostics.push({ code, kind: spec.kind, severity: spec.severity, message: spec.meaning + " " + spec.fix, loc, related, ownerName: ownerAt(original.getSourceFile(), original.getStart()), data: { typed: true } });
+            }
+          }
         }
-      }
+        ts.forEachChild(n, collectFindings);
+      };
+      collectFindings(vsf);
     }
     return { diagnostics, elapsedMs: performance.now() - t0, data: { transformMs: tTransform - t0, unclassified } };
   };

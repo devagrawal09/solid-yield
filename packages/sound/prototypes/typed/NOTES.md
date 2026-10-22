@@ -1,86 +1,85 @@
-# Prototype A — typed annotations: notes
+# Prototype A — typed annotations
 
-## Design
+## Context/services extension
 
-TypeScript stays the checker. transform.mjs rewrites each file, in memory, into calls
-of the virtual module `solid-sound-typed` (runtime.d.ts); a second LanguageService
-type-checks the virtual program; the errors carry a `__CODE__` marker that index.mjs
-maps to a solid-sound code and back to the original position (Output pieces).
+TypeScript remains the checker. The original program resolves declarations; a
+virtual program checks calls into runtime.d.ts. Neither program changes shipped
+Solid code. No context type is recognized from its printed name.
 
-- **Phantom types**: `Src<T, P, E>` (an accessor with pending / failure colors),
-  `View<P, E>` (a rendered view and what it still carries), `Worst` (an unanalyzed
-  value; members are `any` so the user's code keeps checking), `Fails<E>` (a failure
-  set computed by the pre-pass and carried as a string-literal union type).
-- **Syntactic scope**: setup reads become `__s.setupRead(src)` (error through
-  `SetupReadable`), JSX becomes `host/el/loading/errored/flow/views` calls, JSX
-  expression containers become `track(() => e, [deps], fails)`, memos become
-  `memo(fn, [deps], fails)`, effects `effect(compute, [deps], fn, [deps], fails)`,
-  event attributes `handler(fn, fails)`, roots `render / renderComponent / handoff`.
-  **Dependency lists** are extracted syntactically (identifiers bound to sources /
-  worst values, transitively through sync helpers, getters and IIFEs); TypeScript
-  folds their colors (`PendingOf`, `FailsOf`) into views and up to the root.
-- **Two pre-passes** supply what types cannot express: (1) failure sets — TypeScript has
-  no throw types, so `failuresOf()` computes them (throws, awaited rejections,
-  promise chains, unknown callees, callback props' callers) and hands them to the
-  types; (2) which props are **reactive** — TypeScript checks a component body once,
-  not per caller, so the callers are scanned and reactive props read in setup become
-  `setupRead(propSrc(props.x))`. A prop's pending / failure colors are carried on the
-  **caller's** side (`el(Comp, props, propViews)`): the caller's boundaries cover
-  them (D-119's reading), the child never sees them.
-- Non-type diagnostics (partial-check warnings, setter writes in owned scopes) are
-  emitted by the transform directly.
+The virtual declarations now carry a union of read obligations in View<Q> rather
+than just two booleans. Each read records its source, scope, source-map key and
+Loading/Errored coverage. A marker argument error carries the computed findings;
+index.mjs reads its structured Check payload using TS properties and literal
+types, so abbreviated error text cannot lose a read or its location.
 
-## Subset vs SLICE.md
+- Context identities come from createContext declaration provenance. Lookup values
+  carry typed member-path references. provide substitutes the nearest supplied
+  value into descendant references; unresolved lookups use their own defaults or
+  produce CONTEXT_PROVIDER_MISSING. A missing value invents no async/failure read.
+- Factory bodies are transformed too. Their inferred return objects retain each
+  signal/memo/method's colors. Explicit return annotations are omitted only in the
+  virtual copy so those colors are not erased. Different invocations retain their
+  different arguments and provider paths. Factory setup reads travel in __setup
+  facts, separately from the returned members.
+- Methods carry their closure dependencies, inferred failures, and setter sites.
+  Promise-returning methods carry rejection facts, not memo pending facts. Plain
+  injected functions always may fail with unknown; optional fallbacks do not
+  promise that an injected arm is safe. No user failure contracts were added.
+- Props carry lazy colored values. A child's typed prop reference is substituted
+  at its caller only after the child's read boundaries have been applied. The
+  primary site remains the child's read; caller expressions are related sites.
+  Unconsumed props create no obligations. Forwarding preserves typed colors.
+- Escapes warn and taint aliases. Typed taint facts resolve at the affected
+  provider, making other consumers of that object worst case without tainting
+  an independent provider. Alias collection reaches a fixed point.
+- Recursive JSX edges become typed references, not inferred-any component calls.
+  A virtual component registry lets TS unfold them until prop palettes and
+  boundary/context state repeat. Eight changing recursive states are the limit;
+  exceeding it warns and assumes worst case. Other palette expansion is bounded
+  at sixteen steps and is conservative.
+- Known Solid render-callback parameters retain the original checker's types and
+  receive the library's settled/failure-free callback facts. This avoids losing
+  their types when JSX is replaced by declaration calls. Printed types are only
+  serialized for annotations, never matched to recognize an API or context.
 
-Supported: signals, memos (async too), effects, props (reactive classification from
-callers, callback props with forwarding), Loading / Errored / Show / For, handlers
-with the failure pre-pass, timers (`checked`), setup failures, hand-offs, exported
-components (info from the virtual program's inferred `View` type). Partial: a
-worst-case member stored in its own variable loses the color (it is `any`); recursive
-components' views are `any` to TypeScript (one false positive at the root of
-recursion-failing-prop); keyed-For items and render-callback parameters are `any`.
-Not modeled: everything B does not model, plus anything the virtual program cannot
-type (an unclassified TypeScript error becomes an UNANALYZED_BOUNDARY warning with
-`data.unclassified` — 0 on the slice after switching `noImplicitAny` off in the
-virtual program).
+context.mjs extends the original transform. The pre-pass still supplies scope,
+symbol/alias provenance, dependency expressions and failures (TS has no throw
+ types). Pending/failure composition, service-member substitution, provider
+shadowing, prop substitution, recursion and boundary discharge happen in types.
 
-## Where the typed IR is weaker, by construction
+## Rules and assumptions
 
-- **Location**: pending / failure obligations surface where TypeScript checks them —
-  the `render` / hand-off argument — not at the read (13 of 51 expectations are
-  located imprecisely; B locates all 51 at the read, with the root as related
-  information).
-- **Failure sets and prop reactivity need a dataflow pre-pass anyway**; the type
-  system only propagates them. The pre-pass is ~40 % of transform.mjs and duplicates a
-  subset of B's logic less precisely (no interprocedural value flow: `failuresOf`
-  cannot see that a value stored in a variable is a kept promise beyond one
-  declaration).
-- **Prop expression failures** are attributed to the caller's view (one extra error on
-  m-injected-api-prop at the root) where B attributes them to the child's read.
-- **Two programs** are held (original for resolution, virtual for checking): about 2×
-  B's cold time and 4–5× its incremental time.
-- **Fragility**: a construct the virtual encoding cannot type is a warning, not a
-  refusal, but it is a warning about the checker, not about the program.
+- Diagnostic codes/severities come from src/codes.mjs (D-130). Proven findings are
+  errors; partial-check boundaries and pending handler reads warn.
+- Returning a service or giving it to a known provider is not an escape.
+- Defaults in this slice are usable, non-undefined values.
+- The original checker's non-null flow fact is preserved when a generated track
+  closure would otherwise lose that fact; this does not trust an unchecked value.
+- Both original and virtual programs are still held. Incremental checks rebuild
+  the transform and reuse the language services; there is no per-component cache.
 
-## Disputed expectations
+## Limits
 
-None. The imprecise anchors (`atRoot` / `root`) were added to the fixtures so that a
-root-located report counts as a hit *and* is counted separately.
+This remains a prototype, not a general JavaScript interpreter. Dynamic providers,
+classes, unsupported mutations/storage shapes and other unmodeled constructs use
+partial-check warnings. Related prop locations conservatively include all known
+callers of that member rather than only the one render path that fails. Failure
+inference retains the original pre-pass's bounded helper/promise analysis. Escapes
+inside detached callbacks do not yet share taint facts with sibling consumers;
+local aliases still become worst case and the escape warns. Recursive environment
+comparison uses member palettes rather than object identity.
 
-## Numbers (results/latest.md, 3 runs)
+Virtual-program errors that cannot be classified remain explicit analysis
+warnings; none occur in the shared fixture set. They are not evidence that an
+unsupported program is safe. No fixture-name/path/text tests or suppressions were
+added. Shared files, fixtures and the other prototype are unchanged.
 
-51/51 expected errors, 13 imprecise, 0 soundness failures, 2 extra errors
-(recursion-failing-prop: recursive view is `any` → worst case; m-injected-api-prop:
-caller-side attribution), 12/12 warnings, 0 extra warnings, 5/5 info; cold: cases
-11.3 s, Equipment 310 ms; incremental 103 / 110 ms. Vite: build 29 → 345 ms with the
-plugin (check 309 ms); HMR re-check 88 ms.
+## Results
 
-## Emit-readiness
+See RESULTS-context.md for the measured shared-fixture results, timing runs, test
+status and line delta. The old two false positives (recursive view erasure and
+caller-root prop charging) are removed. Primary locations are now read-specific.
 
-The virtual program's types tell, per component, whether its view is pending /
-failing (`View<P, E>` on the inferred return type — the info diagnostic reads it
-that way) and, per memo, its colors. They do not keep **which read** carries a color,
-nor scopes per read beyond the syntactic transform's own tables (which are not an
-exported IR). Driving an optimized emit would mean exporting the transform's
-dependency lists and scope decisions — at which point the IR is the pre-pass, not the
-types.
+## Disputes
+
+None. No shared expectation was changed.

@@ -1,6 +1,6 @@
 # C: oxc — design
 
-C is an independent JavaScript checker. It does not load TypeScript. Oxc parses source and declaration files; oxc-resolver follows files, package exports and pnpm links.
+C is an independent JavaScript checker. It does not load TypeScript. Oxc parses project source and declaration files; oxc-resolver follows files, package exports and pnpm links. Installed implementation bodies are never read or parsed. Application imports establish package boundaries before over-inclusive roots are considered; package real paths preserve that boundary through links. Calls use declarations (including adjacent declaration files), or keep unknown failures and results with a partial warning at the application call site. Declaration initialization never creates body closures.
 
 ## Graph and execution model
 

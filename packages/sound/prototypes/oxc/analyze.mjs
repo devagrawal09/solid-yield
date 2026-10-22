@@ -63,6 +63,7 @@ export class Analysis {
     this.diagnostics = [];
     this.keys = new Set();
     this.inference = new Map();
+    this.worstSites = new Map();
     this.nodes = [];
     this.facts = new Map();
     this.called = new Set();
@@ -90,6 +91,12 @@ export class Analysis {
   needed(node, reason) {
     const loc = this.graph.loc(node);
     this.inference.set(loc.file + ":" + node?.start + ":" + reason, { loc, reason });
+  }
+  worstSite(node, reason) {
+    const loc = this.graph.loc(node);
+    const key = loc.file + ":" + node?.start + ":" + node?.end;
+    const previous = this.worstSites.get(key);
+    this.worstSites.set(key, { loc, reasons: uniq([...(previous?.reasons ?? []), reason]) });
   }
   emit(code, node, c, related = [], data = {}) {
     if (!node) return;
@@ -122,6 +129,7 @@ export class Analysis {
     });
   }
   partial(node, c, reason) {
+    this.worstSite(node, reason);
     this.emit("UNANALYZED_BOUNDARY", node, c, [], { construct: reason });
     this.needed(node, reason);
     this.event("boundary", node, { reason });
@@ -209,6 +217,8 @@ export class Analysis {
         : { tag: "solid", name: v.name, pkg: v.pkg };
     if (!v.path) return unknown("unresolved import " + v.spec);
     const mod = this.graph.load(v.path);
+    if (mod.blocked)
+      return { tag: "dependencyUnknown", reason: "installed dependency has no declaration" };
     this.initialize(mod);
     if (v.name === "*") return { tag: "module", mod };
     return this.exportValue(mod, v.name, new Set());
@@ -217,12 +227,16 @@ export class Analysis {
     const key = mod.path + ":" + name;
     if (seen.has(key)) return unknown("cyclic export");
     seen.add(key);
+    if (mod.blocked)
+      return { tag: "dependencyUnknown", reason: "installed dependency has no declaration" };
     const entry = mod.exports.get(name);
     if (entry?.local) return this.deref(mod.env.get(entry.local) ?? unknown("unresolved export"));
     if (entry?.declaration) {
       entry.value ??=
         mod.env.get(entry.declaration.id?.name) ??
-        this.eval(entry.declaration, mod.env, this.context());
+        (mod.declarationOnly
+          ? this.graph.shape(entry.declaration, mod.env)
+          : this.eval(entry.declaration, mod.env, this.context()));
       return entry.value;
     }
     if (entry?.pkg && ["solid-js", "@solidjs/signals", "@solidjs/web"].includes(entry.pkg))
@@ -246,10 +260,11 @@ export class Analysis {
   initialize(mod) {
     if (mod.state !== "new") return;
     mod.state = "loading";
-    this.hoist(mod.ast.body, mod.env);
-    if (mod.path.endsWith(".d.ts")) {
+    if (mod.declarationOnly) {
       for (const s of mod.ast.body) {
         const n = s.declaration ?? s;
+        if (["TSDeclareFunction", "FunctionDeclaration"].includes(n.type) && n.id)
+          mod.env.define(n.id.name, this.graph.shape(n, mod.env), n);
         if (n.type === "VariableDeclaration")
           for (const d of n.declarations)
             this.bind(d.id, this.annotation(d.id, mod.env), mod.env, this.context());
@@ -257,6 +272,7 @@ export class Analysis {
       mod.state = "done";
       return;
     }
+    this.hoist(mod.ast.body, mod.env);
     for (const statement of mod.ast.body) {
       if (statement.type === "ImportDeclaration") continue;
       this.statement(statement, mod.env, this.context());
@@ -321,6 +337,7 @@ export class Analysis {
     if (count > 8) return this.partial(node, c, "recursive call needs a wider summary");
     this.active.set(fn.node, count + 1);
     const env = new Env(fn.env);
+    if (fn.thisValue) env.define("this", fn.thisValue, fn.node);
     const sink = [];
     const returns = [];
     const next = {
@@ -343,7 +360,7 @@ export class Analysis {
       this.hoist(fn.node.body.body, env);
       this.block(fn.node.body.body, env, next);
     } else returns.push(this.eval(fn.node.body, env, next));
-    let result = join(...returns);
+    let result = returns.length ? join(...returns) : { ...plain(), undefinedValue: true };
     if (fn.node.async) {
       const rejected = [...sink];
       if (result.tag === "promise") rejected.push(...result.rejects);
@@ -390,7 +407,18 @@ export class Analysis {
   }
   member(value, key, node, env, c) {
     return each(this.deref(value), v => {
-      if (v.tainted) return { tag: "worst", reason: "escaped context member" };
+      if (v.tainted) {
+        const previous = v.members?.get(key);
+        if (previous?.tag === "source")
+          return {
+            tag: "source",
+            pending: true,
+            failures: ["unknown"],
+            result: unknown("escaped accessor result")
+          };
+        return { tag: "unknownMethod", reason: "escaped context member" };
+      }
+      if (v.tag === "merged") return this.mergedMember(v.sources, key, node, env, c);
       if (v.tag === "object" || v.tag === "props") {
         const entry = v.members.get(key);
         if (entry?.tag === "thunk") {
@@ -409,7 +437,12 @@ export class Analysis {
           return out.tag === "function" ? { ...out, callbackProp: true } : out;
         }
         if (entry?.tag === "getter") return this.functionCall(entry.fn, [], node, c);
-        return entry ?? (v.tag === "props" ? this.propFallback(v, key, env, node, c) : plain());
+        return (
+          entry ??
+          (v.tag === "props" && !v.closed
+            ? this.propFallback(v, key, env, node, c)
+            : { ...plain(), undefinedValue: true })
+        );
       }
       if (v.tag === "array") {
         if (/^[0-9]+$/.test(key)) return v.elements[Number(key)] ?? v.elements[0] ?? plain();
@@ -421,7 +454,8 @@ export class Analysis {
       if (v.tag === "platform" || v.tag === "platformInstance")
         return { tag: "platform", path: v.path + "." + key, receiver: v };
       if (v.tag === "promise") return { tag: "method", receiver: v, key };
-      if (v.tag === "worst") return v;
+      if (v.tag === "worst") return { tag: "unknownMethod", reason: v.reason };
+      if (v.tag === "unknownMethod" || v.tag === "dependencyUnknown") return v;
       if (v.tag === "plain" && typeof v.value === "string")
         return { tag: "method", receiver: { tag: "platformInstance", path: "String" }, key };
       if (v.tag === "plain")
@@ -434,6 +468,31 @@ export class Analysis {
       return unknown("member shape needs inference");
     });
   }
+  mergedMember(sources, key, node, env, c) {
+    if (!sources.length) return { ...plain(), undefinedValue: true };
+    const fallback = () => this.mergedMember(sources.slice(0, -1), key, node, env, c);
+    return each(sources[sources.length - 1], source => {
+      if (source.tag === "object" || source.tag === "props") {
+        if (!source.members.has(key) && (source.tag === "object" || source.closed))
+          return fallback();
+        const value = source.members.has(key)
+          ? this.member(source, key, node, env, c)
+          : each(source.shape, shape =>
+              shape.tag === "object"
+                ? (shape.members.get(key) ?? { ...plain(), undefinedValue: true })
+                : shape.undefinedValue
+                  ? shape
+                  : this.partial(node, c, "merge source shape needs inference")
+            );
+        return each(value, entry => (entry.undefinedValue ? fallback() : entry));
+      }
+      if (source.tag === "merged")
+        return each(this.member(source, key, node, env, c), entry =>
+          entry.undefinedValue ? fallback() : entry
+        );
+      return join(fallback(), this.partial(node, c, "merge source shape needs inference"));
+    });
+  }
   propFallback(props, key, env, node, c) {
     const shape = props.shape;
     if (shape?.tag === "object" && shape.members.has(key)) return shape.members.get(key);
@@ -444,6 +503,8 @@ export class Analysis {
 
   call(value, args, node, c) {
     return each(this.deref(value), fn => {
+      if (fn.tag === "optionalMissing" || (node.optional && fn.undefinedValue))
+        return { ...plain(), undefinedValue: true };
       if (fn.tag === "function") return this.functionCall(fn, args, node, c);
       if (fn.tag === "solid") return this.solid(fn.name, args, node, c);
       if (fn.tag === "setter") {
@@ -492,18 +553,32 @@ export class Analysis {
             arg.tainted = true;
           }
         this.needed(node, "function annotation supplies no failure facts");
+        this.worstSite(node, "unknown declared failures");
         if (fn.result?.tag === "promise") return { ...fn.result, rejects: ["unknown"] };
         this.fail(["unknown"], node, c);
         return fn.result ?? unknown();
       }
+      if (fn.tag === "unknownMethod") {
+        this.needed(node, "unknown method has no failure or result facts");
+        this.worstSite(node, fn.reason);
+        this.fail(["unknown"], node, c);
+        return { tag: "worst", reason: fn.reason };
+      }
+      if (fn.tag === "dependencyUnknown") {
+        this.partial(node, c, fn.reason);
+        this.fail(["unknown"], node, c);
+        return fn;
+      }
       if (fn.tag === "platform") return this.platform(fn, args, node, c);
       if (fn.tag === "method") return this.method(fn, args, node, c);
       if (fn.tag === "worst") {
+        this.worstSite(node, fn.reason);
         this.read({ pending: true, failures: ["unknown"] }, node, c);
         return { tag: "worst", reason: fn.reason };
       }
       if (fn.tag === "plain") {
         this.needed(node, "callable shape needs inference");
+        this.worstSite(node, "unknown callable");
         this.fail(["unknown"], node, c);
         return unknown("call result needs inference");
       }
@@ -513,6 +588,7 @@ export class Analysis {
           arg.tainted = true;
         }
       this.needed(node, "call needs inference or an analyzable body");
+      this.worstSite(node, "unknown callable");
       this.fail(["unknown"], node, c);
       return unknown("call result");
     });
@@ -523,6 +599,7 @@ export class Analysis {
       return plain();
     }
     if (name === "createContext") return { tag: "context", defaultValue: args[0], node };
+    if (name === "merge") return { tag: "merged", sources: args };
     if (name === "useContext") {
       const context = args[0];
       const provider = [...c.providers].reverse().find(p => p.context === context);
@@ -583,6 +660,11 @@ export class Analysis {
           pending = true;
           failures.push(...v.rejects);
           result = v.result;
+        } else if (["worst", "unknown", "dependencyUnknown"].includes(v.tag)) {
+          // An opaque return can be a promise. The method call alone is not a
+          // reactive read, but exposing it through a memo creates an accessor.
+          pending = true;
+          failures.push("unknown");
         }
         return v;
       });
@@ -670,7 +752,10 @@ export class Analysis {
         return { tag: "platformInstance", path: "Element" };
     }
     if (
-      /^(Element|Event)[.]/.test(path) &&
+      (/^(Element|Event)[.]/.test(path) ||
+        /^(document|window|window[.]document)[.](addEventListener|removeEventListener)$/.test(
+          path
+        )) &&
       /[.](preventDefault|stopPropagation|addEventListener|removeEventListener|focus|blur|setAttribute|removeAttribute|appendChild|remove|reset|requestSubmit)$/.test(
         path
       )
@@ -716,6 +801,7 @@ export class Analysis {
       return plain();
     }
     this.needed(node, "platform call has no modeled contract");
+    this.worstSite(node, "unmodeled platform contract");
     this.fail(["unknown"], node, c);
     return unknown("platform result");
   }
@@ -759,13 +845,13 @@ export class Analysis {
       }
     }
     if (callbackMethods.has(key) && r.tag === "array") {
-      const element = r.elements?.[0] ?? plain();
+      const element = join(...(r.elements ?? []));
       const value = args[0] ? this.call(args[0], [element, plain(), r], node, c) : plain();
-      return key === "map" || key === "flatMap"
-        ? { tag: "array", elements: [value] }
-        : key === "filter"
-          ? r
-          : value;
+      if (key === "map" || key === "flatMap") return { tag: "array", elements: [value] };
+      if (key === "filter") return r;
+      if (key === "find") return join(element, { ...plain(), undefinedValue: true });
+      if (key === "reduce") return value;
+      return plain();
     }
     if (
       scalarMethods.has(key) &&
@@ -776,7 +862,7 @@ export class Analysis {
   }
   eval(input, env, c) {
     const n = unwrap(input);
-    if (!n) return plain();
+    if (!n) return { ...plain(), undefinedValue: true };
     if (fnTypes.has(n.type)) return this.closure(n, env);
     switch (n.type) {
       case "Literal":
@@ -818,7 +904,12 @@ export class Analysis {
         const key = n.computed
           ? (this.eval(n.property, env, c).value ?? keyName(n.property))
           : keyName(n.property);
-        return this.member(value, String(key), n, env, c);
+        return each(value, arm =>
+          arm.tag === "optionalMissing" ||
+          (n.optional && (arm.undefinedValue || arm.value === null))
+            ? { tag: "optionalMissing" }
+            : this.member(arm, String(key), n, env, c)
+        );
       }
       case "CallExpression": {
         const fn = this.eval(n.callee, env, c);
@@ -834,6 +925,27 @@ export class Analysis {
       case "NewExpression": {
         const callee = this.eval(n.callee, env, c);
         const args = n.arguments.map(a => this.eval(a, env, c));
+        if (callee.tag === "class") {
+          const instance = object();
+          const fields = new Env(callee.env);
+          fields.define("this", instance, n);
+          let constructor;
+          for (const part of callee.node.body.body) {
+            if (part.static) continue;
+            if (part.computed || part.key?.type === "PrivateIdentifier")
+              return this.partial(n, c, "computed or private class member");
+            const key = keyName(part.key);
+            if (part.type === "MethodDefinition") {
+              const fn = { ...this.closure(part.value, callee.env), thisValue: instance };
+              if (part.kind === "constructor") constructor = fn;
+              else instance.members.set(key, part.kind === "get" ? { tag: "getter", fn } : fn);
+            } else if (part.type === "PropertyDefinition") {
+              instance.members.set(key, this.eval(part.value, fields, c));
+            } else return this.partial(n, c, "unmodeled class member");
+          }
+          if (constructor) this.call(constructor, args, n, c);
+          return instance;
+        }
         if (callee.tag === "errorClass") return { tag: "plain", error: callee.name };
         if (callee.tag === "platform") {
           if (callee.path === "Promise") {
@@ -847,6 +959,7 @@ export class Analysis {
           if (/Error$/.test(callee.path)) return { tag: "plain", error: callee.path };
           return { tag: "platformInstance", path: callee.path };
         }
+        this.fail(["unknown"], n, c);
         return this.partial(n, c, "class construction");
       }
       case "AwaitExpression": {
@@ -864,7 +977,7 @@ export class Analysis {
         const value = this.eval(n.argument, env, c);
         if (n.operator === "void") {
           this.dropped(value, n, c);
-          return plain();
+          return { ...plain(), undefinedValue: true };
         }
         if (n.operator === "!")
           return typeof value.value === "boolean" ? plain(!value.value) : plain();
@@ -1008,7 +1121,21 @@ export class Analysis {
         const base = this.eval(n.superClass, env, c);
         if (base.tag === "platform" && /Error$/.test(base.path))
           env.define(n.id.name, { tag: "errorClass", name: n.id.name }, n);
-        else this.partial(n, c, "class declaration");
+        else if (
+          !n.superClass &&
+          n.body.body.every(
+            part =>
+              !part.static &&
+              !part.computed &&
+              part.key?.type !== "PrivateIdentifier" &&
+              part.kind !== "set" &&
+              !part.value?.generator &&
+              ["MethodDefinition", "PropertyDefinition"].includes(part.type) &&
+              !(part.value?.params ?? []).some(p => p.type === "TSParameterProperty")
+          )
+        )
+          env.define(n.id.name, { tag: "class", node: n, env }, n);
+        else env.define(n.id.name, this.partial(n, c, "unsupported class shape"), n);
         return false;
       }
       case "VariableDeclaration":
@@ -1154,7 +1281,7 @@ export class Analysis {
           scope: callbackScope,
           capture: callbackScope === "setup" ? null : c.capture
         });
-      if (value.tag === "worst" || value.tag === "unknown")
+      if (["worst", "unknown", "dependencyUnknown"].includes(value.tag))
         this.read({ pending: true, failures: ["unknown"] }, n.expression, {
           ...c,
           scope: "tracking"
@@ -1207,7 +1334,14 @@ export class Analysis {
       }
       const p = value.node.params[0];
       const shape = p?.typeAnnotation ? this.annotation(p, value.env) : undefined;
-      const props = { tag: "props", members, shape };
+      // Exported inputs retain their public injectable arm even when a local
+      // renderer omits it. Supplied prop thunks still keep their known bodies.
+      const publicInput = [...value.env.module.exports.values()].some(
+        entry =>
+          entry.declaration === value.node ||
+          (entry.local && value.env.module.env.get(entry.local)?.node === value.node)
+      );
+      const props = { tag: "props", members, shape, closed: !spread && !publicInput };
       if (spread && shape?.members)
         for (const [k, v] of shape.members) if (!members.has(k)) members.set(k, v);
       this.component(value, props, tag, next);
@@ -1253,6 +1387,9 @@ export class Analysis {
           }
           return arm;
         });
+      } else if (solidName === "Loading" && name === "on") {
+        // A reset key is a tracked value, never a detached callback.
+        this.eval(expression, env, next);
       } else if (/^on/i.test(name)) {
         const fn = this.eval(expression, env, next);
         this.runHandler(fn, a, c, [{ tag: "platformInstance", path: "Event" }]);
@@ -1310,7 +1447,9 @@ export class Analysis {
     return plain();
   }
   run() {
-    for (const path of this.graph.options.files) this.initialize(this.graph.load(path));
+    this.graph.prepare();
+    for (const path of this.graph.options.files)
+      if (!this.graph.isDependency(path)) this.initialize(this.graph.load(path));
     for (const root of this.roots) {
       const c = this.context({ scope: "tracking", related: [root.node] });
       const fn = root.expression ? this.eval(root.expression, root.env, c) : root.fn;
@@ -1354,6 +1493,8 @@ export class Analysis {
       facts: [...this.facts.values()],
       inferenceNeeded: [...this.inference.values()],
       inferenceNeededCount: this.inference.size,
+      worstCaseSites: [...this.worstSites.values()],
+      worstCaseSiteCount: this.worstSites.size,
       graph: { nodes: this.nodes.length }
     };
   }

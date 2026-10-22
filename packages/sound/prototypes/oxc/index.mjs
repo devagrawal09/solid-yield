@@ -2,7 +2,7 @@
 import { performance } from "node:perf_hooks";
 import { realpathSync } from "node:fs";
 import { resolve } from "node:path";
-import { Modules } from "./graph.mjs";
+import { Modules, installedPath } from "./graph.mjs";
 import { Analysis } from "./analyze.mjs";
 export const name = "oxc";
 function canonical(path) {
@@ -14,7 +14,11 @@ function canonical(path) {
 }
 export function createChecker(options) {
   const overrides = new Map();
-  const aliases = new Map(options.files.map(path => [canonical(path), path]));
+  const aliases = new Map(
+    options.files
+      .filter(path => !installedPath(path) && !installedPath(canonical(path)))
+      .map(path => [canonical(path), path])
+  );
   let disposed = false;
   const graph = new Modules({
     ...options,

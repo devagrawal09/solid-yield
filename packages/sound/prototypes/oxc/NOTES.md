@@ -2,7 +2,7 @@
 
 ## Independence
 
-C was written from the shared rules and fixture sources, not copied from A or B. No code is imported from either prototype or the generator packages. The only shared runtime dependency in the checker is the diagnostic table. The standalone Vite wrapper is also independent of TypeScript. The comparison harness itself still loads TypeScript to configure A/B; that is not a C dependency. A child-process test blocks TypeScript resolution while loading C, its Vite wrapper, and checking all 143 fixtures. A source scan also rejects TypeScript imports.
+C was written from the shared rules and fixture sources, not copied from A or B. No code is imported from either prototype or the generator packages. The only shared runtime dependency in the checker is the diagnostic table. The standalone Vite wrapper is also independent of TypeScript. The comparison harness itself still loads TypeScript to configure A/B; that is not a C dependency. A child-process test blocks TypeScript resolution while loading C, its Vite wrapper, and checking all 173 frozen fixtures. A source scan also rejects TypeScript imports.
 
 Oxc packages installed without a minimum-release-age exception. The existing shared TypeScript dependency remains for A/B. C ignores compilerOptions rather than loading their implementation or library files.
 
@@ -22,7 +22,19 @@ All 34 OpenClaw fixtures now meet every requirement without extra errors or warn
 
 Ref reads use setup rules while failures remain detached-handler failures. DOM capture/assignment is supported; reactive writes and primitive creation in refs remain partial-check boundaries because their ownership rules are deferred. Effect apply/helper reads are untracked, but forwarded compute values are plain. Explicit undefined context defaults are missing (also inside an alternative); null and copied accessors are usable. Untrack forwards project failures at its call site and never acts as a catch. Promise branch handling and lazy unused props already worked and have regression checks.
 
-One original out-of-subset fixture has a stale ref-read expectation. The checker retains its required partial warning and adds the real untracked read required by D-131. DISPUTES.md records runtime evidence. This causes one strict no-extra test failure; there are no required misses or in-subset extras. See RESULTS-openclaw.md. No frozen expectation or non-oxc pin changed.
+The earlier ref-read dispute was resolved in the shared expectations before this precision pass. The current checker meets both its read error and deferred-ownership warning without extras. RESULTS-openclaw.md records the earlier measurement; DISPUTES.md now distinguishes that resolved case from the active export/root dispute.
+
+## Precision / D-133
+
+The 30 precision fixtures improve from 13/15 error hits, 22 extra errors and 24 extra warnings to 14/15, zero extra errors and zero extra warnings. The remaining frozen miss is an exported component with no renderer: SLICE.md requires an informational obligation, not an uncovered-root error. DISPUTES.md records passing rc.17 evidence and static checks for export, direct root, and caller-provided Loading. The miss stays visible in the pin and score; no expectation was changed. All other frozen groups retain every hit with no extras. See RESULTS-precision.md.
+
+- Loading.on evaluates its reset input in tracking scope; it never invokes a held function as an event callback. Reset ordering remains deferred.
+- Simple imperative classes have invocation-specific instances, receiver-bound methods/getters, fields and constructors. Methods follow their real bodies and preserve actual accessor reads. Unsupported class features still warn and widen. An unknown member call carries unknown failures/results, not an invented pending-accessor read.
+- Array.find preserves its element facts and checks its predicate. Native document listener teardown keeps its receiver contract; injected lookalikes remain unknown. Optional calls skip known absent arms only. Native Set receivers remain separate from injected add methods.
+- Solid merge keeps lazy prop bodies and real override order, including absent/undefined and nested sources. A no-op default does not discharge a supplied unknown callback. Known callback/ref bodies keep the existing body-wide failure rules.
+- Installed implementations are never read or parsed. This includes checked roots, package dist, and linked package real paths. Resolution uses declarations and adjacent declaration sidecars; unknown package calls warn at app sites and keep unknown failures/returned values. Package source is not a fallback. Tests verify declarations/no-declarations, linked/unlinked packages, extra roots, and updates.
+- Public optional inputs retain their injectable arm when a local root omits them. Known supplied callback bodies remain precise. Closed local merge inputs can use an actually absent override to select a default; a public/unknown override cannot be assumed absent.
+- Results expose distinct worstCaseSites as well as inferenceNeeded requests. The precision measurement script reports unique locations, location/reason requests, worst-case call/boundary sites, and partial-warning sites per group. Annotation-only calls still need failure inference under D-129.
 
 ## Limits and assumptions
 

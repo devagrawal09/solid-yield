@@ -1,0 +1,182 @@
+{
+  "checker": "oxc",
+  "commands": [
+    {
+      "command": "node harness/run.mjs",
+      "exit": 0
+    },
+    {
+      "command": "node harness/vite-measure.mjs oxc --runs 5",
+      "exit": 0
+    },
+    {
+      "command": "pnpm test",
+      "exit": 0
+    }
+  ],
+  "tests": {
+    "files": 16,
+    "passed": 286,
+    "failed": 0,
+    "newPrecisionTests": 15
+  },
+  "typescriptBlockedCheck": {
+    "fixtures": 173,
+    "passed": true
+  },
+  "allFixtureScoresNoWorseThanStart": true,
+  "nonOxcPinsUnchanged": true,
+  "sourceLines": {
+    "before": 1799,
+    "after": 2002,
+    "delta": 203
+  },
+  "viteSummary": [
+    "[oxc] cold vite build (median of 5): plain 25 ms; with sound plugin 13 ms (check itself 8 ms; 10 errors, 2 warnings)",
+    "[oxc] strict build FAILED on errors (as the policy says); report-only build completed in 30 ms",
+    "[oxc] dev server: entry transform 24 ms; HMR re-check of EquipmentRow.tsx median 4.2 ms over 5 edits (10 errors after the edit)"
+  ],
+  "sharedHarness": {
+    "coldMs": {
+      "cases": 28.516297999980452,
+      "equipment": 7.283833000001323,
+      "mutants": 9.892044999985956,
+      "openclaw": 11.498546000017086,
+      "openclaw-precision": 6.395711000026495
+    },
+    "incremental": {
+      "trivialMs": 3.8417090000002645,
+      "semanticMs": 3.63008400000399,
+      "before": 10,
+      "afterTrivial": 10,
+      "afterSemantic": 10
+    },
+    "crashes": [],
+    "imprecise": 0,
+    "unmapped": 0,
+    "leakage": 0,
+    "codeTableViolations": 0
+  },
+  "groups": {
+    "all": {
+      "fixtures": 173,
+      "hits": 102,
+      "misses": 1,
+      "warningHits": 11,
+      "warningMisses": 0,
+      "infoHits": 5,
+      "infoMisses": 0,
+      "extraErrors": 0,
+      "extraWarnings": 0,
+      "soundnessFailures": 1,
+      "mutants": 58,
+      "missedMutants": 1,
+      "inferenceRequests": 62,
+      "inferenceSites": 58,
+      "worstCaseSites": 59,
+      "partialSites": 8,
+      "coldMedianMs": 0.30637500000000273,
+      "coldSumMs": 59.672332
+    },
+    "cases": {
+      "fixtures": 81,
+      "hits": 41,
+      "misses": 0,
+      "warningHits": 8,
+      "warningMisses": 0,
+      "infoHits": 5,
+      "infoMisses": 0,
+      "extraErrors": 0,
+      "extraWarnings": 0,
+      "soundnessFailures": 0,
+      "mutants": 0,
+      "missedMutants": 0,
+      "inferenceRequests": 21,
+      "inferenceSites": 18,
+      "worstCaseSites": 18,
+      "partialSites": 8,
+      "coldMedianMs": 0.32012500000000443,
+      "coldSumMs": 26.157082999999986
+    },
+    "equipment": {
+      "fixtures": 1,
+      "hits": 3,
+      "misses": 0,
+      "warningHits": 2,
+      "warningMisses": 0,
+      "infoHits": 0,
+      "infoMisses": 0,
+      "extraErrors": 0,
+      "extraWarnings": 0,
+      "soundnessFailures": 0,
+      "mutants": 0,
+      "missedMutants": 0,
+      "inferenceRequests": 13,
+      "inferenceSites": 13,
+      "worstCaseSites": 12,
+      "partialSites": 0,
+      "coldMedianMs": 7.460333999999989,
+      "coldSumMs": 7.460333999999989
+    },
+    "mutants": {
+      "fixtures": 27,
+      "hits": 27,
+      "misses": 0,
+      "warningHits": 1,
+      "warningMisses": 0,
+      "infoHits": 0,
+      "infoMisses": 0,
+      "extraErrors": 0,
+      "extraWarnings": 0,
+      "soundnessFailures": 0,
+      "mutants": 27,
+      "missedMutants": 0,
+      "inferenceRequests": 13,
+      "inferenceSites": 12,
+      "worstCaseSites": 12,
+      "partialSites": 0,
+      "coldMedianMs": 0.3559579999999869,
+      "coldSumMs": 9.361459999999965
+    },
+    "openclaw": {
+      "fixtures": 34,
+      "hits": 17,
+      "misses": 0,
+      "warningHits": 0,
+      "warningMisses": 0,
+      "infoHits": 0,
+      "infoMisses": 0,
+      "extraErrors": 0,
+      "extraWarnings": 0,
+      "soundnessFailures": 0,
+      "mutants": 16,
+      "missedMutants": 0,
+      "inferenceRequests": 0,
+      "inferenceSites": 0,
+      "worstCaseSites": 0,
+      "partialSites": 0,
+      "coldMedianMs": 0.31937499999997954,
+      "coldSumMs": 10.711707999999788
+    },
+    "openclaw-precision": {
+      "fixtures": 30,
+      "hits": 14,
+      "misses": 1,
+      "warningHits": 0,
+      "warningMisses": 0,
+      "infoHits": 0,
+      "infoMisses": 0,
+      "extraErrors": 0,
+      "extraWarnings": 0,
+      "soundnessFailures": 1,
+      "mutants": 15,
+      "missedMutants": 1,
+      "inferenceRequests": 15,
+      "inferenceSites": 15,
+      "worstCaseSites": 17,
+      "partialSites": 0,
+      "coldMedianMs": 0.21366699999998673,
+      "coldSumMs": 5.981747000000269
+    }
+  }
+}

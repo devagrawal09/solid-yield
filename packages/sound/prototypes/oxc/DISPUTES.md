@@ -1,17 +1,12 @@
 # Disputes
 
-## ref-event-reads: the old read expectation conflicts with D-131
+## ref-event-reads: resolved before this precision pass
 
-The frozen original fixture is outside the subset and requires only
-UNANALYZED_BOUNDARY at its ref. Its registry note says the callback is
-handler-like and its reads are fine. D-131 now requires setup-like read checks
-in ref callbacks, including this callback's n() at line 1, column 117.
-
-C reports STRICT_READ_UNTRACKED there. That is the only remaining scored extra
-in all 143 fixtures. Removing it would contradict D-131 and miss the same read
-in the new ref mutants. No path, fixture name, text or expectation participates
-in the checker. The older fixture and its tests remain unchanged, so the strict
-no-extra assertion in test/oxc.test.mjs fails for this one case.
+The earlier OpenClaw pass disputed the original ref-read expectation. The
+starting revision for this precision pass already requires both
+STRICT_READ_UNTRACKED at n() and the deferred-ownership warning. C meets both,
+with no extra. This pass changes neither that fixture nor its expectation.
+The evidence below is retained as history, not a current test failure.
 
 Runtime evidence: prototypes/oxc/ref-runtime.test.jsx runs compiled JSX with
 installed rc.17 and jsdom. Its ref reads and writes a signal, as the old fixture
@@ -25,5 +20,32 @@ warning at a ref with a reactive write, returns worst case from that write, and
 does not invent REACTIVE_WRITE_IN_OWNED_SCOPE for it. This retains the old
 required warning. It does not hide the known untracked read.
 
-No other expectation disputes. Callback-prop failure sets remain body-wide,
-including forwarded callbacks, as the shared contract requires.
+Callback-prop failure sets remain body-wide, including forwarded callbacks,
+as the shared contract requires.
+
+## op-loading-reactive-key-mutant: an export is not a render root
+
+The new fixture exports App but never renders it or hands it off. It expects
+ASYNC_OUTSIDE_LOADING_BOUNDARY at read(). SLICE.md, “Roots and hand-offs,”
+explicitly says that a merely exported, unrendered component is **not an error**.
+Its obligation is COMPONENT_OBLIGATIONS_EXPORTED, at info level. D-133 does not
+replace that rule. The checker retains the pending fact and emits that notice.
+This remains a scored miss and a missed mutant; neither is filtered or relabeled
+as a passing expectation. No frozen fixture or expectation was edited.
+
+Runtime evidence: precision-runtime.test.jsx mounts the same pending-sibling
+shape in a caller-provided Loading boundary using installed Solid rc.17 and
+compiled JSX. It first renders “outer wait,” then “ready” after resolution, with
+no ASYNC_OUTSIDE_LOADING_BOUNDARY warning. The test passes. Thus the component
+needs a boundary somewhere above the read, not necessarily inside itself.
+The existing frozen runtime probe mounts its version directly as a root; its
+root warning is valid, but that renderer is absent from the static fixture.
+
+precision.test.mjs checks all three static cases: export alone gives the info
+notice; render(App, document.body) gives the required error at the read; a caller
+Loading discharges it. Turning this export alone into an error would break the
+shared hand-off rule and reject the runtime-proven safe caller. A rendered
+version of this positive fixture would test the intended root obligation.
+
+Command: pnpm exec vitest run prototypes/oxc/precision-runtime.test.jsx
+prototypes/oxc/precision.test.mjs. Both new suites pass.

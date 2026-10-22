@@ -2,84 +2,104 @@
 
 ## Design
 
-A dedicated analysis over the TypeScript AST with the type checker as an oracle
-(symbol resolution, "which Solid export is this", declared return types, default-lib
-membership). One `Analysis` per program (analyze.mjs):
+This remains an abstract interpretation of the authored TypeScript AST. The type
+checker supplies symbols, declarations and Promise information; it does not check
+a generated program. Source files ship unchanged. No user failure contracts are
+accepted. Diagnostic severity comes from src/codes.mjs (D-130).
 
-- **Bindings** keyed by TS symbol: signal getter / setter, memo (with its computed
-  source facts), helper function (with a state-factory flag), component, props
-  parameter, object literal (getters are sync helpers), caught-failure markers,
-  values (`Value` lattice in values.mjs: reactive · pending · failures · promise
-  rejections · callables · worst).
-- **Scopes**: setup · tracking (JSX container, memo / effect compute, Show/For render
-  callbacks) · handler (event attributes, callback props, promise continuations,
-  timer / ref callbacks) · effect (the effect function) · an `untracked` flag. Sync
-  helpers run in the caller's scope; async helpers keep the caller's scope for their
-  synchronous prefix and turn throws into the promise's rejections.
-- **Reads** route by scope: setup → STRICT_READ_UNTRACKED / PENDING_ASYNC_UNTRACKED_READ;
-  tracking inside a computation → the computation's facts; tracking at a JSX position
-  → a pending / failure **obligation** unless a Loading / Errored ancestor covers it;
-  effect → PENDING_ASYNC_FORBIDDEN_SCOPE. `raise()` routes failures the same way.
-- **Components** are summarized (uncovered obligations with the read's location and
-  the owner path); a child's summary lands at its JSX position under the parent's
-  boundaries; props flow parent → child as values (reactive / pending / failing /
-  callables), callback props' failure sets are the union over callers, forwarding
-  included. Whole-program fixpoint (≤ 6 passes; prop tables persist across passes).
-- **Roots**: `render(App | () => <App/>)` and hand-offs (a component used as a value)
-  report the undischarged obligations at the read, with the root as related location
-  and the owner path (`<App> › <Inventory> › <EquipmentRow>`). Exported, never
-  rendered components: info COMPONENT_OBLIGATIONS_EXPORTED.
-- **Worst case**: useContext, stores, state factories, unmodeled Solid APIs, spreads,
-  refs → UNANALYZED_BOUNDARY warning at the construct; the value is reactive,
-  possibly pending, failing with unknown; calls through it have no failure
-  information (Promise-typed → rejection, else sync unknown).
-- **Platform contracts** apply only to callees declared in a TypeScript default lib
-  (the review finding on b2dfebf): ECMAScript library calls never fail, DOM calls only
-  through a small allowlist, `JSON.parse` → SyntaxError, `Promise.reject(x)` → x,
-  timers run their callback detached, array methods run theirs synchronously. A
-  project or package method named `get`/`set`/`map` is unknown.
-- **Incremental**: a `ts.LanguageService` with a document registry; `update()` bumps the
-  file version and re-runs the whole analysis on the reused program (per-file IR
-  caching was not needed at this size: 20–25 ms for the Equipment app).
+### Context and services
 
-## Subset vs SLICE.md
+- Context identities originate at recognized createContext calls, including
+  imported, local and namespace aliases. No printed-type matching is used.
+  Defaults belong to that identity; a definitely undefined default is absent.
+- Each render path carries a provider map. Entering a provider copies the map
+  and replaces only its context binding. Leaving it restores the outer map.
+  Consumers and synchronous lookup helpers use the caller's map, not a union of
+  unrelated providers. A missing provider/default reports at useContext and
+  does not invent downstream pending or failure facts.
+- Object values have separate member and getter tables. Holding a service does
+  not call its accessors. Destructuring preserves functions, signals and memos;
+  getters execute in the reader's scope. Plain members stay plain.
+- An analyzed factory gets a fresh binding map for each invocation. Functions
+  and methods capture that map, so separate calls to one factory do not share
+  signal/memo facts. This includes nested helpers, object arguments and returned
+  object literals. Memo bodies run as computations, not setup.
+- Method summaries are computed at calls: returned values, Promise rejections,
+  synchronous failures and reactive reads. They are scope-sensitive and are not
+  cached across service instances. A method reading a signal uses its caller's
+  scope; setters keep their write checks when copied through object members.
+- Unknown plain functions retain unknown failure facts. An opaque injected arm
+  is retained beside an analyzed fallback, including synchronous APIs. A known
+  failure-free method remains failure-free. Await/catch and Promise chains
+  handle rejections; rendered Errored does not handle handler failures.
+- Shared service objects carry an escape marker. Assigning one to module state
+  or passing it to unknown code warns, then invalidates member facts for aliases
+  of that object. Independent factory instances remain precise. Explicit object
+  member mutations and dynamic provider choices also use warn plus worst case.
 
-Supported: everything in "Inside the subset", including object getters, destructured
-props, IIFEs, sync array callbacks, promise chains (.then/.catch/.finally), dropped and
-`void`-ed promises, try/catch/finally with rethrow, callback-prop forwarding, recursion
-(first activation's facts stand), Show/For/Switch/Match/Loading/Errored (with the
-fallback function's `error`/`reset`). Partial: closures see the last binding of their
-free variables (path-insensitive); a getter stored off a worst-case object keeps the
-worst case, but a plain value stored off a reactive expression is `derived` (facts
-kept, shape dropped). Not modeled: effects created outside setup, generators,
-classes, `createSignal(fn)` derived signals, `latest`/`isPending`.
+### Components, props and scopes
 
-## Known soundness holes / false positives
+The old global component/prop fixpoint is replaced with per-render-invocation
+analysis. A child's summary is returned to that particular caller, where Loading
+and Errored discharge pending and failure separately. This avoids cross-provider
+and cross-boundary contamination. Root summaries are snapshots for each root.
 
-- Holes: a callable hidden in a data structure (`const h = { fn }; h.fn()`) is unknown
-  (reported) — not a hole, but imprecise. Reads of pending values inside handlers are
-  not reported by decision. Reads after `await` in async computes are treated as the
-  compute's.
-- False positives: worst-case rule noise on Equipment (18 vs 10 today), by decision;
-  a value whose type is `any`-ish from an unanalyzed construct stays worst case
-  forever.
-- Disputed expectations: none; two expectations were *added* after this prototype
-  found real obligations the legacy checker missed (EquipmentRow `onClick={edit}`,
-  the second failing read in m-errored-removed).
+Props hold deferred expressions with their caller bindings/provider map. They are
+only evaluated when consumed. Their collected facts are read at the child's
+consuming site, with caller expressions in related locations; forwarding retains
+the chain. Child boundaries apply first, caller element boundaries next. JSX
+children are lazy as well. Setup and handler reads keep their own scope rules.
 
-## Numbers (results/latest.md, 3 runs)
+Scopes remain setup, tracking (JSX/memo/effect compute), handler and effect phase,
+with an explicit untracked flag. Pending handler reads warn even inside a catch
+or rendered Loading; failure handling is checked independently. Helper bodies run
+in the calling scope. Async bodies turn failures into rejection facts.
 
-51/51 expected errors, 0 imprecise, 0 soundness failures, 0 extra errors, 12/12
-warnings, 5/5 info; cold: cases 5.4 s total (52 programs, ≈ 100 ms each, dominated
-by TypeScript program creation), Equipment 131 ms; incremental EquipmentRow 24 /
-21 ms. Vite: build 32 → 149 ms with the plugin (check 144 ms); HMR re-check 23 ms.
+Platform contracts apply only to actual TypeScript default-lib declarations:
+ordinary library calls are safe under the original slice rules, JSON.parse may
+throw SyntaxError, Promise.reject carries its rejection, array callbacks run
+synchronously and timer callbacks run detached. A project method with the same
+name does not gain a platform contract. TypeScript's existing Promise oracle is
+used through a narrow local signature, not a printed type name.
+
+## Incremental checking
+
+The LanguageService/document registry is unchanged. update bumps a document
+version and reruns analysis on the reused program. It does not retain service
+objects or provider maps from an earlier check. See RESULTS-context.md for the
+measured cold, incremental and Vite results.
+
+## Assumptions and known limits
+
+- This is still a prototype, not a general JavaScript heap analysis. Named object
+  members, the specified factory/closure shapes and direct service escapes are
+  modeled; arbitrary containers and mutable closure-cell patterns are not a
+  complete alias model. Explicit member mutation is conservatively invalidated.
+- Branches and loop bodies are analyzed conservatively without evaluating numeric
+  conditions. Local assignment joins and repeated mutable closure updates remain
+  path-insensitive. The checker can over-report unreachable work.
+- Recursive helpers/components use the first activation's facts, as in the
+  original prototype, rather than a general recursive heap/argument fixpoint.
+  Deep helper expansion is bounded. No universal soundness claim follows from
+  zero misses in this finite shared corpus.
+- The specified contexts have usable non-undefined defaults. Definitely undefined
+  defaults are handled, but mixed/dynamic defaults need a fuller value model.
+- An exported component with no reached renderer is analyzed with an empty
+  provider map. There is no cross-project provider/owner metadata.
+- Reads after await retain the caller's scope; the runtime's separate
+  UNTRACKED_READ_AFTER_AWAIT rule is outside this slice. General classes,
+  generators, stores, derived createSignal functions, latest/isPending and
+  effects created outside setup remain outside the supported model.
+
+No fixture expectations, shared contracts, harness code or other prototype were
+changed. No disputes were found. Added prototype-local tests cover provider
+paths, factory instances, aliases, lazy props/children, forwarding locations,
+escapes, pending handlers, injected functions and conservative member mutation.
 
 ## Emit-readiness
 
-Per component the analysis holds: every read with its scope and source name
-(`ComponentFacts.reads`), the sources with pending / failure facts, boundaries with
-locations, the component's own pending / failure summary and owner path, callback-prop
-failure sets, unanalyzed constructs. An optimized emit (lakes / islands) needs exactly
-these: which reads are tracked where, which values are settled, where boundaries sit.
-Missing: write sets per handler, dependency edges between memos, and per-read
-"initialized" facts.
+ComponentFacts still exposes read locations/scopes/source names, boundary sites,
+pending/failure summaries and partial-check sites. Service members and captured
+method environments are analysis facts rather than rewritten user code. An
+optimized emitter would still need handler write sets, dependency edges between
+memos and per-read initialization facts.

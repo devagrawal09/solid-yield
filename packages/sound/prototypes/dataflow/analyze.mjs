@@ -1,7 +1,7 @@
 // @ts-check
 // Prototype B — the dataflow analysis proper. One `Analysis` per program;
-// `run()` analyzes every component to a fixpoint over prop tables and
-// component summaries, then reports at roots and hand-offs.
+// `run()` follows render paths with invocation-local props and provider values,
+// then reports undischarged read obligations at roots and hand-offs.
 import ts from "typescript";
 import { BY_CODE } from "../../src/codes.mjs";
 import { callable, constant, derived, describeFailures, join, joinAll, promiseOf, worst } from "./values.mjs";
@@ -15,9 +15,10 @@ import {
 /** @typedef {import("./values.mjs").Callable} Callable */
 /** @typedef {import("../../src/types.d.ts").SoundDiagnostic} SoundDiagnostic */
 /** @typedef {import("../../src/types.d.ts").Loc} Loc */
+/** @typedef {Pick<ts.Node, "getSourceFile" | "getStart" | "getEnd">} LocNode */
 /** @typedef {"setup" | "tracking" | "handler" | "effect" | "untracked"} Scope */
 
-/** @typedef {{ loc: Loc, path: string[], source: string, failures?: Set<string>, uncoverable?: boolean }} Obligation */
+/** @typedef {{ loc: Loc, path: string[], source: string, failures?: Set<string>, uncoverable?: boolean, related?: Loc[] }} Obligation */
 
 /**
  * @typedef {{
@@ -27,11 +28,8 @@ import {
  *   exported: boolean,
  *   propsParam: ts.ParameterDeclaration | null,
  *   props: Map<string, { values: Value[], worst: boolean }>,
- *   nextProps: Map<string, { values: Value[], worst: boolean }>,
  *   propsWorst: boolean,
- *   nextPropsWorst: boolean,
  *   callers: number,
- *   nextCallers: number,
  *   handedOff: Loc[],
  *   rendered: Loc[],
  *   summary: { pending: Obligation[], failures: Obligation[] },
@@ -62,7 +60,7 @@ import {
  *   | { kind: "memo", source: Source }
  *   | { kind: "accessor", source: Source }
  *   | { kind: "value", value: Value }
- *   | { kind: "function", node: ts.FunctionLikeDeclaration, factory: boolean }
+ *   | { kind: "function", node: ts.FunctionLikeDeclaration, environment?: Map<ts.Symbol, Binding> }
  *   | { kind: "component", component: Component }
  *   | { kind: "props", component: Component }
  *   | { kind: "object", node: ts.ObjectLiteralExpression, value: Value }
@@ -70,7 +68,6 @@ import {
  * )} Binding
  */
 
-const MAX_ITERATIONS = 6;
 const MAX_DEPTH = 24;
 
 export class Analysis {
@@ -88,17 +85,32 @@ export class Analysis {
     this.components = new Map();
     /** @type {SoundDiagnostic[]} */
     this.diagnostics = [];
-    /** @type {{ component: Component | null, view: ts.Node | null, loc: Loc }[]} */
+    /** @type {{ component: Component | null, view: ts.Node | null, loc: Loc, rootSummary?: { pending: Obligation[], failures: Obligation[] } }[]} */
     this.roots = [];
     /** @type {Set<ts.Node>} */
     this.activeFunctions = new Set();
-    /** @type {Map<ts.Node, Map<string, { value: Value, acc: FnAcc }>>} */
-    this.functionCache = new Map();
     this.iteration = 0;
+    this.finalIteration = 0;
+    /** @type {Set<string>} */
+    this.reported = new Set();
+    /** @type {Map<ts.Symbol, Binding>} */
+    this.moduleBindings = this.bindings;
+    /** @type {Set<ts.Symbol>} */
+    this.initializing = new Set();
+    /** @type {Map<import("./values.mjs").ContextBinding, Value>} */
+    this.providers = new Map();
+    /** @type {Set<Component>} */
+    this.visitedComponents = new Set();
+    /** @type {Set<Component>} */
+    this.activeComponents = new Set();
+    /** @type {{ pending: Obligation[], failures: Obligation[] }} */
+    this.current = { pending: [], failures: [] };
+    /** @type {ts.Node | null} */
+    this.setupFailureNode = null;
   }
 
   // ---- locations & reporting -----------------------------------------------
-  /** @param {ts.Node} node @returns {Loc} */
+  /** @param {LocNode} node @returns {Loc} */
   loc(node) {
     const sf = node.getSourceFile();
     const start = sf.getLineAndCharacterOfPosition(node.getStart(sf));
@@ -117,7 +129,7 @@ export class Analysis {
    * @param {SoundDiagnostic["kind"]} kind
    * @param {SoundDiagnostic["severity"]} severity
    * @param {string} message
-   * @param {ts.Node} node
+   * @param {LocNode} node
    * @param {Partial<SoundDiagnostic>} [more]
    */
   report(code, kind, severity, message, node, more) {
@@ -146,9 +158,10 @@ export class Analysis {
   /** @param {ts.Symbol | undefined} symbol */
   bindingOf(symbol) {
     if (!symbol) return undefined;
-    let b = this.bindings.get(symbol);
-    if (b) return b;
     const declaration = symbol.declarations?.[0];
+    const moduleVariable = declaration && ts.isVariableDeclaration(declaration) && ts.isSourceFile(declaration.parent.parent.parent);
+    let b = moduleVariable ? this.moduleBindings.get(symbol) : this.bindings.get(symbol) ?? this.moduleBindings.get(symbol);
+    if (b) return b;
     if (declaration && this.isProjectFile(declaration.getSourceFile())) {
       // Module-level declarations are bound on demand.
       if (ts.isFunctionDeclaration(declaration) && declaration.body) {
@@ -156,6 +169,15 @@ export class Analysis {
       } else if (ts.isVariableDeclaration(declaration) && declaration.initializer && ts.isSourceFile(declaration.parent.parent.parent)) {
         const init = stripParens(declaration.initializer);
         if (isFunctionLike(init)) b = this.bindFunction(symbol, /** @type {ts.FunctionLikeDeclaration} */ (init));
+        else if (!this.initializing.has(symbol)) {
+          this.initializing.add(symbol);
+          const saved = this.bindings;
+          this.bindings = this.moduleBindings;
+          this.analyzeVariableDeclaration(declaration, { component: null, scope: "setup", fn: this.newFnAcc(), comp: null, view: null, depth: 0, ownerName: "module" });
+          b = this.bindings.get(symbol);
+          this.bindings = saved;
+          this.initializing.delete(symbol);
+        }
       }
     }
     return b;
@@ -186,25 +208,9 @@ export class Analysis {
   bindFunction(symbol, node) {
     const component = this.componentOf(node);
     /** @type {Binding} */
-    const b = component ? { kind: "component", component } : { kind: "function", node, factory: this.isStateFactory(node) };
+    const b = component ? { kind: "component", component } : { kind: "function", node, environment: this.moduleBindings ?? this.bindings };
     this.bindings.set(symbol, b);
     return b;
-  }
-
-  /** A non-component function that creates reactive state (outside the slice). @param {ts.FunctionLikeDeclaration} node */
-  isStateFactory(node) {
-    let found = false;
-    /** @param {ts.Node} n */
-    const visit = n => {
-      if (found) return;
-      if (ts.isCallExpression(n)) {
-        const api = solidApiOf(n.expression, this.checker);
-        if (api && /^create(Signal|Memo|Effect|Store|OptimisticStore|Root|Context|RenderEffect)$/.test(api.api)) { found = true; return; }
-      }
-      ts.forEachChild(n, visit);
-    };
-    if (node.body) visit(node.body);
-    return found;
   }
 
   // ---- components ----------------------------------------------------------
@@ -219,7 +225,7 @@ export class Analysis {
     const component = {
       name, node, file: sf, exported: this.isExported(node),
       propsParam: node.parameters[0] ?? null,
-      props: new Map(), nextProps: new Map(), propsWorst: false, nextPropsWorst: false, callers: 0, nextCallers: 0, handedOff: [], rendered: [],
+      props: new Map(), propsWorst: false, callers: 0, handedOff: [], rendered: [],
       summary: { pending: [], failures: [] },
       facts: { component: name, file: sf.fileName, pending: false, failures: [], reads: [], boundaries: [], unanalyzed: [] }
     };
@@ -262,7 +268,7 @@ export class Analysis {
     return found;
   }
 
-  /** @param {ts.Expression} e */
+  /** @param {ts.Expression} e @returns {boolean} */
   isViewExpression(e) {
     const x = stripParens(e);
     if (ts.isJsxElement(x) || ts.isJsxSelfClosingElement(x) || ts.isJsxFragment(x)) return true;
@@ -273,56 +279,28 @@ export class Analysis {
 
   // ---- the whole-program driver --------------------------------------------
   run() {
-    this.finalIteration = -1;
+    this.iteration = 0;
+    this.finalIteration = 0;
     this.reported = new Set();
-    for (const sf of this.program.getSourceFiles()) {
-      if (!this.isProjectFile(sf)) continue;
-      this.collectComponents(sf);
-    }
-    /** @type {string | null} */
-    let previous = null;
-    for (let i = 0; i < MAX_ITERATIONS; i++) {
-      this.iteration = i;
-      const snapshot = this.pass();
-      if (snapshot === previous) break;
-      previous = snapshot;
-    }
-    this.finalIteration = this.iteration;
-    this.diagnostics = [];
-    this.reported = new Set();
-    this.pass();
-    this.reportRoots();
-    return this.diagnostics;
-  }
-
-  /** One analysis pass over every component and every module's top level. */
-  pass() {
-    for (const c of this.components.values()) {
-      c.nextProps = new Map(); c.nextPropsWorst = false; c.nextCallers = 0; c.handedOff = []; c.rendered = [];
-      c.facts = { component: c.name, file: c.file.fileName, pending: false, failures: [], reads: [], boundaries: [], unanalyzed: [] };
-    }
-    this.roots = [];
-    this.functionCache = new Map();
+    this.moduleBindings = this.bindings;
+    this.initializing = new Set();
+    this.providers = new Map();
+    this.visitedComponents = new Set();
     this.current = { pending: [], failures: [] };
     this.setupFailureNode = null;
-    /** @type {Map<Component, { pending: Obligation[], failures: Obligation[] }>} */
-    const previous = new Map([...this.components.values()].map(c => [c, c.summary]));
-    this.childSummaries = previous;
-    // Callers first: module top levels (roots, hand-offs), then components, so
-    // that prop tables are filled before the children that read them (this
-    // pass); summaries from the previous pass feed the parents (next pass).
+    for (const sf of this.program.getSourceFiles()) if (this.isProjectFile(sf)) this.collectComponents(sf);
     for (const sf of this.program.getSourceFiles()) if (this.isProjectFile(sf)) this.analyzeModuleTopLevel(sf);
-    /** @type {Map<Component, { pending: Obligation[], failures: Obligation[] }>} */
-    const next = new Map();
-    for (const c of this.components.values()) next.set(c, this.analyzeComponent(c, previous));
-    for (const [c, s] of next) { c.summary = s; c.props = c.nextProps; c.propsWorst = c.nextPropsWorst || c.handedOff.length > 0; c.callers = c.nextCallers; }
-    return JSON.stringify([...this.components.values()].map(c => [
-      c.name,
-      c.summary.pending.map(o => o.loc.line + ":" + o.loc.col),
-      c.summary.failures.map(o => o.loc.line + ":" + o.loc.col + ":" + describeFailures(o.failures ?? new Set())),
-      [...c.props.entries()].map(([k, v]) => [k, v.worst, v.values.map(x => [x.reactive, x.pending, [...x.failures], x.callables.length])]),
-      c.propsWorst, c.callers, c.handedOff.length, c.rendered.length
-    ]));
+    // Exported components and hand-offs still need a summary when no render
+    // path reaches them. Rendered components are checked separately per path.
+    for (const c of this.components.values()) {
+      if (!this.visitedComponents.has(c) && (c.exported || c.handedOff.length)) {
+        const saved = this.current;
+        c.summary = this.analyzeComponent(c);
+        this.current = saved;
+      }
+    }
+    this.reportRoots();
+    return this.diagnostics;
   }
 
   /** @param {ts.SourceFile} sf */
@@ -334,7 +312,7 @@ export class Analysis {
         if (parentIsModule) {
           const c = this.componentOf(n);
           const symbol = ts.isFunctionDeclaration(n) ? (n.name ? this.symbolOf(n.name) : undefined) : (ts.isVariableDeclaration(n.parent) && ts.isIdentifier(n.parent.name) ? this.symbolOf(n.parent.name) : undefined);
-          if (symbol) this.bindings.set(symbol, c ? { kind: "component", component: c } : { kind: "function", node: n, factory: this.isStateFactory(n) });
+          if (symbol) this.bindings.set(symbol, c ? { kind: "component", component: c } : { kind: "function", node: n, environment: this.moduleBindings ?? this.bindings });
           if (c) return; // components are analyzed by analyzeComponent
         }
       }
@@ -352,7 +330,8 @@ export class Analysis {
       if (ts.isVariableStatement(statement)) {
         for (const d of statement.declarationList.declarations) {
           if (d.initializer && isFunctionLike(stripParens(d.initializer))) continue;
-          this.analyzeVariableDeclaration(d, ctx);
+          const symbol = ts.isIdentifier(d.name) ? this.symbolOf(d.name) : undefined;
+          if (!symbol || !this.moduleBindings.has(symbol)) this.analyzeVariableDeclaration(d, ctx);
         }
         continue;
       }
@@ -362,14 +341,24 @@ export class Analysis {
     }
   }
 
+  /** @returns {FnAcc} */
   newFnAcc() { return { throws: new Set(), reasons: new Map() }; }
 
   /**
-   * @param {Component} c
-   * @param {Map<Component, { pending: Obligation[], failures: Obligation[] }>} previous
+   * @param {Component} base
+   * @param {Map<string, { values: Value[], worst: boolean }>} [props]
    */
-  analyzeComponent(c, previous) {
-    this.childSummaries = previous;
+  analyzeComponent(base, props = base.props) {
+    // Recursive views reuse the first activation: its own reads remain in the
+    // enclosing summary. Do not enter an endless chain of the same AST body.
+    if (this.activeComponents.has(base)) return { pending: [], failures: [] };
+    this.activeComponents.add(base);
+    this.visitedComponents.add(base);
+    const c = { ...base, props, propsWorst: props.get("*")?.worst ?? base.propsWorst };
+    const savedBindings = this.bindings;
+    const savedFailure = this.setupFailureNode;
+    this.setupFailureNode = null;
+    this.bindings = new Map(this.bindings);
     /** @type {Ctx} */
     const ctx = { component: c, scope: "setup", fn: this.newFnAcc(), comp: null, view: { loading: false, errored: false, path: [`<${c.name}>`] }, depth: 0, ownerName: `<${c.name}>` };
     this.current = { pending: /** @type {Obligation[]} */ ([]), failures: /** @type {Obligation[]} */ ([]) };
@@ -389,8 +378,12 @@ export class Analysis {
     }
     this.setupFailureNode = null;
     const summary = this.current;
-    c.facts.pending = summary.pending.length > 0;
-    c.facts.failures = [...new Set(summary.failures.flatMap(o => [...(o.failures ?? [])]))];
+    c.facts.pending = c.facts.pending || summary.pending.length > 0;
+    c.facts.failures = [...new Set([...c.facts.failures, ...summary.failures.flatMap(o => [...(o.failures ?? [])])])];
+    base.summary = { pending: [...base.summary.pending, ...summary.pending], failures: [...base.summary.failures, ...summary.failures] };
+    this.activeComponents.delete(base);
+    this.bindings = savedBindings;
+    this.setupFailureNode = savedFailure;
     return summary;
   }
 
@@ -420,7 +413,7 @@ export class Analysis {
   analyzeBlock(block, ctx, componentBody) {
     let result = constant();
     let returned = false;
-    for (const s of block.statements) if (ts.isFunctionDeclaration(s) && s.name && s.body) { const symbol = this.symbolOf(s.name); if (symbol && !this.bindings.has(symbol)) this.bindings.set(symbol, { kind: "function", node: s, factory: false }); }
+    for (const s of block.statements) if (ts.isFunctionDeclaration(s) && s.name && s.body) { const symbol = this.symbolOf(s.name); if (symbol && !this.bindings.has(symbol)) this.bindings.set(symbol, { kind: "function", node: s, environment: this.bindings }); }
     for (const s of block.statements) {
       const r = this.analyzeStatement(s, ctx, componentBody);
       if (r) { result = returned ? join(result, r) : r; returned = true; }
@@ -440,7 +433,7 @@ export class Analysis {
       return null;
     }
     if (ts.isFunctionDeclaration(s)) {
-      if (s.name && s.body) { const symbol = this.symbolOf(s.name); if (symbol) this.bindings.set(symbol, { kind: "function", node: s, factory: false }); }
+      if (s.name && s.body) { const symbol = this.symbolOf(s.name); if (symbol) this.bindings.set(symbol, { kind: "function", node: s, environment: this.bindings }); }
       return null;
     }
     if (ts.isExpressionStatement(s)) {
@@ -517,7 +510,7 @@ export class Analysis {
         const name = d.name.elements[0] && !ts.isOmittedExpression(d.name.elements[0]) ? d.name.elements[0].name.getText() : "signal";
         for (const a of init.arguments) this.evalExpr(a, ctx);
         /** @type {Source} */
-        const source = { name, reactive: true, pending: false, failures: new Set(), worst: false, node: init };
+        const source = { name, reactive: true, pending: ctx.component === null, failures: new Set(ctx.component === null ? ["unknown"] : []), worst: ctx.component === null, node: init };
         const [g, s] = d.name.elements;
         if (g && !ts.isOmittedExpression(g) && ts.isIdentifier(g.name)) { const sym = this.symbolOf(g.name); if (sym) this.bindings.set(sym, { kind: "signal", source }); }
         if (s && !ts.isOmittedExpression(s) && ts.isIdentifier(s.name)) { const sym = this.symbolOf(s.name); if (sym) this.bindings.set(sym, { kind: "setter", name: s.name.text }); }
@@ -528,13 +521,16 @@ export class Analysis {
     if (ts.isIdentifier(d.name)) {
       const symbol = this.symbolOf(d.name);
       if (!symbol) return;
-      if (isFunctionLike(init)) { this.bindings.set(symbol, { kind: "function", node: /** @type {ts.FunctionLikeDeclaration} */ (init), factory: false }); return; }
+      if (isFunctionLike(init)) { this.bindings.set(symbol, { kind: "function", node: /** @type {ts.FunctionLikeDeclaration} */ (init), environment: this.bindings }); return; }
       if (ts.isCallExpression(init)) {
         const api = solidApiOf(init.expression, this.checker);
         if (api && (api.api === "createMemo" || api.api === "createAsync")) {
           const source = this.analyzeMemo(init, d.name.text, ctx);
           this.bindings.set(symbol, { kind: "memo", source });
-          if (ctx.component === null) this.unanalyzed(init, `${api.api} outside a component`, "module-level reactive state is not modeled; it is treated as possibly pending and possibly failing.", ctx);
+          if (ctx.component === null) {
+            this.unanalyzed(init, `${api.api} outside a component`, "module-level reactive state is not modeled; it is treated as possibly pending and possibly failing.", ctx);
+            source.pending = true; source.worst = true; source.failures.add("unknown");
+          }
           return;
         }
       }
@@ -562,7 +558,7 @@ export class Analysis {
         let v;
         if (base && base.kind === "props") v = this.readProp(base.component, propName, element, ctx);
         else if (base && base.kind === "object") v = this.readObjectMember(base, propName, element, ctx);
-        else v = derived(baseValue ?? (base ? this.bindingValue(base, init, ctx) : constant()));
+        else v = this.memberValue(baseValue ?? (base ? this.bindingValue(base, init, ctx) : constant()), propName, element, ctx);
         const sym = ts.isIdentifier(element.name) ? this.symbolOf(element.name) : undefined;
         if (sym) this.bindings.set(sym, { kind: "value", value: v });
       }
@@ -631,7 +627,7 @@ export class Analysis {
     c?.facts.reads.push({ loc, scope, source: source.name });
     switch (ctx.scope) {
       case "setup":
-        if (source.reactive && !source.worst && !ctx.untracked) {
+        if (source.reactive && !ctx.untracked) {
           if (source.pending)
             this.report("PENDING_ASYNC_UNTRACKED_READ", "async", "error",
               `Async value "${source.name}" is read in ${ctx.ownerName}'s setup; while it is pending there is nothing to read. Read it in a tracking scope (JSX, a memo, or an effect's compute function) under a Loading boundary.`,
@@ -653,6 +649,7 @@ export class Analysis {
         } else if (ctx.view) this.obligate(source, loc, ctx);
         break;
       case "handler":
+        if (source.pending) this.report("PENDING_ASYNC_IN_HANDLER", "async", "warn", "This handler may read a value before it is initialized. Loading and try/catch do not make a pending handler read ready.", node, { ownerName: ctx.ownerName, related: source.related?.map(loc => ({ message: "caller prop expression", loc })) });
         if (source.failures.size) this.raise(ctx, source.failures, `reading "${source.name}" may fail`, node);
         break;
       case "effect":
@@ -665,14 +662,14 @@ export class Analysis {
       case "untracked":
         break;
     }
-    return { reactive: true, pending: source.pending, failures: new Set(source.failures), promise: null, callables: [], worst: source.worst, caught: null };
+    return { ...constant(), reactive: source.reactive, pending: source.pending, failures: new Set(source.failures), worst: source.worst, related: source.related };
   }
 
   /** A read at a JSX position: pending / failure obligations unless a boundary covers it. @param {Source} source @param {Loc} loc @param {Ctx} ctx */
   obligate(source, loc, ctx) {
     const view = /** @type {View} */ (ctx.view);
-    if (source.pending && !view.loading) this.current.pending.push({ loc, path: [...view.path], source: source.name });
-    if (source.failures.size && !view.errored) this.current.failures.push({ loc, path: [...view.path], source: source.name, failures: new Set(source.failures) });
+    if (source.pending && !view.loading) this.current.pending.push({ loc, path: [...view.path], source: source.name, related: source.related });
+    if (source.failures.size && !view.errored) this.current.failures.push({ loc, path: [...view.path], source: source.name, failures: new Set(source.failures), related: source.related });
   }
 
   // ---- expressions ---------------------------------------------------------
@@ -692,7 +689,7 @@ export class Analysis {
       if (v.promise) this.raise(ctx, v.promise, `${this.text(x.expression)} may reject`, x);
       return { ...derived(v), pending: false, reactive: false };
     }
-    if (isFunctionLike(x)) return callable({ kind: "function", node: x });
+    if (isFunctionLike(x)) return callable({ kind: "function", node: x, environment: this.bindings });
     if (ts.isJsxElement(x) || ts.isJsxSelfClosingElement(x) || ts.isJsxFragment(x)) {
       // JSX outside the view position: evaluated as a view under the current boundaries.
       this.evalView(x, ctx, ctx.view ?? { loading: false, errored: false, path: [ctx.ownerName] });
@@ -707,10 +704,28 @@ export class Analysis {
     if (ts.isBinaryExpression(x)) {
       if (x.operatorToken.kind === ts.SyntaxKind.EqualsToken) {
         const v = this.evalExpr(x.right, ctx);
-        if (ts.isIdentifier(x.left)) { const sym = this.symbolOf(x.left); if (sym) this.bindings.set(sym, { kind: "value", value: v }); }
-        else this.evalExpr(x.left, ctx);
+        if (ts.isIdentifier(x.left)) {
+          const sym = this.symbolOf(x.left);
+          const decl = sym?.declarations?.[0];
+          const moduleVariable = decl && ts.isVariableDeclaration(decl) && ts.isSourceFile(decl.parent.parent.parent);
+          if (moduleVariable) this.escapeValue(v, x, ctx, "storing a context service in module state");
+          if (sym) {
+            this.bindings.set(sym, { kind: "value", value: v });
+            if (moduleVariable) this.moduleBindings.set(sym, { kind: "value", value: v });
+          }
+        }
+        else {
+          if (ts.isPropertyAccessExpression(x.left) || ts.isElementAccessExpression(x.left)) {
+            const base = this.evalExpr(x.left.expression, ctx);
+            if (base.objects?.length) {
+              this.unanalyzed(x, "a mutation of an object member", "the shared object and its aliases now have worst-case member facts.", ctx);
+              for (const object of base.objects) object.escaped = true;
+            }
+          } else this.evalExpr(x.left, ctx);
+        }
         return v;
       }
+      if ([ts.SyntaxKind.QuestionQuestionToken, ts.SyntaxKind.BarBarToken, ts.SyntaxKind.AmpersandAmpersandToken].includes(x.operatorToken.kind)) return join(this.evalExpr(x.left, ctx), this.evalExpr(x.right, ctx));
       return join(derived(this.evalExpr(x.left, ctx)), derived(this.evalExpr(x.right, ctx)));
     }
     if (ts.isVoidExpression(x)) {
@@ -719,14 +734,14 @@ export class Analysis {
       return constant();
     }
     if (ts.isPrefixUnaryExpression(x) || ts.isPostfixUnaryExpression(x) || ts.isTypeOfExpression(x) || ts.isSpreadElement(x)) {
-      const operand = ts.isSpreadElement(x) ? x.expression : x.operand;
+      const operand = ts.isSpreadElement(x) || ts.isTypeOfExpression(x) ? x.expression : x.operand;
       return derived(this.evalExpr(operand, ctx));
     }
     if (ts.isTemplateExpression(x)) return joinAll(x.templateSpans.map(s => derived(this.evalExpr(s.expression, ctx))));
     if (ts.isNewExpression(x)) {
       for (const a of x.arguments ?? []) this.evalExpr(a, ctx);
       const name = x.expression.getText();
-      if (name === "Promise" && x.arguments?.[0]) {
+      if (name === "Promise" && ts.isIdentifier(x.expression) && this.isLibGlobal(x.expression) && x.arguments?.[0]) {
         // new Promise(executor): the executor runs now; a throw inside rejects.
         const executor = stripParens(x.arguments[0]);
         if (isFunctionLike(executor)) {
@@ -757,7 +772,9 @@ export class Analysis {
     void ctx;
     const symbol = this.symbolOf(id);
     const decl = symbol?.declarations?.[0];
-    if (decl && ts.isParameter(decl)) return constant(); // an unbound parameter (a plain value)
+    const api = solidApiOf(id, this.checker);
+    if (api) return callable({ kind: "solid", node: id, api: api.api });
+    if (decl && !this.program.isSourceFileDefaultLibrary(decl.getSourceFile()) && (ts.isParameter(decl) || ts.isVariableDeclaration(decl))) return { ...constant(), opaque: true };
     if (decl && ts.isImportSpecifier(decl)) return constant();
     if (decl && this.program.isSourceFileDefaultLibrary(decl.getSourceFile())) return constant(); // Math, Promise, console, document, …
     const pkg = packageOf(decl);
@@ -776,7 +793,7 @@ export class Analysis {
       case "signal": case "memo": case "accessor": return callable({ kind: "source", node, source: b.source });
       case "setter": return callable({ kind: "setter", node });
       case "value": return b.value;
-      case "function": return b.factory ? callable({ kind: "function", node: b.node, reasonText: "factory" }) : callable({ kind: "function", node: b.node });
+      case "function": return callable({ kind: "function", node: b.node, environment: b.environment });
       case "component": {
         // A component referenced as a value outside a JSX tag and outside render(): a hand-off.
         if (!this.inRenderArgument) b.component.handedOff.push(this.loc(node));
@@ -790,40 +807,65 @@ export class Analysis {
 
   /** @param {ts.ObjectLiteralExpression} o @param {Ctx} ctx */
   evalObjectLiteral(o, ctx) {
-    let v = constant();
+    /** @type {import("./values.mjs").ObjectFacts} */
+    const object = { members: new Map(), getters: new Map(), escaped: false, service: false };
     for (const p of o.properties) {
-      if (ts.isPropertyAssignment(p)) v = join(v, derived(this.evalExpr(p.initializer, ctx)));
+      const name = p.name && (ts.isIdentifier(p.name) || ts.isStringLiteral(p.name) || ts.isNumericLiteral(p.name)) ? p.name.text : null;
+      if (ts.isPropertyAssignment(p) && name !== null) object.members.set(name, this.evalExpr(p.initializer, ctx));
       else if (ts.isShorthandPropertyAssignment(p)) {
-        const valueSymbol = resolveAlias(this.checker.getShorthandAssignmentValueSymbol(p), this.checker);
-        const b = this.bindingOf(valueSymbol);
-        v = join(v, derived(b ? this.bindingValue(b, p.name, ctx) : this.foreignIdentifier(p.name, ctx)));
+        const b = this.bindingOf(resolveAlias(this.checker.getShorthandAssignmentValueSymbol(p), this.checker));
+        object.members.set(p.name.text, b ? this.bindingValue(b, p.name, ctx) : this.foreignIdentifier(p.name, ctx));
+      } else if (ts.isMethodDeclaration(p) && name !== null) object.members.set(name, callable({ kind: "function", node: p, environment: this.bindings }));
+      else if (ts.isGetAccessorDeclaration(p) && name !== null) object.getters.set(name, { kind: "function", node: p, environment: this.bindings });
+      else if (ts.isSpreadAssignment(p)) {
+        const v = this.evalExpr(p.expression, ctx);
+        for (const shape of v.objects ?? []) for (const [key, value] of shape.members) object.members.set(key, value);
+        if (v.worst || v.opaque) object.members.set("*", v);
       }
-      else if (ts.isSpreadAssignment(p)) v = join(v, derived(this.evalExpr(p.expression, ctx)));
-      // getters / methods are analyzed where they are read / called
+    }
+    return { ...constant(), objects: [object] };
+  }
+
+  /** @param {Binding & { kind: "object" }} b @param {string} name @param {ts.Node} at @param {Ctx} ctx */
+  readObjectMember(b, name, at, ctx) {
+    return this.memberValue(b.value, name, at, ctx);
+  }
+
+  /** Members keep their own facts; holding an object does not read its accessors.
+   * @param {Value} base @param {string | null} name @param {ts.Node} at @param {Ctx} ctx @returns {Value}
+   */
+  memberValue(base, name, at, ctx) {
+    if (base.unreachable) return base;
+    const results = [];
+    for (const object of base.objects ?? []) {
+      if (object.escaped) { results.push(worst()); continue; }
+      if (name === null) {
+        this.unanalyzed(at, "a dynamic service member", "its value is possibly pending and failing with unknown.", ctx);
+        results.push(worst()); continue;
+      }
+      const getter = object.getters.get(name);
+      if (getter?.node) results.push(this.analyzeFunction(/** @type {ts.FunctionLikeDeclaration} */ (getter.node), ctx, [], getter.environment));
+      else results.push(object.members.get(name) ?? object.members.get("*") ?? constant());
+    }
+    if (base.worst) results.push(worst());
+    if (base.opaque) results.push({ ...constant(), opaque: true });
+    if (!results.length) return derived(base);
+    const v = joinAll(results);
+    if (v.worst && (!ts.isCallExpression(at.parent) || at.parent.expression !== at)) {
+      this.obligateValue(v, at, ctx, this.text(at));
+      this.raise(ctx, ["unknown"], this.text(at) + " has no failure information", at);
     }
     return v;
   }
 
-  /**
-   * @param {Binding & { kind: "object" }} b
-   * @param {string} name
-   * @param {ts.Node} at
-   * @param {Ctx} ctx
+  /** Unknown code can mutate a shared service, but not independent instances.
+   * @param {Value} v @param {ts.Node} at @param {Ctx} ctx @param {string} what
    */
-  readObjectMember(b, name, at, ctx) {
-    for (const p of b.node.properties) {
-      const pName = p.name && (ts.isIdentifier(p.name) || ts.isStringLiteral(p.name)) ? p.name.text : null;
-      if (pName !== name) continue;
-      if (ts.isGetAccessorDeclaration(p)) return this.analyzeFunction(p, ctx, []); // a getter runs in the reader's scope
-      if (ts.isMethodDeclaration(p)) return callable({ kind: "function", node: p });
-      if (ts.isPropertyAssignment(p)) return this.evalExpr(p.initializer, ctx);
-      if (ts.isShorthandPropertyAssignment(p)) {
-        const b2 = this.bindingOf(resolveAlias(this.checker.getShorthandAssignmentValueSymbol(p), this.checker));
-        return b2 ? this.bindingValue(b2, p.name, ctx) : this.foreignIdentifier(p.name, ctx);
-      }
-    }
-    void at;
-    return derived(b.value);
+  escapeValue(v, at, ctx, what) {
+    const objects = (v.objects ?? []).filter(o => o.service);
+    if (!objects.length) return;
+    this.unanalyzed(at, what, "the shared object and its aliases now have worst-case member facts.", ctx);
+    for (const object of objects) object.escaped = true;
   }
 
   /**
@@ -833,21 +875,21 @@ export class Analysis {
    * @param {ts.Node} at
    * @param {Ctx} ctx
    */
+  /** @param {Component} c @param {string} name @param {ts.Node} at @param {Ctx} ctx @returns {Value} */
   readProp(c, name, at, ctx) {
-    const entry = c.props.get(name);
+    const entry = c.props.get(name) ?? (c.props.get("*")?.worst ? c.props.get("*") : undefined);
     if (c.propsWorst || (entry && entry.worst)) return this.read({ name: `props.${name}`, reactive: true, pending: true, failures: new Set(["unknown"]), worst: true, node: at }, at, ctx);
     if (!entry || entry.values.length === 0) {
       // No caller in the program passes it: held, unknown shape. Calls through it are unknown (see callProp).
-      return { ...constant(), callables: [{ kind: "function", node: null, reasonText: `props.${name} (no caller in this program)` }] };
+      return { ...constant(), opaque: true, callables: [{ kind: "function", node: null, reasonText: `props.${name} (no caller in this program)` }] };
     }
-    const v = joinAll(entry.values);
-    if (name === "children") return v;
+    const v = joinAll(entry.values.map(v => this.resolveProp(v, ctx)));
     if (v.reactive || v.pending || v.failures.size) {
       // A caller passed a reactive expression: the prop is a reactive value, read here.
       const sourceCallables = v.callables.filter(cb => cb.kind === "source");
       const pending = v.pending || sourceCallables.some(cb => cb.source?.pending);
       const failures = new Set([...v.failures, ...sourceCallables.flatMap(cb => [...(cb.source?.failures ?? [])])]);
-      const r = this.read({ name: `props.${name}`, reactive: true, pending, failures, worst: v.worst, node: at }, at, ctx);
+      const r = this.read({ name: `props.${name}`, reactive: true, pending, failures, worst: v.worst, node: at, related: v.related }, at, ctx);
       return { ...r, callables: v.callables };
     }
     return v; // held: constants, callbacks
@@ -857,6 +899,16 @@ export class Analysis {
   evalMember(m, ctx) {
     const name = ts.isPropertyAccessExpression(m) ? m.name.text : (ts.isStringLiteral(m.argumentExpression) ? m.argumentExpression.text : null);
     const target = stripParens(m.expression);
+    if (ts.isPropertyAccessExpression(m)) {
+      const api = solidApiOf(m.name, this.checker);
+      if (api) return callable({ kind: "solid", node: m, api: api.api });
+      const symbol = this.symbolOf(m.name);
+      const decl = symbol?.declarations?.[0];
+      if (decl && ts.isVariableDeclaration(decl) && ts.isSourceFile(decl.parent.parent.parent)) {
+        const binding = this.bindingOf(symbol);
+        if (binding) return this.bindingValue(binding, m, ctx);
+      }
+    }
     if (ts.isIdentifier(target)) {
       const b = this.bindingOf(this.symbolOf(target));
       if (b && b.kind === "props" && name !== null) return this.readProp(b.component, name, m, ctx);
@@ -864,8 +916,10 @@ export class Analysis {
     }
     const base = this.evalExpr(m.expression, ctx);
     if (ts.isElementAccessExpression(m)) this.evalExpr(m.argumentExpression, ctx);
+    if (base.objects?.length || base.opaque || base.unreachable) return this.memberValue(base, name, m, ctx);
     if (base.worst) {
       // A member of a worst-case value is a worst-case value; reading it at a JSX position obligates a Loading / Errored boundary.
+      /** @type {Value} */
       const w = { ...worst(), callables: [{ kind: "function", node: null, reasonText: this.text(m) }] };
       if (!ts.isCallExpression(m.parent) || m.parent.expression !== m) { this.obligateValue(w, m, ctx, this.text(m)); this.raise(ctx, ["unknown"], `${this.text(m)} has no failure information`, m); }
       return w;
@@ -892,6 +946,8 @@ export class Analysis {
       return this.callPlatform(call, callee.text, ctx);
     }
     if (ts.isPropertyAccessExpression(callee)) {
+      const resolved = this.bindingOf(this.symbolOf(callee.name));
+      if (resolved?.kind === "function") return this.callBinding(resolved, call, ctx);
       const target = stripParens(callee.expression);
       const name = callee.name.text;
       if (ts.isIdentifier(target)) {
@@ -903,6 +959,7 @@ export class Analysis {
         }
       }
       const receiver = this.evalExpr(callee.expression, ctx);
+      if (receiver.objects?.length || (receiver.opaque && !this.isLibMethod(call)) || receiver.unreachable) return this.callValue(this.memberValue(receiver, name, callee, ctx), call, ctx, this.text(call));
       if (PROMISE_METHODS.has(name) && (receiver.promise || isPromiseType(this.checker.getTypeAtLocation(callee.expression), this.checker)) && this.isLibMethod(call)) return this.callPromiseMethod(name, receiver, call, ctx);
       if (receiver.worst || receiver.callables.some(cb => cb.kind === "function" && cb.node === null)) return this.callUnknownValue(call, receiver, ctx);
       return this.callPlatform(call, name, ctx, receiver);
@@ -922,13 +979,15 @@ export class Analysis {
       }
       case "createSignal": {
         for (const a of args) this.evalExpr(a, ctx);
-        return worst(); // a signal tuple not destructured: not modeled
+        this.unanalyzed(call, "a signal tuple outside destructuring", "its value is possibly pending and failing with unknown.", ctx);
+        return worst();
       }
       case "createEffect": case "createRenderEffect": {
         if (!ctx.component || ctx.scope !== "setup") this.unanalyzed(call, `${api} outside a component's setup`, "an effect created elsewhere is not modeled.", ctx);
         const compute = args[0] ? stripParens(args[0]) : null;
         const effect = args[1] ? stripParens(args[1]) : null;
-        const acc = { pending: false, failures: new Set(), reads: 0 };
+        /** @type {CompAcc} */
+    const acc = { pending: false, failures: new Set(), reads: 0 };
         const fnAcc = this.newFnAcc();
         /** @type {Value} */
         let computed = constant();
@@ -953,11 +1012,26 @@ export class Analysis {
         return constant();
       }
       case "useContext": {
-        for (const a of args) this.evalExpr(a, ctx);
-        this.unanalyzed(call, "useContext(…)", "context values are the next area; this value is treated as possibly pending and possibly failing with unknown.", ctx);
-        return worst();
+        const context = args[0] ? this.evalExpr(args[0], ctx) : constant();
+        if (!context.contexts?.length) {
+          this.unanalyzed(call, "a context lookup without createContext provenance", "its result is possibly pending and failing with unknown.", ctx);
+          return worst();
+        }
+        return joinAll(context.contexts.map(binding => {
+          const value = this.providers.get(binding) ?? binding.defaultValue;
+          if (value === null) {
+            this.report("CONTEXT_PROVIDER_MISSING", "owner", "error", "This context has neither a provider on this render path nor a default. Add a provider or a usable default.", call, { ownerName: ctx.ownerName });
+            return { ...constant(), unreachable: true };
+          }
+          for (const object of value.objects ?? []) object.service = true;
+          return value;
+        }));
       }
-      case "createContext": return constant();
+      case "createContext": {
+        const value = args[0] ? this.evalExpr(args[0], ctx) : null;
+        const absent = args[0] && (this.checker.getTypeAtLocation(args[0]).flags & (ts.TypeFlags.Undefined | ts.TypeFlags.Void)) !== 0;
+        return { ...constant(), contexts: [{ node: call, defaultValue: absent ? null : value }] };
+      }
       case "createStore": case "createOptimisticStore": case "createMutable": case "createProjection": {
         for (const a of args) this.evalExpr(a, ctx);
         this.unanalyzed(call, `${api}(…)`, "stores are not modeled; the store and its setter are treated as possibly pending and possibly failing with unknown.", ctx);
@@ -975,7 +1049,13 @@ export class Analysis {
           this.inRenderArgument = true;
           if (ts.isIdentifier(target)) {
             const b = this.bindingOf(this.symbolOf(target));
-            if (b && b.kind === "component") { b.component.rendered.push(this.loc(call)); this.roots.push({ component: b.component, view: null, loc: this.loc(call) }); }
+            if (b && b.kind === "component") {
+              b.component.rendered.push(this.loc(call));
+              const saved = this.current;
+              const rootSummary = this.analyzeComponent(b.component);
+              this.current = saved;
+              this.roots.push({ component: null, view: null, loc: this.loc(call), rootSummary });
+            }
             else this.unanalyzed(target, "a render argument that is not a component", "the rendered tree is not checked.", ctx);
           } else if (isFunctionLike(target)) {
             this.roots.push({ component: null, view: target, loc: this.loc(call) });
@@ -1002,6 +1082,7 @@ export class Analysis {
   /** createMemo(fn): an analyzed computation. @param {ts.CallExpression} call @param {string} name @param {Ctx} ctx */
   analyzeMemo(call, name, ctx) {
     const fn = call.arguments[0] ? stripParens(call.arguments[0]) : null;
+    /** @type {CompAcc} */
     const acc = { pending: false, failures: new Set(), reads: 0 };
     const fnAcc = this.newFnAcc();
     /** @type {Value} */
@@ -1048,11 +1129,7 @@ export class Analysis {
         return constant();
       }
       case "function": {
-        if (b.factory) {
-          this.unanalyzed(call, `${this.text(call.expression)}(…)`, "it creates reactive state outside a component (a state factory); its result is treated as possibly pending and possibly failing with unknown.", ctx);
-          return worst();
-        }
-        return this.analyzeFunction(b.node, ctx, args);
+        return this.analyzeFunction(b.node, ctx, args, b.environment);
       }
       case "component": {
         this.unanalyzed(call, `calling the component ${b.component.name} as a function`, "the rendered tree is not checked here.", ctx);
@@ -1070,6 +1147,7 @@ export class Analysis {
    * @param {Value} v @param {ts.CallExpression} call @param {Ctx} ctx @param {string} reason
    */
   callValue(v, call, ctx, reason) {
+    if (v.unreachable) return v;
     if (v.worst) return this.callUnknownValue(call, v, ctx);
     if (!v.callables.length) {
       // Calling something we did not track (a plain function value from a computation, a DOM method): unknown.
@@ -1078,15 +1156,17 @@ export class Analysis {
     const args = call.arguments.map(a => this.evalExpr(a, ctx));
     /** @type {Value[]} */
     const results = [];
+    if (v.opaque) results.push(this.callUnknownValue(call, { ...constant(), opaque: true }, ctx, reason));
     for (const cb of v.callables) {
       switch (cb.kind) {
-        case "source": results.push(this.read(/** @type {Source} */ (cb.source), call, ctx)); break;
-        case "setter": results.push(constant()); break;
+        case "source": results.push(this.read({ .../** @type {Source} */ (cb.source), related: [...(cb.source?.related ?? []), ...(v.related ?? [])] }, call, ctx)); break;
+        case "setter": results.push(this.callBinding({ kind: "setter", name: cb.node ? this.text(cb.node) : "setter" }, call, ctx)); break;
         case "safe": results.push(constant()); break;
         case "function":
-          if (cb.node) results.push(this.analyzeFunction(/** @type {ts.FunctionLikeDeclaration} */ (cb.node), ctx, args));
+          if (cb.node) results.push(this.analyzeFunction(/** @type {ts.FunctionLikeDeclaration} */ (cb.node), ctx, args, cb.environment));
           else results.push(this.callUnknownValue(call, v, ctx, cb.reasonText ?? reason));
           break;
+        case "solid": results.push(this.evalSolidCall(cb.api ?? "", call, ctx)); break;
         case "component": results.push(worst()); break;
       }
     }
@@ -1095,7 +1175,7 @@ export class Analysis {
 
   /** A call with no analyzable body: possibly failing with unknown; a Promise-typed result rejects instead of throwing. @param {ts.CallExpression} call @param {Value} receiver @param {Ctx} ctx @param {string} [reason] */
   callUnknownValue(call, receiver, ctx, reason) {
-    for (const a of call.arguments) this.evalCallbackArgument(a, ctx, "unknown");
+    for (const a of call.arguments) { const v = this.evalCallbackArgument(a, ctx, "unknown"); this.escapeValue(v, a, ctx, "passing a context service to unknown code"); }
     const type = this.checker.getTypeAtLocation(call);
     const text = reason ?? this.text(call);
     if (isPromiseType(type, this.checker)) {
@@ -1143,7 +1223,7 @@ export class Analysis {
     const calleeText = calleeRoot && ts.isIdentifier(calleeRoot) && this.isLibGlobal(calleeRoot) ? calleeRoot.text : "";
     if (!isLib && !(ts.isIdentifier(stripParens(call.expression)) && this.isLibGlobal(/** @type {ts.Identifier} */ (stripParens(call.expression))))) {
       // No analyzable body, not the platform: unknown, carried by the promise when the result is one.
-      const args = call.arguments.map(a => this.evalCallbackArgument(a, ctx, "unknown"));
+      const args = call.arguments.map(a => { const v = this.evalCallbackArgument(a, ctx, "unknown"); this.escapeValue(v, a, ctx, "passing a context service to unknown code"); return v; });
       const type = this.checker.getTypeAtLocation(call);
       if (isPromiseType(type, this.checker)) return { ...derived(joinAll([receiver ?? constant(), ...args])), promise: new Set(["unknown"]) };
       this.raise(ctx, ["unknown"], `${this.text(call)} has no failure information`, call);
@@ -1214,13 +1294,14 @@ export class Analysis {
   }
 
   /** Like readProp but a function-typed prop about to be called is not itself a read. @param {Component} c @param {string} name @param {ts.Node} at @param {Ctx} ctx */
+  /** @param {Component} c @param {string} name @param {ts.Node} at @param {Ctx} ctx @returns {Value} */
   readPropForCall(c, name, at, ctx) {
-    const entry = c.props.get(name);
+    const entry = c.props.get(name) ?? (c.props.get("*")?.worst ? c.props.get("*") : undefined);
     if (c.propsWorst || (entry && entry.worst)) return worst();
     if (!entry || entry.values.length === 0) return { ...constant(), callables: [{ kind: "function", node: null, reasonText: `props.${name}(…) has no caller in this program` }] };
-    const v = joinAll(entry.values);
+    const v = joinAll(entry.values.map(v => this.resolveProp(v, ctx)));
     // The caller's expression runs in the child's read (Solid wraps prop expressions in getters): its failures land here.
-    if (v.failures.size) this.raise(ctx, v.failures, `evaluating props.${name} may fail`, at);
+    if (v.reactive || v.pending || v.failures.size) this.read({ name: `props.${name}`, reactive: v.reactive, pending: v.pending, failures: v.failures, worst: v.worst, node: at, related: v.related }, at, ctx);
     if (!v.callables.length) {
       // Called, but no caller passed a function we can see (a value, a member of a bag): unknown.
       return { ...v, callables: [{ kind: "function", node: null, reasonText: `props.${name}(…) has no analyzable function` }] };
@@ -1237,15 +1318,24 @@ export class Analysis {
    * @param {Value[]} args
    * @returns {Value}
    */
-  analyzeFunction(fn, ctx, args) {
+  analyzeFunction(fn, ctx, args, environment = this.bindings) {
     if (this.activeFunctions.has(fn) || ctx.depth > MAX_DEPTH) return constant(); // recursion: the first activation's facts stand
     const isAsync = !!(ts.canHaveModifiers(fn) && ts.getModifiers(fn)?.some(m => m.kind === ts.SyntaxKind.AsyncKeyword));
     const isGenerator = !!fn.asteriskToken;
     if (isGenerator) { this.unanalyzed(fn, "a generator function", "its body is not analyzed; its value is treated as possibly pending and possibly failing.", ctx); return worst(); }
-    // Parameters take the argument values (closures see the last binding; path-insensitive).
+    const savedBindings = this.bindings;
+    this.bindings = new Map(environment);
+    // Each invocation owns its locals; returned methods capture this map.
     fn.parameters.forEach((p, i) => {
-      if (ts.isIdentifier(p.name)) { const sym = this.symbolOf(p.name); if (sym) this.bindings.set(sym, { kind: "value", value: args[i] ?? constant() }); }
-      else if (ts.isObjectBindingPattern(p.name) || ts.isArrayBindingPattern(p.name)) {
+      if (ts.isIdentifier(p.name)) { const sym = this.symbolOf(p.name); if (sym) this.bindings.set(sym, { kind: "value", value: args[i] ?? { ...constant(), opaque: true } }); }
+      else if (ts.isObjectBindingPattern(p.name)) {
+        for (const el of p.name.elements) if (ts.isIdentifier(el.name)) {
+          const name = el.propertyName ? el.propertyName.getText() : el.name.text;
+          const value = this.memberValue(args[i] ?? { ...constant(), opaque: true }, name, el, ctx);
+          const sym = this.symbolOf(el.name);
+          if (sym) this.bindings.set(sym, { kind: "value", value });
+        }
+      } else if (ts.isArrayBindingPattern(p.name)) {
         for (const el of p.name.elements) if (!ts.isOmittedExpression(el) && ts.isIdentifier(el.name)) { const sym = this.symbolOf(el.name); if (sym) this.bindings.set(sym, { kind: "value", value: derived(args[i] ?? constant()) }); }
       }
     });
@@ -1263,6 +1353,7 @@ export class Analysis {
       return this.runBody(fn, { ...ctx, depth: ctx.depth + 1 });
     } finally {
       this.activeFunctions.delete(fn);
+      this.bindings = savedBindings;
     }
   }
 
@@ -1307,8 +1398,9 @@ export class Analysis {
     }
     /** @type {Value[]} */
     const results = [];
+    if (v.opaque) this.raise(hctx, ["unknown"], this.text(at) + " has no failure information", at);
     for (const cb of v.callables) {
-      if (cb.kind === "function" && cb.node) results.push(this.analyzeFunction(/** @type {ts.FunctionLikeDeclaration} */ (cb.node), hctx, [constant()]));
+      if (cb.kind === "function" && cb.node) results.push(this.analyzeFunction(/** @type {ts.FunctionLikeDeclaration} */ (cb.node), hctx, [constant()], cb.environment));
       else if (cb.kind === "function") { this.raise(hctx, ["unknown"], `${cb.reasonText ?? this.text(at)} has no failure information`, at); results.push(constant()); }
       else if (cb.kind === "source") results.push(this.read(/** @type {Source} */ (cb.source), at, hctx));
       else results.push(constant());
@@ -1449,29 +1541,29 @@ export class Analysis {
         }
       }
     }
-    // A context provider (<Ctx value={…}>) or a user component.
+    // Only createContext provenance makes a value a provider. No type spelling.
     const b = ts.isIdentifier(tag) ? this.bindingOf(this.symbolOf(tag)) : undefined;
-    if (!b || b.kind !== "component") {
-      const isContext = ts.isIdentifier(tag) && this.isContextValue(tag);
-      this.unanalyzed(opening, isContext ? `<${tag.getText()} value={…}> (a context provider)` : `<${tag.getText()}>`,
-        isContext ? "context is the next area; the provided value is not followed into consumers (each useContext is treated as the worst case) and the children are checked under the current boundaries." : "its component cannot be resolved to a project function; its children are checked under the current boundaries.", ctx);
-      for (const a of attrs) if (ts.isJsxAttribute(a) && a.initializer && ts.isJsxExpression(a.initializer) && a.initializer.expression) this.evalExpr(a.initializer.expression, tctx);
-      for (const ch of children) this.evalJsxChild(ch, ctx, view);
+    if (b?.kind === "component") {
+      this.renderChild(b.component, opening, children, ctx, view, whole);
       return;
     }
-    this.renderChild(b.component, opening, children, ctx, view, whole);
-  }
-
-  /** @param {ts.Identifier} tag */
-  isContextValue(tag) {
-    const symbol = this.symbolOf(tag);
-    const decl = symbol?.declarations?.[0];
-    if (decl && ts.isVariableDeclaration(decl) && decl.initializer) {
-      const init = stripParens(decl.initializer);
-      if (ts.isCallExpression(init)) { const api = solidApiOf(init.expression, this.checker); return !!api && api.api === "createContext"; }
+    const value = ts.isJsxNamespacedName(tag) ? worst() : this.evalExpr(tag, tctx);
+    if (value.contexts?.length) {
+      const supplied = attrExpr("value");
+      const providerValue = supplied ? this.evalExpr(supplied, tctx) : constant();
+      const saved = this.providers;
+      if (value.contexts.length > 1) this.unanalyzed(opening, "a dynamic provider", "each possible provider path uses worst-case service facts.", ctx);
+      for (const binding of value.contexts) {
+        this.providers = new Map(saved);
+        this.providers.set(binding, value.contexts.length > 1 ? worst() : providerValue);
+        for (const ch of children) this.evalJsxChild(ch, ctx, view);
+      }
+      this.providers = saved;
+      return;
     }
-    const type = this.checker.getTypeAtLocation(tag);
-    return /Context/.test(this.checker.typeToString(type));
+    this.unanalyzed(opening, "an unresolved provider or component", "its values are worst case; children retain their own boundary paths.", ctx);
+    for (const a of attrs) if (ts.isJsxAttribute(a) && a.initializer && ts.isJsxExpression(a.initializer) && a.initializer.expression) this.evalExpr(a.initializer.expression, tctx);
+    for (const ch of children) this.evalJsxChild(ch, ctx, view);
   }
 
   /** A `fallback={…}`: JSX is a view under the outer boundaries; other expressions are tracking reads. @param {ts.Expression} e @param {Ctx} ctx @param {View} view */
@@ -1499,7 +1591,7 @@ export class Analysis {
   analyzeRenderCallback(fn, ctx, args) {
     // Keyed For hands the item as a plain value, not an accessor: either way the body is a view in a tracking scope.
     fn.parameters.forEach((p, i) => {
-      if (ts.isIdentifier(p.name)) { const sym = this.symbolOf(p.name); if (sym) this.bindings.set(sym, { kind: "value", value: args[i] ?? constant() }); }
+      if (ts.isIdentifier(p.name)) { const sym = this.symbolOf(p.name); if (sym) this.bindings.set(sym, { kind: "value", value: args[i] ?? { ...constant(), opaque: true } }); }
       else if (ts.isObjectBindingPattern(p.name)) for (const el of p.name.elements) if (ts.isIdentifier(el.name)) { const sym = this.symbolOf(el.name); if (sym) this.bindings.set(sym, { kind: "value", value: constant() }); }
     });
     const body = fn.body;
@@ -1524,42 +1616,46 @@ export class Analysis {
    * @param {ts.Node} whole
    */
   renderChild(child, opening, children, ctx, view, whole) {
-    child.nextCallers++;
+    child.callers++;
+    /** @type {Map<string, { values: Value[], worst: boolean }>} */
+    const props = new Map();
+    let propsWorst = false;
     for (const attr of opening.attributes.properties) {
       if (ts.isJsxSpreadAttribute(attr)) {
         this.unanalyzed(attr, "a spread into a component's props", "every prop of the child is treated as the worst case (possibly reactive, pending and failing).", ctx);
         this.evalExpr(attr.expression, { ...ctx, scope: "tracking", comp: null, view });
-        child.nextPropsWorst = true;
+        propsWorst = true;
         continue;
       }
       const name = attr.name.getText();
       const value = this.propValue(attr, ctx, view);
-      const entry = child.nextProps.get(name) ?? { values: [], worst: false };
+      const entry = props.get(name) ?? { values: [], worst: false };
       entry.values.push(value);
       if (value.worst) entry.worst = true;
-      child.nextProps.set(name, entry);
+      props.set(name, entry);
     }
     if (children.length) {
       const meaningful = children.filter(ch => !(ts.isJsxText(ch) && ch.containsOnlyTriviaWhiteSpaces));
-      const entry = child.nextProps.get("children") ?? { values: [], worst: false };
+      const entry = props.get("children") ?? { values: [], worst: false };
       for (const ch of meaningful) {
         if (ts.isJsxExpression(ch) && ch.expression) {
           const x = stripParens(ch.expression);
-          if (isFunctionLike(x)) { entry.values.push(callable({ kind: "function", node: x })); continue; }
-          entry.values.push(this.propExpressionValue(ch.expression, ctx, view));
+          if (isFunctionLike(x)) { entry.values.push(callable({ kind: "function", node: x, environment: this.bindings })); continue; }
+          entry.values.push(this.deferProp(ch.expression));
         } else {
-          // JSX children render where the child places them; checked here under the current boundaries.
-          this.evalView(/** @type {ts.Expression} */ (/** @type {unknown} */ (ch)), ctx, view);
-          entry.values.push(constant());
+          // JSX children render lazily where the child places them.
+          entry.values.push(this.deferProp(/** @type {ts.Expression} */ (/** @type {unknown} */ (ch))));
         }
       }
-      child.nextProps.set("children", entry);
+      props.set("children", entry);
     }
-    // The child's obligations (previous pass) land here.
-    const summary = this.childSummaries.get(child) ?? child.summary;
+    const saved = this.current;
+    if (propsWorst) props.set("*", { values: [worst()], worst: true });
+    const summary = this.analyzeComponent(child, props);
+    this.current = saved;
     const path = [...view.path, `<${child.name}>`];
-    for (const o of summary.pending) if (!view.loading) this.current.pending.push({ ...o, path: [...path, ...o.path.slice(1)] });
-    for (const o of summary.failures) if (!view.errored) this.current.failures.push({ ...o, path: [...path, ...o.path.slice(1)] });
+    for (const o of summary.pending) if (o.uncoverable || !view.loading) this.current.pending.push({ ...o, path: [...path, ...o.path.slice(1)] });
+    for (const o of summary.failures) if (o.uncoverable || !view.errored) this.current.failures.push({ ...o, path: [...path, ...o.path.slice(1)] });
     void whole;
   }
 
@@ -1569,21 +1665,42 @@ export class Analysis {
     if (!init) return constant(); // <Comp flag />
     if (ts.isStringLiteral(init)) return constant();
     if (ts.isJsxExpression(init) && init.expression) {
-      if (isEventAttribute(attr.name.getText()) && isFunctionLike(stripParens(init.expression))) return callable({ kind: "function", node: stripParens(init.expression) });
-      return this.propExpressionValue(init.expression, ctx, view);
+      if (isEventAttribute(attr.name.getText()) && isFunctionLike(stripParens(init.expression))) return callable({ kind: "function", node: stripParens(init.expression), environment: this.bindings });
+      return this.deferProp(init.expression);
     }
     if (ts.isJsxElement(init) || ts.isJsxSelfClosingElement(init) || ts.isJsxFragment(init)) { this.evalView(init, ctx, view); return constant(); }
     return constant();
   }
 
-  /** @param {ts.Expression} e @param {Ctx} ctx @param {View} view */
-  propExpressionValue(e, ctx, view) {
-    const x = stripParens(e);
-    if (isFunctionLike(x)) return callable({ kind: "function", node: x });
-    if (ts.isJsxElement(x) || ts.isJsxSelfClosingElement(x) || ts.isJsxFragment(x)) { this.evalView(x, ctx, view); return constant(); }
+  /** @param {ts.Expression} expression @returns {Value} */
+  deferProp(expression) {
+    return { ...constant(), deferred: [{ expression, environment: this.bindings, providers: this.providers }] };
+  }
+
+  /** Evaluate lazy props only at consuming reads, without moving their obligations.
+   * @param {Value} value @param {Ctx} ctx @returns {Value}
+   */
+  resolveProp(value, ctx) {
+    if (!value.deferred?.length) return value;
+    const savedBindings = this.bindings;
+    const savedProviders = this.providers;
+    const results = [];
+    for (const deferred of value.deferred) {
+      this.bindings = deferred.environment;
+      this.providers = deferred.providers;
+      if (this.isViewExpression(deferred.expression) && ctx.view) {
+        this.evalView(deferred.expression, ctx, ctx.view);
+        results.push(constant());
+        continue;
+      }
+      /** @type {CompAcc} */
     const acc = { pending: false, failures: new Set(), reads: 0 };
-    const v = this.evalExpr(e, { ...ctx, scope: "tracking", comp: acc, view: null });
-    return { ...v, reactive: v.reactive || acc.reads > 0, pending: v.pending || acc.pending, failures: new Set([...v.failures, ...acc.failures]) };
+      const v = this.evalExpr(deferred.expression, { ...ctx, scope: "tracking", comp: acc, view: null });
+      results.push({ ...v, reactive: v.reactive || acc.reads > 0, pending: v.pending || acc.pending, failures: new Set([...v.failures, ...acc.failures]), related: [...(v.related ?? []), this.loc(deferred.expression)] });
+    }
+    this.bindings = savedBindings;
+    this.providers = savedProviders;
+    return joinAll(results);
   }
 
   // ---- roots ---------------------------------------------------------------
@@ -1596,14 +1713,14 @@ export class Analysis {
       if (kind === "pending")
         this.report("ASYNC_OUTSIDE_LOADING_BOUNDARY", "async", "error",
           `"${o.source}" may be pending here and no Loading boundary is above this read, up to the ${where}; the root mount would be deferred with no fallback. Wrap the read in <Loading fallback={…}>, here or in a caller.`,
-          node, { ownerName: o.path[o.path.length - 1], ownerPath: o.path, related: [{ message: `the ${rootWhat}`, loc: rootLoc }], data: { source: o.source } });
+          node, { ownerName: o.path[o.path.length - 1], ownerPath: o.path, related: [...(o.related ?? []).map(loc => ({ message: "caller prop expression", loc })), { message: `the ${rootWhat}`, loc: rootLoc }], data: { source: o.source } });
       else
         this.report("ERROR_OUTSIDE_ERRORED_BOUNDARY", "error", "error",
           `"${o.source}" may fail with ${describeFailures(o.failures ?? new Set())} here and no Errored boundary is above this read, up to the ${where}; the failure would reach the root and halt reactivity. Wrap the work in <Errored fallback={…}>, here or in a caller.`,
-          node, { ownerName: o.path[o.path.length - 1], ownerPath: o.path, related: [{ message: `the ${rootWhat}`, loc: rootLoc }], data: { failures: [...(o.failures ?? [])], source: o.source } });
+          node, { ownerName: o.path[o.path.length - 1], ownerPath: o.path, related: [...(o.related ?? []).map(loc => ({ message: "caller prop expression", loc })), { message: `the ${rootWhat}`, loc: rootLoc }], data: { failures: [...(o.failures ?? [])], source: o.source } });
     };
     for (const root of this.roots) {
-      const summary = root.component ? root.component.summary : root.rootSummary;
+      const summary = root.rootSummary ?? root.component?.summary;
       if (!summary) continue;
       for (const o of summary.pending) emit(o, "pending", root.loc, "render root");
       for (const o of summary.failures) emit(o, "failure", root.loc, "render root");
@@ -1632,6 +1749,7 @@ export class Analysis {
     /** @param {ts.Node} n @returns {ts.Node | null} */
     const find = n => {
       if (n.getStart(sf) === pos) return n;
+      /** @type {ts.Node | null} */
       let hit = null;
       ts.forEachChild(n, ch => { if (!hit && ch.getStart(sf) <= pos && ch.getEnd() >= pos) hit = find(ch); });
       return hit;

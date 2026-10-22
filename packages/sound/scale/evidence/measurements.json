@@ -1,0 +1,945 @@
+{
+  "environment": {
+    "baseCommit": "05df715",
+    "branch": "solid-sound-dataflow-scale",
+    "platform": "darwin",
+    "arch": "arm64",
+    "node": "v24.18.0",
+    "typescript": "6.0.3",
+    "solid": "2.0.0-rc.16",
+    "oldSpaceMiB": 2048,
+    "rootCount": 2669,
+    "excluded": 3413,
+    "all": 6082,
+    "loc": 524547
+  },
+  "unboundedProgram": {
+    "inventory": {
+      "stage": "inventory",
+      "ms": 2.552042,
+      "rss": 137347072,
+      "heapTotal": 33570816,
+      "heapUsed": 13573472,
+      "external": 29601751,
+      "arrayBuffers": 9287827,
+      "maxRSS": 134128,
+      "roots": 2669
+    },
+    "lastCheckpoint": {
+      "stage": "load",
+      "count": 12600,
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/app/session-placement-startup.ts",
+      "categories": {
+        "checked": {
+          "count": 215,
+          "chars": 1196996
+        },
+        "declaration": {
+          "count": 226,
+          "chars": 2904963
+        },
+        "unchecked-source-or-json": {
+          "count": 12153,
+          "chars": 87045113
+        },
+        "typescript-lib": {
+          "count": 6,
+          "chars": 69178
+        }
+      },
+      "rss": 2331508736,
+      "heapTotal": 2150973440,
+      "heapUsed": 2116706064,
+      "external": 30386857,
+      "arrayBuffers": 9877651
+    },
+    "workerPeakRssBytes": 2403876864,
+    "wallSeconds": 6.61,
+    "completed": false,
+    "failure": "V8 heap exhaustion before createProgram returned"
+  },
+  "attribution": {
+    "stages": [
+      {
+        "stage": "inventory",
+        "ms": 2.074040999999994,
+        "rss": 137412608,
+        "heapTotal": 34619392,
+        "heapUsed": 13573360,
+        "external": 29601751,
+        "arrayBuffers": 9287827,
+        "maxRSS": 134192,
+        "roots": 2669
+      },
+      {
+        "stage": "program",
+        "ms": 1621.944875,
+        "rss": 906526720,
+        "heapTotal": 781811712,
+        "heapUsed": 627758480,
+        "external": 36716557,
+        "arrayBuffers": 9287827,
+        "maxRSS": 885280,
+        "sourceFiles": 3114,
+        "categories": {
+          "checked": {
+            "count": 2669,
+            "chars": 18778627
+          },
+          "declaration": {
+            "count": 382,
+            "chars": 4021460
+          },
+          "typescript-lib": {
+            "count": 63,
+            "chars": 2865028
+          }
+        }
+      },
+      {
+        "stage": "type-checker",
+        "ms": 2158.297541,
+        "rss": 1112719360,
+        "heapTotal": 976584704,
+        "heapUsed": 803138232,
+        "external": 34301538,
+        "arrayBuffers": 9287827,
+        "maxRSS": 1086640,
+        "nodes": 3198302,
+        "symbols": 466755,
+        "types": 85,
+        "instantiations": 0
+      },
+      {
+        "stage": "analysis-created",
+        "ms": 2233.695208,
+        "rss": 1113505792,
+        "heapTotal": 962428928,
+        "heapUsed": 803674168,
+        "external": 34301538,
+        "arrayBuffers": 9287827,
+        "maxRSS": 1088576
+      },
+      {
+        "stage": "collected",
+        "ms": 2526.1399579999998,
+        "rss": 1114341376,
+        "heapTotal": 964001792,
+        "heapUsed": 806246320,
+        "external": 34301538,
+        "arrayBuffers": 9287827,
+        "maxRSS": 1088576,
+        "nodes": 3198302,
+        "symbols": 466755,
+        "types": 85,
+        "instantiations": 0
+      },
+      {
+        "stage": "modules",
+        "ms": 3377.179708,
+        "rss": 1246724096,
+        "heapTotal": 1085390848,
+        "heapUsed": 929346336,
+        "external": 34301538,
+        "arrayBuffers": 9287827,
+        "maxRSS": 1220160,
+        "nodes": 3198302,
+        "symbols": 614139,
+        "types": 87568,
+        "instantiations": 126146
+      },
+      {
+        "stage": "components",
+        "ms": 16814.268291,
+        "rss": 1817182208,
+        "heapTotal": 1524629504,
+        "heapUsed": 1409773672,
+        "external": 34299071,
+        "arrayBuffers": 9287827,
+        "maxRSS": 2341920,
+        "nodes": 3198302,
+        "symbols": 900937,
+        "types": 226949,
+        "instantiations": 379817
+      },
+      {
+        "stage": "roots",
+        "ms": 19609.108458000002,
+        "rss": 1818329088,
+        "heapTotal": 1589280768,
+        "heapUsed": 1420702664,
+        "external": 34299071,
+        "arrayBuffers": 9287827,
+        "maxRSS": 2341920,
+        "nodes": 3198302,
+        "symbols": 900937,
+        "types": 226949,
+        "instantiations": 379817
+      },
+      {
+        "stage": "analysis-complete",
+        "ms": 19815.881208000003,
+        "rss": 1818329088,
+        "heapTotal": 1589280768,
+        "heapUsed": 1420702912,
+        "external": 34299071,
+        "arrayBuffers": 9287827,
+        "maxRSS": 2341920,
+        "diagnostics": 11214,
+        "nodes": 3198302,
+        "symbols": 900937,
+        "types": 226949,
+        "instantiations": 379817
+      },
+      {
+        "stage": "analysis-released",
+        "ms": 19987.310416,
+        "rss": 1804533760,
+        "heapTotal": 1574961152,
+        "heapUsed": 1156208488,
+        "external": 34299071,
+        "arrayBuffers": 9287827,
+        "maxRSS": 2341920,
+        "diagnostics": 11214,
+        "nodes": 3198302,
+        "symbols": 900937,
+        "types": 226949,
+        "instantiations": 379817
+      }
+    ],
+    "workerPeakRssBytes": 2398126080,
+    "wallSeconds": 20.22
+  },
+  "cold": {
+    "createMs": 44.852833000000004,
+    "checkMs": 16712.196207999998,
+    "result": {
+      "elapsedMs": 16711.669541,
+      "diagnosticCount": 11214,
+      "counts": {
+        "warn:UNANALYZED_BOUNDARY": 5566,
+        "error:UNHANDLED_HANDLER_FAILURE": 1859,
+        "error:CONTEXT_PROVIDER_MISSING": 5,
+        "error:SETUP_MAY_THROW": 114,
+        "warn:PENDING_ASYNC_IN_HANDLER": 403,
+        "error:STRICT_READ_UNTRACKED": 37,
+        "error:PENDING_ASYNC_FORBIDDEN_SCOPE": 11,
+        "error:REACTIVE_WRITE_IN_OWNED_SCOPE": 3,
+        "error:PENDING_ASYNC_UNTRACKED_READ": 9,
+        "error:ASYNC_OUTSIDE_LOADING_BOUNDARY": 1216,
+        "error:ERROR_OUTSIDE_ERRORED_BOUNDARY": 1548,
+        "info:COMPONENT_OBLIGATIONS_EXPORTED": 443
+      },
+      "programStats": {
+        "sources": 3114,
+        "declarations": 445,
+        "nodes": 3198302,
+        "symbols": 900937,
+        "types": 226949,
+        "instantiations": 379817
+      },
+      "partialByConstruct": {
+        "unchecked source re-export": 36,
+        "unchecked source import": 1258,
+        "a dynamic service member": 207,
+        "calling the component PendingDevice as a function": 1242,
+        "a mutation of an object member": 541,
+        "createSignal outside a component": 2,
+        "onCleanup(…)": 74,
+        "createMemo outside a component": 1,
+        "getOwner(…)": 3,
+        "template(…)": 1,
+        "lazy(…)": 60,
+        "a generator function": 3,
+        "recursive/deep or bounded function call": 241,
+        "runWithOwner(…)": 2,
+        "a class with inheritance or unsupported members": 6,
+        "calling the component OpenClawApp as a function": 1,
+        "a spread into a component's props": 332,
+        "a spread on an element": 21,
+        "dynamic(…)": 13,
+        "an unresolved provider or component": 239,
+        "onSettled(…)": 280,
+        "an effect compute that is not a function literal": 25,
+        "omit(…)": 5,
+        "getObserver(…)": 1,
+        "a reactive write in a ref callback": 21,
+        "createOptimistic(…)": 118,
+        "action(…)": 94,
+        "analysis work limit": 57,
+        "createEffect outside a component's setup": 6,
+        "a bound handler array": 57,
+        "createUniqueId(…)": 46,
+        "recursive or bounded component": 4,
+        "a call without a declared result shape": 8,
+        "children(…)": 10,
+        "calling the component renderSlashMatchedName as a function": 2,
+        "calling the component seleneMoon as a function": 1,
+        "calling the component browedFace as a function": 2,
+        "createStore(…)": 51,
+        "createDeferred(…)": 20,
+        "isPending(…)": 72,
+        "calling the component renderSectionHeading as a function": 2,
+        "calling the component renderRunInspectorSafeRef as a function": 2,
+        "calling the component renderReceiptBadges as a function": 1,
+        "calling the component renderRunInspectorPagination as a function": 1,
+        "calling the component renderReceiptDetail as a function": 1,
+        "calling the component renderPanel as a function": 2,
+        "calling the component renderReady as a function": 1,
+        "latest(…)": 63,
+        "createMemo outside a component's setup": 118,
+        "calling the component SessionGit as a function": 1,
+        "refresh(…)": 2,
+        "spread(…)": 1,
+        "mapArray(…)": 4,
+        "calling the component SessionMedia as a function": 1,
+        "calling the component renderWikiInsightBody as a function": 1,
+        "calling the component renderAgentPanelFacts as a function": 2,
+        "calling the component renderAgentContextSection as a function": 2,
+        "calling the component renderPreviewFact as a function": 3,
+        "calling the component renderProfileInheritance as a function": 1,
+        "calling the component renderToolMetaBadges as a function": 1,
+        "calling the component renderToolPolicyDetails as a function": 1,
+        "a function child of an element": 2,
+        "calling the component renderStatusNotice as a function": 3,
+        "reconcile(…)": 1,
+        "preload(…)": 3,
+        "<Portal>": 3,
+        "createOptimisticStore(…)": 10,
+        "calling the component renderContextStat as a function": 4,
+        "a signal tuple outside destructuring": 1,
+        "calling the component renderSessionGlyphRun as a function": 1,
+        "an effect function that is not a function literal": 2,
+        "calling the component renderAgentGroupAvatar as a function": 1,
+        "calling the component renderAgentAvatar as a function": 1,
+        "calling the component renderSidebarServerDetails as a function": 1,
+        "calling the component renderGatewayHealth as a function": 2,
+        "calling the component renderSessionOwnerChip as a function": 1,
+        "calling the component renderSidebarRailPinMenuForMenus as a function": 1,
+        "calling the component renderSidebarPluginNavigationMenuForMenus as a function": 1,
+        "calling the component renderSidebarAgentMenuForMenus as a function": 1,
+        "calling the component renderSidebarAgentCreateDialogForMenus as a function": 1,
+        "calling the component renderSidebarIdentityMenuForMenus as a function": 1,
+        "calling the component renderSidebarSessionMenuForMenus as a function": 1,
+        "calling the component renderSidebarSessionGroupMenuForMenus as a function": 1,
+        "calling the component renderSidebarSessionSortMenuForMenus as a function": 1,
+        "calling the component renderSidebarPeopleFilterMenuForMenus as a function": 1,
+        "calling the component renderSidebarCatalogViewMenuForMenus as a function": 1,
+        "calling the component renderSidebarWorkspaceHeader as a function": 1,
+        "calling the component renderSessionUnreadBadge as a function": 1,
+        "calling the component renderAppSidebarPluginTab as a function": 1,
+        "<Dynamic>": 3,
+        "a memo compute that is not a function literal": 21,
+        "calling the component renderSidebarAgentCard as a function": 1,
+        "calling the component renderRailPin as a function": 1,
+        "calling the component renderAppSidebarFooterBar as a function": 1,
+        "calling the component renderAppSidebarPageEntry as a function": 1,
+        "calling the component renderHoverMarquee as a function": 2,
+        "calling the component renderChildSessionLoadError as a function": 2,
+        "calling the component renderPendingSessionCreateRow as a function": 1,
+        "calling the component renderSessionMutationError as a function": 1,
+        "calling the component renderSessionListFrame as a function": 1,
+        "toArray(…)": 1,
+        "createProjection(…)": 5,
+        "flush(…)": 1,
+        "calling the component terminalPanelTabIcon as a function": 1,
+        "calling the component renderSchemaDefaultDescription as a function": 2,
+        "calling the component renderFilters as a function": 1,
+        "calling the component renderChannelPairingDetail as a function": 1,
+        "calling the component rowStatus as a function": 1,
+        "calling the component renderBrowseAllRow as a function": 1,
+        "calling the component renderChannelPairingQueue as a function": 1,
+        "calling the component renderPluginDetailBreadcrumb as a function": 2,
+        "calling the component renderCatalogGridSkeleton as a function": 2,
+        "calling the component renderError as a function": 2,
+        "calling the component categoryIcon as a function": 1,
+        "calling the component renderCatalogEmptyState as a function": 1,
+        "calling the component renderPluginOfficialBadge as a function": 2,
+        "calling the component renderPluginAuthor as a function": 3,
+        "calling the component renderPluginStateStatus as a function": 2,
+        "calling the component renderPluginRowMessage as a function": 4,
+        "calling the component renderPluginSecurityAudit as a function": 1,
+        "calling the component renderPluginCapabilitySection as a function": 8,
+        "calling the component renderPublisherIdentity as a function": 1,
+        "calling the component renderThemeCardVisual as a function": 1,
+        "calling the component renderConfigPageSubtitle as a function": 1,
+        "<Reveal>": 1,
+        "createErrorBoundary(…)": 1,
+        "calling the component deviceIcon as a function": 1,
+        "createLoadingBoundary(…)": 2,
+        "calling the component renderProviderBilling as a function": 1,
+        "calling the component renderProviderCostHistory as a function": 1,
+        "calling the component profileStatus as a function": 2,
+        "calling the component renderProviderIcon as a function": 5,
+        "calling the component renderAuthStatus as a function": 2,
+        "calling the component renderModelSetupFailure as a function": 2,
+        "calling the component renderLoadingSection as a function": 5,
+        "calling the component renderNativeModelSetupSection as a function": 1,
+        "calling the component renderActivationFeedback as a function": 1,
+        "calling the component renderMutationMessage as a function": 2,
+        "calling the component renderSetupAccessWarning as a function": 1,
+        "calling the component renderPluginAskAction as a function": 1,
+        "calling the component renderRetryError as a function": 4,
+        "calling the component renderPluginCompatibilityNotices as a function": 2,
+        "calling the component renderTarget as a function": 1,
+        "calling the component renderInsightList as a function": 5,
+        "calling the component renderUsageRefreshStatus as a function": 4,
+        "calling the component renderSessionSummary as a function": 1,
+        "calling the component renderHeatmapSvg as a function": 1,
+        "calling the component renderUsageLoadingStatus as a function": 1,
+        "calling the component renderFilterChips as a function": 1,
+        "calling the component renderWorktreesView as a function": 1,
+        "calling the component highlightMatch as a function": 5,
+        "calling the component renderSessionOwnerAvatar as a function": 1,
+        "calling the component renderMetaRow as a function": 2,
+        "calling the component renderApprovalPresentation as a function": 1,
+        "calling the component SessionHistory as a function": 1,
+        "calling the component renderShellRuntime as a function": 1,
+        "calling the component renderConfirmation as a function": 1
+      },
+      "invalidatedCount": 2669,
+      "reanalyzedCount": 2669,
+      "slowestJobs": [
+        {
+          "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/app/native-chrome-setup.ts",
+          "kind": "module",
+          "ms": 134.47079099999974,
+          "steps": 97,
+          "partial": false
+        },
+        {
+          "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/solid/menu.tsx",
+          "component": "Menu",
+          "kind": "component",
+          "ms": 93.78587500000003,
+          "steps": 20022,
+          "partial": true
+        },
+        {
+          "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/terminal/terminal-page.tsx",
+          "component": "TerminalPage",
+          "kind": "component",
+          "ms": 78.56162500000028,
+          "steps": 2111,
+          "partial": false
+        },
+        {
+          "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/chat-outbox-recovery.tsx",
+          "component": "PaneOutboxRecovery",
+          "kind": "component",
+          "ms": 74.89116599999988,
+          "steps": 20056,
+          "partial": true
+        },
+        {
+          "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/systems/systems-page.tsx",
+          "component": "SystemsPage",
+          "kind": "component",
+          "ms": 61.32704100000046,
+          "steps": 20011,
+          "partial": true
+        },
+        {
+          "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/main.ts",
+          "kind": "module",
+          "ms": 59.01508299999978,
+          "steps": 2444,
+          "partial": false
+        },
+        {
+          "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-author-avatar-view.tsx",
+          "component": "ChatAuthorAvatar",
+          "kind": "component",
+          "ms": 58.55495900000005,
+          "steps": 9232,
+          "partial": false
+        },
+        {
+          "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/board/board-widget-menu.tsx",
+          "component": "BoardWidgetMenu",
+          "kind": "component",
+          "ms": 56.512542000000394,
+          "steps": 20070,
+          "partial": true
+        },
+        {
+          "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/lib/chat/pasted-text-excerpt.ts",
+          "kind": "module",
+          "ms": 54.89329099999986,
+          "steps": 7319,
+          "partial": true
+        },
+        {
+          "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/systems/systems-route-view.tsx",
+          "component": "renderSolid",
+          "kind": "component",
+          "ms": 51.39704200000051,
+          "steps": 20012,
+          "partial": true
+        },
+        {
+          "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-message-images-solid.tsx",
+          "component": "MessageImages",
+          "kind": "component",
+          "ms": 50.4777909999998,
+          "steps": 20019,
+          "partial": true
+        },
+        {
+          "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-model-controls.tsx",
+          "component": "ChatModelControls",
+          "kind": "component",
+          "ms": 49.51895800000011,
+          "steps": 16188,
+          "partial": true
+        },
+        {
+          "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/browser-tab-card.tsx",
+          "component": "BrowserTabCardHost",
+          "kind": "component",
+          "ms": 46.876124999999774,
+          "steps": 20018,
+          "partial": true
+        },
+        {
+          "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/activity/activity-page.tsx",
+          "component": "ActivityPage",
+          "kind": "component",
+          "ms": 46.51587500000005,
+          "steps": 20036,
+          "partial": true
+        },
+        {
+          "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/systems/systems-sidebar.tsx",
+          "component": "SystemsSidebarContent",
+          "kind": "component",
+          "ms": 45.25941600000078,
+          "steps": 20092,
+          "partial": true
+        },
+        {
+          "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/agents/panels-overview.tsx",
+          "component": "AgentOverview",
+          "kind": "component",
+          "ms": 44.549041999999645,
+          "steps": 20058,
+          "partial": true
+        },
+        {
+          "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-tool-expanded.solid.tsx",
+          "component": "ExpandedToolCardContent",
+          "kind": "component",
+          "ms": 43.724833999999646,
+          "steps": 18244,
+          "partial": false
+        },
+        {
+          "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/agents/agents-page.tsx",
+          "component": "AgentsPage",
+          "kind": "component",
+          "ms": 43.34391599999981,
+          "steps": 20026,
+          "partial": true
+        },
+        {
+          "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-message-bubble-view.tsx",
+          "component": "GroupedMessage",
+          "kind": "component",
+          "ms": 43.18745800000033,
+          "steps": 20012,
+          "partial": true
+        },
+        {
+          "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-pull-requests-content.tsx",
+          "component": "ChatPullRequestsContent",
+          "kind": "component",
+          "ms": 42.31537500000013,
+          "steps": 20068,
+          "partial": true
+        }
+      ],
+      "namedJobs": [
+        {
+          "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/multi-select.tsx",
+          "kind": "module",
+          "ms": 0.03529099999968821,
+          "steps": 1,
+          "partial": false
+        },
+        {
+          "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/settings-sidebar-shell.tsx",
+          "kind": "module",
+          "ms": 0.0026250000000800355,
+          "steps": 0,
+          "partial": false
+        },
+        {
+          "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/multi-select.tsx",
+          "component": "MultiSelect",
+          "kind": "component",
+          "ms": 39.03837500000009,
+          "steps": 17347,
+          "partial": true
+        },
+        {
+          "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/settings-sidebar-shell.tsx",
+          "component": "ShellSettingsSidebar",
+          "kind": "component",
+          "ms": 22.753458999999566,
+          "steps": 16147,
+          "partial": true
+        }
+      ],
+      "fileTimes": [
+        [
+          "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/app/native-chrome-setup.ts",
+          134.47079099999974
+        ],
+        [
+          "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/solid/menu.tsx",
+          93.78887500000019
+        ],
+        [
+          "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/app-sidebar-session-menu-renderers.tsx",
+          86.11087500000122
+        ],
+        [
+          "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-sidebar-image-view.tsx",
+          82.94987499999934
+        ],
+        [
+          "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/sidebar-menus-render.tsx",
+          80.29150100000152
+        ],
+        [
+          "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/terminal/terminal-page.tsx",
+          78.56420800000024
+        ],
+        [
+          "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-message-stream-view.tsx",
+          77.90541800000074
+        ],
+        [
+          "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-github-publication.tsx",
+          76.94895799999995
+        ],
+        [
+          "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/chat-outbox-recovery.tsx",
+          75.25333300000011
+        ],
+        [
+          "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-message-group-view.tsx",
+          71.90662400000019
+        ],
+        [
+          "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-details-progress.tsx",
+          70.67904199999975
+        ],
+        [
+          "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-header-panel-actions.tsx",
+          66.89433400000053
+        ],
+        [
+          "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-author-avatar-view.tsx",
+          66.12945899999977
+        ],
+        [
+          "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/cloud-workers/cloud-worker-snapshot-rows.tsx",
+          66.01945800000021
+        ],
+        [
+          "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-message-images-solid.tsx",
+          62.08604099999957
+        ],
+        [
+          "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/systems/systems-page.tsx",
+          61.42045800000051
+        ],
+        [
+          "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/config/config-page.tsx",
+          59.4272919999994
+        ],
+        [
+          "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/main.ts",
+          59.01508299999978
+        ],
+        [
+          "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-sidebar-file-chrome.tsx",
+          57.75258399999939
+        ],
+        [
+          "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-tool-cards.solid.tsx",
+          57.48704199999975
+        ]
+      ]
+    },
+    "memory": [
+      {
+        "stage": "create",
+        "rss": 163250176,
+        "heapTotal": 58638336,
+        "heapUsed": 40090752,
+        "external": 29834125,
+        "arrayBuffers": 9287827,
+        "maxRSS": 159440
+      },
+      {
+        "stage": "cold",
+        "rss": 2069315584,
+        "heapTotal": 1838252032,
+        "heapUsed": 1608451656,
+        "external": 34532811,
+        "arrayBuffers": 9287827,
+        "maxRSS": 2177456
+      },
+      {
+        "stage": "disposed",
+        "rss": 2069315584,
+        "heapTotal": 1838252032,
+        "heapUsed": 1609851112,
+        "external": 34532811,
+        "arrayBuffers": 9287827,
+        "maxRSS": 2177456
+      }
+    ],
+    "process": {
+      "command": [
+        "-l",
+        "/Users/devagr/.nvm/versions/node/v24.18.0/bin/node",
+        "--max-old-space-size=2048",
+        "/Users/devagr/solid-yield-wt/sound-dataflow-scale/packages/sound/scale/run.mjs",
+        "--worker"
+      ],
+      "wallMs": 17038.435083,
+      "timedOut": false,
+      "code": 0,
+      "signal": null,
+      "peakGroupRssKiB": 2080336,
+      "peakIncludingDriverRssKiB": 2222496,
+      "driverPeakRssKiB": 142160,
+      "wrapperPeakRssKiB": 1216,
+      "conservativeCombinedPeakUpperKiB": 2320832,
+      "sampleCount": 67,
+      "maxGroupProcesses": 2
+    },
+    "osTiming": {
+      "workerPeakRssBytes": 2229714944,
+      "wallSeconds": 17.03
+    }
+  },
+  "incremental": {
+    "coldMs": 17244.684542,
+    "updates": [
+      {
+        "file": "components/theme-brand-icon.tsx",
+        "kind": "trivial",
+        "ms": 43.510667000002286,
+        "restoreMs": 37.79324999999881,
+        "restoredCount": 11214,
+        "result": {
+          "diagnosticCount": 11214,
+          "invalidatedCount": 1,
+          "reanalyzedCount": 0,
+          "summaryChanges": [],
+          "summaryHash": "1f60383adc8d8a798fd6f03c5a784a8e180614df2ca6de3cece92daeea328de3"
+        }
+      },
+      {
+        "file": "components/theme-brand-icon.tsx",
+        "kind": "semantic",
+        "ms": 15728.501249999998,
+        "restoreMs": 15732.010167,
+        "restoredCount": 11214,
+        "result": {
+          "diagnosticCount": 11214,
+          "invalidatedCount": 2669,
+          "reanalyzedCount": 2669,
+          "summaryChanges": [
+            "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/theme-brand-icon.tsx"
+          ],
+          "summaryHash": "de3e80ee59203f06a1854600ee68efd54db4d35614e27c7f7ef9aa558f0f1cb8"
+        }
+      },
+      {
+        "file": "lib/reactive/i18n.ts",
+        "kind": "trivial",
+        "ms": 40.20037500000035,
+        "restoreMs": 33.589333000003535,
+        "restoredCount": 11214,
+        "result": {
+          "diagnosticCount": 11214,
+          "invalidatedCount": 1,
+          "reanalyzedCount": 0,
+          "summaryChanges": [],
+          "summaryHash": "2f2b895b3aa3e165c004317d0cbf13fc61ce7669e0b2ec05d41d64dab0d88e20"
+        }
+      },
+      {
+        "file": "lib/reactive/i18n.ts",
+        "kind": "semantic",
+        "ms": 15527.191709000006,
+        "restoreMs": 15379.153500000008,
+        "restoredCount": 11214,
+        "result": {
+          "diagnosticCount": 11214,
+          "invalidatedCount": 2669,
+          "reanalyzedCount": 2669,
+          "summaryChanges": [
+            "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/lib/reactive/i18n.ts"
+          ],
+          "summaryHash": "19e3a0a210ffaf90e8cea8214614aa3fc776116bb169e9e75ad464d94914a842"
+        }
+      },
+      {
+        "file": "app/app-root.tsx",
+        "kind": "trivial",
+        "ms": 49.15754200000083,
+        "restoreMs": 43.75287500000559,
+        "restoredCount": 11214,
+        "result": {
+          "diagnosticCount": 11214,
+          "invalidatedCount": 1,
+          "reanalyzedCount": 0,
+          "summaryChanges": [],
+          "summaryHash": "e29cbd2369608d0668961d9c3ddd9adb3bef078ee9716bfe7ac542976fc33bb5"
+        }
+      },
+      {
+        "file": "app/app-root.tsx",
+        "kind": "semantic",
+        "ms": 15407.826333000005,
+        "restoreMs": 15020.856999999989,
+        "restoredCount": 11214,
+        "result": {
+          "diagnosticCount": 11214,
+          "invalidatedCount": 2669,
+          "reanalyzedCount": 2669,
+          "summaryChanges": [
+            "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/app/app-root.tsx"
+          ],
+          "summaryHash": "f77caa6aaa447f1c18c647933c1c2c8c4cb2af569cf374f217b5fe9e4549abb2"
+        }
+      }
+    ],
+    "process": {
+      "command": [
+        "-l",
+        "/Users/devagr/.nvm/versions/node/v24.18.0/bin/node",
+        "--max-old-space-size=2048",
+        "/Users/devagr/solid-yield-wt/sound-dataflow-scale/packages/sound/scale/run.mjs",
+        "--worker",
+        "--updates"
+      ],
+      "wallMs": 110684.064959,
+      "timedOut": false,
+      "code": 0,
+      "signal": null,
+      "peakGroupRssKiB": 2444960,
+      "peakIncludingDriverRssKiB": 2578608,
+      "sampleCount": 440,
+      "maxGroupProcesses": 2
+    },
+    "memory": [
+      {
+        "stage": "create",
+        "rss": 172195840,
+        "heapTotal": 60211200,
+        "heapUsed": 41244168,
+        "external": 29834125,
+        "arrayBuffers": 9287827,
+        "maxRSS": 168176
+      },
+      {
+        "stage": "cold",
+        "rss": 2065416192,
+        "heapTotal": 1801027584,
+        "heapUsed": 1577122304,
+        "external": 34532811,
+        "arrayBuffers": 9287827,
+        "maxRSS": 2170528
+      },
+      {
+        "stage": "update:components/theme-brand-icon.tsx:trivial",
+        "rss": 2065661952,
+        "heapTotal": 1801289728,
+        "heapUsed": 1617912000,
+        "external": 34532811,
+        "arrayBuffers": 9287827,
+        "maxRSS": 2170528
+      },
+      {
+        "stage": "update:components/theme-brand-icon.tsx:semantic",
+        "rss": 2148139008,
+        "heapTotal": 1775075328,
+        "heapUsed": 1638896776,
+        "external": 34530344,
+        "arrayBuffers": 9287827,
+        "maxRSS": 2336848
+      },
+      {
+        "stage": "update:lib/reactive/i18n.ts:trivial",
+        "rss": 2163113984,
+        "heapTotal": 1849147392,
+        "heapUsed": 1687163392,
+        "external": 34530344,
+        "arrayBuffers": 9287827,
+        "maxRSS": 2371856
+      },
+      {
+        "stage": "update:lib/reactive/i18n.ts:semantic",
+        "rss": 2201157632,
+        "heapTotal": 1843740672,
+        "heapUsed": 1726534616,
+        "external": 34530344,
+        "arrayBuffers": 9287827,
+        "maxRSS": 2382832
+      },
+      {
+        "stage": "update:app/app-root.tsx:trivial",
+        "rss": 2397192192,
+        "heapTotal": 1882095616,
+        "heapUsed": 1791069168,
+        "external": 34530344,
+        "arrayBuffers": 9287827,
+        "maxRSS": 2387488
+      },
+      {
+        "stage": "update:app/app-root.tsx:semantic",
+        "rss": 2081718272,
+        "heapTotal": 1785643008,
+        "heapUsed": 1692845848,
+        "external": 34530344,
+        "arrayBuffers": 9287827,
+        "maxRSS": 2447264
+      },
+      {
+        "stage": "disposed",
+        "rss": 2294431744,
+        "heapTotal": 1896906752,
+        "heapUsed": 1767546144,
+        "external": 34530344,
+        "arrayBuffers": 9287827,
+        "maxRSS": 2447264
+      }
+    ],
+    "osTiming": {
+      "workerPeakRssBytes": 2505998336,
+      "wallSeconds": 110.7
+    }
+  },
+  "frozen": {
+    "fixtures": 173,
+    "soundnessFailures": 0,
+    "misses": 0,
+    "warningMisses": 0,
+    "infoMisses": 0,
+    "unmapped": 0,
+    "leakage": 0,
+    "codeTableViolations": 0,
+    "extraErrors": 0,
+    "extraWarnings": 0,
+    "mutants": 58,
+    "missedMutants": [],
+    "crashes": []
+  }
+}

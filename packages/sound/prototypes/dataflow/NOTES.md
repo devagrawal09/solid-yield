@@ -1,5 +1,55 @@
 # Prototype B — dataflow: notes
 
+## Scale pass
+
+See RESULTS-scale.md and ../../scale/ for the measurements and parse-only driver.
+The TypeScript 6 backend stays: measurement found the first heap failure during
+program creation, before B constructed any facts. Moving the same import closure
+to TS 7 would not address that cause; the existing TS 7 spike also timed out on
+this app with about 6.5 GiB combined RSS.
+
+- The oracle resolves declarations and checked roots. Other source imports become
+  explicit opaque boundaries, rather than recursively loading unchecked workspace
+  implementations. Each runtime import warns; using its values keeps worst-case
+  pending/read/failure facts. Include those files as roots for more coverage. This
+  is reduced coverage with warnings, not a declaration-generation substitute.
+  Re-exports, namespace members and missing declarations also keep opaque values
+  until consumption; an ordinary unknown method call is not a pending read.
+  Installed declarations remain available; installed bodies are still excluded by
+  ProjectBoundary. An installed source link listed as a root remains lookup-only.
+- Local invocation maps do not copy the module map. bindingOf already falls back
+  to moduleBindings. Invocation-local captured values remain separate.
+- Locations, short text, symbols and Solid API lookups are cached within a program
+  or analysis lifetime. Repeated identical component facts are retained once.
+  Root reporting skips an already reported site before rebuilding its lookup and
+  message. It keeps the same first diagnostic, not fewer obligations.
+- An outer module/component activation shares a 20,000-operation / one-second
+  budget with its nested calls and views. Cut-offs warn and retain unknown
+  failures and pending/read obligations. Recursive/deep calls no longer return a
+  silently safe constant. A recursive component cycle reuses the first activation
+  only for unchanged primitive/forwarded-source prop facts and identical provider
+  values. Aliases are followed without executing lazy props. Changed inputs,
+  objects, callbacks and unsupported expressions keep the worst-case fallback.
+  These are cooperative bounds: a synchronous TS oracle
+  query cannot be interrupted, and several jobs can belong to one file. They are
+  not a hard two-second wall-clock guarantee.
+- update compares a conservative printed-syntax summary (SHA-256, plus exact shape
+  equality), including private bodies, JSX text, ASI and reference directives.
+  Unchanged syntax reuses results, relocates original-source locations and does
+  not mutate earlier results. Unmappable locations force a real check.
+- **Selective semantic invalidation is not implemented.** A changed summary still
+  rebuilds the analysis of every checked root. Caller/callee prop facts therefore
+  remain conservative in both directions, but semantic updates miss the requested
+  incremental design. No summary hash is claimed to be an inferred exported API.
+
+The createChecker/check/update/dispose contract is unchanged. Results add
+invalidatedFiles, reanalyzedFiles, timings and programStats; update also adds summaryHash and
+summaryChanges. Unchanged syntax invalidates the edited file's locations but
+reanalyzes no files. Semantic changes list every root as reanalyzed; the metadata
+never claims a selective recheck that did not happen. dispose releases retained
+results and document text as well as the language service.
+
+
 ## Precision pass (D-133)
 
 See RESULTS-precision.md for the full frozen score and timings. B now removes

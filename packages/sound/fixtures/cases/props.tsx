@@ -1,0 +1,1 @@
+export function Child(props:{value:number}){return <p>{props.value}</p>;}

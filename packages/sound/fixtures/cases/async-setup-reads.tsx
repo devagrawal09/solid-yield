@@ -1,0 +1,1 @@
+import {createSignal} from 'solid-js';export function App(){const [n]=createSignal(1);async function load(){await Promise.resolve();return n()}load();return <p/>}

@@ -1,0 +1,1 @@
+import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from "solid-js"; import {render} from '@solidjs/web';function Child(p:{n:number}){return <p>{p.n}</p>;}export function App(){const n=createMemo(async()=>1);return <Child n={n()}/>;}render(App,document.body);

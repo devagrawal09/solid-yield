@@ -102,7 +102,7 @@ export const CODES = Object.freeze([
     kind: "error",
     severity: "error",
     meaning:
-      "An event handler may throw or reject and nothing in the handler catches it. A rendered Errored boundary does not catch a handler's rejection. Calls with no failure information (an injected API typed () => Promise<T>, a context method, a platform call) count as possibly failing with unknown.",
+      "A handler — an event handler, a callback prop, a promise continuation, a timer or ref callback — may throw or reject and nothing in it catches the failure. A rendered Errored boundary does not catch a handler's rejection. Calls with no failure information (an injected API typed () => Promise<T>, a context method, a platform call) count as possibly failing with unknown.",
     fix: "Catch and handle the failure inside the handler (try/catch around the await, or .catch on the promise).",
     runtime: null,
     legacy: ["EVENT_REJECTS"]
@@ -111,7 +111,7 @@ export const CODES = Object.freeze([
     code: "SETUP_MAY_THROW",
     kind: "error",
     severity: "error",
-    meaning: "A component's setup body (outside any memo, JSX or handler) may throw synchronously; a component body only creates state.",
+    meaning: "A component's setup body (outside any memo, JSX or handler) may throw synchronously, or drops a promise that may reject (`risk().then(…)` with no catch); a component body only creates state.",
     fix: "Move the failing work into a memo or rendered work under an Errored boundary, or handle it where it is produced.",
     runtime: null,
     legacy: ["NATIVE_SETUP_FAILURE"]
@@ -125,6 +125,16 @@ export const CODES = Object.freeze([
     fix: "No action required for soundness; to narrow the worst case, move the work into a supported form (the message names the construct).",
     runtime: null,
     legacy: ["NATIVE_*", "SUGAR_*", "DEPENDENT_TYPE", "GENERATED_TYPE", "FOREIGN_HANDOFF (non-root)"]
+  },
+  {
+    code: "COMPONENT_OBLIGATIONS_EXPORTED",
+    kind: "analysis",
+    severity: "info",
+    meaning:
+      "An exported component that nothing in this program renders is possibly pending or possibly failing. Its renderers must provide the Loading / Errored boundary; inside this program there is no root to report it at. Structured channel only (a library may legitimately export such a component).",
+    fix: "None inside this program; the facts travel with the component.",
+    runtime: null,
+    legacy: []
   },
   {
     code: "UNRESOLVED_FAILURE_CONTRACT",

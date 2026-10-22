@@ -1,0 +1,1 @@
+import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from "solid-js"; export function Counter(){const [count,set]=createSignal(0);const n=createMemo(()=>[1].map(()=>count()));return <p>{n()}</p>;}

@@ -1,0 +1,1 @@
+import {createMemo} from 'solid-js';export function Page(){const n=createMemo(()=>{throw new Error('route failed')});return <p>{n()}</p>}export const route={component:Page};

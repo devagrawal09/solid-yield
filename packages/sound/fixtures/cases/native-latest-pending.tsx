@@ -1,0 +1,1 @@
+import {createSignal,latest,isPending} from 'solid-js';export function App(){const [n]=createSignal(2);return <p>{latest(n)}{isPending(n)?"pending":"ready"}</p>}

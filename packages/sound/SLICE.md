@@ -31,8 +31,12 @@ non-reactive local). A read of a reactive prop in setup is
 reactive prop. A prop carrying a possibly-pending / possibly-failing value
 carries that obligation into the child (D-119): the child's reads obligate a
 Loading / Errored boundary in the child **or** in the caller above the child.
-Callback props (`onSelect: (id: string) => void`) are held functions with no
-failure information: calling one is possibly failing with `unknown`.
+Callback props (`onSelect: (id: string) => void`) are held functions. Calling one
+fails with the union of the failure sets of the functions its callers pass
+(`setSelected` never fails; `() => { throw new RangeError() }` fails with
+RangeError), transitively through forwarding (`onSelect={props.onSelect}`);
+when any caller is unanalyzable (a spread, a component handed out as a value, no
+caller in the program) the set is `unknown`.
 
 **Scopes.**
 - *setup*: the component body outside memos/JSX/handlers; also the body of a
@@ -42,7 +46,14 @@ failure information: calling one is possibly failing with `unknown`.
   render-prop callbacks of `Show` (`when` / children-as-function) and `For`
   (`each` / row callback), and a sync helper called from one of those.
 - *handler*: a function passed to a JSX `on*` attribute (lower- or camel-case),
-  or passed as a callback prop, or an async helper called from a handler.
+  or passed as a callback prop, or an async helper called from a handler; also
+  the handler-like callbacks that run on their own later — a promise
+  continuation (`.then`/`.catch`/`.finally` callback), a timer callback
+  (`setTimeout`, `setInterval`, `queueMicrotask`, `requestAnimationFrame`), a
+  `ref` callback. Reads there are not reported as untracked; failures escaping
+  them are `UNHANDLED_HANDLER_FAILURE`.
+- An object literal's getter is a sync helper: reading `o.double` runs the getter
+  in the reader's scope.
 - *effect*: an effect's effect function (`createEffect`'s second argument).
 - Nested functions: a sync local helper runs in the scope it is called from; an
   async helper runs as a handler-like scope (its reads are not reported as
@@ -80,13 +91,32 @@ catches the rejection. Setter calls, platform DOM property reads/writes,
 body is `REACTIVE_WRITE_IN_OWNED_SCOPE`. Setters in handlers and effect
 functions are fine.
 
+**Promises without a body.** A call whose declared return type is `Promise<T>`
+and whose body is not analyzable (a platform API such as `fetch`, an injected
+function, a context method) does not throw synchronously; its failure is a
+rejection (`unknown`) carried by the promise: `.catch(fn)` or `await` inside a
+`try/catch` handles it, a bare `await` or a dropped promise lets it escape.
+Solid APIs in the subset never fail: setters, `Errored`'s fallback `reset`,
+`untrack`, `event.preventDefault()`.
+
 **Boundaries.** `<Loading fallback=…>` discharges pending below it;
 `<Errored fallback=…>` discharges failure below it. Both from solid-js rc.17.
+
+**Roots and hand-offs.** `render(…)` from @solidjs/web is a root. A component
+that escapes as a value (`{ component: Page }`, an argument to a non-project
+function, an exported object holding it) is a hand-off and is treated as a
+root: its undischarged obligations are reported at the read, with the hand-off
+as a related location. A component that is merely exported and never rendered
+or handed off in the program is NOT an error: the checker emits the info-level
+`COMPONENT_OBLIGATIONS_EXPORTED` (structured channel only) and the facts travel
+with the component (its renderers are checked where they are).
 
 ## Outside the subset (warn + worst case)
 
 `useContext` / context providers (next area: "context/services"), reactive
-state created outside a component (state factories, module state), stores
+state created outside a component (state factories such as
+`createEquipmentService(api)` — warned at the call site, its result worst case;
+module state), stores
 (`createStore`, `createOptimisticStore`), `createEffect` beyond the two-argument
 form, `createResource`-era APIs, JSX spreads (`{...props}`), dynamic components
 (`<Dynamic>`, `props.children` calls), `lazy`, `Portal`, refs, generics on

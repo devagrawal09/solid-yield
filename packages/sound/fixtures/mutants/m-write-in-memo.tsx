@@ -1,0 +1,1 @@
+import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from "solid-js"; export function Counter(){const [count,set]=createSignal(0);const twice=createMemo(()=>{set(0);return count()*2;});return <button onClick={()=>set(count()+1)}>{twice()}</button>;}

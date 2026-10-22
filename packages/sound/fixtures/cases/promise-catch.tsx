@@ -1,0 +1,1 @@
+import {createMemo} from 'solid-js'; export function App(){const value=createMemo(()=>Promise.reject(new Error('bad')).catch(()=>1));return <p>{value()}</p>}

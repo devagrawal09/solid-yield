@@ -1,0 +1,1 @@
+import {createSignal} from 'solid-js';export function App(){const [n,set]=createSignal(0);async function load(){const before=n();await Promise.resolve();return before+n()+1}return <button onClick={async()=>set(await load())}>{n()}</button>}

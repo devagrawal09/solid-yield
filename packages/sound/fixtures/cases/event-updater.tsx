@@ -1,0 +1,1 @@
+import {createSignal,createEffect,createMemo,createStore} from 'solid-js';function consume<T>(callback:()=>T):T{return callback();}export function App(){const [n,set]=createSignal(1);const [state,write]=createStore({n:0});return <button onClick={()=>write(c=>{c.n=n()})}/>;}

@@ -1,0 +1,1 @@
+import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from "solid-js"; export function Counter(){const [count,set]=createSignal(0);return <button onClick={()=>Promise.reject("failed")}/>;}

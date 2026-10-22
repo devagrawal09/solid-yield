@@ -1,0 +1,1 @@
+import {createSignal} from 'solid-js';export function App(){const [n,set]=createSignal(1);return <div ref={el=>{set(n()+el.childElementCount)}}>{n()}</div>}

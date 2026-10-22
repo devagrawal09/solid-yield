@@ -1,0 +1,1 @@
+import {createSignal,createMemo} from 'solid-js';declare function risk():void;export function App(){const [n]=createSignal(2);const timer=createMemo(()=>setTimeout(()=>{n();risk()},10));return <p>{timer()}</p>}

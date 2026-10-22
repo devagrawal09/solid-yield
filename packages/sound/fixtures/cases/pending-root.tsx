@@ -1,0 +1,1 @@
+import {createSignal,createMemo,createEffect,For,Show,Loading,createContext,useContext} from "solid-js"; import {render} from '@solidjs/web';function App(){const n=createMemo(async()=>1);return <p>{n()}</p>;}render(App,document.body);

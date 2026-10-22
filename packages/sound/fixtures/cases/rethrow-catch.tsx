@@ -1,0 +1,1 @@
+import {createMemo} from 'solid-js';export function App(){const n=createMemo(()=>{try{throw new Error('bad')}catch(e){throw e}});return <p>{n()}</p>}

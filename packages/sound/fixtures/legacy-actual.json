@@ -1,0 +1,496 @@
+{
+  "generatedAt": "2026-10-22T10:27:20.639Z",
+  "checker": "solid-yield native mode (packages/ts-plugin-yield cli.cjs), solid-js 2.0.0-rc.13 via packages/vite-plugin-yield/node_modules",
+  "cases": {
+    "array-callback-in-setup": {
+      "diagnostics": [
+        {
+          "code": "READ_IN_SETUP",
+          "file": "array-callback-in-setup.tsx",
+          "line": 6,
+          "col": 15,
+          "severity": "error",
+          "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
+        }
+      ],
+      "exit": 1
+    },
+    "async-event-reads": {
+      "diagnostics": [],
+      "exit": 0
+    },
+    "async-handler-destructured-uncaught": {
+      "diagnostics": [
+        {
+          "code": "EVENT_REJECTS",
+          "file": "async-handler-destructured-uncaught.tsx",
+          "line": 8,
+          "col": 24,
+          "severity": "error",
+          "message": "[EVENT_REJECTS] This handler can fail with Error and nothing catches it; catch and handle the failure inside the handler."
+        }
+      ],
+      "exit": 1
+    },
+    "async-memo-nested-function": {
+      "diagnostics": [],
+      "exit": 0
+    },
+    "async-memo-reads": {
+      "diagnostics": [],
+      "exit": 0
+    },
+    "async-read": {
+      "diagnostics": [],
+      "exit": 0
+    },
+    "async-setup-reads": {
+      "diagnostics": [
+        {
+          "code": "NATIVE_ASYNC_SETUP",
+          "file": "async-setup-reads.tsx",
+          "line": 1,
+          "col": 144,
+          "severity": "error",
+          "message": "[NATIVE_ASYNC_SETUP] Move this async read into an event or memo."
+        }
+      ],
+      "exit": 1
+    },
+    "callback-prop-forwarded": {
+      "diagnostics": [],
+      "exit": 0
+    },
+    "callback-prop-throws": {
+      "diagnostics": [
+        {
+          "code": "EVENT_REJECTS",
+          "file": "callback-prop-throws.tsx",
+          "line": 3,
+          "col": 27,
+          "severity": "error",
+          "message": "[EVENT_REJECTS] This handler can fail with RangeError and nothing catches it; catch and handle the failure inside the handler."
+        }
+      ],
+      "exit": 1
+    },
+    "callback-prop-unseen": {
+      "diagnostics": [
+        {
+          "code": "EVENT_REJECTS",
+          "file": "callback-prop-unseen.tsx",
+          "line": 6,
+          "col": 27,
+          "severity": "error",
+          "message": "[EVENT_REJECTS] This handler can fail with unknown and nothing catches it; catch and handle the failure inside the handler."
+        },
+        {
+          "code": "EVENT_REJECTS",
+          "file": "callback-prop-unseen.tsx",
+          "line": 3,
+          "col": 27,
+          "severity": "error",
+          "message": "[EVENT_REJECTS] This handler can fail with unknown and nothing catches it; catch and handle the failure inside the handler."
+        }
+      ],
+      "exit": 1
+    },
+    "callback-read": {
+      "diagnostics": [],
+      "exit": 0
+    },
+    "catch": {
+      "diagnostics": [],
+      "exit": 0
+    },
+    "colored-prop": {
+      "diagnostics": [],
+      "exit": 0
+    },
+    "counter": {
+      "diagnostics": [],
+      "exit": 0
+    },
+    "effect-reads-failing-memo-at-root": {
+      "diagnostics": [
+        {
+          "code": "FOREIGN_HANDOFF",
+          "file": "effect-reads-failing-memo-at-root.tsx",
+          "line": 6,
+          "col": 18,
+          "severity": "error",
+          "message": "[FOREIGN_HANDOFF] Catch and handle the failure inside this handler. Remaining: RangeError."
+        }
+      ],
+      "exit": 1
+    },
+    "event-updater": {
+      "diagnostics": [],
+      "exit": 0
+    },
+    "finally-nested-function": {
+      "diagnostics": [],
+      "exit": 0
+    },
+    "foreign-route-failure": {
+      "diagnostics": [
+        {
+          "code": "FOREIGN_HANDOFF",
+          "file": "foreign-route-failure.tsx",
+          "line": 1,
+          "col": 129,
+          "severity": "error",
+          "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: Error."
+        }
+      ],
+      "exit": 1
+    },
+    "getter-read-in-setup": {
+      "diagnostics": [
+        {
+          "code": "READ_IN_SETUP",
+          "file": "getter-read-in-setup.tsx",
+          "line": 6,
+          "col": 16,
+          "severity": "error",
+          "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
+        }
+      ],
+      "exit": 1
+    },
+    "handled-catch": {
+      "diagnostics": [],
+      "exit": 0
+    },
+    "iife-pending-root": {
+      "diagnostics": [
+        {
+          "code": "PENDING_ROOT",
+          "file": "iife-pending-root.tsx",
+          "line": 7,
+          "col": 8,
+          "severity": "error",
+          "message": "[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data."
+        }
+      ],
+      "exit": 1
+    },
+    "inline-event": {
+      "diagnostics": [],
+      "exit": 0
+    },
+    "kept-promise-caught-by-its-chain": {
+      "diagnostics": [],
+      "exit": 0
+    },
+    "kept-promise-rejects-at-its-await": {
+      "diagnostics": [
+        {
+          "code": "EVENT_REJECTS",
+          "file": "kept-promise-rejects-at-its-await.tsx",
+          "line": 5,
+          "col": 27,
+          "severity": "error",
+          "message": "[EVENT_REJECTS] This handler can fail with TypeError | DOMException and nothing catches it; catch and handle the failure inside the handler."
+        }
+      ],
+      "exit": 1
+    },
+    "memo-write": {
+      "diagnostics": [
+        {
+          "code": "WRITE_IN_REACTIVE",
+          "file": "memo-write.tsx",
+          "line": 1,
+          "col": 190,
+          "severity": "error",
+          "message": "[WRITE_IN_REACTIVE] Move this write into an event or effect; a memo or JSX read cannot write state."
+        }
+      ],
+      "exit": 1
+    },
+    "named-callback-in-setup": {
+      "diagnostics": [
+        {
+          "code": "READ_IN_SETUP",
+          "file": "named-callback-in-setup.tsx",
+          "line": 4,
+          "col": 36,
+          "severity": "error",
+          "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
+        }
+      ],
+      "exit": 1
+    },
+    "named-event": {
+      "diagnostics": [],
+      "exit": 0
+    },
+    "native-for-indexed": {
+      "diagnostics": [],
+      "exit": 0
+    },
+    "native-latest-pending": {
+      "diagnostics": [],
+      "exit": 0
+    },
+    "native-optimistic-store-basic": {
+      "diagnostics": [],
+      "exit": 0
+    },
+    "pending-root": {
+      "diagnostics": [
+        {
+          "code": "PENDING_ROOT",
+          "file": "pending-root.tsx",
+          "line": 1,
+          "col": 199,
+          "severity": "error",
+          "message": "[PENDING_ROOT] Wrap this read in Loading; it can suspend while waiting for data."
+        }
+      ],
+      "exit": 1
+    },
+    "plain-callback-throw-in-memo": {
+      "diagnostics": [
+        {
+          "code": "FOREIGN_HANDOFF",
+          "file": "plain-callback-throw-in-memo.tsx",
+          "line": 11,
+          "col": 43,
+          "severity": "error",
+          "message": "[FOREIGN_HANDOFF] Wrap this rendered work in Errored, or handle the failure with attempt. Remaining: RangeError."
+        }
+      ],
+      "exit": 1
+    },
+    "plain-callback-throw-under-errored": {
+      "diagnostics": [],
+      "exit": 0
+    },
+    "promise-catch": {
+      "diagnostics": [],
+      "exit": 0
+    },
+    "promise-event": {
+      "diagnostics": [
+        {
+          "code": "EVENT_REJECTS",
+          "file": "promise-event.tsx",
+          "line": 1,
+          "col": 190,
+          "severity": "error",
+          "message": "[EVENT_REJECTS] This handler can fail with unknown and nothing catches it; catch and handle the failure inside the handler."
+        }
+      ],
+      "exit": 1
+    },
+    "props-accessor-callers": {
+      "diagnostics": [],
+      "exit": 0
+    },
+    "props-interface-live": {
+      "diagnostics": [],
+      "exit": 0
+    },
+    "props": {
+      "diagnostics": [],
+      "exit": 0
+    },
+    "reader-helpers": {
+      "diagnostics": [],
+      "exit": 0
+    },
+    "recursion-failing-prop": {
+      "diagnostics": [],
+      "exit": 0
+    },
+    "ref-event-reads": {
+      "diagnostics": [],
+      "exit": 0
+    },
+    "rethrow-catch": {
+      "diagnostics": [],
+      "exit": 0
+    },
+    "return-and": {
+      "diagnostics": [
+        {
+          "code": "READ_IN_SETUP",
+          "file": "return-and.tsx",
+          "line": 4,
+          "col": 10,
+          "severity": "error",
+          "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
+        }
+      ],
+      "exit": 1
+    },
+    "return-null": {
+      "diagnostics": [],
+      "exit": 0
+    },
+    "return-ternary": {
+      "diagnostics": [
+        {
+          "code": "READ_IN_SETUP",
+          "file": "return-ternary.tsx",
+          "line": 4,
+          "col": 10,
+          "severity": "error",
+          "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
+        }
+      ],
+      "exit": 1
+    },
+    "setup-promise-caught": {
+      "diagnostics": [],
+      "exit": 0
+    },
+    "setup-promise-rejects": {
+      "diagnostics": [
+        {
+          "code": "NATIVE_SETUP_FAILURE",
+          "file": "setup-promise-rejects.tsx",
+          "line": 4,
+          "col": 17,
+          "severity": "error",
+          "message": "[generated] [NATIVE_SETUP_FAILURE] Move this throw into a memo or rendered work, or handle it with attempt; the component body only creates state. Here it cannot raise a failure."
+        }
+      ],
+      "exit": 1
+    },
+    "setup-read": {
+      "diagnostics": [
+        {
+          "code": "READ_IN_SETUP",
+          "file": "setup-read.tsx",
+          "line": 1,
+          "col": 174,
+          "severity": "error",
+          "message": "[READ_IN_SETUP] Move this read into JSX, a memo, an effect, or an event so it stays reactive."
+        }
+      ],
+      "exit": 1
+    },
+    "throw-error": {
+      "diagnostics": [
+        {
+          "code": "EVENT_REJECTS",
+          "file": "throw-error.tsx",
+          "line": 1,
+          "col": 190,
+          "severity": "error",
+          "message": "[EVENT_REJECTS] This handler can fail with Error and nothing catches it; catch and handle the failure inside the handler."
+        }
+      ],
+      "exit": 1
+    },
+    "timer-callback-failure": {
+      "diagnostics": [
+        {
+          "code": "NATIVE_CALLBACK_FAILURE",
+          "file": "timer-callback-failure.tsx",
+          "line": 1,
+          "col": 174,
+          "severity": "error",
+          "message": "[NATIVE_CALLBACK_FAILURE] Catch the failure inside this callback."
+        }
+      ],
+      "exit": 1
+    },
+    "unknown-rethrow-catch": {
+      "diagnostics": [],
+      "exit": 0
+    },
+    "untrack-in-every-host": {
+      "diagnostics": [],
+      "exit": 0
+    }
+  },
+  "equipment": {
+    "diagnostics": [
+      {
+        "code": "EVENT_REJECTS",
+        "file": "src/components/EquipmentRow.tsx",
+        "line": 45,
+        "col": 124,
+        "severity": "error",
+        "message": "[EVENT_REJECTS] This handler can fail with unknown | _E_id and nothing catches it; catch and handle the failure inside the handler."
+      },
+      {
+        "code": "EVENT_REJECTS",
+        "file": "src/components/EquipmentRow.tsx",
+        "line": 44,
+        "col": 146,
+        "severity": "error",
+        "message": "[EVENT_REJECTS] This handler can fail with unknown and nothing catches it; catch and handle the failure inside the handler."
+      },
+      {
+        "code": "EVENT_REJECTS",
+        "file": "src/components/FailureControls.tsx",
+        "line": 9,
+        "col": 640,
+        "severity": "error",
+        "message": "[EVENT_REJECTS] This handler can fail with unknown and nothing catches it; catch and handle the failure inside the handler."
+      },
+      {
+        "code": "EVENT_REJECTS",
+        "file": "src/components/FailureControls.tsx",
+        "line": 9,
+        "col": 543,
+        "severity": "error",
+        "message": "[EVENT_REJECTS] This handler can fail with unknown and nothing catches it; catch and handle the failure inside the handler."
+      },
+      {
+        "code": "EVENT_REJECTS",
+        "file": "src/components/FailureControls.tsx",
+        "line": 9,
+        "col": 462,
+        "severity": "error",
+        "message": "[EVENT_REJECTS] This handler can fail with unknown and nothing catches it; catch and handle the failure inside the handler."
+      },
+      {
+        "code": "EVENT_REJECTS",
+        "file": "src/components/FailureControls.tsx",
+        "line": 9,
+        "col": 381,
+        "severity": "error",
+        "message": "[EVENT_REJECTS] This handler can fail with unknown and nothing catches it; catch and handle the failure inside the handler."
+      },
+      {
+        "code": "EVENT_REJECTS",
+        "file": "src/components/FailureControls.tsx",
+        "line": 9,
+        "col": 300,
+        "severity": "error",
+        "message": "[EVENT_REJECTS] This handler can fail with unknown and nothing catches it; catch and handle the failure inside the handler."
+      },
+      {
+        "code": "EVENT_REJECTS",
+        "file": "src/components/FailureControls.tsx",
+        "line": 9,
+        "col": 219,
+        "severity": "error",
+        "message": "[EVENT_REJECTS] This handler can fail with unknown and nothing catches it; catch and handle the failure inside the handler."
+      },
+      {
+        "code": "EVENT_REJECTS",
+        "file": "src/components/FailureControls.tsx",
+        "line": 9,
+        "col": 138,
+        "severity": "error",
+        "message": "[EVENT_REJECTS] This handler can fail with unknown and nothing catches it; catch and handle the failure inside the handler."
+      },
+      {
+        "code": "EVENT_REJECTS",
+        "file": "src/components/FailureControls.tsx",
+        "line": 9,
+        "col": 61,
+        "severity": "error",
+        "message": "[EVENT_REJECTS] This handler can fail with unknown and nothing catches it; catch and handle the failure inside the handler."
+      }
+    ],
+    "exit": 1
+  }
+}

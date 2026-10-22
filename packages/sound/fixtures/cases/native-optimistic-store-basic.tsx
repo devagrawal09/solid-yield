@@ -1,0 +1,1 @@
+import {createOptimisticStore} from 'solid-js';export function App(){const [state,set]=createOptimisticStore({n:1});return <button onClick={()=>set(s=>{s.n++})}>{state.n}</button>}

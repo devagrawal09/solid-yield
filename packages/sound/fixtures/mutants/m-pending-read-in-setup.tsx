@@ -1,0 +1,1 @@
+import {createSignal,createMemo,Loading} from 'solid-js';export function App(){const [n]=createSignal(1);const value=createMemo(async()=>{await Promise.resolve();return n()});const v=value();return <Loading fallback="wait"><p>{v}</p></Loading>}

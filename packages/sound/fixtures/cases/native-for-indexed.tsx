@@ -1,0 +1,1 @@
+import {For,createSignal} from 'solid-js';export function App(){const [items]=createSignal([1,2]);return <For each={items()} keyed={false}>{(item,index)=><p>{index}:{item()}</p>}</For>}

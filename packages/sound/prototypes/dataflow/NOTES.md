@@ -51,8 +51,15 @@ the chain. Child boundaries apply first, caller element boundaries next. JSX
 children are lazy as well. Setup and handler reads keep their own scope rules.
 
 Scopes remain setup, tracking (JSX/memo/effect compute), handler and effect phase,
-with an explicit untracked flag. Pending handler reads warn even inside a catch
-or rendered Loading; failure handling is checked independently. Helper bodies run
+with an explicit untracked flag. D-131 adds setup-like For row bodies and a
+separate ref scope: ref reads use setup rules, while failures remain callback
+failures and ref write ownership remains partial. Default For items and
+index-mode indices are held; key-function/index-mode items and default indices
+are accessors. Returned row JSX tracks normally. Settled effect apply reads
+are errors, including reads in synchronous helpers; compute inputs stay plain.
+Named/aliased untrack callbacks run with read checks disabled, not failures or
+writes disabled. Setup/effect prop errors keep their related caller locations.
+Pending handler reads warn even inside a catch or rendered Loading; failure handling is checked independently. Helper bodies run
 in the calling scope. Async bodies turn failures into rejection facts.
 
 Platform contracts apply only to actual TypeScript default-lib declarations:
@@ -92,7 +99,11 @@ measured cold, incremental and Vite results.
   effects created outside setup remain outside the supported model.
 
 No fixture expectations, shared contracts, harness code or other prototype were
-changed. No disputes were found. Added prototype-local tests cover provider
+changed. Only dataflow OpenClaw score pins were tightened. DISPUTES.md records
+the legacy ref read expectation that conflicts with D-131; this remaining scored
+extra cannot be removed without hiding a required read. See RESULTS-openclaw.md.
+Ref ownership/cleanup/primitive creation and the FUTURE.md gaps remain deferred.
+Added prototype-local tests cover provider
 paths, factory instances, aliases, lazy props/children, forwarding locations,
 escapes, pending handlers, injected functions and conservative member mutation.
 

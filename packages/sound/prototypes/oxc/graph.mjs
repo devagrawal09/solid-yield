@@ -81,7 +81,7 @@ export const globalValue = name =>
   globals.has(name)
     ? { tag: "platform", path: name }
     : name === "undefined"
-      ? plain()
+      ? { ...plain(), undefinedValue: true }
       : name === "NaN"
         ? plain(NaN)
         : unknown("unresolved name " + name);

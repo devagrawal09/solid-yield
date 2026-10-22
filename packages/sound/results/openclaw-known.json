@@ -1297,15 +1297,15 @@
       "total": 0
     },
     "oc-02-effect-prop-phase-mutant": {
-      "hits": [],
-      "imprecise": [],
-      "misses": [
+      "hits": [
         {
           "code": "STRICT_READ_UNTRACKED",
           "file": "oc-02-effect-prop-phase-mutant.tsx",
-          "at": "\"props.value\""
+          "count": 1
         }
       ],
+      "imprecise": [],
+      "misses": [],
       "warningHits": 0,
       "warningMisses": [],
       "extraErrors": [],
@@ -1313,8 +1313,8 @@
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
-      "soundnessFailure": true,
-      "total": 0
+      "soundnessFailure": false,
+      "total": 1
     },
     "oc-03-optional-context": {
       "hits": [],
@@ -1331,15 +1331,15 @@
       "total": 0
     },
     "oc-03-optional-context-mutant": {
-      "hits": [],
-      "imprecise": [],
-      "misses": [
+      "hits": [
         {
           "code": "CONTEXT_PROVIDER_MISSING",
           "file": "oc-03-optional-context-mutant.tsx",
-          "at": "\"useContext(Optional)\""
+          "count": 1
         }
       ],
+      "imprecise": [],
+      "misses": [],
       "warningHits": 0,
       "warningMisses": [],
       "extraErrors": [],
@@ -1347,8 +1347,8 @@
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
-      "soundnessFailure": true,
-      "total": 0
+      "soundnessFailure": false,
+      "total": 1
     },
     "oc-04-default-accessor": {
       "hits": [],
@@ -1569,36 +1569,23 @@
       "total": 0
     },
     "oc-10-untrack-not-a-catch-mutant": {
-      "hits": [],
-      "imprecise": [],
-      "misses": [
+      "hits": [
         {
           "code": "SETUP_MAY_THROW",
           "file": "oc-10-untrack-not-a-catch-mutant.tsx",
-          "at": "\"untrack(sample)\""
+          "count": 1
         }
       ],
+      "imprecise": [],
+      "misses": [],
       "warningHits": 0,
       "warningMisses": [],
-      "extraErrors": [
-        {
-          "code": "SETUP_MAY_THROW",
-          "severity": "error",
-          "message": "A component's setup body (outside any memo, JSX or handler) may throw synchronously, or drops a promise that may reject (`risk().then(…)` with no catch); a component body only creates state. Move the failing work into a memo or rendered work under an Errored boundary, or handle it where it is produced.",
-          "loc": {
-            "file": "openclaw/oc-10-untrack-not-a-catch-mutant.tsx",
-            "line": 7,
-            "col": 58,
-            "endLine": 7,
-            "endCol": 81
-          }
-        }
-      ],
+      "extraErrors": [],
       "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
-      "soundnessFailure": true,
+      "soundnessFailure": false,
       "total": 1
     },
     "oc-12-keyed-row-snapshot": {
@@ -1607,95 +1594,33 @@
       "misses": [],
       "warningHits": 0,
       "warningMisses": [],
-      "extraErrors": [
-        {
-          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
-          "severity": "error",
-          "message": "Rendered work may fail (a throw in a memo or JSX expression, or a rejected async memo) and no Errored boundary is above it within this component or its callers up to the render root. At runtime the failure reaches the root and halts reactivity. Wrap the rendered work in <Errored fallback={…}>, or handle the failure where it is produced.",
-          "loc": {
-            "file": "openclaw/oc-12-keyed-row-snapshot.tsx",
-            "line": 6,
-            "col": 63,
-            "endLine": 6,
-            "endCol": 68
-          }
-        },
-        {
-          "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
-          "severity": "error",
-          "message": "A possibly pending value is rendered (read in JSX or in a memo the JSX reads) with no Loading boundary above it, within this component or its callers up to the render root. The root mount would be deferred with no fallback shown. Wrap the rendered read in <Loading fallback={…}>, in this component or in a caller.",
-          "loc": {
-            "file": "openclaw/oc-12-keyed-row-snapshot.tsx",
-            "line": 6,
-            "col": 63,
-            "endLine": 6,
-            "endCol": 74
-          }
-        }
-      ],
+      "extraErrors": [],
       "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
       "soundnessFailure": false,
-      "total": 2
+      "total": 0
     },
     "oc-12-keyed-row-snapshot-mutant": {
-      "hits": [],
-      "imprecise": [],
-      "misses": [
+      "hits": [
         {
           "code": "STRICT_READ_UNTRACKED",
           "file": "oc-12-keyed-row-snapshot-mutant.tsx",
-          "at": "\"row().label\""
+          "count": 1
         }
       ],
+      "imprecise": [],
+      "misses": [],
       "warningHits": 0,
       "warningMisses": [],
-      "extraErrors": [
-        {
-          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
-          "severity": "error",
-          "message": "Rendered work may fail (a throw in a memo or JSX expression, or a rejected async memo) and no Errored boundary is above it within this component or its callers up to the render root. At runtime the failure reaches the root and halts reactivity. Wrap the rendered work in <Errored fallback={…}>, or handle the failure where it is produced.",
-          "loc": {
-            "file": "openclaw/oc-12-keyed-row-snapshot-mutant.tsx",
-            "line": 7,
-            "col": 21,
-            "endLine": 7,
-            "endCol": 26
-          }
-        },
-        {
-          "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
-          "severity": "error",
-          "message": "A possibly pending value is rendered (read in JSX or in a memo the JSX reads) with no Loading boundary above it, within this component or its callers up to the render root. The root mount would be deferred with no fallback shown. Wrap the rendered read in <Loading fallback={…}>, in this component or in a caller.",
-          "loc": {
-            "file": "openclaw/oc-12-keyed-row-snapshot-mutant.tsx",
-            "line": 8,
-            "col": 16,
-            "endLine": 8,
-            "endCol": 23
-          }
-        },
-        {
-          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
-          "severity": "error",
-          "message": "Rendered work may fail (a throw in a memo or JSX expression, or a rejected async memo) and no Errored boundary is above it within this component or its callers up to the render root. At runtime the failure reaches the root and halts reactivity. Wrap the rendered work in <Errored fallback={…}>, or handle the failure where it is produced.",
-          "loc": {
-            "file": "openclaw/oc-12-keyed-row-snapshot-mutant.tsx",
-            "line": 8,
-            "col": 16,
-            "endLine": 8,
-            "endCol": 23
-          }
-        }
-      ],
+      "extraErrors": [],
       "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
-      "soundnessFailure": true,
-      "total": 3
+      "soundnessFailure": false,
+      "total": 1
     },
     "oc-12-row-pending": {
       "hits": [],
@@ -1712,15 +1637,15 @@
       "total": 0
     },
     "oc-12-row-pending-mutant": {
-      "hits": [],
-      "imprecise": [],
-      "misses": [
+      "hits": [
         {
           "code": "PENDING_ASYNC_UNTRACKED_READ",
           "file": "oc-12-row-pending-mutant.tsx",
-          "at": "\"read()\""
+          "count": 1
         }
       ],
+      "imprecise": [],
+      "misses": [],
       "warningHits": 0,
       "warningMisses": [],
       "extraErrors": [],
@@ -1728,8 +1653,8 @@
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
-      "soundnessFailure": true,
-      "total": 0
+      "soundnessFailure": false,
+      "total": 1
     },
     "oc-12-row-held": {
       "hits": [],
@@ -1751,95 +1676,33 @@
       "misses": [],
       "warningHits": 0,
       "warningMisses": [],
-      "extraErrors": [
-        {
-          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
-          "severity": "error",
-          "message": "Rendered work may fail (a throw in a memo or JSX expression, or a rejected async memo) and no Errored boundary is above it within this component or its callers up to the render root. At runtime the failure reaches the root and halts reactivity. Wrap the rendered work in <Errored fallback={…}>, or handle the failure where it is produced.",
-          "loc": {
-            "file": "openclaw/oc-12-index-row.tsx",
-            "line": 6,
-            "col": 55,
-            "endLine": 6,
-            "endCol": 60
-          }
-        },
-        {
-          "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
-          "severity": "error",
-          "message": "A possibly pending value is rendered (read in JSX or in a memo the JSX reads) with no Loading boundary above it, within this component or its callers up to the render root. The root mount would be deferred with no fallback shown. Wrap the rendered read in <Loading fallback={…}>, in this component or in a caller.",
-          "loc": {
-            "file": "openclaw/oc-12-index-row.tsx",
-            "line": 6,
-            "col": 55,
-            "endLine": 6,
-            "endCol": 60
-          }
-        }
-      ],
+      "extraErrors": [],
       "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
       "soundnessFailure": false,
-      "total": 2
+      "total": 0
     },
     "oc-12-index-row-mutant": {
-      "hits": [],
-      "imprecise": [],
-      "misses": [
+      "hits": [
         {
           "code": "STRICT_READ_UNTRACKED",
           "file": "oc-12-index-row-mutant.tsx",
-          "at": "\"row()\""
+          "count": 1
         }
       ],
+      "imprecise": [],
+      "misses": [],
       "warningHits": 0,
       "warningMisses": [],
-      "extraErrors": [
-        {
-          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
-          "severity": "error",
-          "message": "Rendered work may fail (a throw in a memo or JSX expression, or a rejected async memo) and no Errored boundary is above it within this component or its callers up to the render root. At runtime the failure reaches the root and halts reactivity. Wrap the rendered work in <Errored fallback={…}>, or handle the failure where it is produced.",
-          "loc": {
-            "file": "openclaw/oc-12-index-row-mutant.tsx",
-            "line": 7,
-            "col": 21,
-            "endLine": 7,
-            "endCol": 26
-          }
-        },
-        {
-          "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
-          "severity": "error",
-          "message": "A possibly pending value is rendered (read in JSX or in a memo the JSX reads) with no Loading boundary above it, within this component or its callers up to the render root. The root mount would be deferred with no fallback shown. Wrap the rendered read in <Loading fallback={…}>, in this component or in a caller.",
-          "loc": {
-            "file": "openclaw/oc-12-index-row-mutant.tsx",
-            "line": 8,
-            "col": 16,
-            "endLine": 8,
-            "endCol": 23
-          }
-        },
-        {
-          "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
-          "severity": "error",
-          "message": "Rendered work may fail (a throw in a memo or JSX expression, or a rejected async memo) and no Errored boundary is above it within this component or its callers up to the render root. At runtime the failure reaches the root and halts reactivity. Wrap the rendered work in <Errored fallback={…}>, or handle the failure where it is produced.",
-          "loc": {
-            "file": "openclaw/oc-12-index-row-mutant.tsx",
-            "line": 8,
-            "col": 16,
-            "endLine": 8,
-            "endCol": 23
-          }
-        }
-      ],
+      "extraErrors": [],
       "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
-      "soundnessFailure": true,
-      "total": 3
+      "soundnessFailure": false,
+      "total": 1
     },
     "oc-23-ref-read": {
       "hits": [],
@@ -1848,57 +1711,31 @@
       "warningHits": 0,
       "warningMisses": [],
       "extraErrors": [],
-      "extraWarnings": [
-        {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "This code is outside the checked subset. The checker did not refuse the file: values flowing from here are treated as the worst case (possibly pending, possibly failing with unknown), so obligations still surface downstream. Nothing here is trusted and nothing is silently green. No action required for soundness; to narrow the worst case, move the work into a supported form (the message names the construct).",
-          "loc": {
-            "file": "openclaw/oc-23-ref-read.tsx",
-            "line": 6,
-            "col": 13,
-            "endLine": 6,
-            "endCol": 60
-          }
-        }
-      ],
+      "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
       "soundnessFailure": false,
-      "total": 1
+      "total": 0
     },
     "oc-23-ref-read-mutant": {
-      "hits": [],
-      "imprecise": [],
-      "misses": [
+      "hits": [
         {
           "code": "STRICT_READ_UNTRACKED",
           "file": "oc-23-ref-read-mutant.tsx",
-          "at": "\"element.title = value()\""
+          "count": 1
         }
       ],
+      "imprecise": [],
+      "misses": [],
       "warningHits": 0,
       "warningMisses": [],
       "extraErrors": [],
-      "extraWarnings": [
-        {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "This code is outside the checked subset. The checker did not refuse the file: values flowing from here are treated as the worst case (possibly pending, possibly failing with unknown), so obligations still surface downstream. Nothing here is trusted and nothing is silently green. No action required for soundness; to narrow the worst case, move the work into a supported form (the message names the construct).",
-          "loc": {
-            "file": "openclaw/oc-23-ref-read-mutant.tsx",
-            "line": 6,
-            "col": 13,
-            "endLine": 6,
-            "endCol": 58
-          }
-        }
-      ],
+      "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
-      "soundnessFailure": true,
+      "soundnessFailure": false,
       "total": 1
     },
     "oc-23-ref-pending": {
@@ -1908,70 +1745,32 @@
       "warningHits": 0,
       "warningMisses": [],
       "extraErrors": [],
-      "extraWarnings": [
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-23-ref-pending-mutant": {
+      "hits": [
         {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "This code is outside the checked subset. The checker did not refuse the file: values flowing from here are treated as the worst case (possibly pending, possibly failing with unknown), so obligations still surface downstream. Nothing here is trusted and nothing is silently green. No action required for soundness; to narrow the worst case, move the work into a supported form (the message names the construct).",
-          "loc": {
-            "file": "openclaw/oc-23-ref-pending.tsx",
-            "line": 6,
-            "col": 22,
-            "endLine": 6,
-            "endCol": 69
-          }
+          "code": "PENDING_ASYNC_UNTRACKED_READ",
+          "file": "oc-23-ref-pending-mutant.tsx",
+          "count": 1
         }
       ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
       "soundnessFailure": false,
       "total": 1
-    },
-    "oc-23-ref-pending-mutant": {
-      "hits": [],
-      "imprecise": [],
-      "misses": [
-        {
-          "code": "PENDING_ASYNC_UNTRACKED_READ",
-          "file": "oc-23-ref-pending-mutant.tsx",
-          "at": "\"element.title = read()\""
-        }
-      ],
-      "warningHits": 0,
-      "warningMisses": [],
-      "extraErrors": [],
-      "extraWarnings": [
-        {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "This code is outside the checked subset. The checker did not refuse the file: values flowing from here are treated as the worst case (possibly pending, possibly failing with unknown), so obligations still surface downstream. Nothing here is trusted and nothing is silently green. No action required for soundness; to narrow the worst case, move the work into a supported form (the message names the construct).",
-          "loc": {
-            "file": "openclaw/oc-23-ref-pending-mutant.tsx",
-            "line": 6,
-            "col": 22,
-            "endLine": 6,
-            "endCol": 66
-          }
-        },
-        {
-          "code": "PENDING_ASYNC_IN_HANDLER",
-          "severity": "warn",
-          "message": "A possibly pending value is read in an event handler. An uninitialized read can throw or suspend even though a stale value can be served during refresh. Loading does not protect handlers. Avoid the pending read in the handler, or explicitly handle its uninitialized state and any failure.",
-          "loc": {
-            "file": "openclaw/oc-23-ref-pending-mutant.tsx",
-            "line": 6,
-            "col": 56,
-            "endLine": 6,
-            "endCol": 62
-          }
-        }
-      ],
-      "infoHits": 0,
-      "infoMisses": 0,
-      "infos": 0,
-      "soundnessFailure": true,
-      "total": 2
     },
     "oc-04-default-without-provider": {
       "hits": [],

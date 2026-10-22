@@ -143,6 +143,7 @@ function summary(r) {
   const scored = r.scores;
   const expectations = scored.reduce((n, s) => n + s.hits.length + s.misses.length, 0);
   const hits = scored.reduce((n, s) => n + s.hits.length, 0);
+  const imprecise = scored.reduce((n, s) => n + s.imprecise.length, 0);
   const inSubsetMisses = scored.filter(s => s.soundnessFailure);
   const mutantMisses = inSubsetMisses.filter(s => s.group === "mutants");
   const extraErrors = scored.reduce((n, s) => n + s.extraErrors.length, 0);
@@ -155,7 +156,7 @@ function summary(r) {
   const violations = [...new Set(scored.flatMap(s => s.codeTableViolations))];
   const infoHits = scored.reduce((n, s) => n + s.infoHits, 0);
   const infoExpect = scored.reduce((n, s) => n + s.infoHits + s.infoMisses, 0);
-  return { expectations, hits, agreement: expectations ? hits / expectations : 1, inSubsetMisses: inSubsetMisses.map(s => s.fixture), mutantMisses: mutantMisses.map(s => s.fixture), extraErrors, extraErrorsInSubsetClean, warningHits, warningExpect, extraWarnings, leakage, unmapped, violations, infoHits, infoExpect, crashes: r.crashes.length };
+  return { expectations, hits, imprecise, agreement: expectations ? hits / expectations : 1, inSubsetMisses: inSubsetMisses.map(s => s.fixture), mutantMisses: mutantMisses.map(s => s.fixture), extraErrors, extraErrorsInSubsetClean, warningHits, warningExpect, extraWarnings, leakage, unmapped, violations, infoHits, infoExpect, crashes: r.crashes.length };
 }
 
 const lines = [];
@@ -168,6 +169,7 @@ const sums = results.map(summary);
 /** @param {string} label @param {(s: ReturnType<typeof summary>, r: PrototypeResult) => string} cell */
 const row = (label, cell) => lines.push(`| ${label} | ${results.map((r, i) => cell(sums[i], r)).join(" | ")} |`);
 row("expected errors hit / expected", s => `${s.hits} / ${s.expectations} (${(s.agreement * 100).toFixed(0)} %)`);
+row("…of which located imprecisely (at a root, not the read)", s => String(s.imprecise));
 row("**soundness failures** (in-subset misses)", s => s.inSubsetMisses.length ? `**${s.inSubsetMisses.length}**: ${s.inSubsetMisses.join(", ")}` : "0");
 row("mutants missed", s => s.mutantMisses.length ? `**${s.mutantMisses.length}**` : "0");
 row("extra errors (all / on in-subset fixtures)", s => `${s.extraErrors} / ${s.extraErrorsInSubsetClean}`);
@@ -204,12 +206,13 @@ fixtures.forEach((fx, i) => {
 });
 lines.push("");
 for (const r of results) {
-  const detail = r.scores.filter(s => s.misses.length || s.extraErrors.length || s.leakage.length || s.codeTableViolations.length);
+  const detail = r.scores.filter(s => s.misses.length || s.extraErrors.length || s.leakage.length || s.codeTableViolations.length || s.imprecise.length);
   if (!detail.length && !r.crashes.length) continue;
   lines.push(`## ${r.prototype}: misses, extras, leakage`, "");
   for (const s of detail) {
     lines.push(`- **${s.fixture}**`);
     for (const m of s.misses) lines.push(`  - missed ${m.code} at ${m.at}${m.note ? ` — ${m.note}` : ""}`);
+    for (const m of s.imprecise) lines.push(`  - imprecise: ${m.code} located at a root / hand-off, not at the read`);
     for (const d of s.extraErrors) lines.push(`  - extra error: ${fmt(d)}`);
     for (const d of s.leakage) lines.push(`  - leakage: ${fmt(d)}`);
     for (const c of s.codeTableViolations) lines.push(`  - code outside the table: ${c}`);

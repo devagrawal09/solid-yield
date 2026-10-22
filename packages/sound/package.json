@@ -13,12 +13,15 @@
     "typescript": "^6.0.3"
   },
   "devDependencies": {
+    "@solidjs/compiler": "2.0.0-rc.17",
+    "@solidjs/vite-plugin": "3.0.0-next.51",
     "@solidjs/web": "2.0.0-rc.17",
-    "solid-js": "2.0.0-rc.17",
-    "@solidjs/vite-plugin": "3.0.0-next.35",
     "@types/node": "^25.0.8",
-    "vite": "^7.0.0",
+    "solid-js": "2.0.0-rc.17",
+    "vite": "^8.3.5",
     "vitest": "^4.1.6"
   },
-  "engines": { "node": ">=24" }
+  "engines": {
+    "node": ">=24"
+  }
 }

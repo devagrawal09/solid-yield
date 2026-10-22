@@ -14,7 +14,7 @@ import { BY_CODE } from "../src/codes.mjs";
 /** Generated-code vocabulary that must never reach a user-facing message. */
 export const LEAKAGE = /(_E_|_P_|\byield\*?|\bGenerator\b|Source<|Path<|\broutine\b|\blowered\b|__sound|SetupOp|ViewOp)/;
 
-/** @typedef {{ line: number, startCol: number, endCol: number }} Span */
+/** @typedef {{ line: number, startCol: number, endCol: number, file?: string, imprecise?: boolean }} Span */
 
 /**
  * @param {string} text
@@ -22,7 +22,7 @@ export const LEAKAGE = /(_E_|_P_|\byield\*?|\bGenerator\b|Source<|Path<|\broutin
  * @returns {Span | null}
  */
 export function resolveAnchor(text, anchor) {
-  if ("line" in anchor) return { line: anchor.line, startCol: 1, endCol: Number.MAX_SAFE_INTEGER };
+  if ("line" in anchor) return { line: anchor.line, startCol: 1, endCol: Number.MAX_SAFE_INTEGER, file: anchor.file, imprecise: anchor.imprecise };
   const occurrence = anchor.occurrence ?? 1;
   let index = -1;
   for (let i = 0; i < occurrence; i++) {
@@ -33,7 +33,7 @@ export function resolveAnchor(text, anchor) {
   const line = before.split("\n").length;
   const startCol = index - before.lastIndexOf("\n");
   // +2: a handler reported at the `{` or `(` right after an attribute name still counts.
-  return { line, startCol, endCol: startCol + anchor.find.length - 1 + 2 };
+  return { line, startCol, endCol: startCol + anchor.find.length - 1 + 2, file: anchor.file, imprecise: anchor.imprecise };
 }
 
 /**
@@ -45,9 +45,12 @@ export function resolveAnchor(text, anchor) {
 function matches(d, fixtureDir, e, spans) {
   if (d.code !== e.code) return false;
   const file = d.loc.file.replaceAll("\\", "/");
-  const expectedFile = resolve(fixtureDir, e.file).replaceAll("\\", "/");
-  if (file !== expectedFile && !file.endsWith("/" + e.file)) return false;
-  return spans.some(s => d.loc.line === s.line && d.loc.col >= s.startCol && d.loc.col <= s.endCol);
+  for (const s of spans) {
+    const expectedFile = resolve(fixtureDir, s.file ?? e.file).replaceAll("\\", "/");
+    if (file !== expectedFile && !file.endsWith("/" + (s.file ?? e.file))) continue;
+    if (d.loc.line === s.line && d.loc.col >= s.startCol && d.loc.col <= s.endCol) return s.imprecise ? "imprecise" : "precise";
+  }
+  return false;
 }
 
 /**
@@ -56,6 +59,7 @@ function matches(d, fixtureDir, e, spans) {
  *   group: Fixture["group"],
  *   inSubset: boolean,
  *   hits: { code: string, file: string, count: number }[],
+ *   imprecise: { code: string, file: string }[],
  *   misses: { code: string, file: string, at: string, note?: string }[],
  *   extraErrors: SoundDiagnostic[],
  *   warningHits: number,
@@ -91,11 +95,13 @@ export function score(fixture, fixturesDir, diagnostics, elapsedMs) {
     return t;
   };
   /** @param {Expectation} e */
-  const spansOf = e => e.at.map(a => resolveAnchor(textOf(e.file), a)).filter(/** @returns {s is Span} */ s => s !== null);
+  const spansOf = e => e.at.map(a => resolveAnchor(textOf(a.file ?? e.file), a)).filter(/** @returns {s is Span} */ s => s !== null);
   /** @param {Expectation} e */
   const describe = e => e.at.map(a => ("line" in a ? `line ${a.line}` : `"${a.find}"${a.occurrence ? ` #${a.occurrence}` : ""}`)).join(" | ");
 
   const consumed = new Set();
+  /** @type {{ code: string, file: string }[]} */
+  const imprecise = [];
   /**
    * @param {readonly Expectation[]} expectations
    * @param {SoundDiagnostic[]} pool
@@ -110,7 +116,8 @@ export function score(fixture, fixturesDir, diagnostics, elapsedMs) {
       if (!spans.length) throw new Error(`${fixture.id}: anchor not found for ${e.code} at ${describe(e)}`);
       const matched = pool.filter(d => matches(d, dir, e, spans));
       for (const d of matched) consumed.add(d);
-      if (matched.length >= (e.minCount ?? 1)) hits.push({ code: e.code, file: e.file, count: matched.length });
+      const precise = matched.filter(d => matches(d, dir, e, spans) === "precise").length;
+      if (matched.length >= (e.minCount ?? 1)) { hits.push({ code: e.code, file: e.file, count: matched.length }); if (!precise) imprecise.push({ code: e.code, file: e.file }); }
       else misses.push({ code: e.code, file: e.file, at: describe(e), note: e.note });
     }
     return { hits, misses };
@@ -133,6 +140,7 @@ export function score(fixture, fixturesDir, diagnostics, elapsedMs) {
     group: fixture.group,
     inSubset: fixture.inSubset,
     hits: e.hits,
+    imprecise,
     misses: e.misses,
     extraErrors,
     warningHits: w.hits.length,

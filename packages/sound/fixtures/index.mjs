@@ -25,6 +25,10 @@ const legacy = JSON.parse(readFileSync(resolve(fixturesDir, "legacy-actual.json"
 const f = (find, occurrence) => (occurrence === undefined ? { find } : { find, occurrence });
 /** @param {number} line @returns {Anchor} */
 const l = line => ({ line });
+/** A root in another file where a type-based checker can only report: counted as an imprecise hit. @param {string} file @param {string} find @returns {Anchor} */
+const root = (file, find) => ({ find, file, imprecise: true });
+/** The same, in the fixture's own file. @param {string} find @returns {Anchor} */
+const atRoot = find => ({ find, imprecise: true });
 /** @param {string} code @param {string} file @param {Anchor[]} at @param {{ minCount?: number, note?: string }} [more] @returns {Expectation} */
 const x = (code, file, at, more) => ({ code, file, at, ...more });
 
@@ -82,7 +86,7 @@ export const cases = [
   kase("return-null", { legacyExpected: [] }),
   kase("named-callback-in-setup", {
     legacyExpected: ["READ_IN_SETUP"],
-    expected: [x(STRICT, "named-callback-in-setup.tsx", [f("n()", 1), f("map(scale)")], { note: "the read inside scale, called from setup through map; either the read or the call" })]
+    expected: [x(STRICT, "named-callback-in-setup.tsx", [f("n()", 1), f("map(scale)"), f("[1, 2].map(scale)")], { note: "the read inside scale, called from setup through map; either the read or the call" })]
   }),
   kase("array-callback-in-setup", {
     legacyExpected: ["READ_IN_SETUP"],
@@ -117,12 +121,12 @@ export const cases = [
   kase("pending-root", {
     legacyExpected: ["PENDING_ROOT"],
     entry: true,
-    expected: [x(LOADING, "pending-root.tsx", [f("{n()}"), f("render(App")], { note: "at the read, with the root as a related location; the root line is also accepted" })]
+    expected: [x(LOADING, "pending-root.tsx", [f("{n()}"), atRoot("render(App")], { note: "at the read, with the root as a related location; the root is accepted as an imprecise location" })]
   }),
   kase("iife-pending-root", {
     legacyExpected: ["PENDING_ROOT"],
     entry: true,
-    expected: [x(LOADING, "iife-pending-root.tsx", [f("p() * 2"), f("(() => p() * 2)()"), f("render(App")])]
+    expected: [x(LOADING, "iife-pending-root.tsx", [f("p() * 2"), f("(() => p() * 2)()"), atRoot("render(App")])]
   }),
   kase("async-setup-reads", {
     legacyExpected: ["NATIVE_ASYNC_SETUP"],
@@ -146,16 +150,16 @@ export const cases = [
   kase("plain-callback-throw-in-memo", {
     legacyExpected: ["FOREIGN_HANDOFF"],
     entry: true,
-    expected: [x(ERRORED, "plain-callback-throw-in-memo.tsx", [f("{total()}"), f("throw new RangeError"), f("render(App")])]
+    expected: [x(ERRORED, "plain-callback-throw-in-memo.tsx", [f("{total()}"), f("throw new RangeError"), atRoot("render(App")])]
   }),
   kase("effect-reads-failing-memo-at-root", {
     legacyExpected: ["FOREIGN_HANDOFF"],
     entry: true,
-    expected: [x(ERRORED, "effect-reads-failing-memo-at-root.tsx", [f("() => checked()"), f("throw new RangeError"), f("render(")], { note: "an effect's compute reads a failing memo; the failure reaches the root" })]
+    expected: [x(ERRORED, "effect-reads-failing-memo-at-root.tsx", [f("() => checked()"), f("throw new RangeError"), atRoot("render(")], { note: "an effect's compute reads a failing memo; the failure reaches the root" })]
   }),
   kase("foreign-route-failure", {
     legacyExpected: ["FOREIGN_HANDOFF"],
-    expected: [x(ERRORED, "foreign-route-failure.tsx", [f("{n()}"), f("throw new Error"), f("component:Page")], { note: "the component is handed off as a value: a root" })]
+    expected: [x(ERRORED, "foreign-route-failure.tsx", [f("{n()}"), f("throw new Error"), atRoot("component:Page")], { note: "the component is handed off as a value: a root" })]
   }),
   kase("setup-promise-caught", { legacyExpected: [], notes: "a promise continuation in setup is a handler-like scope; its chain catches" }),
   kase("setup-promise-rejects", {
@@ -224,8 +228,8 @@ export const equipment = {
   expected: [
     // App.tsx: the service is a state factory (out of subset) → its members are worst case.
     x(HANDLER, "src/App.tsx", [f("onClick={service.reload}")], { note: "service.reload has no analyzable body: unknown" }),
-    x(LOADING, "src/App.tsx", [f("service.notice()")], { note: "worst-case value rendered outside any Loading (root: main.tsx)" }),
-    x(ERRORED, "src/App.tsx", [f("service.notice()")], { note: "worst-case value rendered outside any Errored" }),
+    x(LOADING, "src/App.tsx", [f("service.notice()"), root("src/main.tsx", "() => <App />")], { note: "worst-case value rendered outside any Loading (root: main.tsx)" }),
+    x(ERRORED, "src/App.tsx", [f("service.notice()"), root("src/main.tsx", "() => <App />")], { note: "worst-case value rendered outside any Errored" }),
     x(HANDLER, "src/App.tsx", [f("onClick={() => { service.reload(); reset(); }}")], { note: "the Errored fallback's retry handler calls the unknown service.reload" }),
     // CreateForm: the context's create() is unknown; try/finally catches nothing.
     x(HANDLER, `${EQ}CreateForm.tsx`, [f("onSubmit={submit}")]),
@@ -281,13 +285,13 @@ function mutant(id, spec) {
 export const mutants = [
   mutant("m-loading-removed", {
     parent: "cases/async-memo-nested-function", edit: "removed the <Loading> around {m()}", entry: true,
-    expected: [x(LOADING, "m-loading-removed.tsx", [f("{m()}"), f("render(App")])]
+    expected: [x(LOADING, "m-loading-removed.tsx", [f("{m()}"), atRoot("render(App")])]
   }),
   mutant("m-errored-removed", {
     parent: "cases/plain-callback-throw-under-errored", edit: "removed the <Errored> around the Loading", entry: true,
     expected: [
-      x(ERRORED, "m-errored-removed.tsx", [f("{total()}"), f("throw new RangeError"), f("render(App")]),
-      x(ERRORED, "m-errored-removed.tsx", [f("JSON.parse(String(x))")], { note: "the second failing read the removed Errored covered" })
+      x(ERRORED, "m-errored-removed.tsx", [f("{total()}"), f("throw new RangeError"), atRoot("render(App")]),
+      x(ERRORED, "m-errored-removed.tsx", [f("JSON.parse(String(x))"), atRoot("render(App")], { note: "the second failing read the removed Errored covered" })
     ]
   }),
   mutant("m-catch-removed", {
@@ -308,7 +312,7 @@ export const mutants = [
   }),
   mutant("m-handled-catch-rethrows", {
     parent: "cases/handled-catch", edit: "the catch rethrows and the component is rendered at a root with no Errored", entry: true,
-    expected: [x(ERRORED, "m-handled-catch-rethrows.tsx", [f("{n()}"), f("throw new Error"), f("render(")])]
+    expected: [x(ERRORED, "m-handled-catch-rethrows.tsx", [f("{n()}"), f("throw new Error"), atRoot("render(")])]
   }),
   mutant("m-async-helper-rejects", {
     parent: "cases/async-event-reads", edit: "load() throws after its await; the handler awaits it with no catch",
@@ -316,7 +320,7 @@ export const mutants = [
   }),
   mutant("m-pending-through-prop", {
     parent: "cases/colored-prop", edit: "App is rendered at a root; Child's read of the pending prop has no Loading above it", entry: true,
-    expected: [x(LOADING, "m-pending-through-prop.tsx", [f("{p.n}"), f("n={n()}"), f("render(")])]
+    expected: [x(LOADING, "m-pending-through-prop.tsx", [f("{p.n}"), f("n={n()}"), atRoot("render(")])]
   }),
   mutant("m-pending-read-in-setup", {
     parent: "cases/async-memo-reads", edit: "value() is read in setup (const v = value())",
@@ -328,11 +332,19 @@ export const mutants = [
   }),
   mutant("m-effect-phase-pending", {
     parent: "cases/async-memo-nested-function", edit: "the effect's effect function reads the async memo m()", entry: true,
-    expected: [x("PENDING_ASYNC_FORBIDDEN_SCOPE", "m-effect-phase-pending.tsx", [f("m() + 1")])]
+    expected: [x("PENDING_ASYNC_FORBIDDEN_SCOPE", "m-effect-phase-pending.tsx", [f("m() + 1"), f("() => console.log(m() + 1)")])]
+  }),
+  mutant("m-injected-api-ambient", {
+    parent: "cases/inline-event (shape) — review finding on b2dfebf", edit: "an ambient injected API whose methods are named like platform methods (get/set/add/delete/has/from) is called in six handlers with no catch",
+    expected: [x(HANDLER, "m-injected-api-ambient.tsx", [l(7), l(8), l(9), l(10), l(11), l(12)], { minCount: 6, note: "a name-only safe list would call these failure-free; they have no failure information" })]
+  }),
+  mutant("m-injected-api-prop", {
+    parent: "cases/props-interface-live (shape) — review finding on b2dfebf", edit: "an injected API passed through a prop; its get/set/map methods are called in three handlers with no catch", entry: true,
+    expected: [x(HANDLER, "m-injected-api-prop.tsx", [l(8), l(9), l(10)], { minCount: 3 })]
   }),
   mutant("m-equipment-row-loading-removed", {
     parent: "equipment (App.tsx + Inventory + EquipmentRow)", edit: "a self-contained copy of the service / inventory shape where the Loading around <Inventory> is removed from App", entry: true,
-    expected: [x(LOADING, "m-equipment-row-loading-removed.tsx", [f("props.list()"), f("<Inventory list={list} />"), f("render(")])],
+    expected: [x(LOADING, "m-equipment-row-loading-removed.tsx", [f("props.list()"), f("<Inventory list={list} />"), atRoot("render(")])],
     notes: "the list is an async memo created in the component (in subset); Inventory renders it and App renders Inventory without Loading"
   })
 ];

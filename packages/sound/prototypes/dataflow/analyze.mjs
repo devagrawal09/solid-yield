@@ -160,6 +160,18 @@ export class Analysis {
     return b;
   }
 
+  /** Does the call resolve to a default-lib declaration? @param {ts.CallExpression} call */
+  isLibMethod(call) {
+    const sf = this.checker.getResolvedSignature(call)?.getDeclaration()?.getSourceFile();
+    return !!sf && this.program.isSourceFileDefaultLibrary(sf);
+  }
+
+  /** Is this identifier the lib global of that name (Promise, JSON, setTimeout, fetch, …)? @param {ts.Identifier} id */
+  isLibGlobal(id) {
+    const decl = this.symbolOf(id)?.declarations?.[0];
+    return !!decl && this.program.isSourceFileDefaultLibrary(decl.getSourceFile());
+  }
+
   /** @param {ts.SourceFile} sf */
   isProjectFile(sf) {
     return this.files.has(sf.fileName.replaceAll("\\", "/"));
@@ -317,7 +329,7 @@ export class Analysis {
     /** @param {ts.Node} n */
     const visit = n => {
       if ((ts.isFunctionDeclaration(n) || ts.isArrowFunction(n) || ts.isFunctionExpression(n)) && n.body) {
-        const parentIsModule = ts.isFunctionDeclaration(n) ? ts.isSourceFile(n.parent) : (ts.isVariableDeclaration(n.parent) && ts.isSourceFile(n.parent.parent.parent));
+        const parentIsModule = ts.isFunctionDeclaration(n) ? ts.isSourceFile(n.parent) : (ts.isVariableDeclaration(n.parent) && ts.isSourceFile(n.parent.parent.parent.parent));
         if (parentIsModule) {
           const c = this.componentOf(n);
           const symbol = ts.isFunctionDeclaration(n) ? (n.name ? this.symbolOf(n.name) : undefined) : (ts.isVariableDeclaration(n.parent) && ts.isIdentifier(n.parent.name) ? this.symbolOf(n.parent.name) : undefined);
@@ -700,7 +712,12 @@ export class Analysis {
       }
       return join(derived(this.evalExpr(x.left, ctx)), derived(this.evalExpr(x.right, ctx)));
     }
-    if (ts.isPrefixUnaryExpression(x) || ts.isPostfixUnaryExpression(x) || ts.isTypeOfExpression(x) || ts.isVoidExpression(x) || ts.isSpreadElement(x)) {
+    if (ts.isVoidExpression(x)) {
+      const v = this.evalExpr(x.expression, ctx);
+      this.dropped(v, x.expression, ctx); // void p drops the promise: its rejection escapes
+      return constant();
+    }
+    if (ts.isPrefixUnaryExpression(x) || ts.isPostfixUnaryExpression(x) || ts.isTypeOfExpression(x) || ts.isSpreadElement(x)) {
       const operand = ts.isSpreadElement(x) ? x.expression : x.operand;
       return derived(this.evalExpr(operand, ctx));
     }
@@ -885,7 +902,7 @@ export class Analysis {
         }
       }
       const receiver = this.evalExpr(callee.expression, ctx);
-      if (PROMISE_METHODS.has(name) && (receiver.promise || isPromiseType(this.checker.getTypeAtLocation(callee.expression), this.checker))) return this.callPromiseMethod(name, receiver, call, ctx);
+      if (PROMISE_METHODS.has(name) && (receiver.promise || isPromiseType(this.checker.getTypeAtLocation(callee.expression), this.checker)) && this.isLibMethod(call)) return this.callPromiseMethod(name, receiver, call, ctx);
       if (receiver.worst || receiver.callables.some(cb => cb.kind === "function" && cb.node === null)) return this.callUnknownValue(call, receiver, ctx);
       return this.callPlatform(call, name, ctx, receiver);
     }
@@ -1114,6 +1131,23 @@ export class Analysis {
    * @param {ts.CallExpression} call @param {string} name @param {Ctx} ctx @param {Value} [receiver]
    */
   callPlatform(call, name, ctx, receiver) {
+    // Name tables apply ONLY to callees declared in a TypeScript default lib (the platform). A project or
+    // package method that happens to be called get / set / add / map / then has no failure information
+    // and is the worst case, whatever its name (review finding on b2dfebf).
+    const sig = this.checker.getResolvedSignature(call);
+    const decl = sig?.getDeclaration();
+    const declFile = decl?.getSourceFile();
+    const isLib = declFile ? this.program.isSourceFileDefaultLibrary(declFile) : false;
+    const calleeRoot = ts.isPropertyAccessExpression(call.expression) ? stripParens(call.expression.expression) : null;
+    const calleeText = calleeRoot && ts.isIdentifier(calleeRoot) && this.isLibGlobal(calleeRoot) ? calleeRoot.text : "";
+    if (!isLib && !(ts.isIdentifier(stripParens(call.expression)) && this.isLibGlobal(/** @type {ts.Identifier} */ (stripParens(call.expression))))) {
+      // No analyzable body, not the platform: unknown, carried by the promise when the result is one.
+      const args = call.arguments.map(a => this.evalCallbackArgument(a, ctx, "unknown"));
+      const type = this.checker.getTypeAtLocation(call);
+      if (isPromiseType(type, this.checker)) return { ...derived(joinAll([receiver ?? constant(), ...args])), promise: new Set(["unknown"]) };
+      this.raise(ctx, ["unknown"], `${this.text(call)} has no failure information`, call);
+      return derived(joinAll([receiver ?? constant(), ...args]));
+    }
     if (DETACHED_CALLBACKS.has(name)) {
       for (const a of call.arguments) this.evalCallbackArgument(a, ctx, "detached");
       return constant();
@@ -1122,7 +1156,6 @@ export class Analysis {
       const results = call.arguments.map(a => this.evalCallbackArgument(a, ctx, "sync"));
       return join(receiver ? derived(receiver) : constant(), derived(joinAll(results)));
     }
-    const calleeText = ts.isPropertyAccessExpression(call.expression) ? call.expression.expression.getText() : "";
     if (name === "reject" && calleeText === "Promise") {
       const v = call.arguments[0] ? this.evalExpr(call.arguments[0], ctx) : constant();
       return promiseOf(new Set(call.arguments[0] ? this.failureNamesOf(call.arguments[0], v) : ["unknown"]));
@@ -1138,14 +1171,10 @@ export class Analysis {
     const args = call.arguments.map(a => this.evalCallbackArgument(a, ctx, "unknown"));
     const known = PLATFORM_THROWS.get(name);
     if (known && calleeText === "JSON") { this.raise(ctx, [known], `${this.text(call)} may throw`, call); return constant(); }
-    const sig = this.checker.getResolvedSignature(call);
-    const decl = sig?.getDeclaration();
-    const declFile = decl?.getSourceFile();
-    const isLib = declFile ? this.program.isSourceFileDefaultLibrary(declFile) : false;
     const type = this.checker.getTypeAtLocation(call);
     if (isPromiseType(type, this.checker)) return { ...derived(joinAll(args)), promise: new Set(["unknown"]) };
-    if (SAFE_PLATFORM.has(name) || (isLib && declFile && !/lib\.dom/.test(declFile.fileName))) return derived(joinAll([receiver ?? constant(), ...args]));
-    // Project function without a binding (e.g. imported from a non-checked file) or a DOM / package call: unknown.
+    // The platform: ECMAScript library calls do not fail; DOM calls only when the small allowlist says so.
+    if (SAFE_PLATFORM.has(name) || (declFile && !/lib\.dom/.test(declFile.fileName))) return derived(joinAll([receiver ?? constant(), ...args]));
     this.raise(ctx, ["unknown"], `${this.text(call)} has no failure information`, call);
     return derived(joinAll([receiver ?? constant(), ...args]));
   }
@@ -1189,11 +1218,12 @@ export class Analysis {
     if (c.propsWorst || (entry && entry.worst)) return worst();
     if (!entry || entry.values.length === 0) return { ...constant(), callables: [{ kind: "function", node: null, reasonText: `props.${name}(…) has no caller in this program` }] };
     const v = joinAll(entry.values);
+    // The caller's expression runs in the child's read (Solid wraps prop expressions in getters): its failures land here.
+    if (v.failures.size) this.raise(ctx, v.failures, `evaluating props.${name} may fail`, at);
     if (!v.callables.length) {
       // Called, but no caller passed a function we can see (a value, a member of a bag): unknown.
       return { ...v, callables: [{ kind: "function", node: null, reasonText: `props.${name}(…) has no analyzable function` }] };
     }
-    void at; void ctx;
     return v;
   }
 

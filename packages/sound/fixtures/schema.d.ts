@@ -4,7 +4,12 @@
  * anchor is that substring's line and column span (occurrence 1-based, default
  * 1). A diagnostic matches a find-anchor when its line equals the anchor's and
  * its column lies within the span; it matches a line-anchor on line alone. */
-export type Anchor = { find: string; occurrence?: number } | { line: number };
+export type Anchor =
+  | { find: string; occurrence?: number; file?: string; imprecise?: boolean }
+  | { line: number; file?: string; imprecise?: boolean };
+/** `file` overrides the expectation's file (a root in another module); `imprecise`
+ * marks a location that satisfies the expectation but is counted separately as an
+ * imprecise hit (the obligation reported at the root instead of at the read). */
 
 export interface Expectation {
   code: string;

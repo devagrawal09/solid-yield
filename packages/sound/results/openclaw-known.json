@@ -718,15 +718,15 @@
       "total": 0
     },
     "oc-02-effect-prop-phase-mutant": {
-      "hits": [],
-      "imprecise": [],
-      "misses": [
+      "hits": [
         {
           "code": "STRICT_READ_UNTRACKED",
           "file": "oc-02-effect-prop-phase-mutant.tsx",
-          "at": "\"props.value\""
+          "count": 1
         }
       ],
+      "imprecise": [],
+      "misses": [],
       "warningHits": 0,
       "warningMisses": [],
       "extraErrors": [],
@@ -734,8 +734,8 @@
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
-      "soundnessFailure": true,
-      "total": 0
+      "soundnessFailure": false,
+      "total": 1
     },
     "oc-03-optional-context": {
       "hits": [],
@@ -956,36 +956,23 @@
       "total": 0
     },
     "oc-09-forwarded-pending-setup-mutant": {
-      "hits": [],
-      "imprecise": [],
-      "misses": [
+      "hits": [
         {
           "code": "PENDING_ASYNC_UNTRACKED_READ",
           "file": "oc-09-forwarded-pending-setup-mutant.tsx",
-          "at": "\"props.value\""
+          "count": 1
         }
       ],
+      "imprecise": [],
+      "misses": [],
       "warningHits": 0,
       "warningMisses": [],
-      "extraErrors": [
-        {
-          "code": "PENDING_ASYNC_UNTRACKED_READ",
-          "severity": "error",
-          "message": "Async value \"props.value\" is read in <Child>'s setup; while it is pending there is nothing to read. Read it in a tracking scope (JSX, a memo, or an effect's compute function) under a Loading boundary.",
-          "loc": {
-            "file": "openclaw/oc-09-forwarded-pending-setup-mutant.tsx",
-            "line": 6,
-            "col": 66,
-            "endLine": 6,
-            "endCol": 77
-          }
-        }
-      ],
+      "extraErrors": [],
       "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
-      "soundnessFailure": true,
+      "soundnessFailure": false,
       "total": 1
     },
     "oc-10-untrack-not-a-catch": {
@@ -1003,15 +990,15 @@
       "total": 0
     },
     "oc-10-untrack-not-a-catch-mutant": {
-      "hits": [],
-      "imprecise": [],
-      "misses": [
+      "hits": [
         {
           "code": "SETUP_MAY_THROW",
           "file": "oc-10-untrack-not-a-catch-mutant.tsx",
-          "at": "\"untrack(sample)\""
+          "count": 1
         }
       ],
+      "imprecise": [],
+      "misses": [],
       "warningHits": 0,
       "warningMisses": [],
       "extraErrors": [],
@@ -1019,8 +1006,8 @@
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
-      "soundnessFailure": true,
-      "total": 0
+      "soundnessFailure": false,
+      "total": 1
     },
     "oc-12-keyed-row-snapshot": {
       "hits": [],
@@ -1037,15 +1024,15 @@
       "total": 0
     },
     "oc-12-keyed-row-snapshot-mutant": {
-      "hits": [],
-      "imprecise": [],
-      "misses": [
+      "hits": [
         {
           "code": "STRICT_READ_UNTRACKED",
           "file": "oc-12-keyed-row-snapshot-mutant.tsx",
-          "at": "\"row().label\""
+          "count": 1
         }
       ],
+      "imprecise": [],
+      "misses": [],
       "warningHits": 0,
       "warningMisses": [],
       "extraErrors": [],
@@ -1053,8 +1040,8 @@
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
-      "soundnessFailure": true,
-      "total": 0
+      "soundnessFailure": false,
+      "total": 1
     },
     "oc-12-row-pending": {
       "hits": [],
@@ -1071,15 +1058,15 @@
       "total": 0
     },
     "oc-12-row-pending-mutant": {
-      "hits": [],
-      "imprecise": [],
-      "misses": [
+      "hits": [
         {
           "code": "PENDING_ASYNC_UNTRACKED_READ",
           "file": "oc-12-row-pending-mutant.tsx",
-          "at": "\"read()\""
+          "count": 1
         }
       ],
+      "imprecise": [],
+      "misses": [],
       "warningHits": 0,
       "warningMisses": [],
       "extraErrors": [],
@@ -1087,8 +1074,8 @@
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
-      "soundnessFailure": true,
-      "total": 0
+      "soundnessFailure": false,
+      "total": 1
     },
     "oc-12-row-held": {
       "hits": [],
@@ -1119,15 +1106,15 @@
       "total": 0
     },
     "oc-12-index-row-mutant": {
-      "hits": [],
-      "imprecise": [],
-      "misses": [
+      "hits": [
         {
           "code": "STRICT_READ_UNTRACKED",
           "file": "oc-12-index-row-mutant.tsx",
-          "at": "\"row()\""
+          "count": 1
         }
       ],
+      "imprecise": [],
+      "misses": [],
       "warningHits": 0,
       "warningMisses": [],
       "extraErrors": [],
@@ -1135,8 +1122,8 @@
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
-      "soundnessFailure": true,
-      "total": 0
+      "soundnessFailure": false,
+      "total": 1
     },
     "oc-23-ref-read": {
       "hits": [],
@@ -1145,57 +1132,31 @@
       "warningHits": 0,
       "warningMisses": [],
       "extraErrors": [],
-      "extraWarnings": [
-        {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "a ref is outside the checked subset; the ref callback runs as a handler; its reads are not tracked and its failures are unhandled. Nothing here is trusted: downstream obligations still surface.",
-          "loc": {
-            "file": "openclaw/oc-23-ref-read.tsx",
-            "line": 6,
-            "col": 13,
-            "endLine": 6,
-            "endCol": 60
-          }
-        }
-      ],
+      "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
       "soundnessFailure": false,
-      "total": 1
+      "total": 0
     },
     "oc-23-ref-read-mutant": {
-      "hits": [],
-      "imprecise": [],
-      "misses": [
+      "hits": [
         {
           "code": "STRICT_READ_UNTRACKED",
           "file": "oc-23-ref-read-mutant.tsx",
-          "at": "\"element.title = value()\""
+          "count": 1
         }
       ],
+      "imprecise": [],
+      "misses": [],
       "warningHits": 0,
       "warningMisses": [],
       "extraErrors": [],
-      "extraWarnings": [
-        {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "a ref is outside the checked subset; the ref callback runs as a handler; its reads are not tracked and its failures are unhandled. Nothing here is trusted: downstream obligations still surface.",
-          "loc": {
-            "file": "openclaw/oc-23-ref-read-mutant.tsx",
-            "line": 6,
-            "col": 13,
-            "endLine": 6,
-            "endCol": 58
-          }
-        }
-      ],
+      "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
-      "soundnessFailure": true,
+      "soundnessFailure": false,
       "total": 1
     },
     "oc-23-ref-pending": {
@@ -1205,70 +1166,32 @@
       "warningHits": 0,
       "warningMisses": [],
       "extraErrors": [],
-      "extraWarnings": [
+      "extraWarnings": [],
+      "infoHits": 0,
+      "infoMisses": 0,
+      "infos": 0,
+      "soundnessFailure": false,
+      "total": 0
+    },
+    "oc-23-ref-pending-mutant": {
+      "hits": [
         {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "a ref is outside the checked subset; the ref callback runs as a handler; its reads are not tracked and its failures are unhandled. Nothing here is trusted: downstream obligations still surface.",
-          "loc": {
-            "file": "openclaw/oc-23-ref-pending.tsx",
-            "line": 6,
-            "col": 22,
-            "endLine": 6,
-            "endCol": 69
-          }
+          "code": "PENDING_ASYNC_UNTRACKED_READ",
+          "file": "oc-23-ref-pending-mutant.tsx",
+          "count": 1
         }
       ],
+      "imprecise": [],
+      "misses": [],
+      "warningHits": 0,
+      "warningMisses": [],
+      "extraErrors": [],
+      "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
       "soundnessFailure": false,
       "total": 1
-    },
-    "oc-23-ref-pending-mutant": {
-      "hits": [],
-      "imprecise": [],
-      "misses": [
-        {
-          "code": "PENDING_ASYNC_UNTRACKED_READ",
-          "file": "oc-23-ref-pending-mutant.tsx",
-          "at": "\"element.title = read()\""
-        }
-      ],
-      "warningHits": 0,
-      "warningMisses": [],
-      "extraErrors": [],
-      "extraWarnings": [
-        {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "a ref is outside the checked subset; the ref callback runs as a handler; its reads are not tracked and its failures are unhandled. Nothing here is trusted: downstream obligations still surface.",
-          "loc": {
-            "file": "openclaw/oc-23-ref-pending-mutant.tsx",
-            "line": 6,
-            "col": 22,
-            "endLine": 6,
-            "endCol": 66
-          }
-        },
-        {
-          "code": "PENDING_ASYNC_IN_HANDLER",
-          "severity": "warn",
-          "message": "This handler may read a value before it is initialized. Loading and try/catch do not make a pending handler read ready.",
-          "loc": {
-            "file": "openclaw/oc-23-ref-pending-mutant.tsx",
-            "line": 6,
-            "col": 56,
-            "endLine": 6,
-            "endCol": 62
-          }
-        }
-      ],
-      "infoHits": 0,
-      "infoMisses": 0,
-      "infos": 0,
-      "soundnessFailure": true,
-      "total": 2
     },
     "oc-04-default-without-provider": {
       "hits": [],

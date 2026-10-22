@@ -16,7 +16,7 @@ import {
 /** @typedef {import("../../src/types.d.ts").SoundDiagnostic} SoundDiagnostic */
 /** @typedef {import("../../src/types.d.ts").Loc} Loc */
 /** @typedef {Pick<ts.Node, "getSourceFile" | "getStart" | "getEnd">} LocNode */
-/** @typedef {"setup" | "tracking" | "handler" | "effect" | "untracked"} Scope */
+/** @typedef {"setup" | "tracking" | "handler" | "effect" | "untracked" | "ref"} Scope */
 
 /** @typedef {{ loc: Loc, path: string[], source: string, failures?: Set<string>, uncoverable?: boolean, related?: Loc[] }} Obligation */
 
@@ -49,7 +49,8 @@ import {
  *   view: View | null,
  *   depth: number,
  *   ownerName: string,
- *   untracked?: boolean
+ *   untracked?: boolean,
+ *   refAt?: ts.Node
  * }} Ctx
  */
 
@@ -623,19 +624,20 @@ export class Analysis {
   read(source, node, ctx) {
     const c = ctx.component;
     const loc = this.loc(node);
-    const scope = ctx.scope === "untracked" ? "setup" : ctx.scope;
+    const readScope = ctx.scope === "ref" ? "setup" : ctx.scope;
+    const scope = readScope === "untracked" ? "setup" : readScope;
     c?.facts.reads.push({ loc, scope, source: source.name });
-    switch (ctx.scope) {
+    switch (readScope) {
       case "setup":
         if (source.reactive && !ctx.untracked) {
           if (source.pending)
             this.report("PENDING_ASYNC_UNTRACKED_READ", "async", "error",
               `Async value "${source.name}" is read in ${ctx.ownerName}'s setup; while it is pending there is nothing to read. Read it in a tracking scope (JSX, a memo, or an effect's compute function) under a Loading boundary.`,
-              node, { ownerName: ctx.ownerName, data: { source: source.name } });
+              node, { ownerName: ctx.ownerName, related: source.related?.map(loc => ({ message: "caller prop expression", loc })), data: { source: source.name } });
           else
             this.report("STRICT_READ_UNTRACKED", "strict-read", "error",
               `Reactive value "${source.name}" is read directly in ${ctx.ownerName}'s setup and will not update. Move it into a tracking scope (JSX, a memo, or an effect's compute function), or into the handler that needs it.`,
-              node, { ownerName: ctx.ownerName, data: { source: source.name } });
+              node, { ownerName: ctx.ownerName, related: source.related?.map(loc => ({ message: "caller prop expression", loc })), data: { source: source.name } });
         }
         if (source.failures.size) this.raise(ctx, source.failures, `reading "${source.name}" may fail`, node);
         break;
@@ -656,7 +658,11 @@ export class Analysis {
         if (source.pending && !ctx.untracked)
           this.report("PENDING_ASYNC_FORBIDDEN_SCOPE", "async", "error",
             `Async value "${source.name}" is read in an effect function, which serves the committed value and throws while uninitialized. Read it in the effect's compute function and pass the value.`,
-            node, { ownerName: ctx.ownerName, data: { source: source.name } });
+            node, { ownerName: ctx.ownerName, related: source.related?.map(loc => ({ message: "caller prop expression", loc })), data: { source: source.name } });
+        else if (source.reactive && !ctx.untracked)
+          this.report("STRICT_READ_UNTRACKED", "strict-read", "error",
+            `Reactive value "${source.name}" is read in an effect's apply function and will not update. Read it in compute and pass the value to apply.`,
+            node, { ownerName: ctx.ownerName, related: source.related?.map(loc => ({ message: "caller prop expression", loc })) });
         if (source.failures.size) this.raise(ctx, source.failures, `reading "${source.name}" may fail`, node);
         break;
       case "untracked":
@@ -1007,9 +1013,12 @@ export class Analysis {
         return constant();
       }
       case "untrack": {
-        const fn = args[0] ? stripParens(args[0]) : null;
-        if (fn && isFunctionLike(fn)) return this.analyzeFunction(/** @type {ts.FunctionLikeDeclaration} */ (fn), { ...ctx, untracked: true }, []);
-        return constant();
+        if (!args[0]) return constant();
+        const before = this.setupFailureNode;
+        const value = this.evalExpr(args[0], ctx);
+        const result = this.callValueAsHandler(value, call, { ...ctx, untracked: true }, []);
+        if (!before && this.setupFailureNode) this.setupFailureNode = call;
+        return result;
       }
       case "useContext": {
         const context = args[0] ? this.evalExpr(args[0], ctx) : constant();
@@ -1119,15 +1128,7 @@ export class Analysis {
     const args = call.arguments.map(a => this.evalExpr(a, ctx));
     switch (b.kind) {
       case "signal": case "memo": case "accessor": return this.read(b.source, call, ctx);
-      case "setter": {
-        if (ctx.scope === "setup" || ctx.scope === "tracking" || ctx.scope === "untracked") {
-          const where = ctx.comp ? ctx.ownerName : ctx.scope === "tracking" ? "a JSX expression" : `${ctx.ownerName}'s setup`;
-          this.report("REACTIVE_WRITE_IN_OWNED_SCOPE", "write", "error",
-            `Setter "${b.name}" is called inside ${where}, an owned scope (component body or computation). Move the write into an event handler or an effect function.`,
-            call, { ownerName: ctx.ownerName, data: { setter: b.name } });
-        }
-        return constant();
-      }
+      case "setter": return this.write(b.name, call, ctx);
       case "function": {
         return this.analyzeFunction(b.node, ctx, args, b.environment);
       }
@@ -1140,6 +1141,21 @@ export class Analysis {
       case "props": return this.callUnknownValue(call, worst(), ctx);
       case "caught": return constant();
     }
+  }
+
+  /** @param {string} name @param {ts.Node} at @param {Ctx} ctx */
+  write(name, at, ctx) {
+    if (ctx.scope === "ref") {
+      this.unanalyzed(ctx.refAt ?? at, "a reactive write in a ref callback", "ref write ownership is not modeled; the write result is treated as possibly pending and failing.", ctx);
+      return worst();
+    }
+    if (ctx.scope === "setup" || ctx.scope === "tracking" || ctx.scope === "untracked") {
+      const where = ctx.comp ? ctx.ownerName : ctx.scope === "tracking" ? "a JSX expression" : `${ctx.ownerName}'s setup`;
+      this.report("REACTIVE_WRITE_IN_OWNED_SCOPE", "write", "error",
+        `Setter "${name}" is called inside ${where}, an owned scope (component body or computation). Move the write into an event handler or an effect function.`,
+        at, { ownerName: ctx.ownerName, data: { setter: name } });
+    }
+    return constant();
   }
 
   /**
@@ -1370,13 +1386,14 @@ export class Analysis {
    * A JSX event attribute's value, analyzed as a handler.
    * @param {ts.JsxAttribute} attr
    * @param {Ctx} ctx
+   * @param {boolean} [setupReads] ref callbacks have setup-like reads, not component ownership
    */
-  analyzeHandlerAttribute(attr, ctx) {
+  analyzeHandlerAttribute(attr, ctx, setupReads = false) {
     const init = attr.initializer;
     if (!init || !ts.isJsxExpression(init) || !init.expression) return;
     const expr = stripParens(init.expression);
     const acc = this.newFnAcc();
-    const hctx = { ...ctx, scope: /** @type {Scope} */ ("handler"), fn: acc, comp: null, view: null, ownerName: ctx.ownerName };
+    const hctx = { ...ctx, scope: /** @type {Scope} */ (setupReads ? "ref" : "handler"), refAt: setupReads ? attr : undefined, fn: acc, comp: null, view: null, ownerName: ctx.ownerName };
     /** @type {Value} */
     let result;
     if (isFunctionLike(expr)) result = this.analyzeFunction(/** @type {ts.FunctionLikeDeclaration} */ (expr), hctx, [constant()]);
@@ -1384,14 +1401,17 @@ export class Analysis {
       // onClick={save} / onClick={props.onClick} / onClick={service.reload}: the value is called with the event.
       const v = this.evalExpr(init.expression, { ...ctx, scope: "tracking", comp: { pending: false, failures: new Set(), reads: 0 }, view: null });
       if (ts.isArrayLiteralExpression(expr)) { this.unanalyzed(expr, "a bound handler array", "its handler is treated as possibly failing with unknown.", ctx); result = { ...constant(), promise: new Set(["unknown"]) }; }
+      else if (setupReads && !v.callables.length && !v.worst && !this.checker.getTypeAtLocation(init.expression).getCallSignatures().length) result = constant(); // ref={element}: capture, not a callback
       else result = this.callValueAsHandler(v, init.expression, hctx);
     }
     const escaping = new Set([...acc.throws, ...(result.promise ?? [])]);
     if (escaping.size) this.reportHandler(attr.name, `this ${attr.name.getText()} handler`, escaping, acc, ctx);
   }
 
-  /** @param {Value} v @param {ts.Expression} at @param {Ctx} hctx */
-  callValueAsHandler(v, at, hctx) {
+  /** Invoke a held callback in the supplied scope (also used by ref and untrack).
+   * @param {Value} v @param {ts.Expression} at @param {Ctx} hctx @param {Value[]} [args]
+   */
+  callValueAsHandler(v, at, hctx, args = [constant()]) {
     if (v.worst || !v.callables.length) {
       this.raise(hctx, ["unknown"], `${this.text(at)} has no failure information`, at);
       return constant();
@@ -1400,9 +1420,10 @@ export class Analysis {
     const results = [];
     if (v.opaque) this.raise(hctx, ["unknown"], this.text(at) + " has no failure information", at);
     for (const cb of v.callables) {
-      if (cb.kind === "function" && cb.node) results.push(this.analyzeFunction(/** @type {ts.FunctionLikeDeclaration} */ (cb.node), hctx, [constant()], cb.environment));
+      if (cb.kind === "function" && cb.node) results.push(this.analyzeFunction(/** @type {ts.FunctionLikeDeclaration} */ (cb.node), hctx, args, cb.environment));
       else if (cb.kind === "function") { this.raise(hctx, ["unknown"], `${cb.reasonText ?? this.text(at)} has no failure information`, at); results.push(constant()); }
       else if (cb.kind === "source") results.push(this.read(/** @type {Source} */ (cb.source), at, hctx));
+      else if (cb.kind === "setter") results.push(this.write(cb.node ? this.text(cb.node) : "setter", at, hctx));
       else results.push(constant());
     }
     return joinAll(results);
@@ -1471,8 +1492,7 @@ export class Analysis {
         const name = attr.name.getText();
         if (isEventAttribute(name)) { this.analyzeHandlerAttribute(attr, { ...ctx, view }); continue; }
         if (name === "ref") {
-          this.unanalyzed(attr, "a ref", "the ref callback runs as a handler; its reads are not tracked and its failures are unhandled.", ctx);
-          this.analyzeHandlerAttribute(attr, { ...ctx, view });
+          this.analyzeHandlerAttribute(attr, { ...ctx, view }, true);
           continue;
         }
         if (attr.initializer && ts.isJsxExpression(attr.initializer) && attr.initializer.expression) this.evalExpr(attr.initializer.expression, tctx);
@@ -1522,10 +1542,13 @@ export class Analysis {
           const each = attrExpr("each") ?? attrExpr("count");
           const eachValue = each ? this.evalExpr(each, tctx) : constant();
           const fb = attrExpr("fallback"); if (fb) this.evalExprAsView(fb, ctx, view);
+          const keyed = attrExpr("keyed");
+          const indexMode = api.api === "Index" || keyed?.kind === ts.SyntaxKind.FalseKeyword;
+          const itemAccessor = indexMode || !!(keyed && keyed.kind !== ts.SyntaxKind.TrueKeyword);
           for (const ch of children) this.evalRenderCallbackOrChild(ch, ctx, view, [
-            { name: "item", reactive: true, pending: false, failures: new Set(), worst: eachValue.worst, node: each ?? whole },
-            { name: "index", reactive: true, pending: false, failures: new Set(), worst: false, node: each ?? whole }
-          ]);
+            itemAccessor ? { name: "item", reactive: true, pending: false, failures: new Set(), worst: eachValue.worst, node: each ?? whole } : null,
+            indexMode ? null : { name: "index", reactive: true, pending: false, failures: new Set(), worst: false, node: each ?? whole }
+          ], true);
           return;
         }
         case "Switch": {
@@ -1573,14 +1596,16 @@ export class Analysis {
     else this.evalExpr(e, { ...ctx, scope: "tracking", comp: null, view });
   }
 
-  /** Show / For children: a render callback whose parameters are safe accessors, or plain children. @param {ts.JsxChild} ch @param {Ctx} ctx @param {View} view @param {Source[]} params */
-  evalRenderCallbackOrChild(ch, ctx, view, params) {
+  /** Show / For children: null parameters are held values, the others are accessors.
+   * @param {ts.JsxChild} ch @param {Ctx} ctx @param {View} view @param {(Source | null)[]} params @param {boolean} [setup]
+   */
+  evalRenderCallbackOrChild(ch, ctx, view, params, setup = false) {
     if (ts.isJsxExpression(ch) && ch.expression) {
       const x = stripParens(ch.expression);
       if (isFunctionLike(x)) {
         const fn = /** @type {ts.FunctionLikeDeclaration} */ (x);
-        const args = params.map(p => callable({ kind: "source", node: x, source: p }));
-        this.analyzeRenderCallback(fn, { ...ctx, scope: "tracking", comp: null, view }, args);
+        const args = params.map(p => p ? callable({ kind: "source", node: x, source: p }) : constant());
+        this.analyzeRenderCallback(fn, { ...ctx, scope: setup ? "setup" : "tracking", comp: null, view }, args);
         return;
       }
     }
@@ -1589,7 +1614,7 @@ export class Analysis {
 
   /** @param {ts.FunctionLikeDeclaration} fn @param {Ctx} ctx @param {Value[]} args */
   analyzeRenderCallback(fn, ctx, args) {
-    // Keyed For hands the item as a plain value, not an accessor: either way the body is a view in a tracking scope.
+    // The caller sets the body scope; returned JSX introduces tracking reads.
     fn.parameters.forEach((p, i) => {
       if (ts.isIdentifier(p.name)) { const sym = this.symbolOf(p.name); if (sym) this.bindings.set(sym, { kind: "value", value: args[i] ?? { ...constant(), opaque: true } }); }
       else if (ts.isObjectBindingPattern(p.name)) for (const el of p.name.elements) if (ts.isIdentifier(el.name)) { const sym = this.symbolOf(el.name); if (sym) this.bindings.set(sym, { kind: "value", value: constant() }); }
@@ -1598,7 +1623,7 @@ export class Analysis {
     if (!body) return;
     const view = /** @type {View} */ (ctx.view);
     if (ts.isBlock(body)) {
-      // Statements before the return run in a tracking scope; returned JSX is the view.
+      // For row statements are setup-like; Show callbacks remain tracking.
       for (const s of body.statements) {
         if (ts.isReturnStatement(s) && s.expression) this.evalView(s.expression, ctx, view);
         else this.analyzeStatement(s, ctx, null);

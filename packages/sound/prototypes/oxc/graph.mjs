@@ -10,9 +10,36 @@ const declarationPath = path => /[.]d[.](?:ts|mts|cts)$/.test(path);
 export const plain = value => ({ tag: "plain", value });
 export const unknown = (reason = "no body or annotation") => ({ tag: "unknown", reason });
 export const object = (members = new Map()) => ({ tag: "object", members });
+export function scalarKey(value) {
+  if (
+    value?.tag !== "plain" ||
+    !Object.values(value).every(
+      v => v === null || ["undefined", "boolean", "number", "string", "bigint"].includes(typeof v)
+    )
+  )
+    return null;
+  return JSON.stringify(
+    Object.entries(value)
+      .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+      .map(([key, v]) => [
+        key,
+        typeof v,
+        typeof v === "number" || typeof v === "bigint" ? (Object.is(v, -0) ? "-0" : String(v)) : v
+      ])
+  );
+}
 export function join(...values) {
   const arms = values.flatMap(v => (v?.tag === "union" ? v.arms : v ? [v] : []));
-  const unique = [...new Set(arms)];
+  const seen = new Set();
+  const unique = arms.filter(value => {
+    // Equal scalar facts are one alternative, not a fresh branch on each join.
+    // Mutable values still compare by identity (two factories remain distinct).
+    const scalar = scalarKey(value);
+    const key = scalar === null ? value : "plain:" + scalar;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
   return unique.length === 1 ? unique[0] : unique.length ? { tag: "union", arms: unique } : plain();
 }
 export function each(value, fn) {
@@ -121,8 +148,12 @@ export class Modules {
     this.options = options;
     this.modules = new Map();
     this.dependencies = new Set();
+    this.resolutions = new Map();
+    this.packages = new Map();
+    this.dependencyCache = new Map();
     this.dependencyRoots = new Set();
     this.locations = new WeakMap();
+    this.locationCache = new WeakMap();
     this.resolver = new ResolverFactory({
       extensions: [".ts", ".tsx", ".mts", ".js", ".mjs", ".jsx", ".d.ts"],
       conditionNames: ["types", "import", "browser", "default"],
@@ -138,12 +169,21 @@ export class Modules {
     }
   }
   resolve(from, spec) {
-    const result = this.resolver.sync(dirname(from), spec);
+    const directory = dirname(from);
+    const cacheKey = directory + ":" + spec;
+    if (!this.resolutions.has(cacheKey))
+      this.resolutions.set(cacheKey, this.resolver.sync(directory, spec));
+    const result = this.resolutions.get(cacheKey);
     if (result.path) {
       let pkg;
       if (result.packageJsonPath) {
         try {
-          pkg = JSON.parse(readFileSync(result.packageJsonPath, "utf8")).name;
+          if (!this.packages.has(result.packageJsonPath))
+            this.packages.set(
+              result.packageJsonPath,
+              JSON.parse(readFileSync(result.packageJsonPath, "utf8")).name
+            );
+          pkg = this.packages.get(result.packageJsonPath);
         } catch {}
       }
       const dependency =
@@ -153,10 +193,12 @@ export class Modules {
       if (dependency) {
         this.dependencies.add(result.path);
         if (result.packageJsonPath) {
+          const previousSize = this.dependencyRoots.size;
           this.dependencyRoots.add(dirname(result.packageJsonPath));
           try {
             this.dependencyRoots.add(dirname(realpathSync(result.packageJsonPath)));
           } catch {}
+          if (previousSize !== this.dependencyRoots.size) this.dependencyCache.clear();
         }
       }
       // An implementation entry may have an adjacent declaration even without
@@ -186,14 +228,17 @@ export class Modules {
     return result;
   }
   isDependency(path) {
-    return (
+    if (installedPath(path) || this.dependencies.has(path)) return true;
+    if (this.dependencyCache.has(path)) return this.dependencyCache.get(path);
+    const result =
       installedPath(path) ||
       this.dependencies.has(path) ||
       [...this.dependencyRoots].some(root => {
         const subpath = relative(root, path);
         return !subpath.startsWith("..") && !isAbsolute(subpath);
-      })
-    );
+      });
+    this.dependencyCache.set(path, result);
+    return result;
   }
   prepare() {
     const visited = new Set();
@@ -207,6 +252,12 @@ export class Modules {
     for (const path of this.options.files)
       if (!relative(this.options.rootDir, path).startsWith("..")) visit(path);
     for (const path of this.options.files) visit(path);
+    // An edit can establish a new installed-package boundary around an old root.
+    for (const [path, mod] of this.modules)
+      if (!mod.dependency && this.isDependency(path)) {
+        this.modules.delete(path);
+        this.load(path);
+      }
   }
   load(path) {
     if (this.modules.has(path)) return this.modules.get(path);
@@ -218,6 +269,7 @@ export class Modules {
     const mod = {
       path,
       text,
+      lineStarts: [0, ...Array.from(text.matchAll(/\n/g), m => m.index + 1)],
       dependency,
       blocked,
       declarationOnly: blocked || declarationPath(path),
@@ -282,15 +334,22 @@ export class Modules {
   loc(node) {
     const mod = this.locations.get(node);
     if (!mod) return { file: this.options.files[0], line: 1, col: 1 };
-    const before = mod.text.slice(0, node.start);
-    const end = mod.text.slice(0, node.end);
-    return {
-      file: mod.path,
-      line: before.split(String.fromCharCode(10)).length,
-      col: before.length - before.lastIndexOf(String.fromCharCode(10)),
-      endLine: end.split(String.fromCharCode(10)).length,
-      endCol: end.length - end.lastIndexOf(String.fromCharCode(10))
+    if (this.locationCache.has(node)) return this.locationCache.get(node);
+    const position = offset => {
+      let lo = 0,
+        hi = mod.lineStarts.length;
+      while (lo + 1 < hi) {
+        const mid = (lo + hi) >>> 1;
+        if (mod.lineStarts[mid] <= offset) lo = mid;
+        else hi = mid;
+      }
+      return { line: lo + 1, col: offset - mod.lineStarts[lo] + 1 };
     };
+    const start = position(node.start);
+    const end = position(node.end);
+    const loc = { file: mod.path, ...start, endLine: end.line, endCol: end.col };
+    this.locationCache.set(node, loc);
+    return loc;
   }
   shape(node, env, seen = new Set()) {
     if (!node) return unknown("missing annotation");

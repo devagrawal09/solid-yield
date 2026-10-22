@@ -34,3 +34,11 @@ No fixture paths, names or expected results participate in analysis. Parsed modu
 | Declared types | annotation-only AST shape reader |
 | Inference | expression evaluation where modeled, otherwise recorded worst case |
 | Incremental program | cached parsed modules and fresh invocation graph |
+
+## Implementation details
+
+The graph lives in JavaScript value objects, Env cells, activation contexts and an event stream; it is not a separate serialized IR. CheckResult exposes component facts and the event-node count. Source summaries are refreshed at reads and joined monotonically, so a reassigned captured function does not leave an old safe memo summary. Branches fork local cells and closures; unknown heap correlations are not solved. Known scalar comparisons can terminate bounded component recursion; the activation budget otherwise widens after nine nested activations. Loops warn and widen changed outer cells rather than assuming one iteration is enough.
+
+Callback-prop failure summaries widen literal arguments. This preserves the shared body-failure union even when one call passes a safe literal. Optional public injected props retain their annotation arm beside a fallback implementation.
+
+All file identities are canonical real paths, including updates. The standalone Vite plugin does not import the shared harness compiler-options module. Parsed module ASTs are reused, but cells, activation facts and diagnostics are rebuilt on each check.

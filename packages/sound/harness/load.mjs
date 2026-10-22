@@ -11,7 +11,7 @@ import { nullPrototype } from "./null-prototype.mjs";
 /** @typedef {import("../fixtures/schema.d.ts").Fixture} Fixture */
 
 export const packageDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-export const PROTOTYPE_NAMES = Object.freeze(["typed", "dataflow"]);
+export const PROTOTYPE_NAMES = Object.freeze(["typed", "dataflow", "oxc"]);
 
 /**
  * @param {string} selection "all" | comma-separated names

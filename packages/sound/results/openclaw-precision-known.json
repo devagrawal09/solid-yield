@@ -112,27 +112,27 @@
       "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
-      "infos": 1,
+      "infos": 0,
       "soundnessFailure": false,
-      "total": 1
+      "total": 0
     },
     "op-machine-class-mutant": {
-      "hits": [],
-      "imprecise": [],
-      "misses": [
+      "hits": [
         {
           "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
           "file": "op-machine-class-mutant.tsx",
-          "at": "\"pending()\""
+          "count": 1
         }
       ],
+      "imprecise": [],
+      "misses": [],
       "warningHits": 0,
       "warningMisses": [],
       "extraErrors": [],
       "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
-      "infos": 1,
+      "infos": 0,
       "soundnessFailure": false,
       "total": 1
     },
@@ -244,26 +244,13 @@
       "misses": [],
       "warningHits": 0,
       "warningMisses": [],
-      "extraErrors": [
-        {
-          "code": "UNHANDLED_HANDLER_FAILURE",
-          "severity": "error",
-          "message": "This onClick handler can fail with unknown (target.removeEventListener(\"click\", listener) has no failure information) and nothing catches it; a rendered Errored does not catch a handler's failure. Catch and handle it inside the handler.",
-          "loc": {
-            "file": "openclaw-precision/op-native-listener.tsx",
-            "line": 4,
-            "col": 18,
-            "endLine": 4,
-            "endCol": 25
-          }
-        }
-      ],
+      "extraErrors": [],
       "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
       "soundnessFailure": false,
-      "total": 1
+      "total": 0
     },
     "op-native-listener-mutant": {
       "hits": [
@@ -325,26 +312,13 @@
       "misses": [],
       "warningHits": 0,
       "warningMisses": [],
-      "extraErrors": [
-        {
-          "code": "UNHANDLED_HANDLER_FAILURE",
-          "severity": "error",
-          "message": "This onClick handler can fail with unknown (props.callback(…) has no caller in this program has no failure information) and nothing catches it; a rendered Errored does not catch a handler's failure. Catch and handle it inside the handler.",
-          "loc": {
-            "file": "openclaw-precision/node_modules/@precision/machine/dist/diagnostic-probe.tsx",
-            "line": 17,
-            "col": 18,
-            "endLine": 17,
-            "endCol": 25
-          }
-        }
-      ],
+      "extraErrors": [],
       "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
-      "infos": 1,
+      "infos": 0,
       "soundnessFailure": false,
-      "total": 2
+      "total": 0
     },
     "op-dependency-machine-mutant": {
       "hits": [
@@ -358,26 +332,13 @@
       "misses": [],
       "warningHits": 0,
       "warningMisses": [],
-      "extraErrors": [
-        {
-          "code": "UNHANDLED_HANDLER_FAILURE",
-          "severity": "error",
-          "message": "This onClick handler can fail with unknown (props.callback(…) has no caller in this program has no failure information) and nothing catches it; a rendered Errored does not catch a handler's failure. Catch and handle it inside the handler.",
-          "loc": {
-            "file": "openclaw-precision/node_modules/@precision/machine/dist/diagnostic-probe.tsx",
-            "line": 17,
-            "col": 18,
-            "endLine": 17,
-            "endCol": 25
-          }
-        }
-      ],
+      "extraErrors": [],
       "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
-      "infos": 1,
+      "infos": 0,
       "soundnessFailure": false,
-      "total": 3
+      "total": 1
     },
     "op-dependency-string": {
       "hits": [],
@@ -419,39 +380,13 @@
       "misses": [],
       "warningHits": 0,
       "warningMisses": [],
-      "extraErrors": [
-        {
-          "code": "UNHANDLED_HANDLER_FAILURE",
-          "severity": "error",
-          "message": "This onClick handler can fail with unknown (props.onChange?.([String(index)]) has no failure information) and nothing catches it; a rendered Errored does not catch a handler's failure. Catch and handle it inside the handler.",
-          "loc": {
-            "file": "openclaw-precision/op-e24-remove.tsx",
-            "line": 5,
-            "col": 18,
-            "endLine": 5,
-            "endCol": 25
-          }
-        }
-      ],
-      "extraWarnings": [
-        {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "merge(…) is outside the checked subset; this Solid API is not modeled in the slice; its value is treated as possibly pending and possibly failing with unknown. Nothing here is trusted: downstream obligations still surface.",
-          "loc": {
-            "file": "openclaw-precision/op-e24-remove.tsx",
-            "line": 3,
-            "col": 17,
-            "endLine": 3,
-            "endCol": 72
-          }
-        }
-      ],
+      "extraErrors": [],
+      "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
       "soundnessFailure": false,
-      "total": 2
+      "total": 0
     },
     "op-e24-remove-mutant": {
       "hits": [
@@ -466,25 +401,12 @@
       "warningHits": 0,
       "warningMisses": [],
       "extraErrors": [],
-      "extraWarnings": [
-        {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "merge(…) is outside the checked subset; this Solid API is not modeled in the slice; its value is treated as possibly pending and possibly failing with unknown. Nothing here is trusted: downstream obligations still surface.",
-          "loc": {
-            "file": "openclaw-precision/op-e24-remove-mutant.tsx",
-            "line": 3,
-            "col": 17,
-            "endLine": 3,
-            "endCol": 72
-          }
-        }
-      ],
+      "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
       "soundnessFailure": false,
-      "total": 2
+      "total": 1
     },
     "op-e28-keydown": {
       "hits": [],
@@ -492,39 +414,13 @@
       "misses": [],
       "warningHits": 0,
       "warningMisses": [],
-      "extraErrors": [
-        {
-          "code": "UNHANDLED_HANDLER_FAILURE",
-          "severity": "error",
-          "message": "This onKeyDown handler can fail with unknown (props.onChange?.([String(index)]) has no failure information) and nothing catches it; a rendered Errored does not catch a handler's failure. Catch and handle it inside the handler.",
-          "loc": {
-            "file": "openclaw-precision/op-e28-keydown.tsx",
-            "line": 6,
-            "col": 17,
-            "endLine": 6,
-            "endCol": 26
-          }
-        }
-      ],
-      "extraWarnings": [
-        {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "merge(…) is outside the checked subset; this Solid API is not modeled in the slice; its value is treated as possibly pending and possibly failing with unknown. Nothing here is trusted: downstream obligations still surface.",
-          "loc": {
-            "file": "openclaw-precision/op-e28-keydown.tsx",
-            "line": 3,
-            "col": 17,
-            "endLine": 3,
-            "endCol": 72
-          }
-        }
-      ],
+      "extraErrors": [],
+      "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
       "soundnessFailure": false,
-      "total": 2
+      "total": 0
     },
     "op-e28-keydown-mutant": {
       "hits": [
@@ -539,25 +435,12 @@
       "warningHits": 0,
       "warningMisses": [],
       "extraErrors": [],
-      "extraWarnings": [
-        {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "merge(…) is outside the checked subset; this Solid API is not modeled in the slice; its value is treated as possibly pending and possibly failing with unknown. Nothing here is trusted: downstream obligations still surface.",
-          "loc": {
-            "file": "openclaw-precision/op-e28-keydown-mutant.tsx",
-            "line": 3,
-            "col": 17,
-            "endLine": 3,
-            "endCol": 72
-          }
-        }
-      ],
+      "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
       "soundnessFailure": false,
-      "total": 2
+      "total": 1
     },
     "op-e30-select": {
       "hits": [],
@@ -565,39 +448,13 @@
       "misses": [],
       "warningHits": 0,
       "warningMisses": [],
-      "extraErrors": [
-        {
-          "code": "UNHANDLED_HANDLER_FAILURE",
-          "severity": "error",
-          "message": "This onClick handler can fail with unknown (props.onChange?.([value]) has no failure information) and nothing catches it; a rendered Errored does not catch a handler's failure. Catch and handle it inside the handler.",
-          "loc": {
-            "file": "openclaw-precision/op-e30-select.tsx",
-            "line": 6,
-            "col": 18,
-            "endLine": 6,
-            "endCol": 25
-          }
-        }
-      ],
-      "extraWarnings": [
-        {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "merge(…) is outside the checked subset; this Solid API is not modeled in the slice; its value is treated as possibly pending and possibly failing with unknown. Nothing here is trusted: downstream obligations still surface.",
-          "loc": {
-            "file": "openclaw-precision/op-e30-select.tsx",
-            "line": 3,
-            "col": 17,
-            "endLine": 3,
-            "endCol": 72
-          }
-        }
-      ],
+      "extraErrors": [],
+      "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
       "soundnessFailure": false,
-      "total": 2
+      "total": 0
     },
     "op-e30-select-mutant": {
       "hits": [
@@ -612,25 +469,12 @@
       "warningHits": 0,
       "warningMisses": [],
       "extraErrors": [],
-      "extraWarnings": [
-        {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "merge(…) is outside the checked subset; this Solid API is not modeled in the slice; its value is treated as possibly pending and possibly failing with unknown. Nothing here is trusted: downstream obligations still surface.",
-          "loc": {
-            "file": "openclaw-precision/op-e30-select-mutant.tsx",
-            "line": 3,
-            "col": 17,
-            "endLine": 3,
-            "endCol": 72
-          }
-        }
-      ],
+      "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
       "soundnessFailure": false,
-      "total": 2
+      "total": 1
     },
     "op-e40-reselect": {
       "hits": [],
@@ -638,39 +482,13 @@
       "misses": [],
       "warningHits": 0,
       "warningMisses": [],
-      "extraErrors": [
-        {
-          "code": "UNHANDLED_HANDLER_FAILURE",
-          "severity": "error",
-          "message": "This onClick handler can fail with unknown (props.onReselect?.() has no failure information) and nothing catches it; a rendered Errored does not catch a handler's failure. Catch and handle it inside the handler.",
-          "loc": {
-            "file": "openclaw-precision/op-e40-reselect.tsx",
-            "line": 4,
-            "col": 38,
-            "endLine": 4,
-            "endCol": 45
-          }
-        }
-      ],
-      "extraWarnings": [
-        {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "merge(…) is outside the checked subset; this Solid API is not modeled in the slice; its value is treated as possibly pending and possibly failing with unknown. Nothing here is trusted: downstream obligations still surface.",
-          "loc": {
-            "file": "openclaw-precision/op-e40-reselect.tsx",
-            "line": 3,
-            "col": 17,
-            "endLine": 3,
-            "endCol": 57
-          }
-        }
-      ],
+      "extraErrors": [],
+      "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
       "soundnessFailure": false,
-      "total": 2
+      "total": 0
     },
     "op-e40-reselect-mutant": {
       "hits": [
@@ -685,25 +503,12 @@
       "warningHits": 0,
       "warningMisses": [],
       "extraErrors": [],
-      "extraWarnings": [
-        {
-          "code": "UNANALYZED_BOUNDARY",
-          "severity": "warn",
-          "message": "merge(…) is outside the checked subset; this Solid API is not modeled in the slice; its value is treated as possibly pending and possibly failing with unknown. Nothing here is trusted: downstream obligations still surface.",
-          "loc": {
-            "file": "openclaw-precision/op-e40-reselect-mutant.tsx",
-            "line": 3,
-            "col": 17,
-            "endLine": 3,
-            "endCol": 57
-          }
-        }
-      ],
+      "extraWarnings": [],
       "infoHits": 0,
       "infoMisses": 0,
       "infos": 0,
       "soundnessFailure": false,
-      "total": 2
+      "total": 1
     }
   },
   "oxc": {

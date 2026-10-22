@@ -1,5 +1,50 @@
 # Prototype B — dataflow: notes
 
+## Precision pass (D-133)
+
+See RESULTS-precision.md for the full frozen score and timings. B now removes
+all seven extra errors and eight extra warnings in openclaw-precision and
+catches the class-method mutant. Its raw score is **14/15**, not 15/15: the
+remaining exported-only pending mutant conflicts with the explicit SLICE root
+rule. DISPUTES.md has two passing rc.17 runtime probes; the miss remains visible
+in the score and its unchanged pin. Other groups have no added misses or extras.
+
+- ProjectBoundary excludes installed paths, package link targets, declarations
+  and TypeScript external-library files before component collection or body
+  analysis, even with over-inclusive checked roots. Reporting has the same
+  guard. TypeScript still loads dependencies as type information. Linked
+  implementation tests verify that their bodies and component facts never leak
+  into app analysis.
+- Dependency calls and constructors keep unknown failures at the app site,
+  regardless of a safe-looking installed body. Declared imperative results do
+  not acquire Solid pending-read facts. Untyped results warn and retain worst
+  facts until consumed; merely calling a method is not a proven pending read.
+- Supported imperative classes have fresh instance members, captured locals,
+  methods/getters, field initializers, constructor arguments and this receivers.
+  Arrow fields retain lexical this; extracted methods are not silently bound.
+  Native Error subclasses without a custom constructor stay plain. Other
+  inheritance, decorators, missing bodies, replacement-object constructors and
+  unsupported members warn and keep unknown failures/worst results.
+- merge holds object/props layers lazily. A consuming member read walks them
+  right-to-left and skips undefined. A later safe callback replaces a throwing
+  default; an injected or optional override retains unknown failures. Props
+  stay lazy through merge, rather than becoming setup reads or losing bodies.
+  General merge/omit/spread rules in FUTURE.md remain deferred.
+- Loading.on is evaluated as a tracking reset-key expression under the outer
+  boundaries. Function-valued keys are held, never handlers. Reset ordering and
+  lifetime rules remain deferred.
+- Actual default-lib removeEventListener is a native contract, not a name-based
+  exemption. Safe receiver operations hold callback arguments: removing a
+  listener or adding it to a Set does not run it. Injected lookalikes and actual
+  callback invocation still fail when uncaught. Existing focus-task isolation,
+  ordinary member calls and safe held/ref forwarding already passed their pairs
+  and remain unchanged.
+
+Prototype-local tests cover these rules and their unsafe counterparts, including
+linked installed source roots, unknown results, constructors and HMR updates.
+Only B’s precision known-failure entries were tightened; no shared rules, frozen
+fixtures, harness logic, other prototype or comparison document changed.
+
 ## Design
 
 This remains an abstract interpretation of the authored TypeScript AST. The type
@@ -94,14 +139,15 @@ measured cold, incremental and Vite results.
 - An exported component with no reached renderer is analyzed with an empty
   provider map. There is no cross-project provider/owner metadata.
 - Reads after await retain the caller's scope; the runtime's separate
-  UNTRACKED_READ_AFTER_AWAIT rule is outside this slice. General classes,
-  generators, stores, derived createSignal functions, latest/isPending and
+  UNTRACKED_READ_AFTER_AWAIT rule is outside this slice. Unsupported class
+  inheritance/dynamic shapes, generators, stores, derived createSignal functions, latest/isPending and
   effects created outside setup remain outside the supported model.
 
-No fixture expectations, shared contracts, harness code or other prototype were
-changed. Only dataflow OpenClaw score pins were tightened. DISPUTES.md records
-the legacy ref read expectation that conflicts with D-131; this remaining scored
-extra cannot be removed without hiding a required read. See RESULTS-openclaw.md.
+The earlier OpenClaw pass changed no fixture expectations, shared contracts,
+harness code or other prototype; only dataflow OpenClaw score pins tightened.
+RESULTS-openclaw.md and the historical ref section of DISPUTES.md retain that
+pass’s measurements. The current frozen ref expectation already includes its
+D-131 read error, so it is no longer a scored extra.
 Ref ownership/cleanup/primitive creation and the FUTURE.md gaps remain deferred.
 Added prototype-local tests cover provider
 paths, factory instances, aliases, lazy props/children, forwarding locations,

@@ -122,7 +122,7 @@ export const cases = [
   kase("iife-pending-root", {
     legacyExpected: ["PENDING_ROOT"],
     entry: true,
-    expected: [x(LOADING, "iife-pending-root.tsx", [f("p() * 2"), f("render(App")])]
+    expected: [x(LOADING, "iife-pending-root.tsx", [f("p() * 2"), f("(() => p() * 2)()"), f("render(App")])]
   }),
   kase("async-setup-reads", {
     legacyExpected: ["NATIVE_ASYNC_SETUP"],
@@ -233,6 +233,7 @@ export const equipment = {
     x(HANDLER, `${EQ}EquipmentRow.tsx`, [f("onSubmit={save}")]),
     x(HANDLER, `${EQ}EquipmentRow.tsx`, [f("onChange={changeStatus}")]),
     x(HANDLER, `${EQ}EquipmentRow.tsx`, [f("onClick={remove}")]),
+    x(HANDLER, `${EQ}EquipmentRow.tsx`, [f("onClick={edit}")], { note: "edit() reads item(), a memo over the worst-case service.list(): reading a possibly failing memo in a handler throws. Today's checker misses this." }),
     // Detail: the retry handler calls the unknown service.reload (reset never fails).
     x(HANDLER, `${EQ}Detail.tsx`, [f("onClick={() => { service.reload(); reset(); }}")]),
     // FailureControls: eight buttons call service.api.* (unknown) directly or through arm().
@@ -284,7 +285,10 @@ export const mutants = [
   }),
   mutant("m-errored-removed", {
     parent: "cases/plain-callback-throw-under-errored", edit: "removed the <Errored> around the Loading", entry: true,
-    expected: [x(ERRORED, "m-errored-removed.tsx", [f("{total()}"), f("throw new RangeError"), f("render(App")])]
+    expected: [
+      x(ERRORED, "m-errored-removed.tsx", [f("{total()}"), f("throw new RangeError"), f("render(App")]),
+      x(ERRORED, "m-errored-removed.tsx", [f("JSON.parse(String(x))")], { note: "the second failing read the removed Errored covered" })
+    ]
   }),
   mutant("m-catch-removed", {
     parent: "cases/kept-promise-caught-by-its-chain", edit: "removed .catch(() => 0) from the awaited chain",

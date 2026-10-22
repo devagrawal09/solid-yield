@@ -1,0 +1,14 @@
+{
+  "command": [
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "prototypes/dataflow/noise.test.mjs",
+    "--maxWorkers",
+    "1"
+  ],
+  "code": 0,
+  "timedOut": false,
+  "wallSeconds": 3.1484673330560327
+}

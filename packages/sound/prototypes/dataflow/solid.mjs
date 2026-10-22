@@ -21,7 +21,13 @@ export const PLATFORM_THROWS = new Map([["parse", "SyntaxError"]]);
  */
 export function resolveAlias(symbol, checker) {
   if (!symbol) return undefined;
-  return symbol.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(symbol) : symbol;
+  // A type-only import can share its name/symbol with a local runtime value.
+  // Resolving that symbol as an import loses the local function declaration.
+  if (!(symbol.flags & ts.SymbolFlags.Alias) || (symbol.flags & ts.SymbolFlags.Value)) return symbol;
+  const target = checker.getAliasedSymbol(symbol);
+  // Failed aliases share TypeScript's synthetic unknown symbol. It is not an
+  // identity to which we can attach application bindings or component facts.
+  return target.declarations?.length ? target : undefined;
 }
 
 /**

@@ -1,0 +1,9 @@
+{
+  "command": [
+    "/Users/devagr/.nvm/versions/node/v24.18.0/bin/node",
+    "harness/run.mjs"
+  ],
+  "code": 0,
+  "timedOut": false,
+  "wallSeconds": 67.78919254196808
+}

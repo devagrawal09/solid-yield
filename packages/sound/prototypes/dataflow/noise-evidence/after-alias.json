@@ -1,0 +1,3116 @@
+{
+  "stage": "complete",
+  "node": "v22.23.2",
+  "roots": 2669,
+  "excluded": 3413,
+  "all": 6082,
+  "loc": 524547,
+  "inputHash": "359caa625bdc4f6402e8b441594626d79814fdc288e837a0d83eb2fd1edf42dd",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "allowSyntheticDefaultImports": true,
+    "declaration": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "lib": [
+      "lib.dom.d.ts",
+      "lib.dom.iterable.d.ts",
+      "lib.es2023.d.ts"
+    ],
+    "module": 199,
+    "moduleResolution": 99,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noUncheckedIndexedAccess": true,
+    "noEmit": true,
+    "noEmitOnError": true,
+    "noUncheckedSideEffectImports": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": 10,
+    "types": [
+      "node"
+    ],
+    "useDefineForClassFields": false,
+    "verbatimModuleSyntax": true,
+    "paths": {
+      "openclaw/plugin-sdk/*": [
+        "./src/plugin-sdk/*.ts"
+      ],
+      "@openclaw/ai": [
+        "./packages/ai/src/index.ts"
+      ],
+      "@openclaw/ai/diagnostics": [
+        "./packages/ai/src/utils/diagnostics.ts"
+      ],
+      "@openclaw/ai/event-stream": [
+        "./packages/ai/src/utils/event-stream.ts"
+      ],
+      "@openclaw/ai/providers": [
+        "./packages/ai/src/providers.ts"
+      ],
+      "@openclaw/ai/provider-types": [
+        "./packages/ai/src/provider-types.ts"
+      ],
+      "@openclaw/ai/transports": [
+        "./packages/ai/src/transports.ts"
+      ],
+      "@openclaw/ai/types": [
+        "./packages/ai/src/types.ts"
+      ],
+      "@openclaw/ai/validation": [
+        "./packages/ai/src/validation.ts"
+      ],
+      "@openclaw/ai/internal/anthropic": [
+        "./packages/ai/src/internal/anthropic.ts"
+      ],
+      "@openclaw/ai/internal/google-model-family": [
+        "./packages/ai/src/internal/google-model-family.ts"
+      ],
+      "@openclaw/ai/internal/model-request-body": [
+        "./packages/ai/src/transports/model-request-body.ts"
+      ],
+      "@openclaw/ai/internal/openai": [
+        "./packages/ai/src/internal/openai.ts"
+      ],
+      "@openclaw/ai/internal/openai-completions-compat": [
+        "./packages/ai/src/internal/openai-completions-compat.ts"
+      ],
+      "@openclaw/ai/internal/openai-responses-payload-policy": [
+        "./packages/ai/src/internal/openai-responses-payload-policy.ts"
+      ],
+      "@openclaw/ai/internal/retry-after": [
+        "./packages/ai/src/internal/retry-after.ts"
+      ],
+      "@openclaw/ai/internal/runtime": [
+        "./packages/ai/src/internal/runtime.ts"
+      ],
+      "@openclaw/ai/internal/shared": [
+        "./packages/ai/src/internal/shared.ts"
+      ],
+      "@openclaw/ai/internal/tool-schema": [
+        "./packages/ai/src/internal/tool-schema.ts"
+      ],
+      "@openclaw/agent-core": [
+        "./packages/agent-core/src/index.ts"
+      ],
+      "@openclaw/agent-core/*": [
+        "./packages/agent-core/src/*"
+      ],
+      "@openclaw/llm-core": [
+        "./packages/llm-core/src/index.ts"
+      ],
+      "@openclaw/llm-core/diagnostics": [
+        "./packages/llm-core/src/utils/diagnostics.ts"
+      ],
+      "@openclaw/llm-core/event-stream": [
+        "./packages/llm-core/src/utils/event-stream.ts"
+      ],
+      "@openclaw/llm-core/model-contracts/anthropic": [
+        "./packages/llm-core/src/model-contracts/anthropic.ts"
+      ],
+      "@openclaw/llm-core/types": [
+        "./packages/llm-core/src/types.ts"
+      ],
+      "@openclaw/llm-core/validation": [
+        "./packages/llm-core/src/validation.ts"
+      ],
+      "@openclaw/llm-core/*": [
+        "./packages/llm-core/src/*"
+      ],
+      "@openclaw/model-catalog-core": [
+        "./packages/model-catalog-core/src/index.ts"
+      ],
+      "@openclaw/model-catalog-core/configured-model-refs": [
+        "./packages/model-catalog-core/src/configured-model-refs.ts"
+      ],
+      "@openclaw/model-catalog-core/model-catalog-normalize": [
+        "./packages/model-catalog-core/src/model-catalog-normalize.ts"
+      ],
+      "@openclaw/model-catalog-core/model-catalog-pricing": [
+        "./packages/model-catalog-core/src/model-catalog-pricing.ts"
+      ],
+      "@openclaw/model-catalog-core/model-catalog-refs": [
+        "./packages/model-catalog-core/src/model-catalog-refs.ts"
+      ],
+      "@openclaw/model-catalog-core/model-catalog-types": [
+        "./packages/model-catalog-core/src/model-catalog-types.ts"
+      ],
+      "@openclaw/model-catalog-core/provider-id": [
+        "./packages/model-catalog-core/src/provider-id.ts"
+      ],
+      "@openclaw/model-catalog-core/provider-model-id-normalization": [
+        "./packages/model-catalog-core/src/provider-model-id-normalization.ts"
+      ],
+      "@openclaw/model-catalog-core/provider-model-id-normalize": [
+        "./packages/model-catalog-core/src/provider-model-id-normalize.ts"
+      ],
+      "@openclaw/model-catalog-core/*": [
+        "./packages/model-catalog-core/src/*"
+      ],
+      "@openclaw/gateway-client": [
+        "./packages/gateway-client/src/index.ts"
+      ],
+      "@openclaw/gateway-client/browser": [
+        "./packages/gateway-client/src/browser.ts"
+      ],
+      "@openclaw/gateway-client/scope-upgrade": [
+        "./packages/gateway-client/src/scope-upgrade.ts"
+      ],
+      "@openclaw/gateway-client/websocket-data": [
+        "./packages/gateway-client/src/websocket-data.ts"
+      ],
+      "@openclaw/gateway-client/*": [
+        "./packages/gateway-client/src/*"
+      ],
+      "@openclaw/gateway-protocol": [
+        "./packages/gateway-protocol/src/index.ts"
+      ],
+      "@openclaw/gateway-protocol/client-info": [
+        "./packages/gateway-protocol/src/client-info.ts"
+      ],
+      "@openclaw/gateway-protocol/connect-error-details": [
+        "./packages/gateway-protocol/src/connect-error-details.ts"
+      ],
+      "@openclaw/gateway-protocol/gateway-error-details": [
+        "./packages/gateway-protocol/src/gateway-error-details.ts"
+      ],
+      "@openclaw/gateway-protocol/frame-guards": [
+        "./packages/gateway-protocol/src/frame-guards.ts"
+      ],
+      "@openclaw/gateway-protocol/schema": [
+        "./packages/gateway-protocol/src/schema.ts"
+      ],
+      "@openclaw/gateway-protocol/session-row-deltas": [
+        "./packages/gateway-protocol/src/session-row-deltas.ts"
+      ],
+      "@openclaw/gateway-protocol/restart-unavailable": [
+        "./packages/gateway-protocol/src/restart-unavailable.ts"
+      ],
+      "@openclaw/gateway-protocol/startup-unavailable": [
+        "./packages/gateway-protocol/src/startup-unavailable.ts"
+      ],
+      "@openclaw/gateway-protocol/system-agent-context": [
+        "./packages/gateway-protocol/src/system-agent-context.ts"
+      ],
+      "@openclaw/gateway-protocol/version": [
+        "./packages/gateway-protocol/src/version.ts"
+      ],
+      "@openclaw/gateway-protocol/*": [
+        "./packages/gateway-protocol/src/*"
+      ],
+      "@openclaw/media-generation-core": [
+        "./packages/media-generation-core/src/index.ts"
+      ],
+      "@openclaw/media-generation-core/capability-model-ref": [
+        "./packages/media-generation-core/src/capability-model-ref.ts"
+      ],
+      "@openclaw/media-generation-core/catalog": [
+        "./packages/media-generation-core/src/catalog.ts"
+      ],
+      "@openclaw/media-generation-core/model-ref": [
+        "./packages/media-generation-core/src/model-ref.ts"
+      ],
+      "@openclaw/media-generation-core/normalization": [
+        "./packages/media-generation-core/src/normalization.ts"
+      ],
+      "@openclaw/media-generation-core/*": [
+        "./packages/media-generation-core/src/*"
+      ],
+      "@openclaw/media-core": [
+        "./packages/media-core/src/index.ts"
+      ],
+      "@openclaw/media-core/attachment-classify": [
+        "./packages/media-core/src/attachment-classify.ts"
+      ],
+      "@openclaw/media-core/base64": [
+        "./packages/media-core/src/base64.ts"
+      ],
+      "@openclaw/media-core/constants": [
+        "./packages/media-core/src/constants.ts"
+      ],
+      "@openclaw/media-core/content-length": [
+        "./packages/media-core/src/content-length.ts"
+      ],
+      "@openclaw/media-core/file-name": [
+        "./packages/media-core/src/file-name.ts"
+      ],
+      "@openclaw/media-core/inbound-path-policy": [
+        "./packages/media-core/src/inbound-path-policy.ts"
+      ],
+      "@openclaw/media-core/inline-image-data-url": [
+        "./packages/media-core/src/inline-image-data-url.ts"
+      ],
+      "@openclaw/media-core/media-source-url": [
+        "./packages/media-core/src/media-source-url.ts"
+      ],
+      "@openclaw/media-core/mime": [
+        "./packages/media-core/src/mime.ts"
+      ],
+      "@openclaw/media-core/read-byte-stream-with-limit": [
+        "./packages/media-core/src/read-byte-stream-with-limit.ts"
+      ],
+      "@openclaw/media-core/*": [
+        "./packages/media-core/src/*"
+      ],
+      "@openclaw/media-understanding-common/*": [
+        "./packages/media-understanding-common/src/*"
+      ],
+      "@openclaw/markdown-core": [
+        "./packages/markdown-core/src/index.ts"
+      ],
+      "@openclaw/markdown-core/code-spans": [
+        "./packages/markdown-core/src/code-spans.ts"
+      ],
+      "@openclaw/markdown-core/fences": [
+        "./packages/markdown-core/src/fences.ts"
+      ],
+      "@openclaw/markdown-core/frontmatter": [
+        "./packages/markdown-core/src/frontmatter.ts"
+      ],
+      "@openclaw/markdown-core/ir": [
+        "./packages/markdown-core/src/ir.ts"
+      ],
+      "@openclaw/markdown-core/render": [
+        "./packages/markdown-core/src/render.ts"
+      ],
+      "@openclaw/markdown-core/render-aware-chunking": [
+        "./packages/markdown-core/src/render-aware-chunking.ts"
+      ],
+      "@openclaw/markdown-core/tables": [
+        "./packages/markdown-core/src/tables.ts"
+      ],
+      "@openclaw/markdown-core/types": [
+        "./packages/markdown-core/src/types.ts"
+      ],
+      "@openclaw/markdown-core/*": [
+        "./packages/markdown-core/src/*"
+      ],
+      "@openclaw/normalization-core": [
+        "./packages/normalization-core/src/index.ts"
+      ],
+      "@openclaw/normalization-core/agent-id": [
+        "./packages/normalization-core/src/agent-id.ts"
+      ],
+      "@openclaw/normalization-core/agent-run-terminal-outcome": [
+        "./packages/normalization-core/src/agent-run-terminal-outcome.ts"
+      ],
+      "@openclaw/normalization-core/boolean-coercion": [
+        "./packages/normalization-core/src/boolean-coercion.ts"
+      ],
+      "@openclaw/normalization-core/cjk-chars": [
+        "./packages/normalization-core/src/cjk-chars.ts"
+      ],
+      "@openclaw/normalization-core/code-points": [
+        "./packages/normalization-core/src/code-points.ts"
+      ],
+      "@openclaw/normalization-core/error-coercion": [
+        "./packages/normalization-core/src/error-coercion.ts"
+      ],
+      "@openclaw/normalization-core/expect": [
+        "./packages/normalization-core/src/expect.ts"
+      ],
+      "@openclaw/normalization-core/grapheme": [
+        "./packages/normalization-core/src/grapheme.ts"
+      ],
+      "@openclaw/normalization-core/json-coercion": [
+        "./packages/normalization-core/src/json-coercion.ts"
+      ],
+      "@openclaw/normalization-core/json-schema": [
+        "./packages/normalization-core/src/json-schema.ts"
+      ],
+      "@openclaw/normalization-core/markdown-plain-text": [
+        "./packages/normalization-core/src/markdown-plain-text.ts"
+      ],
+      "@openclaw/normalization-core/mountinfo-path": [
+        "./packages/normalization-core/src/mountinfo-path.ts"
+      ],
+      "@openclaw/normalization-core/node-crypto": [
+        "./packages/normalization-core/src/node-crypto.ts"
+      ],
+      "@openclaw/normalization-core/number-coercion": [
+        "./packages/normalization-core/src/number-coercion.ts"
+      ],
+      "@openclaw/normalization-core/phone-presentation": [
+        "./packages/normalization-core/src/phone-presentation.ts"
+      ],
+      "@openclaw/normalization-core/promise-like": [
+        "./packages/normalization-core/src/promise-like.ts"
+      ],
+      "@openclaw/normalization-core/record-coerce": [
+        "./packages/normalization-core/src/record-coerce.ts"
+      ],
+      "@openclaw/normalization-core/result": [
+        "./packages/normalization-core/src/result.ts"
+      ],
+      "@openclaw/normalization-core/session-key-comparison": [
+        "./packages/normalization-core/src/session-key-comparison.ts"
+      ],
+      "@openclaw/normalization-core/stable-node-path": [
+        "./packages/normalization-core/src/stable-node-path.ts"
+      ],
+      "@openclaw/normalization-core/stable-stringify": [
+        "./packages/normalization-core/src/stable-stringify.ts"
+      ],
+      "@openclaw/normalization-core/string-coerce": [
+        "./packages/normalization-core/src/string-coerce.ts"
+      ],
+      "@openclaw/normalization-core/string-normalization": [
+        "./packages/normalization-core/src/string-normalization.ts"
+      ],
+      "@openclaw/normalization-core/utf16-slice": [
+        "./packages/normalization-core/src/utf16-slice.ts"
+      ],
+      "@openclaw/normalization-core/uuid": [
+        "./packages/normalization-core/src/uuid.ts"
+      ],
+      "@openclaw/normalization-core/home-dir": [
+        "./packages/normalization-core/src/home-dir.ts"
+      ],
+      "@openclaw/normalization-core/*": [
+        "./packages/normalization-core/src/*"
+      ],
+      "@openclaw/retry": [
+        "./packages/retry/src/index.ts"
+      ],
+      "@openclaw/worker-runtime": [
+        "./packages/worker-runtime/src/index.ts"
+      ],
+      "@openclaw/worker-runtime/worker": [
+        "./packages/worker-runtime/src/worker.ts"
+      ],
+      "@openclaw/worker-runtime/lifecycle": [
+        "./packages/worker-runtime/src/lifecycle.ts"
+      ],
+      "@openclaw/mermaid-renderer": [
+        "./packages/mermaid-renderer/src/renderer.ts"
+      ],
+      "@openclaw/session-url-contract": [
+        "./packages/session-url-contract/src/index.ts"
+      ],
+      "@openclaw/session-url-contract/parse": [
+        "./packages/session-url-contract/src/parse.ts"
+      ],
+      "@openclaw/session-url-contract/session-key-normalization": [
+        "./packages/session-url-contract/src/session-key-normalization.ts"
+      ],
+      "@openclaw/session-url-contract/share-build": [
+        "./packages/session-url-contract/src/share-build.ts"
+      ],
+      "@openclaw/session-url-contract/*": [
+        "./packages/session-url-contract/src/*"
+      ],
+      "@openclaw/workboard-contract": [
+        "./packages/workboard-contract/src/index.ts"
+      ],
+      "@openclaw/acp-core": [
+        "./packages/acp-core/src/index.ts"
+      ],
+      "@openclaw/acp-core/meta": [
+        "./packages/acp-core/src/meta.ts"
+      ],
+      "@openclaw/acp-core/session": [
+        "./packages/acp-core/src/session.ts"
+      ],
+      "@openclaw/acp-core/session-interaction-mode": [
+        "./packages/acp-core/src/session-interaction-mode.ts"
+      ],
+      "@openclaw/acp-core/session-lineage-meta": [
+        "./packages/acp-core/src/session-lineage-meta.ts"
+      ],
+      "@openclaw/acp-core/types": [
+        "./packages/acp-core/src/types.ts"
+      ],
+      "@openclaw/acp-core/runtime/error-text": [
+        "./packages/acp-core/src/runtime/error-text.ts"
+      ],
+      "@openclaw/acp-core/runtime/errors": [
+        "./packages/acp-core/src/runtime/errors.ts"
+      ],
+      "@openclaw/acp-core/runtime/session-identifiers": [
+        "./packages/acp-core/src/runtime/session-identifiers.ts"
+      ],
+      "@openclaw/acp-core/runtime/session-identity": [
+        "./packages/acp-core/src/runtime/session-identity.ts"
+      ],
+      "@openclaw/acp-core/runtime/types": [
+        "./packages/acp-core/src/runtime/types.ts"
+      ],
+      "@openclaw/acp-core/*": [
+        "./packages/acp-core/src/*"
+      ],
+      "@openclaw/terminal-core": [
+        "./packages/terminal-core/src/index.ts"
+      ],
+      "@openclaw/terminal-core/ansi": [
+        "./packages/terminal-core/src/ansi.ts"
+      ],
+      "@openclaw/terminal-core/decorative-emoji": [
+        "./packages/terminal-core/src/decorative-emoji.ts"
+      ],
+      "@openclaw/terminal-core/health-style": [
+        "./packages/terminal-core/src/health-style.ts"
+      ],
+      "@openclaw/terminal-core/links": [
+        "./packages/terminal-core/src/links.ts"
+      ],
+      "@openclaw/terminal-core/note": [
+        "./packages/terminal-core/src/note.ts"
+      ],
+      "@openclaw/terminal-core/osc-progress": [
+        "./packages/terminal-core/src/osc-progress.ts"
+      ],
+      "@openclaw/terminal-core/palette": [
+        "./packages/terminal-core/src/palette.ts"
+      ],
+      "@openclaw/terminal-core/progress-line": [
+        "./packages/terminal-core/src/progress-line.ts"
+      ],
+      "@openclaw/terminal-core/prompt-select-styled": [
+        "./packages/terminal-core/src/prompt-select-styled.ts"
+      ],
+      "@openclaw/terminal-core/prompt-select-styled-params": [
+        "./packages/terminal-core/src/prompt-select-styled-params.ts"
+      ],
+      "@openclaw/terminal-core/prompt-style": [
+        "./packages/terminal-core/src/prompt-style.ts"
+      ],
+      "@openclaw/terminal-core/restore": [
+        "./packages/terminal-core/src/restore.ts"
+      ],
+      "@openclaw/terminal-core/safe-text": [
+        "./packages/terminal-core/src/safe-text.ts"
+      ],
+      "@openclaw/terminal-core/stream-writer": [
+        "./packages/terminal-core/src/stream-writer.ts"
+      ],
+      "@openclaw/terminal-core/table": [
+        "./packages/terminal-core/src/table.ts"
+      ],
+      "@openclaw/terminal-core/terminal-link": [
+        "./packages/terminal-core/src/terminal-link.ts"
+      ],
+      "@openclaw/terminal-core/theme": [
+        "./packages/terminal-core/src/theme.ts"
+      ],
+      "@openclaw/terminal-core/*": [
+        "./packages/terminal-core/src/*"
+      ],
+      "@openclaw/net-policy": [
+        "./packages/net-policy/src/index.ts"
+      ],
+      "@openclaw/net-policy/ip": [
+        "./packages/net-policy/src/ip.ts"
+      ],
+      "@openclaw/net-policy/ipv4": [
+        "./packages/net-policy/src/ipv4.ts"
+      ],
+      "@openclaw/net-policy/redact-sensitive-url": [
+        "./packages/net-policy/src/redact-sensitive-url.ts"
+      ],
+      "@openclaw/net-policy/url-protocol": [
+        "./packages/net-policy/src/url-protocol.ts"
+      ],
+      "@openclaw/net-policy/url-userinfo": [
+        "./packages/net-policy/src/url-userinfo.ts"
+      ],
+      "@openclaw/net-policy/*": [
+        "./packages/net-policy/src/*"
+      ],
+      "@openclaw/sdk": [
+        "./packages/sdk/src/index.ts"
+      ],
+      "@openclaw/plugin-sdk/*": [
+        "./src/plugin-sdk/*.ts"
+      ],
+      "openclaw/plugin-sdk/account-id": [
+        "./src/plugin-sdk/account-id.ts"
+      ],
+      "@openclaw/*": [
+        "./extensions/*"
+      ]
+    },
+    "pathsBasePath": "/Users/devagr/solid-yield-wt/openclaw-trial",
+    "jsx": 1,
+    "jsxImportSource": "@solidjs/web"
+  },
+  "elapsedMs": 18862.962333,
+  "wallMs": 19209.886125,
+  "counts": {
+    "warn:UNANALYZED_BOUNDARY": 5747,
+    "error:UNHANDLED_HANDLER_FAILURE": 1908,
+    "error:CONTEXT_PROVIDER_MISSING": 5,
+    "error:SETUP_MAY_THROW": 121,
+    "warn:PENDING_ASYNC_IN_HANDLER": 402,
+    "error:STRICT_READ_UNTRACKED": 37,
+    "error:PENDING_ASYNC_FORBIDDEN_SCOPE": 11,
+    "error:REACTIVE_WRITE_IN_OWNED_SCOPE": 3,
+    "error:PENDING_ASYNC_UNTRACKED_READ": 9,
+    "error:ASYNC_OUTSIDE_LOADING_BOUNDARY": 1183,
+    "error:ERROR_OUTSIDE_ERRORED_BOUNDARY": 1633,
+    "info:COMPONENT_OBLIGATIONS_EXPORTED": 445
+  },
+  "partialByConstruct": {
+    "unchecked source re-export": 36,
+    "unchecked source import": 1258,
+    "a dynamic service member": 207,
+    "a call without a declared result shape": 1312,
+    "a mutation of an object member": 540,
+    "createSignal outside a component": 2,
+    "onCleanup(…)": 74,
+    "createMemo outside a component": 1,
+    "getOwner(…)": 3,
+    "template(…)": 1,
+    "lazy(…)": 60,
+    "an import without declarations": 124,
+    "a generator function": 3,
+    "recursive/deep or bounded function call": 235,
+    "runWithOwner(…)": 2,
+    "a class with inheritance or unsupported members": 6,
+    "calling the component OpenClawApp as a function": 1,
+    "a spread into a component's props": 331,
+    "a spread on an element": 21,
+    "dynamic(…)": 13,
+    "an unresolved provider or component": 238,
+    "onSettled(…)": 280,
+    "an effect compute that is not a function literal": 25,
+    "omit(…)": 5,
+    "getObserver(…)": 1,
+    "a reactive write in a ref callback": 21,
+    "createOptimistic(…)": 118,
+    "action(…)": 94,
+    "analysis work limit": 62,
+    "createEffect outside a component's setup": 6,
+    "a bound handler array": 57,
+    "createUniqueId(…)": 46,
+    "recursive or bounded component": 4,
+    "children(…)": 10,
+    "calling the component renderSlashMatchedName as a function": 2,
+    "calling the component seleneMoon as a function": 1,
+    "calling the component browedFace as a function": 2,
+    "createStore(…)": 51,
+    "createDeferred(…)": 20,
+    "isPending(…)": 72,
+    "calling the component renderSectionHeading as a function": 2,
+    "calling the component renderRunInspectorSafeRef as a function": 2,
+    "calling the component renderReceiptBadges as a function": 1,
+    "calling the component renderRunInspectorPagination as a function": 1,
+    "calling the component renderReceiptDetail as a function": 1,
+    "calling the component renderPanel as a function": 2,
+    "calling the component renderReady as a function": 1,
+    "latest(…)": 63,
+    "createMemo outside a component's setup": 118,
+    "calling the component SessionGit as a function": 1,
+    "refresh(…)": 2,
+    "spread(…)": 1,
+    "mapArray(…)": 4,
+    "calling the component SessionMedia as a function": 1,
+    "calling the component renderWikiInsightBody as a function": 1,
+    "calling the component renderAgentPanelFacts as a function": 2,
+    "calling the component renderAgentContextSection as a function": 2,
+    "calling the component renderPreviewFact as a function": 3,
+    "calling the component renderProfileInheritance as a function": 1,
+    "calling the component renderToolMetaBadges as a function": 1,
+    "calling the component renderToolPolicyDetails as a function": 1,
+    "a function child of an element": 2,
+    "calling the component renderStatusNotice as a function": 3,
+    "reconcile(…)": 1,
+    "preload(…)": 3,
+    "<Portal>": 3,
+    "createOptimisticStore(…)": 10,
+    "calling the component renderContextStat as a function": 4,
+    "a signal tuple outside destructuring": 1,
+    "calling the component renderSessionGlyphRun as a function": 1,
+    "an effect function that is not a function literal": 2,
+    "calling the component renderAgentGroupAvatar as a function": 1,
+    "calling the component renderAgentAvatar as a function": 1,
+    "calling the component renderSidebarServerDetails as a function": 1,
+    "calling the component renderGatewayHealth as a function": 2,
+    "calling the component renderSessionOwnerChip as a function": 1,
+    "calling the component renderSidebarRailPinMenuForMenus as a function": 1,
+    "calling the component renderSidebarPluginNavigationMenuForMenus as a function": 1,
+    "calling the component renderSidebarAgentMenuForMenus as a function": 1,
+    "calling the component renderSidebarAgentCreateDialogForMenus as a function": 1,
+    "calling the component renderSidebarIdentityMenuForMenus as a function": 1,
+    "calling the component renderSidebarSessionMenuForMenus as a function": 1,
+    "calling the component renderSidebarSessionGroupMenuForMenus as a function": 1,
+    "calling the component renderSidebarSessionSortMenuForMenus as a function": 1,
+    "calling the component renderSidebarPeopleFilterMenuForMenus as a function": 1,
+    "calling the component renderSidebarCatalogViewMenuForMenus as a function": 1,
+    "calling the component renderSidebarWorkspaceHeader as a function": 1,
+    "calling the component renderSessionUnreadBadge as a function": 1,
+    "calling the component renderAppSidebarPluginTab as a function": 1,
+    "<Dynamic>": 3,
+    "a memo compute that is not a function literal": 21,
+    "calling the component renderSidebarAgentCard as a function": 1,
+    "calling the component renderRailPin as a function": 1,
+    "calling the component renderAppSidebarFooterBar as a function": 1,
+    "calling the component renderAppSidebarPageEntry as a function": 1,
+    "calling the component renderHoverMarquee as a function": 2,
+    "calling the component renderChildSessionLoadError as a function": 2,
+    "calling the component renderPendingSessionCreateRow as a function": 1,
+    "calling the component renderSessionMutationError as a function": 1,
+    "calling the component renderSessionListFrame as a function": 1,
+    "toArray(…)": 1,
+    "createProjection(…)": 5,
+    "flush(…)": 1,
+    "calling the component terminalPanelTabIcon as a function": 1,
+    "calling the component renderSchemaDefaultDescription as a function": 2,
+    "calling the component renderFilters as a function": 1,
+    "calling the component renderChannelPairingDetail as a function": 1,
+    "calling the component rowStatus as a function": 1,
+    "calling the component renderBrowseAllRow as a function": 1,
+    "calling the component renderChannelPairingQueue as a function": 1,
+    "calling the component renderPluginDetailBreadcrumb as a function": 2,
+    "calling the component renderCatalogGridSkeleton as a function": 2,
+    "calling the component renderError as a function": 2,
+    "calling the component categoryIcon as a function": 1,
+    "calling the component renderCatalogEmptyState as a function": 1,
+    "calling the component renderPluginOfficialBadge as a function": 2,
+    "calling the component renderPluginAuthor as a function": 3,
+    "calling the component renderPluginStateStatus as a function": 2,
+    "calling the component renderPluginRowMessage as a function": 4,
+    "calling the component renderPluginSecurityAudit as a function": 1,
+    "calling the component renderPluginCapabilitySection as a function": 7,
+    "calling the component renderPublisherIdentity as a function": 1,
+    "calling the component renderThemeCardVisual as a function": 1,
+    "calling the component renderConfigPageSubtitle as a function": 1,
+    "<Reveal>": 1,
+    "createErrorBoundary(…)": 1,
+    "calling the component deviceIcon as a function": 1,
+    "createLoadingBoundary(…)": 2,
+    "calling the component renderProviderBilling as a function": 1,
+    "calling the component renderProviderCostHistory as a function": 1,
+    "calling the component profileStatus as a function": 2,
+    "calling the component renderProviderIcon as a function": 5,
+    "calling the component renderAuthStatus as a function": 2,
+    "calling the component renderModelSetupFailure as a function": 2,
+    "calling the component renderLoadingSection as a function": 5,
+    "calling the component renderNativeModelSetupSection as a function": 1,
+    "calling the component renderActivationFeedback as a function": 1,
+    "calling the component renderMutationMessage as a function": 2,
+    "calling the component renderSetupAccessWarning as a function": 1,
+    "calling the component renderPluginAskAction as a function": 1,
+    "calling the component renderRetryError as a function": 4,
+    "calling the component renderPluginCompatibilityNotices as a function": 2,
+    "calling the component renderTarget as a function": 1,
+    "calling the component renderInsightList as a function": 5,
+    "calling the component renderUsageRefreshStatus as a function": 4,
+    "calling the component renderSessionSummary as a function": 1,
+    "calling the component renderHeatmapSvg as a function": 1,
+    "calling the component renderUsageLoadingStatus as a function": 1,
+    "calling the component renderFilterChips as a function": 1,
+    "calling the component renderWorktreesView as a function": 1,
+    "calling the component highlightMatch as a function": 5,
+    "calling the component renderSessionOwnerAvatar as a function": 1,
+    "calling the component renderMetaRow as a function": 2,
+    "calling the component renderApprovalPresentation as a function": 1,
+    "calling the component SessionHistory as a function": 1,
+    "calling the component renderShellRuntime as a function": 1,
+    "calling the component renderConfirmation as a function": 1
+  },
+  "programStats": {
+    "sources": 3114,
+    "declarations": 445,
+    "nodes": 3198302,
+    "symbols": 901662,
+    "types": 227428,
+    "instantiations": 380217
+  },
+  "invalidated": 2669,
+  "reanalyzed": 2669,
+  "budgetHits": [
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/lib/chat/pasted-text-excerpt.ts",
+      "kind": "module",
+      "ms": 69.45391699999982,
+      "steps": 7319,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/markdown.ts",
+      "kind": "module",
+      "ms": 17.85170799999969,
+      "steps": 7628,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/lib/chat/source-previews.ts",
+      "kind": "module",
+      "ms": 12.952416999999969,
+      "steps": 7325,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/link-reader-markdown.tsx",
+      "kind": "module",
+      "ms": 21.7013750000001,
+      "steps": 7591,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/solid/channel-avatar.tsx",
+      "component": "ChannelAvatarContent",
+      "kind": "component",
+      "ms": 5.504417000000103,
+      "steps": 466,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/solid/menu.tsx",
+      "component": "Menu",
+      "kind": "component",
+      "ms": 112.7800830000001,
+      "steps": 20022,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/chat-outbox-recovery.tsx",
+      "component": "PaneOutboxRecovery",
+      "kind": "component",
+      "ms": 99.9670000000001,
+      "steps": 20056,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/solid/provider-icon.tsx",
+      "component": "ProviderBrandIcon",
+      "kind": "component",
+      "ms": 1.4796660000001793,
+      "steps": 550,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-model-catalog-state.tsx",
+      "component": "ChatModelCatalogRefresh",
+      "kind": "component",
+      "ms": 1.4116250000001855,
+      "steps": 431,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-model-picker-options.tsx",
+      "component": "ChatModelProviderIcon",
+      "kind": "component",
+      "ms": 1.4479169999999613,
+      "steps": 554,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-model-picker-options.tsx",
+      "component": "ChatModelPickerOption",
+      "kind": "component",
+      "ms": 20.738041000000067,
+      "steps": 4195,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-model-picker-panel.tsx",
+      "component": "ChatModelPickerPanel",
+      "kind": "component",
+      "ms": 34.71458299999995,
+      "steps": 9978,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-model-picker.tsx",
+      "component": "ChatModelPicker",
+      "kind": "component",
+      "ms": 6.397917000000234,
+      "steps": 2261,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-model-controls.tsx",
+      "component": "ChatModelControls",
+      "kind": "component",
+      "ms": 61.71437500000002,
+      "steps": 16188,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/chat-pane-model-control.tsx",
+      "component": "ChatPaneModelControl",
+      "kind": "component",
+      "ms": 24.173917000000074,
+      "steps": 16186,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-permission-picker.tsx",
+      "component": "ChatPermissionPicker",
+      "kind": "component",
+      "ms": 34.86216700000023,
+      "steps": 20039,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/solid/popover.tsx",
+      "component": "Popover",
+      "kind": "component",
+      "ms": 27.970166999999492,
+      "steps": 13956,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-image-actions.tsx",
+      "component": "ChatImageActions",
+      "kind": "component",
+      "ms": 42.68733299999985,
+      "steps": 20035,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-message-images-solid.tsx",
+      "component": "MessageImages",
+      "kind": "component",
+      "ms": 60.83141700000033,
+      "steps": 20014,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-message-images-solid.tsx",
+      "component": "MessageImageAction",
+      "kind": "component",
+      "ms": 16.760707999999795,
+      "steps": 8482,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-message-attachments-solid.tsx",
+      "component": "AssistantAttachments",
+      "kind": "component",
+      "ms": 37.24333300000035,
+      "steps": 20011,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/browser-tab-card.tsx",
+      "component": "BrowserTabCardHost",
+      "kind": "component",
+      "ms": 56.32641699999931,
+      "steps": 20018,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/widget-card-menu.tsx",
+      "component": "WidgetCardMenu",
+      "kind": "component",
+      "ms": 30.904499999999643,
+      "steps": 20038,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/widget-card-view.tsx",
+      "component": "ToolPreview",
+      "kind": "component",
+      "ms": 37.60437499999989,
+      "steps": 20066,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/activity/session-activity-people.tsx",
+      "component": "PeopleControl",
+      "kind": "component",
+      "ms": 35.15116699999999,
+      "steps": 20011,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/activity/session-activity-view.tsx",
+      "component": "renderSessionActivityView",
+      "kind": "component",
+      "ms": 39.86829099999977,
+      "steps": 20011,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/activity/activity-page-view.tsx",
+      "component": "ActivityPageView",
+      "kind": "component",
+      "ms": 36.31195799999932,
+      "steps": 20068,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/activity/activity-page.tsx",
+      "component": "ActivityPage",
+      "kind": "component",
+      "ms": 60.665374999999585,
+      "steps": 20036,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/activity/activity-route.tsx",
+      "component": "renderSolid",
+      "kind": "component",
+      "ms": 26.796041999999943,
+      "steps": 20036,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/solid/markdown-html.tsx",
+      "component": "MarkdownHtml",
+      "kind": "component",
+      "ms": 31.351959000000534,
+      "steps": 12684,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/agents/memory/view-diary.tsx",
+      "component": "DreamingDiarySection",
+      "kind": "component",
+      "ms": 36.20495799999935,
+      "steps": 20016,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/agents/memory/view.tsx",
+      "component": "renderDreaming",
+      "kind": "component",
+      "ms": 26.326207999999497,
+      "steps": 20038,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/agents/memory/memory-panel-view.tsx",
+      "component": "AgentMemoryView",
+      "kind": "component",
+      "ms": 26.309541999999965,
+      "steps": 20057,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/agents/memory/memory-panel.tsx",
+      "component": "AgentMemoryPanel",
+      "kind": "component",
+      "ms": 29.55291699999998,
+      "steps": 20012,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/agent-emoji-picker.tsx",
+      "component": "AgentEmojiPicker",
+      "kind": "component",
+      "ms": 25.376500000000306,
+      "steps": 15447,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/multi-select.tsx",
+      "component": "MultiSelect",
+      "kind": "component",
+      "ms": 45.5966669999998,
+      "steps": 17347,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/select-picker-view.tsx",
+      "component": "PickerContent",
+      "kind": "component",
+      "ms": 38.46058399999947,
+      "steps": 20081,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/agents/panels-overview.tsx",
+      "component": "AgentOverview",
+      "kind": "component",
+      "ms": 52.057708000000275,
+      "steps": 20058,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/agents/panels-files.tsx",
+      "component": "AgentFiles",
+      "kind": "component",
+      "ms": 41.26637500000015,
+      "steps": 20030,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/agents/panels-tools-skills.tsx",
+      "component": "AgentTools",
+      "kind": "component",
+      "ms": 29.528125000000728,
+      "steps": 20015,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/agents/view.tsx",
+      "component": "Agents",
+      "kind": "component",
+      "ms": 42.085041000000274,
+      "steps": 20065,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/agents/agents-page.tsx",
+      "component": "AgentsPage",
+      "kind": "component",
+      "ms": 55.059417000000394,
+      "steps": 20034,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/approvals/approvals-page.tsx",
+      "component": "ApprovalsPage",
+      "kind": "component",
+      "ms": 16.258374999999432,
+      "steps": 11537,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/chatgpt-usage-limit.tsx",
+      "component": "ChatGPTUsageLimit",
+      "kind": "component",
+      "ms": 4.101416999999856,
+      "steps": 2984,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-child-attention.tsx",
+      "component": "ChatChildAttention",
+      "kind": "component",
+      "ms": 11.122999999999593,
+      "steps": 2441,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/chat-view-notices.tsx",
+      "component": "renderChatComposerNotices",
+      "kind": "component",
+      "ms": 27.87004100000013,
+      "steps": 20023,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-pane-placement.tsx",
+      "component": "ChatPanePlacement",
+      "kind": "component",
+      "ms": 35.529333999999835,
+      "steps": 20022,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-question-answer-controls.tsx",
+      "component": "QuestionFreeText",
+      "kind": "component",
+      "ms": 20.59600000000046,
+      "steps": 7422,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-message-reactions-view.tsx",
+      "component": "MessageReactionPicker",
+      "kind": "component",
+      "ms": 29.01941700000043,
+      "steps": 16789,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-message-markdown-view.tsx",
+      "component": "MessageActions",
+      "kind": "component",
+      "ms": 30.441749999999956,
+      "steps": 20010,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-task-start-menu.tsx",
+      "component": "ChatTaskStartMenu",
+      "kind": "component",
+      "ms": 29.2798329999996,
+      "steps": 20033,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-task-suggestions.tsx",
+      "component": "ChatTaskSuggestionTray",
+      "kind": "component",
+      "ms": 37.739832999999635,
+      "steps": 20035,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/chat-avatar-view.tsx",
+      "component": "ChatAvatar",
+      "kind": "component",
+      "ms": 40.68241699999999,
+      "steps": 20006,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/chat-avatar-view.tsx",
+      "component": "ForwardedAvatar",
+      "kind": "component",
+      "ms": 30.750291999999718,
+      "steps": 20058,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-forwarded-attribution.tsx",
+      "component": "ForwardedAttribution",
+      "kind": "component",
+      "ms": 38.68012499999986,
+      "steps": 20011,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-tool-cards.solid.tsx",
+      "component": "BrowserTabPreviews",
+      "kind": "component",
+      "ms": 32.598540999999386,
+      "steps": 20025,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-tool-cards.solid.tsx",
+      "component": "ChatToolCard",
+      "kind": "component",
+      "ms": 33.479583000000275,
+      "steps": 20012,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-message-activity-operation.tsx",
+      "component": "ActivityOperation",
+      "kind": "component",
+      "ms": 27.374125000000276,
+      "steps": 20008,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-message-text-view.tsx",
+      "component": "MessageJson",
+      "kind": "component",
+      "ms": 10.770375000000058,
+      "steps": 5453,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-message-text-view.tsx",
+      "component": "MessageMarkdown",
+      "kind": "component",
+      "ms": 34.066625000000386,
+      "steps": 20115,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-message-bubble-view.tsx",
+      "component": "GroupedMessage",
+      "kind": "component",
+      "ms": 60.983125000000655,
+      "steps": 20012,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-message-stream-view.tsx",
+      "component": "StreamGroupParts",
+      "kind": "component",
+      "ms": 42.86633299999994,
+      "steps": 20093,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-message-stream-view.tsx",
+      "component": "UnplacedSubagentWait",
+      "kind": "component",
+      "ms": 34.48808300000019,
+      "steps": 20035,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-message-stream-view.tsx",
+      "component": "WorkGroupSummary",
+      "kind": "component",
+      "ms": 36.33874999999989,
+      "steps": 20053,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-message-activity-view.tsx",
+      "component": "ActivityGroupContent",
+      "kind": "component",
+      "ms": 41.78437500000018,
+      "steps": 20016,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-message-reaction-chips-view.tsx",
+      "component": "GroupMessageReactions",
+      "kind": "component",
+      "ms": 29.18041600000015,
+      "steps": 18157,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-session-activity.solid.tsx",
+      "component": "ChatSessionActivity",
+      "kind": "component",
+      "ms": 27.797334000000774,
+      "steps": 20015,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-message-group-view.tsx",
+      "component": "ActivityGroup",
+      "kind": "component",
+      "ms": 30.5092080000004,
+      "steps": 20014,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-message-group-view.tsx",
+      "component": "MessageGroupContent",
+      "kind": "component",
+      "ms": 28.746625000000677,
+      "steps": 20074,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-message-group-view.tsx",
+      "component": "MessageGroup",
+      "kind": "component",
+      "ms": 26.241707999999562,
+      "steps": 20015,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-source-previews.tsx",
+      "component": "ChatSourcePreviews",
+      "kind": "component",
+      "ms": 27.1875,
+      "steps": 15319,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-agent-run-frame.tsx",
+      "component": "AgentRunFrame",
+      "kind": "component",
+      "ms": 39.09758300000067,
+      "steps": 20020,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-divider.tsx",
+      "component": "ChatNotice",
+      "kind": "component",
+      "ms": 26.413292000000183,
+      "steps": 20019,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-system-events.tsx",
+      "component": "ChatSystemEvents",
+      "kind": "component",
+      "ms": 30.329999999999927,
+      "steps": 20019,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-transcript-content.tsx",
+      "component": "TranscriptWorkPreviews",
+      "kind": "component",
+      "ms": 31.075792000000547,
+      "steps": 20022,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-typing-indicator.tsx",
+      "component": "ChatTypingIndicator",
+      "kind": "component",
+      "ms": 27.430041999999958,
+      "steps": 20056,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-attachment-inputs.tsx",
+      "component": "ChatAttachmentInputs",
+      "kind": "component",
+      "ms": 36.961959000000206,
+      "steps": 16498,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-attachment-preview-strip.tsx",
+      "component": "AttachmentPreviewStrip",
+      "kind": "component",
+      "ms": 35.81016600000021,
+      "steps": 20007,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-composer-controls.tsx",
+      "component": "renderMicrophonePickerSolid",
+      "kind": "component",
+      "ms": 36.86250000000018,
+      "steps": 20060,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-composer-plus-menu.tsx",
+      "component": "ChatComposerPlusMenu",
+      "kind": "component",
+      "ms": 39.462249999999585,
+      "steps": 20042,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-composer-queue.tsx",
+      "component": "renderChatQueueSolid",
+      "kind": "component",
+      "ms": 45.34258399999999,
+      "steps": 20014,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/session-progress-card-view.tsx",
+      "component": "ProgressCardMarkdown",
+      "kind": "component",
+      "ms": 20.359166000000187,
+      "steps": 13184,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/session-progress-card-solid.tsx",
+      "component": "ProgressDetailsContent",
+      "kind": "component",
+      "ms": 21.96141699999953,
+      "steps": 15165,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/session-progress-card-solid.tsx",
+      "component": "SessionProgressCard",
+      "kind": "component",
+      "ms": 29.302542000000358,
+      "steps": 20036,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-composer-textarea.tsx",
+      "component": "renderComposerTextarea",
+      "kind": "component",
+      "ms": 34.421875,
+      "steps": 20029,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-activity-pills.tsx",
+      "component": "ChatActivityPills",
+      "kind": "component",
+      "ms": 26.938000000000102,
+      "steps": 20037,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-composer-view.tsx",
+      "component": "renderChatComposerView",
+      "kind": "component",
+      "ms": 29.99708399999963,
+      "steps": 20017,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/new-session/creation-composer-render.tsx",
+      "component": "CreationComposer",
+      "kind": "component",
+      "ms": 33.66204099999959,
+      "steps": 7433,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/new-session/draft-submission-view.tsx",
+      "component": "NewSessionSubmission",
+      "kind": "component",
+      "ms": 29.22125000000051,
+      "steps": 20077,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/sidebar-attention-panel.runtime.tsx",
+      "component": "SidebarAttentionPanel",
+      "kind": "component",
+      "ms": 44.866540999999415,
+      "steps": 20021,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/plugin/logbook-view.tsx",
+      "component": "Logbook",
+      "kind": "component",
+      "ms": 35.07445800000005,
+      "steps": 20035,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/app-sidebar-nav-menus.tsx",
+      "component": "SidebarDropdown",
+      "kind": "component",
+      "ms": 31.391583999999966,
+      "steps": 20016,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/app-sidebar-agent-menu.tsx",
+      "component": "renderSidebarAgentMenu",
+      "kind": "component",
+      "ms": 39.00095800000054,
+      "steps": 20062,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/app-sidebar-identity-menu.tsx",
+      "component": "renderSidebarIdentityMenu",
+      "kind": "component",
+      "ms": 31.677583000000595,
+      "steps": 20038,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/sidebar-session-filter-popover.tsx",
+      "component": "SidebarSessionFilterPopover",
+      "kind": "component",
+      "ms": 22.043166999999812,
+      "steps": 14194,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/app-sidebar-people-filter-menu.tsx",
+      "component": "renderSidebarPeopleFilterMenuForMenus",
+      "kind": "component",
+      "ms": 28.47008300000107,
+      "steps": 15036,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/app-sidebar-plugin-navigation-menu.tsx",
+      "component": "renderSidebarPluginNavigationMenuForMenus",
+      "kind": "component",
+      "ms": 30.902416000000812,
+      "steps": 20029,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/app-sidebar-session-menu-renderers.tsx",
+      "component": "renderSidebarSessionGroupMenuForMenus",
+      "kind": "component",
+      "ms": 67.2125419999993,
+      "steps": 20082,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/app-sidebar-session-menu-renderers.tsx",
+      "component": "renderSidebarCatalogViewMenuForMenus",
+      "kind": "component",
+      "ms": 56.68962499999907,
+      "steps": 20077,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/app-sidebar-session-menu-renderers.tsx",
+      "component": "renderSidebarSessionSortMenuForMenus",
+      "kind": "component",
+      "ms": 57.789708000000246,
+      "steps": 18707,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/agent-create-dialog.tsx",
+      "component": "AgentCreateDialog",
+      "kind": "component",
+      "ms": 53.10870900000009,
+      "steps": 20016,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/sidebar-menus-render.tsx",
+      "component": "renderSidebarRailPinMenuForMenus",
+      "kind": "component",
+      "ms": 32.584459000001516,
+      "steps": 20040,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/sidebar-menus-render.tsx",
+      "component": "renderSidebarAgentMenuForMenus",
+      "kind": "component",
+      "ms": 31.633459000000585,
+      "steps": 20079,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/sidebar-menus-render.tsx",
+      "component": "renderSidebarSessionMenuForMenus",
+      "kind": "component",
+      "ms": 27.205957999998645,
+      "steps": 20043,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/app-sidebar-render.tsx",
+      "component": "renderAppSidebarFooterBar",
+      "kind": "component",
+      "ms": 35.87683399999878,
+      "steps": 20009,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/app-sidebar-rail.tsx",
+      "component": "renderSidebarPages",
+      "kind": "component",
+      "ms": 20.925042000000758,
+      "steps": 13600,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/sidebar-agent-roster.tsx",
+      "component": "SidebarAgentRoster",
+      "kind": "component",
+      "ms": 39.733791000000565,
+      "steps": 20027,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-summary-automations.tsx",
+      "component": "ChatSummaryAutomations",
+      "kind": "component",
+      "ms": 51.39249999999993,
+      "steps": 20051,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-github-publication-menu.tsx",
+      "component": "GitHubPublicationMenu",
+      "kind": "component",
+      "ms": 37.59245799999917,
+      "steps": 20047,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-github-publication.tsx",
+      "component": "GitHubPublicationAccountSelector",
+      "kind": "component",
+      "ms": 40.455832999999984,
+      "steps": 20092,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-github-publication.tsx",
+      "component": "GitHubPublicationAction",
+      "kind": "component",
+      "ms": 41.77045899999939,
+      "steps": 20023,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-branch-actions.tsx",
+      "component": "ChatBranchActions",
+      "kind": "component",
+      "ms": 31.953125,
+      "steps": 20019,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-ci-details.tsx",
+      "component": "ChatCiDetailsContent",
+      "kind": "component",
+      "ms": 18.70666600000004,
+      "steps": 5531,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-details-progress.tsx",
+      "component": "ChatDetailsProgress",
+      "kind": "component",
+      "ms": 26.23083299999962,
+      "steps": 20008,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-details-progress.tsx",
+      "component": "MobileTaskProgressContent",
+      "kind": "component",
+      "ms": 20.0926670000008,
+      "steps": 16886,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-details-progress.tsx",
+      "component": "MobileTaskProgressControls",
+      "kind": "component",
+      "ms": 26.71295900000041,
+      "steps": 20087,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-github-publication-mobile.tsx",
+      "component": "GitHubPublicationMobile",
+      "kind": "component",
+      "ms": 31.469583000000057,
+      "steps": 20013,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-mobile-people.tsx",
+      "component": "ChatMobilePeopleBody",
+      "kind": "component",
+      "ms": 25.557584000000134,
+      "steps": 20030,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-session-sharing.solid.tsx",
+      "component": "ChatSessionSharing",
+      "kind": "component",
+      "ms": 40.77087500000016,
+      "steps": 20008,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-details-mobile-content.tsx",
+      "component": "ChatDetailsMobileControls",
+      "kind": "component",
+      "ms": 33.97095799999988,
+      "steps": 20078,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-pull-request-actions.tsx",
+      "component": "PullRequestActions",
+      "kind": "component",
+      "ms": 34.91166599999997,
+      "steps": 20019,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-pull-request-checks.tsx",
+      "component": "ChatPullRequestChecks",
+      "kind": "component",
+      "ms": 13.833875000000262,
+      "steps": 7307,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-pull-requests-content.tsx",
+      "component": "ChatPullRequestsContent",
+      "kind": "component",
+      "ms": 32.04449999999997,
+      "steps": 20068,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-details-session.tsx",
+      "component": "ChatDetailsDesktopComposition",
+      "kind": "component",
+      "ms": 27.746209000000817,
+      "steps": 20011,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/board/board-widget-menu.tsx",
+      "component": "BoardWidgetMenu",
+      "kind": "component",
+      "ms": 31.204125000000204,
+      "steps": 20070,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-position-rail-view.tsx",
+      "component": "ChatPositionRailView",
+      "kind": "component",
+      "ms": 28.707000000000335,
+      "steps": 16848,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-position-rail-solid.tsx",
+      "component": "ChatPositionRail",
+      "kind": "component",
+      "ms": 32.92329200000131,
+      "steps": 19725,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-thread-view.tsx",
+      "component": "ChatThread",
+      "kind": "component",
+      "ms": 51.66716600000109,
+      "steps": 20291,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/chat-view.tsx",
+      "component": "ChatView",
+      "kind": "component",
+      "ms": 45.85804199999984,
+      "steps": 20010,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/board/board-tabs.tsx",
+      "component": "BoardTabs",
+      "kind": "component",
+      "ms": 33.42499999999927,
+      "steps": 20071,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/lib/board/widgets/session-progress.tsx",
+      "component": "SessionProgressWidgetContent",
+      "kind": "component",
+      "ms": 32.32495800000106,
+      "steps": 20012,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/browser/browser-panel-tabs.tsx",
+      "component": "BrowserPanelTabs",
+      "kind": "component",
+      "ms": 7.085458999999901,
+      "steps": 3055,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/browser/browser-panel-toolbar.tsx",
+      "component": "BrowserToolbar",
+      "kind": "component",
+      "ms": 38.636500000000524,
+      "steps": 20035,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/browser/browser-panel-render.tsx",
+      "component": "BrowserPanelChrome",
+      "kind": "component",
+      "ms": 30.649625000000015,
+      "steps": 20020,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/board/board-widget-cell.solid.tsx",
+      "component": "BoardWidgetCellContent",
+      "kind": "component",
+      "ms": 44.261875000000146,
+      "steps": 20019,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/board/board-view.tsx",
+      "component": "BoardViewContent",
+      "kind": "component",
+      "ms": 41.21766699999898,
+      "steps": 20087,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-sidebar-desktop-frame-controls.tsx",
+      "component": "DesktopFrameControls",
+      "kind": "component",
+      "ms": 33.47370899999987,
+      "steps": 20058,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-sidebar-region-header.tsx",
+      "component": "SidebarRegionHeader",
+      "kind": "component",
+      "ms": 37.14149999999972,
+      "steps": 20023,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-file-session-menu.tsx",
+      "component": "FileSessionMenu",
+      "kind": "component",
+      "ms": 33.92004199999974,
+      "steps": 20023,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-sidebar-file-mobile.tsx",
+      "component": "SidebarFileMobileRail",
+      "kind": "component",
+      "ms": 34.099458000000595,
+      "steps": 20036,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-sidebar-attachment.tsx",
+      "component": "SidebarAttachment",
+      "kind": "component",
+      "ms": 29.060292000000118,
+      "steps": 20027,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-sidebar-editor-menu.tsx",
+      "component": "ChatSidebarEditorMenu",
+      "kind": "component",
+      "ms": 29.23608299999978,
+      "steps": 20026,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-session-workspace-breadcrumb.tsx",
+      "component": "WorkspaceBreadcrumb",
+      "kind": "component",
+      "ms": 37.62800000000061,
+      "steps": 20045,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-sidebar-file-chrome.tsx",
+      "component": "DesktopFileNavigation",
+      "kind": "component",
+      "ms": 32.6299999999992,
+      "steps": 20074,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-sidebar-file-chrome.tsx",
+      "component": "DesktopFileChrome",
+      "kind": "component",
+      "ms": 29.492957999998907,
+      "steps": 20081,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-sidebar-file-view.tsx",
+      "component": "SidebarFile",
+      "kind": "component",
+      "ms": 29.857790999998542,
+      "steps": 20077,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-sidebar-image-view.tsx",
+      "component": "SidebarImage",
+      "kind": "component",
+      "ms": 36.68195800000103,
+      "steps": 20084,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-sidebar-image-view.tsx",
+      "component": "SidebarFileFallback",
+      "kind": "component",
+      "ms": 30.63945799999965,
+      "steps": 20080,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-sidebar-image-view.tsx",
+      "component": "SidebarSvgFile",
+      "kind": "component",
+      "ms": 32.47350000000006,
+      "steps": 20075,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/session-diff-menus.tsx",
+      "component": "SessionDiffMenu",
+      "kind": "component",
+      "ms": 41.66316700000061,
+      "steps": 20024,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/session-diff-tree.tsx",
+      "component": "SessionDiffTree",
+      "kind": "component",
+      "ms": 2.086708999999246,
+      "steps": 520,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/session-diff-panel.tsx",
+      "component": "SessionDiffPanel",
+      "kind": "component",
+      "ms": 71.03941699999996,
+      "steps": 20076,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-sidebar-content.tsx",
+      "component": "SidebarPanel",
+      "kind": "component",
+      "ms": 365.9410420000004,
+      "steps": 20007,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-detail-panel.tsx",
+      "component": "DetailPanel",
+      "kind": "component",
+      "ms": 67.34941699999945,
+      "steps": 20043,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-session-workspace-attachments.tsx",
+      "component": "WorkspaceTranscriptAttachments",
+      "kind": "component",
+      "ms": 31.9207920000008,
+      "steps": 19096,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-session-workspace-desktop.tsx",
+      "component": "DesktopWorkspaceContents",
+      "kind": "component",
+      "ms": 41.27720800000134,
+      "steps": 20083,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-session-workspace-rail-solid.tsx",
+      "component": "SessionWorkspaceRail",
+      "kind": "component",
+      "ms": 53.15820800000074,
+      "steps": 20056,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/terminal/terminal-panel-view.tsx",
+      "component": "TerminalPanelView",
+      "kind": "component",
+      "ms": 42.009500000000116,
+      "steps": 20030,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/link-reader-panel.tsx",
+      "component": "PanelView",
+      "kind": "component",
+      "ms": 55.195167000001675,
+      "steps": 20077,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/desktop/desktop-panel-rail.tsx",
+      "component": "DesktopConnectionRail",
+      "kind": "component",
+      "ms": 41.39295800000036,
+      "steps": 20038,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/portals/portals-page.tsx",
+      "component": "PortalsPageContent",
+      "kind": "component",
+      "ms": 62.11641700000109,
+      "steps": 20053,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/direct-dictation-view.tsx",
+      "component": "DirectDictationView",
+      "kind": "component",
+      "ms": 71.5414579999997,
+      "steps": 20067,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-session-rail-composer.tsx",
+      "component": "SessionRailComposer",
+      "kind": "component",
+      "ms": 86.39466700000048,
+      "steps": 20021,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-session-rail.tsx",
+      "component": "ChatSessionRailContent",
+      "kind": "component",
+      "ms": 51.704499999999825,
+      "steps": 20022,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-header-session-menu.tsx",
+      "component": "ChatHeaderSessionMenuContent",
+      "kind": "component",
+      "ms": 54.61804200000006,
+      "steps": 20035,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-header-panel-actions.tsx",
+      "component": "ChatDashboardMenu",
+      "kind": "component",
+      "ms": 41.62524999999914,
+      "steps": 20035,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-header-panel-actions.tsx",
+      "component": "ChatPaneLayoutMenu",
+      "kind": "component",
+      "ms": 45.93512499999997,
+      "steps": 20073,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-pane-header-identity.tsx",
+      "component": "IdentityCrumbs",
+      "kind": "component",
+      "ms": 42.02258400000028,
+      "steps": 20071,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-pane-mobile-composition.tsx",
+      "component": "ChatPaneMobileComposition",
+      "kind": "component",
+      "ms": 36.82579199999964,
+      "steps": 20050,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-pane-versions-menu.tsx",
+      "component": "ChatPaneVersionsMenu",
+      "kind": "component",
+      "ms": 41.90837499999907,
+      "steps": 20079,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-pane-header.tsx",
+      "component": "PaneHeaderView",
+      "kind": "component",
+      "ms": 34.523417000000336,
+      "steps": 20043,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/chat-pane-layout-view.tsx",
+      "component": "PaneLayout",
+      "kind": "component",
+      "ms": 36.19000000000051,
+      "steps": 20046,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/apps/apps-page.tsx",
+      "component": "AppsPage",
+      "kind": "component",
+      "ms": 27.72516700000051,
+      "steps": 20009,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/config-form-collection-draft.tsx",
+      "component": "ConfigCollectionDraft",
+      "kind": "component",
+      "ms": 10.039415999999619,
+      "steps": 4009,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/config-form.node.collection-map.tsx",
+      "component": "ConfigMapField",
+      "kind": "component",
+      "ms": 38.299291999999696,
+      "steps": 18501,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/config-form.node.collection.tsx",
+      "component": "ConfigObject",
+      "kind": "component",
+      "ms": 52.20958299999984,
+      "steps": 20021,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/config-form.node.collection.tsx",
+      "component": "ConfigArray",
+      "kind": "component",
+      "ms": 26.557958999999755,
+      "steps": 14510,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/config-form.node.json.tsx",
+      "component": "JsonTextarea",
+      "kind": "component",
+      "ms": 1.433708000000479,
+      "steps": 1065,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/config-form.node.scalar.tsx",
+      "component": "TextInput",
+      "kind": "component",
+      "ms": 10.788916999999856,
+      "steps": 5637,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/config-form.node.scalar.tsx",
+      "component": "NumberInput",
+      "kind": "component",
+      "ms": 7.909499999999753,
+      "steps": 5623,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/config-form.node.tsx",
+      "component": "ConfigNode",
+      "kind": "component",
+      "ms": 69.53424999999879,
+      "steps": 20021,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/config-form.node.tsx",
+      "component": "renderNode",
+      "kind": "component",
+      "ms": 61.208166999998866,
+      "steps": 20019,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/config-form.render.tsx",
+      "component": "ConfigTierGroups",
+      "kind": "component",
+      "ms": 5.487415999999939,
+      "steps": 1089,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/config-form.render.tsx",
+      "component": "ConfigForm",
+      "kind": "component",
+      "ms": 42.63970900000095,
+      "steps": 20027,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/channels/view.config.tsx",
+      "component": "ChannelConfig",
+      "kind": "component",
+      "ms": 62.61341600000014,
+      "steps": 20058,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/wizard-step-controls.tsx",
+      "component": "WizardStepControls",
+      "kind": "component",
+      "ms": 34.64133299999958,
+      "steps": 20016,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/channels/view.detail.tsx",
+      "component": "renderChannelDetail",
+      "kind": "component",
+      "ms": 29.107708999999886,
+      "steps": 20021,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/channels/view.tsx",
+      "component": "ChannelsView",
+      "kind": "component",
+      "ms": 28.038125000000946,
+      "steps": 20011,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/channels/channels-page.tsx",
+      "component": "ChannelsPage",
+      "kind": "component",
+      "ms": 44.498999999999796,
+      "steps": 20009,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/file-preview-modal.tsx",
+      "component": "FilePreviewContent",
+      "kind": "component",
+      "ms": 33.41349999999875,
+      "steps": 19673,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/plugins/install-action.tsx",
+      "component": "PluginInstallAction",
+      "kind": "component",
+      "ms": 30.548791999999594,
+      "steps": 16752,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/plugins/catalog-results.tsx",
+      "component": "renderPluginCatalogResults",
+      "kind": "component",
+      "ms": 43.57749999999942,
+      "steps": 20028,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/agents-home/claws-detail-view.tsx",
+      "component": "ClawsDetailView",
+      "kind": "component",
+      "ms": 37.03883300000052,
+      "steps": 20009,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/agents-home/claws-catalog-view.tsx",
+      "component": "ClawsCatalogView",
+      "kind": "component",
+      "ms": 34.17695800000001,
+      "steps": 20013,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/agents-home/claws-catalog-dialog.tsx",
+      "component": "ClawsCatalogDialog",
+      "kind": "component",
+      "ms": 38.19720799999959,
+      "steps": 20058,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/claws/page.tsx",
+      "component": "ClawsPage",
+      "kind": "component",
+      "ms": 34.41466700000092,
+      "steps": 20088,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/cloud-workers/cloud-worker-snapshot-rows.tsx",
+      "component": "CloudWorkerSnapshotRow",
+      "kind": "component",
+      "ms": 36.79933300000084,
+      "steps": 20085,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/cloud-workers/cloud-worker-snapshot-rows.tsx",
+      "component": "CloudWorkerEnvironmentSheet",
+      "kind": "component",
+      "ms": 34.476708000000144,
+      "steps": 20074,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/cloud-workers/cloud-worker-environments.tsx",
+      "component": "CloudWorkerEnvironments",
+      "kind": "component",
+      "ms": 46.22820800000045,
+      "steps": 20016,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/cloud-workers/cloud-workers-page.tsx",
+      "component": "CloudWorkersPage",
+      "kind": "component",
+      "ms": 24.32666699999936,
+      "steps": 11807,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/model-setup/wizard-view-solid.tsx",
+      "component": "ModelSetupWizard",
+      "kind": "component",
+      "ms": 37.389624999999796,
+      "steps": 20008,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/wizard-login-controller.tsx",
+      "component": "WizardLogin",
+      "kind": "component",
+      "ms": 32.68058300000121,
+      "steps": 20015,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/mcp-servers-card.tsx",
+      "component": "McpServersCard",
+      "kind": "component",
+      "ms": 40.90450000000055,
+      "steps": 20035,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/config/mcp.tsx",
+      "component": "Mcp",
+      "kind": "component",
+      "ms": 28.98004099999889,
+      "steps": 20016,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/config/session-storage.tsx",
+      "component": "SessionStorageSettings",
+      "kind": "component",
+      "ms": 23.766999999999825,
+      "steps": 11756,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/config/talk.tsx",
+      "component": "Talk",
+      "kind": "component",
+      "ms": 38.519499999998516,
+      "steps": 20010,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/config/talk-page.tsx",
+      "component": "TalkSettingsPage",
+      "kind": "component",
+      "ms": 33.49858400000085,
+      "steps": 20012,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/config/updates.tsx",
+      "component": "Updates",
+      "kind": "component",
+      "ms": 30.958833999999115,
+      "steps": 20009,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/config/updates-page.tsx",
+      "component": "UpdatesPage",
+      "kind": "component",
+      "ms": 29.73199999999997,
+      "steps": 20014,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/config/setup.tsx",
+      "component": "SetupSection",
+      "kind": "component",
+      "ms": 176.079416999999,
+      "steps": 20033,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/config/session-sources.tsx",
+      "component": "SessionSources",
+      "kind": "component",
+      "ms": 5.834584000000177,
+      "steps": 3163,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/config/view-appearance.tsx",
+      "component": "AppearanceSection",
+      "kind": "component",
+      "ms": 39.294292000000496,
+      "steps": 20026,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/config/view.tsx",
+      "component": "Config",
+      "kind": "component",
+      "ms": 51.12104099999851,
+      "steps": 20042,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/config/config-page.tsx",
+      "component": "ConfigPage",
+      "kind": "component",
+      "ms": 46.86199999999917,
+      "steps": 20040,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/config/config-page.tsx",
+      "component": "ConfigRoute",
+      "kind": "component",
+      "ms": 34.493375000000015,
+      "steps": 20043,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/connection/view.tsx",
+      "component": "ConnectionView",
+      "kind": "component",
+      "ms": 30.14629100000093,
+      "steps": 20014,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/chat/components/chat-transcript-feed-view.tsx",
+      "component": "ChatTranscriptFeed",
+      "kind": "component",
+      "ms": 30.502916999999798,
+      "steps": 20174,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/cron/run-transcript.tsx",
+      "component": "CronRunTranscriptView",
+      "kind": "component",
+      "ms": 34.98741700000028,
+      "steps": 20187,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/cron/view-controls.tsx",
+      "component": "JobMenu",
+      "kind": "component",
+      "ms": 35.773042000000714,
+      "steps": 20034,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/cron/view-editor.tsx",
+      "component": "Editor",
+      "kind": "component",
+      "ms": 29.662000000000262,
+      "steps": 20030,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/cron/view-runs.tsx",
+      "component": "RunsSection",
+      "kind": "component",
+      "ms": 39.231040999999095,
+      "steps": 20023,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/cron/view-detail.tsx",
+      "component": "DetailView",
+      "kind": "component",
+      "ms": 39.011375000000044,
+      "steps": 20042,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/cron/view-jobs-filter.tsx",
+      "component": "JobsFilterPopover",
+      "kind": "component",
+      "ms": 36.69345799999974,
+      "steps": 15168,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/cron/view-list.tsx",
+      "component": "ListView",
+      "kind": "component",
+      "ms": 42.722249999998894,
+      "steps": 20027,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/cron/view.tsx",
+      "component": "CronView",
+      "kind": "component",
+      "ms": 36.327000000001135,
+      "steps": 20031,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/cron/cron-page.tsx",
+      "component": "CronPageContent",
+      "kind": "component",
+      "ms": 40.64929200000006,
+      "steps": 20188,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/cron/cron-page.tsx",
+      "component": "CronPage",
+      "kind": "component",
+      "ms": 34.888208000000304,
+      "steps": 20075,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/custodian/custodian-setup-card.tsx",
+      "component": "CustodianSetupCard",
+      "kind": "component",
+      "ms": 33.1244999999999,
+      "steps": 20017,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/custodian/custodian-surface.tsx",
+      "component": "CustodianSurfaceView",
+      "kind": "component",
+      "ms": 38.80287500000122,
+      "steps": 20018,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/devices/entry-menu.tsx",
+      "component": "DeviceEntryMenu",
+      "kind": "component",
+      "ms": 33.84729100000004,
+      "steps": 20037,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/devices/view-inventory.tsx",
+      "component": "DeviceInventoryContent",
+      "kind": "component",
+      "ms": 35.66291599999931,
+      "steps": 20077,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/devices/view-inventory-readiness.tsx",
+      "component": "DeviceInventory",
+      "kind": "component",
+      "ms": 27.389624999999796,
+      "steps": 20084,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/devices/view.tsx",
+      "component": "DevicesView",
+      "kind": "component",
+      "ms": 30.45275000000038,
+      "steps": 20077,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/devices/devices-page.tsx",
+      "component": "DevicesPage",
+      "kind": "component",
+      "ms": 31.218041000000085,
+      "steps": 20047,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/meetings/meeting-summary.tsx",
+      "component": "MeetingSummary",
+      "kind": "component",
+      "ms": 19.19800000000032,
+      "steps": 14658,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/meetings/view.tsx",
+      "component": "TranscriptsView",
+      "kind": "component",
+      "ms": 49.22829199999978,
+      "steps": 20072,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/meetings/meetings-page.tsx",
+      "component": "MeetingsPage",
+      "kind": "component",
+      "ms": 37.1583329999994,
+      "steps": 20024,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/memory-import/view.tsx",
+      "component": "MemoryImport",
+      "kind": "component",
+      "ms": 48.14795799999956,
+      "steps": 20019,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/model-providers/login-view.tsx",
+      "component": "ModelProviderLoginView",
+      "kind": "component",
+      "ms": 34.45920800000022,
+      "steps": 20016,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/model-setup/model-setup-icon-loader.tsx",
+      "component": "renderProviderIcon",
+      "kind": "component",
+      "ms": 1.3399590000008175,
+      "steps": 663,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/model-setup/provider-picker.tsx",
+      "component": "ManualProviderPicker",
+      "kind": "component",
+      "ms": 40.421875,
+      "steps": 20040,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/model-setup/configured-model.tsx",
+      "component": "ConfiguredModel",
+      "kind": "component",
+      "ms": 4.710458000001381,
+      "steps": 1878,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/model-setup/success-dialog.tsx",
+      "component": "ModelSetupSuccessDialog",
+      "kind": "component",
+      "ms": 11.009208000001308,
+      "steps": 3399,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/model-setup/view.tsx",
+      "component": "ModelSetupView",
+      "kind": "component",
+      "ms": 40.76604200000111,
+      "steps": 20049,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/model-setup/model-setup-page.tsx",
+      "component": "ModelSetupPageBody",
+      "kind": "component",
+      "ms": 50.49570799999856,
+      "steps": 20064,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/model-setup/model-setup-page.tsx",
+      "component": "ModelSetupPage",
+      "kind": "component",
+      "ms": 24.05254199999945,
+      "steps": 20065,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/model-providers/view.tsx",
+      "component": "ModelProviders",
+      "kind": "component",
+      "ms": 42.2702500000014,
+      "steps": 20024,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/model-providers/model-providers-page.tsx",
+      "component": "ModelProvidersPageBody",
+      "kind": "component",
+      "ms": 47.31262500000048,
+      "steps": 20035,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/model-providers/model-providers-page.tsx",
+      "component": "ModelProvidersPage",
+      "kind": "component",
+      "ms": 32.923915999999736,
+      "steps": 20038,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/new-session/composer-capability-controls.tsx",
+      "component": "NewSessionPlusMenu",
+      "kind": "component",
+      "ms": 35.29683300000033,
+      "steps": 20060,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/new-session/model-control-view.tsx",
+      "component": "NewSessionModelControlView",
+      "kind": "component",
+      "ms": 31.40950000000157,
+      "steps": 16401,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/new-session/composer.tsx",
+      "component": "NewSessionComposer",
+      "kind": "component",
+      "ms": 35.872582999998485,
+      "steps": 20035,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/lobster-pet-dismiss-menu.tsx",
+      "component": "LobsterPetDismissMenu",
+      "kind": "component",
+      "ms": 35.16383399999904,
+      "steps": 20027,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/new-session/cloud-target-view.tsx",
+      "component": "CloudProfileMenuItems",
+      "kind": "component",
+      "ms": 32.02349999999933,
+      "steps": 20043,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/new-session/picker.tsx",
+      "component": "SessionPicker",
+      "kind": "component",
+      "ms": 29.00708300000042,
+      "steps": 14122,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/new-session/checkout-chip.tsx",
+      "component": "CheckoutChip",
+      "kind": "component",
+      "ms": 39.925083000001905,
+      "steps": 20036,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/new-session/project-chip.tsx",
+      "component": "ProjectChip",
+      "kind": "component",
+      "ms": 44.520416000003024,
+      "steps": 20015,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/new-session/where-chip.tsx",
+      "component": "WhereChip",
+      "kind": "component",
+      "ms": 47.69537499999933,
+      "steps": 20015,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/new-session/target-controls-view.tsx",
+      "component": "NewSessionPlaceControls",
+      "kind": "component",
+      "ms": 40.097625000002154,
+      "steps": 20068,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/plugins/catalog-detail.tsx",
+      "component": "renderPluginReadme",
+      "kind": "component",
+      "ms": 21.306666999997105,
+      "steps": 14190,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/plugins/settings-editor.tsx",
+      "component": "PluginSettingsEditor",
+      "kind": "component",
+      "ms": 74.23491700000159,
+      "steps": 20050,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/plugins/settings-view.tsx",
+      "component": "renderPluginSettingsInventory",
+      "kind": "component",
+      "ms": 126.7710420000003,
+      "steps": 20053,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/plugins/settings-view.tsx",
+      "component": "renderPluginSettingsDetail",
+      "kind": "component",
+      "ms": 75.54449999999997,
+      "steps": 20014,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/plugins/plugins-page-view.tsx",
+      "component": "PluginsPageView",
+      "kind": "component",
+      "ms": 52.996415999998135,
+      "steps": 20021,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/plugins/plugins-page.tsx",
+      "component": "PluginsPage",
+      "kind": "component",
+      "ms": 41.026207999999315,
+      "steps": 20023,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/features/github-connections/github-connections.tsx",
+      "component": "GitHubConnections",
+      "kind": "component",
+      "ms": 29.468292000001384,
+      "steps": 20032,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/profile/model-accounts-section.tsx",
+      "component": "ModelAccountInventory",
+      "kind": "component",
+      "ms": 11.631500000003143,
+      "steps": 4236,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/profile/model-accounts.tsx",
+      "component": "ModelAccounts",
+      "kind": "component",
+      "ms": 27.325541999998677,
+      "steps": 20017,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/search/search-setup.tsx",
+      "component": "SearchSetup",
+      "kind": "component",
+      "ms": 16.003124999999272,
+      "steps": 7353,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/search/search-setup.tsx",
+      "component": "AdvancedSearchSettings",
+      "kind": "component",
+      "ms": 10.060291000001598,
+      "steps": 5918,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/search/search-page.tsx",
+      "component": "SearchPage",
+      "kind": "component",
+      "ms": 36.36004099999991,
+      "steps": 20051,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/secrets/view.tsx",
+      "component": "SecretsStore",
+      "kind": "component",
+      "ms": 36.45375000000058,
+      "steps": 20053,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/sessions/sessions-filters.tsx",
+      "component": "SessionsAdvancedFilters",
+      "kind": "component",
+      "ms": 42.877040999999736,
+      "steps": 20006,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/sessions/view.tsx",
+      "component": "SessionsView",
+      "kind": "component",
+      "ms": 37.15045900000041,
+      "steps": 20033,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/sessions/sessions-page.tsx",
+      "component": "SessionsPageContent",
+      "kind": "component",
+      "ms": 27.532458000001498,
+      "steps": 20029,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/sessions/sessions-page.tsx",
+      "component": "SessionsPage",
+      "kind": "component",
+      "ms": 33.42012500000055,
+      "steps": 20047,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/skill-workshop/detail.tsx",
+      "component": "Detail",
+      "kind": "component",
+      "ms": 42.723041999997804,
+      "steps": 20014,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/skills/skill-reader-dialog.tsx",
+      "component": "MarkdownContent",
+      "kind": "component",
+      "ms": 20.54095900000175,
+      "steps": 12700,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/skills/skill-reader-dialog.tsx",
+      "component": "ClawHubDetailDialog",
+      "kind": "component",
+      "ms": 26.113750000000437,
+      "steps": 14920,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/skills/view.tsx",
+      "component": "Skills",
+      "kind": "component",
+      "ms": 41.15233299999818,
+      "steps": 20034,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/skills/skills-page.tsx",
+      "component": "SkillsPage",
+      "kind": "component",
+      "ms": 38.567666999999346,
+      "steps": 20022,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/systems/systems-sidebar.tsx",
+      "component": "SystemsSidebarContent",
+      "kind": "component",
+      "ms": 43.36370800000077,
+      "steps": 20092,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/systems/systems-page.tsx",
+      "component": "SystemsPage",
+      "kind": "component",
+      "ms": 56.7476659999993,
+      "steps": 20013,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/systems/systems-route-view.tsx",
+      "component": "renderSolid",
+      "kind": "component",
+      "ms": 54.45966600000247,
+      "steps": 20008,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/usage/view-creators.tsx",
+      "component": "UsageCreators",
+      "kind": "component",
+      "ms": 35.463292000000365,
+      "steps": 20005,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/usage/view-query-filter.tsx",
+      "component": "UsageQueryFilter",
+      "kind": "component",
+      "ms": 36.68116700000246,
+      "steps": 20041,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/usage/view.tsx",
+      "component": "renderUsage",
+      "kind": "component",
+      "ms": 41.98250000000189,
+      "steps": 20069,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/usage/usage-page.tsx",
+      "component": "UsagePage",
+      "kind": "component",
+      "ms": 28.188083000000915,
+      "steps": 20021,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/new-session/palette-session-settings-view.tsx",
+      "component": "PaletteSessionSettingsView",
+      "kind": "component",
+      "ms": 36.53583400000207,
+      "steps": 20062,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/pages/new-session/palette-session-draft-view.tsx",
+      "component": "PaletteSessionControls",
+      "kind": "component",
+      "ms": 36.15341699999772,
+      "steps": 20060,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/command-palette-result.tsx",
+      "component": "CommandPaletteResult",
+      "kind": "component",
+      "ms": 16.28383400000166,
+      "steps": 5637,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/command-palette-view.tsx",
+      "component": "CommandPaletteView",
+      "kind": "component",
+      "ms": 43.13508300000103,
+      "steps": 20127,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/settings-sidebar.tsx",
+      "component": "renderSettingsSidebar",
+      "kind": "component",
+      "ms": 44.54925000000003,
+      "steps": 16460,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/settings-sidebar-shell.tsx",
+      "component": "ShellSettingsSidebar",
+      "kind": "component",
+      "ms": 33.24933299999975,
+      "steps": 16621,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/app/app-shell-view.tsx",
+      "component": "ApplicationShell",
+      "kind": "component",
+      "ms": 47.738915999998426,
+      "steps": 20035,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/session-hovercard-automations.tsx",
+      "component": "SessionHovercardAutomations",
+      "kind": "component",
+      "ms": 23.836457999997947,
+      "steps": 10118,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/session-hovercard-context-solid.tsx",
+      "component": "SessionHovercardContext",
+      "kind": "component",
+      "ms": 20.74620800000048,
+      "steps": 12783,
+      "partial": true
+    },
+    {
+      "file": "/Users/devagr/solid-yield-wt/openclaw-trial/app/src/components/session-hovercard-solid.tsx",
+      "component": "SessionHovercard",
+      "kind": "component",
+      "ms": 55.39812499999971,
+      "steps": 20018,
+      "partial": true
+    }
+  ],
+  "jobs": 3710,
+  "workerMaxRssKiB": 2053088,
+  "memory": {
+    "rss": 1799471104,
+    "heapTotal": 1613905920,
+    "heapUsed": 1504171880,
+    "external": 21444020,
+    "arrayBuffers": 19258328
+  }
+}

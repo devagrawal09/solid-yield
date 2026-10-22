@@ -1,5 +1,25 @@
 # Prototype B — dataflow: notes
 
+## Whole-app noise round
+
+See RESULTS-noise.md and noise-evidence/. All 2,669 roots are retained. The final
+Node 24 run reports 11,569 diagnostics versus 11,214 before; counts are not a
+precision rate. Two fixes use existing bodies and declarations: keep local
+runtime declarations distinct from type imports and TypeScript's shared unknown
+alias symbol; analyze direct/aliased JSX helpers in their caller's scope.
+Unresolved imports still warn and return worst-case values. Their calls now
+retain missing failure/result facts instead of inheriting an unrelated component.
+Seven local tests pair clean controls with pending, throwing and injected mutants.
+Frozen fixtures/pins and other prototypes are unchanged. All 173 fixtures pass.
+
+The 45-error review has 10 contract-valid findings, one confirmed FP and 34
+unsure cases; the separate 15-site silence review finds four missing partial
+warnings. Returned higher-order renderers and ref-array ownership remain coverage
+gaps. Exported scalar-argument JSX helpers still get an imprecise standalone
+component summary. Most downstream diagnostics lack retained causal provenance;
+the aggregate classification labels those origins unresolved. No whole-app
+soundness or noise-reduction claim is made.
+
 ## Scale pass
 
 See RESULTS-scale.md and ../../scale/ for the measurements and parse-only driver.

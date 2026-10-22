@@ -1,0 +1,14 @@
+{
+  "command": [
+    "-l",
+    "/Users/devagr/.hermes/node/bin/node",
+    "--max-old-space-size=2048",
+    "/Users/devagr/solid-yield-wt/sound-dataflow-noise/packages/sound/scale/dataflow-noise-run.mjs",
+    "after-alias",
+    "--worker"
+  ],
+  "code": 0,
+  "signal": null,
+  "timedOut": false,
+  "wallMs": 19504.79675
+}

@@ -1253,7 +1253,8 @@ export class Analysis {
       const b = this.bindingOf(this.symbolOf(callee));
       if (b) return this.callBinding(b, call, ctx);
       const decl = this.symbolOf(callee)?.declarations?.[0];
-      if (decl && ts.isParameter(decl)) return this.callUnknownValue(call, this.evalIdentifier(callee, ctx), ctx);
+      const raw = this.checker.getSymbolAtLocation(callee);
+      if ((decl && ts.isParameter(decl)) || (raw && (raw.flags & ts.SymbolFlags.Alias) && !decl)) return this.callUnknownValue(call, this.evalIdentifier(callee, ctx), ctx);
       return this.callPlatform(call, callee.text, ctx);
     }
     if (ts.isPropertyAccessExpression(callee)) {
@@ -1442,8 +1443,10 @@ export class Analysis {
         return this.analyzeFunction(b.node, ctx, args, b.environment);
       }
       case "component": {
-        this.unanalyzed(call, `calling the component ${b.component.name} as a function`, "the rendered tree is not checked here.", ctx);
-        return worst();
+        // A direct JavaScript call does not introduce a Solid component scope.
+        // Use its resolved body and arguments as for other synchronous helpers;
+        // returned JSX introduces tracking exactly where it is evaluated.
+        return this.analyzeFunction(b.component.node, ctx, args, this.moduleBindings);
       }
       case "value": return this.callValue(b.value, call, ctx, this.text(call));
       case "object": return this.callValue(b.value, call, ctx, this.text(call));
@@ -1493,7 +1496,10 @@ export class Analysis {
           else results.push(this.callUnknownValue(call, v, ctx, cb.reasonText ?? reason));
           break;
         case "solid": results.push(this.evalSolidCall(cb.api ?? "", call, ctx)); break;
-        case "component": results.push(worst()); break;
+        case "component":
+          if (cb.component) results.push(this.analyzeFunction(cb.component.node, ctx, args, this.moduleBindings));
+          else results.push(this.callUnknownValue(call, v, ctx, reason));
+          break;
       }
     }
     return joinAll(results);
@@ -1753,6 +1759,7 @@ export class Analysis {
     if (v.opaque) this.raise(hctx, ["unknown"], this.text(at) + " has no failure information", at);
     for (const cb of v.callables) {
       if (cb.kind === "function" && cb.node) results.push(this.analyzeFunction(/** @type {ts.FunctionLikeDeclaration} */ (cb.node), hctx, args, cb.environment, cb.receiver));
+      else if (cb.kind === "component" && cb.component) results.push(this.analyzeFunction(cb.component.node, hctx, args, this.moduleBindings));
       else if (cb.kind === "function") { this.raise(hctx, ["unknown"], `${cb.reasonText ?? this.text(at)} has no failure information`, at); results.push(constant()); }
       else if (cb.kind === "source") results.push(this.read(/** @type {Source} */ (cb.source), at, hctx));
       else if (cb.kind === "setter") results.push(this.write(cb.node ? this.text(cb.node) : "setter", at, hctx));

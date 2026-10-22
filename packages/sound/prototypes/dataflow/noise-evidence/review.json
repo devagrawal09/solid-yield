@@ -3,7 +3,8 @@
     "errors": "Fixed code quotas: handler 10, setup 5, strict 5, forbidden 4, writes 3, pending-setup 4, pending-root 6, error-root 6, context 2. Sort each by file/line/col; take up to floor(quota/3), minimum one, changed/new entries evenly spaced (rounded index), then evenly spaced unchanged entries. Not random; correlated sites remain visible.",
     "silences": "The 15 pre-existing S01-S15 sites from the read-only trial PRECISION.md, all verified to have no final error beginning on that line. This is a site review, not proof surrounding code was analyzed.",
     "errorVerdicts": "TP = justified finding under current contract, which can be an unknown obligation rather than an observed failure. FP = contradicted by supported source facts. UNSURE = upstream coverage, phase or instance not proven.",
-    "silenceVerdicts": "TP = locally justified silence (possibly with a warning); FP = missing required partial warning; UNSURE = unresolved."
+    "silenceVerdicts": "TP = locally justified silence (possibly with a warning); FP = missing required partial warning; UNSURE = unresolved.",
+    "followup": "Retain 44 surviving round-one stratified error findings; replace removed E13 with the same helper's retained translation setup obligation. Append first two newly added raw findings for each of forbidden-scope, pending-root, handler-failure and error-root (E46-E53), reviewing all eight source chains. Retain S01-S15, refresh the four repaired boundaries, and add S16 for the corrected scalar site. Round-one review remains archived separately. This is a targeted follow-up, not a random sample."
   },
   "errors": [
     {
@@ -35,7 +36,8 @@
       "verdict": "UNSURE",
       "contractObligation": "required unknown; origin incomplete",
       "reason": "request.create receives trackRoot; its projection revision was widened through module state. Callback lifetime and the exact instance are not retained.",
-      "sourceSha256": "6387a1d8c7ed115a0587ec1deae2e7e9a6303c0be0868a002fcd8109975b7588"
+      "sourceSha256": "6387a1d8c7ed115a0587ec1deae2e7e9a6303c0be0868a002fcd8109975b7588",
+      "followupChange": "unchanged"
     },
     {
       "id": "E02",
@@ -63,7 +65,8 @@
       "verdict": "UNSURE",
       "contractObligation": "required unknown import; callback placement unsure",
       "reason": "currentWorkIdentity -> resolveUiConversationIdentity reaches unchecked normalization imports. The map callback is synchronous in the source; the emitted handler attribution needs a fuller receiver/caller trace.",
-      "sourceSha256": "3b3377755cbd12720a10faa3c34a0e9d65d1960d753f6026f7b41e67c5c881ee"
+      "sourceSha256": "3b3377755cbd12720a10faa3c34a0e9d65d1960d753f6026f7b41e67c5c881ee",
+      "followupChange": "unchanged"
     },
     {
       "id": "E03",
@@ -91,7 +94,8 @@
       "verdict": "UNSURE",
       "contractObligation": "required unknown callback; branch precision unresolved",
       "reason": "owner.subscribe -> projectSource callback. This caller supplies equality:\"revision\", but the interpreter still visits contract.equality(value,next). notify and deferred onSettled remain independent unknowns; the displayed equality reason alone is not proof of a failure.",
-      "sourceSha256": "c7443b266a5bd8e008f40711cad7fc5e50c7713cfccd2b62a5c341dea9932108"
+      "sourceSha256": "c7443b266a5bd8e008f40711cad7fc5e50c7713cfccd2b62a5c341dea9932108",
+      "followupChange": "unchanged"
     },
     {
       "id": "E04",
@@ -122,7 +126,8 @@
       "verdict": "TP",
       "contractObligation": "required D-129 unknown callback",
       "reason": "The onModal-cancel body directly calls props.onClose without a catch, and the summary has no known caller body. A function type is not a failure guarantee.",
-      "sourceSha256": "dac29f48552a22c3921715470b399bdf5f55a5f478e6d3ad91c7a4149aa3111f"
+      "sourceSha256": "dac29f48552a22c3921715470b399bdf5f55a5f478e6d3ad91c7a4149aa3111f",
+      "followupChange": "unchanged"
     },
     {
       "id": "E05",
@@ -153,7 +158,8 @@
       "verdict": "UNSURE",
       "contractObligation": "required worst-case return; provenance incomplete",
       "reason": "row().server feeds open; the surrounding memo/action/catalog path is partial. The error is a conservative obligation, not evidence that a settled row field can suspend or throw.",
-      "sourceSha256": "724e1bf8c771359223b34d9a9d57db74376028bcd2bf8fc3d9f3154dec9b1fb1"
+      "sourceSha256": "724e1bf8c771359223b34d9a9d57db74376028bcd2bf8fc3d9f3154dec9b1fb1",
+      "followupChange": "unchanged"
     },
     {
       "id": "E06",
@@ -181,7 +187,8 @@
       "verdict": "UNSURE",
       "contractObligation": "unknown disposer obligation; lifetime unresolved",
       "reason": "gateway.subscribe calls applySnapshot, which may run stopEvents. A supplied disposer can fail; the concrete subscription/cleanup path is not captured by this diagnostic.",
-      "sourceSha256": "114149456840b7fb3ae76bb34999cc190cb1e08f3d874da348aa1ef9c54f091d"
+      "sourceSha256": "114149456840b7fb3ae76bb34999cc190cb1e08f3d874da348aa1ef9c54f091d",
+      "followupChange": "unchanged"
     },
     {
       "id": "E07",
@@ -209,7 +216,8 @@
       "verdict": "TP",
       "contractObligation": "required unknown platform failure under current contracts",
       "reason": "The scheduled callback reaches updateTextareaOverflow -> Element.matches. matches is not in the frozen DOM safe-operation contract; the fixed literal selector looks safe, but no failure-free signature/body is modeled. This is not a demonstrated app bug.",
-      "sourceSha256": "c347e8ff35c0b264ea8023af33f01e33071176aa4080940cb7375841c2211974"
+      "sourceSha256": "c347e8ff35c0b264ea8023af33f01e33071176aa4080940cb7375841c2211974",
+      "followupChange": "unchanged"
     },
     {
       "id": "E08",
@@ -240,7 +248,8 @@
       "verdict": "TP",
       "contractObligation": "required D-129 unknown callback",
       "reason": "Click directly invokes props.workspace.onSetFilter. No catch or resolved supplied implementation discharges the callback obligation.",
-      "sourceSha256": "b082e00a8e940e1ebeb671013995c9c79a98462a909bb93117054b40ea1c9859"
+      "sourceSha256": "b082e00a8e940e1ebeb671013995c9c79a98462a909bb93117054b40ea1c9859",
+      "followupChange": "unchanged"
     },
     {
       "id": "E09",
@@ -268,7 +277,8 @@
       "verdict": "UNSURE",
       "contractObligation": "required worst-case props; phase unresolved",
       "reason": "manualProviders().find reads props.manualProviderId in its callback. JSX spreads elsewhere make the prop worst case; treating the callback as a detached handler is not independently justified by this source.",
-      "sourceSha256": "7b55a7d087ad14abf2b2d1da11510eeb7d266b285e60b4dd000e6344b67b1ebd"
+      "sourceSha256": "7b55a7d087ad14abf2b2d1da11510eeb7d266b285e60b4dd000e6344b67b1ebd",
+      "followupChange": "unchanged"
     },
     {
       "id": "E10",
@@ -299,7 +309,8 @@
       "verdict": "TP",
       "contractObligation": "required D-129 unknown callback",
       "reason": "The event body reaches context().navigate(\"labs\") without a catch. No resolved failure-free implementation is attached to that context member.",
-      "sourceSha256": "d3d1430fce4dc2302e482a6e80110ec68d1ee3c1e9b1b9d0c5528760fa80dd2c"
+      "sourceSha256": "d3d1430fce4dc2302e482a6e80110ec68d1ee3c1e9b1b9d0c5528760fa80dd2c",
+      "followupChange": "unchanged"
     },
     {
       "id": "E11",
@@ -327,7 +338,8 @@
       "verdict": "UNSURE",
       "contractObligation": "required worst-case argument; source summary incomplete",
       "reason": "serializeSidebarEntry reads entry.type. The call originates in renderSidebarRail with widened data; this is not evidence that an ordinary discriminant property throws.",
-      "sourceSha256": "10ca6ac43c2cb92ab67f1119511aef824beffef65f2f15a181ef81f2cea60faa"
+      "sourceSha256": "10ca6ac43c2cb92ab67f1119511aef824beffef65f2f15a181ef81f2cea60faa",
+      "followupChange": "unchanged"
     },
     {
       "id": "E12",
@@ -355,7 +367,8 @@
       "verdict": "UNSURE",
       "contractObligation": "required work-cutoff obligation",
       "reason": "The first unknown is an analysis work limit, not a throw in this condition. The activation is partial; unvisited work must remain worst case.",
-      "sourceSha256": "d0dc80f0bed15ae8044447741f7074d4cfc8a3c5d914ad1055936a83ac806f20"
+      "sourceSha256": "d0dc80f0bed15ae8044447741f7074d4cfc8a3c5d914ad1055936a83ac806f20",
+      "followupChange": "unchanged"
     },
     {
       "id": "E13",
@@ -364,13 +377,13 @@
         "code": "SETUP_MAY_THROW",
         "kind": "error",
         "severity": "error",
-        "message": "<renderClawTrustWarning>'s setup may fail with unknown (warning.trim() has no failure information); a component body only creates state. Move this work into a memo or rendered work under an Errored boundary, or into a handler, or handle the failure where it is produced.",
+        "message": "<renderClawTrustWarning>'s setup may fail with unknown (this.locale has no failure information); a component body only creates state. Move this work into a memo or rendered work under an Errored boundary, or into a handler, or handle the failure where it is produced.",
         "loc": {
-          "file": "src/pages/agents-home/claws-trust-warning.tsx",
-          "line": 12,
-          "col": 17,
-          "endLine": 12,
-          "endCol": 31
+          "file": "src/i18n/lib/translate.ts",
+          "line": 230,
+          "col": 39,
+          "endLine": 230,
+          "endCol": 50
         },
         "ownerName": "<renderClawTrustWarning>",
         "data": {
@@ -379,11 +392,13 @@
           ]
         }
       },
-      "excerpt": "10: \n11: function parseClawHubAudit(warning: string): ClawHubAudit | null {\n12:   const lines = warning.trim().split(/\\r?\\n/u);\n13:   if (\n14:     !/^\u256d\u2500 ClawHub Security Audit \u2500+\u256e$/u.test(lines[0] ?? \"\") ||",
-      "verdict": "FP",
-      "contractObligation": "not required for this native string operation",
-      "reason": "parseClawHubAudit has a string parameter and calls native trim. The exported JSX helper renderClawTrustWarning(warning:string) is separately analyzed as a component with a props-object parameter, losing the scalar argument. Direct helper calls are now checked, but that standalone summary still reports this false setup reason.",
-      "sourceSha256": "e7aa7eae686148df972226d7c3b86cecccefc30576b9dad39e5a679489d27e3c"
+      "excerpt": "228: \n229:   private lookupActive(keys: readonly string[]): unknown {\n230:     const catalog = this.translations[this.locale];\n231:     const value = lookupTranslation(catalog, keys);\n232:     if (value !== undefined || !catalog) {",
+      "verdict": "UNSURE",
+      "contractObligation": "required translation/module-state worst case",
+      "reason": "Replacement for resolved round-one E13. The scalar warning argument now reaches native trim without an invented props object. title still calls t -> projection.read -> Translate.this.locale, whose module-state/class facts are partial. This separate unknown obligation is retained rather than suppressing the whole helper.",
+      "sourceSha256": "ac6ccec9c3092ed1a3712c9df714317508823b11c50ec6246f3a76b2fd4512ac",
+      "replacesResolvedFinding": "round-one E13 at claws-trust-warning.tsx:12",
+      "followupChange": "changed"
     },
     {
       "id": "E14",
@@ -411,7 +426,8 @@
       "verdict": "TP",
       "contractObligation": "required unknown declaration gap",
       "reason": "Promise.withResolvers is absent from the fixed ES2023 declaration set. B cannot resolve the signature; it correctly keeps unknown failure under that input. Adding newer libs to silence it is outside this round.",
-      "sourceSha256": "9a93b1a3d9c8e2f869244845cef2f3c10bbef23a1c6c231dd78111e696cb8fd5"
+      "sourceSha256": "9a93b1a3d9c8e2f869244845cef2f3c10bbef23a1c6c231dd78111e696cb8fd5",
+      "followupChange": "unchanged"
     },
     {
       "id": "E15",
@@ -440,7 +456,8 @@
       "verdict": "TP",
       "contractObligation": "required unknown injected method",
       "reason": "runtime?.selectedReplacement(host.surface) is an injected/runtime method with no retained failure body. Optional access does not promise failure-free execution.",
-      "sourceSha256": "665df8edb8b60d7656a107a5351b4e6ecae9424433e087c55ba29d5791b88bad"
+      "sourceSha256": "665df8edb8b60d7656a107a5351b4e6ecae9424433e087c55ba29d5791b88bad",
+      "followupChange": "unchanged"
     },
     {
       "id": "E16",
@@ -466,7 +483,8 @@
       "verdict": "TP",
       "contractObligation": "supported D-131 ref read",
       "reason": "The ref callback reads the settled host accessor and section accessor. A ref body is setup-like even though it appears inside JSX; copying the node alone would be clean.",
-      "sourceSha256": "5355ce5cd31f043130e25507f43ede4914c1897eefd86d7e285c57245840be84"
+      "sourceSha256": "5355ce5cd31f043130e25507f43ede4914c1897eefd86d7e285c57245840be84",
+      "followupChange": "unchanged"
     },
     {
       "id": "E17",
@@ -514,7 +532,8 @@
       "verdict": "TP",
       "contractObligation": "supported D-131 reactive prop read",
       "reason": "The ref body reads props.state before refreshRef. Related locations identify reactive caller expressions. Forwarding a callback does not make that prop read tracked.",
-      "sourceSha256": "1972113825f5656c4c2931dba64f8261da6a4ba6768fae8cd242123142650991"
+      "sourceSha256": "1972113825f5656c4c2931dba64f8261da6a4ba6768fae8cd242123142650991",
+      "followupChange": "unchanged"
     },
     {
       "id": "E18",
@@ -537,7 +556,8 @@
       "verdict": "TP",
       "contractObligation": "supported D-131 apply/helper read",
       "reason": "wideEnough is a settled createSignal accessor. The effect apply path calls position -> docked -> canDock, which rereads it instead of only using compute inputs.",
-      "sourceSha256": "6d8a4f5d0dc371dcc4160c865cddd7371be4f33312550c7ef462a279aab6810e"
+      "sourceSha256": "6d8a4f5d0dc371dcc4160c865cddd7371be4f33312550c7ef462a279aab6810e",
+      "followupChange": "unchanged"
     },
     {
       "id": "E19",
@@ -560,7 +580,8 @@
       "verdict": "UNSURE",
       "contractObligation": "async/after-await phase deferred",
       "reason": "value() is read after await inside the refresh helper. B carries the calling effect phase into it; FUTURE 26 defers reads after await, so this is not a proven current-slice app defect.",
-      "sourceSha256": "8357d1f61b914217b827ede18826638846e10959e5891edaa985f92711fd3a1b"
+      "sourceSha256": "8357d1f61b914217b827ede18826638846e10959e5891edaa985f92711fd3a1b",
+      "followupChange": "unchanged"
     },
     {
       "id": "E20",
@@ -608,7 +629,8 @@
       "verdict": "UNSURE",
       "contractObligation": "prop-flow obligation; phase/instance unresolved",
       "reason": "status reads props.controller.state.backups through a controller/projection path with latest and spread callers. The snapshot phase and concrete caller facts need further tracing.",
-      "sourceSha256": "595424a4ef5d560abe4b0d37d9393f48b6ef2750a243becefef437ee9058803c"
+      "sourceSha256": "595424a4ef5d560abe4b0d37d9393f48b6ef2750a243becefef437ee9058803c",
+      "followupChange": "unchanged"
     },
     {
       "id": "E21",
@@ -646,7 +668,8 @@
       "verdict": "UNSURE",
       "contractObligation": "required spread/unknown-prop worst case",
       "reason": "params.onClose is an imperative callback, but the caller prop chain is widened by unsupported inputs. The pending fact comes from that worst-case chain, not a proven async accessor.",
-      "sourceSha256": "f7fc60dc54a5a82144f954d2cb951415cbf666d960a123b9ac63fb034dba002f"
+      "sourceSha256": "f7fc60dc54a5a82144f954d2cb951415cbf666d960a123b9ac63fb034dba002f",
+      "followupChange": "unchanged"
     },
     {
       "id": "E22",
@@ -672,7 +695,8 @@
       "verdict": "UNSURE",
       "contractObligation": "required module-state worst case",
       "reason": "projectSource creates revision outside a component on the i18n module path. Its warning at projection.ts:79 explains this pending effect read; the underlying signal itself is initialized synchronously.",
-      "sourceSha256": "290da78837c6e51550211a60637d0bd85507c4e0fdfd374db0f12eb7e5715bc5"
+      "sourceSha256": "290da78837c6e51550211a60637d0bd85507c4e0fdfd374db0f12eb7e5715bc5",
+      "followupChange": "unchanged"
     },
     {
       "id": "E23",
@@ -698,7 +722,8 @@
       "verdict": "UNSURE",
       "contractObligation": "required unknown prop chain; phase unresolved",
       "reason": "runWizardMutation reads props.host before its try. The partial prop path carries pending facts, and this async helper inherits an effect caller. A real pending host is not proven.",
-      "sourceSha256": "f89d87034ed05447117d77d154d01bcc28f6ee74da4fef2676024b91b333138e"
+      "sourceSha256": "f89d87034ed05447117d77d154d01bcc28f6ee74da4fef2676024b91b333138e",
+      "followupChange": "unchanged"
     },
     {
       "id": "E24",
@@ -724,7 +749,8 @@
       "verdict": "UNSURE",
       "contractObligation": "required widened prop obligation",
       "reason": "onOpenChange forwards properties.options.preferences into close. The options path is widened and may be invoked from overlay apply; the report does not establish a concrete async options value.",
-      "sourceSha256": "05c51d90d6b9532bdc2897ee2aea43c3171edf1b1af082ae7d1e87babd662d37"
+      "sourceSha256": "05c51d90d6b9532bdc2897ee2aea43c3171edf1b1af082ae7d1e87babd662d37",
+      "followupChange": "unchanged"
     },
     {
       "id": "E25",
@@ -750,7 +776,8 @@
       "verdict": "UNSURE",
       "contractObligation": "ref ownership/fragment execution deferred",
       "reason": "setOwner occurs in the returned Markdown ref. Some callers invoke it during fragment construction; ref write ownership and ownedWrite are deferred. The setup label is not enough to prove this write is invalid.",
-      "sourceSha256": "6076f134a94cd00c15aeeb7c5b5ffbc30547e93cae2240b6956e0370eae4e9a5"
+      "sourceSha256": "6076f134a94cd00c15aeeb7c5b5ffbc30547e93cae2240b6956e0370eae4e9a5",
+      "followupChange": "unchanged"
     },
     {
       "id": "E26",
@@ -776,7 +803,8 @@
       "verdict": "UNSURE",
       "contractObligation": "subscription/memo callback phase unresolved",
       "reason": "observation memo -> connect -> contract.subscribe -> publish can reach setRevision. Whether the concrete subscribe replays synchronously is not retained; this is not a proven failing runtime write.",
-      "sourceSha256": "290da78837c6e51550211a60637d0bd85507c4e0fdfd374db0f12eb7e5715bc5"
+      "sourceSha256": "290da78837c6e51550211a60637d0bd85507c4e0fdfd374db0f12eb7e5715bc5",
+      "followupChange": "unchanged"
     },
     {
       "id": "E27",
@@ -802,7 +830,8 @@
       "verdict": "UNSURE",
       "contractObligation": "caller memo/write path incomplete",
       "reason": "createFileCopy.reset calls setFeedback, reported from memo snapshot. The local setter fact is real, but concrete call/branch provenance is absent; do not infer that every reset is an owned write.",
-      "sourceSha256": "dcde2740cfa1e8b6ef6a01f0c2c4aed3f4999e5bf873d281143a0cd7a3ff125e"
+      "sourceSha256": "dcde2740cfa1e8b6ef6a01f0c2c4aed3f4999e5bf873d281143a0cd7a3ff125e",
+      "followupChange": "unchanged"
     },
     {
       "id": "E28",
@@ -850,7 +879,8 @@
       "verdict": "UNSURE",
       "contractObligation": "required worst-case forwarded prop",
       "reason": "The ref reads props.host from app-host -> shell-view forwarding. The newly visited direct root exposes the path, but pending derives from partial props rather than a proven async DOM host.",
-      "sourceSha256": "1d02af618a70e67a528afef37216ae3262069961c37440f7a6412a5568aaeee5"
+      "sourceSha256": "1d02af618a70e67a528afef37216ae3262069961c37440f7a6412a5568aaeee5",
+      "followupChange": "unchanged"
     },
     {
       "id": "E29",
@@ -876,7 +906,8 @@
       "verdict": "UNSURE",
       "contractObligation": "required spread-prop worst case",
       "reason": "Sprite is reached with an unsupported spread. Its ref reads props.twin, hence worst-case pending. There is no proof that this boolean is an actual async source.",
-      "sourceSha256": "3c4f1aa94912c035786ef0807d866bcb255f99bda398709f820ad655c0cba842"
+      "sourceSha256": "3c4f1aa94912c035786ef0807d866bcb255f99bda398709f820ad655c0cba842",
+      "followupChange": "unchanged"
     },
     {
       "id": "E30",
@@ -902,7 +933,8 @@
       "verdict": "UNSURE",
       "contractObligation": "required unknown controls prop",
       "reason": "retryRef snapshots props.controls?.ref() during setup. Partial callers supply worst-case controls; optional access only skips absence. The actual control instance is not proven pending.",
-      "sourceSha256": "618498364885bc177beb264867d9d767f2ec5d9f2d5b1bc1f1ca3d83dc56c211"
+      "sourceSha256": "618498364885bc177beb264867d9d767f2ec5d9f2d5b1bc1f1ca3d83dc56c211",
+      "followupChange": "unchanged"
     },
     {
       "id": "E31",
@@ -940,7 +972,8 @@
       "verdict": "UNSURE",
       "contractObligation": "required widened accessor result",
       "reason": "AttachmentActionRow reads props.action() inside a ref; forwarding from line 134 carries an opaque projection result. Ref scope is correct, but the pending origin is conservative.",
-      "sourceSha256": "1592026321a514154dc334279adf5c6d9a2ecbfe765160ba5b0bede90379dee1"
+      "sourceSha256": "1592026321a514154dc334279adf5c6d9a2ecbfe765160ba5b0bede90379dee1",
+      "followupChange": "unchanged"
     },
     {
       "id": "E32",
@@ -981,7 +1014,8 @@
       "verdict": "UNSURE",
       "contractObligation": "required module/root-shape boundary",
       "reason": "The newly analyzed direct OpenClawApp invocation reaches startupPending, whose creation is warned as outside a component at app-root.tsx:122. This models a root/factory scope incompletely; it is not proof of a runtime pending boolean.",
-      "sourceSha256": "6387a1d8c7ed115a0587ec1deae2e7e9a6303c0be0868a002fcd8109975b7588"
+      "sourceSha256": "6387a1d8c7ed115a0587ec1deae2e7e9a6303c0be0868a002fcd8109975b7588",
+      "followupChange": "unchanged"
     },
     {
       "id": "E33",
@@ -1024,7 +1058,8 @@
       "verdict": "UNSURE",
       "contractObligation": "required opaque call result",
       "reason": "formatUiExternalText is reached through an unchecked normalization implementation. Its returned shape is opaque; using it in JSX retains pending worst case. No concrete asynchronous formatter is proven.",
-      "sourceSha256": "17738bf8f8dad21f5d4637f4ab7940bdcb6e2febc1bccff024d676dcc20f6c40"
+      "sourceSha256": "17738bf8f8dad21f5d4637f4ab7940bdcb6e2febc1bccff024d676dcc20f6c40",
+      "followupChange": "unchanged"
     },
     {
       "id": "E34",
@@ -1068,7 +1103,8 @@
       "verdict": "UNSURE",
       "contractObligation": "required dynamic member boundary",
       "reason": "NAVIGATION_PRESENTATION[routeId] has the explicit dynamic-service-member warning at this exact site. Pending is the contract-required unknown result of unmodeled indexing, not proof the constant table suspends.",
-      "sourceSha256": "10ca6ac43c2cb92ab67f1119511aef824beffef65f2f15a181ef81f2cea60faa"
+      "sourceSha256": "10ca6ac43c2cb92ab67f1119511aef824beffef65f2f15a181ef81f2cea60faa",
+      "followupChange": "unchanged"
     },
     {
       "id": "E35",
@@ -1110,7 +1146,8 @@
       "verdict": "UNSURE",
       "contractObligation": "required worst-case prop/effect obligation",
       "reason": "Effect compute reads props.disabled/props.open after partial component-prop forwarding. The effect boundary rule applies, but the concrete pending source is not retained.",
-      "sourceSha256": "cd687a0e47d488e3e8d74735ac63b8f6adb17397849ff203ce1295d4e9eb097b"
+      "sourceSha256": "cd687a0e47d488e3e8d74735ac63b8f6adb17397849ff203ce1295d4e9eb097b",
+      "followupChange": "unchanged"
     },
     {
       "id": "E36",
@@ -1153,7 +1190,8 @@
       "verdict": "UNSURE",
       "contractObligation": "required spread/prop-flow obligation",
       "reason": "ChatAttachmentCard.downloadHref is lazy forwarded data with widened caller props and spreads. Loading covers only selected branches elsewhere; a real pending URL is not established by this output.",
-      "sourceSha256": "823720940b518d51444497c38722ff42608585de0c5f7bdf874597e34611df57"
+      "sourceSha256": "823720940b518d51444497c38722ff42608585de0c5f7bdf874597e34611df57",
+      "followupChange": "unchanged"
     },
     {
       "id": "E37",
@@ -1194,7 +1232,8 @@
       "verdict": "UNSURE",
       "contractObligation": "required store boundary",
       "reason": "presentation originates in createStore at control-ui-dashboard.tsx:137. Accessing initialized outside the Errored block retains worst-case pending; this is an unsupported-store cascade.",
-      "sourceSha256": "552976228196b98f45e9b60decf64c39fe5279392fb4cf8b7d43ec3685b879d0"
+      "sourceSha256": "552976228196b98f45e9b60decf64c39fe5279392fb4cf8b7d43ec3685b879d0",
+      "followupChange": "unchanged"
     },
     {
       "id": "E38",
@@ -1243,7 +1282,8 @@
       "verdict": "TP",
       "contractObligation": "required unknown implementation import",
       "reason": "matchControlUiCatalogSharePath comes from an unchecked source package import. Its call at :413 has no failure body, and the hand-off at chat-transcript-rows.ts:22 has no Errored boundary. This is a valid unknown obligation, not proof the matcher throws.",
-      "sourceSha256": "d7a9b9ffb865b4f830c1586f5a041180454c413faebf71a0185fbc64fcac2cfa"
+      "sourceSha256": "d7a9b9ffb865b4f830c1586f5a041180454c413faebf71a0185fbc64fcac2cfa",
+      "followupChange": "unchanged"
     },
     {
       "id": "E39",
@@ -1287,7 +1327,8 @@
       "verdict": "UNSURE",
       "contractObligation": "required partial projection obligation",
       "reason": "The fallback reads progress.read().card. Fallback work uses the outer boundaries; projectSource and module/callback facts remain partial, so unknown failure must survive.",
-      "sourceSha256": "c7443b266a5bd8e008f40711cad7fc5e50c7713cfccd2b62a5c341dea9932108"
+      "sourceSha256": "c7443b266a5bd8e008f40711cad7fc5e50c7713cfccd2b62a5c341dea9932108",
+      "followupChange": "unchanged"
     },
     {
       "id": "E40",
@@ -1334,7 +1375,8 @@
       "verdict": "UNSURE",
       "contractObligation": "required dynamic member boundary",
       "reason": "Same root cause as E34: unmodeled dynamic indexing of NAVIGATION_PRESENTATION. Errored and Loading are distinct obligations at this site, not duplicate reports to delete.",
-      "sourceSha256": "10ca6ac43c2cb92ab67f1119511aef824beffef65f2f15a181ef81f2cea60faa"
+      "sourceSha256": "10ca6ac43c2cb92ab67f1119511aef824beffef65f2f15a181ef81f2cea60faa",
+      "followupChange": "unchanged"
     },
     {
       "id": "E41",
@@ -1381,7 +1423,8 @@
       "verdict": "UNSURE",
       "contractObligation": "required spread-prop obligation",
       "reason": "Kbd.class inherits worst-case props through spread wrappers. The hand-off relates to NewSessionLink; the report does not prove a class string itself fails.",
-      "sourceSha256": "cbb20641e89bccfb74cfd4828c1e8cfc9a8246270ebe64f3d429970493db72a1"
+      "sourceSha256": "cbb20641e89bccfb74cfd4828c1e8cfc9a8246270ebe64f3d429970493db72a1",
+      "followupChange": "unchanged"
     },
     {
       "id": "E42",
@@ -1428,7 +1471,8 @@
       "verdict": "UNSURE",
       "contractObligation": "required unsupported store member",
       "reason": "failedImages is initialized by createStore at browser-tab-card.tsx:80. Dynamic keyed reads are outside the model and carry unknown failure; the actual false-image table is not a demonstrated bug.",
-      "sourceSha256": "52236d8d97d40ce91a2d4a7e57feef86cfa3f6fbecc6658f26283b29d7e473dd"
+      "sourceSha256": "52236d8d97d40ce91a2d4a7e57feef86cfa3f6fbecc6658f26283b29d7e473dd",
+      "followupChange": "unchanged"
     },
     {
       "id": "E43",
@@ -1483,7 +1527,8 @@
       "verdict": "UNSURE",
       "contractObligation": "required forwarded prop obligation",
       "reason": "PluginView is reached through dynamic registrations/hand-offs and widened props. contributionKey inherits unknown failure; the missing renderer contract is not proof of a failing string.",
-      "sourceSha256": "665df8edb8b60d7656a107a5351b4e6ecae9424433e087c55ba29d5791b88bad"
+      "sourceSha256": "665df8edb8b60d7656a107a5351b4e6ecae9424433e087c55ba29d5791b88bad",
+      "followupChange": "unchanged"
     },
     {
       "id": "E44",
@@ -1506,7 +1551,8 @@
       "verdict": "UNSURE",
       "contractObligation": "modeled missing provider; real path unresolved",
       "reason": "ImageLightboxHost has no default, but image-lightbox.tsx:13 supplies it around lazy Content. The lazy/bridge hand-off is not resolved. Do not claim the production provider is missing.",
-      "sourceSha256": "55013cd6034e1315ec52cb2043eecf64dce2187e8cfb5b88d3f7b401413f184d"
+      "sourceSha256": "55013cd6034e1315ec52cb2043eecf64dce2187e8cfb5b88d3f7b401413f184d",
+      "followupChange": "unchanged"
     },
     {
       "id": "E45",
@@ -1529,7 +1575,300 @@
       "verdict": "UNSURE",
       "contractObligation": "modeled missing provider; real path unresolved",
       "reason": "NewSessionComposerTextareaContext has a provider in new-session-page.tsx:330 around DraftBlock. Higher-order/nested view paths are incomplete; this diagnostic alone does not establish an app defect.",
-      "sourceSha256": "126090de8ffb31278337887723ddbbd8552eacbc183f9720961c4df43e6cb578"
+      "sourceSha256": "126090de8ffb31278337887723ddbbd8552eacbc183f9720961c4df43e6cb578",
+      "followupChange": "unchanged"
+    },
+    {
+      "id": "E46",
+      "change": "new",
+      "followupChange": "new",
+      "diagnostic": {
+        "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
+        "kind": "async",
+        "severity": "error",
+        "message": "Async value \"choice\" is read in an effect function, which serves the committed value and throws while uninitialized. Read it in the effect's compute function and pass the value.",
+        "loc": {
+          "file": "src/pages/chat/components/chat-details.tsx",
+          "line": 115,
+          "col": 24,
+          "endLine": 115,
+          "endCol": 32
+        },
+        "ownerName": "effect",
+        "data": {
+          "source": "choice"
+        }
+      },
+      "excerpt": "113:     };\n114:   });\n115:   const intent = () => choice().intent;\n116:   const desktop = () => props.nativePresentation === \"desktop\" && !isMobile() && !props.mobileHost;\n117:   let manualChange = false;",
+      "sourceSha256": "6d8a4f5d0dc371dcc4160c865cddd7371be4f33312550c7ef462a279aab6810e",
+      "verdict": "UNSURE",
+      "contractObligation": "required unsupported compute-form signal worst case",
+      "reason": "choice is the compute-form signal at chat-details.tsx:101; its initializer reads presentation/isPresented. The old settled-only apply finding is replaced with the contract-required pending worst case. Derived-signal semantics remain unsupported."
+    },
+    {
+      "id": "E47",
+      "change": "new",
+      "followupChange": "new",
+      "diagnostic": {
+        "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
+        "kind": "async",
+        "severity": "error",
+        "message": "Async value \"bodyError\" is read in an effect function, which serves the committed value and throws while uninitialized. Read it in the effect's compute function and pass the value.",
+        "loc": {
+          "file": "src/components/board/board-widget-cell.solid.tsx",
+          "line": 131,
+          "col": 29,
+          "endLine": 131,
+          "endCol": 40
+        },
+        "ownerName": "effect",
+        "data": {
+          "source": "bodyError"
+        }
+      },
+      "excerpt": "129:     { ownedWrite: true },\n130:   );\n131:   const bodyErrored = () => bodyError() !== undefined;\n132:   const loader = createLazyCustomElementRequests();\n133:   const loadState = projectOwner(loader, (owner) => owner.visibleState);",
+      "sourceSha256": "5b6279d54341bdd8fa0c2fc89c5d6dfaf9a16c504691684cdf5c25eb41d67392",
+      "verdict": "UNSURE",
+      "contractObligation": "required unsupported compute-form signal worst case",
+      "reason": "bodyError is a compute-form signal at board-widget-cell.solid.tsx:120, depending on widget and owner revisions. The effect apply read now keeps worst-case pending instead of a settled-only strict finding. This is not proof that bodyError actually suspends."
+    },
+    {
+      "id": "E48",
+      "change": "new",
+      "followupChange": "new",
+      "diagnostic": {
+        "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+        "kind": "async",
+        "severity": "error",
+        "message": "\"activated\" may be pending here and no Loading boundary is above this read, up to the hand-off at website.tsx:73; the root mount would be deferred with no fallback. Wrap the read in <Loading fallback={\u2026}>, here or in a caller.",
+        "loc": {
+          "file": "src/lib/board/widgets/website.tsx",
+          "line": 35,
+          "col": 17,
+          "endLine": 35,
+          "endCol": 28
+        },
+        "ownerName": "<WebsiteWidgetContent>",
+        "ownerPath": [
+          "<WebsiteWidgetContent>"
+        ],
+        "related": [
+          {
+            "message": "the hand-off",
+            "loc": {
+              "file": "src/lib/board/widgets/website.tsx",
+              "line": 73,
+              "col": 3,
+              "endLine": 73,
+              "endCol": 23
+            }
+          }
+        ],
+        "data": {
+          "source": "activated"
+        }
+      },
+      "excerpt": "33:   });\n34:   return (\n35:     <Show when={activated()}>\n36:       <Show when={content().url} fallback={<BoardWidgetError error={content().error} />}>\n37:         <div class=\"board-website\">",
+      "sourceSha256": "33b0dc94783725776147365bde7b85961cd2c47fd49d386f5aa23ca1da63cf14",
+      "verdict": "UNSURE",
+      "contractObligation": "required unsupported compute-form signal worst case",
+      "reason": "activated comes from createSignal(previous=>previous||props.active) at website.tsx:17. The derived compute is unmodeled; the JSX Show condition keeps its pending obligation up to the hand-off at :73."
+    },
+    {
+      "id": "E49",
+      "change": "new",
+      "followupChange": "new",
+      "diagnostic": {
+        "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+        "kind": "async",
+        "severity": "error",
+        "message": "\"the effect's compute\" may be pending here and no Loading boundary is above this read, up to the hand-off at board-widget-cell.solid.tsx:651; the root mount would be deferred with no fallback. Wrap the read in <Loading fallback={\u2026}>, here or in a caller.",
+        "loc": {
+          "file": "src/components/board/board-widget-cell.solid.tsx",
+          "line": 131,
+          "col": 29,
+          "endLine": 131,
+          "endCol": 54
+        },
+        "ownerName": "<BoardWidgetCellContent>",
+        "ownerPath": [
+          "<BoardWidgetCellContent>"
+        ],
+        "related": [
+          {
+            "message": "the hand-off",
+            "loc": {
+              "file": "src/components/board/board-widget-cell.solid.tsx",
+              "line": 651,
+              "col": 3,
+              "endLine": 651,
+              "endCol": 25
+            }
+          }
+        ],
+        "data": {
+          "source": "the effect's compute"
+        }
+      },
+      "excerpt": "129:     { ownedWrite: true },\n130:   );\n131:   const bodyErrored = () => bodyError() !== undefined;\n132:   const loader = createLazyCustomElementRequests();\n133:   const loadState = projectOwner(loader, (owner) => owner.visibleState);",
+      "sourceSha256": "5b6279d54341bdd8fa0c2fc89c5d6dfaf9a16c504691684cdf5c25eb41d67392",
+      "verdict": "UNSURE",
+      "contractObligation": "required unsupported compute-form signal worst case",
+      "reason": "The effect compute calls bodyErrored -> bodyError from the compute-form signal at :120. Its pending obligation remains independent of the apply finding at the same source expression."
+    },
+    {
+      "id": "E50",
+      "change": "new",
+      "followupChange": "new",
+      "diagnostic": {
+        "code": "UNHANDLED_HANDLER_FAILURE",
+        "kind": "error",
+        "severity": "error",
+        "message": "This onClick handler can fail with unknown (setPlaying(false) has no failure information) and nothing catches it; a rendered Errored does not catch a handler's failure. Catch and handle it inside the handler.",
+        "loc": {
+          "file": "src/pages/chat/components/youtube-video-card.tsx",
+          "line": 141,
+          "col": 17,
+          "endLine": 141,
+          "endCol": 24
+        },
+        "ownerName": "<YouTubeVideoCard>",
+        "ownerPath": [
+          "<YouTubeVideoCard>"
+        ],
+        "data": {
+          "failures": [
+            "unknown"
+          ]
+        }
+      },
+      "excerpt": "139:                 type=\"button\"\n140:                 aria-label={t(\"chat.youtube.close\")}\n141:                 onClick={() => {\n142:                   stopPlayback();\n143:                   onSettled(() => previewButton?.focus());",
+      "sourceSha256": "e55dc4a031d951bed50b811b78e10b0d9045a6dec7dfc2c0527a765b1856596d",
+      "verdict": "UNSURE",
+      "contractObligation": "required unsupported compute-form signal worst case",
+      "reason": "The click calls stopPlayback -> setPlaying(false). playing originates in a compute-form signal at youtube-video-card.tsx:20. Its unmodeled write/compute lifetime keeps unknown failure; this is not proof that an ordinary signal setter throws."
+    },
+    {
+      "id": "E51",
+      "change": "new",
+      "followupChange": "new",
+      "diagnostic": {
+        "code": "UNHANDLED_HANDLER_FAILURE",
+        "kind": "error",
+        "severity": "error",
+        "message": "This onClick handler can fail with unknown (setRevealed((value) => !value) has no failure information) and nothing catches it; a rendered Errored does not catch a handler's failure. Catch and handle it inside the handler.",
+        "loc": {
+          "file": "src/pages/chat/components/chat-question-answer-controls.tsx",
+          "line": 219,
+          "col": 13,
+          "endLine": 219,
+          "endCol": 20
+        },
+        "ownerName": "<FreeTextControl>",
+        "ownerPath": [
+          "<FreeTextControl>"
+        ],
+        "data": {
+          "failures": [
+            "unknown"
+          ]
+        }
+      },
+      "excerpt": "217:             aria-pressed={revealed() ? \"true\" : \"false\"}\n218:             disabled={props.disabled}\n219:             onClick={() => setRevealed((value) => !value)}\n220:           >\n221:             <Icon name={revealed() ? \"eyeOff\" : \"eye\"} />",
+      "sourceSha256": "dc7fdd76b9d601f4a77fce6d26bcbac3ca487bd5c36e293b752b37ebe753b5cd",
+      "verdict": "UNSURE",
+      "contractObligation": "required unsupported compute-form signal worst case",
+      "reason": "revealed uses a compute-form initializer at chat-question-answer-controls.tsx:192. Invoking its unmodeled write arm on click retains unknown failure. No plain signal or arbitrary callback has been declared safe."
+    },
+    {
+      "id": "E52",
+      "change": "new",
+      "followupChange": "new",
+      "diagnostic": {
+        "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+        "kind": "error",
+        "severity": "error",
+        "message": "\"activated\" may fail with unknown here and no Errored boundary is above this read, up to the hand-off at website.tsx:73; the failure would reach the root and halt reactivity. Wrap the work in <Errored fallback={\u2026}>, here or in a caller.",
+        "loc": {
+          "file": "src/lib/board/widgets/website.tsx",
+          "line": 35,
+          "col": 17,
+          "endLine": 35,
+          "endCol": 28
+        },
+        "ownerName": "<WebsiteWidgetContent>",
+        "ownerPath": [
+          "<WebsiteWidgetContent>"
+        ],
+        "related": [
+          {
+            "message": "the hand-off",
+            "loc": {
+              "file": "src/lib/board/widgets/website.tsx",
+              "line": 73,
+              "col": 3,
+              "endLine": 73,
+              "endCol": 23
+            }
+          }
+        ],
+        "data": {
+          "failures": [
+            "unknown"
+          ],
+          "source": "activated"
+        }
+      },
+      "excerpt": "33:   });\n34:   return (\n35:     <Show when={activated()}>\n36:       <Show when={content().url} fallback={<BoardWidgetError error={content().error} />}>\n37:         <div class=\"board-website\">",
+      "sourceSha256": "33b0dc94783725776147365bde7b85961cd2c47fd49d386f5aa23ca1da63cf14",
+      "verdict": "UNSURE",
+      "contractObligation": "required unsupported compute-form signal worst case",
+      "reason": "Same derived activated source as E48: the separate unknown-failure obligation at website.tsx:35 remains alongside pending. The two findings are not duplicates."
+    },
+    {
+      "id": "E53",
+      "change": "new",
+      "followupChange": "new",
+      "diagnostic": {
+        "code": "ERROR_OUTSIDE_ERRORED_BOUNDARY",
+        "kind": "error",
+        "severity": "error",
+        "message": "\"query\" may fail with unknown here and no Errored boundary is above this read, up to the hand-off at chat-header-session-menu.tsx:602; the failure would reach the root and halt reactivity. Wrap the work in <Errored fallback={\u2026}>, here or in a caller.",
+        "loc": {
+          "file": "src/components/session-menu-details-solid.tsx",
+          "line": 101,
+          "col": 18,
+          "endLine": 101,
+          "endCol": 25
+        },
+        "ownerName": "<ChatHeaderSessionMenuContent>",
+        "ownerPath": [
+          "<ChatHeaderSessionMenuContent>"
+        ],
+        "related": [
+          {
+            "message": "the hand-off",
+            "loc": {
+              "file": "src/pages/chat/components/chat-header-session-menu.tsx",
+              "line": 602,
+              "col": 3,
+              "endLine": 602,
+              "endCol": 31
+            }
+          }
+        ],
+        "data": {
+          "failures": [
+            "unknown"
+          ],
+          "source": "query"
+        }
+      },
+      "excerpt": "99:           aria-label={t(\"sessionsView.searchPeople\")}\n100:           placeholder={t(\"sessionsView.searchPeople\")}\n101:           value={query()}\n102:           onInput={(event) => setQuery(event.currentTarget.value)}\n103:         />",
+      "sourceSha256": "a6a77b0dc94a1161dd394bfacc071b212817d70472415a76637342fe9434c269",
+      "verdict": "UNSURE",
+      "contractObligation": "required unsupported compute-form signal worst case",
+      "reason": "query comes from the compute-form signal at session-menu-details-solid.tsx:54, which reads searchGeneration. The JSX input value retains unknown failure up to the chat-header hand-off; the source is unsupported, not proven failing."
     }
   ],
   "silences": [
@@ -1578,12 +1917,31 @@
         "file": "src/components/link-reader-preview-root.tsx",
         "line": 28
       },
-      "verdict": "FP",
-      "contractObligation": "missing required partial warning",
-      "reason": "onSettled is in a returned higher-order renderer. This entire file has no diagnostics; the factory path is unvisited. FUTURE 11 is not supported.",
-      "diagnosticsAtLine": [],
+      "verdict": "TP",
+      "contractObligation": "explicit partial boundary; body execution not established",
+      "reason": "Resolved onSettled now warns at :28 even in the returned, unvisited renderer. The scan does not execute its callback or certify its lifetime.",
+      "diagnosticsAtLine": [
+        {
+          "code": "UNANALYZED_BOUNDARY",
+          "kind": "analysis",
+          "severity": "warn",
+          "message": "onSettled(\u2026) is outside the checked subset; its callback phase and disposal are not modeled, including in unvisited functions; reached results retain worst-case facts. Nothing here is trusted: downstream obligations still surface.",
+          "loc": {
+            "file": "src/components/link-reader-preview-root.tsx",
+            "line": 28,
+            "col": 7,
+            "endLine": 32,
+            "endCol": 9
+          },
+          "ownerName": "link-reader-preview-root.tsx",
+          "data": {
+            "construct": "onSettled(\u2026)"
+          }
+        }
+      ],
       "excerpt": "27:     const afterUpdate = () =>\n28:       onSettled(() => {\n29:         if (active) {\n30:           afterCommit();\n31:         }\n32:       });",
-      "sourceSha256": "83775c9b7cb6bb5b53a16a83c2a3b1e04858df32e78f95886344477153a3b777"
+      "sourceSha256": "83775c9b7cb6bb5b53a16a83c2a3b1e04858df32e78f95886344477153a3b777",
+      "previousVerdict": "FP"
     },
     {
       "id": "S05",
@@ -1745,12 +2103,31 @@
         "file": "src/components/session-menu-snooze.tsx",
         "line": 108
       },
-      "verdict": "FP",
-      "contractObligation": "missing required ref-array boundary",
-      "reason": "The array contains listener/disposer refs. B returns early for a noncallable ref value without warning. Dispatch/cleanup are unmodeled; onCleanup at :72 does not cover this construct.",
-      "diagnosticsAtLine": [],
+      "verdict": "TP",
+      "contractObligation": "explicit partial boundary; body execution not established",
+      "reason": "The intrinsic ref-array expression at :108 now has a dispatch/cleanup boundary. Its callback bodies are not assumed to have run.",
+      "diagnosticsAtLine": [
+        {
+          "code": "UNANALYZED_BOUNDARY",
+          "kind": "analysis",
+          "severity": "warn",
+          "message": "a ref callback array is outside the checked subset; its dispatch and cleanup are not modeled, including in unvisited functions; reached callbacks retain unknown failures. Nothing here is trusted: downstream obligations still surface.",
+          "loc": {
+            "file": "src/components/session-menu-snooze.tsx",
+            "line": 108,
+            "col": 14,
+            "endLine": 108,
+            "endCol": 38
+          },
+          "ownerName": "session-menu-snooze.tsx",
+          "data": {
+            "construct": "a ref callback array"
+          }
+        }
+      ],
       "excerpt": "107:         novalidate\n108:         ref={[stopClick, stopKeydown]}\n109:         onSubmit={(event) => {\n110:           event.preventDefault();\n111:           const snoozedUntil = parseCustomSnooze(input.value);\n112:           if (snoozedUntil === null) {",
-      "sourceSha256": "1782e8e7e16ffc0dab2400a454048addd5c82df03def3396b6f1d02d1315747a"
+      "sourceSha256": "1782e8e7e16ffc0dab2400a454048addd5c82df03def3396b6f1d02d1315747a",
+      "previousVerdict": "FP"
     },
     {
       "id": "S11",
@@ -1771,12 +2148,31 @@
         "file": "src/components/session-menu-snooze.tsx",
         "line": 147
       },
-      "verdict": "FP",
-      "contractObligation": "missing required ref-array boundary",
-      "reason": "The first arm captures cancelButton; the second installs a native listener. The ref-array dispatch/cleanup path has no local partial warning.",
-      "diagnosticsAtLine": [],
+      "verdict": "TP",
+      "contractObligation": "explicit partial boundary; body execution not established",
+      "reason": "The mixed capture/listener ref array at :147 now has an explicit boundary, independent of the onCleanup registration.",
+      "diagnosticsAtLine": [
+        {
+          "code": "UNANALYZED_BOUNDARY",
+          "kind": "analysis",
+          "severity": "warn",
+          "message": "a ref callback array is outside the checked subset; its dispatch and cleanup are not modeled, including in unvisited functions; reached callbacks retain unknown failures. Nothing here is trusted: downstream obligations still surface.",
+          "loc": {
+            "file": "src/components/session-menu-snooze.tsx",
+            "line": 147,
+            "col": 50,
+            "endLine": 147,
+            "endCol": 91
+          },
+          "ownerName": "session-menu-snooze.tsx",
+          "data": {
+            "construct": "a ref callback array"
+          }
+        }
+      ],
       "excerpt": "146:         <div class=\"session-menu__snooze-buttons\">\n147:           <button type=\"button\" class=\"btn\" ref={[(node) => (cancelButton = node), cancel]}>\n148:             {t(\"common.cancel\")}\n149:           </button>\n150:           <button\n151:             type=\"submit\"",
-      "sourceSha256": "1782e8e7e16ffc0dab2400a454048addd5c82df03def3396b6f1d02d1315747a"
+      "sourceSha256": "1782e8e7e16ffc0dab2400a454048addd5c82df03def3396b6f1d02d1315747a",
+      "previousVerdict": "FP"
     },
     {
       "id": "S13",
@@ -1797,12 +2193,31 @@
         "file": "src/components/link-reader-preview-root.tsx",
         "line": 34
       },
-      "verdict": "FP",
-      "contractObligation": "missing required unsupported-signal/root warning",
-      "reason": "A returned renderer uses compute-form createSignal with ownedWrite inside render. The higher-order factory is unvisited and the whole file is silent; FUTURE 18/13 are not checked.",
-      "diagnosticsAtLine": [],
+      "verdict": "TP",
+      "contractObligation": "explicit partial boundary; body execution not established",
+      "reason": "The actual createSignal compute-form call now warns at :34. When such a tuple is reached, its members stay worst case; this scan does not establish that this renderer was visited.",
+      "diagnosticsAtLine": [
+        {
+          "code": "UNANALYZED_BOUNDARY",
+          "kind": "analysis",
+          "severity": "warn",
+          "message": "a compute-form signal is outside the checked subset; its compute, writes and lifetime are not modeled, including in unvisited functions; reached tuple members retain worst-case facts. Nothing here is trusted: downstream obligations still surface.",
+          "loc": {
+            "file": "src/components/link-reader-preview-root.tsx",
+            "line": 34,
+            "col": 37,
+            "endLine": 34,
+            "endCol": 87
+          },
+          "ownerName": "link-reader-preview-root.tsx",
+          "data": {
+            "construct": "a compute-form signal"
+          }
+        }
+      ],
       "excerpt": "33:     const dispose = render(() => {\n34:       const [current, setCurrent] = createSignal<T>(() => value, { ownedWrite: true });\n35:       const attributes = createMemo(() => ({ \"aria-label\": label(current()) }));\n36:       spread(card, attributes, true);\n37:       createResizeObserver(() => [card], afterCommit);\n38:       updates.set(card, (next) => {",
-      "sourceSha256": "83775c9b7cb6bb5b53a16a83c2a3b1e04858df32e78f95886344477153a3b777"
+      "sourceSha256": "83775c9b7cb6bb5b53a16a83c2a3b1e04858df32e78f95886344477153a3b777",
+      "previousVerdict": "FP"
     },
     {
       "id": "S15",
@@ -1816,15 +2231,93 @@
       "diagnosticsAtLine": [],
       "excerpt": "46: /** Solid consumers retain t(\"key\") without loading signals in the existing Lit entry. */\n47: const translation = projectI18n(i18n);\n48: export const t = translation.t;\n49: export const getLocale = translation.locale;\n50: export const i18nRevision = translation.revision;\n51: /** Plain owners observe both locale changes and newly registered lazy English catalogs. */",
       "sourceSha256": "f5bb2aefc9f842b0f53f749af03714f44cced71a37c2365e5d266f7f7072bc45"
+    },
+    {
+      "id": "S16",
+      "loc": {
+        "file": "src/pages/agents-home/claws-trust-warning.tsx",
+        "line": 12
+      },
+      "verdict": "TP",
+      "contractObligation": "native scalar operation; independent translation obligations retained",
+      "reason": "parseClawHubAudit receives the declared scalar warning value. Native trim no longer acquires a props-object callback failure. The helper still has translation-related obligations at other locations, including exported info at :45.",
+      "diagnosticsAtLine": [],
+      "excerpt": "10: \n11: function parseClawHubAudit(warning: string): ClawHubAudit | null {\n12:   const lines = warning.trim().split(/\\r?\\n/u);\n13:   if (\n14:     !/^\u256d\u2500 ClawHub Security Audit \u2500+\u256e$/u.test(lines[0] ?? \"\") ||\n15:     !/^\u2570\u2500+\u256f$/u.test(lines.at(-1) ?? \"\")",
+      "sourceSha256": "e7aa7eae686148df972226d7c3b86cecccefc30576b9dad39e5a679489d27e3c"
     }
   ],
   "errorVerdicts": {
-    "UNSURE": 34,
-    "TP": 10,
-    "FP": 1
+    "UNSURE": 43,
+    "TP": 10
   },
   "silenceVerdicts": {
-    "TP": 11,
-    "FP": 4
-  }
+    "TP": 16
+  },
+  "resolvedFindings": [
+    {
+      "id": "E13",
+      "change": "unchanged",
+      "diagnostic": {
+        "code": "SETUP_MAY_THROW",
+        "kind": "error",
+        "severity": "error",
+        "message": "<renderClawTrustWarning>'s setup may fail with unknown (warning.trim() has no failure information); a component body only creates state. Move this work into a memo or rendered work under an Errored boundary, or into a handler, or handle the failure where it is produced.",
+        "loc": {
+          "file": "src/pages/agents-home/claws-trust-warning.tsx",
+          "line": 12,
+          "col": 17,
+          "endLine": 12,
+          "endCol": 31
+        },
+        "ownerName": "<renderClawTrustWarning>",
+        "data": {
+          "failures": [
+            "unknown"
+          ]
+        }
+      },
+      "excerpt": "10: \n11: function parseClawHubAudit(warning: string): ClawHubAudit | null {\n12:   const lines = warning.trim().split(/\\r?\\n/u);\n13:   if (\n14:     !/^\u256d\u2500 ClawHub Security Audit \u2500+\u256e$/u.test(lines[0] ?? \"\") ||",
+      "verdict": "FP",
+      "contractObligation": "not required for this native string operation",
+      "reason": "parseClawHubAudit has a string parameter and calls native trim. The exported JSX helper renderClawTrustWarning(warning:string) is separately analyzed as a component with a props-object parameter, losing the scalar argument. Direct helper calls are now checked, but that standalone summary still reports this false setup reason.",
+      "sourceSha256": "e7aa7eae686148df972226d7c3b86cecccefc30576b9dad39e5a679489d27e3c",
+      "resolution": "Scalar-argument summary fixed. Native trim error removed; separate translation obligations remain.",
+      "afterExportedSummaries": [
+        {
+          "code": "COMPONENT_OBLIGATIONS_EXPORTED",
+          "kind": "analysis",
+          "severity": "info",
+          "message": "<renderClawTrustWarning> is exported and nothing in this program renders it; it may be pending (this.locale, this.translations[this.locale], catalog[localeCatalog], getLazyLocaleCatalog(catalog)?.load(namespace), this.translations[DEFAULT_LOCALE], value.replace(/\\{(\\w+)\\}/g, (_, k) => params[k] ?? `{${k}}`)) and failing (this.locale: unknown, this.translations[this.locale]: unknown, catalog[localeCatalog]: unknown, load.then(\n        () => {\n          if (this.translation\u2026 rejects and nothing handles the promise: unknown, this.translations[DEFAULT_LOCALE]: unknown, value.replace(/\\{(\\w+)\\}/g, (_, k) => params[k] ?? `{${k}}`): unknown). Its renderers must provide the Loading / Errored boundary.",
+          "loc": {
+            "file": "src/pages/agents-home/claws-trust-warning.tsx",
+            "line": 45,
+            "col": 17,
+            "endLine": 45,
+            "endCol": 39
+          },
+          "ownerName": "<renderClawTrustWarning>",
+          "data": {
+            "pending": [
+              "this.locale",
+              "this.translations[this.locale]",
+              "catalog[localeCatalog]",
+              "getLazyLocaleCatalog(catalog)?.load(namespace)",
+              "this.locale",
+              "this.translations[DEFAULT_LOCALE]",
+              "value.replace(/\\{(\\w+)\\}/g, (_, k) => params[k] ?? `{${k}}`)"
+            ],
+            "failures": [
+              "this.locale: unknown",
+              "this.translations[this.locale]: unknown",
+              "catalog[localeCatalog]: unknown",
+              "load.then(\n        () => {\n          if (this.translation\u2026 rejects and nothing handles the promise: unknown",
+              "this.locale: unknown",
+              "this.translations[DEFAULT_LOCALE]: unknown",
+              "value.replace(/\\{(\\w+)\\}/g, (_, k) => params[k] ?? `{${k}}`): unknown"
+            ]
+          }
+        }
+      ]
+    }
+  ]
 }

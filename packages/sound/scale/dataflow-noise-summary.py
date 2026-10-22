@@ -33,7 +33,7 @@ def cause(construct):
         return 'recursion/depth/work cutoff'
     if any(s in construct for s in ['spread', 'object member', 'service member', 'context service', 'module state']):
         return 'object/prop/escape semantics outside model'
-    if construct.endswith('(…)') or 'outside a component' in construct or construct.startswith('<'):
+    if construct == 'a compute-form signal' or construct.endswith('(…)') or 'outside a component' in construct or construct.startswith('<'):
         return 'Solid API/ownership semantics outside model'
     if 'component' in construct or 'provider' in construct or 'render argument' in construct:
         return 'unresolved render/provider/call shape'
@@ -95,6 +95,11 @@ summary = dict(method='Visible-origin partition, not adjudication. Colocation on
                removedByCode=dict(Counter(d['code'] for k, d in bk.items() if k not in ak)),
                addedByCode=dict(Counter(d['code'] for k, d in ak.items() if k not in bk)),
                changedMessageByCode=dict(Counter(d['code'] for k, d in ak.items() if k in bk and d['message'] != bk[k]['message'])))
+round1 = read('after-round1')
+rk = {key(d): d for d in round1}
+summary['round1'] = summarize('after-round1')
+summary['followupRemovedByCode'] = dict(Counter(d['code'] for k, d in rk.items() if k not in ak))
+summary['followupAddedByCode'] = dict(Counter(d['code'] for k, d in ak.items() if k not in rk))
 (out / 'root-causes.json').write_text(json.dumps(summary, indent=2)+'\n')
 review = json.loads((out / 'review.json').read_text())
 assert len(review['errors']) >= 40 and len(review['silences']) >= 15

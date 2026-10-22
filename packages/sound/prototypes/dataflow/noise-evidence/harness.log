@@ -1,4 +1,4 @@
-# solid-sound comparison — 2026-10-22T23:00:36.209Z
+# solid-sound comparison — 2026-10-22T23:15:28.232Z
 
 Fixtures: 173 (all); runs per measurement: 3. Prototypes: dataflow, oxc, null.
 
@@ -18,11 +18,11 @@ Fixtures: 173 (all); runs per measurement: 3. Prototypes: dataflow, oxc, null.
 | unmapped locations | 0 | 0 | 0 |
 | codes outside the table | 0 | 0 | 0 |
 | crashes | 0 | 0 | 0 |
-| cold check, cases total (ms) | 10227.4 | 42.9 | 0.1 |
-| cold check, mutants total (ms) | 3450.6 | 13.1 | 0.0 |
-| cold check, Equipment app (ms) | 215.8 | 7.2 | 0.0 |
-| incremental, EquipmentRow trivial edit (ms) | 2.1 | 1.3 | 0.0 |
-| incremental, EquipmentRow semantic edit (ms) | 76.8 | 6.0 | 0.0 |
+| cold check, cases total (ms) | 9476.8 | 35.4 | 0.1 |
+| cold check, mutants total (ms) | 3274.6 | 12.0 | 0.0 |
+| cold check, Equipment app (ms) | 203.8 | 6.6 | 0.0 |
+| incremental, EquipmentRow trivial edit (ms) | 1.9 | 1.1 | 0.0 |
+| incremental, EquipmentRow semantic edit (ms) | 73.0 | 5.6 | 0.0 |
 | errors before / after trivial / after semantic edit | 10 / 10 / 10 | 10 / 10 / 10 | 0 / 0 / 0 |
 
 > **SOUNDNESS FAILURE — null: 90 in-subset fixture(s) with a missed obligation: context-missing-provider, context-provider-over-default, context-signal-setup, context-method-setup, context-async-uncovered, context-async-setup, context-pending-handler, context-failing-handler, context-promise-uncaught, context-optional-api-uncaught, context-injected-sync, context-module-escape, context-unknown-escape, context-prop-uncovered, setup-read, return-ternary, return-and, named-callback-in-setup, array-callback-in-setup, getter-read-in-setup, memo-write, pending-root, iife-pending-root, async-setup-reads, throw-error, promise-event, plain-callback-throw-in-memo, effect-reads-failing-memo-at-root, foreign-route-failure, setup-promise-rejects, callback-prop-throws, async-handler-destructured-uncaught, kept-promise-rejects-at-its-await, timer-callback-failure, equipment-checkout, m-context-loading-removed, m-context-errored-removed, m-context-catch-removed, m-context-optional-catch-removed, m-context-provider-removed, m-context-default-removed, m-context-shadow-removed, m-context-alias-setup, m-context-method-write-memo, m-context-prop-child-loading-removed, m-context-prop-child-errored-removed, m-context-read-to-handler, m-loading-removed, m-errored-removed, m-catch-removed, m-read-moved-to-setup, m-write-in-memo, m-reactive-prop-read-in-setup, m-handled-catch-rethrows, m-async-helper-rejects, m-pending-through-prop, m-pending-read-in-setup, m-callback-prop-throws-forwarded, m-effect-phase-pending, m-injected-api-ambient, m-injected-api-prop, m-equipment-row-loading-removed, oc-01-factory-reader-mutant, oc-02-effect-prop-phase-mutant, oc-03-optional-context-mutant, oc-04-default-accessor-mutant, oc-05-project-get-method-mutant, oc-06-promise-forks-mutant, oc-07-scoped-outcome-mutant, oc-08-lazy-unused-prop-mutant, oc-09-forwarded-pending-setup-mutant, oc-10-untrack-not-a-catch-mutant, oc-12-keyed-row-snapshot-mutant, oc-12-row-pending-mutant, oc-12-index-row-mutant, oc-23-ref-read-mutant, oc-23-ref-pending-mutant, oc-01-translation-reader-mutant, op-loading-url-mutant, op-loading-reactive-key-mutant, op-focus-repair-mutant, op-machine-members-mutant, op-held-callback-mutant, op-held-ref-mutant, op-native-listener-mutant, op-set-add-mutant, op-e24-remove-mutant, op-e28-keydown-mutant, op-e30-select-mutant, op-e40-reselect-mutant**

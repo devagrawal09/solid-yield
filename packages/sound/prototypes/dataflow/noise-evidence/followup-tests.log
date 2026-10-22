@@ -1,0 +1,9 @@
+
+ RUN  v4.1.11 /Users/devagr/solid-yield-wt/sound-dataflow-noise/packages/sound
+
+
+ Test Files  1 passed (1)
+      Tests  13 passed (13)
+   Start at  04:43:06
+   Duration  4.98s (transform 93ms, setup 0ms, import 262ms, tests 4.64s, environment 0ms)
+

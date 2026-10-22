@@ -1,0 +1,41 @@
+{
+  "dataflow": {
+    "fixtures": 173,
+    "crashes": [],
+    "misses": 0,
+    "warningMisses": 0,
+    "infoMisses": 0,
+    "extraErrors": 0,
+    "extraWarnings": 0,
+    "unmapped": 0,
+    "leakage": 0,
+    "codeTableViolations": 0,
+    "soundnessFailures": 0
+  },
+  "oxc": {
+    "fixtures": 173,
+    "crashes": [],
+    "misses": 0,
+    "warningMisses": 0,
+    "infoMisses": 0,
+    "extraErrors": 0,
+    "extraWarnings": 0,
+    "unmapped": 0,
+    "leakage": 0,
+    "codeTableViolations": 0,
+    "soundnessFailures": 0
+  },
+  "null": {
+    "fixtures": 173,
+    "crashes": [],
+    "misses": 103,
+    "warningMisses": 11,
+    "infoMisses": 5,
+    "extraErrors": 0,
+    "extraWarnings": 0,
+    "unmapped": 0,
+    "leakage": 0,
+    "codeTableViolations": 0,
+    "soundnessFailures": 90
+  }
+}

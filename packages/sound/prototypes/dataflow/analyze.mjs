@@ -392,8 +392,34 @@ export class Analysis {
     this.runtime.onPhase?.("components");
     this.reportRoots();
     this.runtime.onPhase?.("roots");
+    // Deferred constructs can sit in returned functions or behind a work cutoff.
+    // Report their missing coverage without pretending their bodies ran. When
+    // reached, normal evaluation still supplies the worst-case value facts.
+    for (const sf of this.program.getSourceFiles()) if (this.isProjectFile(sf)) this.reportDeferredCoverage(sf);
     return this.diagnostics;
   }
+
+  /** @param {ts.SourceFile} sf */
+  reportDeferredCoverage(sf) {
+    const ctx = { component: null, scope: /** @type {Scope} */ ("setup"), fn: this.newFnAcc(), comp: null, view: null, depth: 0, ownerName: sf.fileName.split("/").pop() ?? "" };
+    /** @param {ts.Node} node */
+    const visit = node => {
+      if (ts.isCallExpression(node)) {
+        const target = stripParens(node.expression);
+        const api = solidApiOf(ts.isPropertyAccessExpression(target) ? target.name : target, this.checker);
+        if (api?.api === "onSettled") this.unanalyzed(node, "onSettled(…)", "its callback phase and disposal are not modeled, including in unvisited functions; reached results retain worst-case facts.", ctx);
+        else if (api?.api === "createSignal" && this.hasSignalCompute(node)) this.unanalyzed(node, "a compute-form signal", "its compute, writes and lifetime are not modeled, including in unvisited functions; reached tuple members retain worst-case facts.", ctx);
+      } else if (ts.isJsxAttribute(node) && node.name.getText() === "ref" && node.initializer && ts.isJsxExpression(node.initializer) && node.initializer.expression && ts.isArrayLiteralExpression(stripParens(node.initializer.expression))) {
+        const opening = node.parent.parent;
+        if ((ts.isJsxOpeningElement(opening) || ts.isJsxSelfClosingElement(opening)) && ts.isIdentifier(opening.tagName) && /^[a-z]/.test(opening.tagName.text)) this.unanalyzed(stripParens(node.initializer.expression), "a ref callback array", "its dispatch and cleanup are not modeled, including in unvisited functions; reached callbacks retain unknown failures.", ctx);
+      }
+      ts.forEachChild(node, visit);
+    };
+    visit(sf);
+  }
+
+  /** @param {ts.CallExpression} call */
+  hasSignalCompute(call) { return !!call.arguments[0] && isFunctionLike(stripParens(call.arguments[0])); }
 
   /** @param {ts.SourceFile} sf */
   collectComponents(sf) {
@@ -570,7 +596,15 @@ export class Analysis {
   bindPropsParam(c, param, ctx) {
     if (ts.isIdentifier(param.name)) {
       const symbol = this.symbolOf(param.name);
-      if (symbol) this.bindings.set(symbol, { kind: "props", component: c });
+      // An exported JSX helper can accept an ordinary scalar argument. Its
+      // value was already evaluated by its caller; it is not a lazy props bag.
+      // Keep actual JSX callers on the props path, including widened inputs.
+      const type = this.checker.getTypeAtLocation(param);
+      const parts = type.isUnion() ? type.types : [type];
+      const scalar = parts.every(t => !!(t.flags & (ts.TypeFlags.StringLike | ts.TypeFlags.NumberLike | ts.TypeFlags.BooleanLike | ts.TypeFlags.BigIntLike | ts.TypeFlags.ESSymbolLike | ts.TypeFlags.Null | ts.TypeFlags.Undefined | ts.TypeFlags.Void | ts.TypeFlags.Never)));
+      if (symbol) this.bindings.set(symbol, scalar && c.callers === 0 && !c.propsWorst && !c.props.size
+        ? { kind: "value", value: { ...constant(), opaque: true } }
+        : { kind: "props", component: c });
     } else if (ts.isObjectBindingPattern(param.name)) {
       // Destructuring props in the parameter list reads every named prop in setup.
       for (const element of param.name.elements) {
@@ -688,12 +722,15 @@ export class Analysis {
       if (api && api.api === "createSignal") {
         const name = d.name.elements[0] && !ts.isOmittedExpression(d.name.elements[0]) ? d.name.elements[0].name.getText() : "signal";
         for (const a of init.arguments) this.evalExpr(a, ctx);
+        const compute = this.hasSignalCompute(init);
+        const unknown = ctx.component === null || compute;
         /** @type {Source} */
-        const source = { name, reactive: true, pending: ctx.component === null, failures: new Set(ctx.component === null ? ["unknown"] : []), worst: ctx.component === null, node: init };
+        const source = { name, reactive: true, pending: unknown, failures: new Set(unknown ? ["unknown"] : []), worst: unknown, node: init };
         const [g, s] = d.name.elements;
         if (g && !ts.isOmittedExpression(g) && ts.isIdentifier(g.name)) { const sym = this.symbolOf(g.name); if (sym) this.bindings.set(sym, { kind: "signal", source }); }
-        if (s && !ts.isOmittedExpression(s) && ts.isIdentifier(s.name)) { const sym = this.symbolOf(s.name); if (sym) this.bindings.set(sym, { kind: "setter", name: s.name.text }); }
-        if (ctx.component === null) this.unanalyzed(init, "createSignal outside a component", "module-level reactive state is not modeled; it is treated as possibly pending and possibly failing.", ctx);
+        if (s && !ts.isOmittedExpression(s) && ts.isIdentifier(s.name)) { const sym = this.symbolOf(s.name); if (sym) this.bindings.set(sym, compute ? { kind: "value", value: worst() } : { kind: "setter", name: s.name.text }); }
+        if (compute) this.unanalyzed(init, "a compute-form signal", "its compute, writes and lifetime are not modeled; both tuple members retain worst-case facts.", ctx);
+        else if (ctx.component === null) this.unanalyzed(init, "createSignal outside a component", "module-level reactive state is not modeled; it is treated as possibly pending and possibly failing.", ctx);
         return;
       }
     }

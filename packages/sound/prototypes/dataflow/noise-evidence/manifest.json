@@ -17,14 +17,27 @@
   "inputHash": "359caa625bdc4f6402e8b441594626d79814fdc288e837a0d83eb2fd1edf42dd",
   "rules": "Unchanged scale/input.mjs, compiler-options.json, exclusions, heap cap, work/depth bounds. Input parsed only.",
   "checks": {
-    "rawAfterRows": 11569,
-    "reviewedErrors": 45,
-    "reviewedSilences": 15,
-    "changedReviewed": {
-      "new": 8,
+    "rawAfterRows": 11926,
+    "reviewedErrors": 53,
+    "reviewedSilences": 16,
+    "followupReviewed": {
+      "unchanged": 44,
       "changed": 1,
-      "unchanged": 36
-    }
+      "new": 8
+    },
+    "resolvedRoundOneFP": "E13: scalar warning -> native trim; independent translation obligations retained",
+    "repairedWarningSites": [
+      "S04",
+      "S10",
+      "S12",
+      "S14"
+    ]
   },
-  "exploratory": "Node22 before/after raw diagnostics were byte-for-byte equivalent as parsed JSON; duplicate artifacts removed. after-alias retains the intermediate alias-only run under Node22."
+  "exploratory": "Round-one artifacts are preserved under *-round1.*. Original Node22 exploratory before/after JSON matched the round-one Node24 diagnostics; duplicate exploratory outputs were removed. after-alias retains the intermediate alias-only Node22 run.",
+  "followupBaseCommit": "cd511106ba2c2811bc9f0edf7ab1978ba3dd3345",
+  "implementationSha256": {
+    "analyze.mjs": "22feb684c39e7a72758512ac35a24057f41c4bd5af6c6ee95f24171a4ed21f98",
+    "solid.mjs": "52fe6e7db5535c96c58e7dd4153b94fad9f3ec30ba999f12f62d1176871ce2eb",
+    "index.mjs": "1f73e8a3fe164c4c0d23a989a39d08b1189776de48e3c49082e98d8444128298"
+  }
 }

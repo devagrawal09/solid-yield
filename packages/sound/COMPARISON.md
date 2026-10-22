@@ -260,3 +260,44 @@ Failing fixture IDs and missed mutants, including null, are listed in
 [results/openclaw-baseline.md](results/openclaw-baseline.md).
 New-group tests pin known scores (not skip/expected-failure tests); old tests
 remain strict. Runtime evidence: results/openclaw-runtime.md.
+
+## Whole-App Noise Round
+
+Both B and C remain active. This round follows the D-133 precision fixtures
+and the scale pass; the tables above retain historical baseline results.
+The real-app runs use the same 2,669 OpenClaw roots / 524,547 LOC and rc.16
+dependencies, with a 2,048 MiB V8 old-space cap. Shared fixtures use rc.17.
+No fixture expectations, input exclusions, failure policy or severity changed.
+
+| Whole-app measure | B: dataflow | C: oxc |
+|---|---:|---:|
+| Errors, before -> after | 4,802 -> 5,028 | 5,599 -> 4,862 |
+| Warnings, before -> after | 5,969 -> 6,447 | 13,025 -> 12,169 |
+| Infos, before -> after | 443 -> 451 | 516 -> 532 |
+| Current cold check | 18.27 s | 35.52 s |
+| Current worker peak RSS | 2.217 GiB | 2,328.94 MiB |
+| Reviewed after errors: TP / FP / unsure | 10 / 0 / 43 | 7 / 0 / 35 |
+| Reviewed silence sites | 16 | 15 |
+
+These are single-run measurements with concurrent work, not isolated speed
+comparisons. Worker RSS includes memory outside V8 old-space. Reviews are
+targeted source audits, not statistical precision estimates; zero confirmed
+sample FPs does not establish an absence of false positives. Contract-required
+unknown failures count as justified obligations, not observed runtime bugs.
+
+B repairs a shared unresolved-alias identity that misattributed 1,242 sites to
+one component, checks resolved direct JSX-helper calls, preserves scalar helper
+parameters, and warns at previously unvisited deferred constructs. Its total
+findings increase as independent unknown obligations and coverage gaps become
+visible. It does not meet the whole-app noise-reduction goal.
+
+C models reachable short-circuit/conditional branches, preserves native
+array/string result facts, separates failure-only props from reactive reads,
+and retains failure-origin metadata. Counts fall, but thousands of budget and
+unsupported-boundary warnings remain. Neither prototype has demonstrated usable
+whole-app precision, complete causal tracing, or general soundness.
+
+Methods, paired regression tests, review records, coverage limits and raw
+before/after evidence:
+[B report](prototypes/dataflow/RESULTS-noise.md),
+[C report](prototypes/oxc/RESULTS-noise.md).

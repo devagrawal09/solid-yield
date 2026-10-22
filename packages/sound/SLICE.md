@@ -1,8 +1,10 @@
 # The shared vertical slice
 
-D-129 updates this starting slice: reused runtime codes keep runtime severity;
-pending event-handler reads warn; prop obligations belong to the child read with
-the caller expression related. CONTEXT.md extends it for both prototypes.
+D-129 updates this starting slice; D-130 amends its severity rule: proven
+in-subset findings are errors even when the reused runtime code warns. Runtime
+severity is recorded separately. Partial-check and pending-handler findings
+remain warnings. Prop obligations belong to the child read with the caller
+expression related. CONTEXT.md extends it for both prototypes.
 
 Both prototypes check exactly this subset of plain Solid 2 (solid-js / @solidjs/web
 2.0.0-rc.17), on the same fixtures (`fixtures/`), emitting the codes in

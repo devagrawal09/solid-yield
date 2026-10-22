@@ -44,7 +44,7 @@ const SETUP_THROW = "SETUP_MAY_THROW";
 const WARN = "UNANALYZED_BOUNDARY";
 const EXPORTED = "COMPONENT_OBLIGATIONS_EXPORTED";
 
-/** Preserve every obligation while putting reused runtime codes at their D-129 severity.
+/** Preserve every obligation at its static table severity (D-130).
  * @param {Expectation[]} [expected]
  * @param {Expectation[]} [warnings]
  */

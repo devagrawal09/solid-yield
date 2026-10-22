@@ -48,9 +48,13 @@ describe("context shared contract", { timeout: 120_000 }, () => {
     const relatedLoc = { file, line: caller.line, col: caller.startCol };
     /** @type {import("../src/types.d.ts").SoundDiagnostic} */
     const diagnostic = { code: "ERROR_OUTSIDE_ERRORED_BOUNDARY", kind: "error", severity: "error", message: "Read may fail", loc };
-    expect(score(f, fixturesDir, [diagnostic], 0).misses).toHaveLength(1);
-    expect(score(f, fixturesDir, [{ ...diagnostic, related: [{ message: "Prop supplied here", loc: relatedLoc }] }], 0).misses).toHaveLength(0);
-    expect(score(f, fixturesDir, [{ ...diagnostic, loc: relatedLoc, related: [{ message: "Read here", loc }] }], 0).misses).toHaveLength(1);
+    // Both failure and pending obligations are static errors under D-130.
+    /** @type {import("../src/types.d.ts").SoundDiagnostic} */
+    const pending = { ...diagnostic, code: "ASYNC_OUTSIDE_LOADING_BOUNDARY", kind: "async", message: "Read may be pending" };
+    const diagnostics = [diagnostic, pending];
+    expect(score(f, fixturesDir, diagnostics, 0).misses).toHaveLength(2);
+    expect(score(f, fixturesDir, diagnostics.map(d => ({ ...d, related: [{ message: "Prop supplied here", loc: relatedLoc }] })), 0).misses).toHaveLength(0);
+    expect(score(f, fixturesDir, diagnostics.map(d => ({ ...d, loc: relatedLoc, related: [{ message: "Read here", loc }] })), 0).misses).toHaveLength(2);
     expect(score(contextCases.find(f => f.id === "context-pending-handler") ?? f, fixturesDir, [], 0).soundnessFailure).toBe(true);
   });
 });

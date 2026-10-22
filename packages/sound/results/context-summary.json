@@ -4,12 +4,12 @@
     "crashes": [],
     "all": {
       "fixtures": 109,
-      "errorHits": 34,
-      "errorMisses": 11,
-      "warningHits": 21,
-      "warningMisses": 15,
-      "extraErrors": 41,
-      "extraWarnings": 117,
+      "errorHits": 48,
+      "errorMisses": 22,
+      "warningHits": 7,
+      "warningMisses": 4,
+      "extraErrors": 68,
+      "extraWarnings": 90,
       "infoHits": 5,
       "infoMisses": 0,
       "soundnessFailures": 22,
@@ -33,11 +33,11 @@
     "contextCases": {
       "fixtures": 29,
       "errorHits": 4,
-      "errorMisses": 6,
+      "errorMisses": 12,
       "warningHits": 2,
-      "warningMisses": 7,
-      "extraErrors": 23,
-      "extraWarnings": 77,
+      "warningMisses": 1,
+      "extraErrors": 39,
+      "extraWarnings": 61,
       "infoHits": 0,
       "infoMisses": 0,
       "soundnessFailures": 10,
@@ -49,11 +49,11 @@
     "contextMutants": {
       "fixtures": 12,
       "errorHits": 2,
-      "errorMisses": 5,
+      "errorMisses": 9,
       "warningHits": 0,
-      "warningMisses": 5,
-      "extraErrors": 10,
-      "extraWarnings": 30,
+      "warningMisses": 1,
+      "extraErrors": 18,
+      "extraWarnings": 22,
       "infoHits": 0,
       "infoMisses": 0,
       "soundnessFailures": 10,
@@ -79,8 +79,8 @@
       "errorMisses": 0,
       "warningHits": 0,
       "warningMisses": 2,
-      "extraErrors": 7,
-      "extraWarnings": 8,
+      "extraErrors": 8,
+      "extraWarnings": 7,
       "infoHits": 0,
       "infoMisses": 0,
       "soundnessFailures": 1,
@@ -91,12 +91,12 @@
     },
     "oldWithoutEquipment": {
       "fixtures": 67,
-      "errorHits": 25,
-      "errorMisses": 0,
-      "warningHits": 19,
-      "warningMisses": 1,
-      "extraErrors": 1,
-      "extraWarnings": 2,
+      "errorHits": 39,
+      "errorMisses": 1,
+      "warningHits": 5,
+      "warningMisses": 0,
+      "extraErrors": 3,
+      "extraWarnings": 0,
       "infoHits": 5,
       "infoMisses": 0,
       "soundnessFailures": 1,
@@ -164,27 +164,45 @@
       },
       {
         "fixture": "setup-read",
-        "errors": [],
+        "errors": [
+          {
+            "code": "STRICT_READ_UNTRACKED",
+            "file": "setup-read.tsx",
+            "count": 1
+          }
+        ],
         "errorMisses": [],
-        "warningHits": 1,
+        "warningHits": 0,
         "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
       },
       {
         "fixture": "return-ternary",
-        "errors": [],
+        "errors": [
+          {
+            "code": "STRICT_READ_UNTRACKED",
+            "file": "return-ternary.tsx",
+            "count": 1
+          }
+        ],
         "errorMisses": [],
-        "warningHits": 1,
+        "warningHits": 0,
         "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
       },
       {
         "fixture": "return-and",
-        "errors": [],
+        "errors": [
+          {
+            "code": "STRICT_READ_UNTRACKED",
+            "file": "return-and.tsx",
+            "count": 1
+          }
+        ],
         "errorMisses": [],
-        "warningHits": 1,
+        "warningHits": 0,
         "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
@@ -200,27 +218,45 @@
       },
       {
         "fixture": "named-callback-in-setup",
-        "errors": [],
+        "errors": [
+          {
+            "code": "STRICT_READ_UNTRACKED",
+            "file": "named-callback-in-setup.tsx",
+            "count": 1
+          }
+        ],
         "errorMisses": [],
-        "warningHits": 1,
+        "warningHits": 0,
         "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
       },
       {
         "fixture": "array-callback-in-setup",
-        "errors": [],
+        "errors": [
+          {
+            "code": "STRICT_READ_UNTRACKED",
+            "file": "array-callback-in-setup.tsx",
+            "count": 2
+          }
+        ],
         "errorMisses": [],
-        "warningHits": 1,
+        "warningHits": 0,
         "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
       },
       {
         "fixture": "getter-read-in-setup",
-        "errors": [],
+        "errors": [
+          {
+            "code": "STRICT_READ_UNTRACKED",
+            "file": "getter-read-in-setup.tsx",
+            "count": 1
+          }
+        ],
         "errorMisses": [],
-        "warningHits": 1,
+        "warningHits": 0,
         "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
@@ -291,12 +327,11 @@
         "errorMisses": [],
         "warningHits": 0,
         "warningMisses": [],
-        "extraErrors": [],
-        "extraWarnings": [
+        "extraErrors": [
           {
             "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
             "kind": "async",
-            "severity": "warn",
+            "severity": "error",
             "message": "The view rendered by `App, document.body);` may be pending and no Loading boundary covers it before the root; the root mount would be deferred with no fallback. Wrap the pending read in <Loading fallback={…}>, in the component or in a caller.",
             "loc": {
               "file": "/Users/devagr/solid-yield/packages/sound/fixtures/cases/recursion-failing-prop.tsx",
@@ -307,7 +342,8 @@
               "tsMessage": "Argument of type '() => View<true, never>' is not assignable to parameter of type '((props: never) => View<true, never>) & __ASYNC_OUTSIDE_LOADING_BOUNDARY__'.\n  Type '() => View<true, never>' is not assignable to type '__ASYNC_OUTSIDE_LOADING_BOUNDARY__'."
             }
           }
-        ]
+        ],
+        "extraWarnings": []
       },
       {
         "fixture": "async-memo-reads",
@@ -365,27 +401,45 @@
       },
       {
         "fixture": "pending-root",
-        "errors": [],
+        "errors": [
+          {
+            "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+            "file": "pending-root.tsx",
+            "count": 1
+          }
+        ],
         "errorMisses": [],
-        "warningHits": 1,
+        "warningHits": 0,
         "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
       },
       {
         "fixture": "iife-pending-root",
-        "errors": [],
+        "errors": [
+          {
+            "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+            "file": "iife-pending-root.tsx",
+            "count": 1
+          }
+        ],
         "errorMisses": [],
-        "warningHits": 1,
+        "warningHits": 0,
         "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
       },
       {
         "fixture": "async-setup-reads",
-        "errors": [],
+        "errors": [
+          {
+            "code": "STRICT_READ_UNTRACKED",
+            "file": "async-setup-reads.tsx",
+            "count": 1
+          }
+        ],
         "errorMisses": [],
-        "warningHits": 1,
+        "warningHits": 0,
         "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
@@ -682,9 +736,15 @@
       },
       {
         "fixture": "m-loading-removed",
-        "errors": [],
+        "errors": [
+          {
+            "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+            "file": "m-loading-removed.tsx",
+            "count": 1
+          }
+        ],
         "errorMisses": [],
-        "warningHits": 1,
+        "warningHits": 0,
         "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
@@ -726,9 +786,15 @@
       },
       {
         "fixture": "m-read-moved-to-setup",
-        "errors": [],
+        "errors": [
+          {
+            "code": "STRICT_READ_UNTRACKED",
+            "file": "m-read-moved-to-setup.tsx",
+            "count": 1
+          }
+        ],
         "errorMisses": [],
-        "warningHits": 1,
+        "warningHits": 0,
         "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
@@ -750,9 +816,15 @@
       },
       {
         "fixture": "m-reactive-prop-read-in-setup",
-        "errors": [],
+        "errors": [
+          {
+            "code": "STRICT_READ_UNTRACKED",
+            "file": "m-reactive-prop-read-in-setup.tsx",
+            "count": 1
+          }
+        ],
         "errorMisses": [],
-        "warningHits": 1,
+        "warningHits": 0,
         "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
@@ -790,21 +862,20 @@
       {
         "fixture": "m-pending-through-prop",
         "errors": [],
-        "errorMisses": [],
-        "warningHits": 0,
-        "warningMisses": [
+        "errorMisses": [
           {
             "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
             "file": "m-pending-through-prop.tsx",
             "at": "\"{p.n}\""
           }
         ],
-        "extraErrors": [],
-        "extraWarnings": [
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [
           {
             "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
             "kind": "async",
-            "severity": "warn",
+            "severity": "error",
             "message": "The view rendered by `App,document.body);` may be pending and no Loading boundary covers it before the root; the root mount would be deferred with no fallback. Wrap the pending read in <Loading fallback={…}>, in the component or in a caller.",
             "loc": {
               "file": "/Users/devagr/solid-yield/packages/sound/fixtures/mutants/m-pending-through-prop.tsx",
@@ -815,7 +886,8 @@
               "tsMessage": "Argument of type '() => View<true, never>' is not assignable to parameter of type '((props: never) => View<true, never>) & __ASYNC_OUTSIDE_LOADING_BOUNDARY__'.\n  Type '() => View<true, never>' is not assignable to type '__ASYNC_OUTSIDE_LOADING_BOUNDARY__'."
             }
           }
-        ]
+        ],
+        "extraWarnings": []
       },
       {
         "fixture": "m-pending-read-in-setup",
@@ -849,9 +921,15 @@
       },
       {
         "fixture": "m-effect-phase-pending",
-        "errors": [],
+        "errors": [
+          {
+            "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
+            "file": "m-effect-phase-pending.tsx",
+            "count": 1
+          }
+        ],
         "errorMisses": [],
-        "warningHits": 1,
+        "warningHits": 0,
         "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
@@ -903,9 +981,15 @@
       },
       {
         "fixture": "m-equipment-row-loading-removed",
-        "errors": [],
+        "errors": [
+          {
+            "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+            "file": "m-equipment-row-loading-removed.tsx",
+            "count": 1
+          }
+        ],
         "errorMisses": [],
-        "warningHits": 1,
+        "warningHits": 0,
         "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
@@ -917,12 +1001,12 @@
     "crashes": [],
     "all": {
       "fixtures": 109,
-      "errorHits": 38,
-      "errorMisses": 7,
-      "warningHits": 24,
-      "warningMisses": 12,
-      "extraErrors": 33,
-      "extraWarnings": 111,
+      "errorHits": 57,
+      "errorMisses": 13,
+      "warningHits": 5,
+      "warningMisses": 6,
+      "extraErrors": 53,
+      "extraWarnings": 91,
       "infoHits": 5,
       "infoMisses": 0,
       "soundnessFailures": 17,
@@ -942,12 +1026,12 @@
     },
     "contextCases": {
       "fixtures": 29,
-      "errorHits": 7,
-      "errorMisses": 3,
-      "warningHits": 3,
-      "warningMisses": 6,
-      "extraErrors": 18,
-      "extraWarnings": 74,
+      "errorHits": 10,
+      "errorMisses": 6,
+      "warningHits": 0,
+      "warningMisses": 3,
+      "extraErrors": 31,
+      "extraWarnings": 61,
       "infoHits": 0,
       "infoMisses": 0,
       "soundnessFailures": 8,
@@ -958,12 +1042,12 @@
     },
     "contextMutants": {
       "fixtures": 12,
-      "errorHits": 3,
-      "errorMisses": 4,
-      "warningHits": 2,
-      "warningMisses": 3,
-      "extraErrors": 8,
-      "extraWarnings": 28,
+      "errorHits": 5,
+      "errorMisses": 6,
+      "warningHits": 0,
+      "warningMisses": 1,
+      "extraErrors": 13,
+      "extraWarnings": 23,
       "infoHits": 0,
       "infoMisses": 0,
       "soundnessFailures": 7,
@@ -986,8 +1070,8 @@
       "errorMisses": 0,
       "warningHits": 0,
       "warningMisses": 2,
-      "extraErrors": 7,
-      "extraWarnings": 8,
+      "extraErrors": 8,
+      "extraWarnings": 7,
       "infoHits": 0,
       "infoMisses": 0,
       "soundnessFailures": 1,
@@ -998,12 +1082,12 @@
     },
     "oldWithoutEquipment": {
       "fixtures": 67,
-      "errorHits": 25,
-      "errorMisses": 0,
-      "warningHits": 19,
-      "warningMisses": 1,
-      "extraErrors": 0,
-      "extraWarnings": 1,
+      "errorHits": 39,
+      "errorMisses": 1,
+      "warningHits": 5,
+      "warningMisses": 0,
+      "extraErrors": 1,
+      "extraWarnings": 0,
       "infoHits": 5,
       "infoMisses": 0,
       "soundnessFailures": 1,
@@ -1071,27 +1155,45 @@
       },
       {
         "fixture": "setup-read",
-        "errors": [],
+        "errors": [
+          {
+            "code": "STRICT_READ_UNTRACKED",
+            "file": "setup-read.tsx",
+            "count": 1
+          }
+        ],
         "errorMisses": [],
-        "warningHits": 1,
+        "warningHits": 0,
         "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
       },
       {
         "fixture": "return-ternary",
-        "errors": [],
+        "errors": [
+          {
+            "code": "STRICT_READ_UNTRACKED",
+            "file": "return-ternary.tsx",
+            "count": 1
+          }
+        ],
         "errorMisses": [],
-        "warningHits": 1,
+        "warningHits": 0,
         "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
       },
       {
         "fixture": "return-and",
-        "errors": [],
+        "errors": [
+          {
+            "code": "STRICT_READ_UNTRACKED",
+            "file": "return-and.tsx",
+            "count": 1
+          }
+        ],
         "errorMisses": [],
-        "warningHits": 1,
+        "warningHits": 0,
         "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
@@ -1107,27 +1209,45 @@
       },
       {
         "fixture": "named-callback-in-setup",
-        "errors": [],
+        "errors": [
+          {
+            "code": "STRICT_READ_UNTRACKED",
+            "file": "named-callback-in-setup.tsx",
+            "count": 1
+          }
+        ],
         "errorMisses": [],
-        "warningHits": 1,
+        "warningHits": 0,
         "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
       },
       {
         "fixture": "array-callback-in-setup",
-        "errors": [],
+        "errors": [
+          {
+            "code": "STRICT_READ_UNTRACKED",
+            "file": "array-callback-in-setup.tsx",
+            "count": 2
+          }
+        ],
         "errorMisses": [],
-        "warningHits": 1,
+        "warningHits": 0,
         "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
       },
       {
         "fixture": "getter-read-in-setup",
-        "errors": [],
+        "errors": [
+          {
+            "code": "STRICT_READ_UNTRACKED",
+            "file": "getter-read-in-setup.tsx",
+            "count": 1
+          }
+        ],
         "errorMisses": [],
-        "warningHits": 1,
+        "warningHits": 0,
         "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
@@ -1257,27 +1377,45 @@
       },
       {
         "fixture": "pending-root",
-        "errors": [],
+        "errors": [
+          {
+            "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+            "file": "pending-root.tsx",
+            "count": 1
+          }
+        ],
         "errorMisses": [],
-        "warningHits": 1,
+        "warningHits": 0,
         "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
       },
       {
         "fixture": "iife-pending-root",
-        "errors": [],
+        "errors": [
+          {
+            "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+            "file": "iife-pending-root.tsx",
+            "count": 1
+          }
+        ],
         "errorMisses": [],
-        "warningHits": 1,
+        "warningHits": 0,
         "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
       },
       {
         "fixture": "async-setup-reads",
-        "errors": [],
+        "errors": [
+          {
+            "code": "STRICT_READ_UNTRACKED",
+            "file": "async-setup-reads.tsx",
+            "count": 1
+          }
+        ],
         "errorMisses": [],
-        "warningHits": 1,
+        "warningHits": 0,
         "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
@@ -1574,9 +1712,15 @@
       },
       {
         "fixture": "m-loading-removed",
-        "errors": [],
+        "errors": [
+          {
+            "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+            "file": "m-loading-removed.tsx",
+            "count": 1
+          }
+        ],
         "errorMisses": [],
-        "warningHits": 1,
+        "warningHits": 0,
         "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
@@ -1618,9 +1762,15 @@
       },
       {
         "fixture": "m-read-moved-to-setup",
-        "errors": [],
+        "errors": [
+          {
+            "code": "STRICT_READ_UNTRACKED",
+            "file": "m-read-moved-to-setup.tsx",
+            "count": 1
+          }
+        ],
         "errorMisses": [],
-        "warningHits": 1,
+        "warningHits": 0,
         "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
@@ -1642,9 +1792,15 @@
       },
       {
         "fixture": "m-reactive-prop-read-in-setup",
-        "errors": [],
+        "errors": [
+          {
+            "code": "STRICT_READ_UNTRACKED",
+            "file": "m-reactive-prop-read-in-setup.tsx",
+            "count": 1
+          }
+        ],
         "errorMisses": [],
-        "warningHits": 1,
+        "warningHits": 0,
         "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
@@ -1682,21 +1838,20 @@
       {
         "fixture": "m-pending-through-prop",
         "errors": [],
-        "errorMisses": [],
-        "warningHits": 0,
-        "warningMisses": [
+        "errorMisses": [
           {
             "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
             "file": "m-pending-through-prop.tsx",
             "at": "\"{p.n}\""
           }
         ],
-        "extraErrors": [],
-        "extraWarnings": [
+        "warningHits": 0,
+        "warningMisses": [],
+        "extraErrors": [
           {
             "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
             "kind": "async",
-            "severity": "warn",
+            "severity": "error",
             "message": "\"props.n\" may be pending here and no Loading boundary is above this read, up to the render root at m-pending-through-prop.tsx:1; the root mount would be deferred with no fallback. Wrap the read in <Loading fallback={…}>, here or in a caller.",
             "loc": {
               "file": "/Users/devagr/solid-yield/packages/sound/fixtures/mutants/m-pending-through-prop.tsx",
@@ -1726,7 +1881,8 @@
               "source": "props.n"
             }
           }
-        ]
+        ],
+        "extraWarnings": []
       },
       {
         "fixture": "m-pending-read-in-setup",
@@ -1760,9 +1916,15 @@
       },
       {
         "fixture": "m-effect-phase-pending",
-        "errors": [],
+        "errors": [
+          {
+            "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
+            "file": "m-effect-phase-pending.tsx",
+            "count": 1
+          }
+        ],
         "errorMisses": [],
-        "warningHits": 1,
+        "warningHits": 0,
         "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
@@ -1799,9 +1961,15 @@
       },
       {
         "fixture": "m-equipment-row-loading-removed",
-        "errors": [],
+        "errors": [
+          {
+            "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+            "file": "m-equipment-row-loading-removed.tsx",
+            "count": 1
+          }
+        ],
         "errorMisses": [],
-        "warningHits": 1,
+        "warningHits": 0,
         "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
@@ -1814,9 +1982,9 @@
     "all": {
       "fixtures": 109,
       "errorHits": 0,
-      "errorMisses": 45,
+      "errorMisses": 70,
       "warningHits": 0,
-      "warningMisses": 36,
+      "warningMisses": 11,
       "extraErrors": 0,
       "extraWarnings": 0,
       "infoHits": 0,
@@ -1858,9 +2026,9 @@
     "contextCases": {
       "fixtures": 29,
       "errorHits": 0,
-      "errorMisses": 10,
+      "errorMisses": 16,
       "warningHits": 0,
-      "warningMisses": 9,
+      "warningMisses": 3,
       "extraErrors": 0,
       "extraWarnings": 0,
       "infoHits": 0,
@@ -1874,9 +2042,9 @@
     "contextMutants": {
       "fixtures": 12,
       "errorHits": 0,
-      "errorMisses": 7,
+      "errorMisses": 11,
       "warningHits": 0,
-      "warningMisses": 5,
+      "warningMisses": 1,
       "extraErrors": 0,
       "extraWarnings": 0,
       "infoHits": 0,
@@ -1919,9 +2087,9 @@
     "oldWithoutEquipment": {
       "fixtures": 67,
       "errorHits": 0,
-      "errorMisses": 25,
+      "errorMisses": 40,
       "warningHits": 0,
-      "warningMisses": 20,
+      "warningMisses": 5,
       "extraErrors": 0,
       "extraWarnings": 0,
       "infoHits": 0,
@@ -2006,45 +2174,45 @@
       {
         "fixture": "setup-read",
         "errors": [],
-        "errorMisses": [],
-        "warningHits": 0,
-        "warningMisses": [
+        "errorMisses": [
           {
             "code": "STRICT_READ_UNTRACKED",
             "file": "setup-read.tsx",
             "at": "\"count()\" #1"
           }
         ],
+        "warningHits": 0,
+        "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
       },
       {
         "fixture": "return-ternary",
         "errors": [],
-        "errorMisses": [],
-        "warningHits": 0,
-        "warningMisses": [
+        "errorMisses": [
           {
             "code": "STRICT_READ_UNTRACKED",
             "file": "return-ternary.tsx",
             "at": "\"n()\" #1"
           }
         ],
+        "warningHits": 0,
+        "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
       },
       {
         "fixture": "return-and",
         "errors": [],
-        "errorMisses": [],
-        "warningHits": 0,
-        "warningMisses": [
+        "errorMisses": [
           {
             "code": "STRICT_READ_UNTRACKED",
             "file": "return-and.tsx",
             "at": "\"n()\" #1"
           }
         ],
+        "warningHits": 0,
+        "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
       },
@@ -2060,9 +2228,7 @@
       {
         "fixture": "named-callback-in-setup",
         "errors": [],
-        "errorMisses": [],
-        "warningHits": 0,
-        "warningMisses": [
+        "errorMisses": [
           {
             "code": "STRICT_READ_UNTRACKED",
             "file": "named-callback-in-setup.tsx",
@@ -2070,15 +2236,15 @@
             "note": "the read inside scale, called from setup through map; either the read or the call"
           }
         ],
+        "warningHits": 0,
+        "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
       },
       {
         "fixture": "array-callback-in-setup",
         "errors": [],
-        "errorMisses": [],
-        "warningHits": 0,
-        "warningMisses": [
+        "errorMisses": [
           {
             "code": "STRICT_READ_UNTRACKED",
             "file": "array-callback-in-setup.tsx",
@@ -2086,15 +2252,15 @@
             "note": "items() and n() are both setup reads on line 6; one expectation covers both"
           }
         ],
+        "warningHits": 0,
+        "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
       },
       {
         "fixture": "getter-read-in-setup",
         "errors": [],
-        "errorMisses": [],
-        "warningHits": 0,
-        "warningMisses": [
+        "errorMisses": [
           {
             "code": "STRICT_READ_UNTRACKED",
             "file": "getter-read-in-setup.tsx",
@@ -2102,6 +2268,8 @@
             "note": "an object getter is a sync helper; reading it in setup is a setup read"
           }
         ],
+        "warningHits": 0,
+        "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
       },
@@ -2231,9 +2399,7 @@
       {
         "fixture": "pending-root",
         "errors": [],
-        "errorMisses": [],
-        "warningHits": 0,
-        "warningMisses": [
+        "errorMisses": [
           {
             "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
             "file": "pending-root.tsx",
@@ -2241,30 +2407,30 @@
             "note": "at the read, with the root as a related location; the root is accepted as an imprecise location"
           }
         ],
+        "warningHits": 0,
+        "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
       },
       {
         "fixture": "iife-pending-root",
         "errors": [],
-        "errorMisses": [],
-        "warningHits": 0,
-        "warningMisses": [
+        "errorMisses": [
           {
             "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
             "file": "iife-pending-root.tsx",
             "at": "\"p() * 2\" | \"(() => p() * 2)()\" | \"render(App\""
           }
         ],
+        "warningHits": 0,
+        "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
       },
       {
         "fixture": "async-setup-reads",
         "errors": [],
-        "errorMisses": [],
-        "warningHits": 0,
-        "warningMisses": [
+        "errorMisses": [
           {
             "code": "STRICT_READ_UNTRACKED",
             "file": "async-setup-reads.tsx",
@@ -2272,6 +2438,8 @@
             "note": "the read inside the async helper called from setup, or the call"
           }
         ],
+        "warningHits": 0,
+        "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
       },
@@ -2609,15 +2777,15 @@
       {
         "fixture": "m-loading-removed",
         "errors": [],
-        "errorMisses": [],
-        "warningHits": 0,
-        "warningMisses": [
+        "errorMisses": [
           {
             "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
             "file": "m-loading-removed.tsx",
             "at": "\"{m()}\" | \"render(App\""
           }
         ],
+        "warningHits": 0,
+        "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
       },
@@ -2660,15 +2828,15 @@
       {
         "fixture": "m-read-moved-to-setup",
         "errors": [],
-        "errorMisses": [],
-        "warningHits": 0,
-        "warningMisses": [
+        "errorMisses": [
           {
             "code": "STRICT_READ_UNTRACKED",
             "file": "m-read-moved-to-setup.tsx",
             "at": "\"count()\" #1"
           }
         ],
+        "warningHits": 0,
+        "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
       },
@@ -2690,9 +2858,7 @@
       {
         "fixture": "m-reactive-prop-read-in-setup",
         "errors": [],
-        "errorMisses": [],
-        "warningHits": 0,
-        "warningMisses": [
+        "errorMisses": [
           {
             "code": "STRICT_READ_UNTRACKED",
             "file": "m-reactive-prop-read-in-setup.tsx",
@@ -2700,6 +2866,8 @@
             "note": "title is reactive: App passes t()"
           }
         ],
+        "warningHits": 0,
+        "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
       },
@@ -2736,15 +2904,15 @@
       {
         "fixture": "m-pending-through-prop",
         "errors": [],
-        "errorMisses": [],
-        "warningHits": 0,
-        "warningMisses": [
+        "errorMisses": [
           {
             "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
             "file": "m-pending-through-prop.tsx",
             "at": "\"{p.n}\""
           }
         ],
+        "warningHits": 0,
+        "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
       },
@@ -2782,15 +2950,15 @@
       {
         "fixture": "m-effect-phase-pending",
         "errors": [],
-        "errorMisses": [],
-        "warningHits": 0,
-        "warningMisses": [
+        "errorMisses": [
           {
             "code": "PENDING_ASYNC_FORBIDDEN_SCOPE",
             "file": "m-effect-phase-pending.tsx",
             "at": "\"m() + 1\" | \"() => console.log(m() + 1)\""
           }
         ],
+        "warningHits": 0,
+        "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
       },
@@ -2828,15 +2996,15 @@
       {
         "fixture": "m-equipment-row-loading-removed",
         "errors": [],
-        "errorMisses": [],
-        "warningHits": 0,
-        "warningMisses": [
+        "errorMisses": [
           {
             "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
             "file": "m-equipment-row-loading-removed.tsx",
             "at": "\"props.list()\" | \"<Inventory list={list} />\" | \"render(\""
           }
         ],
+        "warningHits": 0,
+        "warningMisses": [],
         "extraErrors": [],
         "extraWarnings": []
       }

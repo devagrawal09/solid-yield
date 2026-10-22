@@ -53,7 +53,16 @@ describe("the shared code table", () => {
       expect(runtime, entry.code).toBeDefined();
       expect(runtime?.kind, entry.code).toContain(entry.kind);
       expect(runtime?.severity, entry.code).toContain(entry.runtime.severity);
-      expect(entry.severity, entry.code).toBe(entry.runtime.severity);
+      // Static proof is an error even when rc.17 only warns (D-130).
+      expect(entry.severity, entry.code).toBe(
+        ["STRICT_READ_UNTRACKED", "ASYNC_OUTSIDE_LOADING_BOUNDARY", "PENDING_ASYNC_FORBIDDEN_SCOPE"].includes(entry.code)
+          ? "error" : entry.runtime.severity
+      );
+    }
+  });
+  it("keeps partial-check and pending-handler findings as warnings", () => {
+    for (const code of ["UNANALYZED_BOUNDARY", "PENDING_ASYNC_IN_HANDLER"]) {
+      expect(CODES.find(entry => entry.code === code)?.severity, code).toBe("warn");
     }
   });
   it("invents no code that collides with a runtime code of a different meaning", () => {

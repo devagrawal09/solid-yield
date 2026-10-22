@@ -16,8 +16,11 @@
 // for findings about the checker's own coverage (no runtime counterpart can
 // exist for those).
 //
-// severity: reused runtime codes keep their runtime severity (D-129). New
-// codes keep the severity set here. Only errors fail a Vite build.
+// severity: static severity. Proven in-subset findings are errors even when
+// the reused runtime code warns (D-130, amending D-129b). runtime.severity
+// separately records rc.17's severity; it does not set static severity.
+// Partial-check boundaries and PENDING_ASYNC_IN_HANDLER remain warnings; new
+// codes keep their table severity. Only errors fail a Vite build.
 
 /**
  * @typedef {"strict-read" | "async" | "write" | "lifecycle" | "owner" | "error" | "analysis"} SoundKind
@@ -38,7 +41,7 @@ export const CODES = Object.freeze([
   {
     code: "STRICT_READ_UNTRACKED",
     kind: "strict-read",
-    severity: "warn",
+    severity: "error",
     meaning:
       "A reactive value (a signal or memo getter, a reactive prop, a store or context accessor) is read in a component's setup or another untracked scope: the read runs once and will not update.",
     fix: "Move the read into a tracking scope (JSX, a memo, or an effect's compute function), or into the event handler that needs the value.",
@@ -58,7 +61,7 @@ export const CODES = Object.freeze([
   {
     code: "ASYNC_OUTSIDE_LOADING_BOUNDARY",
     kind: "async",
-    severity: "warn",
+    severity: "error",
     meaning:
       "A possibly pending value is rendered (read in JSX or in a memo the JSX reads) with no Loading boundary above it, within this component or its callers up to the render root. The root mount would be deferred with no fallback shown.",
     fix: "Wrap the rendered read in <Loading fallback={…}>, in this component or in a caller.",
@@ -68,7 +71,7 @@ export const CODES = Object.freeze([
   {
     code: "PENDING_ASYNC_FORBIDDEN_SCOPE",
     kind: "async",
-    severity: "warn",
+    severity: "error",
     meaning:
       "A possibly pending value is read in a scope that serves the committed value and throws while uninitialized: an effect's effect function (createEffect's second argument), createTrackedEffect or onSettled.",
     fix: "Read the source in the effect's compute function and pass the value to the effect function.",

@@ -107,8 +107,7 @@ export const contextCases = [
     "entry": "context-signal-setup.tsx",
     "origin": "solid-sound context/services specification (context-sources.mjs)",
     "inSubset": true,
-    "expected": [],
-    "expectedWarnings": [
+    "expected": [
       {
         "code": "STRICT_READ_UNTRACKED",
         "file": "context-signal-setup.tsx",
@@ -119,6 +118,7 @@ export const contextCases = [
         ]
       }
     ],
+    "expectedWarnings": [],
     "legacyExpected": [],
     "legacyActual": []
   },
@@ -177,8 +177,7 @@ export const contextCases = [
     "entry": "context-method-setup.tsx",
     "origin": "solid-sound context/services specification (context-sources.mjs)",
     "inSubset": true,
-    "expected": [],
-    "expectedWarnings": [
+    "expected": [
       {
         "code": "STRICT_READ_UNTRACKED",
         "file": "context-method-setup.tsx",
@@ -189,6 +188,7 @@ export const contextCases = [
         ]
       }
     ],
+    "expectedWarnings": [],
     "legacyExpected": [],
     "legacyActual": []
   },
@@ -217,8 +217,7 @@ export const contextCases = [
     "entry": "context-async-uncovered.tsx",
     "origin": "solid-sound context/services specification (context-sources.mjs)",
     "inSubset": true,
-    "expected": [],
-    "expectedWarnings": [
+    "expected": [
       {
         "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
         "file": "context-async-uncovered.tsx",
@@ -229,6 +228,7 @@ export const contextCases = [
         ]
       }
     ],
+    "expectedWarnings": [],
     "legacyExpected": [],
     "legacyActual": []
   },
@@ -476,6 +476,15 @@ export const contextCases = [
             "find": "escaped.read()"
           }
         ]
+      },
+      {
+        "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+        "file": "context-module-escape.tsx",
+        "at": [
+          {
+            "find": "escaped.read()"
+          }
+        ]
       }
     ],
     "expectedWarnings": [
@@ -485,15 +494,6 @@ export const contextCases = [
         "at": [
           {
             "find": "escaped = s"
-          }
-        ]
-      },
-      {
-        "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
-        "file": "context-module-escape.tsx",
-        "at": [
-          {
-            "find": "escaped.read()"
           }
         ]
       }
@@ -520,6 +520,15 @@ export const contextCases = [
             "find": "s.read()"
           }
         ]
+      },
+      {
+        "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
+        "file": "context-unknown-escape.tsx",
+        "at": [
+          {
+            "find": "s.read()"
+          }
+        ]
       }
     ],
     "expectedWarnings": [
@@ -529,15 +538,6 @@ export const contextCases = [
         "at": [
           {
             "find": "store(s)"
-          }
-        ]
-      },
-      {
-        "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
-        "file": "context-unknown-escape.tsx",
-        "at": [
-          {
-            "find": "s.read()"
           }
         ]
       }
@@ -604,9 +604,7 @@ export const contextCases = [
             ]
           }
         ]
-      }
-    ],
-    "expectedWarnings": [
+      },
       {
         "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
         "file": "context-prop-uncovered.tsx",
@@ -627,6 +625,7 @@ export const contextCases = [
         ]
       }
     ],
+    "expectedWarnings": [],
     "legacyExpected": [],
     "legacyActual": []
   },
@@ -659,8 +658,7 @@ export const contextMutants = [
     "entry": "m-context-loading-removed.tsx",
     "origin": "derived from cases/context-async-covered: <Loading fallback=\"wait\"><Child /></Loading> → <Child />",
     "inSubset": true,
-    "expected": [],
-    "expectedWarnings": [
+    "expected": [
       {
         "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
         "file": "m-context-loading-removed.tsx",
@@ -671,6 +669,7 @@ export const contextMutants = [
         ]
       }
     ],
+    "expectedWarnings": [],
     "legacyExpected": [],
     "legacyActual": [],
     "mutation": {
@@ -833,8 +832,7 @@ export const contextMutants = [
     "entry": "m-context-shadow-removed.tsx",
     "origin": "derived from cases/context-nested-shadow: <C value={{ value: inner }}><Child /></C> → <Child />",
     "inSubset": true,
-    "expected": [],
-    "expectedWarnings": [
+    "expected": [
       {
         "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
         "file": "m-context-shadow-removed.tsx",
@@ -845,6 +843,7 @@ export const contextMutants = [
         ]
       }
     ],
+    "expectedWarnings": [],
     "legacyExpected": [],
     "legacyActual": [],
     "mutation": {
@@ -862,8 +861,7 @@ export const contextMutants = [
     "entry": "m-context-alias-setup.tsx",
     "origin": "derived from cases/context-helper-alias: return <p>{again()}</p>; → const n = again(); return <p>{n}</p>;",
     "inSubset": true,
-    "expected": [],
-    "expectedWarnings": [
+    "expected": [
       {
         "code": "STRICT_READ_UNTRACKED",
         "file": "m-context-alias-setup.tsx",
@@ -874,6 +872,7 @@ export const contextMutants = [
         ]
       }
     ],
+    "expectedWarnings": [],
     "legacyExpected": [],
     "legacyActual": [],
     "mutation": {
@@ -920,8 +919,7 @@ export const contextMutants = [
     "entry": "m-context-prop-child-loading-removed.tsx",
     "origin": "derived from cases/context-prop-child-boundaries: <Loading fallback=\"wait\"><p>{p.value}</p></Loading> → <p>{p.value}</p>",
     "inSubset": true,
-    "expected": [],
-    "expectedWarnings": [
+    "expected": [
       {
         "code": "ASYNC_OUTSIDE_LOADING_BOUNDARY",
         "file": "m-context-prop-child-loading-removed.tsx",
@@ -942,6 +940,7 @@ export const contextMutants = [
         ]
       }
     ],
+    "expectedWarnings": [],
     "legacyExpected": [],
     "legacyActual": [],
     "mutation": {

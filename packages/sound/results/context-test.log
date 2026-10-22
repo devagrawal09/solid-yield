@@ -1,77 +1,78 @@
 $ vitest run
 
- RUN  v4.1.11 /Users/devagr/solid-yield/packages/sound
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.11 [39m[90m/Users/devagr/solid-yield/packages/sound[39m
 
- ❯ test/harness.test.mjs (8 tests | 2 failed) 1292ms
-     ✓ has every file, and every expected code is in the shared table 2ms
-     ✓ copies the cases byte-identically from their origins 25ms
-     ✓ copies the Equipment Checkout sources byte-identically (when the reference app is present) 2ms
-     ✓ reuses Solid's runtime codes with the runtime's kind and documents the runtime severity 1ms
-     ✓ invents no code that collides with a runtime code of a different meaning 0ms
-     ✓ flags every in-subset expectation as a soundness failure against the null prototype 3ms
-     × typed: no soundness failure, no leakage, only table codes 889ms
-     × dataflow: no soundness failure, no leakage, only table codes 369ms
- ✓ test/context-contract.test.mjs (3 tests) 5258ms
-     ✓ has strict TypeScript-clean native cases and mutants  5254ms
+ [31m❯[39m test/harness.test.mjs [2m([22m[2m9 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 1290[2mms[22m[39m
+     [32m✓[39m has every file, and every expected code is in the shared table[32m 2[2mms[22m[39m
+     [32m✓[39m copies the cases byte-identically from their origins[32m 22[2mms[22m[39m
+     [32m✓[39m copies the Equipment Checkout sources byte-identically (when the reference app is present)[32m 1[2mms[22m[39m
+     [32m✓[39m reuses Solid's runtime codes with the runtime's kind and documents the runtime severity[32m 1[2mms[22m[39m
+     [32m✓[39m keeps partial-check and pending-handler findings as warnings[32m 0[2mms[22m[39m
+     [32m✓[39m invents no code that collides with a runtime code of a different meaning[32m 0[2mms[22m[39m
+     [32m✓[39m flags every in-subset expectation as a soundness failure against the null prototype[32m 3[2mms[22m[39m
+[31m     [31m×[31m typed: no soundness failure, no leakage, only table codes[39m[33m 885[2mms[22m[39m
+[31m     [31m×[31m dataflow: no soundness failure, no leakage, only table codes[39m[33m 374[2mms[22m[39m
+ [32m✓[39m test/context-contract.test.mjs [2m([22m[2m3 tests[22m[2m)[22m[33m 5409[2mms[22m[39m
+     [33m[2m✓[22m[39m has strict TypeScript-clean native cases and mutants [33m 5404[2mms[22m[39m
 
-⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
 
- FAIL  test/harness.test.mjs > the prototypes on the slice > typed: no soundness failure, no leakage, only table codes
-AssertionError: typed / context-missing-provider: expected [ { …(4) } ] to deeply equal []
+[41m[1m FAIL [22m[49m test/harness.test.mjs[2m > [22mthe prototypes on the slice[2m > [22mtyped: no soundness failure, no leakage, only table codes
+[31m[1mAssertionError[22m: typed / context-missing-provider: expected [ { …(4) } ] to deeply equal [][39m
 
-- Expected
-+ Received
+[32m- Expected[39m
+[31m+ Received[39m
 
-- []
-+ [
-+   {
-+     "at": "\"useContext(C)\"",
-+     "code": "CONTEXT_PROVIDER_MISSING",
-+     "file": "context-missing-provider.tsx",
-+     "note": undefined,
-+   },
-+ ]
+[32m- [][39m
+[31m+ [[39m
+[31m+   {[39m
+[31m+     "at": "\"useContext(C)\"",[39m
+[31m+     "code": "CONTEXT_PROVIDER_MISSING",[39m
+[31m+     "file": "context-missing-provider.tsx",[39m
+[31m+     "note": undefined,[39m
+[31m+   },[39m
+[31m+ ][39m
 
- ❯ test/harness.test.mjs:85:58
-     83|         const s = score(fx, fixturesDir, checker.check().diagnostics, …
-     84|         checker.dispose();
-     85|         expect(s.misses, `${prototype.name} / ${fx.id}`).toEqual([]);
-       |                                                          ^
-     86|         expect(s.warningMisses, `${prototype.name} / ${fx.id} warnings…
-     87|         expect(s.leakage, `${prototype.name} / ${fx.id}`).toEqual([]);
+[36m [2m❯[22m test/harness.test.mjs:[2m94:58[22m[39m
+    [90m 92|[39m         const s = score(fx, fixturesDir, checker.check().diagnostics, …
+    [90m 93|[39m         checker[33m.[39m[34mdispose[39m()[33m;[39m
+    [90m 94|[39m         [34mexpect[39m(s[33m.[39mmisses[33m,[39m [32m`[39m[36m${[39mprototype[33m.[39mname[36m}[39m[32m / [39m[36m${[39mfx[33m.[39mid[36m}[39m[32m`[39m)[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m   |[39m                                                          [31m^[39m
+    [90m 95|[39m         expect(s.warningMisses, `${prototype.name} / ${fx.id} warnings…
+    [90m 96|[39m         [34mexpect[39m(s[33m.[39mleakage[33m,[39m [32m`[39m[36m${[39mprototype[33m.[39mname[36m}[39m[32m / [39m[36m${[39mfx[33m.[39mid[36m}[39m[32m`[39m)[33m.[39m[34mtoEqual[39m([])[33m;[39m
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
 
- FAIL  test/harness.test.mjs > the prototypes on the slice > dataflow: no soundness failure, no leakage, only table codes
-AssertionError: dataflow / context-missing-provider: expected [ { …(4) } ] to deeply equal []
+[41m[1m FAIL [22m[49m test/harness.test.mjs[2m > [22mthe prototypes on the slice[2m > [22mdataflow: no soundness failure, no leakage, only table codes
+[31m[1mAssertionError[22m: dataflow / context-missing-provider: expected [ { …(4) } ] to deeply equal [][39m
 
-- Expected
-+ Received
+[32m- Expected[39m
+[31m+ Received[39m
 
-- []
-+ [
-+   {
-+     "at": "\"useContext(C)\"",
-+     "code": "CONTEXT_PROVIDER_MISSING",
-+     "file": "context-missing-provider.tsx",
-+     "note": undefined,
-+   },
-+ ]
+[32m- [][39m
+[31m+ [[39m
+[31m+   {[39m
+[31m+     "at": "\"useContext(C)\"",[39m
+[31m+     "code": "CONTEXT_PROVIDER_MISSING",[39m
+[31m+     "file": "context-missing-provider.tsx",[39m
+[31m+     "note": undefined,[39m
+[31m+   },[39m
+[31m+ ][39m
 
- ❯ test/harness.test.mjs:85:58
-     83|         const s = score(fx, fixturesDir, checker.check().diagnostics, …
-     84|         checker.dispose();
-     85|         expect(s.misses, `${prototype.name} / ${fx.id}`).toEqual([]);
-       |                                                          ^
-     86|         expect(s.warningMisses, `${prototype.name} / ${fx.id} warnings…
-     87|         expect(s.leakage, `${prototype.name} / ${fx.id}`).toEqual([]);
+[36m [2m❯[22m test/harness.test.mjs:[2m94:58[22m[39m
+    [90m 92|[39m         const s = score(fx, fixturesDir, checker.check().diagnostics, …
+    [90m 93|[39m         checker[33m.[39m[34mdispose[39m()[33m;[39m
+    [90m 94|[39m         [34mexpect[39m(s[33m.[39mmisses[33m,[39m [32m`[39m[36m${[39mprototype[33m.[39mname[36m}[39m[32m / [39m[36m${[39mfx[33m.[39mid[36m}[39m[32m`[39m)[33m.[39m[34mtoEqual[39m([])[33m;[39m
+    [90m   |[39m                                                          [31m^[39m
+    [90m 95|[39m         expect(s.warningMisses, `${prototype.name} / ${fx.id} warnings…
+    [90m 96|[39m         [34mexpect[39m(s[33m.[39mleakage[33m,[39m [32m`[39m[36m${[39mprototype[33m.[39mname[36m}[39m[32m / [39m[36m${[39mfx[33m.[39mid[36m}[39m[32m`[39m)[33m.[39m[34mtoEqual[39m([])[33m;[39m
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
 
 
- Test Files  1 failed | 1 passed (2)
-      Tests  2 failed | 9 passed (11)
-   Start at  17:53:51
-   Duration  5.47s (transform 111ms, setup 0ms, import 356ms, tests 6.55s, environment 0ms)
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m10 passed[39m[22m[90m (12)[39m
+[2m   Start at [22m 18:12:19
+[2m   Duration [22m 5.62s[2m (transform 131ms, setup 0ms, import 361ms, tests 6.70s, environment 0ms)[22m
 
 [ELIFECYCLE] Test failed. See above for more details.
